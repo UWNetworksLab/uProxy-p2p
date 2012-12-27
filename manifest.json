@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "UProxy",
+  "description": "Alpha: Ubiquitous Chrome Proxy",
+  "version": "0.0.1",
+  "icons": {
+      "128": "images/uproxy-128.png",
+			"19": "images/uproxy-19.png",
+			"16": "images/uproxy-16.png"
+  },
+	"app": {
+		"background": {
+			"scripts": [
+				"background.js"
+			]
+		}
+	},
+	"permissions": [
+		"storage",
+		"webview",
+		{"socket": ["tcp-connect:*:80", "tcp-connect:*:443", "tcp-listen::8123"]}
+	]
+}
