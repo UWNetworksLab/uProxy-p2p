@@ -233,6 +233,16 @@ const DEFAULT_MAX_CONNECTIONS=5;
     // Register sent callback.
     this.callbacks.sent = callback;
   };
+	
+	
+	/**
+	 * Sends a message pre-formatted into an arrayBuffer.
+	 *
+	 * @param {ArrayBuffer} msg The message to send
+	 */
+	TcpConnection.prototype.sendRawMessage = function(msg) {
+		socket.write(this.socketId, msg, this._onWriteComplete.bind(this));
+	};
 
 
   /**
@@ -284,8 +294,7 @@ const DEFAULT_MAX_CONNECTIONS=5;
     // Call received callback if there's data in the response.
     if (readInfo.resultCode > 0 && this.callbacks.recv) {
       log('onDataRead');
-      // Convert ArrayBuffer to string.
-      _arrayBufferToString(readInfo.data, this.callbacks.recv.bind(this));
+			this.callbacks.recv(readInfo.data);
     }
   };
 
