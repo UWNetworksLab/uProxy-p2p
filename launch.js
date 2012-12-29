@@ -64,15 +64,17 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 			offset = 8;
 		} else if (hostType == 3) { // Domain
 			var len = this.buffer[4];
-			host = ;
-			offset = 4 + len;
+			host = _arrayToStringSynch(this.buffer.subarray(5, 5 + len));
+			offset = 5 + len;
 		} else if (hostType == 4) { // IPv6
 			this._error("TODO: ipv6 support!");
 			offset = 20;
 		} else {
-			this._error("Invliad host specified");
+			this._error("Invalid host specified");
 		}
-		console.log("Connecting to " + host);
+		var port = this.buffer[offset] * 256 + this.buffer[offset + 1];
+
+		console.log("Connecting to " + host + ":" + port);
 	}
 };
 
@@ -88,6 +90,10 @@ Socks5Proxy.prototype._sendHello = function() {
 	msg[1] = 0; // No Authentication.
 	this.client.sendRawMessage(msg.buffer);
 };
+
+function _arrayToStringSynch(array) {
+	return Array.prototype.map.call(array, function(c) {return String.fromCharCode(c);}).join("");
+}
 
 
 window.addEventListener('load', startup, true);
