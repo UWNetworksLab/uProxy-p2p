@@ -195,7 +195,6 @@ require.alias = function (from, to) {
     };
 })();
 
-
 require.define("path",function(require,module,exports,__dirname,__filename,process,global) {
 	function filter (xs, fn) {
     var res = [];
@@ -333,6 +332,98 @@ exports.extname = function(path) {
 };
 
 //@ sourceURL=path
+});
+
+//NOTE(willscott): Added DNS
+require.define("dns",function(require,module,exports,__dirname,__filename,process,global) {
+	function makeAsync(callback) {
+	  if (typeof callback !== 'function') {
+	    return callback;
+	  }
+	  return function asyncCallback() {
+	    if (asyncCallback.immediately) {
+	      // The API already returned, we can invoke the callback immediately.
+	      callback.apply(null, arguments);
+	    } else {
+	      var args = arguments;
+				setTimeout(function() {
+	        callback.apply(null, args);
+	      }, 0);
+	    }
+	  };
+	}
+	
+	function errnoException(errorno, syscall) {
+	  // TODO make this more compatible with ErrnoException from src/node.cc
+	  // Once all of Node is using this function the ErrnoException from
+	  // src/node.cc should be removed.
+	  var e = new Error(syscall + ' ' + errorno);
+
+	  // For backwards compatibility. libuv returns ENOENT on NXDOMAIN.
+	  if (errorno == 'ENOENT') {
+	    errorno = 'ENOTFOUND';
+	  }
+
+	  e.errno = e.code = errorno;
+	  e.syscall = syscall;
+	  return e;
+	}
+	
+	exports.lookup = function(name, cb) {
+		family = 0;
+		callback = makeAsync(callback);
+		if (!domain) {
+		    callback(null, null, family === 6 ? 6 : 4);
+		    return {};
+		}
+		var matchedFamily = chromeSupport.isIP(domain);
+		if (matchedFamily) {
+		  callback(null, domain, matchedFamily);
+		  return {};
+		}
+		
+		function onanswer(addresses) {
+		    if (addresses) {
+		      if (family) {
+		        callback(null, addresses[0], family);
+		      } else {
+		        callback(null, addresses[0], addresses[0].indexOf(':') >= 0 ? 6 : 4);
+		      }
+		    } else {
+		      callback(errnoException(errno, 'getaddrinfo'));
+		    }
+		  }
+			
+			var wrap = chromeSupport.getaddrinfo(domain, family);
+
+			  if (!wrap) {
+			    throw errnoException(errno, 'getaddrinfo');
+			  }
+
+			  wrap.oncomplete = onanswer;
+
+			  callback.immediately = true;
+			  return wrap;
+	};
+
+	exports.resolveSrv = function(name, cb) {
+		function onanswer(status, result) {
+		  if (!status) {
+		   callback(null, result);
+		  } else {
+		    callback(errnoException(errno, bindingName));
+		  }
+		}
+
+		callback = makeAsync(callback);
+		var wrap = chromeSupport.querySrv(name, onanswer);
+		if (!wrap) {
+		  throw errnoException(errno, bindingName);
+		}
+
+		callback.immediately = true;
+		return wrap;
+	};
 });
 
 require.define("__browserify_process",function(require,module,exports,__dirname,__filename,process,global) {
@@ -5174,13 +5265,16 @@ if (process.title !== 'browser') {
     };
 } else {
     var md5lib = require('blueimp-md5').md5;
-    console.log("md5lib",md5lib);
+//NOTE(willscott): Commented out
+//    console.log("md5lib",md5lib);
     md5 = function(s) {
-	console.log("md5", s, md5lib(s, null, true));
+			//NOTE(willscott): Commented out
+//	console.log("md5", s, md5lib(s, null, true));
 	return md5lib(s, null, true);
     };
     md5_hex = function(s) {
-	console.log("md5_hex", s, md5lib(s));
+			//NOTE(willscott): Commented out
+//	console.log("md5_hex", s, md5lib(s));
 	return md5lib(s);
     };
 }
