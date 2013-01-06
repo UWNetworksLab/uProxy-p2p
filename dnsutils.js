@@ -26,6 +26,7 @@ var DNSTypes = {
  * @param {id: short, query: domain name string, type: DNSTypes} dns
  * @return {ArrayBuffer}
  */
+// TODO(willscott): Support multiple queries/message.
 function flattenDNS(dns) {
   var length = 18 + dns.query.length;
   var buffer = new ArrayBuffer(length);
@@ -60,6 +61,114 @@ function flattenDNS(dns) {
   
   return buffer;
 };
+
+/**
+ * Parse a textual label (A domain name) from a buffer.
+ * @param {DataView} buffer
+ * @param {Number} offset
+ * @param {Boolean} nofollow OPTIONAL Don't follow label pointers.
+ * @return {{text:String, length:Number}} the domain name & length of the inline label.
+ */
+function parseLabel(buffer, offset, nofollow) {
+	var data = buffer.getUint8(offset);
+	if (data == 0) {
+		return {text: "", length: 1};
+	} else if ((data & 192) == 192) { // Pointer.
+		if (nofollow) {
+			console.warn("Skipping Nested DNS label Pointer.");
+			return {text: "", length: 2};
+		} else {
+			var offset = buffer.getUint16(offset) ^ (192 << 8)
+		  return {text: parseLabel(buffer, offset, true).text, length: 2};
+		}
+	} else { // Length.
+		offset++;
+		var ret = "";
+		for (var i = 0; i < data; i++) {
+			ret += String.fromCharCode(buffer.getUint8(offset++))
+		}
+		var rest = parseLabel(buffer, offset, nofollow);
+		if (rest.text.length) {
+			return {text: ret + "." + rest.text, length: 1 + data + rest.length};
+		} else {
+			return {text: ret, length: 1 + data + rest.length};
+		}
+	}
+}
+
+/**
+ * Create a JS data structure from a DNS response packet.
+ * @param {ArrayBuffer} dns
+ * @return {Object} packet structure.
+ */
+function parseDNS(dns) {
+	var dataView = new DataView(dns);
+	var ret = {};
+	ret.id = dataView.getUint16(0);
+	if ((dataView.getUint8(2) & 128) != 128) { // is it a response
+		console.warn("Asked to parse a DNS response that is not a response");
+		return {};
+	}
+	ret.authoritative = (dataView.getUint8(2) & 4) == 4;
+	ret.truncated = (dataView.getUint8(2) & 2) == 2;
+	ret.recursed = (dataView.getUint8(2) & 1) == 1;
+	ret.canRecurse = (dataView.getUint8(3) & 128) == 128;
+	ret.code = dataView.getUint8(3) & 15;
+	var nq = dataView.getUint16(4);
+	var na = dataView.getUint16(6);
+	var ns = dataView.getUint16(8);
+	var ar = dataView.getUint16(10);
+  var offset = 12;
+	for (var i = 0; i < nq; i++) {
+		// Parse Query
+		var label = parseLabel(dataView, offset);
+		offset += label.length;
+		var type = dataView.getUint16(offset);
+		offset += 2;
+		var qclass = dataView.getUint16(offset);
+		offset += 2;
+		var q = {
+			label: label.text,
+			type: type,
+			qclass: qclass
+		};
+		if (!ret.query) {
+			ret.query = [q];
+		} else {
+			ret.query.push(q);
+		}
+	}
+
+	for (var i = 0; i < na; i++) {
+		// Parse Answer
+		var label = parseLabel(dataView, offset);
+		offset += label.length;
+		var type = dataView.getUint16(offset);
+		offset += 2;
+		var rclass = dataView.getUint16(offset);
+		offset += 2;
+		var ttl = dataView.getUint32(offset);
+		offset += 4;
+		var rdl = dataView.getUint16(offset);
+		offset += 2;
+		var response = new Uint8Array(dns, offset, rdl);
+		offset += rdl;
+		var r = {
+			label: label.text,
+			type: type,
+			rclass: rclass,
+			ttl: ttl,
+			response: response
+		};
+		if (!ret.response) {
+			ret.response = [r];
+		} else {
+			ret.response.push(r);
+		}
+	}
+	// TODO(willscott): handle NS, Additional data.
+	return ret;
+}
 
 function queryDNS(server, msg, callback) {
   chrome.socket.create('udp', {}, function(_socketInfo) {
