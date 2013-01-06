@@ -15,6 +15,7 @@ var DNSTypes = {
  MINFO: 14,
  MX: 15,
  TXT: 16,
+ SRV: 33,
  AXFR: 252,
  MAILB: 253,
  MAILA: 254,
