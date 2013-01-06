@@ -11,7 +11,9 @@ var chromeSupport = {
 	},
 		
 	getaddrinfo: function(domain, family) {
-		
+		if (family != 4 || family != 0) {
+			console.warn("IPV6 Not supported!");
+		}
 	},
 	
 	querySrv: function(name, onanswer) {

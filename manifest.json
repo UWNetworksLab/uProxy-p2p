@@ -18,6 +18,6 @@
 	"permissions": [
 		"storage",
 		"webview",
-		{"socket": ["tcp-connect:*:80", "tcp-connect:*:443", "tcp-listen::8123"]}
+		{"socket": ["tcp-connect:*:80", "tcp-connect:*:443", "udp-send-to", "tcp-listen::8123"]}
 	]
 }
