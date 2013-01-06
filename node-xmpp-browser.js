@@ -406,7 +406,7 @@ require.define("dns",function(require,module,exports,__dirname,__filename,proces
 			  return wrap;
 	};
 
-	exports.resolveSrv = function(name, cb) {
+	exports.resolveSrv = function(name, callback) {
 		function onanswer(status, result) {
 		  if (!status) {
 		   callback(null, result);

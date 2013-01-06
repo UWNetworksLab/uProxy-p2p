@@ -22,6 +22,11 @@ var DNSTypes = {
  ALL: 255
 };
 
+var _nid = 1;
+function nextId() {
+	return _nid++;
+}
+
 /**
  * Create a Network Packet from a DNS Query.
  * @param {id: short, query: domain name string, type: DNSTypes} dns
@@ -33,7 +38,7 @@ function flattenDNS(dns) {
   var buffer = new ArrayBuffer(length);
   var byteView = new Uint8Array(buffer);
   var dataView = new DataView(buffer);
-	dataView.setUint16(0, dns.id);
+	dataView.setUint16(0, nextId());
   byteView[2] = 1; // Recursion desired, other flags off.
   byteView[3] = 0; // Response Bits.
 	dataView.setUint16(4, 1); // QDCount - # queries
@@ -95,6 +100,21 @@ function parseLabel(buffer, offset, nofollow) {
 			return {text: ret, length: 1 + data + rest.length};
 		}
 	}
+}
+
+/**
+ * Parse an SRV Record
+ * @param {ArrayBuffer} data
+ * @return {{priority:, weight:, name:, port:}}
+ */
+function _parseSRV(data) {
+	var srv = {};
+	var buf = new DataView(data);
+	srv.priority = buf.getUint16(0);
+	srv.weight = buf.getUint16(2);
+	srv.port = buf.getUint16(4);
+	srv.name = parseLabel(buf, 6, true).text;
+	return srv;
 }
 
 /**
