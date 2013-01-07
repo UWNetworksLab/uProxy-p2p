@@ -853,14 +853,11 @@ Connection.prototype.error = function(condition, message) {
 
 // NOTE(willscott): Net stub added.
 require.define("net",function(require,module,exports,__dirname,__filename,process,global) {
-	var EventEmitter = require('events').EventEmitter;
-	var util = require('util');
+	chromeSupport.defineSocket('node-sock',require);
+	var nodesock = require('node-sock');
 	
-	function Socket() {
-		EventEmitter.call(this);
-	};
-	util.inherits(Socket, EventEmitter);
-	exports.Socket = Socket;
+	exports.Socket = nodesock.Socket;
+	
 //@ sourceURL=net
 });
 

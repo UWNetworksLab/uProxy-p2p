@@ -22,6 +22,24 @@ function startup() {
 	var b = document.createElement("button");
 	b.innerHTML="Connect";
 	b.addEventListener('click', function() {
+		var cl = new XMPP.Client({
+			xmlns:'jabber:client',
+			jid: un.value,
+		  password: pw.value
+		});
+		console.log(cl);
+		cl.addListener('online', function() {
+			console.log("online!");
+			["willscott@gmail.com"].forEach(function(to) {
+				cl.send(new XMPP.Element('message', {
+					to: to,
+					type: 'chat'}).c('body').t("Hello from browser"));
+		    });
+		  cl.end();
+		});
+		cl.addListener('error', function(e) {
+		  console.error(e);
+		});
 	}, true);
 	document.body.appendChild(b);
 }
