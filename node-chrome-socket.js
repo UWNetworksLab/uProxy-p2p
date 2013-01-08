@@ -84,12 +84,6 @@ function initSocketHandle(self) {
   self.errorEmitted = false;
   self.bytesRead = 0;
   self._bytesDispatched = 0;
-
-  // Handle creation may be deferred to bind() or connect() time.
-  if (self._handle) {
-    self._handle.owner = self;
-    self._handle.onread = onread;
-  }
 }
 
 function Socket(options) {
@@ -109,11 +103,10 @@ function Socket(options) {
 
   if (options.handle) {
     this._handle = options.handle; // private
-  } else if (typeof options.fd === 'undefined') {
-    this._handle = options && options.handle; // private
   } else {
-    this._handle = createPipe();
-    this._handle.open(options.fd);
+		chrome.socket.create('tcp', {}, function(createInfo) {
+			this._handle = createInfo.socketId;
+		}.bind(this));
     this.readable = options.readable !== false;
     this.writable = options.writable !== false;
   }
@@ -127,9 +120,6 @@ function Socket(options) {
   initSocketHandle(this);
 
   this._pendingWrite = null;
-
-  // handle strings directly
-  this._writableState.decodeStrings = false;
 
   // default to *not* allowing half open sockets
   this.allowHalfOpen = options && options.allowHalfOpen || false;
@@ -636,6 +626,7 @@ function afterWrite(status, handle, req) {
 
 
 function connect(self, address, port, addressType, localAddress) {
+	console.log("Socket asked to connect to" + address +":"+port);
   // TODO return promise from Socket.prototype.connect which
   // wraps _connectReq.
 
