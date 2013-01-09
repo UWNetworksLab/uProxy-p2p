@@ -6,10 +6,10 @@ var chromeSupport = {
 	//TODO(willscott): Add ipv6 support.
 	isIP: function(ip) {
 		var x = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-		return x.test(p);
+		return x.test(ip);
 	},
 	getaddrinfo: function(domain, family) {
-		if (family != 4 || family != 0) {
+		if (family != 4 && family != 0) {
 			console.warn("IPV6 Not supported!");
 		}
 		var ret = new deferred();

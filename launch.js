@@ -25,7 +25,8 @@ function startup() {
 		var cl = new XMPP.Client({
 			xmlns:'jabber:client',
 			jid: un.value,
-		  password: pw.value
+		  password: pw.value,
+			host: "talk.google.com"
 		});
 		console.log(cl);
 		cl.addListener('online', function() {

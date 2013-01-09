@@ -29,8 +29,7 @@ var cluster;
 function noop() {}
 
 var debug = function(x) {
-    console.error('NET: ',
-                  util.format.apply(util, arguments).slice(0, 500));
+  console.error('NET: ', util.format.apply(util, arguments).slice(0, 500));
 };
 
 exports.createServer = function() {
@@ -104,9 +103,6 @@ function Socket(options) {
   if (options.handle) {
     this._handle = options.handle; // private
   } else {
-		chrome.socket.create('tcp', {}, function(createInfo) {
-			this._handle = createInfo.socketId;
-		}.bind(this));
     this.readable = options.readable !== false;
     this.writable = options.writable !== false;
   }
@@ -213,13 +209,12 @@ Socket.prototype.listen = function() {
 
 Socket.prototype.setTimeout = function(msecs, callback) {
   if (msecs > 0 && !isNaN(msecs) && isFinite(msecs)) {
-    timers.enroll(this, msecs);
-    timers.active(this);
+		this._timeout = setTimeout(this._onTimeout.bind(this), msec);
     if (callback) {
       this.once('timeout', callback);
     }
   } else if (msecs === 0) {
-    timers.unenroll(this);
+		clearTimeout(this._timeout);
     if (callback) {
       this.removeListener('timeout', callback);
     }
@@ -352,7 +347,7 @@ Socket.prototype._destroy = function(exception, cb) {
 
   this.readable = this.writable = false;
 
-  timers.unenroll(this);
+	clearTimeout(this._timeout);
 
   debug('close');
   if (this._handle) {
@@ -395,8 +390,6 @@ function onread(buffer, offset, length) {
   var handle = this;
   var self = handle.owner;
   assert(handle === self._handle, 'handle != self._handle');
-
-  timers.active(self);
 
   var end = offset + length;
   debug('onread', global.errno, offset, length, end);
@@ -532,8 +525,6 @@ Socket.prototype._write = function(dataEncoding, cb) {
   }
   this._pendingWrite = null;
 
-  timers.active(this);
-
   if (!this._handle) {
     this._destroy(new Error('This socket is closed.'), cb);
     return false;
@@ -615,8 +606,6 @@ function afterWrite(status, handle, req) {
     return;
   }
 
-  timers.active(self);
-
   if (self !== process.stderr && self !== process.stdout)
     debug('afterWrite call cb');
 
@@ -626,7 +615,6 @@ function afterWrite(status, handle, req) {
 
 
 function connect(self, address, port, addressType, localAddress) {
-	console.log("Socket asked to connect to" + address +":"+port);
   // TODO return promise from Socket.prototype.connect which
   // wraps _connectReq.
 
@@ -645,21 +633,10 @@ function connect(self, address, port, addressType, localAddress) {
       return;
     }
   }
-
-  var connectReq;
-  if (addressType == 6) {
-    connectReq = self._handle.connect6(address, port);
-  } else if (addressType == 4) {
-    connectReq = self._handle.connect(address, port);
-  } else {
-    connectReq = self._handle.connect(address, afterConnect);
-  }
-
-  if (connectReq !== null) {
-    connectReq.oncomplete = afterConnect;
-  } else {
-    self._destroy(errnoException(errno, 'connect'));
-  }
+	
+	chrome.socket.connect(self._handle, address, port, function(result) {
+		afterConnect(result, self, null /* req */, true, true);
+	});
 }
 
 
@@ -687,15 +664,19 @@ Socket.prototype.connect = function(options, cb) {
   var pipe = !!options.path;
 
   if (!this._handle) {
-    this._handle = pipe ? createPipe() : createTCP();
+		if (pipe) {
+	    this._handle = createPipe();			
+		} else {
+			chrome.socket.create('tcp', {}, function(createInfo) {
+				this._handle = createInfo.socketId;
+			}.bind(this));
+		}
     initSocketHandle(this);
   }
 
   if (typeof cb === 'function') {
     self.once('connect', cb);
   }
-
-  timers.active(this);
 
   self._connecting = true;
   self.writable = true;
@@ -726,8 +707,6 @@ Socket.prototype.connect = function(options, cb) {
           self._destroy();
         });
       } else {
-        timers.active(self);
-
         addressType = addressType || 4;
 
         // node_net.cc handles null host names graciously but user land
@@ -755,15 +734,11 @@ Socket.prototype.unref = function() {
 
 
 
-function afterConnect(status, handle, req, readable, writable) {
-  var self = handle.owner;
-
+function afterConnect(status, self, req, readable, writable) {
   // callback may come after call to destroy
   if (self.destroyed) {
     return;
   }
-
-  assert(handle === self._handle, 'handle != self._handle');
 
   debug('afterConnect');
 
@@ -773,7 +748,6 @@ function afterConnect(status, handle, req, readable, writable) {
   if (status == 0) {
     self.readable = readable;
     self.writable = writable;
-    timers.active(self);
 
     self.emit('connect');
 
@@ -784,7 +758,7 @@ function afterConnect(status, handle, req, readable, writable) {
 
   } else {
     self._connecting = false;
-    self._destroy(errnoException(errno, 'connect'));
+    self._destroy(errnoException(status, 'connect'));
   }
 }
 

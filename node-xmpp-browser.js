@@ -369,7 +369,7 @@ require.define("dns",function(require,module,exports,__dirname,__filename,proces
 	  return e;
 	}
 	
-	exports.lookup = function(name, cb) {
+	exports.lookup = function(domain, callback) {
 		family = 0;
 		callback = makeAsync(callback);
 		if (!domain) {
