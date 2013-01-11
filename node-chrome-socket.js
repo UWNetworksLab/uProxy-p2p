@@ -20,7 +20,9 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 chromeSupport.defineSocket = function(e, require) {
 require.define(e,function(require,module,exports,__dirname,__filename,process,global) {
+
 var events = require('events');
+var stream = require('stream');
 var EventEmitter = events.EventEmitter;
 var util = require('util');
 var assert = require('assert');
@@ -97,7 +99,7 @@ function Socket(options) {
       break;
   }
 
-  EventEmitter.call(this);
+  stream.Duplex.call(this, options);
   this.readable = this.writable = false;
 
   if (options.handle) {
@@ -125,7 +127,7 @@ function Socket(options) {
   if (this._handle && options.readable !== false)
     this.read(0);
 }
-util.inherits(Socket, EventEmitter);
+util.inherits(Socket, stream.Duplex);
 
 // the user has called .end(), and all the bytes have been
 // sent out to the other side.
@@ -198,6 +200,14 @@ function onSocketEnd() {
 exports.Socket = Socket;
 exports.Stream = Socket; // Legacy naming.
 
+Socket.prototype.read = function(n) {
+  if (n === 0)
+    return stream.Readable.prototype.read.call(this, n);
+
+  this.read = stream.Readable.prototype.read;
+  this._consuming = true;
+  return this.read(n);
+};
 
 Socket.prototype.listen = function() {
   debug('socket.listen');

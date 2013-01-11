@@ -853,7 +853,11 @@ Connection.prototype.error = function(condition, message) {
 
 // NOTE(willscott): Net stub added.
 require.define("net",function(require,module,exports,__dirname,__filename,process,global) {
-	chromeSupport.defineSocket('node-sock',require);
+	chromeSupport.defineStream('stream', require);
+	chromeSupport.defineReadable('_stream_readable', require);
+	chromeSupport.defineWritable('_stream_writable', require);
+	chromeSupport.defineDuplex('_stream_duplex', require);
+	chromeSupport.defineSocket('node-sock', require);
 	var nodesock = require('node-sock');
 	
 	exports.Socket = nodesock.Socket;
