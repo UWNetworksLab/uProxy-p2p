@@ -1,5 +1,4 @@
 Exec {
-    user => "vagrant",
     cwd => "/home/vagrant",
     logoutput => on_failure,
     environment => ["PWD=/home/vagrant", "HOME=/home/vagrant"],
