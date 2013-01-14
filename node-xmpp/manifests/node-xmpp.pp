@@ -1,5 +1,3 @@
-include nodejs
-
 Exec {
     user => "vagrant",
     cwd => "/home/vagrant",
