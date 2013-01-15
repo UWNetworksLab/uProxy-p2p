@@ -16,31 +16,43 @@ package { 'browserify':
 }
 
 class node-xmpp {
-   exec { "npm install node-xmpp":
-        alias => "npm-xmpp",
-        cwd => "/home/vagrant",
-        require => Package['browserify']
+  exec { "/bin/mkdir node_modules":
+    alias => "mkdir",
+    cwd => "/home/vagrant",
+    require => Package['browserify']
+  }
+
+  exec { "/usr/bin/git clone git://github.com/astro/node-xmpp.git":
+    alias => "git-xmpp",
+    cwd => "/home/vagrant/node_modules",
+    require => Exec['mkdir']
   }
   
-  exec { "npm install browserify-override":
+  exec { "/usr/local/bin/npm install .":
+    alias => "npm-setup",
+    cwd => "/home/vagrant/node_modules/node-xmpp",
+    require => Exec['git-xmpp']
+  }
+  
+  exec { "/usr/local/bin/npm install browserify-override":
     alias => "npm-browserify",
     cwd => "/home/vagrant/node_modules/node-xmpp",
-    require => Exec['npm-xmpp']
+    require => Exec['npm-setup']
   }
   
-  exec { "cp -r /vagrant/chrome-support/* ./":
+  exec { "/bin/cp -r /vagrant/chrome-support/* ./":
     alias => "rules",
     cwd => "/home/vagrant/node_modules",
     require => Exec['npm-browserify']
   }
   
-  exec { "browserify -p browserify-override -o node-xmpp-browser.js lib/node-xmpp-browserify.js":
+  exec { "/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js lib/node-xmpp-browserify.js":
     alias => "compile",
     cwd => "/home/vagrant/node_modules/node-xmpp",
     require => Exec['rules']
   }
   
-  exec { "cp node-xmpp-browser.js /vagrant/":
+  exec { "/bin/cp ./node-xmpp-browser.js /vagrant/":
     alias => "publish",
     cwd => "/home/vagrant/node_modules/node-xmpp",
     require => Exec['compile']
