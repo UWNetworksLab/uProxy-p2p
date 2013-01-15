@@ -18,8 +18,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-chromeSupport.defineStream = function(e, require) {
-require.define(e,function(require,module,exports,__dirname,__filename,process,global) {
+require('streamHelpers');
 
 module.exports = Stream;
 
@@ -27,6 +26,7 @@ var events = require('events');
 var util = require('util');
 
 util.inherits(Stream, events.EventEmitter);
+
 Stream.Readable = require('_stream_readable');
 Stream.Writable = require('_stream_writable');
 Stream.Duplex = require('_stream_duplex');
@@ -126,7 +126,4 @@ Stream.prototype.pipe = function(dest, options) {
 
   // Allow for unix-like usage: A.pipe(B).pipe(C)
   return dest;
-};
-
-});
 };

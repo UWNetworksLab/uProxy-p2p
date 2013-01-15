@@ -18,8 +18,6 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-chromeSupport.defineSocket = function(e, require) {
-require.define(e,function(require,module,exports,__dirname,__filename,process,global) {
 
 var events = require('events');
 var stream = require('stream');
@@ -1119,6 +1117,4 @@ Server.prototype.ref = function() {
 Server.prototype.unref = function() {
   if (this._handle)
     this._handle.unref();
-};
-});
 };

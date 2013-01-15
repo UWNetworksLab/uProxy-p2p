@@ -1,30 +1,37 @@
+/**
+ * Chrome Socket based Node DNS Implementation.
+ *
+ * Currently only handles the methods needed by node-xmpp.
+ * @author Will Scott (willscott@gmail.com)
+ */
+
 var DNSTypes = {
- A: 1,
- NS: 2,
- MD: 3,
- MF: 4,
- CNAME: 5,
- SOA: 6,
- MB: 7,
- MG: 8,
- MR: 9,
- NULL: 10,
- WKS: 11,
- PTR: 12,
- HINFO: 13,
- MINFO: 14,
- MX: 15,
- TXT: 16,
- SRV: 33,
- AXFR: 252,
- MAILB: 253,
- MAILA: 254,
- ALL: 255
+  A: 1,
+  NS: 2,
+  MD: 3,
+  MF: 4,
+  CNAME: 5,
+  SOA: 6,
+  MB: 7,
+  MG: 8,
+  MR: 9,
+  NULL: 10,
+  WKS: 11,
+  PTR: 12,
+  HINFO: 13,
+  MINFO: 14,
+  MX: 15,
+  TXT: 16,
+  SRV: 33,
+  AXFR: 252,
+  MAILB: 253,
+  MAILA: 254,
+  ALL: 255
 };
 
 var _nid = 1;
 function nextId() {
-	return _nid++;
+  return _nid++;
 }
 
 /**
@@ -60,11 +67,11 @@ function flattenDNS(dns) {
   // QTYPE
   byteView[offset++] = 0;
   byteView[offset++] = dns.type;
-  
+ 
   // QCLASS - 1 = Internet 
   byteView[offset++] = 0;
   byteView[offset++] = 1;
-  
+ 
   return buffer;
 };
 
@@ -221,4 +228,151 @@ function queryDNS(server, msg, callback) {
 			});
     });
   });
+};
+
+//TODO(willscott): Add ipv6 support.
+function isIP(ip) {
+	var x = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+	return x.test(ip);
+}
+
+function getaddrinfo(domain, family) {
+		if (family != 4 && family != 0) {
+			console.warn("IPV6 Not supported!");
+		}
+		var ret = new deferred();
+		var msg = flattenDNS({query: domain, type: DNSTypes.A});
+		queryDNS('8.8.8.8', msg, function(resp) {
+			if (!resp || resp.resultCode < 0)
+				return ret.oncomplete(null);
+			var obj = parseDNS(resp.data);
+			var addresses = [];
+			for (var i = 0; i < obj.response.length; i++) {
+				var answer = obj.response[i];
+				if (answer.type == DNSTypes.A) {
+					var quad = answer.response;
+					var addr = quad[0] + "." + quad[1] + "." + quad[2] + "." + quad[3];
+					addresses.push(addr);
+				}
+			}
+			return ret.oncomplete(addresses);
+		});
+		return ret;
+};
+	
+function querySrv(name, onanswer) {
+		var ret = new deferred();
+		ret.oncomplete = onanswer;
+		var msg = flattenDNS({query: name, type: DNSTypes.SRV});
+		queryDNS('8.8.8.8', msg, function(resp) {
+			if (!resp || resp.resultCode < 0)
+				return ret.oncomplete(-1, null);
+			var obj = parseDNS(resp.data);
+			var records = [];
+			if (obj.response) {
+			  for (var i = 0; i < obj.response.length; i++) {
+				  var answer = obj.response[i];
+				  if (answer.type == DNSTypes.SRV) {
+					  records.push(_parseSRV(answer.response.buffer));
+				  }
+			  }
+			}
+			onanswer(0, records);
+		});
+		return ret;
+	}
+};
+
+
+var deferred = function() {
+	this.oncomplete = function() {};
+};
+
+function makeAsync(callback) {
+  if (typeof callback !== 'function') {
+    return callback;
+  }
+  return function asyncCallback() {
+    if (asyncCallback.immediately) {
+      // The API already returned, we can invoke the callback immediately.
+      callback.apply(null, arguments);
+    } else {
+      var args = arguments;
+			setTimeout(function() {
+        callback.apply(null, args);
+      }, 0);
+    }
+  };
+}
+
+function errnoException(errorno, syscall) {
+  // TODO make this more compatible with ErrnoException from src/node.cc
+  // Once all of Node is using this function the ErrnoException from
+  // src/node.cc should be removed.
+  var e = new Error(syscall + ' ' + errorno);
+
+  // For backwards compatibility. libuv returns ENOENT on NXDOMAIN.
+  if (errorno == 'ENOENT') {
+    errorno = 'ENOTFOUND';
+  }
+
+  e.errno = e.code = errorno;
+  e.syscall = syscall;
+  return e;
+}
+
+exports.lookup = function(domain, callback) {
+	family = 0;
+	callback = makeAsync(callback);
+	if (!domain) {
+	    callback(null, null, family === 6 ? 6 : 4);
+	    return {};
+	}
+	var matchedFamily = chromeSupport.isIP(domain);
+	if (matchedFamily) {
+	  callback(null, domain, matchedFamily);
+	  return {};
+	}
+	
+	function onanswer(addresses) {
+	    if (addresses) {
+	      if (family) {
+	        callback(null, addresses[0], family);
+	      } else {
+	        callback(null, addresses[0], addresses[0].indexOf(':') >= 0 ? 6 : 4);
+	      }
+	    } else {
+	      callback(errnoException(errno, 'getaddrinfo'));
+	    }
+	  }
+		
+		var wrap = chromeSupport.getaddrinfo(domain, family);
+
+		  if (!wrap) {
+		    throw errnoException(errno, 'getaddrinfo');
+		  }
+
+		  wrap.oncomplete = onanswer;
+
+		  callback.immediately = true;
+		  return wrap;
+};
+
+exports.resolveSrv = function(name, callback) {
+	function onanswer(status, result) {
+	  if (!status) {
+	   callback(null, result);
+	  } else {
+	    callback(errnoException(errno, bindingName));
+	  }
+	}
+
+	callback = makeAsync(callback);
+	var wrap = chromeSupport.querySrv(name, onanswer);
+	if (!wrap) {
+	  throw errnoException(errno, bindingName);
+	}
+
+	callback.immediately = true;
+	return wrap;
 };
