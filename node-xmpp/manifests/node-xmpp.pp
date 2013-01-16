@@ -28,7 +28,7 @@ class node-xmpp {
     require => Exec['mkdir']
   }
   
-  exec { "/usr/local/bin/npm install .":
+  exec { "/bin/bash -c '/usr/local/bin/npm install . || :'":
     alias => "npm-setup",
     cwd => "/home/vagrant/node_modules/node-xmpp",
     require => Exec['git-xmpp']

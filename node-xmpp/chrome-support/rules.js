@@ -33,5 +33,10 @@ module.exports = {
     action: 'patch',
     replace: 'console.log',
     with: '//'
-  }
+  },
+	"lib/xmpp/srv.js": {
+		action: 'patch',
+		replace: 'require\(dnsPath\)',
+		with: 'require\(\"\dns"\)'
+	}
 };
