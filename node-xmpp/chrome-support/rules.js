@@ -10,9 +10,11 @@ module.exports = {
 		from: module
 	},
 	"stream.js": {
-		action: 'replace',
-		with: 'stream.js',
-		from: module
+		action: 'patch',
+		rules: [{
+			from: 'function Stream',
+			to: '\nfunction Stream'
+		}]
 	},
 	"ender/xmlhttprequest.js": {
 		action: 'patch',
@@ -31,12 +33,16 @@ module.exports = {
 	},
   "lib/xmpp/sasl.js": {
     action: 'patch',
-    replace: 'console.log',
-    with: '//'
+		rules: [{
+      from: 'console\.log',
+      to: '//console.log'
+		}]
   },
 	"lib/xmpp/srv.js": {
 		action: 'patch',
-		replace: 'require\(dnsPath\)',
-		with: 'require\(\"\dns"\)'
+		rules: [{
+			from: 'require\(dnsPath\)',
+			to: 'require\(\"\dns"\)'
+		}]
 	}
 };
