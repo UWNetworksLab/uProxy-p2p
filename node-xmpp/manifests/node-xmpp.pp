@@ -16,22 +16,29 @@ package { 'browserify':
 }
 
 class node-xmpp {
-  exec { "/bin/mkdir node_modules":
-    alias => "mkdir",
-    cwd => "/home/vagrant",
-    require => Package['browserify']
+  file { "/home/vagrant/node_modules":
+    alias => "base",
+    ensure => "directory"
   }
 
   exec { "/usr/bin/git clone git://github.com/astro/node-xmpp.git":
     alias => "git-xmpp",
     cwd => "/home/vagrant/node_modules",
-    require => Exec['mkdir']
+    creates => "/home/vagrant/node_modules/node-xmpp",
+    require => File['base']
+  }
+  
+  exec { "/usr/bin/git pull origin master":
+    alias => "git-update",
+    cwd => "/home/vagrant/node_modules/node-xmpp",
+    require => Exec['git-xmpp']
   }
   
   exec { "/bin/bash -c '/usr/local/bin/npm install . || :'":
     alias => "npm-setup",
     cwd => "/home/vagrant/node_modules/node-xmpp",
-    require => Exec['git-xmpp']
+    creates => "/home/vagrant/node_modules/node-xmpp/node_modules",
+    require => Exec['git-update']
   }
   
   exec { "/usr/local/bin/npm install browserify-override":
