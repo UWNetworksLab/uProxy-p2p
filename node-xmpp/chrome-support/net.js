@@ -938,16 +938,17 @@ Server.prototype._listen2 = function(address, port, addressType, backlog, fd) {
 
 
 function listen(self, address, port, addressType, backlog, fd) {
-  if (!cluster) cluster = require('cluster');
-
-  if (cluster.isWorker) {
-    cluster._getServer(self, address, port, addressType, fd, function(handle) {
-      self._handle = handle;
-      self._listen2(address, port, addressType, backlog, fd);
-    });
-  } else {
+	//NOTE(willscott): Removed cluster dependency.
+  //if (!cluster) cluster = require('cluster');
+  //
+  //if (cluster.isWorker) {
+  //  cluster._getServer(self, address, port, addressType, fd, function(handle) {
+  //    self._handle = handle;
+  //    self._listen2(address, port, addressType, backlog, fd);
+  //  });
+  //} else {
     self._listen2(address, port, addressType, backlog, fd);
-  }
+	//}
 }
 
 

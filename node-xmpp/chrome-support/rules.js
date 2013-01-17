@@ -1,7 +1,7 @@
 module.exports = {
-  "dns.js": {
-    action: 'replace',
-    with: 'dns.js',
+  "dns": {
+    action: 'define',
+		with: 'dns.js',
 		from: module
   },
 	"net.js": {
