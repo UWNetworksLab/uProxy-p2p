@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Directory in which librarian-puppet should manage its modules directory
 PUPPET_DIR=/home/vagrant/.puppet
