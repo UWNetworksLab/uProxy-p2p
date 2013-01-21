@@ -18,7 +18,8 @@ package { 'browserify':
 class node-xmpp {
   file { "/home/vagrant/node_modules":
     alias => "base",
-    ensure => "directory"
+    ensure => "directory",
+    require => Package['browserify']
   }
 
   exec { "/usr/bin/git clone git://github.com/astro/node-xmpp.git":
@@ -53,7 +54,7 @@ class node-xmpp {
     require => Exec['npm-browserify']
   }
   
-  exec { "/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js -v lib/node-xmpp-browserify.js":
+  exec { "/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js lib/node-xmpp-browserify.js":
     alias => "compile",
     cwd => "/home/vagrant/node_modules/node-xmpp",
     require => Exec['rules']
