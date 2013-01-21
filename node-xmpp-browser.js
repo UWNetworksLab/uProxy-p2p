@@ -695,26 +695,25 @@ function getaddrinfo(domain, family) {
 };
 	
 function querySrv(name, onanswer) {
-		var ret = new deferred();
-		ret.oncomplete = onanswer;
-		var msg = flattenDNS({query: name, type: DNSTypes.SRV});
-		queryDNS('8.8.8.8', msg, function(resp) {
-			if (!resp || resp.resultCode < 0)
-				return ret.oncomplete(-1, null);
-			var obj = parseDNS(resp.data);
-			var records = [];
-			if (obj.response) {
-			  for (var i = 0; i < obj.response.length; i++) {
-				  var answer = obj.response[i];
-				  if (answer.type == DNSTypes.SRV) {
-					  records.push(_parseSRV(answer.response.buffer));
-				  }
+	var ret = new deferred();
+	ret.oncomplete = onanswer;
+	var msg = flattenDNS({query: name, type: DNSTypes.SRV});
+	queryDNS('8.8.8.8', msg, function(resp) {
+		if (!resp || resp.resultCode < 0)
+			return ret.oncomplete(-1, null);
+		var obj = parseDNS(resp.data);
+		var records = [];
+		if (obj.response) {
+		  for (var i = 0; i < obj.response.length; i++) {
+			  var answer = obj.response[i];
+			  if (answer.type == DNSTypes.SRV) {
+				  records.push(_parseSRV(answer.response.buffer));
 			  }
-			}
-			onanswer(0, records);
-		});
-		return ret;
-	}
+		  }
+		}
+		onanswer(0, records);
+	});
+	return ret;
 };
 
 
