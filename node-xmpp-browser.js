@@ -2351,6 +2351,12 @@ function initSocketHandle(self) {
   self.errorEmitted = false;
   self.bytesRead = 0;
   self._bytesDispatched = 0;
+
+  // Handle creation may be deferred to bind() or connect() time.
+  if (self._handle) {
+    self._handle.owner = self;
+    self._handle.onread = onread;
+  }
 }
 
 function Socket(options) {
@@ -2371,8 +2377,9 @@ function Socket(options) {
   if (options.handle) {
     this._handle = options.handle; // private
   } else {
-    this.readable = options.readable !== false;
-    this.writable = options.writable !== false;
+    this.readable = this.writable = false;
+//    this.readable = options.readable !== false;
+//    this.writable = options.writable !== false;
   }
 
   this.onend = null;
@@ -2578,7 +2585,7 @@ Socket.prototype._read = function(n, callback) {
 Socket.prototype.end = function(data, encoding) {
   stream.Duplex.prototype.end.call(this, data, encoding);
   this.writable = false;
-  DTRACE_NET_STREAM_END(this);
+  //DTRACE_NET_STREAM_END(this);
 
   // just in case we're waiting for an EOF.
   if (!this._readableState.endEmitted)
@@ -2778,6 +2785,7 @@ Socket.prototype.__defineGetter__('localPort', function() {
 
 
 Socket.prototype.write = function(chunk, encoding, cb) {
+	console.log("write called with " + chunk);
   if (typeof chunk !== 'string' && !Buffer.isBuffer(chunk))
     throw new TypeError('invalid data');
   return stream.Duplex.prototype.write.apply(this, arguments);
@@ -2910,11 +2918,49 @@ function connect(self, address, port, addressType, localAddress) {
     }
   }
 	
-	chrome.socket.connect(self._handle, address, port, function(result) {
-		afterConnect(result, self, null /* req */, true, true);
+	self._handle.connect(address, port, function(result) {
+		afterConnect(result, self, null /* req */, true, true);		
 	});
 }
 
+ChromeTCP = function(fd) {
+	this.fd = fd;
+}
+
+ChromeTCP.prototype.connect = function(address, port, callback) {
+	chrome.socket.connect(this.fd, address, port, callback);
+}
+
+ChromeTCP.prototype.readStart = function() {
+	chrome.socket.read(this.fd, null, function(readinfo) {
+		console.log("read result " + readinfo.resultCode + " - read " + readinfo.data.byteLength + " bytes");
+		if (readinfo.resultCode < 0) {
+			global.errno = readinfo.resultCode;
+			this.onread(null, 0, 0);
+		} else if (readinfo.data.byteLength == 0) {
+			global.errno = 'EOF';
+			this.onread(readinfo.data, 0, 0);
+		} else {
+			this.onread(readinfo.data, 0 , readinfo.data.byteLength);
+		}
+
+		if (this.reading) {
+			this.readStart();
+		}
+	}.bind(this));
+}
+
+ChromeTCP.prototype.readStop = function() {
+	this.reading = false;
+	return false;
+}
+
+ChromeTCP.prototype.close = function() {
+	chrome.socket.disconnect(this.fd);
+	chrome.socket.destroy(this.fd);
+	this.reading = false;
+	this.writing = false;
+}
 
 Socket.prototype.connect = function(options, cb) {
   if (typeof options !== 'object') {
@@ -2942,12 +2988,13 @@ Socket.prototype.connect = function(options, cb) {
   if (!this._handle) {
 		if (pipe) {
 	    this._handle = createPipe();			
+	    initSocketHandle(this);
 		} else {
 			chrome.socket.create('tcp', {}, function(createInfo) {
-				this._handle = createInfo.socketId;
+				this._handle = new ChromeTCP(createInfo.socketId);
+		    initSocketHandle(this);
 			}.bind(this));
 		}
-    initSocketHandle(this);
   }
 
   if (typeof cb === 'function') {
@@ -3315,8 +3362,8 @@ function onconnection(clientHandle) {
   self._connections++;
   socket.server = self;
 
-  DTRACE_NET_SERVER_CONNECTION(socket);
-  COUNTER_NET_SERVER_CONNECTION(socket);
+  //DTRACE_NET_SERVER_CONNECTION(socket);
+  //COUNTER_NET_SERVER_CONNECTION(socket);
   self.emit('connection', socket);
   socket.emit('connect');
 }
