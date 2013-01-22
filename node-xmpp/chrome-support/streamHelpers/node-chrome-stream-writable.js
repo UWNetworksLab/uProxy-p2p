@@ -22,8 +22,6 @@
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, cb), and it'll handle all
 // the drain event emission and buffering.
-chromeSupport.defineWritable = function(e, require) {
-require.define(e,function(require,module,exports,__dirname,__filename,process,global) {
 
 module.exports = Writable;
 Writable.WritableState = WritableState;
@@ -284,6 +282,4 @@ Writable.prototype.end = function(chunk, encoding) {
     state.finished = true;
   }
   state.ended = true;
-};
-});
 };

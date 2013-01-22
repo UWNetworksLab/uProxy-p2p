@@ -23,9 +23,6 @@
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
 // Writable.
-chromeSupport.defineDuplex = function(e, require) {
-require.define(e,function(require,module,exports,__dirname,__filename,process,global) {
-
 module.exports = Duplex;
 var util = require('util');
 var Readable = require('_stream_readable');
@@ -63,5 +60,3 @@ function onend() {
   // But allow more writes to happen in this tick.
   process.nextTick(this.end.bind(this));
 }
-});
-};

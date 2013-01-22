@@ -327,7 +327,7 @@ exports.lookup = function(domain, callback) {
 	    callback(null, null, family === 6 ? 6 : 4);
 	    return {};
 	}
-	var matchedFamily = chromeSupport.isIP(domain);
+	var matchedFamily = isIP(domain);
 	if (matchedFamily) {
 	  callback(null, domain, matchedFamily);
 	  return {};
@@ -345,7 +345,7 @@ exports.lookup = function(domain, callback) {
 	    }
 	  }
 		
-		var wrap = chromeSupport.getaddrinfo(domain, family);
+		var wrap = getaddrinfo(domain, family);
 
 		  if (!wrap) {
 		    throw errnoException(errno, 'getaddrinfo');
@@ -367,7 +367,7 @@ exports.resolveSrv = function(name, callback) {
 	}
 
 	callback = makeAsync(callback);
-	var wrap = chromeSupport.querySrv(name, onanswer);
+	var wrap = querySrv(name, onanswer);
 	if (!wrap) {
 	  throw errnoException(errno, bindingName);
 	}

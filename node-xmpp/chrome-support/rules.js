@@ -4,6 +4,21 @@ module.exports = {
 		with: 'dns.js',
 		from: module
   },
+	"_stream_readable": {
+		action: 'define',
+		with: 'streamHelpers/node-chrome-stream-readable.js',
+		from: module
+	},
+	"_stream_writable": {
+		action: 'define',
+		with: 'streamHelpers/node-chrome-stream-writable.js',
+		from: module
+	},
+	"_stream_duplex": {
+		action: 'define',
+		with: 'streamHelpers/node-chrome-stream-duplex.js',
+		from: module
+	},
 	"net.js": {
 		action: 'replace',
 		with: 'net.js',
@@ -12,8 +27,8 @@ module.exports = {
 	"stream.js": {
 		action: 'patch',
 		rules: [{
-			from: 'function Stream',
-			to: '\nfunction Stream'
+			from: 'Stream.Stream',
+			to: 'Stream.Readable = require(\'_stream_readable\');\nStream.Writable = require(\'_stream_writable\');\nStream.Duplex = require(\'_stream_duplex\');\nStream.Stream'
 		}]
 	},
 	"ender/xmlhttprequest.js": {
