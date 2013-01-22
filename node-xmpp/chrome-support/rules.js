@@ -57,7 +57,14 @@ module.exports = {
 		action: 'patch',
 		rules: [{
 			from: 'require\\(dnsPath\\)',
-			to: 'require\(\"\dns\"\)'
+			to: 'require\(\"dns\"\)'
+		}]
+	},
+	"xmpp/connection.js": {
+		action: 'patch',
+		rules: [{
+			from: 'proxyEvent\\(\'drain\'\\);',
+			to: 'proxyEvent\(\'drain\'\);\nproxyEvent\(\'connect\'\);'
 		}]
 	}
 };

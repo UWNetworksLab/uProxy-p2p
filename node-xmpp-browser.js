@@ -1981,6 +1981,7 @@ Connection.prototype.setupStream = function() {
     };
     proxyEvent('data');  // let them sniff unparsed XML
     proxyEvent('drain');
+proxyEvent('connect');
     //proxyEvent('close');
 
     /**
@@ -2960,6 +2961,13 @@ ChromeTCP.prototype.close = function() {
 	chrome.socket.destroy(this.fd);
 	this.reading = false;
 	this.writing = false;
+}
+
+ChromeTCP.prototype.shutdown = function() {
+	this.close();
+	var deferred = {};
+	window.setTimeout(0, deferred.oncomplete);
+	return deferred;
 }
 
 Socket.prototype.connect = function(options, cb) {

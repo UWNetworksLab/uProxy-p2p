@@ -694,6 +694,13 @@ ChromeTCP.prototype.close = function() {
 	this.writing = false;
 }
 
+ChromeTCP.prototype.shutdown = function() {
+	this.close();
+	var deferred = {};
+	window.setTimeout(0, deferred.oncomplete);
+	return deferred;
+}
+
 Socket.prototype.connect = function(options, cb) {
   if (typeof options !== 'object') {
     // Old API:
