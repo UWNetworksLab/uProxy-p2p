@@ -26,6 +26,7 @@
 module.exports = Writable;
 Writable.WritableState = WritableState;
 
+var Buffer = require('buffer').Buffer;
 var util = require('util');
 var assert = require('assert');
 var Stream = require('stream');
@@ -152,7 +153,7 @@ Writable.prototype.write = function(chunk, encoding, cb) {
   state.sync = true;
   state.writelen = l;
   state.writecb = cb;
-  this._write(chunk, state.onwrite);
+  this._write([chunk], state.onwrite);
   state.sync = false;
 
   return ret;
@@ -239,7 +240,7 @@ function onwrite(stream, er) {
       state.writechunk = chunk;
       state.writing = true;
       state.sync = true;
-      stream._write(chunk, state.onwrite);
+      stream._write([chunk], state.onwrite);
       state.sync = false;
 
       // if we didn't call the onwrite immediately, then

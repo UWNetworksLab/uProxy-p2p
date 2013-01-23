@@ -19,6 +19,7 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+var Buffer = require('buffer').Buffer;
 var events = require('events');
 var stream = require('stream');
 var EventEmitter = events.EventEmitter;
@@ -685,6 +686,44 @@ ChromeTCP.prototype.readStart = function() {
 ChromeTCP.prototype.readStop = function() {
 	this.reading = false;
 	return false;
+}
+
+var ChromeTCPDeferred = function() {
+	this.oncomplete = function() {};
+};
+
+//TODO(willscott): buffer should be native chrome arrayBuffer.
+// currently it is a buffer-browserify, which is stupid.
+ChromeTCP.prototype.writeBuffer = function(b) {
+	var deferred = new ChromeTCPDeferred();
+	var data = new Uint8Array(b.length);
+	var self = this;
+
+	for (var i = 0; i < b.length; i++) {
+		data[i] = b.get(i);
+	}
+	chrome.socket.write(this.fd, data.buffer, function(writeinfo) {
+		var bytes = writeinfo.bytesWritten;
+		console.log("wrote " + bytes + " chars to socket.");
+		deferred.oncomplete(bytes < 0, self, deferred);
+	});
+
+	return deferred;
+}
+
+ChromeTCP.prototype.writeUtf8String = function(s) {
+	var deferred = new ChromeTCPDeferred();
+	var data = new Uint8Array(s.length);
+	var self = this;
+	for (var i = 0; i < s.length; i++) {
+		data[i] = s.charCodeAt(i);
+	}
+	chrome.socket.write(this.fd, data.buffer, function(writeinfo) {
+		var bytes = writeinfo.bytesWritten;
+		deferred.oncomplete(bytes < 0, self, deferred);
+	});
+
+	return deferred;
 }
 
 ChromeTCP.prototype.close = function() {
