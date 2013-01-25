@@ -834,6 +834,7 @@ require.define("_stream_readable",function(require,module,exports,__dirname,__fi
 module.exports = Readable;
 Readable.ReadableState = ReadableState;
 
+var Buffer = require('buffer').Buffer;
 var Stream = require('stream');
 var util = require('util');
 var StringDecoder;
@@ -2944,7 +2945,15 @@ ChromeTCP.prototype.readStart = function() {
 			global.errno = 'EOF';
 			this.onread(readinfo.data, 0, 0);
 		} else {
-			this.onread(readinfo.data, 0 , readinfo.data.byteLength);
+			//TODO(willscott): Keep data in chrome buffers.
+			var byteview = new Uint8Array(readinfo.data);
+			var len = readinfo.data.byteLength;
+			//var buf = new Buffer(len);
+			//for (var i = 0; i < len; i++) {
+			//	buf[i] = byteview[i];
+			//}
+			var buf = new Buffer(byteview);
+			this.onread(buf, 0 , len);
 		}
 
 		if (this.reading) {

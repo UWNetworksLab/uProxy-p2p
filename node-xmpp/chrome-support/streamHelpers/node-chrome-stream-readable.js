@@ -21,6 +21,7 @@
 module.exports = Readable;
 Readable.ReadableState = ReadableState;
 
+var Buffer = require('buffer').Buffer;
 var Stream = require('stream');
 var util = require('util');
 var StringDecoder;
