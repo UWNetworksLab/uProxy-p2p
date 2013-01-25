@@ -18,3 +18,16 @@ implementation.  Layout is as follows:
     Overridden classes from the native version of node-xmpp.
   * rules.js
       Defines the transformations to node-xmpp.  Applied by [node-browserify-override](https://github.com/willscott/node-browserify-override)
+
+Todo
+----
+
+* Efficiency
+
+    In particular, the current implementation of sockets & streams uses the buffer-browserify implementation of buffers, which are stored as javascript arrays.  Storing this data as ArrayBuffers would be preferable.
+
+* SSL
+
+    Browserify does not implement the TLS class, currently causing failures.
+    This can potentially be implemented using [Forge](https://github.com/digitalbazaar/forge)
+    or alternatively, could be exposed by chrome ([Bug](https://code.google.com/p/chromium/issues/detail?id=132896))
