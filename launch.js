@@ -28,6 +28,10 @@ function startup() {
 		  password: pw.value,
 			host: "talk.google.com"
 		});
+
+		//TODO(willscott): Support Upgrade to TLS wrapped connection.
+		cl.connection.allowTLS = false;
+		
 		console.log(cl);
 		cl.addListener('online', function() {
 			console.log("online!");
