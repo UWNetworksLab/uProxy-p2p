@@ -12,10 +12,12 @@ function startup() {
 	tcpServer.listen(handleClientAccept);
 
   // Auth Flow.
+  var creds = {};
   var start = document.createElement("button");
   start.innerHTML = "Log In!";
   start.addEventListener('click', function() {
     getCredentials(function(cred) {
+      creds = cred;
       console.log(cred);
     });
   }, true);
@@ -24,8 +26,9 @@ function startup() {
 	var startXmpp = function() {
 		var cl = new XMPP.Client({
 			xmlns:'jabber:client',
-			jid: un.value,
-		  password: pw.value,
+			jid: creds.email,
+			oauth2_token: creds.token,
+			oauth2_auth: 'http://www.google.com/talk/protocol/auth',
 			host: "talk.google.com"
 		});
 
@@ -39,13 +42,18 @@ function startup() {
 				cl.send(new XMPP.Element('message', {
 					to: to,
 					type: 'chat'}).c('body').t("Hello from browser"));
-		    });
-		  cl.end();
+				});
+			cl.end();
 		});
 		cl.addListener('error', function(e) {
 		  console.error(e);
 		});
 	}
+
+  var connect = document.createElement("button");
+  connect.innerHTML = "Connect!";
+  connect.addEventListener('click', startXmpp, true);
+  document.body.appendChild(connect);
 }
 
 window.addEventListener('load', startup, true);
