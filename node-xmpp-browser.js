@@ -2301,7 +2301,7 @@ var cluster;
 function noop() {}
 
 var debug = function(x) {
-  console.error('NET: ', util.format.apply(util, arguments).slice(0, 500));
+  //console.error('NET: ', util.format.apply(util, arguments).slice(0, 500));
 };
 
 exports.createServer = function() {
@@ -2789,7 +2789,7 @@ Socket.prototype.__defineGetter__('localPort', function() {
 
 
 Socket.prototype.write = function(chunk, encoding, cb) {
-	console.log("write called with " + chunk);
+	//console.log("write called with " + chunk);
   if (typeof chunk !== 'string' && !Buffer.isBuffer(chunk))
     throw new TypeError('invalid data');
   return stream.Duplex.prototype.write.apply(this, arguments);
@@ -2983,7 +2983,7 @@ ChromeTCP.prototype.writeBuffer = function(b) {
 	}
 	chrome.socket.write(this.fd, data.buffer, function(writeinfo) {
 		var bytes = writeinfo.bytesWritten;
-		console.log("wrote " + bytes + " chars to socket.");
+		//console.log("wrote " + bytes + " chars to socket.");
 		deferred.oncomplete(bytes < 0, self, deferred);
 	});
 
