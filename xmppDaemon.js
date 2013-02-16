@@ -1,5 +1,6 @@
 (function(exports) {
-  function Roster() {
+  function Roster(daemon) {
+    this.daemon = daemon;
     this.jids = {};
     this.listener = function() {};
     this.friends = [];
@@ -33,7 +34,7 @@
       if (!this.jids.hasOwnProperty(i)) {
         continue;
       }
-      if (i.indexOf("/uproxy") > 0) {
+      if (i.indexOf("/uproxy") > 0 && i != this.daemon.client.jid.toString()) {
         friends.push(i);
       }
     }
@@ -45,7 +46,7 @@
   }
 
   function XmppDaemon(credentials) {
-    this.roster = new Roster();
+    this.roster = new Roster(this);
     this.client = new XMPP.Client({
       xmlns:'jabber:client',
       jid: credentials.email + "/uproxy",
@@ -122,7 +123,10 @@
   }
   
   XmppDaemon.prototype.sendMessage = function(to, msg) {
-    
+    this.client.send(new XMPP.Element('message', {
+      to: to,
+      type: 'chat'
+    }).c('body').t(JSON.stringify(msg)));
   }
   
   exports.XmppDaemon = XmppDaemon;

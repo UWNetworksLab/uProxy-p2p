@@ -1,5 +1,6 @@
 var tcpServer;
 var chatClient;
+var activeJID = "";
 
 var activeConnections = [];
 
@@ -24,13 +25,22 @@ function startup() {
   }, true);
   document.body.appendChild(start);
 
-  var roster = document.createElement("pre");
+  var status = document.createElement("div");
+  status.innerHTML = "No active friend connection.";
+  var roster = document.createElement("div");
   var rosterPrinter = function(r) {
-    var s = "Available uproxies:\n";
+    roster.innerHTML = "";
+    roster.appendChild(document.createTextNode("Available Friends:"));
     for (var i = 0; i < r.length; i++) {
-      s += r[i] + "\n";
+      var child = document.createElement('div');
+      child.innerHTML = r[i];
+      child.addEventListener('click', function() {
+        activeJID = r[i];
+        console.log("Messages will be sent to: " + activeJID);
+        status.innerText = "Active connection to " + activeJID;
+      }, true);
+      roster.appendChild(child);
     }
-    roster.innerHTML = s;
   }
   var connect = document.createElement("button");
   connect.innerHTML = "Connect!";
@@ -39,6 +49,7 @@ function startup() {
     chatClient.setRosterListener(rosterPrinter)
   }, true);
   document.body.appendChild(connect);
+  document.body.appendChild(status);
   document.body.appendChild(roster);
 }
 
