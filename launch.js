@@ -34,11 +34,11 @@ function startup() {
     for (var i = 0; i < r.length; i++) {
       var child = document.createElement('div');
       child.innerHTML = r[i];
-      child.addEventListener('click', function() {
-        activeJID = r[i];
+      child.addEventListener('click', function(jid) {
+        activeJID = jid;
         console.log("Messages will be sent to: " + activeJID);
         status.innerText = "Active connection to " + activeJID;
-      }, true);
+      }.bind(this, r[i]), true);
       roster.appendChild(child);
     }
   }
