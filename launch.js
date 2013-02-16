@@ -26,7 +26,7 @@ function startup() {
 
   var roster = document.createElement("pre");
   var rosterPrinter = function(r) {
-    var s = "";
+    var s = "Available uproxies:\n";
     for (var i = 0; i < r.length; i++) {
       s += r[i] + "\n";
     }

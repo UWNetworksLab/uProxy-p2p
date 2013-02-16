@@ -1,7 +1,51 @@
 (function(exports) {
+  function Roster() {
+    this.jids = {};
+    this.listener = function() {};
+    this.friends = [];
+  }
   
+  Roster.prototype.seen = function(jid) {
+    if (this.jids[jid]) {
+      this.jids[jid].lastSeen = new Date();
+    } else {
+      this.jids[jid] = {lastSeen: new Date()};
+    }
+    if (this.getFriends() != this.friends) {
+      this.friends = this.getFriends();
+      this.listener(this.friends);
+    }
+  }
+  
+  Roster.prototype.drop = function(jid) {
+    if (this.jids[jid]) {
+      delete this.jids[jid];
+    }
+    if (this.getFriends() != this.friends) {
+      this.friends = this.getFriends();
+      this.listener(this.friends);
+    }
+  }
+  
+  Roster.prototype.getFriends = function() {
+    var friends = [];
+    for (var i in this.jids) {
+      if (!this.jids.hasOwnProperty(i)) {
+        continue;
+      }
+      if (i.indexOf("/uproxy") > 0) {
+        friends.push(i);
+      }
+    }
+    return friends;
+  }
+  
+  Roster.prototype.setListener = function(l) {
+    this.listener = l;
+  }
+
   function XmppDaemon(credentials) {
-    this.roster = [];
+    this.roster = new Roster();
     this.client = new XMPP.Client({
       xmlns:'jabber:client',
       jid: credentials.email + "/uproxy",
@@ -10,7 +54,6 @@
       host: "talk.google.com"
     });
     this.messageListener = function() {};
-    this.rosterListener = function() {};
 
     //TODO(willscott): Support Upgrade to TLS wrapped connection.  
     this.client.connection.allowTLS = false;
@@ -27,12 +70,9 @@
   }
   
   XmppDaemon.prototype.onOnline = function() {
-    //TODO(willscott): Subscribe to roster changes.
-    this.client.send(new XMPP.Element('iq', {type: 'get'})
-        .c("query", {xmlns: "jabber:iq:roster"}));
     this.client.send(new XMPP.Element('presence', {})
         .c("show").t("xa").up() //mark status of this client as 'extended away'.
-        .c('priority').t("-128").up() // mark priority as low.
+        .c('priority').t("-127").up() // mark priority as low.
         .c("c", { // Advertise extended capabilities.
           xmlns: "http://jabber.org/protocol/caps",
           node: "https://github.com/UWNetworksLab/UProxy",
@@ -50,6 +90,7 @@
       var query = stanza.getChild("query");
       // Respond to capability requests from other users.
       if (query && query.attrs.xmlns == "http://jabber.org/protocol/disco#info") {
+        this.roster.seen(stanza.attrs.from);
         stanza.attrs.to = stanza.attrs.from;
         delete stanza.attrs.from;
         stanza.attrs.type = 'result';
@@ -63,14 +104,11 @@
 //        .c('feature', {'var': ''}).up()
         this.client.send(stanza);
       }
-    } else if (stanza.is('iq') && stanza.attrs.type == 'result') {
-      var query = stanza.getChild("query");
-      // Handle roster updates.
-      if (query && query.attrs.xmlns == "jabber:iq:roster") {
-        for (var i = 0; i < query.children.length; i++) {
-          this.roster.push(query.children[i].attrs.jid);
-        }
-        this.rosterListener(this.roster);
+    } else if (stanza.is('presence')) {
+      if (stanza.attrs.type == 'unavailable') {
+        this.roster.drop(stanza.attrs.from);
+      } else {
+        this.roster.seen(stanza.attrs.from);
       }
     }
   }
@@ -80,13 +118,12 @@
   }
   
   XmppDaemon.prototype.setRosterListener = function(listener) {
-    this.rosterListener = listener;
+    this.roster.setListener(listener);
   }
   
   XmppDaemon.prototype.sendMessage = function(to, msg) {
     
   }
-  
   
   exports.XmppDaemon = XmppDaemon;
 })(window);
