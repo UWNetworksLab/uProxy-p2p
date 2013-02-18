@@ -116,7 +116,7 @@ function startup() {
     }
   }
   
-  var streamListener = function(data) {
+  var streamListener = function(from, data) {
     console.log(data);
     if (!(data.hasOwnProperty('command') && data.hasOwnProperty('id'))) {
       console.log('Missing either command or id');
@@ -149,8 +149,8 @@ function startup() {
         });
       }
     } else if (data['command'] == 'receive') {
-      
-      activeConnections[data['id']]._sendRawData(window.atob(data.data));
+      console.log(data.data);
+      activeConnections[data['id']]._sendRawData(b64toab(data.data));
     }
   }
 

@@ -86,7 +86,7 @@
   XmppDaemon.prototype.onMessage = function(stanza) {
     if (stanza.is('message') && stanza.attrs.type !== 'error') {
       //TODO(willscott): extract data, send cleaned up stream structure?
-      this.messageListener(JSON.parse(stanza.getChildText("body")));
+      this.messageListener(stanza.attrs.from, JSON.parse(stanza.getChildText("body")));
     } else if (stanza.is('iq') && stanza.attrs.type == 'get') {
       var query = stanza.getChild("query");
       // Respond to capability requests from other users.

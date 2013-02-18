@@ -81,8 +81,8 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 		console.log("Connecting to " + host + ":" + port);
 	}
 	else if (this.state == SocksState.CONNECTED) {
-    console.log(data);
     var encodeddata = window.btoa(String.fromCharCode.apply(null, new Uint8Array(data)));;
+    console.log(encodeddata);
     var msg = {id: this.xmppid, command: "send", data: encodeddata};
     this.xmppSender(msg);
 	}
