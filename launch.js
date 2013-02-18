@@ -126,7 +126,7 @@ function startup() {
           activeSockets[data['id']] = sockInfo.socketId;
           var socketRead = function(readInfo) {
             if (readInfo.resultCode > 0) {
-              chatClient.sendMessage(activeJID, {id: data['id'], command: "receive", data: abtob64(readInfo.data)});
+              chatClient.sendMessage(from, {id: data['id'], command: "receive", data: abtob64(readInfo.data)});
             }
             chrome.socket.read(sockInfo.socketId, socketRead);
           }
