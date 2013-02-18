@@ -5,7 +5,11 @@ var activeJID = "";
 var activeConnections = [];
 
 function handleClientAccept(client) {
-	activeConnections.push(new Socks5Proxy(client));
+	var proxy = new Socks5Proxy(client);
+  proxy._setXmppSender(function(jsondata) {
+    chatClient.sendMessage(activeJID, jsondata);
+  });
+  activeConnections[proxy.xmppid] = proxy;
 };
 
 function startup() {
@@ -42,11 +46,16 @@ function startup() {
       roster.appendChild(child);
     }
   }
+  var streamListener = function(data) {
+    console.log(data);
+  }
+
   var connect = document.createElement("button");
   connect.innerHTML = "Connect!";
   connect.addEventListener('click', function() {
     chatClient = new XmppDaemon(creds);
-    chatClient.setRosterListener(rosterPrinter)
+    chatClient.setRosterListener(rosterPrinter);
+    chatClient.setStreamListener(streamListener);
   }, true);
   document.body.appendChild(connect);
   document.body.appendChild(status);

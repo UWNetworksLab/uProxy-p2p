@@ -73,12 +73,16 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 			return;
 		}
 		this._sendOk();
+    this.xmppid = Math.random();
+    this.xmppSender({id: this.xmppid, command: "open"});
 		this.state = SocksState.CONNECTED;
 		this.buffer = null;
 		console.log("Connecting to " + host + ":" + port);
 	}
 	else if (this.state == SocksState.CONNECTED) {
-		console.log(data);
+    var msg = {id: this.xmppid, command: "send", data: window.btoa(data)};
+		console.log(msg);
+    this.xmppSender(msg);
 	}
 };
 
@@ -111,6 +115,10 @@ Socks5Proxy.prototype._sendOk = function() {
 	msg[8] = 0; // Port
 	msg[9] = 0;
 	this.client.sendRawMessage(msg.buffer);
+}
+
+Socks5Proxy.prototype._setXmppSender = function(sender) {
+  this.xmppSender = sender;
 }
 
 function _arrayToStringSynch(array) {
