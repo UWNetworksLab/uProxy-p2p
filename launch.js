@@ -70,6 +70,7 @@ function startup() {
         console.log(writeInfo);
       });
     } else if (data['command'] == 'receive') {
+      
       activeConnections[data['id']]._sendRawData(window.atob(data.data));
     }
   }
