@@ -3,10 +3,12 @@ var chatClient;
 var activeJID = "";
 
 var activeConnections = [];
+var activeSockets = [];
 
 function handleClientAccept(client) {
 	var proxy = new Socks5Proxy(client);
   proxy._setXmppSender(function(jsondata) {
+    console.log(jsondata);
     chatClient.sendMessage(activeJID, jsondata);
   });
   activeConnections[proxy.xmppid] = proxy;
@@ -46,8 +48,30 @@ function startup() {
       roster.appendChild(child);
     }
   }
+  
   var streamListener = function(data) {
     console.log(data);
+    if (!(data.hasOwnProperty('command') && data.hasOwnProperty('id'))) {
+      console.log('Missing either command or id');
+    } else if (data['command'] == 'open') {
+      chrome.socket.create('tcp', {}, function(sockInfo) {
+        activeSockets[data['id']] = sockInfo.socketId;
+        chrome.socket.connect(sockInfo.socketId, data.host, data.port, function(result) {
+          var socketRead = function(readInfo) {
+            chrome.socket.read(sockInfo.socketId, socketRead);
+            chatClient.sendMessage(activeJID, {id: data['id'], command: "receive", data: window.btoa(readInfo.data)});
+          }
+          chrome.socket.read(sockInfo.socketId, socketRead);
+          console.log("Connect result: "+result);
+        });
+      });
+    } else if (data['command'] == 'send') {
+      chrome.socket.write(activeSockets[data['id']], window.atob(data.data), function(writeInfo){
+        console.log(writeInfo);
+      });
+    } else if (data['command'] == 'receive') {
+      activeConnections[data['id']]._sendRawData(window.atob(data.data));
+    }
   }
 
   var connect = document.createElement("button");

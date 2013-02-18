@@ -10,6 +10,7 @@ function Socks5Proxy(client) {
 		recv: null  // Called when data is received for an outbound connection.
 	};
 	this.buffer = null;
+  this.xmppid = Math.random();
 	this.client.addDataReceivedListener(this._onDataRead.bind(this));
 	this.state = SocksState.NEW;
 }
@@ -29,7 +30,7 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 	// Parse Initial Connection Messages.
 	if (this.state == SocksState.NEW && this.buffer) {
 		if (this.buffer[0] != 5) {
-			this._error("Client Handshake was invalid");
+			this._error("Client Handshake was invalid" + "first byte was " + this.buffer[0]);
 		}
 		var length = this.buffer[1];
 		if (this.buffer.length == length + 2) {
@@ -73,15 +74,14 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 			return;
 		}
 		this._sendOk();
-    this.xmppid = Math.random();
-    this.xmppSender({id: this.xmppid, command: "open"});
+    var msg = {id: this.xmppid, command: "open", host: host, port: port};
+    this.xmppSender(msg);
 		this.state = SocksState.CONNECTED;
 		this.buffer = null;
 		console.log("Connecting to " + host + ":" + port);
 	}
 	else if (this.state == SocksState.CONNECTED) {
     var msg = {id: this.xmppid, command: "send", data: window.btoa(data)};
-		console.log(msg);
     this.xmppSender(msg);
 	}
 };
@@ -115,6 +115,10 @@ Socks5Proxy.prototype._sendOk = function() {
 	msg[8] = 0; // Port
 	msg[9] = 0;
 	this.client.sendRawMessage(msg.buffer);
+}
+
+Socks5Proxy.prototype._sendRawData = function(data) {
+  this.client.sendRawMessage(data);
 }
 
 Socks5Proxy.prototype._setXmppSender = function(sender) {
