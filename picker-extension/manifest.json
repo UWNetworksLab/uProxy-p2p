@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "UProxyPicker",
+  "description": "Alpha: Ubiquitous Chrome Proxy Picker",
+  "version": "0.0.1",
+  "icons": {
+    "128": "images/uproxy-128.png",
+    "19": "images/uproxy-19.png",
+    "16": "images/uproxy-16.png"
+  },
+
+  "permissions": [
+    "storage"
+  ],
+
+  "browser_action": {
+    "default_icon": "images/uproxy-128.png",
+    "default_popup": "popup.html"
+  }
+}
