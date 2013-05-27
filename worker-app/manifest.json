@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "UProxy Worker",
-  "description": "Alpha: Ubiquitous Chrome Proxy Worker",
-  "version": "0.0.3",
+  "name": "UProxy",
+  "description": "Ubiquitous Proxy [Alpha]",
+  "version": "0.0.4",
   "icons": {
       "128": "images/uproxy-128.png",
       "19": "images/uproxy-19.png",

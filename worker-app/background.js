@@ -1,12 +1,9 @@
 function launchWindow(launchData) { 
-	console.log(launchData);
-	chrome.app.window.create('launch.html', {
-		  width: 800,
-		  height: 600,
-		  minWidth: 640,
-		  minHeight: 480,
-			type: 'shell'
-	});
+  chrome.app.window.create('launch.html', {
+    id: "uproxy",
+    minWidth: 640,
+    minHeight: 480
+  });
 }
 
 chrome.app.runtime.onLaunched.addListener(launchWindow);

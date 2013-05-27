@@ -1,14 +1,22 @@
 <!doctype HTML>
 <html>
   <head>
+    <title>UProxy</title>
     <script type="text/javascript" src="tcp-server.js"></script>
     <script type="text/javascript" src="socks-proxy.js"></script>
     <script type="text/javascript" src="node-xmpp-browser.js"></script>
     <script type="text/javascript" src="oauth.js"></script>
     <script type="text/javascript" src="xmppDaemon.js"></script>
     <script type="text/javascript" src="launch.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css" />
   </head>
   <body>
+    <section id='head'>
+      <input type='text' id='url' />
+      <button id='settings'>
+        <img src='images/uproxy-19.png' />
+      </button>
+    </section>
     <webview src="about:blank"></webview>
   </body>
 </html>
