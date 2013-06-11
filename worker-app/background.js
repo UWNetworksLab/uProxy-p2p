@@ -1,4 +1,4 @@
-function launchWindow(launchData) { 
+function launchWindow(launchData) {
   chrome.app.window.create('launch.html', {
     id: "uproxy",
     minWidth: 640,

@@ -1,5 +1,11 @@
+function loadSupport() {
+  importScripts('/xmppDaemon.js');
+}
+
 function IdentityProvider() {
-// late bound importScripts() available.
+  if (typeof XmppDaemon == "undefined") {
+    loadSupport();
+  }
 }
 
 // Get my id.
