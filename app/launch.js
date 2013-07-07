@@ -157,7 +157,7 @@ function startup() {
   var connect = document.createElement("button");
   connect.innerHTML = "Connect!";
   connect.addEventListener('click', function() {
-    chatClient = new XmppDaemon(creds);
+    chatClient = new XmppDaemon("uproxy", creds);
     chatClient.setRosterListener(rosterPrinter);
     chatClient.setStreamListener(streamListener);
   }, true);
