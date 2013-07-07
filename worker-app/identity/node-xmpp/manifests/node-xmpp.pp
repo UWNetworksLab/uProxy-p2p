@@ -54,7 +54,7 @@ class node-xmpp {
     require => Exec['npm-browserify']
   }
   
-  exec { "/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js lib/node-xmpp-browserify.js":
+  exec { "/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js -r request:browser-request -i node-stringprep lib/node-xmpp-browserify.js":
     alias => "compile",
     cwd => "/home/vagrant/node_modules/node-xmpp",
     require => Exec['rules']

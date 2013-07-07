@@ -5,5 +5,5 @@ cd /home/vagrant/node_modules/node-xmpp
 cd ..
 cp -r /vagrant/chrome-support/* ./
 cd node-xmpp
-/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js lib/node-xmpp-browserify.js
+/usr/local/bin/browserify -p browserify-override -o node-xmpp-browser.js -r request:browser-request -i node-stringprep lib/node-xmpp-browserify.js
 cp node-xmpp-browser.js /vagrant/

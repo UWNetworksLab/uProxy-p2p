@@ -36,7 +36,7 @@ module.exports = {
 		rules: [
   		{
 			  from: 'window = window',
-				to: 'var unsafeKeys = {"locationbar":1, "menubar":1, "personalbar":1, "scrollbars":1, "statusbar":1, "toolbar":1, "localStorage":1};\nwindow = window'
+				to: 'var unsafeKeys = {"locationbar":1, "menubar":1, "personalbar":1, "scrollbars":1, "statusbar":1, "toolbar":1, "localStorage":1, "XMLHttpRequest":1};\nwindow = window'
 		  }, {
 		    from: 'if\\(window\\.hasOwnProperty\\(key\\)',
 		    to: 'if(window.hasOwnProperty(key) && !unsafeKeys[key]'
@@ -66,5 +66,12 @@ module.exports = {
 			from: 'proxyEvent\\(\'drain\'\\);',
 			to: 'proxyEvent\(\'drain\'\);\nproxyEvent\(\'connect\'\);'
 		}]
-	}
+	},
+  "/lib/xmpp/bosh.js": {
+    action: 'patch',
+    rules: [{
+      from: 'require\\(\'request\'\\);',
+      to: 'false;'
+    }]
+  }
 };
