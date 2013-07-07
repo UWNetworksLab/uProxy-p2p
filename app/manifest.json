@@ -18,7 +18,7 @@
   "permissions": [
     "storage",
     "webview",
-    "experimental",
+    "identity",
     {"socket": ["tcp-connect", "udp-send-to", "tcp-listen::8123"]}
   ],
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDT20aY/lDUHQ2dpRK2htOHxHPedPT+mZujEMifUV4BA6jxQ4AuMRjriKXJiq0PpDyJFaAJG3JLxmOHeDaygp/KjgVPzeo4v0kKWHSj7GpS41C8e6glsBWnVem6DvBZ/hk0rLZ9oNlsNbvUooG4QArdVNiUvjp55Lp9x5gfyIQSWQIDAQAB",

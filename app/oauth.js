@@ -38,5 +38,5 @@ var getCredentials = function(callback) {
 
   // Request an Auth Token - this brings up a dialog for the user to approve
   // the first time it is called.
-  chrome.experimental.identity.getAuthToken({ 'interactive': true }, onGetAuthToken);
+  chrome.identity.getAuthToken({ 'interactive': true }, onGetAuthToken);
 }
