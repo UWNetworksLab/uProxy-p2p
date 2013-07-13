@@ -78,5 +78,12 @@ module.exports = {
     action: 'append',
     with: 'element.js',
     from: module
+  },
+  "/lib/xmpp/session.js": {
+    action: 'patch',
+    rules: [{
+      from: 'self\\.connection\\.socket\\.on\\(\\"connect\\"',
+      to: 'self.connection.socket.on\(\'connect-disabled\''
+    }]
   }
 };

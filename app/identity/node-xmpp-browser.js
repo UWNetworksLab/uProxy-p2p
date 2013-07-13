@@ -12303,7 +12303,7 @@ function Session(opts) {
 	            if (opts.credentials) {
 	                self.connection.credentials = crypto.createCredentials(opts.credentials);
 	            }
-	            self.connection.socket.on("connect", function() {
+	            self.connection.socket.on('connect-disabled', function() {
                         self.connection.emit('connect')
                     })
                     self.connection.socket.connect(opts.port || 5222, opts.host);
