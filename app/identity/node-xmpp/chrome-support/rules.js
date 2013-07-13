@@ -73,5 +73,10 @@ module.exports = {
       from: 'require\\(\'request\'\\);',
       to: 'false;'
     }]
+  },
+  "/node_modules/ltx/lib/element.js": {
+    action: 'append',
+    with: 'element.js',
+    from: module
   }
 };
