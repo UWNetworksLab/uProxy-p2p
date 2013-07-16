@@ -2,7 +2,7 @@
   "name": "UProxy",
   "description": "The UProxy backend provides a mesh web proxy, access the web through your social connections.",
   "app": {
-    "script": "proxy.js"
+    "script": "uproxy.js"
   },
   "dependencies": {
     "identity": "identity/identity.json"
