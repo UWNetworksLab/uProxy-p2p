@@ -9,6 +9,11 @@
     "16": "images/uproxy-16.png"
   },
 
+  "background": {
+    "persistent": true,
+    "scripts": ["js/plumbing.js"]
+  },
+
   "permissions": [
     "storage"
   ],

@@ -2,3 +2,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   console.log("loaded UProxy DOM");
 });
+
+freedom.emit('test', 'test');
