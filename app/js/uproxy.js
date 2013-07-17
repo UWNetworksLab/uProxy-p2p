@@ -9,7 +9,8 @@ var onload = function() {
 
   freedom.on("forward", function(msg) {
     console.log("forward:"+msg);
-    freedom.emit("backward", "testmessage");
+    freedom.emit("backward", "testmessage1");
+    freedom.emit("backward", "testmessage2");
   });
 }
 

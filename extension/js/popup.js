@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log("loaded UProxy DOM");
 });
 
-freedom.on('backward', function(msg) {
+freedom.once('backward', function(msg) {
   console.log('backward:'+msg);
 });
 freedom.emit('forward', 'testmessage');
