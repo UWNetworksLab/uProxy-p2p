@@ -6,6 +6,11 @@ var onload = function() {
   namepromise.done(function(data) {
     freedom.emit('id', data.id);
   });
+
+  freedom.on("forward", function(msg) {
+    console.log("forward:"+msg);
+    freedom.emit("backward", "testmessage");
+  });
 }
 
 //TODO(willscott): WebWorkers startup errors are hard to debug.

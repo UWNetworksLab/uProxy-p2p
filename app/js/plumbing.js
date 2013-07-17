@@ -2,9 +2,19 @@ var extPort;
 
 chrome.runtime.onConnectExternal.addListener(function(port) {
   extPort = port;
-  port.onMessage.addListener(onExtMsg);
+  extPort.onMessage.addListener(onExtMsg);
 });
 
 function onExtMsg(msg) {
-  console.log(msg);
+  if (msg.cmd == 'emit') {
+    freedom.emit(msg.type, msg.data);
+  } else if (msg.cmd == 'on') {
+    freedom.on(msg.type, function (ret) {
+      extPort.postMessage({
+        type: msg.type,
+        data: ret
+      });
+    });
+  }
 };
+
