@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "UProxy",
+  "name": "UProxyApp",
   "description": "Ubiquitous Proxy [Alpha]",
   "version": "0.0.4",
   "icons": {
@@ -10,9 +10,7 @@
   },
   "app": {
     "background": {
-      "scripts": [
-        "background.js"
-      ]
+      "page": "background.html"
     }
   },
   "permissions": [
