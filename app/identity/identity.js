@@ -1,4 +1,15 @@
 function loadSupport() {
+  chrome = {
+    socket: freedom['core.socket']()
+  };
+  
+  console.warn = function(f) {
+    console.log(f);
+  }
+
+  window = {};
+
+  importScripts('/node-xmpp-browser.js');
   importScripts('/xmppDaemon.js');
 }
 

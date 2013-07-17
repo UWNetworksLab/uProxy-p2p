@@ -8,7 +8,7 @@
     "identity"
   ],
   "permissions": [
-    "core.sockets",
+    "core.socket",
     "core.oauth"
   ]
 }
