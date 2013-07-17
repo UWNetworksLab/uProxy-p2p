@@ -87,21 +87,27 @@ function startup() {
   tcpServer.listen(handleClientAccept);
 
   // Auth Flow.
-  var creds = {};
-  var start = document.createElement("button");
-  start.innerHTML = "Log In!";
-  start.addEventListener('click', function() {
-    getCredentials(function(cred) {
-      creds = cred;
-      console.log(cred);
-    });
-  }, true);
-  document.body.appendChild(start);
-
   var status = document.createElement("div");
-  status.innerHTML = "No active friend connection.";
+  status.innerHTML = "Waiting for credentials...";
+  document.body.appendChild(status);
+  chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+      console.log('Got request:', request, sender);
+      // XXX https://github.com/UWNetworksLab/UProxy/issues/7
+      var extensionId = "jnknbgbmdkpnjkcaakmlnlnhdbfpdeig";
+      if (sender.id != extensionId) {
+        console.log('Invalid sender.id, aborting.');
+        return;
+      }
+      status.innerHtml = "Connecting...";
+      connect({email: request.email, token: request.token});
+      sendResponse({credentialsReceived: true});
+    });
+
   var roster = document.createElement("div");
+  document.body.appendChild(roster);
   var rosterPrinter = function(r) {
+    status.innerHTML = "Received roster";
     roster.innerHTML = "";
     roster.appendChild(document.createTextNode("Available Friends:"));
     for (var i = 0; i < r.length; i++) {
@@ -154,16 +160,11 @@ function startup() {
     }
   }
 
-  var connect = document.createElement("button");
-  connect.innerHTML = "Connect!";
-  connect.addEventListener('click', function() {
+  function connect(creds) {
     chatClient = new XmppDaemon("uproxy", creds);
     chatClient.setRosterListener(rosterPrinter);
     chatClient.setStreamListener(streamListener);
-  }, true);
-  document.body.appendChild(connect);
-  document.body.appendChild(status);
-  document.body.appendChild(roster);
+  };
 }
 
 window.addEventListener('load', startup, true);

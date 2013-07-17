@@ -15,7 +15,16 @@
   },
 
   "permissions": [
+    "https://accounts.google.com/o/oauth2/token",
     "storage"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["http://www.google.com/robots.txt*"],
+      "js": ["oauth2/oauth2_inject.js"],
+      "run_at": "document_start"
+    }
   ],
 
   "browser_action": {
