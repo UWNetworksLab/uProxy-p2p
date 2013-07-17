@@ -5,9 +5,10 @@
     "script": "uproxy.js"
   },
   "dependencies": {
-    "identity": "identity/identity.json"
+    "identity": "js/identity/identity.json"
   },
   "permissions": [
-    "identity"
+    "identity",
+    "storage"
   ]
 }

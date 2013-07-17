@@ -1,10 +1,14 @@
 var buddies = [];
 var msg_listeners = [];
+var id;
 
 //freedom.on('buddylist-update', function (msg) {
 //  buddies = msg;
 //});
 
+freedom.on('id', function(msg) {
+  id = msg;
+});
 
 freedom.on('message-update', function (msg) {
   console.log('new message: '+msg);
@@ -20,3 +24,5 @@ function sendMsg(to, msg) {
 function addMsgListener(func) {
   msg_listeners.push(func);
 }
+
+freedom.emit('start-extension', 'start');
