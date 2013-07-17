@@ -7,10 +7,10 @@ var onload = function() {
     freedom.emit('id', data.id);
   });
 
-  freedom.on("forward", function(msg) {
-    console.log("forward:"+msg);
-    freedom.emit("backward", "testmessage1");
-    freedom.emit("backward", "testmessage2");
+  //Echo Service
+  freedom.on("send-message", function(msg) {
+    console.log("msg: "+msg);
+    freedom.emit("message-update", msg);
   });
 }
 
