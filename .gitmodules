@@ -1,3 +1,6 @@
 [submodule "app/js/freedom"]
 	path = app/js/freedom
 	url = https://github.com/UWNetworksLab/freedom
+[submodule "extension/submodules/oauth2"]
+	path = extension/submodules/oauth2
+	url = https://github.com/borismus/oauth2-extensions
