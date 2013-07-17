@@ -5,7 +5,7 @@ Tagline Coming Soon
 
 ### Installation
 
-1. `git clone `
+1. `git clone --recursive https://github.com/UWNetworksLab/UProxy.git`
 
 2. Navigate to chrome://extensions, check 'Developer Mode'.
 
