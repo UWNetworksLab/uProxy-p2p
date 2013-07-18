@@ -1,5 +1,10 @@
 var extPort;
 
+var script = document.createElement('script');
+script.setAttribute('data-manifest', 'js/uproxy.json');
+script.src = 'js/freedom/freedom.js';
+document.head.appendChild(script);
+
 chrome.runtime.onConnectExternal.addListener(function(port) {
   extPort = port;
   extPort.onMessage.addListener(onExtMsg);
