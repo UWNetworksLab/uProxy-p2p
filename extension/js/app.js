@@ -9,21 +9,11 @@ angular.module('UProxyExt', [
                'https://www.googleapis.com/auth/googletalk'
   })
   .controller('MainCtrl', ['$rootScope', '$http', 'OAUTH_CONFIG', function ($rootScope, $http, OAUTH_CONFIG) {
-    // XXX https://github.com/UWNetworksLab/UProxy/issues/7
-    var appId = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
-
-    function sendToApp(data) {
-      // XXX https://github.com/skivvies/UProxy/issues/3
-      chrome.runtime.sendMessage(appId, data,
-        function (response) {
-          console.log('Got response:', response);
-        }
-      );
-    }
 
     var googleAuth = new OAuth2('google', OAUTH_CONFIG);
     var profileUrl = 'https://www.googleapis.com/oauth2/v1/userinfo';
     var accessToken, email;
+    var bkg = chrome.extension.getBackgroundPage();
 
     $rootScope.sendCredentials = function () {
       if (!accessToken || !email) {
@@ -36,14 +26,16 @@ angular.module('UProxyExt', [
           }).then(
             function getProfileSuccessHandler(resp) {
               var email = resp.data.email;
-              sendToApp({email: email, token: accessToken});
+              bkg.freedom.emit('oauth-credentials', {email:email, token, accessToken});
+              //sendToApp({email: email, token: accessToken});
             },
             function getProfileFailureHandler(resp) {
               console.error('request for', profileUrl, 'failed:', resp);
             });
         });
       } else {
-        sendToApp({email: email, token: accessToken});
+        bkg.freedom.emit('oauth-credentials', {email:email, token, accessToken});
+        //sendToApp({email: email, token: accessToken});
       }
     };
   }]);

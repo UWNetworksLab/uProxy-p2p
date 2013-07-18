@@ -5,7 +5,7 @@ var popup_listeners = {};
 //});
 //
 function clearPopupListeners() {
-  popup_listeners = [];
+  popup_listeners = {};
 }
 
 function addPopupListener(type, func) {

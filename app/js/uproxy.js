@@ -24,6 +24,10 @@ var onload = function() {
     });
   });
 
+  freedom.on('oauth-credentials', function(msg) {
+    console.log(msg);
+  });
+
   identity.on('buddylist', function(list) {
     for (var i = 0; i < list.length; i++) {
       if (allowed_peers.indexOf(list[i]) >= 0) {
