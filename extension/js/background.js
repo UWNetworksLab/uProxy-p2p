@@ -1,28 +1,25 @@
-var buddies = [];
-var msg_listeners = [];
-var id;
+var popup_listeners = {};
 
 //freedom.on('buddylist-update', function (msg) {
 //  buddies = msg;
 //});
 
 freedom.on('id', function(msg) {
-  id = msg;
+  if (popup_listeners['id']) {
+    popup_listeners['id'](msg);
+  } else {
+    console.log('Handler missing for: id');
+  }
 });
 
 freedom.on('message-update', function (msg) {
   console.log('new message: '+msg);
-  for (var i = 0; i < msg_listeners.length; i++) {
-    msg_listeners[i](msg);
+  if (popup_listeners['message-update']) {
+    popup_listeners['message-update'](msg);
+  } else {
+    console.log('Handler missing for: message-update');
   }
 });
 
-function sendMsg(to, msg) {
-  freedom.emit('send-message', msg);
-}
 
-function addMsgListener(func) {
-  msg_listeners.push(func);
-}
-
-freedom.emit('start-extension', 'start');
+freedom.emit('open-extension', '');

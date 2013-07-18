@@ -11,12 +11,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (evt.keyCode == 13) {
       var text = input.value;
       input.value = "";
-      bkg.sendMsg("", text);
+      bkg.freedom.emit('send-message', text);
     }
   };
+
   bkg.addMsgListener(function(msg) {
     var msg_log = document.getElementById('msg_log');
     msg_log.appendChild(document.createTextNode(msg));
     msg_log.appendChild(document.createElement('br'));
   });
+
+  bkg.freedom.emit('open-popup', '');
 })();

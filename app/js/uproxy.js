@@ -5,18 +5,22 @@ var blocked_peers = [];
 var online_peers = [];
 
 var onload = function() {
-  freedom.on('start-extension', function(msg) {
+  storage.get("allowed_peers").done(function (data) {
+    if (data !== null) {
+      allowed_peers = data;
+    }
+  });
+  storage.get("blocked_peers").done(function (data) {
+    if (data !== null) {
+      blocked_peers = data;
+    }
+  });
+
+  //Everytime pop-up is opened
+  freedom.on('open-popup', function(msg) {
     //Fetch UID
     identity.get().done(function(data) {
       freedom.emit('id', data.id);
-    });
-    storage.get("allowed_peers").done(function (data) {
-      //if (check if exists)
-      allowed_peers = data;
-    });
-    storage.get("blocked_peers").done(function (data) {
-      //if (check if exists)
-      blocked_peers = data;
     });
   });
 
