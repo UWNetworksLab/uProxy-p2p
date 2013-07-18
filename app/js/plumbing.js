@@ -1,5 +1,31 @@
 var extPort;
 
+window.freedomcfg = function(register) {
+  register("core.view", View_proxy);
+}
+
+var View_proxy = function(channel) {
+  this.host = null;
+  this.win = null;
+  this.channel = channel;
+};
+
+View_proxy.prototype.open = function(args, continuation) {
+  console.log('open w/ ' + args);
+  continuation({});
+}
+
+View_proxy.prototype.show = function(continuation) {
+  continuation();
+}
+
+View_proxy.prototype.postMessage = function(args, continuation) {
+  continuation();
+}
+
+View_proxy.prototype.close = function() {
+}
+
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'js/uproxy.json');
 script.src = 'js/freedom/freedom.js';
@@ -31,4 +57,3 @@ function onExtMsg(msg) {
     });
   }
 };
-
