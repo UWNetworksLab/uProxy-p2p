@@ -3,9 +3,7 @@ var bkg = chrome.extension.getBackgroundPage();
 
 document.addEventListener('DOMContentLoaded', function () {
   bkg.console.log("loaded UProxy DOM");
-});
-
-(function load() {
+  bkg.clearPopupListeners();
   var input = document.getElementById('msg_input');
   input.onkeydown = function(evt) {
     if (evt.keyCode == 13) {
@@ -15,11 +13,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
-  bkg.addMsgListener(function(msg) {
+  bkg.addPopupListener('message-update', function(msg) {
     var msg_log = document.getElementById('msg_log');
     msg_log.appendChild(document.createTextNode(msg));
     msg_log.appendChild(document.createElement('br'));
   });
 
   bkg.freedom.emit('open-popup', '');
-})();
+});
+
