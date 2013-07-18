@@ -2,6 +2,7 @@
   "name": "UProxyExt",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "PatternConsulting/bower-angular"
+    "angular": "PatternConsulting/bower-angular",
+    "jsonpatch": "~v1.0.0-rc1"
   }
 }

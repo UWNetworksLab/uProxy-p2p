@@ -26,13 +26,8 @@ function callPopupListener(type, data) {
   }
 }
 
-freedom.on('id', function(msg) {
-  callPopupListener('id', msg);
-});
-
-freedom.on('message-update', function (msg) {
-  callPopupListener('message-update', msg);
-  console.log('new message: '+msg);
+freedom.on('state-change', function (msg) {
+  callPopupListener('state-change', msg);
 });
 
 

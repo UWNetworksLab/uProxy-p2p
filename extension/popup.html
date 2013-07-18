@@ -23,14 +23,32 @@
       -
       - [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
      -->
+    <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="oauth2/oauth2.js"></script>
     <script src="js/app.js"></script>
-    <script src="js/popup.js"></script>
   </head>
   <body ng-cloak ng-controller="MainCtrl">
-    <button ng-click="sendCredentials()">Send Credentials</button>
-    <input id='msg_input' class='text'>
-    <div id='msg_log'></div>
+    <div>
+      <button ng-click="sendCredentials()">Send Credentials</button>
+    </div>
+    <div>
+      Hi {{uproxy.id}} <br>
+      {{uproxy.status_msg}}
+    </div>
+    <div>
+      You can proxy through:
+      <li ng-repeat='peer in uproxy.allowed_peers'>
+        {{peer.name}} ({{peer.id}})
+      </li>
+    <div>
+    <div>
+      <input id='msg_input' class='text'>
+      <div>
+        <li ng-repeat='msg in uproxy.msg_log'>
+          {{msg}}
+        </li>
+      </div>
+    </div>
   </body>
 </html>

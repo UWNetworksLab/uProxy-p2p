@@ -1,31 +1,54 @@
 var identity = freedom.identity();
 var storage = freedom.storage();
-var allowed_peers = [];
-var blocked_peers = [];
-var online_peers = [];
+var state = {
+  id: "Foobar",
+  status_msg: "",
+  allowed_peers: [
+    {'name': 'Alice', 'id': 'alice@gmail.com'},
+    {'name': 'Bob', 'id': 'bob@gmail.com'}
+  ],
+  blocked_peers: [],
+  online_peers: [],
+  msg_log: []
+};
 
 var onload = function() {
   storage.get("allowed_peers").done(function (data) {
     if (data !== null) {
-      allowed_peers = data;
+      state.allowed_peers = data;
     }
   });
   storage.get("blocked_peers").done(function (data) {
     if (data !== null) {
-      blocked_peers = data;
+      state.blocked_peers = data;
     }
   });
+  
+  //Fetch UID
+  identity.get().done(function(data) {
+    state.id = data.id;
+    freedom.emit('state-change', [{
+      'op': 'replace',
+      'path': '/id',
+      'value': state.id
+    }]);
+  });
+
+  //TODO check status
+  state.status_msg = "Your connection is currently not being proxied";
 
   //Everytime pop-up is opened
   freedom.on('open-popup', function(msg) {
-    //Fetch UID
-    identity.get().done(function(data) {
-      freedom.emit('id', data.id);
-    });
+    var patch = [{
+      'op': 'replace',
+      'path': '',
+      'value': state
+    }];
+    freedom.emit('state-change', patch);
   });
 
   freedom.on('oauth-credentials', function(msg) {
-    console.log(msg);
+    console.log(JSON.stringify(msg));
   });
 
   identity.on('buddylist', function(list) {
@@ -42,8 +65,14 @@ var onload = function() {
 
   //Echo Service
   freedom.on("send-message", function(msg) {
+    state.msg_log.push(msg);  
+    var patch = [{
+      'op': 'add',
+      'path': '/msg_log/-',
+      'value': msg
+    }];
     console.log("msg: "+msg);
-    freedom.emit("message-update", msg);
+    freedom.emit("state-change", patch);
   });
 }
 
