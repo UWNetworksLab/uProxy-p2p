@@ -7,3 +7,6 @@
 [submodule "firefox/submodules/uproxy-common"]
 	path = firefox/submodules/uproxy-common
 	url = https://github.com/UWNetworksLab/uproxy-common.git
+[submodule "chrome/extension/submodules/uproxy-common"]
+	path = chrome/extension/submodules/uproxy-common
+	url = https://github.com/UWNetworksLab/uproxy-common.git
