@@ -22,7 +22,7 @@ function IdentityProvider() {
 }
 
 // Get my id.
-IdentityProvider.prototype.get = function(continuation) {
+IdentityProvider.prototype.getProfile = function(continuation) {
   if (!this.credentials) {
     var view = freedom['core.view']();
     var promise = view.open({
