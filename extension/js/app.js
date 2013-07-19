@@ -51,8 +51,6 @@ angular.module('UProxyExt', [
       }
     };
 
-
-    //ryscheng
     $rootScope.uproxy = {};
     bkg.addPopupListener('state-change', function(patch) {
       console.log(patch);
