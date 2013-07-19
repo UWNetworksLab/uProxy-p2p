@@ -1,17 +1,26 @@
 var extPort;
+var pendingMsgs = [];
 
 window.freedomcfg = function(register) {
   register("core.view", View_proxy);
 }
 
-var View_proxy = function(channel) {
+var View_proxy = function(channel, resolver) {
   this.host = null;
+  console.log(resolver);
+  this.resolver = resolver;
   this.win = null;
   this.channel = channel;
 };
 
 View_proxy.prototype.open = function(args, continuation) {
-  console.log('open w/ ' + args);
+  var file = this.resolver(args.file);
+  this.win = file;
+  sendMessage({
+    cmd: 'on',
+    type: 'viewopen',
+    data: file
+  });
   continuation({});
 }
 
@@ -34,7 +43,18 @@ document.head.appendChild(script);
 chrome.runtime.onConnectExternal.addListener(function(port) {
   extPort = port;
   extPort.onMessage.addListener(onExtMsg);
+  for (var i = 0; i < pendingMsgs.length; i++) {
+    extPort.postMessage(pendingMsgs[i]);
+  }
 });
+
+function sendMessage(msg) {
+  if (extPort) {
+    extPort.postMessage(msg);
+  } else {
+    pendingMsgs.push(msg);
+  }
+}
 
 function onExtMsg(msg) {
   if (msg.cmd == 'emit') {
