@@ -36,8 +36,9 @@ View_proxy.prototype.close = function() {
 }
 
 var script = document.createElement('script');
-script.setAttribute('data-manifest', 'js/uproxy.json');
-script.src = 'js/freedom/freedom.js';
+script.setAttribute('data-manifest', 'submodules/uproxy-common/uproxy.json');
+script.src = 'submodules/uproxy-common/submodules/freedom/freedom.js';
+
 document.head.appendChild(script);
 
 chrome.runtime.onConnectExternal.addListener(function(port) {

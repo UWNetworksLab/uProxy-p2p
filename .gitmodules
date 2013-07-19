@@ -1,6 +1,9 @@
-[submodule "app/js/freedom"]
-	path = app/js/freedom
-	url = https://github.com/UWNetworksLab/freedom
 [submodule "chrome/extension/submodules/oauth2"]
 	path = chrome/extension/submodules/oauth2
 	url = https://github.com/borismus/oauth2-extensions
+[submodule "chrome/app/submodules/uproxy-common"]
+	path = chrome/app/submodules/uproxy-common
+	url = https://github.com/UWNetworksLab/uproxy-common.git
+[submodule "firefox/submodules/uproxy-common"]
+	path = firefox/submodules/uproxy-common
+	url = https://github.com/UWNetworksLab/uproxy-common.git
