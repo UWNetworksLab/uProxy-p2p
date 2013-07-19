@@ -10,7 +10,7 @@
   },
   "app": {
     "background": {
-      "page": "background.html"
+      "scripts": ["js/plumbing.js", "js/background.js"]
     }
   },
   "permissions": [
