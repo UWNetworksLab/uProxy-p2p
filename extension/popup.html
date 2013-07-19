@@ -37,9 +37,9 @@
       {{uproxy.status_msg}}
     </div>
     <div>
-      You can proxy through:
-      <li ng-repeat='peer in uproxy.allowed_peers'>
-        {{peer.name}} ({{peer.id}})
+      Buddies:
+      <li ng-repeat='card in uproxy.roster | checkOnline'>
+        {{card.name}} ({{card.id}}) - {{card.status}}
       </li>
     <div>
     <div>

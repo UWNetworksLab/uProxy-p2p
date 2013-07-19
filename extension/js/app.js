@@ -8,6 +8,17 @@ angular.module('UProxyExt', [
     api_scope: 'https://www.googleapis.com/auth/userinfo.email '+
                'https://www.googleapis.com/auth/googletalk'
   })
+  .filter('checkOnline', function () {
+    return function(roster) {
+      var filtered = [];
+      angular.forEach(roster, function (card, id) {
+        if (card.status !== 'offline') {
+          filtered.push(card);
+        }
+      });
+      return filtered;
+    };
+  })
   .controller('MainCtrl', ['$rootScope', '$http', 'OAUTH_CONFIG', function ($rootScope, $http, OAUTH_CONFIG) {
 
     var googleAuth = new OAuth2('google', OAUTH_CONFIG);
@@ -59,7 +70,7 @@ angular.module('UProxyExt', [
       if (evt.keyCode == 13) {
         var text = input.value;
         input.value = "";
-        bkg.freedom.emit('send-message', text);
+        bkg.freedom.emit('send-message', {to: '', message: text});
       }
     };
 

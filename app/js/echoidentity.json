@@ -1,0 +1,10 @@
+{
+  "name": "Echo Identity",
+  "description": "Echo identity provider (for testing purposes)",
+  "app": {
+    "script": "echoidentity.js"
+  },
+  "provides": [
+    "identity"
+  ],
+}

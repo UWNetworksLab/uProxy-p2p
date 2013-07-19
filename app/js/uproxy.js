@@ -2,36 +2,28 @@ var identity = freedom.identity();
 var storage = freedom.storage();
 var state = {
   id: "Foobar",
-  status_msg: "",
-  allowed_peers: [
-    {'name': 'Alice', 'id': 'alice@gmail.com'},
-    {'name': 'Bob', 'id': 'bob@gmail.com'}
-  ],
-  blocked_peers: [],
-  online_peers: [],
+  my_card: {}
+  status_msg: "I'm good",
+  allowed_peers: ['alice@gmail.com'],
+  blocked_peers: ['bob@gmail.com'],
+  roster: {},
   msg_log: []
 };
 
 var onload = function() {
-  storage.get("allowed_peers").done(function (data) {
+  //Restore state from storage
+  storage.get("state").done(function (data) {
     if (data !== null) {
-      state.allowed_peers = data;
-    }
-  });
-  storage.get("blocked_peers").done(function (data) {
-    if (data !== null) {
-      state.blocked_peers = data;
+      state = data;
     }
   });
   
   //Fetch UID
-  identity.get().done(function(data) {
-    state.id = data.id;
-    freedom.emit('state-change', [{
-      'op': 'replace',
-      'path': '/id',
-      'value': state.id
-    }]);
+  //state.id = identity.id;
+  identity.getProfile(null).done(function(data) {
+    state.id = data.card.id;
+    state.my_card = data.card;
+    state.roster = data.roster;
   });
 
   //TODO check status
@@ -39,40 +31,47 @@ var onload = function() {
 
   //Everytime pop-up is opened
   freedom.on('open-popup', function(msg) {
-    var patch = [{
+    freedom.emit('state-change',[{
       'op': 'replace',
       'path': '',
       'value': state
-    }];
-    freedom.emit('state-change', patch);
+    }]);
   });
 
   freedom.on('oauth-credentials', function(msg) {
     console.log(JSON.stringify(msg));
   });
 
-  identity.on('buddylist', function(list) {
-    for (var i = 0; i < list.length; i++) {
-      if (allowed_peers.indexOf(list[i]) >= 0) {
-        
-      } else if (blocked_peers.indexOf([i]) >= 0) {
-
-      } else {
-
-      }
+  identity.on('onChange', function(data) {
+    //If my card changed
+    if (data.id && data.id == state.id) {
+      state.my_card = data;
+      freedom.emit('state-change', [{
+        'op': 'replace',
+        'path': '/my_card',
+        'value': data
+      }]);
+    } else { //must be a buddy
+      state.roster[data.id] = data;
+      freedom.emit('state-change', [{
+        'op': 'replace',
+        'path': '/roster/'+data.id,
+        'value': data
+      }]);
     }
   });
 
-  //Echo Service
-  freedom.on("send-message", function(msg) {
-    state.msg_log.push(msg);  
-    var patch = [{
+  identity.on('onMessage', function(data) {
+    state.msg_log.push(data);
+    freedom.emit("state-change", [{
       'op': 'add',
       'path': '/msg_log/-',
-      'value': msg
-    }];
-    console.log("msg: "+msg);
-    freedom.emit("state-change", patch);
+      'value': data
+    }]);
+  });
+
+  freedom.on("send-message", function(data) {
+    identity.sendMessage(data.to, data.message);
   });
 }
 
