@@ -12,7 +12,13 @@ function Socks5Proxy(client) {
 	this.buffer = null;
   this.xmppid = Math.random();
 	this.client.addDataReceivedListener(this._onDataRead.bind(this));
-	this.state = SocksState.NEW;
+	this.testClient = {
+    sendMessage : function(socketid, data) {
+      console.log("Received message!!!");
+      client.sendRawMessage(data.data);
+    }
+  };
+  this.state = SocksState.NEW;
 }
 
 const SocksState = {
@@ -75,16 +81,17 @@ Socks5Proxy.prototype._onDataRead = function(data) {
 		}
 		this._sendOk();
     var msg = {id: this.xmppid, command: "open", host: host, port: port};
-    this.xmppSender(msg);
+        console.log("made a message");
+    this.sender(this.testClient, msg);
 		this.state = SocksState.CONNECTED;
 		this.buffer = null;
+
 		console.log("Connecting to " + host + ":" + port);
 	}
 	else if (this.state == SocksState.CONNECTED) {
     var encodeddata = window.btoa(String.fromCharCode.apply(null, new Uint8Array(data)));;
-    console.log(encodeddata);
     var msg = {id: this.xmppid, command: "send", data: encodeddata};
-    this.xmppSender(msg);
+    this.sender(this.testClient, msg);
 	}
 };
 
@@ -123,8 +130,8 @@ Socks5Proxy.prototype._sendRawData = function(data) {
   this.client.sendRawMessage(data);
 }
 
-Socks5Proxy.prototype._setXmppSender = function(sender) {
-  this.xmppSender = sender;
+Socks5Proxy.prototype._setSender = function(sender) {
+  this.sender = sender;
 }
 
 function _arrayToStringSynch(array) {
