@@ -3,6 +3,10 @@ function IdentityProvider() {
 }
 
 IdentityProvider.prototype.getProfile = function(id, continuation) {
+  for (var i = 0; i < arguments.length; i++) {
+    console.log(arguments[i]);
+  }
+  console.log(arguments);
   continuation({
     card: {
       'id': 'me@gmail.com',
