@@ -2,37 +2,7 @@ var extPort;
 var pendingMsgs = [];
 
 window.freedomcfg = function(register) {
-  register("core.view", View_proxy);
-}
-
-var View_proxy = function(channel, resolver) {
-  this.host = null;
-  console.log(resolver);
-  this.resolver = resolver;
-  this.win = null;
-  this.channel = channel;
-};
-
-View_proxy.prototype.open = function(args, continuation) {
-  var file = this.resolver(args.file);
-  this.win = file;
-  sendMessage({
-    cmd: 'on',
-    type: 'viewopen',
-    data: file
-  });
-  continuation({});
-}
-
-View_proxy.prototype.show = function(continuation) {
-  continuation();
-}
-
-View_proxy.prototype.postMessage = function(args, continuation) {
-  continuation();
-}
-
-View_proxy.prototype.close = function() {
+  register("core.view", View_oauth);
 }
 
 var script = document.createElement('script');
