@@ -1,8 +1,6 @@
 function IdentityProvider() {
-  this.credentials = null;
   this.client = null;
 }
-
 
 IdentityProvider.prototype.getProfile = function(id, continuation) {
   continuation({

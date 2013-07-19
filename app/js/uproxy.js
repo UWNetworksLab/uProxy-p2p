@@ -2,7 +2,7 @@ var identity = freedom.identity();
 var storage = freedom.storage();
 var state = {
   id: "Foobar",
-  my_card: {}
+  my_card: {},
   status_msg: "I'm good",
   allowed_peers: ['alice@gmail.com'],
   blocked_peers: ['bob@gmail.com'],
