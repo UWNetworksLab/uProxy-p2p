@@ -82,33 +82,85 @@
     RESERVED: 0x00
   };
 
-  /**
-   * Code to read IP addresses in the SOCKS protocol format.
-   */
-  var Address = {
-    read: function (biteArray, offset) {
-      if (biteArray[offset] == ATYP.IP_V4) {
-        return biteArray.toString('utf8', biteArray[offset+1])
-           + '.' + biteArray.toString('utf8',biteArray[offset+2])
-           + '.' + biteArray.toString('utf8',biteArray[offset+3])
-           + '.' + biteArray.toString('utf8',biteArray[offset+4]);
-      } else if (biteArray[offset] == ATYP.DNS) {
-        return biteArray.toString('utf8', offset+2,
-                                  offset+2+biteArray[offset+1]);
-      } else if (biteArray[offset] == ATYP.IP_V6) {
-        return biteArray.slice(biteArray[offset+1], biteArray[offset+1+16]);
-      }
-    },
-    sizeOf: function(biteArray, offset) {
-      if (biteArray[offset] == ATYP.IP_V4) {
-        return 4;
-      } else if (biteArray[offset] == ATYP.DNS) {
-        return biteArray[offset+1];
-      } else if (biteArray[offset] == ATYP.IP_V6) {
-        return 16;
-      }
+  /*
+   The SOCKS request is formed as follows:
+        +----+-----+-------+------+----------+----------+
+        |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+        +----+-----+-------+------+----------+----------+
+        | 1  |  1  | X'00' |  1   | Variable |    2     |
+        +----+-----+-------+------+----------+----------+
+
+     Where:
+          o  VER    protocol version: X'05'
+          o  CMD
+             o  CONNECT X'01'
+             o  BIND X'02'
+             o  UDP ASSOCIATE X'03'
+          o  RSV    RESERVED
+          o  ATYP   address type of following address
+             o  IP V4 address: X'01'
+             o  DOMAINNAME: X'03'
+             o  IP V6 address: X'04'
+          o  DST.ADDR       desired destination address
+          o  DST.PORT desired destination port in network octet
+             order
+  */
+  interpretSocksRequest = function(byteArray) {
+    var result = {};
+
+    // Fail if client is not talking Socks version 5.
+    var version=byteArray[0];
+    if (version !== SOCKS_VERSION) {
+      result.failure = SOCKS_RESPONSE.FAILURE;
+      return result;
     }
-  };
+
+    // Fail unless we got a CONNECT command.
+    var cmd=byteArray[1];
+    if (cmd != REQUEST_CMD.CONNECT) {
+      result.failure = SOCKS_RESPONSE.UNSUPPORTED_COMMAND;
+      return result;
+    }
+    result.cmd = cmd;
+
+    // Parse address and port and set the callback to be handled by the
+    // destination proxy (the bit that actually sends data to the destination).
+    result.atyp = byteArray[3];
+
+    if (result.atyp == ATYP.IP_V4) {
+      result.addressSize = 4;
+      result.address = byteArray.subarray(4, result.addressSize);
+      result.addressString = byteArray[4] + '.' + byteArray[5] + '.'
+          + byteArray[6] + '.' + byteArray[7];
+      result.portOffset = result.addressSize + 4;
+    } else if (result.atyp == ATYP.DNS) {
+      result.addressSize = byteArray[4];
+      result.address = byteArray.subarray(5, result.addressSize);
+      result.addressString = '';
+      for (i = 0; i < result.addressSize; ++i) {
+        result.addressString += String.fromCharCode(byteArray[5 + i]);
+      }
+      result.portOffset = result.addressSize + 5;
+    } else if (result.atyp == ATYP.IP_V6) {
+      result.addressSize = 16;
+      result.address = byteArray.subarray(5, result.addressSize);
+      var byteDataView = new DataView(byteArray.buffer);
+      result.addressString = byteDataView.getUint32(5).toString(16) + '.'
+                             + byteDataView.getUint32(5 + 4).toString(16)
+                             + byteDataView.getUint32(5 + 8).toString(16)
+                             + byteDataView.getUint32(5 + 12).toString(16);
+      result.portOffset = result.addressSize + 4;
+    }
+    result.portByte1 = byteArray[result.portOffset];
+    result.portByte2 = byteArray[result.portOffset + 1];
+    result.port = byteArray[result.portOffset] << 8
+                  | byteArray[result.portOffset + 1];
+    result.dataOffset = result.portOffset + 2;
+    result.data = byteArray.subarray(result.dataOffset,
+                                     byteArray.length - result.dataOffset);
+    console.log(result);
+    return result;
+  }
 
   /**
    * destination_callback = function(tcpConnection, address, port,
@@ -164,20 +216,20 @@
         chunk.byteLength);
     });
 
-    var biteArray = new Uint8Array(chunk);
+    var byteArray = new Uint8Array(chunk);
     // Only SOCKS Version 5 is supported
-    if (biteArray[0] != SOCKS_VERSION) {
-      console.error('handshake: wrong socks version: %d', biteArray[0]);
+    if (byteArray[0] != SOCKS_VERSION) {
+      console.error('handshake: wrong socks version: %d', byteArray[0]);
       this.tcpConnection.disconnect();
       return;
     }
 
     // Number of authentication methods
-    method_count = biteArray[1];
+    method_count = byteArray[1];
     // Get the supported authentication methods.
-    // i starts on 1, since we've read biteArray 0 & 1 already
+    // i starts on 1, since we've read byteArray 0 & 1 already
     for (var i=2; i < method_count + 2; i++) {
-      this.auth_methods.push(biteArray[i]);
+      this.auth_methods.push(byteArray[i]);
     }
     console.log('Supported auth methods: ', this.auth_methods);
 
@@ -201,67 +253,12 @@
     this.tcpConnection.sendRaw(response.buffer);
   };
 
-  /*
-   The SOCKS request is formed as follows:
-        +----+-----+-------+------+----------+----------+
-        |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
-        +----+-----+-------+------+----------+----------+
-        | 1  |  1  | X'00' |  1   | Variable |    2     |
-        +----+-----+-------+------+----------+----------+
-
-     Where:
-          o  VER    protocol version: X'05'
-          o  CMD
-             o  CONNECT X'01'
-             o  BIND X'02'
-             o  UDP ASSOCIATE X'03'
-          o  RSV    RESERVED
-          o  ATYP   address type of following address
-             o  IP V4 address: X'01'
-             o  DOMAINNAME: X'03'
-             o  IP V6 address: X'04'
-          o  DST.ADDR       desired destination address
-          o  DST.PORT desired destination port in network octet
-             order
-  */
-  interpretSocksRequest = function(biteArray) {
-    var result = {};
-
-    // Fail if client is not talking Socks version 5.
-    var version=biteArray[0];
-    if (version !== SOCKS_VERSION) {
-      result.failure = SOCKS_RESPONSE.FAILURE;
-      return result;
-    }
-
-    // Fail unless we got a CONNECT command.
-    var cmd=biteArray[1];
-    if (cmd != REQUEST_CMD.CONNECT) {
-      result.failure = SOCKS_RESPONSE.UNSUPPORTED_COMMAND;
-      return result;
-    }
-    result.cmd = cmd;
-
-    // Parse address and port and set the callback to be handled by the
-    // destination proxy (the bit that actually sends data to the destination).
-    result.atyp = biteArray[4];
-    result.addressSize = Address.sizeOf(biteArray, 3);
-    result.portOffset = result.addressSize + 5;
-    result.address = Address.read(biteArray, 3);
-    result.port = biteArray[result.portOffset] << 8
-                  + biteArray[result.portOffset + 1];
-    result.dataOffset = result.portOffset + 2;
-    result.data = biteArray.subarray(result.dataOffset,
-                                     biteArray.length - result.dataOffset);
-    return result;
-  }
-
   LocalSocksConnection.prototype._handleRequest = function (chunk) {
     // We only handle one request per tcp connection.
     this.tcpConnection.on('recv', null);
 
-    biteArray = new Uint8Array(chunk);
-    this.result = interpretSocksRequest(biteArray);
+    byteArray = new Uint8Array(chunk);
+    this.result = interpretSocksRequest(byteArray);
     if('failure' in this.result) {
       response = new Uint8Array(2);
       response[0] = SOCKS_VERSION;
@@ -272,8 +269,8 @@
       return;
     }
 
-    console.log('Request: type: %d -- to: %s:%s', this.result.cmd,
-        this.result.address, this.result.port);
+    console.log('Request: type: %d -- to: (atyp:%d) %s:%s', this.result.cmd,
+        this.result.atyp, this.result.addressString, this.result.port);
     // TODO: add a handler for failure to reach destination.
     this.destinationCallback(this.tcpConnection, this.result.port,
         this.result.address, this._connectedToDestination.bind(this));
@@ -293,10 +290,12 @@
     for (var i = 0; i < this.result.addressSize; ++i) {
       response[3 + i] = this.result.address[i];
     }
-    response[this.result.addressSize + 3] = this.result.port & 0x0F;
-    response[this.result.addressSize + 4] = this.result.port & 0xF0;
+    response[this.result.addressSize + 3] = this.result.portByte1;
+    response[this.result.addressSize + 4] = this.result.portByte2;
     this.tcpConnection.sendRaw(response.buffer);
-    console.log('Connected to: %s:%d', this.result.address, this.result.port);
+    console.log('Connected to (atyp: %d): %s:%d', this.result.atyp,
+                this.result.addressString,
+                this.result.port);
   };
 
   exports.LocalSocksServer = LocalSocksServer;
