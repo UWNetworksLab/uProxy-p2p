@@ -18,7 +18,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
 */
 (function(exports) {
 
-  var DEFAULT_MAX_CONNECTIONS=1;
+  var DEFAULT_MAX_CONNECTIONS = 1;
 
   // Define some local variables here.
   var socket = chrome.socket || chrome.experimental.socket;
@@ -27,21 +27,21 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * Create an instance of the server
    *
    * @param {Object} options Options of the form { maxConnections: integer,
-   * allowHalfOpen: bool }
-   * @param {function} connect_callback Called when socket is connected
+   * allowHalfOpen: bool }.
+   * @param {function} connect_callback Called when socket is connected.
    */
   function TcpServer(server_address, port, options) {
     this.addr = server_address;
     this.port = port;
-    this.maxConnections = typeof(options) != 'undefined'
-        && options.maxConnections || DEFAULT_MAX_CONNECTIONS;
+    this.maxConnections = typeof(options) != 'undefined' &&
+        options.maxConnections || DEFAULT_MAX_CONNECTIONS;
 
     // Callback functions.
     this.callbacks = {
       listening: null,  // Called when server starts listening for connections.
       connection: null, // Called when a new socket connection happens.
       disconnect: null  // Called when server stops listening for connections.
-    }
+    };
 
     // Default callbacks for when we create new TcpConnections.
     this.connectionCallbacks = {
@@ -55,25 +55,25 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     };
 
     // Sockets open
-    this.openConnections={};
+    this.openConnections = {};
 
-    // server socket (one server connection, accepts and opens one socket per client)
+    // Server socket (accepts and opens one socket per client)
     this.serverSocketId = null;
   }
 
   /**
    *
    */
-  TcpServer.prototype.addToServer=function(tcpConnection) {
+  TcpServer.prototype.addToServer = function(tcpConnection) {
     this.openConnections[tcpConnection.socketId] = tcpConnection;
-  }
+  };
 
   /**
    *
    */
-  TcpServer.prototype.removeFromServer=function(tcpConnection) {
+  TcpServer.prototype.removeFromServer = function(tcpConnection) {
     delete this.openConnections[tcpConnection.socketId];
-  }
+  };
 
   /**
    * Static method to return available network interfaces.
@@ -85,9 +85,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * {name(string), address(string)} objects. Use the address property of the
    * preferred network as the addr parameter on TcpServer contructor.
    */
-  TcpServer.getNetworkAddresses=function(callback) {
+  TcpServer.getNetworkAddresses = function(callback) {
     socket.getNetworkList(callback);
-  }
+  };
 
   /**
    * Static method to return available network interfaces.
@@ -99,9 +99,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * {name(string), address(string)} objects. Use the address property of the
    * preferred network as the addr parameter on TcpServer contructor.
    */
-  TcpServer.prototype.isConnected=function() {
+  TcpServer.prototype.isConnected = function() {
     return this.serverSocketId > 0;
-  }
+  };
 
   /**
    * Set an event handler. See http://developer.chrome.com/trunk/apps/socket.
@@ -109,19 +109,19 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    *
    * 'listening' takes TODO: complete.
    */
-  TcpServer.prototype.on=function(eventName, callback) {
-    if(eventName in this.callbacks) {
+  TcpServer.prototype.on = function(eventName, callback) {
+    if (eventName in this.callbacks) {
       this.callbacks[eventName] = callback;
     } else {
-      console.error("TcpServer: on failed for " + eventName);
+      console.error('TcpServer: on failed for ' + eventName);
     }
-  }
+  };
 
   /**
    * Listens for TCP requests (opens a socket).
    *
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-create
-   * @param {Function} callback The function to call on connection
+   * @param {Function} callback The function to call on connection.
    */
   TcpServer.prototype.listen = function() {
     socket.create('tcp', {}, this._onCreate.bind(this));
@@ -156,7 +156,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    *
    * @private
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-connect
-   * @param {Object} createInfo The socket details
+   * @param {Object} createInfo The socket details.
    */
   TcpServer.prototype._onCreate = function(createInfo) {
     this.serverSocketId = createInfo.socketId;
@@ -178,27 +178,27 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @private
    */
   TcpServer.prototype._onListenComplete = function(resultCode) {
-    if (resultCode===0) {
+    if (resultCode === 0) {
       socket.accept(this.serverSocketId, this._onAccept.bind(this));
       this.callbacks.listening && this.callbacks.listening();
     } else {
       console.error('TcpServer: accept failed for %s:%d. Resultcode=%d',
           this.addr, this.port, resultCode);
     }
-  }
+  };
 
   TcpServer.prototype._onAccept = function(resultInfo) {
     // continue to accept more connections:
     socket.accept(this.serverSocketId, this._onAccept.bind(this));
     var connectionsCount = Object.keys(this.openConnections).length;
-    console.log("TcpServer: this.openConnections.length=" +
+    console.log('TcpServer: this.openConnections.length=' +
         connectionsCount);
 
-    if (resultInfo.resultCode===0) {
-      if (connectionsCount>=this.maxConnections) {
+    if (resultInfo.resultCode === 0) {
+      if (connectionsCount >= this.maxConnections) {
         socket.disconnect(resultInfo.socketId);
         socket.destroy(resultInfo.socketId);
-        console.warn("TcpServer: too many connections: " + connectionsCount);
+        console.warn('TcpServer: too many connections: ' + connectionsCount);
         // TODO: make a callback for this case.
         //this._onNoMoreConnectionsAvailable(resultInfo.socketId);
         return;
@@ -210,7 +210,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
       console.error('TcpServer: Incoming connection failure: ' +
           resultInfo.resultCode);
     }
-  }
+  };
 
   TcpServer.prototype._createTcpConnection = function(socketId) {
     // Get info about the socket to create the TcpConnection.
@@ -229,12 +229,12 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
         socket.read(socketId, null,
             tcpConnection._onDataRead.bind(tcpConnection));
     });
-  }
+  };
 
   /**
    * Holds a connection to a client
    *
-   * @param {number} socketId The ID of the server<->client socket
+   * @param {number} socketId The ID of the server<->client socket.
    * @param {socketInfo} socketInfo
    * @param {TcpServer.connectionCallbacks} callbacks
    */
@@ -255,20 +255,20 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @param {string} eventName Enumerated instance of valid callback.
    * @param {function} callback Callback function.
    */
-  TcpConnection.prototype.on=function(eventName, callback) {
-    if(eventName in this.callbacks) {
+  TcpConnection.prototype.on = function(eventName, callback) {
+    if (eventName in this.callbacks) {
       this.callbacks[eventName] = callback;
     } else {
-      console.error("TcpConnection: no such event for on: " + eventName);
+      console.error('TcpConnection: no such event for on: ' + eventName);
     }
-  }
+  };
 
   /**
    * Sends a message down the wire to the remote side
    *
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-write
-   * @param {String} msg The message to send
-   * @param {Function} callback The function to call when the message has sent
+   * @param {String} msg The message to send.
+   * @param {Function} callback The function to call when the message has sent.
    */
   TcpConnection.prototype.send = function(msg, callback) {
     // Register sent callback.
@@ -278,15 +278,15 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     }.bind(this));
   };
 
-	/**
-	 * Sends a message pre-formatted into an arrayBuffer.
-	 *
-	 * @param {ArrayBuffer} msg The message to send
-	 */
-	TcpConnection.prototype.sendRaw = function(msg, callback) {
+  /**
+   * Sends a message pre-formatted into an arrayBuffer.
+   *
+   * @param {ArrayBuffer} msg The message to send.
+   */
+  TcpConnection.prototype.sendRaw = function(msg, callback) {
     var realCallback = callback || this.callbacks.sent || function() {};
-		socket.write(this.socketId, msg, realCallback);
-	};
+    socket.write(this.socketId, msg, realCallback);
+  };
 
   /**
    * Disconnects from the remote side
@@ -311,7 +311,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    *
    * @private
    * @see TcpConnection.prototype.addDataReceivedListener
-   * @param {Object} readInfo The incoming message
+   * @param {Object} readInfo The incoming message.
    */
   TcpConnection.prototype._onDataRead = function(readInfo) {
     if (readInfo.resultCode < 0) {
@@ -332,7 +332,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * written to the socket.
    *
    * @private
-   * @param {Object} writeInfo The outgoing message
+   * @param {Object} writeInfo The outgoing message.
    */
   TcpConnection.prototype._onWriteComplete = function(writeInfo) {
     // Call sent callback.
@@ -345,8 +345,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * Converts an array buffer to a string
    *
    * @private
-   * @param {ArrayBuffer} buf The buffer to convert
-   * @param {Function} callback The function to call when conversion is complete
+   * @param {ArrayBuffer} buf The buffer to convert.
+   * @param {Function} callback The function to call when conversion is
+   * complete.
    */
   function _arrayBufferToString(buf, callback) {
     var bb = new Blob([new Uint8Array(buf)]);
@@ -361,8 +362,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * Converts a string to an array buffer
    *
    * @private
-   * @param {String} str The string to convert
-   * @param {Function} callback The function to call when conversion is complete
+   * @param {String} str The string to convert.
+   * @param {Function} callback The function to call when conversion is
+   * complete.
    */
   function _stringToArrayBuffer(str, callback) {
     var bb = new Blob([str]);
