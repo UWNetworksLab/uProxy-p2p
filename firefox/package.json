@@ -1,8 +1,9 @@
 {
-  "name": "UProxyExt",
-  "fullName": "UProxy Extension",
+  "name": "uproxy",
+  "fullName": "UProxy Firefox Extension",
   "id": "UProxyFirefox@UniversityOfWashington",
   "description": "Alpha: Ubiquitous Firefox Proxy Picker",
+  "icon":"chrome/skin/uproxy-128.png",
   "author": "",
   "license": "",
   "version": "0.0.1"

@@ -1,0 +1,37 @@
+<!doctype html>
+<html ng-app="UProxyChromeExtension" ng-csp>
+  <head>
+    <link href="styles/popup.css" rel="stylesheet">
+
+    <!-- build:js scripts/popup.js -->
+    <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="oauth2/oauth2.js"></script>
+
+    <script src="scripts/popup.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body ng-controller="MainCtrl">
+
+    <h4>{{'appName'|chromei18n}}</h4>
+
+    <hr>
+
+    <details id="debug" open>
+      <summary>Debug</summary>
+
+      <div class="well">
+        <div class="btn-group">
+          <button class="btn btn-small" ng-click="sendCredentials()">send credentials</button>
+          <button class="btn btn-small" disabled>clear credentials (TODO)</button>
+        </div>
+
+        <details open>
+          <summary>Roster</summary>
+          <pre>{{ model.roster | json }}</pre>
+        </details>
+      </div>
+    </details>
+  </body>
+</html>

@@ -1,8 +1,13 @@
 {
-  "name": "UProxyExt",
+  "name": "uproxy-chrome-extension",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "PatternConsulting/bower-angular",
+    "angular": "~1.0.7",
+    "bootstrap-sass": "~2.3.1",
     "jsonpatch": "~v1.0.0-rc1"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.0.7",
+    "angular-scenario": "~1.0.7"
   }
 }

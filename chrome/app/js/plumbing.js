@@ -3,6 +3,7 @@ var pendingMsgs = [];
 
 window.freedomcfg = function(register) {
   register("core.view", View_oauth);
+  register("core.socket", Socket_chrome);
 }
 
 var script = document.createElement('script');
