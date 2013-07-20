@@ -4,4 +4,5 @@ uproxy.crx
 .DS_Store
 *.swp
 *.un~
+*~
 bower_components
