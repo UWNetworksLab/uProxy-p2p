@@ -286,12 +286,17 @@
     // creating response
     response[0] = SOCKS_VERSION;
     response[1] = SOCKS_RESPONSE.SUCCEEDED;
-    response[2] = this.result.atyp;
-    for (var i = 0; i < this.result.addressSize; ++i) {
-      response[3 + i] = this.result.address[i];
+    response[3] = this.result.atyp;
+    var j = 4;
+    if (this.result.atyp == ATYP.DNS) {
+      response[j] = this.result.addressSize;
+      j++;
     }
-    response[this.result.addressSize + 3] = this.result.portByte1;
-    response[this.result.addressSize + 4] = this.result.portByte2;
+    for (var i = 0; i < this.result.addressSize; ++i) {
+      response[i + j] = this.result.address[i];
+    }
+    response[this.result.addressSize + j] = this.result.portByte1;
+    response[this.result.addressSize + j + 1] = this.result.portByte2;
     this.tcpConnection.sendRaw(response.buffer);
     console.log('Connected to (atyp: %d): %s:%d', this.result.atyp,
                 this.result.addressString,
