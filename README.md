@@ -26,6 +26,10 @@ that can run on any Freedom-supporting platform and be migrated to any other.
 UProxy is built with the following tools:
 
 - [bower](http://bower.io)
+- [yeoman](http://yeoman.io)
+- [generator-angular](https://github.com/yeoman/generator-angular)
+- [generator-chrome-extension](https://github.com/yeoman/generator-chrome-extension)
+- [grunt](http://gruntjs.com)
 - [AngularJS](http://angularjs.org)
 - [oauth2-extensions](https://github.com/borismus/oauth2-extensions)
 
@@ -42,6 +46,9 @@ not have used before.
 
 - [bower](http://bower.io/) 0.10:
   if `bower --version` does not give '0.10.x', run `npm install -g bower@'~0.10.0'`
+
+- [compass](http://compass-style.org/):
+  `gem install compass` (requires ruby, often comes installed)
 
 
 #### Installation
@@ -61,15 +68,27 @@ not have used before.
    to fetch required bower packages.
 
 
-#### Chrome App + Extension
+#### Development
+
+- Run `grunt watch` from the chrome/extension directory to start compass
+  monitoring for changes to sass stylesheets and automatically compiling css.
+
+
+#### Testing in Chrome
 
 1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
 
 1. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
 
-1. Click 'Load unpacked extension...' and select the 'chrome/extension' directory.
+1. Click 'Load unpacked extension...' and select the 'chrome/extension/app' directory.
 
 
 #### Firefox Add-on
 
 1. TODO
+
+
+#### Building
+
+- Run `grunt` from the chrome/extension director to lint the script, run tests,
+  and if those go well, build a packed extension.
