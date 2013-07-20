@@ -1,12 +1,12 @@
-[submodule "chrome/extension/submodules/oauth2"]
-	path = chrome/extension/submodules/oauth2
+[submodule "chrome/extension/app/submodules/oauth2"]
+	path = chrome/extension/app/submodules/oauth2
 	url = https://github.com/borismus/oauth2-extensions
+[submodule "chrome/extension/app/submodules/uproxy-common"]
+	path = chrome/extension/app/submodules/uproxy-common
+	url = https://github.com/UWNetworksLab/uproxy-common.git
 [submodule "chrome/app/submodules/uproxy-common"]
 	path = chrome/app/submodules/uproxy-common
 	url = https://github.com/UWNetworksLab/uproxy-common.git
 [submodule "firefox/submodules/uproxy-common"]
 	path = firefox/submodules/uproxy-common
-	url = https://github.com/UWNetworksLab/uproxy-common.git
-[submodule "chrome/extension/submodules/uproxy-common"]
-	path = chrome/extension/submodules/uproxy-common
 	url = https://github.com/UWNetworksLab/uproxy-common.git

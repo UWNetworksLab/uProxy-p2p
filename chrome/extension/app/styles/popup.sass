@@ -1,0 +1,22 @@
+$baseFontSize: 11px
+
+@import bootstrap-sass/lib/bootstrap
+
+body
+  min-width: 357px
+  overflow-x: hidden
+  padding: 15px
+
+details
+  & > summary
+    cursor: pointer
+    &:focus
+      outline: none
+  & > *:not(summary)
+    margin-left: 10px
+
+#debug
+  pre
+    font-size: $baseFontSize * .85
+  .btn-group
+    margin-bottom: 10px
