@@ -75,5 +75,5 @@ socksServer = new window.SocksServer("127.0.0.1", 9999,
       }  // if SocksUtil.REQUEST_CMD.CONNECT
 }); //
 
-console.log("starting server...");
+console.log("Starting test...");
 socksServer.tcpServer.listen();

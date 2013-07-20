@@ -14,16 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Author: Lucas Dixon (ldixon@google.com)
-Based on code by: Renato Mangini (mangini@chromium.org)
+Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
 */
-
-const DEFAULT_MAX_CONNECTIONS=50;
-
 (function(exports) {
 
-  var log = console.log;
-  var log = console.info;
-  var error = console.error;
+  var DEFAULT_MAX_CONNECTIONS=1;
 
   // Define some local variables here.
   var socket = chrome.socket || chrome.experimental.socket;
@@ -45,21 +40,40 @@ const DEFAULT_MAX_CONNECTIONS=50;
     this.callbacks = {
       listening: null,  // Called when server starts listening for connections.
       connection: null, // Called when a new socket connection happens.
-      stop: null,       // Called when server stops listening for connections.
+      disconnect: null  // Called when server stops listening for connections.
+    }
+
+    // Default callbacks for when we create new TcpConnections.
+    this.connectionCallbacks = {
       disconnect: null, // Called when a socket is disconnected.
       recv: null,       // Called when server receives data.
-      sent: null        // Called when server has sent data.
+      sent: null,       // Called when server has sent data.
+      // Called when a tcpConnection belonging to this server is created.
+      created: this.addToServer.bind(this),
+      // Called when a tcpConnection belonging to this server is removed.
+      removed: this.removeFromServer.bind(this)
     };
 
     // Sockets open
-    this.openSockets=[];
+    this.openConnections={};
 
     // server socket (one server connection, accepts and opens one socket per client)
     this.serverSocketId = null;
-
-    console.log('initialized tcp server, not listening yet');
   }
 
+  /**
+   *
+   */
+  TcpServer.prototype.addToServer=function(tcpConnection) {
+    this.openConnections[tcpConnection.socketId] = tcpConnection;
+  }
+
+  /**
+   *
+   */
+  TcpServer.prototype.removeFromServer=function(tcpConnection) {
+    delete this.openConnections[tcpConnection.socketId];
+  }
 
   /**
    * Static method to return available network interfaces.
@@ -95,11 +109,11 @@ const DEFAULT_MAX_CONNECTIONS=50;
    *
    * 'listening' takes TODO: complete.
    */
-  TcpServer.prototype.on=function(event_name, callback) {
-    if(event_name in this.callbacks) {
-      this.callbacks[event_name] = callback;
+  TcpServer.prototype.on=function(eventName, callback) {
+    if(eventName in this.callbacks) {
+      this.callbacks[eventName] = callback;
     } else {
-      console.error("No such event to be handled: " + event_name);
+      console.error("TcpServer: on failed for " + eventName);
     }
   }
 
@@ -120,16 +134,19 @@ const DEFAULT_MAX_CONNECTIONS=50;
    */
   TcpServer.prototype.disconnect = function() {
     if (this.serverSocketId) socket.disconnect(this.serverSocketId);
-    for (var i=0; i<this.openSockets.length; i++) {
+    for (var i in this.openConnections) {
       try {
-        this.openSockets[i].disconnect();
+        this.openConnections[i].disconnect();
+        this.removeFromServer(this.openConnections[i]);
       } catch (ex) {
-        console.log(ex);
+        console.warn(ex);
       }
     }
-    this.openSockets=[];
-    this.serverSocketId=0;
-    this.callbacks.stop && this.callbacks.stop();
+    socket.disconnect(serverSocketId);
+    socket.destory(serverSocketId);
+    this.serverSocketId = 0;
+    this.isListening = false;
+    this.callbacks.disconnect && this.callbacks.disconnect();
   };
 
   /**
@@ -148,7 +165,8 @@ const DEFAULT_MAX_CONNECTIONS=50;
         this._onListenComplete.bind(this));
       this.isListening = true;
     } else {
-      console.error('Unable to create socket');
+      console.error('TcpServer: create socket failed for %s:%d',
+        this.addr, this.port);
     }
   };
 
@@ -164,7 +182,7 @@ const DEFAULT_MAX_CONNECTIONS=50;
       socket.accept(this.serverSocketId, this._onAccept.bind(this));
       this.callbacks.listening && this.callbacks.listening();
     } else {
-      console.error('Unable to listen to socket %s:%d. Resultcode=%d',
+      console.error('TcpServer: accept failed for %s:%d. Resultcode=%d',
           this.addr, this.port, resultCode);
     }
   }
@@ -172,20 +190,25 @@ const DEFAULT_MAX_CONNECTIONS=50;
   TcpServer.prototype._onAccept = function(resultInfo) {
     // continue to accept more connections:
     socket.accept(this.serverSocketId, this._onAccept.bind(this));
+    var connectionsCount = Object.keys(this.openConnections).length;
+    console.log("TcpServer: this.openConnections.length=" +
+        connectionsCount);
 
     if (resultInfo.resultCode===0) {
-      if (this.openSockets.length>=this.maxConnections) {
-        socket.disconnect(socketId);
-        //socket.destory(socketId);
-        console.error("Disconnected socket (too many connections)");
+      if (connectionsCount>=this.maxConnections) {
+        socket.disconnect(resultInfo.socketId);
+        socket.destroy(resultInfo.socketId);
+        console.warn("TcpServer: too many connections: " + connectionsCount);
+        // TODO: make a callback for this case.
         //this._onNoMoreConnectionsAvailable(resultInfo.socketId);
         return;
       }
+      //
       this._createTcpConnection(resultInfo.socketId);
-      console.log('Incoming connection handled.');
+      console.log('TcpServer: Incoming connection created.');
     } else {
-      console.error('Unable to accept incoming connection. Error code='
-          + resultInfo.resultCode);
+      console.error('TcpServer: Incoming connection failure: ' +
+          resultInfo.resultCode);
     }
   }
 
@@ -195,18 +218,14 @@ const DEFAULT_MAX_CONNECTIONS=50;
     socket.getInfo(socketId,
       function(socketInfo) {
         var tcpConnection = new TcpConnection(socketId, socketInfo,
-            { disconnect: self.callbacks.disconnect,
-              recv: self.callbacks.recv,
-              sent: self.callbacks.sent
-            });
-        self.openSockets.push(tcpConnection);
+                                              self.connectionCallbacks);
         // Connection has been established, so make the connection callback.
         if (self.callbacks.connection) {
           self.callbacks.connection(tcpConnection);
         }
         // This is set after connection callback so that the connection
         // callback can create a read-data handler.
-        console.log('Established client connection. Listening...');
+        console.log('TcpServer: client connection.');
         socket.read(socketId, null,
             tcpConnection._onDataRead.bind(tcpConnection));
     });
@@ -216,17 +235,15 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * Holds a connection to a client
    *
    * @param {number} socketId The ID of the server<->client socket
+   * @param {socketInfo} socketInfo
+   * @param {TcpServer.connectionCallbacks} callbacks
    */
   function TcpConnection(socketId, socketInfo, callbacks) {
     this.socketId = socketId;
     this.socketInfo = socketInfo;
+    this.callbacks = callbacks;
 
-    // Callback functions.
-    this.callbacks = callbacks || {
-      disconnect: null, // Called when socket is disconnected.
-      recv: null,       // List of callbacks for when data is received.
-      sent: null        // Called sent data to server.
-    };
+    this.callbacks.created(this);
   };
 
   /**
@@ -234,12 +251,15 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * html for more about the events than can happen.
    *
    * 'listening' takes TODO: complete.
+   *
+   * @param {string} eventName Enumerated instance of valid callback.
+   * @param {function} callback Callback function.
    */
-  TcpConnection.prototype.on=function(event_name, callback) {
-    if(event_name in this.callbacks) {
-      this.callbacks[event_name] = callback;
+  TcpConnection.prototype.on=function(eventName, callback) {
+    if(eventName in this.callbacks) {
+      this.callbacks[eventName] = callback;
     } else {
-      console.error("No such event to be handled: " + event_name);
+      console.error("TcpConnection: no such event for on: " + eventName);
     }
   }
 
@@ -274,7 +294,12 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-disconnect
    */
   TcpConnection.prototype.disconnect = function() {
-    if (this.socketId) socket.disconnect(this.socketId);
+    this.callbacks.removed(this);
+    if (this.socketId) {
+      socket.disconnect(this.socketId);
+      socket.destroy(this.socketId);
+      this.socketId = null;
+    }
     this.callbacks.disconnect && this.callbacks.disconnect(this);
   };
 
@@ -289,13 +314,13 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * @param {Object} readInfo The incoming message
    */
   TcpConnection.prototype._onDataRead = function(readInfo) {
-    // Call received callback if there's data in the response.
-    if (readInfo.resultCode > 0 && this.callbacks.recv) {
-      console.log('onDataRead result: %d', readInfo.resultCode);
-      this.callbacks.recv(readInfo.data);
-    } else {
-      console.warn('TcpConnection.prototype._onDataRead: unexpected resultCode: %d', readInfo.resultCode);
+    if (readInfo.resultCode < 0) {
+      console.warn('TcpConnection(%d): resultCode: %d. Disconnecting',
+          this.socketId, readInfo.resultCode);
+      this.disconnect();
       return;
+    } else if (this.callbacks.recv) {
+      this.callbacks.recv(readInfo.data);
     }
 
     // Read more data
@@ -310,7 +335,6 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * @param {Object} writeInfo The outgoing message
    */
   TcpConnection.prototype._onWriteComplete = function(writeInfo) {
-    console.log('onWriteComplete');
     // Call sent callback.
     if (this.callbacks.sent) {
       this.callbacks.sent(writeInfo);

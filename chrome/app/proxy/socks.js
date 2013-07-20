@@ -17,6 +17,7 @@
   var SocksUtil = {};
   /**
    * version 5 of socks
+   * @const {number}
    */
   SocksUtil.VERSION5 = 0x05;
 
@@ -29,6 +30,8 @@
    * o  X'03' to X'7F' IANA ASSIGNED
    * o  X'80' to X'FE' RESERVED FOR PRIVATE METHODS
    * o  X'FF' NO ACCEPTABLE METHODS
+   *
+   * @enum {number}
    */
   SocksUtil.AUTHENTICATION = {
     NOAUTH: 0x00,
@@ -42,6 +45,8 @@
    * o  CONNECT X'01'        // Connect to tcp
    * o  BIND X'02'           // Listen for tcp
    * o  UDP ASSOCIATE X'03'  // Connect to UDP association
+   *
+   * @enum {number}
    */
   SocksUtil.REQUEST_CMD = {
     CONNECT: 0x01,
@@ -54,6 +59,8 @@
    * o  IP V4 address: X'01'
    * o  DOMAINNAME: X'03'
    * o  IP V6 address: X'04'
+   *
+   * @enum {number}
    */
   SocksUtil.ATYP = {
     IP_V4: 0x01,
@@ -73,6 +80,8 @@
    * o  X'07' Command not supported
    * o  X'08' Address type not supported
    * o  X'09' to X'FF' unassigned
+   *
+   * @enum {number}
    */
   SocksUtil.RESPONSE = {
     SUCCEEDED: 0x00,
@@ -114,13 +123,13 @@
     var result = {};
 
     // Fail if client is not talking Socks version 5.
-    result.version=byteArray[0];
+    result.version = byteArray[0];
     if (result.version !== SocksUtil.VERSION5) {
       result.failure = SocksUtil.RESPONSE.FAILURE;
       return result;
     }
 
-    result.cmd=byteArray[1];
+    result.cmd = byteArray[1];
     // Fail unless we got a CONNECT (to TCP) command.
     if (result.cmd != SocksUtil.REQUEST_CMD.CONNECT) {
       result.failure = SocksUtil.RESPONSE.UNSUPPORTED_COMMAND;
@@ -134,8 +143,8 @@
     if (result.atyp == SocksUtil.ATYP.IP_V4) {
       result.addressSize = 4;
       result.address = byteArray.subarray(4, result.addressSize);
-      result.addressString = byteArray[4] + '.' + byteArray[5] + '.'
-          + byteArray[6] + '.' + byteArray[7];
+      result.addressString = byteArray[4] + '.' + byteArray[5] + '.' +
+          byteArray[6] + '.' + byteArray[7];
       result.portOffset = result.addressSize + 4;
     } else if (result.atyp == SocksUtil.ATYP.DNS) {
       result.addressSize = byteArray[4];
@@ -149,22 +158,22 @@
       result.addressSize = 16;
       result.address = byteArray.subarray(5, result.addressSize);
       var byteDataView = new DataView(byteArray.buffer);
-      result.addressString = byteDataView.getUint32(5).toString(16) + '.'
-                             + byteDataView.getUint32(5 + 4).toString(16)
-                             + byteDataView.getUint32(5 + 8).toString(16)
-                             + byteDataView.getUint32(5 + 12).toString(16);
+      result.addressString = byteDataView.getUint32(5).toString(16) + '.' +
+                             byteDataView.getUint32(5 + 4).toString(16) +
+                             byteDataView.getUint32(5 + 8).toString(16) +
+                             byteDataView.getUint32(5 + 12).toString(16);
       result.portOffset = result.addressSize + 4;
     }
     result.portByte1 = byteArray[result.portOffset];
     result.portByte2 = byteArray[result.portOffset + 1];
-    result.port = byteArray[result.portOffset] << 8
-                  | byteArray[result.portOffset + 1];
+    result.port = byteArray[result.portOffset] << 8 |
+                  byteArray[result.portOffset + 1];
     result.dataOffset = result.portOffset + 2;
     result.data = byteArray.subarray(result.dataOffset,
                                      byteArray.length - result.dataOffset);
     console.log(result);
     return result;
-  }
+  };
 
   //----------------------------------------------------------------------------
   // SocksServer
@@ -176,30 +185,32 @@
   function SocksServer(address, port, destinationCallback) {
     var self = this;
     // Holds index from socketId
-    this.clients = {};
     this.destinationCallback = destinationCallback;
 
-    this.tcpServer = new window.TcpServer(address || "localhost",
+    this.tcpServer = new window.TcpServer(address || 'localhost',
                                           port || 1080);
+
+    // When we start listening, print it out.
     this.tcpServer.on('listening', function() {
       console.info('LISTENING %s:%s', self.tcpServer.addr,
                    self.tcpServer.port);
     });
-    // Remove from clients on disconnect.
-    this.tcpServer.on('disconnect', function(tcpConnection) {
-      self.clients[tcpConnection.socketId] = undefined;
-    });
-    //
+
+    // When we receieve a new connection make a new SocksClientConnection.
+    // and log to info.
     this.tcpServer.on('connection', function(tcpConnection) {
       console.info('CONNECTED %s:%s', tcpConnection.socketInfo.peerAddress,
                    tcpConnection.socketInfo.peerPort);
-      // When we receieve a request, handle it.
       tcpConnection.on('recv', function(buffer) {
-        self.clients[tcpConnection.socketId] =
+        tcpConnection.socksClient =
             new SocksClientConnection(tcpConnection, buffer,
-                                     self.destinationCallback);
+                                      self.destinationCallback);
       });
     });
+  }
+
+  SocksServer.prototype.disconnect = function() {
+    this.tcpServer.disconnect();
   }
 
   //----------------------------------------------------------------------------
@@ -217,12 +228,12 @@
     var self = this;
     var response;  // UintArray;
 
-    console.log("SocksClientConnection(... chunk.length=%d ...)",
+    console.log('SocksClientConnection(... chunk.length=%d ...)',
         chunk.byteLength);
 
     // We are no longer at waiting for a proxy request on this tcp connection.
     this.tcpConnection.on('recv', function(chunk) {
-        console.log("unexpected data(... chunk.length=%d ...)",
+        console.log('unexpected data(... chunk.length=%d ...)',
         chunk.byteLength);
     });
 
@@ -238,7 +249,7 @@
     method_count = byteArray[1];
     // Get the supported authentication methods.
     // i starts on 1, since we've read byteArray 0 & 1 already
-    for (var i=2; i < method_count + 2; i++) {
+    for (var i = 2; i < method_count + 2; i++) {
       this.auth_methods.push(byteArray[i]);
     }
     console.log('Supported auth methods: ', this.auth_methods);
@@ -263,13 +274,13 @@
     this.tcpConnection.sendRaw(response.buffer);
   };
 
-  SocksClientConnection.prototype._handleRequest = function (chunk) {
+  SocksClientConnection.prototype._handleRequest = function(chunk) {
     // We only handle one request per tcp connection.
     this.tcpConnection.on('recv', null);
 
     byteArray = new Uint8Array(chunk);
     this.result = SocksUtil.interpretSocksRequest(byteArray);
-    if('failure' in this.result) {
+    if ('failure' in this.result) {
       response = new Uint8Array(2);
       response[0] = SocksUtil.VERSION5;
       response[1] = this.result.failure;
@@ -293,7 +304,7 @@
   SocksClientConnection.prototype._connectedToDestination = function(
       connectionDetails,
       continuation) {
-    console.log("SocksClientConnection._connectedToDestination:");
+    console.log('SocksClientConnection._connectedToDestination:');
     console.log(connectionDetails);
     var response = [];
     // creating response
@@ -323,7 +334,7 @@
     console.log('Connected to (atyp: %d): %s:%d', this.result.atyp,
                 this.result.addressString,
                 this.result.port);
-    if(continuation) { continuation(); }
+    if (continuation) { continuation(); }
   };
 
   //----------------------------------------------------------------------------
