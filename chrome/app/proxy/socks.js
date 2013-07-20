@@ -86,24 +86,25 @@
    * Code to read IP addresses in the SOCKS protocol format.
    */
   var Address = {
-    read: function (buffer, offset) {
-      if (buffer[offset] == ATYP.IP_V4) {
-        return buffer.toString('utf8', buffer[offset+1])
-           + '.' + buffer.toString('utf8',buffer[offset+2])
-           + '.' + buffer.toString('utf8',buffer[offset+3])
-           + '.' + buffer.toString('utf8',buffer[offset+4]);
-      } else if (buffer[offset] == ATYP.DNS) {
-        return buffer.toString('utf8', offset+2, offset+2+buffer[offset+1]);
-      } else if (buffer[offset] == ATYP.IP_V6) {
-        return buffer.slice(buffer[offset+1], buffer[offset+1+16]);
+    read: function (biteArray, offset) {
+      if (biteArray[offset] == ATYP.IP_V4) {
+        return biteArray.toString('utf8', biteArray[offset+1])
+           + '.' + biteArray.toString('utf8',biteArray[offset+2])
+           + '.' + biteArray.toString('utf8',biteArray[offset+3])
+           + '.' + biteArray.toString('utf8',biteArray[offset+4]);
+      } else if (biteArray[offset] == ATYP.DNS) {
+        return biteArray.toString('utf8', offset+2,
+                                  offset+2+biteArray[offset+1]);
+      } else if (biteArray[offset] == ATYP.IP_V6) {
+        return biteArray.slice(biteArray[offset+1], biteArray[offset+1+16]);
       }
     },
-    sizeOf: function(buffer, offset) {
-      if (buffer[offset] == ATYP.IP_V4) {
+    sizeOf: function(biteArray, offset) {
+      if (biteArray[offset] == ATYP.IP_V4) {
         return 4;
-      } else if (buffer[offset] == ATYP.DNS) {
-        return buffer[offset+1];
-      } else if (buffer[offset] == ATYP.IP_V6) {
+      } else if (biteArray[offset] == ATYP.DNS) {
+        return biteArray[offset+1];
+      } else if (biteArray[offset] == ATYP.IP_V6) {
         return 16;
       }
     }
@@ -113,30 +114,31 @@
    * destination_callback = function(tcpConnection, address, port,
         connectedToDestinationCallback) {...}
    */
-  function LocalSocksServer(destinationCallback) {
+  function LocalSocksServer(address, port, destinationCallback) {
     var self = this;
     // Holds index from socketId
     this.clients = {};
     this.destinationCallback = destinationCallback;
 
-    this.socksServer = new TcpNetServer("localhost", 1080);
-    socksServer.on('listening', function() {
-      console.info('LISTENING %s:%s', self.socksServer.addr,
-                   self.socksServer.port);
+    this.tcpServer = new window.TcpServer(address || "localhost",
+                                          port || 1080);
+    this.tcpServer.on('listening', function() {
+      console.info('LISTENING %s:%s', self.tcpServer.addr,
+                   self.tcpServer.port);
     });
     // Remove from clients on disconnect.
-    socksServer.on('disconnect', function(tcpConnection) {
+    this.tcpServer.on('disconnect', function(tcpConnection) {
       self.clients[tcpConnection.socketId] = undefined;
     });
     //
-    socksServer.on('connection', function(tcpConnection) {
+    this.tcpServer.on('connection', function(tcpConnection) {
       console.info('CONNECTED %s:%s', tcpConnection.socketInfo.peerAddress,
                    tcpConnection.socketInfo.peerPort);
-      self.clients[tcpConnection.socketId] = tcpConnection;
       // When we receieve a request, handle it.
-      tcpConnection.on('recv', function(dataChunk) {
-        new LocalSocksConnection(tcpConnection, dataChunk,
-                                 self.destinationCallback);
+      tcpConnection.on('recv', function(buffer) {
+        self.clients[tcpConnection.socketId] =
+            new LocalSocksConnection(tcpConnection, buffer,
+                                     self.destinationCallback);
       });
     });
   }
@@ -144,54 +146,59 @@
   /**
    *
    */
-  function LocalSocksConnection(tcpConnection, dataChunk, destinationCallback) {
+  function LocalSocksConnection(tcpConnection, chunk, destinationCallback) {
     this.tcpConnection = tcpConnection;
-    this.destinationCallback = destination_callback;
+    this.destinationCallback = destinationCallback;
     this.method_count = 0;
     this.auth_methods = [];
-    this.address = null;
-    this.addressSize = null;
-    this.atyp = null;
-    this.port = null;
-    this.portOffset = null;
-    this.dataOffset = null;
+    this.request = null;
     var self = this;
     var response;  // UintArray;
 
-    // We are no longer at waiting for a proxy request on this tcp connection.
-    this.tcpConnection.on('recv', null);
+    console.log("LocalSocksConnection(... chunk.length=%d ...)",
+        chunk.byteLength);
 
+    // We are no longer at waiting for a proxy request on this tcp connection.
+    this.tcpConnection.on('recv', function(chunk) {
+        console.log("unexpected data(... chunk.length=%d ...)",
+        chunk.byteLength);
+    });
+
+    var biteArray = new Uint8Array(chunk);
     // Only SOCKS Version 5 is supported
-    if (dataChunk[0] != SOCKS_VERSION) {
-      console.error('handshake: wrong socks version: %d', chunk[0]);
+    if (biteArray[0] != SOCKS_VERSION) {
+      console.error('handshake: wrong socks version: %d', biteArray[0]);
       this.tcpConnection.disconnect();
+      return;
     }
 
     // Number of authentication methods
-    method_count = dataChunk[1];
+    method_count = biteArray[1];
     // Get the supported authentication methods.
-    // i starts on 1, since we've read dataChunk 0 & 1 already
+    // i starts on 1, since we've read biteArray 0 & 1 already
     for (var i=2; i < method_count + 2; i++) {
-      this.auth_methods.push(dataChunk[i]);
+      this.auth_methods.push(biteArray[i]);
     }
-    console.log('Supported auth methods: %j', this.auth_methods);
+    console.log('Supported auth methods: ', this.auth_methods);
 
     // Make sure the client supports no authentication.
-    if (this.auth_methods.indexOf(AUTHENTICATION.NOAUTH) > -1) {
-      console.log('Handing off to handleRequest');
-      this.tcpConnection.on('recv', this._handleRequest);
-      response = new Uint8Array(2);
-      response[0] = SOCKS_VERSION;
-      response[1] = AUTHENTICATION.NOAUTH;
-      this.tcpConnection.sendRaw(response);
-    } else {
+    if (this.auth_methods.indexOf(AUTHENTICATION.NOAUTH) <= -1) {
       console.error('Unsuported authentication method -- disconnecting');
       response = new Uint8Array(2);
       response[0] = SOCKS_VERSION;
       response[1] = AUTHENTICATION.NONE;
-      this.tcpConnection.sendRaw(response);
+      this.tcpConnection.sendRaw(response.buffer);
       this.tcpConnection.disconnect();
+      return;
     }
+
+    //
+    console.log('Handing off to handleRequest');
+    this.tcpConnection.on('recv', this._handleRequest.bind(this));
+    response = new Uint8Array(2);
+    response[0] = SOCKS_VERSION;
+    response[1] = AUTHENTICATION.NOAUTH;
+    this.tcpConnection.sendRaw(response.buffer);
   };
 
   /*
@@ -217,49 +224,59 @@
           o  DST.PORT desired destination port in network octet
              order
   */
-  LocalSocksConnection.prototype._handleRequest = function (chunk) {
-    // We only handle one request per tcp connection.
-    this.tcpConnection.on('data', null);
-    var response;  // Uint8Array
-    var version=chunk[0];
+  interpretSocksRequest = function(biteArray) {
+    var result = {};
 
     // Fail if client is not talking Socks version 5.
+    var version=biteArray[0];
     if (version !== SOCKS_VERSION) {
-      response = new Uint8Array(2);
-      response[0] = SOCKS_VERSION;
-      response[1] = SOCKS_RESPONSE.FAILURE;
-      this.tcpConnection.sendRaw(response);
-      this.tcpConnection.disconnect();
-      console.error('handleRequest: wrong socks version: %d', version);
-      return;
+      result.failure = SOCKS_RESPONSE.FAILURE;
+      return result;
     }
 
     // Fail unless we got a CONNECT command.
-    var cmd=chunk[1];
+    var cmd=biteArray[1];
     if (cmd != REQUEST_CMD.CONNECT) {
-      response = new Uint8Array(2);
-      response[0] = SOCKS_VERSION;
-      response[1] = SOCKS_RESPONSE.UNSUPPORTED_COMMAND;
-      this.tcpConnection.sendRaw(response);
-      this.tcpConnection.disconnect();
-      console.error('handleRequest: unsupported command: %d', cmd);
-      return;
+      result.failure = SOCKS_RESPONSE.UNSUPPORTED_COMMAND;
+      return result;
     }
+    result.cmd = cmd;
 
     // Parse address and port and set the callback to be handled by the
     // destination proxy (the bit that actually sends data to the destination).
-    this.atyp = chunk[4];
-    this.addressSize = Address.sizeOf(chunk, 3);
-    this.portOffset = addressSize + 5;
-    this.address = Address.read(chunk, 3);
-    this.port = chunk.readUInt16BE(portOffset);
-    this.dataOffset = portOffset + 2;
+    result.atyp = biteArray[4];
+    result.addressSize = Address.sizeOf(biteArray, 3);
+    result.portOffset = result.addressSize + 5;
+    result.address = Address.read(biteArray, 3);
+    result.port = biteArray[result.portOffset] << 8
+                  + biteArray[result.portOffset + 1];
+    result.dataOffset = result.portOffset + 2;
+    result.data = biteArray.subarray(result.dataOffset,
+                                     biteArray.length - result.dataOffset);
+    return result;
+  }
 
-    console.log('Request: type: %d -- to: %s:%s', cmd, address, port);
-    this.request = chunk.subarray(dataOffset, chunk.length - dataOffset);
+  LocalSocksConnection.prototype._handleRequest = function (chunk) {
+    // We only handle one request per tcp connection.
+    this.tcpConnection.on('recv', null);
+
+    biteArray = new Uint8Array(chunk);
+    this.result = interpretSocksRequest(biteArray);
+    if('failure' in this.result) {
+      response = new Uint8Array(2);
+      response[0] = SOCKS_VERSION;
+      response[1] = this.result.failure;
+      this.tcpConnection.sendRaw(response.buffer);
+      this.tcpConnection.disconnect();
+      console.error('handleRequest failed with error: %d', this.result.failure);
+      return;
+    }
+
+    console.log('Request: type: %d -- to: %s:%s', this.result.cmd,
+        this.result.address, this.result.port);
     // TODO: add a handler for failure to reach destination.
-    this.destinationCallback(tcpConnection, this.port, this.address,
-        _connectedToDestination.bind(this));
+    this.destinationCallback(this.tcpConnection, this.result.port,
+        this.result.address, this._connectedToDestination.bind(this));
   };
 
   /**
@@ -272,14 +289,14 @@
     // creating response
     response[0] = SOCKS_VERSION;
     response[1] = SOCKS_RESPONSE.SUCCEEDED;
-    response[2] = this.atyp;
-    for (var i = 0; i < this.addressSize; ++i) {
-      response[3 + i] = this.address[i];
+    response[2] = this.result.atyp;
+    for (var i = 0; i < this.result.addressSize; ++i) {
+      response[3 + i] = this.result.address[i];
     }
-    response[this.addressSize + 3] = this.port[0];
-    response[this.addressSize + 4] = this.port[1];
-    this.tcpConnection.sendRaw(response);
-    console.log('Connected to: %s:%d', this.port, this.address);
+    response[this.result.addressSize + 3] = this.result.port & 0x0F;
+    response[this.result.addressSize + 4] = this.result.port & 0xF0;
+    this.tcpConnection.sendRaw(response.buffer);
+    console.log('Connected to: %s:%d', this.result.address, this.result.port);
   };
 
   exports.LocalSocksServer = LocalSocksServer;

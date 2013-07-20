@@ -164,7 +164,8 @@ const DEFAULT_MAX_CONNECTIONS=50;
       socket.accept(this.serverSocketId, this._onAccept.bind(this));
       this.callbacks.listening && this.callbacks.listening();
     } else {
-      console.error('Unable to listen to socket. Resultcode='+resultCode);
+      console.error('Unable to listen to socket %s:%d. Resultcode=%d',
+          this.addr, this.port, resultCode);
     }
   }
 
@@ -202,6 +203,11 @@ const DEFAULT_MAX_CONNECTIONS=50;
         if (self.callbacks.connection) {
           self.callbacks.connection(tcpConnection);
         }
+        // This is set after connection callback so that the connection
+        // callback can create a read-data handler.
+        console.log('Established client connection. Listening...');
+        socket.read(socketId, null,
+            tcpConnection._onDataRead.bind(tcpConnection));
     });
   }
 
@@ -220,9 +226,6 @@ const DEFAULT_MAX_CONNECTIONS=50;
       recv: null,       // List of callbacks for when data is received.
       sent: null        // Called sent data to server.
     };
-
-    console.log('Established client connection. Listening...');
-    socket.read(socketId, null, this._onDataRead.bind(this));
   };
 
   /**
@@ -232,10 +235,10 @@ const DEFAULT_MAX_CONNECTIONS=50;
    * 'listening' takes TODO: complete.
    */
   TcpConnection.prototype.on=function(event_name, callback) {
-    if(this.callbacks[event_name] != undefined) {
+    if(event_name in this.callbacks) {
       this.callbacks[event_name] = callback;
     } else {
-      console.error("No such event to be handled.");
+      console.error("No such event to be handled: " + event_name);
     }
   }
 
@@ -260,8 +263,8 @@ const DEFAULT_MAX_CONNECTIONS=50;
 	 * @param {ArrayBuffer} msg The message to send
 	 */
 	TcpConnection.prototype.sendRaw = function(msg, callback) {
-    var realcallback = callback || this.callbacks.sent;
-		socket.write(this.socketId, msg, realcallback);
+    var realCallback = callback || this.callbacks.sent || function() {};
+		socket.write(this.socketId, msg, realCallback);
 	};
 
   /**
@@ -287,8 +290,11 @@ const DEFAULT_MAX_CONNECTIONS=50;
   TcpConnection.prototype._onDataRead = function(readInfo) {
     // Call received callback if there's data in the response.
     if (readInfo.resultCode > 0 && this.callbacks.recv) {
-      console.log('onDataRead');
-			this.callbacks.recv(readInfo.data);
+      console.log('onDataRead result: %d', readInfo.resultCode);
+      this.callbacks.recv(readInfo.data);
+    } else {
+      console.warn('TcpConnection.prototype._onDataRead: unexpected resultCode: %d', readInfo.resultCode);
+      return;
     }
 
     // Read more data
