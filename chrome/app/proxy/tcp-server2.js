@@ -176,6 +176,7 @@ const DEFAULT_MAX_CONNECTIONS=50;
     if (resultInfo.resultCode===0) {
       if (this.openSockets.length>=this.maxConnections) {
         socket.disconnect(socketId);
+        //socket.destory(socketId);
         console.error("Disconnected socket (too many connections)");
         //this._onNoMoreConnectionsAvailable(resultInfo.socketId);
         return;
