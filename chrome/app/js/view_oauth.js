@@ -11,7 +11,7 @@ View_oauth.prototype.open = function(args, continuation) {
     }
     continuation();
   } else {
-    console.warn("Authentication view provider used for unsupported provider.");
+    console.warn("Authentication view provider asked to served unknown path: " + file);
     continuation();
   }
 }
