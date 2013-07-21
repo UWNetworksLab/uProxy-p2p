@@ -1,17 +1,17 @@
 // socks_test.js
+'use strict';
 
-socksServer = new window.SocksServer("127.0.0.1", 9999,
+var socksServer = new window.SocksServer("127.0.0.1", 9999,
     function (socksClientConnection, address, port,
-          connectedToDestinationCallback) {
-      // Implement your own proxy here! Do encryption, tunnelling, whatever! Go flippin' mental!
-      // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
+              connectedToDestinationCallback) {
+
       var clientTcpConnection = socksClientConnection.tcpConnection;
 
       if(socksClientConnection.result.cmd == SocksUtil.REQUEST_CMD.CONNECT) {
         chrome.socket.create("tcp", null, function (createInfo) {
           // Socket is now created.
-          var socketId = createInfo.socketId;
-          chrome.socket.connect(createInfo.socketId,
+          var destSocketId = createInfo.socketId;
+          chrome.socket.connect(destSocketId,
               socksClientConnection.result.addressString,
               socksClientConnection.result.port, function() {
                 // Socket is now connected.
@@ -19,11 +19,13 @@ socksServer = new window.SocksServer("127.0.0.1", 9999,
                 //
                 clientTcpConnection.on('recv', function(buffer) {
                   //try {
-                    console.log('received data from client to send to destination: ' + buffer.byteLength + ' bytes.');
+                    console.log('SocksDestConnection(%d -> %d): %d bytes.',
+                      clientTcpConnection.socketId, destSocketId,
+                      buffer.byteLength);
                     // TODO: send to destination, e.g. via webrtc, direct tcp
                     // socket.
-                    chrome.socket.write(socketId, buffer, function () {
-                      console.log("Sent data to destination.")
+                    chrome.socket.write(destSocketId, buffer, function () {
+                      console.log('SocksDestConnection(%d): %d bytes.', clientTcpConnection.socketId, buffer.byteLength);
                     });
                   //} catch(err) {
                     // TODO: send error back to socks somehow?
@@ -32,26 +34,40 @@ socksServer = new window.SocksServer("127.0.0.1", 9999,
                 });
 
                 clientTcpConnection.on('sent', function() {
-                  console.log('data sent to client.');
+                  console.log('SocksDestConnection(%d -> %d): data sent to client.',
+                      clientTcpConnection.socketId, destSocketId);
                 });
 
                 clientTcpConnection.on('disconnect', function(connection) {
-                  console.log('The client closed');
-                  chrome.socket.disconnect(socketId);
-                  chrome.socket.destroy(socketId);
+                  console.log('SocksDestConnection(%d -> %d): The client closed',
+                      clientTcpConnection.socketId, destSocketId);
+                  chrome.socket.disconnect(destSocketId);
+                  chrome.socket.destroy(destSocketId);
+                  destSocketId = null;
                 });
 
-                // Called when we get data from destination to be given to client.
+                // Called when we get data from destination to be given
+                // to client.
                 var onRead = function(readInfo) {
-                  console.log("Got data from destination, sending it to the client.");
-                  clientTcpConnection.sendRaw(readInfo.data);
-                  //chrome.socket.read(socketId, null, onRead);
+                  if (readInfo.resultCode < 0) {
+                    console.warn('SocksDestConnection(%d -> %d): resultCode: %d. Disconnecting', clientTcpConnection.socketId, destSocketId, readInfo.resultCode);
+                    clientTcpConnection.disconnect();
+                    return;
+                  } else if (readInfo.resultCode == 0) {
+                    clientTcpConnection.disconnect();
+                    return;
+                  } else {
+                    console.log("SocksDestConnection(%d -> %d): Got data from destination, sending it to the client (%d bytes).", clientTcpConnection.socketId, destSocketId, readInfo.resultCode);
+                    clientTcpConnection.sendRaw(readInfo.data);
+                    // chrome.socket.read(socketId, null, onRead);
+                    chrome.socket.read(destSocketId, null, onRead);
+                  }
                 }
-                chrome.socket.read(socketId, null, onRead);
+                chrome.socket.read(destSocketId, null, onRead);
 
                 // Get socket info to tell socks client the final port/IP we
                 // connected to.
-                chrome.socket.getInfo(socketId, function(socketInfo) {
+                chrome.socket.getInfo(destSocketId, function(socketInfo) {
                   // We now have socket Info. Now we tell client that connection
                   // success details.
                   var connectionDetails = {

@@ -16,9 +16,11 @@ limitations under the License.
 Author: Lucas Dixon (ldixon@google.com)
 Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
 */
+'use strict';
+
 (function(exports) {
 
-  var DEFAULT_MAX_CONNECTIONS = 1;
+  var DEFAULT_MAX_CONNECTIONS = 50;
 
   // Define some local variables here.
   var socket = chrome.socket || chrome.experimental.socket;
@@ -294,13 +296,13 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-disconnect
    */
   TcpConnection.prototype.disconnect = function() {
+    this.callbacks.disconnect && this.callbacks.disconnect(this);
     this.callbacks.removed(this);
     if (this.socketId) {
       socket.disconnect(this.socketId);
       socket.destroy(this.socketId);
-      this.socketId = null;
     }
-    this.callbacks.disconnect && this.callbacks.disconnect(this);
+    this.socketId = null;
   };
 
   /**
@@ -319,12 +321,21 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
           this.socketId, readInfo.resultCode);
       this.disconnect();
       return;
+    } else if (readInfo.resultCode == 0) {
+      console.warn('TcpConnection(%d): resultCode: %d. Disconnecting',
+          this.socketId, readInfo.resultCode);
+      this.disconnect();
+      return;
     } else if (this.callbacks.recv) {
       this.callbacks.recv(readInfo.data);
     }
 
-    // Read more data
-    socket.read(this.socketId, null, this._onDataRead.bind(this));
+    // The socketId is set to null when we disconnect, which may happen in the
+    // recv callback.
+    if(this.socketId) {
+      // Read more data
+      socket.read(this.socketId, null, this._onDataRead.bind(this));
+    }
   };
 
   /**
