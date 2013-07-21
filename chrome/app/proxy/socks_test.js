@@ -31,6 +31,10 @@ var socksServer = new window.SocksServer("127.0.0.1", 9999,
 
                 // When we get data from client, send it to dest.
                 clientTcpConnection.on('recv', function(buffer) {
+
+                  console.log('%s: got data: %s', JSON.stringify(clientTcpConnection.state()),
+                    getStringOfArrayBuffer(buffer));
+
                   //try {
                     if(!destConnected) {
                       clientTcpConnection.disconnect();
