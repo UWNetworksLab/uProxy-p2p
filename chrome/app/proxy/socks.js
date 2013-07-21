@@ -176,6 +176,7 @@
     result.port = byteArray[result.portOffset] << 8 |
                   byteArray[result.portOffset + 1];
     result.dataOffset = result.portOffset + 2;
+    result.raw = byteArray.subarray(0, result.dataOffset);
     result.data = byteArray.subarray(result.dataOffset,
                                      byteArray.length - result.dataOffset);
     console.log(result);
