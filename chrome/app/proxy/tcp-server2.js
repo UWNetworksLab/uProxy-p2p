@@ -225,11 +225,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
         if (self.callbacks.connection) {
           self.callbacks.connection(tcpConnection);
         }
-        // This is set after connection callback so that the connection
-        // callback can create a read-data handler.
-        console.log('TcpServer: client connection.');
-        socket.read(socketId, null,
-            tcpConnection._onDataRead.bind(tcpConnection));
+        console.log('TcpServer: client connected.');
     });
   };
 
@@ -244,26 +240,65 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     this.socketId = socketId;
     this.socketInfo = socketInfo;
     this.callbacks = callbacks;
-
+    this.isConnected = true;
+    this.pendingReadBuffer = null;
+    this.recvOptions = null;
+    this.pendingRead = false;
     this.callbacks.created(this);
+
+    if(this.callbacks.recv) {
+      this._read();
+    }
   };
+
+  /**
+   * start reading data
+   */
+  TcpConnection.prototype._read = function() {
+    socket.read(this.socketId, null, this._onRead.bind(this));
+    this.pendingRead = true;
+  }
 
   /**
    * Set an event handler. See http://developer.chrome.com/trunk/apps/socket.
    * html for more about the events than can happen.
    *
-   * 'listening' takes TODO: complete.
+   * When 'recv' callback is null, data is buffered and given to next non-null
+   * callback.
    *
    * @param {string} eventName Enumerated instance of valid callback.
    * @param {function} callback Callback function.
    */
-  TcpConnection.prototype.on = function(eventName, callback) {
+  TcpConnection.prototype.on = function(eventName, callback, options) {
     if (eventName in this.callbacks) {
       this.callbacks[eventName] = callback;
+      // For receving, if recv is set to null at some point, we may end up with
+      // data in pendingReadBuffer which when it is set to something else,
+      // makes the callback with the pending data, and then re-starts reading.
+      if(eventName == 'recv' && callback) {
+        if(options) { this.recvOptions = options; }
+        else { this.recvOptions = null; }
+        if (this.pendingReadBuffer) {
+          this._bufferedCallRecv();
+        }
+        if(!this.pendingRead) this._read();
+      }
     } else {
-      console.error('TcpConnection: no such event for on: ' + eventName);
+      console.error('TcpConnection(%d): no such event for on: %s',
+          this.socketId, eventName);
     }
   };
+
+  /**
+   *
+   */
+  TcpConnection.prototype._bufferedCallRecv = function() {
+    if(this.recvOptions && this.recvOptions.minByteLength >
+        this.pendingReadBuffer.byteLength) return;
+
+    this.callbacks.recv(this.pendingReadBuffer);
+    this.pendingReadBuffer = null;
+  }
 
   /**
    * Sends a message down the wire to the remote side
@@ -286,6 +321,11 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @param {ArrayBuffer} msg The message to send.
    */
   TcpConnection.prototype.sendRaw = function(msg, callback) {
+    if(!this.isConnected) {
+      console.warn('TcpConnection(%d): sendRaw when disconnected.',
+        this.socketId);
+      return;
+    }
     var realCallback = callback || this.callbacks.sent || function() {};
     socket.write(this.socketId, msg, realCallback);
   };
@@ -296,14 +336,41 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-disconnect
    */
   TcpConnection.prototype.disconnect = function() {
-    this.callbacks.disconnect && this.callbacks.disconnect(this);
+    if(!this.isConnected) return;
+    this.isConnected = false;
+
+    // Temparary variable for disconnect callback.
+    var disconnectCallback = this.callbacks.disconnect;
+
+    // Disconnecting removes all callbacks.
+    this.callbacks.disconnect = null;
+    this.callbacks.recv = null;
+    this.callbacks.sent = null;
+
+    // Close the socket.
+    //if (this.socketId) {
+    socket.disconnect(this.socketId);
+    socket.destroy(this.socketId);
+
+    // Make disconnect callback if not null
+    disconnectCallback && disconnectCallback(this);
+
+    // Make the callback to remove this from the count held by the tcpServer
+    // we are associated with.
     this.callbacks.removed(this);
-    if (this.socketId) {
-      socket.disconnect(this.socketId);
-      socket.destroy(this.socketId);
-    }
-    this.socketId = null;
   };
+
+  TcpConnection.prototype._addPendingData = function(buffer) {
+    if (!this.pendingReadBuffer) {
+      this.pendingReadBuffer = buffer;
+    } else {
+      var temp = Uint8Array(this.pendingReadBuffer.byteLength +
+                            buffer.byteLength);
+      temp.set(new Uint8Array(this.pendingReadBuffer), 0);
+      temp.set(new Uint8Array(buffer), this.pendingReadBuffer.byteLength);
+      this.pendingReadBuffer = temp.buffer;
+    }
+  }
 
   /**
    * Callback function for when data has been read from the socket.
@@ -315,26 +382,36 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
    * @see TcpConnection.prototype.addDataReceivedListener
    * @param {Object} readInfo The incoming message.
    */
-  TcpConnection.prototype._onDataRead = function(readInfo) {
+  TcpConnection.prototype._onRead = function(readInfo) {
+    // if we are disconnected, do nothing and stop reading.
     if (readInfo.resultCode < 0) {
       console.warn('TcpConnection(%d): resultCode: %d. Disconnecting',
           this.socketId, readInfo.resultCode);
       this.disconnect();
       return;
     } else if (readInfo.resultCode == 0) {
-      console.warn('TcpConnection(%d): resultCode: %d. Disconnecting',
-          this.socketId, readInfo.resultCode);
       this.disconnect();
       return;
-    } else if (this.callbacks.recv) {
-      this.callbacks.recv(readInfo.data);
     }
 
-    // The socketId is set to null when we disconnect, which may happen in the
-    // recv callback.
-    if(this.socketId) {
-      // Read more data
-      socket.read(this.socketId, null, this._onDataRead.bind(this));
+    if (this.callbacks.recv) {
+      this._addPendingData(readInfo.data);
+      this._bufferedCallRecv();
+
+      // We have to check this.callbacks.recv again becuase when it was called,
+      // it may have set this.callbacks.recv to null (e.g. to say we no longer
+      // want to recieve more data, or because we decided to disconnect)
+      if (this.callbacks.recv) {
+        this._read();
+      } else {
+        this.pendingRead = false;
+      }
+    } else {
+      // If we are not receiving more data at the moment, we store the received
+      // data in a pendingReadBuffer for the next time this.callbacks.recv is
+      // turned on.
+      this.pendingReadBuffer = readInfo.data;
+      this.pendingRead = false;
     }
   };
 
