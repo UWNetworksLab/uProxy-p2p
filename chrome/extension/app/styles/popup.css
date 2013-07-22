@@ -6831,3 +6831,7 @@ details > *:not(summary) {
 #debug .btn-group {
   margin-bottom: 10px;
 }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/_pants\/Code\/UProxy\/chrome\/extension\/app\/styles\/popup\.sass}line{font-family:\0000323}}
+#debug form[name=sendMsgForm] {
+  margin-bottom: 3px;
+}
