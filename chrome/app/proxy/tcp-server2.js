@@ -18,6 +18,37 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
 */
 'use strict';
 
+/**
+ * Converts an array buffer to a string of hex codes and interpretations as
+ * a char code.
+ *
+ * @param {ArrayBuffer} buf The buffer to convert.
+ */
+function getHexStringOfArrayBuffer(buf) {
+  var uInt8Buf = new Uint8Array(buf);
+  var a = [];
+  for (var i = 0; i < buf.byteLength; ++i) {
+    a.push(uInt8Buf[i].toString(16));
+  }
+  return a.join('.');
+}
+
+/**
+ * Converts an array buffer to a string of hex codes and interpretations as
+ * a char code.
+ *
+ * @param {ArrayBuffer} buf The buffer to convert.
+ */
+function getStringOfArrayBuffer(buf) {
+  var uInt8Buf = new Uint8Array(buf);
+  var s = '';
+  for (var i = 0; i < buf.byteLength; ++i) {
+    s += String.fromCharCode(uInt8Buf[i]);
+  }
+  return s;
+}
+
+
 (function(exports) {
 
   var DEFAULT_MAX_CONNECTIONS = 50;
@@ -193,14 +224,15 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     // continue to accept more connections:
     socket.accept(this.serverSocketId, this._onAccept.bind(this));
     var connectionsCount = Object.keys(this.openConnections).length;
-    console.log('TcpServer: this.openConnections.length=' +
+    console.log('TcpServer: this.openConnections.length=%d',
         connectionsCount);
+    console.log(this);
 
     if (resultInfo.resultCode === 0) {
       if (connectionsCount >= this.maxConnections) {
         socket.disconnect(resultInfo.socketId);
         socket.destroy(resultInfo.socketId);
-        console.warn('TcpServer: too many connections: ' + connectionsCount);
+        console.warn('TcpServer: too many connections: %d', connectionsCount);
         // TODO: make a callback for this case.
         //this._onNoMoreConnectionsAvailable(resultInfo.socketId);
         return;
@@ -209,7 +241,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
       this._createTcpConnection(resultInfo.socketId);
       console.log('TcpServer: Incoming connection created.');
     } else {
-      console.error('TcpServer: Incoming connection failure: ' +
+      console.error('TcpServer: Incoming connection failure: %d',
           resultInfo.resultCode);
     }
   };
@@ -239,7 +271,12 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
   function TcpConnection(socketId, socketInfo, callbacks) {
     this.socketId = socketId;
     this.socketInfo = socketInfo;
-    this.callbacks = callbacks;
+    this.callbacks = {};
+    this.callbacks.recv = callbacks.recv;
+    this.callbacks.diconnect = callbacks.diconnect;
+    this.callbacks.sent = callbacks.sent;
+    this.callbacks.created = callbacks.created;
+    this.callbacks.removed = callbacks.removed;
     this.isConnected = true;
     this.pendingReadBuffer = null;
     this.recvOptions = null;
@@ -247,6 +284,8 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     this.callbacks.created(this);
 
     if(this.callbacks.recv) {
+      console.log('TcpConnection(%d): calling _read from TcpConnection.',
+          this.socketId);
       this._read();
     }
   };
@@ -278,7 +317,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
       if(eventName == 'recv' && callback) {
         if(options) { this.recvOptions = options; }
         else { this.recvOptions = null; }
+
         if (this.pendingReadBuffer) {
+          console.log('TcpConnection(%d): calling recv from "on".', this.socketId);
           this._bufferedCallRecv();
         }
         if(!this.pendingRead) this._read();
@@ -296,8 +337,9 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     if(this.recvOptions && this.recvOptions.minByteLength >
         this.pendingReadBuffer.byteLength) return;
 
-    this.callbacks.recv(this.pendingReadBuffer);
+    var tmpBuf = this.pendingReadBuffer;
     this.pendingReadBuffer = null;
+    this.callbacks.recv(tmpBuf);
   }
 
   /**
@@ -396,6 +438,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
 
     if (this.callbacks.recv) {
       this._addPendingData(readInfo.data);
+      console.log('TcpConnection(%d): calling recv from _onRead.', this.socketId);
       this._bufferedCallRecv();
 
       // We have to check this.callbacks.recv again becuase when it was called,
@@ -410,7 +453,7 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
       // If we are not receiving more data at the moment, we store the received
       // data in a pendingReadBuffer for the next time this.callbacks.recv is
       // turned on.
-      this.pendingReadBuffer = readInfo.data;
+      this._addPendingData(readInfo.data);
       this.pendingRead = false;
     }
   };
@@ -427,6 +470,18 @@ Based on tcp-server.js code by: Renato Mangini (mangini@chromium.org)
     if (this.callbacks.sent) {
       this.callbacks.sent(writeInfo);
     }
+  };
+
+  TcpConnection.prototype.state = function() {
+    return {
+      socketId: this.socketId,
+      socketInfo: this.socketInfo,
+      callbacks: this.callbacks,
+      isConnected: this.isConnected,
+      pendingReadBuffer: this.pendingReadBuffer,
+      recvOptions: this.recvOptions,
+      pendingRead: this.pendingRead,
+    };
   };
 
   /**

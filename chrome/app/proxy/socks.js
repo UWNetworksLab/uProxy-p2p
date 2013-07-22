@@ -176,6 +176,7 @@
     result.port = byteArray[result.portOffset] << 8 |
                   byteArray[result.portOffset + 1];
     result.dataOffset = result.portOffset + 2;
+    result.raw = byteArray.subarray(0, result.dataOffset);
     result.data = byteArray.subarray(result.dataOffset,
                                      byteArray.length - result.dataOffset);
     console.log(result);
@@ -210,6 +211,7 @@
           tcpConnection.socketInfo.peerAddress,
           tcpConnection.socketInfo.peerPort);
       tcpConnection.on('recv', function(buffer) {
+        console.log('new SocksClientConnection (%s): \n* Got data: %s', tcpConnection.socketId, JSON.stringify(tcpConnection.state()),getHexStringOfArrayBuffer(buffer));
         tcpConnection.socksClient =
             new SocksClientConnection(tcpConnection, buffer,
                                       self.destinationCallback);
@@ -227,7 +229,7 @@
   /**
    * Connection to a particular socks client
    */
-  function SocksClientConnection(tcpConnection, chunk, destinationCallback) {
+  function SocksClientConnection(tcpConnection, buffer, destinationCallback) {
     this.tcpConnection = tcpConnection;  // to the client.
     this.destinationCallback = destinationCallback;
     this.method_count = 0;
@@ -237,12 +239,12 @@
     var response;  // Uint8Array;
 
     console.log('SocksClientConnection(%d): Auth (length=%d)',
-        this.tcpConnection.socketId, chunk.byteLength);
+        this.tcpConnection.socketId, buffer.byteLength);
 
     // We are no longer at waiting for a proxy request on this tcp connection.
-    this.tcpConnection.on('recv', null);
+    // this.tcpConnection.on('recv', null);
 
-    var byteArray = new Uint8Array(chunk);
+    var byteArray = new Uint8Array(buffer);
     // Only SOCKS Version 5 is supported
     if (byteArray[0] != SocksUtil.VERSION5) {
       console.error('SocksClientConnection(%d): unsupported socks version: %d',
@@ -271,8 +273,7 @@
     }
 
     // Handle more data with request handler.
-    this.tcpConnection.on('recv', this._handleRequest.bind(this),
-        {minByteLength: 5});
+    this.tcpConnection.on('recv', this._handleRequest.bind(this));
     // Send request to use NOAUTH for authentication
     response = new Uint8Array(2);
     response[0] = SocksUtil.VERSION5;
@@ -280,14 +281,23 @@
     this.tcpConnection.sendRaw(response.buffer);
   };
 
-  // Given an array buffer of data (chunk) interpret the SOCKS request.
-  SocksClientConnection.prototype._handleRequest = function(chunk) {
+  // Given an array buffer of data (buffer) interpret the SOCKS request.
+  SocksClientConnection.prototype._handleRequest = function(buffer) {
     // We only handle one request per tcp connection. Note that pending data
     // will be stored and sent to the next non-null callback.
     this.tcpConnection.on('recv', null);
 
-    var byteArray = new Uint8Array(chunk);
+    console.log(this.tcpConnection);
+    console.log('SocksClientConnection(%d): handleRequest\n*got data: %s; \n data: %s', this.tcpConnection.socketId,
+      JSON.stringify(this.tcpConnection.state()),
+      getHexStringOfArrayBuffer(buffer));
+
+    var byteArray = new Uint8Array(buffer);
     this.result = SocksUtil.interpretSocksRequest(byteArray);
+
+    console.log('SocksClientConnection(%d): parsed request: %s', this.tcpConnection.socketId,
+      JSON.stringify(this.result));
+
     if (this.result == null) {
       console.error('SocksClientConnection(%d): bad request (length %d)',
           this.tcpConnection.socketId, byteArray.length);
