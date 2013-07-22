@@ -10,7 +10,8 @@
     this.sendChannel = sendChannel;
 
     this.socksClientConnection.tcpConnection.on('recv', function(buffer) {
-      console.log("Received data: '%s'", buffer);
+
+      //console.log("Received data from socks client: '%s'", Encoding.ab2str(buffer));
       console.dir(buffer);
       this.sendToPeer(buffer);
     }.bind(this));
@@ -18,13 +19,21 @@
 
   WebRtcRelayer.prototype.sendToSocksClient = function(b64) {
     console.log("Sending data to socks client: '%s'", b64);
-    var raw = Encoding.b64toab(b64);
-    this.socksClientConnection.tcpConnection.sendRaw(raw);
+    var raw = Encoding.b64toab(b64);//Encoding.b64toab('AB');//Encoding.b64toab(b64);
+    if (this.socksClientConnection.tcpConnection.isConnected) {
+      console.log("Sending raw response to tcp connection: "+raw);
+      this.socksClientConnection.tcpConnection.sendRaw(raw, function() {
+        console.log('Got callback from send call');
+      });
+    } else {
+      console.log('SOCKS client no longer connected, disconnecting WebRtc client');
+      this.sendChannel.close();
+    }
   }
 
   WebRtcRelayer.prototype.sendToPeer = function(buf) {
     var b64 = Encoding.abtob64(buf);
-    console.log("Sending data '%s'", b64);
+    console.log("Sending data from peer 1 to peer 2 '%s'", b64);
     this.sendChannel.send(b64);
   }
 
@@ -35,11 +44,6 @@
     console.dir(socksRequest);
 
     var client = socksClientConnection.tcpConnection;
-
-    var onData = function(data) {
-      console.log("Received data: "+ (typeof data));
-      client.sendRaw(data);
-    };
 
     var onPeerConnection = function (sendChannel) {
       // This means we've established a connection to the remote *peer*, not necessarily the remote
@@ -75,7 +79,7 @@
     var processConnect = function() {
       // Create a web rtc connection.
 
-      WebRtcUtil.createConnection(onPeerConnection, onData);
+      WebRtcUtil.createConnection(onPeerConnection);
     };
 
 
