@@ -80,7 +80,7 @@ not have used before.
 
 1. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
 
-1. Click 'Load unpacked extension...' and select the 'chrome/extension/app' directory.
+1. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
 
 
 #### Firefox Add-on
