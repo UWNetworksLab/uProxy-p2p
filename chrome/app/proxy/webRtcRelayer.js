@@ -16,6 +16,12 @@
     }.bind(this));
   }
 
+  WebRtcRelayer.prototype.sendToSocksClient = function(b64) {
+    console.log("Sending data to socks client: '%s'", b64);
+    var raw = Encoding.b64toab(b64);
+    this.socksClientConnection.tcpConnection.sendRaw(raw);
+  }
+
   WebRtcRelayer.prototype.sendToPeer = function(buf) {
     var b64 = Encoding.abtob64(buf);
     console.log("Sending data '%s'", b64);
@@ -42,7 +48,7 @@
       console.log('Established PEER connection...');
       var relayer = new WebRtcRelayer(socksClientConnection, sendChannel);
       relayer.sendToPeer(socksRequest.raw);
-
+      return relayer;
 
       // We now relay the connected response from the remote side.
       /*

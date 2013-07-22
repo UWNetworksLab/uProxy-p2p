@@ -1,12 +1,16 @@
 /**
  * Utilities for web rtc.
+ *
+ * TODO: This is a very immature implementation **on localhost** for testing that won't handle multiple sockets --
+ * we need to create multiple instances of likely WebRtcClient and WebRtcServer classes for this to work for
+ * multiple connections in the real world.
  */
 'use strict';
 
 (function(exports) {
 
   var WebRtcUtil = {};
-  var pc1, pc2, sendChannel, receiveChannel;
+  var pc1, pc2, sendChannel, receiveChannel, destSocketId;
 
   WebRtcUtil.createConnection = function (onPeerOpen, onData) {
     var servers = null;
@@ -30,15 +34,16 @@
     this.pc1.onicecandidate = this.iceCallback1.bind(this);
     this.sendChannel.onopen = function () {
       this.onPeerOpen.bind(this);
-      onPeerOpen(this.sendChannel);
+      this.socksClient = onPeerOpen(this.sendChannel);
     }.bind(this);
     this.sendChannel.onclose = this.onPeerClose.bind(this);
     this.sendChannel.onmessage = function (event) {
       console.log("Received message on send channel!!");
       console.dir(event);
-      var buf = Encoding.b64toab(event.data);
-      onData(buf);
-    };
+      //var buf = Encoding.b64toab(event.data);
+      //onData(buf);
+      this.socksClient.sendToSocksClient(event.data);
+    }.bind(this);
 
     console.log('creating connection...');
     this.pc2 = new webkitRTCPeerConnection(servers,
@@ -82,8 +87,8 @@
     console.dir(socksConnect);
     chrome.socket.create("tcp", null, function (createInfo) {
       // Socket is now created.
-      var destSocketId = createInfo.socketId;
-      chrome.socket.connect(destSocketId,
+      this.destSocketId = createInfo.socketId;
+      chrome.socket.connect(this.destSocketId,
         socksConnect.addressString,
         socksConnect.port, function () {
           console.log("Socket connected to destination site!!");
@@ -114,6 +119,12 @@
 
   WebRtcUtil.onReceiveMessageCallback = function(event) {
     console.log('Processing message callback');
+    console.dir(event);
+    var buf = Encoding.b64toab(event.data);
+    chrome.socket.write(this.destSocketId, buf, function(writeInfo) {
+      console.log('Received write callback');
+      console.dir(writeInfo);
+    });
   };
 
   WebRtcUtil.gotDescription1 = function(desc) {
