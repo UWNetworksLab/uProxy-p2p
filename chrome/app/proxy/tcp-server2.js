@@ -311,7 +311,7 @@ function getStringOfArrayBuffer(buf) {
   TcpConnection.prototype.on = function(eventName, callback, options) {
     if (eventName in this.callbacks) {
       this.callbacks[eventName] = callback;
-      // For receving, if recv is set to null at some point, we may end up with
+      // For receiving, if recv is set to null at some point, we may end up with
       // data in pendingReadBuffer which when it is set to something else,
       // makes the callback with the pending data, and then re-starts reading.
       if(eventName == 'recv' && callback) {
@@ -381,7 +381,7 @@ function getStringOfArrayBuffer(buf) {
     if(!this.isConnected) return;
     this.isConnected = false;
 
-    // Temparary variable for disconnect callback.
+    // Temporary variable for disconnect callback.
     var disconnectCallback = this.callbacks.disconnect;
 
     // Disconnecting removes all callbacks.
