@@ -18,7 +18,7 @@
 
     <hr>
 
-    <details id="debug" open>
+    <details id="debug" open ng-controller="DebugCtrl" ng-show="model._debug">
       <summary>Debug</summary>
 
       <div class="well">
@@ -28,8 +28,21 @@
         </div>
 
         <details open>
+          <summary>message log</summary>
+
+          <form name="sendMsgForm" ng-submit="sendMsg()">
+            <div class="input-append">
+              <input type="text" required ng-model="msg" placeholder="send test message">
+              <input type="submit" value="+" class="btn" ng-disabled="sendMsgForm.$invalid">
+            </div>
+          </form>
+
+          <pre>{{model._msgLog | json}}</pre>
+        </details>
+
+        <details open>
           <summary>state</summary>
-          <pre>{{ model | json }}</pre>
+          <pre>{{model | json}}</pre>
         </details>
       </div>
     </details>
