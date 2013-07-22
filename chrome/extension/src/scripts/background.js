@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
 });
 
 
-var popupListenerss = {};
+var popupListeners = {};
 
 //freedom.on('buddylist-update', function (msg) {
 //  buddies = msg;
@@ -15,25 +15,25 @@ var popupListenerss = {};
 
 
 function clearPopupListeners() {
-  popupListenerss = {};
+  popupListeners = {};
 }
 
 function addPopupListener(type, func) {
-  if (popupListenerss[type]) {
-    popupListenerss[type].push(func);
+  if (popupListeners[type]) {
+    popupListeners[type].push(func);
   } else {
-    popupListenerss[type] = [func];
+    popupListeners[type] = [func];
   }
 }
 
 function callPopupListener(type, data) {
-  if (popupListenerss[type]) {
-    for (var i = 0; i < popupListenerss[type].length; i++) {
-      popupListenerss[type][i](data);
+  if (popupListeners[type]) {
+    for (var i = 0; i < popupListeners[type].length; i++) {
+      popupListeners[type][i](data);
     }
   } else {
     console.log('Handler missing for: ' + type);
-    console.log(popupListenerss);
+    console.log(popupListeners);
   }
 }
 
