@@ -1,1 +1,36 @@
+@import compass
 @import bootstrap-sass/lib/bootstrap
+
+#popup
+  min-width: 357px
+  overflow-x: hidden
+  padding: 15px
+
+details
+  & > summary
+    cursor: pointer
+    &:focus
+      outline: none
+  & > *:not(summary)
+    margin-left: 10px
+
+#debug
+  pre
+    font-size: $baseFontSize * .7
+    max-height: 200px
+    overflow: scroll
+  .btn-group
+    margin-bottom: 10px
+  form[name=sendMsgForm]
+    margin-bottom: 3px
+
+body#options
+  padding: 30px
+  #debug
+    margin-top: 50px
+
+ul.options
+  +no-bullets
+
+details.advanced
+  margin-top: 15px

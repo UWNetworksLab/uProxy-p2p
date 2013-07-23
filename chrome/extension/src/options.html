@@ -1,15 +1,58 @@
 <!doctype html>
-<html>
-    <head>
-        <link href="styles/main.css" rel="stylesheet">
-        <!-- build:js scripts/options.js -->
-        <script src="scripts/options.js"></script>
-        <!-- endbuild -->
-    </head>
-    <body>
-        <!-- CHROME EXTENSION OPTION -->
+<html ng-app="UProxyChromeExtension" ng-csp>
+  <head>
+    <link href="styles/main.css" rel="stylesheet">
 
-        <!-- TODO: add options here: -->
-        <!-- [x] DISABLE NON-ROUTABLE ADDRESSES -->
-    </body>
+    <!-- build:js scripts/options.js -->
+    <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+
+    <script src="scripts/app.js"></script>
+    <script src="scripts/options.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body ng-controller="OptionsCtrl" id="options">
+
+    <h3>{{'appName'|chromei18n}}</h3>
+    <h4>{{'options'|chromei18n}}</h4>
+
+    <ul class="options">
+      <li>
+        <label class="checkbox inline">
+          <input type="checkbox">
+          option one
+        </label>
+      </li>
+      <li>
+        <label class="checkbox inline">
+          <input type="checkbox">
+          option two
+        </label>
+      </li>
+      <li>
+        <details open class="advanced">
+        <summary>{{'advanced'|chromei18n}}</summary>
+
+          <ul class="options">
+            <li>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="allowNonRoutableAddresses"
+                  ng-click="changeOption('allowNonRoutableAddresses', allowNonRoutableAddresses)">
+                  <!-- XXX DRY: use a directive to automatically bind ng-click to the proper
+                                changeOption call based on the ng-model binding -->
+                {{'allowNonroutableAddresses'|chromei18n}}
+              </label>
+            </li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+
+    <details id="debug" open ng-show="model._debug">
+      <summary>Debug</summary>
+      <pre class="well">state: {{model|json}}</pre>
+    </details>
+
+  </body>
 </html>

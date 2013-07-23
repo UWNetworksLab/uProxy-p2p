@@ -1,18 +1,19 @@
 <!doctype html>
 <html ng-app="UProxyChromeExtension" ng-csp>
   <head>
-    <link href="styles/popup.css" rel="stylesheet">
+    <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/popup.js -->
     <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="oauth2/oauth2.js"></script>
 
+    <script src="scripts/app.js"></script>
     <script src="scripts/popup.js"></script>
     <!-- endbuild -->
 
   </head>
-  <body ng-controller="MainCtrl">
+  <body ng-controller="MainCtrl" id="popup">
 
     <h4>{{'appName'|chromei18n}}</h4>
 
