@@ -3,6 +3,7 @@
  */
 'use strict';
 
+var connection = null;
 (function(exports) {
 
   function WebRtcRelayer(socksClientConnection, sendChannel) {
@@ -18,7 +19,7 @@
   }
 
   WebRtcRelayer.prototype.sendToSocksClient = function(b64) {
-    console.log("Sending data to socks client: '%s'", b64);
+    console.log("Sending data to socks client: '%s'", atob(b64));
     var raw = Encoding.b64toab(b64);//Encoding.b64toab('AB');//Encoding.b64toab(b64);
     if (this.socksClientConnection.tcpConnection.isConnected) {
       console.log("Sending raw response to tcp connection: "+raw);
@@ -33,7 +34,7 @@
 
   WebRtcRelayer.prototype.sendToPeer = function(buf) {
     var b64 = Encoding.abtob64(buf);
-    console.log("Sending data from peer 1 to peer 2 '%s'", b64);
+    console.log("Sending data from peer 1 to peer 2 '%s'", atob(b64));
     this.sendChannel.send(b64);
   }
 
@@ -79,7 +80,7 @@
     var processConnect = function() {
       // Create a web rtc connection.
 
-      WebRtcUtil.createConnection(onPeerConnection);
+      connection = WebRtcUtil.createConnection(onPeerConnection);
     };
 
 

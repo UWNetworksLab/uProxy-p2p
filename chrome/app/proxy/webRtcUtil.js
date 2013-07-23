@@ -38,10 +38,8 @@
     }.bind(this);
     this.sendChannel.onclose = this.onPeerClose.bind(this);
     this.sendChannel.onmessage = function (event) {
-      console.log("Received message on send channel!!");
-      console.dir(event);
-      //var buf = Encoding.b64toab(event.data);
-      //onData(buf);
+      console.log("Received message on send channel: %s", atob(event.data));
+      //console.dir(event);
       this.socksClient.sendToSocksClient(event.data);
     }.bind(this);
 
@@ -56,6 +54,7 @@
     this.pc2.ondatachannel = this.receiveChannelCallback.bind(this);
 
     this.pc1.createOffer(this.gotDescription1.bind(this));
+    return this;
   };
 
   WebRtcUtil.closeDataChannels = function () {
@@ -113,85 +112,77 @@
 
           // Wire up the data handler on the web rtc connection to just relay raw data post-socks.
           this.receiveChannel.onmessage = this.onReceiveMessageCallback.bind(this);
-
-          var socketRead = function(readInfo) {
-            console.log("Reading from socket to destination site");
-            if (readInfo.resultCode > 0) {
-              console.log("Got read info!!!");
-              console.dir(readInfo);
-              //var str = Encoding.ab2str(readInfo.data);
-              //console.log("Read string..."+str);
-              var b64 = Encoding.abtob64(readInfo.data);
-
-              var decoded = atob(b64);
-              console.log("DECODED: "+decoded);
-              console.log("Read data: '%s'", b64);
-              console.log("Read data length: ", b64.length);
-
-              var written = 0;
-              var chunkSize = 100;
-
-              /*
-              var sendChunk = function () {
-                var limit = written + chunkSize;
-                if (limit > str.length) {
-                  limit = str.length;
-                }
-
-                console.log("Sending chunk from %d to %d", written, limit);
-                var chunk = str.substring(written, limit);
-                console.log("Sending chunk: %s", chunk);
-
-                setTimeout(function (){
-                  this.receiveChannel.send(chunk);
-                  written = limit;
-                  sendChunk();
-
-                }.bind(this), 200);
-              }.bind(this);
-              sendChunk();
-              */
-
-              while (written < b64.length) {
-                var limit = written + chunkSize;
-                if (limit > b64.length) {
-                  limit = b64.length;
-                }
-
-                console.log("Sending chunk from %d to %d", written, limit);
-                var chunk = b64.substring(written, limit);
-                console.log("Sending chunk: %s", chunk);
-                this.receiveChannel.send(chunk);
-                //setTimeout(function (){
-//                  this.receiveChannel.send(chunk);
-  //              }.bind(this), 200);
-
-                written = limit;
-              }
-
-
-
-              console.log("Sent data back through web rtc...");
-              chrome.socket.read(this.destSocketId, null, socketRead);
-            } else {
-              // Otherwise it's a disconnect, so we need to disconnect from the web rtc client.
-              this.receiveChannel.close();
-            }
-
-          }.bind(this);
-          chrome.socket.read(this.destSocketId, null, socketRead);
+          chrome.socket.read(this.destSocketId, null, this.processDataFromDestinationSite.bind(this));
         }.bind(this));
     }.bind(this));
   };
 
-  WebRtcUtil.onReceiveMessageCallback = function(event) {
+  WebRtcUtil.onReceiveMessageCallback = function(readInfo) {
     console.log('Processing message callback');
-    console.dir(event);
-    var buf = Encoding.b64toab(event.data);
+    console.dir(readInfo);
+    var buf = Encoding.b64toab(readInfo.data);
     chrome.socket.write(this.destSocketId, buf, function(writeInfo) {
       console.log('Received write callback');
       console.dir(writeInfo);
     });
+  };
+
+  WebRtcUtil.processDataFromDestinationSite = function(readInfo) {
+    console.log("Reading from socket to destination site");
+    if (readInfo.resultCode > 0) {
+      console.log("Got read info!!!");
+      console.dir(readInfo);
+      //var str = Encoding.ab2str(readInfo.data);
+      //console.log("Read string..."+str);
+      var b64 = Encoding.abtob64(readInfo.data);
+
+      var decoded = atob(b64);
+      console.log("DECODED: "+decoded);
+      console.log("Read data: '%s'", b64);
+      console.log("Read data length: ", b64.length);
+
+      var written = 0;
+      var chunkSize = 200;
+
+      var newChunkFunc = function(chunk) {
+        var thisChunk = chunk;
+        function locChunkFunc() {
+          this.receiveChannel.send(thisChunk);
+        }
+        return locChunkFunc.bind(this);
+      }.bind(this);
+
+
+      while (written < b64.length) {
+        var limit = written + chunkSize;
+        if (limit > b64.length) {
+          limit = b64.length;
+        }
+        var chunk = b64.substring(written, limit);
+        setTimeout(newChunkFunc(chunk), 400);
+
+        written = limit;
+      }
+
+
+      console.log("Sent data back through web rtc...");
+      try {
+        chrome.socket.read(this.destSocketId, null, this.processDataFromDestinationSite.bind(this));
+      } catch (e) {
+        console.log("Reading from closed socket?");
+        console.dir(e);
+      }
+      console.log("CALLED READ");
+    } else {
+      console.log("CLOSING WEBRTC SERVER CHANNEL");
+      // Otherwise it's a disconnect, so we need to disconnect from the web rtc client.
+      setTimeout(function (){
+        //this.receiveChannel.send(chunk);
+        this.receiveChannel.close();
+      }.bind(this), 400);
+
+      console.log("CLOSED WEBRTC SERVER CHANNEL");
+    }
   };
 
   WebRtcUtil.gotDescription1 = function(desc) {
