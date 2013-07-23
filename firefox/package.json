@@ -3,7 +3,7 @@
   "fullName": "UProxy Firefox Extension",
   "id": "UProxyFirefox@UniversityOfWashington",
   "description": "Alpha: Ubiquitous Firefox Proxy Picker",
-  "icon":"submodules/uproxy-common/images/uproxy-128.png",
+  "icon":"data/images/uproxy-128.png",
   "dependencies": ["toolbarbutton", "addon-sdk"],
   "author": "",
   "license": "",
