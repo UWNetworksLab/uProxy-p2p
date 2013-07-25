@@ -41,6 +41,8 @@ not have used before.
 
 #### Pre-Requirements
 
+Note: you will either need to run these as root, or set the directories they modify (/usr/local) to being editable by your user.
+
 - [node](http://nodejs.org/) + npm: `brew install node # or similar for your
   system`
 
