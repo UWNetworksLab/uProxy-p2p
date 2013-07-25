@@ -1,5 +1,15 @@
 var self = require("sdk/self");
 var panel = require("sdk/panel");
+var pageWorker = require("sdk/page-worker");
+//const { Cu } = require("chrome");
+
+//Cu.import(self.data.url("lib/freedom.js"));
+
+var initFreeDOM = function() {
+  var freedomPageWorker = pageWorker.Page({
+					    contentURL: self.data.url("freedom-page-worker.html")
+					  });
+};
 
 var initToolbar = function() {
   // create toolbarbutton
@@ -20,10 +30,15 @@ var initToolbar = function() {
 };
 
 var initPanel = function() {
+  var l10n = JSON.parse(self.data.load("l10n/en/messages.json"));
   var uproxyPanel = panel.Panel({
-                                 contentURL: self.data.url("popup.html")
+                                  contentURL: self.data.url("popup.html")
 				});
+  uproxyPanel.port.on("show", function() {
+			uproxyPanel.port.emit("l10n", l10n);
+		      });
   return uproxyPanel;
 };
 
+initFreeDOM();
 initToolbar();
