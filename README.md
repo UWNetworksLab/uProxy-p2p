@@ -41,11 +41,19 @@ not have used before.
 
 #### Pre-Requirements
 
-- [node](http://nodejs.org/) + npm:
-  `which npm || brew install node # or similar for your system`
+Note: you will either need to run these as root, or set the directories they modify (/usr/local) to being editable by your user.
 
-- [bower](http://bower.io/) 0.10:
-  if `bower --version` does not give '0.10.x', run `npm install -g bower@'~0.10.0'`
+- [node](http://nodejs.org/) + npm: `brew install node # or similar for your
+  system`
+
+- [grunt](http://gruntjs.com/): `npm install -g grunt-cli`
+
+- [bower](http://bower.io/) 1.0: `npm install -g bower`. If you already have
+  bower installed at a lower version, run `npm update -g bower`.
+
+    - To run binaries from globally-installed npm packages without
+      fully-qualifying paths, add your npm bin directory to your path
+      (e.g. /usr/local/share/npm/bin/grunt).
 
 - [compass](http://compass-style.org/):
   `gem install compass` (requires ruby, often comes installed)
@@ -53,25 +61,33 @@ not have used before.
 
 #### Installation
 
-1. Clone UProxy and its submodules (and its submodules' submodules...):
-   `git clone --recursive https://github.com/UWNetworksLab/UProxy.git`
+1. Clone UProxy and its submodules (and its submodules' submodules...): `git
+   clone --recursive https://github.com/UWNetworksLab/UProxy.git`
 
 1. Run `LOCAL=yes make` in each of the Freedom submodules
    (chrome/app/submodules/uproxy-common/submodules/freedom and
    firefox/submodules/uproxy-common/submodules/freedom). We intend to make this
    more automated.
 
-1. Anywhere there's a package.json (e.g. chrome/extension), run `npm install` to
-   fetch required npm packages.
+1. Anywhere there's a package.json (currently just chrome/extension), run `npm
+   install` to fetch required npm packages.
 
-1. Anywhere there's a bower.json (e.g. chrome/extension), run `bower install`
-   to fetch required bower packages.
+1. Anywhere there's a bower.json (currently just chrome/extension), run `bower
+   install` to fetch required bower packages.
 
 
 #### Development
 
-- Run `grunt watch` from the chrome/extension directory to start compass
-  monitoring for changes to sass stylesheets and automatically compiling css.
+- A number of grunt tasks are set up for the chrome extension to aid
+  development. Currently `grunt jshint` (a javascript linting task) is the only
+  development task that's useful, but once there are tests, `grunt test` will
+  run them for you. In the next version of generator-chrome-extension, `grunt
+  watch` will be supported, which does things like monitor for changes to
+  scripts, and when detected, linting them + running tests automatically,
+  monitoring changes to sass stylesheets and compiling them to css when
+  detected, etc. For now, compiling the sass to css can be accomplished via
+  `grunt compass:dist`, and then manually copying chrome/extension/.tmp/styles/\*.css
+  to chrome/extension/src/styles/. :\
 
 
 #### Testing in Chrome
@@ -82,13 +98,21 @@ not have used before.
 
 1. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
 
+    - Loading the extension before the app is important. If you load the
+      extension first, you'll get an error like "Uncaught Error: Attempting to
+      use a disconnected port object" (miscellaneous_bindings:69). If this
+      happens, just load the app and then reload the extension from
+      chrome://extensions.
+
 
 #### Firefox Add-on
 
 1. TODO
 
 
-#### Building
+#### Building Chrome Extension
 
-- Run `grunt` from the chrome/extension director to lint the script, run tests,
-  and if those go well, build a packed extension.
+- Run `grunt build` from the chrome/extension directory to lint the script, run tests,
+  and if those go well, build a packed extension. To test the built extension, go to
+  chrome://extensions and load it unpacked from the chrome/extension/dist
+  directory, or packed from the chrome/extension/package directory.
