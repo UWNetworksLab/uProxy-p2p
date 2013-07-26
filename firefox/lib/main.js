@@ -3,7 +3,6 @@ var panel = require("sdk/panel");
 var pageWorker = require("sdk/page-worker");
 //const { Cu } = require("chrome");
 
-//Cu.import(self.data.url("lib/freedom.js"));
 
 var initFreeDOM = function() {
   var freedomPageWorker = pageWorker.Page({
@@ -16,7 +15,7 @@ var initToolbar = function() {
   var tbb = require("toolbarbutton").ToolbarButton({
     id: "UProxyItem",
     label: "UProxy",
-    image: self.data.url("images/uproxy-19.png"),
+    image: self.data.url("submodules/uproxy-common/images/uproxy-19.png"),
     panel: initPanel(),
     onCommand: function () {
       //tbb.destroy(); // kills the toolbar button
