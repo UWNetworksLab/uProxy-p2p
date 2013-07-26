@@ -1,9 +1,10 @@
 'use strict';
 
+// TODO: client secret should not be public.
 var OAUTH_CONFIG = {
-  "client_id": "814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com",
-  "client_secret": "JxrMEKHEk9ELTTSPgZ8IfZu-",
-  "api_scope": "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/googletalk"
+  'client_id': '814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com',
+  'client_secret': 'JxrMEKHEk9ELTTSPgZ8IfZu-',
+  'api_scope': 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/googletalk'
 };
 
 angular.module('UProxyChromeExtension')
@@ -24,7 +25,7 @@ angular.module('UProxyChromeExtension')
         if (!model.accessToken || !model.email) {
           googleAuth.authorize(function () {
             var accessToken = googleAuth.getAccessToken();
-            $http({method: 'GET', url: GOOG_PROFILE_URL, params: {oauth_token: accessToken}}).then(
+            $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
               function getProfileSuccessHandler(resp) {
                 var email = resp.data.email;
                 freedom.emit('oauth-credentials', {email: email, token: accessToken});
