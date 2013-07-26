@@ -1,6 +1,8 @@
 'use strict';
 
-var freedomListeners = {};
+var freedom, freedomListeners;
+
+freedomListeners = {};
 chrome.extension.getBackgroundPage().appPort.onMessage.addListener(function(msg) {
   if (freedomListeners[msg.type]) {
     var handlers = freedomListeners[msg.type].slice(0);
@@ -12,7 +14,7 @@ chrome.extension.getBackgroundPage().appPort.onMessage.addListener(function(msg)
   }
 });
 
-var freedom = {
+freedom = {
   emit: function(a, b) {
     chrome.extension.getBackgroundPage().appPort.postMessage({
       cmd: 'emit',
