@@ -1,13 +1,14 @@
 var self = require("sdk/self");
 var panel = require("sdk/panel");
 var pageWorker = require("sdk/page-worker");
+var freedomShim 
 //const { Cu } = require("chrome");
 
 
 var initFreeDOM = function() {
   var freedomPageWorker = pageWorker.Page({
-					    contentURL: self.data.url("freedom-page-worker.html")
-					  });
+    contentURL: self.data.url("freedom-page-worker.html")
+  });
 };
 
 var initToolbar = function() {
@@ -21,7 +22,7 @@ var initToolbar = function() {
       //tbb.destroy(); // kills the toolbar button
     }
   });
- 
+  
   tbb.moveTo({
     toolbarID: "nav-bar",
     forceMove: false // only move from palette
@@ -31,11 +32,11 @@ var initToolbar = function() {
 var initPanel = function() {
   var l10n = JSON.parse(self.data.load("l10n/en/messages.json"));
   var uproxyPanel = panel.Panel({
-                                  contentURL: self.data.url("popup.html")
-				});
+    contentURL: self.data.url("popup.html")
+  });
   uproxyPanel.port.on("show", function() {
-			uproxyPanel.port.emit("l10n", l10n);
-		      });
+    uproxyPanel.port.emit("l10n", l10n);
+  });
   return uproxyPanel;
 };
 
