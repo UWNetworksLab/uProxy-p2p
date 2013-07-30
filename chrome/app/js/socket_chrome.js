@@ -11,6 +11,9 @@ var Socket_chrome = function(channel) {
   this.connect = chrome.socket.connect;
   this.read = chrome.socket.read;
   this.write = chrome.socket.write;
+  this.listen = chrome.socket.listen;
+  this.accept = chrome.socket.accept;
+  this.getInfo = chrome.socket.getInfo;
 };
 
 Socket_chrome.prototype.destroy = function(socketId, continuation) {
