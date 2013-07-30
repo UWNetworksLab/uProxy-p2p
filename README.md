@@ -46,6 +46,9 @@ Note: you will either need to run these as root, or set the directories they mod
 - [node](http://nodejs.org/) + npm: `brew install node # or similar for your
   system`
 
+    - Also make sure your $NODE_PATH environment variable is set correctly
+      (e.g. /usr/local/share/npm/lib/node_modules).
+
 - [grunt](http://gruntjs.com/): `npm install -g grunt-cli`
 
 - [bower](http://bower.io/) 1.0: `npm install -g bower`. If you already have
