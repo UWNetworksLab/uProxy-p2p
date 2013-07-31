@@ -7,6 +7,22 @@
     "message": "UProxy",
     "description": "The description of the extension"
   },
+  "giveAccess": {
+    "message": "Give Access",
+    "description": "Button label"
+  },
+  "getAccess": {
+    "message": "Get Access",
+    "description": "Button label"
+  },
+  "accept": {
+    "message": "Accept",
+    "description": "Button label"
+  },
+  "decline": {
+    "message": "Decline",
+    "description": "Button label"
+  },
   "options": {
     "message": "Options",
     "description": "Header for the options page"
