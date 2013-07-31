@@ -1,6 +1,8 @@
 <!doctype html>
 <html ng-app="UProxyChromeExtension" ng-csp>
   <head>
+    <meta charset="utf-8">
+    
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/popup.js -->
@@ -14,8 +16,67 @@
 
   </head>
   <body ng-controller="MainCtrl" id="popup">
+    <section ng-hide="model.options.mode">
+      <button class="btn btn-success" ng-click="changeOption('mode', 'give')">{{'giveAccess'|chromei18n}}</button>
+      <button class="btn btn-warning" ng-click="changeOption('mode', 'get')">{{'getAccess'|chromei18n}}</button>
+    </section>
 
-    <h4>{{'appName'|chromei18n}}</h4>
+    <!-- TODO: i18n -->
+
+    <section ng-show="model.options.mode">
+
+      <section ng-show="!model.me.gtalk.credentials">
+        <!-- TODO: replace with https://developers.google.com/+/features/sign-in -->
+        <button class="btn btn-danger" ng-click="sendCredentials()">g+ sign in</button>
+
+        <!-- allow connecting to additional chat services in future version -->
+      </section>
+
+      <section ng-show="model.me.gtalk.presence.status == 'connecting'">
+        Connecting to Google Talk...
+        <div>
+          <button class="btn btn-mini" ng-click="model.me.gtalk.presence.status = 'available'">
+            (test) locally change status from "connecting" to "available"
+          </button>
+        </div>
+      </section>
+
+      <section ng-show="model.me.gtalk.presence.status == 'available'"><!-- XXX 'busy', 'idle' -->
+        <section ng-show="inGiveMode">
+
+          <section ng-show="model.allowGiveTo.length">
+            <h5>Can get access through you:</h5>
+            <ul>
+              <li ng-repeat="id in model.allowGiveTo">
+                <a class="btn-link">×</a> {{id}}
+              </li>
+            </ul>
+          </section>
+
+          <section ng-show="model.pendingGiveTo.length">
+            <h5>Requested you give them access:</h5>
+            <ul>
+              <li ng-repeat="id in model.pendingGiveTo">
+                {{id}}
+                <span class="btn-group">
+                  <button class="btn btn-mini btn-success">{{'accept'|chromei18n}}</button>
+                  <button class="btn btn-mini btn-danger">{{'decline'|chromei18n}}</button>
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <section ng-show="model.denyGiveTo.length">
+            <h5>May not get access through you:</h5>
+            <ul>
+              <li ng-repeat="id in model.denyGiveTo">
+                <a class="btn-link">×</a> {{id}}
+              </li>
+            </ul>
+          </section>
+        </section>
+      </section>
+    </section>
 
     <hr>
 
