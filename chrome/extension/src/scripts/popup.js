@@ -21,6 +21,13 @@ angular.module('UProxyChromeExtension')
     function ($http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
       $rootScope.model = model;
 
+      // XXX move to run block once https://github.com/angular/angular.js/issues/2963 is fixed
+      $rootScope.$watch('model.options.mode', function (mode) {
+        if (!mode) return;
+        $rootScope.inGiveMode = mode === 'give';
+        $rootScope.inGetMode = mode === 'get';
+      });
+
       $rootScope.sendCredentials = function () {
         if (!model.accessToken || !model.email) {
           googleAuth.authorize(function () {
@@ -28,14 +35,14 @@ angular.module('UProxyChromeExtension')
             $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
               function getProfileSuccessHandler(resp) {
                 var email = resp.data.email;
-                freedom.emit('oauth-credentials', {email: email, token: accessToken});
+                freedom.emit('gtalk-credentials', {email: email, token: accessToken});
               },
               function getProfileFailureHandler(resp) {
                 console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
               });
           });
         } else {
-          freedom.emit('oauth-credentials', {email: model.email, token: model.accessToken});
+          freedom.emit('gtalk-credentials', {email: model.email, token: model.accessToken});
         }
       };
     }

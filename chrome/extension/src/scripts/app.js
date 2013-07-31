@@ -11,6 +11,10 @@ angular.module('UProxyChromeExtension', [])
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   .constant('model', {}) // application state. determined by backend (packaged app)
   .run(['$rootScope', 'bg', 'freedom', 'model', function($rootScope, bg, freedom, model) {
+    $rootScope.changeOption = function (key, value) {
+      freedom.emit('changeOption', {key: key, value: value});
+    };
+
     bg.clearPopupListeners();
     freedom.emit('open-popup', '');
 
