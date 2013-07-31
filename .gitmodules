@@ -9,7 +9,7 @@
 	url = https://github.com/UWNetworksLab/uproxy-common.git
 [submodule "firefox/data/submodules/uproxy-common"]
 	path = firefox/data/submodules/uproxy-common
-	url = git@github.com:UWNetworksLab/uproxy-common.git
+	url = https://github.com/UWNetworksLab/uproxy-common.git
 [submodule "firefox/data/submodules/oauth2"]
 	path = firefox/data/submodules/oauth2
 	url = https://github.com/borismus/oauth2-extensions
