@@ -16,6 +16,7 @@ var freedomShim = function(id) {
 };
 
 freedomShim.prototype.emit = function(event, data) {
+    console.log('fsc Emitting message for event: ' + event);
     addon.port.emit("freedom_shim",
 		    {event: event,
 		     data: data,
@@ -23,6 +24,7 @@ freedomShim.prototype.emit = function(event, data) {
 };
 
 freedomShim.prototype.on = function(event, callback) {
+    console.log('fsc listening for event: ' + event);
     this.callbacks[event] = callback;
     addon.port.emit("freedom_shim_listen", event);
 };

@@ -9,11 +9,20 @@ var OAUTH_CONFIG = {
 };
 
 addon.port.emit("show");
-angular.module('UProxyChromeExtension', []);
-addon.port.on("l10n", function(l10n) {
-  console.log("Initializing popup");
-  app(l10n);
-  popup();
+// angular.module('UProxyChromeExtension', []);
+// addon.port.on("l10n", function(l10n) {
+//   console.log("Initializing popup");
+//   app(l10n);
+//   popup();
+// });
+
+freedom.on('state-change', function(change) {
+    console.log('state-change called with: ' + change);
 });
+
+console.log("Sending hello world");
+freedom.emit("send-message", {to:'', message: 'Hello World'});
+
+
 
 
