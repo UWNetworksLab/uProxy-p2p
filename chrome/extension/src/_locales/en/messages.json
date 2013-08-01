@@ -24,7 +24,7 @@
     "description": "Button label"
   },
   "options": {
-    "message": "Options",
+    "message": "UProxy Options",
     "description": "Header for the options page"
   },
   "advanced": {

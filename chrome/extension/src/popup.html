@@ -2,7 +2,7 @@
 <html ng-app="UProxyChromeExtension" ng-csp>
   <head>
     <meta charset="utf-8">
-    
+
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/popup.js -->
@@ -16,6 +16,11 @@
 
   </head>
   <body ng-controller="MainCtrl" id="popup">
+
+    <section class="topnav">
+      <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|chromei18n}}">⚙</a>
+    </section>
+
     <section ng-hide="model.options.mode">
       <button class="btn btn-success" ng-click="changeOption('mode', 'give')">{{'giveAccess'|chromei18n}}</button>
       <button class="btn btn-warning" ng-click="changeOption('mode', 'get')">{{'getAccess'|chromei18n}}</button>
@@ -54,7 +59,7 @@
           </section>
 
           <section ng-show="model.pendingGiveTo.length">
-            <h5>Requested you give them access:</h5>
+            <h5>Requested to get access through you:</h5>
             <ul>
               <li ng-repeat="id in model.pendingGiveTo">
                 {{id}}
