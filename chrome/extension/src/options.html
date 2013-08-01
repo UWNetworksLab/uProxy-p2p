@@ -1,11 +1,14 @@
 <!doctype html>
 <html ng-app="UProxyChromeExtension" ng-csp>
   <head>
+    <meta charset="utf-8">
+
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/options.js -->
     <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="oauth2/oauth2.js"></script>
 
     <script src="scripts/app.js"></script>
     <script src="scripts/options.js"></script>
@@ -14,29 +17,17 @@
   </head>
   <body ng-controller="OptionsCtrl" id="options">
 
-    <h3>{{'appName'|chromei18n}}</h3>
-    <h4>{{'options'|chromei18n}}</h4>
+    <h3>{{'options'|chromei18n}}</h3>
+    <hr>
 
     <ul class="options">
       <li>
         <div class="btn-group">
-          <button class="btn btn-success" ng-click="changeOption('mode', 'give')"
+          <button class="btn btn-mini btn-success" ng-click="changeOption('mode', 'give')"
             ng-disabled="inGiveMode" ng-class="{active: inGiveMode}">{{'giveAccess'|chromei18n}}</button>
-          <button class="btn btn-warning" ng-click="changeOption('mode', 'get')"
+          <button class="btn btn-mini btn-warning" ng-click="changeOption('mode', 'get')"
             ng-disabled="inGetMode" ng-class="{active: inGetMode}">{{'getAccess'|chromei18n}}</button>
         </div>
-      </li>
-      <li>
-        <label class="checkbox inline">
-          <input type="checkbox">
-          option one
-        </label>
-      </li>
-      <li>
-        <label class="checkbox inline">
-          <input type="checkbox">
-          option two
-        </label>
       </li>
       <li>
         <details open class="advanced">
