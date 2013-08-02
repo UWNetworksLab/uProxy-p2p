@@ -32,7 +32,7 @@ function callPopupListener(type, data) {
       try {
         popupListeners[type][i](data);
       } catch (e) {
-        console.log("Received message, no popup to route to");
+        console.log('Received message, no popup to route to');
       }
     }
   } else {
