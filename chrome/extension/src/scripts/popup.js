@@ -2,8 +2,7 @@
 
 angular.module('UProxyChromeExtension')
   .controller('MainCtrl', [function () {
-    }
-  ])
+}])
   .controller('DebugCtrl', ['$scope', 'freedom', function($scope, freedom) {
     $scope.sendMsg = function () {
       console.log($scope.chatbuddy);

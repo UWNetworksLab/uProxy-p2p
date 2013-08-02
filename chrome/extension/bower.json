@@ -4,7 +4,8 @@
   "dependencies": {
     "angular": "~1.0.7",
     "bootstrap-sass": "~2.3.1",
-    "jsonpatch": "~v1.0.0-rc1"
+    "jsonpatch": "~v1.0.0-rc1",
+    "oauth2-extensions": "https://github.com/borismus/oauth2-extensions.git"
   },
   "devDependencies": {
     "angular-mocks": "~1.0.7",
