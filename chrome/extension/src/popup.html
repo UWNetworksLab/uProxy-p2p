@@ -21,66 +21,23 @@
       <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|chromei18n}}">⚙</a>
     </section>
 
-    <section ng-hide="model.options.mode">
-      <button class="btn btn-success" ng-click="changeOption('mode', 'give')">{{'giveAccess'|chromei18n}}</button>
-      <button class="btn btn-warning" ng-click="changeOption('mode', 'get')">{{'getAccess'|chromei18n}}</button>
-    </section>
-
     <!-- TODO: i18n -->
 
-    <section ng-show="model.options.mode">
+    <section ng-show="!model.credentials.goog">
+      <!-- TODO: replace with https://developers.google.com/+/features/sign-in -->
+      <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
 
-      <section ng-show="!model.me.gtalk.credentials">
-        <!-- TODO: replace with https://developers.google.com/+/features/sign-in -->
-        <button class="btn btn-danger" ng-click="sendCredentials()">g+ sign in</button>
+      <!-- allow connecting to additional chat services in future version -->
+    </section>
 
-        <!-- allow connecting to additional chat services in future version -->
-      </section>
+    <section ng-show="model.card.devices.0.status == 'connecting'">
+      Connecting to Google Talk...
+    </section>
 
-      <section ng-show="model.me.gtalk.presence.status == 'connecting'">
-        Connecting to Google Talk...
-        <div>
-          <button class="btn btn-mini" ng-click="model.me.gtalk.presence.status = 'available'">
-            (test) locally change status from "connecting" to "available"
-          </button>
-        </div>
-      </section>
+    <section ng-show="model.card.devices.0.status == 'messageable'">
 
-      <section ng-show="model.me.gtalk.presence.status == 'available'"><!-- XXX 'busy', 'idle' -->
-        <section ng-show="inGiveMode">
+      Connected to Google Talk
 
-          <section ng-show="model.allowGiveTo.length">
-            <h5>Can get access through you:</h5>
-            <ul>
-              <li ng-repeat="id in model.allowGiveTo">
-                <a class="btn-link">×</a> {{id}}
-              </li>
-            </ul>
-          </section>
-
-          <section ng-show="model.pendingGiveTo.length">
-            <h5>Requested to get access through you:</h5>
-            <ul>
-              <li ng-repeat="id in model.pendingGiveTo">
-                {{id}}
-                <span class="btn-group">
-                  <button class="btn btn-mini btn-success">{{'accept'|chromei18n}}</button>
-                  <button class="btn btn-mini btn-danger">{{'decline'|chromei18n}}</button>
-                </span>
-              </li>
-            </ul>
-          </section>
-
-          <section ng-show="model.denyGiveTo.length">
-            <h5>May not get access through you:</h5>
-            <ul>
-              <li ng-repeat="id in model.denyGiveTo">
-                <a class="btn-link">×</a> {{id}}
-              </li>
-            </ul>
-          </section>
-        </section>
-      </section>
     </section>
 
     <hr>
@@ -89,11 +46,6 @@
       <summary>Debug</summary>
 
       <div class="well">
-        <div class="btn-group">
-          <button class="btn btn-small" ng-click="sendCredentials()">send credentials</button>
-          <button class="btn btn-small" disabled>clear credentials (TODO)</button>
-        </div>
-
         <details open>
           <summary>message log</summary>
 
