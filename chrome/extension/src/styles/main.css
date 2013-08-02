@@ -6864,11 +6864,16 @@ details.advanced {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/_pants\/Code\/UProxy\/chrome\/extension\/src\/styles\/main\.sass}line{font-family:\000038}}
-#popup .topnav {
+#popup .footer {
   text-align: right;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/_pants\/Code\/UProxy\/chrome\/extension\/src\/styles\/main\.sass}line{font-family:\0000311}}
 .large-font {
   font-size: 21px;
+}
+
+.roster ul {
+  max-height: 150px;
+  overflow: scroll;
 }

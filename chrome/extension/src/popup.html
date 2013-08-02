@@ -7,7 +7,9 @@
 
     <!-- build:js scripts/popup.js -->
     <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
+    <script src="bower_components/lodash/dist/lodash.mobile.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-lodash/angular-lodash.js"></script>
     <script src="bower_components/oauth2-extensions/lib/oauth2.js"></script>
 
     <script src="scripts/app.js"></script>
@@ -16,10 +18,6 @@
 
   </head>
   <body ng-controller="MainCtrl" id="popup">
-
-    <section class="topnav">
-      <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|chromei18n}}">⚙</a>
-    </section>
 
     <!-- TODO: i18n -->
 
@@ -35,9 +33,80 @@
     </section>
 
     <section ng-show="model.card.devices.0.status == 'messageable'">
+      <section class="current-sessions">
+        <section class="current-sessions-get">
+          <h5>Currently getting access through:</h5>
+          <ul>
+            <li ng-show="isEmpty(model.currentSessionsGive)">
+              No one
+            </li>
+            <li ng-repeat="(id, buddy) in model.currentSessionsGive">
+              {{id}}
+              <button class="btn btn-mini">Stop</button>
+            </li>
+          </ul>
+        </section>
+        <section class="current-sessions-give">
+          <h5>Currently giving access to:</h5>
+          <ul>
+            <li ng-show="isEmpty(model.currentSessionsGet)">
+              No one
+            </li>
+            <li ng-repeat="(id, buddy) in model.currentSessionsGet">
+              {{id}}
+              <button class="btn btn-mini">Stop</button>
+            </li>
+          </ul>
+        </section>
+      </section>
 
-      Connected to Google Talk
+      <section class="request-access" ng-hide="isEmpty(model.canGetFrom)">
+        <h5>Request access through:</h5>
+        <ul>
+          <li ng-repeat="(id, buddy) in model.canGetFrom">
+            {{id}}
+            <button class="btn btn-mini">Request</button>
+          </li>
+        </ul>
+      </section>
 
+      <section class="requested-access" ng-hide="isEmpty(model.pendingGiveTo)">
+        <h5>Requested access through you:</h5>
+        <ul>
+          <li ng-repeat="(id, buddy) in model.pendingGiveTo">
+            {{id}}
+            <div class="btn-group">
+              <button class="btn btn-mini">Allow</button>
+              <button class="btn btn-mini">Ignore</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="roster">
+        <h5>Contacts:</h5>
+        <ul>
+          <li ng-show="isEmpty(model.roster)">
+            No contacts
+          </li>
+          <li ng-repeat="(id, card) in model.roster">
+            <span >
+              {{card.name}} ({{card.userId}})
+              <div style="margin-left: 15px; font-size: 12px">
+                <em ng-show="card.devices.0.status == 'messageable'">running UProxy</em>
+                <em ng-show="card.devices.0.status == 'offline'">offline</em>
+                <a class="btn-link" ng-show="card.devices.0.status == 'online'">
+                  Invite to run UProxy
+                </a>
+              </div>
+            </span>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section class="footer">
+      <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|chromei18n}}">⚙</a>
     </section>
 
     <hr>
