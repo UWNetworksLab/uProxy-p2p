@@ -37,34 +37,22 @@ angular.module('UProxyChromeExtension', [])
     function($http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
       $rootScope.model = model;
 
-      $rootScope.$watch('model.options.mode', function (mode) {
-        if (!mode) {
-          return;
-        }
-        $rootScope.inGiveMode = mode === 'give';
-        $rootScope.inGetMode = mode === 'get';
-      });
-
       $rootScope.changeOption = function (key, value) {
         freedom.emit('changeOption', {key: key, value: value});
       };
 
-      $rootScope.sendCredentials = function () {
-        if (!model.accessToken || !model.email) {
-          googleAuth.authorize(function () {
-            var accessToken = googleAuth.getAccessToken();
-            $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
-              function getProfileSuccessHandler(resp) {
-                var email = resp.data.email;
-                freedom.emit('gtalk-credentials', {email: email, token: accessToken});
-              },
-              function getProfileFailureHandler(resp) {
-                console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
-              });
-          });
-        } else {
-          freedom.emit('gtalk-credentials', {email: model.email, token: model.accessToken});
-        }
+      $rootScope.authGoog = function () {
+        googleAuth.authorize(function () {
+          var accessToken = googleAuth.getAccessToken();
+          $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
+            function getProfileSuccessHandler(resp) {
+              var email = resp.data.email;
+              freedom.emit('goog-credentials', {email: email, token: accessToken});
+            },
+            function getProfileFailureHandler(resp) {
+              console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
+            });
+        });
       };
 
       bg.clearPopupListeners();
