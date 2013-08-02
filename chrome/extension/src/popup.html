@@ -108,6 +108,12 @@
         </details>
 
         <details open>
+          <summary>Chat</summary>
+            <select ng-model="chatbuddy" ng-options="card.name for (id, card) in model.roster">
+            </select>
+        </details>
+
+        <details open>
           <summary>state</summary>
           <pre>{{model | json}}</pre>
         </details>

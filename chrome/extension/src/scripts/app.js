@@ -38,7 +38,9 @@ angular.module('UProxyChromeExtension', [])
       $rootScope.model = model;
 
       $rootScope.$watch('model.options.mode', function (mode) {
-        if (!mode) return;
+        if (!mode) {
+          return;
+        }
         $rootScope.inGiveMode = mode === 'give';
         $rootScope.inGetMode = mode === 'get';
       });
@@ -81,4 +83,5 @@ angular.module('UProxyChromeExtension', [])
           }
         });
       });
-  }]);
+    }
+  ]);

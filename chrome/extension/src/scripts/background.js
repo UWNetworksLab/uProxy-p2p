@@ -29,7 +29,11 @@ function addPopupListener(type, func) {
 function callPopupListener(type, data) {
   if (popupListeners[type]) {
     for (var i = 0; i < popupListeners[type].length; i++) {
-      popupListeners[type][i](data);
+      try {
+        popupListeners[type][i](data);
+      } catch (e) {
+        console.log('Received message, no popup to route to');
+      }
     }
   } else {
     console.log('Handler missing for: ' + type);
