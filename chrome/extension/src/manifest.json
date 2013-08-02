@@ -35,7 +35,7 @@
         "http://www.google.com/robots.txt*"
       ],
       "js": [
-        "oauth2/oauth2_inject.js"
+        "bower_components/oauth2-extensions/lib/oauth2_inject.js"
       ],
       "run_at": "document_start"
     }
