@@ -30,11 +30,11 @@
       <!-- allow connecting to additional chat services in future version -->
     </section>
 
-    <section ng-show="model.card.devices.0.status == 'connecting'">
+    <section ng-show="model.identityStatus.status == 'connecting'">
       Connecting to Google Talk...
     </section>
 
-    <section ng-show="model.card.devices.0.status == 'messageable'">
+    <section ng-show="model.identityStatus.status == 'online'">
 
       Connected to Google Talk
 
