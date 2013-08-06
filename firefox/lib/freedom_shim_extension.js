@@ -30,17 +30,4 @@ var Freedom = function(freedomWindow) {
   return freedom;
 };
 
-var addContentContext = function(context) {
-  console.log('Adding context window to freedom');
-  this.contextWindows.push(context);
-  context.port.on("freedom_shim_listen", function(event) {
-    console.log('Received message from content to listen for event: ' + event);
-    this.freedomWindow.port.emit("freedom_shim_listen", event);
-  });
-  context.port.on("freedom_shim", function(args) {
-    console.log('Received message from content for event: ' + args.event);
-    this.freedomWindow.port.emit(args);
-  });
-};
-
 exports.Freedom = Freedom;
