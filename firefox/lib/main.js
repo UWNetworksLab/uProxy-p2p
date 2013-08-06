@@ -18,7 +18,7 @@ var initToolbar = function(freedom) {
     id: "UProxyItem",
     label: "UProxy",
     image: self.data.url("submodules/uproxy-common/images/uproxy-19.png"),
-    panel: initPanel(freedom),
+    panel: initPanel(freedom)
   });
   
   tbb.moveTo({
