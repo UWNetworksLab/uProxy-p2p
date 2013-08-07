@@ -9,8 +9,9 @@ echo "ROOT_DIR=$ROOT_DIR"
 echo "PRG=PRG"
 
 # for command printout messages.
-PREFIX=""
+PREFIX="* Running: "
 
+echo
 echo "### Updating UProxy root git repo"
 CMD="cd $ROOT_DIR";
 echo "$PREFIX$CMD"; $CMD || exit 1;
@@ -21,6 +22,7 @@ echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="git submodule update";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 
+echo
 echo "### Updating UProxy Chrome App"
 CMD="cd $ROOT_DIR/chrome/app/submodules/uproxy-common";
 echo "$PREFIX$CMD"; $CMD || exit 1;
@@ -33,6 +35,7 @@ echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="LOCAL=yes make";
 echo "$PREFIX$CMD"; LOCAL=yes make || exit 1;
 
+echo
 echo "### Updating UProxy Chrome Extension"
 CMD="cd $ROOT_DIR/chrome/extension";
 echo "$PREFIX$CMD"; $CMD || exit 1;
@@ -41,6 +44,7 @@ echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="bower install";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 
+echo
 echo "### Updating UProxy Firefox Extension"
 CMD="cd $ROOT_DIR/firefox/data/submodules/uproxy-common";
 echo "$PREFIX$CMD"; $CMD || exit 1;
@@ -53,6 +57,7 @@ echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="LOCAL=yes make"
 echo "$PREFIX$CMD"; LOCAL=yes make || exit 1;
 
+echo
 echo "### Finishing up, running git stats, and returning to your previous directory"
 CMD="cd $ROOT_DIR";
 echo "$PREFIX$CMD"; $CMD || exit 1;
@@ -61,4 +66,5 @@ echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="cd $START_DIR";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 
-echo "Success!";
+echo
+echo "### Success!";
