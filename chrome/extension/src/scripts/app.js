@@ -69,8 +69,12 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
           });
       }, true);
 
-      $rootScope.requestAccessFrom = function (userId) {
-        freedom.emit('send-message', {to: userId, message: 'requestAccess'});
+      $rootScope.requestAccessFrom = function (contact) {
+        _.each(contact.clients, function (client, id) {
+          if (client.status === 'messageable') {
+            freedom.emit('send-message', {to: id, message: 'requestAccess'});
+          }
+        });
       };
 
       $rootScope.changeOption = function (key, value) {

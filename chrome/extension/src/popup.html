@@ -89,7 +89,7 @@
         <ul>
           <li ng-repeat="contact in contactsMessageableCannotGetFrom">
             {{contact.name}} ({{contact.userId}})
-            <button class="btn btn-mini" ng-click="requestAccessFrom(contact.userId)">Request</button>
+            <button class="btn btn-mini" ng-click="requestAccessFrom(contact)">Request</button>
           </li>
         </ul>
       </section>
