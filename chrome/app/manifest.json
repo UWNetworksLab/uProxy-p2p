@@ -10,7 +10,7 @@
   },
   "app": {
     "background": {
-      "scripts": ["js/view_oauth.js", "js/socket_chrome.js", "js/plumbing.js", "js/background.js"]
+      "scripts": ["js/view_oauth.js", "js/socket_chrome.js", "js/storage_chrome.js", "js/plumbing.js", "js/background.js"]
     }
   },
   "permissions": [
