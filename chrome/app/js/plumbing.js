@@ -4,12 +4,13 @@ var pendingMsgs = [];
 window.freedomcfg = function(register) {
   register("core.view", View_oauth);
   register("core.socket", Socket_chrome);
+  register("core.storage", Storage_chrome);
 }
 
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'submodules/uproxy-common/uproxy.json');
 // Uncomment for clearer but less portable module error messages.
- script.textContent = '{"nonblob": true}';
+ script.textContent = '{"strongIsolation": true}';
 script.src = 'submodules/uproxy-common/submodules/freedom/freedom.js';
 
 document.head.appendChild(script);
