@@ -28,12 +28,12 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       return _.any(contact.clients, {status: 'messageable'});
     };
   })
-  .filter('onlineNotMessageable', function () {
+  .filter('onlineNotMessageable', ['$filter', function ($filter) {
+    var messageable = $filter('messageable');
     return function (contact) {
-      return !_.any(contact.clients, {status: 'messageable'}) &&
-              _.any(contact.clients, {status: 'online'});
+      return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
     };
-  })
+  }])
   .constant('bg', chrome.extension.getBackgroundPage())
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   .constant('model', {}) // application state. determined by backend (packaged app)
