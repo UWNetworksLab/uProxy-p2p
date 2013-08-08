@@ -17,7 +17,7 @@ angular.module('UProxyChromeExtension')
             return;
           }
         }
-      } 
+      }
       if ($scope.chatbuddy && $scope.chatbuddy.userId) {
         //Invite friend to UProxy
         freedom.emit('echo', "Invitation send to "+$scope.chatbuddy.userId);

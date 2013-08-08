@@ -23,10 +23,22 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       return getMessage(key);
     };
   })
+  .filter('messageable', function () {
+    return function (contact) {
+      return _.any(contact.clients, {status: 'messageable'});
+    };
+  })
+  .filter('onlineNotMessageable', function () {
+    return function (contact) {
+      return !_.any(contact.clients, {status: 'messageable'}) &&
+              _.any(contact.clients, {status: 'online'});
+    };
+  })
   .constant('bg', chrome.extension.getBackgroundPage())
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   .constant('model', {}) // application state. determined by backend (packaged app)
   .run([
+    '$filter',
     '$http',
     '$rootScope',
     'GOOG_PROFILE_URL',
@@ -34,8 +46,32 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     'freedom',
     'googleAuth',
     'model',
-    function($http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
+    function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
+      var filter = $filter('filter'),
+          messageable = $filter('messageable'),
+          onlineNotMessageable = $filter('onlineNotMessageable');
+
       $rootScope.model = model;
+
+      $rootScope.$watch('model.roster', function (roster) {
+        if (!roster) return;
+        $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
+        $rootScope.contactsMessageable = filter(roster, messageable);
+
+        $rootScope.contactsMessageableCanGetFrom = [];
+        $rootScope.contactsMessageableCannotGetFrom = [];
+        _.each($rootScope.contactsMessageable, function (contact) {
+            if (contact.userId in model.canGetFrom) {
+              $rootScope.contactsMessageableCanGetFrom.push(contact);
+            } else {
+              $rootScope.contactsMessageableCannotGetFrom.push(contact);
+            }
+          });
+      }, true);
+
+      $rootScope.requestAccessFrom = function (userId) {
+        freedom.emit('send-message', {to: userId, message: 'requestAccess'});
+      };
 
       $rootScope.changeOption = function (key, value) {
         freedom.emit('changeOption', {key: key, value: value});

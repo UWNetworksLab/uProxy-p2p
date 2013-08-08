@@ -21,7 +21,7 @@
 
     <!-- TODO: i18n -->
 
-    <section ng-show="!model.credentials.goog">
+    <section ng-show="isEmpty(model.identityStatus) || model.identityStatus.status == 'offline'">
       <!-- TODO: replace with https://developers.google.com/+/features/sign-in -->
       <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
 
@@ -35,46 +35,70 @@
     <section ng-show="model.identityStatus.status == 'online'">
       <section class="current-sessions">
         <section class="current-sessions-get">
-          <h5>Currently getting access through:</h5>
-          <ul>
-            <li ng-show="isEmpty(model.currentSessionsGive)">
-              No one
-            </li>
-            <li ng-repeat="(id, buddy) in model.currentSessionsGive">
-              {{id}}
-              <button class="btn btn-mini">Stop</button>
-            </li>
-          </ul>
+          <section ng-show="isEmpty(model.currentSessionsGive)">
+            <h5>Not currently getting access through anyone.</h5>
+          </section>
+          <section ng-hide="isEmpty(model.currentSessionsGive)">
+            <h5>Currently getting access through:</h5>
+            <ul>
+              <li ng-show="">
+                No one
+              </li>
+              <li ng-repeat="(id, contact) in model.currentSessionsGive">
+                {{contact.name}} ({{contact.userId}})
+                <button class="btn btn-mini">Stop</button>
+              </li>
+            </ul>
+          </section>
         </section>
         <section class="current-sessions-give">
-          <h5>Currently giving access to:</h5>
-          <ul>
-            <li ng-show="isEmpty(model.currentSessionsGet)">
-              No one
-            </li>
-            <li ng-repeat="(id, buddy) in model.currentSessionsGet">
-              {{id}}
-              <button class="btn btn-mini">Stop</button>
-            </li>
-          </ul>
+          <section ng-show="isEmpty(model.currentSessionsGet)">
+            <h5>Not currently giving access to anyone.</h5>
+          </section>
+          <section ng-hide="isEmpty(model.currentSessionsGet)">
+            <h5>Currently giving access to:</h5>
+            <ul>
+              <li ng-show="">
+                No one
+              </li>
+              <li ng-repeat="(id, contact) in model.currentSessionsGet">
+                {{contact.name}} ({{contact.userId}})
+                <button class="btn btn-mini">Stop</button>
+              </li>
+            </ul>
+          </section>
         </section>
       </section>
 
-      <section class="request-access" ng-hide="isEmpty(model.canGetFrom)">
-        <h5>Request access through:</h5>
+      <section class="start-getting-through" ng-show="isEmpty(contactsMessageableCanGetFrom)">
+        <h5>Don't have permission to get access through anyone currently online.</h5>
+      </section>
+
+      <section class="start-getting-through" ng-hide="isEmpty(contactsMessageableCanGetFrom)">
+        <h5>Start getting access through:</h5>
         <ul>
-          <li ng-repeat="(id, buddy) in model.canGetFrom">
-            {{id}}
-            <button class="btn btn-mini">Request</button>
+          <li ng-repeat="contact in contactsMessageableCanGetFrom">
+            {{contact.name}} ({{contact.userId}})
+            <button class="btn btn-mini">Start</button>
+          </li>
+        </ul>
+      </section>
+
+      <section class="request-access" ng-hide="isEmpty(contactsMessageableCannotGetFrom)">
+        <h5>Request permission to get access through:</h5>
+        <ul>
+          <li ng-repeat="contact in contactsMessageableCannotGetFrom">
+            {{contact.name}} ({{contact.userId}})
+            <button class="btn btn-mini" ng-click="requestAccessFrom(contact.userId)">Request</button>
           </li>
         </ul>
       </section>
 
       <section class="requested-access" ng-hide="isEmpty(model.pendingGiveTo)">
-        <h5>Requested access through you:</h5>
+        <h5>Requested permission to get access through you:</h5>
         <ul>
-          <li ng-repeat="(id, buddy) in model.pendingGiveTo">
-            {{id}}
+          <li ng-repeat="(id, contact) in model.pendingGiveTo">
+            {{contact.name}} ({{contact.userId}})
             <div class="btn-group">
               <button class="btn btn-mini">Allow</button>
               <button class="btn btn-mini">Ignore</button>
@@ -83,23 +107,16 @@
         </ul>
       </section>
 
-      <section class="roster">
-        <h5>Contacts:</h5>
+      <section class="online-no-uproxy" ng-show="isEmpty(contactsOnlineNotMessageable)">
+        <h5>No other contacts currently online.</h5>
+      </section>
+
+      <section class="online-no-uproxy" ng-hide="isEmpty(contactsOnlineNotMessageable)">
+        <h5>Online contacts not running UProxy:</h5>
         <ul>
-          <li ng-show="isEmpty(model.roster)">
-            No contacts
-          </li>
-          <li ng-repeat="(id, card) in model.roster">
-            <span >
-              {{card.name}} ({{card.userId}})
-              <div style="margin-left: 15px; font-size: 12px">
-                <em ng-show="card.devices.0.status == 'messageable'">running UProxy</em>
-                <em ng-show="card.devices.0.status == 'offline'">offline</em>
-                <a class="btn-link" ng-show="card.devices.0.status == 'online'">
-                  Invite to run UProxy
-                </a>
-              </div>
-            </span>
+          <li ng-repeat="contact in contactsOnlineNotMessageable">
+            {{contact.name}} ({{contact.userId}})
+            <button class="btn btn-mini">Ask to run UProxy</button>
           </li>
         </ul>
       </section>
