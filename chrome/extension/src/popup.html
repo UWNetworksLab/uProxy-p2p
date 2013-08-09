@@ -133,7 +133,9 @@
       <summary>Debug</summary>
 
       <div class="well">
-        <details open>
+        <button class="btn btn-block btn-mini" ng-click="freedomEmit('reset')">Reset</button>
+
+        <details>
           <summary>message log</summary>
 
           <form name="sendMsgForm" ng-submit="sendMsg()">
@@ -146,8 +148,8 @@
           <pre>{{model._msgLog | json}}</pre>
         </details>
 
-        <details open>
-          <summary>Chat</summary>
+        <details>
+          <summary>chat</summary>
             <select ng-model="chatbuddy" ng-options="card.name for (id, card) in model.roster">
             </select>
         </details>

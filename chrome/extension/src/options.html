@@ -25,7 +25,7 @@
     <ul class="options">
       <li>
         <details open class="advanced">
-        <summary>{{'advanced'|chromei18n}}</summary>
+          <summary>{{'advanced'|chromei18n}}</summary>
 
           <ul class="options">
             <li>
@@ -38,9 +38,34 @@
               </label>
             </li>
           </ul>
+
         </details>
       </li>
     </ul>
+
+    <hr>
+
+    <div>
+      <button class="btn btn-warning btn-mini" ng-disabled="resetClicked"
+        ng-click="resetClicked=true" && freedomEmit('reset') || (resetClicked=true)">
+        ⚠ Reset UProxy
+      </button>
+
+      <div ng-show="resetClicked" style="margin: 10px">
+        You will be signed out and all saved state will be lost.
+
+        <div>
+          <button class="btn btn-mini" ng-click="resetClicked=false">
+            Cancel
+          </button>
+          <button class="btn btn-mini btn-danger" ng-click="freedomEmit('reset')">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr>
 
     <details id="debug" open ng-show="model._debug">
       <summary>Debug</summary>
