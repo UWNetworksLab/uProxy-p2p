@@ -58,7 +58,7 @@ CMD="LOCAL=yes make"
 echo "$PREFIX$CMD"; LOCAL=yes make || exit 1;
 
 echo
-echo "### Finishing up, running git stats, and returning to your previous directory"
+echo "### Finishing up, running git status, and returning to your previous directory"
 CMD="cd $ROOT_DIR";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="git status";
