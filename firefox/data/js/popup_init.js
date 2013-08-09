@@ -16,8 +16,4 @@ addon.port.on("l10n", function(l10n) {
   popup();
 });
 
-freedom.emit("echo", {to: '', message: 'Hello World'});
-
-
-
 
