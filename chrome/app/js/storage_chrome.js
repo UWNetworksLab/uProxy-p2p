@@ -1,12 +1,9 @@
 /**
- * A FreeDOM storage provider offers a key value store interface
- * with some level of persistance, and some size limitation.
+ * A storage provider using chrome's local extension storage pool.
  * @constructor
- * @private
  */
 var Storage_chrome = function(channel) {
   this.channel = channel;
-  handleEvents(this);
 };
 
 Storage_chrome.prototype.get = function(key, continuation) {
