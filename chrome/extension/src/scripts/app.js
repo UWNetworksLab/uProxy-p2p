@@ -34,6 +34,11 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
     };
   }])
+  .filter('offline', function () {
+    return function (contact) {
+      return _.all(contact.clients, {status: 'offline'});
+    };
+  })
   .constant('bg', chrome.extension.getBackgroundPage())
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   .constant('model', {}) // application state. determined by backend (packaged app)
@@ -57,24 +62,35 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
         if (!roster) return;
         $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
         $rootScope.contactsMessageable = filter(roster, messageable);
-
-        $rootScope.contactsMessageableCanGetFrom = [];
-        $rootScope.contactsMessageableCannotGetFrom = [];
-        _.each($rootScope.contactsMessageable, function (contact) {
-            if (contact.userId in model.canGetFrom) {
-              $rootScope.contactsMessageableCanGetFrom.push(contact);
-            } else {
-              $rootScope.contactsMessageableCannotGetFrom.push(contact);
-            }
-          });
       }, true);
 
-      $rootScope.requestAccessFrom = function (contact) {
+      $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
+      $rootScope.$watch('contactsMessageable', updateCanGetFrom, true);
+
+      function updateCanGetFrom() {
+        $rootScope.canGetFrom = {};
+        $rootScope.cannotGetFrom = {};
+        _.each($rootScope.contactsMessageable, function (contact) {
+          if (contact.userId in model.canGetFrom) {
+            $rootScope.canGetFrom[contact.userId] = contact;
+          } else {
+            $rootScope.cannotGetFrom[contact.userId] = contact;
+          }
+        });
+      }
+
+      $rootScope.freedomEmit = function (msgName, data) {
+        freedom.emit(msgName, data);
+      };
+
+      $rootScope.sendMessage = function (contact, msg) {
+        // XXX freedom.emit('send-message', {to: contact.userId, msg})
+        //     gets intercepted by non-freedom clients and is not received by uproxy clients
         _(contact.clients).filter({status: 'messageable'}).each(function (client) {
           freedom.emit('send-message', {
             to: client.clientId,
             toUserId: contact.userId,
-            message: 'request-access'});
+            message: msg});
         });
       };
 
@@ -94,10 +110,6 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
               console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
             });
         });
-      };
-
-      $rootScope.freedomEmit = function (msgName, data) {
-        freedom.emit(msgName, data);
       };
 
       bg.clearPopupListeners();
