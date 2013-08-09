@@ -5,7 +5,7 @@ var panel = require("sdk/panel");
 
 var initToolbar = function(freedom) {
   // create toolbarbutton
-  var tbb = require("toolbarbutton").ToolbarButton({
+  var tbb = require("pathfinder/ui/toolbarbutton").ToolbarButton({
     id: "UProxyItem",
     label: "UProxy",
     image: self.data.url("submodules/uproxy-common/images/uproxy-19.png"),
