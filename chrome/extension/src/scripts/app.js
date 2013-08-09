@@ -71,7 +71,10 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
 
       $rootScope.requestAccessFrom = function (contact) {
         _(contact.clients).filter({status: 'messageable'}).each(function (client) {
-          freedom.emit('send-message', {to: client.clientId, message: 'request-access'});
+          freedom.emit('send-message', {
+            to: client.clientId,
+            toUserId: contact.userId,
+            message: 'request-access'});
         });
       };
 
@@ -91,6 +94,10 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
               console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
             });
         });
+      };
+
+      $rootScope.freedomEmit = function (msgName, data) {
+        freedom.emit(msgName, data);
       };
 
       bg.clearPopupListeners();
