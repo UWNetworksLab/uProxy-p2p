@@ -21,7 +21,7 @@
 
     <!-- TODO: i18n -->
 
-    <section ng-show="isEmpty(model.identityStatus) || model.identityStatus.status == 'offline'">
+    <section ng-show="!model.identityStatus.status || model.identityStatus.status == 'offline'">
       <!-- TODO: replace with https://developers.google.com/+/features/sign-in -->
       <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
 
@@ -89,12 +89,13 @@
         <ul>
           <li ng-repeat="contact in contactsMessageableCannotGetFrom">
             {{contact.name}} ({{contact.userId}})
-            <button class="btn btn-mini" ng-click="requestAccessFrom(contact)">Request</button>
+            <button class="btn btn-mini" ng-click="requestAccessFrom(contact)">
+              <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request</button>
           </li>
         </ul>
       </section>
 
-      <section class="requested-access" ng-hide="isEmpty(model.pendingGiveTo)">
+      <section class="pending-give-to" ng-hide="isEmpty(model.pendingGiveTo)">
         <h5>Requested permission to get access through you:</h5>
         <ul>
           <li ng-repeat="(id, contact) in model.pendingGiveTo">

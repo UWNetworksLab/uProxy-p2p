@@ -70,15 +70,13 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       }, true);
 
       $rootScope.requestAccessFrom = function (contact) {
-        _.each(contact.clients, function (client, id) {
-          if (client.status === 'messageable') {
-            freedom.emit('send-message', {to: id, message: 'requestAccess'});
-          }
+        _(contact.clients).filter({status: 'messageable'}).each(function (client) {
+          freedom.emit('send-message', {to: client.clientId, message: 'request-access'});
         });
       };
 
       $rootScope.changeOption = function (key, value) {
-        freedom.emit('changeOption', {key: key, value: value});
+        freedom.emit('change-option', {key: key, value: value});
       };
 
       $rootScope.authGoog = function () {
@@ -96,7 +94,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       };
 
       bg.clearPopupListeners();
-      freedom.emit('open-popup', '');
+      freedom.emit('open-popup');
 
       var JSONPatch = jsonpatch.JSONPatch;
       bg.addPopupListener('state-change', function (patch) {
