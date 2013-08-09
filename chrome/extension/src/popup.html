@@ -33,6 +33,10 @@
     </section>
 
     <section ng-show="model.identityStatus.status == 'online'">
+      <section class="pagination-right muted">
+        {{model.me.userId}}
+      </section>
+
       <section class="current-sessions">
         <section class="current-sessions-get">
           <section ng-show="isEmpty(model.currentSessionsGive)">
@@ -70,27 +74,30 @@
         </section>
       </section>
 
-      <section class="start-getting-through" ng-show="isEmpty(contactsMessageableCanGetFrom)">
+      <section class="start-getting-through" ng-show="isEmpty(canGetFrom)">
         <h5>No one online you can get access through.</h5>
       </section>
 
-      <section class="start-getting-through" ng-hide="isEmpty(contactsMessageableCanGetFrom)">
+      <section class="start-getting-through" ng-hide="isEmpty(canGetFrom)">
         <h5>Start getting access through:</h5>
         <ul>
-          <li ng-repeat="contact in contactsMessageableCanGetFrom">
+          <li ng-repeat="(id, contact) in canGetFrom">
             {{contact.name}} ({{contact.userId}})
-            <button class="btn btn-mini">Start</button>
+            <button class="btn btn-mini" ng-click="sendMessage(contact, 'start-proxying')">
+              Start
+            </button>
           </li>
         </ul>
       </section>
 
-      <section class="request-access" ng-hide="isEmpty(contactsMessageableCannotGetFrom)">
+      <section class="request-access" ng-hide="isEmpty(cannotGetFrom)">
         <h5>Request permission to get access through:</h5>
         <ul>
-          <li ng-repeat="contact in contactsMessageableCannotGetFrom">
+          <li ng-repeat="(id, contact) in cannotGetFrom">
             {{contact.name}} ({{contact.userId}})
-            <button class="btn btn-mini" ng-click="requestAccessFrom(contact)">
-              <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request</button>
+            <button class="btn btn-mini" ng-click="sendMessage(contact, 'request-access')">
+              <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request
+            </button>
           </li>
         </ul>
       </section>
@@ -101,8 +108,8 @@
           <li ng-repeat="(id, contact) in model.pendingGiveTo">
             {{contact.name}} ({{contact.userId}})
             <div class="btn-group">
-              <button class="btn btn-mini">Allow</button>
-              <button class="btn btn-mini">Ignore</button>
+              <button class="btn btn-mini" ng-click="sendMessage(contact, 'allow')">Allow</button>
+              <button class="btn btn-mini" ng-click="freedomEmit('ignore', contact.userId)">Ignore</button>
             </div>
           </li>
         </ul>
@@ -117,7 +124,7 @@
         <ul>
           <li ng-repeat="contact in contactsOnlineNotMessageable">
             {{contact.name}} ({{contact.userId}})
-            <button class="btn btn-mini">Ask to run UProxy</button>
+            <button class="btn btn-mini" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
           </li>
         </ul>
       </section>
@@ -135,23 +142,28 @@
       <div class="well">
         <button class="btn btn-block btn-mini" ng-click="freedomEmit('reset')">Reset</button>
 
-        <details>
+        <details open>
           <summary>message log</summary>
-
-          <form name="sendMsgForm" ng-submit="sendMsg()">
-            <div class="input-append">
-              <input type="text" required ng-model="msg" placeholder="send test message">
-              <input type="submit" value="+" class="btn" ng-disabled="sendMsgForm.$invalid">
-            </div>
-          </form>
 
           <pre>{{model._msgLog | json}}</pre>
         </details>
 
-        <details>
+        <details open>
           <summary>chat</summary>
-            <select ng-model="chatbuddy" ng-options="card.name for (id, card) in model.roster">
+
+          <form name="sendMsgForm" ng-submit="submitChat()">
+            <select ng-model="userId" required>
+              <option value="">Select contact</option>
+              <option ng-repeat="(id, contact) in model.roster" value="{{id}}">
+                {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
+              </option>
             </select>
+
+            <div class="input-append">
+              <input type="text" required ng-model="msg" placeholder="message">
+              <input type="submit" value="send" class="btn" ng-disabled="sendMsgForm.$invalid">
+            </div>
+          </form>
         </details>
 
         <details open>
