@@ -13,5 +13,5 @@
 	url = https://github.com/borismus/oauth2-extensions
 [submodule "firefox/packages/pathfinder"]
 	path = firefox/packages/pathfinder
-	url = git@github.com:erikvold/addon-pathfinder.git
+	url = https://github.com/erikvold/addon-pathfinder.git
 	branch = master
