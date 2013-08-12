@@ -21,7 +21,9 @@ var initToolbar = function(freedom) {
 var initPanel = function(freedomCommunicator) {
   var l10n = JSON.parse(self.data.load("l10n/en/messages.json"));
   var uproxyPanel = panel.Panel({
-    contentURL: self.data.url("popup.html")
+    contentURL: self.data.url("popup.html"),
+    width: 450,
+    height: 300
   });
   freedomCommunicator.addContentContext(uproxyPanel);
   uproxyPanel.port.on("show", function() {
