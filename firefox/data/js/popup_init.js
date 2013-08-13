@@ -6,7 +6,11 @@ var freedom = new freedomShim("toolbar");
 // getMessage will be defined after the extension sends the popup the JSON
 // with the internationalization data.
 var chrome = {
-  i18n: {},
+  i18n: {
+    getMessage: function () {
+      return "";
+    }
+  },
   extension: {
     getBackgroundPage: function () {
       return {
@@ -26,15 +30,11 @@ var appendScript = function (scriptSrc) {
 };
 
 addon.port.emit("show");
-// angular.module('UProxyChromeExtension', ['angular-lodash']);
 addon.port.on("l10n", function(l10n) {
-  console.log("Initializing popup");
   chrome.i18n.getMessage = function(key) {
     console.log('get message');
     return l10n['key'].message;
   };
-  appendScript('js/app.js');
-  appendScript('js/popup.js');
 });
 
 
