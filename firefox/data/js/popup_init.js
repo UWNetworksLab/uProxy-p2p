@@ -22,13 +22,6 @@ var chrome = {
   }
 };
 
-var appendScript = function (scriptSrc) {
-  var s = document.createElement('script');
-  s.type = 'text/javascript';
-  s.src = scriptSrc;
-  document.getElementsByTagName('head')[0].appendChild(s);
-};
-
 addon.port.emit("show");
 addon.port.on("l10n", function(l10n) {
   chrome.i18n.getMessage = function(key) {
@@ -36,5 +29,3 @@ addon.port.on("l10n", function(l10n) {
     return l10n['key'].message;
   };
 });
-
-
