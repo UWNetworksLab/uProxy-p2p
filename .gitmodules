@@ -11,3 +11,7 @@
 [submodule "firefox/data/submodules/oauth2"]
 	path = firefox/data/submodules/oauth2
 	url = https://github.com/borismus/oauth2-extensions
+[submodule "firefox/packages/pathfinder"]
+	path = firefox/packages/pathfinder
+	url = https://github.com/erikvold/addon-pathfinder.git
+	branch = master

@@ -1,19 +1,40 @@
 'use strict';
 
 var freedom = new freedomShim("toolbar");
+// Firefox does not have the same l10n & i18n interface as chrome,
+// so it must be mocked.
+// getMessage will be defined after the extension sends the popup the JSON
+// with the internationalization data.
+var chrome = {
+  i18n: {
+    getMessage: function () {
+      return "";
+    }
+  },
+  extension: {
+    getBackgroundPage: function () {
+      return {
+	freedom: freedom,
+	clearPopupListeners: function () {},
+	addPopupListener: function () {}
+      };
+    }
+  }
+};
 
-var OAUTH_CONFIG = {
-  "client_id": "814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com",
-  "client_secret": "JxrMEKHEk9ELTTSPgZ8IfZu-",
-  "api_scope": "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/googletalk"
+var appendScript = function (scriptSrc) {
+  var s = document.createElement('script');
+  s.type = 'text/javascript';
+  s.src = scriptSrc;
+  document.getElementsByTagName('head')[0].appendChild(s);
 };
 
 addon.port.emit("show");
-angular.module('UProxyChromeExtension', []);
 addon.port.on("l10n", function(l10n) {
-  console.log("Initializing popup");
-  app(l10n);
-  popup();
+  chrome.i18n.getMessage = function(key) {
+    console.log('get message');
+    return l10n['key'].message;
+  };
 });
 
 

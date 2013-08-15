@@ -1,45 +1,25 @@
 'use strict';
 
+console.log('loading popup.js');
 
+angular.module('UProxyChromeExtension')
+  .controller('MainCtrl', [function () {
+}])
+  .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model', function ($filter, $scope, freedom, model) {
+    var messageable = $filter('messageable');
 
-function popup() {
-  angular.module('UProxyChromeExtension')
-    .constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
-    .constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
-    .controller('MainCtrl', [
-      '$http',
-      '$rootScope',
-      'GOOG_PROFILE_URL',
-      'bg',
-      'freedom',
-      'googleAuth',
-      'model',
-      function ($http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
-	$rootScope.model = model;
-
-	$rootScope.sendCredentials = function () {
-          if (!model.accessToken || !model.email) {
-            googleAuth.authorize(function () {
-              var accessToken = googleAuth.getAccessToken();
-              $http({method: 'GET', url: GOOG_PROFILE_URL, params: {oauth_token: accessToken}}).then(
-		function getProfileSuccessHandler(resp) {
-                  var email = resp.data.email;
-                  freedom.emit('oauth-credentials', {email: email, token: accessToken});
-		},
-		function getProfileFailureHandler(resp) {
-                  console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
-		});
-            });
-          } else {
-            freedom.emit('oauth-credentials', {email: model.email, token: model.accessToken});
-          }
-	};
+    $scope.submitChat = function () {
+      var contact = model.roster[$scope.userId];
+      if (!contact) {
+        console.error('not on roster:', $scope.userId);
+        return;
       }
-    ])
-    .controller('DebugCtrl', ['$scope', 'freedom', function($scope, freedom) {
-      $scope.sendMsg = function () {
-	freedom.emit('send-message', {to: '', message: $scope.msg});
-	$scope.msg = '';
-      };
-    }]);
-};
+      if (messageable(contact)) {
+        // only sends to UProxy clients
+        $scope.sendMessage(contact, $scope.msg);
+      } else {
+        freedom.emit('send-message', {to: contact.userId, message: $scope.msg});
+      }
+      $scope.msg = '';
+    };
+  }]);
