@@ -52,6 +52,8 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     'googleAuth',
     'model',
     function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
+      console.log('running run function');
+
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
@@ -59,6 +61,8 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       $rootScope.model = model;
 
       $rootScope.$watch('model.roster', function (roster) {
+	console.log('roster watch fired');
+	console.log(JSON.stringify(onlineNotMessageable));
         if (!roster) return;
         $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
         $rootScope.contactsMessageable = filter(roster, messageable);

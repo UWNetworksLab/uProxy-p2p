@@ -1,0 +1,78 @@
+<!doctype html>
+<html ng-app="UProxyChromeExtension" ng-csp>
+  <head>
+    <meta charset="utf-8">
+
+    <link href="styles/main.css" rel="stylesheet">
+
+    <!-- build:js scripts/options.js -->
+    <script src="lib/jsonpatch.js"></script>
+    <script src="lib/lodash.mobile.js"></script>
+    <script src="lib/angular.js"></script>
+    <script src="lib/angular-lodash.js"></script>
+    <script src="submodules/oauth2/lib/oauth2.js"></script>
+
+    <script src="js/freedom_shim_content.js"></script>
+    <script src="js/options_init.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/options.js"></script>
+    <!-- endbuild -->
+
+  </head>
+  <body ng-controller="OptionsCtrl" id="options">
+
+    <h3>{{'options'|chromei18n}}</h3>
+    <hr>
+
+    <ul class="options">
+      <li>
+        <details open class="advanced">
+          <summary>{{'advanced'|chromei18n}}</summary>
+
+          <ul class="options">
+            <li>
+              <label class="checkbox inline">
+                <input type="checkbox" ng-model="allowNonRoutableAddresses"
+                  ng-click="changeOption('allowNonRoutableAddresses', allowNonRoutableAddresses)">
+                  <!-- XXX DRY: use a directive to automatically bind ng-click to the proper
+                                changeOption call based on the ng-model binding -->
+                {{'allowNonroutableAddresses'|chromei18n}}
+              </label>
+            </li>
+          </ul>
+
+        </details>
+      </li>
+    </ul>
+
+    <hr>
+
+    <div>
+      <button class="btn btn-warning btn-mini" ng-disabled="resetClicked"
+        ng-click="resetClicked=true" && freedomEmit('reset') || (resetClicked=true)">
+        ⚠ Reset UProxy
+      </button>
+
+      <div ng-show="resetClicked" style="margin: 10px">
+        You will be signed out and all saved state will be lost.
+
+        <div>
+          <button class="btn btn-mini" ng-click="resetClicked=false">
+            Cancel
+          </button>
+          <button class="btn btn-mini btn-danger" ng-click="freedomEmit('reset')">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <details id="debug" open ng-show="model._debug">
+      <summary>Debug</summary>
+      <pre class="well">state: {{model|json}}</pre>
+    </details>
+
+  </body>
+</html>
