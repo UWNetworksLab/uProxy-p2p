@@ -5,7 +5,7 @@ var panel = require("sdk/panel");
 
 var initToolbar = function(freedom) {
   // create toolbarbutton
-  var tbb = require("toolbarbutton").ToolbarButton({
+  var tbb = require("pathfinder/ui/toolbarbutton").ToolbarButton({
     id: "UProxyItem",
     label: "UProxy",
     image: self.data.url("submodules/uproxy-common/images/uproxy-19.png"),
@@ -21,7 +21,9 @@ var initToolbar = function(freedom) {
 var initPanel = function(freedomCommunicator) {
   var l10n = JSON.parse(self.data.load("l10n/en/messages.json"));
   var uproxyPanel = panel.Panel({
-    contentURL: self.data.url("popup.html")
+    contentURL: self.data.url("popup.html"),
+    width: 450,
+    height: 300
   });
   freedomCommunicator.addContentContext(uproxyPanel);
   uproxyPanel.port.on("show", function() {
