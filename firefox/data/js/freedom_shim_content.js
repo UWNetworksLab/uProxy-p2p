@@ -3,16 +3,19 @@
 // Shim for talking to FreeDOM, which is running as a content script
 // in a separate page. Content scripts can only talk to the extension,
 // and the extension can to everyone.
-
+// TODO: create function that doesn't require 'new' keyword.
 var freedomShim = function(id) {
-    this.id = id;
-    this.callbacks = {};
+  console.log('loading freedom shim');
+  this.id = id;
+  this.callbacks = {};
+  callbacks = this.callbacks;
 
-    addon.port.on("freedom_shim", function(args) {
-	if (args.id == "FreeDOM" && (args.event in this.callbacks)) {
-	    this.callbacks[args.event](args.data);
-	}
-    });
+  addon.port.on("freedom_shim", function(args) {
+    if (args.id == "FreeDOM" && (args.event in callbacks)) {
+      callbacks[args.event](args.data);
+    }
+  });
+  console.log('freedom shim constructed');
 };
 
 freedomShim.prototype.emit = function(event, data) {
