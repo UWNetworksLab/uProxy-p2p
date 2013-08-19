@@ -103,14 +103,18 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       };
 
       $rootScope.authGoog = function () {
+	console.log('authGoog fired');
         googleAuth.authorize(function () {
+	  console.log('grabbing access token');
           var accessToken = googleAuth.getAccessToken();
           $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
             function getProfileSuccessHandler(resp) {
+	      console.log('profile grab success');
               var email = resp.data.email;
               freedom.emit('goog-credentials', {email: email, token: accessToken});
             },
             function getProfileFailureHandler(resp) {
+	      console.log('profile grab fail');
               console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
             });
         });
