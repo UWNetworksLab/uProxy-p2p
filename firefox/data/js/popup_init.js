@@ -1,6 +1,5 @@
 'use strict';
 
-var freedom = new freedomShim("toolbar");
 // Firefox does not have the same l10n & i18n interface as chrome,
 // so it must be mocked.
 // getMessage will be defined after the extension sends the popup the JSON
@@ -16,17 +15,12 @@ var chrome = {
       return {
 	freedom: freedom,
 	clearPopupListeners: function () {},
-	addPopupListener: function () {}
+	addPopupListener: function (event, callback) {
+	  freedom.on(event, callback);
+	}
       };
     }
   }
-};
-
-var appendScript = function (scriptSrc) {
-  var s = document.createElement('script');
-  s.type = 'text/javascript';
-  s.src = scriptSrc;
-  document.getElementsByTagName('head')[0].appendChild(s);
 };
 
 addon.port.emit("show");
@@ -36,5 +30,3 @@ addon.port.on("l10n", function(l10n) {
     return l10n['key'].message;
   };
 });
-
-
