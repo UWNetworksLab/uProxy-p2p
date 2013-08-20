@@ -1,6 +1,5 @@
 'use strict';
 
-var freedom = new freedomShim("toolbar");
 // Firefox does not have the same l10n & i18n interface as chrome,
 // so it must be mocked.
 // getMessage will be defined after the extension sends the popup the JSON
@@ -16,7 +15,9 @@ var chrome = {
       return {
 	freedom: freedom,
 	clearPopupListeners: function () {},
-	addPopupListener: function () {}
+	addPopupListener: function (event, callback) {
+	  freedom.on(event, callback);
+	}
       };
     }
   }

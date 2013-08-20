@@ -1,7 +1,5 @@
 'use strict';
 
-console.log('loading popup.js');
-
 angular.module('UProxyChromeExtension')
   .controller('MainCtrl', [function () {
 }])
