@@ -1,5 +1,5 @@
 'use strict';
-console.log('loading app.js');
+
 // TODO: client secret should not be public.
 var OAUTH_CONFIG = {
   'client_id': '814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com',
@@ -52,8 +52,6 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     'googleAuth',
     'model',
     function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
-      console.log('running run function');
-
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
@@ -61,8 +59,6 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       $rootScope.model = model;
 
       $rootScope.$watch('model.roster', function (roster) {
-	console.log('roster watch fired');
-	console.log(JSON.stringify(onlineNotMessageable));
         if (!roster) return;
         $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
         $rootScope.contactsMessageable = filter(roster, messageable);
@@ -103,18 +99,14 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       };
 
       $rootScope.authGoog = function () {
-	console.log('authGoog fired');
         googleAuth.authorize(function () {
-	  console.log('grabbing access token');
           var accessToken = googleAuth.getAccessToken();
           $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
             function getProfileSuccessHandler(resp) {
-	      console.log('profile grab success');
               var email = resp.data.email;
               freedom.emit('goog-credentials', {email: email, token: accessToken});
             },
             function getProfileFailureHandler(resp) {
-	      console.log('profile grab fail');
               console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
             });
         });
