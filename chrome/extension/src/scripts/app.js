@@ -138,8 +138,12 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
           if (patch[0].path === '') {
             angular.copy(patch[0].value, model);
           } else {
-            patch = new JSONPatch(patch, true); // mutate = true
-            patch.apply(model);
+            if (_.isEmpty(model)) {
+              console.debug('model init patch not yet received, ignoring non init patch:', patch);
+            } else {
+              patch = new JSONPatch(patch, true); // mutate = true
+              patch.apply(model);
+            }
           }
         });
       });
