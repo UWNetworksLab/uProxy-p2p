@@ -98,6 +98,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
         freedom.emit('change-option', {key: key, value: value});
       };
 
+      var clearedAndRetried = false;
       $rootScope.authGoog = function () {
         googleAuth.authorize(function () {
           var accessToken = googleAuth.getAccessToken();
@@ -105,12 +106,26 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
             function getProfileSuccessHandler(resp) {
               var email = resp.data.email;
               freedom.emit('goog-credentials', {email: email, token: accessToken});
+              clearedAndRetried = false;
             },
             function getProfileFailureHandler(resp) {
-              console.error('request for', GOOG_PROFILE_URL, 'failed:', resp);
+              if (resp.status === 401) {
+                console.debug('request for', GOOG_PROFILE_URL, 'yielded 401 response');
+                if (clearedAndRetried) {
+                  console.debug('already cleared access token and tried again');
+                } else {
+                  console.debug('clearing access token and trying again');
+                  clearedAndRetried = true;
+                  googleAuth.clearAccessToken();
+                  $rootScope.authGoog();
+                }
+              } else {
+                console.debug('request for', GOOG_PROFILE_URL, 'failed:', resp);
+              }
             });
         });
       };
+      $rootScope.authGoog();
 
       bg.clearPopupListeners();
       freedom.emit('open-popup');
