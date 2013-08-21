@@ -4,8 +4,8 @@
 var FreedomCommunication = function(freedomWindow) {
   var contextWindows = [];
   freedomWindow.port.on('freedom_shim', function(args) {
-    for (var i = 0; i < freedom.contextWindows.length; i++) {
-      freedom.contextWindows.port.emit('freedom_shim', args);
+    for (var i = 0; i < contextWindows.length; i++) {
+      contextWindows[i].port.emit('freedom_shim', args);
     }
   });
   var freedom = {
