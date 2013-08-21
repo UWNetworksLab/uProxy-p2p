@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# This script will update the directly, all submodules, and build everything to
+# bring you to the latest version from the git repository.
 
 START_DIR="$(pwd)"
 ROOT_DIR="$(cd "$(dirname $0)"; cd ..; pwd)"
