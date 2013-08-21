@@ -1,5 +1,5 @@
 'use strict';
-console.log('loading app.js');
+
 // TODO: client secret should not be public.
 var OAUTH_CONFIG = {
   'client_id': '814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com',
