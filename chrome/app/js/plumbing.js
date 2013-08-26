@@ -27,7 +27,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // We don't want another extension secretly making you proxy others, or
   // trying to do something even worse.
   if (port.sender.id !== EXTENSION_ID) {
-    console.log("Got connect form an unexpected extension id: "
+    console.log("Got connect from an unexpected extension id: "
         + port.sender.id);
     return;
   }
