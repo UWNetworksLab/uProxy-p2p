@@ -44,6 +44,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     };
   })
   .constant('bg', chrome.extension.getBackgroundPage())
+  .constant('chrome', chrome)
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   // application state. determined by backend (packaged app)
   .constant('model', {})
@@ -55,14 +56,16 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     '$rootScope',
     'GOOG_PROFILE_URL',
     'bg',
+    'chrome',
     'freedom',
     'googleAuth',
     'model',
-    function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, freedom, googleAuth, model) {
+    function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, chrome, freedom, googleAuth, model) {
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
 
+      $rootScope.extensionID = chrome.runtime.id;
       $rootScope.model = model;
 
       $rootScope.$watch('model.roster', function (roster) {

@@ -20,7 +20,14 @@
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl" id="popup">
     <section ng-show="!connectedToApp">
-      You need to install <a href="TODO(): insert link">the UProxy App</a>.
+      Not connected to
+      <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
+      UProxy app</a>. Please ensure it is
+      <a href="https://github.com/UWNetworksLab/UProxy/#testing-in-chrome" target="_blank">
+      installed</a> and running by checking your <code>chrome://extensions</code> page, and
+      <a href="https://github.com/UWNetworksLab/UProxy/blob/81f5bee/chrome/app/js/plumbing.js#L9"
+      target="_blank">expecting this extension to have the right ID</a>
+      (<code>{{extensionID}}</code>).
     </section>
     <section ng-show="connectedToApp">
       <section ng-show="model.identityStatus.status == 'offline'">
