@@ -101,12 +101,6 @@ Note: you will either need to run these as root, or set the directories they mod
 
 1. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
 
-    - Loading the extension before the app is important. If you load the
-      extension first, you'll get an error like "Uncaught Error: Attempting to
-      use a disconnected port object" (miscellaneous_bindings:69). If this
-      happens, just load the app and then reload the extension from
-      chrome://extensions.
-
 
 #### Firefox Add-on
 
