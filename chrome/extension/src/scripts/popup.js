@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('UProxyChromeExtension')
+angular.module('UProxyChromeExtension-popup', ['UProxyChromeExtension'])
   // There is no initial state stored by the extension for the main controller.
   .controller('MainCtrl', [function () {}])
   // The controller for debug information/UI.
