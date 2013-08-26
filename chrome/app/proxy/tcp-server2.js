@@ -61,7 +61,6 @@ function getStringOfArrayBuffer(buf) {
    *
    * @param {Object} options Options of the form { maxConnections: integer,
    * allowHalfOpen: bool }.
-   * @param {function} connect_callback Called when socket is connected.
    */
   function TcpServer(server_address, port, options) {
     this.addr = server_address;

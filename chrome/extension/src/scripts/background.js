@@ -1,49 +1,22 @@
+// Assumes that freedom_connector.js has been loaded.
 'use strict';
-
 /* jshint -W098 */
 
+// Chrome App Id for UProxy Packaged Chrome App.
+var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+
+// TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener(function (details) {
-  console.log('previousVersion', details.previousVersion);
+  console.log('onInstalled: previousVersion', details.previousVersion);
 });
 
+var freedom = new FreedomConnector(FREEDOM_CHROME_APP_ID,
+                                   {name: 'uproxy-extension-to-app-port'});
 
-var popupListeners = {};
+var onFreedomStateChange = new chrome.Event();
 
-//freedom.on('buddylist-update', function (msg) {
-//  buddies = msg;
-//});
-
-
-function clearPopupListeners() {
-  popupListeners = {};
-}
-
-function addPopupListener(type, func) {
-  if (popupListeners[type]) {
-    popupListeners[type].push(func);
-  } else {
-    popupListeners[type] = [func];
-  }
-}
-
-function callPopupListener(type, data) {
-  if (popupListeners[type]) {
-    for (var i = 0; i < popupListeners[type].length; i++) {
-      try {
-        popupListeners[type][i](data);
-      } catch (e) {
-        console.log('Received message, no popup to route to');
-      }
-    }
-  } else {
-    console.log('Handler missing for: ' + type);
-    console.log(popupListeners);
-  }
-}
-
-freedom.on('state-change', function (msg) {
-  callPopupListener('state-change', msg);
+freedom.onConnected.addListener(function () {
+  freedom.on('state-change', function (patchMsg) {
+    onFreedomStateChange.dispatch(patchMsg);
+  });
 });
-
-
-freedom.emit('open-extension', '');

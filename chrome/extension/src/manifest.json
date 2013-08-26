@@ -12,8 +12,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/plumbing.js",
-      "scripts/unfreedom.js",
+      "scripts/freedom_connector.js",
       "scripts/background.js"
     ]
   },

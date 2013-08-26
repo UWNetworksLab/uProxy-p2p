@@ -17,7 +17,7 @@
     <!-- endbuild -->
 
   </head>
-  <body ng-controller="OptionsCtrl" id="options">
+  <body ng-cloak ng-controller="OptionsCtrl" id="options">
 
     <h3>{{'options'|chromei18n}}</h3>
     <hr>
@@ -46,8 +46,9 @@
     <hr>
 
     <div>
+      <!-- TODO: make a proper controller for state reseting -->
       <button class="btn btn-warning btn-mini" ng-disabled="resetClicked"
-        ng-click="resetClicked=true" && freedomEmit('reset') || (resetClicked=true)">
+        ng-click="resetClicked=true">
         ⚠ Reset UProxy
       </button>
 
@@ -58,7 +59,8 @@
           <button class="btn btn-mini" ng-click="resetClicked=false">
             Cancel
           </button>
-          <button class="btn btn-mini btn-danger" ng-click="freedomEmit('reset')">
+          <button class="btn btn-mini btn-danger"
+            ng-click="resetState() || (resetClicked=false)">
             Confirm
           </button>
         </div>
