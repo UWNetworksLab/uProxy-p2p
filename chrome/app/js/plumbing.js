@@ -6,7 +6,7 @@ var pendingMsgs = [];
 // true iff extension has connected to the app and extPort is connected.
 var connectedToExtension = false;
 // Constant
-var EXTENSION_ID = 'pgahmldgaffooaikeibhbacbamffmopi';
+var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
 window.freedomcfg = function(register) {
   register("core.view", View_oauth);
