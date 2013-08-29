@@ -3,17 +3,19 @@
 'use strict';
 
 // TODO: client secret should not be public.
+/**
 var OAUTH_CONFIG = {
   'client_id': '814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com',
   'client_secret': 'JxrMEKHEk9ELTTSPgZ8IfZu-',
   'api_scope': 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/googletalk'
 };
+**/
 
 var bg = chrome.extension.getBackgroundPage();
 
 angular.module('UProxyChromeExtension', ['angular-lodash'])
-  .constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
-  .constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
+  //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
+  //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
@@ -111,6 +113,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       }
 
       var clearedAndRetried = false;
+      /**
       $rootScope.authGoog = function () {
         googleAuth.authorize(function () {
           var accessToken = googleAuth.getAccessToken();
@@ -129,7 +132,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
                   console.debug('clearing access token and trying again');
                   clearedAndRetried = true;
                   googleAuth.clearAccessToken();
-                  $rootScope.authGoog();
+                  //$rootScope.authGoog();
                 }
               } else {
                 console.debug('request for', GOOG_PROFILE_URL, 'failed:', resp);
@@ -137,6 +140,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
             });
         });
       }
+      **/
 
       // TODO(): change the icon/text shown in the broswer action, and maybe
       // add a butter-bar. This is important for when someone is proxying
@@ -173,7 +177,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
             bg.onFreedomStateChange.removeListener($rootScope.onStateChange);
           };
           freedom.emit('open-popup');
-          $rootScope.authGoog();
+          //$rootScope.authGoog();
           $rootScope.connectedToApp = true;
         });
       }
