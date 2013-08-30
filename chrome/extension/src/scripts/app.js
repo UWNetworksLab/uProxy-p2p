@@ -56,13 +56,13 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     '$filter',
     '$http',
     '$rootScope',
-    'GOOG_PROFILE_URL',
+    //'GOOG_PROFILE_URL',
     'bg',
     'chrome',
     'freedom',
-    'googleAuth',
+    //'googleAuth',
     'model',
-    function($filter, $http, $rootScope, GOOG_PROFILE_URL, bg, chrome, freedom, googleAuth, model) {
+    function($filter, $http, $rootScope, /*GOOG_PROFILE_URL,*/ bg, chrome, freedom, /*googleAuth,*/ model) {
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
