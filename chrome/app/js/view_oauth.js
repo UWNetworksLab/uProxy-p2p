@@ -53,7 +53,7 @@ View_oauth.prototype.open = function(args, continuation) {
         this.manualdialog.onClosed(function() {
           this.manualdialog = null;
         });
-      }).bind(this);
+      }).bind(this)
     ); 
   } else if (file == "oauth.html") {
     //@TODO{ryscheng} Get rid of this block
