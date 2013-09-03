@@ -4,7 +4,7 @@ var pageMod = require("sdk/page-mod");
 
 var initToolbar = function(freedom) {
   // create toolbarbutton
-  var tbb = require("pathfinder/ui/toolbarbutton").ToolbarButton({
+  var tbb = require("sdk/ui").Button({
     id: "UProxyItem",
     label: "UProxy",
     image: self.data.url("common/ui/icons/uproxy-19.png"),
