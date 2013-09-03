@@ -4,7 +4,7 @@
   "id": "UProxyFirefox@UniversityOfWashington",
   "description": "Alpha: Ubiquitous Firefox Proxy Picker",
   "icon":"data/submodules/uproxy-common/images/uproxy-128.png",
-  "dependencies": ["pathfinder", "addon-sdk"],
+  "dependencies": ["addon-sdk"],
   "author": "",
   "license": "",
   "version": "0.0.1"
