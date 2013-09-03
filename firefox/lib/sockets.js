@@ -1,17 +1,23 @@
 'use strict';
 
-const { Class } = require('sdk/core/heritage');
-const { isUndefined, isNumber, isFunction } = require('sdk/lang/type');
 const { Cc, Ci, CC, Cr } = require('chrome');
+const { Class } = require('sdk/core/heritage');
+var { EventTarget } = require("sdk/event/target");
+let { emit } = require('sdk/event/core');
+const { isUndefined, isNumber, isFunction } = require('sdk/lang/type');
 const { ByteReader, ByteWriter } = require('sdk/io/byte-streams');
 
+
 const socketTransportService = Cc["@mozilla.org/network/socket-transport-service;1"].getService(Ci.nsISocketTransportService);
+// Components.classes["@mozilla.org/binaryinputstream;1"].createInstance(Components.interfaces.nsIBinaryInputStream);
 
 // Private variables for sockets get stored in WeakMaps
 // Client socket variables
 let transports = new WeakMap();
 let readers = new WeakMap();
 let writers = new WeakMap();
+// Map nsIInputStreamCallbacks to their ClientSockets
+let streamCallbacks = new WeakMap();
 
 // Server socket variables
 let serverSockets = new WeakMap();
@@ -21,43 +27,78 @@ let waitingAccepts = new WeakMap();
 function transportFor(socket) transports.get(socket)
 function readerFor(socket) readers.get(socket)
 function writerFor(socket) writers.get(socket)
+function clientSocketFor(streamCallback) streamCallbacks.get(streamCallback)
 
 function serverSocketFor(socket) serverSockets.get(socket)
 function waitingConnectionsFor(socket) waitingConnections.get(socket)
 function waitingAcceptsFor(socket) waitingAccepts.get(socket)
 
+/**
+ * Sets up transport and streams for a ClientSocket.
+ */
 var setTransport = function(socket, transport) {
   if (!isUndefined(transportFor(socket))) {
     throw 'Socket already connected';
   }
+
+  var binaryReader = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
+  binaryReader.setInputStream(transport.openInputStream(0,0,0));
   // Requires new, unlike the rest of the Jetpack API
   // See https://bugzilla.mozilla.org/show_bug.cgi?id=902222
-  reader = new ByteReader(transport.openInputStream(0,0,0));
-  writer = new ByteWriter(transport.openOutputStream(0,0,0));
+  var writer = new ByteWriter(transport.openOutputStream(0,0,0));
 
   transports.set(socket, transport);
-  readers.set(socket, reader);
+  readers.set(socket, binaryReader);
   writers.set(socket, writer);
+  nsIInputStreamCallback(socket);
 };
 
+/*
+ * Waits for data/disconnect on a nsIAsyncInputStream
+ * stream. ClientSocket isn't used as the callback to exporting
+ * onInputStreamReady into the public API of ClientSocket.
+ */
+var nsIInputStreamCallback = Class({
+  type: 'SocketReader',
+  initialize: function initialize(clientSocket) {
+    var binaryReader = readerFor(clientSocket);
+    binaryReader.asyncWait(this, 0, 0, null);
+  },
+  onInputStreamReady: function onInputStreamReady() {
+    var clientSocket = clientSocketFor(this);
+    var binaryReader = readerFor(clientSocket);
+    try {
+      var bytesAvailable = binaryReader.available();
+    } catch (e) {
+      consoe.log(e);
+      clientSocket.disconnect();
+      return;
+    }
+    var buffer = ArrayBuffer(bytesAvailable);
+    var typedBuffer = new Uint8Array(buffer);
+    binaryReader.readByteArray(bytesAvailable, typedBuffer);
+    emit(clientSocket, 'onData', buffer);
+
+    binaryReader.asyncWait(this, 0, 0, null);
+  }
+});
+
 var ClientSocket = Class({
-  initialize: function initialize(transport) {
+  extends: EventTarget,
+  type: 'ClientSocket',
+  initialize: function initialize(transport, eventOptions) {
+    EventTarget.prototype.initialize.call(this, eventOptions);
     if (!isUndefined(transport)) {
       setTransport(this, transport);
     }
   },
-  type: 'ClientSocket',
   connect: function connect(hostname, port) {
     if (!isUndefined(transportFor(socket))) {
       throw 'Socket already connected';
     }
-    transport = socketTransportService.createTransport(null, 0,
-						       hostname, port, null);
-    initializeReaderWriter(transport);
-  },
-  read: function(numBytes) {
-    let reader = readerFor(this);
-    return reader.read(numBytes);
+    var transport = socketTransportService.createTransport(null, 0,
+							   hostname, port, null);
+    setTransport(this, transport);
   },
   write: function(data) {
     let writer = writerFor(this);
@@ -69,6 +110,7 @@ var ClientSocket = Class({
      transportFor(this)].forEach(function close(stream) {
        stream.close(0);
      });
+    emit(this, 'onDisconnect');
   }
 });
 
