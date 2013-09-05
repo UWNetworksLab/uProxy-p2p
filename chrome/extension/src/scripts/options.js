@@ -7,6 +7,7 @@ angular.module('UProxyChromeExtension-options', ['UProxyChromeExtension'])
       if (!roster) return;
       model.contacts = angular.copy(model.roster);
       angular.forEach(model.contacts, function (contact) {
+        contact.name = contact.name || contact.userId;
         angular.forEach(contact.clients, function (client, clientId) {
           client.clientName = contact.name+'ʼs client "'+clientId+'"';
           client.staticId = contact.name+'ʼs static ID';
