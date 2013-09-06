@@ -1,0 +1,27 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "indent": 2,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "noempty": true,
+  "nonew": true,
+  "undef": true,
+  "strict": true,
+  "trailing": true,
+  "eqnull": true,
+  "es5": true,
+  "browser": true,
+  "node": true,
+  "devel": true,
+  "unused": true,
+  "quotmark": "single",
+  "predef": [
+    "require",
+    "define",
+    "angular",
+    "_"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Google Tasks OAuth 2.0",
+  "version": "1.0",
+  "description": "Adds a Google task. OAuth 2.0 Extension Demo",
+  "icons": {
+    "128": "icon128.png"
+  },
+  "manifest_version":2,
+  "browser_action": {
+    "default_title": "OAuth 2.0",
+    "default_icon": "icon128.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://www.google.com/robots.txt*"],
+      "js": ["oauth2/oauth2_inject.js"],
+        "run_at": "document_start"
+    }
+  ],
+  "permissions": [
+    "https://accounts.google.com/o/oauth2/token",
+    "https://www.googleapis.com/"
+  ]
+}
