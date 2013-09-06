@@ -148,7 +148,7 @@
         <summary>Debug</summary>
 
         <div class="well">
-          <button class="btn btn-block btn-mini" ng-click="freedomEmit('reset')">Reset</button>
+          <button class="btn btn-block btn-mini" ng-click="resetState()">Reset</button>
 
           <details open>
             <summary>message log</summary>
@@ -163,7 +163,7 @@
               <select ng-model="userId" required>
                 <option value="">Select contact</option>
                 <option ng-repeat="(id, contact) in model.roster" value="{{id}}">
-                  {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
+                  {{contact.name}} - {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
                 </option>
               </select>
 
