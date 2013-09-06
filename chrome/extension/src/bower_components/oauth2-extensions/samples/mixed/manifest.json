@@ -1,0 +1,37 @@
+{
+  "name": "Multi OAuth 2.0",
+  "version": "1.0",
+  "description": "OAuth 2.0 Extension Demo",
+  "manifest_version": 2,
+  "icons": {
+    "128": "icon128.png"
+  },
+  "browser_action": {
+    "default_title": "OAuth 2.0",
+    "default_icon": "icon128.png",
+    "default_popup": "options.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["http://www.facebook.com/robots.txt*"],
+      "js": ["oauth2/oauth2_inject.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["http://www.google.com/robots.txt*"],
+      "js": ["oauth2/oauth2_inject.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://github.com/robots.txt*"],
+      "js": ["oauth2/oauth2_inject.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": [
+    "https://graph.facebook.com/",
+    "https://accounts.google.com/o/oauth2/token",
+    "https://github.com/"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "angular-lodash",
+  "description": "Lodash adapter for AngularJS.",
+  "version": "0.1.0",
+  "author": "cabrel <cabrel@zerklabs.com>",
+  "main": "angular-lodash.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cabrel/angular-lodash"
+  }
+}
