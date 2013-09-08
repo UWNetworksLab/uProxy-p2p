@@ -30,10 +30,9 @@
       (<code>{{extensionID}}</code>).
     </section>
     <section ng-show="connectedToApp">
+      <!--
       <section ng-show="model.identityStatus.status == 'offline'">
-        <!-- TODO: replace with oauth view from identity provider -->
         <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
-        <!-- TODO: allow connecting to additional chat services -->
       </section>
 
       <section ng-show="model.identityStatus.status == 'connecting'">
@@ -41,6 +40,7 @@
       </section>
 
       <section ng-show="model.identityStatus.status == 'online'">
+      -->
         <section class="pagination-right muted">
           {{model.me.userId}}
         </section>
@@ -136,7 +136,9 @@
             </li>
           </ul>
         </section>
+      <!--
       </section>
+      -->
 
       <section class="footer">
         <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|chromei18n}}">⚙</a>
