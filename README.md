@@ -1,7 +1,6 @@
 UProxy
 ======
 
-Tagline Coming Soon
 
 
 ### Layout
@@ -31,7 +30,6 @@ UProxy is built with the following tools:
 - [generator-chrome-extension](https://github.com/yeoman/generator-chrome-extension)
 - [grunt](http://gruntjs.com)
 - [AngularJS](http://angularjs.org)
-- [oauth2-extensions](https://github.com/borismus/oauth2-extensions)
 
 Before jumping in, it's worth familiarizing yourself with any of these you may
 not have used before.
@@ -41,13 +39,17 @@ not have used before.
 
 #### Pre-Requirements
 
-Note: you will either need to run these as root, or set the directories they modify (/usr/local) to being editable by your user.
+Note: you will either need to run these as root, or set the directories they
+modify (/usr/local) to being editable by your user.
 
 - [node](http://nodejs.org/) + npm: `brew install node # or similar for your
   system`
 
-    - Also make sure your $NODE_PATH environment variable is set correctly
+    - You may need to set your $NODE_PATH environment variable appropriately
       (e.g. /usr/local/share/npm/lib/node_modules).
+
+    - If you install npm things globally, you'll need to do so as the
+      appropriate super-user.
 
 - [grunt](http://gruntjs.com/): `npm install -g grunt-cli`
 
@@ -59,29 +61,64 @@ Note: you will either need to run these as root, or set the directories they mod
       (e.g. /usr/local/share/npm/bin/grunt).
 
 - [compass](http://compass-style.org/):
-  `gem install compass` (requires ruby, often comes installed)
+  `gem install compass` (requires ruby, often comes installed, may need to be installed as super-user)
+
+    - This is assuming you have `ruby` and `rubygems` installed. 
 
 
-#### Installation
+#### Installation, setup, compilation, updating
 
-1. Clone UProxy and its submodules (and its submodules' submodules...): `git
-   clone --recursive https://github.com/UWNetworksLab/UProxy.git`
+1. Clone UProxy and its submodules (and its submodules' submodules...): 
+`git clone https://github.com/UWNetworksLab/UProxy.git`
+
+2. Run script `tools/update.sh`. This will update, install and compile all
+compenents. The first time you run this, you'll see lots of npm, bower and grunt
+messages. Check the last couple of lines in case there is an error. 
+
+At any point you should be able to run `tools/update.sh` to update your local repository, all 
+submodules, dependencies, and rebuild everything needed to test in Chrome. 
+
+
+#### Testing in Chrome
+
+1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
+
+2. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
+
+3. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
+
+
+#### Testign in Firefox
+
+1. TODO
+
+
+#### Building the packaged Chrome extension
+
+- Run `grunt build` from the chrome/extension directory to lint the script, run tests,
+  and if those go well, build a packed extension. To test the built extension, go to
+  chrome://extensions and load it unpacked from the chrome/extension/dist
+  directory, or packed from the chrome/extension/package directory.
+
+
+#### Fixing compilation and setup
+
+The `tools/update.sh` bash script should run all the steps needed to setup and
+compile UProxy. However the following hints should help you if it goes wrong and
+you need to debug and fix it.
 
 1. Run `LOCAL=yes make` in each of the Freedom submodules
    (chrome/app/submodules/uproxy-common/submodules/freedom and
    firefox/submodules/uproxy-common/submodules/freedom). We intend to make this
    more automated.
 
-1. Anywhere there's a package.json (currently just chrome/extension), run `npm
+2. Anywhere there's a package.json (currently just chrome/extension), run `npm
    install` to fetch required npm packages.
 
-1. Anywhere there's a bower.json (currently just chrome/extension), run `bower
+3. Anywhere there's a bower.json (currently just chrome/extension), run `bower
    install` to fetch required bower packages.
 
-
-#### Development
-
-- A number of grunt tasks are set up for the chrome extension to aid
+4. A number of grunt tasks are set up for the chrome extension to aid
   development. Currently `grunt jshint` (a javascript linting task) is the only
   development task that's useful, but once there are tests, `grunt test` will
   run them for you. In the next version of generator-chrome-extension, `grunt
@@ -89,27 +126,5 @@ Note: you will either need to run these as root, or set the directories they mod
   scripts, and when detected, linting them + running tests automatically,
   monitoring changes to sass stylesheets and compiling them to css when
   detected, etc. For now, compiling the sass to css can be accomplished via
-  `grunt compass:dist`, and then manually copying chrome/extension/.tmp/styles/\*.css
-  to chrome/extension/src/styles/. :\
-
-
-#### Testing in Chrome
-
-1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
-
-1. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
-
-1. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
-
-
-#### Firefox Add-on
-
-1. TODO
-
-
-#### Building Chrome Extension
-
-- Run `grunt build` from the chrome/extension directory to lint the script, run tests,
-  and if those go well, build a packed extension. To test the built extension, go to
-  chrome://extensions and load it unpacked from the chrome/extension/dist
-  directory, or packed from the chrome/extension/package directory.
+  `grunt compass:dist`, and then manually copying
+  chrome/extension/.tmp/styles/\*.css to chrome/extension/src/styles/. :\
