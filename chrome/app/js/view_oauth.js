@@ -1,7 +1,13 @@
+/**
+ * Hackety hack. Used by:
+ *  - Google XMPP
+ *  - Manual identity
+ **/
+
 var View_oauth = function(channel) {
   this.channel = channel;
-  this.manualdialog = null;
-  this.manualMsgQueue = [];
+  this.manualdialog = {};
+  this.manualMsgQueue = {};
 };
 
 View_oauth.prototype.open = function(args, continuation) {
@@ -34,27 +40,6 @@ View_oauth.prototype.open = function(args, continuation) {
       xhr.open('get', 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token='+token, true);
       xhr.send();
     }).bind(this));
-  } else if (file == 'manualdialog.html') {
-    chrome.app.window.create(
-      'submodules/uproxy-common/identity/manual/manualdialog.html',
-      {
-        id: 'manualdialog',
-        minWidth: 600,
-        minHeight: 400,
-        maxWidth: 600,
-        maxHeight: 400
-      },
-      (function(child_win) {
-        this.manualdialog = child_win;
-        for (var i=0; i<this.manualMsgQueue.length; i++) {
-          this.manualdialog.postMessage(this.manualMsgQueue[i]);
-        }
-        this.manualMsgQueue = [];
-        this.manualdialog.onClosed(function() {
-          this.manualdialog = null;
-        });
-      }).bind(this)
-    ); 
   } else if (file == "oauth.html") {
     //@TODO{ryscheng} Get rid of this block
     if (!this.listening) {
@@ -74,13 +59,20 @@ View_oauth.prototype.open = function(args, continuation) {
 
 View_oauth.prototype.show = function(continuation) {
   continuation();
-}
+};
 
 View_oauth.prototype.postMessage = function(args, continuation) {
-  if (this.manualdialog) {
-    this.manualdialog.postMessage(args);
-  } else {
-    this.manualMsgQueue.push(args);
+  if (args && args.to && args.cmd && (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
+    this.createManualWindow(args.to);
+    if (this.manualdialog[args.to]) {
+      this.manualdialog[args.to].contentWindow.postMessage(args, "*");
+    } else {
+      if (this.manualMsgQueue[args.to]) {
+        this.manualMsgQueue[args.to].push(args);
+      } else {
+        this.manualMsgQueue[args.to] = [args];
+      }
+    }
   }
   continuation();
 }
@@ -88,3 +80,32 @@ View_oauth.prototype.postMessage = function(args, continuation) {
 View_oauth.prototype.close = function(continuation) {
   continuation();
 }
+
+/**
+ *INTERNAL METHODS
+ */
+View_oauth.prototype.createManualWindow = function(id) {
+  chrome.app.window.create(
+    'submodules/uproxy-common/identity/manual/manualdialog.html',
+    {
+      id: id,
+      minWidth: 600,
+      minHeight: 400,
+      maxWidth: 600,
+      maxHeight: 400
+    },
+    (function(id, child_win) {
+      this.manualdialog[id] = child_win;
+      this.manualdialog[id].onClosed.addListener((function(id) {
+        delete this.manualdialog[id];
+      }).bind(this, id));
+      for (var key in this.manualMsgQueue[id]) {
+        if (this.manualMsgQueue[id].hasOwnProperty(key)) {
+          this.manualdialog[id].contentWindow.postMessage(this.manualMsgQueue[id][key], "*");
+        }
+      }
+      this.manualMsgQueue[id] = [];
+    }).bind(this, id)
+  ); 
+};
+
