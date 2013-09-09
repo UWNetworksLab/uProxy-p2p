@@ -66,14 +66,17 @@ modify (/usr/local) to being editable by your user.
     - This is assuming you have `ruby` and `rubygems` installed. 
 
 
-#### Installation, setup, compilation
+#### Installation, setup, compilation, updating
 
-1. Clone UProxy and its submodules (and its submodules' submodules...): `git
-clone https://github.com/UWNetworksLab/UProxy.git`
+1. Clone UProxy and its submodules (and its submodules' submodules...): 
+`git clone https://github.com/UWNetworksLab/UProxy.git`
 
-2. The the script `UProxy/tools/update.sh`. This will install and compile all
+2. Run script `tools/update.sh`. This will update, install and compile all
 compenents. The first time you run this, you'll see lots of npm, bower and grunt
-messages. The the last couple of lines in case there is an error. 
+messages. Check the last couple of lines in case there is an error. 
+
+At any point you should be able to run `tools/update.sh` to update your local repository, all 
+submodules, dependencies, and rebuild everything needed to test in Chrome. 
 
 
 #### Testing in Chrome
