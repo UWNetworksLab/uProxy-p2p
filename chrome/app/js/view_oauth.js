@@ -6,8 +6,10 @@
 
 var View_oauth = function(channel) {
   this.channel = channel;
-  this.manualdialog = {};
-  this.manualMsgQueue = {};
+  this.manualdialog = null;
+  this.manualport = null;
+  this.manualMsgQueue = [];
+  chrome.runtime.onConnect.addListener(this.onConnect.bind(this));
 };
 
 View_oauth.prototype.open = function(args, continuation) {
@@ -20,12 +22,14 @@ View_oauth.prototype.open = function(args, continuation) {
         if (xhr.status == 200) {
           var resp = JSON.parse(xhr.responseText);
           this.dispatchEvent('message', {
+            cmd: 'google-auth',
             success: true, 
             userId: resp.email, 
             message: {email: resp.email, token: token}
           });
         } else {
           this.dispatchEvent('message', {
+            cmd: 'google-auth',
             success: false,
             message: "Error validating oAuth token"
           });
@@ -33,6 +37,7 @@ View_oauth.prototype.open = function(args, continuation) {
       }).bind(this), false);
       xhr.addEventListener('error', (function(evt) {
         this.dispatchEvent('message', {
+          cmd: 'google-auth',
           success: false,
           message: "Error occurred while validating oAuth token"
         });
@@ -50,6 +55,7 @@ View_oauth.prototype.open = function(args, continuation) {
   } else {
     console.warn("Authentication view provider asked to serve unknown file: " + file);
     this.dispatchEvent('message', {
+      cmd: 'google-auth',
       success: false,
       message: "Authentication view provider asked to serve unknown file: "+file
     });
@@ -62,16 +68,12 @@ View_oauth.prototype.show = function(continuation) {
 };
 
 View_oauth.prototype.postMessage = function(args, continuation) {
-  if (args && args.to && args.cmd && (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
-    this.createManualWindow(args.to);
-    if (this.manualdialog[args.to]) {
-      this.manualdialog[args.to].contentWindow.postMessage(args, "*");
+  if (args && args.cmd && (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
+    this.createManualWindow();
+    if (this.manualport) {
+      this.manualport.postMessage(args);
     } else {
-      if (this.manualMsgQueue[args.to]) {
-        this.manualMsgQueue[args.to].push(args);
-      } else {
-        this.manualMsgQueue[args.to] = [args];
-      }
+      this.manualMsgQueue.push(args);
     }
   }
   continuation();
@@ -84,28 +86,49 @@ View_oauth.prototype.close = function(continuation) {
 /**
  *INTERNAL METHODS
  */
-View_oauth.prototype.createManualWindow = function(id) {
+View_oauth.prototype.createManualWindow = function() {
   chrome.app.window.create(
-    'submodules/uproxy-common/identity/manual/manualdialog.html',
+    //'submodules/uproxy-common/identity/manual/manualdialog.html',
+    'manualidentity/manualdialog.html',
     {
-      id: id,
+      id: 'manual',
       minWidth: 600,
       minHeight: 400,
       maxWidth: 600,
       maxHeight: 400
     },
-    (function(id, child_win) {
-      this.manualdialog[id] = child_win;
-      this.manualdialog[id].onClosed.addListener((function(id) {
-        delete this.manualdialog[id];
-      }).bind(this, id));
-      for (var key in this.manualMsgQueue[id]) {
-        if (this.manualMsgQueue[id].hasOwnProperty(key)) {
-          this.manualdialog[id].contentWindow.postMessage(this.manualMsgQueue[id][key], "*");
+    (function(child_win) {
+      this.manualdialog = child_win;
+      this.manualdialog.onClosed.addListener((function() {
+        if (this.manualport) {
+          this.manualport.disconnect();
+          this.manualport = null;
         }
-      }
-      this.manualMsgQueue[id] = [];
-    }).bind(this, id)
+        this.manualdialog = null;
+      }).bind(this));
+    }).bind(this)
   ); 
 };
 
+View_oauth.prototype.onConnect = function(port) {
+  if (port.name !== 'manualdialog') {
+    console.error("Unexpected internal port connection from " + port.sender.id);
+    return;
+  } else if (this.manualport) {
+    console.error("Port to manual dialog already exists");
+    return;
+  }
+  this.manualport = port;
+  this.manualport.onMessage.addListener(this.onMessage.bind(this));
+  for (var i=0; i < this.manualMsgQueue.length; i++) {
+    this.manualport.postMessage(this.manualMsgQueue[i]);
+  }
+  this.manualMsgQueue = [];
+};
+
+View_oauth.prototype.onMessage = function(msg) {
+  this.dispatchEvent('message', {
+    cmd: 'manual-msg',
+    message: msg
+  });
+};
