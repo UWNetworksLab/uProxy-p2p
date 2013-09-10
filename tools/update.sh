@@ -39,7 +39,7 @@ echo "### Building Freedom from Chrome App"
 CMD="cd $ROOT_DIR/chrome/app/submodules/uproxy-common/submodules/freedom";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="npm install";
-echo "$PREFIX$CMD"; $CMD || echo "Do you have npm installed?" && exit 1;
+echo "$PREFIX$CMD"; $CMD || (echo "Do you have npm installed?" && exit 1);
 CMD="grunt"
 echo "$PREFIX$CMD"; $CMD || exit 1;
 
@@ -48,9 +48,9 @@ echo "### Updating UProxy Chrome Extension"
 CMD="cd $ROOT_DIR/chrome/extension";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="npm install";
-echo "$PREFIX$CMD"; $CMD || echo "Do you have npm installed?" && exit 1;
+echo "$PREFIX$CMD"; $CMD || (echo "Do you have npm installed?" && exit 1);
 CMD="bower install";
-echo "$PREFIX$CMD"; $CMD || echo "Do you have bower installed?" && exit 1;
+echo "$PREFIX$CMD"; $CMD || (echo "Do you have bower installed?" && exit 1);
 
 echo
 echo "### Updating UProxy Firefox Extension"
@@ -66,7 +66,7 @@ echo "### Building Freedom from Firefox Extension"
 CMD="cd $ROOT_DIR/firefox/data/submodules/uproxy-common/submodules/freedom";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="npm install";
-echo "$PREFIX$CMD"; $CMD || echo "Do you have npm installed?" && exit 1;
+echo "$PREFIX$CMD"; $CMD || (echo "Do you have npm installed?" && exit 1);
 CMD="grunt"
 echo "$PREFIX$CMD"; $CMD || exit 1;
 
