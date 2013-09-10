@@ -26,7 +26,8 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // Security: only allow the official uproxy extension to control the backend.
   // We don't want another extension secretly making you proxy others, or
   // trying to do something even worse.
-  if (port.sender.id !== EXTENSION_ID) {
+  if (port.sender.id !== EXTENSION_ID &&
+      port.name == 'uproxy-extension-to-app-port') {
     console.log("Got connect from an unexpected extension id: "
         + port.sender.id);
     return;
