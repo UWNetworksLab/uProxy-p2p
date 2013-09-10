@@ -28,3 +28,7 @@ CMD="cd $ROOT_DIR/chrome/app/submodules/uproxy-common/submodules/freedom";
 echo "$PREFIX$CMD"; $CMD || exit 1;
 CMD="git status"
 echo "$PREFIX$CMD"; $CMD || exit 1;
+CMD="cd $ROOT_DIR/firefox/data/submodules/uproxy-common/submodules/freedom";
+echo "$PREFIX$CMD"; $CMD || exit 1;
+CMD="git status"
+echo "$PREFIX$CMD"; $CMD || exit 1;
