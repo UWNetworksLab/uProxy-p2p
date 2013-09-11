@@ -31,7 +31,7 @@ AuthManager.prototype.validate = function(token) {
           userId: this.credentials.userId,
           message: {email: this.credentials.userId, token: this.credentials.token}
         });
-        this.updateStatus('online', '');
+        this.updateStatus('online', resp.email);
       } else {
         this.updateStatus('error', 'Port to Chrome App missing');
       }

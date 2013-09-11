@@ -52,7 +52,6 @@ AuthManager.prototype.validate = function(token) {
       this.credentials.userId = '-' + resp.id + '@chat.facebook.com';
       this.credentials.token = token;
       console.log(resp);
-      console.log(this.credentials);
       if (this.port) {
         this.port.postMessage({
           cmd: this.opts.name,
@@ -60,7 +59,7 @@ AuthManager.prototype.validate = function(token) {
           userId: this.credentials.userId,
           message: {email: this.credentials.userId, token: this.credentials.token}
         });
-        this.updateStatus('online', '');
+        this.updateStatus('online', resp.first_name + " " + resp.last_name); 
       } else {
         this.updateStatus('error', 'Port to Chrome App missing');
       }
