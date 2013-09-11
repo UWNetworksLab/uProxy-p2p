@@ -1,8 +1,9 @@
 'use strict';
 
-angular.module('UProxyChromeExtension')
-  .controller('MainCtrl', [function () {
-}])
+angular.module('UProxyChromeExtension-popup', ['UProxyChromeExtension'])
+  // There is no initial state stored by the extension for the main controller.
+  .controller('MainCtrl', [function () {}])
+  // The controller for debug information/UI.
   .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model', function ($filter, $scope, freedom, model) {
     var messageable = $filter('messageable');
 
