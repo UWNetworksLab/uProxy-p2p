@@ -24,8 +24,18 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "identity",
+    "https://apis.google.com/"
   ],
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCYcdjD0H0HL8DVcv1+r/e8WyOs4HCakDBlS4scDTopMT7h6AzA6DIacwmLME+jxti4W7lZn32RUdb885/67BJ+4vjTpm+hgC8Oi0AcScyZNtJBygkFI3NNc8Ssm8vaIQxeYAKOHkdw8Jo0yE/6MvLXdEatj3AkQ8Qd2O2LQNF8rwIDAQAB",
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "oauth2": {
+    "client_id": "746567772449-k9rvi4arejtdi9dkjl97lomfn74iqdum.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/plus.login",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/googletalk"
+    ]
+  }  
 }
