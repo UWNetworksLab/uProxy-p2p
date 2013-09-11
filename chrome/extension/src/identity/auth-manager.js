@@ -32,16 +32,20 @@ AuthManager.prototype.onMessage = function(msg) {
 AuthManager.prototype.updateStatus = function(status, message) {
   this.status = status;
   var div = document.getElementById('contents');
-  while (div.firstChild) {
-    div.removeChild(div.firstChild);
-  }
   if (this.status == 'offline') {
+    while (div.firstChild) {
+      div.removeChild(div.firstChild);
+    }
     var img = document.createElement('img');
     img.src = this.opts.signinImg;
     img.width = this.opts.signinImgWidth;
     img.onclick = this.login.bind(this);
     div.appendChild(img);
+    div.appendChild(document.createElement('br'));
   } else if (this.status == 'online') {
+    while (div.firstChild) {
+      div.removeChild(div.firstChild);
+    }
     var img = document.createElement('img');
     img.src = this.opts.iconImg;
     img.width = this.opts.iconImgWidth;
