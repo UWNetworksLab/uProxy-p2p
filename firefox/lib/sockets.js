@@ -14,7 +14,8 @@ const socketTransportService = Cc["@mozilla.org/network/socket-transport-service
 // Private variables for sockets get stored in WeakMaps
 // Client socket variables
 let transports = new WeakMap();
-let readers = new WeakMap();
+let rawReaders = new WeakMap();
+let binaryReaders = new WeakMap();
 let writers = new WeakMap();
 // Map nsIInputStreamCallbacks to their ClientSockets
 let streamCallbacks = new WeakMap();
@@ -25,7 +26,8 @@ let waitingConnections = new WeakMap();
 let waitingAccepts = new WeakMap();
 
 function transportFor(socket) transports.get(socket)
-function readerFor(socket) readers.get(socket)
+function readerFor(socket) binaryReaders.get(socket)
+function rawReaderFor(socket) rawReaders.get(socket)
 function writerFor(socket) writers.get(socket)
 function clientSocketFor(streamCallback) streamCallbacks.get(streamCallback)
 
@@ -42,13 +44,15 @@ var setTransport = function(socket, transport) {
   }
 
   var binaryReader = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
-  binaryReader.setInputStream(transport.openInputStream(0,0,0));
+  var rawInputStream = transport.openInputStream(0,0,0);
+  binaryReader.setInputStream(rawInputStream);
   // Requires new, unlike the rest of the Jetpack API
   // See https://bugzilla.mozilla.org/show_bug.cgi?id=902222
   var writer = new ByteWriter(transport.openOutputStream(0,0,0));
 
   transports.set(socket, transport);
-  readers.set(socket, binaryReader);
+  rawReaders.set(socket, rawInputStream);
+  binaryReaders.set(socket, binaryReader);
   writers.set(socket, writer);
   nsIInputStreamCallback(socket);
 };
@@ -61,8 +65,8 @@ var setTransport = function(socket, transport) {
 var nsIInputStreamCallback = Class({
   type: 'SocketReader',
   initialize: function initialize(clientSocket) {
-    var binaryReader = readerFor(clientSocket);
-    binaryReader.asyncWait(this, 0, 0, null);
+    var rawReader = rawReaderFor(clientSocket);
+    rawReader.asyncWait(this, 0, 0, null);
   },
   onInputStreamReady: function onInputStreamReady() {
     var clientSocket = clientSocketFor(this);
@@ -70,7 +74,7 @@ var nsIInputStreamCallback = Class({
     try {
       var bytesAvailable = binaryReader.available();
     } catch (e) {
-      consoe.log(e);
+      console.log(e);
       clientSocket.disconnect();
       return;
     }
@@ -78,8 +82,9 @@ var nsIInputStreamCallback = Class({
     var typedBuffer = new Uint8Array(buffer);
     binaryReader.readByteArray(bytesAvailable, typedBuffer);
     emit(clientSocket, 'onData', buffer);
-
-    binaryReader.asyncWait(this, 0, 0, null);
+    
+    var rawReader = rawReaderFor(clientSocket);
+    rawReader.asyncWait(this, 0, 0, null);
   }
 });
 
@@ -93,11 +98,12 @@ var ClientSocket = Class({
     }
   },
   connect: function connect(hostname, port) {
-    if (!isUndefined(transportFor(socket))) {
+    if (!isUndefined(transportFor(this))) {
       throw 'Socket already connected';
     }
     var transport = socketTransportService.createTransport(null, 0,
 							   hostname, port, null);
+    // console.log('transport isNonBlocking' + transport.isNonBlocking());
     setTransport(this, transport);
   },
   write: function(data) {
@@ -115,18 +121,13 @@ var ClientSocket = Class({
 });
 
 var nsIServerSocketListener = Class({
+  type: 'nsIServerSocketListener',
   initialize: function initialize(serverSocket) {
     this.serverSocket = serverSocket;
   },
-  type: 'nsIServerSocketListener',
   onSocketAccepted: function onSocketAccepted(nsiServerSocket, transport) {
     let clientSocket = ClientSocket(transport);
-    if (!isUndefined(waitingAcceptsFor(this.serverSocket))) {
-      waitingAcceptsFor(this.serverSocket)(clientSocket);
-      waitingAccepts.put(this.serverSocket, undefined);
-    } else {
-      waitingConnectionsFor(this.serverSocket).push(clientSocket);
-    }
+    emit(this.serverSocket, 'onConnect', clientSocket);
   },
   onStopListening: function onStopListening(nsiServerSocket, status) {
     
@@ -134,6 +135,8 @@ var nsIServerSocketListener = Class({
 });
 
 var ServerSocket = Class({
+  type: 'ServerSocket',
+  extends: EventTarget,
   // Address is currently ignored
   initialize: function initialize(address, port, backlog) {
     if (!isNumber(backlog)) {
@@ -145,18 +148,9 @@ var ServerSocket = Class({
     nsiServerSocket.put(this, serverSocket);
     waitingConnections.put(this, []);
   },
-  type: 'ServerSocket',
   listen: function listen() {
     let serverSocket = serverSocketFor(this);
     serverSocket.asyncListen(nsIServerSocketListener(this));
-  },
-  accept: function accept(callback) {
-    waitingConnections = waitingConnectionsFor(this);
-    if (waitingConnections.length > 0) {
-      callback(waitingConnections.shift());
-    } else if (isUndefined(waitingAcceptsFor(this))) {
-      waitingAccepts.put(this, callback);
-    }
   },
   disconnect: function disconnect() {
     serverSocketFor(this).close();
