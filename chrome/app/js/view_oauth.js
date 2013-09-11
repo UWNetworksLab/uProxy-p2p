@@ -3,19 +3,27 @@
  *  - Google XMPP
  *  - Manual identity
  **/
+var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
 var View_oauth = function(channel) {
   this.channel = channel;
   this.manualdialog = null;
   this.manualport = null;
   this.manualMsgQueue = [];
-  chrome.runtime.onConnect.addListener(this.onConnect.bind(this));
+  this.authPort = {
+    'google-auth': null,
+    'facebook-auth': null
+  };
+  this.designation = null;
+  chrome.runtime.onConnect.addListener(this.onConnectManual.bind(this));
+  chrome.runtime.onConnectExternal.addListener(this.onConnectAuth.bind(this));
 };
 
 View_oauth.prototype.open = function(args, continuation) {
   var file = args.file;
   if (file == "googlelogin.html") {
     //chrome.app.window.create('submodules/uproxy-common/identity/google/googlelogin.html', {});
+    this.designation = 'google-auth';
     chrome.identity.getAuthToken({ 'interactive': true }, (function(token) {
       var xhr = new XMLHttpRequest();
       xhr.addEventListener('load', (function(evt) {
@@ -45,6 +53,8 @@ View_oauth.prototype.open = function(args, continuation) {
       xhr.open('get', 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token='+token, true);
       xhr.send();
     }).bind(this));
+  } else if (file == 'manual') {
+    this.designation = 'manual';
   } else if (file == "oauth.html") {
     //@TODO{ryscheng} Get rid of this block
     if (!this.listening) {
@@ -61,7 +71,7 @@ View_oauth.prototype.open = function(args, continuation) {
     });
     continuation();
   }
-}
+};
 
 View_oauth.prototype.show = function(continuation) {
   continuation();
@@ -77,11 +87,11 @@ View_oauth.prototype.postMessage = function(args, continuation) {
     }
   }
   continuation();
-}
+};
 
 View_oauth.prototype.close = function(continuation) {
   continuation();
-}
+};
 
 /**
  *INTERNAL METHODS
@@ -110,25 +120,53 @@ View_oauth.prototype.createManualWindow = function() {
   ); 
 };
 
-View_oauth.prototype.onConnect = function(port) {
+View_oauth.prototype.onConnectManual = function(port) {
   if (port.name !== 'manualdialog') {
     console.error("Unexpected internal port connection from " + port.sender.id);
     return;
   } else if (this.manualport) {
     console.error("Port to manual dialog already exists");
     return;
+  } else if (this.designation !== 'manual') {
+    console.log('Port to core.view for something else');
+    return;
   }
   this.manualport = port;
-  this.manualport.onMessage.addListener(this.onMessage.bind(this));
+  this.manualport.onMessage.addListener(this.onMessageManual.bind(this));
+  this.manualport.onDisconnect.addListener((function() {
+    this.manualport = null;
+  }).bind(this));
   for (var i=0; i < this.manualMsgQueue.length; i++) {
     this.manualport.postMessage(this.manualMsgQueue[i]);
   }
   this.manualMsgQueue = [];
 };
 
-View_oauth.prototype.onMessage = function(msg) {
+View_oauth.prototype.onMessageManual = function(msg) {
   this.dispatchEvent('message', {
     cmd: 'manual-msg',
     message: msg
   });
+};
+
+View_oauth.prototype.onConnectAuth = function(port) {
+  if (!this.authPort.hasOwnProperty(port.name)) {
+    console.log("Unexpected external port connection with name "+port.name);
+    return;
+  } else if (port.sender.id !== EXTENSION_ID) {
+    console.error("Unexpected external port connection from "+port.sender.id);
+    return;
+  } else if (port.name !== this.designation) {
+    console.log('Got connection request from ' + port.name + " for core.view for " + this.designation);
+    return;
+  }
+  this.authPort[port.name] = port;
+  port.onDisconnect.addListener((function() {
+    this.authPort[port.name] = null;
+  }).bind(this));
+  port.onMessage.addListener(this.onMessageAuth.bind(this));
+};
+
+View_oauth.prototype.onMessageAuth = function (msg) {
+  console.log('!!!' + JSON.stringify(msg));
 };
