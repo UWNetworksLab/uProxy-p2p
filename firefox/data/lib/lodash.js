@@ -1,7 +1,7 @@
 /**
  * @license
  * Lo-Dash 1.3.1 (Custom Build) <http://lodash.com/>
- * Build: `lodash mobile -o ./dist/lodash.mobile.js`
+ * Build: `lodash modern -o ./dist/lodash.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.4.4 <http://underscorejs.org/>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -51,6 +51,9 @@
   /** Used to match "interpolate" template delimiters */
   var reInterpolate = /<%=([\s\S]+?)%>/g;
 
+  /** Used to detect functions containing a `this` reference */
+  var reThis = (reThis = /\bthis\b/) && reThis.test(runInContext) && reThis;
+
   /** Used to detect and test whitespace */
   var whitespace = (
     // whitespace
@@ -77,7 +80,7 @@
 
   /** Used to assign default `context` object properties */
   var contextProps = [
-    'Array', 'Boolean', 'Date', 'Error', 'Function', 'Math', 'Number', 'Object',
+    'Array', 'Boolean', 'Date', 'Function', 'Math', 'Number', 'Object',
     'RegExp', 'String', '_', 'attachEvent', 'clearTimeout', 'isFinite', 'isNaN',
     'parseInt', 'setImmediate', 'setTimeout'
   ];
@@ -424,7 +427,6 @@
     var Array = context.Array,
         Boolean = context.Boolean,
         Date = context.Date,
-        Error = context.Error,
         Function = context.Function,
         Math = context.Math,
         Number = context.Number,
@@ -442,8 +444,7 @@
     var arrayRef = [];
 
     /** Used for native method references */
-    var errorProto = Error.prototype,
-        objectProto = Object.prototype,
+    var objectProto = Object.prototype,
         stringProto = String.prototype;
 
     /** Used to restore the original `_` reference in `noConflict` */
@@ -461,10 +462,12 @@
         clearTimeout = context.clearTimeout,
         concat = arrayRef.concat,
         floor = Math.floor,
+        fnToString = Function.prototype.toString,
         getPrototypeOf = reNative.test(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf,
         hasOwnProperty = objectProto.hasOwnProperty,
         push = arrayRef.push,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
+        setImmediate = context.setImmediate,
         setTimeout = context.setTimeout,
         toString = objectProto.toString;
 
@@ -589,43 +592,12 @@
     var support = lodash.support = {};
 
     /**
-     * Detect if `name` or `message` properties of `Error.prototype` are
-     * enumerable by default. (IE < 9, Safari < 5.1)
-     *
-     * @memberOf _.support
-     * @type Boolean
-     */
-    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') || propertyIsEnumerable.call(errorProto, 'name');
-
-    /**
-     * Detect if `prototype` properties are enumerable by default.
-     *
-     * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
-     * (if the prototype or a property on the prototype has been set)
-     * incorrectly sets a function's `prototype` property [[Enumerable]]
-     * value to `true`.
-     *
-     * @memberOf _.support
-     * @type Boolean
-     */
-    support.enumPrototypes = true;
-
-    /**
      * Detect if `Function#bind` exists and is inferred to be fast (all but V8).
      *
      * @memberOf _.support
      * @type Boolean
      */
     support.fastBind = nativeBind && !isV8;
-
-    /**
-     * Detect if `arguments` object indexes are non-enumerable
-     * (Firefox < 4, IE < 9, PhantomJS, Safari < 5.1).
-     *
-     * @memberOf _.support
-     * @type Boolean
-     */
-    support.nonEnumArgs = true;
 
     /**
      * By default, the template delimiters used by Lo-Dash are similar to those in
@@ -758,17 +730,6 @@
     function createObject(prototype) {
       return isObject(prototype) ? nativeCreate(prototype) : {};
     }
-    // fallback for browsers without `Object.create`
-    if  (!nativeCreate) {
-      var createObject = function(prototype) {
-        if (isObject(prototype)) {
-          noop.prototype = prototype;
-          var result = new noop;
-          noop.prototype = null;
-        }
-        return result || {};
-      };
-    }
 
     /**
      * Used by `escape` to convert characters to HTML entities.
@@ -894,9 +855,7 @@
      * _.isArray([1, 2, 3]);
      * // => true
      */
-    var isArray = nativeIsArray || function(value) {
-      return value ? (typeof value == 'object' && toString.call(value) == arrayClass) : false;
-    };
+    var isArray = nativeIsArray;
 
     /**
      * A fallback implementation of `Object.keys` which produces an array of the
@@ -910,22 +869,12 @@
     var shimKeys = function (object) {
       var index, iterable = object, result = [];
       if (!iterable) return result;
-      if (!(objectTypes[typeof object])) return result;
-        var length = iterable.length; index = -1;
-        if (length && isArguments(iterable)) {
-          while (++index < length) {
-            index += '';
-            result.push(index);
-          }
-        } else {    
-        var skipProto = typeof iterable == 'function';
-
+      if (!(objectTypes[typeof object])) return result;    
         for (index in iterable) {
-          if (!(skipProto && index == "prototype") && hasOwnProperty.call(iterable, index)) {
+          if (hasOwnProperty.call(iterable, index)) {
             result.push(index);    
           }
-        }  
-      }
+        }    
       return result
     };
 
@@ -946,47 +895,7 @@
       if (!isObject(object)) {
         return [];
       }
-      if ((support.enumPrototypes && typeof object == 'function') ||
-          (support.nonEnumArgs && object.length && isArguments(object))) {
-        return shimKeys(object);
-      }
       return nativeKeys(object);
-    };
-
-    /**
-     * A function compiled to iterate `arguments` objects, arrays, objects, and
-     * strings consistenly across environments, executing the `callback` for each
-     * element in the `collection`. The `callback` is bound to `thisArg` and invoked
-     * with three arguments; (value, index|key, collection). Callbacks may exit
-     * iteration early by explicitly returning `false`.
-     *
-     * @private
-     * @type Function
-     * @param {Array|Object|String} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {Mixed} [thisArg] The `this` binding of `callback`.
-     * @returns {Array|Object|String} Returns `collection`.
-     */
-    var basicEach = function (collection, callback, thisArg) {
-      var index, iterable = collection, result = iterable;
-      if (!iterable) return result;
-      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);
-      var length = iterable.length; index = -1;
-      if (typeof length == 'number') {
-        while (++index < length) {
-          if (callback(iterable[index], index, collection) === false) return result;
-        }
-      }
-      else {    
-        var skipProto = typeof iterable == 'function';
-
-        for (index in iterable) {
-          if (!(skipProto && index == "prototype") && hasOwnProperty.call(iterable, index)) {
-            if (callback(iterable[index], index, collection) === false) return result;    
-          }
-        }  
-      }
-      return result
     };
 
     /**
@@ -1053,22 +962,15 @@
       }
       while (++argsIndex < argsLength) {
         iterable = args[argsIndex];
-        if (iterable && objectTypes[typeof iterable]) {
-        var length = iterable.length; index = -1;
-        if (length && isArguments(iterable)) {
-          while (++index < length) {
-            index += '';
-            result[index] = callback ? callback(result[index], iterable[index]) : iterable[index];
-          }
-        } else {    
-        var skipProto = typeof iterable == 'function';
+        if (iterable && objectTypes[typeof iterable]) {    
+        var ownIndex = -1,
+            ownProps = objectTypes[typeof iterable] && keys(iterable),
+            length = ownProps ? ownProps.length : 0;
 
-        for (index in iterable) {
-          if (!(skipProto && index == "prototype") && hasOwnProperty.call(iterable, index)) {
-            result[index] = callback ? callback(result[index], iterable[index]) : iterable[index];    
-          }
-        }  
-      }
+        while (++ownIndex < length) {
+          index = ownProps[ownIndex];
+          result[index] = callback ? callback(result[index], iterable[index]) : iterable[index];    
+        }    
         }
       }
       return result
@@ -1194,7 +1096,7 @@
       stackB.push(result);
 
       // recursively populate clone (susceptible to call stack limits)
-      (isArr ? basicEach : forOwn)(value, function(objValue, key) {
+      (isArr ? forEach : forOwn)(value, function(objValue, key) {
         result[key] = clone(objValue, deep, callback, undefined, stackA, stackB);
       });
 
@@ -1278,22 +1180,15 @@
           argsLength = typeof guard == 'number' ? 2 : args.length;
       while (++argsIndex < argsLength) {
         iterable = args[argsIndex];
-        if (iterable && objectTypes[typeof iterable]) {
-        var length = iterable.length; index = -1;
-        if (length && isArguments(iterable)) {
-          while (++index < length) {
-            index += '';
-            if (typeof result[index] == 'undefined') result[index] = iterable[index];
-          }
-        } else {    
-        var skipProto = typeof iterable == 'function';
+        if (iterable && objectTypes[typeof iterable]) {    
+        var ownIndex = -1,
+            ownProps = objectTypes[typeof iterable] && keys(iterable),
+            length = ownProps ? ownProps.length : 0;
 
-        for (index in iterable) {
-          if (!(skipProto && index == "prototype") && hasOwnProperty.call(iterable, index)) {
-            if (typeof result[index] == 'undefined') result[index] = iterable[index];    
-          }
-        }  
-      }
+        while (++ownIndex < length) {
+          index = ownProps[ownIndex];
+          if (typeof result[index] == 'undefined') result[index] = iterable[index];    
+        }    
         }
       }
       return result
@@ -1364,22 +1259,10 @@
       var index, iterable = collection, result = iterable;
       if (!iterable) return result;
       if (!objectTypes[typeof iterable]) return result;
-      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);
-        var length = iterable.length; index = -1;
-        if (length && isArguments(iterable)) {
-          while (++index < length) {
-            index += '';
-            if (callback(iterable[index], index, collection) === false) return result;
-          }
-        } else {    
-        var skipProto = typeof iterable == 'function';
-
+      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);    
         for (index in iterable) {
-          if (!(skipProto && index == "prototype")) {
-            if (callback(iterable[index], index, collection) === false) return result;    
-          }
-        }  
-      }
+          if (callback(iterable[index], index, collection) === false) return result;    
+        }    
       return result
     };
 
@@ -1408,22 +1291,15 @@
       var index, iterable = collection, result = iterable;
       if (!iterable) return result;
       if (!objectTypes[typeof iterable]) return result;
-      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);
-        var length = iterable.length; index = -1;
-        if (length && isArguments(iterable)) {
-          while (++index < length) {
-            index += '';
-            if (callback(iterable[index], index, collection) === false) return result;
-          }
-        } else {    
-        var skipProto = typeof iterable == 'function';
+      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);    
+        var ownIndex = -1,
+            ownProps = objectTypes[typeof iterable] && keys(iterable),
+            length = ownProps ? ownProps.length : 0;
 
-        for (index in iterable) {
-          if (!(skipProto && index == "prototype") && hasOwnProperty.call(iterable, index)) {
-            if (callback(iterable[index], index, collection) === false) return result;    
-          }
-        }  
-      }
+        while (++ownIndex < length) {
+          index = ownProps[ownIndex];
+          if (callback(iterable[index], index, collection) === false) return result;    
+        }    
       return result
     };
 
@@ -1833,12 +1709,6 @@
     function isFunction(value) {
       return typeof value == 'function';
     }
-    // fallback for older versions of Chrome and Safari
-    if (isFunction(/x/)) {
-      isFunction = function(value) {
-        return typeof value == 'function' && toString.call(value) == funcClass;
-      };
-    }
 
     /**
      * Checks if `value` is the language type of Object.
@@ -1960,7 +1830,7 @@
      * _.isPlainObject({ 'name': 'moe', 'age': 40 });
      * // => true
      */
-    var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
+    var isPlainObject = function(value) {
       if (!(value && toString.call(value) == objectClass)) {
         return false;
       }
@@ -1986,7 +1856,7 @@
      * // => true
      */
     function isRegExp(value) {
-      return !!(value && objectTypes[typeof value]) && toString.call(value) == regexpClass;
+      return value ? (typeof value == 'object' && toString.call(value) == regexpClass) : false;
     }
 
     /**
@@ -2335,7 +2205,7 @@
           accumulator = createObject(proto);
         }
       }
-      (isArr ? basicEach : forOwn)(object, function(value, index, object) {
+      (isArr ? forEach : forOwn)(object, function(value, index, object) {
         return callback(accumulator, value, index, object);
       });
       return accumulator;
@@ -2441,7 +2311,7 @@
           : indexOf(collection, target, fromIndex)
         ) > -1;
       } else {
-        basicEach(collection, function(value) {
+        forOwn(collection, function(value) {
           if (++index >= fromIndex) {
             return !(result = value === target);
           }
@@ -2539,17 +2409,17 @@
       var result = true;
       callback = lodash.createCallback(callback, thisArg);
 
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection ? collection.length : 0;
 
+      if (typeof length == 'number') {
         while (++index < length) {
           if (!(result = !!callback(collection[index], index, collection))) {
             break;
           }
         }
       } else {
-        basicEach(collection, function(value, index, collection) {
+        forOwn(collection, function(value, index, collection) {
           return (result = !!callback(value, index, collection));
         });
       }
@@ -2600,10 +2470,10 @@
       var result = [];
       callback = lodash.createCallback(callback, thisArg);
 
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection ? collection.length : 0;
 
+      if (typeof length == 'number') {
         while (++index < length) {
           var value = collection[index];
           if (callback(value, index, collection)) {
@@ -2611,7 +2481,7 @@
           }
         }
       } else {
-        basicEach(collection, function(value, index, collection) {
+        forOwn(collection, function(value, index, collection) {
           if (callback(value, index, collection)) {
             result.push(value);
           }
@@ -2666,10 +2536,10 @@
     function find(collection, callback, thisArg) {
       callback = lodash.createCallback(callback, thisArg);
 
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection ? collection.length : 0;
 
+      if (typeof length == 'number') {
         while (++index < length) {
           var value = collection[index];
           if (callback(value, index, collection)) {
@@ -2678,7 +2548,7 @@
         }
       } else {
         var result;
-        basicEach(collection, function(value, index, collection) {
+        forOwn(collection, function(value, index, collection) {
           if (callback(value, index, collection)) {
             result = value;
             return false;
@@ -2711,17 +2581,18 @@
      * // => alerts each number value (order is not guaranteed)
      */
     function forEach(collection, callback, thisArg) {
-      if (callback && typeof thisArg == 'undefined' && isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection ? collection.length : 0;
 
+      callback = callback && typeof thisArg == 'undefined' ? callback : lodash.createCallback(callback, thisArg);
+      if (typeof length == 'number') {
         while (++index < length) {
           if (callback(collection[index], index, collection) === false) {
             break;
           }
         }
       } else {
-        basicEach(collection, callback, thisArg);
+        forOwn(collection, callback);
       }
       return collection;
     }
@@ -2847,16 +2718,17 @@
      */
     function map(collection, callback, thisArg) {
       var index = -1,
-          length = collection ? collection.length : 0,
-          result = Array(typeof length == 'number' ? length : 0);
+          length = collection ? collection.length : 0;
 
       callback = lodash.createCallback(callback, thisArg);
-      if (isArray(collection)) {
+      if (typeof length == 'number') {
+        var result = Array(length);
         while (++index < length) {
           result[index] = callback(collection[index], index, collection);
         }
       } else {
-        basicEach(collection, function(value, key, collection) {
+        result = [];
+        forOwn(collection, function(value, key, collection) {
           result[++index] = callback(value, key, collection);
         });
       }
@@ -2921,7 +2793,7 @@
           ? charAtCallback
           : lodash.createCallback(callback, thisArg);
 
-        basicEach(collection, function(value, index, collection) {
+        forEach(collection, function(value, index, collection) {
           var current = callback(value, index, collection);
           if (current > computed) {
             computed = current;
@@ -2990,7 +2862,7 @@
           ? charAtCallback
           : lodash.createCallback(callback, thisArg);
 
-        basicEach(collection, function(value, index, collection) {
+        forEach(collection, function(value, index, collection) {
           var current = callback(value, index, collection);
           if (current < computed) {
             computed = current;
@@ -3021,7 +2893,18 @@
      * _.pluck(stooges, 'name');
      * // => ['moe', 'larry']
      */
-    var pluck = map;
+    function pluck(collection, property) {
+      var index = -1,
+          length = collection ? collection.length : 0;
+
+      if (typeof length == 'number') {
+        var result = Array(length);
+        while (++index < length) {
+          result[index] = collection[index][property];
+        }
+      }
+      return result || map(collection, property);
+    }
 
     /**
      * Reduces a `collection` to a value which is the accumulated result of running
@@ -3054,13 +2937,14 @@
      * // => { 'a': 3, 'b': 6, 'c': 9 }
      */
     function reduce(collection, callback, accumulator, thisArg) {
+      if (!collection) return accumulator;
       var noaccum = arguments.length < 3;
       callback = lodash.createCallback(callback, thisArg, 4);
 
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection.length;
 
+      if (typeof length == 'number') {
         if (noaccum) {
           accumulator = collection[++index];
         }
@@ -3068,7 +2952,7 @@
           accumulator = callback(accumulator, collection[index], index, collection);
         }
       } else {
-        basicEach(collection, function(value, index, collection) {
+        forOwn(collection, function(value, index, collection) {
           accumulator = noaccum
             ? (noaccum = false, value)
             : callback(accumulator, value, index, collection)
@@ -3259,17 +3143,17 @@
       var result;
       callback = lodash.createCallback(callback, thisArg);
 
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
+      var index = -1,
+          length = collection ? collection.length : 0;
 
+      if (typeof length == 'number') {
         while (++index < length) {
           if ((result = callback(collection[index], index, collection))) {
             break;
           }
         }
       } else {
-        basicEach(collection, function(value, index, collection) {
+        forOwn(collection, function(value, index, collection) {
           return !(result = callback(value, index, collection));
         });
       }
@@ -4540,7 +4424,7 @@
           return result;
         };
       }
-      if (typeof thisArg == 'undefined') {
+      if (typeof thisArg == 'undefined' || (reThis && !reThis.test(fnToString.call(func)))) {
         return func;
       }
       if (argCount === 1) {
@@ -4694,6 +4578,10 @@
     function defer(func) {
       var args = nativeSlice.call(arguments, 1);
       return setTimeout(function() { func.apply(undefined, args); }, 1);
+    }
+    // use `setImmediate` if it's available in Node.js
+    if (isV8 && freeModule && typeof setImmediate == 'function') {
+      defer = bind(setImmediate, context);
     }
 
     /**
@@ -5603,7 +5491,7 @@
     lodash.prototype.valueOf = wrapperValueOf;
 
     // add `Array` functions that return unwrapped values
-    basicEach(['join', 'pop', 'shift'], function(methodName) {
+    forEach(['join', 'pop', 'shift'], function(methodName) {
       var func = arrayRef[methodName];
       lodash.prototype[methodName] = function() {
         return func.apply(this.__wrapped__, arguments);
@@ -5611,7 +5499,7 @@
     });
 
     // add `Array` functions that return the wrapped value
-    basicEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
+    forEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
       var func = arrayRef[methodName];
       lodash.prototype[methodName] = function() {
         func.apply(this.__wrapped__, arguments);
@@ -5620,7 +5508,7 @@
     });
 
     // add `Array` functions that return new wrapped values
-    basicEach(['concat', 'slice', 'splice'], function(methodName) {
+    forEach(['concat', 'slice', 'splice'], function(methodName) {
       var func = arrayRef[methodName];
       lodash.prototype[methodName] = function() {
         return new lodashWrapper(func.apply(this.__wrapped__, arguments));
