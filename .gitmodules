@@ -11,3 +11,9 @@
 [submodule "firefox/data/submodules/oauth2"]
 	path = firefox/data/submodules/oauth2
 	url = https://github.com/borismus/oauth2-extensions
+[submodule "firefox/packages/jetpack-subprocess"]
+	path = firefox/packages/jetpack-subprocess
+	url = https://github.com/ochameau/jetpack-subprocess.git
+[submodule "firefox/packages/pathfinder"]
+	path = firefox/packages/pathfinder
+	url = https://github.com/Paul-E/addon-pathfinder.git
