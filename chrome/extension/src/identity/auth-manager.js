@@ -52,8 +52,8 @@ AuthManager.prototype.updateStatus = function(status, message) {
     img.onclick = this.logout.bind(this);
     div.appendChild(img);
     div.appendChild(document.createElement('br'));
-    if (this.credentials && this.credentials.userId) {
-      div.appendChild(document.createTextNode(this.credentials.userId));
+    if (message) {
+      div.appendChild(document.createTextNode(message));
       div.appendChild(document.createElement('br'));
     }
     var logout = document.createElement('button');
