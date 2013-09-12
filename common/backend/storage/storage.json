@@ -1,0 +1,13 @@
+{
+  "name": "Storage",
+  "description": "Included Storage Provider",
+  "app": {
+    "script": "storage.js"
+  },
+  "provides": [
+    "storage"
+  ],
+  "permissions": [
+    "core.storage"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Loopback Identity",
+  "description": "Mock Identity provider.",
+  "app": {
+    "script": ["identity.loopback.js"]
+  },
+  "provides": [
+    "identity"
+  ]
+}
