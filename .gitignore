@@ -7,3 +7,5 @@ uproxy.crx
 *~
 node_modules
 chrome/app/common
+chrome/extension/src/common
+common/ui/bower_components
