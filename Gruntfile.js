@@ -36,6 +36,10 @@ module.exports = function(grunt) {
         command: 'bower install',
         options: {stdout: true, execOptions: {cwd: 'common/ui'}}
       },
+      setup_freedom: {
+        command: 'npm install',
+        options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
+      },
       freedom: {
         command: 'grunt',
         options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
@@ -65,19 +69,20 @@ module.exports = function(grunt) {
 
   grunt.registerTask('setup', [
     'shell:git_submodule', 
-    'shell:bower_install', 
+    'shell:bower_install',
+    'shell:setup_freedom',
     'shell:freedom'
   ]);
   grunt.registerTask('test', [
     'jshint:all',
     'jasmine'
   ]);
-  grunt.registerTask('run', [
+  grunt.registerTask('build', [
     'copy:chrome_app',
     'copy:chrome_ext'
   ]);
-  grunt.registerTask('everything' ['setup', 'test', 'run']);
+  grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
-  grunt.registerTask('default', ['run']);
+  grunt.registerTask('default', ['build']);
  
 };
