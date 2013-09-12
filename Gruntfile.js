@@ -11,15 +11,23 @@ module.exports = function(grunt) {
           {src: 'common/backend/storage/**', dest: 'chrome/app/'},
           {src: 'common/backend/transport/**', dest: 'chrome/app/'},
           {src: 'common/backend/*.js', dest: 'chrome/app/'},
-          {src: 'common/backend/*.json', dest: 'chrome/app/'}
+          {src: 'common/backend/*.json', dest: 'chrome/app/'},
+          {src: 'common/freedom/freedom.js', dest: 'chrome/app/'}
         ]
       },
       chrome_ext: {},
       firefox: {}
+    },
+    spawn: {
+      freedom: {
+        
+      }
     }
   });
   
   grunt.loadNpmTasks('grunt-contrib-copy');
+
+  grunt.registerTask();
 
   // Default task(s).
   grunt.registerTask('default', ['copy:chrome_app']);
