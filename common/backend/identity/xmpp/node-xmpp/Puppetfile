@@ -1,0 +1,3 @@
+# Configuration for librarian-puppet.
+mod "nodejs",
+   :git => "git://github.com/logicalparadox/puppet-nodejs.git"

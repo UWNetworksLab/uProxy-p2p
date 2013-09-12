@@ -1,0 +1,14 @@
+{
+  "name": "Facebook Identity",
+  "description": "Communication and discovery service for Facebook contacts.",
+  "app": {
+    "script": ["identity.facebook.js", "../identity.xmpp.js", "../node-xmpp-browser.js"]
+  },
+  "provides": [
+    "identity"
+  ],
+  "permissions": [
+    "core.socket",
+    "core.view"
+  ]
+}

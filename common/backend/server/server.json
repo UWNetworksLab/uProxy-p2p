@@ -1,0 +1,16 @@
+{
+  "name": "UProxy Socks Server",
+  "description": "Proxy remote connections to their destination.",
+  "app": {
+    "script": ["../util.js", "server.js", "webclient.js"]
+  },
+  "dependencies": {
+    "transport": {
+      "url": "submodules/uproxy-common/transport/transport.json",
+      "api": "transport"
+    }
+  },
+  "permissions": [
+    "core.socket"
+  ]
+}
