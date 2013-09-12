@@ -34,7 +34,7 @@ module.exports = function(grunt) {
       },
       bower_install: {
         command: 'bower install',
-        options: {execOptions: {cwd: 'common'}}
+        options: {execOptions: {cwd: 'common/ui'}}
       },
       freedom: {
         command: 'grunt',
