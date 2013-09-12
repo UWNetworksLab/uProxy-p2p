@@ -4,9 +4,9 @@
   "description": "Ubiquitous Proxy [Alpha]",
   "version": "0.0.4",
   "icons": {
-      "128": "images/uproxy-128.png",
-      "19": "images/uproxy-19.png",
-      "16": "images/uproxy-16.png"
+      "128": "common/ui/icons/uproxy-128.png",
+      "19": "common/ui/icons/uproxy-19.png",
+      "16": "common/ui/icons/uproxy-16.png"
   },
   "app": {
     "background": {
