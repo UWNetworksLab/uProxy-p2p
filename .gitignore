@@ -1,7 +1,9 @@
 uproxy.zip
 uproxy.crx
 .DS_Store
+.grunt
 *.swp
 *.un~
 *~
+node_modules
 chrome/app/common
