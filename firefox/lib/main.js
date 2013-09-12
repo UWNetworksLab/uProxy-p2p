@@ -1,7 +1,6 @@
 var self = require("sdk/self");
 var panel = require("sdk/panel");
-
-
+var pageMod = require("sdk/page-mod");
 
 var initToolbar = function(freedom) {
   // create toolbarbutton
@@ -32,10 +31,20 @@ var initPanel = function(freedomCommunicator) {
   return uproxyPanel;
 };
 
+// var optionsPanel = function(freedomCommunicator) {
+//   var options = pageMod({
+//     include: "",
+//     contentScriptFile:[]
+//     contentScriptWhen: "start"
+//   });  
+//   //freedomCommunicator.addContentContext(options);
+//   options.show();
+// };
+
 var freedomEnvironment = require('./init_freedom').InitFreedom();
 
 // TODO: Remove when uproxy.js no longer uses setTimeout
 // and replace with the line:
 // initToolbar(freedomEnvironment);
-require('sdk/timers').setTimeout(initToolbar, 20, freedomEnvironment);
-
+require('sdk/timers').setTimeout(initToolbar, 100, freedomEnvironment);
+// optionsPanel(freedomEnvironment);
