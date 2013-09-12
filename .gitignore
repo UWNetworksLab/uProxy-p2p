@@ -1,7 +1,7 @@
-resources
 uproxy.zip
 uproxy.crx
 .DS_Store
 *.swp
 *.un~
 *~
+chrome/app/common
