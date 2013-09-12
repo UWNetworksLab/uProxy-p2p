@@ -68,18 +68,18 @@ modify (/usr/local) to being editable by your user.
 1. Clone UProxy and its submodules (and its submodules' submodules...): 
 `git clone https://github.com/UWNetworksLab/UProxy.git`
 
-2. Run `grunt setup`. This will install all local dependencies,
+2. Run `./setup.sh`. This will install all local dependencies,
 as appropriate to run in Chrome.
 The first time you run this, you'll see lots of npm, bower and grunt
 messages. Check the last couple of lines in case there is an error. 
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies,
-updates to FreeDOM), you will have to run `grunt setup` to update these dependencies.
+updates to FreeDOM), you will have to run `./setup.sh` to update these dependencies.
 
 
 #### Running in Chrome
 
-1. Run `grunt build` to compile UProxy, which needs to be done
+1. Run `./build.sh` to compile UProxy, which needs to be done
 every time changes are made to the code.
 
 2. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
