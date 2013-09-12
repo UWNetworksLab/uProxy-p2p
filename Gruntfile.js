@@ -15,7 +15,11 @@ module.exports = function(grunt) {
           {src: 'common/freedom/freedom.js', dest: 'chrome/app/'}
         ]
       },
-      chrome_ext: {},
+      chrome_ext: {files: [
+	{src:'common/ui/**', dest:'chrome/extension/src/'},
+	{src:'common/bower_components/**', dest:'chrome/extension/src/'}
+      ]
+		  },
       firefox: {}
     },
     spawn: {
@@ -30,6 +34,6 @@ module.exports = function(grunt) {
   grunt.registerTask();
 
   // Default task(s).
-  grunt.registerTask('default', ['copy:chrome_app']);
+  grunt.registerTask('default', ['copy:chrome_app', 'copy:chrome_ext']);
  
 };

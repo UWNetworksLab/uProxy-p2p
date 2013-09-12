@@ -4,9 +4,9 @@
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
   "icons": {
-    "16": "images/uproxy-16.png",
-    "19": "images/uproxy-19.png",
-    "128": "images/uproxy-128.png"
+    "16": "common/ui/icons/uproxy-16.png",
+    "19": "common/ui/icons/uproxy-19.png",
+    "128": "common/ui/icons/uproxy-128.png"
   },
   "default_locale": "en",
   "background": {
@@ -18,10 +18,10 @@
   },
   "browser_action": {
     "default_icon": {
-      "19": "images/uproxy-19.png"
+      "19": "common/ui/icons/uproxy-19.png"
     },
     "default_title": "__MSG_appName__",
-    "default_popup": "popup.html"
+    "default_popup": "common/ui/popup.html"
   },
   "permissions": [
     "storage",
@@ -29,7 +29,7 @@
     "https://apis.google.com/"
   ],
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCYcdjD0H0HL8DVcv1+r/e8WyOs4HCakDBlS4scDTopMT7h6AzA6DIacwmLME+jxti4W7lZn32RUdb885/67BJ+4vjTpm+hgC8Oi0AcScyZNtJBygkFI3NNc8Ssm8vaIQxeYAKOHkdw8Jo0yE/6MvLXdEatj3AkQ8Qd2O2LQNF8rwIDAQAB",
-  "options_page": "options.html",
+  "options_page": "common/ui/options.html",
   "oauth2": {
     "client_id": "746567772449-k9rvi4arejtdi9dkjl97lomfn74iqdum.apps.googleusercontent.com",
     "scopes": [
