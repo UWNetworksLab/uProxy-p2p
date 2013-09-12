@@ -1,3 +1,7 @@
+path = require("path");
+var sources = ['common/backend/util.js'];
+var testSources = sources.slice(0);
+
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -18,18 +22,56 @@ module.exports = function(grunt) {
       chrome_ext: {},
       firefox: {}
     },
-    spawn: {
+    shell: {
+      git_submodule: {
+        command: ['git submodule init', 'git submodule update'].join(';'),
+        options: {stdout: true}
+      },
+      bower_install: {
+        command: 'bower install',
+        options: {execOptions: {cwd: 'common'}}
+      },
       freedom: {
-        
+        command: 'grunt',
+        options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
+      },
+    },
+    jasmine: {
+      common: {
+        src: testSources,
+        options: {
+          specs: 'common/backend/spec/*Spec.js'
+        }
+      }
+    },
+    jshint: {
+      all: sources,
+      options: {
+        '-W069': true
       }
     }
+
   });
   
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask();
-
+  grunt.registerTask('setup', [
+    'shell:git_submodule', 
+    'shell:bower_install', 
+    'shell:freedom'
+  ]);
+  grunt.registerTask('test', [
+    'jshint:all',
+    'jasmine'
+  ]);
+  grunt.registerTask('run', [
+    'copy:chrome_app'
+  ]);
+  grunt.registerTask('everything' ['setup', 'test', 'run']);
   // Default task(s).
-  grunt.registerTask('default', ['copy:chrome_app']);
+  grunt.registerTask('default', ['run']);
  
 };
