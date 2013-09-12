@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "transport": {
-      "url": "submodules/uproxy-common/transport/transport.json",
+      "url": "common/backend/transport/transport.json",
       "api": "transport"
     }
   },

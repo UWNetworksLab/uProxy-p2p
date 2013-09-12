@@ -6,15 +6,15 @@
   },
   "dependencies": {
     "loopbackIdentity": {
-      "url": "submodules/uproxy-common/identity/loopback/identity.loopback.json",
+      "url": "common/backend/identity/loopback/identity.loopback.json",
       "api": "identity"
     },
     "manualIdentity": {
-      "url": "submodules/uproxy-common/identity/manual/identity.manual.json",
+      "url": "common/backend/identity/manual/identity.manual.json",
       "api": "identity"
     },
     "googleIdentity": {
-      "url": "submodules/uproxy-common/identity/xmpp/google/identity.google.json",
+      "url": "common/backend/identity/xmpp/google/identity.google.json",
       "api": "identity"
     }
   },
