@@ -41,6 +41,8 @@ var chrome_ext_files = [
 ];
 var firefox_files = [
   'common/backend/**',
+  '!common/backend/spec/**', 
+  '!common/backend/identity/xmpp/node-xmpp/**',
   'common/freedom/freedom.js',
   'common/ui/*.html',
   'common/ui/icons/**',
@@ -67,6 +69,13 @@ module.exports = function(grunt) {
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
       watch: {files: []},
+    },
+    concat: {
+      firefox: {
+	src: ['firefox/data/scripts/freedom_shim_content.js',
+	      'firefox/data/scripts/injector.js'],
+	dest: 'firefox/data/scripts/dependencies.js'
+      }
     },
     watch: {  //Watch everything
       files: ['common/**/*'], //TODO this doesn't work as expected on VMs
@@ -110,6 +119,7 @@ module.exports = function(grunt) {
   });
   
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -153,6 +163,7 @@ module.exports = function(grunt) {
   grunt.registerTask('build', [
     'copy:chrome_app',
     'copy:chrome_ext',
+    'concat:firefox',
     'copy:firefox'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
