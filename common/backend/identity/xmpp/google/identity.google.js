@@ -64,7 +64,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
       status: this.status, 
       message: "G+ XMPP connect"
     });
-    this.profile.me[this.credentials.userId] = {}
+    this.profile.me[this.credentials.userId] = {};
     this.profile.me[this.credentials.userId].userId = this.credentials.userId;
     this.profile.me[this.credentials.userId].clients = {};
     this.profile.me[this.credentials.userId].clients[clientId] = {
@@ -124,13 +124,21 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
 IdentityProvider.prototype.logout = function(userId, networkName, continuation) {
   //@TODO(ryscheng) debug, remove oAuth stuffies
   this.status = 'offline'; 
-  var userId = this.credentials.userId;
+  userId = this.credentials.userId;
   this.dispatchEvent('onStatus', {
     userId: userId,
     network: 'google',
     status: this.status,
     message: 'Woo!'
   });
+  this.profile.me[userId].clients = {};
+  this.dispatchEvent('onChange', this.profile.me[userId]);
+  for (var id in this.profile.roster) {
+    if (this.profile.roster.hasOwnProperty(id)) {
+      this.profile.roster[id].clients = {};
+      this.dispatchEvent('onChange', this.profile.roster[id]);
+    }
+  }
   this.credentials = null;
   this.unannounce();
   this.client.end();
@@ -147,7 +155,7 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
 // INTERNAL METHODS
 ////////////////////////////////////
 
-function getBaseJid(fullJid, caller) {
+function getBaseJid(fullJid) {
   if (fullJid.indexOf('/') < 0) {
     return fullJid;
   } else {
@@ -209,7 +217,7 @@ IdentityProvider.prototype.setDeviceAttr = function (fullJid, attr, value) {
   if (clientList[fullJid]) {
     clientList[fullJid][attr] = value;
   } else {
-    clientList[fullJid] = {clientId: fullJid}
+    clientList[fullJid] = {clientId: fullJid};
     clientList[fullJid][attr] = value;
   }
   this.sendChange(baseJid);
@@ -304,7 +312,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     }
   }
 
-}
+};
 
 IdentityProvider.prototype.onPresence = function(stanza) {
   console.log(stanza.attrs.from);
