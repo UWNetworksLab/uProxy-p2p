@@ -1,5 +1,24 @@
+/**
+ * UProxy Grunt Build System
+ * Support commands:
+ * grunt
+ *  build - Builds Chrome and Firefox extensions
+ *  setup - Installs local dependencies and sets up environment
+ *  test - Run unit tests
+ *  watch - Watch for changes in 'common' and copy as necessary
+ *  clean - Cleans up
+ *  copy:chrome_app - Copy 'common' files into the Chrome App
+ *  copy:chrome_ext - Copy 'common' files into the Chrome Extension
+ *  copy:firefox - Copy 'common' files into Firefox
+ *  everything - 'setup', 'test', then 'build'
+ **/
+
 var path = require("path");
 var minimatch = require("minimatch");
+
+//List of all files for each distribution
+//NOTE: This is ultimately what gets copied, so keep this precise
+//NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
 var chrome_app_files = [
   'common/ui/icons/**',
   'common/freedom/freedom.js',
@@ -21,8 +40,10 @@ var chrome_ext_files = [
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 var firefox_files = [];
-var sources = ['common/backend/util.js']; //TODO fix
-var testSources = sources.slice(0);       //TODO fix
+//Testing
+//TODO fix
+var sources = ['common/backend/util.js'];
+var testSources = sources.slice(0);
 
 module.exports = function(grunt) {
   grunt.initConfig({
@@ -33,8 +54,8 @@ module.exports = function(grunt) {
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
       watch: {files: []},
     },
-    watch: {
-      files: ['common/**/*'], //TODO this doesn't work as expected.
+    watch: {  //Watch everything
+      files: ['common/**/*'], //TODO this doesn't work as expected on VMs
       tasks: ['copy:watch'],
       options: {spawn: false}
     },
@@ -81,6 +102,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
 
+  //On file change, see which distribution it affects and
+  //update the copy:watch task to copy only those files
   grunt.event.on('watch', function(action, filepath, target) {
     grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
     var files = [];
@@ -100,16 +123,19 @@ module.exports = function(grunt) {
     grunt.log.writeln("copy:watch is now: " + JSON.stringify(grunt.config(['copy', 'watch'])));
   });
 
+  //Setup task
   grunt.registerTask('setup', [
     'shell:git_submodule', 
     'shell:bower_install',
     'shell:setup_freedom',
     'shell:freedom'
   ]);
+  //Test task
   grunt.registerTask('test', [
     'jshint:all',
     'jasmine'
   ]);
+  //Build task
   grunt.registerTask('build', [
     'copy:chrome_app',
     'copy:chrome_ext'
@@ -120,6 +146,10 @@ module.exports = function(grunt) {
  
 };
 
+//minimatchArray will see if 'file' matches the set of patterns
+//described by 'arr'
+//NOTE: all exclusion strings ("!" prefix) must be at the end
+//of the array arr
 function minimatchArray(file, arr) {
   var result = false;
   for (var i = 0; i < arr.length; i++) {
