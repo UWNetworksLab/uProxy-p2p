@@ -122,6 +122,16 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
     status: this.status,
     message: 'Woo!'
   });
+  var card = JSON.parse(JSON.stringify(this.profile.me[this.userId]));
+  card.clients = {};
+  this.dispatchEvent('onChange', card);
+  for (var id in this.profile.roster) {
+    if (this.profile.roster.hasOwnProperty(id)) {
+      var card = JSON.parse(JSON.stringify(this.profile.roster[id]));
+      card.clients = {};
+      this.dispatchEvent('onChange', card);
+    }
+  }
   continuation({
     userId: this.userId,
     success: true,
