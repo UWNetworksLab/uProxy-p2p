@@ -8,14 +8,11 @@ UProxy
 This is the top-level [UProxy
 repository](https://github.com/UWNetworksLab/UProxy). It contains all code for
 UProxy. Browser-dependent components live in "chrome" and "firefox"
-subdirectories. Browser-independent components live in the
-[uproxy-common](https://github.com/UWNetworksLab/uproxy-common) repository,
-which is included via git submodule in each of the browser-specific
-directories.
+subdirectories. Browser-independent components live in the 'common' subdirectory.
 
-uproxy-common in turn includes the
-[freedom](https://github.com/UWNetworksLab/freedom) repository, again included
-via git submodule. Freedom is a generic framework and modularization for
+UProxy current has 1 git submodule, 
+[freedom](https://github.com/UWNetworksLab/freedom), located in "common/freedom".
+Freedom is a generic framework and modularization for
 building browser-based distributed applications. A *Freedom module* is a module
 that can run on any Freedom-supporting platform and be migrated to any other.
 
@@ -71,24 +68,33 @@ modify (/usr/local) to being editable by your user.
 1. Clone UProxy and its submodules (and its submodules' submodules...): 
 `git clone https://github.com/UWNetworksLab/UProxy.git`
 
-2. Run script `tools/update.sh`. This will update, install and compile all
-compenents. The first time you run this, you'll see lots of npm, bower and grunt
+2. Run `./setup.sh`. This will install all local dependencies,
+as appropriate to run in Chrome.
+The first time you run this, you'll see lots of npm, bower and grunt
 messages. Check the last couple of lines in case there is an error. 
 
-At any point you should be able to run `tools/update.sh` to update your local repository, all 
-submodules, dependencies, and rebuild everything needed to test in Chrome. 
+Note that if any local dependencies have changed (i.e. changes to bower dependencies,
+updates to FreeDOM), you will have to run `./setup.sh` to update these dependencies.
 
 
-#### Testing in Chrome
+#### Running in Chrome
 
-1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
+1. Run `./build.sh` to compile UProxy, which needs to be done
+every time changes are made to the code.
 
-2. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
+2. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
 
-3. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
+3. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
 
+4. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
 
-#### Testign in Firefox
+#### Pull Requests
+
+Before submitting any changes to the repository, make sure to run `grunt test`
+to make sure it passes all unit tests. Failing tests are cause to immediately
+reject submissions.
+
+#### Testing in Firefox
 
 1. TODO
 
@@ -103,7 +109,9 @@ submodules, dependencies, and rebuild everything needed to test in Chrome.
 
 #### Fixing compilation and setup
 
-The `tools/update.sh` bash script should run all the steps needed to setup and
+UPDATE THIS SECTION SOON
+
+The `grunt everything` task should run all the steps needed to setup, test and
 compile UProxy. However the following hints should help you if it goes wrong and
 you need to debug and fix it.
 
