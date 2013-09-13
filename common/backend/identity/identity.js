@@ -46,7 +46,7 @@ function IdentityProvider() {
 
 IdentityProvider.prototype.login = function(opts, continuation) {
   if (opts.network && this.providers[opts.network]) {
-    this.providers[key].ref.login(opts); 
+    this.providers[opts.network].ref.login(opts); 
   } else if (opts.network) {
     console.error('Invalid network name: '+opts.network);
   } else {
