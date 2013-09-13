@@ -23,7 +23,7 @@ View_oauth.prototype.open = function(args, continuation) {
   } else if (file == 'facebook') {
     this.authMan = new AuthFacebook((function(msg) {
       this.dispatchEvent('message', {
-        cmd: 'facebook-auth',
+        cmd: 'auth',
         message: msg
       });
     }).bind(this));
@@ -49,7 +49,7 @@ View_oauth.prototype.postMessage = function(args, continuation) {
         (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
     this.manualDialog.sendMessage(args);
   } else if (this.authMan && args && args.cmd && 
-                (args.cmd == 'google-login' || args.cmd == 'facebook-login')) {
+                (args.cmd == 'google-login' || args.cmd == 'login')) {
     this.authMan.login(args.interactive);
   } else {
     console.error("Unrecognized message to core.view: " + JSON.stringify(args));

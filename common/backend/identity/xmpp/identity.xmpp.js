@@ -7,6 +7,7 @@ console.warn = function(f) {
 };
 
 var window = {};
+var view = freedom['core.view']();
 
 function IdentityProvider() {
   //DEBUG
@@ -15,69 +16,64 @@ function IdentityProvider() {
   
   this.client = null;
   this.credentials = null;
-  this.agent = null;
-  this.version = null;
-  this.url = null;
+  this.loginOpts = null;
 
   this.status = 'offline';
+  //dispatchEvent is not bound until after constructor
+  setTimeout((function () {
+    this.dispatchEvent('onStatus', {
+      status: this.status, network: NETWORK_ID, message: "Init"
+    });
+  }).bind(this), 0);
   this.profile = {
     me: {},
     roster: {}
   };
-}
 
-IdentityProvider.prototype.login = function(agent, version, url, continuation) {
+  view.open({file: NETWORK_ID}).done(function() {
+    view.show();
+  });
+};
+
+IdentityProvider.prototype.login = function(opts, continuation) {
+  this.loginOpts = opts;
   if (!this.credentials) {
     this.status = 'authenticating';
     this.dispatchEvent('onStatus', {
-      status: this.status, network: NETWORK_ID, message: "G+ OAuth2 Sequence"
+      status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
     });
-    var view = freedom['core.view']();
-    var promise = view.open({
-      file: "googlelogin.html"
-    });
-    promise.done(function() {
-      view.show();
-    });
-
-    view.on('message', function(agent, version, url, cont, message) {
-      view.close();
-      if (message.cmd && message.cmd == 'google-auth' && message.success) {
+    view.once('message', function(opts, cont, message) {
+      if (message.cmd && message.cmd == 'auth') {
         this.credentials = message.message;
-        this.login(agent, version, url, cont);
+        this.login(opts, cont);
       } else {
         cont(message);
       }
-    }.bind(this, agent, version, url, continuation));
+    }.bind(this, opts, continuation));
+    view.postMessage({
+      cmd: 'login',
+      interactive: opts.interactive
+    });
     return;
   } else if (!this.client) {
-    var clientId = this.credentials.email + '/' + agent;
-    this.agent = agent;
-    this.version = version;
-    this.url = url;
+    var clientId = this.credentials.userId + '/' + this.loginOpts.agent;
     this.status = 'connecting';
     this.dispatchEvent('onStatus', {
-      userId: this.credentials.email,
+      userId: this.credentials.userId,
       network: NETWORK_ID,
       status: this.status, 
-      message: "G+ XMPP connect"
+      message: "XMPP connect"
     });
-    this.profile.me[this.credentials.email] = {};
-    this.profile.me[this.credentials.email].userId = this.credentials.email;
-    this.profile.me[this.credentials.email].clients = {};
-    this.profile.me[this.credentials.email].clients[clientId] = {
+    this.profile.me[this.credentials.userId] = {};
+    this.profile.me[this.credentials.userId].userId = this.credentials.userId;
+    this.profile.me[this.credentials.userId].clients = {};
+    this.profile.me[this.credentials.userId].clients[clientId] = {
       clientId: clientId, 
       network: NETWORK_ID,
       status: 'offline'
     };
     //Start XMPP client
-    this.client = new window.XMPP.Client({
-      xmlns:'jabber:client',
-      jid: clientId,
-      oauth2_token: this.credentials.token,
-      oauth2_auth: 'http://www.google.com/talk/protocol/auth',
-      host: "talk.google.com"
-    });
+    this.client = new window.XMPP.Client(CONNECT_OPTS(clientId, this.credentials.token));
     //TODO(willscott): Support Upgrade to TLS wrapped connection.  
     this.client.connection.allowTLS = false;
     //this.client.addListener('online', function(){this.client.send(new window.XMPP.Element('presence', {}));}.bind(this));
@@ -87,11 +83,11 @@ IdentityProvider.prototype.login = function(agent, version, url, continuation) {
       console.warn(e);
       this.status = 'error';
       this.dispatchEvent('onStatus', {
-        userId: this.credentials.email,
+        userId: this.credentials.userId,
         network: NETWORK_ID,
         status: this.status, 
         message: JSON.stringify(e)
-      });
+      })
       continuation();
     }.bind(this));
     this.client.addListener('stanza', this.onMessage.bind(this));
@@ -114,17 +110,38 @@ IdentityProvider.prototype.getProfile = function(id, continuation) {
 IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
   this.client.send(new window.XMPP.Element('message', {
     to: to,
-    type: 'normal'
+    type: 'chat'
   }).c('body').t(JSON.stringify(msg)));
   continuation();
 };
 
-IdentityProvider.prototype.logout = function(id, continuation) {
+IdentityProvider.prototype.logout = function(userId, networkName, continuation) {
   //@TODO(ryscheng) debug, remove oAuth stuffies
+  this.status = 'offline'; 
+  userId = this.credentials.userId;
+  this.dispatchEvent('onStatus', {
+    userId: userId,
+    network: NETWORK_ID,
+    status: this.status,
+    message: 'Woo!'
+  });
+  this.profile.me[userId].clients = {};
+  this.dispatchEvent('onChange', this.profile.me[userId]);
+  for (var id in this.profile.roster) {
+    if (this.profile.roster.hasOwnProperty(id)) {
+      this.profile.roster[id].clients = {};
+      this.dispatchEvent('onChange', this.profile.roster[id]);
+    }
+  }
+  this.credentials = null;
   this.unannounce();
   this.client.end();
   this.client = null;
-  continuation();
+  continuation({
+    userId: userId,
+    success: true,
+    message: 'Logout'
+  });
 };
 
 
@@ -205,7 +222,7 @@ IdentityProvider.prototype.onOnline = function() {
   this.announce();
   this.status = 'online';
   this.dispatchEvent('onStatus', {
-    userId: this.credentials.email,
+    userId: this.credentials.userId,
     network: NETWORK_ID,
     status: this.status, 
     message: "Woo!"
@@ -214,16 +231,14 @@ IdentityProvider.prototype.onOnline = function() {
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
   //Get my own vCard
-  /**
   this.client.send(new window.XMPP.Element('iq', {
     type: 'get',
-    to: this.credentials.email
+    to: this.credentials.userId
   }).c('vCard', {'xmlns': 'vcard-temp'}).up());
-  **/
   //Update status
-  var clients = this.profile.me[this.credentials.email].clients;
+  var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
-    if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.agent) >= 0) {
+    if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
       clients[k].status = 'messageable';
     }
   }
@@ -234,8 +249,8 @@ IdentityProvider.prototype.announce = function () {
     .c("show").t("xa").up() //mark status of this client as 'extended away'.
     .c("c", { // Advertise extended capabilities.
       xmlns: "http://jabber.org/protocol/caps",
-      node: this.url,
-      ver: this.version,
+      node: this.loginOpts.url,
+      ver: this.loginOpts.version,
       hash: "fixed"
     }).up()
     //.c('priority').t("-127").up() // mark priority as low.
@@ -248,8 +263,18 @@ IdentityProvider.prototype.unannounce = function() {
 };
 
 IdentityProvider.prototype.onRoster = function(stanza) {
+  if (window.roster) {
+    window.roster.push(stanza);
+  } else {
+    window.roster = [stanza];
+  }
   //Expect result from roster 'get'
-  var from = stanza.attrs.from;
+  var from = null;
+  if (stanza.attrs.from) {
+    from = stanza.attrs.from;
+  } else {
+    from = stanza.attrs.to;
+  }
   var query = stanza.getChild('query');
   var vCard = stanza.getChild('vCard');
   if (query && query.attrs.xmlns == 'jabber:iq:roster') {
@@ -306,7 +331,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     //Set Uproxy capability
     var cap = stanza.getChild('c');
     //TODO check application version mismatch
-    if (cap && cap.attrs.node==this.url) { //&& cap.attrs.ver==this.version) {
+    if (cap && cap.attrs.node==this.url) { //&& cap.attrs.ver==this.loginOpts.version) {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'messageable');
     } else {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'online');
@@ -317,16 +342,14 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     
   //Request vCard if not seen before
   //TODO(ryscheng) - Do this in a better way that caches results
-  /**
   if (this.getAttr(stanza.attrs.from, 'name') == null) {
     //TODO(ryscheng) Used to permanently dedup iq requests. Probably a better way
-    this.setAttr(stanza.attrs.from, 'name', '');
+    this.setAttr(stanza.attrs.from, 'name', ' ');
     this.client.send(new window.XMPP.Element('iq', {
       type: 'get',
       to: getBaseJid(stanza.attrs.from)
     }).c('vCard', {'xmlns': 'vcard-temp'}).up());
   }
-  **/
 };
 
 IdentityProvider.prototype.onMessage = function(stanza) {
@@ -335,7 +358,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
     //TODO(ryscheng): extract data, send cleaned up stream structure?
     this.setDeviceAttr(stanza.attrs.from, 'lastSeen', new Date());
     //TODO check intended recipient
-    if (stanza.attrs.to.indexOf(this.agent) >= 0) {
+    if (stanza.attrs.to.indexOf(this.loginOpts.agent) >= 0) {
       this.dispatchEvent('onMessage', {
         fromUserId: getBaseJid(stanza.attrs.from),
         fromClientId: stanza.attrs.from, 
@@ -355,7 +378,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
       stanza.attrs.to = stanza.attrs.from;
       delete stanza.attrs.from;
       stanza.attrs.type = 'result';
-      query.c('identity', {category: 'client', name: this.agent, type: 'bot'}).up()
+      query.c('identity', {category: 'client', name: this.loginOpts.agent, type: 'bot'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/caps'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/disco#info'}).up()
         .c('feature', {'var': this.url}).up();
