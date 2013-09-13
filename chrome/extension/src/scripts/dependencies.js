@@ -7,6 +7,5 @@ angular.module('dependencyInjector', [])
       return getMessage(key);
     };
   })
-  .constant('bg', chrome.extension.getBackgroundPage())
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   .constant('onFreedomStateChange', chrome.extension.getBackgroundPage().onFreedomStateChange);
