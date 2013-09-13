@@ -10,6 +10,8 @@
  *  copy:chrome_app - Copy 'common' files into the Chrome App
  *  copy:chrome_ext - Copy 'common' files into the Chrome Extension
  *  copy:firefox - Copy 'common' files into Firefox
+ *  concat:firefox - collect popup.html and options.html dependencies into
+                     a single file.
  *  everything - 'setup', 'test', then 'build'
  **/
 
