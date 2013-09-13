@@ -19,7 +19,7 @@
   </head>
   <body ng-cloak ng-controller="OptionsCtrl" id="options">
 
-    <h3>{{'options'|chromei18n}}</h3>
+    <h3>{{'options'|i18n}}</h3>
     <hr>
 
     <ul class="options">
@@ -74,7 +74,7 @@
       </li>
       <li>
         <details open class="advanced">
-          <summary>{{'advanced'|chromei18n}}</summary>
+          <summary>{{'advanced'|i18n}}</summary>
 
           <ul class="options">
             <li>
@@ -83,7 +83,7 @@
                   ng-click="changeOption('allowNonRoutableAddresses', allowNonRoutableAddresses)">
                   <!-- XXX DRY: use a directive to automatically bind ng-click to the proper
                                 changeOption call based on the ng-model binding -->
-                {{'allowNonroutableAddresses'|chromei18n}}
+                {{'allowNonroutableAddresses'|i18n}}
               </label>
             </li>
             <li>
