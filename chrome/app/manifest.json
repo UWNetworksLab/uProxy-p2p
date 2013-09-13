@@ -4,13 +4,16 @@
   "description": "Ubiquitous Proxy [Alpha]",
   "version": "0.0.4",
   "icons": {
-      "128": "images/uproxy-128.png",
-      "19": "images/uproxy-19.png",
-      "16": "images/uproxy-16.png"
+      "128": "common/ui/icons/uproxy-128.png",
+      "19": "common/ui/icons/uproxy-19.png",
+      "16": "common/ui/icons/uproxy-16.png"
   },
   "app": {
     "background": {
       "scripts": [
+        "js/manual_dialog.js",
+        "js/auth_google.js",
+        "js/auth_facebook.js",
         "js/view_oauth.js",
         "js/socket_chrome.js",
         "js/storage_chrome.js",
@@ -19,11 +22,13 @@
     }
   },
   "permissions": [
+    {"socket": ["tcp-connect", "udp-send-to", "tcp-listen"]},
     "storage",
     "webview",
     "identity",
-    {"socket": ["tcp-connect", "udp-send-to", "tcp-listen"]},
-    "https://apis.google.com/"
+    "https://apis.google.com/",
+    "https://www.facebook.com/",
+    "https://graph.facebook.com/"
   ],
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDT20aY/lDUHQ2dpRK2htOHxHPedPT+mZujEMifUV4BA6jxQ4AuMRjriKXJiq0PpDyJFaAJG3JLxmOHeDaygp/KjgVPzeo4v0kKWHSj7GpS41C8e6glsBWnVem6DvBZ/hk0rLZ9oNlsNbvUooG4QArdVNiUvjp55Lp9x5gfyIQSWQIDAQAB",
   "oauth2": {

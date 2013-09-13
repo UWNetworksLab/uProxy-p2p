@@ -1,0 +1,16 @@
+{
+  "name": "UProxy Socks Client",
+  "description": "Listen for incoming requests, and relay them through a transport.",
+  "app": {
+    "script": ["../util.js", "client.js", "tcp-server.js", "socks.js"]
+  },
+  "dependencies": {
+    "transport": {
+      "url": "common/backend/transport/transport.json",
+      "api": "transport"
+    }
+  },
+  "permissions": [
+    "core.socket"
+  ]
+}

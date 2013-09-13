@@ -1,19 +1,6 @@
-# uproxy-common not currently used by chrome extension
-#[submodule "chrome/extension/src/submodules/uproxy-common"]
-#	path = chrome/extension/src/submodules/uproxy-common
-#	url = https://github.com/UWNetworksLab/uproxy-common.git
-[submodule "chrome/app/submodules/uproxy-common"]
-	path = chrome/app/submodules/uproxy-common
-	url = https://github.com/UWNetworksLab/uproxy-common.git
-[submodule "firefox/data/submodules/uproxy-common"]
-	path = firefox/data/submodules/uproxy-common
-	url = https://github.com/UWNetworksLab/uproxy-common.git
-[submodule "firefox/data/submodules/oauth2"]
-	path = firefox/data/submodules/oauth2
-	url = https://github.com/borismus/oauth2-extensions
-[submodule "firefox/packages/jetpack-subprocess"]
-	path = firefox/packages/jetpack-subprocess
-	url = https://github.com/ochameau/jetpack-subprocess.git
 [submodule "firefox/packages/pathfinder"]
 	path = firefox/packages/pathfinder
 	url = https://github.com/Paul-E/addon-pathfinder.git
+[submodule "common/freedom"]
+	path = common/freedom
+	url = git@github.com:UWNetworksLab/freedom.git

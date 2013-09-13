@@ -15,10 +15,10 @@ window.freedomcfg = function(register) {
 }
 
 var script = document.createElement('script');
-script.setAttribute('data-manifest', 'submodules/uproxy-common/uproxy.json');
+script.setAttribute('data-manifest', 'common/backend/uproxy.json');
 // Uncomment for clearer but less portable module error messages.
- script.textContent = '{"strongIsolation": true, "stayLocal": true}';
-script.src = 'submodules/uproxy-common/submodules/freedom/freedom.js';
+ script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
+script.src = 'common/freedom/freedom.js';
 
 document.head.appendChild(script);
 
@@ -26,8 +26,8 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // Security: only allow the official uproxy extension to control the backend.
   // We don't want another extension secretly making you proxy others, or
   // trying to do something even worse.
-  if (port.sender.id !== EXTENSION_ID &&
-      port.name == 'uproxy-extension-to-app-port') {
+  if (port.sender.id !== EXTENSION_ID ||
+      port.name !== 'uproxy-extension-to-app-port') {
     console.log("Got connect from an unexpected extension id: "
         + port.sender.id);
     return;

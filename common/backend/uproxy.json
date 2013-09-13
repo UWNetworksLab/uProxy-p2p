@@ -1,0 +1,23 @@
+{
+  "name": "UProxy",
+  "description": "The UProxy backend provides a mesh web proxy, access the web through your social connections.",
+  "app": {
+    "script": ["util.js", "uproxy.js"]
+  },
+  "dependencies": {
+    "uproxyclient": {
+      "url": "common/backend/client/client.json"
+    },
+    "uproxyserver": {
+      "url": "common/backend/server/server.json"
+    },
+    "identity": {
+      "url": "common/backend/identity/identity.json",
+      "api": "identity"
+    },
+    "storage": {
+      "url": "common/backend/storage/storage.json",
+      "api": "storage"
+    }
+  }
+}
