@@ -46,5 +46,4 @@ var freedomEnvironment = require('./init_freedom').InitFreedom();
 // TODO: Remove when uproxy.js no longer uses setTimeout
 // and replace with the line:
 // initToolbar(freedomEnvironment);
-require('sdk/timers').setTimeout(initToolbar, 100, freedomEnvironment);
-// optionsPanel(freedomEnvironment);
+require('sdk/timers').setTimeout(initToolbar, 500, freedomEnvironment);
