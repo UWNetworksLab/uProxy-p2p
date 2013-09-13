@@ -1,5 +1,6 @@
 var FACEBOOK_APP_ID = '161927677344933';
 var FACEBOOK_REDIRECT_URI = 'https://hilnpmepiebcjhibkbkfkjkacnnclkmi.chromiumapp.org/';
+//FACEBOOK_REDIRECT_URI = 'https://www.facebook.com/connect/login_success.html';
 var FACEBOOK_TOKENINFO_URL = 'https://graph.facebook.com/me?access_token=';
 
 function AuthFacebook(cb) {
@@ -19,12 +20,15 @@ AuthFacebook.prototype.login = function(interactive) {
     interactive: interactive
   }, (function(responseUrl) {
     //Parse the responseUrl
-    var queryTok = responseUrl.substr(responseUrl.indexOf('#') + 1).split('&');
+    console.log(responseUrl);
     var query = {};
-    for (var i = 0; i < queryTok.length; i++) {
-      var tmp = queryTok[i].split('=');
-      if (tmp.length > 1) {
-        query[tmp[0]] = tmp[1];
+    if (responseUrl && responseUrl.indexOf('#') >= 0) {
+      var queryTok = responseUrl.substr(responseUrl.indexOf('#') + 1).split('&');
+      for (var i = 0; i < queryTok.length; i++) {
+        var tmp = queryTok[i].split('=');
+        if (tmp.length > 1) {
+          query[tmp[0]] = tmp[1];
+        }
       }
     }
     //If success
@@ -35,7 +39,7 @@ AuthFacebook.prototype.login = function(interactive) {
     } else if (query.error) {
       console.error("Facebook Auth: " + query.error + ": " + query.error_reason);
     } else {
-      console.error("Facebook Auth: " + JSON.stringify(query));
+      console.error("Facebook Auth failed: " + JSON.stringify(query));
     }
   }).bind(this));
 
