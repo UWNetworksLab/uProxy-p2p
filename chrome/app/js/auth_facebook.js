@@ -2,6 +2,7 @@ var FACEBOOK_APP_ID = '161927677344933';
 var FACEBOOK_REDIRECT_URI = 'https://hilnpmepiebcjhibkbkfkjkacnnclkmi.chromiumapp.org/';
 //FACEBOOK_REDIRECT_URI = 'https://www.facebook.com/connect/login_success.html';
 var FACEBOOK_TOKENINFO_URL = 'https://graph.facebook.com/me?access_token=';
+var FACEBOOK_OAUTH_SCOPES = 'email,xmpp_login,user_online_presence,friends_online_presence,read_mailbox';
 
 function AuthFacebook(cb) {
   this.credentialsCallback = cb;
@@ -16,6 +17,7 @@ AuthFacebook.prototype.login = function(interactive) {
     url: 'https://www.facebook.com/dialog/oauth?' + 
       'client_id=' + FACEBOOK_APP_ID +
       '&redirect_uri=' + FACEBOOK_REDIRECT_URI + 
+      '&scope=' + FACEBOOK_OAUTH_SCOPES +
       '&response_type=token',
     interactive: interactive
   }, (function(responseUrl) {
