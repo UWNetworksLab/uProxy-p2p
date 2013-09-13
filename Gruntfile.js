@@ -1,17 +1,15 @@
-path = require("path");
+var path = require("path");
+var minimatch = require("minimatch");
 var chrome_app_files = [
-  {src: 'common/ui/icons/**', dest: 'chrome/app/'},
-  {src: [
-    'common/backend/**', 
-    '!common/backend/spec/**', 
-    '!common/backend/identity/xmpp/node-xmpp/**'
-    ], dest: 'chrome/app/'},
-  {src: 'common/freedom/freedom.js', dest: 'chrome/app/'}
+  'common/ui/icons/**',
+  'common/freedom/freedom.js',
+  'common/backend/**', 
+  '!common/backend/spec/**', 
+  '!common/backend/identity/xmpp/node-xmpp/**'
 ];
 var chrome_ext_files = [
-  {src:'common/ui/**', dest:'chrome/extension/src/'},
-  {src:'common/bower_components/**', dest:'chrome/extension/src/'},
-  {src:'chrome/extension/src/scripts/dependencies.js', dest:'chrome/extensions/src/common/ui/scripts/'}
+  'common/ui/**',
+  'common/bower_components/**'
 ];
 var firefox_files = [];
 var sources = ['common/backend/util.js']; //TODO fix
@@ -21,17 +19,15 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     copy: {
-      chrome_app: {files: chrome_app_files},
-      chrome_ext: {files: chrome_ext_files},
-      firefox: {files: firefox_files},
+      chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
+      chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
+      firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
       watch: {files: []},
     },
     watch: {
-      all: {
-        files: ['common/**'],
-        task: ['copy:watch'],
-        options: {spawn: false}
-      }
+      files: ['common/**/*'], //TODO this doesn't work as expected.
+      tasks: ['copy:watch'],
+      options: {spawn: false}
     },
     shell: {
       git_submodule: {
@@ -51,6 +47,7 @@ module.exports = function(grunt) {
         options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
       },
     },
+    clean: ['chrome/app/common/**', 'chrome/extension/src/common/**', 'firefox/data/common/**'],
     jasmine: {
       common: {
         src: testSources,
@@ -69,13 +66,29 @@ module.exports = function(grunt) {
   });
   
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
 
   grunt.event.on('watch', function(action, filepath, target) {
-    //grunt.config(['copy', 'watch', 'files'], );
+    grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
+    var files = [];
+    if (minimatchArray(filepath, chrome_app_files)) {
+      grunt.log.writeln(filepath + ' - watch copying to Chrome app');
+      files.push({src: filepath, dest: 'chrome/app/'});
+    } 
+    if (minimatchArray(filepath, chrome_ext_files)) {
+      grunt.log.writeln(filepath + ' - watch copying to Chrome ext');
+      files.push({src: filepath, dest: 'chrome/extension/src/'});
+    }
+    if (minimatchArray(filepath, firefox_files)) {
+      grunt.log.writeln(filepath + ' - watch copying to Firefox');
+      files.push({src: filepath, dest: 'firefox/data/'});
+    }
+    grunt.config(['copy', 'watch', 'files'], files);
+    grunt.log.writeln("copy:watch is now: " + JSON.stringify(grunt.config(['copy', 'watch'])));
   });
 
   grunt.registerTask('setup', [
@@ -97,3 +110,16 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['build']);
  
 };
+
+function minimatchArray(file, arr) {
+  var result = false;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].substr(0, 1) == "!") {
+      result &= minimatch(file, arr[i]);
+    } else {
+      result |= minimatch(file, arr[i]);
+    }
+  }
+  return result;
+};
+
