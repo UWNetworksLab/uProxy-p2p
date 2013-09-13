@@ -79,16 +79,28 @@ updates to FreeDOM), you will have to run `./setup.sh` to update these dependenc
 
 #### Running in Chrome
 
-1. Run `./build.sh` to compile UProxy, which needs to be done
-every time changes are made to the code.
+1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
 
-2. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
+2. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
 
-3. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
+3. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
 
-4. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
+#### Development
 
-#### Pull Requests
+UProxy uses the Grunt build system for development. Here are a list
+of supported Grunt commands:
+ *  build - Builds Chrome and Firefox extensions
+ *  setup - Installs local dependencies and sets up environment
+ *  test - Run unit tests
+ *  watch - Watch for changes in 'common' and copy as necessary
+ *  clean - Cleans up
+ *  copy:chrome_app - Copy 'common' files into the Chrome App
+ *  copy:chrome_ext - Copy 'common' files into the Chrome Extension
+ *  copy:firefox - Copy 'common' files into Firefox
+ *  everything - 'setup', 'test', then 'build'
+
+The easiest way to stay current is to pull changes, run `grunt build` to build
+your distribution, then run `grunt watch`, which will rebuild as you make changes
 
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
