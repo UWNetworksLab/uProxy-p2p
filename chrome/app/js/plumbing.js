@@ -17,7 +17,7 @@ window.freedomcfg = function(register) {
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'common/backend/uproxy.json');
 // Uncomment for clearer but less portable module error messages.
- script.textContent = '{"strongIsolation": true, "stayLocal": true}';
+ script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
 script.src = 'common/freedom/freedom.js';
 
 document.head.appendChild(script);

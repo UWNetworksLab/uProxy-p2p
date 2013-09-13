@@ -16,6 +16,10 @@
     "googleIdentity": {
       "url": "common/backend/identity/xmpp/google/identity.google.json",
       "api": "identity"
+    },
+    "facebookIdentity": {
+      "url": "common/backend/identity/xmpp/facebook/identity.facebook.json",
+      "api": "identity"
     }
   },
   "provides": [
