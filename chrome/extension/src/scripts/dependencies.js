@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('dependencyInjector', [])
-  .filter('chromei18n', function () {
+  .filter('i18n', function () {
     var getMessage = chrome.i18n.getMessage;
     return function (key) {
       return getMessage(key);
