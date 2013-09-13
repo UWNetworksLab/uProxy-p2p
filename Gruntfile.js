@@ -10,8 +10,7 @@ var chrome_app_files = [
 ];
 var chrome_ext_files = [
   {src:'common/ui/**', dest:'chrome/extension/src/'},
-  {src:'common/bower_components/**', dest:'chrome/extension/src/'},
-  {src:'chrome/extension/src/scripts/dependencies.js', dest:'chrome/extensions/src/common/ui/scripts/'}
+  {src:'common/bower_components/**', dest:'chrome/extension/src/'}
 ];
 var firefox_files = [];
 var sources = ['common/backend/util.js']; //TODO fix
