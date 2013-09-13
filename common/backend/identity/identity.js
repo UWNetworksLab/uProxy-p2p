@@ -26,6 +26,12 @@ function IdentityProvider() {
       status: 'offline',
       userId: null,
       network: 'google'
+    },
+    facebook: {
+      ref: freedom.facebookIdentity(),
+      status: 'offline',
+      userId: null,
+      network: 'facebook'
     }
   };
   //Register listeners
