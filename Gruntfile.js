@@ -1,32 +1,37 @@
 path = require("path");
-var sources = ['common/backend/util.js'];
-var testSources = sources.slice(0);
+var chrome_app_files = [
+  {src: 'common/ui/icons/**', dest: 'chrome/app/'},
+  {src: [
+    'common/backend/**', 
+    '!common/backend/spec/**', 
+    '!common/backend/identity/xmpp/node-xmpp/**'
+    ], dest: 'chrome/app/'},
+  {src: 'common/freedom/freedom.js', dest: 'chrome/app/'}
+];
+var chrome_ext_files = [
+  {src:'common/ui/**', dest:'chrome/extension/src/'},
+  {src:'common/bower_components/**', dest:'chrome/extension/src/'},
+  {src:'chrome/extension/src/scripts/dependencies.js', dest:'chrome/extensions/src/common/ui/scripts/'}
+];
+var firefox_files = [];
+var sources = ['common/backend/util.js']; //TODO fix
+var testSources = sources.slice(0);       //TODO fix
 
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     copy: {
-      chrome_app: {
-        files: [
-          {src: 'common/ui/icons/**', dest: 'chrome/app/'},
-          {src: 'common/backend/client/**', dest: 'chrome/app/'},
-          {src: 'common/backend/identity/**', dest: 'chrome/app/'},
-          {src: 'common/backend/server/**', dest: 'chrome/app/'},
-          {src: 'common/backend/storage/**', dest: 'chrome/app/'},
-          {src: 'common/backend/transport/**', dest: 'chrome/app/'},
-          {src: 'common/backend/*.js', dest: 'chrome/app/'},
-          {src: 'common/backend/*.json', dest: 'chrome/app/'},
-          {src: 'common/freedom/freedom.js', dest: 'chrome/app/'}
-        ]
-      },
-      chrome_ext: {
-        files: [
-	        {src:'common/ui/**', dest:'chrome/extension/src/'},
-	        {src:'common/bower_components/**', dest:'chrome/extension/src/'},
-	        {src:'chrome/extension/src/scripts/dependencies.js', dest:'chrome/extensions/src/common/ui/scripts/'}
-        ]
-		  },
-      firefox: {}
+      chrome_app: {files: chrome_app_files},
+      chrome_ext: {files: chrome_ext_files},
+      firefox: {files: firefox_files},
+      watch: {files: []},
+    },
+    watch: {
+      all: {
+        files: ['common/**'],
+        task: ['copy:watch'],
+        options: {spawn: false}
+      }
     },
     shell: {
       git_submodule: {
@@ -35,7 +40,11 @@ module.exports = function(grunt) {
       },
       bower_install: {
         command: 'bower install',
-        options: {execOptions: {cwd: 'common'}}
+        options: {stdout: true, execOptions: {cwd: 'common/ui'}}
+      },
+      setup_freedom: {
+        command: 'npm install',
+        options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
       },
       freedom: {
         command: 'grunt',
@@ -62,23 +71,29 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
+
+  grunt.event.on('watch', function(action, filepath, target) {
+    //grunt.config(['copy', 'watch', 'files'], );
+  });
 
   grunt.registerTask('setup', [
     'shell:git_submodule', 
-    'shell:bower_install', 
+    'shell:bower_install',
+    'shell:setup_freedom',
     'shell:freedom'
   ]);
   grunt.registerTask('test', [
     'jshint:all',
     'jasmine'
   ]);
-  grunt.registerTask('run', [
+  grunt.registerTask('build', [
     'copy:chrome_app',
     'copy:chrome_ext'
   ]);
-  grunt.registerTask('everything' ['setup', 'test', 'run']);
+  grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
-  grunt.registerTask('default', ['run']);
+  grunt.registerTask('default', ['build']);
  
 };
