@@ -39,7 +39,21 @@ var chrome_ext_files = [
   'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
-var firefox_files = [];
+var firefox_files = [
+  'common/backend/**',
+  'common/freedom/freedom.js',
+  'common/ui/*.html',
+  'common/ui/icons/**',
+  'common/ui/scripts/**',
+  'common/ui/styles/**',
+  'common/ui/bower_components/angular/angular.js',
+  'common/ui/bower_components/angular-lodash/angular-lodash.js',
+  'common/ui/bower_components/angular-mocks/angular-mocks.js',
+  'common/ui/bower_components/angular-scenario/*.js',
+  'common/ui/bower_components/jquery/jquery.js',
+  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/lodash/dist/lodash.js'
+];
 //Testing
 //TODO fix
 var sources = ['common/backend/util.js'];
@@ -138,7 +152,8 @@ module.exports = function(grunt) {
   //Build task
   grunt.registerTask('build', [
     'copy:chrome_app',
-    'copy:chrome_ext'
+    'copy:chrome_ext',
+    'copy:firefox'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
