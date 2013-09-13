@@ -22,7 +22,8 @@ module.exports = function(grunt) {
       chrome_ext: {
         files: [
 	        {src:'common/ui/**', dest:'chrome/extension/src/'},
-	        {src:'common/bower_components/**', dest:'chrome/extension/src/'}
+	        {src:'common/bower_components/**', dest:'chrome/extension/src/'},
+	        {src:'chrome/extension/src/scripts/dependencies.js', dest:'chrome/extensions/src/common/ui/scripts/'}
         ]
 		  },
       firefox: {}
