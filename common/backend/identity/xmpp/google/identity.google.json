@@ -2,7 +2,7 @@
   "name": "Google Hangouts Identity",
   "description": "Communication and discovery service for Google contacts.",
   "app": {
-    "script": ["identity.google.js", "../node-xmpp-browser.js"]
+    "script": ["identity.google.js", "../identity.xmpp.js", "../node-xmpp-browser.js"]
   },
   "provides": [
     "identity"
