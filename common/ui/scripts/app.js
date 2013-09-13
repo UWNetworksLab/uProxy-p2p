@@ -11,9 +11,8 @@ var OAUTH_CONFIG = {
 };
 **/
 
-var bg = chrome.extension.getBackgroundPage();
 
-angular.module('UProxyChromeExtension', ['angular-lodash'])
+angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
@@ -23,12 +22,6 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       return $sniffer;
     }]);
   }) //
-  .filter('chromei18n', function () {
-    var getMessage = chrome.i18n.getMessage;
-    return function (key) {
-      return getMessage(key);
-    };
-  })
   .filter('messageable', function () {
     return function (contact) {
       return _.any(contact.clients, {status: 'messageable'});
@@ -45,9 +38,6 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
       return _.all(contact.clients, {status: 'offline'});
     };
   })
-  .constant('bg', chrome.extension.getBackgroundPage())
-  .constant('chrome', chrome)
-  .constant('freedom', chrome.extension.getBackgroundPage().freedom)
   // application state. determined by backend (packaged app)
   .constant('model', {})
   // Run gets called every time the popup is openned. This initialises the main
@@ -56,16 +46,14 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
     '$filter',
     '$http',
     '$rootScope',
-    'bg',
-    'chrome',
+    'onFreedomStateChange',
     'freedom',
     'model',
-    function($filter, $http, $rootScope, bg, chrome, freedom, model) {
+    function($filter, $http, $rootScope, onFreedomStateChange, freedom, model) {
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
 
-      $rootScope.extensionID = chrome.runtime.id;
       $rootScope.model = model;
 
       $rootScope.$watch('model.roster', function (roster) {
@@ -170,9 +158,9 @@ angular.module('UProxyChromeExtension', ['angular-lodash'])
         // call these in the Angular scope so that window is defined.
         $rootScope.$apply(function() {
           freedom.onConnected.removeListener($rootScope.startUI);
-          bg.onFreedomStateChange.addListener($rootScope.onStateChange);
+          onFreedomStateChange.addListener($rootScope.onStateChange);
           window.onunload = function() {
-            bg.onFreedomStateChange.removeListener($rootScope.onStateChange);
+            onFreedomStateChange.removeListener($rootScope.onStateChange);
           };
           freedom.emit('open-popup');
           //$rootScope.authGoog();
