@@ -8,8 +8,17 @@ var chrome_app_files = [
   '!common/backend/identity/xmpp/node-xmpp/**'
 ];
 var chrome_ext_files = [
-  'common/ui/**',
-  'common/bower_components/**'
+  'common/ui/*.html',
+  'common/ui/icons/**',
+  'common/ui/scripts/**',
+  'common/ui/styles/**',
+  'common/ui/bower_components/angular/angular.js',
+  'common/ui/bower_components/angular-lodash/angular-lodash.js',
+  'common/ui/bower_components/angular-mocks/angular-mocks.js',
+  'common/ui/bower_components/angular-scenario/*.js',
+  'common/ui/bower_components/jquery/jquery.js',
+  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 var firefox_files = [];
 var sources = ['common/backend/util.js']; //TODO fix
