@@ -26,6 +26,8 @@
     "storage",
     "webview",
     "identity",
+    "videoCapture",
+    "audioCapture",
     "https://apis.google.com/",
     "https://www.facebook.com/",
     "https://graph.facebook.com/"

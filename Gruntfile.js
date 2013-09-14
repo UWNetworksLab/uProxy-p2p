@@ -26,9 +26,13 @@ var chrome_app_files = [
   'common/freedom/freedom.js',
   'common/backend/**', 
   '!common/backend/spec/**', 
-  '!common/backend/identity/xmpp/node-xmpp/**'
+  '!common/backend/identity/xmpp/node-xmpp/**',
+  // scraps is a palce for throwing example code for demonstrating stuff to each other.
+  'common/scraps/**'
 ];
 var chrome_ext_files = [
+  // scraps is a palce for throwing example code for demonstrating stuff to each other.
+  'common/scraps/**',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',

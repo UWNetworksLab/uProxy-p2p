@@ -121,7 +121,7 @@ function startup() {
       roster.appendChild(child);
     }
   }
-  
+
   var streamListener = function(from, data) {
     console.log(data);
     if (!(data.hasOwnProperty('command') && data.hasOwnProperty('id'))) {
