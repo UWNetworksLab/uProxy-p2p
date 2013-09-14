@@ -26,8 +26,6 @@
   "permissions": [
     "storage",
     "identity",
-    "videoCapture",
-    "audioCapture",
     "https://apis.google.com/"
   ],
   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCYcdjD0H0HL8DVcv1+r/e8WyOs4HCakDBlS4scDTopMT7h6AzA6DIacwmLME+jxti4W7lZn32RUdb885/67BJ+4vjTpm+hgC8Oi0AcScyZNtJBygkFI3NNc8Ssm8vaIQxeYAKOHkdw8Jo0yE/6MvLXdEatj3AkQ8Qd2O2LQNF8rwIDAQAB",
