@@ -34,13 +34,13 @@ var onload = function() {
   var onConnection = function(conn, address, port, callback) {
     if (transport) {
       // TODO: reuse tags from a pool.
-      var tag = Math.random();
+      var channelid = Math.random();
       var sock = conn.tcpConnection;
-      sock.on('recv', transport.send.bind(transport, tag));
-      sock.on('disconnect', onClose.bind({}, tag));
-      conns[tag] = sock;
+      sock.on('recv', transport.send.bind(transport, channelid));
+      sock.on('disconnect', onClose.bind({}, channelid));
+      conns[channelid] = sock;
 
-      transport.send(tag, JSON.stringify({host: address, port: port}));
+      transport.send(channelid, JSON.stringify({host: address, port: port}));
       // TODO: determine if these need to be accurate.
       callback({ipAddrString: '127.0.0.1', port: 0});
     }
@@ -57,8 +57,8 @@ var onload = function() {
 
       transport.on('onClose', shutdown);
       transport.on('message', function(msg) {
-        if (msg.tag) {
-          conns[msg.tag].sendRaw(msg.data);
+        if (msg.channelid) {
+          conns[msg.channelid].sendRaw(msg.data);
         }
         // Use a control method to reuse / close tags.
       });
