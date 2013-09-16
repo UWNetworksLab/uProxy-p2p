@@ -24,8 +24,8 @@ var minimatch = require("minimatch");
 var chrome_app_files = [
   'common/ui/icons/**',
   'common/freedom/freedom.js',
-  'common/backend/**', 
-  '!common/backend/spec/**', 
+  'common/backend/**',
+  '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
   // scraps is a palce for throwing example code for demonstrating stuff to each other.
   'common/scraps/**'
@@ -47,7 +47,7 @@ var chrome_ext_files = [
 ];
 var firefox_files = [
   'common/backend/**',
-  '!common/backend/spec/**', 
+  '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
   'common/freedom/freedom.js',
   'common/ui/*.html',
@@ -78,9 +78,9 @@ module.exports = function(grunt) {
     },
     concat: {
       firefox: {
-	src: ['firefox/data/scripts/freedom_shim_content.js',
-	      'firefox/data/scripts/injector.js'],
-	dest: 'firefox/data/scripts/dependencies.js'
+        src: ['firefox/data/scripts/freedom_shim_content.js',
+	            'firefox/data/scripts/injector.js'],
+        dest: 'firefox/data/scripts/dependencies.js'
       }
     },
     watch: {  //Watch everything
@@ -123,7 +123,7 @@ module.exports = function(grunt) {
     }
 
   });
-  
+
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -140,7 +140,7 @@ module.exports = function(grunt) {
     if (minimatchArray(filepath, chrome_app_files)) {
       grunt.log.writeln(filepath + ' - watch copying to Chrome app');
       files.push({src: filepath, dest: 'chrome/app/'});
-    } 
+    }
     if (minimatchArray(filepath, chrome_ext_files)) {
       grunt.log.writeln(filepath + ' - watch copying to Chrome ext');
       files.push({src: filepath, dest: 'chrome/extension/src/'});
@@ -155,7 +155,7 @@ module.exports = function(grunt) {
 
   //Setup task
   grunt.registerTask('setup', [
-    'shell:git_submodule', 
+    'shell:git_submodule',
     'shell:bower_install',
     'shell:setup_freedom',
     'shell:freedom'
@@ -175,7 +175,7 @@ module.exports = function(grunt) {
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
   grunt.registerTask('default', ['build']);
- 
+
 };
 
 //minimatchArray will see if 'file' matches the set of patterns

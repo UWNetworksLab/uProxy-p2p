@@ -13,3 +13,11 @@ function launchWindow(launchData) {
 }
 chrome.app.runtime.onLaunched.addListener(launchWindow);
 
+// We use the launch window for debugging WebRTC.
+function launchWebRtcTestWindow() {
+  chrome.app.window.create('scraps/webrtc-test.html', {
+    id: "webrtc-test",
+    minWidth: 640,
+    minHeight: 480
+  });
+}

@@ -1,6 +1,6 @@
 //XXX: needed for chrome debugging, used by socks.js and tcp-server.js.
 var window = {};
-console.log('SOCKS5 server');
+console.log('SOCKS5 server: ' + self.location.href);
 
 window.socket = freedom['core.socket']();
 
@@ -29,7 +29,7 @@ var onload = function() {
     delete transports[from];
     delete signallingChannels[from];
   };
-  
+
   var initChannel = function(from, callback) {
     if (!transports[from]) {
       transports[from] = {};
@@ -82,12 +82,12 @@ var onload = function() {
     shutdown();
     active = true;
   });
-  
+
   freedom.on('toServer', function(msg) {
     if (!active) {
       return;
     }
-    
+
     console.log("sending to transport: " + JSON.stringify(msg.data));
     if (!transports[msg.from]) {
       // Make a channel.
@@ -102,7 +102,7 @@ var onload = function() {
       signallingChannels[msg.from].emit('message', msg.data);
     }
   });
-  
+
   freedom.on('stop', shutdown);
 
   freedom.emit('ready', {});
