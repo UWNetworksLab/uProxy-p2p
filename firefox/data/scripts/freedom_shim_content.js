@@ -6,7 +6,7 @@
 (function defineShim(global) {
 
   var callbacks = {};
-  var id = window.location;
+  var id = "None";
   var communicator = addon;
 
   // The way messages are passed depends on where this script is
@@ -47,5 +47,5 @@
   };
 
   global.freedom = freedom;
-})(window);
+})(this);
 
