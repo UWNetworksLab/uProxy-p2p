@@ -22,6 +22,7 @@ AuthGoogle.prototype.validate = function(token) {
       this.credentials = {};
       this.credentials.userId = resp.email;
       this.credentials.token = token;
+      console.log('Google credentials: ' + JSON.stringify(this.credentials));
       if (this.credentialsCallback) {
         this.credentialsCallback(this.credentials);
       } else {

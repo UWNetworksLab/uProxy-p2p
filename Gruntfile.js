@@ -26,9 +26,13 @@ var chrome_app_files = [
   'common/freedom/freedom.js',
   'common/backend/**', 
   '!common/backend/spec/**', 
-  '!common/backend/identity/xmpp/node-xmpp/**'
+  '!common/backend/identity/xmpp/node-xmpp/**',
+  // scraps is a palce for throwing example code for demonstrating stuff to each other.
+  'common/scraps/**'
 ];
 var chrome_ext_files = [
+  // scraps is a palce for throwing example code for demonstrating stuff to each other.
+  'common/scraps/**',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',
@@ -58,6 +62,11 @@ var firefox_files = [
   'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
+
+// Firefox concat files
+var firefox_concat_src = ['firefox/data/scripts/freedom_shim_content.js',
+			  'firefox/data/scripts/injector.js'];
+
 //Testing
 //TODO fix
 var sources = ['common/backend/util.js'];
@@ -74,15 +83,21 @@ module.exports = function(grunt) {
     },
     concat: {
       firefox: {
-	src: ['firefox/data/scripts/freedom_shim_content.js',
-	      'firefox/data/scripts/injector.js'],
+	src: firefox_concat_src,
 	dest: 'firefox/data/scripts/dependencies.js'
       }
     },
-    watch: {  //Watch everything
-      files: ['common/**/*'], //TODO this doesn't work as expected on VMs
-      tasks: ['copy:watch'],
-      options: {spawn: false}
+    watch: {  
+      common: {//Watch everything
+	files: ['common/**/*'], //TODO this doesn't work as expected on VMs
+	tasks: ['copy:watch'],
+	options: {spawn: false}
+      },
+      firefox_dep: {
+	files: firefox_concat_src,
+	tasks: ['concat:firefox'],
+	options: {spawn: false}
+      }
     },
     shell: {
       git_submodule: {
