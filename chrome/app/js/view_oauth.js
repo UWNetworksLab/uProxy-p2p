@@ -16,7 +16,7 @@ View_oauth.prototype.open = function(args, continuation) {
   if (file == "google") {
     this.authMan = new AuthGoogle((function(msg) {
       this.dispatchEvent('message', {
-        cmd: 'google-auth',
+        cmd: 'auth',
         message: msg
       });
     }).bind(this));
@@ -48,8 +48,7 @@ View_oauth.prototype.postMessage = function(args, continuation) {
   if (this.manualDialog && args && args.cmd && 
         (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
     this.manualDialog.sendMessage(args);
-  } else if (this.authMan && args && args.cmd && 
-                (args.cmd == 'google-login' || args.cmd == 'login')) {
+  } else if (this.authMan && args && args.cmd && args.cmd == 'login') {
     this.authMan.login(args.interactive);
   } else {
     console.error("Unrecognized message to core.view: " + JSON.stringify(args));
