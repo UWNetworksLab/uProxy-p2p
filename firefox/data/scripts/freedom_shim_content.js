@@ -17,9 +17,9 @@
   var freedom = {
     emit: function emit(event, data) {
       addon.port.emit("freedom_shim",
-		      {event: event,
-		       data: data,
-		       id: id});
+          {event: event,
+           data: data,
+           id: id});
     },
     on: function on(event, callback) {
       callbacks[event] = callback;

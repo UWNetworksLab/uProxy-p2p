@@ -11,8 +11,8 @@
   addon.port.on("freedom_shim_listen", function(event) {
     freedom.on(event, function(freedomOutput) {
       var args = {event: event,
-		  data: freedomOutput,
-		  id: "FreeDOM"};
+      data: freedomOutput,
+      id: "FreeDOM"};
       addon.port.emit("freedom_shim", args);
     });
   });

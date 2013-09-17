@@ -12,7 +12,7 @@ var OAUTH_CONFIG = {
 **/
 
 
-angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector'])
+angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:

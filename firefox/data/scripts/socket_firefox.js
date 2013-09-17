@@ -25,7 +25,7 @@ var Socket_firefox = function(channel) {
   this.connect = function(socketId, hostname, port, callback) {
     connectingSockets[socketId] = callback;
     addon.port.emit('socket-connect',
-		    {socketId: socketId, hostname: hostname, port:port});
+        {socketId: socketId, hostname: hostname, port:port});
   };
   addon.port.on('socket-connect-response', function(response) {
     connectingSockets[response.socketId]({result: response.result});
@@ -40,7 +40,7 @@ var Socket_firefox = function(channel) {
     var reads = socketReads['reads']++;
     socketReads[reads] = callback;
     addon.port.emit('socket-read',
-		    {socketId: socketId, bufferSize: bufferSize, reads: reads});
+        {socketId: socketId, bufferSize: bufferSize, reads: reads});
   };
   addon.port.on('socket-read-response', function (response) {
     var callbackArgs = {
@@ -62,7 +62,7 @@ var Socket_firefox = function(channel) {
     var writes = socketWrites['writes']++;
     socketWrites[writes] = callback;
     addon.port.emit('socket-write',
-		    {socketId: socketId, data: data, writes: writes});
+        {socketId: socketId, data: data, writes: writes});
   };
 
   addon.port.on('socket-write-response', function (response) {
@@ -78,7 +78,7 @@ var Socket_firefox = function(channel) {
     disconnectingSockets[socketId] = callback;
     addon.port.emit('socket-disconnect', {socketId: socketId});
   };
-  
+
   addon.port.on('socket-disconnected', function(response) {
     disconnectingSockets[response.socketId]();
   });
