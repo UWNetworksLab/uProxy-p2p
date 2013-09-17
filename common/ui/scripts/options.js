@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('UProxyChromeExtension-options', ['UProxyChromeExtension'])
+angular.module('UProxyExtension-options', ['UProxyExtension'])
   .run(['$rootScope', 'model', function ($rootScope, model) {
     // sketch out some mock data. TODO: this should come from backend
     var unwatch = $rootScope.$watch('model.roster', function (roster, oldRoster) {
