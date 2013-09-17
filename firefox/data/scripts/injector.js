@@ -9,17 +9,17 @@ var chromeEvent = function() {
     },
     removeListener: function removeListener(listener) {
       for(var i = 0; i < listeners.length; i++) {
-	if (listeners[i] === listener) {
-	  listeners.splice(i, 1);
-	  return;
-	}
+  if (listeners[i] === listener) {
+    listeners.splice(i, 1);
+    return;
+  }
       }
     },
     dispatch: function dispatch() {
       console.log('dispatch called, looking for callbacks');
       for(var i = 0; i < listeners.length; i++) {
-	 console.log('dispatching event');
-	listeners[i].apply(this, arguments);
+   console.log('dispatching event');
+  listeners[i].apply(this, arguments);
       }
     }
   };
