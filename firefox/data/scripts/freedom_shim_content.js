@@ -7,25 +7,38 @@
 
   var callbacks = {};
   var id = "None";
-  var communicator = addon;
+  var communicator;
 
   // The way messages are passed depends on where this script is
   // running, so we need to detect the proper way to pass messages.
-  if ((typeof communicator) === "undefined") {
-    if(self) {
-      console.log("Shim is in a user script, using 'self' for message passing");
-      communicator = self;
-    } else if(document && document.defaultView) {
-      console.log("Shim is in a web page, using 'document.defaultView' for message passing");
-      communicator = {
-  	port:{
-  	  emit: document.defaultView.postMessage,
-  	  on: document.defaultView.addEventListener
-      }};
-    }
-  } else {
-    console.log("Shim is in a panel, using 'addon' for message passing");
-  }
+ if ((typeof addon) !== "undefined") {
+   console.log("Shim is in a panel, using 'addon' for message passing");
+   communicator = addon;
+ } else if ((typeof self) !== "undefined" &&
+	   (typeof self.port) !== "undefined") {
+   console.log("Shim is in a user script, using 'self' for message passing");
+   communicator = self;
+ } else if((typeof window) !== "undefined") {
+   console.log("Shim is in a web page, using 'window' for message passing");
+   communicator = {
+     port: {
+       emit: function(event, data) {
+	 window.postMessage({event: event, data: data},
+			    "resource://uproxyfirefox-at-universityofwashington");
+
+       },
+       on: function(event, target) {
+	 window.addEventListener("message", function(windowEvent) {
+	   if (windowEvent.event === event) {
+	     target(windowEvent.data);
+	   }
+	 });
+       }
+     }};
+ } else {
+   throw "No communication channel.";
+ }
+  
 
   communicator.port.on("freedom_shim", function(args) {
     if (args.id == "FreeDOM" && (args.event in callbacks)) {
@@ -35,6 +48,7 @@
 
   var freedom = {
     emit: function emit(event, data) {
+      console.log("emitting event" + event);
       communicator.port.emit("freedom_shim",
 		      {event: event,
 		       data: data,
