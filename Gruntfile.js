@@ -92,7 +92,11 @@ module.exports = function(grunt) {
     },
     watch: {  
       common: {//Watch everything
-        files: ['common/**/*'], //TODO this doesn't work as expected on VMs
+        //TODO this doesn't work as expected on VMsw
+        files: ['common/**/*',
+                // bower components should only change when grunt is
+                // already being run
+                '!**/bower_components/**'], 
         tasks: ['copy:watch'],
         options: {spawn: false}
       },
