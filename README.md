@@ -91,6 +91,7 @@ UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
+ *  xpi - Generates an .xpi for installation to Firefox.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
