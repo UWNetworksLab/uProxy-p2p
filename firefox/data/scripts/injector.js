@@ -31,6 +31,7 @@ angular.module('dependencyInjector', [])
   })
   .constant('freedom', freedom)
   .constant('onFreedomStateChange', chromeEvent())
+  .constant('model', {})
   .run(['freedom', 'onFreedomStateChange', function(freedom, onFreedomStateChange) {
     freedom.onConnected = chromeEvent();
     freedom.onDisconnected = chromeEvent();

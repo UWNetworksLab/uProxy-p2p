@@ -1,3 +1,4 @@
+// Chrome-specific dependencies.
 'use strict';
 
 angular.module('dependencyInjector', [])
@@ -8,4 +9,6 @@ angular.module('dependencyInjector', [])
     };
   })
   .constant('freedom', chrome.extension.getBackgroundPage().freedom)
-  .constant('onFreedomStateChange', chrome.extension.getBackgroundPage().onFreedomStateChange);
+  .constant('onFreedomStateChange', chrome.extension.getBackgroundPage().onFreedomStateChange)
+  // Singleton model lives in chrome extension's background page.
+  .constant('model', chrome.extension.getBackgroundPage().model);

@@ -8,18 +8,19 @@ PRG="$(basename "$0")"
 
 echo "START_DIR=$START_DIR"
 echo "ROOT_DIR=$ROOT_DIR"
-echo "PRG=PRG"
+echo "PRG=$PRG"
 
-# for command printout messages.
-PREFIX="* Running: "
+runcmd() {
+  # For command printout messages.
+  echo "* Running: $1"
+  $1 || exit 1
+}
 
 echo
 echo "### Install local dependencies"
-CMD="cd $ROOT_DIR";
-echo "$PREFIX$CMD"; $CMD || exit 1;
-CMD="npm install";
-echo "$PREFIX$CMD"; $CMD || exit 1;
-CMD="grunt setup";
-echo "$PREFIX$CMD"; $CMD || exit 1;
-CMD="grunt build";
-echo "$PREFIX$CMD"; $CMD || exit 1;
+runcmd "cd $ROOT_DIR"
+runcmd "npm install"
+runcmd "npm install -g grunt-cli"
+runcmd "npm install -g bower"
+runcmd "grunt setup"
+runcmd "grunt build"

@@ -12,7 +12,7 @@ var OAUTH_CONFIG = {
 **/
 
 
-angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector'])
+angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
@@ -38,28 +38,32 @@ angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector']
       return _.all(contact.clients, {status: 'offline'});
     };
   })
-  // application state. determined by backend (packaged app)
-  .constant('model', {})
-  // Run gets called every time the popup is openned. This initialises the main
+  // Run gets called every time the popup is openned. This initializes the main
   // extension UI and makes sure it is in sync with the app.
   .run([
     '$filter',
     '$http',
     '$rootScope',
-    'onFreedomStateChange',
-    'freedom',
-    'model',
-    function($filter, $http, $rootScope, onFreedomStateChange, freedom, model) {
+    'freedom',               // Via dependencyInjector.
+    'onFreedomStateChange',  // Via dependencyInjector.
+    'model',                 // Via dependencyInjector.
+    function(
+        $filter, $http, $rootScope,
+        freedom, onFreedomStateChange, model) {
       var filter = $filter('filter'),
           messageable = $filter('messageable'),
           onlineNotMessageable = $filter('onlineNotMessageable');
-
+      if (undefined === model) {
+        console.error('model not found in dependency injections.');
+      }
       $rootScope.model = model;
 
       $rootScope.$watch('model.roster', function (roster) {
         if (!roster) return;
+        console.log('watcher roster');
         $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
         $rootScope.contactsMessageable = filter(roster, messageable);
+        console.log($rootScope);
       }, true);
 
       $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
@@ -128,7 +132,7 @@ angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector']
       }
       **/
 
-      // TODO(): change the icon/text shown in the broswer action, and maybe
+      // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
       // through you. See:
       //   * chrome.browserAction.setBadgeText(...)
@@ -139,15 +143,15 @@ angular.module('UProxyChromeExtension', ['angular-lodash', 'dependencyInjector']
           console.info('got state change:', patch);
           $rootScope.connectedToApp = true;
           // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
-          if (patch[0].path === '') {
-            angular.copy(patch[0].value, model);
-          } else {
-            if (_.isEmpty(model)) {
-              console.info('model init patch not yet received, ignoring non init patch:', patch);
+          if (_.isEmpty(model)) {  // Refresh state if local model is empty.
+            if (patch[0].path === '') {
+              angular.copy(patch[0].value, model);
             } else {
-              patch = new jsonpatch.JSONPatch(patch, true); // mutate = true
-              patch.apply(model);
+              console.info('model init patch not yet received, ignoring non init patch:', patch);
             }
+          } else {
+            patch = new jsonpatch.JSONPatch(patch, true);  // mutate = true
+            patch.apply(model);
           }
         });
       }
