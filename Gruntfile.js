@@ -124,7 +124,11 @@ module.exports = function(grunt) {
         options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
       },
     },
-    clean: ['chrome/app/common/**', 'chrome/extension/src/common/**', 'firefox/data/common/**'],
+    clean: ['chrome/app/common/**',
+            'chrome/extension/src/common/**',
+            'firefox/data/common/**',
+            'tmp',
+            'uproxy.xpi'],
     jasmine: {
       common: {
         src: testSources,
