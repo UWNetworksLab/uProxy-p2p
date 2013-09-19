@@ -138,8 +138,20 @@ module.exports = function(grunt) {
       options: {
         '-W069': true
       }
+    },
+    'mozilla-addon-sdk': {
+      download: {
+        options: {
+          revision: "firefox24"
+        }
+      },
+      xpi: {
+        options: {
+          extension_dir: "firefox",
+          dist_dir: "."
+        }
+      }
     }
-
   });
   
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -148,6 +160,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
 
   //On file change, see which distribution it affects and
@@ -189,6 +202,11 @@ module.exports = function(grunt) {
     'copy:chrome_ext',
     'concat:firefox',
     'copy:firefox'
+  ]);
+  grunt.registerTask('xpi', [
+    'build',
+    'mozilla-addon-sdk:download',
+    'mozilla-addon-sdk:xpi'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
