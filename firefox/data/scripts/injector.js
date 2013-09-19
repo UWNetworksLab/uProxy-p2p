@@ -4,7 +4,6 @@ var chromeEvent = function() {
   var listeners = [];
   var event = {
     addListener: function addListener(listener) {
-      console.log('adding listener');
       listeners.push(listener);
     },
     removeListener: function removeListener(listener) {
@@ -16,9 +15,7 @@ var chromeEvent = function() {
       }
     },
     dispatch: function dispatch() {
-      console.log('dispatch called, looking for callbacks');
       for(var i = 0; i < listeners.length; i++) {
-	 console.log('dispatching event');
 	listeners[i].apply(this, arguments);
       }
     }

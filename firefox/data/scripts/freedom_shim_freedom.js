@@ -6,16 +6,17 @@
   var id = "FreeDOMHub@NOID";
   if ((typeof self) !== 'undefined' &&
       (typeof self.location) !== 'undefined') {
-    id = 'FreeDOMShim@' + self.location.href;
+    id = 'FreeDOMHub@' + self.location.href;
   } else if ((typeof href) !== 'undefined') {
-    id = 'FreeDOMShim@' + href;
+    id = 'FreeDOMHub@' + href;
   }
 
   global.freedomShim = {
     addCommunicator: function addCommunicator(communicator) {
-
-      communicator.on("freedom_shim", function(args) {
-	console.log(id + ' incomming message message for event: ' + args.event);
+      console.log('Adding communicator to ' + id);
+      communicator.on("freedom_shim_hub", function(args) {
+	console.log(id + ' incomming message message for event: ' + args.event +
+		   ', passing event on to freedom');
 	freedom.emit(args.event, args.data);
       });
       
@@ -24,21 +25,20 @@
       communicator.on("freedom_shim_listen", function(event) {
 	console.log(id + ' now listening for: ' + event);
 	freedom.on(event, function(freedomOutput) {
+	  if ((typeof communicator) === 'undefined') return;
+	  console.log(id + ' received event for: ' + event +
+		      ' from freedom, sending on to communicator.');
 	  var args = {event: event,
 		      data: freedomOutput,
 		      id: id};
-	  communicator.emit("freedom_shim", args);
+	  try {
+	    communicator.emit("freedom_shim", args);
+	  } catch (e) {
+	    // This may occur when the resource (eg Worker) is destroyed.
+	    // Delete this reference to prevent memory leaks.
+	    delete communicator;
+	  }
 	});
-      });
-
-      // Release the reference to communicator by referencing a dummy object. 
-      communicator.on('detach', function removeCommunicator() {
-	// We mock the communicator so that events that used to go to
-	// this communicator are now a no-op.  We may want to fix this
-	// later so that a no-op functions don't accumulate.
-	communicator = {
-	    emit: function emit() {}
-	};
       });
     }
   };
