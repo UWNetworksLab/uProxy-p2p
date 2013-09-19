@@ -86,20 +86,20 @@ module.exports = function(grunt) {
     },
     concat: {
       firefox: {
-	src: firefox_concat_src,
-	dest: 'firefox/data/scripts/dependencies.js'
+        src: firefox_concat_src,
+        dest: 'firefox/data/scripts/dependencies.js'
       }
     },
     watch: {  
       common: {//Watch everything
-	files: ['common/**/*'], //TODO this doesn't work as expected on VMs
-	tasks: ['copy:watch'],
-	options: {spawn: false}
+        files: ['common/**/*'], //TODO this doesn't work as expected on VMs
+        tasks: ['copy:watch'],
+        options: {spawn: false}
       },
       firefox_dep: {
-	files: firefox_concat_src,
-	tasks: ['concat:firefox'],
-	options: {spawn: false}
+        files: firefox_concat_src,
+        tasks: ['concat:firefox'],
+        options: {spawn: false}
       }
     },
     shell: {
