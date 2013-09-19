@@ -64,8 +64,11 @@ var firefox_files = [
 ];
 
 // Firefox concat files
-var firefox_concat_src = ['firefox/data/scripts/freedom_shim_content.js',
-			  'firefox/data/scripts/injector.js'];
+var firefox_concat_src = [
+  'firefox/data/scripts/event_on_emit_shim.js',
+  'firefox/data/scripts/freedom_shim_content.js',
+  'firefox/data/scripts/injector.js'
+];
 
 //Testing
 //TODO fix

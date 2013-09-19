@@ -24,22 +24,27 @@ var initPanel = function(freedomCommunicator) {
     width: 450,
     height: 300
   });
-  freedomCommunicator.addContentContext(uproxyPanel);
+  freedomCommunicator.addContentContext(uproxyPanel.port);
   uproxyPanel.port.on("show", function() {
     uproxyPanel.port.emit("l10n", l10n);
   });
   return uproxyPanel;
 };
 
-// var optionsPanel = function(freedomCommunicator) {
-//   var options = pageMod({
-//     include: "",
-//     contentScriptFile:[]
-//     contentScriptWhen: "start"
-//   });  
-//   //freedomCommunicator.addContentContext(options);
-//   options.show();
-// };
+var optionsPageContentScript = function(freedomCommunicator) {
+  var options = pageMod.PageMod({
+    include: "resource://uproxyfirefox-at-universityofwashington/uproxy/data/common/ui/options.html",
+    contentScriptFile:[self.data.url("scripts/freedom_shim_content.js"),
+		       self.data.url("scripts/freedom_shim_freedom.js"),
+		       self.data.url("scripts/event_on_emit_shim.js"),
+		      self.data.url("scripts/content_script_communicator.js")],
+    contentScriptWhen: "start",
+    onAttach: function contentScriptAttached(worker) {
+      console.log('Attaching scripts for options page.');
+      freedomCommunicator.addContentContext(worker.port);
+    }
+  });
+};
 
 var freedomEnvironment = require('./init_freedom').InitFreedom();
 
@@ -47,3 +52,4 @@ var freedomEnvironment = require('./init_freedom').InitFreedom();
 // and replace with the line:
 // initToolbar(freedomEnvironment);
 require('sdk/timers').setTimeout(initToolbar, 500, freedomEnvironment);
+require('sdk/timers').setTimeout(optionsPageContentScript, 500, freedomEnvironment.communicator);

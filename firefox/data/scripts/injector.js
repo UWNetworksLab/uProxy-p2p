@@ -35,14 +35,18 @@ angular.module('dependencyInjector', [])
   .constant('freedom', freedom)
   .constant('onFreedomStateChange', chromeEvent())
   .run(['freedom', 'onFreedomStateChange', function(freedom, onFreedomStateChange) {
+    freedom.onConnected = chromeEvent();
+    freedom.onDisconnected = chromeEvent();
+
+    freedom.onConnected.addListener(function () {
+      freedom.on('state-change', function (patchMsg) {
+	onFreedomStateChange.dispatch(patchMsg);
+      });
+    });
+
     freedom.connect = function() {
       this.connected = true;
       freedom.onConnected.dispatch();
     };
-    freedom.onConnected = chromeEvent();
-    freedom.onDisconnected = chromeEvent();
-    freedom.on('state-change', function stateChangeHanlder(patch) {
-      onFreedomStateChange.dispatch(patch);
-    });
   }
        ]);
