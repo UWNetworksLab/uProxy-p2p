@@ -30,6 +30,14 @@ ul
   list-style: none
   padding: 0
 
+.btn
+  border: 1px solid #000
+  background: #fff
+
+.btn-request
+  position: absolute
+  right: 0
+
 #header
 
 .title
@@ -48,6 +56,9 @@ ul
 #options:hover
   opacity: 0.8
 
+#search-section
+  position: relative
+
 #search-contacts
   width: 100%
   padding: 8px 20px
@@ -60,14 +71,38 @@ ul
   outline: none
   box-shadow: 0 1px 1px #ccc
 
+#search-btn
+  position: absolute
+  right: 0
+  top: 0
+  width: 35px
+  height: 35px
+  padding: 4px
+  border: none
+  background: transparent url('../icons/search.png') no-repeat center
+  background-size: 80%
+
+#search-btn:hover, #search-btn:focus
+  opacity: 0.5
+  outline: none
+
 #filters
+  position: relative
+  display: block
+  width: 100%
   border-top: 1px solid #aaa
 
-.btn
-  border: 1px solid #000
-  background: #fff
+.filter
+  background-color: #fff
+  margin: 0
+  padding: 8px 20px
+  width: 50%
 
-.btn-request
+#my-access
+  position: absolute
+  left: 0
+
+#friends-access
   position: absolute
   right: 0
 
@@ -82,13 +117,19 @@ ul
 
 .contacts li
   position: relative
+  z-index: 0
   cursor: default
-  padding: 8px 24px
+  padding: 6px 20px
+  white-space: nowrap
   @include smooth
 
 .contacts li:hover
-  box-shadow: 0 1px 1px #ccc
+  z-index: 50
   top: -2px
+  box-shadow: 0 1px 3px #aaa
+
+.contact-details
+  display: none
 
 #popup
   min-width: 357px

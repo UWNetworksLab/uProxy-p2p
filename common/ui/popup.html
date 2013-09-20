@@ -35,13 +35,20 @@
     </section>
 
     <section ng-show="connectedToApp">
-      <input type="text" id="search-contacts" placeholder="search contacts">
-      </input>
+
+      <section id="search-section">
+        <input type="text" id="search-contacts" placeholder="search contacts">
+        </input>
+        <button id="search-btn"></button>
+      </section>
+
       <section class="roster">
         <ul class="contacts">
           <li ng-repeat="contact in model.roster">
             {{contact.name}}
-            <span class="contact-details">({{contact.userId}})</span>
+            <span class="contact-details">
+              ({{contact.userId}})
+            </span>
             <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
             <button class="btn">Stop</button>
           </li>
@@ -49,14 +56,8 @@
       </section>
 
       <section id="filters">
-      Filter By:
-      <ul>
-      <li>Available</li>
-      <li>Requested</li>
-      <li>Pending</li>
-      <li>Granted</li>
-      <li>No UProxy</li>
-      </ul>
+      <button id="my-access" class="filter">My Access</button>
+      <button id="friends-access" class="filter">Friends' Access</button>
       </section>
 
       <!--
