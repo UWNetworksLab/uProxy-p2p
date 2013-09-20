@@ -37,24 +37,24 @@
         <label>
           Networks:
         </label>
-            <button class="btn btn-mini" ng-show="!isOnline('loopback')"
-                  ng-click="login('loopback')">Loop</button>
-            <button class="btn btn-mini active" ng-show="isOnline('loopback')"
-                  ng-click="logout('loopback')">Loop</button>
-            <button class="btn btn-danger btn-mini" ng-show="!isOnline('google')"
-                  ng-click="login('google')">G+</button>
-            <button class="btn btn-danger btn-mini active" ng-show="isOnline('google')"
-                  ng-click="logout('google')">G+</button>
-            <button class="btn btn-primary btn-mini" ng-show="!isOnline('facebook')"
-                  ng-click="login('facebook')">FB</button>
-            <button class="btn btn-primary btn-mini active" ng-show="isOnline('facebook')"
-                  ng-click="logout('facebook')">FB</button>
+        <button class="btn btn-mini" ng-show="!isOnline('loopback')"
+              ng-click="login('loopback')">Loop</button>
+        <button class="btn btn-mini active" ng-show="isOnline('loopback')"
+              ng-click="logout('loopback')">Loop</button>
+        <button class="btn btn-danger btn-mini" ng-show="!isOnline('google')"
+              ng-click="login('google')">G+</button>
+        <button class="btn btn-danger btn-mini active" ng-show="isOnline('google')"
+              ng-click="logout('google')">G+</button>
+        <button class="btn btn-primary btn-mini" ng-show="!isOnline('facebook')"
+              ng-click="login('facebook')">FB</button>
+        <button class="btn btn-primary btn-mini active" ng-show="isOnline('facebook')"
+              ng-click="logout('facebook')">FB</button>
       </li>
       <li>
         <h4>Contacts</h4>
         <ul style="max-height: 400px; overflow-y: scroll; border: thin solid gray">
           <li ng-repeat="contact in model.contacts">
-            <ul>
+            <ul class="contacts">
               <li ng-repeat="client in contact.clients">
                 <h5>{{client.clientName}}</h5>
                 <div style="margin-left: 15px">

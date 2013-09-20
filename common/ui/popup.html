@@ -20,7 +20,12 @@
   </head>
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl" id="popup">
-    <section ng-show="!connectedToApp">
+    <section id="header">
+      <h3 class="title">UProxy</h3>
+      <a class="btn" id="options" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
+    </section>
+
+    <section ng-hide="connectedToApp">
       Not connected to
       <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
       UProxy app</a>. Please ensure it is
@@ -28,22 +33,47 @@
       <a href="https://github.com/UWNetworksLab/UProxy/#testing-in-chrome" target="_blank">
       installed</a> and running by checking your <code>chrome://extensions</code> page.
     </section>
+
     <section ng-show="connectedToApp">
+      <input type="text" id="search-contacts" placeholder="search contacts">
+      </input>
+      <section class="roster">
+        <ul class="contacts">
+          <li ng-repeat="contact in model.roster">
+            {{contact.name}}
+            <span class="contact-details">({{contact.userId}})</span>
+            <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
+            <button class="btn">Stop</button>
+          </li>
+        </ul>
+      </section>
+
+      <section id="filters">
+      Filter By:
+      <ul>
+      <li>Available</li>
+      <li>Requested</li>
+      <li>Pending</li>
+      <li>Granted</li>
+      <li>No UProxy</li>
+      </ul>
+      </section>
+
       <!--
       <section ng-show="model.identityStatus.status == 'offline'">
         <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
       </section>
-
       <section ng-show="model.identityStatus.status == 'connecting'">
         Connecting to Google Talk...
       </section>
-
       <section ng-show="model.identityStatus.status == 'online'">
       -->
       <section class="pagination-right muted">
         {{model.me.userId}}
       </section>
 
+      <!--
+      <h4>Status</h4>
       <section class="current-sessions">
         <section class="current-sessions-get">
           <section ng-show="isEmpty(model.currentSessionsToInitiate)">
@@ -99,10 +129,11 @@
 
         <section class="request-access" ng-hide="isEmpty(cannotGetFrom)">
           <h5>Request permission to get access through:</h5>
-          <ul>
+          <ul class="contacts">
             <li ng-repeat="(id, contact) in cannotGetFrom">
-              {{contact.name}} ({{contact.userId}})
-              <button class="btn btn-mini" ng-click="sendMessage(contact, 'request-access')">
+              {{contact.name}}
+              <span class="contact-detail">({{contact.userId}})</span>
+              <button class="btn btn-request" ng-click="sendMessage(contact, 'request-access')">
                 <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request
               </button>
             </li>
@@ -135,12 +166,6 @@
             </li>
           </ul>
         </section>
-      <!--
-      </section>
-      -->
-
-      <section class="footer">
-        <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
       </section>
 
       <hr>
@@ -185,6 +210,8 @@
           </details>
         </div>
       </details>
+      -->
+
     </section>
   </div></body>
 </html>

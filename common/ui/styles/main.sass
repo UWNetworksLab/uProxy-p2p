@@ -1,19 +1,102 @@
-@import compass
-@import bootstrap-sass/lib/bootstrap
+// Primary stylesheet for both popup and options page.
+
+$fontSize: 10px
+
+@font-face
+  font-family: 'Eurostile'
+  src: url('eurostile.ttf') format('truetype')
+
+@mixin smooth
+  -webkit-transition: all 0.23s !important
+  -moz-transition: all 0.23s !important
+  -o-transition: all 0.23s !important
+  transition: all 0.23s !important
+
+html
+  height: 600px
+
+body
+  font-family: Eurostile, sans-serif
+  height: 100%
+  margin: 0
+  padding: 0
+  overflow: hidden
+
+h1, h2, h3, h4, h5
+  margin: 0
+  padding: 0
+
+ul
+  list-style: none
+  padding: 0
+
+#header
+
+.title
+  padding: 0 8px
+
+#options
+  position: absolute
+  top: 0
+  right: 0
+  background: transparent
+  border: none
+  outline: none
+  padding: 4px
+  text-decoration: none
+
+#options:hover
+  opacity: 0.8
+
+#search-contacts
+  width: 100%
+  padding: 8px 20px
+  font-size: $fontSize * 1.5
+  border: 1px solid #aaa
+  outline: none
+  color: #333
+
+#search-contacts:focus
+  outline: none
+  box-shadow: 0 1px 1px #ccc
+
+#filters
+  border-top: 1px solid #aaa
+
+.btn
+  border: 1px solid #000
+  background: #fff
+
+.btn-request
+  position: absolute
+  right: 0
+
+.contacts
+  height: 400px
+  overflow: auto
+  position: relative
+  margin: 0
+  padding: 0
+  border-top: 1px solid #eee
+  @include smooth
+
+.contacts li
+  position: relative
+  cursor: default
+  padding: 8px 24px
+  @include smooth
+
+.contacts li:hover
+  box-shadow: 0 1px 1px #ccc
+  top: -2px
 
 #popup
   min-width: 357px
-  overflow-x: hidden
-  padding: 15px
   .footer
     text-align: right
 
-.roster ul
-  max-height: 150px
-  overflow: scroll
-
 .large-font
-  font-size: $baseFontSize * 1.5
+  font-size: $fontSize * 1.5
 
 details
   & > summary
@@ -25,7 +108,7 @@ details
 
 #debug
   pre
-    font-size: $baseFontSize * .7
+    font-size: $fontSize * .7
     max-height: 200px
     overflow: scroll
   .btn-group
@@ -39,7 +122,6 @@ body#options
     margin-top: 50px
 
 ul.options
-  +no-bullets
 
 details.advanced
   margin-top: 15px
