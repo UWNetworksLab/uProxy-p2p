@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="UProxyExtension-popup" ng-csp>
+<html ng-app="UProxyExtension-popup" ng-csp id="popup">
   <head>
     <meta charset="utf-8">
 
@@ -19,10 +19,10 @@
 
   </head>
   <!-- TODO: i18n -->
-  <body><div ng-cloak ng-controller="MainCtrl" id="popup">
+  <body><div ng-cloak ng-controller="MainCtrl">
     <section id="header">
       <h3 class="title">UProxy</h3>
-      <a class="btn" id="options" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
+      <a class="btn" id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
     </section>
 
     <section ng-hide="connectedToApp">
@@ -39,18 +39,31 @@
       <section id="search-section">
         <input type="text" id="search-contacts" placeholder="search contacts">
         </input>
-        <button id="search-btn"></button>
+        <button id="search-btn" ng-click="meow = meow + 1"></button>
+        {{meow}}
       </section>
 
       <section class="roster">
         <ul class="contacts">
-          <li ng-repeat="contact in model.roster">
+          <li ng-repeat="contact in model.roster" ng-click="toggleContact(contact)">
             {{contact.name}}
-            <span class="contact-details">
+            <div class="contact-details" ng-show="contact.detailsVisible">
               ({{contact.userId}})
-            </span>
-            <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
-            <button class="btn">Stop</button>
+              <div>
+                <button class="btn">Stop</button>
+                <button class="btn">Start</button>
+              </div>
+              <div>
+                <button class="btn">Allow</button>
+                <button class="btn">Ignore</button>
+              </div>
+              <div>
+                <button class="btn">Request</button>
+              </div>
+              <div>
+                <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
+              </div>
+            </div>
           </li>
         </ul>
       </section>

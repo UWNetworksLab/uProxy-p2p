@@ -2,9 +2,6 @@
   font-family: "Eurostile";
   src: url("eurostile.ttf") format("truetype"); }
 
-html {
-  height: 600px; }
-
 body {
   font-family: Eurostile, sans-serif;
   height: 100%;
@@ -20,6 +17,25 @@ ul {
   list-style: none;
   padding: 0; }
 
+::-webkit-scrollbar {
+  width: 6px; }
+
+::-webkit-scrollbar:hover {
+  width: 10px; }
+
+::-webkit-scrollbar-track {
+  background-color: #fafafa; }
+
+::-webkit-scrollbar-track:window-inactive {
+  background-color: black; }
+
+::-webkit-scrollbar-thumb {
+  background-color: #aaaaaa;
+  height: 10%; }
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #cccccc; }
+
 .btn {
   border: 1px solid black;
   background: white; }
@@ -31,7 +47,7 @@ ul {
 .title {
   padding: 0 8px; }
 
-#options {
+#options-btn {
   position: absolute;
   top: 0;
   right: 0;
@@ -41,7 +57,7 @@ ul {
   padding: 4px;
   text-decoration: none; }
 
-#options:hover {
+#options-btn:hover {
   opacity: 0.8; }
 
 #search-section {
@@ -95,9 +111,9 @@ ul {
   right: 0; }
 
 .contacts {
+  position: relative;
   height: 400px;
   overflow: auto;
-  position: relative;
   margin: 0;
   padding: 0;
   border-top: 1px solid #eeeeee;
@@ -107,6 +123,7 @@ ul {
   transition: all 0.23s !important; }
 
 .contacts li {
+  background-color: #fdfdfd;
   position: relative;
   z-index: 0;
   cursor: default;
@@ -118,15 +135,17 @@ ul {
   transition: all 0.23s !important; }
 
 .contacts li:hover {
+  background-color: white;
   z-index: 50;
-  top: -2px;
-  box-shadow: 0 1px 3px #aaaaaa; }
+  top: -1px;
+  box-shadow: 0 1px 2px #aaaaaa; }
 
-.contact-details {
+.contact-actions {
   display: none; }
 
 #popup {
-  min-width: 357px; }
+  min-width: 357px;
+  height: 600px; }
   #popup .footer {
     text-align: right; }
 
