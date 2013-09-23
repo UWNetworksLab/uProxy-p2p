@@ -33,8 +33,4 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.msg = '';
     };
   }])
-  .constant('meow', function() {
-    alert('rofl');
-  });
-
 

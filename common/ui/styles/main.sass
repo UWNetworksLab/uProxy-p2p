@@ -148,7 +148,33 @@ ul
   box-shadow: 0 1px 2px #aaa
 
 .contact-details
+  height: 200px
+  opacity: 1
+  @include smooth
 
+.contact-details.ng-hide
+  display: block !important
+  opacity: 0
+  height: 0
+  z-index: -500
+  pointer-events: none
+
+// .contact-details.ng-hide-add,
+// .contact-details.ng-hide-remove
+  // @include smooth
+  // display: block !important
+// 
+// .contact-details.ng-hide-add.ng-hide-add-active,
+// .contact-details.ng-hide-remove
+  // @include smooth
+  // opacity: 0
+  // height: 0
+// 
+// .contact-details.ng-hide-add,
+// .contact-details.ng-hide-remove.ng-hide-remove-active
+  // opacity: 1
+  // height: 50px
+// 
 .contact-actions
   display: none
 
