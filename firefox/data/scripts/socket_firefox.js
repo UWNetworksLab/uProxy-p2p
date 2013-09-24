@@ -1,18 +1,31 @@
 'use strict';
 
 /**
- * A FreeDOM interface to Firefox sockets
+ * A FreeDOM interface to Firefox sockets.
+ * Communicates with the freedom socket manager in the extension.
  * @constructor
  * @private
  */
+
+
 
 var Socket_firefox = function(channel) {
   this.appChannel = channel;
   var createCallbacks = [];
   var connectingSockets = {};
   var disconnectingSockets = {};
-  var pendingReads = {};
   var pendingWrites = {};
+  var listeningSockets = {};
+  var pendingInfo = {};
+
+  function stringToArrayBuffer(str) {
+    var buf = new ArrayBuffer(str.length); 
+    var bufView = new Uint8Array(buf);
+    for (var i=0, strLen=str.length; i<strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+  }
 
   this.create = function(type, options, callback) {
     createCallbacks.push(callback);
@@ -31,27 +44,10 @@ var Socket_firefox = function(channel) {
     connectingSockets[response.socketId]({result: response.result});
   });
 
-  this.read = function(socketId, bufferSize, callback) {
-    if ((typeof pendingReads[socketId]) === 'undefined') {
-      pendingReads[socketId] = {reads: 0};
-    }
-    var socketReads = pendingReads[socketId];
-    // Each call back is associated with its read# so we can find it later
-    var reads = socketReads['reads']++;
-    socketReads[reads] = callback;
-    addon.port.emit('socket-read',
-        {socketId: socketId, bufferSize: bufferSize, reads: reads});
-  };
-  addon.port.on('socket-read-response', function (response) {
-    var callbackArgs = {
-      resultCode: response.resultCode,
-      data: response.data
-      };
-    pendingReads[response.socketId][response.reads](callbackArgs);
-    // Delete to prevent memory leaks, the callback may have a lot of 'stuff'
-    // in its enclosure that the GC can't remove because of the callback.
-    delete pendingReads[response.socketId][response.reads];
-  });
+  addon.port.on('socket-data', function (data) {
+    data.data = stringToArrayBuffer(data.data);
+    this.dispatchEvent('onData', data);
+  }.bind(this));
 
   this.write = function(socketId, data, callback) {
     if ((typeof pendingWrites[socketId]) === 'undefined') {
@@ -81,9 +77,54 @@ var Socket_firefox = function(channel) {
 
   addon.port.on('socket-disconnected', function(response) {
     disconnectingSockets[response.socketId]();
+    delete listeningSockets[response.socketId];
   });
 
   this.destroy = function(socketId, callback) {
     this.disconnect(socketId, callback);
   };
+
+  this.listen = function (socketId, address, port, callback) {
+    if (listeningSockets[socketId]) {
+      throw 'Socket ' + socketId + ' is either listening or registering to listen.';
+    }
+    addon.port.emit('socket-listen',
+                    {socketId: socketId,
+                    address: address,
+                    port: port});
+    listeningSockets[socketId] = callback;
+  };
+
+  addon.port.on('socket-listen-response', function socketListenResponse(args){
+    listeningSockets[args.socketId](args);
+    listeningSockets[args.socketId] = true;
+  });
+
+  addon.port.on('socket-connected', function socketConnected(socketInfo) {
+    this.dispatchEvent('onConnection', socketInfo);
+  }.bind(this));
+
+  this.getInfo = function(socketId, callback) {
+    var infoCallNumber;
+    if (socketId in pendingInfo) {
+      let waitingInfoCalls = pendingInfo[socketId];
+      infoCallNumber = ++waitingInfoCalls.infos;
+      waitingInfoCalls[infoCallNumber] = callback;
+    } else {
+      let waitingInfoCalls = {};
+      pendingInfo[socketId] = waitingInfoCalls;
+      infoCallNumber = 0;
+      waitingInfoCalls.infos = infoCallNumber;
+      waitingInfoCalls[infoCallNumber] = callback;
+    }
+    addon.port.emit('socket-info',
+                    {socketId: socketId,
+                    infoCall: infoCallNumber});
+  };
+
+  addon.port.on('socket-info-response', function getInfoResponse(args) {
+    var infoCallback = pendingInfo[args.socketId][args.infoCall];
+    infoCallback(args.info);
+    delete pendingInfo[args.socketId][args.infoCall];
+  });
 };

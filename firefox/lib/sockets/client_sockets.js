@@ -9,6 +9,7 @@ const socketTransportService = Cc["@mozilla.org/network/socket-transport-service
 const mainThread = Cc["@mozilla.org/thread-manager;1"].getService().mainThread;
 
 // Private variables for sockets get stored in WeakMaps
+let socketType = new WeakMap();
 let transports = new WeakMap();
 let rawReaders = new WeakMap();
 let binaryReaders = new WeakMap();
@@ -16,6 +17,7 @@ let writers = new WeakMap();
 // Map nsIInputStreamCallbacks to their ClientSockets
 let streamCallbacks = new WeakMap();
 
+function typeOfSocket(socket) socketType.get(socket)
 function transportFor(socket) transports.get(socket)
 function readerFor(socket) binaryReaders.get(socket)
 function rawReaderFor(socket) rawReaders.get(socket)
@@ -66,7 +68,7 @@ var nsIInputStreamCallback = Class({
  */
 var setTransport = function(socket, transport) {
   if (!isUndefined(transportFor(socket))) {
-    throw 'Socket already connected';
+    throw new Error('Socket already connected');
   }
 
   var binaryReader = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
@@ -93,16 +95,20 @@ var ClientSocket = Class({
       setTransport(this, transport);
     }
   },
-  connect: function connect(hostname, port) {
+  connect: function connect(hostname, port, socketType) {
     if (!isUndefined(transportFor(this))) {
-      throw 'Socket already connected';
+      throw new Error('Socket already connected');
+    }
+    if (isUndefined(socketType) || socketType === 'tcp') {
+      socketType = null;
     }
 
-    var transport = socketTransportService.createTransport(null,
+    var transport = socketTransportService.createTransport([socketType],
                                                            0,
 							   hostname,
                                                            port,
                                                            null);
+    socketType.set(this, socketType || 'tcp');
     setTransport(this, transport);
   },
   write: function(data) {
@@ -115,7 +121,28 @@ var ClientSocket = Class({
      transportFor(this)].forEach(function close(stream) {
        stream.close(0);
      });
+    transports.delete(this);
     emit(this, 'onDisconnect');
+  },
+  getInfo: function getInfo() {
+    var socketType = typeOfSocket(this);
+    var transport = transportFor(this);
+
+    if (isUndefined(transport)) {
+      let info = {socketType: socketType,
+                 connected: false};
+      return info;
+    } 
+
+    var nsINetAddrPeer = transport.getScriptablePeerAddr();
+    var nsINetAddrLocal = transport.getScriptableSelfAddr();
+    var info = {socketType: socketType,
+               connected: true,
+               peerAddress: nsINetAddrPeer.address,
+               peerPort: nsINetAddrPeer.port,
+               localAddress: nsINetAddrLocal.address,
+               localPort: nsINetAddrLocal.port};
+    return info;
   }
 });
 

@@ -1,45 +1,74 @@
 'use strict';
 
-const { ClientSocket } = require('./sockets');
+const { Socket, ClientSocket, ServerSocket } = require('./sockets/sockets');
 
+function arrayBufferToString(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf));
+}
 
 var FreedomSocketManager = function(freedomWindow) {
   const sockets = [];
 
+  // Given a socket id, it returns a function that notifies the
+  // FreeDOM component when data is received.
+  function onDataManager(clientSocketId) {
+    return function dataReceived(data) {
+      var dataMessage = {socketId: clientSocketId,
+                       data: arrayBufferToString(data)};
+      freedomWindow.port.emit('socket-data', dataMessage);
+      };
+  }
+
   freedomWindow.port.on('socket-create', function socketCreate(args) {
-    var socketNumber = sockets.push(ClientSocket()) - 1;
+    var socketNumber = sockets.push(Socket()) - 1;
     freedomWindow.port.emit('socket-created', socketNumber);
   });
 
   freedomWindow.port.on('socket-connect', function socketConnect(args) {
     var socket = sockets[args.socketId];
+    // Return zero if no error
+    // https://code.google.com/p/chromium/issues/detail?id=157181
+    var result;
     try {
       socket.connect(args.hostname, args.port);
-      // Return zero if no error
-      // https://code.google.com/p/chromium/issues/detail?id=157181
-      freedomWindow.port.emit('socket-connect-response',
-			       {socketId: args.socketId,
-				result: 0});
+      result = 0;
     } catch (e) {
       console.error(e);
+      result = -1;
+      return;
+    } finally {
       freedomWindow.port.emit('socket-connect-response',
-			       {socketId: args.socketId,
-				result: -1});
+			      {socketId: args.socketId,
+			       result: result});
     }
+    socket.on('onData', onDataManager(args.socketId));
   });
 
-  freedomWindow.port.on('socket-read', function socketRead(args) {
-    var socket = sockets[args.socketId];
+  freedomWindow.port.on('socket-listen', function socketListen(args) {
+    var serverSocket = sockets[args.socketId];
+    var address = args.address;
+    var port = args.port;
+    var result;
     try {
-      let data = socket.read(args.bufferSize);
-      freedomWindow.port.emit('socket-read-response',
-			      {data: data, resultCode: 0, reads: args.reads,
-			      socketId: args.socketId});
+      serverSocket.listen(args.address, args.port);
+      result = 0;
     } catch (e) {
-      freedomWindow.port.emit('socket-read-response', {resultCode: -1,
-						       reads: args.reads,
-						       socketId: args.socketId});
+      console.error(e);
+      result = -1;
+      return;
+    } finally {
+      freedomWindow.port.emit('socket-listen-response',
+                              {socketId: args.socketId,
+                               result: result});
     }
+    serverSocket.on('onConnect', function onConnect(clientSocket) {
+      var clientSocketId = sockets.push(clientSocket) - 1;
+      clientSocket.on('onData', onDataManager(clientSocketId));
+      freedomWindow.port.emit('socket-connected',
+                              {serverSocketId: args.socketId,
+                               clientSocketId: clientSocketId});
+    });
+    
   });
 
   freedomWindow.port.on('socket-write', function socketWrite(args) {
@@ -61,6 +90,15 @@ var FreedomSocketManager = function(freedomWindow) {
     var socket = sockets[args.socketId];
     socket.disconnect();
     freedomWindow.port.emit('socket-disconnected', {socketId: args.socketId});
+  });
+
+  freedomWindow.port.on('socket-info', function socketInfo(args) {
+    var socket = sockets[args.socketId];
+    var info = socket.getInfo();
+    var result = {socketId: args.socketId,
+                  infoCall: args.infoCall,
+                  info: info};
+    freedomWindow.port.emit('socket-info-response', result);
   });
 };
 

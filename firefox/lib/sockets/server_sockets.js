@@ -49,6 +49,13 @@ var ServerSocket = Class({
   },
   disconnect: function disconnect() {
     serverSocketFor(this).close();
+  },
+  getInfo: function getInfo() {
+    var nsiServerSocket = serverSocketFor(this);
+    var port = nsiServerSocket.port;
+    var connected = false;
+    var localAddress = '127.0.0.1';
+    var socketType = 'tcp';
   }
 });
 
