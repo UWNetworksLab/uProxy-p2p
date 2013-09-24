@@ -1,11 +1,12 @@
 const { Cc, Ci, CC, Cr } = require('chrome');
 const { Class } = require('sdk/core/heritage');
-var { EventTarget } = require("sdk/event/target");
-let { emit } = require('sdk/event/core');
+const { EventTarget } = require("sdk/event/target");
+const { emit } = require('sdk/event/core');
 const { isUndefined, isNumber, isFunction } = require('sdk/lang/type');
 const { ByteReader, ByteWriter } = require('sdk/io/byte-streams');
 
 const socketTransportService = Cc["@mozilla.org/network/socket-transport-service;1"].getService(Ci.nsISocketTransportService);
+const mainThread = Cc["@mozilla.org/thread-manager;1"].getService().mainThread;
 
 // Private variables for sockets get stored in WeakMaps
 let transports = new WeakMap();
@@ -30,25 +31,33 @@ var nsIInputStreamCallback = Class({
   type: 'SocketReader',
   initialize: function initialize(clientSocket) {
     var rawReader = rawReaderFor(clientSocket);
-    rawReader.asyncWait(this, 0, 0, null);
+    streamCallbacks.set(this, clientSocket);
+    rawReader.asyncWait(this, 0, 0, mainThread);
   },
-  onInputStreamReady: function onInputStreamReady() {
+  onInputStreamReady: function onInputStreamReady(stream) {
     var clientSocket = clientSocketFor(this);
     var binaryReader = readerFor(clientSocket);
     try {
       var bytesAvailable = binaryReader.available();
     } catch (e) {
-      console.log(e);
+      // The error name is NS_BASE_STREAM_CLOSED if the connection
+      // closed normally.
+      if (e.name !== 'NS_BASE_STREAM_CLOSED') {
+        console.warn(e);
+      }
       clientSocket.disconnect();
       return;
     }
-    var buffer = ArrayBuffer(bytesAvailable);
+
+    var lineData = binaryReader.readByteArray(bytesAvailable);
+    var buffer = ArrayBuffer(lineData.length);
     var typedBuffer = new Uint8Array(buffer);
-    binaryReader.readByteArray(bytesAvailable, typedBuffer);
-    emit(clientSocket, 'onData', buffer);
+    typedBuffer.set(lineData);
+
+    emit(clientSocket, 'onData', typedBuffer);
     
     var rawReader = rawReaderFor(clientSocket);
-    rawReader.asyncWait(this, 0, 0, null);
+    rawReader.asyncWait(this, 0, 0, mainThread);
   }
 });
 
@@ -88,9 +97,12 @@ var ClientSocket = Class({
     if (!isUndefined(transportFor(this))) {
       throw 'Socket already connected';
     }
-    var transport = socketTransportService.createTransport(null, 0,
-							   hostname, port, null);
-    // console.log('transport isNonBlocking' + transport.isNonBlocking());
+
+    var transport = socketTransportService.createTransport(null,
+                                                           0,
+							   hostname,
+                                                           port,
+                                                           null);
     setTransport(this, transport);
   },
   write: function(data) {
@@ -107,16 +119,4 @@ var ClientSocket = Class({
   }
 });
 
-var nsIServerSocketListener = Class({
-  type: 'nsIServerSocketListener',
-  initialize: function initialize(serverSocket) {
-    this.serverSocket = serverSocket;
-  },
-  onSocketAccepted: function onSocketAccepted(nsiServerSocket, transport) {
-    let clientSocket = ClientSocket(transport);
-    emit(this.serverSocket, 'onConnect', clientSocket);
-  },
-  onStopListening: function onStopListening(nsiServerSocket, status) {
-    
-  }
-});
+exports.ClientSocket = ClientSocket;

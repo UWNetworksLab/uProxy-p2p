@@ -1,8 +1,8 @@
 'use strict';
 
 const { Class } = require('sdk/core/heritage');
-const { ClientSocket } = require('./sockets/client_sockets');
-const { ServerSocket } = require('./sockets/server_sockets');
+const { ClientSocket } = require('./client_sockets');
+const { ServerSocket } = require('./server_sockets');
 
 
 var copyFunctions = function(source, destination) {
@@ -19,4 +19,6 @@ var Socket = Class({
   
 });
 
-exports.Socket = Socket;
+// exports.Socket = Socket;
+exports.ClientSocket = ClientSocket;
+exports.ServerSocket = ServerSocket;
