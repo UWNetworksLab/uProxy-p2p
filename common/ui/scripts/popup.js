@@ -1,10 +1,20 @@
 'use strict';
 
 angular.module('UProxyExtension-popup', ['UProxyExtension'])
-  // Extension stores no initial state for the main controller.
+  // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
+
+    // State for roster vs. detail view.
+    $scope.rosterNudge = false;
+    $scope.currentContact = {
+      'name': 'Nobody'
+    };
+
     $scope.toggleContact = function(c) {
-      c.detailsVisible = !c.detailsVisible;
+      // c.detailsVisible = !c.detailsVisible;
+      $scope.currentContact = c;
+      console.log(c);
+      $scope.rosterNudge = true;
     }
     // $scope.showContact = function(c) {
       // c.detailsVisible = true;

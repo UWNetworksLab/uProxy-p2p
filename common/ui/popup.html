@@ -38,35 +38,52 @@
     <section ng-show="connectedToApp">
 
       <section id="search-section">
-        <input type="text" id="search-contacts" placeholder="search contacts">
+        <input type="text" id="search-contacts" placeholder="search contacts"
+                ng-model="search">
         </input>
-        <button id="search-btn" ng-click="meow = meow + 1"></button>
+        <button type="search" id="search-btn" ng-click="meow = meow + 1"></button>
         {{meow}}
       </section>
 
-      <section class="roster">
+      <section id="roster" ng-init="roster=model.roster">
+        <section id="contacts-frame" ng-hide="rosterNudge">
         <ul class="contacts">
-          <li ng-repeat="contact in model.roster" ng-click="toggleContact(contact)">
+          <li ng-repeat="contact in roster | filter:search"
+              ng-click="toggleContact(contact)">
             {{contact.name}}
-            <div class="contact-details" ng-show="contact.detailsVisible">
+            <!--
+            <span class="contact-hover" ng-show="contact.hovered">
               ({{contact.userId}})
-              <div>
-                <button class="btn">Stop</button>
-                <button class="btn">Start</button>
-              </div>
-              <div>
-                <button class="btn">Allow</button>
-                <button class="btn">Ignore</button>
-              </div>
-              <div>
-                <button class="btn">Request</button>
-              </div>
-              <div>
-                <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
-              </div>
-            </div>
+            </span>
+            -->
           </li>
         </ul>
+        </section>
+        <div id="contact-details" ng-show="rosterNudge">
+          <button class="btn" ng-click="rosterNudge=false">Back</button>
+          <h3>{{currentContact.name}}</h3>
+          <div class="client-details" ng-repeat="client in currentContact.clients">
+            {{ client.clientId }}
+          </div>
+          <!--
+          <div class="contact-details" ng-show="contact.detailsVisible">
+            <div>
+              <button class="btn">Stop</button>
+              <button class="btn">Start</button>
+            </div>
+            <div>
+              <button class="btn">Allow</button>
+              <button class="btn">Ignore</button>
+            </div>
+            <div>
+              <button class="btn">Request</button>
+            </div>
+            <div>
+              <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
+            </div>
+          </div>
+          -->
+        </div>
       </section>
 
       <section id="filters">

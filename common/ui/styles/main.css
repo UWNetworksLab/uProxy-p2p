@@ -44,6 +44,9 @@ ul {
   position: absolute;
   right: 0; }
 
+#header {
+  padding: 4px 16px; }
+
 .title {
   padding: 0 8px; }
 
@@ -61,19 +64,29 @@ ul {
   opacity: 0.8; }
 
 #search-section {
-  position: relative; }
+  position: relative;
+  background-color: black;
+  z-index: 50; }
 
 #search-contacts {
-  width: 100%;
+  width: 358px;
+  margin: 0;
   padding: 8px 20px;
   font-size: 15px;
   border: 1px solid #aaaaaa;
   outline: none;
-  color: #333333; }
+  color: #333333;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#search-contacts:hover {
+  box-shadow: 0 1px 3px #888888 inset; }
 
 #search-contacts:focus {
   outline: none;
-  box-shadow: 0 1px 1px #cccccc; }
+  box-shadow: 0 1px 4px #aaaaaa; }
 
 #search-btn {
   position: absolute;
@@ -110,25 +123,51 @@ ul {
   position: absolute;
   right: 0; }
 
-.contacts {
+#roster {
   position: relative;
-  height: 400px;
-  overflow: auto;
-  margin: 0;
-  padding: 0;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#contacts-frame {
+  position: relative;
+  width: 400px;
+  height: 500px;
+  white-space: no-wrap;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-top: 1px solid #eeeeee;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
 
+#contacts-frame.ng-hide {
+  display: block !important;
+  left: -400px; }
+
+.contacts {
+  position: absolute;
+  width: 400px;
+  margin: 0;
+  padding: 0;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
 .contacts li {
-  background-color: #fdfdfd;
+  background-color: #fafafa;
   position: relative;
   z-index: 0;
   cursor: default;
   padding: 6px 20px;
-  white-space: nowrap;
+  white-space: no-wrap;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-left: none;
+  border-right: none;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -136,30 +175,39 @@ ul {
 
 .contacts li:hover {
   background-color: white;
+  border-color: #dddddd;
+  color: black;
   z-index: 50;
-  top: -1px;
-  box-shadow: 0 1px 2px #aaaaaa; }
+  top: -2px;
+  box-shadow: 0 2px 6px 1px #dddddd; }
 
-.contact-details {
-  height: 200px;
-  opacity: 1;
+#contact-details {
+  display: inline-block;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  padding: 16px;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
 
-.contact-details.ng-hide {
-  display: block !important;
+#contact-details.ng-hide {
+  display: inline-block !important;
   opacity: 0;
-  height: 0;
-  z-index: -500;
-  pointer-events: none; }
+  left: 400px; }
+
+.client-details {
+  display: block; }
+
+.client-details:hover {
+  background-color: #eeeeee; }
 
 .contact-actions {
   display: none; }
 
 #popup {
-  min-width: 357px;
+  width: 400px;
   height: 600px; }
   #popup .footer {
     text-align: right; }
