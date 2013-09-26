@@ -29,9 +29,14 @@ TransportProvider.prototype.message = function(msg) {
   }
 };
 
-//
-TransportProvider.prototype.open = function(freedomChannelId, continuation) {
-  var promise = this.peer.setSignallingChannel(freedomChannelId);
+// The argument |freedomChannelId| is a freedom communication channel id to use
+// to open a peer connection. |initiateConnection| is a boolean that, when true,
+// indicates that this transport should initiate setup of a connection to the
+// peer.
+TransportProvider.prototype.open = function(freedomChannelId,
+    initiateConnection, continuation) {
+  console.log("TransportProvider.open.");
+  var promise = this.peer.startup(freedomChannelId, initiateConnection);
   promise.done(continuation);
 };
 
@@ -55,7 +60,7 @@ TransportProvider.prototype.send = function(channelid, msg, continuation) {
 };
 
 TransportProvider.prototype.close = function(continuation) {
-  this.peer.close().done(continuation);
+  this.peer.shutdown().done(continuation);
 };
 
 TransportProvider.prototype.onClose = function() {

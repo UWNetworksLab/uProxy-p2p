@@ -38,7 +38,7 @@ var onload = function() {
     var transport = freedom.transport();
     transport.on('onClose', onClose.bind({}, from));
     transport.on('message', function(transport, from, msg) {
-      var tag = msg.tag;
+      var tag = msg.channelid;
       if (!webClients[from][tag]) {
         webClients[from][tag] = new window.webclient(transport.send.bind(transport, tag));
       }
@@ -74,7 +74,8 @@ var onload = function() {
         }.bind({}, trans.signallingChannel._cb));
         trans.signallingChannel = channel;
       }.bind({}, f, cb, trans));
-      trans.open(chan.identifier);
+      // TODO: fix "false" to real boolean when Freedom supports it.
+      trans.open(chan.identifier, false);
     }.bind({}, from, callback, transport));
   };
 

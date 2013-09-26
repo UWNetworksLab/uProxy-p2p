@@ -47,7 +47,7 @@ var onload = function() {
     }
 
     // TODO: reuse tags from a pool.
-    var channelid = Math.random();
+    var channelid = "c" + Math.random();
 
     // Connect the TCP-connection to the transport.
     conn.tcpConnection.on('recv', transport.send.bind(transport, channelid));
@@ -60,6 +60,7 @@ var onload = function() {
   };
 
   freedom.on('start', function(options) {
+    console.log('Cleint: on(start)...');
     shutdown();
     proxy = new window.SocksServer(options.host, options.port, onConnection);
     proxy.tcpServer.listen();
@@ -87,7 +88,7 @@ var onload = function() {
 
       // chan.identifier is a freedom-proxy (not a socks proxy) for the
       // signalling channel used for signalling.
-      transport.open(chan.identifier);
+      transport.open(chan.identifier, true);
 
       // when the channel is complete, setup handlers.
       chan.channel.done(function(channel) {
@@ -122,3 +123,4 @@ var onload = function() {
 //TODO(willscott): WebWorker startup errors are hard to debug.
 // Once fixed, code can be executed synchronously.
 setTimeout(onload, 0);
+

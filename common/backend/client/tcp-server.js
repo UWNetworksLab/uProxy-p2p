@@ -202,8 +202,8 @@ function getStringOfArrayBuffer(buf) {
 	.done(this._onListenComplete.bind(this));
       this.isListening = true;
     } else {
-      console.error('TcpServer: create socket failed for %s:%d',
-        this.addr, this.port);
+      console.error('TcpServer: create socket failed for ' + this.addr + ':' +
+          this.port);
     }
   };
 
@@ -228,14 +228,14 @@ function getStringOfArrayBuffer(buf) {
           socket.destroy(acceptValue.clientSocketId);
           console.warn('TcpServer: too many connections: ' + connectionsCount);
           return;
-      } 
+      }
 	this._createTcpConnection(acceptValue.clientSocketId);
       }.bind(this));
-      
+
       this.callbacks.listening && this.callbacks.listening();
     } else {
-      console.error('TcpServer: listen failed for %s:%d. Resultcode=%d',
-		    this.addr, this.port, resultCode);
+      console.error('TcpServer: listen failed for ' + this.addr + ':' +
+          this.port + '. Resultcode=' + resultCode);
     }
   };
 
@@ -305,13 +305,14 @@ function getStringOfArrayBuffer(buf) {
         else { this.recvOptions = null; }
 
         if (this.pendingReadBuffer) {
-          console.log('TcpConnection(%d): calling recv from "on".', this.socketId);
+          console.log('TcpConnection(' + this.socketId + '):' +
+              ' calling recv from "on".');
           this._bufferedCallRecv();
         }
       }
     } else {
-      console.error('TcpConnection(%d): no such event for on: %s',
-          this.socketId, eventName);
+      console.error('TcpConnection(' + this.socketId + '):' +
+          'no such event for on: ' + eventName);
     }
   };
 
@@ -349,8 +350,8 @@ function getStringOfArrayBuffer(buf) {
    */
   TcpConnection.prototype.sendRaw = function(msg, callback) {
     if(!this.isConnected) {
-      console.warn('TcpConnection(%d): sendRaw when disconnected.',
-        this.socketId);
+      console.warn('TcpConnection(' + this.socketId + '):' +
+          ' sendRaw when disconnected.');
       return;
     }
     var realCallback = callback || this.callbacks.sent || function() {};
