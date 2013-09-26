@@ -7,6 +7,9 @@
     <script src="scripts/plumbing.js"></script>
     <script src="common/freedom/freedom.js" data-manifest="common/backend/uproxy.json">{"strongIsolation": true, "stayLocal": true, "debug": false}</script>
      <script src="scripts/freedom_shim_freedom.js"></script>
+     <script>
+       freedomShim.addCommunicator(addon.port);
+     </script>
   </head>
   <body>
   </body>

@@ -40,46 +40,46 @@
 
       <section ng-show="model.identityStatus.status == 'online'">
       -->
-        <section class="pagination-right muted">
-          {{model.me.userId}}
-        </section>
+      <section class="pagination-right muted">
+        {{model.me.userId}}
+      </section>
 
-        <section class="current-sessions">
-          <section class="current-sessions-get">
-            <section ng-show="isEmpty(model.currentSessionsToInitiate)">
-              <h5>Not currently getting access through anyone.</h5>
-            </section>
-            <section ng-hide="isEmpty(model.currentSessionsToInitiate)">
-              <h5>Currently getting access through:</h5>
-              <ul>
-                <li ng-show="">
-                  No one
-                </li>
-                <li ng-repeat="(id, contact) in model.currentSessionsToInitiate">
-                  {{contact.name}} ({{contact.userId}})
-                  <button class="btn btn-mini">Stop</button>
-                </li>
-              </ul>
-            </section>
+      <section class="current-sessions">
+        <section class="current-sessions-get">
+          <section ng-show="isEmpty(model.currentSessionsToInitiate)">
+            <h5>Not currently getting access through anyone.</h5>
           </section>
-          <section class="current-sessions-give">
-            <section ng-show="isEmpty(model.currentSessionsToRelay)">
-              <h5>Not currently giving access to anyone.</h5>
-            </section>
-            <section ng-hide="isEmpty(model.currentSessionsToRelay)">
-              <h5>Currently giving access to:</h5>
-              <ul>
-                <li ng-show="">
-                  No one
-                </li>
-                <li ng-repeat="(id, contact) in model.currentSessionsToRelay">
-                  {{contact.name}} ({{contact.userId}})
-                  <button class="btn btn-mini">Stop</button>
-                </li>
-              </ul>
-            </section>
+          <section ng-hide="isEmpty(model.currentSessionsToInitiate)">
+            <h5>Currently getting access through:</h5>
+            <ul>
+              <li ng-show="">
+                No one
+              </li>
+              <li ng-repeat="(id, contact) in model.currentSessionsToInitiate">
+                {{contact.name}} ({{contact.userId}})
+                <button class="btn btn-mini">Stop</button>
+              </li>
+            </ul>
           </section>
         </section>
+        <section class="current-sessions-give">
+          <section ng-show="isEmpty(model.currentSessionsToRelay)">
+            <h5>Not currently giving access to anyone.</h5>
+          </section>
+          <section ng-hide="isEmpty(model.currentSessionsToRelay)">
+            <h5>Currently giving access to:</h5>
+            <ul>
+              <li ng-show="">
+                No one
+              </li>
+              <li ng-repeat="(id, contact) in model.currentSessionsToRelay">
+                {{contact.name}} ({{contact.userId}})
+                <button class="btn btn-mini">Stop</button>
+              </li>
+            </ul>
+          </section>
+        </section>
+      </section>
 
         <section class="start-getting-through" ng-show="isEmpty(canGetFrom)">
           <h5>No one online you can get access through.</h5>
@@ -167,6 +167,10 @@
                   {{contact.name}} - {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
                 </option>
               </select>
+
+              <div ng-show="isEmpty(model.roster)">
+                Loading Roster...
+              </div>
 
               <div class="input-append">
                 <input type="text" required ng-model="msg" placeholder="message">

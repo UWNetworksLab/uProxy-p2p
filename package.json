@@ -18,6 +18,7 @@
     "grunt-spawn": "~1.0.41",
     "grunt-shell": "~0.3.1",
     "grunt-contrib-watch": "~0.5.3",
+    "grunt-mozilla-addon-sdk": "~0.1.0",
     "minimatch": "~0.2.12",
     "glob": "~3.2.6"
   },

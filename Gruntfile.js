@@ -4,6 +4,7 @@
  * grunt
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
+ *  xpi - Generates an .xpi for installation to Firefox.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
@@ -62,6 +63,14 @@ var firefox_files = [
   'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
+
+// Firefox concat files
+var firefox_concat_src = [
+  'firefox/data/scripts/event_on_emit_shim.js',
+  'firefox/data/scripts/freedom_shim_content.js',
+  'firefox/data/scripts/injector.js'
+];
+
 //Testing
 //TODO fix
 var sources = ['common/backend/util.js'];
@@ -78,15 +87,25 @@ module.exports = function(grunt) {
     },
     concat: {
       firefox: {
-        src: ['firefox/data/scripts/freedom_shim_content.js',
-	            'firefox/data/scripts/injector.js'],
+        src: firefox_concat_src,
         dest: 'firefox/data/scripts/dependencies.js'
       }
     },
-    watch: {  //Watch everything
-      files: ['common/**/*'], //TODO this doesn't work as expected on VMs
-      tasks: ['copy:watch'],
-      options: {spawn: false}
+    watch: {
+      common: {//Watch everything
+        //TODO this doesn't work as expected on VMsw
+        files: ['common/**/*',
+                // bower components should only change when grunt is
+                // already being run
+                '!**/bower_components/**'],
+        tasks: ['copy:watch'],
+        options: {spawn: false}
+      },
+      firefox_dep: {
+        files: firefox_concat_src,
+        tasks: ['concat:firefox'],
+        options: {spawn: false}
+      }
     },
     shell: {
       git_submodule: {
@@ -106,7 +125,11 @@ module.exports = function(grunt) {
         options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
       },
     },
-    clean: ['chrome/app/common/**', 'chrome/extension/src/common/**', 'firefox/data/common/**'],
+    clean: ['chrome/app/common/**',
+            'chrome/extension/src/common/**',
+            'firefox/data/common/**',
+            'tmp',
+            'uproxy.xpi'],
     jasmine: {
       common: {
         src: testSources,
@@ -120,8 +143,20 @@ module.exports = function(grunt) {
       options: {
         '-W069': true
       }
+    },
+    'mozilla-addon-sdk': {
+      download: {
+        options: {
+          revision: "firefox24"
+        }
+      },
+      xpi: {
+        options: {
+          extension_dir: "firefox",
+          dist_dir: "."
+        }
+      }
     }
-
   });
 
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -130,6 +165,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
 
   //On file change, see which distribution it affects and
@@ -171,6 +207,11 @@ module.exports = function(grunt) {
     'copy:chrome_ext',
     'concat:firefox',
     'copy:firefox'
+  ]);
+  grunt.registerTask('xpi', [
+    'build',
+    'mozilla-addon-sdk:download',
+    'mozilla-addon-sdk:xpi'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).

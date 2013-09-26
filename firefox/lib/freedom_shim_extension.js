@@ -1,27 +1,27 @@
-/**
- * @param {freedomWindow} The window in which the freedom module resides
- */
-var FreedomCommunication = function(freedomWindow) {
-  var contextWindows = [];
-  freedomWindow.port.on('freedom_shim', function(args) {
-    for (var i = 0; i < contextWindows.length; i++) {
-      contextWindows[i].port.emit('freedom_shim', args);
+var self = require("sdk/self");
+const { Cc, Ci, CC, Cr } = require('chrome');
+const { Class } = require('sdk/core/heritage');
+
+var mozIJSSubScriptLoader = Cc['@mozilla.org/moz/jssubscript-loader;1']
+      .getService(Ci.mozIJSSubScriptLoader);
+var shims = {};
+
+shims.href = self.uri;
+
+var FreedomCommunication = Class({
+  type: "FreedomShim",
+  initialize: function initialize(freedomWindow) {
+    console.log('Initializing freedom communicator');
+    if (!shims.freedomShim) {
+      shims.addon = freedomWindow;
+      mozIJSSubScriptLoader.loadSubScript(self.data.url('scripts/freedom_shim_content.js'), shims);
+      mozIJSSubScriptLoader.loadSubScript(self.data.url('scripts/freedom_shim_freedom.js'), shims);
     }
-  });
-  var freedom = {
-    addContentContext: function(context) {
-      console.log('Adding context window to freedom');
-      contextWindows.push(context);
-
-      context.port.on("freedom_shim_listen", function(event) {
-	freedomWindow.port.emit("freedom_shim_listen", event);
-      });
-
-      context.port.on("freedom_shim", function(args) {
-	freedomWindow.port.emit('freedom_shim', args);
-      });
-    }};
-  return freedom;
-};
+  },
+  addContentContext: function(context) {
+    console.log('Adding context to freedom.');
+    shims.freedomShim.addCommunicator(context);
+  }
+});
 
 exports.FreedomCommunication = FreedomCommunication;
