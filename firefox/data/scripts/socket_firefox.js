@@ -1,13 +1,13 @@
 'use strict';
 
+console.log('socket_firefox.js loaded');
+
 /**
  * A FreeDOM interface to Firefox sockets.
  * Communicates with the freedom socket manager in the extension.
  * @constructor
  * @private
  */
-
-
 
 var Socket_firefox = function(channel) {
   this.appChannel = channel;
