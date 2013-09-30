@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('UProxyExtension-popup', ['UProxyExtension'])
+var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
 
@@ -42,5 +42,14 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       $scope.msg = '';
     };
-  }])
-
+  }]);
+  // .directive('ngFocus', ['$parse', function ($parse) {
+    // return function (scope, elem, attr) {
+      // var fn = $parse(attr['ngFocus']);
+      // elem.bind('focus', function (event) {
+        // scope.$apply(function () {
+          // fn(scope, { $event: event });
+        // });
+      // });
+    // };
+  // }]);

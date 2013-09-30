@@ -21,11 +21,6 @@
   </head>
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
-    <section id="header">
-      <h3 class="title">UProxy</h3>
-      <a class="btn" id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
-    </section>
-
     <section ng-hide="connectedToApp">
       Not connected to
       <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
@@ -36,20 +31,37 @@
     </section>
 
     <section ng-show="connectedToApp">
+      <section id="header">
+        <a class="btn" id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}"></a>
+        <section id="search-section" ng-hide="rosterNudge">
 
-      <section id="search-section">
-        <input type="text" id="search-contacts" placeholder="search contacts"
-                ng-model="search">
-        </input>
-        <button type="search" id="search-btn" ng-click="meow = meow + 1"></button>
-        {{meow}}
+          <input type="text" id="search-contacts" placeholder="search contacts"
+              ng-model="search"
+              ng-blur="searchFocused=false"
+              ng-focus="searchFocused=true">
+          </input>
+
+          <button type="search" id="search-btn"></button>
+
+          <section id="filters">
+            <button id="my-access" class="filter">My Access</button>
+            <button id="all-access" class="filter">All</button>
+            <button id="friends-access" class="filter">Friends' Access</button>
+          </section>
+
+        </section>
+        <section id="contact-header" ng-show="rosterNudge">
+          <button class="btn-back" ng-click="rosterNudge=false"></button>
+          <h1>{{currentContact.name}}</h1>
+        </section>
       </section>
 
-      <section id="roster" ng-init="roster=model.roster">
+      <section id="roster">
         <section id="contacts-frame" ng-hide="rosterNudge">
         <ul class="contacts">
-          <li ng-repeat="contact in roster | filter:search"
-              ng-click="toggleContact(contact)">
+          <li ng-repeat="contact in model.roster | filter:search"
+              ng-click="toggleContact(contact)"
+              ng-animate=" 'animate' ">
             {{contact.name}}
             <!--
             <span class="contact-hover" ng-show="contact.hovered">
@@ -57,20 +69,24 @@
             </span>
             -->
           </li>
+          <div ng-show="isEmpty(model.roster)">
+            Loading Roster...
+          </div>
         </ul>
         </section>
         <div id="contact-details" ng-show="rosterNudge">
-          <button class="btn" ng-click="rosterNudge=false">Back</button>
-          <h3>{{currentContact.name}}</h3>
           <div class="client-details" ng-repeat="client in currentContact.clients">
             {{ client.clientId }}
           </div>
+
+          <div class="client-actions">
+            <button class="btn" ng-click="sendMessage(contact, 'start-proxying')">
+              Start
+            </button>
+            <button class="btn">Request</button>
+          </div>
+
           <!--
-          <div class="contact-details" ng-show="contact.detailsVisible">
-            <div>
-              <button class="btn">Stop</button>
-              <button class="btn">Start</button>
-            </div>
             <div>
               <button class="btn">Allow</button>
               <button class="btn">Ignore</button>
@@ -81,16 +97,13 @@
             <div>
               <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
             </div>
-          </div>
           -->
         </div>
       </section>
 
-      <section id="filters">
-      <button id="my-access" class="filter">My Access</button>
-      <button id="friends-access" class="filter">Friends' Access</button>
+      <section id="status">
+        Not Connected
       </section>
-
       <!--
       <section ng-show="model.identityStatus.status == 'offline'">
         <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
@@ -224,10 +237,6 @@
                   {{contact.name}} - {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
                 </option>
               </select>
-
-              <div ng-show="isEmpty(model.roster)">
-                Loading Roster...
-              </div>
 
               <div class="input-append">
                 <input type="text" required ng-model="msg" placeholder="message">

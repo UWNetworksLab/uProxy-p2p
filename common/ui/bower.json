@@ -2,7 +2,7 @@
   "name": "uproxy-chrome-extension",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "http://code.angularjs.org/1.1.5/",
+    "angular": "http://code.angularjs.org/1.2.0/",
     "angular-lodash": "https://github.com/cabrel/angular-lodash.git",
     "angular-animate": "1.2.0-rc.2",
     "bootstrap-sass": "~2.3.1",

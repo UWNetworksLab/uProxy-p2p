@@ -7,7 +7,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; }
+  overflow: hidden;
+  font-size: 16px; }
 
 h1, h2, h3, h4, h5 {
   margin: 0;
@@ -24,17 +25,17 @@ ul {
   width: 10px; }
 
 ::-webkit-scrollbar-track {
-  background-color: #fafafa; }
+  background-color: #f9f9f9; }
 
 ::-webkit-scrollbar-track:window-inactive {
-  background-color: black; }
+  background-color: #888888; }
 
 ::-webkit-scrollbar-thumb {
   background-color: #aaaaaa;
-  height: 10%; }
+  height: 114.589px; }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #cccccc; }
+  background-color: #bbbbbb; }
 
 .btn {
   border: 1px solid black;
@@ -44,20 +45,36 @@ ul {
   position: absolute;
   right: 0; }
 
-#header {
-  padding: 4px 16px; }
+.btn-back {
+  background: transparent url("../icons/back_arrow.png") no-repeat center;
+  border: none;
+  height: 24px;
+  width: 30px; }
+
+.btn-back:hover, .btn-back:focus {
+  opacity: 0.5;
+  outline: none; }
 
 .title {
   padding: 0 8px; }
+
+#contact-header h1 {
+  position: fixed;
+  width: 100%;
+  text-align: center;
+  top: 8px;
+  pointer-events: none; }
 
 #options-btn {
   position: absolute;
   top: 0;
   right: 0;
-  background: transparent;
+  background: transparent url("../icons/settings.svg") no-repeat center;
   border: none;
   outline: none;
   padding: 4px;
+  width: 20px;
+  height: 30px;
   text-decoration: none; }
 
 #options-btn:hover {
@@ -65,14 +82,12 @@ ul {
 
 #search-section {
   position: relative;
-  background-color: black;
   z-index: 50; }
 
 #search-contacts {
   width: 358px;
   margin: 0;
   padding: 8px 20px;
-  font-size: 15px;
   border: 1px solid #aaaaaa;
   outline: none;
   color: #333333;
@@ -86,7 +101,7 @@ ul {
 
 #search-contacts:focus {
   outline: none;
-  box-shadow: 0 1px 4px #aaaaaa; }
+  box-shadow: 0 1px 2px #aaaaaa; }
 
 #search-btn {
   position: absolute;
@@ -107,21 +122,32 @@ ul {
   position: relative;
   display: block;
   width: 100%;
-  border-top: 1px solid #aaaaaa; }
+  background-color: #fafafa;
+  text-align: center;
+  overflow: hidden;
+  z-index: 20;
+  padding: 2px;
+  box-shadow: 0 1px 2px #aaaaaa; }
 
 .filter {
-  background-color: white;
   margin: 0;
-  padding: 8px 20px;
-  width: 50%; }
+  padding: 2px 16px;
+  border: none;
+  background-color: #fafafa;
+  color: #999999;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
-#my-access {
-  position: absolute;
-  left: 0; }
+.filter:hover {
+  background-color: #fbfbfb;
+  box-shadow: 0 0 2px #aaaaaa inset; }
 
-#friends-access {
-  position: absolute;
-  right: 0; }
+.filter:active, .filter:focus {
+  outline: none;
+  box-shadow: 0 0 3px #888888 inset;
+  color: #666666; }
 
 #roster {
   position: relative;
@@ -132,8 +158,7 @@ ul {
 
 #contacts-frame {
   position: relative;
-  width: 400px;
-  height: 500px;
+  min-height: 520px;
   white-space: no-wrap;
   overflow-y: auto;
   overflow-x: hidden;
@@ -149,7 +174,8 @@ ul {
 
 .contacts {
   position: absolute;
-  width: 400px;
+  background-color: #fafafa;
+  width: 100%;
   margin: 0;
   padding: 0;
   -webkit-transition: all 0.23s !important;
@@ -158,7 +184,6 @@ ul {
   transition: all 0.23s !important; }
 
 .contacts li {
-  background-color: #fafafa;
   position: relative;
   z-index: 0;
   cursor: default;
@@ -181,12 +206,16 @@ ul {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd; }
 
+.contacts li.ng-hide {
+  display: block !important;
+  line-height: 0; }
+
 #contact-details {
   display: inline-block;
   position: fixed;
-  top: 50px;
+  width: 400px;
+  top: 40px;
   left: 0;
-  padding: 16px;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -198,22 +227,36 @@ ul {
   left: 400px; }
 
 .client-details {
-  display: block; }
+  display: block;
+  padding: 8px;
+  border: 1px solid #eeeeee; }
 
 .client-details:hover {
   background-color: #eeeeee; }
+
+#status {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 12.8px;
+  color: #888888;
+  padding: 8px 0;
+  cursor: default;
+  border-top: 1px solid #eeeeee;
+  background-color: white;
+  text-align: center; }
 
 .contact-actions {
   display: none; }
 
 #popup {
-  width: 400px;
+  width: 370.8204px;
   height: 600px; }
   #popup .footer {
     text-align: right; }
 
 .large-font {
-  font-size: 15px; }
+  font-size: 24px; }
 
 details > summary {
   cursor: pointer; }
@@ -223,7 +266,7 @@ details > *:not(summary) {
   margin-left: 10px; }
 
 #debug pre {
-  font-size: 7px;
+  font-size: 11.2px;
   max-height: 200px;
   overflow: scroll; }
 #debug .btn-group {

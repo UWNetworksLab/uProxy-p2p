@@ -1,6 +1,6 @@
 // Primary stylesheet for both popup and options page.
 
-$fontSize: 10px
+$fontSize: 16px
 
 @font-face
   font-family: 'Eurostile'
@@ -24,6 +24,7 @@ body
   margin: 0
   padding: 0
   overflow: hidden
+  font-size: $fontSize
   // background-color: #222
 
 h1, h2, h3, h4, h5
@@ -41,17 +42,17 @@ ul
   width: 10px
 
 ::-webkit-scrollbar-track
-  background-color: #fafafa
+  background-color: #f9f9f9
 
 ::-webkit-scrollbar-track:window-inactive
-  background-color: #000
+  background-color: #888
 
 ::-webkit-scrollbar-thumb
   background-color: #aaa
-  height: 10%
+  height: 114.589px
 
 ::-webkit-scrollbar-thumb:hover
-  background-color: #ccc
+  background-color: #bbb
 
 
 .btn
@@ -62,20 +63,39 @@ ul
   position: absolute
   right: 0
 
+.btn-back
+  background: transparent url('../icons/back_arrow.png') no-repeat center
+  border: none
+  height: 24px
+  width: 30px
+
+.btn-back:hover, .btn-back:focus
+  opacity: 0.5
+  outline: none
+
 #header
-  padding: 4px 16px
 
 .title
   padding: 0 8px
+
+#contact-header
+  h1
+    position: fixed
+    width: 100%
+    text-align: center
+    top: 8px
+    pointer-events: none
 
 #options-btn
   position: absolute
   top: 0
   right: 0
-  background: transparent
+  background: transparent url('../icons/settings.svg') no-repeat center
   border: none
   outline: none
   padding: 4px
+  width: 20px
+  height: 30px
   text-decoration: none
 
 #options-btn:hover
@@ -83,14 +103,12 @@ ul
 
 #search-section
   position: relative
-  background-color: #000
   z-index: 50
 
 #search-contacts
   width: 358px
   margin: 0
   padding: 8px 20px
-  font-size: $fontSize * 1.5
   border: 1px solid #aaa
   outline: none
   color: #333
@@ -101,7 +119,7 @@ ul
 
 #search-contacts:focus
   outline: none
-  box-shadow: 0 1px 4px #aaa
+  box-shadow: 0 1px 2px #aaa
 
 #search-btn
   position: absolute
@@ -122,21 +140,29 @@ ul
   position: relative
   display: block
   width: 100%
-  border-top: 1px solid #aaa
+  background-color: #fafafa
+  text-align: center
+  overflow: hidden
+  z-index: 20
+  padding: 2px
+  box-shadow: 0 1px 2px #aaa
 
 .filter
-  background-color: #fff
   margin: 0
-  padding: 8px 20px
-  width: 50%
+  padding: 2px 16px
+  border: none
+  background-color: #fafafa
+  color: #999
+  @include smooth
 
-#my-access
-  position: absolute
-  left: 0
+.filter:hover
+  background-color: #fbfbfb
+  box-shadow: 0 0 2px #aaa inset
 
-#friends-access
-  position: absolute
-  right: 0
+.filter:active, .filter:focus
+  outline: none
+  box-shadow: 0 0 3px #888 inset
+  color: #666
 
 #roster
   position: relative
@@ -144,8 +170,7 @@ ul
 
 #contacts-frame
   position: relative
-  width: 400px
-  height: 500px
+  min-height: 520px
   white-space: no-wrap
   overflow-y: auto
   overflow-x: hidden
@@ -158,13 +183,13 @@ ul
 
 .contacts
   position: absolute
-  width: 400px
+  background-color: #fafafa
+  width: 100%
   margin: 0
   padding: 0
   @include smooth
 
 .contacts li
-  background-color: #fafafa
   position: relative
   z-index: 0
   cursor: default
@@ -184,12 +209,16 @@ ul
   top: -2px
   box-shadow: 0 2px 6px 1px #ddd
 
+.contacts li.ng-hide
+  display: block !important
+  line-height: 0
+
 #contact-details
   display: inline-block
   position: fixed
-  top: 50px
+  width: 400px
+  top: 40px
   left: 0
-  padding: 16px
   // color: #aaa
   @include smooth
 
@@ -200,9 +229,23 @@ ul
 
 .client-details
   display: block
+  padding: 8px
+  border: 1px solid #eee
 
 .client-details:hover
   background-color: #eee
+
+#status
+  position: fixed
+  bottom: 0
+  width: 100%
+  font-size: $fontSize * 0.8
+  color: #888
+  padding: 8px 0
+  cursor: default
+  border-top: 1px solid #eee
+  background-color: #fff
+  text-align: center
 
 // .contact-hover
   // position: absolute !important
@@ -237,7 +280,7 @@ ul
   display: none
 
 #popup
-  width: 400px
+  width: 370.8204px
   height: 600px
   .footer
     text-align: right
