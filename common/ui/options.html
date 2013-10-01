@@ -52,9 +52,9 @@
       </li>
       <li>
         <h4>Contacts</h4>
-        <ul style="max-height: 400px; overflow-y: scroll; border: thin solid gray">
+        <ul class="contacts">
           <li ng-repeat="contact in model.contacts">
-            <ul class="contacts">
+            <ul class="clients">
               <li ng-repeat="client in contact.clients">
                 <h5>{{client.clientName}}</h5>
                 <div style="margin-left: 15px">

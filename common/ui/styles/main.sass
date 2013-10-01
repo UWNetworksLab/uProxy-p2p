@@ -56,8 +56,18 @@ ul
 
 
 .btn
-  border: 1px solid #000
+  border: 1px solid #aaa
+  color: #333
   background: #fff
+  border-radius: 2px
+  cursor: pointer
+.btn:hover, .btn:focus
+  border-color: #999
+  box-shadow: 0 1px 3px #aaa
+  outline: none
+.btn:active
+  box-shadow: 0 1px 3px #aaa inset
+  color: #777
 
 .btn-request
   position: absolute
@@ -72,6 +82,7 @@ ul
 .btn-back:hover, .btn-back:focus
   opacity: 0.5
   outline: none
+  cursor: pointer
 
 #header
 
@@ -81,31 +92,39 @@ ul
 #contact-header
   h1
     position: fixed
-    width: 100%
+    width: 80%
+    padding: 0 10%
     text-align: center
-    top: 8px
+    top: 10px
     pointer-events: none
+    white-space: nowrap
 
 #options-btn
   position: absolute
   top: 0
   right: 0
-  background: transparent url('../icons/settings.svg') no-repeat center
+  background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
   outline: none
   padding: 4px
   width: 20px
-  height: 30px
+  height: 20px
   text-decoration: none
+  opacity: 0.6
+  #include smooth
 
-#options-btn:hover
-  opacity: 0.8
+#options-btn:hover, #options-btn:focus
+  opacity: 0.3
+#options-btn:active
+  opacity: 0.9
 
 #search-section
   position: relative
   z-index: 50
 
 #search-contacts
+  position: relative
+  z-index: 30
   width: 358px
   margin: 0
   padding: 8px 20px
@@ -123,11 +142,12 @@ ul
 
 #search-btn
   position: absolute
+  z-index: 40
   right: 0
   top: 0
-  width: 35px
-  height: 35px
-  padding: 4px
+  width: 26px
+  height: 30px
+  padding: 12px
   border: none
   background: transparent url('../icons/search.png') no-repeat center
   background-size: 80%
@@ -185,6 +205,7 @@ ul
   position: absolute
   background-color: #fafafa
   width: 100%
+  height: 100%
   margin: 0
   padding: 0
   @include smooth
@@ -201,13 +222,14 @@ ul
   border-right: none
   @include smooth
 
-.contacts li:hover
+.contacts li:hover, .contacts li:focus
   background-color: #fff
   border-color: #ddd
   color: #000
   z-index: 50
   top: -2px
   box-shadow: 0 2px 6px 1px #ddd
+  outline: none
 
 .contacts li.ng-hide
   display: block !important
@@ -228,15 +250,24 @@ ul
   left: 400px
 
 .client-details
+  position: relative
   display: block
   padding: 8px
+  margin: 2px
+  height: 50px
   border: 1px solid #eee
+  font-size: $fontSize * 0.5
+  font-family: monospace
+  @include smooth
 
 .client-details:hover
-  background-color: #eee
+  border-color: #ddd
+  top: -2px
+  box-shadow: 0 2px 6px 1px #ddd
 
 #status
   position: fixed
+  z-index: 50
   bottom: 0
   width: 100%
   font-size: $fontSize * 0.8
@@ -306,8 +337,8 @@ details
   form[name=sendMsgForm]
     margin-bottom: 3px
 
-body#options
-  padding: 30px
+#options
+  height: 100%
   #debug
     margin-top: 50px
 

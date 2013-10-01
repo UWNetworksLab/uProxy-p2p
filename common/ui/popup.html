@@ -32,7 +32,6 @@
 
     <section ng-show="connectedToApp">
       <section id="header">
-        <a class="btn" id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}"></a>
         <section id="search-section" ng-hide="rosterNudge">
 
           <input type="text" id="search-contacts" placeholder="search contacts"
@@ -59,9 +58,9 @@
       <section id="roster">
         <section id="contacts-frame" ng-hide="rosterNudge">
         <ul class="contacts">
-          <li ng-repeat="contact in model.roster | filter:search"
+          <li ng-repeat="contact in model.roster"
               ng-click="toggleContact(contact)"
-              ng-animate=" 'animate' ">
+              tabindex="{{ $index + 10 }}">
             {{contact.name}}
             <!--
             <span class="contact-hover" ng-show="contact.hovered">
@@ -77,13 +76,19 @@
         <div id="contact-details" ng-show="rosterNudge">
           <div class="client-details" ng-repeat="client in currentContact.clients">
             {{ client.clientId }}
-          </div>
-
-          <div class="client-actions">
-            <button class="btn" ng-click="sendMessage(contact, 'start-proxying')">
-              Start
-            </button>
-            <button class="btn">Request</button>
+            <br>
+            Network: {{ client.network }}
+            <br>
+            Status: {{ client.status }}
+            <div class="client-actions">
+              <button class="btn"
+                  ng-show="currentContact.userId in cannotGetFrom"
+                  ng-click="sendMessage(currentContact, 'request-access')">
+                Request
+              </button>
+              <button class="btn">
+                Grant
+              </button>
           </div>
 
           <!--
@@ -103,6 +108,7 @@
 
       <section id="status">
         Not Connected
+        <a id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}"></a>
       </section>
       <!--
       <section ng-show="model.identityStatus.status == 'offline'">

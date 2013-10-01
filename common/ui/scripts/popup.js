@@ -16,6 +16,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       console.log(c);
       $scope.rosterNudge = true;
     }
+
     // $scope.showContact = function(c) {
       // c.detailsVisible = true;
     // };

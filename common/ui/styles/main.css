@@ -38,8 +38,20 @@ ul {
   background-color: #bbbbbb; }
 
 .btn {
-  border: 1px solid black;
-  background: white; }
+  border: 1px solid #aaaaaa;
+  color: #333333;
+  background: white;
+  border-radius: 2px;
+  cursor: pointer; }
+
+.btn:hover, .btn:focus {
+  border-color: #999999;
+  box-shadow: 0 1px 3px #aaaaaa;
+  outline: none; }
+
+.btn:active {
+  box-shadow: 0 1px 3px #aaaaaa inset;
+  color: #777777; }
 
 .btn-request {
   position: absolute;
@@ -53,38 +65,47 @@ ul {
 
 .btn-back:hover, .btn-back:focus {
   opacity: 0.5;
-  outline: none; }
+  outline: none;
+  cursor: pointer; }
 
 .title {
   padding: 0 8px; }
 
 #contact-header h1 {
   position: fixed;
-  width: 100%;
+  width: 80%;
+  padding: 0 10%;
   text-align: center;
-  top: 8px;
-  pointer-events: none; }
+  top: 10px;
+  pointer-events: none;
+  white-space: nowrap; }
 
 #options-btn {
   position: absolute;
   top: 0;
   right: 0;
-  background: transparent url("../icons/settings.svg") no-repeat center;
+  background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
   outline: none;
   padding: 4px;
   width: 20px;
-  height: 30px;
-  text-decoration: none; }
+  height: 20px;
+  text-decoration: none;
+  opacity: 0.6; }
 
-#options-btn:hover {
-  opacity: 0.8; }
+#options-btn:hover, #options-btn:focus {
+  opacity: 0.3; }
+
+#options-btn:active {
+  opacity: 0.9; }
 
 #search-section {
   position: relative;
   z-index: 50; }
 
 #search-contacts {
+  position: relative;
+  z-index: 30;
   width: 358px;
   margin: 0;
   padding: 8px 20px;
@@ -105,11 +126,12 @@ ul {
 
 #search-btn {
   position: absolute;
+  z-index: 40;
   right: 0;
   top: 0;
-  width: 35px;
-  height: 35px;
-  padding: 4px;
+  width: 26px;
+  height: 30px;
+  padding: 12px;
   border: none;
   background: transparent url("../icons/search.png") no-repeat center;
   background-size: 80%; }
@@ -176,6 +198,7 @@ ul {
   position: absolute;
   background-color: #fafafa;
   width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   -webkit-transition: all 0.23s !important;
@@ -198,13 +221,14 @@ ul {
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
 
-.contacts li:hover {
+.contacts li:hover, .contacts li:focus {
   background-color: white;
   border-color: #dddddd;
   color: black;
   z-index: 50;
   top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
+  box-shadow: 0 2px 6px 1px #dddddd;
+  outline: none; }
 
 .contacts li.ng-hide {
   display: block !important;
@@ -227,15 +251,27 @@ ul {
   left: 400px; }
 
 .client-details {
+  position: relative;
   display: block;
   padding: 8px;
-  border: 1px solid #eeeeee; }
+  margin: 2px;
+  height: 50px;
+  border: 1px solid #eeeeee;
+  font-size: 8px;
+  font-family: monospace;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 .client-details:hover {
-  background-color: #eeeeee; }
+  border-color: #dddddd;
+  top: -2px;
+  box-shadow: 0 2px 6px 1px #dddddd; }
 
 #status {
   position: fixed;
+  z-index: 50;
   bottom: 0;
   width: 100%;
   font-size: 12.8px;
@@ -274,9 +310,9 @@ details > *:not(summary) {
 #debug form[name=sendMsgForm] {
   margin-bottom: 3px; }
 
-body#options {
-  padding: 30px; }
-  body#options #debug {
+#options {
+  height: 100%; }
+  #options #debug {
     margin-top: 50px; }
 
 details.advanced {
