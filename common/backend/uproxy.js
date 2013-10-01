@@ -21,17 +21,8 @@ var RESET_STATE = {
   "_debug": DEBUG,
   "_msgLog": [],
 
-  "identityStatus": {},
   "me": {},
   "roster": {},
-
-  "currentSessionsToRelay": {},
-  "allowGiveTo": {},
-  "pendingGiveTo": {},
-
-  "currentSessionsToInitiate": {},
-  "canGetFrom": {},
-  "pendingGetFrom": {},
 
   "options": {
     "allowNonRoutableAddresses": false,
@@ -41,18 +32,52 @@ var RESET_STATE = {
 };
 var state = cloneDeep(RESET_STATE);
 
-// List of all keys for data that we hold in (local) storage.
-var STORED_KEYS = [
-  // TODO these should change to
-  //    'profile',
-  //    'contacts',
-  //    'advancedOptions'
-  'allowGiveTo',
-  'pendingGiveTo',
-  'canGetFrom',
-  'pendingGetFrom',
-  'options'
-  ];
+var LOCAL_STORAGE_ENTRIES = {
+  // These are default dummy initial values
+  "me": { "description": "l's Laptop", }
+  "options": {
+    "allowNonRoutableAddresses": false,
+    "stunServers": ["stunServer1", "stunServer2"],
+    "turnServers": ["turnServer1", "turnServer2"]
+  },
+  "rosterIds": [
+    "s@gmail.com",
+    "r@gmail.com",
+    "s on qq"
+  ],
+  "roster/s@gmail.com": {
+    "annotation": "Cool S who has high bandwidth",
+    "instanceId": "ssssssssshjafdshjadskfjlkasfs",
+    "permissions":
+      { "proxy": "yes" // "no" | "requested" | "yes"
+        "client": "no" // "no" | "requested" | "yes"
+      }
+    // "status" {
+       // "activeProxy": boolean
+       // "activeClient": boolean
+    // }
+  },
+  "roster/r@fmail.com": {
+    "annotation": "R is who is repressed",
+    "instanceId": "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
+    "permissions":
+      { "proxy": "no"
+        "client": "yes"
+      }
+  },
+  "roster/s on qq": {
+    "annotation": "S who is on qq",
+    "instanceId": "sssssjksdklflsdjkljkfdsa",
+    "permissions":
+      { "proxy": "no"
+        "client": "no"
+      }
+  }
+};
+
+
+storage.set(client.userId, JSON.stringify(client)).done(callback);
+
 
 function _loadKeyFromStorage(key, callback, defaultIfUndefined) {
   storage.get(key).done(function (result) {
@@ -75,8 +100,8 @@ setTimeout(onload, 0);
 
 function _loginInit(cb) {
   identity.login({
-    agent: 'uproxy', 
-    version: '0.1', 
+    agent: 'uproxy',
+    version: '0.1',
     url: 'https://github.com/UWNetworksLab/UProxy',
     interactive: false
     //network: ''
@@ -100,7 +125,7 @@ function onload() {
   **/
 
 
-  STORED_KEYS.forEach(function (key) {
+  LOCAL_STORAGE_ENTRIES.forEach(function (key) {
     _loadKeyFromStorage(key, function (data) { state[key] = data; },
         RESET_STATE[key]);
   });
@@ -109,8 +134,8 @@ function onload() {
     log.debug('reset');
     state = cloneDeep(RESET_STATE);
     // TODO: sign out of Google Talk
-    var nkeys = STORED_KEYS.length, nreset = 0;
-    STORED_KEYS.forEach(function (key) {
+    var nkeys = LOCAL_STORAGE_ENTRIES.length, nreset = 0;
+    LOCAL_STORAGE_ENTRIES.forEach(function (key) {
       _save(key, RESET_STATE[key], function () {
         log.debug('reset', key);
         if ((++nreset) === nkeys) {
@@ -168,14 +193,14 @@ function onload() {
 
   freedom.on('login', function(network) {
     identity.login({
-      agent: 'uproxy', 
-      version: '0.1', 
+      agent: 'uproxy',
+      version: '0.1',
       url: 'https://github.com/UWNetworksLab/UProxy',
       interactive: true,
       network: network
     });
   });
-  
+
   freedom.on('logout', function(network) {
     identity.logout(null, network);
   });
@@ -301,7 +326,7 @@ function _handleProxyStartReceived(msg, contact) {
 function _handleConnectionSetupReceived(msg, contact) {
   msg.data.from = msg['fromClientId'];
   server.emit('toServer', msg.data);
-  
+
   // Figure out the crypto key
   var cryptoKey = null;
   var data = JSON.parse(msg.data.data);
@@ -310,11 +335,12 @@ function _handleConnectionSetupReceived(msg, contact) {
   } else {
     log.debug("Data did not contain sdp headers", msg);
   }
-  
+
   // Compare against the verified crypto keys
   var verifiedCryptoKeysKey = contact.userId + ".verifiedCryptoKeys";
   var verificationRequired = false;
   if (cryptoKey) {
+    // TODO: rename to Hash: this is not the key, this is the hash of the key.
     _loadKeyFromStorage(verifiedCryptoKeysKey, function(verifiedCryptoKeys) {
       log.debug("Comparing crypto key against verified keys for this user");
       if (cryptoKey in verifiedCryptoKeys) {
