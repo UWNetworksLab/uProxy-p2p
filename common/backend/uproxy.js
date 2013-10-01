@@ -16,40 +16,64 @@ var server = freedom.uproxyserver();
 //XXX: Makes chrome debugging saner, not needed otherwise.
 var window = {};
 
+// enum of state ids that we need to worry about.
+var StateEntries = {
+  ME: "me",
+  OPTIONS: "options",
+  INSTANCEIDS: "instanceIds", // only exists for local storage state.
+  INSTANCES: "instances",   // only exists for in-memory state.
+}
+
 // Initial empty state
 var RESET_STATE = {
-  "_debug": DEBUG,
-  "_msgLog": [],
+  // debugging stuff
+  "_debug": DEBUG,  // debug state.
+  "_msgLog": [],  //
 
+  // A table from network identifier to your status on that network
+  // (online/offline/idle, etc)
+  "identityStatus": {},
+  // Entries filled in by identity providers.
   "me": {},
+  // Merged roster of contacts coming from each identity provider.
   "roster": {},
 
+  // Options coming from local storage and setable by the options page.
   "options": {
     "allowNonRoutableAddresses": false,
     "stunServers": ["stunServer1", "stunServer2"],
     "turnServers": ["turnServer1", "turnServer2"]
   }
 };
+// Initial state is set from RESET_STATE.
 var state = cloneDeep(RESET_STATE);
 
-var LOCAL_STORAGE_ENTRIES = {
-  // These are default dummy initial values
-  "me": { "description": "l's Laptop", }
+// Mock data for what may live in local storage. (note: values will be strings
+// too, via JSON interpretation)
+var LOCAL_STORAGE_EXAMPLE = {
+  "me": { "description": "l's Laptop",
+          "instanceId": "mememmemememsdhodafslkffdaslkjfds",
+        },
   "options": {
     "allowNonRoutableAddresses": false,
     "stunServers": ["stunServer1", "stunServer2"],
     "turnServers": ["turnServer1", "turnServer2"]
   },
-  "rosterIds": [
-    "s@gmail.com",
-    "r@gmail.com",
-    "s on qq"
+  // Note invariant: for each instanceIds[X] there should be an entry:
+  // "instance/X": { ... } which holds out local stored knowledge about that
+  // instance id.
+  "instanceIds": [
+    "ssssssssshjafdshjadskfjlkasfs",
+    "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
+    "qqqqjksdklflsdjkljkfdsa"
   ],
-  "roster/s@gmail.com": {
+  "instance/ssssssssshjafdshjadskfjlkasfs": {
     "annotation": "Cool S who has high bandwidth",
     "instanceId": "ssssssssshjafdshjadskfjlkasfs",
+    "userId": "s@gmail.com",
+    "keyhash" : "HASHssssjklsfjkldfslkfljkdfsklas",
     "permissions":
-      { "proxy": "yes" // "no" | "requested" | "yes"
+      { "proxy": "yes", // "no" | "requested" | "yes"
         "client": "no" // "no" | "requested" | "yes"
       }
     // "status" {
@@ -57,41 +81,83 @@ var LOCAL_STORAGE_ENTRIES = {
        // "activeClient": boolean
     // }
   },
-  "roster/r@fmail.com": {
+  "instance/r@fmail.com": {
     "annotation": "R is who is repressed",
     "instanceId": "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
+    "userId": "r@fmail.com",
+    "keyhash" : "HASHrrrjklsfjkldfslkfljkdfsklas",
     "permissions":
-      { "proxy": "no"
+      { "proxy": "no",
         "client": "yes"
       }
   },
-  "roster/s on qq": {
+  "instance/qqqqjksdklflsdjkljkfdsa": {
     "annotation": "S who is on qq",
-    "instanceId": "sssssjksdklflsdjkljkfdsa",
+    "instanceId": "qqqqjksdklflsdjkljkfdsa",
+    "userId": "s@qq",
+    "keyhash" : "HASHqqqqqjklsfjkldfslkfljkdfsklas",
     "permissions":
-      { "proxy": "no"
+      { "proxy": "no",
         "client": "no"
       }
   }
 };
 
-
-storage.set(client.userId, JSON.stringify(client)).done(callback);
-
-
-function _loadKeyFromStorage(key, callback, defaultIfUndefined) {
+function _loadFromStorage(key, callback, defaultIfUndefined) {
   storage.get(key).done(function (result) {
     if (isDefined(result)) {
-      var parsed = JSON.parse(result);
-      callback(parsed);
+      callback(JSON.parse(result));
     } else {
       callback(defaultIfUndefined);
     }
   });
 }
 
-function _save(key, val, callback) {
+function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
+}
+
+function _loadStateFromStorage(state) {
+  var key;
+  var instanceIds = [];
+
+  // Set the saves |me| state and |options|.
+  key = StateEntries.ME;
+  _loadFromStorage(key, function(v){ state[key] = v; }, RESET_STATE[key]);
+  key = StateEntries.OPTIONS;
+  _loadFromStorage(key, function(v){ state[key] = v; }, RESET_STATE[key]);
+
+  // Set the state |instances| from the local storage entries.
+  var instancesTable = {};
+  state[StateEntries.INSTANCES] = instancesTable;
+  key = StateEntries.INSTANCEIDS;
+  _loadFromStorage(key, function(instanceIds){
+      console.log("instanceIds:", instanceIds);
+      for(var i = 0; i < instanceIds.length; i++) {
+        var key = instanceIds[i];
+        _loadFromStorage(key,
+            function(v){
+              if(v === null) {
+                console.error("_loadStateFromStorage: undefined key:", key);
+              } else {
+                instancesTable[key] = v;
+              }},
+            null);
+      }
+  }, []);
+
+ // TODO: remove these and propergate changes.
+ state.allowGiveTo = {};
+ state.pendingGiveTo = {};
+ state.canGetFrom = {};
+ state.pendingGetFrom = {};
+ state.currentSessionsToInitiate = {};
+ state.currentSessionsToRelay = {};
+}
+
+function _saveStateToStorage() {
+  // TODO
+  console.error("Not yet implemented");
 }
 
 //TODO(willscott): WebWorkers startup errors are hard to debug.
@@ -123,27 +189,13 @@ function onload() {
     });
   });
   **/
-
-
-  LOCAL_STORAGE_ENTRIES.forEach(function (key) {
-    _loadKeyFromStorage(key, function (data) { state[key] = data; },
-        RESET_STATE[key]);
-  });
+  _loadStateFromStorage(state);
 
   freedom.on('reset', function () {
     log.debug('reset');
+    // TODO: sign out of Google Talk and other networks.
     state = cloneDeep(RESET_STATE);
-    // TODO: sign out of Google Talk
-    var nkeys = LOCAL_STORAGE_ENTRIES.length, nreset = 0;
-    LOCAL_STORAGE_ENTRIES.forEach(function (key) {
-      _save(key, RESET_STATE[key], function () {
-        log.debug('reset', key);
-        if ((++nreset) === nkeys) {
-          log.debug('done resetting, sending reset state');
-          freedom.emit('state-change', [{op: 'replace', path: '', value: state}]);
-        }
-      });
-    });
+    _loadStateFromStorage(state);
   });
 
   // Called from extension whenever the user clicks opens the extension popup.
@@ -212,7 +264,8 @@ function onload() {
 
   freedom.on('ignore', function (userId) {
     delete state.pendingGiveTo[userId];
-    _save('pendingGiveTo', state.pendingGiveTo);
+    // TODO: fix.
+    _saveToStorage('pendingGiveTo', state.pendingGiveTo);
     freedom.emit('state-change', [
       {op: 'remove', path: '/pendingGiveTo/'+userId}
     ]);
@@ -229,7 +282,7 @@ function onload() {
 
   freedom.on('change-option', function (data) {
     state.options[data.key] = data.value;
-    _save('options', state.options);
+    _saveToStorage('options', state.options);
     freedom.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
     notifyClient();
     notifyServer();
@@ -300,9 +353,11 @@ function _handleMessageReceived(msg) {
 
 function _handleAllowReceived(msg, contact) {
   state.canGetFrom[contact.userId] = contact;
-  _save('canGetFrom', state.canGetFrom);
+  // TODO: fix.
+  _saveToStorage('canGetFrom', state.canGetFrom);
   delete state.pendingGetFrom[contact.userId];
-  _save('pendingGetFrom', state.pendingGetFrom);
+  // TODO: fix.
+  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
   freedom.emit('state-change', [
     {op: 'add', path: '/canGetFrom/'+contact.userId, value: contact},
     {op: 'remove', path: '/pendingGetFrom/'+contact.userId}
@@ -311,14 +366,15 @@ function _handleAllowReceived(msg, contact) {
 
 function _handleRequestAccessReceived(msg, contact) {
   state.pendingGiveTo[contact.userId] = contact;
-  _save('pendingGiveTo', state.pendingGiveTo);
+  // TODO: fix.
+  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
   freedom.emit('state-change', [{op: 'add', path: '/pendingGiveTo/'+contact.userId, value: contact}]);
 }
 
 function _handleProxyStartReceived(msg, contact) {
   // TODO: Access Check on if it's allowed.
   state.currentSessionsToRelay[msg['fromClientId']] = msg['fromClientId'];
-  _save('currentSessionsToRelay', state.currentSessionsToRelay);
+  _saveToStorage('currentSessionsToRelay', state.currentSessionsToRelay);
   notifyServer();
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToRelay/' + msg['fromClientId'], value: contact}]);
 }
@@ -341,7 +397,7 @@ function _handleConnectionSetupReceived(msg, contact) {
   var verificationRequired = false;
   if (cryptoKey) {
     // TODO: rename to Hash: this is not the key, this is the hash of the key.
-    _loadKeyFromStorage(verifiedCryptoKeysKey, function(verifiedCryptoKeys) {
+    _loadFromStorage(verifiedCryptoKeysKey, function(verifiedCryptoKeys) {
       log.debug("Comparing crypto key against verified keys for this user");
       if (cryptoKey in verifiedCryptoKeys) {
         log.debug("Crypto key already verified, proceed to establishing connection");
@@ -382,9 +438,9 @@ function _handleMessageSent(msg) {
 
 function _handleAllowSent(msg, contact) {
   state.allowGiveTo[contact.userId] = contact;
-  _save('allowGiveTo', state.allowGiveTo);
+  _saveToStorage('allowGiveTo', state.allowGiveTo);
   delete state.pendingGiveTo[contact.userId];
-  _save('pendingGiveTo', state.pendingGiveTo);
+  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
   freedom.emit('state-change', [
     {op: 'add', path: '/allowGiveTo/'+contact.userId, value: contact},
     {op: 'remove', path: '/pendingGiveTo/'+contact.userId}
@@ -393,7 +449,7 @@ function _handleAllowSent(msg, contact) {
 
 function _handleRequestAccessSent(msg, contact) {
   state.pendingGetFrom[contact.userId] = contact;
-  _save('pendingGetFrom', state.pendingGetFrom);
+  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
   freedom.emit('state-change', [{op: 'add', path: '/pendingGetFrom/'+contact.userId, value: contact}]);
 }
 
@@ -404,7 +460,7 @@ function _handleStartProxyingSent(msg, contact) {
   }
 
   state.currentSessionsToInitiate['*'] = msg['to'];
-  _save('currentSessionsToInitiate', state.currentSessionsToInitiate);
+  _saveToStorage('currentSessionsToInitiate', state.currentSessionsToInitiate);
   notifyClient();
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
 }
