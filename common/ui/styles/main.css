@@ -302,19 +302,30 @@ details > summary {
 details > *:not(summary) {
   margin-left: 10px; }
 
-#debug pre {
-  font-size: 11.2px;
-  max-height: 200px;
-  overflow: scroll; }
-#debug .btn-group {
-  margin-bottom: 10px; }
-#debug form[name=sendMsgForm] {
-  margin-bottom: 3px; }
-
 #options {
+  position: relative;
   height: 100%; }
-  #options #debug {
-    margin-top: 50px; }
+
+#options-left {
+  width: 50%; }
+
+#debug {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 45%;
+  height: 100%;
+  paddinG: 2%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: black;
+  color: #aaffff; }
+  #debug pre {
+    font-size: 9.6px; }
+  #debug .btn-group {
+    margin-bottom: 10px; }
+  #debug form[name=sendMsgForm] {
+    margin-bottom: 3px; }
 
 details.advanced {
   margin-top: 15px; }
