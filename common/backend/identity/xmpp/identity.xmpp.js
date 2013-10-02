@@ -331,11 +331,6 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     //Set Uproxy capability
     var cap = stanza.getChild('c');
     //TODO check application version mismatch
-
-    // If this is the only plase we set something to messageable,
-    // we're not setting any of our buddies' clients to messageable.
-    console.log('IdentityProvider.onPresence: cap: ' + JSON.stringify(cap));
-    console.log('IdentityProvider.onPresence: stanza: ' + stanza);
     if (cap && cap.attrs.node==this.url) { //&& cap.attrs.ver==this.loginOpts.version) {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'messageable');
     } else {
