@@ -9,13 +9,13 @@ const socketTransportService = Cc["@mozilla.org/network/socket-transport-service
 const mainThread = Cc["@mozilla.org/thread-manager;1"].getService().mainThread;
 
 // Private variables for sockets get stored in WeakMaps
-let socketType = new WeakMap();
-let transports = new WeakMap();
-let rawReaders = new WeakMap();
-let binaryReaders = new WeakMap();
-let writers = new WeakMap();
+const socketType = new WeakMap();
+const transports = new WeakMap();
+const rawReaders = new WeakMap();
+const binaryReaders = new WeakMap();
+const writers = new WeakMap();
 // Map nsIInputStreamCallbacks to their ClientSockets
-let streamCallbacks = new WeakMap();
+const streamCallbacks = new WeakMap();
 
 function typeOfSocket(socket) socketType.get(socket)
 function transportFor(socket) transports.get(socket)
@@ -95,20 +95,20 @@ var ClientSocket = Class({
       setTransport(this, transport);
     }
   },
-  connect: function connect(hostname, port, socketType) {
+  connect: function connect(hostname, port, currentSocketType) {
     if (!isUndefined(transportFor(this))) {
       throw new Error('Socket already connected');
     }
-    if (isUndefined(socketType) || socketType === 'tcp') {
-      socketType = null;
+    if (isUndefined(currentSocketType) || currentSocketType === 'tcp') {
+      currentSocketType = null;
     }
 
-    var transport = socketTransportService.createTransport([socketType],
+    var transport = socketTransportService.createTransport([currentSocketType],
                                                            0,
 							   hostname,
                                                            port,
                                                            null);
-    socketType.set(this, socketType || 'tcp');
+    socketType.set(this, currentSocketType || 'tcp');
     setTransport(this, transport);
   },
   write: function(data) {

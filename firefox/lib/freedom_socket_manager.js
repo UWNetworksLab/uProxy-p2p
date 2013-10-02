@@ -6,6 +6,15 @@ function arrayBufferToString(buf) {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 
+function stringToArrayBuffer(str) {
+  var buf = new ArrayBuffer(str.length);
+  var bufView = new Uint8Array(buf);
+  for (var i=0, strLen=str.length; i<strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
 var FreedomSocketManager = function(freedomWindow) {
   const sockets = [];
 
@@ -80,6 +89,7 @@ var FreedomSocketManager = function(freedomWindow) {
 			       writes: args.writes,
 			       socketId: args.socketId});
     } catch (e) {
+      console.warn(e.message);
       freedomWindow.port.emit('socket-write-response',
 			      {bytesWritten: -1, writes:args.writes,
 			       socketId: args.socketId});
