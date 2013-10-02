@@ -328,22 +328,30 @@ details
   & > *:not(summary)
     margin-left: 10px
 
+#options
+  position: relative
+  height: 100%
+
+#options-left
+  width: 50%
+
 #debug
+  position: fixed
+  top: 0
+  right: 0
+  width: 45%
+  height: 100%
+  paddinG: 2%
+  overflow-y: auto
+  overflow-x: hidden
+  background-color: #000
+  color: #aff
   pre
-    font-size: $fontSize * .7
-    max-height: 200px
-    overflow: scroll
+    font-size: $fontSize * .6
   .btn-group
     margin-bottom: 10px
   form[name=sendMsgForm]
     margin-bottom: 3px
-
-#options
-  height: 100%
-  #debug
-    margin-top: 50px
-
-ul.options
 
 details.advanced
   margin-top: 15px

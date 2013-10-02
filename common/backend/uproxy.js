@@ -68,9 +68,12 @@ var LOCAL_STORAGE_EXAMPLE = {
     "qqqqjksdklflsdjkljkfdsa"
   ],
   "instance/ssssssssshjafdshjadskfjlkasfs": {
+    "name": "S",
+    "description": "S's home desktop",
     "annotation": "Cool S who has high bandwidth",
     "instanceId": "ssssssssshjafdshjadskfjlkasfs",
     "userId": "s@gmail.com",
+    "network": "google",
     "keyhash" : "HASHssssjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "yes", // "no" | "requested" | "yes"
@@ -82,9 +85,12 @@ var LOCAL_STORAGE_EXAMPLE = {
     // }
   },
   "instance/r@fmail.com": {
+    "name": "R",
+    "description": "R's laptop",
     "annotation": "R is who is repressed",
     "instanceId": "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
-    "userId": "r@fmail.com",
+    "userId": "r@facebook.com",
+    "network": "facebook",
     "keyhash" : "HASHrrrjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "no",
@@ -92,9 +98,12 @@ var LOCAL_STORAGE_EXAMPLE = {
       }
   },
   "instance/qqqqjksdklflsdjkljkfdsa": {
+    "name": "S",
+    "description": "S's laptop",
     "annotation": "S who is on qq",
     "instanceId": "qqqqjksdklflsdjkljkfdsa",
     "userId": "s@qq",
+    "network": "manual",
     "keyhash" : "HASHqqqqqjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "no",
