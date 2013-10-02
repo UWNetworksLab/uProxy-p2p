@@ -1,7 +1,7 @@
 'use strict';
 
 var DEBUG = true; // XXX get this from somewhere else
-console.log('Uproxy backend');
+console.log('Uproxy backend, running in worker ' + self.location.href);
 
 var log = {
   debug: DEBUG ? makeLogger('debug') : function(){},
@@ -153,6 +153,7 @@ function _loadStateFromStorage(state) {
  state.pendingGetFrom = {};
  state.currentSessionsToInitiate = {};
  state.currentSessionsToRelay = {};
+  log.debug('_loadStateFromStorage: saving state: ' + JSON.stringify(state));
 }
 
 function _saveStateToStorage() {
@@ -207,23 +208,27 @@ function onload() {
   });
 
   identity.on('onStatus', function(data) {
+    log.debug('onStatus: data:' + JSON.stringify(data));
     if (data.userId) {
       state.identityStatus[data.network] = data;
       freedom.emit('state-change', [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
-    }
-    if (data.userId && !state.me[data.userId]) {
-      state.me[data.userId] = {userId: data.userId};
+      if (!state.me[data.userId]) {
+        state.me[data.userId] = {userId: data.userId};
+      }
     }
   });
 
   identity.on('onChange', function(data) {
-    //If my card changed
+    // log.debug('onChange: data:' + JSON.stringify(data));
     if (data.userId && state.me[data.userId]) {
+      // My card changed
       state.me[data.userId] = data;
       freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
       notifyClient();
       notifyServer();
-    } else { //must be a buddy
+    } else {
+      // Must be a buddy
+      _updateInstanceIdsOnChange(state.roster[data.userId], data);
       state.roster[data.userId] = data;
       freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     }
@@ -333,8 +338,40 @@ var _msgReceivedHandlers = {
   'request-access': _handleRequestAccessReceived,
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
-  'connection-setup-response': _handleConnectionSetupResponseReceived
+  'connection-setup-response': _handleConnectionSetupResponseReceived,
+  'request-instance-id' : _handleRequestInstanceIdReceived,
+  'request-instance-id-response' : _handleRequestInstanceIdResponseReceived
 };
+
+// Look for a !messageable->messageable transition, and dispatch a
+// query if needed.
+function _updateInstanceIdsOnChange(prior, current) {
+  var should_dump = false;
+  for (var client in current.clients) {
+    var cur = current.clients[client];
+    var prev = prior? prior.clients[client] : null;
+    if (cur.network == 'google') {
+      should_dump = true;
+    }
+    if (cur.status == 'messageable' && (!prev || prev.status != 'messageable')) {
+      _dispatchInstanceIdQuery(current.userId, cur);
+    }
+  }
+  if (should_dump) {
+    log.debug('_updateInstanceIdsOnChange(  prior="' + JSON.stringify(prior) + '",');
+    log.debug('_updateInstanceIdsOnChange   current="' + JSON.stringify(current) + '")');
+  }
+}
+
+function _dispatchInstanceIdQuery(user, client) {
+  log.debug('_dispatchInstanceIdQuery(' + user + ', ' + JSON.stringify(client) + ')');
+  if (client.network != 'loopback' && client.network != 'manual') {
+    log.debug('_dispatchInstanceIdQuery:  identity.sendMessage(' +
+              client.clientId + ', {message: request-instance-id})')
+    identity.sendMessage(client.clientId,
+                         JSON.stringify({ message: 'request-instance-id' }));
+  }
+}
 
 function _handleMessageReceived(msg) {
   var handler = _msgReceivedHandlers[msg.message];
@@ -376,7 +413,8 @@ function _handleProxyStartReceived(msg, contact) {
   state.currentSessionsToRelay[msg['fromClientId']] = msg['fromClientId'];
   _saveToStorage('currentSessionsToRelay', state.currentSessionsToRelay);
   notifyServer();
-  freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToRelay/' + msg['fromClientId'], value: contact}]);
+  freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToRelay/' +
+      msg['fromClientId'], value: contact}]);
 }
 
 function _handleConnectionSetupReceived(msg, contact) {
@@ -465,3 +503,16 @@ function _handleStartProxyingSent(msg, contact) {
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
 }
 
+function _handleRequestInstanceIdReceived(msg, contact) {
+  // Ignore |msg|, just send back our instanceId to |contact|
+  // TODO(mollyling): consider rate-limiting responses, in case the
+  // other side's flaking out.
+  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg) + ', ' + JSON.stringify(contact));
+
+}
+function _handleRequestInstanceIdResponseReceived(msg, contact) {
+  // Update |state| with the instance ID, and emit a state-change
+  // notification to tell the UI what's up.
+  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) + ', ' +
+      JSON.stringify(contact));
+}

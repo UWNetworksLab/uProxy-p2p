@@ -62,6 +62,8 @@ modify (/usr/local) to being editable by your user.
 
     - This is assuming you have `ruby` and `rubygems` installed. 
 
+- [icu](https://sites.google.com/site/icuprojectuserguide/): Needed for
+  StringPrep.  sudo apt-get install icu-dev.
 
 #### Installation, setup, compilation, updating
 
