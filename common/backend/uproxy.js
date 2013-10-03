@@ -1,3 +1,13 @@
+/**
+ * uproxy.js
+ *
+ * This is the primary backend script. It maintains both in-memory state and
+ * checkpoints information to local storage.
+
+ * In-memory state includes:
+ *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
+ *  - Instances, which is a list of active UProxy installs.
+ */
 'use strict';
 var adjectives, nouns;
 
@@ -14,16 +24,25 @@ var storage = freedom.storage();
 var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
 
-//XXX: Makes chrome debugging saner, not needed otherwise.
-var window = {};
+var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
 
 // enum of state ids that we need to worry about.
 var StateEntries = {
-  ME: "me",
-  OPTIONS: "options",
-  INSTANCEIDS: "instanceIds", // only exists for local storage state.
-  INSTANCES: "instances",   // only exists for in-memory state.
-}
+  ME: 'me',
+  OPTIONS: 'options',
+  INSTANCEIDS: 'instanceIds', // only exists for local storage state.
+  INSTANCES: 'instances',   // only exists for in-memory state.
+};
+
+var Trust = {
+  NO: 'no',
+  REQUESTED: 'requested',
+  YES: 'yes'
+};
+var TrustType = {
+  PROXY: 'asProxy',
+  CLIENT: 'asClient'
+};
 
 // Keys that we don't save to local storage each time.
 // Format: each key is a dot-delimited path.
@@ -40,10 +59,9 @@ var RESET_STATE = {
   // A table from network identifier to your status on that network
   // (online/offline/idle, etc)
   "identityStatus": {},
-  // Entries filled in by identity providers.
-  "me": {},
-  // Merged roster of contacts coming from each identity provider.
-  "roster": {},
+  "me": {},         // Local client's information.
+  "roster": {},     // Merged contact lists from each identity provider.
+  "instances": {},  // instanceId -> instance. Active UProxy installations.
 
   // Options coming from local storage and setable by the options page.
   "options": {
@@ -52,8 +70,22 @@ var RESET_STATE = {
     "turnServers": ["turnServer1", "turnServer2"]
   }
 };
-// Initial state is set from RESET_STATE.
 var state = cloneDeep(RESET_STATE);
+
+// Mapping functions
+function instanceToClient(instanceId) {
+  // TODO: client = state[StateEntries.INSTANCES][
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    return null;
+  }
+  return instance.currentClient;
+}
+
+function clientToInstance(clientId) {
+  // TODO:
+  return null
+}
 
 // Mock data for what may live in local storage. (note: values will be strings
 // too, via JSON interpretation)
@@ -169,28 +201,27 @@ function _loadStateFromStorage(state) {
   var instancesTable = {};
   state[StateEntries.INSTANCES] = instancesTable;
   key = StateEntries.INSTANCEIDS;
-  _loadFromStorage(key, function(instanceIds){
-      console.log("instanceIds:", instanceIds);
-      for(var i = 0; i < instanceIds.length; i++) {
-        var key = instanceIds[i];
-        _loadFromStorage(key,
-            function(v){
-              if(v === null) {
-                console.error("_loadStateFromStorage: undefined key:", key);
-              } else {
-                instancesTable[key] = v;
-              }},
-            null);
-      }
+  _loadFromStorage(key, function(instanceIds) {
+    console.log("instanceIds:", instanceIds);
+    for (var i = 0; i < instanceIds.length ; i++) {
+      var key = instanceIds[i];
+      _loadFromStorage(key, function(v) {
+        if(v === null) {
+          console.error("_loadStateFromStorage: undefined key:", key);
+        } else {
+          instancesTable[key] = v;
+        }},
+      null);
+    }
   }, []);
 
- // TODO: remove these and propergate changes.
- state.allowGiveTo = {};
- state.pendingGiveTo = {};
- state.canGetFrom = {};
- state.pendingGetFrom = {};
- state.currentSessionsToInitiate = {};
- state.currentSessionsToRelay = {};
+  // TODO: remove these and propegate changes.
+  // state.allowGiveTo = {};
+  // state.pendingGiveTo = {};
+  // state.canGetFrom = {};
+  // state.pendingGetFrom = {};
+  state.currentSessionsToInitiate = {};
+  state.currentSessionsToRelay = {};
   log.debug('_loadStateFromStorage: saving state: ' + JSON.stringify(state));
 }
 
@@ -226,7 +257,9 @@ function _loginInit(cb) {
   });
 };
 
-// Called once when uproxy.js is loaded.
+/**
+ * Called once when uproxy.js is loaded.
+ */
 function onload() {
   // Check if the app is installed.
   _loginInit();
@@ -239,6 +272,7 @@ function onload() {
   **/
   _loadStateFromStorage(state);
 
+  // Define freedom bindings.
   freedom.on('reset', function () {
     log.debug('reset');
     // TODO: sign out of Google Talk and other networks.
@@ -247,14 +281,16 @@ function onload() {
   });
 
   // Called from extension whenever the user clicks opens the extension popup.
+  // The intent is to reset its model - but this may or may not always be
+  // necessary. Improvements to come.
   freedom.on('open-popup', function () {
     log.debug('open-popup');
     log.debug('state:', state);
-    // Send the extension the state
+    // Send the extension an empty state object.
     freedom.emit('state-change', [{op: 'replace', path: '', value: state}]);
   });
 
-  // Called when a user changes their "status" (away, busy, etc.)
+  // Update local user's online status (away, busy, etc.).
   identity.on('onStatus', function(data) {
     log.debug('onStatus: data:' + JSON.stringify(data));
     if (data.userId) {
@@ -279,6 +315,7 @@ function onload() {
       // Must be a buddy
       _updateInstanceIdsOnChange(state.roster[data.userId], data);
       state.roster[data.userId] = data;
+      // Determine networks and uproxy state.
       freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     }
   });
@@ -294,7 +331,7 @@ function onload() {
     } catch(e) {
       msg.unparseable = msg.message;
     }
-    _handleMessageReceived(msg);
+    _handleMessage(msg, false);  // beingSent = false
   });
 
   freedom.on('login', function(network) {
@@ -313,16 +350,16 @@ function onload() {
 
   freedom.on('send-message', function (msg) {
     identity.sendMessage(msg.to, msg.message);
-    _handleMessageSent(msg);
+    _handleMessage(msg, true);  // beingSent = true
   });
 
   freedom.on('ignore', function (userId) {
-    delete state.pendingGiveTo[userId];
+    // delete state.pendingGiveTo[userId];
     // TODO: fix.
-    _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-    freedom.emit('state-change', [
-      {op: 'remove', path: '/pendingGiveTo/'+userId}
-    ]);
+    // _saveToStorage('pendingGiveTo', state.pendingGiveTo);
+    // freedom.emit('state-change', [
+      // {op: 'remove', path: '/pendingGiveTo/'+userId}
+    // ]);
   });
 
   freedom.on('invite-friend', function (userId) {
@@ -382,15 +419,57 @@ var notifyServer = function() {
   }
 }
 
+// These message handlers must operate on a per-instance basis rather than a
+// per-user basis...
+// Each of these functions should take parameters (msg, contact)
+// Some of these message handlers deal with modifying trust values.
+// Others deal with actually starting and stopping a proxy connection.
+
+// Trust mutation.
+var TrustOp = {
+  'allow': Trust.YES,
+  'request-access': Trust.REQUESTED,
+  'deny': Trust.NO
+};
+
 var _msgReceivedHandlers = {
-  'allow': _handleAllowReceived,
-  'request-access': _handleRequestAccessReceived,
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
   'request-instance-id' : _handleRequestInstanceIdReceived,
   'request-instance-id-response' : _handleRequestInstanceIdResponseReceived
 };
+
+/**
+ * Bi-directional message handler.
+ *
+ * @isSent - True if message is being sent. False if received.
+ */
+function _handleMessage(msg, beingSent) {
+  log.debug('Handling ' + (beingSent ? 'sent' : 'received') + ' message...');
+  console.log(msg);
+  // Check if this is a trust modification.
+  var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
+  if (trustValue) {
+    // Access request and Grants go in opposite directions.
+    var asProxy = 'allow' == msg.message ? !beingSent : beingSent;
+    _updateTrust(msg.to, asProxy, trustValue);
+    // TODO freedom emit this stuff and save to storage
+    return true;
+  }
+
+  // Check if it's a proxy connection message.
+  log.debug('Dealing with a proxy connection?!?', msg);
+  var handler = null;
+  if (!beingSent) {
+    handler = _msgReceivedHandlers[msg.message];
+  }
+  if (!handler) {
+    log.error('No handler for sent message: ', msg);
+    return false;
+  }
+  handler(msg, msg.to);
+}
 
 // A simple predicate function to see if we can talk to this client.
 function _isMessageableUproxy(client) {
@@ -440,39 +519,17 @@ function _dispatchInstanceIdQuery(user, client) {
   }
 }
 
-function _handleMessageReceived(msg) {
-  var handler = _msgReceivedHandlers[msg.message];
-  if (!handler) {
-    log.error('No handler for received message:', msg);
-  } else {
-    log.debug('Handling received message:', msg);
-    var contact = state.roster[msg.fromUserId];
-    if (!contact) {
-      log.debug('userId', msg.fromUserId, 'not on roster, ignoring');
-    } else {
-      handler(msg, contact);
-    }
+function _updateTrust(clientId, asProxy, trustValue) {
+  var instance = clientToInstance(clientId);
+  if (!instance) {
+    log.debug('Could not find instance corresponding to client: ' + clientId);
+    return false;
   }
-}
-
-function _handleAllowReceived(msg, contact) {
-  state.canGetFrom[contact.userId] = contact;
-  // TODO: fix.
-  _saveToStorage('canGetFrom', state.canGetFrom);
-  delete state.pendingGetFrom[contact.userId];
-  // TODO: fix.
-  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
-  freedom.emit('state-change', [
-    {op: 'add', path: '/canGetFrom/'+contact.userId, value: contact},
-    {op: 'remove', path: '/pendingGetFrom/'+contact.userId}
-  ]);
-}
-
-function _handleRequestAccessReceived(msg, contact) {
-  state.pendingGiveTo[contact.userId] = contact;
-  // TODO: fix.
-  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-  freedom.emit('state-change', [{op: 'add', path: '/pendingGiveTo/'+contact.userId, value: contact}]);
+  var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
+  log.debug('Modifying trust value: ', instance, trust);
+  trust = trustValue;
+  // TODO freedom emit? and local storage?
+  return true;
 }
 
 function _handleProxyStartReceived(msg, contact) {
@@ -515,82 +572,67 @@ function _handleConnectionSetupReceived(msg, contact) {
   }
 }
 
-function _handleConnectionSetupResponseReceived(msg, contact) {
-  msg.data.from = msg['fromClientId'];
-  client.emit('toClient', msg.data);
+function _handleConnectionSetupResponseReceived(msg, clientId) {
+  // msg.data.from = msg['fromClientId'];
+  // client.emit('toClient', msg.data);
 }
 
-var _msgSentHandlers = {
-  'allow': _handleAllowSent,
-  'request-access': _handleRequestAccessSent,
-  'start-proxying': _handleStartProxyingSent
-};
+// Handle sending -----------------------------------------------------------
 
-function _handleMessageSent(msg) {
-  var handler = _msgSentHandlers[msg.message];
-  if (!handler) {
-    log.error('No handler for sent message:', msg);
-  } else {
-    log.debug('Handling sent message:', msg);
-    var contact = state.roster[msg.toUserId || msg.to];
-    if (!contact) {
-      log.debug('userId', msg.to, 'not on roster, ignoring');
-    } else {
-      handler(msg, contact);
-    }
-  }
-}
-
-function _handleAllowSent(msg, contact) {
-  state.allowGiveTo[contact.userId] = contact;
-  _saveToStorage('allowGiveTo', state.allowGiveTo);
-  delete state.pendingGiveTo[contact.userId];
-  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-  freedom.emit('state-change', [
-    {op: 'add', path: '/allowGiveTo/'+contact.userId, value: contact},
-    {op: 'remove', path: '/pendingGiveTo/'+contact.userId}
-  ]);
-}
-
-function _handleRequestAccessSent(msg, contact) {
-  state.pendingGetFrom[contact.userId] = contact;
-  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
-  freedom.emit('state-change', [{op: 'add', path: '/pendingGetFrom/'+contact.userId, value: contact}]);
-}
-
-function _handleStartProxyingSent(msg, contact) {
+function _handleStartProxyingSent(msg, clientId) {
   //TODO replace with better handling of manual identity
   if (msg.to.indexOf('manual') >= 0) {
-    return;
+    return false;
   }
-
   state.currentSessionsToInitiate['*'] = msg['to'];
   _saveToStorage('currentSessionsToInitiate', state.currentSessionsToInitiate);
   notifyClient();
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
 }
 
-function _handleRequestInstanceIdReceived(msg, contact) {
-  // Ignore |msg|, just send back our instanceId to |contact|
+function _handleRequestInstanceIdReceived(msg, clientId) {
+  // Respond to the user with our clientId.
   // TODO(mollyling): consider rate-limiting responses, in case the
   // other side's flaking out.
-  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg) + ', ' + JSON.stringify(contact));
-  identity.sendMessage(msg.fromUserId, JSON.stringify(
-      {message: 'request-instance-id-response', instanceId: state.me.instanceId}));
-
+  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg)); // + ', ' + JSON.stringify(contact));
+  var instanceIdMsg = JSON.stringify({
+      message: 'request-instance-id-response',
+      data: '' + state.me.instanceId});
+  console.log(instanceIdMsg);
+  identity.sendMessage(msg.fromClientId, instanceIdMsg);
 }
 
-function _handleRequestInstanceIdResponseReceived(msg, contact) {
+function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) + ', ' +
-      JSON.stringify(contact));
-  // figure out which instance to put in the roster.
-  // TODO(mollyling): Use a better mechanism than pure overwrite.
-  state.roster[msg.fromUserId].instanceId = msg.messsage.instanceId;
+  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg));
+  var instanceId = msg.data;
+  // Install the instanceId for the client.
+  var user = state.roster[msg.fromUserId];
+  if (!user) {
+    log.error("user does not exist in roster for instanceId: " + instanceId);
+    return false;
+  }
+  var client = user.clients[msg.fromClientId];
+  if (!client) {
+    log.error('client does not exist! User: ' + user);
+    return false;
+  }
+  // Update the client's instanceId for the extension.
+  // freedom.emit('state-change', [{
+      // op: client.instanceId ? 'replace' : 'add',
+      // path: '/roster/' + msg.fromUserId + '/clients/' + msg.fromClientId +  '/instanceId',
+      // value: instanceId
+  // }]);
+  client.instanceId = instanceId;
+  freedom.emit('state-change', [{
+      op: client.instanceId ? 'replace' : 'add',
+      path: '/roster/' + msg.fromUserId,
+      value: state.roster[msg.fromUserId]
+  }]);
+  return true;
 }
 
-// TODO: find a better place for this, and then reference from here.
 adjectives = [ "abandoned", "able", "absolute", "adorable", "adventurous",
   "academic", "acceptable", "acclaimed", "accomplished", "accurate", "aching",
   "acidic", "acrobatic", "active", "actual", "adept", "admirable", "admired",

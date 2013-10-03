@@ -40,22 +40,23 @@
       <button class="btn btn-mini active" ng-show="isOnline('loopback')"
             ng-click="logout('loopback')">Loop</button>
       <button class="btn btn-danger btn-mini" ng-show="!isOnline('google')"
-            ng-click="login('google')">G+</button>
+            ng-click="login('google')">Login G+</button>
       <button class="btn btn-danger btn-mini active" ng-show="isOnline('google')"
-            ng-click="logout('google')">G+</button>
+            ng-click="logout('google')">Logout G+</button>
       <button class="btn btn-primary btn-mini" ng-show="!isOnline('facebook')"
-            ng-click="login('facebook')">FB</button>
+            ng-click="login('facebook')">Login FB</button>
       <button class="btn btn-primary btn-mini active" ng-show="isOnline('facebook')"
-            ng-click="logout('facebook')">FB</button>
+            ng-click="logout('facebook')">Logout FB</button>
     </div>
 
     <h4>Contacts</h4>
     <div id="contacts-frame">
       <ul class="contacts">
-        <li ng-repeat="contact in model.contacts">
+        <li ng-repeat="contact in model.roster">
+          <h4>{{ contact.name }}</h4>
           <ul class="clients">
             <li ng-repeat="client in contact.clients">
-              <h5>{{client.clientName}}</h5>
+              <h5>{{ client.clientId }} </h5>
               <div style="margin-left: 15px">
                 <label class="checkbox inline">
                   <input type="checkbox" ng-model="client.hasClientPermission">

@@ -57,7 +57,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
-      $rootScope.roster = model.roster;
+      // $rootScope.roster = model.roster;
 
       // $rootScope.$watch('model.roster', function (roster) {
         // if (!roster) return;
