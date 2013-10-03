@@ -905,8 +905,6 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
   // TODO(mollyling): consider rate-limiting responses, in case the
   // other side's flaking out.
   log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg)); // + ', ' + JSON.stringify(contact));
-  log.debug('RESPONDING WITH MY INSTANCE ID!!!!', state.me.instanceId);
-
   var instanceIdMsg = JSON.stringify({
       message: 'request-instance-id-response',
       data: '' + state.me.instanceId});
@@ -917,8 +915,30 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg)); //+ ', ' +
-      // JSON.stringify(contact));
-  console.log('RECEIVED INSTANCE ID! :D ', msg.data);
-  // state.instances[instanceId] = msg.fromClientId;
+  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg));
+  var instanceId = msg.data;
+  // Install the instanceId for the client.
+  var user = state.roster[msg.fromUserId];
+  if (!user) {
+    log.error("user does not exist in roster for instanceId: " + instanceId);
+    return false;
+  }
+  var client = user.clients[msg.fromClientId];
+  if (!client) {
+    log.error('client does not exist! User: ' + user);
+    return false;
+  }
+  // Update the client's instanceId for the extension.
+  // freedom.emit('state-change', [{
+      // op: client.instanceId ? 'replace' : 'add',
+      // path: '/roster/' + msg.fromUserId + '/clients/' + msg.fromClientId +  '/instanceId',
+      // value: instanceId
+  // }]);
+  client.instanceId = instanceId;
+  freedom.emit('state-change', [{
+      op: client.instanceId ? 'replace' : 'add',
+      path: '/roster/' + msg.fromUserId,
+      value: state.roster[msg.fromUserId]
+  }]);
+  return true;
 }
