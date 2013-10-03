@@ -1,8 +1,17 @@
+/**
+ * uproxy.js
+ *
+ * This is the primary backend script. It maintains both in-memory state and
+ * checkpoints information to local storage.
+
+ * In-memory state includes:
+ *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
+ *  - Instances, which is a list of active UProxy installs.
+ */
 'use strict';
+console.log('Uproxy backend: ' + self.location.href);  // Webworker uri.
 
 var DEBUG = true; // XXX get this from somewhere else
-console.log('Uproxy backend');
-
 var log = {
   debug: DEBUG ? makeLogger('debug') : function(){},
   error: makeLogger('error')
@@ -13,16 +22,25 @@ var storage = freedom.storage();
 var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
 
-//XXX: Makes chrome debugging saner, not needed otherwise.
-var window = {};
+var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
 
 // enum of state ids that we need to worry about.
 var StateEntries = {
-  ME: "me",
-  OPTIONS: "options",
-  INSTANCEIDS: "instanceIds", // only exists for local storage state.
-  INSTANCES: "instances",   // only exists for in-memory state.
-}
+  ME: 'me',
+  OPTIONS: 'options',
+  INSTANCEIDS: 'instanceIds', // only exists for local storage state.
+  INSTANCES: 'instances',   // only exists for in-memory state.
+};
+
+var Trust = {
+  NO: 'no',
+  REQUESTED: 'requested',
+  YES: 'yes'
+};
+var TrustType = {
+  PROXY: 'asProxy',
+  CLIENT: 'asClient'
+};
 
 // Initial empty state
 var RESET_STATE = {
@@ -33,10 +51,9 @@ var RESET_STATE = {
   // A table from network identifier to your status on that network
   // (online/offline/idle, etc)
   "identityStatus": {},
-  // Entries filled in by identity providers.
-  "me": {},
-  // Merged roster of contacts coming from each identity provider.
-  "roster": {},
+  "me": {},         // Local client's information.
+  "roster": {},     // Merged contact lists from each identity provider.
+  "instances": {},  // instanceId -> instance. Active UProxy installations.
 
   // Options coming from local storage and setable by the options page.
   "options": {
@@ -45,8 +62,22 @@ var RESET_STATE = {
     "turnServers": ["turnServer1", "turnServer2"]
   }
 };
-// Initial state is set from RESET_STATE.
 var state = cloneDeep(RESET_STATE);
+
+// Mapping functions
+function instanceToClient(instanceId) {
+  // TODO: client = state[StateEntries.INSTANCES][
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    return null;
+  }
+  return instance.currentClient;
+}
+
+function clientToInstance(clientId) {
+  // TODO:
+  return null
+}
 
 // Mock data for what may live in local storage. (note: values will be strings
 // too, via JSON interpretation)
@@ -140,19 +171,18 @@ function _loadStateFromStorage(state) {
   var instancesTable = {};
   state[StateEntries.INSTANCES] = instancesTable;
   key = StateEntries.INSTANCEIDS;
-  _loadFromStorage(key, function(instanceIds){
-      console.log("instanceIds:", instanceIds);
-      for(var i = 0; i < instanceIds.length; i++) {
-        var key = instanceIds[i];
-        _loadFromStorage(key,
-            function(v){
-              if(v === null) {
-                console.error("_loadStateFromStorage: undefined key:", key);
-              } else {
-                instancesTable[key] = v;
-              }},
-            null);
-      }
+  _loadFromStorage(key, function(instanceIds) {
+    console.log("instanceIds:", instanceIds);
+    for (var i = 0; i < instanceIds.length ; i++) {
+      var key = instanceIds[i];
+      _loadFromStorage(key, function(v) {
+        if(v === null) {
+          console.error("_loadStateFromStorage: undefined key:", key);
+        } else {
+          instancesTable[key] = v;
+        }},
+      null);
+    }
   }, []);
 
  // TODO: remove these and propergate changes.
@@ -187,7 +217,9 @@ function _loginInit(cb) {
   });
 };
 
-// Called once when uproxy.js is loaded.
+/**
+ * Called once when uproxy.js is loaded.
+ */
 function onload() {
   // Check if the app is installed.
   _loginInit();
@@ -200,6 +232,7 @@ function onload() {
   **/
   _loadStateFromStorage(state);
 
+  // Define freedom bindings.
   freedom.on('reset', function () {
     log.debug('reset');
     // TODO: sign out of Google Talk and other networks.
@@ -208,20 +241,27 @@ function onload() {
   });
 
   // Called from extension whenever the user clicks opens the extension popup.
+  // The intent is to reset its model - but this may or may not always be
+  // necessary. Improvements to come.
   freedom.on('open-popup', function () {
     log.debug('open-popup');
     log.debug('state:', state);
-    // Send the extension the state
+    // Send the extension an empty state object.
     freedom.emit('state-change', [{op: 'replace', path: '', value: state}]);
   });
 
+  // Update local user's online status.
   identity.on('onStatus', function(data) {
     if (data.userId) {
       state.identityStatus[data.network] = data;
-      freedom.emit('state-change', [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
+      freedom.emit('state-change', [{
+          op: 'add',
+          path: '/identityStatus/' + data.network,
+          value: data
+      }]);
     }
     if (data.userId && !state.me[data.userId]) {
-      state.me[data.userId] = {userId: data.userId};
+      state.me[data.userId] = { userId: data.userId };
     }
   });
 
@@ -234,6 +274,7 @@ function onload() {
       notifyServer();
     } else { //must be a buddy
       state.roster[data.userId] = data;
+      // Determine networks and uproxy state.
       freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     }
   });
@@ -249,7 +290,7 @@ function onload() {
     } catch(e) {
       msg.unparseable = msg.message;
     }
-    _handleMessageReceived(msg);
+    _handleMessage(msg, false);  // beingSent = false
   });
 
   freedom.on('login', function(network) {
@@ -268,16 +309,16 @@ function onload() {
 
   freedom.on('send-message', function (msg) {
     identity.sendMessage(msg.to, msg.message);
-    _handleMessageSent(msg);
+    _handleMessage(msg, true);  // beingSent = true
   });
 
   freedom.on('ignore', function (userId) {
-    delete state.pendingGiveTo[userId];
+    // delete state.pendingGiveTo[userId];
     // TODO: fix.
-    _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-    freedom.emit('state-change', [
-      {op: 'remove', path: '/pendingGiveTo/'+userId}
-    ]);
+    // _saveToStorage('pendingGiveTo', state.pendingGiveTo);
+    // freedom.emit('state-change', [
+      // {op: 'remove', path: '/pendingGiveTo/'+userId}
+    // ]);
   });
 
   freedom.on('invite-friend', function (userId) {
@@ -337,48 +378,68 @@ var notifyServer = function() {
   }
 }
 
+// These message handlers must operate on a per-instance basis rather than a
+// per-user basis...
+// Each of these functions should take parameters (msg, contact)
+// Some of these message handlers deal with modifying trust values.
+// Others deal with actually starting and stopping a proxy connection.
+
+// Trust mutation.
+var TrustOp = {
+  'allow': Trust.YES,
+  'request-access': Trust.REQUESTED,
+  'deny': Trust.NO
+}
+
+/**
+ * Bi-directional message handler.
+ *
+ * @isSent - True if message is being sent. False if received.
+ */
+function _handleMessage(msg, beingSent) {
+  log.debug('Handling ' + (beingSent ? 'sent' : 'received') + ' message:', msg);
+  // Check if this is a trust modification.
+  var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
+  if (trustValue) {
+    // Access request and Grants go in opposite directions.
+    var asProxy = 'allow' == msg.message ? !beingSent : beingSent;
+    _updateTrust(msg.to, asProxy, trustValue);
+    // TODO freedom emit this stuff and save to storage
+    return true;
+  }
+
+  // Check if it's a proxy connection message.
+  log.debug('Dealing with a proxy connection?!?');
+  var handler = null;
+  if (!handler) {
+    log.error('No handler for sent message: ', msg);
+    return false;
+  }
+}
+
+function _updateTrust(clientId, asProxy, trustValue) {
+  var instance = clientToInstance(clientId);
+  if (!instance) {
+    log.debug('Could not find instance corresponding to client: ' + clientId);
+    return false;
+  }
+  var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
+  log.debug('Modifying trust value: ', instance, trust);
+  trust = trustValue;
+  // TODO freedom emit? and local storage?
+  return true;
+}
+
+
 var _msgReceivedHandlers = {
-  'allow': _handleAllowReceived,
-  'request-access': _handleRequestAccessReceived,
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived
 };
 
-function _handleMessageReceived(msg) {
-  var handler = _msgReceivedHandlers[msg.message];
-  if (!handler) {
-    log.error('No handler for received message:', msg);
-  } else {
-    log.debug('Handling received message:', msg);
-    var contact = state.roster[msg.fromUserId];
-    if (!contact) {
-      log.debug('userId', msg.fromUserId, 'not on roster, ignoring');
-    } else {
-      handler(msg, contact);
-    }
-  }
-}
-
-function _handleAllowReceived(msg, contact) {
-  state.canGetFrom[contact.userId] = contact;
-  // TODO: fix.
-  _saveToStorage('canGetFrom', state.canGetFrom);
-  delete state.pendingGetFrom[contact.userId];
-  // TODO: fix.
-  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
-  freedom.emit('state-change', [
-    {op: 'add', path: '/canGetFrom/'+contact.userId, value: contact},
-    {op: 'remove', path: '/pendingGetFrom/'+contact.userId}
-  ]);
-}
-
-function _handleRequestAccessReceived(msg, contact) {
-  state.pendingGiveTo[contact.userId] = contact;
-  // TODO: fix.
-  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-  freedom.emit('state-change', [{op: 'add', path: '/pendingGiveTo/'+contact.userId, value: contact}]);
-}
+var _msgSentHandlers = {
+  'start-proxying': _handleStartProxyingSent
+};
 
 function _handleProxyStartReceived(msg, contact) {
   // TODO: Access Check on if it's allowed.
@@ -424,53 +485,15 @@ function _handleConnectionSetupResponseReceived(msg, contact) {
   client.emit('toClient', msg.data);
 }
 
-var _msgSentHandlers = {
-  'allow': _handleAllowSent,
-  'request-access': _handleRequestAccessSent,
-  'start-proxying': _handleStartProxyingSent
-};
-
-function _handleMessageSent(msg) {
-  var handler = _msgSentHandlers[msg.message];
-  if (!handler) {
-    log.error('No handler for sent message:', msg);
-  } else {
-    log.debug('Handling sent message:', msg);
-    var contact = state.roster[msg.toUserId || msg.to];
-    if (!contact) {
-      log.debug('userId', msg.to, 'not on roster, ignoring');
-    } else {
-      handler(msg, contact);
-    }
-  }
-}
-
-function _handleAllowSent(msg, contact) {
-  state.allowGiveTo[contact.userId] = contact;
-  _saveToStorage('allowGiveTo', state.allowGiveTo);
-  delete state.pendingGiveTo[contact.userId];
-  _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-  freedom.emit('state-change', [
-    {op: 'add', path: '/allowGiveTo/'+contact.userId, value: contact},
-    {op: 'remove', path: '/pendingGiveTo/'+contact.userId}
-  ]);
-}
-
-function _handleRequestAccessSent(msg, contact) {
-  state.pendingGetFrom[contact.userId] = contact;
-  _saveToStorage('pendingGetFrom', state.pendingGetFrom);
-  freedom.emit('state-change', [{op: 'add', path: '/pendingGetFrom/'+contact.userId, value: contact}]);
-}
+// Handle sending -----------------------------------------------------------
 
 function _handleStartProxyingSent(msg, contact) {
   //TODO replace with better handling of manual identity
   if (msg.to.indexOf('manual') >= 0) {
-    return;
+    return false;
   }
-
   state.currentSessionsToInitiate['*'] = msg['to'];
   _saveToStorage('currentSessionsToInitiate', state.currentSessionsToInitiate);
   notifyClient();
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
 }
-

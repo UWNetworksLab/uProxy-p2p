@@ -1,5 +1,8 @@
 var window = {};
 
+/**
+ * IdentityProvider handles the individual identities for each network.
+ */
 function IdentityProvider() {
   window.current = this;
   console.log('Meta Identity Provider');
@@ -52,7 +55,7 @@ function IdentityProvider() {
 
 IdentityProvider.prototype.login = function(opts, continuation) {
   if (opts.network && this.providers[opts.network]) {
-    this.providers[opts.network].ref.login(opts); 
+    this.providers[opts.network].ref.login(opts);
   } else if (opts.network) {
     console.error('Invalid network name: '+opts.network);
   } else {
