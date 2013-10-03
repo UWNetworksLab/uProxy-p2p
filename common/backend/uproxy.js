@@ -9,7 +9,6 @@
  *  - Instances, which is a list of active UProxy installs.
  */
 'use strict';
-console.log('Uproxy backend: ' + self.location.href);  // Webworker uri.
 
 // TODO: find a better place for this, and then reference from here.
 var adjectives = [ "abandoned", "able", "absolute", "adorable", "adventurous",
@@ -753,8 +752,6 @@ var TrustOp = {
 };
 
 var _msgReceivedHandlers = {
-  'allow': _handleAllowReceived,
-  'request-access': _handleRequestAccessReceived,
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
@@ -781,18 +778,16 @@ function _handleMessage(msg, beingSent) {
   }
 
   // Check if it's a proxy connection message.
-  log.debug('Dealing with a proxy connection?!?');
+  log.debug('Dealing with a proxy connection?!?', msg);
   var handler = null;
   if (!beingSent) {
-    log.debug(msg.message);
-    log.debug(_msgReceivedHandlers);
     handler = _msgReceivedHandlers[msg.message];
   }
   if (!handler) {
     log.error('No handler for sent message: ', msg);
     return false;
   }
-  // handler(msg, msg.to);
+  handler(msg, msg.to);
 }
 
 // A simple predicate function to see if we can talk to this client.
@@ -906,12 +901,17 @@ function _handleStartProxyingSent(msg, clientId) {
 }
 
 function _handleRequestInstanceIdReceived(msg, clientId) {
-  // Ignore |msg|, just send back our instanceId to |clientId|
+  // Respond to the user with our clientId.
   // TODO(mollyling): consider rate-limiting responses, in case the
   // other side's flaking out.
   log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg)); // + ', ' + JSON.stringify(contact));
-  identity.sendMessage(clientId, JSON.stringify(
-      {message: 'request-instance-id-response', instanceId: state.me.instanceId}));
+  log.debug('RESPONDING WITH MY INSTANCE ID!!!!', state.me.instanceId);
+
+  var instanceIdMsg = JSON.stringify({
+      message: 'request-instance-id-response',
+      data: '' + state.me.instanceId});
+  console.log(instanceIdMsg);
+  identity.sendMessage(msg.fromClientId, instanceIdMsg);
 
 }
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
@@ -919,5 +919,6 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // notification to tell the UI what's up.
   log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg)); //+ ', ' +
       // JSON.stringify(contact));
-  // state.instances[instanceId] = msg.data
+  console.log('RECEIVED INSTANCE ID! :D ', msg.data);
+  // state.instances[instanceId] = msg.fromClientId;
 }
