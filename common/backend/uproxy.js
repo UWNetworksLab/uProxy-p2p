@@ -179,12 +179,22 @@ function _loadStateFromStorage(state) {
   if (state.me.instanceId === undefined) {
     state.me.instanceId = "";
     state.me.description = null;
+    state.me.keyHash = "";
     // Just generate 20 random 8-bit numbers, print them out in hex.
     for (i = 0; i < 20; i++) {
+      // 20 bytes for the instance ID.  This we can keep.
       val = Math.floor(Math.random() * 256);
       hex = val.toString(16);
       state.me.instanceId = state.me.instanceId +
           ("00".substr(0, 2 - hex.length) + hex);
+
+      // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
+      val = Math.floor(Math.random() * 256);
+      hex = val.toString(16);
+
+      state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
+          ("00".substr(0, 2 - hex.length) + hex);
+
       if (i < 4) {
         id = (i & 1) ? nouns[val] : adjectives[val];
         if (state.me.description !== null) {
@@ -575,10 +585,15 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
   // other side's flaking out.
   var instanceIdMsg = JSON.stringify({
       message: 'request-instance-id-response',
-      data: '' + state.me.instanceId});
+    data: {
+      instanceId: '' + state.me.instanceId,
+      description: '' + state.me.description,
+      keyHash: '' + state.me.keyHash
+    }});
   console.log(instanceIdMsg);
   identity.sendMessage(msg.fromClientId, instanceIdMsg);
-  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg) + ': sending response to ' + msg.fromClientId); // + ', ' + JSON.stringify(contact));
+  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg) + ': sending response to '
+      + msg.fromClientId);
 }
 
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
@@ -590,7 +605,9 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
     pending_instance_requests.splice(index, 1);
     log.debug('_handleRequestInstanceIdResponseReceived: removing pending request index ' + index);
   }
-  var instanceId = msg.data;
+  var instanceId = msg.data.instanceId;
+  var description = msg.data.description;
+  var keyHash = msg.data.keyHash;
   // Install the instanceId for the client.
   var user = state.roster[msg.fromUserId];
   if (!user) {
@@ -609,6 +626,8 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
       // value: instanceId
   // }]);
   state.roster[msg.fromUserId].clients[msg.fromClientId].instanceId = instanceId;
+  state.roster[msg.fromUserId].clients[msg.fromClientId].description = description;
+  state.roster[msg.fromUserId].clients[msg.fromClientId].keyHash = keyHash;
   freedom.emit('state-change', [{
       op: client.instanceId ? 'replace' : 'add',
       path: '/roster/' + msg.fromUserId,
