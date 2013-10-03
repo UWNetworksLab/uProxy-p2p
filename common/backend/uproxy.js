@@ -750,7 +750,7 @@ var TrustOp = {
   'allow': Trust.YES,
   'request-access': Trust.REQUESTED,
   'deny': Trust.NO
-}
+};
 
 var _msgReceivedHandlers = {
   'allow': _handleAllowReceived,
@@ -769,7 +769,7 @@ var _msgReceivedHandlers = {
  */
 function _handleMessage(msg, beingSent) {
   log.debug('Handling ' + (beingSent ? 'sent' : 'received') + ' message...');
-  log.debug(msg);
+  console.log(msg);
   // Check if this is a trust modification.
   var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
   if (trustValue) {
@@ -784,6 +784,8 @@ function _handleMessage(msg, beingSent) {
   log.debug('Dealing with a proxy connection?!?');
   var handler = null;
   if (!beingSent) {
+    log.debug(msg.message);
+    log.debug(_msgReceivedHandlers);
     handler = _msgReceivedHandlers[msg.message];
   }
   if (!handler) {

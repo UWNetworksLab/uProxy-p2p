@@ -12,12 +12,12 @@ function IdentityProvider() {
   };
   this.reverseIndex = {};
   this.providers = {
-    loopback: {
-      ref: freedom.loopbackIdentity(),
-      status: 'offline',
-      userId: null,
-      network: 'loopback'
-    },
+    // loopback: {
+      // ref: freedom.loopbackIdentity(),
+      // status: 'offline',
+      // userId: null,
+      // network: 'loopback'
+    // },
     manual: {
       ref: freedom.manualIdentity(),
       status: 'offline',

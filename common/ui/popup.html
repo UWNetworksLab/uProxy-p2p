@@ -81,7 +81,9 @@
             Network: {{ client.network }}
             <br>
             Status: {{ client.status }}
-            <div class="client-actions">
+            <br>
+            InstanceId: {{ client.instanceId }}
+            <div class="client-actions" ng-show="client.instanceId">
               <div class="box-for-proxy"
                   ng-switch="client.permissions.proxy">
                 <button class="btn"
