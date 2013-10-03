@@ -30,7 +30,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       // Update the UI
     };
 
-
     $scope.grantAccess = function(client) {
       sendMessage(client.clientId, 'allow');
       if (!client.permissions)
