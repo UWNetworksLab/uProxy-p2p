@@ -31,6 +31,12 @@ var Socket = Class({
     ClientSocket.prototype.initialize.call(this);
     ClientSocket.prototype.connect.call(this, hostname, port);
     this.socketType = CLIENTTYPE;
+  },
+  getInfo: function getInfo() {
+    if (this.socketType === CLIENTTYPE) {
+      return ClientSocket.prototype.getInfo.call(this);
+    }
+    return ServerSocket.prototype.getInfo.call(this);
   }
 });
 
