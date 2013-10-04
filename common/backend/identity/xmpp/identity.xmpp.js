@@ -211,31 +211,31 @@ IdentityProvider.prototype.setDeviceAttr = function (fullJid, attr, value) {
   if (clientList[fullJid]) {
     clientList[fullJid][attr] = value;
   } else {
-    clientList[fullJid] = {clientId: fullJid};
+    clientList[fullJid] = {clientId: fullJid, network: NETWORK_ID};
     clientList[fullJid][attr] = value;
   }
   this.sendChange(baseJid);
 };
 
 IdentityProvider.prototype.onOnline = function() {
-  //Send first presence message
+  // Send first presence message
   this.announce();
   this.status = 'online';
   this.dispatchEvent('onStatus', {
     userId: this.credentials.userId,
     network: NETWORK_ID,
-    status: this.status, 
+    status: this.status,
     message: "Woo!"
   });
-  //Get roster request (for names)
+  // Get roster request (for names)
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
-  //Get my own vCard
+  // Get my own vCard
   this.client.send(new window.XMPP.Element('iq', {
     type: 'get',
     to: this.credentials.userId
   }).c('vCard', {'xmlns': 'vcard-temp'}).up());
-  //Update status
+  // Update status
   var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
     if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
@@ -246,8 +246,8 @@ IdentityProvider.prototype.onOnline = function() {
 
 IdentityProvider.prototype.announce = function () {
   this.client.send(new window.XMPP.Element('presence', {})
-    .c("show").t("xa").up() //mark status of this client as 'extended away'.
-    .c("c", { // Advertise extended capabilities.
+    .c("show").t("xa").up() // mark status of this client as 'extended away'.
+    .c("c", { //  Advertise extended capabilities.
       xmlns: "http://jabber.org/protocol/caps",
       node: this.loginOpts.url,
       ver: this.loginOpts.version,
@@ -302,7 +302,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
       var type = photo.getChildText('TYPE');
       var bin = photo.getChildText('BINVAL');
-      //TODO(ryscheng) deal with it
+      this.setAttr(from, 'imageData', "data:"+type+";base64,"+bin);
     }
   }
 
@@ -331,7 +331,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     //Set Uproxy capability
     var cap = stanza.getChild('c');
     //TODO check application version mismatch
-    if (cap && cap.attrs.node==this.url) { //&& cap.attrs.ver==this.loginOpts.version) {
+    if (cap && cap.attrs.node==this.loginOpts.url) { //&& cap.attrs.ver==this.loginOpts.version) {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'messageable');
     } else {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'online');
@@ -361,14 +361,14 @@ IdentityProvider.prototype.onMessage = function(stanza) {
     if (stanza.attrs.to.indexOf(this.loginOpts.agent) >= 0) {
       this.dispatchEvent('onMessage', {
         fromUserId: getBaseJid(stanza.attrs.from),
-        fromClientId: stanza.attrs.from, 
+        fromClientId: stanza.attrs.from,
         toUserId: getBaseJid(stanza.attrs.to),
         toClientId: stanza.attrs.to,
         message: JSON.parse(stanza.getChildText('body'))
       });
     } else {
-      //this wasn't intended for me
-      console.log('Unprocessed message: '+ JSON.stringify(stanza));
+      // This wasn't intended for me
+      console.log('Unprocessed message: '+ JSON.stringify(stanza.attrs));
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'get') {
     // Respond to capability requests from other users.
@@ -381,7 +381,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
       query.c('identity', {category: 'client', name: this.loginOpts.agent, type: 'bot'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/caps'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/disco#info'}).up()
-        .c('feature', {'var': this.url}).up();
+        .c('feature', {'var': this.loginOpts.url}).up();
       this.client.send(stanza);
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'result') {

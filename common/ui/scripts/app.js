@@ -11,7 +11,6 @@ var OAUTH_CONFIG = {
 };
 **/
 
-
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
@@ -21,22 +20,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $sniffer.csp = true;
       return $sniffer;
     }]);
-  }) //
-  .filter('messageable', function () {
-    return function (contact) {
-      return _.any(contact.clients, {status: 'messageable'});
-    };
-  })
-  .filter('onlineNotMessageable', ['$filter', function ($filter) {
-    var messageable = $filter('messageable');
-    return function (contact) {
-      return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
-    };
-  }])
-  .filter('offline', function () {
-    return function (contact) {
-      return _.all(contact.clients, {status: 'offline'});
-    };
   })
   // Run gets called every time the popup is openned. This initializes the main
   // extension UI and makes sure it is in sync with the app.
@@ -50,53 +33,72 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     function(
         $filter, $http, $rootScope,
         freedom, onFreedomStateChange, model) {
-      var filter = $filter('filter'),
-          messageable = $filter('messageable'),
-          onlineNotMessageable = $filter('onlineNotMessageable');
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
-
-      $rootScope.$watch('model.roster', function (roster) {
-        if (!roster) return;
-        console.log('watcher roster');
-        $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
-        $rootScope.contactsMessageable = filter(roster, messageable);
-        console.log($rootScope);
-      }, true);
-
-      $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
-      $rootScope.$watch('contactsMessageable', updateCanGetFrom, true);
-
-      function updateCanGetFrom() {
-        $rootScope.canGetFrom = {};
-        $rootScope.cannotGetFrom = {};
-        _.each($rootScope.contactsMessageable, function (contact) {
-          if (contact.userId in model.canGetFrom) {
-            $rootScope.canGetFrom[contact.userId] = contact;
-          } else {
-            $rootScope.cannotGetFrom[contact.userId] = contact;
-          }
-        });
-      }
 
       $rootScope.resetState = function (msgName, data) {
         localStorage.clear();
         freedom.emit('reset', null);
       }
 
-      $rootScope.sendMessage = function (contact, msg) {
-        // XXX freedom.emit('send-message', {to: contact.userId, msg})
-        //     gets intercepted by non-freedom clients and is not received by uproxy clients
-        _(contact.clients).filter({status: 'messageable'}).each(
-            function (client) {
-          freedom.emit('send-message', {
-            to: client.clientId,
-            toUserId: contact.userId,
-            message: msg});
-        });
+      /**
+       * Determine whether UProxy is connected to |network|.
+       */
+      $rootScope.isOnline = function(network) {
+        window.tmp = model;
+        return (model && model.identityStatus &&
+                model.identityStatus[network] &&
+                model.identityStatus[network].status == 'online');
+      };
+      $rootScope.login = function(network) {
+        console.log('!!! login ' + network);
+        freedom.emit('login', network);
+      };
+      $rootScope.logout = function(network) {
+        console.log('!!! logout ' + network);
+        freedom.emit('logout', network);
+      };
+
+
+      // These work the same even if |client| is an instance - so long as it
+      // contains the attribute |clientId|.
+
+      // Request access through a friend.
+      $rootScope.requestAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'request-access');
+      };
+      $rootScope.cancelRequest = function(client) {
+        $rootScope.sendMessage(client.clientId, 'cancel-request');
       }
+      $rootScope.acceptAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'accept-access');
+      };
+      $rootScope.startAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'start-proxying');
+      };
+
+      // Providing access for a friend:
+      $rootScope.offerAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'offer');
+      }
+      $rootScope.grantAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'allow');
+      };
+      $rootScope.revokeAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'deny');
+      };
+      $rootScope.denyAccess = $rootScope.revokeAccess;
+
+      // |id| can be either a client id or a user id.
+      $rootScope.sendMessage = function (id, msg) {
+        freedom.emit('send-message', {
+            to: id,
+            message: msg
+        });
+            // toUserId: contact.userId,
+      };
 
       $rootScope.changeOption = function (key, value) {
         freedom.emit('change-option', {key: key, value: value});
@@ -140,7 +142,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       $rootScope.onStateChange = function (patch) {
         $rootScope.$apply(function () {
-          console.info('got state change:', patch);
+          // console.info('got state change:', patch);
           $rootScope.connectedToApp = true;
           // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
           if (_.isEmpty(model)) {  // Refresh state if local model is empty.

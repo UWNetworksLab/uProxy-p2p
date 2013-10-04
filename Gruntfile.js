@@ -39,6 +39,7 @@ var chrome_ext_files = [
   'common/ui/scripts/**',
   'common/ui/styles/**',
   'common/ui/bower_components/angular/angular.js',
+  'common/ui/bower_components/angular-animate/angular-animate.js',
   'common/ui/bower_components/angular-lodash/angular-lodash.js',
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',
@@ -97,7 +98,7 @@ module.exports = function(grunt) {
         files: ['common/**/*',
                 // bower components should only change when grunt is
                 // already being run
-                '!**/bower_components/**'], 
+                '!**/bower_components/**'],
         tasks: ['copy:watch'],
         options: {spawn: false}
       },
@@ -158,7 +159,7 @@ module.exports = function(grunt) {
       }
     }
   });
-  
+
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -202,9 +203,11 @@ module.exports = function(grunt) {
     'jasmine'
   ]);
   //Build task
-  grunt.registerTask('build', [
+  grunt.registerTask('build_chrome', [
     'copy:chrome_app',
-    'copy:chrome_ext',
+    'copy:chrome_ext'
+  ]);
+  grunt.registerTask('build_firefox', [
     'concat:firefox',
     'copy:firefox'
   ]);
@@ -213,11 +216,19 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk:download',
     'mozilla-addon-sdk:xpi'
   ]);
+  grunt.registerTask('build', [
+    'build_chrome',
+    'build_firefox'
+  ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
   grunt.registerTask('default', ['build']);
- 
 };
+
+
+/**
+ * UTILITIES
+ **/
 
 //minimatchArray will see if 'file' matches the set of patterns
 //described by 'arr'
