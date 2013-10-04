@@ -405,12 +405,7 @@ function onload() {
   });
 
   freedom.on('ignore', function (userId) {
-    // delete state.pendingGiveTo[userId];
     // TODO: fix.
-    // _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-    // freedom.emit('state-change', [
-      // {op: 'remove', path: '/pendingGiveTo/'+userId}
-    // ]);
   });
 
   freedom.on('invite-friend', function (userId) {
@@ -666,57 +661,44 @@ function _sendNotifyInstance(user, client) {
  */
 function _handleNotifyInstanceReceived(msg, clientId) {
   log.debug('_handleNotifyInstanceReceived(from: ' + msg.fromUserId + ')');
-
   var instanceId = msg.data.instanceId;
   var description = msg.data.description;
   var keyHash = msg.data.keyHash;
   var userId = msg.fromUserId;
   var clientId = msg.fromClientId;
   var user = state.roster[userId];
-  if (!user) {  // Check for a valid user.
+  if (!user) {
     log.error("user does not exist in roster for instanceId: " + instanceId);
     return false;
   }
-  var client = user.clients[msg.fromClientId];
-  if (!client) {  // Check that the client is valid.
+  var client = user.clients[clientId];
+  if (!client) {
     log.error('client does not exist! User: ' + user);
     return false;
   }
-
-  // TODO(uzimizu): Actually check hash for consistency, for security reasons.
+  // TODO(uzimizu): Actually make this check work.
   _validateKeyHash(keyHash);
 
   var instanceOp = 'replace';  // JSONpatch operation to send through freedom.
-  // Fetch or prepare new Instance object.
   var instance = _instances[instanceId];
   if (!instance) {
     instance = _prepareNewInstance(instanceId, description, keyHash);
     instanceOp = 'add';
   }
-  var oldClientId = instance.clientId;
-  instance.clientId = clientId;  // Synchronize latest IDs.
-  client.instanceId = instanceId;
 
-  // Delete old clients which used to correspond to this instance.
-  if (oldClientId) {
+  var oldClientId = instance.clientId;
+  // Delete old clients for same instanceId if necessary.
+  if (oldClientId && clientId != oldClientId) {
     log.debug('_handleNotifyInstanceReceived: deleting old clientID: ',
               oldClientId);
-    // delete _clients[oldClientId];
+    delete _clients[oldClientId];
+    delete user.clients[oldClientId];
   }
-  // var oldclients = Object.keys(user.clients);
-  // for(var oldclient in oldclients) {
-    // if (user.clients[oldclient] === undefined) {
-      // continue;  // really, wtf?
-    // }
-    // if (state.roster[userId].clients[oldclient].instanceId == instanceId) {
-      // log.debug('_handleNotifyInstanceReceived: deleting old client ID with same instance ID.' +
-          // ' instanceId: ' + instanceId + ', old client ID: ' + oldclient + ', new client ID:' + clientId);
-      // delete user.clients[oldclient];
-    // }
-  // }
 
-  // Tell extension about updated state.
-  freedom.emit('state-change', [{
+  client.instanceId = instanceId;  // Synchronize latest IDs.
+  instance.clientId = clientId;
+
+  freedom.emit('state-change', [{  // Tell extension about updated state.
       op: 'replace',    // User data.
       path: '/roster/' + msg.fromUserId,
       value: state.roster[msg.fromUserId]
