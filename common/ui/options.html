@@ -49,26 +49,43 @@
             ng-click="logout('facebook')">Logout FB</button>
     </div>
 
-    <h4>Contacts</h4>
+    <h4>Instances</h4>
     <div id="contacts-frame">
       <ul class="contacts">
-        <li ng-repeat="contact in model.roster">
-          <h4>{{ contact.name }}</h4>
-          <ul class="clients">
-            <li ng-repeat="client in contact.clients">
-              <h5>{{ client.clientId }} </h5>
-              <div style="margin-left: 15px">
-                <label class="checkbox inline">
-                  <input type="checkbox" ng-model="client.hasClientPermission">
-                  Grant access to
-                </label>
-                <label class="checkbox inline">
-                  <input type="checkbox" ng-model="client.desiredAsServer">
-                  Seek access from
-                </label>
+        <li ng-repeat="instance in model.instances">
+          <h4>{{ instance.clientId }}</h4>
+          <p class="instance-description">
+            {{ instance.description }}
+          </p>
+          <div class="client-details">
+            Instance ID: {{ instance.instanceId }}
+            <p>Key Hash: {{ instance.keyHash }}</p>
+          </div>
+          <div class="trust">
+            Trust as Proxy: {{ instance.trust.asProxy }}
+            <div class="box-for-proxy"
+                ng-switch="instance.trust.asProxy">
+              <button class="btn"
+                  ng-switch-when="yes"
+                  ng-click="startAccess(client)">
+                Start
+              </button>
+              <div ng-switch-when="requested">
+                <button class="btn" ng-click="client.permissions.proxy='no'">
+                  Cancel
+                </button>
+                <span>Pending...</span>
               </div>
-            </li>
-          </ul>
+              <button class="btn"
+                  ng-switch-default
+                  ng-click="requestAccess(client)">
+                Request
+              </button>
+            </div>
+
+            <br>
+            Trust as Client: {{ instance.trust.asClient }}
+          </div>
         </li>
       </ul>
     </div>

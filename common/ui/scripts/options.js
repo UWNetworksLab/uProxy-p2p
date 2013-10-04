@@ -41,12 +41,14 @@ angular.module('UProxyExtension-options', ['UProxyExtension'])
       };
 
       $scope.login = function(network) {
-        console.log('!!! login '+network);
+        console.log('!!! login ' + network);
         freedom.emit('login', network);
       };
 
       $scope.logout = function(network) {
-        console.log('!!! logout '+network);
+        console.log('!!! logout ' + network);
         freedom.emit('logout', network);
       };
+
+      $scope.instances = model.instances;
     }]);

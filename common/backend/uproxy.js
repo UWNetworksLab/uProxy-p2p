@@ -25,7 +25,6 @@ var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
 
 var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
-var pending_instance_requests = [];
 
 // enum of state ids that we need to worry about.
 var StateEntries = {
@@ -72,20 +71,23 @@ var RESET_STATE = {
   }
 };
 var state = cloneDeep(RESET_STATE);
+var _clients = {};  // clientId -> client reference table.
 
 // Mapping functions between instanceIds and clientIds.
-function instanceToClient(instanceId) {
-  // TODO: client = state[StateEntries.INSTANCES][
+function instanceToClientId(instanceId) {
   var instance = state.instances[instanceId];
-  if (!instance) {
-    return null;
-  }
-  return instance.currentClient;
+  if (!instance) { return null; }
+  return instance.clientId;
 }
 
+// clientId -> Instance object
 function clientToInstance(clientId) {
-  // TODO:
-  return null;
+  var client = _clients[clientId];
+  log.debug('finding instance for client ' + clientId, client);
+  if (!client) { return null; }
+  log.debug('meow! ', _clients);
+  log.debug('lol! ', state.instances);
+  return state.instances[client.instanceId];
 }
 
 // Instance object.
@@ -276,10 +278,6 @@ function _loadStateFromStorage(state) {
   }, []);
 
   // TODO: remove these and propegate changes.
-  // state.allowGiveTo = {};
-  // state.pendingGiveTo = {};
-  // state.canGetFrom = {};
-  // state.pendingGetFrom = {};
   state.currentSessionsToInitiate = {};
   state.currentSessionsToRelay = {};
   log.debug('_loadStateFromStorage: loaded: ' + JSON.stringify(state));
@@ -412,7 +410,7 @@ function onload() {
       notifyServer();
     } else {
       // Must be a buddy
-      state.roster[data.userId] = _updateInstanceIdsOnChange(data);
+      state.roster[data.userId] = _updateUser(data);
       // Determine networks and uproxy state.
       freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     }
@@ -444,6 +442,8 @@ function onload() {
 
   freedom.on('logout', function(network) {
     identity.logout(null, network);
+    // Clear clients so that the next logon propogates instance data correctly.
+    _clients = {};
   });
 
   freedom.on('send-message', function (msg) {
@@ -452,12 +452,7 @@ function onload() {
   });
 
   freedom.on('ignore', function (userId) {
-    // delete state.pendingGiveTo[userId];
     // TODO: fix.
-    // _saveToStorage('pendingGiveTo', state.pendingGiveTo);
-    // freedom.emit('state-change', [
-      // {op: 'remove', path: '/pendingGiveTo/'+userId}
-    // ]);
   });
 
   freedom.on('invite-friend', function (userId) {
@@ -547,13 +542,13 @@ function _handleMessage(msg, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '--> SEND' : '<-- RECEIVE') +
             ' MESSAGE: ' + JSON.stringify(msg));
 
-  // Check if this is a trust modification.
+  // Check if this is a Trust modification.
   var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
   if (trustValue) {
-    // Access request and Grants go in opposite directions.
+    // Access request and Grants go in opposite directions - tweak boolean.
     var asProxy = 'allow' == msg.message ? !beingSent : beingSent;
     _updateTrust(msg.to, asProxy, trustValue);
-    // TODO freedom emit this stuff and save to storage
+    // TODO freedom emit this stuff and save to storage!
     return true;
   }
 
@@ -571,49 +566,64 @@ function _handleMessage(msg, beingSent) {
 
 // A simple predicate function to see if we can talk to this client.
 function _isMessageableUproxy(client) {
+  // TODO(uzimizu): Make identification of whether or not this is a uproxy
+  // client more sensible.
   var retval = (/* [issue 21] client.network == 'google' && */ client.status == 'online'
       && client.clientId.indexOf('/uproxy') > 0);
-  // log.debug('_isMessageableUproxy(' + JSON.stringify(client) + '):' + retval);
   return retval;
 }
 
-// Look for a !messageable->messageable transition, and dispatch a
-// query if needed.  Returns 'current', possbily with additional data in there.
-function _updateInstanceIdsOnChange(current) {
-  log.debug('_updateInstanceIdsOnChange: current requests are to: ' + pending_instance_requests);
-  var userId = current.userId;
-  for (var client in current.clients) {
-    if (_isMessageableUproxy(current.clients[client])) {
-      var shall_ask = (pending_instance_requests.indexOf(client) == -1);
-      // Look for an existing instanceId for this client.  Preserve it and don't ask again.
-      if (state.roster[userId] !== undefined && state.roster[userId].clients[client] !== undefined) {
-        if(state.roster[userId].clients[client].instanceId !== undefined) {
-          current.clients[client].instanceId = state.roster[userId].clients[client].instanceId;
-          shall_ask = false;
-        }
-      }
-      // TODO(mollyling): Properly hangle logout.
-      if (shall_ask) {
-        // TODO: when thing settle down, don't be so chatty.
-        pending_instance_requests.push(client);
-        log.debug('_updateInstanceIdsOnChange: deciding to message ' + client);
-        _dispatchInstanceIdQuery(client, current.clients[client]);
-      }
+/**
+ * Update client and instance information for a user. For each active UProxy
+ * client, synchronize Instance data if it's a new clientId. Otherwise, preserve
+ * the instanceId to maintain data hooks between client and instance.
+ *
+ * @param {object} newData Incoming JSON info for a single user.
+ */
+function _updateUser(newData) {
+  var userId = newData.userId;
+  for (var clientId in newData.clients) {
+    log.debug('_updateUser: client: ', clientId);
+    var client = newData.clients[clientId];
+    // Skip non-UProxy clients.
+    // TODO(uzimizu): Figure out best way to request new UProxy users...
+    if (!_isMessageableUproxy(client)) {
+      continue;
     }
+
+    // Synchronize Instance data if this is a new client.
+    var existingClient = _clients[clientId];
+    if (!existingClient) {
+      log.debug('_updateUser: deciding to message ' + client);
+      _sendNotifyInstance(clientId, client);
+    } else { // Otherwise, preserve existing instance id.
+      log.debug('Preserving data. ' + existingClient.instanceId);
+      client.instanceId = existingClient.instanceId;
+    }
+    _clients[clientId] = client;
+    // TODO(mollyling): Properly hangle logout.
   }
-  return current;
+  return newData;  // Overwrites the userdata.
 }
 
 function _updateTrust(clientId, asProxy, trustValue) {
   var instance = clientToInstance(clientId);
+  log.debug(instance);
   if (!instance) {
     log.debug('Could not find instance corresponding to client: ' + clientId);
     return false;
   }
   var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
   log.debug('Modifying trust value: ', instance, trust);
-  trust = trustValue;
-  // TODO freedom emit? and local storage?
+  if (asProxy) {
+    instance.trust.asProxy = trustValue;
+  } else {
+    instance.trust.asClient = trustValue;
+  }
+  // TODO(uzimizu): local storage?
+  freedom.emit('state-change', [{
+      op: 'replace', path: '/instances/' + instance.instanceId, value: instance
+  }]);
   return true;
 }
 
@@ -687,86 +697,91 @@ function _buildInstancePayload(msg) {
     }});
 }
 
-function _dispatchInstanceIdQuery(user, client) {
+function _sendNotifyInstance(user, client) {
   if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
     var msg = _buildInstancePayload('notify-instance');
     log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
-    identity.sendMessage(user,msg);
+    identity.sendMessage(user, msg);  // user can be a clientId.
   }
 }
 
+/**
+ * Primary handler for synchronizing Instance data. Updates an instance-client
+ * mapping, and emit state-changes to the UI.
+ */
 function _handleNotifyInstanceReceived(msg, clientId) {
-  // Update |state| with the instance ID, and emit a state-change
-  // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(from: ' + msg.fromUserId +
-      '): got response. pending_instance_requests is [' + pending_instance_requests + ']');
+  log.debug('_handleNotifyInstanceReceived(from: ' + msg.fromUserId + ')');
   var instanceId = msg.data.instanceId;
   var description = msg.data.description;
-  // TODO check hash for consistency before accepting changes, for security.
   var keyHash = msg.data.keyHash;
   var userId = msg.fromUserId;
   var clientId = msg.fromClientId;
-
   var user = state.roster[userId];
-  if (!user) {  // Check for a valid user.
+  if (!user) {
     log.error("user does not exist in roster for instanceId: " + instanceId);
     return false;
   }
-  var client = user.clients[msg.fromClientId];
-  if (!client) {  // Check that the client is valid.
+  var client = user.clients[clientId];
+  if (!client) {
     log.error('client does not exist! User: ' + user);
     return false;
   }
+  // TODO(uzimizu): Actually make this check work.
+  _validateKeyHash(keyHash);
 
-  // Check if the instanceId already exists in the Instance table.
-  var instanceOp = 'replace';
+  var instanceOp = 'replace';  // JSONpatch operation to send through freedom.
   var instance = state.instances[instanceId];
   if (!instance) {
-    instanceOp = 'add';  // Prepare fresh instance if necessary.
-    instance = DEFAULT_INSTANCE;
-    instance.description = description;
-    instance.keyHash = keyHash;
-    state.instances[instanceId] = instance;
+    instance = _prepareNewInstance(instanceId, description, keyHash);
+    instanceOp = 'add';
   }
-  // Always associate instanceId with the latest clientId.
-  instance.clientId = clientId;
-  client.instanceId = instanceId;
 
-  // Delete any old clients that have the same instance IDs.
-  var oldclients = Object.keys(user.clients);
-  for(var oldclient in oldclients) {
-    if (user.clients[oldclient] === undefined) {
-      continue;  // really, wtf?
-    }
-    if (state.roster[userId].clients[oldclient].instanceId == instanceId) {
-      log.debug('_handleRequestInstanceIdResponseReceived: deleting old client ID with same instance ID.' +
-          ' instanceId: ' + instanceId + ', old client ID: ' + oldclient + ', new client ID:' + clientId);
-      delete state.roster[userId].clients[oldclient];
-    }
-  }
-  // Mark the request as satisfied.
-  var index = pending_instance_requests.indexOf(clientId);
-  if (index >= 0) {
-    pending_instance_requests.splice(index, 1);
-    log.debug('_handleRequestInstanceIdResponseReceived: removing pending request index ' + index);
+  var oldClientId = instance.clientId;
+  // Delete old clients for same instanceId if necessary.
+  if (oldClientId && clientId != oldClientId) {
+    log.debug('_handleNotifyInstanceReceived: deleting old clientID: ',
+              oldClientId);
+    delete _clients[oldClientId];
+    delete user.clients[oldClientId];
   }
 
   log.debug('_handleRequestInstanceIdResponseReceived: saving instance ' + JSON.stringify(instance));
+
+  client.instanceId = instanceId;  // Synchronize latest IDs.
+  instance.clientId = clientId;
 
   // Save to local storage.
   _saveInstance(instanceId, userId);
   _saveInstanceId(instanceId);
 
-  // Update the client's instanceId for the extension.
-  freedom.emit('state-change', [{
-      op: 'replace',
+  freedom.emit('state-change', [{  // Tell extension about updated state.
+      op: 'replace',    // User data.
       path: '/roster/' + msg.fromUserId,
       value: state.roster[msg.fromUserId]
     }, {
-      op: instanceOp,
+      op: instanceOp,   // Instance data.
       path: '/instances/' + instanceId,
       value: instance
     }
   ]);
+  return true;
+}
+
+/**
+ * When a new instanceId is received, prepare a new entry for the Instance
+ * Table.
+ */
+function _prepareNewInstance(instanceId, description, keyHash) {
+  var instance = DEFAULT_INSTANCE;
+  instance.instanceId = instanceId;
+  instance.description = description;
+  instance.keyHash = keyHash;
+  state.instances[instanceId] = instance;
+  log.debug('Prepared NEW Instance: ', instance);
+  return instance;
+}
+
+function _validateKeyHash(keyHash) {
+  console.error('Not Implemented.');
   return true;
 }

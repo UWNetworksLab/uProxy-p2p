@@ -4,11 +4,16 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
 
+
     // State for roster vs. detail view.
     $scope.rosterNudge = false;
     $scope.currentContact = {
       'name': 'Nobody'
     };
+    $scope.instances = $scope.model.instances;
+    var _getTrust = function(client) {
+      return $scope.instances[client.instanceId].trust;
+    }
 
     $scope.toggleContact = function(c) {
       // c.detailsVisible = !c.detailsVisible;
@@ -17,24 +22,21 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.rosterNudge = true;
     };
 
-
     $scope.startAccess = function(client) {
       $scope.sendMessage(client.clientId, 'start-proxying');
     };
     // Request access through a friend.
     $scope.requestAccess = function(client) {
       $scope.sendMessage(client.clientId, 'request-access');
-      if (!client.permissions)
-        client.permissions = {};
-      client.permissions.proxy = 'requested';
-      // Update the UI
+      var trust = _getTrust(client);
+      // Emit to freedom.
+      // $scope.client.permissions.proxy = 'requested';
     };
 
     $scope.grantAccess = function(client) {
       sendMessage(client.clientId, 'allow');
-      if (!client.permissions)
-        client.permissions = {};
-      client.permissions.client = 'yes';
+      var trust = _getTrust(client);
+      // trust.asClient = 'yes';
     };
 
   }])
