@@ -28,4 +28,9 @@ Storage_chrome.prototype.set = function(key, value, continuation) {
 Storage_chrome.prototype.remove = function(key, continuation) {
   console.log('storage_chrome: removing ' + key);
   chrome.storage.local.remove(key, continuation);
-}
+};
+
+Storage_chrome.prototype.clear = function(continuation) {
+  console.log('storage_chrome: clear all');
+  chrome.storage.local.clear(continuation);
+};
