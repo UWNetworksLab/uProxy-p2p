@@ -17,11 +17,12 @@ window.freedomcfg = function(register) {
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'common/backend/uproxy.json');
 // Uncomment for clearer but less portable module error messages.
- script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
+script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
 script.src = 'common/freedom/freedom.js';
 
 document.head.appendChild(script);
 
+// Called when an extension connects to the app.
 chrome.runtime.onConnectExternal.addListener(function(port) {
   // Security: only allow the official uproxy extension to control the backend.
   // We don't want another extension secretly making you proxy others, or

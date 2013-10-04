@@ -21,7 +21,6 @@ var RESET_STATE = {
   "_debug": DEBUG,
   "_msgLog": [],
 
-  "identityStatus": {},
   "me": {},
   "roster": {},
 
@@ -75,8 +74,8 @@ setTimeout(onload, 0);
 
 function _loginInit(cb) {
   identity.login({
-    agent: 'uproxy', 
-    version: '0.1', 
+    agent: 'uproxy',
+    version: '0.1',
     url: 'https://github.com/UWNetworksLab/UProxy',
     interactive: false
     //network: ''
@@ -168,14 +167,14 @@ function onload() {
 
   freedom.on('login', function(network) {
     identity.login({
-      agent: 'uproxy', 
-      version: '0.1', 
+      agent: 'uproxy',
+      version: '0.1',
       url: 'https://github.com/UWNetworksLab/UProxy',
       interactive: true,
       network: network
     });
   });
-  
+
   freedom.on('logout', function(network) {
     identity.logout(null, network);
   });
@@ -301,7 +300,7 @@ function _handleProxyStartReceived(msg, contact) {
 function _handleConnectionSetupReceived(msg, contact) {
   msg.data.from = msg['fromClientId'];
   server.emit('toServer', msg.data);
-  
+
   // Figure out the crypto key
   var cryptoKey = null;
   var data = JSON.parse(msg.data.data);
@@ -310,7 +309,7 @@ function _handleConnectionSetupReceived(msg, contact) {
   } else {
     log.debug("Data did not contain sdp headers", msg);
   }
-  
+
   // Compare against the verified crypto keys
   var verifiedCryptoKeysKey = contact.userId + ".verifiedCryptoKeys";
   var verificationRequired = false;

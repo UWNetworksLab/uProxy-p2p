@@ -5,106 +5,116 @@ console.log('SOCKS5 server: ' + self.location.href);
 window.socket = freedom['core.socket']();
 
 var onload = function() {
-  var active = false;
-  var transports = {};
-  var webClients = {};
-  var signallingChannels = {};
+  var _active = false;
+  var _peers = {};
 
-  var shutdown = function() {
-    for (var contact in transports) {
-      transports[contact].close();
+  //
+  var resetServer = function() {
+    for (var contact in _peers) {
+      _peers[contact].close();
     }
-    transports = {};
-    signallingChannels = {};
-    active = false;
+    _peers = {};
+    _active = false;
+    if (_sctpPc) { _sctpPc.shutdown(); }
+    _sctpPc = null;
   };
 
-  var onClose = function(from) {
+  // Close the peerId. Closes all tcp sockets open for this peer.
+  var onClose = function(peerId) {
     //conn.disconnect();
-    for (var i in webClients[from]) {
-      webclients[from][i]._onClose();
+    for (var i in _peers[peerId].webClients[peerId]) {
+      _peers[peerId].webClients[i].close();
     }
-    delete webClients[from];
-    transports[from].close();
-    delete transports[from];
-    delete signallingChannels[from];
+    _peers[peerId].sctpPc.close();
+    delete _peers[peerId];
   };
 
-  var initChannel = function(from, callback) {
-    if (!transports[from]) {
-      transports[from] = {};
-      webClients[from] = {};
+  //
+  var initPeer = function(peerId, peerOptions) {
+    if (!_peers[peerId]) {
+      _peers[peerId] = {};
     }
-    var transport = freedom.transport();
-    transport.on('onClose', onClose.bind({}, from));
-    transport.on('message', function(transport, from, msg) {
-      var tag = msg.channelid;
-      if (!webClients[from][tag]) {
-        webClients[from][tag] = new window.webclient(transport.send.bind(transport, tag));
-      }
-      webClients[from][tag].onMessage(msg.data);
-    }.bind({}, transport, from));
-    transports[from] = transport;
-    transport.signallingChannel = {
-      _cb: [],
-      on: function(what, cb) {
-        this._cb.push(cb);
-      }
+
+    var sctpPc = freedom['core.sctp-peerconnection']();
+    var webClients = {};
+    var peer = {
+      // The peer connection.
+      sctpPc : sctpPc,
+      // We open up multple connections, for each data channels there is a
+      // corresponding webclient. Each entry is keyed by channelId with value:
+      // being a WebClient.
+      //  { dataChannel: SmartDataChannel,
+      //    webclient: WebClient }
+      webClients : webClients,
+      // The freedom signalling channel
+      signallingChannel : null,
+      // queue of messages to hold on to while we wait for the
+      // signallingChannel to be ready.
+      messageQueue : []
     };
+    _peers[peerId] = peer;
+
+    sctpPc.on('onMessage', function(message) {
+      if (! message.channelId) {
+        console.error("Message received but missing channelId. Msg: " +
+            JSON.stringify(message));
+        return;
+      }
+      if (! (message.channelId in webClients)) {
+        webClients[message.channelId] = new window.webclient(
+            sctpPc.send.bind(sctpPc, message.channelId));
+      }
+      webClients[message.channelId].onMessage(message.data);
+    });
 
     var promise = freedom.core().createChannel();
-    promise.done(function(f, cb, trans, chan) {
-      chan.channel.done(function(f, cb, trans, channel) {
-        channel.on('message', function(other, msg) {
-          var outgoing = {
-            to: other,
-            data: msg
-          };
-          freedom.emit('fromServer', outgoing);
-        }.bind({}, f));
-        channel.on('ready', function(cb, f) {
-          signallingChannels[f] = this;
-          cb();
-        }.bind(channel, callback, f));
-
-        channel.on('ready', function(cbs) {
-          for (var i = 0; i < cbs.length; i++) {
-            cbs[i]();
+    promise.done(function(chan) {
+      sctpPc.setup(chan.identifier, peerOptions, false);
+      chan.channel.done(function(channel) {
+        // When
+        channel.on('message', function(msg) {
+          freedom.emit('fromServer', { to: peerId, data: msg });
+        });
+        // sctpPc will emit 'ready' when it is ready, and at that point we
+        // have successfully initialised this peer connection and can set the
+        // signalling channel and process any messages we have been sent.
+        channel.on('ready', function() {
+          while(peer.messageQueue.length > 0) {
+            channel.emit('message', peer.messageQueue.shift());
           }
-        }.bind({}, trans.signallingChannel._cb));
-        trans.signallingChannel = channel;
-      }.bind({}, f, cb, trans));
-      // TODO: fix "false" to real boolean when Freedom supports it.
-      trans.open(chan.identifier, false);
-    }.bind({}, from, callback, transport));
+          peer.signallingChannel = channel;
+        });
+      });
+    });
   };
 
   freedom.on('start', function(options) {
-    shutdown();
-    active = true;
+    resetServer();
+    _active = true;
   });
 
+  // msg.peerId : string of the clientId for the peer being sent a message.
+  // msg.data : message body received peerId signalling channel, typically
+  //            contains SDP headers.
+  //
+  // TODO: make sure callers set the peerId.
   freedom.on('toServer', function(msg) {
-    if (!active) {
-      return;
-    }
+    if (!_active) return;
 
+    // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));
-    if (!transports[msg.from]) {
-      // Make a channel.
-      initChannel(msg.from, function(m) {
-        signallingChannels[m.from].emit('message', m.data);
-      }.bind(this, msg));
-    } else if (!signallingChannels[msg.from]){
-      transports[msg.from].signallingChannel.on('ready', function(m) {
-        signallingChannels[m.from].emit('message', m.data);
-      }.bind(this, msg));
+    // Make a peer for this id if it doesn't already exist.
+    if (!_peers[msg.peerId]) {
+      initPeer(msg.peerId);
+    }
+    if (_peers[msg.peerId].signallingChannel){
+      _peers[msg.peerId].signallingChannel.emit('message', msg.data);
     } else {
-      signallingChannels[msg.from].emit('message', msg.data);
+      _peers[msg.peerId].messageQueue.push(msg.data);
     }
   });
 
-  freedom.on('stop', shutdown);
+  freedom.on('stop', resetServer);
 
   freedom.emit('ready', {});
 }

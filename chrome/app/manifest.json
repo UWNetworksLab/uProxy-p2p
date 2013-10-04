@@ -18,7 +18,8 @@
         "js/socket_chrome.js",
         "js/storage_chrome.js",
         "js/plumbing.js",
-        "js/background.js"]
+        "js/background.js"
+      ]
     }
   },
   "permissions": [

@@ -279,7 +279,7 @@ function getStringOfArrayBuffer(buf) {
       // Connection has been established, so make the connection callback.
       console.log('TcpServer: client connected.');
       if (serverConnectionCallback) {
-	serverConnectionCallback(this);
+        serverConnectionCallback(this);
       }
     }.bind(this));
   };
