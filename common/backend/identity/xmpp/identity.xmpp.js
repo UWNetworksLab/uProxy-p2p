@@ -305,7 +305,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       vcard['imageData'] = imageData;
       this.setAttr(from, 'imageData', imageData);
     }
-    storage.set('vcard-'+getBaseJid(from), vcard);
+    storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
   }
 
 };
@@ -349,7 +349,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
 };
 
 IdentityProvider.prototype.getVCard = function(from) {
-  storage.get('vcard-'+getBaseJid(from)).done(function(result) {
+  storage.get('vcard-'+getBaseJid(from)).done((function(result) {
     //Fetch vcard from server if not cached
     if (result == null) {
       console.log("Fetching VCard for " + getBaseJid(from));
@@ -360,17 +360,19 @@ IdentityProvider.prototype.getVCard = function(from) {
         to: getBaseJid(from)
       }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
     } else {
-      if (result['name']) {
-        this.setAttr(from, 'name', result['name']);
+      console.log("Cached VCard: " + result);
+      var resultObj = JSON.parse(result);
+      if (resultObj['name']) {
+        this.setAttr(from, 'name', resultObj['name']);
       }
-      if (result['url']) {
-        this.setAttr(from, 'url', result['url']);
+      if (resultObj['url']) {
+        this.setAttr(from, 'url', resultObj['url']);
       }
-      if (result['imageData']) {
-        this.setAttr(from, 'imageData', result['imageData']);
+      if (resultObj['imageData']) {
+        this.setAttr(from, 'imageData', resultObj['imageData']);
       }
     }
-  });
+  }).bind(this));
 
 };
 
