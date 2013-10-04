@@ -69,16 +69,21 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Request access through a friend.
       $rootScope.requestAccess = function(client) {
         $rootScope.sendMessage(client.clientId, 'request-access');
-        // TODO(uzimizu): Figure out if concurrency would be a problem.
       };
       $rootScope.cancelRequest = function(client) {
         $rootScope.sendMessage(client.clientId, 'cancel-request');
       }
+      $rootScope.acceptAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'accept-access');
+      };
       $rootScope.startAccess = function(client) {
         $rootScope.sendMessage(client.clientId, 'start-proxying');
       };
 
       // Providing access for a friend:
+      $rootScope.offerAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'offer');
+      }
       $rootScope.grantAccess = function(client) {
         $rootScope.sendMessage(client.clientId, 'allow');
       };

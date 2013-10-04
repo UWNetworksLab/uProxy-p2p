@@ -37,6 +37,7 @@ var StateEntries = {
 var Trust = {
   NO: 'no',
   REQUESTED: 'requested',
+  OFFERED: 'offered',
   YES: 'yes'
 };
 var TrustType = {
@@ -477,9 +478,11 @@ var notifyServer = function() {
 // Trust mutation - map from message -> new trust level.
 var TrustOp = {
   'allow': Trust.YES,
+  'offer': Trust.OFFERED,
   'deny': Trust.NO,
   'request-access': Trust.REQUESTED,
-  'cancel-request': Trust.NO
+  'cancel-request': Trust.NO,
+  'accept-access': Trust.YES
 };
 
 var _msgReceivedHandlers = {
@@ -502,7 +505,8 @@ function _handleMessage(msg, beingSent) {
   var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
   if (trustValue) {
     // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = 'allow' == msg.message || 'deny' == msg.message ? !beingSent : beingSent;
+    var asProxy = 'allow' == msg.message || 'deny' == msg.message ||
+                  'offer' == msg.message ? !beingSent : beingSent;
     var clientId = msg.to || msg.toClientId;
     if (!beingSent) {  // Update trust on the remote instance if received.
       clientId = msg.fromClientId;
