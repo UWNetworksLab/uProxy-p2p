@@ -478,8 +478,7 @@ var _msgReceivedHandlers = {
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
-  'request-instance-id' : _handleRequestInstanceIdReceived,
-  'request-instance-id-response' : _handleRequestInstanceIdResponseReceived
+  'notify-instance' : _handleNotifyInstanceReceived,
 };
 
 /**
@@ -625,32 +624,25 @@ function _handleStartProxyingSent(msg, clientId) {
 
 // Instance ID (+ more) Synchronization I/O
 
-function _dispatchInstanceIdQuery(user, client) {
-  if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
-    var msg = JSON.stringify({ message: 'request-instance-id' });
-    log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
-    identity.sendMessage(user, msg);
-  }
-}
-
-function _handleRequestInstanceIdReceived(msg, clientId) {
-  // Respond to the user with our clientId.
-  // TODO(mollyling): consider rate-limiting responses, in case the
-  // other side's flaking out.
-  var instanceIdMsg = JSON.stringify({
-      message: 'request-instance-id-response',
+function _buildInstancePayload(msg) {
+  return JSON.stringify({
+    message: msg,
     data: {
       instanceId: '' + state.me.instanceId,
       description: '' + state.me.description,
       keyHash: '' + state.me.keyHash
     }});
-  console.log(instanceIdMsg);
-  identity.sendMessage(msg.fromClientId, instanceIdMsg);
-  log.debug('_handleRequestInstanceIdReceived(from:' + msg.fromClientId + ': sending response to '
-      + msg.fromClientId);
 }
 
-function _handleRequestInstanceIdResponseReceived(msg, clientId) {
+function _dispatchInstanceIdQuery(user, client) {
+  if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
+    var msg = _buildInstancePayload('notify-instance');
+    log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
+    identity.sendMessage(user,msg);
+  }
+}
+
+function _handleNotifyInstanceReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
   log.debug('_handleRequestInstanceIdResponseReceived(from: ' + msg.fromUserId +
