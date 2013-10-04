@@ -31,115 +31,127 @@
     </section>
 
     <section ng-show="connectedToApp">
-      <section id="header">
-        <section id="search-section" ng-hide="rosterNudge">
+      <section id="login-splash" ng-hide="loggedIn()">
+        <div class='uproxy-banner'>
+        <img src='icons/uproxy-128.png'>proxy
+        </div>
+        <p class="description">
+        Safe Passage for the Web.<br>
+        To begin, please connect to one of your social networks.
+        </p>
 
-          <input type="text" id="search-contacts" placeholder="search contacts"
-              ng-model="search"
-              ng-blur="searchFocused=false"
-              ng-focus="searchFocused=true">
-          </input>
+        <div class="network-btn">
+        <button class="btn" ng-show="!isOnline('google')"
+              ng-click="login('google')">G+</button>
+        <button class="btn" ng-show="isOnline('google')"
+              ng-click="logout('google')">Logout G+</button>
+        </div>
 
-          <button type="search" id="search-btn"></button>
+        <div class="network-btn">
+        <button class="btn" ng-show="!isOnline('facebook')"
+              ng-click="login('facebook')">FB</button>
+        <button class="btn" ng-show="isOnline('facebook')"
+              ng-click="logout('facebook')">Logout FB</button>
+        </div>
+      </section>
 
-          <section id="filters">
-            <button id="my-access" class="filter">My Access</button>
-            <button id="all-access" class="filter">All</button>
-            <button id="friends-access" class="filter">Friends' Access</button>
+      <div ng-show="loggedIn()">
+        <section id="header">
+          <section id="search-section" ng-hide="rosterNudge">
+            <input type="text" id="search-contacts" placeholder="search contacts"
+                ng-model="search"
+                ng-blur="searchFocused=false"
+                ng-focus="searchFocused=true">
+            </input>
+
+            <button type="search" id="search-btn"></button>
+
+            <section id="filters">
+              <button id="my-access" class="filter">My Access</button>
+              <button id="all-access" class="filter">All</button>
+              <button id="friends-access" class="filter">Friends' Access</button>
+            </section>
+          </section>
+          <section id="contact-header" ng-show="rosterNudge">
+            <button class="btn-back" ng-click="rosterNudge=false"></button>
+            <h1>{{currentContact.name}}</h1>
+          </section>
+        </section>
+
+        <section id="roster">
+          <section id="contacts-frame" ng-hide="rosterNudge">
+          <ul class="contacts">
+            <li ng-repeat="contact in model.roster"
+                ng-click="toggleContact(contact)"
+                tabindex="{{ $index + 10 }}">
+              {{contact.name}}
+              <img class="contact-image" ng-src='{{contact.imageData}}'>
+              <span class="contact-icons">
+                <img ng-show='{{contact.canUProxy}}' src='icons/uproxy-19.png'>
+              </span>
+            </li>
+          </ul>
+          <div ng-show="isEmpty(model.roster)">
+            Loading Roster...
+          </div>
           </section>
 
-        </section>
-        <section id="contact-header" ng-show="rosterNudge">
-          <button class="btn-back" ng-click="rosterNudge=false"></button>
-          <h1>{{currentContact.name}}</h1>
-        </section>
-      </section>
-
-      <section id="roster">
-        <section id="contacts-frame" ng-hide="rosterNudge">
-        <ul class="contacts">
-          <li ng-repeat="contact in model.roster"
-              ng-click="toggleContact(contact)"
-              tabindex="{{ $index + 10 }}">
-            {{contact.name}}
-            <img class="contact-image" ng-src='{{contact.imageData}}'>
-            <span class="contact-icons">
-              <img ng-show='{{contact.canUProxy}}' src='icons/uproxy-19.png'>
-            </span>
-          </li>
-        </ul>
-        <div ng-show="isEmpty(model.roster)">
-          Loading Roster...
-        </div>
-        </section>
-
-        <div id="contact-details" ng-show="rosterNudge">
-          <div class="client-details" ng-repeat="client in currentContact.clients">
-            {{ client.clientId }}
-            <br>Network: {{ client.network }}
-            <br>Status: {{ client.status }}
-            <br>
-            <div class="client-actions" ng-show="client.instanceId">
-              <h5>InstanceId: {{ client.instanceId }}</h5>
-              <div class="box-for-proxy"
-                  ng-switch="model.instances[client.instanceId].trust.asProxy">
-                <button class="btn" ng-switch-when="yes"
-                    ng-click="startAccess(client)">
-                  Start
-                </button>
-                <div ng-switch-when="requested">
-                  <button class="btn" ng-click="cancelRequest(client)">
-                    Cancel
+          <div id="contact-details" ng-show="rosterNudge">
+            <div class="client-details" ng-repeat="client in currentContact.clients">
+              {{ client.clientId }}
+              <br>Network: {{ client.network }}
+              <br>Status: {{ client.status }}
+              <br>
+              <div class="client-actions" ng-show="client.instanceId">
+                <h5>InstanceId: {{ client.instanceId }}</h5>
+                <div class="box-for-proxy"
+                    ng-switch="model.instances[client.instanceId].trust.asProxy">
+                  <button class="btn" ng-switch-when="yes"
+                      ng-click="startAccess(client)">
+                    Start
                   </button>
-                  <span>Pending...</span>
-                </div>
-                <button class="btn" ng-switch-when="offered"
-                    ng-click="acceptAccess(client)">
-                  Accept Access
-                </button>
-                <button class="btn"
-                    ng-switch-default
-                    ng-click="requestAccess(client)">
-                  Request
-                </button>
-              </div>
-
-              <div class="box-for-client"
-                  ng-switch="instances[client.instanceId].trust.asClient">
-                <button class="btn" ng-switch-when="no"
-                    ng-click="offerAccess(client)">
-                  Offer Access
-                </button>
-                <div ng-switch-when="requested">
-                  <button class="btn" ng-click="grantAccess(client)">
-                    Grant
+                  <div ng-switch-when="requested">
+                    <button class="btn" ng-click="cancelRequest(client)">
+                      Cancel
+                    </button>
+                    <span>Pending...</span>
+                  </div>
+                  <button class="btn" ng-switch-when="offered"
+                      ng-click="acceptAccess(client)">
+                    Accept Access
                   </button>
-                  <button class="btn" ng-click="denyAccess(client)">
-                    Ignore
+                  <button class="btn"
+                      ng-switch-default
+                      ng-click="requestAccess(client)">
+                    Request
                   </button>
                 </div>
-                <button class="btn" ng-switch-default
-                    ng-click="revokeAccess(client)">
-                  Revoke Access
-                </button>
+
+                <div class="box-for-client"
+                    ng-switch="instances[client.instanceId].trust.asClient">
+                  <button class="btn" ng-switch-when="no"
+                      ng-click="offerAccess(client)">
+                    Offer Access
+                  </button>
+                  <div ng-switch-when="requested">
+                    <button class="btn" ng-click="grantAccess(client)">
+                      Grant
+                    </button>
+                    <button class="btn" ng-click="denyAccess(client)">
+                      Ignore
+                    </button>
+                  </div>
+                  <button class="btn" ng-switch-default
+                      ng-click="revokeAccess(client)">
+                    Revoke Access
+                  </button>
+                </div>
               </div>
             </div>
+
           </div>
-
-          <!--
-            <div>
-              <button class="btn">Allow</button>
-              <button class="btn">Ignore</button>
-            </div>
-            <div>
-              <button class="btn">Request</button>
-            </div>
-            <div>
-              <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
-            </div>
-          -->
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section id="status">
         Not Connected
@@ -154,9 +166,6 @@
       </section>
       <section ng-show="model.identityStatus.status == 'online'">
       -->
-      <section class="pagination-right muted">
-        {{model.me.userId}}
-      </section>
 
       <!--
       <h4>Status</h4>

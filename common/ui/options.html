@@ -35,17 +35,19 @@
       <label>
         Networks:
       </label>
-      <button class="btn btn-mini" ng-show="!isOnline('loopback')"
+      <button class="btn" ng-show="!isOnline('loopback')"
             ng-click="login('loopback')">Loop</button>
-      <button class="btn btn-mini active" ng-show="isOnline('loopback')"
+      <button class="btn" ng-show="isOnline('loopback')"
             ng-click="logout('loopback')">Loop</button>
-      <button class="btn btn-danger btn-mini" ng-show="!isOnline('google')"
+
+      <button class="btn" ng-show="!isOnline('google')"
             ng-click="login('google')">Login G+</button>
-      <button class="btn btn-danger btn-mini active" ng-show="isOnline('google')"
+      <button class="btn" ng-show="isOnline('google')"
             ng-click="logout('google')">Logout G+</button>
-      <button class="btn btn-primary btn-mini" ng-show="!isOnline('facebook')"
+
+      <button class="btn" ng-show="!isOnline('facebook')"
             ng-click="login('facebook')">Login FB</button>
-      <button class="btn btn-primary btn-mini active" ng-show="isOnline('facebook')"
+      <button class="btn" ng-show="isOnline('facebook')"
             ng-click="logout('facebook')">Logout FB</button>
     </div>
 

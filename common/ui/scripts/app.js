@@ -11,7 +11,6 @@ var OAUTH_CONFIG = {
 };
 **/
 
-
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
@@ -21,23 +20,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $sniffer.csp = true;
       return $sniffer;
     }]);
-  }) //
-  // .filter('messageable', function () {
-    // return function (contact) {
-      // return _.any(contact.clients, {status: 'messageable'});
-    // };
-  // })
-  // .filter('onlineNotMessageable', ['$filter', function ($filter) {
-    // var messageable = $filter('messageable');
-    // return function (contact) {
-      // return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
-    // };
-  // }])
-  // .filter('offline', function () {
-    // return function (contact) {
-      // return _.all(contact.clients, {status: 'offline'});
-    // };
-  // })
+  })
   // Run gets called every time the popup is openned. This initializes the main
   // extension UI and makes sure it is in sync with the app.
   .run([
@@ -50,9 +33,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     function(
         $filter, $http, $rootScope,
         freedom, onFreedomStateChange, model) {
-      // var filter = $filter('filter'),
-          // messageable = $filter('messageable'),
-          // onlineNotMessageable = $filter('onlineNotMessageable');
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -62,6 +42,25 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         localStorage.clear();
         freedom.emit('reset', null);
       }
+
+      /**
+       * Determine whether UProxy is connected to |network|.
+       */
+      $rootScope.isOnline = function(network) {
+        window.tmp = model;
+        return (model && model.identityStatus &&
+                model.identityStatus[network] &&
+                model.identityStatus[network].status == 'online');
+      };
+      $rootScope.login = function(network) {
+        console.log('!!! login ' + network);
+        freedom.emit('login', network);
+      };
+      $rootScope.logout = function(network) {
+        console.log('!!! logout ' + network);
+        freedom.emit('logout', network);
+      };
+
 
       // These work the same even if |client| is an instance - so long as it
       // contains the attribute |clientId|.

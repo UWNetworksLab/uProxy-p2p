@@ -34,21 +34,6 @@ angular.module('UProxyExtension-options', ['UProxyExtension'])
           // $scope[key] = val;
         // });
       // }, true);
-      $scope.isOnline = function(network) {
-        window.tmp = model;
-        return (model && model.identityStatus && model.identityStatus[network] &&
-                model.identityStatus[network].status == 'online');
-      };
-
-      $scope.login = function(network) {
-        console.log('!!! login ' + network);
-        freedom.emit('login', network);
-      };
-
-      $scope.logout = function(network) {
-        console.log('!!! logout ' + network);
-        freedom.emit('logout', network);
-      };
 
       $scope.instances = model.instances;
     }]);

@@ -13,7 +13,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.instances = $scope.model.instances;
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
-    }
+    };
+
+    // Whether UProxy is logged in to *any* network.
+    $scope.loggedIn = function() {
+      return $scope.isOnline('google') || $scope.isOnline('facebook');
+    };
 
     $scope.toggleContact = function(c) {
       // c.detailsVisible = !c.detailsVisible;

@@ -99,6 +99,32 @@ ul {
 #options-btn:active {
   opacity: 0.9; }
 
+#login-splash {
+  text-align: center;
+  padding-top: 30px; }
+
+.network-btn {
+  display: inline-block;
+  margin: 8px; }
+
+.network-btn .btn {
+  font-size: 24px; }
+
+.uproxy-banner {
+  font-size: 32px;
+  font-weight: 600;
+  text-shadow: 2px 2px 2px #888888;
+  cursor: default; }
+
+.uproxy-banner img {
+  vertical-align: middle;
+  margin-bottom: 23px; }
+
+.description {
+  color: #222222;
+  text-shadow: 1px 2px 2px #aaaaaa;
+  cursor: default; }
+
 #search-section {
   position: relative;
   z-index: 50; }
