@@ -621,6 +621,12 @@ function _updateUser(newData) {
   for (var clientId in newData.clients) {
     log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];
+    // Determine network state.
+    if ('google' == client.network) {
+      newData.onGoogle = true;
+    } else if ('facebook' == client.network) {
+      newData.onFB = true;
+    }
     // Skip non-UProxy clients.
     // TODO(uzimizu): Figure out best way to request new users to install UProxy
     if (!_isMessageableUproxy(client)) {
