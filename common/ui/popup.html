@@ -62,6 +62,7 @@
               ng-click="toggleContact(contact)"
               tabindex="{{ $index + 10 }}">
             {{contact.name}}
+            <img src='{{contact.imageData}}'>
             <!--
             <span class="contact-hover" ng-show="contact.hovered">
               ({{contact.userId}})

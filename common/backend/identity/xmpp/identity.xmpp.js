@@ -302,7 +302,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
       var type = photo.getChildText('TYPE');
       var bin = photo.getChildText('BINVAL');
-      //TODO(ryscheng) deal with it
+      this.setAttr(from, 'imageData', "data:"+type+";base64,"+bin);
     }
   }
 
