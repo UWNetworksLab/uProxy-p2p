@@ -13,13 +13,33 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.instances = $scope.model.instances;
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
-    }
+    };
 
+    // Whether UProxy is logged in to *any* network.
+    $scope.loggedIn = function() {
+      return $scope.isOnline('google') || $scope.isOnline('facebook');
+    };
+
+    // Opening the detailed contact view.
     $scope.toggleContact = function(c) {
-      // c.detailsVisible = !c.detailsVisible;
       $scope.currentContact = c;
       console.log(c);
       $scope.rosterNudge = true;
+    };
+
+    // Multifiter function for determining whether a contact should be hidden.
+    $scope.contactIsHidden = function(c) {
+      var searchText = $scope.search,
+          compareString = c.name.toLowerCase();
+      // If there is no search text and no filters are active, nothing is
+      // hidden.
+      if (!searchText) {
+        return false;
+      }
+      if (compareString.indexOf(searchText) >= 0) {
+        return false;  // Valid substring, should be visible.
+      }
+      return true;
     };
   }])
   // The controller for debug information/UI.

@@ -99,6 +99,32 @@ ul {
 #options-btn:active {
   opacity: 0.9; }
 
+#login-splash {
+  text-align: center;
+  padding-top: 30px; }
+
+.network-btn {
+  display: inline-block;
+  margin: 8px; }
+
+.network-btn .btn {
+  font-size: 24px; }
+
+.uproxy-banner {
+  font-size: 32px;
+  font-weight: 600;
+  text-shadow: 2px 2px 2px #888888;
+  cursor: default; }
+
+.uproxy-banner img {
+  vertical-align: middle;
+  margin-bottom: 23px; }
+
+.description {
+  color: #222222;
+  text-shadow: 1px 2px 2px #aaaaaa;
+  cursor: default; }
+
 #search-section {
   position: relative;
   z-index: 50; }
@@ -210,12 +236,15 @@ ul {
   position: relative;
   z-index: 0;
   cursor: default;
-  padding: 6px 30px;
+  padding: 6px 37px;
   white-space: no-wrap;
   overflow: hidden;
   border: 1px solid transparent;
   border-left: none;
   border-right: none;
+  color: #222222;
+  font-weight: 300;
+  text-shadow: 2px 2px 2px #cccccc;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -230,14 +259,38 @@ ul {
   box-shadow: 0 2px 6px 1px #dddddd;
   outline: none; }
 
-.contacts li.ng-hide {
-  display: block !important;
-  line-height: 0; }
-
-.contact-image {
+img.contact-image {
   position: absolute;
   left: 1px;
-  top: 4px; }
+  top: 1px;
+  height: 100%;
+  width: 25px;
+  background: transparent url("../icons/contact-default.png") no-repeat center;
+  background-size: cover; }
+
+.c-icons {
+  position: absolute;
+  right: 4px;
+  color: #222222;
+  font-size: 12.8px;
+  font-weight: 900; }
+
+.c-icon {
+  padding: 1px;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+.c-icon:hover {
+  color: #888888; }
+
+img.c-icon {
+  vertical-align: middle;
+  margin-top: -4px; }
+
+img.c-icon:hover {
+  opacity: 0.5; }
 
 #contact-details {
   display: inline-block;
