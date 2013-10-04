@@ -63,6 +63,9 @@
               tabindex="{{ $index + 10 }}">
             {{contact.name}}
             <img class="contact-image" ng-src='{{contact.imageData}}'>
+            <span class="contact-icons">
+              <img ng-show='{{contact.canUProxy}}' src='icons/uproxy-19.png'>
+            </span>
           </li>
         </ul>
         <div ng-show="isEmpty(model.roster)">

@@ -603,8 +603,8 @@ function _handleMessage(msg, beingSent) {
 function _isMessageableUproxy(client) {
   // TODO(uzimizu): Make identification of whether or not this is a uproxy
   // client more sensible.
-  var retval = (/* [issue 21] client.network == 'google' && */ client.status == 'online'
-      && client.clientId.indexOf('/uproxy') > 0) || client.status == 'messageable';
+  var retval = (client.status == 'online' || client.status == 'messageable')
+      && (client.clientId.indexOf('/uproxy') > 0);
   return retval;
 }
 
@@ -616,8 +616,9 @@ function _isMessageableUproxy(client) {
  * @param {object} newData Incoming JSON info for a single user.
  */
 function _updateUser(newData) {
-  var userId = newData.userId;
   log.debug('User: ' + JSON.stringify(newData));
+  var userId = newData.userId;
+  var canUProxy = false;
   for (var clientId in newData.clients) {
     log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];
@@ -627,18 +628,20 @@ function _updateUser(newData) {
       continue;
     }
 
-    // Synchronize Instance data if this is a new client.
+    // Synchronize Instance data if this is a new UProxy client.
     var existingClient = _clients[clientId];
     if (!existingClient) {
       log.debug('_updateUser: deciding to message ' + JSON.stringify(client));
       _sendNotifyInstance(clientId, client);
-    } else if (existingClient.instanceId) { // Otherwise, preserve existing instance id.
+    } else { // if (existingClient.instanceId) { // Otherwise, preserve existing instance id.
       log.debug('Preserving data. ' + existingClient.instanceId);
       client.instanceId = existingClient.instanceId;
+      client.canUProxy = existingClient.canUProxy;
     }
     _clients[clientId] = client;
     // TODO(mollyling): Properly hangle logout.
   }
+  newData.canUProxy = canUProxy;
   return newData;  // Overwrites the userdata.
 }
 
@@ -797,8 +800,9 @@ function _handleNotifyInstanceReceived(msg, clientId) {
   }
 
   if (!instance) {
-    instance = _prepareNewInstance(instanceId, description, keyHash);
+    instance = _prepareNewInstance(instanceId, userId, description, keyHash);
     instanceOp = 'add';
+    user.canUProxy = true;
     instance.trust.asClient = consent.asProxy? 'offered' : 'no';
     instance.trust.asProxy = consent.asClient? 'requested' : 'no';
   } else {
@@ -847,11 +851,12 @@ function _handleNotifyInstanceReceived(msg, clientId) {
  * When a new instanceId is received, prepare a new entry for the Instance
  * Table.
  */
-function _prepareNewInstance(instanceId, description, keyHash) {
+function _prepareNewInstance(instanceId, userId, description, keyHash) {
   var instance = DEFAULT_INSTANCE;
   instance.instanceId = instanceId;
-  instance.description = description;
+  instance.userId = userId;
   instance.keyHash = keyHash;
+  instance.description = description;
   state.instances[instanceId] = instance;
   log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
   return instance;
