@@ -361,14 +361,14 @@ IdentityProvider.prototype.onMessage = function(stanza) {
     if (stanza.attrs.to.indexOf(this.loginOpts.agent) >= 0) {
       this.dispatchEvent('onMessage', {
         fromUserId: getBaseJid(stanza.attrs.from),
-        fromClientId: stanza.attrs.from, 
+        fromClientId: stanza.attrs.from,
         toUserId: getBaseJid(stanza.attrs.to),
         toClientId: stanza.attrs.to,
         message: JSON.parse(stanza.getChildText('body'))
       });
     } else {
-      //this wasn't intended for me
-      console.log('Unprocessed message: '+ JSON.stringify(stanza));
+      // This wasn't intended for me
+      console.log('Unprocessed message: '+ JSON.stringify(stanza.attrs));
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'get') {
     // Respond to capability requests from other users.

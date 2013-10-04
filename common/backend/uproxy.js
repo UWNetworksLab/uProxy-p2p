@@ -178,62 +178,101 @@ function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
 }
 
+function _validateStoredInstance(instanceId, instanceData) {
+  var ids = [ "name", "description", "annotation", "instanceId", "userId", "network", "keyHash", "trust" ];
+  for (var i = 0; i < ids.length; ++i) {
+    var id = ids[i];
+    if (instanceData[id] === undefined) {
+      log.debug("_validateStoredInstance: Rejecting instanceId " + instanceId + " for missing key " + id);
+      return false;
+    }
+  }
+  if ((instanceData.trust.asProxy === undefined) ||
+      (instanceData.trust.asProxy != "yes" && instanceData.trust.asProxy != "no") ||
+      (instanceData.trust.asClient === undefined) ||
+      (instanceData.trust.asClient != "yes" && instanceData.trust.asClient != "no")) {
+    log.debug("_validateStoredInstance: Rejecting instanceId " + instanceId + " for trust value " +
+        JSON.stringify(instanceData.trust));
+    return false;
+  }
+  return true;
+}
+
 function _loadStateFromStorage(state) {
   var i, val, hex, id, key, instanceIds = [];
 
-  // Set the saves |me| state and |options|.
+  // Set the saves |me| state and |options|.  Note that in both of
+  // these callbacks |key| will be a different value by the time they
+  // run.
   key = StateEntries.ME;
-  _loadFromStorage(key, function(v){ state[key] = v; }, RESET_STATE[key]);
-  key = StateEntries.OPTIONS;
-  _loadFromStorage(key, function(v){ state[key] = v; }, RESET_STATE[key]);
+  _loadFromStorage(key, function(v){
+    if (v === null) {
+      // Create an instanceId if we don't have one yet.
+      state.me.instanceId = '';
+      state.me.description = null;
+      state.me.keyHash = '';
+      // Just generate 20 random 8-bit numbers, print them out in hex.
+      for (i = 0; i < 20; i++) {
+        // 20 bytes for the instance ID.  This we can keep.
+        val = Math.floor(Math.random() * 256);
+        hex = val.toString(16);
+        state.me.instanceId = state.me.instanceId +
+            ('00'.substr(0, 2 - hex.length) + hex);
 
-  // Create an instanceId if we don't have one yet.
-  if (state.me.instanceId === undefined) {
-    state.me.instanceId = '';
-    state.me.description = null;
-    state.me.keyHash = '';
-    // Just generate 20 random 8-bit numbers, print them out in hex.
-    for (i = 0; i < 20; i++) {
-      // 20 bytes for the instance ID.  This we can keep.
-      val = Math.floor(Math.random() * 256);
-      hex = val.toString(16);
-      state.me.instanceId = state.me.instanceId +
-          ('00'.substr(0, 2 - hex.length) + hex);
+        // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
+        val = Math.floor(Math.random() * 256);
+        hex = val.toString(16);
 
-      // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
-      val = Math.floor(Math.random() * 256);
-      hex = val.toString(16);
+        state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
+            ('00'.substr(0, 2 - hex.length) + hex);
 
-      state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
-          ('00'.substr(0, 2 - hex.length) + hex);
-
-      if (i < 4) {
-        id = (i & 1) ? nouns[val] : adjectives[val];
-        if (state.me.description !== null) {
-          state.me.description = state.me.description + " " + id;
-        } else {
-          state.me.description = id;
+        if (i < 4) {
+          id = (i & 1) ? nouns[val] : adjectives[val];
+          if (state.me.description !== null) {
+            state.me.description = state.me.description + " " + id;
+          } else {
+            state.me.description = id;
+          }
         }
       }
+      _saveToStorage("me", state.me);
+      log.debug("****** Saving new self-definition *****");
+      log.debug("  state.me = " + JSON.stringify(state.me));
+    } else {
+      log.debug("++++++ Loaded self-definition ++++++");
+      log.debug("  state.me = " + JSON.stringify(v));
+      state.me = v;
     }
-  }
+  }, null);
+
+  key = StateEntries.OPTIONS;
+  _loadFromStorage(key, function(v){ state[StateEntries.OPTIONS] = v; }, RESET_STATE[key]);
 
   // Set the state |instances| from the local storage entries.
   var instancesTable = {};
   state[StateEntries.INSTANCES] = instancesTable;
   key = StateEntries.INSTANCEIDS;
-  _loadFromStorage(key, function(instanceIds) {
-   console.log("instanceIds:", instanceIds);
-   for (i = 0; i < instanceIds.length ; i++) {
-     key = instanceIds[i];
-     _loadFromStorage(key, function(v) {
-       if(v === null) {
-         console.error("_loadStateFromStorage: undefined key:", key);
-       } else {
-         instancesTable[key] = v;
-       }},
-     null);
-   }
+  var checkAndSave = function(instanceId) {
+    _loadFromStorage("instance/" + instanceId, function(v) {
+      if(v === null) {
+        console.log("instance " + instanceId + " not found");
+      } else if (!_validateStoredInstance(instanceId, v)) {
+        console.log("instance " + instanceId + " was bad:", v);
+      } else {
+        instancesTable[instanceId] = v;
+      }
+    }, null);
+  };
+
+  _loadFromStorage(StateEntries.INSTANCEIDS, function(insts) {
+    var instanceIds = [];
+    if (insts !== null && insts.length > 2) {
+      instanceIds = JSON.parse(insts);
+    }
+    console.log('instanceIds:' + instanceIds);
+    for (i = 0; i < instanceIds.length; i++) {
+      checkAndSave(instanceIds[i]);
+    }
   }, []);
 
   // TODO: remove these and propegate changes.
@@ -243,60 +282,67 @@ function _loadStateFromStorage(state) {
   // state.pendingGetFrom = {};
   state.currentSessionsToInitiate = {};
   state.currentSessionsToRelay = {};
-  log.debug('_loadStateFromStorage: saving state: ' + JSON.stringify(state));
+  log.debug('_loadStateFromStorage: loaded: ' + JSON.stringify(state));
 }
 
 // Local storage mechanisms.
 
 // |instanceId| - string instance identifier (a 40-char hex string)
-// |name| - The name (human-readable format) of the user whose client we're saving.
-// |userId| - The userid such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
-// |rosterClient| - a RosterClient [ref: UProxy/wiki/Schemas]
-// |permitClient| - ACL bool ["yes","no"] for whether
-function _saveInstance(instanceId, name, userId, rosterClient, permitProxy, permitClient) {
+// |userId| - The userId such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
+function _saveInstance(instanceId, userId) {
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
-  var msg = { name: name,
-              description: rosterClient.description,
-              annotation: getKeyWithDefault(rosterClient, 'annotation', rosterClient.description),
-              instanceId: rosterClient.instanceId,
+  var instanceInfo = state.instances[instanceId];
+  var msg = { name: state.roster[userId].name,
+              description: instanceInfo.description,
+              annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
+              instanceId: instanceId,
               userId: userId,
-              keyHash: getKeyWithDefault(rosterClient, 'keyHash', ""),
-              permissions: { proxy: permitProxy,
-                             client: permitClient }
+              network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
+                                         'network', "xmpp"),
+              keyHash: instanceInfo.keyHash,
+              trust: instanceInfo.trust,
             };
-
-  log.debug('_saveInstance(' + instanceId + ', ' + JSON.stringify(msg) + ')');
+  log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' + JSON.stringify(msg));
   _saveToStorage("instance/" + instanceId, msg);
 }
 
+// Update the list of instanceIds to include instanceId.
+function _saveInstanceId(instanceId) {
+  log.debug('_saveInstanceId: saving ' + instanceId + '.');
+  _loadFromStorage(StateEntries.INSTANCEIDS, function (ids) {
+    console.log('_saveInstanceId got: ', ids);
+    if (ids !== undefined && ids !== null) {
+      var instanceids = JSON.parse(ids);
+      if (instanceids.indexOf(instanceId) < 0) {
+        console.log('_saveInstanceId: -- new value: ' + JSON.stringify(instanceids) + ', type: ' +
+            typeof(instanceids) + '.');
+        instanceids.push(instanceId);
+        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(instanceids));
+      }
+    } else {
+        log.debug('_saveInstanceId: -- new value: ' + JSON.stringify([instanceId]) + '.');
+        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify([instanceId]));
+    }
+  }, []);
+}
+
 function _saveAllInstances() {
-  // Go through |state.roster.clients|, and save every instance with an instanceId.
+  // Go through |roster.client[*].clients[*]|, and save every instance
+  // with an instanceId.  We pull data from both the|state.instances|
+  // and |state.roster| objects.
   for (var userId in state.roster) {
     for (var clientId in state.roster[userId]) {
       var rosterClient = state.roster[userId].clients[clientId];
       if (rosterClient.instanceId !== undefined && rosterClient.instanceId) {
-        // TODO(mollyling): finish this.
+        _saveInstance(rosterClient.instanceId, userId);
       }
     }
   }
 
-}
-
-function _saveStateToStorage() {
-  // Ref: LOCAL_STORAGE_EXA
-  var saveKeyPath = function (prefix, obj) {
-    var k;
-    if (typeof(obj) !== "object") {
-      localStorage.setItem(prefix, obj);
-    } else {
-      for (k in Object.keys(obj)) {
-        saveKeyPath(prefix + "." + k, obj[k]);
-      }
-    }
-  }
-  saveKeyPath("state", state);
-  // console.error("Not yet implemented");
+  // Now save the entire instanceIds list.
+  _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
+      Object.keys(state[StateEntries.INSTANCES])));
 }
 
 //TODO(willscott): WebWorkers startup errors are hard to debug.
@@ -364,8 +410,6 @@ function onload() {
       freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
       notifyClient();
       notifyServer();
-      // Are we online?  LET EVERYONE KNOW.
-      _transmitInstanceData();
     } else {
       // Must be a buddy
       state.roster[data.userId] = _updateInstanceIdsOnChange(data);
@@ -428,6 +472,7 @@ function onload() {
   freedom.on('change-option', function (data) {
     state.options[data.key] = data.value;
     _saveToStorage('options', state.options);
+    log.debug('saved options ' + JSON.stringify(state.options));
     freedom.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
     notifyClient();
     notifyServer();
@@ -530,10 +575,6 @@ function _isMessageableUproxy(client) {
       && client.clientId.indexOf('/uproxy') > 0);
   // log.debug('_isMessageableUproxy(' + JSON.stringify(client) + '):' + retval);
   return retval;
-}
-
-function _transmitInstanceData() {
-
 }
 
 // Look for a !messageable->messageable transition, and dispatch a
@@ -709,6 +750,12 @@ function _handleNotifyInstanceReceived(msg, clientId) {
     pending_instance_requests.splice(index, 1);
     log.debug('_handleRequestInstanceIdResponseReceived: removing pending request index ' + index);
   }
+
+  log.debug('_handleRequestInstanceIdResponseReceived: saving instance ' + JSON.stringify(instance));
+
+  // Save to local storage.
+  _saveInstance(instanceId, userId);
+  _saveInstanceId(instanceId);
 
   // Update the client's instanceId for the extension.
   freedom.emit('state-change', [{
