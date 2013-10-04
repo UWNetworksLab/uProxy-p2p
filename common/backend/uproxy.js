@@ -84,10 +84,7 @@ function instanceToClientId(instanceId) {
 // clientId -> Instance object
 function clientToInstance(clientId) {
   var client = _clients[clientId];
-  log.debug('meow! ' + JSON.stringify(_clients));
-  log.debug('finding instance for client ' + clientId + ": " + client);
   if (!client) { return null; }
-  log.debug('lol! ' +  JSON.stringify(state.instances));
   return state.instances[client.instanceId];
 }
 
@@ -327,14 +324,15 @@ function _saveInstanceId(instanceId) {
     if (ids !== undefined && ids !== null) {
       var instanceids = JSON.parse(ids);
       if (instanceids.indexOf(instanceId) < 0) {
-        console.log('_saveInstanceId: -- new value: ' + JSON.stringify(instanceids) + ', type: ' +
+        console.log('_saveInstanceId: -- new value: ' +
+            JSON.stringify(instanceids) + ', type: ' +
             typeof(instanceids) + '.');
         instanceids.push(instanceId);
         _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(instanceids));
       }
     } else {
-        log.debug('_saveInstanceId: -- new value: ' + JSON.stringify([instanceId]) + '.');
-        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify([instanceId]));
+      log.debug('_saveInstanceId: -- new value: ' + JSON.stringify([instanceId]) + '.');
+      _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify([instanceId]));
     }
   }, []);
 }
@@ -572,7 +570,7 @@ var _msgReceivedHandlers = {
  * @isSent - True if message is being sent. False if received.
  */
 function _handleMessage(msg, beingSent) {
-  log.debug(' ^_^ ' + (beingSent ? '--> SEND' : '<-- RECEIVE') +
+  log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
             ' MESSAGE: ' + JSON.stringify(msg));
 
   // Check if this is a Trust modification.
@@ -606,7 +604,7 @@ function _isMessageableUproxy(client) {
   // TODO(uzimizu): Make identification of whether or not this is a uproxy
   // client more sensible.
   var retval = (/* [issue 21] client.network == 'google' && */ client.status == 'online'
-      && client.clientId.indexOf('/uproxy') > 0);
+      && client.clientId.indexOf('/uproxy') > 0) || client.status == 'messageable';
   return retval;
 }
 
@@ -619,11 +617,12 @@ function _isMessageableUproxy(client) {
  */
 function _updateUser(newData) {
   var userId = newData.userId;
+  log.debug('User: ' + JSON.stringify(newData));
   for (var clientId in newData.clients) {
     log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];
     // Skip non-UProxy clients.
-    // TODO(uzimizu): Figure out best way to request new UProxy users...
+    // TODO(uzimizu): Figure out best way to request new users to install UProxy
     if (!_isMessageableUproxy(client)) {
       continue;
     }
@@ -645,19 +644,19 @@ function _updateUser(newData) {
 
 function _updateTrust(clientId, asProxy, trustValue) {
   var instance = clientToInstance(clientId);
-  log.debug(instance);
   if (!instance) {
     log.debug('Could not find instance corresponding to client: ' + clientId);
     return false;
   }
   var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
-  log.debug('Modifying trust value: ', instance, trust);
+  log.debug('Updating trust for ' + instance.clientId + ' as ' +
+      (asProxy? 'proxy' : 'client') + ' to "' + trustValue + '".');
   if (asProxy) {
     instance.trust.asProxy = trustValue;
   } else {
     instance.trust.asClient = trustValue;
   }
-  // TODO(uzimizu): local storage?
+  // Update state.
   freedom.emit('state-change', [{
       op: 'replace', path: '/instances/' + instance.instanceId, value: instance
   }]);
@@ -824,8 +823,6 @@ function _handleNotifyInstanceReceived(msg, clientId) {
     delete user.clients[oldClientId];
   }
 
-  log.debug('_handleRequestInstanceIdResponseReceived: saving instance ' + JSON.stringify(instance));
-
   client.instanceId = instanceId;  // Synchronize latest IDs.
   instance.clientId = clientId;
 
@@ -856,11 +853,11 @@ function _prepareNewInstance(instanceId, description, keyHash) {
   instance.description = description;
   instance.keyHash = keyHash;
   state.instances[instanceId] = instance;
-  log.debug('Prepared NEW Instance: ', instance);
+  log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
   return instance;
 }
 
 function _validateKeyHash(keyHash) {
-  console.error('Not Implemented.');
+  log.debug('Warning: keyHash Validation not yet implemented...');
   return true;
 }
