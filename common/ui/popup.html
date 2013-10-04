@@ -84,8 +84,7 @@
               <h5>InstanceId: {{ client.instanceId }}</h5>
               <div class="box-for-proxy"
                   ng-switch="model.instances[client.instanceId].trust.asProxy">
-                <button class="btn"
-                    ng-switch-when="yes"
+                <button class="btn" ng-switch-when="yes"
                     ng-click="startAccess(client)">
                   Start
                 </button>
@@ -95,6 +94,10 @@
                   </button>
                   <span>Pending...</span>
                 </div>
+                <button class="btn" ng-switch-when="offered"
+                    ng-click="acceptAccess(client)">
+                  Accept Access
+                </button>
                 <button class="btn"
                     ng-switch-default
                     ng-click="requestAccess(client)">
@@ -104,18 +107,22 @@
 
               <div class="box-for-client"
                   ng-switch="instances[client.instanceId].trust.asClient">
-                <button class="btn"
-                    ng-switch-when="yes">
-                  Revoke Access
+                <button class="btn" ng-switch-when="no"
+                    ng-click="offerAccess(client)">
+                  Offer Access
                 </button>
                 <div ng-switch-when="requested">
                   <button class="btn" ng-click="grantAccess(client)">
                     Grant
                   </button>
-                  <button class="btn" ng-click="freedomEmit('ignore', contact.userId)">
+                  <button class="btn" ng-click="denyAccess(client)">
                     Ignore
                   </button>
                 </div>
+                <button class="btn" ng-switch-default
+                    ng-click="revokeAccess(client)">
+                  Revoke Access
+                </button>
               </div>
             </div>
           </div>
