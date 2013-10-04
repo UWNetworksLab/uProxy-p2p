@@ -529,14 +529,14 @@ function _transmitInstanceData() {
 // query if needed.  Returns 'current', possbily with additional data in there.
 function _updateInstanceIdsOnChange(current) {
   log.debug('_updateInstanceIdsOnChange: current requests are to: ' + pending_instance_requests);
+  var userId = current.userId;
   for (var client in current.clients) {
     if (_isMessageableUproxy(current.clients[client])) {
       var shall_ask = (pending_instance_requests.indexOf(client) == -1);
-
       // Look for an existing instanceId for this client.  Preserve it and don't ask again.
-      if (state.roster[data.userId] !== undefined && state.roster[data.userId].clients[client] !== undefined) {
-        if(state.roster[data.userId].clients[client].instanceId !== undefined) {
-          current.clients[client].instanceId = state.roster[data.userId].clients[client].instanceId;
+      if (state.roster[userId] !== undefined && state.roster[userId].clients[client] !== undefined) {
+        if(state.roster[userId].clients[client].instanceId !== undefined) {
+          current.clients[client].instanceId = state.roster[userId].clients[client].instanceId;
           shall_ask = false;
         }
       }
@@ -646,15 +646,15 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
     }});
   console.log(instanceIdMsg);
   identity.sendMessage(msg.fromClientId, instanceIdMsg);
-  log.debug('_handleRequestInstanceIdReceived(' + JSON.stringify(msg) + ': sending response to '
+  log.debug('_handleRequestInstanceIdReceived(from:' + msg.fromClientId + ': sending response to '
       + msg.fromClientId);
 }
 
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) +
-      '): got response. pending_instance_requests is ' + pending_instance_requests);
+  log.debug('_handleRequestInstanceIdResponseReceived(from: ' + msg.fromUserId +
+      '): got response. pending_instance_requests is [' + pending_instance_requests + ']');
   var instanceId = msg.data.instanceId;
   var description = msg.data.description;
   var keyHash = msg.data.keyHash;
@@ -664,7 +664,12 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Delete any old clients that have the same instance IDs.
   var oldclients = Object.keys(state.roster[userId].clients);
   for(var oldclient in oldclients) {
+    if (state.roster[userId].clients[oldclient] === undefined) {
+      continue;  // really, wtf?
+    }
     if (state.roster[userId].clients[oldclient].instanceId == instanceId) {
+      log.debug('_handleRequestInstanceIdResponseReceived: deleting old client ID with same instance ID.' +
+          ' instanceId: ' + instanceId + ', old client ID: ' + oldclient + ', new client ID:' + clientId);
       delete state.roster[userId].clients[oldclient];
     }
   }
