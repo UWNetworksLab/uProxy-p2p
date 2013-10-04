@@ -618,7 +618,6 @@ function _isMessageableUproxy(client) {
 function _updateUser(newData) {
   log.debug('User: ' + JSON.stringify(newData));
   var userId = newData.userId;
-  var canUProxy = false;
   for (var clientId in newData.clients) {
     log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];
@@ -636,12 +635,11 @@ function _updateUser(newData) {
     } else { // if (existingClient.instanceId) { // Otherwise, preserve existing instance id.
       log.debug('Preserving data. ' + existingClient.instanceId);
       client.instanceId = existingClient.instanceId;
-      client.canUProxy = existingClient.canUProxy;
+      newData.canUProxy = true;
     }
     _clients[clientId] = client;
     // TODO(mollyling): Properly hangle logout.
   }
-  newData.canUProxy = canUProxy;
   return newData;  // Overwrites the userdata.
 }
 

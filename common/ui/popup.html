@@ -154,19 +154,11 @@
       </div>
 
       <section id="status">
-        Not Connected
+        <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
+        <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
+        <span ng-hide="loggedIn()">Not Connected</span>
         <a id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}"></a>
       </section>
-      <!--
-      <section ng-show="model.identityStatus.status == 'offline'">
-        <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
-      </section>
-      <section ng-show="model.identityStatus.status == 'connecting'">
-        Connecting to Google Talk...
-      </section>
-      <section ng-show="model.identityStatus.status == 'online'">
-      -->
-
       <!--
       <h4>Status</h4>
       <section class="current-sessions">

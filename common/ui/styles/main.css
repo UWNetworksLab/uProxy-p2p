@@ -265,7 +265,7 @@ img.contact-image {
   left: 1px;
   top: 1px;
   height: 100%;
-  min-width: 25px;
+  width: 25px;
   background: transparent url("../icons/contact-default.png") no-repeat center;
   background-size: cover; }
 
