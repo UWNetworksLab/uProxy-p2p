@@ -256,10 +256,6 @@ ul {
   box-shadow: 0 2px 6px 1px #dddddd;
   outline: none; }
 
-.contacts li.ng-hide {
-  display: block !important;
-  line-height: 0; }
-
 img.contact-image {
   position: absolute;
   left: 1px;

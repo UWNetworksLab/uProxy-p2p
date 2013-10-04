@@ -83,6 +83,7 @@
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
                 ng-click="toggleContact(contact)"
+                ng-hide="contactIsHidden(contact)"
                 tabindex="{{ $index + 10 }}">
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
