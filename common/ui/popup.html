@@ -62,7 +62,7 @@
               ng-click="toggleContact(contact)"
               tabindex="{{ $index + 10 }}">
             {{contact.name}}
-            <img class="contact-image" src='{{contact.imageData}}'>
+            <img class="contact-image" ng-src='{{contact.imageData}}'>
           </li>
         </ul>
         <div ng-show="isEmpty(model.roster)">
