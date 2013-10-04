@@ -73,7 +73,7 @@ var RESET_STATE = {
 };
 var state = cloneDeep(RESET_STATE);
 
-// Mapping functions
+// Mapping functions between instanceIds and clientIds.
 function instanceToClient(instanceId) {
   // TODO: client = state[StateEntries.INSTANCES][
   var instance = state.instances[instanceId];
@@ -88,67 +88,79 @@ function clientToInstance(clientId) {
   return null;
 }
 
+// Instance object.
+var DEFAULT_INSTANCE = {
+  instanceId: null,  // Primary key.
+  clientId: null,    // May change many times.
+  keyHash: null,
+  trust: {
+    asProxy: Trust.NO,
+    asClient: Trust.NO
+  },
+  description: ''
+};
+
 // Mock data for what may live in local storage. (note: values will be strings
 // too, via JSON interpretation)
 var LOCAL_STORAGE_EXAMPLE = {
-  "me": { "description": "l's Laptop",
-          "instanceId": "mememmemememsdhodafslkffdaslkjfds",
+  'me': { 'description': 'l\'s Laptop',
+          'instanceId': 'mememmemememsdhodafslkffdaslkjfds',
         },
-  "options": {
-    "allowNonRoutableAddresses": false,
-    "stunServers": ["stunServer1", "stunServer2"],
-    "turnServers": ["turnServer1", "turnServer2"]
+  'options': {
+    'allowNonRoutableAddresses': false,
+    'stunServers': ['stunServer1', 'stunServer2'],
+    'turnServers': ['turnServer1', 'turnServer2']
   },
   // Note invariant: for each instanceIds[X] there should be an entry:
-  // "instance/X": { ... } which holds out local stored knowledge about that
+  // 'instance/X': { ... } which holds out local stored knowledge about that
   // instance id.
-  "instanceIds": [
-    "ssssssssshjafdshjadskfjlkasfs",
-    "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
-    "qqqqjksdklflsdjkljkfdsa"
+  'instanceIds': [
+    'ssssssssshjafdshjadskfjlkasfs',
+    'rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn',
+    'qqqqjksdklflsdjkljkfdsa'
   ],
-  "instance/ssssssssshjafdshjadskfjlkasfs": {
-    "name": "S",
-    "description": "S's home desktop",
-    "annotation": "Cool S who has high bandwidth",
-    "instanceId": "ssssssssshjafdshjadskfjlkasfs",
-    "userId": "s@gmail.com",
-    "network": "google",
-    "keyhash" : "HASHssssjklsfjkldfslkfljkdfsklas",
-    "permissions":
-      { "proxy": "yes", // "no" | "requested" | "yes"
-        "client": "no" // "no" | "requested" | "yes"
+  'instance/ssssssssshjafdshjadskfjlkasfs': {
+    'name': 'S',
+    'description': 'S\'s home desktop',
+    'annotation': 'Cool S who has high bandwidth',
+    'instanceId': 'ssssssssshjafdshjadskfjlkasfs',
+    'userId': 's@gmail.com',
+    'network': 'google',
+    'keyhash' : 'HASHssssjklsfjkldfslkfljkdfsklas',
+    'trust':
+      { 'proxy': 'yes', // 'no' | 'requested' | 'yes'
+        'client': 'no' // 'no' | 'requested' | 'yes'
       }
-    // "status" {
-       // "activeProxy": boolean
-       // "activeClient": boolean
+    // 'status' {
+       // 'activeProxy': boolean
+       // 'activeClient': boolean
     // }
   },
-  "instance/r@fmail.com": {
-    "name": "R",
-    "description": "R's laptop",
-    "annotation": "R is who is repressed",
-    "instanceId": "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
-    "userId": "r@facebook.com",
-    "network": "facebook",
-    "keyhash" : "HASHrrrjklsfjkldfslkfljkdfsklas",
-    "permissions":
-      { "proxy": "no",
-        "client": "yes"
-      }
+  'instance/r@fmail.com': {
+    'name': 'R',
+    'description': 'R\'s laptop',
+    'annotation': 'R is who is repressed',
+    'instanceId': 'rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn',
+    'userId': 'r@facebook.com',
+    'network': 'facebook',
+    'keyhash' : 'HASHrrrjklsfjkldfslkfljkdfsklas',
+    'trust': {
+      'proxy': 'no',
+      'client': 'yes'
+    }
   },
-  "instance/qqqqjksdklflsdjkljkfdsa": {
-    "name": "S",
-    "description": "S's laptop",
-    "annotation": "S who is on qq",
-    "instanceId": "qqqqjksdklflsdjkljkfdsa",
-    "userId": "s@qq",
-    "network": "manual",
-    "keyhash" : "HASHqqqqqjklsfjkldfslkfljkdfsklas",
-    "permissions":
-      { "proxy": "no",
-        "client": "no"
-      }
+  'instance/qqqqjksdklflsdjkljkfdsa': {
+    'name': 'S',
+    'description': 'S\'s laptop',
+    'annotation': 'S who is on qq',
+    'instanceId': 'qqqqjksdklflsdjkljkfdsa',
+    'userId': 's@qq',
+    'network': 'manual',
+    'keyhash' : 'HASHqqqqqjklsfjkldfslkfljkdfsklas',
+    'trust': {
+      'proxy': 'no',
+      'client': 'no'
+    }
   }
 };
 
@@ -177,23 +189,23 @@ function _loadStateFromStorage(state) {
 
   // Create an instanceId if we don't have one yet.
   if (state.me.instanceId === undefined) {
-    state.me.instanceId = "";
+    state.me.instanceId = '';
     state.me.description = null;
-    state.me.keyHash = "";
+    state.me.keyHash = '';
     // Just generate 20 random 8-bit numbers, print them out in hex.
     for (i = 0; i < 20; i++) {
       // 20 bytes for the instance ID.  This we can keep.
       val = Math.floor(Math.random() * 256);
       hex = val.toString(16);
       state.me.instanceId = state.me.instanceId +
-          ("00".substr(0, 2 - hex.length) + hex);
+          ('00'.substr(0, 2 - hex.length) + hex);
 
       // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
       val = Math.floor(Math.random() * 256);
       hex = val.toString(16);
 
       state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
-          ("00".substr(0, 2 - hex.length) + hex);
+          ('00'.substr(0, 2 - hex.length) + hex);
 
       if (i < 4) {
         id = (i & 1) ? nouns[val] : adjectives[val];
@@ -449,8 +461,9 @@ var _msgReceivedHandlers = {
  * @isSent - True if message is being sent. False if received.
  */
 function _handleMessage(msg, beingSent) {
-  log.debug('Handling ' + (beingSent ? 'sent' : 'received') + ' message...' + JSON.stringify(msg));
-  console.log(msg);
+  log.debug(' ^_^ ' + (beingSent ? '--> SEND' : '<-- RECEIVE') +
+            ' MESSAGE: ' + JSON.stringify(msg));
+
   // Check if this is a trust modification.
   var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
   if (trustValue) {
@@ -462,7 +475,6 @@ function _handleMessage(msg, beingSent) {
   }
 
   // Check if it's a proxy connection message.
-  log.debug('Dealing with a proxy connection?!?', msg);
   var handler = null;
   if (!beingSent) {
     handler = _msgReceivedHandlers[msg.message];
@@ -599,16 +611,14 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) + '): got response. pending_instance_requests is ' + pending_instance_requests);
+  log.debug('_handleRequestInstanceIdResponseReceived(' +
+      JSON.stringify(msg) + '): got response. pending_instance_requests is '
+      + pending_instance_requests);
   var index = pending_instance_requests.indexOf(clientId);
   if (index >= 0) {
     pending_instance_requests.splice(index, 1);
     log.debug('_handleRequestInstanceIdResponseReceived: removing pending request index ' + index);
   }
-  var instanceId = msg.data.instanceId;
-  var description = msg.data.description;
-  var keyHash = msg.data.keyHash;
-  // Install the instanceId for the client.
   var user = state.roster[msg.fromUserId];
   if (!user) {
     log.error("user does not exist in roster for instanceId: " + instanceId);
@@ -619,19 +629,40 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
     log.error('client does not exist! User: ' + user);
     return false;
   }
+
+  var instanceId = msg.data.instanceId;
+  var description = msg.data.description;
+  // TODO check hash for consistency before accepting changes, for security.
+  var keyHash = msg.data.keyHash;
+  var instanceOp = 'replace';
+  // Check if the instanceId already exists in the table.
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    instanceOp = 'add';
+    // Prepare fresh instance.
+    instance = DEFAULT_INSTANCE;
+    instance.description = description;
+    instance.keyHash = keyHash;
+    state.instances[instanceId] = instance;
+  }
+  // TODO delete old clients.
+  // Always associate instanceId with the latest clientId.
+  instance.clientId = clientId;
+  client.instanceId = instanceId;
+
   // Update the client's instanceId for the extension.
-  // freedom.emit('state-change', [{
-      // op: client.instanceId ? 'replace' : 'add',
-      // path: '/roster/' + msg.fromUserId + '/clients/' + msg.fromClientId +  '/instanceId',
-      // value: instanceId
-  // }]);
-  state.roster[msg.fromUserId].clients[msg.fromClientId].instanceId = instanceId;
-  state.roster[msg.fromUserId].clients[msg.fromClientId].description = description;
-  state.roster[msg.fromUserId].clients[msg.fromClientId].keyHash = keyHash;
+  // state.roster[msg.fromUserId].clients[msg.fromClientId].instanceId = instanceId;
+  // state.roster[msg.fromUserId].clients[msg.fromClientId].description = description;
+  // state.roster[msg.fromUserId].clients[msg.fromClientId].keyHash = keyHash;
   freedom.emit('state-change', [{
-      op: client.instanceId ? 'replace' : 'add',
+      op: 'replace',
       path: '/roster/' + msg.fromUserId,
       value: state.roster[msg.fromUserId]
-  }]);
+    }, {
+      op: instanceOp,
+      path: '/instances/' + instanceId,
+      value: instance
+    }
+  ]);
   return true;
 }
