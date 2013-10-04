@@ -57,45 +57,40 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
-      // $rootScope.roster = model.roster;
-
-      // $rootScope.$watch('model.roster', function (roster) {
-        // if (!roster) return;
-        // $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
-        // $rootScope.contactsMessageable = filter(roster, messageable);
-      // }, true);
-
-      // $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
-      // $rootScope.$watch('contactsMessageable', updateCanGetFrom, true);
-
-      // function updateCanGetFrom() {
-        // $rootScope.canGetFrom = {};
-        // $rootScope.cannotGetFrom = {};
-        // _.each($rootScope.contactsMessageable, function (contact) {
-          // if (contact.userId in model.canGetFrom) {
-            // $rootScope.canGetFrom[contact.userId] = contact;
-          // } else {
-            // $rootScope.cannotGetFrom[contact.userId] = contact;
-          // }
-        // });
-      // }
 
       $rootScope.resetState = function (msgName, data) {
         localStorage.clear();
         freedom.emit('reset', null);
       }
 
-      // $rootScope.sendMessage = function (contact, msg) {
-        // XXX freedom.emit('send-message', {to: contact.userId, msg})
-        //     gets intercepted by non-freedom clients and is not received by uproxy clients
-        // _(contact.clients).filter({status: 'messageable'}).each(
-            // function (client) {
-          // freedom.emit('send-message', {
-            // to: client.clientId,
-            // toUserId: contact.userId,
-            // message: msg});
-        // });
-      // }
+      // These work the same even if |client| is an instance - so long as it
+      // contains the attribute |clientId|.
+
+      // Request access through a friend.
+      $rootScope.requestAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'request-access');
+      };
+      $rootScope.cancelRequest = function(client) {
+        $rootScope.sendMessage(client.clientId, 'cancel-request');
+      }
+      $rootScope.acceptAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'accept-access');
+      };
+      $rootScope.startAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'start-proxying');
+      };
+
+      // Providing access for a friend:
+      $rootScope.offerAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'offer');
+      }
+      $rootScope.grantAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'allow');
+      };
+      $rootScope.revokeAccess = function(client) {
+        $rootScope.sendMessage(client.clientId, 'deny');
+      };
+      $rootScope.denyAccess = $rootScope.revokeAccess;
 
       // |id| can be either a client id or a user id.
       $rootScope.sendMessage = function (id, msg) {
@@ -148,7 +143,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       $rootScope.onStateChange = function (patch) {
         $rootScope.$apply(function () {
-          console.info('got state change:', patch);
+          // console.info('got state change:', patch);
           $rootScope.connectedToApp = true;
           // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
           if (_.isEmpty(model)) {  // Refresh state if local model is empty.
