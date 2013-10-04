@@ -237,7 +237,8 @@ ul {
 .contact-image {
   position: absolute;
   left: 1px;
-  top: 4px; }
+  top: 4px;
+  height: 100%; }
 
 #contact-details {
   display: inline-block;
