@@ -189,10 +189,18 @@ function _validateStoredInstance(instanceId, instanceData) {
       return false;
     }
   }
-  if ((instanceData.trust.asProxy === undefined) ||
-      (instanceData.trust.asProxy != "yes" && instanceData.trust.asProxy != "no") ||
-      (instanceData.trust.asClient === undefined) ||
-      (instanceData.trust.asClient != "yes" && instanceData.trust.asClient != "no")) {
+  var testTrustValue = function(variable) {
+    if (instanceData.trust[variable] === undefined) {
+      return false;
+    }
+    var value = instanceData.trust[variable];
+    if (value != "yes" && value != "no" && value != "requested" && value != "offered") {
+      return false;
+    }
+    return true;
+  };
+
+  if (!testTrustValue('asProxy') || !testTrustValue('asClient')) {
     log.debug("_validateStoredInstance: Rejecting instanceId " + instanceId + " for trust value " +
         JSON.stringify(instanceData.trust));
     return false;
@@ -260,6 +268,7 @@ function _loadStateFromStorage(state) {
         console.log("instance " + instanceId + " not found");
       } else if (!_validateStoredInstance(instanceId, v)) {
         console.log("instance " + instanceId + " was bad:", v);
+        _removeInstanceId(instanceId);
       } else {
         instancesTable[instanceId] = v;
       }
@@ -273,7 +282,11 @@ function _loadStateFromStorage(state) {
     }
     console.log('instanceIds:' + instanceIds);
     for (i = 0; i < instanceIds.length; i++) {
-      checkAndSave(instanceIds[i]);
+      if (instanceIds[i] == "undefined") {
+        _removeInstanceId("undefined");
+      } else {
+        checkAndSave(instanceIds[i]);
+      }
     }
   }, []);
 
@@ -309,7 +322,7 @@ function _saveInstance(instanceId, userId) {
 function _saveInstanceId(instanceId) {
   log.debug('_saveInstanceId: saving ' + instanceId + '.');
   _loadFromStorage(StateEntries.INSTANCEIDS, function (ids) {
-    console.log('_saveInstanceId got: ', ids);
+    console.log('_saveInstanceId got: ' + ids);
     if (ids !== undefined && ids !== null) {
       var instanceids = JSON.parse(ids);
       if (instanceids.indexOf(instanceId) < 0) {
@@ -323,6 +336,22 @@ function _saveInstanceId(instanceId) {
         _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify([instanceId]));
     }
   }, []);
+}
+
+function _removeInstanceId(instanceId) {
+  storage.remove("instance/" + instanceId);
+  log.debug('_removeInstanceId: removing ' + instanceId + '.');
+  _loadFromStorage(StateEntries.INSTANCEIDS, function (ids) {
+    console.log('_removeInstanceId got: ', ids);
+    if (ids !== undefined && ids !== null) {
+      var instanceids = JSON.parse(ids);
+      var index = instanceids.indexOf(instanceId);
+      if (index >= 0) {
+        instanceids.splice(index,1);
+        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(instanceids));
+      }
+    }
+  }, null);
 }
 
 function _saveAllInstances() {
@@ -583,7 +612,7 @@ function _isMessageableUproxy(client) {
 function _updateUser(newData) {
   var userId = newData.userId;
   for (var clientId in newData.clients) {
-    log.debug('_updateUser: client: ', clientId);
+    log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];
     // Skip non-UProxy clients.
     // TODO(uzimizu): Figure out best way to request new UProxy users...
@@ -594,9 +623,9 @@ function _updateUser(newData) {
     // Synchronize Instance data if this is a new client.
     var existingClient = _clients[clientId];
     if (!existingClient) {
-      log.debug('_updateUser: deciding to message ' + client);
+      log.debug('_updateUser: deciding to message ' + JSON.stringify(client));
       _sendNotifyInstance(clientId, client);
-    } else { // Otherwise, preserve existing instance id.
+    } else if (existingClient.instanceId) { // Otherwise, preserve existing instance id.
       log.debug('Preserving data. ' + existingClient.instanceId);
       client.instanceId = existingClient.instanceId;
     }
@@ -687,21 +716,30 @@ function _handleStartProxyingSent(msg, clientId) {
 
 // Instance ID (+ more) Synchronization I/O
 
-function _buildInstancePayload(msg) {
+function _buildInstancePayload(msg, clientId) {
+  // Look up permissions for the clientId.
+  var u, trust = null;
+  for (u in state.roster) {
+    if (state.roster[u].clients[clientId] !== undefined) {
+      trust = state.roster[u].clients[clientId].trust;
+    }
+  }
+
   return JSON.stringify({
     message: msg,
     data: {
       instanceId: '' + state.me.instanceId,
       description: '' + state.me.description,
-      keyHash: '' + state.me.keyHash
+      keyHash: '' + state.me.keyHash,
+      trust: (trust? trust : { asProxy: Trust.NO, asClient: Trust.NO })
     }});
 }
 
 function _sendNotifyInstance(user, client) {
   if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
-    var msg = _buildInstancePayload('notify-instance');
+    var msg = _buildInstancePayload('notify-instance', user);
     log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
-    identity.sendMessage(user, msg);  // user can be a clientId.
+    identity.sendMessage(user, msg);  // user is a clientId.
   }
 }
 
