@@ -617,6 +617,7 @@ function _isMessageableUproxy(client) {
  */
 function _updateUser(newData) {
   var userId = newData.userId;
+  log.debug('User: ' + JSON.stringify(newData));
   for (var clientId in newData.clients) {
     log.debug('_updateUser: client: ' + clientId);
     var client = newData.clients[clientId];

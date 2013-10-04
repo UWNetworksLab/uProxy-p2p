@@ -62,17 +62,12 @@
               ng-click="toggleContact(contact)"
               tabindex="{{ $index + 10 }}">
             {{contact.name}}
-            <img src='{{contact.imageData}}'>
-            <!--
-            <span class="contact-hover" ng-show="contact.hovered">
-              ({{contact.userId}})
-            </span>
-            -->
+            <img class="contact-image" src='{{contact.imageData}}'>
           </li>
-          <div ng-show="isEmpty(model.roster)">
-            Loading Roster...
-          </div>
         </ul>
+        <div ng-show="isEmpty(model.roster)">
+          Loading Roster...
+        </div>
         </section>
 
         <div id="contact-details" ng-show="rosterNudge">
