@@ -725,11 +725,25 @@ function _handleStartProxyingSent(msg, clientId) {
 
 function _buildInstancePayload(msg, clientId) {
   // Look up permissions for the clientId.
-  var u, trust = null;
+  var u, trust = null, consent;
   for (u in state.roster) {
     if (state.roster[u].clients[clientId] !== undefined) {
-      trust = state.roster[u].clients[clientId].trust;
+      // How we trust them to be a proxy for us (asProxy) or a client
+      // for us (asClient).
+      trust = state.instances[state.roster[u].clients[clientId].instanceId].trust;
     }
+  }
+
+  if (trust !== null) {
+    // For each direction (e.g., I proxy for you, or you proxy for me), there
+    // is a logical AND of consent from both parties.  If the local state for
+    // trusting them to be a client (trust.asProxy) is Yes or Offered, we
+    // consent to being a proxy.  If the local state for trusting them to proxy
+    // is Yes or Requested, we consent to being a client.
+    consent = { asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0,
+                asProxy: ["yes", "offered"].indexOf(trust.asClient) >= 0 };
+  } else {
+    consent = { asProxy: false, asClient: false };
   }
 
   return JSON.stringify({
@@ -738,7 +752,7 @@ function _buildInstancePayload(msg, clientId) {
       instanceId: '' + state.me.instanceId,
       description: '' + state.me.description,
       keyHash: '' + state.me.keyHash,
-      trust: (trust? trust : { asProxy: Trust.NO, asClient: Trust.NO })
+      consent: consent,
     }});
 }
 
@@ -762,6 +776,7 @@ function _handleNotifyInstanceReceived(msg, clientId) {
   var userId = msg.fromUserId;
   var clientId = msg.fromClientId;
   var user = state.roster[userId];
+  var consent = msg.data.consent;
   if (!user) {
     log.error("user does not exist in roster for instanceId: " + instanceId);
     return false;
@@ -776,9 +791,27 @@ function _handleNotifyInstanceReceived(msg, clientId) {
 
   var instanceOp = 'replace';  // JSONpatch operation to send through freedom.
   var instance = state.instances[instanceId];
+  var trust;
+  if (consent === undefined) {
+    consent = {asProxy: false, asClient: false };
+  }
+
   if (!instance) {
     instance = _prepareNewInstance(instanceId, description, keyHash);
     instanceOp = 'add';
+    instance.trust.asClient = consent.asProxy? 'offered' : 'no';
+    instance.trust.asProxy = consent.asClient? 'requested' : 'no';
+  } else {
+    if (consent.asProxy) {
+      instance.trust.asProxy = ['yes', 'requested'].indexOf(instance.trust.asProxy) >= 0 ? 'yes' : 'offered';
+    } else {
+      instance.trust.asProxy = ['yes', 'requested'].indexOf(instance.trust.asProxy) >= 0 ? 'requested' : 'no';
+    }
+    if (consent.asClient) {
+      instance.trust.asClient = ['yes', 'offered'].indexOf(instance.trust.asClient) >= 0 ? 'yes' : 'requested';
+    } else {
+      instance.trust.asClient = ['yes', 'offered'].indexOf(instance.trust.asClient) >= 0 ? 'offered' : 'no';
+    }
   }
 
   var oldClientId = instance.clientId;
