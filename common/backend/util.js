@@ -57,6 +57,15 @@ function cloneDeep(val) {
   return JSON.parse(JSON.stringify(val)); // quick and dirty
 }
 
+// returns object[key] if it exists, or default if it doesn't.
+function getKeyWithDefault(object, key, def) {
+  if (object[key] !== undefined) {
+    return object[key];
+  } else {
+    return def;
+  }
+}
+
 /**
  * This function extracts the cryptographic key used to encrypt the data media
  * type (mid:data) from the provided sdp headers string. If no key can be
