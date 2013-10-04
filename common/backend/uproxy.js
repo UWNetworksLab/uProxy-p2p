@@ -669,7 +669,6 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
       '): got response. pending_instance_requests is [' + pending_instance_requests + ']');
   var instanceId = msg.data.instanceId;
   var description = msg.data.description;
-  // TODO check hash for consistency before accepting changes, for security.
   var keyHash = msg.data.keyHash;
   var userId = msg.fromUserId;
   var clientId = msg.fromClientId;
@@ -685,17 +684,17 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
     return false;
   }
 
+  // TODO actually check hash for consistency before accepting changes, for security.
+  _validateKeyHash(keyHash);
+
   // Check if the instanceId already exists in the Instance table.
   var instanceOp = 'replace';
   var instance = state.instances[instanceId];
   if (!instance) {
     instanceOp = 'add';  // Prepare fresh instance if necessary.
-    instance = DEFAULT_INSTANCE;
-    instance.description = description;
-    instance.keyHash = keyHash;
-    state.instances[instanceId] = instance;
+    instance = _prepareNewInstance(instanceId, description, keyHash);
   }
-  // Always associate instanceId with the latest clientId.
+  // Always synchronize the latest clientId for the instance.
   instance.clientId = clientId;
   client.instanceId = instanceId;
 
@@ -708,7 +707,7 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
     if (state.roster[userId].clients[oldclient].instanceId == instanceId) {
       log.debug('_handleRequestInstanceIdResponseReceived: deleting old client ID with same instance ID.' +
           ' instanceId: ' + instanceId + ', old client ID: ' + oldclient + ', new client ID:' + clientId);
-      delete state.roster[userId].clients[oldclient];
+      delete user.clients[oldclient];
     }
   }
   // Mark the request as satisfied.
@@ -729,5 +728,24 @@ function _handleRequestInstanceIdResponseReceived(msg, clientId) {
       value: instance
     }
   ]);
+  return true;
+}
+
+/**
+ * When a new instanceId is received, prepare a new entry for the Instance
+ * Table.
+ */
+function _prepareNewInstance(instanceId, description, keyHash) {
+  var instance = DEFAULT_INSTANCE;
+  instance.instanceId = instanceId;
+  instance.description = description;
+  instance.keyHash = keyHash;
+  state.instances[instanceId] = instance;
+  log.debug('Prepared NEW Instance: ', instance);
+  return instance;
+}
+
+function _validateKeyHash(keyHash) {
+  console.error('Not Implemented.');
   return true;
 }
