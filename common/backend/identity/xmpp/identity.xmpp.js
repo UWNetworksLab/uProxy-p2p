@@ -218,24 +218,24 @@ IdentityProvider.prototype.setDeviceAttr = function (fullJid, attr, value) {
 };
 
 IdentityProvider.prototype.onOnline = function() {
-  //Send first presence message
+  // Send first presence message
   this.announce();
   this.status = 'online';
   this.dispatchEvent('onStatus', {
     userId: this.credentials.userId,
     network: NETWORK_ID,
-    status: this.status, 
+    status: this.status,
     message: "Woo!"
   });
-  //Get roster request (for names)
+  // Get roster request (for names)
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
-  //Get my own vCard
+  // Get my own vCard
   this.client.send(new window.XMPP.Element('iq', {
     type: 'get',
     to: this.credentials.userId
   }).c('vCard', {'xmlns': 'vcard-temp'}).up());
-  //Update status
+  // Update status
   var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
     if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
@@ -246,8 +246,8 @@ IdentityProvider.prototype.onOnline = function() {
 
 IdentityProvider.prototype.announce = function () {
   this.client.send(new window.XMPP.Element('presence', {})
-    .c("show").t("xa").up() //mark status of this client as 'extended away'.
-    .c("c", { // Advertise extended capabilities.
+    .c("show").t("xa").up() // mark status of this client as 'extended away'.
+    .c("c", { //  Advertise extended capabilities.
       xmlns: "http://jabber.org/protocol/caps",
       node: this.loginOpts.url,
       ver: this.loginOpts.version,

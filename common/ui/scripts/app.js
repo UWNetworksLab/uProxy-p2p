@@ -22,22 +22,22 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       return $sniffer;
     }]);
   }) //
-  .filter('messageable', function () {
-    return function (contact) {
-      return _.any(contact.clients, {status: 'messageable'});
-    };
-  })
-  .filter('onlineNotMessageable', ['$filter', function ($filter) {
-    var messageable = $filter('messageable');
-    return function (contact) {
-      return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
-    };
-  }])
-  .filter('offline', function () {
-    return function (contact) {
-      return _.all(contact.clients, {status: 'offline'});
-    };
-  })
+  // .filter('messageable', function () {
+    // return function (contact) {
+      // return _.any(contact.clients, {status: 'messageable'});
+    // };
+  // })
+  // .filter('onlineNotMessageable', ['$filter', function ($filter) {
+    // var messageable = $filter('messageable');
+    // return function (contact) {
+      // return _.any(contact.clients, {status: 'online'}) && !messageable(contact);
+    // };
+  // }])
+  // .filter('offline', function () {
+    // return function (contact) {
+      // return _.all(contact.clients, {status: 'offline'});
+    // };
+  // })
   // Run gets called every time the popup is openned. This initializes the main
   // extension UI and makes sure it is in sync with the app.
   .run([
@@ -50,53 +50,61 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     function(
         $filter, $http, $rootScope,
         freedom, onFreedomStateChange, model) {
-      var filter = $filter('filter'),
-          messageable = $filter('messageable'),
-          onlineNotMessageable = $filter('onlineNotMessageable');
+      // var filter = $filter('filter'),
+          // messageable = $filter('messageable'),
+          // onlineNotMessageable = $filter('onlineNotMessageable');
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
+      // $rootScope.roster = model.roster;
 
-      $rootScope.$watch('model.roster', function (roster) {
-        if (!roster) return;
-        console.log('watcher roster');
-        $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
-        $rootScope.contactsMessageable = filter(roster, messageable);
-        console.log($rootScope);
-      }, true);
+      // $rootScope.$watch('model.roster', function (roster) {
+        // if (!roster) return;
+        // $rootScope.contactsOnlineNotMessageable = filter(roster, onlineNotMessageable);
+        // $rootScope.contactsMessageable = filter(roster, messageable);
+      // }, true);
 
-      $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
-      $rootScope.$watch('contactsMessageable', updateCanGetFrom, true);
+      // $rootScope.$watch('model.canGetFrom', updateCanGetFrom, true);
+      // $rootScope.$watch('contactsMessageable', updateCanGetFrom, true);
 
-      function updateCanGetFrom() {
-        $rootScope.canGetFrom = {};
-        $rootScope.cannotGetFrom = {};
-        _.each($rootScope.contactsMessageable, function (contact) {
-          if (contact.userId in model.canGetFrom) {
-            $rootScope.canGetFrom[contact.userId] = contact;
-          } else {
-            $rootScope.cannotGetFrom[contact.userId] = contact;
-          }
-        });
-      }
+      // function updateCanGetFrom() {
+        // $rootScope.canGetFrom = {};
+        // $rootScope.cannotGetFrom = {};
+        // _.each($rootScope.contactsMessageable, function (contact) {
+          // if (contact.userId in model.canGetFrom) {
+            // $rootScope.canGetFrom[contact.userId] = contact;
+          // } else {
+            // $rootScope.cannotGetFrom[contact.userId] = contact;
+          // }
+        // });
+      // }
 
       $rootScope.resetState = function (msgName, data) {
         localStorage.clear();
         freedom.emit('reset', null);
       }
 
-      $rootScope.sendMessage = function (contact, msg) {
+      // $rootScope.sendMessage = function (contact, msg) {
         // XXX freedom.emit('send-message', {to: contact.userId, msg})
         //     gets intercepted by non-freedom clients and is not received by uproxy clients
-        _(contact.clients).filter({status: 'messageable'}).each(
-            function (client) {
-          freedom.emit('send-message', {
-            to: client.clientId,
-            toUserId: contact.userId,
-            message: msg});
+        // _(contact.clients).filter({status: 'messageable'}).each(
+            // function (client) {
+          // freedom.emit('send-message', {
+            // to: client.clientId,
+            // toUserId: contact.userId,
+            // message: msg});
+        // });
+      // }
+
+      // |id| can be either a client id or a user id.
+      $rootScope.sendMessage = function (id, msg) {
+        freedom.emit('send-message', {
+            to: id,
+            message: msg
         });
-      }
+            // toUserId: contact.userId,
+      };
 
       $rootScope.changeOption = function (key, value) {
         freedom.emit('change-option', {key: key, value: value});

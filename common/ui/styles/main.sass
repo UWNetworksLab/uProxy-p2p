@@ -1,19 +1,324 @@
-@import compass
-@import bootstrap-sass/lib/bootstrap
+// Primary stylesheet for both popup and options page.
+
+$fontSize: 16px
+
+@font-face
+  font-family: 'Eurostile'
+  src: url('eurostile.ttf') format('truetype')
+
+@mixin smooth
+  -webkit-transition: all 0.23s !important
+  -moz-transition: all 0.23s !important
+  -o-transition: all 0.23s !important
+  transition: all 0.23s !important
+
+@mixin smooth-slow
+  -webkit-transition: all 0.5s !important
+  -moz-transition: all 0.5s !important
+  -o-transition: all 0.5s !important
+  transition: all 0.5s !important
+
+body
+  font-family: Eurostile, sans-serif
+  height: 100%
+  margin: 0
+  padding: 0
+  overflow: hidden
+  font-size: $fontSize
+  // background-color: #222
+
+h1, h2, h3, h4, h5
+  margin: 0
+  padding: 0
+
+ul
+  list-style: none
+  padding: 0
+
+::-webkit-scrollbar
+  width: 6px
+
+::-webkit-scrollbar:hover
+  width: 10px
+
+::-webkit-scrollbar-track
+  background-color: #f9f9f9
+
+::-webkit-scrollbar-track:window-inactive
+  background-color: #888
+
+::-webkit-scrollbar-thumb
+  background-color: #aaa
+  height: 114.589px
+
+::-webkit-scrollbar-thumb:hover
+  background-color: #bbb
+
+
+.btn
+  border: 1px solid #aaa
+  color: #333
+  background: #fff
+  border-radius: 2px
+  cursor: pointer
+.btn:hover, .btn:focus
+  border-color: #999
+  box-shadow: 0 1px 3px #aaa
+  outline: none
+.btn:active
+  box-shadow: 0 1px 3px #aaa inset
+  color: #777
+
+.btn-request
+  position: absolute
+  right: 0
+
+.btn-back
+  background: transparent url('../icons/back_arrow.png') no-repeat center
+  border: none
+  height: 24px
+  width: 30px
+
+.btn-back:hover, .btn-back:focus
+  opacity: 0.5
+  outline: none
+  cursor: pointer
+
+#header
+
+.title
+  padding: 0 8px
+
+#contact-header
+  h1
+    position: fixed
+    width: 80%
+    padding: 0 10%
+    text-align: center
+    top: 10px
+    pointer-events: none
+    white-space: nowrap
+
+#options-btn
+  position: absolute
+  top: 0
+  right: 0
+  background: transparent url('../icons/settings.svg') no-repeat center center
+  border: none
+  outline: none
+  padding: 4px
+  width: 20px
+  height: 20px
+  text-decoration: none
+  opacity: 0.6
+  #include smooth
+
+#options-btn:hover, #options-btn:focus
+  opacity: 0.3
+#options-btn:active
+  opacity: 0.9
+
+#search-section
+  position: relative
+  z-index: 50
+
+#search-contacts
+  position: relative
+  z-index: 30
+  width: 358px
+  margin: 0
+  padding: 8px 20px
+  border: 1px solid #aaa
+  outline: none
+  color: #333
+  @include smooth
+
+#search-contacts:hover
+  box-shadow: 0 1px 3px #888 inset
+
+#search-contacts:focus
+  outline: none
+  box-shadow: 0 1px 2px #aaa
+
+#search-btn
+  position: absolute
+  z-index: 40
+  right: 0
+  top: 0
+  width: 26px
+  height: 30px
+  padding: 12px
+  border: none
+  background: transparent url('../icons/search.png') no-repeat center
+  background-size: 80%
+
+#search-btn:hover, #search-btn:focus
+  opacity: 0.5
+  outline: none
+
+#filters
+  position: relative
+  display: block
+  width: 100%
+  background-color: #fafafa
+  text-align: center
+  overflow: hidden
+  z-index: 20
+  padding: 2px
+  box-shadow: 0 1px 2px #aaa
+
+.filter
+  margin: 0
+  padding: 2px 16px
+  border: none
+  background-color: #fafafa
+  color: #999
+  @include smooth
+
+.filter:hover
+  background-color: #fbfbfb
+  box-shadow: 0 0 2px #aaa inset
+
+.filter:active, .filter:focus
+  outline: none
+  box-shadow: 0 0 3px #888 inset
+  color: #666
+
+#roster
+  position: relative
+  @include smooth
+
+#contacts-frame
+  position: relative
+  min-height: 520px
+  white-space: no-wrap
+  overflow-y: auto
+  overflow-x: hidden
+  border-top: 1px solid #eee
+  @include smooth
+
+#contacts-frame.ng-hide
+  display: block !important
+  left: -400px
+
+.contacts
+  position: absolute
+  background-color: #fafafa
+  width: 100%
+  min-height: 100%
+  margin: 0
+  padding: 0
+  @include smooth
+
+.contacts li
+  position: relative
+  z-index: 0
+  cursor: default
+  padding: 6px 20px
+  white-space: no-wrap
+  overflow: hidden
+  border: 1px solid transparent
+  border-left: none
+  border-right: none
+  @include smooth
+
+.contacts li:hover, .contacts li:focus
+  background-color: #fff
+  border-color: #ddd
+  color: #000
+  z-index: 50
+  top: -2px
+  box-shadow: 0 2px 6px 1px #ddd
+  outline: none
+
+.contacts li.ng-hide
+  display: block !important
+  line-height: 0
+
+#contact-details
+  display: inline-block
+  position: fixed
+  width: 400px
+  top: 40px
+  left: 0
+  // color: #aaa
+  @include smooth
+
+#contact-details.ng-hide
+  display: inline-block !important
+  opacity: 0
+  left: 400px
+
+.client-details
+  position: relative
+  display: block
+  padding: 8px
+  margin: 2px
+  height: 53px
+  width: 82%
+  border: 1px solid #eee
+  font-size: $fontSize * 0.5
+  font-family: monospace
+  @include smooth
+
+.client-details:hover
+  border-color: #ddd
+  top: -2px
+  box-shadow: 0 2px 6px 1px #ddd
+
+#status
+  position: fixed
+  z-index: 50
+  bottom: 0
+  width: 100%
+  font-size: $fontSize * 0.8
+  color: #888
+  padding: 8px 0
+  cursor: default
+  border-top: 1px solid #eee
+  background-color: #fff
+  text-align: center
+
+// .contact-hover
+  // position: absolute !important
+  // bottom: -10px
+  // left: 0
+  // opacity: 1.0
+  // @include smooth
+// 
+// .contact-hover.ng-hide
+  // display: block !important
+  // z-index: -500
+  // opacity: 0 !important
+  // pointer-events: none
+
+// .contact-details.ng-hide-add,
+// .contact-details.ng-hide-remove
+  // @include smooth
+  // display: block !important
+// 
+// .contact-details.ng-hide-add.ng-hide-add-active,
+// .contact-details.ng-hide-remove
+  // @include smooth
+  // opacity: 0
+  // height: 0
+// 
+// .contact-details.ng-hide-add,
+// .contact-details.ng-hide-remove.ng-hide-remove-active
+  // opacity: 1
+  // height: 50px
+// 
+.contact-actions
+  display: none
 
 #popup
-  min-width: 357px
-  overflow-x: hidden
-  padding: 15px
+  width: 370.8204px
+  height: 600px
   .footer
     text-align: right
 
-.roster ul
-  max-height: 150px
-  overflow: scroll
-
 .large-font
-  font-size: $baseFontSize * 1.5
+  font-size: $fontSize * 1.5
 
 details
   & > summary
@@ -23,23 +328,30 @@ details
   & > *:not(summary)
     margin-left: 10px
 
+#options
+  position: relative
+  height: 100%
+
+#options-left
+  width: 50%
+
 #debug
+  position: fixed
+  top: 0
+  right: 0
+  width: 46%
+  height: 100%
+  padding: 2%
+  padding-bottom: 100px
+  overflow-y: auto
+  overflow-x: hidden
+  background-color: #000
+  color: #aff
   pre
-    font-size: $baseFontSize * .7
-    max-height: 200px
-    overflow: scroll
-  .btn-group
-    margin-bottom: 10px
+    font-size: $fontSize * .6
+    margin-bottom: 100px
   form[name=sendMsgForm]
     margin-bottom: 3px
-
-body#options
-  padding: 30px
-  #debug
-    margin-top: 50px
-
-ul.options
-  +no-bullets
 
 details.advanced
   margin-top: 15px

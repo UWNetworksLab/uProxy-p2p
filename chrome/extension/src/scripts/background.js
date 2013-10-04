@@ -21,6 +21,8 @@ var model = {};  // Singleton angularjs model for either popup or options.
 
 freedom.onConnected.addListener(function () {
   freedom.on('state-change', function (patchMsg) {
+    if (patchMsg[0].path.indexOf('roster') > 0)
+      console.log(patchMsg);
     onFreedomStateChange.dispatch(patchMsg);
   });
 });

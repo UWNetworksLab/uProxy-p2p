@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="UProxyExtension-popup" ng-csp>
+<html ng-app="UProxyExtension-popup" ng-csp id="popup">
   <head>
     <meta charset="utf-8">
 
@@ -9,6 +9,7 @@
     <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
     <script src="bower_components/lodash/dist/lodash.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
     <script src="bower_components/angular-lodash/angular-lodash.js"></script>
     <!--script src="bower_components/oauth2-extensions/lib/oauth2.js"></script-->
 
@@ -19,8 +20,8 @@
 
   </head>
   <!-- TODO: i18n -->
-  <body><div ng-cloak ng-controller="MainCtrl" id="popup">
-    <section ng-show="!connectedToApp">
+  <body><div ng-cloak ng-controller="MainCtrl">
+    <section ng-hide="connectedToApp">
       Not connected to
       <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
       UProxy app</a>. Please ensure it is
@@ -28,22 +29,133 @@
       <a href="https://github.com/UWNetworksLab/UProxy/#testing-in-chrome" target="_blank">
       installed</a> and running by checking your <code>chrome://extensions</code> page.
     </section>
+
     <section ng-show="connectedToApp">
+      <section id="header">
+        <section id="search-section" ng-hide="rosterNudge">
+
+          <input type="text" id="search-contacts" placeholder="search contacts"
+              ng-model="search"
+              ng-blur="searchFocused=false"
+              ng-focus="searchFocused=true">
+          </input>
+
+          <button type="search" id="search-btn"></button>
+
+          <section id="filters">
+            <button id="my-access" class="filter">My Access</button>
+            <button id="all-access" class="filter">All</button>
+            <button id="friends-access" class="filter">Friends' Access</button>
+          </section>
+
+        </section>
+        <section id="contact-header" ng-show="rosterNudge">
+          <button class="btn-back" ng-click="rosterNudge=false"></button>
+          <h1>{{currentContact.name}}</h1>
+        </section>
+      </section>
+
+      <section id="roster">
+        <section id="contacts-frame" ng-hide="rosterNudge">
+        <ul class="contacts">
+          <li ng-repeat="contact in model.roster"
+              ng-click="toggleContact(contact)"
+              tabindex="{{ $index + 10 }}">
+            {{contact.name}}
+            <!--
+            <span class="contact-hover" ng-show="contact.hovered">
+              ({{contact.userId}})
+            </span>
+            -->
+          </li>
+          <div ng-show="isEmpty(model.roster)">
+            Loading Roster...
+          </div>
+        </ul>
+        </section>
+
+        <div id="contact-details" ng-show="rosterNudge">
+          <div class="client-details" ng-repeat="client in currentContact.clients">
+            {{ client.clientId }}
+            <br>
+            Network: {{ client.network }}
+            <br>
+            Status: {{ client.status }}
+            <br>
+            InstanceId: {{ client.instanceId }}
+            <div class="client-actions" ng-show="client.instanceId">
+              <div class="box-for-proxy"
+                  ng-switch="client.permissions.proxy">
+                <button class="btn"
+                    ng-switch-when="yes"
+                    ng-click="startAccess(client)">
+                  Start
+                </button>
+                <div ng-switch-when="requested">
+                  <button class="btn" ng-click="client.permissions.proxy='no'">
+                    Cancel
+                  </button>
+                  <span>Pending...</span>
+                </div>
+                <button class="btn"
+                    ng-switch-default
+                    ng-click="requestAccess(client)">
+                  Request
+                </button>
+              </div>
+
+              <div class="box-for-client"
+                  ng-switch="client.permissions.client">
+                <button class="btn"
+                    ng-switch-when="yes">
+                  Revoke Access
+                </button>
+                <div ng-switch-when="requested">
+                  <button ng-click="grantAccess(client)">
+                    Grant
+                  </button>
+                  <button class="btn" ng-click="freedomEmit('ignore', contact.userId)">
+                    Ignore
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--
+            <div>
+              <button class="btn">Allow</button>
+              <button class="btn">Ignore</button>
+            </div>
+            <div>
+              <button class="btn">Request</button>
+            </div>
+            <div>
+              <button class="btn" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
+            </div>
+          -->
+        </div>
+      </section>
+
+      <section id="status">
+        Not Connected
+        <a id="options-btn" href="options.html" target="_blank" title="{{'options'|i18n}}"></a>
+      </section>
       <!--
       <section ng-show="model.identityStatus.status == 'offline'">
         <button class="btn btn-danger" ng-click="authGoog()">g+ sign in</button>
       </section>
-
       <section ng-show="model.identityStatus.status == 'connecting'">
         Connecting to Google Talk...
       </section>
-
       <section ng-show="model.identityStatus.status == 'online'">
       -->
       <section class="pagination-right muted">
         {{model.me.userId}}
       </section>
 
+      <!--
+      <h4>Status</h4>
       <section class="current-sessions">
         <section class="current-sessions-get">
           <section ng-show="isEmpty(model.currentSessionsToInitiate)">
@@ -99,10 +211,11 @@
 
         <section class="request-access" ng-hide="isEmpty(cannotGetFrom)">
           <h5>Request permission to get access through:</h5>
-          <ul>
+          <ul class="contacts">
             <li ng-repeat="(id, contact) in cannotGetFrom">
-              {{contact.name}} ({{contact.userId}})
-              <button class="btn btn-mini" ng-click="sendMessage(contact, 'request-access')">
+              {{contact.name}}
+              <span class="contact-detail">({{contact.userId}})</span>
+              <button class="btn btn-request" ng-click="sendMessage(contact, 'request-access')">
                 <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request
               </button>
             </li>
@@ -135,12 +248,6 @@
             </li>
           </ul>
         </section>
-      <!--
-      </section>
-      -->
-
-      <section class="footer">
-        <a class="btn btn-small large-font" href="options.html" target="_blank" title="{{'options'|i18n}}">⚙</a>
       </section>
 
       <hr>
@@ -168,10 +275,6 @@
                 </option>
               </select>
 
-              <div ng-show="isEmpty(model.roster)">
-                Loading Roster...
-              </div>
-
               <div class="input-append">
                 <input type="text" required ng-model="msg" placeholder="message">
                 <input type="submit" value="send" class="btn" ng-disabled="sendMsgForm.$invalid">
@@ -185,6 +288,8 @@
           </details>
         </div>
       </details>
+      -->
+
     </section>
   </div></body>
 </html>

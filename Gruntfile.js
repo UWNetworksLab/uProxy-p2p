@@ -39,6 +39,7 @@ var chrome_ext_files = [
   'common/ui/scripts/**',
   'common/ui/styles/**',
   'common/ui/bower_components/angular/angular.js',
+  'common/ui/bower_components/angular-animate/angular-animate.js',
   'common/ui/bower_components/angular-lodash/angular-lodash.js',
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',

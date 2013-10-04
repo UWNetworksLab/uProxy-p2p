@@ -1,12 +1,47 @@
 'use strict';
 
-angular.module('UProxyExtension-popup', ['UProxyExtension'])
-  // Extension stores no initial state for the main controller.
-  .controller('MainCtrl', [function () {}])
+var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
+  // Main extension controller.
+  .controller('MainCtrl', ['$scope', function ($scope) {
+
+    // State for roster vs. detail view.
+    $scope.rosterNudge = false;
+    $scope.currentContact = {
+      'name': 'Nobody'
+    };
+
+    $scope.toggleContact = function(c) {
+      // c.detailsVisible = !c.detailsVisible;
+      $scope.currentContact = c;
+      console.log(c);
+      $scope.rosterNudge = true;
+    };
+
+
+    $scope.startAccess = function(client) {
+      $scope.sendMessage(client.clientId, 'start-proxying');
+    };
+    // Request access through a friend.
+    $scope.requestAccess = function(client) {
+      $scope.sendMessage(client.clientId, 'request-access');
+      if (!client.permissions)
+        client.permissions = {};
+      client.permissions.proxy = 'requested';
+      // Update the UI
+    };
+
+    $scope.grantAccess = function(client) {
+      sendMessage(client.clientId, 'allow');
+      if (!client.permissions)
+        client.permissions = {};
+      client.permissions.client = 'yes';
+    };
+
+  }])
   // The controller for debug information/UI.
   .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model',
       function ($filter, $scope, freedom, model) {
-    var messageable = $filter('messageable');
+    // var messageable = $filter('messageable');
 
     $scope.submitChat = function () {
       var contact = model.roster[$scope.userId];
