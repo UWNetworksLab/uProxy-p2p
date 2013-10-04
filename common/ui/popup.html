@@ -77,15 +77,13 @@
         <div id="contact-details" ng-show="rosterNudge">
           <div class="client-details" ng-repeat="client in currentContact.clients">
             {{ client.clientId }}
+            <br>Network: {{ client.network }}
+            <br>Status: {{ client.status }}
             <br>
-            Network: {{ client.network }}
-            <br>
-            Status: {{ client.status }}
-            <br>
-            InstanceId: {{ client.instanceId }}
             <div class="client-actions" ng-show="client.instanceId">
+              <h5>InstanceId: {{ client.instanceId }}</h5>
               <div class="box-for-proxy"
-                  ng-switch="client.permissions.proxy">
+                  ng-switch="model.instances[client.instanceId].trust.asProxy">
                 <button class="btn"
                     ng-switch-when="yes"
                     ng-click="startAccess(client)">
@@ -105,7 +103,7 @@
               </div>
 
               <div class="box-for-client"
-                  ng-switch="client.permissions.client">
+                  ng-switch="instances[client.instanceId].trust.asClient">
                 <button class="btn"
                     ng-switch-when="yes">
                   Revoke Access
