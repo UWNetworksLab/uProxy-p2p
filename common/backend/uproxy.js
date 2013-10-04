@@ -606,7 +606,7 @@ function _isMessageableUproxy(client) {
   // TODO(uzimizu): Make identification of whether or not this is a uproxy
   // client more sensible.
   var retval = (/* [issue 21] client.network == 'google' && */ client.status == 'online'
-      && client.clientId.indexOf('/uproxy') > 0);
+      && client.clientId.indexOf('/uproxy') > 0) || client.status == 'messageable';
   return retval;
 }
 
@@ -630,6 +630,7 @@ function _updateUser(newData) {
 
     // Synchronize Instance data if this is a new client.
     var existingClient = _clients[clientId];
+    log.debug('Existing client: ', existingClient);
     if (!existingClient) {
       log.debug('_updateUser: deciding to message ' + JSON.stringify(client));
       _sendNotifyInstance(clientId, client);
