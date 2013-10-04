@@ -211,7 +211,7 @@ IdentityProvider.prototype.setDeviceAttr = function (fullJid, attr, value) {
   if (clientList[fullJid]) {
     clientList[fullJid][attr] = value;
   } else {
-    clientList[fullJid] = {clientId: fullJid};
+    clientList[fullJid] = {clientId: fullJid, network: NETWORK_ID};
     clientList[fullJid][attr] = value;
   }
   this.sendChange(baseJid);
@@ -331,7 +331,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     //Set Uproxy capability
     var cap = stanza.getChild('c');
     //TODO check application version mismatch
-    if (cap && cap.attrs.node==this.url) { //&& cap.attrs.ver==this.loginOpts.version) {
+    if (cap && cap.attrs.node==this.loginOpts.url) { //&& cap.attrs.ver==this.loginOpts.version) {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'messageable');
     } else {
       this.setDeviceAttr(stanza.attrs.from, 'status', 'online');
@@ -381,7 +381,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
       query.c('identity', {category: 'client', name: this.loginOpts.agent, type: 'bot'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/caps'}).up()
         .c('feature', {'var': 'http://jabber.org/protocol/disco#info'}).up()
-        .c('feature', {'var': this.url}).up();
+        .c('feature', {'var': this.loginOpts.url}).up();
       this.client.send(stanza);
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'result') {
