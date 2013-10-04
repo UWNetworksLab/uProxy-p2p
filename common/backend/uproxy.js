@@ -72,19 +72,22 @@ var RESET_STATE = {
 };
 var state = cloneDeep(RESET_STATE);
 var _clients = {};  // clientId -> client reference table.
-var _instances = state.instances;
 
 // Mapping functions between instanceIds and clientIds.
 function instanceToClientId(instanceId) {
-  var instance = _instances[instanceId];
+  var instance = state.instances[instanceId];
   if (!instance) { return null; }
   return instance.clientId;
 }
 
-function clientToInstanceId(clientId) {
+// clientId -> Instance object
+function clientToInstance(clientId) {
   var client = _clients[clientId];
+  log.debug('finding instance for client ' + clientId, client);
   if (!client) { return null; }
-  return client.instanceId;
+  log.debug('meow! ', _clients);
+  log.debug('lol! ', state.instances);
+  return state.instances[client.instanceId];
 }
 
 // Instance object.
@@ -552,9 +555,7 @@ function _updateUser(newData) {
     if (!existingClient) {
       log.debug('_updateUser: deciding to message ' + client);
       _sendNotifyInstance(clientId, client);
-
-    } else {
-      // Otherwise, preserve existing instance id.
+    } else { // Otherwise, preserve existing instance id.
       log.debug('Preserving data. ' + existingClient.instanceId);
       client.instanceId = existingClient.instanceId;
     }
@@ -566,14 +567,22 @@ function _updateUser(newData) {
 
 function _updateTrust(clientId, asProxy, trustValue) {
   var instance = clientToInstance(clientId);
+  log.debug(instance);
   if (!instance) {
     log.debug('Could not find instance corresponding to client: ' + clientId);
     return false;
   }
   var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
   log.debug('Modifying trust value: ', instance, trust);
-  trust = trustValue;
-  // TODO freedom emit? and local storage?
+  if (asProxy) {
+    instance.trust.asProxy = trustValue;
+  } else {
+    instance.trust.asClient = trustValue;
+  }
+  // TODO(uzimizu): local storage?
+  freedom.emit('state-change', [{
+      op: 'replace', path: '/instances/' + instance.instanceId, value: instance
+  }]);
   return true;
 }
 
@@ -680,7 +689,7 @@ function _handleNotifyInstanceReceived(msg, clientId) {
   _validateKeyHash(keyHash);
 
   var instanceOp = 'replace';  // JSONpatch operation to send through freedom.
-  var instance = _instances[instanceId];
+  var instance = state.instances[instanceId];
   if (!instance) {
     instance = _prepareNewInstance(instanceId, description, keyHash);
     instanceOp = 'add';
