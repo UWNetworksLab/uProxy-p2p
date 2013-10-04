@@ -1,3 +1,4 @@
+var VCARD_TIMEOUT = 3000;
 var chrome = {
   socket: freedom['core.socket']()
 };
@@ -18,6 +19,7 @@ function IdentityProvider() {
   this.client = null;
   this.credentials = null;
   this.loginOpts = null;
+  this.vCardRequestTime = {};
 
   this.status = 'offline';
   //dispatchEvent is not bound until after constructor
@@ -232,7 +234,7 @@ IdentityProvider.prototype.onOnline = function() {
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
   // Get my own vCard
-  this.getVCard(this.credentials.userId);
+  this.getVCard(this.credentials.userId, 'unknown');
   // Update status
   var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
@@ -302,7 +304,9 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       this.setAttr(from , 'imageUrl', photo.getChildText('EXTVAL'));
     } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
       var imageData = "data:"+photo.getChildText('TYPE')+";base64,"+photo.getChildText('BINVAL');
+      var imageHash = this.getAttr(from, 'imageHash');
       vcard['imageData'] = imageData;
+      vcard['imageHash'] = imageHash;
       this.setAttr(from, 'imageData', imageData);
     }
     storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
@@ -340,40 +344,48 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     }
   }
   this.setDeviceAttr(stanza.attrs.from, 'xmppStatus', status);
-  this.setDeviceAttr(stanza.attrs.from, 'xmppHash', hash);
+  this.setAttr(stanza.attrs.from, 'imageHash', hash);
+  //Update VCard
+  this.getVCard(stanza.attrs.from, hash);
     
-  //Fetch vCard if attributes not set
-  if (this.getAttr(stanza.attrs.from, 'name') == null) {
-    this.getVCard(stanza.attrs.from);
-  }
 };
 
-IdentityProvider.prototype.getVCard = function(from) {
+IdentityProvider.prototype.getVCard = function(from, hash) {
   storage.get('vcard-'+getBaseJid(from)).done((function(result) {
     //Fetch vcard from server if not cached
     if (result == null) {
-      console.log("Fetching VCard for " + getBaseJid(from));
-      //TODO(ryscheng) Used to permanently dedup iq requests. Probably a better way
-      this.setAttr(from, 'name', ' ');
-      this.client.send(new window.XMPP.Element('iq', {
-        type: 'get',
-        to: getBaseJid(from)
-      }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
+      this.fetchVCard(from);
     } else {
-      console.log("Cached VCard: " + result);
       var resultObj = JSON.parse(result);
-      if (resultObj['name']) {
-        this.setAttr(from, 'name', resultObj['name']);
-      }
-      if (resultObj['url']) {
-        this.setAttr(from, 'url', resultObj['url']);
-      }
-      if (resultObj['imageData']) {
-        this.setAttr(from, 'imageData', resultObj['imageData']);
+      if (hash == 'unknown' || hash == this.getAttr(from, 'imageHash')) {
+        console.log("Cached VCard: " + result);
+        if (resultObj['name'] && this.getAttr(from, 'name') !== resultObj['name']) {
+          this.setAttr(from, 'name', resultObj['name']);
+        }
+        if (resultObj['url'] && this.getAttr(from, 'url') !== resultObj['url']) {
+          this.setAttr(from, 'url', resultObj['url']);
+        }
+        if (resultObj['imageData'] && this.getAttr(from, 'imageData') !== resultObj['imageData']) {
+          this.setAttr(from, 'imageData', resultObj['imageData']);
+        }
+      } else {
+        this.fetchVCard(from);
       }
     }
   }).bind(this));
+};
 
+IdentityProvider.prototype.fetchVCard = function(from) {
+  var time = new Date();
+  var baseJid = getBaseJid(from);
+  if (!this.vCardRequestTime[baseJid] || (time - this.vCardRequestTime[baseJid]) > VCARD_TIMEOUT) {
+    this.vCardRequestTime[baseJid] = time;
+    console.log("Fetching VCard for " + getBaseJid(from));
+    this.client.send(new window.XMPP.Element('iq', {
+      type: 'get',
+      to: getBaseJid(from)
+    }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
+  }
 };
 
 IdentityProvider.prototype.onMessage = function(stanza) {
