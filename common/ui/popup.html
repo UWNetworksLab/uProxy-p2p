@@ -90,7 +90,7 @@
                   Start
                 </button>
                 <div ng-switch-when="requested">
-                  <button class="btn" ng-click="client.permissions.proxy='no'">
+                  <button class="btn" ng-click="cancelRequest(client)">
                     Cancel
                   </button>
                   <span>Pending...</span>
@@ -109,7 +109,7 @@
                   Revoke Access
                 </button>
                 <div ng-switch-when="requested">
-                  <button ng-click="grantAccess(client)">
+                  <button class="btn" ng-click="grantAccess(client)">
                     Grant
                   </button>
                   <button class="btn" ng-click="freedomEmit('ignore', contact.userId)">

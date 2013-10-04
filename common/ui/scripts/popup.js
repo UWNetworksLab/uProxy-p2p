@@ -21,24 +21,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       console.log(c);
       $scope.rosterNudge = true;
     };
-
-    $scope.startAccess = function(client) {
-      $scope.sendMessage(client.clientId, 'start-proxying');
-    };
-    // Request access through a friend.
-    $scope.requestAccess = function(client) {
-      $scope.sendMessage(client.clientId, 'request-access');
-      var trust = _getTrust(client);
-      // Emit to freedom.
-      // $scope.client.permissions.proxy = 'requested';
-    };
-
-    $scope.grantAccess = function(client) {
-      sendMessage(client.clientId, 'allow');
-      var trust = _getTrust(client);
-      // trust.asClient = 'yes';
-    };
-
   }])
   // The controller for debug information/UI.
   .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model',

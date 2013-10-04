@@ -67,24 +67,40 @@
                 ng-switch="instance.trust.asProxy">
               <button class="btn"
                   ng-switch-when="yes"
-                  ng-click="startAccess(client)">
+                  ng-click="startAccess(instance)">
                 Start
               </button>
               <div ng-switch-when="requested">
-                <button class="btn" ng-click="client.permissions.proxy='no'">
+                <button class="btn" ng-click="cancelRequest(instance)">
                   Cancel
                 </button>
                 <span>Pending...</span>
               </div>
               <button class="btn"
                   ng-switch-default
-                  ng-click="requestAccess(client)">
+                  ng-click="requestAccess(instance)">
                 Request
               </button>
             </div>
 
             <br>
             Trust as Client: {{ instance.trust.asClient }}
+            <div class="box-for-client"
+                ng-switch="instance.trust.asClient">
+              <button class="btn" ng-switch-when="yes"
+                  ng-click="revokeAccess(instance)">
+                Revoke Access
+              </button>
+              <div ng-switch-when="requested">
+                <button class="btn" ng-click="grantAccess(instance)">
+                  Grant
+                </button>
+                <button class="btn" ng-click="denyAccess(instance)">
+                  Ignore
+                </button>
+              </div>
+            </div>
+
           </div>
         </li>
       </ul>

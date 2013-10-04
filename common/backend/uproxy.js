@@ -83,9 +83,9 @@ function instanceToClientId(instanceId) {
 // clientId -> Instance object
 function clientToInstance(clientId) {
   var client = _clients[clientId];
+  log.debug('meow! ', _clients);
   log.debug('finding instance for client ' + clientId, client);
   if (!client) { return null; }
-  log.debug('meow! ', _clients);
   log.debug('lol! ', state.instances);
   return state.instances[client.instanceId];
 }
@@ -474,11 +474,12 @@ var notifyServer = function() {
 // Some of these message handlers deal with modifying trust values.
 // Others deal with actually starting and stopping a proxy connection.
 
-// Trust mutation.
+// Trust mutation - map from message -> new trust level.
 var TrustOp = {
   'allow': Trust.YES,
+  'deny': Trust.NO,
   'request-access': Trust.REQUESTED,
-  'deny': Trust.NO
+  'cancel-request': Trust.NO
 };
 
 var _msgReceivedHandlers = {
@@ -501,13 +502,16 @@ function _handleMessage(msg, beingSent) {
   var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
   if (trustValue) {
     // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = 'allow' == msg.message ? !beingSent : beingSent;
-    _updateTrust(msg.to, asProxy, trustValue);
-    // TODO freedom emit this stuff and save to storage!
+    var asProxy = 'allow' == msg.message || 'deny' == msg.message ? !beingSent : beingSent;
+    var clientId = msg.to || msg.toClientId;
+    if (!beingSent) {  // Update trust on the remote instance if received.
+      clientId = msg.fromClientId;
+    }
+    _updateTrust(clientId, asProxy, trustValue);
     return true;
   }
 
-  // Check if it's a proxy connection message.
+  // Other type of message - instance or proxy state update.
   var handler = null;
   if (!beingSent) {
     handler = _msgReceivedHandlers[msg.message];
