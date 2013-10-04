@@ -8,29 +8,28 @@ var onload = function() {
   var _active = false;
   var _peers = {};
 
+
   //
   var resetServer = function() {
     for (var contact in _peers) {
-      _peers[contact].close();
+      closePeer(contact);
     }
     _peers = {};
     _active = false;
-    if (_sctpPc) { _sctpPc.shutdown(); }
-    _sctpPc = null;
   };
 
   // Close the peerId. Closes all tcp sockets open for this peer.
-  var onClose = function(peerId) {
+  var closePeer = function(peerId) {
     //conn.disconnect();
     for (var i in _peers[peerId].webClients[peerId]) {
       _peers[peerId].webClients[i].close();
     }
-    _peers[peerId].sctpPc.close();
+    _peers[peerId].sctpPc.shutdown();
     delete _peers[peerId];
   };
 
   //
-  var initPeer = function(peerId, peerOptions) {
+  var _initPeer = function(peerId) {
     if (!_peers[peerId]) {
       _peers[peerId] = {};
     }
@@ -55,6 +54,7 @@ var onload = function() {
     _peers[peerId] = peer;
 
     sctpPc.on('onMessage', function(message) {
+      console.error("Server got message: ", message);
       if (! message.channelId) {
         console.error("Message received but missing channelId. Msg: " +
             JSON.stringify(message));
@@ -69,11 +69,11 @@ var onload = function() {
 
     var promise = freedom.core().createChannel();
     promise.done(function(chan) {
-      sctpPc.setup(chan.identifier, peerOptions, false);
+      sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
       chan.channel.done(function(channel) {
         // When
         channel.on('message', function(msg) {
-          freedom.emit('fromServer', { to: peerId, data: msg });
+          freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
         });
         // sctpPc will emit 'ready' when it is ready, and at that point we
         // have successfully initialised this peer connection and can set the
@@ -88,7 +88,7 @@ var onload = function() {
     });
   };
 
-  freedom.on('start', function(options) {
+  freedom.on('start', function() {
     resetServer();
     _active = true;
   });
@@ -98,14 +98,15 @@ var onload = function() {
   //            contains SDP headers.
   //
   // TODO: make sure callers set the peerId.
-  freedom.on('toServer', function(msg) {
+  freedom.on('handleSignalFromPeer', function(msg) {
+    console.log("server handleSignalFromPeer:", msg);
     if (!_active) return;
 
     // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));
     // Make a peer for this id if it doesn't already exist.
     if (!_peers[msg.peerId]) {
-      initPeer(msg.peerId);
+      _initPeer(msg.peerId);
     }
     if (_peers[msg.peerId].signallingChannel){
       _peers[msg.peerId].signallingChannel.emit('message', msg.data);

@@ -19,10 +19,15 @@ var log = {
   error: makeLogger('error')
 };
 
+// The channel to speak to the background page.
+var bgPageChannel = freedom;
+
+// Channels with module interface to speak to the various providers.
 var identity = freedom.identity();
 var storage = freedom.storage();
 var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
+
 
 var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
 var pending_instance_requests = [];
@@ -433,7 +438,7 @@ function onload() {
     notifyServer();
   });
 
-  client.on('fromClient', function(data) {
+  client.on('peerSignalFromClient', function(data) {
     log.debug('Connection Setup:', data);
     var contact = state.currentSessionsToInitiate['*'];
     if (!contact) {
@@ -451,7 +456,37 @@ function onload() {
     identity.sendMessage(contact, JSON.stringify({message: 'connection-setup-response', data: data}));
   });
 
+
+  bgPageChannel.on('local_test_proxying', function() {
+    _localTestProxying();
+  });
+
 };
+
+var _localTestProxying = function() {
+  var pA = "pA";
+  var pB = "pB";
+  console.log("Setting up signalling");
+  // msg : {peerId : string, // peer id message should go to.
+  //        data : json-string}
+  client.on("sendSignalToPeer", function (msg) {
+    server.emit("handleSignalFromPeer",
+        // Message came from pA.
+        {peerId: pA, data: msg.data});
+  });
+  // msg : {peerId : string, // peer id message should go to.
+  //        data : json-string}
+  server.on("sendSignalToPeer", function (msg) {
+    client.emit("handleSignalFromPeer",
+        // message came from pB
+        {peerId: pB, data: msg.data});
+  });
+  server.emit("start");
+  client.emit("start",
+      {'host': '127.0.0.1', 'port': 9999,
+        // peerId of the peer being routed to.
+       'peerId': pB});
+}
 
 var notifyClient = function() {
   if (client.started && !('*' in state.currentSessionsToInitiate)) {
@@ -618,7 +653,7 @@ function _handleConnectionSetupReceived(msg, contact) {
 
 function _handleConnectionSetupResponseReceived(msg, clientId) {
   // msg.data.from = msg['fromClientId'];
-  // client.emit('toClient', msg.data);
+  // client.emit('peerSignalToClient', msg.data);
 }
 
 // Handle sending -----------------------------------------------------------
@@ -723,3 +758,8 @@ function _handleNotifyInstanceReceived(msg, clientId) {
   ]);
   return true;
 }
+
+
+// Now that this module has got itself setup, it sends a 'ready' message to the
+// freedom background page.
+bgPageChannel.emit('ready');

@@ -14,7 +14,8 @@ var onload = function() {
   // The socks TCP Server.
   var _socksServer = null;
   // The Freedom sctp-peer connection.
-  var _sctpPeer = null;
+  var _sctpPc = null;
+  var _peerId = null;
   // The signalling channel
   var _signallingChannel = null;
   // Each TcpConnection that is active, indexed by it's corresponding sctp
@@ -31,24 +32,29 @@ var onload = function() {
     for (var channelId in _conns) {
       onClose(channelId, _conns[channelId]);
     }
-    if(_sctpPeer) { _sctpPeer.shutdown(); }
+    if(_sctpPc) { _sctpPc.shutdown(); }
     _conns = {};
-    _sctpPeer = null;
+    _sctpPc = null;
+    _peerId = null;
     _signallingChannel = null;
   };
 
   // Close a particular tcp-connection and data channel pair.
   var closeConnection = function(channelId, conn) {
     conn.disconnect();
-    _sctpPeer.closeDataChannel.bind(_sctpPeer, channelId);
+    _sctpPc.closeDataChannel.bind(_sctpPc, channelId);
     delete _conns[channelId];
   };
+
+  var _sendToPeer = function (channelId, buffer) {
+    _sctpPc.send({'channelLabel': channelId, 'buffer': buffer});
+  }
 
   // A SOCKS5 connection request has been received, setup the data channel and
   // start socksServering the corresponding tcp-connection to the data channel.
   var onConnection = function(conn, address, port, connectedCallback) {
-    if (!_sctpPeer) {
-      console.error("onConnection called without a _sctpPeer.");
+    if (!_sctpPc) {
+      console.error("onConnection called without a _sctpPc.");
       return;
     }
 
@@ -57,11 +63,12 @@ var onload = function() {
     _conns[channelId] = conn.tcpConnection;
 
     // When the TCP-connection receives data, send it on the sctp peer on the corresponding channelId
-    conn.tcpConnection.on('recv', _sctpPeer.send.bind(_sctpPeer, channelId));
+    conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelId));
     // When the TCP-connection closes
     conn.tcpConnection.on('disconnect', closeConnection.bind(null, channelId));
 
-    _sctpPeer.send(channelId, JSON.stringify({host: address, port: port}));
+    _sctpPc.send({'channelLabel' : channelId,
+      'text': JSON.stringify({host: address, port: port})});
 
     // TODO: we are not connected yet... should we have some message passing
     // back from the other end of the data channel to tell us when it has
@@ -75,10 +82,11 @@ var onload = function() {
     shutdown();
     _socksServer = new window.SocksServer(options.host, options.port, onConnection);
     _socksServer.tcpServer.listen();
+    _peerId = options.peerId;
 
     // Create sctp connection to a peer.
-    _sctpPeer = freedom['core.sctp-peerconnection']();
-    _sctpPeer.on('onMessage', function(message) {
+    _sctpPc = freedom['core.sctp-peerconnection']();
+    _sctpPc.on('onMessage', function(message) {
       if (message.channelId) {
         if (message.buffer) {
           _conns[message.channelId].sendRaw(message.buffer);
@@ -95,14 +103,14 @@ var onload = function() {
     });
 
     // When WebRTC data-channel transport is closed, shut everything down.
-    _sctpPeer.on('onCloseDataChannel', closeConnection);
+    _sctpPc.on('onCloseDataChannel', closeConnection);
 
     // Create a freedom-channel to act as the signallin channel.
     var promise = freedom.core().createChannel();
     promise.done(function(chan) {  // When the signalling channel is created.
       // chan.identifier is a freedom-_socksServer (not a socks _socksServer) for the
       // signalling channel used for signalling.
-      _sctpPeer.setup(chan.identifier, options, true);
+      _sctpPc.setup(chan.identifier, "client-to-" + _peerId, true);
 
       // when the channel is complete, setup handlers.
       chan.channel.done(function(signallingChannel) {
@@ -110,7 +118,7 @@ var onload = function() {
         // when the signalling channel gets a message, send that message to the
         // freedom 'fromClient' handlers.
         _signallingChannel.on('message', function(msg) {
-          freedom.emit('fromClient', { data: msg });
+          freedom.emit('sendSignalToPeer', {peerId: _peerId, data: msg});
         });
         // When the signalling channel is ready, set the global variable.
         _signallingChannel.on('ready', function() {});
@@ -118,9 +126,12 @@ var onload = function() {
     });
   });
 
-  // Send any toClient freedom messages to the signalling channel.
-  freedom.on('toClient', function(msg) {
+  // Send any messages from coming from the peer via the signalling channel
+  // handled by freedom, to the signalling channel input of the peer connection.
+  // msg : {peerId : string, data : json-string}
+  freedom.on('handleSignalFromPeer', function(msg) {
     if (_signallingChannel) {
+      console.log("client handleSignalFromPeer: ", msg);
       _signallingChannel.emit('message', msg.data);
     } else {
       console.log("Couldn't route incoming signaling message");

@@ -1,6 +1,7 @@
 /*
  * background.js is evaluated when the app is loaded.
  */
+"use strict";
 
 // We use the launch window for debugging.
 // TODO: Have a version of the UI here also.

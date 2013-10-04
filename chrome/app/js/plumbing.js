@@ -1,3 +1,5 @@
+"use strict";
+
 // The port that the extension connects to.
 var extPort;
 // A list of pending messages sent to the extension at the next possible
@@ -19,8 +21,16 @@ script.setAttribute('data-manifest', 'common/backend/uproxy.json');
 // Uncomment for clearer but less portable module error messages.
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
 script.src = 'common/freedom/freedom.js';
-
 document.head.appendChild(script);
+
+// Once the script had loaded, uProxyAppChannel is set to freedom, which is a channel to the
+var uProxyAppChannel = null;
+script.onload = function() {
+  uProxyAppChannel = freedom;
+  uProxyAppChannel.on('ready', function() {
+    console.log("uproxy.js is ready!");
+  });
+};
 
 // Called when an extension connects to the app.
 chrome.runtime.onConnectExternal.addListener(function(port) {
@@ -43,7 +53,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   extPort.postMessage("hello.");
 
   // TODO: remove this testing code.
-  setTimeout(function() { extPort.postMessage("ignore me."); }, 10);
+  // setTimeout(function() { extPort.postMessage("ignore me."); }, 10);
 
   extPort.onMessage.addListener(onExtMsg);
   for (var i = 0; i < pendingMsgs.length; i++) {
@@ -65,9 +75,9 @@ function onExtMsg(msg) {
   console.log(msg);
 
   if (msg.cmd == 'emit') {
-    freedom.emit(msg.type, msg.data);
+    uProxyAppChannel.emit(msg.type, msg.data);
   } else if (msg.cmd == 'on') {
-    freedom.on(msg.type, function (ret) {
+    uProxyAppChannel.on(msg.type, function (ret) {
       extPort.postMessage({
         cmd: 'on',
         type: msg.type,
@@ -75,7 +85,7 @@ function onExtMsg(msg) {
       });
     });
   } else if (msg.cmd == 'once') {
-    freedom.once(msg.type, function (ret) {
+    uProxyAppChannel.once(msg.type, function (ret) {
       extPort.postMessage({
         cmd: 'once',
         type: msg.type,

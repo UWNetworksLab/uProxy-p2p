@@ -11,6 +11,7 @@
     }
   },
   "permissions": [
-    "core.socket"
+    "core.socket",
+    "core.sctp-peerconnection"
   ]
 }
