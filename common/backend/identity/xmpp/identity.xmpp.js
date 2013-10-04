@@ -8,6 +8,7 @@ console.warn = function(f) {
 
 var window = {};
 var view = freedom['core.view']();
+var storage = freedom['core.storage']();
 
 function IdentityProvider() {
   //DEBUG
@@ -231,10 +232,7 @@ IdentityProvider.prototype.onOnline = function() {
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
   // Get my own vCard
-  this.client.send(new window.XMPP.Element('iq', {
-    type: 'get',
-    to: this.credentials.userId
-  }).c('vCard', {'xmlns': 'vcard-temp'}).up());
+  this.getVCard(this.credentials.userId);
   // Update status
   var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
@@ -288,22 +286,26 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     }
   }
   if (vCard && vCard.attrs.xmlns == 'vcard-temp') {
+    var vcard = {};
     var fn = vCard.getChildText('FN');
     var url = vCard.getChildText('URL');
     var photo = vCard.getChild('PHOTO');
     if (fn) {
+      vcard['name'] = fn;
       this.setAttr(from , 'name', fn);
     }
     if (url) {
+      vcard['url'] = url;
       this.setAttr(from , 'url', url);
     }
     if (photo && photo.getChildText('EXTVAL')) {
       this.setAttr(from , 'imageUrl', photo.getChildText('EXTVAL'));
     } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
-      var type = photo.getChildText('TYPE');
-      var bin = photo.getChildText('BINVAL');
-      this.setAttr(from, 'imageData', "data:"+type+";base64,"+bin);
+      var imageData = "data:"+photo.getChildText('TYPE')+";base64,"+photo.getChildText('BINVAL');
+      vcard['imageData'] = imageData;
+      this.setAttr(from, 'imageData', imageData);
     }
+    storage.set('vcard-'+getBaseJid(from), vcard);
   }
 
 };
@@ -338,18 +340,38 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     }
   }
   this.setDeviceAttr(stanza.attrs.from, 'xmppStatus', status);
-  this.setDeviceAttr(stanza.attrs.from, 'hash', hash);
+  this.setDeviceAttr(stanza.attrs.from, 'xmppHash', hash);
     
-  //Request vCard if not seen before
-  //TODO(ryscheng) - Do this in a better way that caches results
+  //Fetch vCard if attributes not set
   if (this.getAttr(stanza.attrs.from, 'name') == null) {
-    //TODO(ryscheng) Used to permanently dedup iq requests. Probably a better way
-    this.setAttr(stanza.attrs.from, 'name', ' ');
-    this.client.send(new window.XMPP.Element('iq', {
-      type: 'get',
-      to: getBaseJid(stanza.attrs.from)
-    }).c('vCard', {'xmlns': 'vcard-temp'}).up());
+    this.getVCard(stanza.attrs.from);
   }
+};
+
+IdentityProvider.prototype.getVCard = function(from) {
+  storage.get('vcard-'+getBaseJid(from)).done(function(result) {
+    //Fetch vcard from server if not cached
+    if (result == null) {
+      console.log("Fetching VCard for " + getBaseJid(from));
+      //TODO(ryscheng) Used to permanently dedup iq requests. Probably a better way
+      this.setAttr(from, 'name', ' ');
+      this.client.send(new window.XMPP.Element('iq', {
+        type: 'get',
+        to: getBaseJid(from)
+      }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
+    } else {
+      if (result['name']) {
+        this.setAttr(from, 'name', result['name']);
+      }
+      if (result['url']) {
+        this.setAttr(from, 'url', result['url']);
+      }
+      if (result['imageData']) {
+        this.setAttr(from, 'imageData', result['imageData']);
+      }
+    }
+  });
+
 };
 
 IdentityProvider.prototype.onMessage = function(stanza) {
