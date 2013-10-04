@@ -114,7 +114,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     "instanceId": "ssssssssshjafdshjadskfjlkasfs",
     "userId": "s@gmail.com",
     "network": "google",
-    "keyhash" : "HASHssssjklsfjkldfslkfljkdfsklas",
+    "keyHash" : "HASHssssjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "yes", // "no" | "requested" | "yes"
         "client": "no" // "no" | "requested" | "yes"
@@ -131,7 +131,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     "instanceId": "rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn",
     "userId": "r@facebook.com",
     "network": "facebook",
-    "keyhash" : "HASHrrrjklsfjkldfslkfljkdfsklas",
+    "keyHash" : "HASHrrrjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "no",
         "client": "yes"
@@ -144,7 +144,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     "instanceId": "qqqqjksdklflsdjkljkfdsa",
     "userId": "s@qq",
     "network": "manual",
-    "keyhash" : "HASHqqqqqjklsfjkldfslkfljkdfsklas",
+    "keyHash" : "HASHqqqqqjklsfjkldfslkfljkdfsklas",
     "permissions":
       { "proxy": "no",
         "client": "no"
@@ -234,8 +234,45 @@ function _loadStateFromStorage(state) {
   log.debug('_loadStateFromStorage: saving state: ' + JSON.stringify(state));
 }
 
+// Local storage mechanisms.
+
+// |instanceId| - string instance identifier (a 40-char hex string)
+// |name| - The name (human-readable format) of the user whose client we're saving.
+// |userId| - The userid such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
+// |rosterClient| - a RosterClient [ref: UProxy/wiki/Schemas]
+// |permitClient| - ACL bool ["yes","no"] for whether
+function _saveInstance(instanceId, name, userId, rosterClient, permitProxy, permitClient) {
+  // Be obscenely strict here, to make sure we don't propagate buggy
+  // state across runs (or versions) of UProxy.
+  var msg = { name: name,
+              description: rosterClient.description,
+              annotation: getKeyWithDefault(rosterClient, 'annotation', rosterClient.description),
+              instanceId: rosterClient.instanceId,
+              userId: userId,
+              keyHash: getKeyWithDefault(rosterClient, 'keyHash', ""),
+              permissions: { proxy: permitProxy,
+                             client: permitClient }
+            };
+
+  log.debug('_saveInstance(' + instanceId + ', ' + JSON.stringify(msg) + ')');
+  _saveToStorage("instance/" + instanceId, msg);
+}
+
+function _saveAllInstances() {
+  // Go through |state.roster.clients|, and save every instance with an instanceId.
+  for (var userId in state.roster) {
+    for (var clientId in state.roster[userId]) {
+      var rosterClient = state.roster[userId].clients[clientId];
+      if (rosterClient.instanceId !== undefined && rosterClient.instanceId) {
+        // TODO(mollyling): finish this.
+      }
+    }
+  }
+
+}
+
 function _saveStateToStorage() {
-  // TODO
+  // Ref: LOCAL_STORAGE_EXA
   var saveKeyPath = function (prefix, obj) {
     var k;
     if (typeof(obj) !== "object") {
@@ -315,6 +352,8 @@ function onload() {
       freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
       notifyClient();
       notifyServer();
+      // Are we online?  LET EVERYONE KNOW.
+      _transmitInstanceData();
     } else {
       // Must be a buddy
       state.roster[data.userId] = _updateInstanceIdsOnChange(data);
@@ -482,15 +521,28 @@ function _isMessageableUproxy(client) {
   return retval;
 }
 
+function _transmitInstanceData() {
+
+}
+
 // Look for a !messageable->messageable transition, and dispatch a
 // query if needed.  Returns 'current', possbily with additional data in there.
 function _updateInstanceIdsOnChange(current) {
   log.debug('_updateInstanceIdsOnChange: current requests are to: ' + pending_instance_requests);
   for (var client in current.clients) {
-    // TODO(mollyling): Properly hangle logout.
-    if (pending_instance_requests.indexOf(client) == -1) {
-      // TODO: when thing settle down, don't be so chatty.
-      if (_isMessageableUproxy(current.clients[client])) {
+    if (_isMessageableUproxy(current.clients[client])) {
+      var shall_ask = (pending_instance_requests.indexOf(client) == -1);
+
+      // Look for an existing instanceId for this client.  Preserve it and don't ask again.
+      if (state.roster[data.userId] !== undefined && state.roster[data.userId].clients[client] !== undefined) {
+        if(state.roster[data.userId].clients[client].instanceId !== undefined) {
+          current.clients[client].instanceId = state.roster[data.userId].clients[client].instanceId;
+          shall_ask = false;
+        }
+      }
+      // TODO(mollyling): Properly hangle logout.
+      if (shall_ask) {
+        // TODO: when thing settle down, don't be so chatty.
         pending_instance_requests.push(client);
         log.debug('_updateInstanceIdsOnChange: deciding to message ' + client);
         _dispatchInstanceIdQuery(client, current.clients[client]);
@@ -498,14 +550,6 @@ function _updateInstanceIdsOnChange(current) {
     }
   }
   return current;
-}
-
-function _dispatchInstanceIdQuery(user, client) {
-  if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
-    var msg = JSON.stringify({ message: 'request-instance-id' });
-    log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
-    identity.sendMessage(user, msg);
-  }
 }
 
 function _updateTrust(clientId, asProxy, trustValue) {
@@ -579,6 +623,16 @@ function _handleStartProxyingSent(msg, clientId) {
   freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
 }
 
+// Instance ID (+ more) Synchronization I/O
+
+function _dispatchInstanceIdQuery(user, client) {
+  if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
+    var msg = JSON.stringify({ message: 'request-instance-id' });
+    log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
+    identity.sendMessage(user, msg);
+  }
+}
+
 function _handleRequestInstanceIdReceived(msg, clientId) {
   // Respond to the user with our clientId.
   // TODO(mollyling): consider rate-limiting responses, in case the
@@ -599,17 +653,31 @@ function _handleRequestInstanceIdReceived(msg, clientId) {
 function _handleRequestInstanceIdResponseReceived(msg, clientId) {
   // Update |state| with the instance ID, and emit a state-change
   // notification to tell the UI what's up.
-  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) + '): got response. pending_instance_requests is ' + pending_instance_requests);
+  log.debug('_handleRequestInstanceIdResponseReceived(' + JSON.stringify(msg) +
+      '): got response. pending_instance_requests is ' + pending_instance_requests);
+  var instanceId = msg.data.instanceId;
+  var description = msg.data.description;
+  var keyHash = msg.data.keyHash;
+  var userId = msg.fromUserId;
+  var clientId = msg.fromClientId;
+
+  // Delete any old clients that have the same instance IDs.
+  var oldclients = Object.keys(state.roster[userId].clients);
+  for(var oldclient in oldclients) {
+    if (state.roster[userId].clients[oldclient].instanceId == instanceId) {
+      delete state.roster[userId].clients[oldclient];
+    }
+  }
+
+  // Mark the request as satisfied.
   var index = pending_instance_requests.indexOf(clientId);
   if (index >= 0) {
     pending_instance_requests.splice(index, 1);
     log.debug('_handleRequestInstanceIdResponseReceived: removing pending request index ' + index);
   }
-  var instanceId = msg.data.instanceId;
-  var description = msg.data.description;
-  var keyHash = msg.data.keyHash;
+
   // Install the instanceId for the client.
-  var user = state.roster[msg.fromUserId];
+  var user = state.roster[userId];
   if (!user) {
     log.error("user does not exist in roster for instanceId: " + instanceId);
     return false;
