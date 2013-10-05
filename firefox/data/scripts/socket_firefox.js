@@ -10,8 +10,10 @@ console.log('socket_firefox.js loaded');
  */
 
 var Socket_firefox = function(channel) {
+  console.log('socket_firefox.js creating firefox socket provider.');
   this.appChannel = channel;
-  var createCallbacks = [];
+  const id = Math.floor((1 + Math.random()) * 0x10000);
+  const createCallbacks = [];
   var connectingSockets = {};
   var disconnectingSockets = {};
   var pendingWrites = {};
@@ -67,7 +69,13 @@ var Socket_firefox = function(channel) {
    */ 
   function getInternalId(externalSocketId) {
     checkId(externalSocketId);
-    return externalToInternal[externalSocketId];
+    var internalId = externalToInternal[externalSocketId];
+    if (typeof internalId === 'undefined') {
+      // XXX: Should this get a custom error type?
+      throw ReferenceError('External socket id ' + externalSocketId +
+                           ' does not exist for this provider.');
+    }
+    return internalId;
   }
 
   /**
@@ -77,17 +85,46 @@ var Socket_firefox = function(channel) {
    */ 
   function getExternalId(internalSocketId) {
     checkId(internalSocketId);
-    return internalToExternal[internalSocketId];
+    var externalId = internalToExternal[internalSocketId];
+    if (typeof externalId === 'undefined') {
+      // XXX: Should this get a custom error type?
+      throw ReferenceError('Internal socket id ' + internalSocketId +
+                           ' does not exist for this provider.');
+    }
+    return externalId;
   }
 
+  /**
+   * Determine if an internal socket id corresponds with an external
+   * socket id for this manager.
+   * @param {number} the internal socket id.
+   * @return {boolean} true if this internal socket is managed by this instance.
+   */
+  function isOurSocket(internalSocketId) {
+    checkId(internalSocketId);
+    var externalSocketId = internalToExternal[internalSocketId];
+    return typeof externalSocketId === 'number';
+  }
+  
   this.create = function(type, options, callback) {
-    console.log('requesting socket creation');
+    console.log('socket_firefox.js socket creation');
     createCallbacks.push(callback);
-    addon.port.emit('socket-create', {type: type, options: options});
+    addon.port.emit('socket-create', {type: type, 
+                                      options: options,
+                                      providerId: id});
   };
-  addon.port.on('socket-created', function(socketId) {
-    console.log('socket created');
-    createCallbacks.pop()({socketId: allocateId(socketId)});
+
+  // TODO This event is getting dispatched twice somehow...
+  // Not calling the continuation eliminates the duplicate dispatch.
+  addon.port.on('socket-created', function(socketInfo) {
+    // All providers receive every message from the manager, so this
+    // socket may belong to another provider.
+    if (socketInfo.providerId !== id) {
+      return;
+    }
+    console.log('socket_firefox.js socket created');
+    var callback = createCallbacks.pop();
+    callback({socketId: allocateId(socketInfo.socketId)});
   });
 
   this.connect = function(socketId, hostname, port, callback) {
@@ -97,10 +134,13 @@ var Socket_firefox = function(channel) {
         {socketId: socketId, hostname: hostname, port:port});
   };
   addon.port.on('socket-connect-response', function(response) {
+    if(!isOurSocket(response.socketId)) return;
     connectingSockets[response.socketId]({result: response.result});
   });
 
   addon.port.on('socket-data', function (data) {
+    if(!isOurSocket(data.socketId)) return;
+
     data.data = stringToArrayBuffer(data.data);
     data.socketId = getExternalId(data.socketId);
     this.dispatchEvent('onData', data);
@@ -120,6 +160,8 @@ var Socket_firefox = function(channel) {
   };
 
   addon.port.on('socket-write-response', function (response) {
+    if(!isOurSocket(response.socketId)) return;
+
     var callbackArgs = {
       bytesWritten: response.bytesWritten
     };
@@ -135,6 +177,8 @@ var Socket_firefox = function(channel) {
   };
 
   addon.port.on('socket-disconnected', function(response) {
+    if(!isOurSocket(response.socketId)) return;
+
     disconnectingSockets[response.socketId]();
     delete listeningSockets[response.socketId];
   });
@@ -157,12 +201,23 @@ var Socket_firefox = function(channel) {
 
   addon.port.on('socket-listen-response', function socketListenResponse(args){
     var internalId = args.socketId;
+    if(!isOurSocket(internalId)) return;
+
     args.socketId = getExternalId(args.socketId);
-    listeningSockets[internalId](args);
-    listeningSockets[internalId] = true;
+    listeningSockets[internalId](args.result);
+    if (args.result === 0) {
+      listeningSockets[internalId] = true;
+    } else {
+      delete listeningSockets[internalId];
+    }
   });
 
+  // This is fired when a client socket is created via a listening
+  // server socket.
   addon.port.on('socket-connected', function socketConnected(socketInfo) {
+    if(!isOurSocket(socketInfo.serverSocketId)) return;
+    console.log('socket_firefox.js incomming client connection');
+
     socketInfo.serverSocketId = getExternalId(socketInfo.serverSocketId);
     socketInfo.clientSocketId = allocateId(socketInfo.clientSocketId);
     this.dispatchEvent('onConnection', socketInfo);
@@ -189,8 +244,11 @@ var Socket_firefox = function(channel) {
   };
 
   addon.port.on('socket-info-response', function getInfoResponse(args) {
+    if(!isOurSocket(args.socketId)) return;
+
     var infoCallback = pendingInfo[args.socketId][args.infoCall];
     infoCallback(args.info);
     delete pendingInfo[args.socketId][args.infoCall];
   });
+
 };

@@ -29,8 +29,10 @@ var FreedomSocketManager = function(freedomWindow) {
   }
 
   freedomWindow.port.on('socket-create', function socketCreate(args) {
+    console.log('freedom_socket_managers.js socket manager create socket');
     var socketNumber = sockets.push(Socket()) - 1;
-    freedomWindow.port.emit('socket-created', socketNumber);
+    freedomWindow.port.emit('socket-created', {socketId: socketNumber,
+                                              providerId: args.providerId});
   });
 
   freedomWindow.port.on('socket-connect', function socketConnect(args) {
@@ -54,6 +56,7 @@ var FreedomSocketManager = function(freedomWindow) {
   });
 
   freedomWindow.port.on('socket-listen', function socketListen(args) {
+    debugger;
     var serverSocket = sockets[args.socketId];
     var address = args.address;
     var port = args.port;
