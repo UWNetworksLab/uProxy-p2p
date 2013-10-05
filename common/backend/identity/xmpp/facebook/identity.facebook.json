@@ -9,6 +9,7 @@
   ],
   "permissions": [
     "core.socket",
-    "core.view"
+    "core.view",
+    "core.storage"
   ]
 }

@@ -1,3 +1,4 @@
+var VCARD_TIMEOUT = 3000;
 var chrome = {
   socket: freedom['core.socket']()
 };
@@ -8,6 +9,7 @@ console.warn = function(f) {
 
 var window = {};
 var view = freedom['core.view']();
+var storage = freedom['core.storage']();
 
 function IdentityProvider() {
   //DEBUG
@@ -17,6 +19,7 @@ function IdentityProvider() {
   this.client = null;
   this.credentials = null;
   this.loginOpts = null;
+  this.vCardRequestTime = {};
 
   this.status = 'offline';
   //dispatchEvent is not bound until after constructor
@@ -231,10 +234,7 @@ IdentityProvider.prototype.onOnline = function() {
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
   // Get my own vCard
-  this.client.send(new window.XMPP.Element('iq', {
-    type: 'get',
-    to: this.credentials.userId
-  }).c('vCard', {'xmlns': 'vcard-temp'}).up());
+  this.getVCard(this.credentials.userId, 'unknown');
   // Update status
   var clients = this.profile.me[this.credentials.userId].clients;
   for (var k in clients) {
@@ -288,22 +288,30 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     }
   }
   if (vCard && vCard.attrs.xmlns == 'vcard-temp') {
+    var vcard = {};
     var fn = vCard.getChildText('FN');
     var url = vCard.getChildText('URL');
     var photo = vCard.getChild('PHOTO');
     if (fn) {
+      vcard['name'] = fn;
       this.setAttr(from , 'name', fn);
     }
     if (url) {
+      vcard['url'] = url;
       this.setAttr(from , 'url', url);
     }
     if (photo && photo.getChildText('EXTVAL')) {
       this.setAttr(from , 'imageUrl', photo.getChildText('EXTVAL'));
     } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
-      var type = photo.getChildText('TYPE');
-      var bin = photo.getChildText('BINVAL');
-      this.setAttr(from, 'imageData', "data:"+type+";base64,"+bin);
+      var imageData = "data:"+photo.getChildText('TYPE')+";base64,"+photo.getChildText('BINVAL');
+      var imageHash = this.getAttr(from, 'imageHash');
+      vcard['imageData'] = imageData;
+      vcard['imageHash'] = imageHash;
+      console.log(this.getAttr(from, 'imageData'));
+
+      this.setAttr(from, 'imageData', imageData);
     }
+    storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
   }
 
 };
@@ -338,17 +346,47 @@ IdentityProvider.prototype.onPresence = function(stanza) {
     }
   }
   this.setDeviceAttr(stanza.attrs.from, 'xmppStatus', status);
-  this.setDeviceAttr(stanza.attrs.from, 'hash', hash);
+  this.setAttr(stanza.attrs.from, 'imageHash', hash);
+  //Update VCard
+  this.getVCard(stanza.attrs.from, hash);
     
-  //Request vCard if not seen before
-  //TODO(ryscheng) - Do this in a better way that caches results
-  if (this.getAttr(stanza.attrs.from, 'name') == null) {
-    //TODO(ryscheng) Used to permanently dedup iq requests. Probably a better way
-    this.setAttr(stanza.attrs.from, 'name', ' ');
+};
+
+IdentityProvider.prototype.getVCard = function(from, hash) {
+  storage.get('vcard-'+getBaseJid(from)).done((function(result) {
+    //Fetch vcard from server if not cached
+    if (result == null) {
+      this.fetchVCard(from);
+    } else {
+      var resultObj = JSON.parse(result);
+      if (hash == 'unknown' || hash == resultObj['imageHash']) {
+        console.log("Cached VCard: " + result);
+        if (resultObj['name'] && this.getAttr(from, 'name') !== resultObj['name']) {
+          this.setAttr(from, 'name', resultObj['name']);
+        }
+        if (resultObj['url'] && this.getAttr(from, 'url') !== resultObj['url']) {
+          this.setAttr(from, 'url', resultObj['url']);
+        }
+        if (resultObj['imageData'] && this.getAttr(from, 'imageData') !== resultObj['imageData']) {
+          this.setAttr(from, 'imageData', resultObj['imageData']);
+        }
+      } else {
+        this.fetchVCard(from);
+      }
+    }
+  }).bind(this));
+};
+
+IdentityProvider.prototype.fetchVCard = function(from) {
+  var time = new Date();
+  var baseJid = getBaseJid(from);
+  if (!this.vCardRequestTime[baseJid] || (time - this.vCardRequestTime[baseJid]) > VCARD_TIMEOUT) {
+    this.vCardRequestTime[baseJid] = time;
+    console.log("Fetching VCard for " + getBaseJid(from));
     this.client.send(new window.XMPP.Element('iq', {
       type: 'get',
-      to: getBaseJid(stanza.attrs.from)
-    }).c('vCard', {'xmlns': 'vcard-temp'}).up());
+      to: getBaseJid(from)
+    }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
   }
 };
 
