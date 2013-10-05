@@ -65,7 +65,11 @@ var onload = function() {
       setupPeer(peerB, sendSignalToPeer.bind(null, peerA));
     }, 500);
 
-  peerA.sctpPc.send({'channelLabel': "a", 'text': "hello?"});
+  // Make sure this happens after the previous two...
+  setTimeout(function () {
+    console.log("Sending message to peer...");
+    peerA.sctpPc.send({'channelLabel': "a", 'text': "hello?"});
+  }, 1000);
 
   console.log("loaded sctp-peerconnection_test");
   console.log('LOCATION: sctp-peerconnection_test: ' + self.location.href);
