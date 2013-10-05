@@ -307,6 +307,8 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       var imageHash = this.getAttr(from, 'imageHash');
       vcard['imageData'] = imageData;
       vcard['imageHash'] = imageHash;
+      console.log(this.getAttr(from, 'imageData'));
+
       this.setAttr(from, 'imageData', imageData);
     }
     storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
@@ -357,7 +359,7 @@ IdentityProvider.prototype.getVCard = function(from, hash) {
       this.fetchVCard(from);
     } else {
       var resultObj = JSON.parse(result);
-      if (hash == 'unknown' || hash == this.getAttr(from, 'imageHash')) {
+      if (hash == 'unknown' || hash == resultObj['imageHash']) {
         console.log("Cached VCard: " + result);
         if (resultObj['name'] && this.getAttr(from, 'name') !== resultObj['name']) {
           this.setAttr(from, 'name', resultObj['name']);
