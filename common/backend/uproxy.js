@@ -27,7 +27,7 @@ var identity = freedom.identity();
 var storage = freedom.storage();
 var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
-
+var sctp_test = freedom['sctp-peerconnection_test']();
 
 var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
 var pending_instance_requests = [];

@@ -29,8 +29,8 @@ var onload = function() {
       _socksServer.tcpServer.disconnect();
       _socksServer = null;
     }
-    for (var channelId in _conns) {
-      onClose(channelId, _conns[channelId]);
+    for (var channelLabel in _conns) {
+      onClose(channelLabel, _conns[channelLabel]);
     }
     if(_sctpPc) { _sctpPc.shutdown(); }
     _conns = {};
@@ -40,14 +40,14 @@ var onload = function() {
   };
 
   // Close a particular tcp-connection and data channel pair.
-  var closeConnection = function(channelId, conn) {
+  var closeConnection = function(channelLabel, conn) {
     conn.disconnect();
-    _sctpPc.closeDataChannel.bind(_sctpPc, channelId);
-    delete _conns[channelId];
+    _sctpPc.closeDataChannel.bind(_sctpPc, channelLabel);
+    delete _conns[channelLabel];
   };
 
-  var _sendToPeer = function (channelId, buffer) {
-    _sctpPc.send({'channelLabel': channelId, 'buffer': buffer});
+  var _sendToPeer = function (channelLabel, buffer) {
+    _sctpPc.send({'channelLabel': channelLabel, 'buffer': buffer});
   }
 
   // A SOCKS5 connection request has been received, setup the data channel and
@@ -59,15 +59,16 @@ var onload = function() {
     }
 
     // TODO: reuse tags from a pool.
-    var channelId = "c" + Math.random();
-    _conns[channelId] = conn.tcpConnection;
+    var channelLabel = "c" + Math.random();
+    _conns[channelLabel] = conn.tcpConnection;
 
-    // When the TCP-connection receives data, send it on the sctp peer on the corresponding channelId
-    conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelId));
+    // When the TCP-connection receives data, send it on the sctp peer on the corresponding channelLabel
+    conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelLabel));
     // When the TCP-connection closes
-    conn.tcpConnection.on('disconnect', closeConnection.bind(null, channelId));
+    conn.tcpConnection.on('disconnect',
+        closeConnection.bind(null, channelLabel));
 
-    _sctpPc.send({'channelLabel' : channelId,
+    _sctpPc.send({'channelLabel' : channelLabel,
       'text': JSON.stringify({host: address, port: port})});
 
     // TODO: we are not connected yet... should we have some message passing
@@ -86,18 +87,18 @@ var onload = function() {
 
     // Create sctp connection to a peer.
     _sctpPc = freedom['core.sctp-peerconnection']();
-    _sctpPc.on('onMessage', function(message) {
-      if (message.channelId) {
+    _sctpPc.on('onReceived', function(message) {
+      if (message.channelLabel) {
         if (message.buffer) {
-          _conns[message.channelId].sendRaw(message.buffer);
+          _conns[message.channelLabel].sendRaw(message.buffer);
         } else if (message.text) {
-          _conns[message.channelId].sendRaw(message.text);
+          _conns[message.channelLabel].sendRaw(message.text);
         } else {
           console.error("Message type isn't specified properly. Msg: "
             + JSON.stringify(message));
         }
       } else {
-        console.error("Message received but missing channelId. Msg: "
+        console.error("Message received but missing channelLabel. Msg: "
             + JSON.stringify(message));
       }
     });
@@ -121,7 +122,7 @@ var onload = function() {
           freedom.emit('sendSignalToPeer', {peerId: _peerId, data: msg});
         });
         // When the signalling channel is ready, set the global variable.
-        _signallingChannel.on('ready', function() {});
+        // _signallingChannel.on('ready', function() {});
       });
     });
   });

@@ -30,6 +30,10 @@ script.onload = function() {
   uProxyAppChannel.on('ready', function() {
     console.log("uproxy.js is ready!");
   });
+
+  //var test_script = document.createElement('script');
+  //test_script.src = 'common/backend/test/sctp-peerconnection_test.js';
+  //document.head.appendChild(test_script);
 };
 
 // Called when an extension connects to the app.

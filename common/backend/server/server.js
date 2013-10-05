@@ -40,10 +40,8 @@ var onload = function() {
       // The peer connection.
       sctpPc : sctpPc,
       // We open up multple connections, for each data channels there is a
-      // corresponding webclient. Each entry is keyed by channelId with value:
-      // being a WebClient.
-      //  { dataChannel: SmartDataChannel,
-      //    webclient: WebClient }
+      // corresponding webclient. Each entry is keyed by channelLabel with
+      // value being a WebClient.
       webClients : webClients,
       // The freedom signalling channel
       signallingChannel : null,
@@ -53,18 +51,25 @@ var onload = function() {
     };
     _peers[peerId] = peer;
 
-    sctpPc.on('onMessage', function(message) {
-      console.error("Server got message: ", message);
-      if (! message.channelId) {
-        console.error("Message received but missing channelId. Msg: " +
+    sctpPc.on('onReceived', function(message) {
+      console.log("Server got message: " + message.text);
+      if (! message.channelLabel) {
+        console.error("Message received but missing channelLabel. Msg: " +
             JSON.stringify(message));
         return;
       }
-      if (! (message.channelId in webClients)) {
-        webClients[message.channelId] = new window.webclient(
-            sctpPc.send.bind(sctpPc, message.channelId));
+      if (! (message.channelLabel in webClients)) {
+        webClients[message.channelLabel] = new window.webclient(
+            sctpPc.send.bind(sctpPc, message.channelLabel));
       }
-      webClients[message.channelId].onMessage(message.data);
+      if (message.text) {
+        webClients[message.channelLabel].onMessage(message.text);
+      } else if (message.buffer) {
+        webClients[message.channelLabel].onMessage(message.buffer);
+      } else {
+        console.error("Message received but missing valid data field. Msg: " +
+            JSON.stringify(message));
+      }
     });
 
     var promise = freedom.core().createChannel();
@@ -79,10 +84,11 @@ var onload = function() {
         // have successfully initialised this peer connection and can set the
         // signalling channel and process any messages we have been sent.
         channel.on('ready', function() {
-          while(peer.messageQueue.length > 0) {
-            channel.emit('message', peer.messageQueue.shift());
-          }
+          console.log("Server channel to sctpPc ready.");
           peer.signallingChannel = channel;
+          while(peer.messageQueue.length > 0) {
+            peer.signallingChannel.emit('message', peer.messageQueue.shift());
+          }
         });
       });
     });
