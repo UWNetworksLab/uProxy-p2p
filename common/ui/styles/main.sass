@@ -116,7 +116,7 @@ ul
   position: absolute
   margin: 0
   padding: 6px 8px
-  right: 20px
+  right: 10px
   width: 300px
   background-color: #fcfcfc
   font-size: $fontSize * 0.9
@@ -134,8 +134,19 @@ ul
 
 // ---------------------------- Login Splash -----------------------------------
 #login-splash
+  position: absolute
   text-align: center
   padding-top: 30px
+  height: 100%
+  bottom: 0
+  z-index: 40
+  background-color: #fff
+  @include smooth
+#login-splash.ng-hide
+  display: block !important
+  height: 0
+  opacity: 0
+
 .network-btn
   display: inline-block
   margin: 8px
