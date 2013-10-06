@@ -6,17 +6,17 @@
   },
   "dependencies": {
     "uproxyclient": {
-      "url": "common/backend/client/client.json"
+      "url": "client/client.json"
     },
     "uproxyserver": {
-      "url": "common/backend/server/server.json"
+      "url": "server/server.json"
     },
     "identity": {
-      "url": "common/backend/identity/identity.json",
+      "url": "identity/identity.json",
       "api": "identity"
     },
     "storage": {
-      "url": "common/backend/storage/storage.json",
+      "url": "storage/storage.json",
       "api": "storage"
     }
   },

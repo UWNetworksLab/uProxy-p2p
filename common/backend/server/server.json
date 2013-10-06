@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "transport": {
-      "url": "common/backend/transport/transport.json",
+      "url": "../transport/transport.json",
       "api": "transport"
     }
   },

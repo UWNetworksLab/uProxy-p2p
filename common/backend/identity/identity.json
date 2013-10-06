@@ -6,19 +6,19 @@
   },
   "dependencies": {
     "loopbackIdentity": {
-      "url": "common/backend/identity/loopback/identity.loopback.json",
+      "url": "loopback/identity.loopback.json",
       "api": "identity"
     },
     "manualIdentity": {
-      "url": "common/backend/identity/manual/identity.manual.json",
+      "url": "manual/identity.manual.json",
       "api": "identity"
     },
     "googleIdentity": {
-      "url": "common/backend/identity/xmpp/google/identity.google.json",
+      "url": "xmpp/google/identity.google.json",
       "api": "identity"
     },
     "facebookIdentity": {
-      "url": "common/backend/identity/xmpp/facebook/identity.facebook.json",
+      "url": "xmpp/facebook/identity.facebook.json",
       "api": "identity"
     }
   },
