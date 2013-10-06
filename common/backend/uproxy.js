@@ -75,16 +75,18 @@ var state = cloneDeep(RESET_STATE);
 var _clients = {};  // clientId -> client reference table.
 
 // Mapping functions between instanceIds and clientIds.
-function instanceToClientId(instanceId) {
+function instanceToClient(instanceId) {
   var instance = state.instances[instanceId];
-  if (!instance) { return null; }
-  return instance.clientId;
+  if (!instance) return null;
+  var user = state.roster[instance.userId];
+  if (!user) return null;
+  return user.clients[instance.clientId]
 }
 
 // clientId -> Instance object
 function clientToInstance(clientId) {
   var client = _clients[clientId];
-  if (!client) { return null; }
+  if (!client) return null;
   return state.instances[client.instanceId];
 }
 
@@ -427,7 +429,8 @@ function onload() {
     }
   });
 
-  // Called when a contact (or ourselves) changes online-status
+  // Called when a contact (or ourselves) changes state, whether online or
+  // description.
   identity.on('onChange', function(data) {
     // log.debug('onChange: data:' + JSON.stringify(data));
     if (data.userId && state.me[data.userId]) {
@@ -501,6 +504,26 @@ function onload() {
     notifyServer();
   });
 
+  // Updating our own UProxy instance's description.
+  freedom.on('update-description', function (data) {
+    state.me.description = data;
+    // TODO(uzimizu): save to storage
+    var payload = JSON.stringify({
+      message: 'update-description',
+      data: {
+          instanceId: '' + state.me.instanceId,
+          description: '' + state.me.description,
+      }
+    });
+    // Send the new description to ALL currently online friend instances.
+    for (var instanceId in state.instances) {
+      var client = instanceToClient(instanceId);
+      if (!client || 'offline' == client.status)
+        continue;
+      identity.sendMessage(client.clientId, payload);
+    }
+  });
+
   client.on('fromClient', function(data) {
     log.debug('Connection Setup:', data);
     var contact = state.currentSessionsToInitiate['*'];
@@ -561,7 +584,8 @@ var _msgReceivedHandlers = {
   'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
-  'notify-instance' : _handleNotifyInstanceReceived,
+  'notify-instance': _handleNotifyInstanceReceived,
+  'update-description': _handleUpdateDescription
 };
 
 /**
@@ -734,14 +758,19 @@ function _handleStartProxyingSent(msg, clientId) {
 
 // Instance ID (+ more) Synchronization I/O
 
+/**
+ * Prepare a message indicating instance data, to be sent to other instances and
+ * synchronize everybody's world view.
+ */
 function _buildInstancePayload(msg, clientId) {
   // Look up permissions for the clientId.
   var u, trust = null, consent;
   for (u in state.roster) {
-    if (state.roster[u].clients[clientId] !== undefined) {
+    var user = state.roster[u];
+    if (user.clients[clientId] !== undefined) {
       // How we trust them to be a proxy for us (asProxy) or a client
       // for us (asClient).
-      trust = state.instances[state.roster[u].clients[clientId].instanceId].trust;
+      trust = state.instances[user.clients[clientId].instanceId].trust;
     }
   }
 
@@ -767,11 +796,21 @@ function _buildInstancePayload(msg, clientId) {
     }});
 }
 
-function _sendNotifyInstance(user, client) {
-  if (client['network'] === undefined || (client.network != 'loopback' && client.network != 'manual')) {
-    var msg = _buildInstancePayload('notify-instance', user);
-    log.debug('identity.sendMessage(' + user + ', ' + msg + ')');
-    identity.sendMessage(user, msg);  // user is a clientId.
+/**
+ * Send a notification about my instance data to a particular clientId. This
+ * clientId should probably be another instance.
+ */
+function _sendNotifyInstance(id, client) {
+  if (client['network'] === undefined ||
+      (client.network != 'loopback' && client.network != 'manual')) {
+    // TODO(uzimizu): Build the instance payload somewhere else, so we
+    // don't have to rebuild it *everytime* a person logs on, as that's
+    // wasteful.
+    var msg = _buildInstancePayload('notify-instance', id);
+    log.debug('identity.sendMessage(' + id + ', ' + msg + ')');
+    // TODO(uzimizu): Ensure that this clientId is associated with an instance
+    // so that we don't spam innocent gchats.
+    identity.sendMessage(id, msg);
   }
 }
 
@@ -873,4 +912,20 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
 function _validateKeyHash(keyHash) {
   log.debug('Warning: keyHash Validation not yet implemented...');
   return true;
+}
+
+/**
+ * Update the description for an instanceId.
+ * Assumes that the instanceId is valid.
+ */
+function _handleUpdateDescription(msg, clientId) {
+  var instanceId = msg.data.instanceId;
+  var description = msg.data.description;
+  state.instances[instanceId].description = description;
+  log.debug('Updating description! ' + JSON.stringify(msg));
+  freedom.emit('state-change', [{
+    op: 'replace',
+    path: '/instances/' + instanceId + '/description',
+    value: description
+  }]);
 }
