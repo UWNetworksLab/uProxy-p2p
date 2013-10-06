@@ -824,11 +824,9 @@ function _sendNotifyInstance(id, client) {
   }
 }
 
-///
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
-///
 function _handleNotifyInstanceReceived(msg, toClientId) {
   log.debug('_handleNotifyInstanceReceived(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
