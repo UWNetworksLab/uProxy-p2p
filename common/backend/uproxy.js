@@ -72,7 +72,7 @@ var RESET_STATE = {
   }
 };
 var state = cloneDeep(RESET_STATE);
-var _clients = {};  // clientId -> client reference table.
+var _uproxyClients = {};  // clientId -> client reference table.
 
 var _clientToInstanceId = {};  // clientId -> instanceId mapping.
 
@@ -90,8 +90,10 @@ function instanceToClient(instanceId) {
 // notification was sent and received prior to the xmpp onChange update). In
 // that case, we must scan the instance table for the correct client id.
 function clientToInstance(clientId) {
-  var client = _clients[clientId];
+  var client = _uproxyClients[clientId];
+  log.debug('c2i:' + JSON.stringify(_uproxyClients));
   if (!client) return null;
+  log.debug('c2i:' + JSON.stringify(state.instances));
   return state.instances[client.instanceId];
 }
 
@@ -316,6 +318,7 @@ function _saveInstance(instanceId, userId) {
               annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
               instanceId: instanceId,
               userId: userId,
+              clientId: instanceInfo.clientId,
               network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
                                          'network', "xmpp"),
               keyHash: instanceInfo.keyHash,
@@ -398,9 +401,8 @@ function _loginInit(cb) {
   });
 };
 
-/**
- * Called once when uproxy.js is loaded.
- */
+
+// Called once when uproxy.js is loaded.
 function onload() {
   // Check if the app is installed.
   _loginInit();
@@ -440,17 +442,21 @@ function onload() {
   // description.
   identity.on('onChange', function(data) {
     // log.debug('onChange: data:' + JSON.stringify(data));
-    if (data.userId && state.me[data.userId]) {
+    if (!data.userId) {
+      log.error('onChange: missing userId! ' + JSON.stringify(data));
+    }
+    if (state.me[data.userId]) {
       // My card changed
       state.me[data.userId] = data;
       freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
       notifyClient();
       notifyServer();
+
     } else {
       // Must be a buddy
-      state.roster[data.userId] = _updateUser(data);
-      // Determine networks and uproxy state.
-      freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
+      var existingUser = state.roster[data.userId];
+      // state.roster[data.userId] = _updateUser(data);
+      _updateUser(data);
     }
   });
 
@@ -481,7 +487,7 @@ function onload() {
   freedom.on('logout', function(network) {
     identity.logout(null, network);
     // Clear clients so that the next logon propogates instance data correctly.
-    _clients = {};
+    _uproxyClients = {};
   });
 
   freedom.on('send-message', function (msg) {
@@ -551,7 +557,7 @@ function onload() {
 
 };
 
-var notifyClient = function() {
+function notifyClient() {
   if (client.started && !('*' in state.currentSessionsToInitiate)) {
     client.emit('stop');
     client.started = false;
@@ -561,7 +567,7 @@ var notifyClient = function() {
   }
 };
 
-var notifyServer = function() {
+function notifyServer() {
   if (server.started && Object.keys(state.currentSessionsToRelay).length == 0) {
     server.emit('stop');
     server.started = fale;
@@ -637,39 +643,54 @@ function _isMessageableUproxy(client) {
 }
 
 // Update data for a user, typically when new client data shows up. Notifies all
-// new UProxy clients of our instance data, and preserve existing hooks.
+// new UProxy clients of our instance data, and preserve existing hooks. Does
+// not do a complete replace - does a merge of any provided key values.
+//
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
   log.debug('Incoming User Data: ' + JSON.stringify(newData));
-  var userId = newData.userId;
-  // TODO(uzimizu): Figure out best way to deal with mutability of clients with
-  // minimal overhead.
-  for (var clientId in newData.clients) {
-    log.debug('_updateUser: client: ' + clientId);
+
+  var userId = newData.userId,
+      userOp = 'replace',
+      existingUser = state.roster[userId];
+  if (!existingUser) {
+    state.roster[userId] = newData;
+    userOp = 'add';
+  }
+  var user = state.roster[userId];
+  var onGoogle = false,   // Flag updates..
+      onFB = false,
+      online = false,
+      canProxi = false;
+
+  for (var clientId in newData.clients) {  // Update clients.
     var client = newData.clients[clientId];
+    if (!user.clients[clientId]) {
+      user.clients[clientId] = client;
+    }
 
     // Determine network state / flags for filtering purposes.
-    if ('google' == client.network) {
-      newData.onGoogle = true;
-    } else if ('facebook' == client.network) {
-      newData.onFB = true;
-    }
-    if (!newData.online && 'manual' != client.network &&
+    if (!onGoogle && 'google' == client.network)
+      onGoogle = true;
+    if (!onFB && 'facebook' == client.network)
+      onFB = true;
+
+    if (!online && 'manual' != client.network &&
         ('messageable' == client.status || 'online' == client.status)) {
-      newData.online = true;
+      online = true;
     }
 
     // TODO(uzimizu): Figure out best way to request new users to install UProxy
-    // Skip non-UProxy clients.
+
+    // Done this client if it's non-UProxy.
     if (!_isMessageableUproxy(client)) {
       continue;
     }
-
     // Synchronize our instance data with all online uproxy clients.
-    var existingClient = _clients[clientId];
-    _clients[clientId] = client;
+    var existingClient = _uproxyClients[clientId];
+    _uproxyClients[clientId] = client;
     if (!existingClient) {  // They are a new UProxy-enabled client!
-      log.debug('_updateUser: Aware of new client. Sending my instance data to ' + JSON.stringify(client));
+      log.debug('Aware of new client. Sending my instance data to ' + JSON.stringify(client));
       _sendNotifyInstance(clientId, client);  // Enlighten them of our instance.
 
       // Check if they've already enlightened us of their instance, in which
@@ -679,15 +700,25 @@ function _updateUser(newData) {
         _linkClientAndInstance(clientId, instanceId);
         log.debug('Finished linking client and instance in updateUser. ' + JSON.stringify(client));
       }
-
-    } else {  // Otherwise, just update our local data.
-      log.debug('Preserving data. ' + existingClient.instanceId);
-      client.instanceId = existingClient.instanceId;
-      newData.canUProxy = true;
+        // client.instanceId = null;  // Prepare a placeholder.
     }
+    canProxi = true;  // TODO: UI indicators for various 'can proxy'-abilities.
+
     // TODO(mollyling): Properly hangle logout.
   }
-  return newData;  // Overwrites the userdata.
+  // Apply user-level flags.
+  user.online = online;
+  user.canUProxy = canProxi;
+  user.onGoogle = onGoogle;
+  user.onFB = onFB;
+
+  freedom.emit('state-change', [{
+      op: userOp,
+      path: '/roster/' + userId,
+      value: user
+  }]);
+  // return newData;  // Overwrites the userdata.
+  return true;
 }
 
 // Update trust state in a particular client. Assumes the client has a valid
@@ -774,20 +805,17 @@ function _handleStartProxyingSent(msg, clientId) {
 // Instance ID (+ more) Synchronization I/O
 
 // Prepare a message indicating instance data, to be sent to other instances and
-// synchronize everybody's world view.
+// synchronize everybody's world view. Does not assume that the instance
+// actually exists.
 function _buildInstancePayload(msg, clientId) {
   // Look up permissions for the clientId.
   var u, trust = null, consent;
-  for (u in state.roster) {
-    var user = state.roster[u];
-    if (user.clients[clientId] !== undefined) {
-      // How we trust them to be a proxy for us (asProxy) or a client
-      // for us (asClient).
-      trust = state.instances[user.clients[clientId].instanceId].trust;
-    }
+  var client = _uproxyClients[clientId];
+  if (client && client.instanceId) {
+    // Acquire current trust state, if available.
+    trust = state.instances[client.instanceId].trust;
   }
-
-  if (trust !== null) {
+  if (null !== trust) {
     // For each direction (e.g., I proxy for you, or you proxy for me), there
     // is a logical AND of consent from both parties.  If the local state for
     // trusting them to be a client (trust.asProxy) is Yes or Offered, we
@@ -864,6 +892,13 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
     }
   }
 
+  // If the user and client already exist, then complete the association.
+  var user = state.roster[userId];
+  if (user) {
+    if (user.clients[clientId]) {
+       _linkClientAndInstance(clientId, instanceId);
+    }
+  }
   _saveInstanceId(instanceId);  // Update local storage and extension.
   freedom.emit('state-change', [{
       op: instanceOp,
@@ -871,14 +906,6 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
       value: instance
   }]);
 
-  // If the user and client already exist, then complete the association.
-  var user = state.roster[userId];
-  if (user) {
-    var client = user.clients[clientId];
-    if (client) {
-       _linkClientAndInstance(clientId, instanceId);
-    }
-  }
   return true;
 }
 
@@ -902,21 +929,23 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
 // and |instanceId| already exist.
 function _linkClientAndInstance(clientId, instanceId) {
   var instance = state.instances[instanceId],
-      client   = _clients[clientId];
+      client   = _uproxyClients[clientId];
   var user     = state.roster[instance.userId];  // Must exist if client exists.
 
   // Before sychronizing, delete old client if it exists
   var oldClientId = instance.clientId;
   if (oldClientId && (clientId != oldClientId)) {
-    log.debug('Deleting old client: ', oldClientId);
-    delete _clients[oldClientId];
+    log.debug('Deleting old client: ' + JSON.stringify(oldClientId));
+    delete _uproxyClients[oldClientId];
     delete _clientToInstanceId[oldClientId];
     delete user.clients[oldClientId];
   }
 
-  log.debug('Linking client and instance', clientId, instanceId);
-  client.instanceId = instanceId;  // Synchronize latest IDs.
+  log.debug('Linking client and instance: ' + clientId + ' - ' + instanceId);
+  user.clients[clientId].instanceId = instanceId;
   state.instances[instanceId].clientId = clientId;
+  // client.instanceId = instanceId;  // Synchronize latest IDs.
+  _uproxyClients[clientId] = user.clients[clientId];
   user.canUProxy = true;
 
   // Update both local storage and extension.
