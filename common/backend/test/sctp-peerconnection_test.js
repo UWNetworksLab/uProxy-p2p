@@ -23,17 +23,17 @@ function setupPeer(peer, sendSignalFn) {
     console.log(peer.name + ": onReceived: " +
         JSON.stringify(message));
   });
-  freedom.core().createChannel().done(function(chan) {
+  freedom.core().createChannel().done(function(peer, cb, chan) {
     peer.sctpPc.setup(chan.identifier, peer.name, false);
-    chan.channel.done(function(channel) {
+    chan.channel.done(function(peer, cb, channel) {
       peer.channel = channel;
-      peer.channel.on('message', sendSignalFn);
+      peer.channel.on('message', cb);
       console.log(peer.name + ": signalling channel setup. Queued messages being sent: " + peer.msgQueue.length);
       while(peer.msgQueue.length > 0) {
         peer.channel.emit('message', peer.msgQueue.shift());
       }
-    });
-  });
+    }.bind({}, peer, cb));
+  }.bind({}, peer, sendSignalFn));
 };
 
 var onload = function() {
@@ -55,15 +55,15 @@ var onload = function() {
   // TODO: FIX freedom BUG: uncommenting these lines puts freedom in an
   // infinite loop? When there is a delay between this it works ok.
   //
-  // setupPeer(peerA, sendSignalToPeer.bind(null, peerB));
-  // setupPeer(peerB, sendSignalToPeer.bind(null, peerA));
+  setupPeer(peerA, sendSignalToPeer.bind(null, peerB));
+  setupPeer(peerB, sendSignalToPeer.bind(null, peerA));
 
-  setTimeout(function () {
-      setupPeer(peerA, sendSignalToPeer.bind(null, peerB));
-    }, 0);
-  setTimeout(function () {
-      setupPeer(peerB, sendSignalToPeer.bind(null, peerA));
-    }, 500);
+  //setTimeout(function () {
+  //    setupPeer(peerA, sendSignalToPeer.bind(null, peerB));
+  //  }, 0);
+  //setTimeout(function () {
+  //    setupPeer(peerB, sendSignalToPeer.bind(null, peerA));
+  //  }, 500);
 
   // Make sure this happens after the previous two...
   setTimeout(function () {
