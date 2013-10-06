@@ -67,17 +67,20 @@ var onload = function() {
             JSON.stringify(message));
         return;
       }
-      if (! (message.channelLabel in netClients)) {
-        netClients[message.channelLabel] = new NetClient(
-            _sendDataToPeer.bind(null, message.channelLabel));
-      }
+
       if (message.text) {
-        // Text from the peer is used to set the destination.
+        // Text from the peer is used to set a new destination request.
         // Assumes "message.text" is a json of form:
         // { host: string, port: number }
-        netClients[message.channelLabel].connectTo(
+        netClients[message.channelLabel] = new window.NetClient(
+            _sendDataToPeer.bind(null, sctpPc, message.channelLabel),
             JSON.parse(message.text));
       } else if (message.buffer) {
+        if(!message.channelLabel in netClients) {
+          console.error("Message received for non-existent channel. Msg: " +
+            JSON.stringify(message));
+        }
+
         // Buffer from the peer is data for the destination.
         netClients[message.channelLabel].send(message.buffer);
       } else {
