@@ -203,9 +203,11 @@ module.exports = function(grunt) {
     'jasmine'
   ]);
   //Build task
-  grunt.registerTask('build', [
+  grunt.registerTask('build_chrome', [
     'copy:chrome_app',
-    'copy:chrome_ext',
+    'copy:chrome_ext'
+  ]);
+  grunt.registerTask('build_firefox', [
     'concat:firefox',
     'copy:firefox'
   ]);
@@ -214,11 +216,19 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk:download',
     'mozilla-addon-sdk:xpi'
   ]);
+  grunt.registerTask('build', [
+    'build_chrome',
+    'build_firefox'
+  ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
   grunt.registerTask('default', ['build']);
-
 };
+
+
+/**
+ * UTILITIES
+ **/
 
 //minimatchArray will see if 'file' matches the set of patterns
 //described by 'arr'
