@@ -66,11 +66,11 @@ var onload = function() {
   //  }, 500);
 
   // Make sure this happens after the previous two...
-  setTimeout(function () {
+  //setTimeout(function () {
     console.log("Sending message to peer...");
     peerA.sctpPc.send({'channelLabel': "a", 'text': "hello?"});
     peerA.sctpPc.send({'channelLabel': "a", 'buffer': new UInt8Array(100)});
-  }, 1000);
+  //}, 1000);
 
   console.log("loaded sctp-peerconnection_test");
   console.log('LOCATION: sctp-peerconnection_test: ' + self.location.href);
