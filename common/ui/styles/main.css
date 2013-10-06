@@ -82,8 +82,8 @@ ul {
 
 #options-btn {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 4px;
+  right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
   outline: none;
@@ -91,17 +91,55 @@ ul {
   width: 20px;
   height: 20px;
   text-decoration: none;
-  opacity: 0.6; }
+  opacity: 0.6;
+  cursor: pointer; }
 
-#options-btn:hover, #options-btn:focus {
-  opacity: 0.3; }
-
-#options-btn:active {
+#options-btn:active, #options-btn:focus {
   opacity: 0.9; }
 
+#options-btn:hover {
+  opacity: 0.3; }
+
+.tip {
+  position: absolute;
+  margin: 0;
+  padding: 6px 8px;
+  right: 10px;
+  width: 300px;
+  background-color: #fcfcfc;
+  font-size: 14.4px;
+  color: #444444;
+  border: 1px solid #eeeeee;
+  text-align: left;
+  cursor: default;
+  opacity: 1;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+.tip.ng-hide {
+  display: block !important;
+  pointer-events: none;
+  opacity: 0; }
+
 #login-splash {
+  position: absolute;
   text-align: center;
-  padding-top: 30px; }
+  padding-top: 30px;
+  height: 100%;
+  bottom: 0;
+  z-index: 40;
+  background-color: white;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#login-splash.ng-hide {
+  display: block !important;
+  height: 0;
+  opacity: 0; }
 
 .network-btn {
   display: inline-block;
@@ -124,6 +162,26 @@ ul {
   color: #222222;
   text-shadow: 1px 2px 2px #aaaaaa;
   cursor: default; }
+
+#my-description {
+  margin-top: 20px;
+  padding: 8px;
+  width: 80%;
+  color: #333333;
+  border: 1px solid #dddddd;
+  outline: none;
+  box-shadow: 0 3px 1px #eeeeee;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#my-description:hover {
+  box-shadow: 0px 3px 3px #dddddd;
+  border-color: #bbbbbb; }
+
+#networks-box {
+  margin-top: 30px; }
 
 #search-section {
   position: relative;

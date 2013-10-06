@@ -92,8 +92,8 @@ ul
 
 #options-btn
   position: absolute
-  top: 0
-  right: 0
+  top: 4px
+  right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
   outline: none
@@ -102,16 +102,51 @@ ul
   height: 20px
   text-decoration: none
   opacity: 0.6
+  cursor: pointer
   #include smooth
-#options-btn:hover, #options-btn:focus
-  opacity: 0.3
-#options-btn:active
+#options-btn:active, #options-btn:focus
   opacity: 0.9
+#options-btn:hover
+  opacity: 0.3
+
+
+// A tip is a helpful bit of text which shows up when you have focus upon a
+// particular input element.
+.tip
+  position: absolute
+  margin: 0
+  padding: 6px 8px
+  right: 10px
+  width: 300px
+  background-color: #fcfcfc
+  font-size: $fontSize * 0.9
+  color: #444
+  border: 1px solid #eee
+  text-align: left
+  cursor: default
+  opacity: 1
+  @include smooth
+
+.tip.ng-hide
+  display: block !important
+  pointer-events: none
+  opacity: 0
 
 // ---------------------------- Login Splash -----------------------------------
 #login-splash
+  position: absolute
   text-align: center
   padding-top: 30px
+  height: 100%
+  bottom: 0
+  z-index: 40
+  background-color: #fff
+  @include smooth
+#login-splash.ng-hide
+  display: block !important
+  height: 0
+  opacity: 0
+
 .network-btn
   display: inline-block
   margin: 8px
@@ -131,6 +166,24 @@ ul
   color: #222
   text-shadow: 1px 2px 2px #aaa
   cursor: default
+
+#my-description
+  margin-top: 20px
+  padding: 8px
+  width: 80%
+  color: #333
+  border: 1px solid #ddd
+  outline: none
+  box-shadow: 0 3px 1px #eee
+  @include smooth
+
+#my-description:hover
+  box-shadow: 0px 3px 3px #ddd
+  border-color: #bbb
+
+// Selection of your social network connections.
+#networks-box
+  margin-top: 30px
 
 // ------------------------------ Searching ------------------------------------
 #search-section

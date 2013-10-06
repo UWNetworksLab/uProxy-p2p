@@ -55,7 +55,8 @@
     <div id="contacts-frame">
       <ul class="contacts">
         <li ng-repeat="instance in model.instances">
-          <h4>{{ instance.clientId }}</h4>
+          <h4>{{ model.roster[instance.userId].name }}</h4>
+          <p>{{ instance.clientId }}<p>
           <p class="instance-description">
             {{ instance.description }}
           </p>

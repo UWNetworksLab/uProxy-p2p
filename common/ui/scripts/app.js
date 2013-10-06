@@ -1,5 +1,11 @@
-// The angular module and defintions for state associated with the underlying
-// app. This code defines
+/**
+ * app.js
+ *
+ * This is the primary frontend script. It maintains in-memory state which is
+ * continuously patched from the backend (uproxy.js) and provides hooks for the
+ * UI to modify state and send messages.
+ */
+
 'use strict';
 
 // TODO: client secret should not be public.
@@ -60,7 +66,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         console.log('!!! logout ' + network);
         freedom.emit('logout', network);
       };
-
+      $rootScope.updateDescription = function() {
+        freedom.emit('update-description', model.me.description);
+      }
 
       // These work the same even if |client| is an instance - so long as it
       // contains the attribute |clientId|.
