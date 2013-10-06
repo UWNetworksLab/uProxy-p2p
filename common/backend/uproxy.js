@@ -22,9 +22,6 @@ var log = {
   error: makeLogger('error')
 };
 
-// The channel to speak to the background page.
-var bgPageChannel = freedom;
-
 // Channels with module interface to speak to the various providers.
 
 // Identity is a module that speaks to chat networks and does some message
@@ -45,6 +42,10 @@ var client = freedom.uproxyclient();
 var server = freedom.uproxyserver();
 server.emit("start");
 
+// The channel to speak to the UI part of uproxy. The UI is running from the
+// privaledged part of freedom, so we can just set this to be freedom.
+var uiChannel = freedom;
+
 // enum of state ids that we need to worry about.
 var StateEntries = {
   ME: 'me',
@@ -59,10 +60,11 @@ var Trust = {
   OFFERED: 'offered',
   YES: 'yes'
 };
-var TrustType = {
-  PROXY: 'asProxy',
-  CLIENT: 'asClient'
-};
+
+//var TrustType = {
+//  PROXY: 'asProxy',
+//  CLIENT: 'asClient'
+//};
 
 // Keys that we don't save to local storage each time.
 // Format: each key is a dot-delimited path.
@@ -86,6 +88,9 @@ var RESET_STATE = {
   //   description : string,  // descirption of this installed instance
   //   instanceId : string,   // id for this installed instance
   //   keyHash : string,      // hash of your public key for peer connections
+  //   peerAsProxy : string,  // proxying clientId if connected else null
+  //   peersAsClients : [     // clientIds using me as a proxy.
+  //     clientId, ... ]
   //   [userIdX] : {
   //     userId : string,     // same as key [userIdX].
   //     name : string,       // user-friendly name given by network
@@ -100,7 +105,13 @@ var RESET_STATE = {
   //     }
   //   }, ... userIdX
   // }
-  "me": {},         // Local client's information.
+  "me": {
+    "description": "",
+    "instanceId": "",
+    "keyHash": "",
+    "peerAsProxy": null,
+    "peersAsClients": []
+  },         // Local client's information.
   // roster: {
   //   [userIdX]: {
   //     userId: string,
@@ -118,13 +129,32 @@ var RESET_STATE = {
   // }
   "roster": {},     // Merged contact lists from each identity provider.
   // instances: {
-  //
+  //   [instanceIdX]: {
+  //     name: string,
+  //     description: string,
+  //     annotation: string,
+  //     instanceId: string,
+  //     userId: string,
+  //     network: string,
+  //     keyhash: string,
+  //     trust: {
+  //       asProxy: Trust
+  //       asClient: Trust
+  //     }
+  //     status {
+  //       activeProxy: boolean
+  //       activeClient: boolean
+  //     }
+  //   }
   // }
   "instances": {},  // instanceId -> instance. Active UProxy installations.
-
   // Options coming from local storage and setable by the options page.
+  // TODO: put real values in here.
   "options": {
     "allowNonRoutableAddresses": false,
+    // See: https://gist.github.com/zziuni/3741933
+    // http://www.html5rocks.com/en/tutorials/webrtc/basics/
+    //   "stun:stun.l.google.com:19302"
     "stunServers": ["stunServer1", "stunServer2"],
     "turnServers": ["turnServer1", "turnServer2"]
   }
@@ -181,6 +211,7 @@ function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
 }
 
+// TODO: Generalise to a simple type system & checker for JS.
 function _validateStoredInstance(instanceId, instanceData) {
   var ids = [ "name", "description", "annotation", "instanceId", "userId", "network", "keyHash", "trust" ];
   for (var i = 0; i < ids.length; ++i) {
@@ -190,6 +221,7 @@ function _validateStoredInstance(instanceId, instanceData) {
       return false;
     }
   }
+  // TODO: use Trust enum.
   var testTrustValue = function(variable) {
     if (instanceData.trust[variable] === undefined) {
       return false;
@@ -403,7 +435,7 @@ function onload() {
   _loadStateFromStorage(state);
 
   // Define freedom bindings.
-  freedom.on('reset', function () {
+  uiChannel.on('reset', function () {
     log.debug('reset');
     // TODO: sign out of Google Talk and other networks.
     state = cloneDeep(RESET_STATE);
@@ -413,11 +445,11 @@ function onload() {
   // Called from extension whenever the user clicks opens the extension popup.
   // The intent is to reset its model - but this may or may not always be
   // necessary. Improvements to come.
-  freedom.on('open-popup', function () {
+  uiChannel.on('open-popup', function () {
     log.debug('open-popup');
     log.debug('state:', state);
     // Send the extension an empty state object.
-    freedom.emit('state-change', [{op: 'replace', path: '', value: state}]);
+    uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
   });
 
   // Update local user's online status (away, busy, etc.).
@@ -425,7 +457,7 @@ function onload() {
     log.debug('onStatus: data:' + JSON.stringify(data));
     if (data.userId) {
       state.identityStatus[data.network] = data;
-      freedom.emit('state-change', [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
+      uiChannel.emit('state-change', [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
       if (!state.me[data.userId]) {
         state.me[data.userId] = {userId: data.userId};
       }
@@ -439,19 +471,19 @@ function onload() {
     if (data.userId && state.me[data.userId]) {
       // My card changed
       state.me[data.userId] = data;
-      freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
+      uiChannel.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
       // TODO: Handle changes that might affect proxying
     } else {
       // Must be a buddy
       state.roster[data.userId] = _updateUser(data);
       // Determine networks and uproxy state.
-      freedom.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
+      uiChannel.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     }
   });
 
   identity.on('onMessage', function (msg) {
     state._msgLog.push(msg);
-    freedom.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
+    uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
     var payload = {};
     try {
       payload = JSON.parse(msg.message);
@@ -463,7 +495,7 @@ function onload() {
     _handleMessage(msg, false);  // beingSent = false
   });
 
-  freedom.on('login', function(network) {
+  uiChannel.on('login', function(network) {
     identity.login({
       agent: 'uproxy',
       version: '0.1',
@@ -473,45 +505,43 @@ function onload() {
     });
   });
 
-  freedom.on('logout', function(network) {
+  uiChannel.on('logout', function(network) {
     identity.logout(null, network);
     // Clear clients so that the next logon propogates instance data correctly.
     _clients = {};
   });
 
-  freedom.on('send-message', function (msg) {
+  uiChannel.on('send-message', function (msg) {
     identity.sendMessage(msg.to, msg.message);
     _handleMessage(msg, true);  // beingSent = true
   });
 
-  freedom.on('ignore', function (userId) {
+  uiChannel.on('ignore', function (userId) {
     // TODO: fix.
   });
 
-  freedom.on('invite-friend', function (userId) {
+  uiChannel.on('invite-friend', function (userId) {
     identity.sendMessage(userId, "Join UProxy!");
   });
 
-  freedom.on('echo', function (msg) {
+  uiChannel.on('echo', function (msg) {
     state._msgLog.push(msg);
-    freedom.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
+    uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
   });
 
-  freedom.on('change-option', function (data) {
+  uiChannel.on('change-option', function (data) {
     state.options[data.key] = data.value;
     _saveToStorage('options', state.options);
     log.debug('saved options ' + JSON.stringify(state.options));
-    freedom.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
+    uiChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
     // TODO: Handle changes that might affect proxying
   });
 
+
   // TODO: should we lookup the instance ID for this client here?
   // TODO: say not if we havn't given them permission :)
-  freedom.on('startUsingPeerAsProxyServer', peerClientId) {
-    client.emit("start",
-        {'host': '127.0.0.1', 'port': 9999,
-          // peerId of the peer being routed to.
-         'peerId': peerClientId});
+  uiChannel.on('startUsingPeerAsProxyServer', peerClientId) {
+    startUsingPeerAsProxySever(peerClientId);
   }
 
   client.on('sendSignalToPeer', function(data) {
@@ -526,7 +556,7 @@ function onload() {
   });
 
   // Updating our own UProxy instance's description.
-  freedom.on('update-description', function (data) {
+  uiChannel.on('update-description', function (data) {
     state.me.description = data;
     // TODO(uzimizu): save to storage
     var payload = JSON.stringify({
@@ -545,7 +575,7 @@ function onload() {
     }
   });
 
-  bgPageChannel.on('local_test_proxying', function() {
+  uiChannel.on('local_test_proxying', function() {
     _localTestProxying();
   });
 };
@@ -553,8 +583,30 @@ function onload() {
 
 function startUsingPeerAsProxyServer(peerClientId) {
   // TODO: check permission first.
-  // state.me.
+  state.me.peerAsProxy = peerClientId;
+  uiChannel.emit('state-change',
+      [{op: 'replace', path: '/me/peerAsProxy', value: peerClientId}]);
+  uiChannel.emit('state-change',
+      [{op: 'replace', path: '/me/roster', value: peerClientId}]);
+
+
+  // TODO: sync properly between the extension and the app on proxy settings
+  // rather than this cooincidentally the same data.
+  client.emit("start",
+    {'host': '127.0.0.1', 'port': 9999,
+      // peerId of the peer being routed to.
+     'peerId': peerClientId});
 }
+
+function stopUsingPeerAsProxyServer(peerClientId) {
+  // TODO: check permission first.
+  state.me.peerAsProxy = null;
+  uiChannel.emit('state-change',
+      [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
+  client.emit("stop");
+}
+
+
 
 // These message handlers must operate on a per-instance basis rather than a
 // per-user basis...
@@ -691,7 +743,7 @@ function _updateTrust(clientId, asProxy, trustValue) {
     instance.trust.asClient = trustValue;
   }
   // Update extension. TODO(uzimizu): Local storage as well.
-  freedom.emit('state-change', [{
+  uiChannel.emit('state-change', [{
       op: 'replace', path: '/instances/' + instance.instanceId, value: instance
   }]);
   return true;
@@ -829,7 +881,7 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
   }
 
   _saveInstanceId(instanceId);  // Update local storage and extension.
-  freedom.emit('state-change', [{
+  uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
       value: instance
@@ -885,7 +937,7 @@ function _linkClientAndInstance(clientId, instanceId) {
 
   // Update both local storage and extension.
   _saveInstance(instanceId, user.userId);
-  freedom.emit('state-change', [{
+  uiChannel.emit('state-change', [{
       op: 'replace',    // User data.
       path: '/roster/' + user.userId,
       value: user
@@ -904,7 +956,7 @@ function _handleUpdateDescription(msg, clientId) {
   var description = msg.data.description;
   state.instances[instanceId].description = description;
   log.debug('Updating description! ' + JSON.stringify(msg));
-  freedom.emit('state-change', [{
+  uiChannel.emit('state-change', [{
     op: 'replace',
     path: '/instances/' + instanceId + '/description',
     value: description
@@ -913,4 +965,4 @@ function _handleUpdateDescription(msg, clientId) {
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
-bgPageChannel.emit('ready');
+uiChannel.emit('ready');

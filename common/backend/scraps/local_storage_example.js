@@ -26,8 +26,8 @@ var LOCAL_STORAGE_EXAMPLE = {
     'network': 'google',
     'keyhash' : 'HASHssssjklsfjkldfslkfljkdfsklas',
     'trust':
-      { 'proxy': 'yes', // 'no' | 'requested' | 'yes'
-        'client': 'no' // 'no' | 'requested' | 'yes'
+      { 'asProxy': 'yes', // 'no' | 'requested' | 'yes'
+        'asClient': 'no' // 'no' | 'requested' | 'yes'
       }
     // 'status' {
        // 'activeProxy': boolean
@@ -43,8 +43,8 @@ var LOCAL_STORAGE_EXAMPLE = {
     'network': 'facebook',
     'keyhash' : 'HASHrrrjklsfjkldfslkfljkdfsklas',
     'trust': {
-      'proxy': 'no',
-      'client': 'yes'
+      'asProxy': 'no',
+      'asClient': 'yes'
     }
   },
   'instance/qqqqjksdklflsdjkljkfdsa': {
@@ -56,8 +56,8 @@ var LOCAL_STORAGE_EXAMPLE = {
     'network': 'manual',
     'keyhash' : 'HASHqqqqqjklsfjkldfslkfljkdfsklas',
     'trust': {
-      'proxy': 'no',
-      'client': 'no'
+      'asProxy': 'no',
+      'asClient': 'no'
     }
   }
 };
