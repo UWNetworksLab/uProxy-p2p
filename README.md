@@ -98,9 +98,8 @@ of supported Grunt commands:
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
- *  copy:chrome_app - Copy 'common' files into the Chrome App
- *  copy:chrome_ext - Copy 'common' files into the Chrome Extension
- *  copy:firefox - Copy 'common' files into Firefox
+ *  build_chrome - Build just Chrome
+ *  build_firefox - Build just Firefox
  *  everything - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build

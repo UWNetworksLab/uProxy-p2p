@@ -18,9 +18,6 @@
     "storage": {
       "url": "storage/storage.json",
       "api": "storage"
-    },
-    "sctp-peerconnection_test": {
-      "url": "test/sctp-peerconnection_test.json"
     }
   },
   "permissions": [

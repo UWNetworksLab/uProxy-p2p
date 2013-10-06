@@ -2,7 +2,7 @@
   "name": "UProxy Socks Server",
   "description": "Proxy remote connections to their destination.",
   "app": {
-    "script": ["../util.js", "server.js", "webclient.js"]
+    "script": ["../util.js", "server.js", "netclient.js"]
   },
   "dependencies": {
     "transport": {

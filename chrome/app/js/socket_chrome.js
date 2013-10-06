@@ -7,6 +7,7 @@
 var Socket_chrome = function(channel) {
   this.appChannel = channel;
   this.sid = null;
+  // http://developer.chrome.com/apps/socket.html
   this.create = chrome.socket.create;
   this.write = chrome.socket.write;
   this.getInfo = chrome.socket.getInfo;

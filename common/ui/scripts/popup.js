@@ -4,39 +4,43 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
 
+
     // State for roster vs. detail view.
     $scope.rosterNudge = false;
     $scope.currentContact = {
       'name': 'Nobody'
     };
+    $scope.instances = $scope.model.instances;
+    var _getTrust = function(client) {
+      return $scope.instances[client.instanceId].trust;
+    };
 
+    // Whether UProxy is logged in to *any* network.
+    $scope.loggedIn = function() {
+      return $scope.isOnline('google') || $scope.isOnline('facebook');
+    };
+
+    // Opening the detailed contact view.
     $scope.toggleContact = function(c) {
-      // c.detailsVisible = !c.detailsVisible;
       $scope.currentContact = c;
       console.log(c);
       $scope.rosterNudge = true;
     };
 
-
-    $scope.startAccess = function(client) {
-      $scope.sendMessage(client.clientId, 'start-proxying');
+    // Multifiter function for determining whether a contact should be hidden.
+    $scope.contactIsHidden = function(c) {
+      var searchText = $scope.search,
+          compareString = c.name.toLowerCase();
+      // If there is no search text and no filters are active, nothing is
+      // hidden.
+      if (!searchText) {
+        return false;
+      }
+      if (compareString.indexOf(searchText) >= 0) {
+        return false;  // Valid substring, should be visible.
+      }
+      return true;
     };
-    // Request access through a friend.
-    $scope.requestAccess = function(client) {
-      $scope.sendMessage(client.clientId, 'request-access');
-      if (!client.permissions)
-        client.permissions = {};
-      client.permissions.proxy = 'requested';
-      // Update the UI
-    };
-
-    $scope.grantAccess = function(client) {
-      sendMessage(client.clientId, 'allow');
-      if (!client.permissions)
-        client.permissions = {};
-      client.permissions.client = 'yes';
-    };
-
   }])
   // The controller for debug information/UI.
   .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model',
