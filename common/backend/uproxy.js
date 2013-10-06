@@ -14,6 +14,9 @@
 var DEBUG = true; // XXX get this from somewhere else
 console.log('Uproxy backend, running in worker ' + self.location.href);
 
+//
+var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
+
 var log = {
   debug: DEBUG ? makeLogger('debug') : function(){},
   error: makeLogger('error')
@@ -23,13 +26,24 @@ var log = {
 var bgPageChannel = freedom;
 
 // Channels with module interface to speak to the various providers.
+
+// Identity is a module that speaks to chat networks and does some message
+// passing to manage contacts privilages and initiate proxying.
 var identity = freedom.identity();
+
+// Storage is used for saving settings to the browsre local storage available
+// to the extension.
 var storage = freedom.storage();
+
+// Client is used to manage a peer connection to a contact that will proxy our
+// connection. This module listens on a localhost port and forwards requests
+// through the peer connection.
 var client = freedom.uproxyclient();
 
+// Server module; listens for peer connections and proxies their requests
+// through the peer connection.
 var server = freedom.uproxyserver();
-
-var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
+server.emit("start");
 
 // enum of state ids that we need to worry about.
 var StateEntries = {
@@ -52,8 +66,11 @@ var TrustType = {
 
 // Keys that we don't save to local storage each time.
 // Format: each key is a dot-delimited path.
+//
 // TODO(mollying): allow * to denote any-value for a single element of
 // a path.
+//
+// TODO(mollying): doesn't seem to be used, remove?
 var TRANSIENT_STATE_KEYS = [];
 
 // Initial empty state
@@ -65,8 +82,44 @@ var RESET_STATE = {
   // A table from network identifier to your status on that network
   // (online/offline/idle, etc)
   "identityStatus": {},
+  // me : {
+  //   description : string,  // descirption of this installed instance
+  //   instanceId : string,   // id for this installed instance
+  //   keyHash : string,      // hash of your public key for peer connections
+  //   [userIdX] : {
+  //     userId : string,     // same as key [userIdX].
+  //     name : string,       // user-friendly name given by network
+  //     url : string         // ?
+  //     clients: {
+  //       [clientIdX]: {
+  //         clientId: string, // same as key [clientIdX].
+  //         // TODO: users should live in network, not visa-versa!
+  //         network: string   // unique id for the network connected to.
+  //         status: string
+  //       }, ... clientIdX
+  //     }
+  //   }, ... userIdX
+  // }
   "me": {},         // Local client's information.
+  // roster: {
+  //   [userIdX]: {
+  //     userId: string,
+  //     name: string,
+  //     url: string,
+  //     clients: {
+  //       [clientIdX]: {
+  //         clientId: string, // same as key [clientIdX].
+  //         // TODO: users should live in network, not visa-versa!
+  //         network: string
+  //         status: string
+  //       }, ... clientIdX
+  //     },
+  //   } ... userIdX
+  // }
   "roster": {},     // Merged contact lists from each identity provider.
+  // instances: {
+  //
+  // }
   "instances": {},  // instanceId -> instance. Active UProxy installations.
 
   // Options coming from local storage and setable by the options page.
@@ -105,70 +158,8 @@ var DEFAULT_INSTANCE = {
   description: ''
 };
 
-// Mock data for what may live in local storage. (note: values will be strings
-// too, via JSON interpretation)
-var LOCAL_STORAGE_EXAMPLE = {
-  'me': { 'description': 'l\'s Laptop',
-          'instanceId': 'mememmemememsdhodafslkffdaslkjfds',
-        },
-  'options': {
-    'allowNonRoutableAddresses': false,
-    'stunServers': ['stunServer1', 'stunServer2'],
-    'turnServers': ['turnServer1', 'turnServer2']
-  },
-  // Note invariant: for each instanceIds[X] there should be an entry:
-  // 'instance/X': { ... } which holds out local stored knowledge about that
-  // instance id.
-  'instanceIds': [
-    'ssssssssshjafdshjadskfjlkasfs',
-    'rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn',
-    'qqqqjksdklflsdjkljkfdsa'
-  ],
-  'instance/ssssssssshjafdshjadskfjlkasfs': {
-    'name': 'S',
-    'description': 'S\'s home desktop',
-    'annotation': 'Cool S who has high bandwidth',
-    'instanceId': 'ssssssssshjafdshjadskfjlkasfs',
-    'userId': 's@gmail.com',
-    'network': 'google',
-    'keyhash' : 'HASHssssjklsfjkldfslkfljkdfsklas',
-    'trust':
-      { 'proxy': 'yes', // 'no' | 'requested' | 'yes'
-        'client': 'no' // 'no' | 'requested' | 'yes'
-      }
-    // 'status' {
-       // 'activeProxy': boolean
-       // 'activeClient': boolean
-    // }
-  },
-  'instance/r@fmail.com': {
-    'name': 'R',
-    'description': 'R\'s laptop',
-    'annotation': 'R is who is repressed',
-    'instanceId': 'rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn',
-    'userId': 'r@facebook.com',
-    'network': 'facebook',
-    'keyhash' : 'HASHrrrjklsfjkldfslkfljkdfsklas',
-    'trust': {
-      'proxy': 'no',
-      'client': 'yes'
-    }
-  },
-  'instance/qqqqjksdklflsdjkljkfdsa': {
-    'name': 'S',
-    'description': 'S\'s laptop',
-    'annotation': 'S who is on qq',
-    'instanceId': 'qqqqjksdklflsdjkljkfdsa',
-    'userId': 's@qq',
-    'network': 'manual',
-    'keyhash' : 'HASHqqqqqjklsfjkldfslkfljkdfsklas',
-    'trust': {
-      'proxy': 'no',
-      'client': 'no'
-    }
-  }
-};
-
+// To see the format used by localstorage, see the file:
+//   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
   storage.get(key).done(function (result) {
     if (isDefined(result)) {
@@ -439,8 +430,7 @@ function onload() {
       // My card changed
       state.me[data.userId] = data;
       freedom.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
-      notifyClient();
-      notifyServer();
+      // TODO: Handle changes that might affect proxying
     } else {
       // Must be a buddy
       state.roster[data.userId] = _updateUser(data);
@@ -502,28 +492,28 @@ function onload() {
     _saveToStorage('options', state.options);
     log.debug('saved options ' + JSON.stringify(state.options));
     freedom.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
-    notifyClient();
-    notifyServer();
+    // TODO: Handle changes that might affect proxying
   });
 
-  client.on('peerSignalFromClient', function(data) {
-    log.debug('Connection Setup:', data);
-    var contact = state.currentSessionsToInitiate['*'];
-    if (!contact) {
-      return log.error("Client connection received but no active connections.");
-    }
-    identity.sendMessage(contact, JSON.stringify({message: 'connection-setup', data: data}));
+  // TODO: should we lookup the instance ID for this client here?
+  // TODO: say not if we havn't given them permission :)
+  freedom.on('startUsingPeerAsProxyServer', peerClientId) {
+    client.emit("start",
+        {'host': '127.0.0.1', 'port': 9999,
+          // peerId of the peer being routed to.
+         'peerId': peerClientId});
+  }
+
+  client.on('sendSignalToPeer', function(data) {
+    log.debug('client(sendSignalToPeer):', data);
+    // TODO: don't use 'message' as a field in a message! that's confusing!
+    identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-client', data: data}));
   });
 
-  server.on('fromServer', function(data) {
-    log.debug('server response:', data);
-    var contact = state.currentSessionsToRelay[data.to];
-    if(!contact) {
-      return log.error("Response requested to inactive client: " + data.to);
-    }
-    identity.sendMessage(contact, JSON.stringify({message: 'connection-setup-response', data: data}));
+  server.on('sendSignalToPeer', function(data) {
+    log.debug('server(sendSignalToPeer):', data);
+    identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-server', data: data}));
   });
-
 
   bgPageChannel.on('local_test_proxying', function() {
     _localTestProxying();
@@ -531,24 +521,10 @@ function onload() {
 
 };
 
-var notifyClient = function() {
-  if (client.started && !('*' in state.currentSessionsToInitiate)) {
-    client.emit('stop');
-    client.started = false;
-  } else if (!client.started && ('*' in state.currentSessionsToInitiate)) {
-    client.emit('start', {host: '127.0.0.1', port: 9999});
-    client.started = true;
-  }
-};
 
-var notifyServer = function() {
-  if (server.started && Object.keys(state.currentSessionsToRelay).length == 0) {
-    server.emit('stop');
-    server.started = fale;
-  } else if (!server.started && Object.keys(state.currentSessionsToRelay).length > 0) {
-    server.emit('start');
-    server.started = true;
-  }
+function startUsingPeerAsProxyServer(peerClientId) {
+  // TODO: check permission first.
+  // state.me.
 }
 
 // These message handlers must operate on a per-instance basis rather than a
@@ -859,34 +835,6 @@ function _validateKeyHash(keyHash) {
   log.debug('Warning: keyHash Validation not yet implemented...');
   return true;
 }
-
-
-
-function _localTestProxying() {
-  var pA = "pA";
-  var pB = "pB";
-  console.log("Setting up signalling");
-  // msg : {peerId : string, // peer id message should go to.
-  //        data : json-string}
-  client.on("sendSignalToPeer", function (msg) {
-    server.emit("handleSignalFromPeer",
-        // Message came from pA.
-        {peerId: pA, data: msg.data});
-  });
-  // msg : {peerId : string, // peer id message should go to.
-  //        data : json-string}
-  server.on("sendSignalToPeer", function (msg) {
-    client.emit("handleSignalFromPeer",
-        // message came from pB
-        {peerId: pB, data: msg.data});
-  });
-  server.emit("start");
-  client.emit("start",
-      {'host': '127.0.0.1', 'port': 9999,
-        // peerId of the peer being routed to.
-       'peerId': pB});
-  console.log("ready...");
-};
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

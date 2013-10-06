@@ -46,6 +46,7 @@ var onload = function() {
     delete _conns[channelLabel];
   };
 
+  // A simple wrapper function to send data to the peer.
   var _sendToPeer = function (channelLabel, buffer) {
     _sctpPc.send({'channelLabel': channelLabel, 'buffer': buffer});
   }
@@ -58,7 +59,7 @@ var onload = function() {
       return;
     }
 
-    // TODO: reuse tags from a pool.
+    // TODO: reuse channelLabels from a pool.
     var channelLabel = "c" + Math.random();
     _conns[channelLabel] = conn.tcpConnection;
 
@@ -92,6 +93,9 @@ var onload = function() {
         if (message.buffer) {
           _conns[message.channelLabel].sendRaw(message.buffer);
         } else if (message.text) {
+          // TODO: we should use text as a signalling/control channel, e.g. to
+          // give back the actall address that was connected to as per socks
+          // official spec.
           _conns[message.channelLabel].sendRaw(message.text);
         } else {
           console.error("Message type isn't specified properly. Msg: "

@@ -13,6 +13,7 @@
     "persistent": true,
     "scripts": [
       "scripts/freedom_connector.js",
+      "scripts/proxy-config.js",
       "scripts/background.js"
     ]
   },

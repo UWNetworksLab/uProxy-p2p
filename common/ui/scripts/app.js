@@ -76,7 +76,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         $rootScope.sendMessage(client.clientId, 'accept-access');
       };
       $rootScope.startAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'start-proxying');
+        // We don't need to tell them we'll start proxying, we can just try to
+        // start. The SDP request will go through chat already.
+        // $rootScope.sendMessage(client.clientId, 'start-proxying');
+        freedom.emit('start-getting-access-from', client.clientId)
       };
 
       // Providing access for a friend:
