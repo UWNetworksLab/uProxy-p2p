@@ -568,7 +568,6 @@ var TrustOp = {
 };
 
 var _msgReceivedHandlers = {
-  'start-proxying': _handleProxyStartReceived,
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
   'notify-instance' : _handleNotifyInstanceReceived,
@@ -680,15 +679,6 @@ function _updateTrust(clientId, asProxy, trustValue) {
   return true;
 }
 
-function _handleProxyStartReceived(msg, contact) {
-  // TODO: Access Check on if it's allowed.
-  state.currentSessionsToRelay[msg['fromClientId']] = msg['fromClientId'];
-  _saveToStorage('currentSessionsToRelay', state.currentSessionsToRelay);
-  notifyServer();
-  freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToRelay/' +
-      msg['fromClientId'], value: contact}]);
-}
-
 function _handleConnectionSetupReceived(msg, contact) {
   msg.data.from = msg['fromClientId'];
   server.emit('toServer', msg.data);
@@ -726,17 +716,6 @@ function _handleConnectionSetupResponseReceived(msg, clientId) {
 }
 
 // Handle sending -----------------------------------------------------------
-
-function _handleStartProxyingSent(msg, clientId) {
-  //TODO replace with better handling of manual identity
-  if (msg.to.indexOf('manual') >= 0) {
-    return false;
-  }
-  state.currentSessionsToInitiate['*'] = msg['to'];
-  _saveToStorage('currentSessionsToInitiate', state.currentSessionsToInitiate);
-  notifyClient();
-  freedom.emit('state-change', [{op: 'add', path: '/currentSessionsToInitiate/*', value: contact}]);
-}
 
 // Instance ID (+ more) Synchronization I/O
 
@@ -880,6 +859,8 @@ function _validateKeyHash(keyHash) {
   log.debug('Warning: keyHash Validation not yet implemented...');
   return true;
 }
+
+
 
 function _localTestProxying() {
   var pA = "pA";
