@@ -2,9 +2,10 @@
 
 angular.module('UProxyExtension-options', ['UProxyExtension'])
   .run(['$rootScope', 'model', function ($rootScope, model) {
-    $rootScope.$watch('model.me.peerAsProxy', function (newValue, oldValue) {
 
-    }
+    $rootScope.$watch('model.me.peerAsProxy', function (newValue, oldValue) {
+      console.log("model.me.peerAsProxy changed");
+    }, true);
 
     // sketch out some mock data. TODO: this should come from backend
     var unwatch = $rootScope.$watch('model.roster',

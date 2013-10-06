@@ -550,9 +550,9 @@ function onload() {
 
   // TODO: should we lookup the instance ID for this client here?
   // TODO: say not if we havn't given them permission :)
-  uiChannel.on('startUsingPeerAsProxyServer', peerClientId) {
+  uiChannel.on('startUsingPeerAsProxyServer', function(peerClientId) {
     startUsingPeerAsProxySever(peerClientId);
-  }
+  });
 
   client.on('sendSignalToPeer', function(data) {
     log.debug('client(sendSignalToPeer):', data);

@@ -2,7 +2,7 @@
  * Configuration and control of the browsers proxy settings.
  */
 
-function (exports) {
+(function(exports) {
   // From:
   //   http://en.wikipedia.org/wiki/Private_network
   //   http://en.wikipedia.org/wiki/Reserved_IP_addresses
@@ -44,11 +44,11 @@ function (exports) {
         function() {});
   };
 
-  BrowerProxyConfig.prototype.stopUsingProxy = () {
+  BrowerProxyConfig.prototype.stopUsingProxy = function () {
       chrome.proxy.settings.set(
         {value: this.preUproxyConfig, scope: 'regular'},
         function() {});
   }
 
   exports.BrowerProxyConfig = BrowerProxyConfig;
-} (window);
+})(window);
