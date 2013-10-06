@@ -39,10 +39,8 @@
 
     if (this.state == NetClientState.CONNECTED) {
       socket.write(this.socketId, buffer).done(this._onWrite.bind(this));
-      return true;
     } else {
       this.queue.push(msg);
-      return false;
     }
   };
 
@@ -67,7 +65,6 @@
         .done(this._onConnected.bind(this));
     this.state = NetClientState.CONNECTING;
     console.log("Connection being made to " + JSON.stringify(connectInfo));
-    return connectInfo;
   };
 
   NetClient.prototype._onConnected = function() {
