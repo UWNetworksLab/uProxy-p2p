@@ -1,13 +1,18 @@
 //XXX: needed for chrome debugging, used by socks.js and tcp-server.js.
+"use strict";
+
 var window = {};
 console.log('SOCKS5 server: ' + self.location.href);
 
 window.socket = freedom['core.socket']();
 
+// Defined in webclient.js
+var NetClient = window.NetClient;
+
+
 var onload = function() {
   var _active = false;
   var _peers = {};
-
 
   //
   var resetServer = function() {
@@ -21,11 +26,15 @@ var onload = function() {
   // Close the peerId. Closes all tcp sockets open for this peer.
   var closePeer = function(peerId) {
     //conn.disconnect();
-    for (var i in _peers[peerId].webClients[peerId]) {
-      _peers[peerId].webClients[i].close();
+    for (var i in _peers[peerId].netClients[peerId]) {
+      _peers[peerId].netClients[i].close();
     }
     _peers[peerId].sctpPc.shutdown();
     delete _peers[peerId];
+  };
+
+  var _sendDataToPeer = function (sctpPc, channelLabel, data) {
+    sctpPc.send({'channelLabel': channelLabel, 'buffer': data});
   };
 
   //
@@ -35,14 +44,14 @@ var onload = function() {
     }
 
     var sctpPc = freedom['core.sctp-peerconnection']();
-    var webClients = {};
+    var netClients = {};
     var peer = {
       // The peer connection.
       sctpPc : sctpPc,
       // We open up multple connections, for each data channels there is a
       // corresponding webclient. Each entry is keyed by channelLabel with
-      // value being a WebClient.
-      webClients : webClients,
+      // value being a NetClient.
+      netClients : netClients,
       // The freedom signalling channel
       signallingChannel : null,
       // queue of messages to hold on to while we wait for the
@@ -52,20 +61,25 @@ var onload = function() {
     _peers[peerId] = peer;
 
     sctpPc.on('onReceived', function(message) {
-      console.log("Server got message: " + message.text);
+      console.log("Server got message: " + JSON.stringify(message));
       if (! message.channelLabel) {
         console.error("Message received but missing channelLabel. Msg: " +
             JSON.stringify(message));
         return;
       }
-      if (! (message.channelLabel in webClients)) {
-        webClients[message.channelLabel] = new window.webclient(
-            sctpPc.send.bind(sctpPc, message.channelLabel));
+      if (! (message.channelLabel in netClients)) {
+        netClients[message.channelLabel] = new NetClient(
+            _sendDataToPeer.bind(null, message.channelLabel));
       }
       if (message.text) {
-        webClients[message.channelLabel].onMessage(message.text);
+        // Text from the peer is used to set the destination.
+        // Assumes "message.text" is a json of form:
+        // { host: string, port: number }
+        netClients[message.channelLabel].connectTo(
+            JSON.parse(message.text));
       } else if (message.buffer) {
-        webClients[message.channelLabel].onMessage(message.buffer);
+        // Buffer from the peer is data for the destination.
+        netClients[message.channelLabel].send(message.buffer);
       } else {
         console.error("Message received but missing valid data field. Msg: " +
             JSON.stringify(message));

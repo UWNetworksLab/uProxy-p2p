@@ -69,6 +69,7 @@ var onload = function() {
   setTimeout(function () {
     console.log("Sending message to peer...");
     peerA.sctpPc.send({'channelLabel': "a", 'text': "hello?"});
+    peerA.sctpPc.send({'channelLabel': "a", 'buffer': new UInt8Array(100)});
   }, 1000);
 
   console.log("loaded sctp-peerconnection_test");
