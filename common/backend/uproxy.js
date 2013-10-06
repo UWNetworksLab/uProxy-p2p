@@ -627,6 +627,10 @@ function _updateUser(newData) {
     } else if ('facebook' == client.network) {
       newData.onFB = true;
     }
+    if (!newData.online && 'manual' != client.network &&
+        ('messageable' == client.status || 'online' == client.status)) {
+      newData.online = true;
+    }
     // Skip non-UProxy clients.
     // TODO(uzimizu): Figure out best way to request new users to install UProxy
     if (!_isMessageableUproxy(client)) {

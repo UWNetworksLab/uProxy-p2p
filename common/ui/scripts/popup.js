@@ -1,14 +1,28 @@
+/**
+ * popup.js
+ *
+ * This is the script which controls the beavior of the popup component of the
+ * frontend. The popup contains a contacts list and filters which allow the user
+ * to conveniently access all desired uproxy info and interactions.
+ */
+
 'use strict';
 
 var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
 
-
     // State for roster vs. detail view.
     $scope.rosterNudge = false;
     $scope.currentContact = {
       'name': 'Nobody'
+    };
+    // Initial filter state.
+    $scope.filters = {
+      'all': true,
+      'online': true,
+      'myAccess': false,
+      'friendsAccess': false
     };
     $scope.instances = $scope.model.instances;
     var _getTrust = function(client) {
@@ -27,20 +41,29 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.rosterNudge = true;
     };
 
+
     // Multifiter function for determining whether a contact should be hidden.
-    $scope.contactIsHidden = function(c) {
+    $scope.contactIsFiltered = function(c) {
       var searchText = $scope.search,
           compareString = c.name.toLowerCase();
-      // If there is no search text and no filters are active, nothing is
-      // hidden.
+      // First, compare filters.
+      if (!$scope.filters.offline && !c.online) {
+        return true;
+      }
+      // for (var filter in $scope.filters) {
+        // if ($scope.filters[filter] && c[filter])
+          // return true;
+      // }
+      // Otherwise, if there is no search text, this contact is visible.
       if (!searchText) {
         return false;
       }
       if (compareString.indexOf(searchText) >= 0) {
-        return false;  // Valid substring, should be visible.
+        return false;
       }
-      return true;
+      return true;  // Does not match the search text, should be hidden.
     };
+
   }])
   // The controller for debug information/UI.
   .controller('DebugCtrl', ['$filter', '$scope', 'freedom', 'model',

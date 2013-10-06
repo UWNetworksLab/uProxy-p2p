@@ -1,5 +1,11 @@
-// The angular module and defintions for state associated with the underlying
-// app. This code defines
+/**
+ * app.js
+ *
+ * This is the primary frontend script. It maintains in-memory state which is
+ * continuously patched from the backend (uproxy.js) and provides hooks for the
+ * UI to modify state and send messages.
+ */
+
 'use strict';
 
 // TODO: client secret should not be public.

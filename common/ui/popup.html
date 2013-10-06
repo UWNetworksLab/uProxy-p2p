@@ -70,7 +70,9 @@
               <button id="my-access" class="filter">My Access</button>
               <button id="all-access" class="filter">All</button>
               <button id="friends-access" class="filter">Friends' Access</button>
-              <button id="offline-filter" class="filter">Offline</button>
+              <input type="checkbox" id="offline-filter" class="filter" ng-model="filters.offline">
+                Offline
+              </button>
             </section>
           </section>
           <section id="contact-header" ng-show="rosterNudge">
@@ -84,7 +86,7 @@
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
                 ng-click="toggleContact(contact)"
-                ng-hide="contactIsHidden(contact)"
+                ng-hide="contactIsFiltered(contact)"
                 tabindex="{{ $index + 10 }}">
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
@@ -109,7 +111,7 @@
               <div class="client-actions" ng-show="client.instanceId">
                 <h5>InstanceId: {{ client.instanceId }}</h5>
                 <div class="box-for-proxy"
-                    ng-switch="model.instances[client.instanceId].trust.asProxy">
+                    ng-switch="instances[client.instanceId].trust.asProxy">
                   <button class="btn" ng-switch-when="yes"
                       ng-click="startAccess(client)">
                     Start
