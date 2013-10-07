@@ -75,7 +75,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         freedom.emit('logout', network);
       };
       $rootScope.updateDescription = function() {
-        freedom.emit('update-description', model.me.description);
+        if ($rootScope.oldDescription != model.me.description) {
+          freedom.emit('update-description', model.me.description);
+        }
+        $rootScope.oldDescription = model.me.description;
       }
 
       // These work the same even if |client| is an instance - so long as it
