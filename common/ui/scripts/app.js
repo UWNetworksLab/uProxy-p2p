@@ -81,6 +81,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         console.log('!!! logout ' + network);
         freedom.emit('logout', network);
       };
+
       $rootScope.updateDescription = function() {
         if ($rootScope.oldDescription != model.me.description) {
           freedom.emit('update-description', model.me.description);

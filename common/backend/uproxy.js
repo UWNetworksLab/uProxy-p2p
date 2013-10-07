@@ -535,17 +535,16 @@ uiChannel.on('update-description', function (data) {
   // TODO(uzimizu): save to storage
   var payload = JSON.stringify({
     type: 'update-description',
-    data: {
-        instanceId: '' + state.me.instanceId,
-        description: '' + state.me.description,
-    }
+    instanceId: '' + state.me.instanceId,
+    description: '' + state.me.description
   });
+
   // Send the new description to ALL currently online friend instances.
   for (var instanceId in state.instances) {
-    var client = state.instanceToClient(instanceId);
-    if (!client || 'offline' == client.status)
+    var clientId = state.instanceToClient[instanceId];
+    if (!clientId)  // || 'offline' == state.roster[state.instances[instanceId]].clients[clientId].status)
       continue;
-    identity.sendMessage(client.clientId, payload);
+    identity.sendMessage(clientId, payload);
   }
 });
 
@@ -822,7 +821,6 @@ function _sendInstanceData(client) {
   // TODO(uzimizu): Build the instance payload somewhere else, so we
   // don't have to rebuild it *everytime* a person logs on, as that's ineffic.
   var msg = _buildInstancePayload(client);
-  log.debug('identity.sendMessage(' + client.clientId + ', ' + msg + ')');
   identity.sendMessage(client.clientId, msg);
 }
 
@@ -883,17 +881,10 @@ function _receiveInstanceData(msg) {
       value: instance
   }]);
 
-  // uiChannel.emit('state-change', [
-      // { op: 'add', path: '/clientToInstance/' + clientId, value: instanceId },
-      // { op: 'add', path: '/instanceToClient/' + instanceId, value: clientId }
-  // ]);
   uiChannel.emit('state-change', [
     { op: 'replace', path: '/clientToInstance', value: state.clientToInstance },
     { op: 'replace', path: '/instanceToClient', value: state.instanceToClient }
   ]);
-
-  log.debug('finished updating the instance data.');
-
   return true;
 }
 
@@ -916,10 +907,11 @@ function _validateKeyHash(keyHash) {
 // Update the description for an instanceId.
 // Assumes that |instanceId| is valid.
 function _handleUpdateDescription(msg) {
-  var instanceId = msg.data.instanceId;
-  var description = msg.data.description;
-  state.instances[instanceId].description = description;
   log.debug('Updating description! ' + JSON.stringify(msg));
+  var instanceId = msg.data.instanceId,
+      description = msg.data.description;
+
+  state.instances[instanceId].description = description;
   uiChannel.emit('state-change', [{
     op: 'replace',
     path: '/instances/' + instanceId + '/description',
