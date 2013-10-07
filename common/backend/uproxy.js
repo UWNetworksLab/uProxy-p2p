@@ -501,12 +501,14 @@ identity.on('onMessage', function (msgInfo) {
       [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
   try {
-    jsonMessage = JSON.parse(msgInfo);
+    // Replace the message JSON-string with actual data attributes.
+    jsonMessage = JSON.parse(msgInfo.message);
+    msgInfo.message = jsonMessage;
   } catch(e) {
     jsonMessage = {}
     jsonMessage.unparseable = msgInfo.message;
   }
-  _handleMessage(jsonMessage, false);  // beingSent = false
+  _handleMessage(msgInfo, false);  // beingSent = false
 });
 
 uiChannel.on('login', function(network) {
@@ -643,20 +645,20 @@ var _msgReceivedHandlers = {
 
 // Bi-directional message handler.
 // |beingSent| - True if message is being sent. False if received.
-function _handleMessage(jsonMessage, beingSent) {
+function _handleMessage(msgInfo, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
-            ' MESSAGE: ' + JSON.stringify(jsonMessage));
+            ' MESSAGE: ' + JSON.stringify(msgInfo));
 
+  var payload = msgInfo.message,
+      msgType = payload.message;
   // Check if this is a Trust modification.
-  var trustValue = TrustOp[jsonMessage.message];  // NO, REQUESTED, or YES
+  var trustValue = TrustOp[msgType];
   if (trustValue) {
-    var mType = jsonMessage.message;
     // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = 'allow' == mType || 'deny' == mType ||
-                  'offer' == mType ? !beingSent : beingSent;
-    var clientId = jsonMessage.to || jsonMessage.toClientId;
+    var asProxy = ['allow', 'deny', 'offer'].indexOf(msgType) >= 0? !beingSent : beingSent;
+    var clientId = msgInfo.to || msgInfo.toClientId;
     if (!beingSent) {  // Update trust on the remote instance if received.
-      clientId = jsonMessage.fromClientId;
+      clientId = msgInfo.fromClientId;
     }
     _updateTrust(clientId, asProxy, trustValue);
     return true;
@@ -665,13 +667,13 @@ function _handleMessage(jsonMessage, beingSent) {
   // Other type of message - instance or proxy state update.
   var handler = null;
   if (!beingSent) {
-    handler = _msgReceivedHandlers[jsonMessage.message];
+    handler = _msgReceivedHandlers[msgType];
   }
   if (!handler) {
-    log.error('No handler for sent message: ', jsonMessage);
+    log.error('No handler for sent message type: ' + msgType);
     return false;
   }
-  handler(jsonMessage, jsonMessage.to);
+  handler(payload, msgInfo.to);
 }
 
 // A simple predicate function to see if we can talk to this client.
@@ -699,6 +701,7 @@ function _updateUser(newData) {
     userOp = 'add';
   }
   var user = state.roster[userId];
+  user.name = newData.name;
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
