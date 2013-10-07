@@ -548,7 +548,7 @@ uiChannel.on('update-description', function (data) {
   });
   // Send the new description to ALL currently online friend instances.
   for (var instanceId in state.instances) {
-    var client = instanceToClient(instanceId);
+    var client = state.instanceToClient(instanceId);
     if (!client || 'offline' == client.status)
       continue;
     identity.sendMessage(client.clientId, payload);
