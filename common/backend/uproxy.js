@@ -732,8 +732,8 @@ function _updateUser(newData) {
     }
 
     // Inform UProxy instances of each others' ephemeral clients.
-    canProxi = _checkUProxyClientSynchronization(client);
-
+    var isUProxyClient = _checkUProxyClientSynchronization(client);
+    canProxi = canProxi || isUProxyClient;
     // TODO: UI indicators for various 'can proxy'-abilities.
     // TODO(mollyling): Properly hangle logout.
   }
@@ -839,9 +839,7 @@ function _receiveInstanceData(msg) {
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
-  // Before everything, remember the clientId - instanceId relation for future
-  // completion, because it's possible that the corresponding user/client data
-  // has not yet been received.
+  // Before everything, remember the clientId - instanceId relation.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
 
