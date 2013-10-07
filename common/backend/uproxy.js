@@ -505,8 +505,6 @@ uiChannel.on('login', function(network) {
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
-  // Clear clients so that the next logon propogates instance data correctly.
-  _uproxyClients = {};
 });
 
 //
