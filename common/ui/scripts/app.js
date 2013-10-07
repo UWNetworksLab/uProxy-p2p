@@ -36,9 +36,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     'freedom',               // Via dependencyInjector.
     'onFreedomStateChange',  // Via dependencyInjector.
     'model',                 // Via dependencyInjector.
-    function(
-        $filter, $http, $rootScope,
-        freedom, onFreedomStateChange, model) {
+    function($filter, $http, $rootScope,
+             freedom, onFreedomStateChange, model) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -48,6 +47,17 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         localStorage.clear();
         freedom.emit('reset', null);
       }
+
+      $rootScope.instanceIdOfClientId = function(clientId) {
+        return model.clientToInstance[clientId];
+
+      $rootScope.instanceOfClientId = function(clientId) {
+        if (clientId in model.clientToInstance) {
+          return model.instancesTable[model.clientToInstance[clientId]];
+        } else {
+          return null;
+        }
+      };
 
       /**
        * Determine whether UProxy is connected to |network|.
@@ -74,20 +84,20 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // contains the attribute |clientId|.
 
       // Request access through a friend.
-      $rootScope.requestAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'request-access');
+      $rootScope.requestAccess = function(instance) {
+        $rootScope.sendMessage(instance.instanceId, 'request-access');
       };
-      $rootScope.cancelRequest = function(client) {
-        $rootScope.sendMessage(client.clientId, 'cancel-request');
+      $rootScope.cancelRequest = function(instance) {
+        $rootScope.sendMessage(instance.instanceId, 'cancel-request');
       }
-      $rootScope.acceptAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'accept-access');
+      $rootScope.acceptAccess = function(instance) {
+        $rootScope.sendMessage(instance.instanceId, 'accept-access');
       };
-      $rootScope.startAccess = function(client) {
+      $rootScope.startAccess = function(instance) {
         // We don't need to tell them we'll start proxying, we can just try to
         // start. The SDP request will go through chat already.
         // $rootScope.sendMessage(client.clientId, 'start-proxying');
-        freedom.emit('start-getting-access-from', client.clientId)
+        freedom.emit('start-using-peer-as-proxy-server', instance.instanceId)
       };
 
       // Providing access for a friend:

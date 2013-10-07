@@ -2,23 +2,7 @@
 
 angular.module('UProxyExtension-options', ['UProxyExtension'])
   .run(['$rootScope', 'model', function ($rootScope, model) {
-
-    $rootScope.$watch('model.me.peerAsProxy', function (newValue, oldValue) {
-      console.log("model.me.peerAsProxy changed");
-    }, true);
-
-    // sketch out some mock data. TODO: this should come from backend
-    var unwatch = $rootScope.$watch('model.roster',
-        function (roster, oldRoster) {
-      if (!roster) return;
-      model.profile = {
-        clientName: model.me.name+'ʼs client',
-        staticId: model.me.name+'ʼs static ID',
-        publicKey: model.me.name+'ʼs public key'
-      };
-
-      unwatch();
-    }, true);
+    // Can add stuff here if we want/need for the options page.
   }])
   .controller('OptionsCtrl', ['$scope', 'freedom', 'model',
     function ($scope, freedom, model) {
