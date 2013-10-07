@@ -48,7 +48,7 @@ var server = freedom.uproxyserver();
 server.emit("start");
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
-// privaledged part of freedom, so we can just set this to be freedom.
+// privileged part of freedom, so we can just set this to be freedom.
 var uiChannel = freedom;
 
 // enum of state ids that we need to worry about.
@@ -83,12 +83,12 @@ var TRANSIENT_STATE_KEYS = [];
 // Initial empty state
 var RESET_STATE = {
   // debugging stuff
-  "_debug": DEBUG,  // debug state.
-  "_msgLog": [],  //
+  '_debug': DEBUG,  // debug state.
+  '_msgLog': [],  //
 
   // A table from network identifier to your status on that network
   // (online/offline/idle, etc)
-  "identityStatus": {},
+  'identityStatus': {},
 
   // me : {
   //   description : string,  // descirption of this installed instance
@@ -112,12 +112,12 @@ var RESET_STATE = {
   //   }, ... userIdX
   // }
   // Local client's information.
-  "me": {
-    "description": "",
-    "instanceId": "",
-    "keyHash": "",
-    "peerAsProxy": null,
-    "peersAsClients": []
+  'me': {
+    'description': '',
+    'instanceId': '',
+    'keyHash': '',
+    'peerAsProxy': null,
+    'peersAsClients': []
   },
 
   // roster: {
@@ -136,7 +136,7 @@ var RESET_STATE = {
   //   } ... userIdX
   // }
   // Merged contact lists from each identity provider.
-  "roster": {},
+  'roster': {},
 
   // instances: {
   //   [instanceIdX]: {
@@ -157,18 +157,23 @@ var RESET_STATE = {
   //     }
   //   }
   // }
+
   // instanceId -> instance. Active UProxy installations.
-  "instances": {},
+  'instances': {},
+
+  // ID mappings.
+  'clientToInstance': {},      // instanceId -> clientId
+  'instanceToClient': {},       // clientId -> instanceId
 
   // Options coming from local storage and setable by the options page.
   // TODO: put real values in here.
-  "options": {
-    "allowNonRoutableAddresses": false,
+  'options': {
+    'allowNonRoutableAddresses': false,
     // See: https://gist.github.com/zziuni/3741933
     // http://www.html5rocks.com/en/tutorials/webrtc/basics/
-    //   "stun:stun.l.google.com:19302"
-    "stunServers": ["stunServer1", "stunServer2"],
-    "turnServers": ["turnServer1", "turnServer2"]
+    //   'stun:stun.l.google.com:19302'
+    'stunServers': ['stunServer1', 'stunServer2'],
+    'turnServers': ['turnServer1', 'turnServer2']
   }
 };
 var state = cloneDeep(RESET_STATE);
@@ -365,7 +370,6 @@ function _saveInstance(instanceId, userId) {
               annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
               instanceId: instanceId,
               userId: userId,
-              clientId: instanceInfo.clientId,
               network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
                                          'network', "xmpp"),
               keyHash: instanceInfo.keyHash,
@@ -490,7 +494,6 @@ identity.on('onChange', function(data) {
     // Must be a buddy
     // state.roster[data.userId] = _updateUser(data);
     // Determine networks and uproxy state.
-    //uiChannel.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
     // var existingUser = state.roster[data.userId];
     // state.roster[data.userId] = _updateUser(data);
     _updateUser(data);
@@ -504,8 +507,9 @@ identity.on('onMessage', function (msgInfo) {
       [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
   try {
-    jsonMessage = JSON.parse(msgInfo.message);
+    jsonMessage = JSON.parse(msgInfo);
   } catch(e) {
+    jsonMessage = {}
     jsonMessage.unparseable = msgInfo.message;
   }
   _handleMessage(jsonMessage, false);  // beingSent = false
@@ -637,7 +641,7 @@ var TrustOp = {
 var _msgReceivedHandlers = {
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
-  'notify-instance': _handleNotifyInstanceReceived,
+  'notify-instance': _receiveInstanceNotification,
   'update-description': _handleUpdateDescription
 };
 
@@ -650,9 +654,10 @@ function _handleMessage(jsonMessage, beingSent) {
   // Check if this is a Trust modification.
   var trustValue = TrustOp[jsonMessage.message];  // NO, REQUESTED, or YES
   if (trustValue) {
+    var mType = jsonMessage.message;
     // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = 'allow' == jsonMessage.message || 'deny' == jsonMessage.message ||
-                  'offer' == jsonMessage.message ? !beingSent : beingSent;
+    var asProxy = 'allow' == mType || 'deny' == mType ||
+                  'offer' == mType ? !beingSent : beingSent;
     var clientId = jsonMessage.to || jsonMessage.toClientId;
     if (!beingSent) {  // Update trust on the remote instance if received.
       clientId = jsonMessage.fromClientId;
@@ -702,12 +707,14 @@ function _updateUser(newData) {
       onFB = false,
       online = false,
       canProxi = false;
+  if (!user.clients) user.clients = {};
 
-  for (var clientId in newData.clients) {  // Update clients.
+  for (var clientId in newData.clients) {
     var client = newData.clients[clientId];
     if (!user.clients[clientId]) {
       user.clients[clientId] = client;
     }
+    log.debug('  Interacting with client: ' + JSON.stringify(client));
 
     // Determine network state / flags for filtering purposes.
     if (!onGoogle && 'google' == client.network)
@@ -719,31 +726,28 @@ function _updateUser(newData) {
         ('messageable' == client.status || 'online' == client.status)) {
       online = true;
     }
-
     // TODO(uzimizu): Figure out best way to request new users to install UProxy
-
-    // Done this client if it's non-UProxy.
     if (!_isMessageableUproxy(client)) {
-      continue;
+      continue;  // Skip non-uproxy clients.
     }
+
     // Synchronize our instance data with all online uproxy clients.
     var existingClient = _uproxyClients[clientId];
     _uproxyClients[clientId] = client;
-    if (!existingClient) {  // They are a new UProxy-enabled client!
+    if (!existingClient) {
       log.debug('Aware of new client. Sending my instance data to ' + JSON.stringify(client));
-      _sendNotifyInstance(clientId, client);  // Enlighten them of our instance.
+      // Tell them that we're a UProxy instance as well.
+      _sendNotifyInstance(clientId, client);
 
-      // Check if they've already enlightened us of their instance, in which
-      // case we must complete the association.
-      var instanceId = _clientToInstanceId[clientId];
+      // Associate this new Client with its Instance, if they've already
+      // enlightened us of their instance.
+      var instanceId = state.clientToInstance[clientId];
       if (instanceId) {
         _linkClientAndInstance(clientId, instanceId);
         log.debug('Finished linking client and instance in updateUser. ' + JSON.stringify(client));
       }
-        // client.instanceId = null;  // Prepare a placeholder.
     }
     canProxi = true;  // TODO: UI indicators for various 'can proxy'-abilities.
-
     // TODO(mollyling): Properly hangle logout.
   }
   // Apply user-level flags.
@@ -751,13 +755,11 @@ function _updateUser(newData) {
   user.canUProxy = canProxi;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
-
-  freedom.emit('state-change', [{
+  uiChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
       value: user
   }]);
-  // return newData;  // Overwrites the userdata.
   return true;
 }
 
@@ -875,8 +877,8 @@ function _sendNotifyInstance(id, client) {
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
-function _handleNotifyInstanceReceived(msg, toClientId) {
-  log.debug('_handleNotifyInstanceReceived(from: ' + msg.fromUserId + ')');
+function _receiveInstanceNotification(msg, toClientId) {
+  log.debug('_receiveInstanceNotification(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
@@ -885,16 +887,18 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
-  // Before everything, remember this clientId -> instanceId relation for future
-  // completion, because it's possible that the user & client have not yet been
-  // prepared due to a not-yet-received XMPP status event.
-  _clientToInstanceId[clientId] = instanceId;
+  // Before everything, remember the clientId - instanceId relation for future
+  // completion, because it's possible that the corresponding user/client data
+  // has not yet been received.
+  state.clientToInstance[clientId] = instanceId;
+  state.instanceToClient[instanceId] = clientId;
 
   // Update the local instance tables.
   var instance = state.instances[instanceId];
   if (!instance) {
-    instance = _prepareNewInstance(instanceId, userId, description, keyHash);
     instanceOp = 'add';
+    instance = _prepareNewInstance(instanceId, userId, description, keyHash);
+    state.instances[instanceId] = instance;
     instance.trust.asClient = consent.asProxy? 'offered' : 'no';
     instance.trust.asProxy = consent.asClient? 'requested' : 'no';
 
@@ -912,13 +916,13 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
     }
   }
 
-  // If the user and client already exist, then complete the association.
-  var user = state.roster[userId];
-  if (user) {
-    if (user.clients[clientId]) {
-       _linkClientAndInstance(clientId, instanceId);
-    }
-  }
+  // Complete the association if the client already exists.
+  // var user = state.roster[userId];
+  // if (user) {
+    // if (user.clients[clientId]) {
+       // _linkClientAndInstance(clientId, instanceId);
+    // }
+  // }
   _saveInstanceId(instanceId);  // Update local storage and extension.
   uiChannel.emit('state-change', [{
       op: instanceOp,
@@ -926,22 +930,24 @@ function _handleNotifyInstanceReceived(msg, toClientId) {
       value: instance
   }]);
 
+  uiChannel.emit('state-change', [
+      { op: 'add', path: '/clientToInstance/' + clientId, value: instanceId },
+      { op: 'add', path: '/instanceToClient/' + instanceId, value: clientId }
+  ]);
+
   return true;
 }
 
-
-// When a new instanceId is received, prepare a new instance for the table.
+// Prepare and return new instance object. Assumes new |instanceId|.
 function _prepareNewInstance(instanceId, userId, description, keyHash) {
   var instance = DEFAULT_INSTANCE;
   instance.instanceId = instanceId;
   instance.userId = userId;
-  instance.keyHash = keyHash;
   instance.description = description;
+  instance.keyHash = keyHash;
   log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
-  state.instances[instanceId] = instance;
   return instance;
 }
-
 
 // Provides the linkage between a client and an instance, whether it occurs
 // after an XMPP status update or an Instance notification message. Assumes
