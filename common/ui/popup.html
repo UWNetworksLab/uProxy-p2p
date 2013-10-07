@@ -115,56 +115,61 @@
           </section>
 
           <div id="contact-details" ng-show="rosterNudge">
-            <div class="client-details" ng-repeat="client in currentContact.clients">
-              {{ client.clientId }}
-              <br>Network: {{ client.network }}
-              <br>Status: {{ client.status }}
+            <div class="instance-details" ng-repeat="instance in [instanceOfUserId(currentContact.userId)]">
+              <h5>Instance</h5>
+              <br>Network: {{ currentContact.network }}
+              <br>Instance Id: {{ instance.instanceId }}
               <br>
-              <div class="client-actions" ng-show="instanceOfClientId(client.clientId)">
-                <h5>InstanceId: {{ model.clientToInstance[clientId] }}</h5>
+              <div class="instance-actions">
                 <div class="box-for-proxy"
-                    ng-switch="instanceOfClientId(client.clientId).trust.asProxy">
+                    ng-switch="instance.trust.asProxy">
                   <button class="btn" ng-switch-when="yes"
-                      ng-click="startAccess(instanceOfClientId(client.clientId))">
+                      ng-click="startAccess(instance)">
                     Start
                   </button>
                   <div ng-switch-when="requested">
-                    <button class="btn" ng-click="cancelRequest(instanceOfClientId(client.clientId))">
+                    <button class="btn" ng-click="cancelRequest(instance)">
                       Cancel
                     </button>
                     <span>Pending...</span>
                   </div>
                   <button class="btn" ng-switch-when="offered"
-                      ng-click="acceptAccess(instanceOfClientId(client.clientId))">
+                      ng-click="acceptAccess(instance)">
                     Accept Access
                   </button>
                   <button class="btn"
                       ng-switch-default
-                      ng-click="requestAccess(instanceOfClientId(client.clientId))">
+                      ng-click="requestAccess(instance)">
                     Request
                   </button>
                 </div>
 
                 <div class="box-for-client"
-                    ng-switch="instanceOfClientId(client.clientId).trust.asClient">
+                    ng-switch="instance.trust.asClient">
                   <button class="btn" ng-switch-when="no"
-                      ng-click="offerAccess(instanceOfClientId(client.clientId))">
+                      ng-click="offerAccess(instance)">
                     Offer Access
                   </button>
                   <div ng-switch-when="requested">
-                    <button class="btn" ng-click="grantAccess(instanceOfClientId(client.clientId))">
+                    <button class="btn" ng-click="grantAccess(instance)">
                       Grant
                     </button>
-                    <button class="btn" ng-click="denyAccess(instanceOfClientId(client.clientId))">
+                    <button class="btn" ng-click="denyAccess(instance)">
                       Ignore
                     </button>
                   </div>
                   <button class="btn" ng-switch-default
-                      ng-click="revokeAccess(instanceOfClientId(client.clientId))">
+                      ng-click="revokeAccess(instance)">
                     Revoke Access
                   </button>
                 </div>
               </div>
+            </div>
+            <h5>Clients</h5>
+            <div class="client-details" ng-repeat="client in currentContact.clients">
+              {{ client.clientId }}
+              <br>Network: {{ client.network }}
+              <br>Status: {{ client.status }}
             </div>
 
           </div>

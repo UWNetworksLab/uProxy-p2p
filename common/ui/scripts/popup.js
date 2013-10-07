@@ -27,6 +27,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     };
     $scope.instances = $scope.model.instances;
 
+    //
     $scope.currentContact = {};  // Visible for the individual contact page.
 
     var _getTrust = function(client) {

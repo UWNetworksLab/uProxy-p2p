@@ -145,7 +145,6 @@ var RESET_STATE = {
   //     annotation: string,
   //     instanceId: string,
   //     userId: string,
-  //     network: string,
   //     keyhash: string,
   //     trust: {
   //       asProxy: Trust
@@ -162,8 +161,11 @@ var RESET_STATE = {
   'instances': {},
 
   // ID mappings.
+  // TODO: Make these mappings properly properly reflect that an instance can
+  // be connected to multiple networks and therefore have multiple client ids.
+  // TODO: add mappings between networks?
   'clientToInstance': {},      // instanceId -> clientId
-  'instanceToClient': {},       // clientId -> instanceId
+  'instanceToClient': {},      // clientId -> instanceId
 
   // Options coming from local storage and setable by the options page.
   // TODO: put real values in here.
@@ -886,7 +888,7 @@ function _receiveInstanceData(msg, toClientId) {
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
-      userId      = msg.fromUserId,
+      userId      = msg.fromUserId, //  TODO: remove
       clientId    = msg.fromClientId,
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
@@ -896,6 +898,12 @@ function _receiveInstanceData(msg, toClientId) {
   // has not yet been received.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
+  state.userToInstances[userId] ?
+    state.userToInstances[userId].push(instanceId) :
+    state.userToInstances[userId] = [instanceId];
+  state.instanceToUsers[instanceId] ?
+    state.instanceToUsers[instanceId].push(userId) :
+    state.instanceToUsers[instanceId] = [userId];
 
   // Update the local instance tables.
   var instance = state.instances[instanceId];
