@@ -515,6 +515,7 @@ uiChannel.on('send-message', function (msgInfo) {
   _handleMessage(msgInfo, true);  // beingSent = true
 });
 
+
 uiChannel.on('ignore', function (userId) {
   // TODO: fix.
 });
@@ -600,23 +601,56 @@ function stopUsingPeerAsProxyServer(peerClientId) {
 
 
 
-// These message handlers must operate on a per-instance basis rather than a
-// per-user basis...
-// Each of these functions should take parameters (msg, contact)
-// Some of these message handlers deal with modifying trust values.
-// Others deal with actually starting and stopping a proxy connection.
-
-// Trust mutation - map from message -> new trust level.
+// --------------------------------------------------------------------------
+//  Trust
+// --------------------------------------------------------------------------
+// action -> target trust level.
 var TrustOp = {
+  // If Alice |action|'s Bob, then Bob acts as the client.
   'allow': Trust.YES,
   'offer': Trust.OFFERED,
   'deny': Trust.NO,
-
+  // Bob acts as the proxy.
   'request-access': Trust.REQUESTED,
   'cancel-request': Trust.NO,
   'accept-access': Trust.YES
-
 };
+
+// Update trust level for an instance.
+uiChannel.on('instance-trust-change', function (data) {
+  var iId = data.instanceId,
+      clientId = state.instanceToClient[iId];
+  if (!clientId) {
+    log.debug('Warning! Cannot change trust level because client ID does not ' +
+              'exist for instance ' + iId + ' - they are probably offline.');
+    return false;
+  }
+  // Set trust level locally, then notify the other end through XMPP.
+  _updateTrust(data.instanceId, data.action, false);  // received = false
+  identity.sendMessage(clientId, data.action);
+});
+
+// Update trust state for a particular instance.
+// |instanceId| - instance to change the trust levels upon.
+// |action| - Trust action to execute.
+// |received| - boolean of source of this action.
+function _updateTrust(instanceId, action, received) {
+  received = received || false;
+  var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ? !received : received;
+  var trustValue = TrustOp[action];
+  var instance = state.instances[instanceId];
+  if (asProxy) {
+    instance.trust.asProxy = trustValue;
+  } else {
+    instance.trust.asClient = trustValue;
+  }
+
+  // Update UI. TODO(uzimizu): Local storage as well?
+  uiChannel.emit('state-change', [{
+      op: 'replace', path: '/instances/' + instance.instanceId, value: instance
+  }]);
+  return true;
+}
 
 var _msgReceivedHandlers = {
   'connection-setup': _handleConnectionSetupReceived,
@@ -630,18 +664,18 @@ var _msgReceivedHandlers = {
 function _handleMessage(msgInfo, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
             ' MESSAGE: ' + JSON.stringify(msgInfo));
-
   var msgType = msgInfo.message;
-  // Check if this is a Trust modification.
   var trustValue = TrustOp[msgType];
-  if (trustValue) {
-    // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = ['allow', 'deny', 'offer'].indexOf(msgType) >= 0? !beingSent : beingSent;
-    var clientId = msgInfo.to || msgInfo.toClientId;
-    if (!beingSent) {  // Update trust on the remote instance if received.
-      clientId = msgInfo.fromClientId;
+  if (trustValue) {  // Check if this is a Trust modification. If so, it can
+                    //  only be a received message....
+    var clientId = msgInfo.fromClientId;
+    var instanceId = state.clientToInstance[clientId];
+    if (!instanceId) {
+      // TODO(uzimizu): Attach instanceId to the message and verify.
+      log.debug('Could not find instance for the trust modification!');
+      return false;
     }
-    _updateTrust(clientId, asProxy, trustValue);
+    _updateTrust(instanceId, msgType, true);  // received = true
     return true;
   }
 
@@ -746,29 +780,6 @@ function _checkUProxyClientSynchronization(client) {
     state.clientToInstance[clientId] = null;
     _sendInstanceData(client);
   }
-  return true;
-}
-
-// Update trust state in a particular client. Assumes the client has a valid
-// relation with an instanceId, indicating that it's a UProxy client.
-function _updateTrust(clientId, asProxy, trustValue) {
-  var instance = state.clientToInstance[clientId];
-  if (!instance) {
-    log.debug('Client ' + clientId + ' does not have an instance!');
-    return false;
-  }
-  var trust = asProxy? instance.trust.asProxy : instance.trust.asClient;
-  log.debug('Updating trust for ' + instance.clientId + ' as ' +
-      (asProxy? 'proxy' : 'client') + ' to "' + trustValue + '".');
-  if (asProxy) {
-    instance.trust.asProxy = trustValue;
-  } else {
-    instance.trust.asClient = trustValue;
-  }
-  // Update extension. TODO(uzimizu): Local storage as well.
-  uiChannel.emit('state-change', [{
-      op: 'replace', path: '/instances/' + instance.instanceId, value: instance
-  }]);
   return true;
 }
 
@@ -879,12 +890,6 @@ function _receiveInstanceData(msg, toClientId) {
   // has not yet been received.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
-  state.userToInstances[userId] ?
-    state.userToInstances[userId].push(instanceId) :
-    state.userToInstances[userId] = [instanceId];
-  state.instanceToUsers[instanceId] ?
-    state.instanceToUsers[instanceId].push(userId) :
-    state.instanceToUsers[instanceId] = [userId];
 
   // Delete any old client for this instance.
   if (oldClientId && (oldClientId != clientId)) {
