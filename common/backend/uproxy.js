@@ -170,35 +170,33 @@ var RESET_STATE = {
   }
 };
 var state = cloneDeep(RESET_STATE);
-var _uproxyClients = {};  // clientId -> client reference table.
-
-var _clientToInstanceId = {};  // clientId -> instanceId mapping.
+// var _uproxyClients = {};  // clientId -> client reference table.
+// var _clientToInstanceId = {};  // clientId -> instanceId mapping.
 
 // Mapping functions between instanceIds and clientIds.
-function instanceToClient(instanceId) {
-  var instance = state.instances[instanceId];
-  if (!instance) return null;
-  var user = state.roster[instance.userId];
-  if (!user) return null;
-  return user.clients[instance.clientId]
-}
+// function instanceToClient(instanceId) {
+  // var instance = state.instances[instanceId];
+  // if (!instance) return null;
+  // var user = state.roster[instance.userId];
+  // if (!user) return null;
+  // return user.clients[instance.clientId]
+// }
 
 // clientId -> Instance object. First attempts to use the client table. It is
 // possible for the client to not exist but the instance to (if the instance
 // notification was sent and received prior to the xmpp onChange update). In
 // that case, we must scan the instance table for the correct client id.
-function clientToInstance(clientId) {
-  var client = _uproxyClients[clientId];
-  log.debug('c2i:' + JSON.stringify(_uproxyClients));
-  if (!client) return null;
-  log.debug('c2i:' + JSON.stringify(state.instances));
-  return state.instances[client.instanceId];
-}
+// function clientToInstance(clientId) {
+  // var client = _uproxyClients[clientId];
+  // log.debug('c2i:' + JSON.stringify(_uproxyClients));
+  // if (!client) return null;
+  // log.debug('c2i:' + JSON.stringify(state.instances));
+  // return state.instances[client.instanceId];
+// }
 
 // Instance object.
 var DEFAULT_INSTANCE = {
   instanceId: null,  // Primary key.
-  clientId: null,    // May change many times.
   keyHash: null,
   trust: {
     asProxy: Trust.NO,
@@ -478,10 +476,6 @@ identity.on('onChange', function(data) {
     // TODO: Handle changes that might affect proxying
   } else {
     // Must be a buddy
-    // state.roster[data.userId] = _updateUser(data);
-    // Determine networks and uproxy state.
-    // var existingUser = state.roster[data.userId];
-    // state.roster[data.userId] = _updateUser(data);
     _updateUser(data);
   }
 });
@@ -624,15 +618,17 @@ var TrustOp = {
   'allow': Trust.YES,
   'offer': Trust.OFFERED,
   'deny': Trust.NO,
+
   'request-access': Trust.REQUESTED,
   'cancel-request': Trust.NO,
   'accept-access': Trust.YES
+
 };
 
 var _msgReceivedHandlers = {
   'connection-setup': _handleConnectionSetupReceived,
   'connection-setup-response': _handleConnectionSetupResponseReceived,
-  'notify-instance': _receiveInstanceNotification,
+  'notify-instance': _receiveInstanceData,
   'update-description': _handleUpdateDescription
 };
 
@@ -705,7 +701,6 @@ function _updateUser(newData) {
     if (!user.clients[clientId]) {
       user.clients[clientId] = client;
     }
-    log.debug('  Interacting with client: ' + JSON.stringify(client));
 
     // Determine network state / flags for filtering purposes.
     if (!onGoogle && 'google' == client.network)
@@ -717,35 +712,20 @@ function _updateUser(newData) {
         ('messageable' == client.status || 'online' == client.status)) {
       online = true;
     }
-    // TODO(uzimizu): Figure out best way to request new users to install UProxy
-    if (!_isMessageableUproxy(client)) {
-      continue;  // Skip non-uproxy clients.
-    }
 
-    // Synchronize our instance data with all online uproxy clients.
-    var existingClient = _uproxyClients[clientId];
-    _uproxyClients[clientId] = client;
-    if (!existingClient) {
-      log.debug('Aware of new client. Sending my instance data to ' + JSON.stringify(client));
-      // Tell them that we're a UProxy instance as well.
-      _sendNotifyInstance(clientId, client);
+    // Inform UProxy instances of each others' ephemeral clients.
+    canProxi = _checkUProxyClientSynchronization(client);
 
-      // Associate this new Client with its Instance, if they've already
-      // enlightened us of their instance.
-      var instanceId = state.clientToInstance[clientId];
-      if (instanceId) {
-        _linkClientAndInstance(clientId, instanceId);
-        log.debug('Finished linking client and instance in updateUser. ' + JSON.stringify(client));
-      }
-    }
-    canProxi = true;  // TODO: UI indicators for various 'can proxy'-abilities.
+    // TODO: UI indicators for various 'can proxy'-abilities.
     // TODO(mollyling): Properly hangle logout.
   }
+
   // Apply user-level flags.
   user.online = online;
   user.canUProxy = canProxi;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
+
   uiChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
@@ -754,10 +734,31 @@ function _updateUser(newData) {
   return true;
 }
 
+// TODO(uzimizu): Figure out best way to request new users to install UProxy if
+// they don't have any uproxy clients.
+
+// Examine |client| and synchronize instance data if it's a new UProxy client.
+// Returns true if |client| is a valid uproxy client.
+function _checkUProxyClientSynchronization(client) {
+  if (!_isMessageableUproxy(client)) {
+    return false;
+  }
+  var clientId = client.clientId,
+      clientIsNew = (undefined === state.clientToInstance[clientId]);
+  if (clientIsNew) {
+    log.debug('Aware of new UProxy client. Sending instance data.' + JSON.stringify(client));
+    // Set the instance mapping to null as opposed to undefined, to indicate that
+    // we know the client is pending its corresponding instance data.
+    state.clientToInstance[clientId] = null;
+    _sendInstanceData(client);
+  }
+  return true;
+}
+
 // Update trust state in a particular client. Assumes the client has a valid
 // relation with an instanceId, indicating that it's a UProxy client.
 function _updateTrust(clientId, asProxy, trustValue) {
-  var instance = clientToInstance(clientId);
+  var instance = state.clientToInstance(clientId);
   if (!instance) {
     log.debug('Client ' + clientId + ' does not have an instance!');
     return false;
@@ -820,13 +821,13 @@ function _handleConnectionSetupResponseReceived(msg, clientId) {
 // Prepare a message indicating instance data, to be sent to other instances and
 // synchronize everybody's world view. Does not assume that the instance
 // actually exists.
-function _buildInstancePayload(msg, clientId) {
+function _buildInstancePayload(msg, client) {
   // Look up permissions for the clientId.
   var u, trust = null, consent;
-  var client = _uproxyClients[clientId];
-  if (client && client.instanceId) {
-    // Acquire current trust state, if available.
-    trust = state.instances[client.instanceId].trust;
+  // Acquire current trust state, if available.
+  var instance = state.clientToInstance[client.clientId];
+  if (instance) {
+    trust = instance.trust;
   }
   if (null !== trust) {
     // For each direction (e.g., I proxy for you, or you proxy for me), there
@@ -851,25 +852,25 @@ function _buildInstancePayload(msg, clientId) {
 }
 
 // Send a notification about my instance data to a particular clientId.
-// Assumes client corresponds to a valid UProxy instance - otherwise you'd just
-// be spamming poor shmucks.
-function _sendNotifyInstance(id, client) {
-  if (client['network'] === undefined ||
-      (client.network != 'loopback' && client.network != 'manual')) {
-    // TODO(uzimizu): Build the instance payload somewhere else, so we
-    // don't have to rebuild it *everytime* a person logs on, as that's
-    // wasteful.
-    var msg = _buildInstancePayload('notify-instance', id);
-    log.debug('identity.sendMessage(' + id + ', ' + msg + ')');
-    identity.sendMessage(id, msg);
+// Assumes |client| corresponds to a valid UProxy instance.
+function _sendInstanceData(client) {
+  // if (client['network'] === undefined ||
+      // (client.network != 'loopback' && client.network != 'manual')) {
+  if (client.network == 'manual') {
+    return false;
   }
+  // TODO(uzimizu): Build the instance payload somewhere else, so we
+  // don't have to rebuild it *everytime* a person logs on, as that's ineffic.
+  var msg = _buildInstancePayload('notify-instance', client);
+  log.debug('identity.sendMessage(' + client.clientId + ', ' + msg + ')');
+  identity.sendMessage(client.clientId, msg);
 }
 
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
-function _receiveInstanceNotification(msg, toClientId) {
-  log.debug('_receiveInstanceNotification(from: ' + msg.fromUserId + ')');
+function _receiveInstanceData(msg, toClientId) {
+  log.debug('_receiveInstanceData(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
@@ -907,13 +908,6 @@ function _receiveInstanceNotification(msg, toClientId) {
     }
   }
 
-  // Complete the association if the client already exists.
-  // var user = state.roster[userId];
-  // if (user) {
-    // if (user.clients[clientId]) {
-       // _linkClientAndInstance(clientId, instanceId);
-    // }
-  // }
   _saveInstanceId(instanceId);  // Update local storage and extension.
   uiChannel.emit('state-change', [{
       op: instanceOp,
