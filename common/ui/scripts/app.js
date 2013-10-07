@@ -91,9 +91,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
 
       // Providing access for a friend:
+      // TODO: use instanceIDs.
       $rootScope.offerAccess = function(client) {
         $rootScope.sendMessage(client.clientId, 'offer');
-      }
+      };
       $rootScope.grantAccess = function(client) {
         $rootScope.sendMessage(client.clientId, 'allow');
       };

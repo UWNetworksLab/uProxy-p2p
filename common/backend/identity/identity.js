@@ -18,12 +18,12 @@ function IdentityProvider() {
       // userId: null,
       // network: 'loopback'
     // },
-    manual: {
-      ref: freedom.manualIdentity(),
-      status: 'offline',
-      userId: null,
-      network: 'manual'
-    },
+    //manual: {
+    //  ref: freedom.manualIdentity(),
+    //  status: 'offline',
+    //  userId: null,
+    //  network: 'manual'
+    //},
     google: {
       ref: freedom.googleIdentity(),
       status: 'offline',
@@ -95,7 +95,7 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
   var providerCount = 0;
   for (var key in this.providers) {
     if (this.providers.hasOwnProperty(key)) {
-      if ((userId == undefined && networkName == undefined) || 
+      if ((userId == undefined && networkName == undefined) ||
           this.providers[key].userId == userId ||
           this.providers[key].network == networkName) {
         providerCount += 1;
@@ -152,6 +152,7 @@ IdentityProvider.prototype.onChange = function(data, providerKey) {
     }
   }
   //Add manual client
+  /*
   var manualId = 'manual://' + data.userId;
   if (!data.clients) {
     data.clients = {};
@@ -162,6 +163,7 @@ IdentityProvider.prototype.onChange = function(data, providerKey) {
     status: 'messageable'
   };
   this.reverseIndex[manualId] = 'manual';
+  */
   //Cache the card in the local profile
   if (data.userId && this.profile.me[data.userId]) {
     this.profile.me[data.userId] = data;

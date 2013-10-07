@@ -10,6 +10,11 @@
  */
 'use strict';
 
+// Called once when uproxy.js is loaded.
+// TODO: WebWorkers startup errors are hard to debug.
+// Once fixed, the setTimeout will no longer be needed.
+function onload() {
+
 /*global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives */   // for jslint.
 var DEBUG = true; // XXX get this from somewhere else
 console.log('Uproxy backend, running in worker ' + self.location.href);
@@ -411,185 +416,173 @@ function _saveAllInstances() {
       Object.keys(state[StateEntries.INSTANCES])));
 }
 
-//TODO(willscott): WebWorkers startup errors are hard to debug.
-// Once fixed, the setTimeout will no longer be needed.
-setTimeout(onload, 0);
+// Try to login to chat networks.
+identity.login({
+  agent: 'uproxy',
+  version: '0.1',
+  url: 'https://github.com/UWNetworksLab/UProxy',
+  interactive: false
+  //network: ''
+});
 
-function _loginInit(cb) {
+// Check if the app is installed.
+_loadStateFromStorage(state);
+
+// Define freedom bindings.
+uiChannel.on('reset', function () {
+  log.debug('reset');
+  // TODO: sign out of Google Talk and other networks.
+  state = cloneDeep(RESET_STATE);
+  _loadStateFromStorage(state);
+});
+
+// Called from extension whenever the user clicks opens the extension popup.
+// The intent is to reset its model - but this may or may not always be
+// necessary. Improvements to come.
+uiChannel.on('open-popup', function () {
+  log.debug('open-popup');
+  log.debug('state:', state);
+  // Send the extension an empty state object.
+  uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
+});
+
+// Update local user's online status (away, busy, etc.).
+identity.on('onStatus', function(data) {
+  log.debug('onStatus: data:' + JSON.stringify(data));
+  if (data.userId) {
+    state.identityStatus[data.network] = data;
+    uiChannel.emit('state-change',
+        [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
+    if (!state.me[data.userId]) {
+      state.me[data.userId] = {userId: data.userId};
+    }
+  }
+});
+
+// Called when a contact (or ourselves) changes state, whether online or
+// description.
+identity.on('onChange', function(data) {
+  // log.debug('onChange: data:' + JSON.stringify(data));
+  if (!data.userId) {
+    log.error('onChange: missing userId! ' + JSON.stringify(data));
+  }
+  if (state.me[data.userId]) {
+    // My card changed
+    state.me[data.userId] = data;
+
+    uiChannel.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
+    // TODO: Handle changes that might affect proxying
+  } else {
+    // Must be a buddy
+    // state.roster[data.userId] = _updateUser(data);
+    // Determine networks and uproxy state.
+    //uiChannel.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
+    // var existingUser = state.roster[data.userId];
+    // state.roster[data.userId] = _updateUser(data);
+    _updateUser(data);
+  }
+});
+
+identity.on('onMessage', function (msgInfo) {
+  log.debug("identity.on('onMessage'): msgInfo: ", msgInfo);
+  state._msgLog.push(msgInfo);
+  uiChannel.emit('state-change',
+      [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
+  var jsonMessage = {};
+  try {
+    jsonMessage = JSON.parse(msgInfo.message);
+  } catch(e) {
+    jsonMessage.unparseable = msgInfo.message;
+  }
+  _handleMessage(jsonMessage, false);  // beingSent = false
+});
+
+uiChannel.on('login', function(network) {
   identity.login({
     agent: 'uproxy',
     version: '0.1',
     url: 'https://github.com/UWNetworksLab/UProxy',
-    interactive: false
-    //network: ''
-  }).done(function (loginRet) {
-    if (cb) {
-      cb();
+    interactive: true,
+    network: network
+  });
+});
+
+uiChannel.on('logout', function(network) {
+  identity.logout(null, network);
+  // Clear clients so that the next logon propogates instance data correctly.
+  _uproxyClients = {};
+});
+
+//
+uiChannel.on('send-message', function (msgInfo) {
+  identity.sendMessage(msgInfo.to, msgInfo.message);
+  _handleMessage(msgInfo, true);  // beingSent = true
+});
+
+uiChannel.on('ignore', function (userId) {
+  // TODO: fix.
+});
+
+uiChannel.on('invite-friend', function (userId) {
+  identity.sendMessage(userId, "Join UProxy!");
+});
+
+uiChannel.on('echo', function (msg) {
+  state._msgLog.push(msg);
+  uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
+});
+
+uiChannel.on('change-option', function (data) {
+  state.options[data.key] = data.value;
+  _saveToStorage('options', state.options);
+  log.debug('saved options ' + JSON.stringify(state.options));
+  uiChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
+  // TODO: Handle changes that might affect proxying
+});
+
+// Updating our own UProxy instance's description.
+uiChannel.on('update-description', function (data) {
+  state.me.description = data;
+  // TODO(uzimizu): save to storage
+  var payload = JSON.stringify({
+    message: 'update-description',
+    data: {
+        instanceId: '' + state.me.instanceId,
+        description: '' + state.me.description,
     }
   });
-};
+  // Send the new description to ALL currently online friend instances.
+  for (var instanceId in state.instances) {
+    var client = instanceToClient(instanceId);
+    if (!client || 'offline' == client.status)
+      continue;
+    identity.sendMessage(client.clientId, payload);
+  }
+});
 
+// --------------------------------------------------------------------------
+//  Proxying
+// --------------------------------------------------------------------------
+// TODO: should we lookup the instance ID for this client here?
+// TODO: say not if we havn't given them permission :)
+uiChannel.on('startUsingPeerAsProxyServer', function(peerClientId) {
+  startUsingPeerAsProxySever(peerClientId);
+});
 
-// Called once when uproxy.js is loaded.
-function onload() {
-  // Check if the app is installed.
-  _loginInit();
-  _loadStateFromStorage(state);
+client.on('sendSignalToPeer', function(data) {
+  log.debug('client(sendSignalToPeer):', data);
+  // TODO: don't use 'message' as a field in a message! that's confusing!
+  identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-client', data: data}));
+});
 
-  // Define freedom bindings.
-  uiChannel.on('reset', function () {
-    log.debug('reset');
-    // TODO: sign out of Google Talk and other networks.
-    state = cloneDeep(RESET_STATE);
-    _loadStateFromStorage(state);
-  });
+server.on('sendSignalToPeer', function(data) {
+  log.debug('server(sendSignalToPeer):', data);
+  identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-server', data: data}));
+});
 
-  // Called from extension whenever the user clicks opens the extension popup.
-  // The intent is to reset its model - but this may or may not always be
-  // necessary. Improvements to come.
-  uiChannel.on('open-popup', function () {
-    log.debug('open-popup');
-    log.debug('state:', state);
-    // Send the extension an empty state object.
-    uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
-  });
-
-  // Update local user's online status (away, busy, etc.).
-  identity.on('onStatus', function(data) {
-    log.debug('onStatus: data:' + JSON.stringify(data));
-    if (data.userId) {
-      state.identityStatus[data.network] = data;
-      uiChannel.emit('state-change',
-          [{op: 'add', path: '/identityStatus/'+data.network, value: data}]);
-      if (!state.me[data.userId]) {
-        state.me[data.userId] = {userId: data.userId};
-      }
-    }
-  });
-
-  // Called when a contact (or ourselves) changes state, whether online or
-  // description.
-  identity.on('onChange', function(data) {
-    // log.debug('onChange: data:' + JSON.stringify(data));
-    if (!data.userId) {
-      log.error('onChange: missing userId! ' + JSON.stringify(data));
-    }
-    if (state.me[data.userId]) {
-      // My card changed
-      state.me[data.userId] = data;
-
-      uiChannel.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
-      // TODO: Handle changes that might affect proxying
-    } else {
-      // Must be a buddy
-      // state.roster[data.userId] = _updateUser(data);
-      // Determine networks and uproxy state.
-      //uiChannel.emit('state-change', [{op: 'add', path: '/roster/'+data.userId, value: data}]);
-      // var existingUser = state.roster[data.userId];
-      // state.roster[data.userId] = _updateUser(data);
-      _updateUser(data);
-    }
-  });
-
-  identity.on('onMessage', function (msg) {
-    state._msgLog.push(msg);
-    uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
-    var payload = {};
-    try {
-      payload = JSON.parse(msg.message);
-      msg.message = payload.message;
-      msg.data = payload.data;
-    } catch(e) {
-      msg.unparseable = msg.message;
-    }
-    _handleMessage(msg, false);  // beingSent = false
-  });
-
-  uiChannel.on('login', function(network) {
-    identity.login({
-      agent: 'uproxy',
-      version: '0.1',
-      url: 'https://github.com/UWNetworksLab/UProxy',
-      interactive: true,
-      network: network
-    });
-  });
-
-  uiChannel.on('logout', function(network) {
-    identity.logout(null, network);
-    // Clear clients so that the next logon propogates instance data correctly.
-    _uproxyClients = {};
-  });
-
-  uiChannel.on('send-message', function (msg) {
-    identity.sendMessage(msg.to, msg.message);
-    _handleMessage(msg, true);  // beingSent = true
-  });
-
-  uiChannel.on('ignore', function (userId) {
-    // TODO: fix.
-  });
-
-  uiChannel.on('invite-friend', function (userId) {
-    identity.sendMessage(userId, "Join UProxy!");
-  });
-
-  uiChannel.on('echo', function (msg) {
-    state._msgLog.push(msg);
-    uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
-  });
-
-  uiChannel.on('change-option', function (data) {
-    state.options[data.key] = data.value;
-    _saveToStorage('options', state.options);
-    log.debug('saved options ' + JSON.stringify(state.options));
-    uiChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
-    // TODO: Handle changes that might affect proxying
-  });
-
-
-  // TODO: should we lookup the instance ID for this client here?
-  // TODO: say not if we havn't given them permission :)
-  uiChannel.on('startUsingPeerAsProxyServer', function(peerClientId) {
-    startUsingPeerAsProxySever(peerClientId);
-  });
-
-  client.on('sendSignalToPeer', function(data) {
-    log.debug('client(sendSignalToPeer):', data);
-    // TODO: don't use 'message' as a field in a message! that's confusing!
-    identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-client', data: data}));
-  });
-
-  server.on('sendSignalToPeer', function(data) {
-    log.debug('server(sendSignalToPeer):', data);
-    identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-server', data: data}));
-  });
-
-  // Updating our own UProxy instance's description.
-  uiChannel.on('update-description', function (data) {
-    state.me.description = data;
-    // TODO(uzimizu): save to storage
-    var payload = JSON.stringify({
-      message: 'update-description',
-      data: {
-          instanceId: '' + state.me.instanceId,
-          description: '' + state.me.description,
-      }
-    });
-    // Send the new description to ALL currently online friend instances.
-    for (var instanceId in state.instances) {
-      var client = instanceToClient(instanceId);
-      if (!client || 'offline' == client.status)
-        continue;
-      identity.sendMessage(client.clientId, payload);
-    }
-  });
-
-  uiChannel.on('local_test_proxying', function() {
-    _localTestProxying();
-  });
-};
-
+uiChannel.on('local_test_proxying', function() {
+  _localTestProxying();
+});
 
 function startUsingPeerAsProxyServer(peerClientId) {
   // TODO: check permission first.
@@ -642,12 +635,12 @@ var _msgReceivedHandlers = {
 
 // Bi-directional message handler.
 // |beingSent| - True if message is being sent. False if received.
-function _handleMessage(msg, beingSent) {
+function _handleMessage(jsonMessage, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
-            ' MESSAGE: ' + JSON.stringify(msg));
+            ' MESSAGE: ' + JSON.stringify(jsonMessage));
 
   // Check if this is a Trust modification.
-  var trustValue = TrustOp[msg.message];  // NO, REQUESTED, or YES
+  var trustValue = TrustOp[jsonMessage.message];  // NO, REQUESTED, or YES
   if (trustValue) {
     // Access request and Grants go in opposite directions - tweak boolean.
     var asProxy = 'allow' == msg.message || 'deny' == msg.message ||
@@ -998,3 +991,9 @@ function _handleUpdateDescription(msg, clientId) {
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
 uiChannel.emit('ready');
+
+
+//TODO(willscott): WebWorkers startup errors are hard to debug.
+// Once fixed, the setTimeout will no longer be needed.
+};  // onload
+setTimeout(onload, 0);
