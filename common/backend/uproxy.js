@@ -289,11 +289,11 @@ function _loadStateFromStorage(state) {
   _loadFromStorage(key, function(v){ state[StateEntries.OPTIONS] = v; }, RESET_STATE[key]);
 
   // Set the state |instances| from the local storage entries.
-  var instancesTable = {};
-  state[StateEntries.INSTANCES] = instancesTable;
+  var instances = {};
+  state[StateEntries.INSTANCES] = instances;
   key = StateEntries.INSTANCEIDS;
 
-  var checkAndSave = function(instanceId, updateUI) {
+  var checkAndSave = function(instanceId) {
     _loadFromStorage("instance/" + instanceId, function(instance) {
       if(instance === null) {
         console.error("instance " + instanceId + " not found");
@@ -301,34 +301,35 @@ function _loadStateFromStorage(state) {
         console.error("instance " + instanceId + " was bad:", instance);
         _removeInstanceId(instanceId);
       } else {
-        console.error("instance " + instanceId + " loaded");
-        instancesTable[instanceId] = instance;
+        console.log("instance " + instanceId + " loaded");
+        instances[instanceId] = instance;
         // Add to the roster also
         var user = state.roster[instance.userId] = {};
         user.userId = instance.userId;
         user.name = instance.name;
+        user.url = '';
         user.clients = {};
+
+        uiChannel.emit('state-change',
+          [{op: 'add', path: '/roster/'+user.userId, value: user}]);
       }
-      // update the state from root path. Lots may have changed.
-      uiChannel.emit('state-change',
-          [{op: 'replace', path: '', value: state}]);
     }, null);
   };
 
   // Load
   _loadFromStorage(StateEntries.INSTANCEIDS, function(insts) {
     var instanceIds = [];
-    if (insts !== null && insts.length > 2) {
+    if (insts !== null && insts.length > 0) {
       instanceIds = JSON.parse(insts);
     }
     console.log('instanceIds:' + instanceIds);
     for (i = 0; i < instanceIds.length; i++) {
-      if (instanceIds[i] == "undefined") {
-        _removeInstanceId("undefined");
-      } else {
+      //if (instanceIds[i] == "undefined") {
+      //  _removeInstanceId("undefined");
+      //} else {
         // Check, save and update the UI on the last loaded entry.
-        checkAndSave(instanceIds[i], i + 1 == instanceIds.length);
-      }
+      checkAndSave(instanceIds[i]);
+      //}
     }
   }, []);
 
@@ -481,17 +482,15 @@ identity.on('onMessage', function (msgInfo) {
   uiChannel.emit('state-change',
       [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
+  msgInfo.messageText = msgInfo.message;
+  delete msgInfo.message;
   try {
     // Replace the JSON str with actual data attributes, then flatten.
-    jsonMessage = JSON.parse(msgInfo.message);
-    msgInfo.message = '';
-    for (var key in jsonMessage) {
-      msgInfo[key] = jsonMessage[key];
-    }
+    msgInfo.data = JSON.parse(msgInfo.messageText);
   } catch(e) {
-    jsonMessage = {}
-    jsonMessage.unparseable = msgInfo.message;
+    msgInfo.unparseable = true;
   }
+  // By passing
   _handleMessage(msgInfo, false);  // beingSent = false
 });
 
@@ -508,13 +507,6 @@ uiChannel.on('login', function(network) {
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
 });
-
-//
-uiChannel.on('send-message', function (msgInfo) {
-  identity.sendMessage(msgInfo.to, msgInfo.message);
-  _handleMessage(msgInfo, true);  // beingSent = true
-});
-
 
 uiChannel.on('ignore', function (userId) {
   // TODO: fix.
@@ -542,7 +534,7 @@ uiChannel.on('update-description', function (data) {
   state.me.description = data;
   // TODO(uzimizu): save to storage
   var payload = JSON.stringify({
-    message: 'update-description',
+    type: 'update-description',
     data: {
         instanceId: '' + state.me.instanceId,
         description: '' + state.me.description,
@@ -627,7 +619,7 @@ uiChannel.on('instance-trust-change', function (data) {
   }
   // Set trust level locally, then notify the other end through XMPP.
   _updateTrust(data.instanceId, data.action, false);  // received = false
-  identity.sendMessage(clientId, data.action);
+  identity.sendMessage(clientId, JSON.stringify({type: data.action}));
 });
 
 // Update trust state for a particular instance.
@@ -653,18 +645,17 @@ function _updateTrust(instanceId, action, received) {
 }
 
 var _msgReceivedHandlers = {
-  'connection-setup': _handleConnectionSetupReceived,
-  'connection-setup-response': _handleConnectionSetupResponseReceived,
   'notify-instance': _receiveInstanceData,
   'update-description': _handleUpdateDescription
 };
 
 // Bi-directional message handler.
-// |beingSent| - True if message is being sent. False if received.
+// |beingSent| - True if message is being sent by us. False if we are receiving
+// it.
 function _handleMessage(msgInfo, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
             ' MESSAGE: ' + JSON.stringify(msgInfo));
-  var msgType = msgInfo.message;
+  var msgType = msgInfo.data.type;
   var trustValue = TrustOp[msgType];
   if (trustValue) {  // Check if this is a Trust modification. If so, it can
                     //  only be a received message....
@@ -681,6 +672,7 @@ function _handleMessage(msgInfo, beingSent) {
 
   // Other type of message - instance or proxy state update.
   var handler = null;
+  // If the message is not being sent by us...
   if (!beingSent) {
     handler = _msgReceivedHandlers[msgType];
   }
@@ -783,42 +775,6 @@ function _checkUProxyClientSynchronization(client) {
   return true;
 }
 
-function _handleConnectionSetupReceived(msg, contact) {
-  msg.data.from = msg['fromClientId'];
-  server.emit('toServer', msg.data);
-
-  // Figure out the crypto key
-  var cryptoKey = null;
-  var data = JSON.parse(msg.data.data);
-  if (data.sdp) {
-    cryptoKey = extractCryptoKey(data.sdp);
-  } else {
-    log.debug("Data did not contain sdp headers", msg);
-  }
-
-  // Compare against the verified crypto keys
-  var verifiedCryptoKeysKey = contact.userId + ".verifiedCryptoKeys";
-  var verificationRequired = false;
-  if (cryptoKey) {
-    // TODO: rename to Hash: this is not the key, this is the hash of the key.
-    _loadFromStorage(verifiedCryptoKeysKey, function(verifiedCryptoKeys) {
-      log.debug("Comparing crypto key against verified keys for this user");
-      if (cryptoKey in verifiedCryptoKeys) {
-        log.debug("Crypto key already verified, proceed to establishing connection");
-      } else {
-        log.debug("Crypto key not yet verified, need to start video chat");
-      }
-    }, {});
-  } else {
-    log.error("Didn't receive crypto key in SDP headers, not sure what to do");
-  }
-}
-
-function _handleConnectionSetupResponseReceived(msg, clientId) {
-  // msg.data.from = msg['fromClientId'];
-  // client.emit('peerSignalToClient', msg.data);
-}
-
 // Handle sending -----------------------------------------------------------
 
 // Instance ID (+ more) Synchronization I/O
@@ -826,7 +782,7 @@ function _handleConnectionSetupResponseReceived(msg, clientId) {
 // Prepare a message indicating instance data, to be sent to other instances and
 // synchronize everybody's world view. Does not assume that the instance
 // actually exists.
-function _buildInstancePayload(msg, client) {
+function _buildInstancePayload(client) {
   // Look up permissions for the clientId.
   var u, trust = null, consent;
   // Acquire current trust state, if available.
@@ -847,13 +803,12 @@ function _buildInstancePayload(msg, client) {
   }
 
   return JSON.stringify({
-    message: msg,
-    data: {
-      instanceId: '' + state.me.instanceId,
-      description: '' + state.me.description,
-      keyHash: '' + state.me.keyHash,
-      consent: consent,
-    }});
+    type: 'notify-instance',
+    instanceId: '' + state.me.instanceId,
+    description: '' + state.me.description,
+    keyHash: '' + state.me.keyHash,
+    consent: consent,
+  });
 }
 
 // Send a notification about my instance data to a particular clientId.
@@ -866,7 +821,7 @@ function _sendInstanceData(client) {
   }
   // TODO(uzimizu): Build the instance payload somewhere else, so we
   // don't have to rebuild it *everytime* a person logs on, as that's ineffic.
-  var msg = _buildInstancePayload('notify-instance', client);
+  var msg = _buildInstancePayload(client);
   log.debug('identity.sendMessage(' + client.clientId + ', ' + msg + ')');
   identity.sendMessage(client.clientId, msg);
 }
@@ -874,12 +829,13 @@ function _sendInstanceData(client) {
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
-function _receiveInstanceData(msg, toClientId) {
+// TODO: support instance being on multiple chat networks.
+function _receiveInstanceData(msg) {
   log.debug('_receiveInstanceData(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
-      userId      = msg.fromUserId, //  TODO: remove
+      userId      = msg.fromUserId,
       clientId    = msg.fromClientId,
       oldClientId = state.instanceToClient[instanceId],
       consent = msg.data.consent || { asProxy: false, asClient: false },
@@ -906,7 +862,6 @@ function _receiveInstanceData(msg, toClientId) {
     state.instances[instanceId] = instance;
     instance.trust.asClient = consent.asProxy? 'offered' : 'no';
     instance.trust.asProxy = consent.asClient? 'requested' : 'no';
-
   } else {
     // If the instance already exists, remap consent.
     if (consent.asProxy) {
@@ -960,7 +915,7 @@ function _validateKeyHash(keyHash) {
 
 // Update the description for an instanceId.
 // Assumes that |instanceId| is valid.
-function _handleUpdateDescription(msg, clientId) {
+function _handleUpdateDescription(msg) {
   var instanceId = msg.data.instanceId;
   var description = msg.data.description;
   state.instances[instanceId].description = description;
