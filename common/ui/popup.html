@@ -120,47 +120,47 @@
               <br>Network: {{ client.network }}
               <br>Status: {{ client.status }}
               <br>
-              <div class="client-actions" ng-show="client.instanceId">
-                <h5>InstanceId: {{ client.instanceId }}</h5>
+              <div class="client-actions" ng-show="instanceOfClientId(client.clientId)">
+                <h5>InstanceId: {{ model.clientToInstance[clientId] }}</h5>
                 <div class="box-for-proxy"
-                    ng-switch="instances[client.instanceId].trust.asProxy">
+                    ng-switch="instanceOfClientId(client.clientId).trust.asProxy">
                   <button class="btn" ng-switch-when="yes"
-                      ng-click="startAccess(client)">
+                      ng-click="startAccess(instanceOfClientId(client.clientId))">
                     Start
                   </button>
                   <div ng-switch-when="requested">
-                    <button class="btn" ng-click="cancelRequest(client)">
+                    <button class="btn" ng-click="cancelRequest(instanceOfClientId(client.clientId))">
                       Cancel
                     </button>
                     <span>Pending...</span>
                   </div>
                   <button class="btn" ng-switch-when="offered"
-                      ng-click="acceptAccess(client)">
+                      ng-click="acceptAccess(instanceOfClientId(client.clientId))">
                     Accept Access
                   </button>
                   <button class="btn"
                       ng-switch-default
-                      ng-click="requestAccess(client)">
+                      ng-click="requestAccess(instanceOfClientId(client.clientId))">
                     Request
                   </button>
                 </div>
 
                 <div class="box-for-client"
-                    ng-switch="instances[client.instanceId].trust.asClient">
+                    ng-switch="instanceOfClientId(client.clientId).trust.asClient">
                   <button class="btn" ng-switch-when="no"
-                      ng-click="offerAccess(client)">
+                      ng-click="offerAccess(instanceOfClientId(client.clientId))">
                     Offer Access
                   </button>
                   <div ng-switch-when="requested">
-                    <button class="btn" ng-click="grantAccess(client)">
+                    <button class="btn" ng-click="grantAccess(instanceOfClientId(client.clientId))">
                       Grant
                     </button>
-                    <button class="btn" ng-click="denyAccess(client)">
+                    <button class="btn" ng-click="denyAccess(instanceOfClientId(client.clientId))">
                       Ignore
                     </button>
                   </div>
                   <button class="btn" ng-switch-default
-                      ng-click="revokeAccess(client)">
+                      ng-click="revokeAccess(instanceOfClientId(client.clientId))">
                     Revoke Access
                   </button>
                 </div>

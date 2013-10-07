@@ -89,6 +89,7 @@ var RESET_STATE = {
   // A table from network identifier to your status on that network
   // (online/offline/idle, etc)
   "identityStatus": {},
+
   // me : {
   //   description : string,  // descirption of this installed instance
   //   instanceId : string,   // id for this installed instance
@@ -110,13 +111,15 @@ var RESET_STATE = {
   //     }
   //   }, ... userIdX
   // }
+  // Local client's information.
   "me": {
     "description": "",
     "instanceId": "",
     "keyHash": "",
     "peerAsProxy": null,
     "peersAsClients": []
-  },         // Local client's information.
+  },
+
   // roster: {
   //   [userIdX]: {
   //     userId: string,
@@ -132,7 +135,9 @@ var RESET_STATE = {
   //     },
   //   } ... userIdX
   // }
-  "roster": {},     // Merged contact lists from each identity provider.
+  // Merged contact lists from each identity provider.
+  "roster": {},
+
   // instances: {
   //   [instanceIdX]: {
   //     name: string,
@@ -152,7 +157,9 @@ var RESET_STATE = {
   //     }
   //   }
   // }
-  "instances": {},  // instanceId -> instance. Active UProxy installations.
+  // instanceId -> instance. Active UProxy installations.
+  "instances": {},
+
   // Options coming from local storage and setable by the options page.
   // TODO: put real values in here.
   "options": {
@@ -305,9 +312,9 @@ function _loadStateFromStorage(state) {
   var checkAndSave = function(instanceId) {
     _loadFromStorage("instance/" + instanceId, function(v) {
       if(v === null) {
-        console.log("instance " + instanceId + " not found");
+        console.error("instance " + instanceId + " not found");
       } else if (!_validateStoredInstance(instanceId, v)) {
-        console.log("instance " + instanceId + " was bad:", v);
+        console.error("instance " + instanceId + " was bad:", v);
         _removeInstanceId(instanceId);
       } else {
         instancesTable[instanceId] = v;
@@ -330,13 +337,20 @@ function _loadStateFromStorage(state) {
     }
   }, []);
 
-  // TODO: remove these and propegate changes.
-  state.currentSessionsToInitiate = {};
-  state.currentSessionsToRelay = {};
+  _initRosterFromInstancesTable();
+
   log.debug('_loadStateFromStorage: loaded: ' + JSON.stringify(state));
 }
 
-// Local storage mechanisms.
+function _initRosterFromInstancesTable() {
+  for(var instanceId in state.instancesTable) {
+    var instance = state.instancesTable[instanceId];
+    var user = state.roster[instance.userId] = {};
+    user.userId = instance.userId;
+    user.name = instance.name;
+    user.clients = {};
+  }
+}
 
 // Save the instance to local storage. Assumes that both the Instance
 // notification and XMPP user nad client information exists and is up-to-date.
@@ -565,23 +579,19 @@ uiChannel.on('update-description', function (data) {
 // --------------------------------------------------------------------------
 // TODO: should we lookup the instance ID for this client here?
 // TODO: say not if we havn't given them permission :)
-uiChannel.on('startUsingPeerAsProxyServer', function(peerClientId) {
+uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
   startUsingPeerAsProxySever(peerClientId);
 });
 
-client.on('sendSignalToPeer', function(data) {
+client.on('send-signal-to-peer', function(data) {
   log.debug('client(sendSignalToPeer):', data);
   // TODO: don't use 'message' as a field in a message! that's confusing!
-  identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-client', data: data}));
+  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
 });
 
-server.on('sendSignalToPeer', function(data) {
+server.on('send-signal-to-peer', function(data) {
   log.debug('server(sendSignalToPeer):', data);
-  identity.sendMessage(contact, JSON.stringify({message: 'peerconnection-server', data: data}));
-});
-
-uiChannel.on('local_test_proxying', function() {
-  _localTestProxying();
+  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
 
 function startUsingPeerAsProxyServer(peerClientId) {
@@ -589,8 +599,6 @@ function startUsingPeerAsProxyServer(peerClientId) {
   state.me.peerAsProxy = peerClientId;
   uiChannel.emit('state-change',
       [{op: 'replace', path: '/me/peerAsProxy', value: peerClientId}]);
-  uiChannel.emit('state-change',
-      [{op: 'replace', path: '/me/roster', value: peerClientId}]);
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
@@ -643,11 +651,11 @@ function _handleMessage(jsonMessage, beingSent) {
   var trustValue = TrustOp[jsonMessage.message];  // NO, REQUESTED, or YES
   if (trustValue) {
     // Access request and Grants go in opposite directions - tweak boolean.
-    var asProxy = 'allow' == msg.message || 'deny' == msg.message ||
-                  'offer' == msg.message ? !beingSent : beingSent;
-    var clientId = msg.to || msg.toClientId;
+    var asProxy = 'allow' == jsonMessage.message || 'deny' == jsonMessage.message ||
+                  'offer' == jsonMessage.message ? !beingSent : beingSent;
+    var clientId = jsonMessage.to || jsonMessage.toClientId;
     if (!beingSent) {  // Update trust on the remote instance if received.
-      clientId = msg.fromClientId;
+      clientId = jsonMessage.fromClientId;
     }
     _updateTrust(clientId, asProxy, trustValue);
     return true;
@@ -656,13 +664,13 @@ function _handleMessage(jsonMessage, beingSent) {
   // Other type of message - instance or proxy state update.
   var handler = null;
   if (!beingSent) {
-    handler = _msgReceivedHandlers[msg.message];
+    handler = _msgReceivedHandlers[jsonMessage.message];
   }
   if (!handler) {
-    log.error('No handler for sent message: ', msg);
+    log.error('No handler for sent message: ', jsonMessage);
     return false;
   }
-  handler(msg, msg.to);
+  handler(jsonMessage, jsonMessage.to);
 }
 
 // A simple predicate function to see if we can talk to this client.
