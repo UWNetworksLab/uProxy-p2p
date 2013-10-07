@@ -740,10 +740,8 @@ function _updateUser(newData) {
     }
 
     // Inform UProxy instances of each others' ephemeral clients.
-    canUProxy = _checkUProxyClientSynchronization(client);
-
-    // TODO: UI indicators for various 'can proxy'-abilities.
-    // TODO(mollyling): Properly hangle logout.
+    var isUProxyClient = _checkUProxyClientSynchronization(client);
+    canUProxy = canUProxy || isUProxyClient;
   }
 
   // Apply user-level flags.
@@ -752,6 +750,7 @@ function _updateUser(newData) {
   user.onGoogle = onGoogle;
   user.onFB = onFB;
 
+  // TODO(mollyling): Properly hangle logout: remove client.
   uiChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
@@ -848,9 +847,7 @@ function _receiveInstanceData(msg) {
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
-  // Before everything, remember the clientId - instanceId relation for future
-  // completion, because it's possible that the corresponding user/client data
-  // has not yet been received.
+  // Before everything, remember the clientId - instanceId relation.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
 
