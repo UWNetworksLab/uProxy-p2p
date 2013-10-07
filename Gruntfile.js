@@ -5,6 +5,7 @@
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
  *  xpi - Generates an .xpi for installation to Firefox.
+ *  ff - Open up a firefox window with an instance of the extension running.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
