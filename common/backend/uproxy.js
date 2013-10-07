@@ -670,8 +670,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
-  log.debug('Incoming User Data: ' + JSON.stringify(newData));
-
+  // log.debug('Incoming User Data: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
@@ -737,6 +736,7 @@ function _checkUProxyClientSynchronization(client) {
   }
   var clientId = client.clientId,
       clientIsNew = (undefined === state.clientToInstance[clientId]);
+
   if (clientIsNew) {
     log.debug('Aware of new UProxy client. Sending instance data.' + JSON.stringify(client));
     // Set the instance mapping to null as opposed to undefined, to indicate that
@@ -868,6 +868,7 @@ function _receiveInstanceData(msg, toClientId) {
       keyHash     = msg.data.keyHash,
       userId      = msg.fromUserId,
       clientId    = msg.fromClientId,
+      oldClientId = state.instanceToClient[instanceId],
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
@@ -876,6 +877,13 @@ function _receiveInstanceData(msg, toClientId) {
   // has not yet been received.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
+
+  // Delete any old client for this instance.
+  if (oldClientId && (oldClientId != clientId)) {
+    log.debug('Deleting old client ' + oldClientId);
+    delete state.roster[userId].clients[oldClientId];
+    delete state.clientToInstance[oldClientId];
+  }
 
   // Update the local instance tables.
   var instance = state.instances[instanceId];
@@ -930,40 +938,6 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
   instance.keyHash = keyHash;
   log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
   return instance;
-}
-
-// Provides the linkage between a client and an instance, whether it occurs
-// after an XMPP status update or an Instance notification message. Assumes
-// that both the actual client and instance objects corresponding to |clientId|
-// and |instanceId| already exist.
-function _linkClientAndInstance(clientId, instanceId) {
-  var instance = state.instances[instanceId],
-      client   = _uproxyClients[clientId];
-  var user     = state.roster[instance.userId];  // Must exist if client exists.
-
-  // Before sychronizing, delete old client if it exists
-  var oldClientId = instance.clientId;
-  if (oldClientId && (clientId != oldClientId)) {
-    log.debug('Deleting old client: ' + JSON.stringify(oldClientId));
-    delete _uproxyClients[oldClientId];
-    delete _clientToInstanceId[oldClientId];
-    delete user.clients[oldClientId];
-  }
-
-  log.debug('Linking client and instance: ' + clientId + ' - ' + instanceId);
-  user.clients[clientId].instanceId = instanceId;
-  state.instances[instanceId].clientId = clientId;
-  // client.instanceId = instanceId;  // Synchronize latest IDs.
-  _uproxyClients[clientId] = user.clients[clientId];
-  user.canUProxy = true;
-
-  // Update both local storage and extension.
-  _saveInstance(instanceId, user.userId);
-  uiChannel.emit('state-change', [{
-      op: 'replace',    // User data.
-      path: '/roster/' + user.userId,
-      value: user
-  }]);
 }
 
 function _validateKeyHash(keyHash) {
