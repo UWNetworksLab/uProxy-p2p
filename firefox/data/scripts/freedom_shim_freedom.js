@@ -1,3 +1,5 @@
+'use strict';
+
 // Part of FreeDOM shim that allows FreeDOM to talk to other scripts
 // and allows scripts to listen to events from FreeDOM.
 
@@ -9,6 +11,11 @@
     id = 'FreeDOMHub@' + self.location.href;
   } else if ((typeof href) !== 'undefined') {
     id = 'FreeDOMHub@' + href;
+  }
+
+  if ((typeof freedom) === 'undefined') {
+    console.warn(id + ' freedom is undefined. Messages may not get delivered.');
+    console.log('global is:\n' + Object.keys(global));
   }
 
   global.freedomShim = {
@@ -25,7 +32,7 @@
       communicator.on("freedom_shim_listen", function(event) {
 	console.log(id + ' now listening for: ' + event);
 	freedom.on(event, function(freedomOutput) {
-	  if ((typeof communicator) === 'undefined') return;
+	  if (communicator === null) return;
 	  console.log(id + ' received event for: ' + event +
 		      ' from freedom, sending on to communicator.');
 	  var args = {event: event,
@@ -35,8 +42,8 @@
 	    communicator.emit("freedom_shim", args);
 	  } catch (e) {
 	    // This may occur when the resource (eg Worker) is destroyed.
-	    // Delete this reference to prevent memory leaks.
-	    delete communicator;
+	    // null this reference to prevent memory leaks.
+	    communicator = null;
 	  }
 	});
       });

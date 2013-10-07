@@ -5,6 +5,7 @@
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
  *  xpi - Generates an .xpi for installation to Firefox.
+ *  ff - Open up a firefox window with an instance of the extension running.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
@@ -148,13 +149,21 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk': {
       download: {
         options: {
-          revision: "firefox24"
+          revision: 'firefox24'
         }
       },
       xpi: {
         options: {
-          extension_dir: "firefox",
-          dist_dir: "."
+          extension_dir: 'firefox',
+          dist_dir: '.'
+        }
+      }
+    },
+    'mozilla-cfx': {
+      debug_run: {
+        options: {
+          extension_dir: 'firefox',
+          command: 'run'
         }
       }
     }
@@ -212,9 +221,14 @@ module.exports = function(grunt) {
     'copy:firefox'
   ]);
   grunt.registerTask('xpi', [
-    'build',
+    'build_firefox',
     'mozilla-addon-sdk:download',
     'mozilla-addon-sdk:xpi'
+  ]);
+  grunt.registerTask('ff', [
+    'build_firefox',
+    'mozilla-addon-sdk:download',
+    'mozilla-cfx'
   ]);
   grunt.registerTask('build', [
     'build_chrome',
