@@ -57,6 +57,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
       };
 
+      $rootScope.instanceOfUserId = function(userId) {
+        for (var i in instancesTable) {
+          if (instancesTable[i].userId = userId) return i;
+        }
+        return null;
+      };
+
       /**
        * Determine whether UProxy is connected to |network|.
        */
@@ -86,41 +93,37 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Request access through a friend.
       $rootScope.requestAccess = function(instance) {
-        $rootScope.sendMessage(instance.instanceId, 'request-access');
+        $rootScope.instanceTrustChange(instance.instanceId, 'request-access');
       };
       $rootScope.cancelRequest = function(instance) {
-        $rootScope.sendMessage(instance.instanceId, 'cancel-request');
+        $rootScope.instanceTrustChange(instance.instanceId, 'cancel-request');
       }
       $rootScope.acceptAccess = function(instance) {
-        $rootScope.sendMessage(instance.instanceId, 'accept-access');
+        $rootScope.instanceTrustChange(instance.instanceId, 'accept-access');
       };
       $rootScope.startAccess = function(instance) {
         // We don't need to tell them we'll start proxying, we can just try to
-        // start. The SDP request will go through chat already.
-        // $rootScope.sendMessage(client.clientId, 'start-proxying');
+        // start. The SDP request will go through chat/identity network on its
+        // own.
         freedom.emit('start-using-peer-as-proxy-server', instance.instanceId)
       };
 
       // Providing access for a friend:
-      // TODO: use instanceIDs.
-      $rootScope.offerAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'offer');
+      $rootScope.offerAccess = function(instance) {
+        $rootScope.instanceTrustChange(instance.instanceId, 'offer');
       };
       $rootScope.grantAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'allow');
+        $rootScope.instanceTrustChange(instance.instanceId, 'allow');
       };
       $rootScope.revokeAccess = function(client) {
-        $rootScope.sendMessage(client.clientId, 'deny');
+        $rootScope.instanceTrustChange(instance.instanceId, 'deny');
       };
       $rootScope.denyAccess = $rootScope.revokeAccess;
 
       // |id| can be either a client id or a user id.
-      $rootScope.sendMessage = function (id, msg) {
-        freedom.emit('send-message', {
-            to: id,
-            message: msg
-        });
-            // toUserId: contact.userId,
+      $rootScope.instanceTrustChange = function (id, action) {
+        freedom.emit('instance-trust-change', {
+          instanceId: id, action: action });
       };
 
       $rootScope.changeOption = function (key, value) {

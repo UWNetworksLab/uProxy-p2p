@@ -22,8 +22,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     'description': 'S\'s home desktop',
     'annotation': 'Cool S who has high bandwidth',
     'instanceId': 'ssssssssshjafdshjadskfjlkasfs',
-    'userId': 's@gmail.com',
-    'network': 'google',
+    'userIds': ['s@gmail.com', 's@facebook.com'],
     'keyhash' : 'HASHssssjklsfjkldfslkfljkdfsklas',
     'trust':
       { 'asProxy': 'yes', // 'no' | 'requested' | 'yes'
@@ -39,8 +38,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     'description': 'R\'s laptop',
     'annotation': 'R is who is repressed',
     'instanceId': 'rrrrrrhjfhjfjnbmnsbfdbmnfsdambnfdsmn',
-    'userId': 'r@facebook.com',
-    'network': 'facebook',
+    'userIds': ['r@facebook.com']
     'keyhash' : 'HASHrrrjklsfjkldfslkfljkdfsklas',
     'trust': {
       'asProxy': 'no',
@@ -52,8 +50,7 @@ var LOCAL_STORAGE_EXAMPLE = {
     'description': 'S\'s laptop',
     'annotation': 'S who is on qq',
     'instanceId': 'qqqqjksdklflsdjkljkfdsa',
-    'userId': 's@qq',
-    'network': 'manual',
+    'userIds': ['s@qq'],
     'keyhash' : 'HASHqqqqqjklsfjkldfslkfljkdfsklas',
     'trust': {
       'asProxy': 'no',

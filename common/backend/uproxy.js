@@ -145,7 +145,6 @@ var RESET_STATE = {
   //     annotation: string,
   //     instanceId: string,
   //     userId: string,
-  //     network: string,
   //     keyhash: string,
   //     trust: {
   //       asProxy: Trust
@@ -162,8 +161,11 @@ var RESET_STATE = {
   'instances': {},
 
   // ID mappings.
+  // TODO: Make these mappings properly properly reflect that an instance can
+  // be connected to multiple networks and therefore have multiple client ids.
+  // TODO: add mappings between networks?
   'clientToInstance': {},      // instanceId -> clientId
-  'instanceToClient': {},       // clientId -> instanceId
+  'instanceToClient': {},      // clientId -> instanceId
 
   // Options coming from local storage and setable by the options page.
   // TODO: put real values in here.
@@ -503,8 +505,6 @@ uiChannel.on('login', function(network) {
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
-  // Clear clients so that the next logon propogates instance data correctly.
-  _uproxyClients = {};
 });
 
 //
@@ -564,13 +564,13 @@ uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
   startUsingPeerAsProxySever(peerClientId);
 });
 
-client.on('send-signal-to-peer', function(data) {
+client.on('sendSignalToPeer', function(data) {
   log.debug('client(sendSignalToPeer):', data);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
 });
 
-server.on('send-signal-to-peer', function(data) {
+server.on('sendSignalToPeer', function(data) {
   log.debug('server(sendSignalToPeer):', data);
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
@@ -877,7 +877,7 @@ function _receiveInstanceData(msg, toClientId) {
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
-      userId      = msg.fromUserId,
+      userId      = msg.fromUserId, //  TODO: remove
       clientId    = msg.fromClientId,
       oldClientId = state.instanceToClient[instanceId],
       consent = msg.data.consent || { asProxy: false, asClient: false },
@@ -888,6 +888,12 @@ function _receiveInstanceData(msg, toClientId) {
   // has not yet been received.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
+  state.userToInstances[userId] ?
+    state.userToInstances[userId].push(instanceId) :
+    state.userToInstances[userId] = [instanceId];
+  state.instanceToUsers[instanceId] ?
+    state.instanceToUsers[instanceId].push(userId) :
+    state.instanceToUsers[instanceId] = [userId];
 
   // Delete any old client for this instance.
   if (oldClientId && (oldClientId != clientId)) {

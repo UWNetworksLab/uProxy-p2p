@@ -386,6 +386,26 @@ img.c-icon:hover {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd; }
 
+.instance-details {
+  position: relative;
+  display: block;
+  padding: 8px;
+  margin: 2px;
+  height: 53px;
+  width: 82%;
+  border: 1px solid #eeeeee;
+  font-size: 8px;
+  font-family: monospace;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+.instance-details:hover {
+  border-color: #dddddd;
+  top: -2px;
+  box-shadow: 0 2px 6px 1px #dddddd; }
+
 .box-for-proxy {
   display: inline-block; }
 
