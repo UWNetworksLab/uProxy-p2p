@@ -179,29 +179,6 @@ var RESET_STATE = {
   }
 };
 var state = cloneDeep(RESET_STATE);
-// var _uproxyClients = {};  // clientId -> client reference table.
-// var _clientToInstanceId = {};  // clientId -> instanceId mapping.
-
-// Mapping functions between instanceIds and clientIds.
-// function instanceToClient(instanceId) {
-  // var instance = state.instances[instanceId];
-  // if (!instance) return null;
-  // var user = state.roster[instance.userId];
-  // if (!user) return null;
-  // return user.clients[instance.clientId]
-// }
-
-// clientId -> Instance object. First attempts to use the client table. It is
-// possible for the client to not exist but the instance to (if the instance
-// notification was sent and received prior to the xmpp onChange update). In
-// that case, we must scan the instance table for the correct client id.
-// function clientToInstance(clientId) {
-  // var client = _uproxyClients[clientId];
-  // log.debug('c2i:' + JSON.stringify(_uproxyClients));
-  // if (!client) return null;
-  // log.debug('c2i:' + JSON.stringify(state.instances));
-  // return state.instances[client.instanceId];
-// }
 
 // Instance object.
 var DEFAULT_INSTANCE = {
@@ -503,9 +480,12 @@ identity.on('onMessage', function (msgInfo) {
       [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
   try {
-    // Replace the message JSON-string with actual data attributes.
+    // Replace the JSON str with actual data attributes, then flatten.
     jsonMessage = JSON.parse(msgInfo.message);
-    msgInfo.message = jsonMessage;
+    msgInfo.message = '';
+    for (var key in jsonMessage) {
+      msgInfo[key] = jsonMessage[key];
+    }
   } catch(e) {
     jsonMessage = {}
     jsonMessage.unparseable = msgInfo.message;
@@ -651,8 +631,7 @@ function _handleMessage(msgInfo, beingSent) {
   log.debug(' ^_^ ' + (beingSent ? '----> SEND' : '<---- RECEIVE') +
             ' MESSAGE: ' + JSON.stringify(msgInfo));
 
-  var payload = msgInfo.message,
-      msgType = payload.message;
+  var msgType = msgInfo.message;
   // Check if this is a Trust modification.
   var trustValue = TrustOp[msgType];
   if (trustValue) {
@@ -675,7 +654,7 @@ function _handleMessage(msgInfo, beingSent) {
     log.error('No handler for sent message type: ' + msgType);
     return false;
   }
-  handler(payload, msgInfo.to);
+  handler(msgInfo, msgInfo.to);
 }
 
 // A simple predicate function to see if we can talk to this client.
@@ -693,8 +672,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
-  log.debug('Incoming User Data: ' + JSON.stringify(newData));
-
+  // log.debug('Incoming User Data: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
@@ -703,14 +681,15 @@ function _updateUser(newData) {
     userOp = 'add';
   }
   var user = state.roster[userId];
-  user.name = newData.name;
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
       canProxi = false;
-  if (!user.clients) user.clients = {};
+  // if (!user.clients) user.clients = {};
+  user.name = newData.name;
+  user.clients = newData.clients;
 
-  for (var clientId in newData.clients) {
+  for (var clientId in user.clients) {
     var client = newData.clients[clientId];
     if (!user.clients[clientId]) {
       user.clients[clientId] = client;
@@ -759,6 +738,7 @@ function _checkUProxyClientSynchronization(client) {
   }
   var clientId = client.clientId,
       clientIsNew = (undefined === state.clientToInstance[clientId]);
+
   if (clientIsNew) {
     log.debug('Aware of new UProxy client. Sending instance data.' + JSON.stringify(client));
     // Set the instance mapping to null as opposed to undefined, to indicate that
@@ -772,7 +752,7 @@ function _checkUProxyClientSynchronization(client) {
 // Update trust state in a particular client. Assumes the client has a valid
 // relation with an instanceId, indicating that it's a UProxy client.
 function _updateTrust(clientId, asProxy, trustValue) {
-  var instance = state.clientToInstance(clientId);
+  var instance = state.clientToInstance[clientId];
   if (!instance) {
     log.debug('Client ' + clientId + ' does not have an instance!');
     return false;
@@ -890,6 +870,7 @@ function _receiveInstanceData(msg, toClientId) {
       keyHash     = msg.data.keyHash,
       userId      = msg.fromUserId, //  TODO: remove
       clientId    = msg.fromClientId,
+      oldClientId = state.instanceToClient[instanceId],
       consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
@@ -904,6 +885,13 @@ function _receiveInstanceData(msg, toClientId) {
   state.instanceToUsers[instanceId] ?
     state.instanceToUsers[instanceId].push(userId) :
     state.instanceToUsers[instanceId] = [userId];
+
+  // Delete any old client for this instance.
+  if (oldClientId && (oldClientId != clientId)) {
+    log.debug('Deleting old client ' + oldClientId);
+    delete state.roster[userId].clients[oldClientId];
+    delete state.clientToInstance[oldClientId];
+  }
 
   // Update the local instance tables.
   var instance = state.instances[instanceId];
@@ -935,10 +923,16 @@ function _receiveInstanceData(msg, toClientId) {
       value: instance
   }]);
 
+  // uiChannel.emit('state-change', [
+      // { op: 'add', path: '/clientToInstance/' + clientId, value: instanceId },
+      // { op: 'add', path: '/instanceToClient/' + instanceId, value: clientId }
+  // ]);
   uiChannel.emit('state-change', [
-      { op: 'add', path: '/clientToInstance/' + clientId, value: instanceId },
-      { op: 'add', path: '/instanceToClient/' + instanceId, value: clientId }
+    { op: 'replace', path: '/clientToInstance', value: state.clientToInstance },
+    { op: 'replace', path: '/instanceToClient', value: state.instanceToClient }
   ]);
+
+  log.debug('finished updating the instance data.');
 
   return true;
 }
@@ -952,40 +946,6 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
   instance.keyHash = keyHash;
   log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
   return instance;
-}
-
-// Provides the linkage between a client and an instance, whether it occurs
-// after an XMPP status update or an Instance notification message. Assumes
-// that both the actual client and instance objects corresponding to |clientId|
-// and |instanceId| already exist.
-function _linkClientAndInstance(clientId, instanceId) {
-  var instance = state.instances[instanceId],
-      client   = _uproxyClients[clientId];
-  var user     = state.roster[instance.userId];  // Must exist if client exists.
-
-  // Before sychronizing, delete old client if it exists
-  var oldClientId = instance.clientId;
-  if (oldClientId && (clientId != oldClientId)) {
-    log.debug('Deleting old client: ' + JSON.stringify(oldClientId));
-    delete _uproxyClients[oldClientId];
-    delete _clientToInstanceId[oldClientId];
-    delete user.clients[oldClientId];
-  }
-
-  log.debug('Linking client and instance: ' + clientId + ' - ' + instanceId);
-  user.clients[clientId].instanceId = instanceId;
-  state.instances[instanceId].clientId = clientId;
-  // client.instanceId = instanceId;  // Synchronize latest IDs.
-  _uproxyClients[clientId] = user.clients[clientId];
-  user.canUProxy = true;
-
-  // Update both local storage and extension.
-  _saveInstance(instanceId, user.userId);
-  uiChannel.emit('state-change', [{
-      op: 'replace',    // User data.
-      path: '/roster/' + user.userId,
-      value: user
-  }]);
 }
 
 function _validateKeyHash(keyHash) {
