@@ -888,12 +888,6 @@ function _receiveInstanceData(msg, toClientId) {
   // has not yet been received.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
-  state.userToInstances[userId] ?
-    state.userToInstances[userId].push(instanceId) :
-    state.userToInstances[userId] = [instanceId];
-  state.instanceToUsers[instanceId] ?
-    state.instanceToUsers[instanceId].push(userId) :
-    state.instanceToUsers[instanceId] = [userId];
 
   // Delete any old client for this instance.
   if (oldClientId && (oldClientId != clientId)) {
