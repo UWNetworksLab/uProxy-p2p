@@ -587,13 +587,13 @@ uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
   startUsingPeerAsProxySever(peerClientId);
 });
 
-client.on('send-signal-to-peer', function(data) {
+client.on('sendSignalToPeer', function(data) {
   log.debug('client(sendSignalToPeer):', data);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
 });
 
-server.on('send-signal-to-peer', function(data) {
+server.on('sendSignalToPeer', function(data) {
   log.debug('server(sendSignalToPeer):', data);
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
