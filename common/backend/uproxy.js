@@ -13,7 +13,6 @@
 // Called once when uproxy.js is loaded.
 // TODO: WebWorkers startup errors are hard to debug.
 // Once fixed, the setTimeout will no longer be needed.
-function onload() {
 
 /*global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives */   // for jslint.
 var DEBUG = true; // XXX get this from somewhere else
@@ -191,6 +190,8 @@ var DEFAULT_INSTANCE = {
   description: ''
 };
 
+function onload() {
+
 // To see the format used by localstorage, see the file:
 //   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
@@ -291,19 +292,30 @@ function _loadStateFromStorage(state) {
   var instancesTable = {};
   state[StateEntries.INSTANCES] = instancesTable;
   key = StateEntries.INSTANCEIDS;
-  var checkAndSave = function(instanceId) {
-    _loadFromStorage("instance/" + instanceId, function(v) {
-      if(v === null) {
+
+  var checkAndSave = function(instanceId, updateUI) {
+    _loadFromStorage("instance/" + instanceId, function(instance) {
+      if(instance === null) {
         console.error("instance " + instanceId + " not found");
-      } else if (!_validateStoredInstance(instanceId, v)) {
-        console.error("instance " + instanceId + " was bad:", v);
+      } else if (!_validateStoredInstance(instanceId, instance)) {
+        console.error("instance " + instanceId + " was bad:", instance);
         _removeInstanceId(instanceId);
       } else {
-        instancesTable[instanceId] = v;
+        console.error("instance " + instanceId + " loaded");
+        instancesTable[instanceId] = instance;
+        // Add to the roster also
+        var user = state.roster[instance.userId] = {};
+        user.userId = instance.userId;
+        user.name = instance.name;
+        user.clients = {};
       }
+      // update the state from root path. Lots may have changed.
+      uiChannel.emit('state-change',
+          [{op: 'replace', path: '', value: state}]);
     }, null);
   };
 
+  // Load
   _loadFromStorage(StateEntries.INSTANCEIDS, function(insts) {
     var instanceIds = [];
     if (insts !== null && insts.length > 2) {
@@ -314,25 +326,15 @@ function _loadStateFromStorage(state) {
       if (instanceIds[i] == "undefined") {
         _removeInstanceId("undefined");
       } else {
-        checkAndSave(instanceIds[i]);
+        // Check, save and update the UI on the last loaded entry.
+        checkAndSave(instanceIds[i], i + 1 == instanceIds.length);
       }
     }
   }, []);
 
-  _initRosterFromInstancesTable();
-
   log.debug('_loadStateFromStorage: loaded: ' + JSON.stringify(state));
 }
 
-function _initRosterFromInstancesTable() {
-  for(var instanceId in state.instancesTable) {
-    var instance = state.instancesTable[instanceId];
-    var user = state.roster[instance.userId] = {};
-    user.userId = instance.userId;
-    user.name = instance.name;
-    user.clients = {};
-  }
-}
 
 // Save the instance to local storage. Assumes that both the Instance
 // notification and XMPP user nad client information exists and is up-to-date.
