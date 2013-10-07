@@ -192,6 +192,10 @@ var DEFAULT_INSTANCE = {
 
 function onload() {
 
+
+// --------------------------------------------------------------------------
+//  Local Storage
+// --------------------------------------------------------------------------
 // To see the format used by localstorage, see the file:
 //   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
@@ -413,6 +417,10 @@ function _saveAllInstances() {
   _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
       Object.keys(state[StateEntries.INSTANCES])));
 }
+
+// --------------------------------------------------------------------------
+//  General UI interaction
+// --------------------------------------------------------------------------
 
 // Try to login to chat networks.
 identity.login({
@@ -697,7 +705,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
-  // log.debug('Incoming User Data: ' + JSON.stringify(newData));
+  console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
@@ -709,14 +717,14 @@ function _updateUser(newData) {
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
-      canProxi = false;
+      canUProxy = false;
   // if (!user.clients) user.clients = {};
   user.name = newData.name;
   user.clients = newData.clients;
 
   for (var clientId in user.clients) {
     var client = newData.clients[clientId];
-    if (!user.clients[clientId]) {
+    if (! (clientId in user.clients)) {
       user.clients[clientId] = client;
     }
 
@@ -732,7 +740,7 @@ function _updateUser(newData) {
     }
 
     // Inform UProxy instances of each others' ephemeral clients.
-    canProxi = _checkUProxyClientSynchronization(client);
+    canUProxy = _checkUProxyClientSynchronization(client);
 
     // TODO: UI indicators for various 'can proxy'-abilities.
     // TODO(mollyling): Properly hangle logout.
@@ -740,7 +748,7 @@ function _updateUser(newData) {
 
   // Apply user-level flags.
   user.online = online;
-  user.canUProxy = canProxi;
+  user.canUProxy = canUProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
 
@@ -761,12 +769,13 @@ function _checkUProxyClientSynchronization(client) {
   if (!_isMessageableUproxy(client)) {
     return false;
   }
-  var clientId = client.clientId,
-      clientIsNew = (undefined === state.clientToInstance[clientId]);
+  var clientId = client.clientId;
+  var clientIsNew = !(clientId in state.clientToInstance);
 
   if (clientIsNew) {
     log.debug('Aware of new UProxy client. Sending instance data.' + JSON.stringify(client));
-    // Set the instance mapping to null as opposed to undefined, to indicate that
+    // Set the instance mapping to null as opposed to undefined, to
+    // indicate that
     // we know the client is pending its corresponding instance data.
     state.clientToInstance[clientId] = null;
     _sendInstanceData(client);

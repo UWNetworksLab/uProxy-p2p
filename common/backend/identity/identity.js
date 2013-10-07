@@ -44,9 +44,11 @@ function IdentityProvider() {
         this.onStatus(data, key);
       }).bind(this, key));
       this.providers[key].ref.on('onChange', (function(key, data) {
+        data.network = this.providers[key].network;
         this.onChange(data, key);
       }).bind(this, key));
       this.providers[key].ref.on('onMessage', (function(key, data) {
+        data.network = this.providers[key].network;
         this.onMessage(data, key);
       }).bind(this, key));
     }
