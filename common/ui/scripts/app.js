@@ -38,6 +38,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     'model',                 // Via dependencyInjector.
     function($filter, $http, $rootScope,
              freedom, onFreedomStateChange, model) {
+
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -46,13 +47,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.resetState = function (msgName, data) {
         localStorage.clear();
         freedom.emit('reset', null);
-      }
-
-      $rootScope.instanceIdOfClientId = function(clientId) {
-        return model.clientToInstance[clientId];
+      };
 
       $rootScope.instanceOfClientId = function(clientId) {
-        if (clientId in model.clientToInstance) {
+        if (model.clientToInstance[clientId]) {
           return model.instancesTable[model.clientToInstance[clientId]];
         } else {
           return null;
