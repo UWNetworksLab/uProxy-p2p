@@ -29,9 +29,14 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     //
     $scope.currentContact = {};  // Visible for the individual contact page.
+    $scope.currentInstance = null;  // Visible for the individual contact page.
 
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
+    };
+
+    $scope.stringifyContact = function(contact) {
+      return JSON.stringify(contact);
     };
 
     // Whether UProxy is logged in to *any* network.
@@ -40,10 +45,15 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     };
     $scope.splashPage = !$scope.loggedIn();
 
+    // TODO: fix using watchs on the contact of interest. Currently updates are
+    // not correctly propegated.
+    //
     // Opening the detailed contact view.
     $scope.toggleContact = function(c) {
       $scope.currentContact = c;
+      $scope.currentInstance = $scope.instanceOfUserId(c.userId);
       console.log(c);
+      console.log($scope.model);
       $scope.rosterNudge = true;
     };
 

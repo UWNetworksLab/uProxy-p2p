@@ -2,15 +2,16 @@
   "name": "uproxy-chrome-extension",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "http://code.angularjs.org/1.2.0/",
-    "angular-lodash": "https://github.com/cabrel/angular-lodash.git",
+    "angular": "1.2.0-rc.2",
     "angular-animate": "1.2.0-rc.2",
+    "angular-lodash": "https://github.com/cabrel/angular-lodash.git",
     "bootstrap-sass": "~2.3.1",
     "jsonpatch": "~v1.0.0-rc1",
+    "json-patch": "~0.4.0",
     "lodash": "~1.3.1"
   },
   "devDependencies": {
-    "angular-mocks": "~1.0.7",
-    "angular-scenario": "~1.0.7"
+    "angular-mocks": "~v1.2.0-rc.2",
+    "angular-scenario": "~v1.2.0-rc.2"
   }
 }

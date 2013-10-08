@@ -192,6 +192,10 @@ var DEFAULT_INSTANCE = {
 
 function onload() {
 
+
+// --------------------------------------------------------------------------
+//  Local Storage
+// --------------------------------------------------------------------------
 // To see the format used by localstorage, see the file:
 //   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
@@ -238,13 +242,17 @@ function _validateStoredInstance(instanceId, instanceData) {
   return true;
 }
 
-function _loadStateFromStorage(state) {
+
+function _loadStateFromStorage(state, callback) {
   var i, val, hex, id, key, instanceIds = [];
+
+  var finalCallbacker = new FinalCallback(callback);
 
   // Set the saves |me| state and |options|.  Note that in both of
   // these callbacks |key| will be a different value by the time they
   // run.
   key = StateEntries.ME;
+  var maybeCallbackAfterLoadingMe = finalCallbacker.makeCountedCallback();
   _loadFromStorage(key, function(v){
     if (v === null) {
       // Create an instanceId if we don't have one yet.
@@ -252,6 +260,8 @@ function _loadStateFromStorage(state) {
       state.me.description = null;
       state.me.keyHash = '';
       // Just generate 20 random 8-bit numbers, print them out in hex.
+      // TODO: check use of randomness: why not one big random number that is
+      // serialised?
       for (i = 0; i < 20; i++) {
         // 20 bytes for the instance ID.  This we can keep.
         val = Math.floor(Math.random() * 256);
@@ -266,6 +276,8 @@ function _loadStateFromStorage(state) {
         state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
             ('00'.substr(0, 2 - hex.length) + hex);
 
+        // TODO: separate this out and use full space of possible names by
+        // using the whole of the .
         if (i < 4) {
           id = (i & 1) ? nouns[val] : adjectives[val];
           if (state.me.description !== null) {
@@ -283,10 +295,15 @@ function _loadStateFromStorage(state) {
       log.debug("  state.me = " + JSON.stringify(v));
       state.me = v;
     }
+    maybeCallbackAfterLoadingMe();
   }, null);
 
   key = StateEntries.OPTIONS;
-  _loadFromStorage(key, function(v){ state[StateEntries.OPTIONS] = v; }, RESET_STATE[key]);
+  var maybeCallbackAfterLoadingOptions = finalCallbacker.makeCountedCallback();
+  _loadFromStorage(key, function(v){
+    state[StateEntries.OPTIONS] = v;
+    maybeCallbackAfterLoadingOptions();
+  }, RESET_STATE[key]);
 
   // Set the state |instances| from the local storage entries.
   var instances = {};
@@ -294,6 +311,8 @@ function _loadStateFromStorage(state) {
   key = StateEntries.INSTANCEIDS;
 
   var checkAndSave = function(instanceId) {
+    var maybeCallbackAfterLoadingInstance =
+        finalCallbacker.makeCountedCallback();
     _loadFromStorage("instance/" + instanceId, function(instance) {
       if(instance === null) {
         console.error("instance " + instanceId + " not found");
@@ -309,10 +328,8 @@ function _loadStateFromStorage(state) {
         user.name = instance.name;
         user.url = '';
         user.clients = {};
-
-        uiChannel.emit('state-change',
-          [{op: 'add', path: '/roster/'+user.userId, value: user}]);
       }
+      maybeCallbackAfterLoadingInstance();
     }, null);
   };
 
@@ -414,6 +431,10 @@ function _saveAllInstances() {
       Object.keys(state[StateEntries.INSTANCES])));
 }
 
+// --------------------------------------------------------------------------
+//  General UI interaction
+// --------------------------------------------------------------------------
+
 // Try to login to chat networks.
 identity.login({
   agent: 'uproxy',
@@ -423,16 +444,48 @@ identity.login({
   //network: ''
 });
 
-// Check if the app is installed.
-_loadStateFromStorage(state);
+function sendFullStateToUI() {
+  console.log("sending sendFullStateToUI state-change.");
+  uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
+  //
+  // Note: this is not the same as replace: replace only works if the path is
+  // already there.
+/*   for(var k in state) {
+    uiChannel.emit('state-change', [{op: 'replace', path: '/' + k, value: state[k]}]);
+     uiChannel.emit('state-change', [{op: 'remove', path: '/' + k}]);
+    uiChannel.emit('state-change', [{op: 'add', path: '/' + k, value: state[k]}]);
+
+  } */
+};
+
+// Load state from storage and when done, emit an total state update.
+_loadStateFromStorage(state, function () {
+
+});
 
 // Define freedom bindings.
 uiChannel.on('reset', function () {
-  log.debug('reset');
-  // TODO: sign out of Google Talk and other networks.
-  state = cloneDeep(RESET_STATE);
-  _loadStateFromStorage(state);
+  reset();
 });
+
+// Define freedom bindings.
+uiChannel.on('reset', function () {
+  reset();
+});
+
+// Logs out of networks and resets data.
+function reset() {
+  log.debug('reset');
+  identity.logout(null, null);
+  state = cloneDeep(RESET_STATE);
+  storage.clear().done(function() {
+    console.log("Cleared storage.");
+    _loadStateFromStorage(state, function () {
+      console.log("Emiting a state-change");
+      sendFullStateToUI();
+    });
+  });
+}
 
 // Called from extension whenever the user clicks opens the extension popup.
 // The intent is to reset its model - but this may or may not always be
@@ -440,8 +493,8 @@ uiChannel.on('reset', function () {
 uiChannel.on('open-popup', function () {
   log.debug('open-popup');
   log.debug('state:', state);
-  // Send the extension an empty state object.
-  uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
+  // Send the extension the full state.
+  sendFullStateToUI();
 });
 
 // Update local user's online status (away, busy, etc.).
@@ -664,7 +717,7 @@ function _handleMessage(msgInfo, beingSent) {
     var instanceId = state.clientToInstance[clientId];
     if (!instanceId) {
       // TODO(uzimizu): Attach instanceId to the message and verify.
-      log.debug('Could not find instance for the trust modification!');
+      log.error('Could not find instance for the trust modification!');
       return false;
     }
     _updateTrust(instanceId, msgType, true);  // received = true
@@ -699,7 +752,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
-  // log.debug('Incoming User Data: ' + JSON.stringify(newData));
+  console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
@@ -711,7 +764,7 @@ function _updateUser(newData) {
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
-      canProxi = false;
+      canUProxy = false;
   // if (!user.clients) user.clients = {};
   user.name = newData.name;
   user.clients = newData.clients;
@@ -719,10 +772,10 @@ function _updateUser(newData) {
   for (var clientId in user.clients) {
     var client = user.clients[clientId];
     if ('offline' == user.status) {  // Delete offline clients
-      delete user.clients[clientId]
+      delete user.clients[clientId];
       continue;
     }
-    if (!user.clients[clientId]) {
+    if (! (clientId in user.clients)) {
       user.clients[clientId] = client;
     }
 
@@ -739,17 +792,16 @@ function _updateUser(newData) {
 
     // Inform UProxy instances of each others' ephemeral clients.
     var isUProxyClient = _checkUProxyClientSynchronization(client);
-    canProxi = canProxi || isUProxyClient;
-    // TODO: UI indicators for various 'can proxy'-abilities.
-    // TODO(mollyling): Properly hangle logout.
+    canUProxy = canUProxy || isUProxyClient;
   }
 
   // Apply user-level flags.
   user.online = online;
-  user.canUProxy = canProxi;
+  user.canUProxy = canUProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
 
+  // TODO(mollyling): Properly hangle logout: remove client.
   uiChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
@@ -767,12 +819,13 @@ function _checkUProxyClientSynchronization(client) {
   if (!_isMessageableUproxy(client)) {
     return false;
   }
-  var clientId = client.clientId,
-      clientIsNew = (undefined === state.clientToInstance[clientId]);
+  var clientId = client.clientId;
+  var clientIsNew = !(clientId in state.clientToInstance);
 
   if (clientIsNew) {
     log.debug('Aware of new UProxy client. Sending instance data.' + JSON.stringify(client));
-    // Set the instance mapping to null as opposed to undefined, to indicate that
+    // Set the instance mapping to null as opposed to undefined, to
+    // indicate that
     // we know the client is pending its corresponding instance data.
     state.clientToInstance[clientId] = null;
     _sendInstanceData(client);

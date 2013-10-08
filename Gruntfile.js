@@ -5,6 +5,7 @@
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
  *  xpi - Generates an .xpi for installation to Firefox.
+ *  ff - Open up a firefox window with an instance of the extension running.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
@@ -44,7 +45,8 @@ var chrome_ext_files = [
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',
   'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/json-patch/jsonpatch.js',
+  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 var firefox_files = [
@@ -61,7 +63,8 @@ var firefox_files = [
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',
   'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/json-patch/jsonpatch.js',
+  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 
@@ -148,13 +151,21 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk': {
       download: {
         options: {
-          revision: "firefox24"
+          revision: 'firefox24'
         }
       },
       xpi: {
         options: {
-          extension_dir: "firefox",
-          dist_dir: "."
+          extension_dir: 'firefox',
+          dist_dir: '.'
+        }
+      }
+    },
+    'mozilla-cfx': {
+      debug_run: {
+        options: {
+          extension_dir: 'firefox',
+          command: 'run'
         }
       }
     }
@@ -212,13 +223,19 @@ module.exports = function(grunt) {
     'copy:firefox'
   ]);
   grunt.registerTask('xpi', [
-    'build',
+    'build_firefox',
     'mozilla-addon-sdk:download',
     'mozilla-addon-sdk:xpi'
   ]);
+  grunt.registerTask('ff', [
+    'build_firefox',
+    'mozilla-addon-sdk:download',
+    'mozilla-cfx'
+  ]);
   grunt.registerTask('build', [
     'build_chrome',
-    'build_firefox'
+    'build_firefox',
+    'test'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).
