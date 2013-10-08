@@ -506,6 +506,8 @@ uiChannel.on('login', function(network) {
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
+  // Clear the clientsToInstance table.
+  state.clientToInstance = {};
 });
 
 uiChannel.on('ignore', function (userId) {
@@ -715,7 +717,11 @@ function _updateUser(newData) {
   user.clients = newData.clients;
 
   for (var clientId in user.clients) {
-    var client = newData.clients[clientId];
+    var client = user.clients[clientId];
+    if ('offline' == user.status) {  // Delete offline clients
+      delete user.clients[clientId]
+      continue;
+    }
     if (!user.clients[clientId]) {
       user.clients[clientId] = client;
     }
