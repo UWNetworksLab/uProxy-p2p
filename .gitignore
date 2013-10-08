@@ -5,6 +5,7 @@ uproxy.crx
 *.swp
 *.un~
 *~
+tmp
 node_modules
 chrome/app/common
 chrome/extension/src/common
