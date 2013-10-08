@@ -200,6 +200,7 @@ var DEFAULT_INSTANCE = {
 //   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
   storage.get(key).done(function (result) {
+    console.log("Loaded from storage[" + key + "] (type: " + (typeof result) + "): " + result);
     if (isDefined(result)) {
       callback(JSON.parse(result));
     } else {
@@ -300,8 +301,8 @@ function _loadStateFromStorage(state, callback) {
 
   key = StateEntries.OPTIONS;
   var maybeCallbackAfterLoadingOptions = finalCallbacker.makeCountedCallback();
-  _loadFromStorage(key, function(v){
-    state[StateEntries.OPTIONS] = v;
+  _loadFromStorage(key, function(options){
+    state[StateEntries.OPTIONS] = options;
     maybeCallbackAfterLoadingOptions();
   }, RESET_STATE[key]);
 
@@ -334,19 +335,11 @@ function _loadStateFromStorage(state, callback) {
   };
 
   // Load
-  _loadFromStorage(StateEntries.INSTANCEIDS, function(insts) {
-    var instanceIds = [];
-    if (insts !== null && insts.length > 0) {
-      instanceIds = JSON.parse(insts);
-    }
-    console.log('instanceIds:' + instanceIds);
+  _loadFromStorage(StateEntries.INSTANCEIDS, function(instanceIds) {
+    console.log("instanceIds typeof = " + (typeof instanceIds));
+    console.log('instanceIds: ' + instanceIds);
     for (i = 0; i < instanceIds.length; i++) {
-      //if (instanceIds[i] == "undefined") {
-      //  _removeInstanceId("undefined");
-      //} else {
-        // Check, save and update the UI on the last loaded entry.
       checkAndSave(instanceIds[i]);
-      //}
     }
   }, []);
 
@@ -576,13 +569,13 @@ uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
 });
 
 client.on('sendSignalToPeer', function(data) {
-  log.debug('client(sendSignalToPeer):', data);
+  console.log('client(sendSignalToPeer):', data);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
-  log.debug('server(sendSignalToPeer):', data);
+  console.log('server(sendSignalToPeer):', data);
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
 
