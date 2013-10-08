@@ -5,6 +5,7 @@ uproxy.crx
 *.swp
 *.un~
 *~
+common/ui/styles/.sass-cache
 tmp
 node_modules
 chrome/app/common

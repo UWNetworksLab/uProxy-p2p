@@ -115,9 +115,12 @@
           </section>
 
           <div id="contact-details" ng-show="rosterNudge">
+            <div class="network-details">
+              <br>Network: {{ currentContact.network }}
+              <br>UserId: {{ currentContact.userId }}
+            </div>
             <div class="instance-details" ng-show="currentInstance">
               <h5>Instance</h5>
-              <br>Network: {{ currentContact.network }}
               <br>Instance Id: {{ currentInstance.instanceId }}
               <br>
               <div class="instance-actions">
