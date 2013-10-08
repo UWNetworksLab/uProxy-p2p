@@ -715,7 +715,7 @@ function _handleMessage(msgInfo, beingSent) {
     var instanceId = state.clientToInstance[clientId];
     if (!instanceId) {
       // TODO(uzimizu): Attach instanceId to the message and verify.
-      log.debug('Could not find instance for the trust modification!');
+      log.error('Could not find instance for the trust modification!');
       return false;
     }
     _updateTrust(instanceId, msgType, true);  // received = true

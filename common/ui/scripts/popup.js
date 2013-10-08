@@ -45,6 +45,9 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     };
     $scope.splashPage = !$scope.loggedIn();
 
+    // TODO: fix using watchs on the contact of interest. Currently updates are
+    // not correctly propegated.
+    //
     // Opening the detailed contact view.
     $scope.toggleContact = function(c) {
       $scope.currentContact = c;
