@@ -425,7 +425,6 @@ function _saveAllInstances() {
       }
     }
   }
-
   // Now save the entire instanceIds list.
   _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
       Object.keys(state[StateEntries.INSTANCES])));
@@ -460,18 +459,10 @@ function sendFullStateToUI() {
 
 // Load state from storage and when done, emit an total state update.
 _loadStateFromStorage(state, function () {
-
 });
 
 // Define freedom bindings.
-uiChannel.on('reset', function () {
-  reset();
-});
-
-// Define freedom bindings.
-uiChannel.on('reset', function () {
-  reset();
-});
+uiChannel.on('reset', function () { reset(); });
 
 // Logs out of networks and resets data.
 function reset() {
@@ -520,12 +511,10 @@ identity.on('onChange', function(data) {
   if (state.me[data.userId]) {
     // My card changed
     state.me[data.userId] = data;
-
-    uiChannel.emit('state-change', [{op: 'add', path: '/me/'+data.userId, value: data}]);
+    _SyncUI('/me' + data.userId, data, 'add');
     // TODO: Handle changes that might affect proxying
   } else {
-    // Must be a buddy
-    _updateUser(data);
+    _updateUser(data);  // Not myself.
   }
 });
 
@@ -586,7 +575,7 @@ uiChannel.on('change-option', function (data) {
 
 // Updating our own UProxy instance's description.
 uiChannel.on('update-description', function (data) {
-  state.me.description = data;
+  state.me.description = data;  // UI side already up-to-date.
   // TODO(uzimizu): save to storage
   var payload = JSON.stringify({
     type: 'update-description',
@@ -645,8 +634,6 @@ function stopUsingPeerAsProxyServer(peerClientId) {
   client.emit("stop");
 }
 
-
-
 // --------------------------------------------------------------------------
 //  Trust
 // --------------------------------------------------------------------------
@@ -704,6 +691,9 @@ var _msgReceivedHandlers = {
   'update-description': _handleUpdateDescription
 };
 
+// --------------------------------------------------------------------------
+//  Messages
+// --------------------------------------------------------------------------
 // Bi-directional message handler.
 // |beingSent| - True if message is being sent by us. False if we are receiving
 // it.
@@ -833,8 +823,10 @@ function _checkUProxyClientSynchronization(client) {
   return true;
 }
 
-// Handle sending -----------------------------------------------------------
 
+// --------------------------------------------------------------------------
+//  Instance - Client mapping and consent
+// --------------------------------------------------------------------------
 // The instance data for the local UProxy can be cached, since it is typically
 // the same unless something like |description| is explicitly updated. Consent
 // bits are sent individually, after initial instance notifications.
@@ -905,7 +897,6 @@ function _receiveInstanceData(msg) {
       path: '/instances/' + instanceId,
       value: instance
   }]);
-
   uiChannel.emit('state-change', [
     { op: 'replace', path: '/clientToInstance', value: state.clientToInstance },
     { op: 'replace', path: '/instanceToClient', value: state.instanceToClient }
@@ -945,33 +936,24 @@ function _sendConsent(instance) {
 // Receive consent bits and re-synchronize the relation between instances.
 function _receiveConsent(msg) {
   log.debug('_receiveConsent(from: ' + msg.fromUserId + ')');
-  var instanceId  = msg.data.instanceId,  // InstanceId of the sender.
-      consent     = msg.data.consent;     // Their view of consent.
-  var instance = state.instances[instanceId];
+  var consent     = msg.data.consent,     // Their view of consent.
+      instanceId  = msg.data.instanceId,  // InstanceId of the sender.
+      instance    = state.instances[instanceId];
   if (!instance) {
     log.error('Instance for id: ' + instanceId + ' not found!');
     return false;
   }
-  // Determine my own consent bits, and remap.
+  // Determine my own consent bits, compare with their consent and remap.
   var myConsent = _determineConsent(instance.trust);
-  if (consent.asProxy) {
-    instance.trust.asProxy = myConsent.asClient? 'yes' : 'offered';
-  } else {
-    instance.trust.asProxy = myConsent.asClient? 'requested' : 'no';
-  }
-  if (consent.asClient) {
-    instance.trust.asClient = myConsent.asProxy? 'yes' : 'requested';
-  } else {
-    instance.trust.asClient = myConsent.asProxy? 'offered' : 'no';
-  }
-
-  // Update.
+  instance.trust.asProxy = consent.asProxy?
+      (myConsent.asClient? 'yes' : 'offered') :
+      (myConsent.asClient? 'requested' : 'no');
+  instance.trust.asClient = consent.asClient?
+      (myConsent.asProxy? 'yes' : 'requested') :
+      (myConsent.asProxy? 'offered' : 'no');
   _saveInstanceId(instanceId);
-  uiChannel.emit('state-change', [{
-      op: instanceOp,
-      path: '/instances/' + instanceId + '/trust',
-      value: instance.trust
-  }]);
+  _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
+  return true;
 }
 
 // For each direction (e.g., I proxy for you, or you proxy for me), there
@@ -997,17 +979,26 @@ function _handleUpdateDescription(msg) {
       description = msg.data.description;
 
   state.instances[instanceId].description = description;
+  _SyncUI('/instances/' + instanceId + '/description', description);
+}
+
+// --------------------------------------------------------------------------
+//  Updating the UI
+// --------------------------------------------------------------------------
+function _SyncUI(path, value, op) {
+  op = op || 'replace';
   uiChannel.emit('state-change', [{
-    op: 'replace',
-    path: '/instances/' + instanceId + '/description',
-    value: description
+      op: op,
+      path: path,
+      value: value
   }]);
 }
+
+
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
 uiChannel.emit('ready');
-
 
 //TODO(willscott): WebWorkers startup errors are hard to debug.
 // Once fixed, the setTimeout will no longer be needed.

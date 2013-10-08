@@ -226,34 +226,34 @@ IdentityProvider.prototype.onOnline = function() {
   this.announce();
   this.status = 'online';
   this.dispatchEvent('onStatus', {
-userId: this.credentials.userId,
-network: NETWORK_ID,
-status: this.status,
-message: "Woo!"
-});
-// Get roster request (for names)
-this.client.send(new window.XMPP.Element('iq', {type: 'get'})
-    .c('query', {'xmlns': 'jabber:iq:roster'}).up());
-// Get my own vCard
-this.getVCard(this.credentials.userId, 'unknown');
-// Update status
-var clients = this.profile.me[this.credentials.userId].clients;
-for (var k in clients) {
-  if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
-    clients[k].status = 'messageable';
+      userId: this.credentials.userId,
+      network: NETWORK_ID,
+      status: this.status,
+      message: "Woo!"
+  });
+  // Get roster request (for names)
+  this.client.send(new window.XMPP.Element('iq', {type: 'get'})
+      .c('query', {'xmlns': 'jabber:iq:roster'}).up());
+  // Get my own vCard
+  this.getVCard(this.credentials.userId, 'unknown');
+  // Update status
+  var clients = this.profile.me[this.credentials.userId].clients;
+  for (var k in clients) {
+    if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
+      clients[k].status = 'messageable';
+    }
   }
-}
 };
 
 IdentityProvider.prototype.announce = function () {
   this.client.send(new window.XMPP.Element('presence', {})
       .c("show").t("xa").up() // mark status of this client as 'extended away'.
       .c("c", { //  Advertise extended capabilities.
-xmlns: "http://jabber.org/protocol/caps",
-node: this.loginOpts.url,
-ver: this.loginOpts.version,
-      hash: "fixed"
-    }).up()
+          xmlns: "http://jabber.org/protocol/caps",
+          node: this.loginOpts.url,
+          ver: this.loginOpts.version,
+          hash: "fixed"
+      }).up()
     //.c('priority').t("-127").up() // mark priority as low.
   );
   //this.client.send(new window.XMPP.Element('presence', {}));
@@ -328,7 +328,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
   var status = stanza.getChildText("show") || "online";
   if (stanza.attrs.type == 'unavailable') {
     status = stanza.attrs.type;
-  } 
+  }
   var hash = "unknown";
   try {
     hash = stanza.getChild("x").getChildText("photo");
@@ -350,7 +350,6 @@ IdentityProvider.prototype.onPresence = function(stanza) {
   this.setAttr(stanza.attrs.from, 'imageHash', hash);
   //Update VCard
   this.getVCard(stanza.attrs.from, hash);
-    
 };
 
 IdentityProvider.prototype.getVCard = function(from, hash) {
@@ -387,7 +386,7 @@ IdentityProvider.prototype.fetchVCard = function(from) {
     this.client.send(new window.XMPP.Element('iq', {
       type: 'get',
       to: getBaseJid(from)
-    }).c('vCard', {'xmlns': 'vcard-temp'}).up());    
+    }).c('vCard', {'xmlns': 'vcard-temp'}).up());
   }
 };
 
@@ -433,9 +432,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
     } else {
       window.droppedMessages = [stanza];
     }
-
   }
-
 };
 
 var identity = freedom.identity();
