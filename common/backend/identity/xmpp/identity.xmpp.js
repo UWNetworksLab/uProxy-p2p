@@ -2,7 +2,7 @@ var VCARD_TIMEOUT = 3000;
 var chrome = {
   socket: freedom['core.socket']()
 };
-  
+
 console.warn = function(f) {
   console.log(f);
 };
@@ -15,7 +15,7 @@ function IdentityProvider() {
   //DEBUG
   window.current = this;
   console.log(NETWORK_NAME);
-  
+
   this.client = null;
   this.credentials = null;
   this.loginOpts = null;
@@ -43,7 +43,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
   if (!this.credentials) {
     this.status = 'authenticating';
     this.dispatchEvent('onStatus', {
-      status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
+        status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
     });
     view.once('message', function(opts, cont, message) {
       if (message.cmd && message.cmd == 'auth') {
@@ -62,22 +62,22 @@ IdentityProvider.prototype.login = function(opts, continuation) {
     var clientId = this.credentials.userId + '/' + this.loginOpts.agent;
     this.status = 'connecting';
     this.dispatchEvent('onStatus', {
-      userId: this.credentials.userId,
-      network: NETWORK_ID,
-      status: this.status, 
-      message: "XMPP connect"
+        userId: this.credentials.userId,
+        network: NETWORK_ID,
+        status: this.status,
+        message: "XMPP connect"
     });
     this.profile.me[this.credentials.userId] = {};
     this.profile.me[this.credentials.userId].userId = this.credentials.userId;
     this.profile.me[this.credentials.userId].clients = {};
     this.profile.me[this.credentials.userId].clients[clientId] = {
-      clientId: clientId, 
-      network: NETWORK_ID,
-      status: 'offline'
+        clientId: clientId,
+        network: NETWORK_ID,
+        status: 'offline'
     };
     //Start XMPP client
     this.client = new window.XMPP.Client(CONNECT_OPTS(clientId, this.credentials.token));
-    //TODO(willscott): Support Upgrade to TLS wrapped connection.  
+    //TODO(willscott): Support Upgrade to TLS wrapped connection.
     this.client.connection.allowTLS = false;
     //this.client.addListener('online', function(){this.client.send(new window.XMPP.Element('presence', {}));}.bind(this));
     //this.client.addListener('stanza', function(s) {console.log(s.attrs.from);} );
@@ -86,10 +86,10 @@ IdentityProvider.prototype.login = function(opts, continuation) {
       console.warn(e);
       this.status = 'error';
       this.dispatchEvent('onStatus', {
-        userId: this.credentials.userId,
-        network: NETWORK_ID,
-        status: this.status, 
-        message: JSON.stringify(e)
+          userId: this.credentials.userId,
+          network: NETWORK_ID,
+          status: this.status,
+          message: JSON.stringify(e)
       })
       continuation();
     }.bind(this));
@@ -111,22 +111,23 @@ IdentityProvider.prototype.getProfile = function(id, continuation) {
 
 // Send a message to someone.
 IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
-  this.client.send(new window.XMPP.Element('message', {
-    to: to,
-    type: 'chat'
-  }).c('body').t(JSON.stringify(msg)));
+  this.client.send(
+      new window.XMPP.Element('message', {
+          to: to,
+          type: 'chat'
+      }).c('body').t(JSON.stringify(msg)));
   continuation();
 };
 
 IdentityProvider.prototype.logout = function(userId, networkName, continuation) {
   //@TODO(ryscheng) debug, remove oAuth stuffies
-  this.status = 'offline'; 
+  this.status = 'offline';
   userId = this.credentials.userId;
   this.dispatchEvent('onStatus', {
-    userId: userId,
-    network: NETWORK_ID,
-    status: this.status,
-    message: 'Woo!'
+      userId: userId,
+      network: NETWORK_ID,
+      status: this.status,
+      message: 'Woo!'
   });
   this.profile.me[userId].clients = {};
   this.dispatchEvent('onChange', this.profile.me[userId]);
@@ -141,9 +142,9 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
   this.client.end();
   this.client = null;
   continuation({
-    userId: userId,
-    success: true,
-    message: 'Logout'
+      userId: userId,
+      success: true,
+      message: 'Logout'
   });
 };
 
@@ -225,32 +226,32 @@ IdentityProvider.prototype.onOnline = function() {
   this.announce();
   this.status = 'online';
   this.dispatchEvent('onStatus', {
-    userId: this.credentials.userId,
-    network: NETWORK_ID,
-    status: this.status,
-    message: "Woo!"
-  });
-  // Get roster request (for names)
-  this.client.send(new window.XMPP.Element('iq', {type: 'get'})
+userId: this.credentials.userId,
+network: NETWORK_ID,
+status: this.status,
+message: "Woo!"
+});
+// Get roster request (for names)
+this.client.send(new window.XMPP.Element('iq', {type: 'get'})
     .c('query', {'xmlns': 'jabber:iq:roster'}).up());
-  // Get my own vCard
-  this.getVCard(this.credentials.userId, 'unknown');
-  // Update status
-  var clients = this.profile.me[this.credentials.userId].clients;
-  for (var k in clients) {
-    if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
-      clients[k].status = 'messageable';
-    }
+// Get my own vCard
+this.getVCard(this.credentials.userId, 'unknown');
+// Update status
+var clients = this.profile.me[this.credentials.userId].clients;
+for (var k in clients) {
+  if (clients.hasOwnProperty(k) && clients[k].clientId.indexOf(this.loginOpts.agent) >= 0) {
+    clients[k].status = 'messageable';
   }
+}
 };
 
 IdentityProvider.prototype.announce = function () {
   this.client.send(new window.XMPP.Element('presence', {})
-    .c("show").t("xa").up() // mark status of this client as 'extended away'.
-    .c("c", { //  Advertise extended capabilities.
-      xmlns: "http://jabber.org/protocol/caps",
-      node: this.loginOpts.url,
-      ver: this.loginOpts.version,
+      .c("show").t("xa").up() // mark status of this client as 'extended away'.
+      .c("c", { //  Advertise extended capabilities.
+xmlns: "http://jabber.org/protocol/caps",
+node: this.loginOpts.url,
+ver: this.loginOpts.version,
       hash: "fixed"
     }).up()
     //.c('priority').t("-127").up() // mark priority as low.
