@@ -522,6 +522,8 @@ uiChannel.on('login', function(network) {
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
+  // Clear the clientsToInstance table.
+  state.clientToInstance = {};
 });
 
 uiChannel.on('ignore', function (userId) {
@@ -680,7 +682,7 @@ function _handleMessage(msgInfo, beingSent) {
     var instanceId = state.clientToInstance[clientId];
     if (!instanceId) {
       // TODO(uzimizu): Attach instanceId to the message and verify.
-      log.debug('Could not find instance for the trust modification!');
+      log.error('Could not find instance for the trust modification!');
       return false;
     }
     _updateTrust(instanceId, msgType, true);  // received = true
@@ -733,7 +735,11 @@ function _updateUser(newData) {
   user.clients = newData.clients;
 
   for (var clientId in user.clients) {
-    var client = newData.clients[clientId];
+    var client = user.clients[clientId];
+    if ('offline' == user.status) {  // Delete offline clients
+      delete user.clients[clientId];
+      continue;
+    }
     if (! (clientId in user.clients)) {
       user.clients[clientId] = client;
     }
