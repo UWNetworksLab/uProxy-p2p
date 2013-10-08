@@ -92,7 +92,15 @@ module.exports = function(grunt) {
     concat: {
       firefox: {
         src: firefox_concat_src,
-        dest: 'firefox/data/scripts/dependencies.js'
+        dest: 'firefox/data/scripts/dependencies.js',
+        options: {
+        // Replace all 'use strict' statements in the code with a single one at the top
+          banner: "'use strict';\n",
+          process: function(src, filepath) {
+            return '// Source: ' + filepath + '\n' +
+              src.replace(/(^|\n)[ \t]*('use strict'|"use strict");?\s*/g, '$1');
+          }
+        }
       }
     },
     watch: {
