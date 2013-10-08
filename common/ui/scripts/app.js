@@ -5,7 +5,6 @@
  * continuously patched from the backend (uproxy.js) and provides hooks for the
  * UI to modify state and send messages.
  */
-
 'use strict';
 
 // TODO: client secret should not be public.
@@ -44,22 +43,22 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
       $rootScope.model = model;
 
-      $rootScope.resetState = function (msgName, data) {
+      $rootScope.resetState = function () {
         localStorage.clear();
         freedom.emit('reset', null);
       };
 
       $rootScope.instanceOfClientId = function(clientId) {
         if (model.clientToInstance[clientId]) {
-          return model.instancesTable[model.clientToInstance[clientId]];
+          return model.instances[model.clientToInstance[clientId]];
         } else {
           return null;
         }
       };
 
       $rootScope.instanceOfUserId = function(userId) {
-        for (var i in instancesTable) {
-          if (instancesTable[i].userId = userId) return i;
+        for (var i in model.instances) {
+          if (model.instances[i].userId = userId) return i;
         }
         return null;
       };
@@ -172,16 +171,24 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           // console.info('got state change:', patch);
           $rootScope.connectedToApp = true;
           // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
+ /*
           if (_.isEmpty(model)) {  // Refresh state if local model is empty.
             if (patch[0].path === '') {
               angular.copy(patch[0].value, model);
             } else {
               console.info('model init patch not yet received, ignoring non init patch:', patch);
             }
+          } else {*/
+
+          // patches with an empty path don't seem to apply.
+          if (patch[0].path === '') {
+            angular.copy(patch[0].value, model);
           } else {
-            patch = new jsonpatch.JSONPatch(patch, true);  // mutate = true
-            patch.apply(model);
+            jsonpatch.apply(model, patch);
           }
+          //  patch = new jsonpatch.JSONPatch(patch, true);  // mutate = true
+          //  patch.apply(model);
+          // }
         });
       }
 

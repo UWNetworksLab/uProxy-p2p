@@ -45,7 +45,8 @@ var chrome_ext_files = [
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',
   'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/json-patch/jsonpatch.js',
+  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 var firefox_files = [
@@ -62,7 +63,8 @@ var firefox_files = [
   'common/ui/bower_components/angular-mocks/angular-mocks.js',
   'common/ui/bower_components/angular-scenario/*.js',
   'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
+  'common/ui/bower_components/json-patch/jsonpatch.js',
+  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
   'common/ui/bower_components/lodash/dist/lodash.js'
 ];
 

@@ -36,6 +36,7 @@ script.onload = function() {
   //document.head.appendChild(test_script);
 };
 
+
 // Called when an extension connects to the app.
 chrome.runtime.onConnectExternal.addListener(function(port) {
   // Security: only allow the official uproxy extension to control the backend.
