@@ -700,6 +700,7 @@ function _updateTrust(instanceId, action, received) {
 
 var _msgReceivedHandlers = {
   'notify-instance': _receiveInstanceData,
+  'notify-consent': _receiveConsent,
   'update-description': _handleUpdateDescription
 };
 
@@ -765,7 +766,6 @@ function _updateUser(newData) {
       onFB = false,
       online = false,
       canUProxy = false;
-  // if (!user.clients) user.clients = {};
   user.name = newData.name;
   user.clients = newData.clients;
 
@@ -847,20 +847,19 @@ function _fetchMyInstance() {
       description: '' + state.me.description,
       keyHash: '' + state.me.keyHash
     });
+    log.debug('Caching local instance payload: ' + _myInstanceData);
   }
   return _myInstanceData;
 }
 
 // Send a notification about my instance data to a particular clientId.
-// Assumes |client| corresponds to a valid UProxy instance.
+// Assumes |client| corresponds to a valid UProxy instance, but does not assume
+// that we've received the other side's Instance data yet.
 function _sendInstanceData(client) {
   if ('manual' == client.network) {
     return false;
   }
-  // Prepare a message indicating instance data, to be sent to other instances and
-  // synchronize everybody's world view. Does not assume that the instance
-  // actually exists.
-  identity.sendMessage(client.clientId, _fetchmyInstance());
+  identity.sendMessage(client.clientId, _fetchMyInstance());
 }
 
 // Primary handler for synchronizing Instance data. Updates an instance-client
@@ -875,43 +874,32 @@ function _receiveInstanceData(msg) {
       userId      = msg.fromUserId,
       clientId    = msg.fromClientId,
       oldClientId = state.instanceToClient[instanceId],
-      consent = msg.data.consent || { asProxy: false, asClient: false },
       instanceOp  = 'replace';  // Intended JSONpatch operation.
 
   // Before everything, remember the clientId - instanceId relation.
   state.clientToInstance[clientId] = instanceId;
   state.instanceToClient[instanceId] = clientId;
 
-  // Delete any old client for this instance.
+  // Obsolete client will never have further communications.
   if (oldClientId && (oldClientId != clientId)) {
-    log.debug('Deleting old client ' + oldClientId);
+    log.debug('Deleting obsolete client ' + oldClientId);
     delete state.roster[userId].clients[oldClientId];
     delete state.clientToInstance[oldClientId];
   }
 
-  // Update the local instance tables.
+  // Update the local instance table.
   var instance = state.instances[instanceId];
   if (!instance) {
     instanceOp = 'add';
     instance = _prepareNewInstance(instanceId, userId, description, keyHash);
     state.instances[instanceId] = instance;
-    instance.trust.asClient = consent.asProxy? 'offered' : 'no';
-    instance.trust.asProxy = consent.asClient? 'requested' : 'no';
   } else {
-    // If the instance already exists, remap consent.
-    if (consent.asProxy) {
-      instance.trust.asProxy = ['yes', 'requested'].indexOf(instance.trust.asProxy) >= 0 ? 'yes' : 'offered';
-    } else {
-      instance.trust.asProxy = ['yes', 'requested'].indexOf(instance.trust.asProxy) >= 0 ? 'requested' : 'no';
-    }
-    if (consent.asClient) {
-      instance.trust.asClient = ['yes', 'offered'].indexOf(instance.trust.asClient) >= 0 ? 'yes' : 'requested';
-    } else {
-      instance.trust.asClient = ['yes', 'offered'].indexOf(instance.trust.asClient) >= 0 ? 'offered' : 'no';
-    }
+    // If we've had relationships to this instance, send them our consent bits.
+    _sendConsent(instance);
   }
 
-  _saveInstanceId(instanceId);  // Update local storage and extension.
+  // Update local storage and extension.
+  _saveInstanceId(instanceId);
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
@@ -936,29 +924,64 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
   return instance;
 }
 
-// Send consent bits to re-synchronize consent. This must happen right *after*
-// receiving an instance notification.
-function _sendConsent(instanceId, consent) {
-  // Acquire current trust state, if available.
-  var instance = state.clientToInstance[client.clientId];
-  if (instance) {
-    trust = instance.trust;
+// Send consent bits to re-synchronize consent with remote |instance|.
+// This happens *after* receiving an instance notification for an instance which
+// we already have a history with.
+function _sendConsent(instance) {
+  var clientId = state.instanceToClient[instance.instanceId];
+  if (!clientId) {
+    log.error('Instance ' + instance.instanceId + ' missing clientId!');
+    return false;
   }
-  if (null !== trust) {
-    // For each direction (e.g., I proxy for you, or you proxy for me), there
-    // is a logical AND of consent from both parties.  If the local state for
-    // trusting them to be a client (trust.asProxy) is Yes or Offered, we
-    // consent to being a proxy.  If the local state for trusting them to proxy
-    // is Yes or Requested, we consent to being a client.
-    consent = { asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0,
-                asProxy: ["yes", "offered"].indexOf(trust.asClient) >= 0 };
-  } else {
-    consent = { asProxy: false, asClient: false };
-  }
+  var consentPayload = JSON.stringify({
+    type: 'notify-consent',
+    instanceId: state.me.instanceId,            // Our own instanceId.
+    consent: _determineConsent(instance.trust)  // My consent.
+  });
+  identity.sendMessage(clientId, consentPayload);
+  return true;
 }
 
-// Recevie consent bits and re-synchronize the relation between instances.
+// Receive consent bits and re-synchronize the relation between instances.
 function _receiveConsent(msg) {
+  log.debug('_receiveConsent(from: ' + msg.fromUserId + ')');
+  var instanceId  = msg.data.instanceId,  // InstanceId of the sender.
+      consent     = msg.data.consent;     // Their view of consent.
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Instance for id: ' + instanceId + ' not found!');
+    return false;
+  }
+  // Determine my own consent bits, and remap.
+  var myConsent = _determineConsent(instance.trust);
+  if (consent.asProxy) {
+    instance.trust.asProxy = myConsent.asClient? 'yes' : 'offered';
+  } else {
+    instance.trust.asProxy = myConsent.asClient? 'requested' : 'no';
+  }
+  if (consent.asClient) {
+    instance.trust.asClient = myConsent.asProxy? 'yes' : 'requested';
+  } else {
+    instance.trust.asClient = myConsent.asProxy? 'offered' : 'no';
+  }
+
+  // Update.
+  _saveInstanceId(instanceId);
+  uiChannel.emit('state-change', [{
+      op: instanceOp,
+      path: '/instances/' + instanceId + '/trust',
+      value: instance.trust
+  }]);
+}
+
+// For each direction (e.g., I proxy for you, or you proxy for me), there
+// is a logical AND of consent from both parties. If the local state for
+// trusting them to be a proxy (trust.asProxy) is Yes or Requested, we
+// consent to being their client. If the local state for trusting them to
+// be our client is Yes or Offered, we consent to being their proxy.
+function _determineConsent(trust) {
+  return { asProxy:  ["yes", "offered"].indexOf(trust.asClient) >= 0,
+           asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0 };
 }
 
 function _validateKeyHash(keyHash) {
