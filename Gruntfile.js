@@ -232,7 +232,8 @@ module.exports = function(grunt) {
   ]);
   grunt.registerTask('build', [
     'build_chrome',
-    'build_firefox'
+    'build_firefox',
+    'test'
   ]);
   grunt.registerTask('everything' ['setup', 'test', 'build']);
   // Default task(s).

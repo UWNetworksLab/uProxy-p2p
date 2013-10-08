@@ -1,9 +1,31 @@
+/* jshint -W097 */
+/* jshint -W083 */
 'use strict';
+
+// A little class that callbacks such that you can use it as the callback for
+// many operations, but only when the last of the operations you started is
+// completed, but the finalCallback actually get called.
+function FinalCallback(finalCallback) {
+  this.callsWaiting = 0;
+  this.finalCallback = finalCallback;
+}
+
+FinalCallback.prototype.makeCountedCallback = function () {
+  // A way to make sure that we only call the callback once, and that it happens only for the last callback. Assumes: callbacks happen in call order.
+  this.callsWaiting++;
+  return this._oneOfManyCallbacks.bind(this);
+};
+
+FinalCallback.prototype._oneOfManyCallbacks = function () {
+  this.callsWaiting--;
+  if (!this.callsWaiting) this.finalCallback();
+};
 
 /**
  * Convert a freedom promise-style interface into a
  * callback-style interface as used in the Chrome API.
  */
+// TODO:
 var promise2callback = function(object) {
   for (var prop in object) {
     if (object.hasOwnProperty(prop) && typeof object[prop] === 'function') {
@@ -26,8 +48,9 @@ var promise2callback = function(object) {
     }
   }
   return object;
-}
+};
 
+/* jshint -W117 */
 function makeLogger(level) {
   var logFunc = console[level];
   if (logFunc) {
@@ -43,6 +66,7 @@ function makeLogger(level) {
     console.log(s);
   };
 }
+/* jshint +W117 */
 
 //== XXX can get rid of these when we include lodash: ==//
 function isUndefined(val) {
@@ -116,3 +140,5 @@ function extractCryptoKey(sdpHeaders) {
 
   return null;
 }
+/* jshint +W097 */
+/* jshint +W083 */

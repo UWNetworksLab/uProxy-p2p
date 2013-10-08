@@ -20,4 +20,24 @@ describe("util", function() {
       expect(extracted).toEqual(null);
     });
   });
-});
+
+  describe("FinalCallback", function() {
+    it("Should handle multiple callbacks", function() {
+      var x = 0;
+      function upX () { x++; }
+      var finalCallbacker = new FinalCallback(upX);
+      var cb1 = finalCallbacker.makeCountedCallback();
+      var cb2 = finalCallbacker.makeCountedCallback();
+      var cb3 = finalCallbacker.makeCountedCallback();
+
+      expect(x).toEqual(0);
+      cb1();
+      expect(x).toEqual(0);
+      cb3();
+      expect(x).toEqual(0);
+      cb2();
+      expect(x).toEqual(1);
+    });
+  });
+
+});  // util
