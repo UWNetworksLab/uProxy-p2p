@@ -22,7 +22,7 @@ var initPanel = function(freedomCommunicator) {
   var uproxyPanel = panel.Panel({
     contentURL: self.data.url("common/ui/popup.html"),
     width: 450,
-    height: 300
+    height: 600
   });
   freedomCommunicator.addContentContext(uproxyPanel.port);
   uproxyPanel.port.on("show", function() {
