@@ -835,52 +835,32 @@ function _checkUProxyClientSynchronization(client) {
 
 // Handle sending -----------------------------------------------------------
 
-// Instance ID (+ more) Synchronization I/O
-
-// Prepare a message indicating instance data, to be sent to other instances and
-// synchronize everybody's world view. Does not assume that the instance
-// actually exists.
-function _buildInstancePayload(client) {
-  // Look up permissions for the clientId.
-  var u, trust = null, consent;
-  // Acquire current trust state, if available.
-  var instance = state.clientToInstance[client.clientId];
-  if (instance) {
-    trust = instance.trust;
+// The instance data for the local UProxy can be cached, since it is typically
+// the same unless something like |description| is explicitly updated. Consent
+// bits are sent individually, after initial instance notifications.
+var _myInstanceData = null;
+function _fetchMyInstance() {
+  if (!_myInstanceData) {
+    _myInstanceData = JSON.stringify({
+      type: 'notify-instance',
+      instanceId: '' + state.me.instanceId,
+      description: '' + state.me.description,
+      keyHash: '' + state.me.keyHash
+    });
   }
-  if (null !== trust) {
-    // For each direction (e.g., I proxy for you, or you proxy for me), there
-    // is a logical AND of consent from both parties.  If the local state for
-    // trusting them to be a client (trust.asProxy) is Yes or Offered, we
-    // consent to being a proxy.  If the local state for trusting them to proxy
-    // is Yes or Requested, we consent to being a client.
-    consent = { asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0,
-                asProxy: ["yes", "offered"].indexOf(trust.asClient) >= 0 };
-  } else {
-    consent = { asProxy: false, asClient: false };
-  }
-
-  return JSON.stringify({
-    type: 'notify-instance',
-    instanceId: '' + state.me.instanceId,
-    description: '' + state.me.description,
-    keyHash: '' + state.me.keyHash,
-    consent: consent,
-  });
+  return _myInstanceData;
 }
 
 // Send a notification about my instance data to a particular clientId.
 // Assumes |client| corresponds to a valid UProxy instance.
 function _sendInstanceData(client) {
-  // if (client['network'] === undefined ||
-      // (client.network != 'loopback' && client.network != 'manual')) {
-  if (client.network == 'manual') {
+  if ('manual' == client.network) {
     return false;
   }
-  // TODO(uzimizu): Build the instance payload somewhere else, so we
-  // don't have to rebuild it *everytime* a person logs on, as that's ineffic.
-  var msg = _buildInstancePayload(client);
-  identity.sendMessage(client.clientId, msg);
+  // Prepare a message indicating instance data, to be sent to other instances and
+  // synchronize everybody's world view. Does not assume that the instance
+  // actually exists.
+  identity.sendMessage(client.clientId, _fetchmyInstance());
 }
 
 // Primary handler for synchronizing Instance data. Updates an instance-client
@@ -954,6 +934,31 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
   instance.keyHash = keyHash;
   log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
   return instance;
+}
+
+// Send consent bits to re-synchronize consent. This must happen right *after*
+// receiving an instance notification.
+function _sendConsent(instanceId, consent) {
+  // Acquire current trust state, if available.
+  var instance = state.clientToInstance[client.clientId];
+  if (instance) {
+    trust = instance.trust;
+  }
+  if (null !== trust) {
+    // For each direction (e.g., I proxy for you, or you proxy for me), there
+    // is a logical AND of consent from both parties.  If the local state for
+    // trusting them to be a client (trust.asProxy) is Yes or Offered, we
+    // consent to being a proxy.  If the local state for trusting them to proxy
+    // is Yes or Requested, we consent to being a client.
+    consent = { asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0,
+                asProxy: ["yes", "offered"].indexOf(trust.asClient) >= 0 };
+  } else {
+    consent = { asProxy: false, asClient: false };
+  }
+}
+
+// Recevie consent bits and re-synchronize the relation between instances.
+function _receiveConsent(msg) {
 }
 
 function _validateKeyHash(keyHash) {
