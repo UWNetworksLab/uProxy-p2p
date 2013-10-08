@@ -190,7 +190,7 @@ var DEFAULT_INSTANCE = {
   description: ''
 };
 
-function onload() {
+//function onload() {
 
 
 // --------------------------------------------------------------------------
@@ -200,6 +200,7 @@ function onload() {
 //   scraps/local_storage_example.js
 function _loadFromStorage(key, callback, defaultIfUndefined) {
   storage.get(key).done(function (result) {
+    console.log("Loaded from storage[" + key + "] (type: " + (typeof result) + "): " + result);
     if (isDefined(result)) {
       callback(JSON.parse(result));
     } else {
@@ -300,8 +301,8 @@ function _loadStateFromStorage(state, callback) {
 
   key = StateEntries.OPTIONS;
   var maybeCallbackAfterLoadingOptions = finalCallbacker.makeCountedCallback();
-  _loadFromStorage(key, function(v){
-    state[StateEntries.OPTIONS] = v;
+  _loadFromStorage(key, function(options){
+    state[StateEntries.OPTIONS] = options;
     maybeCallbackAfterLoadingOptions();
   }, RESET_STATE[key]);
 
@@ -318,7 +319,7 @@ function _loadStateFromStorage(state, callback) {
         console.error("instance " + instanceId + " not found");
       } else if (!_validateStoredInstance(instanceId, instance)) {
         console.error("instance " + instanceId + " was bad:", instance);
-        _removeInstanceId(instanceId);
+        // TODO: remove bad instance ids?
       } else {
         console.log("instance " + instanceId + " loaded");
         instances[instanceId] = instance;
@@ -334,25 +335,16 @@ function _loadStateFromStorage(state, callback) {
   };
 
   // Load
-  _loadFromStorage(StateEntries.INSTANCEIDS, function(insts) {
-    var instanceIds = [];
-    if (insts !== null && insts.length > 0) {
-      instanceIds = JSON.parse(insts);
-    }
-    console.log('instanceIds:' + instanceIds);
+  _loadFromStorage(StateEntries.INSTANCEIDS, function(instanceIds) {
+    console.log("instanceIds typeof = " + (typeof instanceIds));
+    console.log('instanceIds: ' + instanceIds);
     for (i = 0; i < instanceIds.length; i++) {
-      //if (instanceIds[i] == "undefined") {
-      //  _removeInstanceId("undefined");
-      //} else {
-        // Check, save and update the UI on the last loaded entry.
       checkAndSave(instanceIds[i]);
-      //}
     }
   }, []);
 
   log.debug('_loadStateFromStorage: loaded: ' + JSON.stringify(state));
 }
-
 
 // Save the instance to local storage. Assumes that both the Instance
 // notification and XMPP user nad client information exists and is up-to-date.
@@ -362,7 +354,7 @@ function _saveInstance(instanceId, userId) {
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
   var instanceInfo = state.instances[instanceId];
-  var msg = { name: state.roster[userId].name,
+  var instance = { name: state.roster[userId].name,
               description: instanceInfo.description,
               annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
               instanceId: instanceId,
@@ -372,45 +364,9 @@ function _saveInstance(instanceId, userId) {
               keyHash: instanceInfo.keyHash,
               trust: instanceInfo.trust,
             };
-  log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' + JSON.stringify(msg));
-  _saveToStorage("instance/" + instanceId, msg);
-}
-
-// Update the list of instanceIds to include instanceId.
-function _saveInstanceId(instanceId) {
-  log.debug('_saveInstanceId: saving ' + instanceId + '.');
-  _loadFromStorage(StateEntries.INSTANCEIDS, function (ids) {
-    console.log('_saveInstanceId got: ' + ids);
-    if (ids !== undefined && ids !== null) {
-      var instanceids = JSON.parse(ids);
-      if (instanceids.indexOf(instanceId) < 0) {
-        console.log('_saveInstanceId: -- new value: ' +
-            JSON.stringify(instanceids) + ', type: ' +
-            typeof(instanceids) + '.');
-        instanceids.push(instanceId);
-        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(instanceids));
-      }
-    } else {
-      log.debug('_saveInstanceId: -- new value: ' + JSON.stringify([instanceId]) + '.');
-      _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify([instanceId]));
-    }
-  }, []);
-}
-
-function _removeInstanceId(instanceId) {
-  storage.remove("instance/" + instanceId);
-  log.debug('_removeInstanceId: removing ' + instanceId + '.');
-  _loadFromStorage(StateEntries.INSTANCEIDS, function (ids) {
-    console.log('_removeInstanceId got: ', ids);
-    if (ids !== undefined && ids !== null) {
-      var instanceids = JSON.parse(ids);
-      var index = instanceids.indexOf(instanceId);
-      if (index >= 0) {
-        instanceids.splice(index,1);
-        _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(instanceids));
-      }
-    }
-  }, null);
+  log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
+      JSON.stringify(instance));
+  _saveToStorage("instance/" + instanceId, instance);
 }
 
 function _saveAllInstances() {
@@ -598,17 +554,17 @@ uiChannel.on('update-description', function (data) {
 // TODO: should we lookup the instance ID for this client here?
 // TODO: say not if we havn't given them permission :)
 uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
-  startUsingPeerAsProxySever(peerClientId);
+  startUsingPeerAsProxyServer(peerClientId);
 });
 
 client.on('sendSignalToPeer', function(data) {
-  log.debug('client(sendSignalToPeer):', data);
+  console.log('client(sendSignalToPeer):', data);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
-  log.debug('server(sendSignalToPeer):', data);
+  console.log('server(sendSignalToPeer):', data);
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
 
@@ -624,6 +580,8 @@ function startUsingPeerAsProxyServer(peerClientId) {
     {'host': '127.0.0.1', 'port': 9999,
       // peerId of the peer being routed to.
      'peerId': peerClientId});
+
+  // TODO: set that we are negotiating.
 }
 
 function stopUsingPeerAsProxyServer(peerClientId) {
@@ -890,8 +848,10 @@ function _receiveInstanceData(msg) {
     _sendConsent(instance);
   }
 
-  // Update local storage and extension.
-  _saveInstanceId(instanceId);
+  // TODO: optimise to only save when different to what was in storage before.
+  _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
+      Object.keys(state[StateEntries.INSTANCES])));
+
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
@@ -1002,5 +962,5 @@ uiChannel.emit('ready');
 
 //TODO(willscott): WebWorkers startup errors are hard to debug.
 // Once fixed, the setTimeout will no longer be needed.
-};  // onload
-setTimeout(onload, 0);
+//};  // onload
+//setTimeout(onload, 0);
