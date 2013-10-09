@@ -32,11 +32,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
-    'freedom',               // Via dependencyInjector.
+    'freedom',               // Via dependencyInjector - talks to backend.
     'onFreedomStateChange',  // Via dependencyInjector.
     'model',                 // Via dependencyInjector.
     function($filter, $http, $rootScope,
-             backendChannel, onFreedomStateChange, model) {
+             appChannel, onFreedomStateChange, model) {
 
       if (undefined === model) {
         console.error('model not found in dependency injections.');
@@ -45,7 +45,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.resetState = function () {
         localStorage.clear();
-        backendChannel.emit('reset', null);
+        appChannel.emit('reset', null);
       };
 
       $rootScope.instanceOfClientId = function(clientId) {
@@ -74,16 +74,16 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
-        backendChannel.emit('login', network);
+        appChannel.emit('login', network);
       };
       $rootScope.logout = function(network) {
         console.log('!!! logout ' + network);
-        backendChannel.emit('logout', network);
+        appChannel.emit('logout', network);
       };
 
       $rootScope.updateDescription = function() {
         if ($rootScope.oldDescription != model.me.description) {
-          backendChannel.emit('update-description', model.me.description);
+          appChannel.emit('update-description', model.me.description);
         }
         $rootScope.oldDescription = model.me.description;
       }
@@ -108,7 +108,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // We don't need to tell them we'll start proxying, we can just try to
         // start. The SDP request will go through chat/identity network on its
         // own.
-        backendChannel.emit('start-using-peer-as-proxy-server', instance.instanceId)
+        appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId)
       };
 
       // Providing access for a friend:
@@ -125,12 +125,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
-        backendChannel.emit('instance-trust-change', {
+        appChannel.emit('instance-trust-change', {
           instanceId: id, action: action });
       };
 
       $rootScope.changeOption = function (key, value) {
-        backendChannel.emit('change-option', {key: key, value: value});
+        appChannel.emit('change-option', {key: key, value: value});
       }
 
       var clearedAndRetried = false;
@@ -141,7 +141,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
             function getProfileSuccessHandler(resp) {
               var email = resp.data.email;
-              backendChannel.emit('goog-credentials', {email: email, token: accessToken});
+              appChannel.emit('goog-credentials', {email: email, token: accessToken});
               clearedAndRetried = false;
             },
             function getProfileFailureHandler(resp) {
@@ -200,12 +200,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.startUI = function() {
         // call these in the Angular scope so that window is defined.
         $rootScope.$apply(function() {
-          backendChannel.onConnected.removeListener($rootScope.startUI);
+          appChannel.onConnected.removeListener($rootScope.startUI);
           onFreedomStateChange.addListener($rootScope.onStateChange);
           window.onunload = function() {
             onFreedomStateChange.removeListener($rootScope.onStateChange);
           };
-          backendChannel.emit('open-popup');
+          appChannel.emit('open-popup');
           //$rootScope.authGoog();
           $rootScope.connectedToApp = true;
         });
@@ -213,12 +213,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.connectedToApp = false;
 
-      if(backendChannel.connected) {
+      if(appChannel.connected) {
         $rootScope.connectedToApp = true;
         $rootScope.startUI();
       } else {
-        backendChannel.onConnected.addListener($rootScope.startUI);
-        backendChannel.connect();
+        appChannel.onConnected.addListener($rootScope.startUI);
+        appChannel.connect();
       }
     }  // run function
   ]);
