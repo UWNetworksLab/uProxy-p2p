@@ -71,13 +71,13 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
   }
 };
 
-// Wrapper for
+// Wrapper for disconnection.
 FreedomConnector.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
   this.connected = false;
-  this.onDisconnected.dispatch();
   this.port_ = null;
   this.listeners_ = {};
+  this.onDisconnected.dispatch();
 };
 
 

@@ -10,6 +10,8 @@ function IdentityProvider() {
     me: {},
     roster: {}
   };
+
+  // Map from clientIDs -> network
   this.reverseIndex = {};
   this.providers = {
     // loopback: {

@@ -169,18 +169,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       $rootScope.onStateChange = function (patch) {
         $rootScope.$apply(function () {
-          // console.info('got state change:', patch);
           $rootScope.connectedToApp = true;
           // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
- /*
-          if (_.isEmpty(model)) {  // Refresh state if local model is empty.
-            if (patch[0].path === '') {
-              angular.copy(patch[0].value, model);
-            } else {
-              console.info('model init patch not yet received, ignoring non init patch:', patch);
-            }
-          } else {*/
-
           // patches with an empty path don't seem to apply.
           if (patch[0].path === '') {
             angular.copy(patch[0].value, model);
@@ -208,15 +198,33 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           $rootScope.connectedToApp = true;
         });
       }
+      $rootScope.reconnect = function() {
+        console.log('Disconnected. Attempting to reconnect to app...');
+        $rootScope.$apply(function() {
+          $rootScope.connectedToApp = false;
+        });
+        appChannel.onDisconnected.removeListener($rootScope.reconnect);
+        $rootScope.checkAppConnection();
+      }
 
       $rootScope.connectedToApp = false;
-
-      if(appChannel.connected) {
-        $rootScope.connectedToApp = true;
-        $rootScope.startUI();
-      } else {
-        appChannel.onConnected.addListener($rootScope.startUI);
-        appChannel.connect();
+      $rootScope.checkAppConnection = function() {
+        if ($rootScope.connectedToApp) {
+          return;  // Already connected.
+        }
+        console.log('checking app connection.');
+        // Check that the extension is connected.
+        if(appChannel.connected) {
+          $rootScope.connectedToApp = true;
+          $rootScope.startUI();
+        } else {
+          console.log('connecting.');
+          appChannel.onConnected.addListener($rootScope.startUI);
+          appChannel.connect();
+        }
+        appChannel.onDisconnected.addListener($rootScope.reconnect);
       }
+
+      $rootScope.checkAppConnection();
     }  // run function
   ]);

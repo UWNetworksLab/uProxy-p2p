@@ -258,7 +258,9 @@ ul {
   color: #666666; }
 
 #roster {
-  position: relative;
+  position: absolute;
+  top: 64px;
+  width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
