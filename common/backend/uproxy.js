@@ -590,16 +590,17 @@ var TrustOp = {
 
 // Update trust level for an instance.
 uiChannel.on('instance-trust-change', function (data) {
-  var iId = data.instanceId,
-      clientId = state.instanceToClient[iId];
+  var iId = data.instanceId;
+  // Set trust level locally, then notify through XMPP if possible.
+  _updateTrust(data.instanceId, data.action, false);  // received = false
+  var clientId = state.instanceToClient[iId];
   if (!clientId) {
     log.debug('Warning! Cannot change trust level because client ID does not ' +
               'exist for instance ' + iId + ' - they are probably offline.');
     return false;
   }
-  // Set trust level locally, then notify the other end through XMPP.
-  _updateTrust(data.instanceId, data.action, false);  // received = false
   identity.sendMessage(clientId, JSON.stringify({type: data.action}));
+  return true;
 });
 
 // Update trust state for a particular instance.
@@ -682,7 +683,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function updateUser(newData) {
-  console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
+  // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
