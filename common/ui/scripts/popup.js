@@ -39,10 +39,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       return JSON.stringify(contact);
     };
 
-    // Whether UProxy is logged in to *any* network.
-    $scope.loggedIn = function() {
-      return $scope.isOnline('google') || $scope.isOnline('facebook');
-    };
     $scope.splashPage = !$scope.loggedIn();
 
     // TODO: fix using watchs on the contact of interest. Currently updates are

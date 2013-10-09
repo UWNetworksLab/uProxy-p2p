@@ -53,7 +53,7 @@
 
         <div class="network-btn">
         <button class="btn" ng-show="!isOnline('google')"
-              ng-click="login('google')">G+</button>
+              ng-click="login('google');splashPage = false">G+</button>
         <button class="btn" ng-show="isOnline('google')"
               ng-click="logout('google')">Logout G+</button>
         </div>
@@ -94,6 +94,15 @@
         </section>
 
         <section id="roster">
+          <div id="roster-text">
+            <span ng-show="loggedIn() && isEmpty(model.roster)">
+              Loading Roster...
+            </span>
+            <span ng-show="loggedOut()">
+              You aren't logged in to any network.
+            </span>
+          </div>
+
           <section id="contacts-frame" ng-hide="rosterNudge">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
@@ -109,9 +118,6 @@
               </span>
             </li>
           </ul>
-          <div ng-show="isEmpty(model.roster)">
-            Loading Roster...
-          </div>
           </section>
 
           <div id="contact-details" ng-show="rosterNudge">
@@ -185,146 +191,13 @@
       </div>
 
       <section id="status">
-        <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
+        <span ng-show="loggedIn()">
+          <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
+        </span>
         <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
-        <span ng-hide="loggedIn()">Not Connected</span>
+        <span ng-show="loggedOut()">Not Connected</span>
         <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
       </section>
-      <!--
-      <h4>Status</h4>
-      <section class="current-sessions">
-        <section class="current-sessions-get">
-          <section ng-show="isEmpty(model.currentSessionsToInitiate)">
-            <h5>Not currently getting access through anyone.</h5>
-          </section>
-          <section ng-hide="isEmpty(model.currentSessionsToInitiate)">
-            <h5>Currently getting access through:</h5>
-            <ul>
-              <li ng-show="">
-                No one
-              </li>
-              <li ng-repeat="(id, contact) in model.currentSessionsToInitiate">
-                {{contact.name}} ({{contact.userId}})
-                <button class="btn btn-mini">Stop</button>
-              </li>
-            </ul>
-          </section>
-        </section>
-        <section class="current-sessions-give">
-          <section ng-show="isEmpty(model.currentSessionsToRelay)">
-            <h5>Not currently giving access to anyone.</h5>
-          </section>
-          <section ng-hide="isEmpty(model.currentSessionsToRelay)">
-            <h5>Currently giving access to:</h5>
-            <ul>
-              <li ng-show="">
-                No one
-              </li>
-              <li ng-repeat="(id, contact) in model.currentSessionsToRelay">
-                {{contact.name}} ({{contact.userId}})
-                <button class="btn btn-mini">Stop</button>
-              </li>
-            </ul>
-          </section>
-        </section>
-      </section>
-
-        <section class="start-getting-through" ng-show="isEmpty(canGetFrom)">
-          <h5>No one online you can get access through.</h5>
-        </section>
-
-        <section class="start-getting-through" ng-hide="isEmpty(canGetFrom)">
-          <h5>Start getting access through:</h5>
-          <ul>
-            <li ng-repeat="(id, contact) in canGetFrom">
-              {{contact.name}} ({{contact.userId}})
-              <button class="btn btn-mini" ng-click="sendMessage(contact, 'start-proxying')">
-                Start
-              </button>
-            </li>
-          </ul>
-        </section>
-
-        <section class="request-access" ng-hide="isEmpty(cannotGetFrom)">
-          <h5>Request permission to get access through:</h5>
-          <ul class="contacts">
-            <li ng-repeat="(id, contact) in cannotGetFrom">
-              {{contact.name}}
-              <span class="contact-detail">({{contact.userId}})</span>
-              <button class="btn btn-request" ng-click="sendMessage(contact, 'request-access')">
-                <span ng-show="model.pendingGetFrom[contact.userId]">Re-</span>Request
-              </button>
-            </li>
-          </ul>
-        </section>
-
-        <section class="pending-give-to" ng-hide="isEmpty(model.pendingGiveTo)">
-          <h5>Requested permission to get access through you:</h5>
-          <ul>
-            <li ng-repeat="(id, contact) in model.pendingGiveTo">
-              {{contact.name}} ({{contact.userId}})
-              <div class="btn-group">
-                <button class="btn btn-mini" ng-click="sendMessage(contact, 'allow')">Allow</button>
-                <button class="btn btn-mini" ng-click="freedomEmit('ignore', contact.userId)">Ignore</button>
-              </div>
-            </li>
-          </ul>
-        </section>
-
-        <section class="online-no-uproxy" ng-show="isEmpty(contactsOnlineNotMessageable)">
-          <h5>No other contacts currently online.</h5>
-        </section>
-
-        <section class="online-no-uproxy" ng-hide="isEmpty(contactsOnlineNotMessageable)">
-          <h5>Online contacts not running UProxy:</h5>
-          <ul>
-            <li ng-repeat="contact in contactsOnlineNotMessageable">
-              {{contact.name}} ({{contact.userId}})
-              <button class="btn btn-mini" ng-click="freedomEmit('invite-friend', contact.userId)">Ask to run UProxy</button>
-            </li>
-          </ul>
-        </section>
-      </section>
-
-      <hr>
-
-      <details id="debug" open ng-controller="DebugCtrl" ng-show="model._debug">
-        <summary>Debug</summary>
-
-        <div class="well">
-          <button class="btn btn-block btn-mini" ng-click="resetState()">Reset</button>
-
-          <details open>
-            <summary>message log</summary>
-
-            <pre>{{model._msgLog | json}}</pre>
-          </details>
-
-          <details open>
-            <summary>chat</summary>
-
-            <form name="sendMsgForm" ng-submit="submitChat()">
-              <select ng-model="userId" required>
-                <option value="">Select contact</option>
-                <option ng-repeat="(id, contact) in model.roster" value="{{id}}">
-                  {{contact.name}} - {{id}} {{(contact|messageable) && '(messageable)' || ((contact|onlineNotMessageable) && '(online)' || '(offline)')}}
-                </option>
-              </select>
-
-              <div class="input-append">
-                <input type="text" required ng-model="msg" placeholder="message">
-                <input type="submit" value="send" class="btn" ng-disabled="sendMsgForm.$invalid">
-              </div>
-            </form>
-          </details>
-
-          <details open>
-            <summary>state</summary>
-            <pre>{{model | json}}</pre>
-          </details>
-        </div>
-      </details>
-      -->
 
     </section>
   </div></body>

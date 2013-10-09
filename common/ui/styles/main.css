@@ -132,15 +132,14 @@ ul {
   bottom: 0;
   z-index: 40;
   background-color: white;
-  -webkit-transition: all 0.23s !important;
-  -moz-transition: all 0.23s !important;
-  -o-transition: all 0.23s !important;
-  transition: all 0.23s !important; }
+  -webkit-transition: all 0.5s !important;
+  -moz-transition: all 0.5s !important;
+  -o-transition: all 0.5s !important;
+  transition: all 0.5s !important; }
 
 #login-splash.ng-hide {
   display: block !important;
-  height: 0;
-  opacity: 0; }
+  height: 0; }
 
 .network-btn {
   display: inline-block;
@@ -265,6 +264,17 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+
+#roster-text {
+  position: absolute;
+  text-align: center;
+  top: 100px;
+  width: 80%;
+  padding: 10%;
+  z-index: 500;
+  color: #444444;
+  text-shadow: 0 2px 2px #cccccc;
+  pointer-events: none; }
 
 #contacts-frame {
   position: relative;

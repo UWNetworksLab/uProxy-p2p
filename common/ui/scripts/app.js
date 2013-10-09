@@ -37,11 +37,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     'model',                 // Via dependencyInjector.
     function($filter, $http, $rootScope,
              appChannel, onFreedomStateChange, model) {
-
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
+      // $rootScope.VALID_NETWORKS = [
+        // 'google',
+        // 'facebook'
+      // ];
 
       $rootScope.resetState = function () {
         localStorage.clear();
@@ -65,11 +68,24 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Determine whether UProxy is connected to |network|.
       $rootScope.isOnline = function(network) {
-        window.tmp = model;
         return (model && model.identityStatus &&
                 model.identityStatus[network] &&
-                model.identityStatus[network].status == 'online');
+                'online' == model.identityStatus[network].status);
       };
+      $rootScope.isOffline = function(network) {
+        return (!model || !model.identityStatus ||
+                !model.identityStatus[network] ||
+                'offline' == model.identityStatus[network].status);
+      };
+      // Whether UProxy is logged in to *any* network.
+      $rootScope.loggedIn = function() {
+        return $rootScope.isOnline('google') || $rootScope.isOnline('facebook');
+      };
+      $rootScope.loggedOut = function() {
+        return $rootScope.isOffline('google') && $rootScope.isOffline('facebook');
+      };
+
+
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
         appChannel.emit('login', network);

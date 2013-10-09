@@ -142,11 +142,10 @@ ul
   bottom: 0
   z-index: 40
   background-color: #fff
-  @include smooth
+  @include smooth-slow
 #login-splash.ng-hide
   display: block !important
   height: 0
-  opacity: 0
 
 .network-btn
   display: inline-block
@@ -257,6 +256,17 @@ ul
   top: 64px
   width: 100%
   @include smooth
+
+#roster-text
+  position: absolute
+  text-align: center
+  top: 100px
+  width: 80%
+  padding: 10%
+  z-index: 500
+  color: #444
+  text-shadow: 0 2px 2px #ccc
+  pointer-events: none
 
 #contacts-frame
   position: relative
