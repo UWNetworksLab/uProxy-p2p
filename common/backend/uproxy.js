@@ -452,8 +452,8 @@ identity.on('onChange', function(data) {
 identity.on('onMessage', function (msgInfo) {
   log.debug("identity.on('onMessage'): msgInfo: ", msgInfo);
   // state._msgLog.push(msgInfo);
-  uiChannel.emit('state-change',
-      [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
+  // uiChannel.emit('state-change',
+      // [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
   msgInfo.messageText = msgInfo.message;
   delete msgInfo.message;
@@ -484,8 +484,8 @@ uiChannel.on('invite-friend', function (userId) {
 });
 
 uiChannel.on('echo', function (msg) {
-  state._msgLog.push(msg);
-  uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
+  // state._msgLog.push(msg);
+  // uiChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
 });
 
 uiChannel.on('change-option', function (data) {
