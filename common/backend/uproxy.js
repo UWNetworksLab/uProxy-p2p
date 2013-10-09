@@ -217,46 +217,6 @@ function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
 }
 
-// TODO: Generalise to a simple type system & checker for JS.
-function _validateStoredInstance(instanceId, instanceData) {
-  var ids = [ // identity network:
-              "name",
-              "url",
-              "userId",
-              "network",
-              // instance specific:
-              "instanceId",
-              "description",
-              "keyHash",
-              "trust"
-            ];
-  for (var i = 0; i < ids.length; ++i) {
-    var id = ids[i];
-    if (instanceData[id] === undefined) {
-      log.debug("_validateStoredInstance: Rejecting instanceId " + instanceId + " for missing key " + id);
-      return false;
-    }
-  }
-  // TODO: use Trust enum.
-  var testTrustValue = function(variable) {
-    if (instanceData.trust[variable] === undefined) {
-      return false;
-    }
-    var value = instanceData.trust[variable];
-    if (value != "yes" && value != "no" && value != "requested" && value != "offered") {
-      return false;
-    }
-    return true;
-  };
-
-  if (!testTrustValue('asProxy') || !testTrustValue('asClient')) {
-    log.debug("_validateStoredInstance: Rejecting instanceId " + instanceId + " for trust value " +
-        JSON.stringify(instanceData.trust));
-    return false;
-  }
-  return true;
-}
-
 
 function _loadStateFromStorage(state, callback) {
   var i, val, hex, id, key, instanceIds = [];
@@ -331,10 +291,14 @@ function _loadStateFromStorage(state, callback) {
     _loadFromStorage("instance/" + instanceId, function(instance) {
       if(instance === null) {
         console.error("instance " + instanceId + " not found");
-      } else if (!_validateStoredInstance(instanceId, instance)) {
-        console.error("instance " + instanceId + " was bad:", instance);
-        // TODO: remove bad instance ids?
-      } else {
+      }
+      // // see: scraps/validtate-instance.js, but use unit tests instead of
+      // // runtime code for type-checking.
+      // else if (!_validateStoredInstance(instanceId, instance)) {
+      // console.error("instance " + instanceId + " was bad:", instance);
+      // TODO: remove bad instance ids?
+      //}
+      else {
         console.log("instance " + instanceId + " loaded");
         instances[instanceId] = instance;
         // Add to the roster also
@@ -569,6 +533,17 @@ uiChannel.on('update-description', function (data) {
 });
 
 // --------------------------------------------------------------------------
+//  Data management
+// --------------------------------------------------------------------------
+
+function instanceOfUserId(userId) {
+  for (var i in state.instances) {
+    if (state.instances[i].userId == userId) return state.instances[i];
+  }
+  return null;
+};
+
+// --------------------------------------------------------------------------
 //  Proxying
 // --------------------------------------------------------------------------
 // TODO: should we lookup the instance ID for this client here?
@@ -730,6 +705,7 @@ function _updateUser(newData) {
     userOp = 'add';
   }
   var user = state.roster[userId];
+  var instance = instanceOfUserId(userId);
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
@@ -836,6 +812,9 @@ function _sendInstanceData(client) {
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
 // TODO: support instance being on multiple chat networks.
+// Note: does not assume that a roster entry exists for the user that send the
+// instance data. Sometimes we get an instance data message from user that is
+// not (yet) in the roster.
 function _receiveInstanceData(msg) {
   log.debug('_receiveInstanceData(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
@@ -867,6 +846,7 @@ function _receiveInstanceData(msg) {
     // If we've had relationships to this instance, send them our consent bits.
     _sendConsent(instance);
   }
+  _saveInstance(instanceId);
 
   // TODO: optimise to only save when different to what was in storage before.
   _saveToStorage(StateEntries.INSTANCEIDS,
