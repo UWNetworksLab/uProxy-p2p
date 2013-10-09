@@ -55,6 +55,7 @@ function IdentityProvider() {
   }
 };
 
+// Either login to |network|, or try each provider.
 IdentityProvider.prototype.login = function(opts, continuation) {
   if (opts.network && this.providers[opts.network]) {
     this.providers[opts.network].ref.login(opts);

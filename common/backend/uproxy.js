@@ -190,9 +190,6 @@ var DEFAULT_INSTANCE = {
   description: ''
 };
 
-//function onload() {
-
-
 // --------------------------------------------------------------------------
 //  Local Storage
 // --------------------------------------------------------------------------
@@ -347,23 +344,24 @@ function _loadStateFromStorage(state, callback) {
 }
 
 // Save the instance to local storage. Assumes that both the Instance
-// notification and XMPP user nad client information exists and is up-to-date.
+// notification and XMPP user and client information exist and are up-to-date.
 // |instanceId| - string instance identifier (a 40-char hex string)
 // |userId| - The userId such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
 function _saveInstance(instanceId, userId) {
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
   var instanceInfo = state.instances[instanceId];
-  var instance = { name: state.roster[userId].name,
-              description: instanceInfo.description,
-              annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
-              instanceId: instanceId,
-              userId: userId,
-              network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
-                                         'network', "xmpp"),
-              keyHash: instanceInfo.keyHash,
-              trust: instanceInfo.trust,
-            };
+  var instance = {
+      name: state.roster[userId].name,
+      description: instanceInfo.description,
+      annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
+      instanceId: instanceId,
+      userId: userId,
+      network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
+                                 'network', "xmpp"),
+      keyHash: instanceInfo.keyHash,
+      trust: instanceInfo.trust,
+  };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
   _saveToStorage("instance/" + instanceId, instance);
@@ -389,15 +387,6 @@ function _saveAllInstances() {
 // --------------------------------------------------------------------------
 //  General UI interaction
 // --------------------------------------------------------------------------
-
-// Try to login to chat networks.
-identity.login({
-  agent: 'uproxy',
-  version: '0.1',
-  url: 'https://github.com/UWNetworksLab/UProxy',
-  interactive: false
-  //network: ''
-});
 
 function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
@@ -492,15 +481,7 @@ identity.on('onMessage', function (msgInfo) {
   _handleMessage(msgInfo, false);  // beingSent = false
 });
 
-uiChannel.on('login', function(network) {
-  identity.login({
-    agent: 'uproxy',
-    version: '0.1',
-    url: 'https://github.com/UWNetworksLab/UProxy',
-    interactive: true,
-    network: network
-  });
-});
+uiChannel.on('login', function(network) { _Login(network); });
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
@@ -532,6 +513,8 @@ uiChannel.on('change-option', function (data) {
 // Updating our own UProxy instance's description.
 uiChannel.on('update-description', function (data) {
   state.me.description = data;  // UI side already up-to-date.
+  _fetchMyInstance(true);       // Reset local instance data.
+
   // TODO(uzimizu): save to storage
   var payload = JSON.stringify({
     type: 'update-description',
@@ -644,9 +627,9 @@ function _updateTrust(instanceId, action, received) {
 }
 
 var _msgReceivedHandlers = {
-  'notify-instance': _receiveInstanceData,
-  'notify-consent': _receiveConsent,
-  'update-description': _handleUpdateDescription
+  'notify-instance': receiveInstance,
+  'notify-consent': receiveConsent,
+  'update-description': handleUpdateDescription
 };
 
 // --------------------------------------------------------------------------
@@ -701,7 +684,7 @@ function _isMessageableUproxy(client) {
 //
 //  |newData| - Incoming JSON info for a single user.
 function _updateUser(newData) {
-  console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
+  // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = state.roster[userId];
@@ -748,8 +731,6 @@ function _updateUser(newData) {
   user.canUProxy = canUProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
-
-  // TODO(mollyling): Properly hangle logout: remove client.
   uiChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
@@ -776,7 +757,7 @@ function _checkUProxyClientSynchronization(client) {
     // indicate that
     // we know the client is pending its corresponding instance data.
     state.clientToInstance[clientId] = null;
-    _sendInstanceData(client);
+    sendInstance(client);
   }
   return true;
 }
@@ -789,15 +770,16 @@ function _checkUProxyClientSynchronization(client) {
 // the same unless something like |description| is explicitly updated. Consent
 // bits are sent individually, after initial instance notifications.
 var _myInstanceData = null;
-function _fetchMyInstance() {
-  if (!_myInstanceData) {
+function _fetchMyInstance(resetCache) {
+  resetCache = resetCache || false;
+  if (!_myInstanceData || resetCache) {
     _myInstanceData = JSON.stringify({
       type: 'notify-instance',
       instanceId: '' + state.me.instanceId,
       description: '' + state.me.description,
       keyHash: '' + state.me.keyHash
     });
-    log.debug('Caching local instance payload: ' + _myInstanceData);
+    // log.debug('Caching local instance payload: ' + _myInstanceData);
   }
   return _myInstanceData;
 }
@@ -805,7 +787,7 @@ function _fetchMyInstance() {
 // Send a notification about my instance data to a particular clientId.
 // Assumes |client| corresponds to a valid UProxy instance, but does not assume
 // that we've received the other side's Instance data yet.
-function _sendInstanceData(client) {
+function sendInstance(client) {
   if ('manual' == client.network) {
     return false;
   }
@@ -816,8 +798,8 @@ function _sendInstanceData(client) {
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
 // TODO: support instance being on multiple chat networks.
-function _receiveInstanceData(msg) {
-  log.debug('_receiveInstanceData(from: ' + msg.fromUserId + ')');
+function receiveInstance(msg) {
+  log.debug('receiveInstance(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId,
       description = msg.data.description,
       keyHash     = msg.data.keyHash,
@@ -833,7 +815,12 @@ function _receiveInstanceData(msg) {
   // Obsolete client will never have further communications.
   if (oldClientId && (oldClientId != clientId)) {
     log.debug('Deleting obsolete client ' + oldClientId);
-    delete state.roster[userId].clients[oldClientId];
+    var user = state.roster[userId];
+    if (user) {
+      delete user.clients[oldClientId];
+    } else {
+      log.debug('Warning: no user for ' + userId);
+    }
     delete state.clientToInstance[oldClientId];
   }
 
@@ -845,13 +832,14 @@ function _receiveInstanceData(msg) {
     state.instances[instanceId] = instance;
   } else {
     // If we've had relationships to this instance, send them our consent bits.
-    _sendConsent(instance);
+    sendConsent(instance);
   }
 
   // TODO: optimise to only save when different to what was in storage before.
   _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
       Object.keys(state[StateEntries.INSTANCES])));
 
+  _saveInstance(instanceId, userId);
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
@@ -878,7 +866,7 @@ function _prepareNewInstance(instanceId, userId, description, keyHash) {
 // Send consent bits to re-synchronize consent with remote |instance|.
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
-function _sendConsent(instance) {
+function sendConsent(instance) {
   var clientId = state.instanceToClient[instance.instanceId];
   if (!clientId) {
     log.error('Instance ' + instance.instanceId + ' missing clientId!');
@@ -894,8 +882,8 @@ function _sendConsent(instance) {
 }
 
 // Receive consent bits and re-synchronize the relation between instances.
-function _receiveConsent(msg) {
-  log.debug('_receiveConsent(from: ' + msg.fromUserId + ')');
+function receiveConsent(msg) {
+  log.debug('receiveConsent(from: ' + msg.fromUserId + ')');
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = state.instances[instanceId];
@@ -911,7 +899,7 @@ function _receiveConsent(msg) {
   instance.trust.asClient = consent.asClient?
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
-  _saveInstanceId(instanceId);
+  // _saveInstanceId(instanceId);
   _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
   return true;
 }
@@ -933,13 +921,18 @@ function _validateKeyHash(keyHash) {
 
 // Update the description for an instanceId.
 // Assumes that |instanceId| is valid.
-function _handleUpdateDescription(msg) {
+function handleUpdateDescription(msg) {
   log.debug('Updating description! ' + JSON.stringify(msg));
-  var instanceId = msg.data.instanceId,
-      description = msg.data.description;
-
-  state.instances[instanceId].description = description;
+  var description = msg.data.description,
+      instanceId = msg.data.instanceId,
+      instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Could not update description - no instance: ' + instanceId);
+    return false;
+  }
+  instance.description = description;
   _SyncUI('/instances/' + instanceId + '/description', description);
+  return true;
 }
 
 // --------------------------------------------------------------------------
@@ -954,7 +947,27 @@ function _SyncUI(path, value, op) {
   }]);
 }
 
+function _Login(network) {
+  network = network || undefined;
+  identity.login({
+    agent: 'uproxy',
+    version: '0.1',
+    url: 'https://github.com/UWNetworksLab/UProxy',
+    interactive: Boolean(network),
+    network: network
+  }, sendFullStateToUI);
+}
 
+_Login();
+
+// Try to login to chat networks.
+// identity.login({
+  // agent: 'uproxy',
+  // version: '0.1',
+  // url: 'https://github.com/UWNetworksLab/UProxy',
+  // interactive: false
+  // //network: ''
+// });
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -76,7 +76,9 @@ IdentityProvider.prototype.login = function(opts, continuation) {
         status: 'offline'
     };
     //Start XMPP client
-    this.client = new window.XMPP.Client(CONNECT_OPTS(clientId, this.credentials.token));
+    this.client = new window.XMPP.Client(
+        CONNECT_OPTS(clientId, this.credentials.token));
+
     //TODO(willscott): Support Upgrade to TLS wrapped connection.
     this.client.connection.allowTLS = false;
     //this.client.addListener('online', function(){this.client.send(new window.XMPP.Element('presence', {}));}.bind(this));
@@ -303,22 +305,25 @@ IdentityProvider.prototype.onRoster = function(stanza) {
     }
     if (photo && photo.getChildText('EXTVAL')) {
       this.setAttr(from , 'imageUrl', photo.getChildText('EXTVAL'));
-    } else if (photo && photo.getChildText('TYPE') && photo.getChildText('BINVAL')) {
-      var imageData = "data:"+photo.getChildText('TYPE')+";base64,"+photo.getChildText('BINVAL');
+    } else if (photo && photo.getChildText('TYPE') &&
+               photo.getChildText('BINVAL')) {
+      var imageData = 'data: ' +
+          photo.getChildText('TYPE') + ';base64,' +
+          photo.getChildText('BINVAL');
       var imageHash = this.getAttr(from, 'imageHash');
       vcard['imageData'] = imageData;
       vcard['imageHash'] = imageHash;
       console.log(this.getAttr(from, 'imageData'));
-
       this.setAttr(from, 'imageData', imageData);
     }
     storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
   }
-
 };
 
+// Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
-  console.log(stanza.attrs.from);
+  console.log(stanza)
+  // console.log(stanza.attrs.from);
   if(window.presence) {
     window.presence.push(stanza);
   } else {
@@ -360,7 +365,7 @@ IdentityProvider.prototype.getVCard = function(from, hash) {
     } else {
       var resultObj = JSON.parse(result);
       if (hash == 'unknown' || hash == resultObj['imageHash']) {
-        console.log("Cached VCard: " + result);
+        // console.log("Cached VCard: " + result);
         if (resultObj['name'] && this.getAttr(from, 'name') !== resultObj['name']) {
           this.setAttr(from, 'name', resultObj['name']);
         }
