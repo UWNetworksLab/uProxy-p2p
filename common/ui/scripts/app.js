@@ -193,9 +193,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           if (patch[0].path === '') {
             angular.copy(patch[0].value, model);
           } else {
-            // console.log(jsonpatch);
-            // console.log(patch);
-            jsonpatch.apply_patch(model, patch);
+            jsonpatch.apply(model, patch);
           }
         });
       }
@@ -210,18 +208,25 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           window.onunload = function() {
             $rootScope.onAppData.removeListener($rootScope.onStateChange);
           };
+          // TODO(uzimizu): Make this *not* resend all the things if not
+          // necessary...
           appChannel.emit('open-popup');
           //$rootScope.authGoog();
           $rootScope.connectedToApp = true;
         });
       }
+
       $rootScope.reconnect = function() {
         console.log('Disconnected. Attempting to reconnect to app...');
         $rootScope.$apply(function() {
           $rootScope.connectedToApp = false;
         });
         appChannel.onDisconnected.removeListener($rootScope.reconnect);
+        // TODO(uzimizu): Delay the app connection check.
         $rootScope.checkAppConnection();
+        // $timeout(
+          // function() { $rootScope.checkAppConnection();},
+          // 3000);
       }
 
       $rootScope.connectedToApp = false;
@@ -230,9 +235,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           return;  // Already connected.
         }
         // Check that the extension is connected.
-        if(appChannel.connected) {
+        if (appChannel.connected) {
           $rootScope.connectedToApp = true;
           $rootScope.startUI();
+
         } else {
           console.log('connecting.');
           appChannel.onConnected.addListener($rootScope.startUI);
