@@ -445,13 +445,13 @@ identity.on('onChange', function(data) {
     _SyncUI('/me/clients/' + data.userId, data, 'add');
     // TODO: Handle changes that might affect proxying
   } else {
-    _updateUser(data);  // Not myself.
+    updateUser(data);  // Not myself.
   }
 });
 
 identity.on('onMessage', function (msgInfo) {
   log.debug("identity.on('onMessage'): msgInfo: ", msgInfo);
-  state._msgLog.push(msgInfo);
+  // state._msgLog.push(msgInfo);
   uiChannel.emit('state-change',
       [{op: 'add', path: '/_msgLog/-', value: msgInfo}]);
   var jsonMessage = {};
@@ -681,7 +681,7 @@ function _isMessageableUproxy(client) {
 // not do a complete replace - does a merge of any provided key values.
 //
 //  |newData| - Incoming JSON info for a single user.
-function _updateUser(newData) {
+function updateUser(newData) {
   console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
