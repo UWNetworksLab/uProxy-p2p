@@ -139,11 +139,15 @@ var RESET_STATE = {
 
   // instances: {
   //   [instanceIdX]: {
+  //     // From Network/identity:
   //     name: string,
-  //     description: string,
-  //     annotation: string,
-  //     instanceId: string,
   //     userId: string,
+  //     network: string,
+  //     url: string,
+  //     // Instance specific
+  //     description: string,
+  //     // annotation: string, // TODO
+  //     instanceId: string,
   //     keyhash: string,
   //     trust: {
   //       asProxy: Trust
@@ -215,7 +219,17 @@ function _saveToStorage(key, val, callback) {
 
 // TODO: Generalise to a simple type system & checker for JS.
 function _validateStoredInstance(instanceId, instanceData) {
-  var ids = [ "name", "description", "annotation", "instanceId", "userId", "network", "keyHash", "trust" ];
+  var ids = [ // identity network:
+              "name",
+              "url",
+              "userId",
+              "network",
+              // instance specific:
+              "instanceId",
+              "description",
+              "keyHash",
+              "trust"
+            ];
   for (var i = 0; i < ids.length; ++i) {
     var id = ids[i];
     if (instanceData[id] === undefined) {
@@ -327,7 +341,8 @@ function _loadStateFromStorage(state, callback) {
         var user = state.roster[instance.userId] = {};
         user.userId = instance.userId;
         user.name = instance.name;
-        user.url = '';
+        user.network = instance.network,
+        user.url = instance.url;
         user.clients = {};
       }
       maybeCallbackAfterLoadingInstance();
@@ -350,21 +365,24 @@ function _loadStateFromStorage(state, callback) {
 // notification and XMPP user nad client information exists and is up-to-date.
 // |instanceId| - string instance identifier (a 40-char hex string)
 // |userId| - The userId such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
-function _saveInstance(instanceId, userId) {
+function _saveInstance(instanceId) {
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
   var instanceInfo = state.instances[instanceId];
   var instance = {
-    name: state.roster[userId].name,
-    description: instanceInfo.description,
-    annotation: getKeyWithDefault(instanceInfo, 'annotation',
-        instanceInfo.description),
+    // Instance stuff:
+    //annotation: getKeyWithDefault(instanceInfo, 'annotation',
+    //    instanceInfo.description),
     instanceId: instanceId,
-    userId: userId,
-    network: getKeyWithDefault(
-        state.roster[userId].clients[instanceInfo.clientId], 'network', "xmpp"),
     keyHash: instanceInfo.keyHash,
     trust: instanceInfo.trust,
+    // Overlay protocol used to get descriptions.
+    description: instanceInfo.description,
+    // Network stuff:
+    name: instanceInfo.name,
+    userId: instanceInfo.userId,
+    url: instanceInfo.url,
+    network: instanceInfo.network,
   };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
@@ -379,7 +397,7 @@ function _saveAllInstances() {
     for (var clientId in state.roster[userId]) {
       var rosterClient = state.roster[userId].clients[clientId];
       if (rosterClient.instanceId !== undefined && rosterClient.instanceId) {
-        _saveInstance(rosterClient.instanceId, userId);
+        _saveInstance(rosterClient.instanceId);
       }
     }
   }
@@ -919,7 +937,7 @@ function _receiveConsent(msg) {
   instance.trust.asClient = consent.asClient?
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
-  _saveInstance(instanceId, msg.fromUserId);
+  _saveInstance(instanceId);
   _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
   return true;
 }
