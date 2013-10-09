@@ -354,16 +354,18 @@ function _saveInstance(instanceId, userId) {
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
   var instanceInfo = state.instances[instanceId];
-  var instance = { name: state.roster[userId].name,
-              description: instanceInfo.description,
-              annotation: getKeyWithDefault(instanceInfo, 'annotation', instanceInfo.description),
-              instanceId: instanceId,
-              userId: userId,
-              network: getKeyWithDefault(state.roster[userId].clients[instanceInfo.clientId],
-                                         'network', "xmpp"),
-              keyHash: instanceInfo.keyHash,
-              trust: instanceInfo.trust,
-            };
+  var instance = {
+    name: state.roster[userId].name,
+    description: instanceInfo.description,
+    annotation: getKeyWithDefault(instanceInfo, 'annotation',
+        instanceInfo.description),
+    instanceId: instanceId,
+    userId: userId,
+    network: getKeyWithDefault(
+        state.roster[userId].clients[instanceInfo.clientId], 'network', "xmpp"),
+    keyHash: instanceInfo.keyHash,
+    trust: instanceInfo.trust,
+  };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
   _saveToStorage("instance/" + instanceId, instance);
@@ -894,7 +896,13 @@ function _sendConsent(instance) {
 }
 
 // Receive consent bits and re-synchronize the relation between instances.
+// Assumes that when we receive consent there is a roster entry.
+// But does not assume there is an instance entry for this user.
 function _receiveConsent(msg) {
+  if (! (msg.fromUserId in state.roster)) {
+    console.error("msg.fromUserId (" + msg.fromUserId +
+        ") is not in the roster");
+  }
   log.debug('_receiveConsent(from: ' + msg.fromUserId + ')');
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
@@ -911,7 +919,7 @@ function _receiveConsent(msg) {
   instance.trust.asClient = consent.asClient?
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
-  _saveInstanceId(instanceId);
+  _saveInstance(instanceId, msg.fromUserId);
   _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
   return true;
 }
