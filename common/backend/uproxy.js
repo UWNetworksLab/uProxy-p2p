@@ -382,8 +382,8 @@ function _saveAllInstances() {
     }
   }
   // Now save the entire instanceIds list.
-  _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
-      Object.keys(state[StateEntries.INSTANCES])));
+  _saveToStorage(StateEntries.INSTANCEIDS,
+      Object.keys(state[StateEntries.INSTANCES]));
 }
 
 // --------------------------------------------------------------------------
@@ -849,8 +849,8 @@ function _receiveInstanceData(msg) {
   }
 
   // TODO: optimise to only save when different to what was in storage before.
-  _saveToStorage(StateEntries.INSTANCEIDS, JSON.stringify(
-      Object.keys(state[StateEntries.INSTANCES])));
+  _saveToStorage(StateEntries.INSTANCEIDS,
+      Object.keys(state[StateEntries.INSTANCES]));
 
   uiChannel.emit('state-change', [{
       op: instanceOp,
