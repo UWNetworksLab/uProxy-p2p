@@ -98,8 +98,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.cancelRequest = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'cancel-request');
       }
-      $rootScope.acceptAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'accept-access');
+      $rootScope.acceptOffer = function(instance) {
+        $rootScope.instanceTrustChange(instance.instanceId, 'accept-offer');
+      };
+      $rootScope.declineOffer = function(instance) {
+        $rootScope.instanceTrustChange(instance.instanceId, 'decline-offer');
       };
       $rootScope.startAccess = function(instance) {
         // We don't need to tell them we'll start proxying, we can just try to

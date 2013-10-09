@@ -587,7 +587,8 @@ var TrustOp = {
   // Bob acts as the proxy.
   'request-access': Trust.REQUESTED,
   'cancel-request': Trust.NO,
-  'accept-access': Trust.YES
+  'accept-offer': Trust.YES,
+  'decline-offer': Trust.NO
 };
 
 // Update trust level for an instance.

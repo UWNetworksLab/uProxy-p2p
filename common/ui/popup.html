@@ -136,10 +136,14 @@
                     </button>
                     <span>Pending...</span>
                   </div>
-                  <button class="btn" ng-switch-when="offered"
-                      ng-click="acceptAccess(currentInstance)">
-                    Accept Access
-                  </button>
+                  <div ng-swicth-when="offered">
+                    <button class="btn" ng-click="acceptOffer(currentInstance)">
+                      Accept Access
+                    </button>
+                    <button class="btn" ng-click="declineOffer(currentInstance)">
+                      No Thanks
+                    </button>
+                  </div>
                   <button class="btn"
                       ng-switch-default
                       ng-click="requestAccess(currentInstance)">
