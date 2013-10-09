@@ -63,9 +63,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return null;
       };
 
-      /**
-       * Determine whether UProxy is connected to |network|.
-       */
+      // Determine whether UProxy is connected to |network|.
       $rootScope.isOnline = function(network) {
         window.tmp = model;
         return (model && model.identityStatus &&
