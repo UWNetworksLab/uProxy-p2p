@@ -45,6 +45,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // 'google',
         // 'facebook'
       // ];
+      $rootScope.onAppData = onFreedomStateChange;
 
       $rootScope.resetState = function () {
         localStorage.clear();
@@ -61,7 +62,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.instanceOfUserId = function(userId) {
         for (var i in model.instances) {
-          if (model.instances[i].userId == userId) return model.instances[i];
+          if (model.instances[i].rosterInfo.userId == userId)
+            return model.instances[i];
         }
         return null;
       };
@@ -191,11 +193,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           if (patch[0].path === '') {
             angular.copy(patch[0].value, model);
           } else {
-            jsonpatch.apply(model, patch);
+            // console.log(jsonpatch);
+            // console.log(patch);
+            jsonpatch.apply_patch(model, patch);
           }
-          //  patch = new jsonpatch.JSONPatch(patch, true);  // mutate = true
-          //  patch.apply(model);
-          // }
         });
       }
 
@@ -205,9 +206,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // call these in the Angular scope so that window is defined.
         $rootScope.$apply(function() {
           appChannel.onConnected.removeListener($rootScope.startUI);
-          onFreedomStateChange.addListener($rootScope.onStateChange);
+          $rootScope.onAppData.addListener($rootScope.onStateChange);
           window.onunload = function() {
-            onFreedomStateChange.removeListener($rootScope.onStateChange);
+            $rootScope.onAppData.removeListener($rootScope.onStateChange);
           };
           appChannel.emit('open-popup');
           //$rootScope.authGoog();
@@ -228,7 +229,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         if ($rootScope.connectedToApp) {
           return;  // Already connected.
         }
-        console.log('checking app connection.');
         // Check that the extension is connected.
         if(appChannel.connected) {
           $rootScope.connectedToApp = true;
@@ -238,6 +238,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           appChannel.onConnected.addListener($rootScope.startUI);
           appChannel.connect();
         }
+        // Automatically attempt to reconnect when disconnected.
         appChannel.onDisconnected.addListener($rootScope.reconnect);
       }
 

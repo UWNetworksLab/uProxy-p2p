@@ -95,11 +95,14 @@
 
         <section id="roster">
           <div id="roster-text">
-            <span ng-show="loggedIn() && isEmpty(model.roster)">
-              Loading Roster...
-            </span>
             <span ng-show="loggedOut()">
               You aren't logged in to any network.
+            </span>
+            <span ng-hide="loggedOut()">
+              {{ model.roster.length }}
+              <span ng-show=" isEmpty(model.roster)">
+                Loading Roster...
+              </span>
             </span>
           </div>
 
@@ -122,8 +125,11 @@
 
           <div id="contact-details" ng-show="rosterNudge">
             <div class="network-details">
+              {{ currentContact.userId }}
               <br>Network: {{ currentContact.network }}
-              <br>UserId: {{ currentContact.userId }}
+              <br><a href="{{ currentContact.url }}" target="_blank">
+                Contact
+              </a>
             </div>
             <div class="instance-details" ng-show="currentInstance">
               <h5>Instance</h5>
@@ -142,7 +148,7 @@
                     </button>
                     <span>Pending...</span>
                   </div>
-                  <div ng-swicth-when="offered">
+                  <div ng-switch-when="offered">
                     <button class="btn" ng-click="acceptOffer(currentInstance)">
                       Accept Access
                     </button>

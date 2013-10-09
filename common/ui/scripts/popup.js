@@ -41,6 +41,18 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     $scope.splashPage = !$scope.loggedIn();
 
+    // On the contacts details page, dynamically update |currentInstance| to
+    // reflect user actions.
+    $scope.updateCurrentInstance = function() {
+      if (!$scope.currentInstance) {
+        return;
+      }
+      $scope.$apply(function() {
+        $scope.currentInstance = $scope.model.instances[$scope.currentInstance.instanceId];
+      });
+    }
+    $scope.onAppData.addListener($scope.updateCurrentInstance);
+
     // TODO: fix using watchs on the contact of interest. Currently updates are
     // not correctly propegated.
     //
@@ -48,8 +60,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.toggleContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
-      console.log(c);
-      console.log($scope.model);
+      // Watch the instance on the model to keep the UI up to date.
+      // $scope.$watch('instances', function(v) {
+        // $scope.$apply(function() {
+          // $scope.currentInstance = $scope.instanceOfUserId(c.userId);
+        // });
+      // });
       $scope.rosterNudge = true;
     };
 

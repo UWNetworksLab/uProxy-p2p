@@ -279,7 +279,7 @@ ul {
 #contacts-frame {
   position: relative;
   min-height: 520px;
-  white-space: no-wrap;
+  white-space: nowrap;
   overflow-y: auto;
   overflow-x: hidden;
   border-top: 1px solid #eeeeee;
@@ -310,7 +310,7 @@ ul {
   min-height: 16px;
   cursor: default;
   padding: 6px 37px;
-  white-space: no-wrap;
+  white-space: nowrap;
   overflow: hidden;
   border: 1px solid transparent;
   border-left: none;
@@ -368,7 +368,7 @@ img.c-icon:hover {
 #contact-details {
   display: inline-block;
   position: fixed;
-  width: 400px;
+  width: 100%;
   top: 40px;
   left: 0;
   -webkit-transition: all 0.23s !important;
@@ -385,11 +385,9 @@ img.c-icon:hover {
   position: relative;
   display: block;
   padding: 8px;
-  margin: 2px;
-  height: 53px;
-  width: 82%;
+  margin: 8px;
   border: 1px solid #eeeeee;
-  font-size: 8px;
+  font-size: 12px;
   font-family: monospace;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -425,11 +423,9 @@ img.c-icon:hover {
   position: relative;
   display: block;
   padding: 8px;
-  margin: 2px;
-  height: 53px;
+  margin: 16px;
   width: 82%;
   border: 1px solid #eeeeee;
-  font-size: 8px;
   font-family: monospace;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
