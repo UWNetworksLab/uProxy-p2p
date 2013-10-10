@@ -132,7 +132,11 @@ ul
   pointer-events: none
   opacity: 0
 
-// ---------------------------- Login Splash -----------------------------------
+#not-connected
+  text-align: center
+  padding: 16px
+
+//---------------------------- Login Splash -----------------------------------
 #login-splash
   position: absolute
   text-align: center
@@ -349,20 +353,50 @@ img.c-icon
 img.c-icon:hover
   opacity: 0.5
 
-
 #contact-details
   display: inline-block
   position: fixed
   width: 100%
   top: 40px
   left: 0
-  // color: #aaa
   @include smooth
 
 #contact-details.ng-hide
   display: inline-block !important
   opacity: 0
   left: 400px
+
+.contact-status
+  padding: 32px
+  text-align: center
+  text-shadow: 0px 1px 1px #ccc
+
+.chat-btn
+  display: inline-block
+  background: transparent url('../icons/chat.png') no-repeat center center
+  background-size: contain
+  border: 1px none #000
+  outline: none
+  padding: 4px
+  width: 50px
+  height: 50px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  #include smooth
+.chat-btn:active, .chat-btn:focus
+  opacity: 0.9
+.chat-btn:hover
+  opacity: 0.3
+
+.instance-actions
+  text-align: center
+
+.instance-actions .btn
+  padding: 8px 16px
+  font-size: $fontSize * 1.2
+  text-shadow: 0 2px #888
+  border-radius: 8px
 
 .client-details
   position: relative
@@ -396,26 +430,13 @@ img.c-icon:hover
   top: -2px
   box-shadow: 0 2px 6px 1px #ddd
 
-.network-details
-  position: relative
-  display: block
-  padding: 8px
-  margin: 16px
-  width: 82%
-  border: 1px solid #eee
-  font-family: monospace
-  @include smooth
-.network-details:hover
-  border-color: #ddd
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
-
 .box-for-proxy
-  display: inline-block
 
 .box-for-client
-  display: inline-block
 
+.instance-id
+  font-size: $fontSize * 0.6
+  font-family: monospace
 
 #status
   position: fixed

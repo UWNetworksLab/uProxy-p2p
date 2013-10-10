@@ -21,7 +21,7 @@
   </head>
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
-    <section ng-hide="connectedToApp">
+    <section ng-hide="connectedToApp" id="not-connected" class="description">
       Not connected to
       <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
       UProxy app</a>. Please ensure it is
@@ -124,18 +124,29 @@
           </section>
 
           <div id="contact-details" ng-show="rosterNudge">
-            <div class="network-details">
+            <div class="contact-status">
               {{ currentContact.userId }}
               <br>Network: {{ currentContact.network }}
-              <br><a href="{{ currentContact.url }}" target="_blank">
-                Contact
-              </a>
-            </div>
-            <div class="instance-details" ng-show="currentInstance">
-              <h5>Instance</h5>
-              <br>Instance Id: {{ currentInstance.instanceId }}
+              <div ng-hide="currentInstance">
+                {{ currentContact.name }} is not connected to UProxy.
+                <p>
+                Ask them to Install UProxy!
+                </p>
+              </div>
               <br>
+              <a class="chat-btn" href="{{ currentContact.url }}" target="_blank"></a>
+            </div>
+
+            <div ng-show="currentInstance">
               <div class="instance-actions">
+                <img src="icons/uproxy-128.png"
+                    ng-mouseenter="instanceHovered=true"
+                    ng-mouseout="instanceHovered=false">
+                <br>
+                <div class="instance-id" ng-show="instanceHovered">
+                  {{currentInstance.instanceId}}
+                </div>
+
                 <div class="box-for-proxy"
                     ng-switch="currentInstance.trust.asProxy">
                   <button class="btn" ng-switch-when="yes"
@@ -182,15 +193,18 @@
                     Revoke Access
                   </button>
                 </div>
+
               </div>
             </div>
 
+            <!--
             <h5>Clients</h5>
             <div class="client-details" ng-repeat="client in currentContact.clients">
               {{ client.clientId }}
               <br>Network: {{ client.network }}
               <br>Status: {{ client.status }}
             </div>
+            -->
 
           </div>
         </section>

@@ -123,6 +123,10 @@ ul {
   pointer-events: none;
   opacity: 0; }
 
+#not-connected {
+  text-align: center;
+  padding: 16px; }
+
 #login-splash {
   position: absolute;
   text-align: center;
@@ -381,6 +385,39 @@ img.c-icon:hover {
   opacity: 0;
   left: 400px; }
 
+.contact-status {
+  padding: 32px;
+  text-align: center;
+  text-shadow: 0px 1px 1px #cccccc; }
+
+.chat-btn {
+  display: inline-block;
+  background: transparent url("../icons/chat.png") no-repeat center center;
+  background-size: contain;
+  border: 1px none black;
+  outline: none;
+  padding: 4px;
+  width: 50px;
+  height: 50px;
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: pointer; }
+
+.chat-btn:active, .chat-btn:focus {
+  opacity: 0.9; }
+
+.chat-btn:hover {
+  opacity: 0.3; }
+
+.instance-actions {
+  text-align: center; }
+
+.instance-actions .btn {
+  padding: 8px 16px;
+  font-size: 19.2px;
+  text-shadow: 0 2px #888888;
+  border-radius: 8px; }
+
 .client-details {
   position: relative;
   display: block;
@@ -419,29 +456,9 @@ img.c-icon:hover {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd; }
 
-.network-details {
-  position: relative;
-  display: block;
-  padding: 8px;
-  margin: 16px;
-  width: 82%;
-  border: 1px solid #eeeeee;
-  font-family: monospace;
-  -webkit-transition: all 0.23s !important;
-  -moz-transition: all 0.23s !important;
-  -o-transition: all 0.23s !important;
-  transition: all 0.23s !important; }
-
-.network-details:hover {
-  border-color: #dddddd;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
-
-.box-for-proxy {
-  display: inline-block; }
-
-.box-for-client {
-  display: inline-block; }
+.instance-id {
+  font-size: 9.6px;
+  font-family: monospace; }
 
 #status {
   position: fixed;
