@@ -38,11 +38,15 @@ ul {
   background-color: #bbbbbb; }
 
 .btn {
-  border: 1px solid #aaaaaa;
+  border: 1px solid #cccccc;
   color: #333333;
   background: white;
   border-radius: 2px;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 .btn:hover, .btn:focus {
   border-color: #999999;
