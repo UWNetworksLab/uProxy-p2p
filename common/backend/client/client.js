@@ -22,6 +22,14 @@ var onload = function() {
   // channel id.
   var _conns = {};
 
+    var printSelf = function () {
+        return JSON.stringify({ _socksServer: _socksServer,
+                                _sctpPc: _sctpPc,
+                                _peerId: _peerId,
+                                _signallingChannel: _signallingChannel,
+                                _conns: _conns});
+    }
+
   // Stop running as a _socksServer. Close all connections both to data
   // channels and tcp.
   var shutdown = function() {
@@ -80,7 +88,7 @@ var onload = function() {
   };
 
   freedom.on('start', function(options) {
-    console.log('Cleint: on(start)...');
+    console.log('Client: on(start)...');
     shutdown();
     _socksServer = new window.SocksServer(options.host, options.port, onConnection);
     _socksServer.tcpServer.listen();
@@ -135,8 +143,9 @@ var onload = function() {
   // handled by freedom, to the signalling channel input of the peer connection.
   // msg : {peerId : string, data : json-string}
   freedom.on('handleSignalFromPeer', function(msg) {
+      console.log("client handleSignalFromPeer: " + JSON.stringify(msg) +
+                  ' with state ' + printSelf());
     if (_signallingChannel) {
-      console.log("client handleSignalFromPeer: ", msg);
       _signallingChannel.emit('message', msg.data);
     } else {
       console.log("Couldn't route incoming signaling message");

@@ -220,7 +220,6 @@ function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
 }
 
-
 function _loadStateFromStorage(state, callback) {
   var i, val, hex, id, key, instanceIds = [];
 
@@ -533,19 +532,24 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 // TODO: should we lookup the instance ID for this client here?
 // TODO: say not if we havn't given them permission :)
-uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
-  startUsingPeerAsProxyServer(peerClientId);
+uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
+    startUsingPeerAsProxyServer(state.instanceToClient[peerInstanceId]);
 });
 
 client.on('sendSignalToPeer', function(data) {
-  console.log('client(sendSignalToPeer):', data);
+    console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
+                ', sending to ' + data.peerId);
   // TODO: don't use 'message' as a field in a message! that's confusing!
-  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
+  identity.sendMessage(
+      data.peerId,
+      JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
-  console.log('server(sendSignalToPeer):', data);
-  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
+  console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
+                ', sending to ' + data.peerId);
+  identity.sendMessage(data.peerId, JSON.stringify(
+      {type: 'peerconnection-server', data: data.msg}));
 });
 
 function startUsingPeerAsProxyServer(peerClientId) {
@@ -570,6 +574,18 @@ function stopUsingPeerAsProxyServer(peerClientId) {
   uiChannel.emit('state-change',
       [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
+}
+
+// peerconnection-client
+function handleClientSignalToPeer(msg) {
+    console.log('handleClientSignalToPeer: ' + JSON.stringify(msg));
+    server.emit('handleSignalFromPeer', msg);
+}
+
+// peerconnection-server
+function handleServerSignalToPeer(msg) {
+    console.log('handleServerSignalToPeer: ' + JSON.stringify(msg));
+    client.emit('handleServerSignalToPeer', msg);
 }
 
 // --------------------------------------------------------------------------
@@ -626,9 +642,11 @@ function _updateTrust(instanceId, action, received) {
 }
 
 var _msgReceivedHandlers = {
-  'notify-instance': receiveInstance,
-  'notify-consent': receiveConsent,
-  'update-description': handleUpdateDescription
+    'notify-instance': receiveInstance,
+    'notify-consent': receiveConsent,
+    'update-description': handleUpdateDescription,
+    'peerconnection-server' : handleServerSignalToPeer,
+    'peerconnection-client' : handleClientSignalToPeer
 };
 
 // --------------------------------------------------------------------------
@@ -778,7 +796,7 @@ var _myInstanceData = null;
 function _fetchMyInstance(resetCache) {
   resetCache = resetCache || false;
   if (!_myInstanceData || resetCache) {
-    var me = state.me.identities[_getMyId()];
+      var me = state.me; // state.me.identities[_getMyId()];
     _myInstanceData = JSON.stringify({
       type: 'notify-instance',
       instanceId: '' + state.me.instanceId,
@@ -908,7 +926,8 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  log.debug('receiveConsent(from: ' + msg.fromUserId + ')');
+  log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
+            JSON.stringify(msg));
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = state.instances[instanceId];
