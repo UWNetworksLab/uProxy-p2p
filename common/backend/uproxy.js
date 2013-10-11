@@ -219,10 +219,10 @@ var DEFAULT_INSTANCE = {
 // If one is running UProxy for the first time, or without any available
 // instance data, generate an instance for oneself.
 function _generateMyInstance() {
-  var me = {};
-  me.instanceId = '';
-  me.description = null;
-  me.keyHash = '';
+  var i, val, hex, id, key, instanceIds = [];
+
+  var me = cloneDeep(RESET_STATE.me);
+
   // Create an instanceId if we don't have one yet.
   // Just generate 20 random 8-bit numbers, print them out in hex.
   // TODO: check use of randomness: why not one big random number that is
@@ -252,6 +252,7 @@ function _generateMyInstance() {
       }
     }
   }
+
   return me;
 }
 
@@ -276,9 +277,8 @@ function _saveToStorage(key, val, callback) {
 }
 
 function _loadStateFromStorage(state, callback) {
-  var i, val, hex, id, key, instanceIds = [];
-
   var finalCallbacker = new FinalCallback(callback);
+  var i, key;
 
   // Set the saves |me| state and |options|.  Note that in both of
   // these callbacks |key| will be a different value by the time they
@@ -589,7 +589,7 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 // TODO: say not if we havn't given them permission :)
 uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
-  startUsingPeerAsProxyServer(state.instanceToClient[peerInstanceId]);
+  startUsingPeerAsProxyServer(peerInstanceId);
 });
 
 uiChannel.on('stop-proxying', function(peerInstanceId) {
@@ -598,18 +598,21 @@ uiChannel.on('stop-proxying', function(peerInstanceId) {
 
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId);
+                ', sending to ' + data.peerId + ", which should map to " +
+                    state.instanceToClient[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
+  // data.peerId is an instance ID.  convert.
   identity.sendMessage(
-      data.peerId,
+      state.instanceToClient[data.peerId],
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to ' + data.peerId);
-  identity.sendMessage(data.peerId, JSON.stringify(
-      {type: 'peerconnection-server', data: data.data}));
+  identity.sendMessage(
+      state.instanceToClient[data.peerId],
+      JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
 function startUsingPeerAsProxyServer(peerInstanceId) {
@@ -634,7 +637,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': peerClientId});
+               'peerId': peerInstanceId});
 }
 
 function stopUsingPeerAsProxyServer(peerInstanceId) {
@@ -873,6 +876,7 @@ function _getMyId() {
     return id;
   }
 }
+
 var _myInstanceData = null;
 function _fetchMyInstance(resetCache) {
   resetCache = resetCache || false;

@@ -11,10 +11,9 @@ var NetClient = window.NetClient;
 
 
 var onload = function() {
-  var _active = false;
+  var _active = true;  // this variable can only make things worse.
   var _peers = {};
 
-  //
   var resetServer = function() {
     for (var contact in _peers) {
       closePeer(contact);
@@ -111,9 +110,11 @@ var onload = function() {
         });
       });
     });
+    console.log('_initPeer(' + peerId + ') complete.');
   };
 
   freedom.on('start', function() {
+    console.log("Starting server.");
     resetServer();
     _active = true;
   });
