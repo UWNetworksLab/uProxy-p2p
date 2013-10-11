@@ -33,10 +33,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$http',
     '$rootScope',
     'freedom',               // Via dependencyInjector - talks to backend.
-    'onFreedomStateChange',  // Via dependencyInjector.
-    'model',                 // Via dependencyInjector.
+    'onFreedomStateChange',
+    'icon',
+    'model',
     function($filter, $http, $rootScope,
-             appChannel, onFreedomStateChange, model) {
+             appChannel, onFreedomStateChange,
+             icon, model) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -125,6 +127,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // start. The SDP request will go through chat/identity network on its
         // own.
         appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId)
+        // setIcon('icons/search.png');
+        icon.set('../common/ui/icons/uproxy-19-p.png');
       };
       $rootScope.stopAccess = function(instance) {
         appChannel.emit('stop-proxying', instance.instanceId);
