@@ -38,11 +38,15 @@ ul {
   background-color: #bbbbbb; }
 
 .btn {
-  border: 1px solid #aaaaaa;
+  border: 1px solid #cccccc;
   color: #333333;
   background: white;
   border-radius: 2px;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 .btn:hover, .btn:focus {
   border-color: #999999;
@@ -82,7 +86,7 @@ ul {
 
 #options-btn {
   position: absolute;
-  top: 4px;
+  bottom: 4px;
   right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
@@ -92,7 +96,11 @@ ul {
   height: 20px;
   text-decoration: none;
   opacity: 0.6;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 #options-btn:active, #options-btn:focus {
   opacity: 0.9; }
@@ -101,18 +109,17 @@ ul {
   opacity: 0.3; }
 
 .tip {
-  position: absolute;
+  display: inline-block;
   margin: 0;
   padding: 6px 8px;
-  right: 10px;
-  width: 300px;
+  max-width: 270px;
   background-color: #fcfcfc;
   font-size: 14.4px;
   color: #444444;
   border: 1px solid #eeeeee;
   text-align: left;
   cursor: default;
-  opacity: 1;
+  opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -122,6 +129,16 @@ ul {
   display: block !important;
   pointer-events: none;
   opacity: 0; }
+
+.tool {
+  position: absolute;
+  display: block;
+  width: 100%;
+  text-align: center; }
+
+#not-connected {
+  text-align: center;
+  padding: 16px; }
 
 #login-splash {
   position: absolute;
@@ -258,7 +275,7 @@ ul {
 
 #roster {
   position: absolute;
-  top: 64px;
+  top: 62px;
   width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -381,6 +398,55 @@ img.c-icon:hover {
   opacity: 0;
   left: 400px; }
 
+.contact-status {
+  text-align: center;
+  text-shadow: 0px 1px 1px #cccccc;
+  padding: 8px; }
+
+.contact-name {
+  text-align: center; }
+
+#contact-details img.contact-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 8px;
+  border-color: #dddddd;
+  background-size: contain;
+  box-shadow: 2px 3px 5px 1px #cccccc; }
+
+.chat-btn {
+  display: inline-block;
+  background: transparent url("../icons/chat.png") no-repeat center center;
+  background-size: contain;
+  border: 1px none black;
+  outline: none;
+  padding: 4px;
+  width: 40px;
+  height: 40px;
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+.chat-btn:active, .chat-btn:focus {
+  opacity: 0.7; }
+
+.chat-btn:hover {
+  opacity: 0.3; }
+
+.instance-actions {
+  text-align: center; }
+
+.instance-actions .btn {
+  padding: 8px 16px;
+  margin-top: 16px;
+  text-shadow: 0 2px #888888;
+  border-radius: 3px; }
+
 .client-details {
   position: relative;
   display: block;
@@ -419,29 +485,9 @@ img.c-icon:hover {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd; }
 
-.network-details {
-  position: relative;
-  display: block;
-  padding: 8px;
-  margin: 16px;
-  width: 82%;
-  border: 1px solid #eeeeee;
-  font-family: monospace;
-  -webkit-transition: all 0.23s !important;
-  -moz-transition: all 0.23s !important;
-  -o-transition: all 0.23s !important;
-  transition: all 0.23s !important; }
-
-.network-details:hover {
-  border-color: #dddddd;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
-
-.box-for-proxy {
-  display: inline-block; }
-
-.box-for-client {
-  display: inline-block; }
+.instance-id {
+  font-size: 9.6px;
+  font-family: monospace; }
 
 #status {
   position: fixed;

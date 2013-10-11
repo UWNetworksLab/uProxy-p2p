@@ -47,11 +47,12 @@ ul
   background-color: #bbb
 
 .btn
-  border: 1px solid #aaa
+  border: 1px solid #ccc
   color: #333
   background: #fff
   border-radius: 2px
   cursor: pointer
+  @include smooth
 .btn:hover, .btn:focus
   border-color: #999
   box-shadow: 0 1px 3px #aaa
@@ -92,7 +93,7 @@ ul
 
 #options-btn
   position: absolute
-  top: 4px
+  bottom: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
@@ -103,7 +104,7 @@ ul
   text-decoration: none
   opacity: 0.6
   cursor: pointer
-  #include smooth
+  @include smooth
 #options-btn:active, #options-btn:focus
   opacity: 0.9
 #options-btn:hover
@@ -113,18 +114,17 @@ ul
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
 .tip
-  position: absolute
+  display: inline-block
   margin: 0
   padding: 6px 8px
-  right: 10px
-  width: 300px
+  max-width: 270px
   background-color: #fcfcfc
   font-size: $fontSize * 0.9
   color: #444
   border: 1px solid #eee
   text-align: left
   cursor: default
-  opacity: 1
+  opacity: 0.9
   @include smooth
 
 .tip.ng-hide
@@ -132,7 +132,18 @@ ul
   pointer-events: none
   opacity: 0
 
-// ---------------------------- Login Splash -----------------------------------
+// For centering the tooltip.
+.tool
+  position: absolute
+  display: block
+  width: 100%
+  text-align: center
+
+#not-connected
+  text-align: center
+  padding: 16px
+
+//---------------------------- Login Splash -----------------------------------
 #login-splash
   position: absolute
   text-align: center
@@ -253,7 +264,7 @@ ul
 // --------------------------- Roster & Contacts -------------------------------
 #roster
   position: absolute
-  top: 64px
+  top: 62px
   width: 100%
   @include smooth
 
@@ -349,20 +360,62 @@ img.c-icon
 img.c-icon:hover
   opacity: 0.5
 
-
 #contact-details
   display: inline-block
   position: fixed
   width: 100%
   top: 40px
   left: 0
-  // color: #aaa
   @include smooth
 
 #contact-details.ng-hide
   display: inline-block !important
   opacity: 0
   left: 400px
+
+.contact-status
+  text-align: center
+  text-shadow: 0px 1px 1px #ccc
+  padding: 8px
+
+.contact-name
+  text-align: center
+
+#contact-details img.contact-image
+  position: relative
+  width: 100px
+  height: 100px
+  margin: 8px
+  border-color: #ddd
+  background-size: contain
+  box-shadow: 2px 3px 5px 1px #ccc
+
+.chat-btn
+  display: inline-block
+  background: transparent url('../icons/chat.png') no-repeat center center
+  background-size: contain
+  border: 1px none #000
+  outline: none
+  padding: 4px
+  width: 40px
+  height: 40px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  @include smooth
+.chat-btn:active, .chat-btn:focus
+  opacity: 0.7
+.chat-btn:hover
+  opacity: 0.3
+
+.instance-actions
+  text-align: center
+
+.instance-actions .btn
+  padding: 8px 16px
+  margin-top: 16px
+  text-shadow: 0 2px #888
+  border-radius: 3px
 
 .client-details
   position: relative
@@ -396,26 +449,13 @@ img.c-icon:hover
   top: -2px
   box-shadow: 0 2px 6px 1px #ddd
 
-.network-details
-  position: relative
-  display: block
-  padding: 8px
-  margin: 16px
-  width: 82%
-  border: 1px solid #eee
-  font-family: monospace
-  @include smooth
-.network-details:hover
-  border-color: #ddd
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
-
 .box-for-proxy
-  display: inline-block
 
 .box-for-client
-  display: inline-block
 
+.instance-id
+  font-size: $fontSize * 0.6
+  font-family: monospace
 
 #status
   position: fixed

@@ -64,6 +64,17 @@ var Trust = {
   YES: 'yes'
 };
 
+var ProxyState = {
+  OFF: 'off',
+  READY: 'ready',
+  RUNNING: 'running'
+}
+
+var VALID_NETWORKS = {
+  GOOGLE: 'google',
+  FACEBOOK: 'facebook',
+};
+
 //var TrustType = {
 //  PROXY: 'asProxy',
 //  CLIENT: 'asClient'
@@ -183,6 +194,11 @@ var RESET_STATE = {
 };
 var state = cloneDeep(RESET_STATE);
 
+var DEFAULT_PROXY_STATUS = {
+    proxy: ProxyState.OFF,
+    client: ProxyState.OFF
+};
+
 // Instance object.
 var DEFAULT_INSTANCE = {
   instanceId: null,  // Primary key.
@@ -191,6 +207,7 @@ var DEFAULT_INSTANCE = {
     asProxy: Trust.NO,
     asClient: Trust.NO
   },
+  status: DEFAULT_PROXY_STATUS,
   description: '',
   rosterInfo: {  // Ifo corresponding to its roster entry
     userId: '',
@@ -199,6 +216,45 @@ var DEFAULT_INSTANCE = {
     url: ''
   }
 };
+
+// If one is running UProxy for the first time, or without any available
+// instance data, generate an instance for oneself.
+function _generateMyInstance() {
+  var me = {};
+  me.instanceId = '';
+  me.description = null;
+  me.keyHash = '';
+  // Create an instanceId if we don't have one yet.
+  // Just generate 20 random 8-bit numbers, print them out in hex.
+  // TODO: check use of randomness: why not one big random number that is
+  // serialised?
+  for (i = 0; i < 20; i++) {
+    // 20 bytes for the instance ID.  This we can keep.
+    val = Math.floor(Math.random() * 256);
+    hex = val.toString(16);
+    me.instanceId = me.instanceId +
+        ('00'.substr(0, 2 - hex.length) + hex);
+
+    // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
+    val = Math.floor(Math.random() * 256);
+    hex = val.toString(16);
+
+    me.keyHash = ((i > 0)? (me.keyHash + ':') : '')  +
+        ('00'.substr(0, 2 - hex.length) + hex);
+
+    // TODO: separate this out and use full space of possible names by
+    // using the whole of the .
+    if (i < 4) {
+      id = (i & 1) ? nouns[val] : adjectives[val];
+      if (me.description !== null) {
+        me.description = me.description + " " + id;
+      } else {
+        me.description = id;
+      }
+    }
+  }
+  return me;
+}
 
 // --------------------------------------------------------------------------
 //  Local Storage
@@ -232,38 +288,7 @@ function _loadStateFromStorage(state, callback) {
   var maybeCallbackAfterLoadingMe = finalCallbacker.makeCountedCallback();
   _loadFromStorage(key, function(v) {
     if (v === null) {
-      // Create an instanceId if we don't have one yet.
-      state.me.instanceId = '';
-      state.me.description = null;
-      state.me.keyHash = '';
-      // Just generate 20 random 8-bit numbers, print them out in hex.
-      // TODO: check use of randomness: why not one big random number that is
-      // serialised?
-      for (i = 0; i < 20; i++) {
-        // 20 bytes for the instance ID.  This we can keep.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-        state.me.instanceId = state.me.instanceId +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-
-        state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // TODO: separate this out and use full space of possible names by
-        // using the whole of the .
-        if (i < 4) {
-          id = (i & 1) ? nouns[val] : adjectives[val];
-          if (state.me.description !== null) {
-            state.me.description = state.me.description + " " + id;
-          } else {
-            state.me.description = id;
-          }
-        }
-      }
+      state.me = _generateMyInstance();
       _saveToStorage("me", state.me);
       log.debug("****** Saving new self-definition *****");
       log.debug("  state.me = " + JSON.stringify(state.me));
@@ -292,7 +317,7 @@ function _loadStateFromStorage(state, callback) {
         finalCallbacker.makeCountedCallback();
     _loadFromStorage("instance/" + instanceId, function(instance) {
       if (null === instance) {
-        console.error("instance " + instanceId + " not found");
+        console.error("Load error: instance " + instanceId + " not found");
       }
       // // see: scraps/validtate-instance.js, but use unit tests instead of
       // // runtime code for type-checking.
@@ -302,8 +327,9 @@ function _loadStateFromStorage(state, callback) {
       //}
       else {
         console.log("instance " + instanceId + " loaded");
+        instance.status = DEFAULT_PROXY_STATUS;
         instances[instanceId] = instance;
-        // Add to the roster.
+        // Extrapolate the user & add to the roster.
         var user = state.roster[instance.rosterInfo.userId] = {};
         user.userId = instance.rosterInfo.userId;
         user.name = instance.rosterInfo.name;
@@ -344,12 +370,7 @@ function _saveInstance(instanceId) {
     trust: instanceInfo.trust,
     // Overlay protocol used to get descriptions.
     description: instanceInfo.description,
-    rosterInfo: instanceInfo.rosterInfo
-    // Network stuff:
-    // name: instanceInfo.name,
-    // userId: instanceInfo.userId,
-    // url: instanceInfo.url,
-    // network: instanceInfo.network,
+    rosterInfo: instanceInfo.rosterInfo  // Network stuff:
   };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
@@ -371,6 +392,27 @@ function _saveAllInstances() {
   // Now save the entire instanceIds list.
   _saveToStorage(StateEntries.INSTANCEIDS,
       Object.keys(state[StateEntries.INSTANCES]));
+}
+
+// Remember whether uproxy is currently logged on to |network|.
+function _saveNetworkState(network, state) {
+  log.debug('Saving network state for: ' + network + ' : ' + state);
+  _saveToStorage('online/' + network, state);
+}
+
+// Load the status for |network|, and reconnect to it if |reconnect| is true.
+function _loadNetworkState(network, reconnect) {
+  log.debug('Loading network state for: ' + network);
+  _loadFromStorage('online/' + network, function (wasOnline) {
+    if (reconnect && wasOnline) {
+      log.debug('Was previously logged on to ' + network + '. Reconnecting...');
+      _Login(network);
+    }
+  }, false);
+}
+
+function checkPastNetworkConnection(network) {
+  _loadNetworkState(network, true);
 }
 
 // --------------------------------------------------------------------------
@@ -466,12 +508,14 @@ identity.on('onMessage', function (msgInfo) {
   _handleMessage(msgInfo, false);  // beingSent = false
 });
 
-uiChannel.on('login', function(network) { _Login(network); });
+uiChannel.on('login', function(network) {
+  _Login(network);
+});
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
-  // Clear the clientsToInstance table.
-  state.clientToInstance = {};
+  state.clientToInstance = {};  // Clear the clientsToInstance table.
+  _saveNetworkState(network, false);
 });
 
 uiChannel.on('ignore', function (userId) {
@@ -530,10 +574,13 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 //  Proxying
 // --------------------------------------------------------------------------
-// TODO: should we lookup the instance ID for this client here?
 // TODO: say not if we havn't given them permission :)
 uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
-    startUsingPeerAsProxyServer(state.instanceToClient[peerInstanceId]);
+  startUsingPeerAsProxyServer(state.instanceToClient[peerInstanceId]);
+});
+
+uiChannel.on('stop-proxying', function(peerInstanceId) {
+  stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
 client.on('sendSignalToPeer', function(data) {
@@ -552,28 +599,48 @@ server.on('sendSignalToPeer', function(data) {
       {type: 'peerconnection-server', data: data.msg}));
 });
 
-function startUsingPeerAsProxyServer(peerClientId) {
-  // TODO: check permission first.
-  state.me.peerAsProxy = peerClientId;
-  uiChannel.emit('state-change',
-      [{op: 'replace', path: '/me/peerAsProxy', value: peerClientId}]);
+function startUsingPeerAsProxyServer(peerInstanceId) {
+  var instance = state.instances[peerInstanceId];
+  if (!instance) {
+    log.error('Instance ' + peerInstanceId + ' does not exist! Cannot proxy...')
+    return false;
+  }
+  if ('yes' != state.instances[peerInstanceId].trust.asProxy) {
+    log.debug('Lacking permission to proxy through ' + peerInstanceId);
+    return false;
+  }
+  // TODO: Cleanly disable any previous proxying session.
+  state.me.peerAsProxy = peerInstanceId;
+  _SyncUI('/me/peerAsProxy', peerInstanceId);
+  instance.status.proxy = ProxyState.RUNNING;
+  // _SyncUI('/instances/' + peerInstanceId, instance);
+  _SyncInstance(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
-  client.emit("start",
-    {'host': '127.0.0.1', 'port': 9999,
+  // client.emit("start",
+    // {'host': '127.0.0.1', 'port': 9999,
       // peerId of the peer being routed to.
-     'peerId': peerClientId});
-
+     // 'peerId': peerClientId});
   // TODO: set that we are negotiating.
 }
 
-function stopUsingPeerAsProxyServer(peerClientId) {
+function stopUsingPeerAsProxyServer(peerInstanceId) {
+  var instance = state.instances[peerInstanceId];
+  if (!instance) {
+    log.error('Instance ' + peerInstanceId + ' does not exist!')
+    return false;
+  }
+  // TODO: Handle revoked permissions notifications.
+
   // TODO: check permission first.
   state.me.peerAsProxy = null;
-  uiChannel.emit('state-change',
-      [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
+  _SyncUI('/me/peerAsProxy', '');
+  // uiChannel.emit('state-change',
+      // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
+  instance.status.proxy = ProxyState.OFF;
+  _SyncInstance(instance, 'status');
 }
 
 // peerconnection-client
@@ -944,7 +1011,8 @@ function receiveConsent(msg) {
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
   _saveInstance(instanceId);
-  _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
+  // _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
+  _SyncInstance(instance, 'trust');
   return true;
 }
 
@@ -975,7 +1043,8 @@ function handleUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  _SyncUI('/instances/' + instanceId + '/description', description);
+  // _SyncUI('/instances/' + instanceId + '/description', description);
+  _SyncInstance(instance, 'description');
   return true;
 }
 
@@ -990,6 +1059,12 @@ function _SyncUI(path, value, op) {
       value: value
   }]);
 }
+// Helper to consolidate syncing the instance on the UI side.
+function _SyncInstance(instance, field) {
+  var fieldStr = field? '/' + field : '';
+  _SyncUI('/instances/' + instance.instanceId + fieldStr,
+          field? instance[field] : instance);
+}
 
 function _Login(network) {
   network = network || undefined;
@@ -1000,12 +1075,17 @@ function _Login(network) {
     interactive: Boolean(network),
     network: network
   }, sendFullStateToUI);
+  if (network) {
+    _saveNetworkState(network, true);
+  }
 }
-
 
 // Load state from storage and when done, emit an total state update.
 _loadStateFromStorage(state, function () { });
-_Login();
+
+// Only logon to networks if local storage says we were online previously.
+checkPastNetworkConnection(VALID_NETWORKS.GOOGLE);
+checkPastNetworkConnection(VALID_NETWORKS.FACEBOOK);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

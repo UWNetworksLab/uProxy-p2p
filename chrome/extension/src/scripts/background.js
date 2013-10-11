@@ -19,6 +19,17 @@ var onFreedomStateChange = new chrome.Event();
 
 var model = {};  // Singleton angularjs model for either popup or options.
 
+var Icon = function() {
+  this.set = function(path) {
+    console.log('Setting browser icon to: ' + path);
+    chrome.browserAction.setIcon({
+      path: path
+    });
+  };
+};
+
+var icon = new Icon();
+
 freedom.onConnected.addListener(function () {
   freedom.on('state-change', function (patchMsg) {
     // console.log('Patch: ' + JSON.stringify(patchMsg));
