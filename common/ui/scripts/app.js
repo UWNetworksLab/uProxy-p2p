@@ -132,6 +132,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
       $rootScope.stopAccess = function(instance) {
         appChannel.emit('stop-proxying', instance.instanceId);
+        icon.set('../common/ui/icons/uproxy-19.png');
       };
 
       // Providing access for a friend:

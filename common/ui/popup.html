@@ -141,6 +141,9 @@
                   <p>
                     {{currentInstance.description}}
                   </p>
+                  <div class="instance-id" ng-show="rosterNudge">
+                    {{currentInstance.instanceId}}
+                  </div>
                   <div class="box-for-proxy"
                       ng-switch="currentInstance.trust.asProxy">
                     <div ng-switch-when="yes">
@@ -231,9 +234,6 @@
 
       <section id="status">
 
-        <div class="instance-id" ng-show="rosterNudge">
-          {{currentInstance.instanceId}}
-        </div>
         <div ng-show="model.me.peerAsProxy">
           Proxying via {{currentInstance.rosterInfo.name}}.
           <br>{{model.me.peerAsProxy}}
