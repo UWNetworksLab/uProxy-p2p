@@ -93,7 +93,7 @@ ul
 
 #options-btn
   position: absolute
-  top: 4px
+  bottom: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
@@ -104,7 +104,7 @@ ul
   text-decoration: none
   opacity: 0.6
   cursor: pointer
-  #include smooth
+  @include smooth
 #options-btn:active, #options-btn:focus
   opacity: 0.9
 #options-btn:hover
@@ -114,24 +114,30 @@ ul
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
 .tip
-  position: absolute
+  display: inline-block
   margin: 0
   padding: 6px 8px
-  right: 10px
-  width: 300px
+  max-width: 270px
   background-color: #fcfcfc
   font-size: $fontSize * 0.9
   color: #444
   border: 1px solid #eee
   text-align: left
   cursor: default
-  opacity: 1
+  opacity: 0.9
   @include smooth
 
 .tip.ng-hide
   display: block !important
   pointer-events: none
   opacity: 0
+
+// For centering the tooltip.
+.tool
+  position: absolute
+  display: block
+  width: 100%
+  text-align: center
 
 #not-connected
   text-align: center
@@ -258,7 +264,7 @@ ul
 // --------------------------- Roster & Contacts -------------------------------
 #roster
   position: absolute
-  top: 64px
+  top: 62px
   width: 100%
   @include smooth
 
@@ -368,9 +374,21 @@ img.c-icon:hover
   left: 400px
 
 .contact-status
-  padding: 32px
   text-align: center
   text-shadow: 0px 1px 1px #ccc
+  padding: 8px
+
+.contact-name
+  text-align: center
+
+#contact-details img.contact-image
+  position: relative
+  width: 100px
+  height: 100px
+  margin: 8px
+  border-color: #ddd
+  background-size: contain
+  box-shadow: 2px 3px 5px 1px #ccc
 
 .chat-btn
   display: inline-block
@@ -379,14 +397,14 @@ img.c-icon:hover
   border: 1px none #000
   outline: none
   padding: 4px
-  width: 50px
-  height: 50px
+  width: 40px
+  height: 40px
   text-decoration: none
   opacity: 0.6
   cursor: pointer
-  #include smooth
+  @include smooth
 .chat-btn:active, .chat-btn:focus
-  opacity: 0.9
+  opacity: 0.7
 .chat-btn:hover
   opacity: 0.3
 
@@ -396,9 +414,8 @@ img.c-icon:hover
 .instance-actions .btn
   padding: 8px 16px
   margin-top: 16px
-  font-size: $fontSize * 1.2
   text-shadow: 0 2px #888
-  border-radius: 8px
+  border-radius: 3px
 
 .client-details
   position: relative

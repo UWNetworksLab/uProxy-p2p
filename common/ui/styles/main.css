@@ -86,7 +86,7 @@ ul {
 
 #options-btn {
   position: absolute;
-  top: 4px;
+  bottom: 4px;
   right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
@@ -96,7 +96,11 @@ ul {
   height: 20px;
   text-decoration: none;
   opacity: 0.6;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 #options-btn:active, #options-btn:focus {
   opacity: 0.9; }
@@ -105,18 +109,17 @@ ul {
   opacity: 0.3; }
 
 .tip {
-  position: absolute;
+  display: inline-block;
   margin: 0;
   padding: 6px 8px;
-  right: 10px;
-  width: 300px;
+  max-width: 270px;
   background-color: #fcfcfc;
   font-size: 14.4px;
   color: #444444;
   border: 1px solid #eeeeee;
   text-align: left;
   cursor: default;
-  opacity: 1;
+  opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -126,6 +129,12 @@ ul {
   display: block !important;
   pointer-events: none;
   opacity: 0; }
+
+.tool {
+  position: absolute;
+  display: block;
+  width: 100%;
+  text-align: center; }
 
 #not-connected {
   text-align: center;
@@ -266,7 +275,7 @@ ul {
 
 #roster {
   position: absolute;
-  top: 64px;
+  top: 62px;
   width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -390,9 +399,21 @@ img.c-icon:hover {
   left: 400px; }
 
 .contact-status {
-  padding: 32px;
   text-align: center;
-  text-shadow: 0px 1px 1px #cccccc; }
+  text-shadow: 0px 1px 1px #cccccc;
+  padding: 8px; }
+
+.contact-name {
+  text-align: center; }
+
+#contact-details img.contact-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 8px;
+  border-color: #dddddd;
+  background-size: contain;
+  box-shadow: 2px 3px 5px 1px #cccccc; }
 
 .chat-btn {
   display: inline-block;
@@ -401,14 +422,18 @@ img.c-icon:hover {
   border: 1px none black;
   outline: none;
   padding: 4px;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   text-decoration: none;
   opacity: 0.6;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 .chat-btn:active, .chat-btn:focus {
-  opacity: 0.9; }
+  opacity: 0.7; }
 
 .chat-btn:hover {
   opacity: 0.3; }
@@ -419,9 +444,8 @@ img.c-icon:hover {
 .instance-actions .btn {
   padding: 8px 16px;
   margin-top: 16px;
-  font-size: 19.2px;
   text-shadow: 0 2px #888888;
-  border-radius: 8px; }
+  border-radius: 3px; }
 
 .client-details {
   position: relative;

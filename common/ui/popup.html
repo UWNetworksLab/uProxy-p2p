@@ -125,75 +125,82 @@
 
           <div id="contact-details" ng-show="rosterNudge">
             <div class="contact-status">
-              {{ currentContact.userId }}
-              <br>Network: {{ currentContact.network }}
-              <div ng-hide="currentInstance">
-                {{ currentContact.name }} is not connected to UProxy.
-                <p>
-                Ask them to Install UProxy!
-                </p>
+              <div class="contact-name">
+                <img class="contact-image" ng-src='{{contact.imageData}}'>
               </div>
-              <br>
-              <a class="chat-btn" href="{{ currentContact.url }}" target="_blank"></a>
-            </div>
 
-            <div ng-show="currentInstance">
-              <div class="instance-actions">
-                <img src="icons/uproxy-128.png">
-                <p>
-                  {{currentInstance.description}}
-                </p>
-                <div class="instance-id">
-                  {{currentInstance.instanceId}}
-                </div>
+              <br>Network: {{ currentContact.network }}
+              <p>
+              {{ currentContact.name }} does
+              <span ng-hide="currentInstance">not</span>
+              have UProxy installed.
+              </p>
 
-                <div class="box-for-proxy"
-                    ng-switch="currentInstance.trust.asProxy">
-                  <button class="btn" ng-switch-when="yes"
-                      ng-click="startAccess(currentInstance)">
-                    Start
-                  </button>
-                  <div ng-switch-when="requested">
-                    <button class="btn" ng-click="cancelRequest(currentInstance)">
-                      Cancel
+              <div ng-show="currentInstance">
+                <div class="instance-actions">
+                  <p>
+                    {{currentInstance.description}}
+                  </p>
+                  <div class="box-for-proxy"
+                      ng-switch="currentInstance.trust.asProxy">
+                    <button class="btn" ng-switch-when="yes"
+                        ng-click="startAccess(currentInstance)">
+                      Start
                     </button>
-                    <span>Pending...</span>
-                  </div>
-                  <div ng-switch-when="offered">
-                    <button class="btn" ng-click="acceptOffer(currentInstance)">
-                      Accept Access
-                    </button>
-                    <button class="btn" ng-click="declineOffer(currentInstance)">
-                      No Thanks
-                    </button>
-                  </div>
-                  <button class="btn"
-                      ng-switch-default
-                      ng-click="requestAccess(currentInstance)">
-                    Request
-                  </button>
-                </div>
-
-                <div class="box-for-client"
-                    ng-switch="currentInstance.trust.asClient">
-                  <button class="btn" ng-switch-when="no"
-                      ng-click="offerAccess(currentInstance)">
-                    Offer Access
-                  </button>
-                  <div ng-switch-when="requested">
-                    <button class="btn" ng-click="grantAccess(currentInstance)">
-                      Grant
-                    </button>
-                    <button class="btn" ng-click="denyAccess(currentInstance)">
-                      Ignore
+                    <div ng-switch-when="requested">
+                      <button class="btn" ng-click="cancelRequest(currentInstance)">
+                        Cancel
+                      </button>
+                      <span>Pending...</span>
+                    </div>
+                    <div ng-switch-when="offered">
+                      <button class="btn" ng-click="acceptOffer(currentInstance)">
+                        Accept Access
+                      </button>
+                      <button class="btn" ng-click="declineOffer(currentInstance)">
+                        No Thanks
+                      </button>
+                    </div>
+                    <button class="btn"
+                        ng-switch-default
+                        ng-click="requestAccess(currentInstance)">
+                      Request
                     </button>
                   </div>
-                  <button class="btn" ng-switch-default
-                      ng-click="revokeAccess(currentInstance)">
-                    Revoke Access
-                  </button>
-                </div>
 
+                  <div class="box-for-client"
+                      ng-switch="currentInstance.trust.asClient">
+                    <button class="btn" ng-switch-when="no"
+                        ng-click="offerAccess(currentInstance)">
+                      Offer Access
+                    </button>
+                    <div ng-switch-when="requested">
+                      <button class="btn" ng-click="grantAccess(currentInstance)">
+                        Grant
+                      </button>
+                      <button class="btn" ng-click="denyAccess(currentInstance)">
+                        Ignore
+                      </button>
+                    </div>
+                    <button class="btn" ng-switch-default
+                        ng-click="revokeAccess(currentInstance)">
+                      Revoke Access
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <a class="chat-btn" href="{{ currentContact.url }}"
+                 target="_blank"
+                 ng-mouseenter="chatButtonHovered=true"
+                 ng-mouseleave="chatButtonHovered=false">
+              </a>
+              <div class="tool">
+              <p class="tip" ng-show="chatButtonHovered" >
+                Ask {{ currentContact.name }} to
+                <span ng-hide="currentInstance">install</span>
+                <span ng-show="currentInstance">run</span>
+                UProxy.
+              </p>
               </div>
             </div>
 
@@ -211,6 +218,11 @@
       </div>
 
       <section id="status">
+
+        <div class="instance-id" ng-show="rosterNudge">
+          {{currentInstance.instanceId}}
+        </div>
+
         <span ng-show="loggedIn()">
           <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
         </span>
