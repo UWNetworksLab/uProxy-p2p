@@ -44,7 +44,6 @@ var client = freedom.uproxyclient();
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
 var server = freedom.uproxyserver();
-server.emit("start");
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -222,10 +221,10 @@ var DEFAULT_INSTANCE = {
 // If one is running UProxy for the first time, or without any available
 // instance data, generate an instance for oneself.
 function _generateMyInstance() {
-  var me = {};
-  me.instanceId = '';
-  me.description = null;
-  me.keyHash = '';
+  var i, val, hex, id, key, instanceIds = [];
+
+  var me = cloneDeep(RESET_STATE.me);
+
   // Create an instanceId if we don't have one yet.
   // Just generate 20 random 8-bit numbers, print them out in hex.
   // TODO: check use of randomness: why not one big random number that is
@@ -255,6 +254,7 @@ function _generateMyInstance() {
       }
     }
   }
+
   return me;
 }
 
@@ -278,11 +278,9 @@ function _saveToStorage(key, val, callback) {
   storage.set(key, JSON.stringify(val)).done(callback);
 }
 
-
 function _loadStateFromStorage(state, callback) {
-  var i, val, hex, id, key, instanceIds = [];
-
   var finalCallbacker = new FinalCallback(callback);
+  var i, key;
 
   // Set the saves |me| state and |options|.  Note that in both of
   // these callbacks |key| will be a different value by the time they
@@ -299,6 +297,15 @@ function _loadStateFromStorage(state, callback) {
       log.debug("++++++ Loaded self-definition ++++++");
       log.debug("  state.me = " + JSON.stringify(v));
       state.me = v;
+      // Put back any fields that weren't saved (say, from a version change).
+      for (var k in RESET_STATE.me) {
+        if (state.me[k] === undefined) {
+          log.debug(" -- adding back property " + k);
+          state.me[k] = cloneDeep(RESET_STATE.me[k]);
+        }
+      }
+      log.debug("  state.me, post repair = " + JSON.stringify(state.me));
+      state.me.identities = {};
     }
     maybeCallbackAfterLoadingMe();
   }, null);
@@ -485,13 +492,18 @@ identity.on('onChange', function(data) {
   if (!data.userId) {
     log.error('onChange: missing userId! ' + JSON.stringify(data));
   }
-  if (state.me.identities[data.userId]) {
-    // My card changed.
-    state.me.identities[data.userId] = data;
-    _SyncUI('/me/clients/' + data.userId, data, 'add');
-    // TODO: Handle changes that might affect proxying
-  } else {
-    updateUser(data);  // Not myself.
+  try {
+    if (state.me.identities[data.userId]) {
+      // My card changed.
+      state.me.identities[data.userId] = data;
+      _SyncUI('/me/clients/' + data.userId, data, 'add');
+      // TODO: Handle changes that might affect proxying
+    } else {
+      updateUser(data);  // Not myself.
+    }
+  } catch (e) {
+    console.log('Failure in onChange handler.  state.me = ' + JSON.stringify(state.me));
+    console.log(e.stack);
   }
 });
 
@@ -601,7 +613,7 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 //  Proxying
 // --------------------------------------------------------------------------
-// InstanceId given from extension, because that's where we click from.
+// TODO: say not if we havn't given them permission :)
 uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
   startUsingPeerAsProxyServer(peerInstanceId);
 });
@@ -611,14 +623,22 @@ uiChannel.on('stop-proxying', function(peerInstanceId) {
 });
 
 client.on('sendSignalToPeer', function(data) {
-  console.log('client(sendSignalToPeer):', data);
+    console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
+                ', sending to ' + data.peerId + ", which should map to " +
+                    state.instanceToClient[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
-  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-client', data: data}));
+  // data.peerId is an instance ID.  convert.
+  identity.sendMessage(
+      state.instanceToClient[data.peerId],
+      JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
-  console.log('server(sendSignalToPeer):', data);
-  identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
+  console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
+                ', sending to ' + data.peerId);
+  identity.sendMessage(
+      state.instanceToClient[data.peerId],
+      JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
 function startUsingPeerAsProxyServer(peerInstanceId) {
@@ -640,11 +660,10 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
-  // client.emit("start",
-    // {'host': '127.0.0.1', 'port': 9999,
-      // peerId of the peer being routed to.
-     // 'peerId': peerClientId});
-  // TODO: set that we are negotiating.
+  client.emit("start",
+              {'host': '127.0.0.1', 'port': 9999,
+               // peerId of the peer being routed to.
+               'peerId': peerInstanceId});
 }
 
 function stopUsingPeerAsProxyServer(peerInstanceId) {
@@ -663,6 +682,20 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("stop");
   instance.status.proxy = ProxyState.OFF;
   _SyncInstance(instance, 'status');
+}
+
+// peerconnection-client -- sent from client on other side.
+function handleSignalFromClientPeer(msg) {
+  console.log('handleSignalFromClientPeer: ' + JSON.stringify(msg));
+  // sanitize from the identity service
+  server.emit('handleSignalFromPeer', {peerId: msg.fromClientId, data: msg.data});
+}
+
+// peerconnection-server -- sent from server on other side.
+function handleSignalFromServerPeer(msg) {
+  console.log('handleSignalFromServerPeer: ' + JSON.stringify(msg));
+  // sanitize from the identity service
+  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data});
 }
 
 // --------------------------------------------------------------------------
@@ -723,9 +756,11 @@ function _updateTrust(instanceId, action, received) {
 }
 
 var _msgReceivedHandlers = {
-  'notify-instance': receiveInstance,
-  'notify-consent': receiveConsent,
-  'update-description': handleUpdateDescription
+    'notify-instance': receiveInstance,
+    'notify-consent': receiveConsent,
+    'update-description': handleUpdateDescription,
+    'peerconnection-server' : handleSignalFromServerPeer,
+    'peerconnection-client' : handleSignalFromClientPeer
 };
 
 // --------------------------------------------------------------------------
@@ -872,11 +907,12 @@ function _getMyId() {
     return id;
   }
 }
+
 var _myInstanceData = null;
 function _fetchMyInstance(resetCache) {
   resetCache = resetCache || false;
   if (!_myInstanceData || resetCache) {
-    var me = state.me.identities[_getMyId()];
+      var me = state.me; // state.me.identities[_getMyId()];
     _myInstanceData = JSON.stringify({
       type: 'notify-instance',
       instanceId: '' + state.me.instanceId,
@@ -1006,7 +1042,8 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  log.debug('receiveConsent(from: ' + msg.fromUserId + ')');
+  log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
+            JSON.stringify(msg));
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = state.instances[instanceId];
@@ -1139,6 +1176,8 @@ function _Login(network) {
   }
 }
 
+
+server.emit("start");
 // Load state from storage and when done, emit an total state update.
 _loadStateFromStorage(state, function () { });
 
