@@ -43,7 +43,6 @@ var client = freedom.uproxyclient();
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
 var server = freedom.uproxyserver();
-server.emit("start");
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -296,6 +295,15 @@ function _loadStateFromStorage(state, callback) {
       log.debug("++++++ Loaded self-definition ++++++");
       log.debug("  state.me = " + JSON.stringify(v));
       state.me = v;
+      // Put back any fields that weren't saved (say, from a version change).
+      for (var k in RESET_STATE.me) {
+        if (state.me[k] === undefined) {
+          log.debug(" -- adding back property " + k);
+          state.me[k] = cloneDeep(RESET_STATE.me[k]);
+        }
+      }
+      log.debug("  state.me, post repair = " + JSON.stringify(state.me));
+      state.me.identities = {};
     }
     maybeCallbackAfterLoadingMe();
   }, null);
@@ -480,13 +488,18 @@ identity.on('onChange', function(data) {
   if (!data.userId) {
     log.error('onChange: missing userId! ' + JSON.stringify(data));
   }
-  if (state.me.identities[data.userId]) {
-    // My card changed.
-    state.me.identities[data.userId] = data;
-    _SyncUI('/me/clients/' + data.userId, data, 'add');
-    // TODO: Handle changes that might affect proxying
-  } else {
-    updateUser(data);  // Not myself.
+  try {
+    if (state.me.identities[data.userId]) {
+      // My card changed.
+      state.me.identities[data.userId] = data;
+      _SyncUI('/me/clients/' + data.userId, data, 'add');
+      // TODO: Handle changes that might affect proxying
+    } else {
+      updateUser(data);  // Not myself.
+    }
+  } catch (e) {
+    console.log('Failure in onChange handler.  state.me = ' + JSON.stringify(state.me));
+    console.log(e.stack);
   }
 });
 
@@ -596,7 +609,7 @@ server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to ' + data.peerId);
   identity.sendMessage(data.peerId, JSON.stringify(
-      {type: 'peerconnection-server', data: data.msg}));
+      {type: 'peerconnection-server', data: data.data}));
 });
 
 function startUsingPeerAsProxyServer(peerInstanceId) {
@@ -618,11 +631,10 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
-  // client.emit("start",
-    // {'host': '127.0.0.1', 'port': 9999,
-      // peerId of the peer being routed to.
-     // 'peerId': peerClientId});
-  // TODO: set that we are negotiating.
+  client.emit("start",
+              {'host': '127.0.0.1', 'port': 9999,
+               // peerId of the peer being routed to.
+               'peerId': peerClientId});
 }
 
 function stopUsingPeerAsProxyServer(peerInstanceId) {
@@ -643,16 +655,18 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   _SyncInstance(instance, 'status');
 }
 
-// peerconnection-client
-function handleClientSignalToPeer(msg) {
-    console.log('handleClientSignalToPeer: ' + JSON.stringify(msg));
-    server.emit('handleSignalFromPeer', msg);
+// peerconnection-client -- sent from client on other side.
+function handleSignalFromClientPeer(msg) {
+  console.log('handleSignalFromClientPeer: ' + JSON.stringify(msg));
+  // sanitize from the identity service
+  server.emit('handleSignalFromPeer', {peerId: msg.fromClientId, data: msg.data});
 }
 
-// peerconnection-server
-function handleServerSignalToPeer(msg) {
-    console.log('handleServerSignalToPeer: ' + JSON.stringify(msg));
-    client.emit('handleServerSignalToPeer', msg);
+// peerconnection-server -- sent from server on other side.
+function handleSignalFromServerPeer(msg) {
+  console.log('handleSignalFromServerPeer: ' + JSON.stringify(msg));
+  // sanitize from the identity service
+  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data});
 }
 
 // --------------------------------------------------------------------------
@@ -712,8 +726,8 @@ var _msgReceivedHandlers = {
     'notify-instance': receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': handleUpdateDescription,
-    'peerconnection-server' : handleServerSignalToPeer,
-    'peerconnection-client' : handleClientSignalToPeer
+    'peerconnection-server' : handleSignalFromServerPeer,
+    'peerconnection-client' : handleSignalFromClientPeer
 };
 
 // --------------------------------------------------------------------------
@@ -1080,6 +1094,8 @@ function _Login(network) {
   }
 }
 
+
+server.emit("start");
 // Load state from storage and when done, emit an total state update.
 _loadStateFromStorage(state, function () { });
 

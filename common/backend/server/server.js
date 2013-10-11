@@ -39,6 +39,8 @@ var onload = function() {
 
   //
   var _initPeer = function(peerId) {
+    console.log("server.js: _initPeer(" + peerId + ").  _peers = " +
+        JSON.stringify(_peers));
     if (!_peers[peerId]) {
       _peers[peerId] = {};
     }

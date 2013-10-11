@@ -71,20 +71,25 @@ var onload = function() {
     var channelLabel = "c" + Math.random();
     _conns[channelLabel] = conn.tcpConnection;
 
-    // When the TCP-connection receives data, send it on the sctp peer on the corresponding channelLabel
+    // When the TCP-connection receives data, send it on the sctp peer
+    // on the corresponding channelLabel
     conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelLabel));
     // When the TCP-connection closes
     conn.tcpConnection.on('disconnect',
         closeConnection.bind(null, channelLabel));
 
     _sctpPc.send({'channelLabel' : channelLabel,
-      'text': JSON.stringify({host: address, port: port})});
+                  'text': JSON.stringify({host: address, port: port})},
+                 function () {
+                   console.log('client.js/onConnection: _sctpPc.send() returned.');
+                   connectedCallback({ipAddrString: '127.0.0.1', port: 0});
+                 });
 
     // TODO: we are not connected yet... should we have some message passing
     // back from the other end of the data channel to tell us when it has
     // happened, instead of just pretended?
     // TODO: determine if these need to be accurate.
-    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
+//    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
   };
 
   freedom.on('start', function(options) {
@@ -162,4 +167,3 @@ var onload = function() {
 //TODO(willscott): WebWorker startup errors are hard to debug.
 // Once fixed, code can be executed synchronously.
 setTimeout(onload, 0);
-
