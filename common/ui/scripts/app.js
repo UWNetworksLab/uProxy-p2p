@@ -198,6 +198,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           } else {
             jsonpatch.apply(model, patch);
           }
+          // Also update pointers locally.
+          $rootScope.instances = model.instances;
         });
       }
 

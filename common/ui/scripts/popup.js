@@ -25,7 +25,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'myAccess': false,
       'friendsAccess': false
     };
-    $scope.instances = $scope.model.instances;
 
     //
     $scope.currentContact = {};  // Visible for the individual contact page.
@@ -42,15 +41,16 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.splashPage = !$scope.loggedIn();
 
     // On the contacts details page, dynamically update |currentInstance| to
-    // reflect user actions.
+    // reflect user actions and state changes in the DOM.
     $scope.updateCurrentInstance = function() {
       if (!$scope.currentInstance) {
         return;
       }
       $scope.$apply(function() {
-        $scope.currentInstance = $scope.model.instances[$scope.currentInstance.instanceId];
+        $scope.currentInstance = $scope.instances[$scope.currentInstance.instanceId];
       });
     }
+    // Attach to the App-Extension channel.
     $scope.onAppData.addListener($scope.updateCurrentInstance);
 
     // TODO: fix using watchs on the contact of interest. Currently updates are

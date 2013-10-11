@@ -238,6 +238,7 @@
         <div ng-show="model.me.peerAsProxy">
           Proxying via {{currentInstance.rosterInfo.name}}.
           <br>{{model.me.peerAsProxy}}
+          </br>
           <button class="btn"
               ng-hide="'off'==currentInstance.status.proxy"
               ng-click="stopAccess(currentInstance)">
