@@ -1,9 +1,10 @@
 /**
  * uproxy.js
  *
- * This is the primary backend script. It maintains both in-memory state and
- * checkpoints information to local storage.
-
+ * This is the primary backend script. It maintains in-memory state,
+ * checkpoints information to local storage, and synchronizes state with the
+ * front-end.
+ *
  * In-memory state includes:
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
@@ -1057,6 +1058,7 @@ function _addNotification(instanceId) {
     return false;
   }
   instance.notify = true;
+  _saveInstance(instanceId);
   _SyncInstance(instance, 'notify');
   var user = state.roster[instance.rosterInfo.userId];
   if (!user) {
@@ -1083,6 +1085,7 @@ function _removeNotification(instanceId) {
     return false;
   }
   instance.notify = false;
+  _saveInstance(instanceId);
   _SyncInstance(instance, 'notify');
   return true;
 }

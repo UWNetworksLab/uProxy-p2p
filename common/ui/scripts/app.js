@@ -157,6 +157,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Notifications occur on the user level. The message sent to the app side
       // will also remove the notification flag from instances.
       $rootScope.notificationSeen = function (user) {
+        if (!user.hasNotification) {
+          return;  // Ignore if user has no notification.
+        }
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
         $rootScope.notifications--;
