@@ -44,9 +44,11 @@
       <ul class="contacts">
         <li ng-repeat='instance in model.instances'>
           <h4>{{ instance.rosterInfo.name }}</h4>
-          <p>{{ model.instanceToClient[instance.instanceId] }}
+          <p>
+            {{ model.instanceToClient[instance.instanceId] }}
           <br>{{ instance.description }}
           <br>{{ instance.instanceId }}
+          <br>Notification: {{ instance.notify }}
           </p>
           <div class="trust">
             Proxy: {{ instance.trust.asProxy }}

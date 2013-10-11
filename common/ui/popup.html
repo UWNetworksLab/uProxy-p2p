@@ -109,7 +109,7 @@
           <section id="contacts-frame" ng-hide="rosterNudge">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
-                ng-click="toggleContact(contact)"
+                ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
                 tabindex="{{ $index + 10 }}">
               {{contact.name}}
@@ -117,7 +117,10 @@
               <span class="c-icons">
                 <span class="c-icon" ng-show='contact.onGoogle'> G+ </span>
                 <span class="c-icon" ng-show='contact.onFB'> FB </span>
-                <img class="c-icon" ng-show='contact.canUProxy' src='icons/uproxy-19.png'>
+                <span ng-show="contact.canUProxy">
+                  <span class="c-icon" ng-show='contact.hasNotification'> ! </span>
+                  <img class="c-icon" ng-show='contact.canUProxy' src='icons/uproxy-19.png'>
+                </span>
               </span>
             </li>
           </ul>

@@ -26,6 +26,12 @@ var Icon = function() {
       path: path
     });
   };
+  this.label = function(text) {
+    console.log('Setting browser badge to: ' + text);
+    chrome.browserAction.setBadgeText({
+      text: text
+    });
+  };
 };
 
 var icon = new Icon();

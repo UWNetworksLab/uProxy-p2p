@@ -209,7 +209,8 @@ var DEFAULT_INSTANCE = {
   },
   status: DEFAULT_PROXY_STATUS,
   description: '',
-  rosterInfo: {  // Ifo corresponding to its roster entry
+  notify: false,      // Whether UI should show state-change notification.
+  rosterInfo: {       // Info corresponding to its roster entry.
     userId: '',
     name: '',
     network: '',
@@ -337,6 +338,7 @@ function _loadStateFromStorage(state, callback) {
         user.network = instance.rosterInfo.network,
         user.url = instance.rosterInfo.url;
         user.clients = {};
+        user.hasNotification = Boolean(instance.notify);
       }
       maybeCallbackAfterLoadingInstance();
     }, null);
@@ -371,7 +373,8 @@ function _saveInstance(instanceId) {
     trust: instanceInfo.trust,
     // Overlay protocol used to get descriptions.
     description: instanceInfo.description,
-    rosterInfo: instanceInfo.rosterInfo  // Network stuff:
+    notify: Boolean(instanceInfo.notify),
+    rosterInfo: instanceInfo.rosterInfo
   };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
@@ -561,6 +564,28 @@ uiChannel.on('update-description', function (data) {
   }
 });
 
+// Updating our own UProxy instance's description.
+uiChannel.on('notification-seen', function (userId) {
+  var user = state.roster[userId];
+  if (!user) {
+    log.error('User ' + id + ' does not exist!');
+    return false;
+  }
+  user.hasNotification = false;
+  // Go through clients, remove notification flag from any uproxy instance.
+  for (var clientId in user.clients) {
+    var instanceId = state.clientToInstance[clientId];
+    if (instanceId) {
+      _removeNotification(instanceId);
+    }
+  }
+  // _removeNotification(user);
+  // instance.notify = false;
+  // _saveInstance(id);
+  // Don't need to re-sync with UI - expect UI to have done the change.
+  // _SyncInstance(instance);
+});
+
 // --------------------------------------------------------------------------
 //  Data management
 // --------------------------------------------------------------------------
@@ -670,7 +695,7 @@ uiChannel.on('instance-trust-change', function (data) {
   return true;
 });
 
-// Update trust state for a particular instance.
+// Update trust state for a particular instance. Emits change to UI.
 // |instanceId| - instance to change the trust levels upon.
 // |action| - Trust action to execute.
 // |received| - boolean of source of this action.
@@ -679,16 +704,20 @@ function _updateTrust(instanceId, action, received) {
   var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ? !received : received;
   var trustValue = TrustOp[action];
   var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Cannot find instance ' + instanceId + ' for a trust change!');
+    return false;
+  }
   if (asProxy) {
     instance.trust.asProxy = trustValue;
   } else {
     instance.trust.asClient = trustValue;
   }
-
   // Update UI. TODO(uzimizu): Local storage as well?
-  uiChannel.emit('state-change', [{
-      op: 'replace', path: '/instances/' + instance.instanceId, value: instance
-  }]);
+  _SyncInstance(instance);
+  // uiChannel.emit('state-change', [{
+      // op: 'replace', path: '/instances/' + instance.instanceId, value: instance
+  // }]);
   return true;
 }
 
@@ -718,6 +747,7 @@ function _handleMessage(msgInfo, beingSent) {
       log.error('Could not find instance for the trust modification!');
       return false;
     }
+    _addNotification(instanceId);
     _updateTrust(instanceId, msgType, true);  // received = true
     return true;
   }
@@ -921,12 +951,12 @@ function receiveInstance(msg) {
     sendConsent(instance);
   }
   _saveInstance(instanceId);
-
   // TODO: optimise to only save when different to what was in storage before.
   _saveToStorage(StateEntries.INSTANCEIDS,
       Object.keys(state[StateEntries.INSTANCES]));
 
-  _saveInstance(instanceId, userId);
+  // _saveInstance(instanceId, userId);
+  // Update UI's view of instances and mapping.
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
@@ -984,6 +1014,8 @@ function receiveConsent(msg) {
     return false;
   }
   // Determine my own consent bits, compare with their consent and remap.
+  var oldTrustAsProxy = instance.trust.asProxy;
+  var oldTrustAsClient = instance.trust.asClient;
   var myConsent = _determineConsent(instance.trust);
   instance.trust.asProxy = consent.asProxy?
       (myConsent.asClient? 'yes' : 'offered') :
@@ -991,8 +1023,12 @@ function receiveConsent(msg) {
   instance.trust.asClient = consent.asClient?
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
+  // Apply state change notification if the trust state changed.
+  if (oldTrustAsProxy != instance.trust.asProxy ||
+      oldTrustAsClient != instance.trust.asClient) {
+    _addNotification(instanceId);
+  }
   _saveInstance(instanceId);
-  // _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
   _SyncInstance(instance, 'trust');
   return true;
 }
@@ -1009,6 +1045,45 @@ function _determineConsent(trust) {
 
 function _validateKeyHash(keyHash) {
   log.debug('Warning: keyHash Validation not yet implemented...');
+  return true;
+}
+
+// Set notification flag for Instance corresponding to |instanceId|, and also
+// set the notification flag for the userId.
+function _addNotification(instanceId) {
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Could not find instance ' + instanceId);
+    return false;
+  }
+  instance.notify = true;
+  _SyncInstance(instance, 'notify');
+  var user = state.roster[instance.rosterInfo.userId];
+  if (!user) {
+    console.error('User does not exist for instance ' + instance);
+    return false;
+  }
+  // state.notifications += user.hasNotification? 1 : 0;
+  user.hasNotification = true;
+  uiChannel.emit('state-change', [{
+      op: 'replace',
+      path: '/roster/' + user.userId + '/hasNotification',
+      value: true
+  }]);
+}
+
+// Remove notification flag for Instance corresponding to |instanceId|, if it
+// exists.
+function _removeNotification(instanceId) {
+  if (!instanceId) return;
+
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Instance does not exist for ' + instanceId);
+    return false;
+  }
+  instance.notify = false;
+  _SyncInstance(instance, 'notify');
   return true;
 }
 

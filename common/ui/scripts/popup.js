@@ -57,7 +57,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // not correctly propegated.
     //
     // Opening the detailed contact view.
-    $scope.toggleContact = function(c) {
+    $scope.viewContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
       // Watch the instance on the model to keep the UI up to date.
@@ -67,6 +67,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         // });
       // });
       $scope.rosterNudge = true;
+      $scope.notificationSeen(c);
     };
 
     // Toggling the 'options' page which is just the splash page.

@@ -43,6 +43,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         console.error('model not found in dependency injections.');
       }
       $rootScope.model = model;
+      $rootScope.notifications = 0;
       // $rootScope.VALID_NETWORKS = [
         // 'google',
         // 'facebook'
@@ -153,6 +154,18 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           instanceId: id, action: action });
       };
 
+      // Notifications occur on the user level. The message sent to the app side
+      // will also remove the notification flag from instances.
+      $rootScope.notificationSeen = function (user) {
+        appChannel.emit('notification-seen', user.userId);
+        user.hasNotification = false;
+        $rootScope.notifications--;
+        if ($rootScope.notifications == 0) {
+          $rootScope.notifications = '';
+        }
+        icon.label('' + $rootScope.notifications);
+      }
+
       $rootScope.changeOption = function (key, value) {
         appChannel.emit('change-option', {key: key, value: value});
       }
@@ -205,6 +218,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           }
           // Also update pointers locally.
           $rootScope.instances = model.instances;
+          // Count up notifications;
+          $rootScope.notifications = 0;
+          for (var userId in model.roster) {
+            $rootScope.notifications += model.roster[userId].hasNotification? 1 : 0;
+          }
+          if ($rootScope.notifications > 0) {
+            icon.label('' + $rootScope.notifications);
+            // {text: '↑', color: "#fff"})
+          }
         });
       }
 
