@@ -126,6 +126,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // own.
         appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId)
       };
+      $rootScope.stopAccess = function(instance) {
+        appChannel.emit('stop-proxying', instance.instanceId);
+      };
 
       // Providing access for a friend:
       $rootScope.offerAccess = function(instance) {

@@ -64,6 +64,12 @@ var Trust = {
   YES: 'yes'
 };
 
+var ProxyState = {
+  OFF: 'off',
+  READY: 'ready',
+  RUNNING: 'running'
+}
+
 //var TrustType = {
 //  PROXY: 'asProxy',
 //  CLIENT: 'asClient'
@@ -183,6 +189,11 @@ var RESET_STATE = {
 };
 var state = cloneDeep(RESET_STATE);
 
+var DEFAULT_PROXY_STATUS = {
+    proxy: ProxyState.OFF,
+    client: ProxyState.OFF
+};
+
 // Instance object.
 var DEFAULT_INSTANCE = {
   instanceId: null,  // Primary key.
@@ -191,6 +202,7 @@ var DEFAULT_INSTANCE = {
     asProxy: Trust.NO,
     asClient: Trust.NO
   },
+  status: DEFAULT_PROXY_STATUS,
   description: '',
   rosterInfo: {  // Ifo corresponding to its roster entry
     userId: '',
@@ -303,6 +315,7 @@ function _loadStateFromStorage(state, callback) {
       //}
       else {
         console.log("instance " + instanceId + " loaded");
+        instance.status = DEFAULT_PROXY_STATUS;
         instances[instanceId] = instance;
         // Add to the roster.
         var user = state.roster[instance.rosterInfo.userId] = {};
@@ -345,12 +358,7 @@ function _saveInstance(instanceId) {
     trust: instanceInfo.trust,
     // Overlay protocol used to get descriptions.
     description: instanceInfo.description,
-    rosterInfo: instanceInfo.rosterInfo
-    // Network stuff:
-    // name: instanceInfo.name,
-    // userId: instanceInfo.userId,
-    // url: instanceInfo.url,
-    // network: instanceInfo.network,
+    rosterInfo: instanceInfo.rosterInfo  // Network stuff:
   };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instance));
@@ -531,10 +539,13 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 //  Proxying
 // --------------------------------------------------------------------------
-// TODO: should we lookup the instance ID for this client here?
-// TODO: say not if we havn't given them permission :)
-uiChannel.on('start-using-peer-as-proxy-server', function(peerClientId) {
-  startUsingPeerAsProxyServer(peerClientId);
+// InstanceId given from extension, because that's where we click from.
+uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
+  startUsingPeerAsProxyServer(peerInstanceId);
+});
+
+uiChannel.on('stop-proxying', function(peerInstanceId) {
+  stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
 client.on('sendSignalToPeer', function(data) {
@@ -548,28 +559,48 @@ server.on('sendSignalToPeer', function(data) {
   identity.sendMessage(contact, JSON.stringify({type: 'peerconnection-server', data: data}));
 });
 
-function startUsingPeerAsProxyServer(peerClientId) {
-  // TODO: check permission first.
-  state.me.peerAsProxy = peerClientId;
-  uiChannel.emit('state-change',
-      [{op: 'replace', path: '/me/peerAsProxy', value: peerClientId}]);
+function startUsingPeerAsProxyServer(peerInstanceId) {
+  var instance = state.instances[peerInstanceId];
+  if (!instance) {
+    log.error('Instance ' + peerInstanceId + ' does not exist! Cannot proxy...')
+    return false;
+  }
+  if ('yes' != state.instances[peerInstanceId].trust.asProxy) {
+    log.debug('Lacking permission to proxy through ' + peerInstanceId);
+    return false;
+  }
+  // TODO: Cleanly disable any previous proxying session.
+  state.me.peerAsProxy = peerInstanceId;
+  _SyncUI('/me/peerAsProxy', peerInstanceId);
+  instance.status.proxy = ProxyState.RUNNING;
+  // _SyncUI('/instances/' + peerInstanceId, instance);
+  _SyncInstance(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
-  client.emit("start",
-    {'host': '127.0.0.1', 'port': 9999,
+  // client.emit("start",
+    // {'host': '127.0.0.1', 'port': 9999,
       // peerId of the peer being routed to.
-     'peerId': peerClientId});
-
+     // 'peerId': peerClientId});
   // TODO: set that we are negotiating.
 }
 
-function stopUsingPeerAsProxyServer(peerClientId) {
+function stopUsingPeerAsProxyServer(peerInstanceId) {
+  var instance = state.instances[peerInstanceId];
+  if (!instance) {
+    log.error('Instance ' + peerInstanceId + ' does not exist!')
+    return false;
+  }
+  // TODO: Handle revoked permissions notifications.
+
   // TODO: check permission first.
   state.me.peerAsProxy = null;
-  uiChannel.emit('state-change',
-      [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
+  _SyncUI('/me/peerAsProxy', '');
+  // uiChannel.emit('state-change',
+      // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
+  instance.status.proxy = ProxyState.OFF;
+  _SyncInstance(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
@@ -925,7 +956,8 @@ function receiveConsent(msg) {
       (myConsent.asProxy? 'yes' : 'requested') :
       (myConsent.asProxy? 'offered' : 'no');
   _saveInstance(instanceId);
-  _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
+  // _SyncUI('/instances/' + instanceId + '/trust', instance.trust);
+  _SyncInstance(instance, 'trust');
   return true;
 }
 
@@ -956,7 +988,8 @@ function handleUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  _SyncUI('/instances/' + instanceId + '/description', description);
+  // _SyncUI('/instances/' + instanceId + '/description', description);
+  _SyncInstance(instance, 'description');
   return true;
 }
 
@@ -970,6 +1003,12 @@ function _SyncUI(path, value, op) {
       path: path,
       value: value
   }]);
+}
+// Helper to consolidate syncing the instance on the UI side.
+function _SyncInstance(instance, field) {
+  var fieldStr = field? '/' + field : '';
+  _SyncUI('/instances/' + instance.instanceId + fieldStr,
+          field? instance[field] : instance);
 }
 
 function _Login(network) {

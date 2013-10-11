@@ -143,10 +143,22 @@
                   </p>
                   <div class="box-for-proxy"
                       ng-switch="currentInstance.trust.asProxy">
-                    <button class="btn" ng-switch-when="yes"
-                        ng-click="startAccess(currentInstance)">
-                      Start
-                    </button>
+                    <div ng-switch-when="yes">
+                      <button class="btn"
+                          ng-show="'off'==currentInstance.status.proxy"
+                          ng-click="startAccess(currentInstance)">
+                        Start
+                      </button>
+                      <div class="btn"
+                          ng-show="'ready'==currentInstance.status.proxy">
+                        Setting up proxy...
+                      </div>
+                      <button class="btn"
+                          ng-hide="'off'==currentInstance.status.proxy"
+                          ng-click="stopAccess(currentInstance)">
+                        Stop
+                      </button>
+                    </div>
                     <div ng-switch-when="requested">
                       <button class="btn" ng-click="cancelRequest(currentInstance)">
                         Cancel
@@ -223,9 +235,20 @@
           {{currentInstance.instanceId}}
         </div>
 
+        <div ng-show="model.me.peerAsProxy">
+          Proxying via {{currentInstance.rosterInfo.name}}.
+          <br>{{model.me.peerAsProxy}}
+          <button class="btn"
+              ng-hide="'off'==currentInstance.status.proxy"
+              ng-click="stopAccess(currentInstance)">
+            Stop
+          </button>
+        </div>
+
         <span ng-show="loggedIn()">
           <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
         </span>
+
         <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
         <span ng-show="loggedOut()">Not Connected</span>
         <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
