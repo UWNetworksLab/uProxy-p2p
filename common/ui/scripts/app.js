@@ -61,7 +61,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.instanceOfUserId = function(userId) {
         for (var i in model.instances) {
-          if (model.instances[i].userId == userId) return model.instances[i];
+          if (model.instances[i].rosterInfo.userId == userId)
+            return model.instances[i];
         }
         return null;
       };

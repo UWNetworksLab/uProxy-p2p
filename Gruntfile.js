@@ -77,8 +77,13 @@ var firefox_concat_src = [
 
 //Testing
 //TODO fix
-var sources = ['common/backend/util.js'];
-var testSources = sources.slice(0);
+//var sources = ['common/backend/spec/*.js'];
+//var sources = ['common/backend/spec/*.js'];
+var sourcesToTest = [
+  'common/backend/test/freedom-mocks.js',
+  'common/backend/state-Storage.js',
+  'common/backend/util.js'
+];
 
 module.exports = function(grunt) {
   grunt.initConfig({
@@ -144,16 +149,24 @@ module.exports = function(grunt) {
             'uproxy.xpi'],
     jasmine: {
       common: {
-        src: testSources,
+        // Files being tested
+        src: sourcesToTest,
         options: {
           specs: 'common/backend/spec/*Spec.js'
         }
       }
     },
+    jsvalidate: {
+      files: sourcesToTest.concat(['common/backend/spec/*Spec.js'])
+    },
     jshint: {
-      all: sources,
+      all: sourcesToTest.concat(['common/backend/spec/*Spec.js']),
       options: {
-        '-W069': true
+        // 'strict': true, // Better to have it in the file
+        // 'globalstrict': true,
+        'moz': true,   // Used for function closures and other stuff
+        '-W069': true,
+        '-W097': true  // force: allow "strict use" in non function form.
       }
     },
     'mozilla-addon-sdk': {
@@ -185,6 +198,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
 
@@ -216,7 +230,6 @@ module.exports = function(grunt) {
     'shell:setup_freedom',
     'shell:freedom'
   ]);
-  //Test task
   grunt.registerTask('test', [
     'jshint:all',
     'jasmine'
@@ -224,7 +237,8 @@ module.exports = function(grunt) {
   //Build task
   grunt.registerTask('build_chrome', [
     'copy:chrome_app',
-    'copy:chrome_ext'
+    'copy:chrome_ext',
+    'jsvalidate'
   ]);
   grunt.registerTask('build_firefox', [
     'concat:firefox',

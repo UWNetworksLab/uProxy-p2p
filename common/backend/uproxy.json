@@ -5,6 +5,7 @@
     "script": [
       "nouns-and-adjectives.js",
       "util.js",
+      "state-storage.js",
       "uproxy.js",
       "test/uproxy_local_test_proxying.js"
     ]
