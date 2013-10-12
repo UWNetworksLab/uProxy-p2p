@@ -14,7 +14,6 @@
 /* global RESET_STATE: false */
 "use strict";
 
-// --------------------------------------------------------------------------
 //  Local Storage
 // --------------------------------------------------------------------------
 // To see the format used by localstorage, see the file:
@@ -35,9 +34,8 @@ function _saveToStorage(key, val, callback) {
 }
 
 function _loadStateFromStorage(state, callback) {
-  var i, val, hex, id, key, instanceIds = [];
-
   var finalCallbacker = new FinalCallback(callback);
+  var i, key;
 
   // Set the saves |me| state and |options|.  Note that in both of
   // these callbacks |key| will be a different value by the time they
@@ -46,38 +44,7 @@ function _loadStateFromStorage(state, callback) {
   var maybeCallbackAfterLoadingMe = finalCallbacker.makeCountedCallback();
   _loadFromStorage(key, function(v) {
     if (v === null) {
-      // Create an instanceId if we don't have one yet.
-      state.me.instanceId = '';
-      state.me.description = null;
-      state.me.keyHash = '';
-      // Just generate 20 random 8-bit numbers, print them out in hex.
-      // TODO: check use of randomness: why not one big random number that is
-      // serialised?
-      for (i = 0; i < 20; i++) {
-        // 20 bytes for the instance ID.  This we can keep.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-        state.me.instanceId = state.me.instanceId +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-
-        state.me.keyHash = ((i > 0)? (state.me.keyHash + ':') : '')  +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // TODO: separate this out and use full space of possible names by
-        // using the whole of the .
-        if (i < 4) {
-          id = (i & 1) ? nouns[val] : adjectives[val];
-          if (state.me.description !== null) {
-            state.me.description = state.me.description + " " + id;
-          } else {
-            state.me.description = id;
-          }
-        }
-      }
+      state.me = _generateMyInstance();
       _saveToStorage("me", state.me);
       log.debug("****** Saving new self-definition *****");
       log.debug("  state.me = " + JSON.stringify(state.me));
@@ -85,6 +52,15 @@ function _loadStateFromStorage(state, callback) {
       log.debug("++++++ Loaded self-definition ++++++");
       log.debug("  state.me = " + JSON.stringify(v));
       state.me = v;
+      // Put back any fields that weren't saved (say, from a version change).
+      for (var k in RESET_STATE.me) {
+        if (state.me[k] === undefined) {
+          log.debug(" -- adding back property " + k);
+          state.me[k] = cloneDeep(RESET_STATE.me[k]);
+        }
+      }
+      log.debug("  state.me, post repair = " + JSON.stringify(state.me));
+      state.me.identities = {};
     }
     maybeCallbackAfterLoadingMe();
   }, null);
@@ -106,7 +82,7 @@ function _loadStateFromStorage(state, callback) {
         finalCallbacker.makeCountedCallback();
     _loadFromStorage("instance/" + instanceId, function(instance) {
       if (null === instance) {
-        console.error("instance " + instanceId + " not found");
+        console.error("Load error: instance " + instanceId + " not found");
       }
       // // see: scraps/validtate-instance.js, but use unit tests instead of
       // // runtime code for type-checking.
@@ -116,14 +92,16 @@ function _loadStateFromStorage(state, callback) {
       //}
       else {
         console.log("instance " + instanceId + " loaded");
+        instance.status = DEFAULT_PROXY_STATUS;
         instances[instanceId] = instance;
-        // Add to the roster.
+        // Extrapolate the user & add to the roster.
         var user = state.roster[instance.rosterInfo.userId] = {};
         user.userId = instance.rosterInfo.userId;
         user.name = instance.rosterInfo.name;
-        user.network = instance.rosterInfo.network;
+        user.network = instance.rosterInfo.network,
         user.url = instance.rosterInfo.url;
         user.clients = {};
+        user.hasNotification = Boolean(instance.notify);
       }
       maybeCallbackAfterLoadingInstance();
     }, null);
@@ -152,13 +130,13 @@ function _saveInstance(instanceId) {
   var instance = {
     // Instance stuff:
     // annotation: getKeyWithDefault(instanceInfo, 'annotation',
-    //    instanceInfo.description),  // TODO
+    //    instanceInfo.description),
     instanceId: instanceId,
     keyHash: instanceInfo.keyHash,
     trust: instanceInfo.trust,
     // Overlay protocol used to get descriptions.
     description: instanceInfo.description,
-    // Network stuff
+    notify: Boolean(instanceInfo.notify),
     rosterInfo: instanceInfo.rosterInfo
   };
   log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
@@ -182,3 +160,26 @@ function _saveAllInstances() {
   _saveToStorage(StateEntries.INSTANCEIDS,
       Object.keys(state[StateEntries.INSTANCES]));
 }
+
+// Remember whether uproxy is currently logged on to |network|.
+function _saveNetworkState(network, state) {
+  log.debug('Saving network state for: ' + network + ' : ' + state);
+  _saveToStorage('online/' + network, state);
+}
+
+// Load the status for |network|, and reconnect to it if |reconnect| is true.
+function _loadNetworkState(network, reconnect) {
+  log.debug('Loading network state for: ' + network);
+  _loadFromStorage('online/' + network, function (wasOnline) {
+    if (reconnect && wasOnline) {
+      log.debug('Was previously logged on to ' + network + '. Reconnecting...');
+      _Login(network);
+    }
+  }, false);
+}
+
+function checkPastNetworkConnection(network) {
+  _loadNetworkState(network, true);
+}
+
+// --------------------------------------------------------------------------

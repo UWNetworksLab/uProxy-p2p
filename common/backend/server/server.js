@@ -11,10 +11,9 @@ var NetClient = window.NetClient;
 
 
 var onload = function() {
-  var _active = false;
+  var _active = true;  // this variable can only make things worse.
   var _peers = {};
 
-  //
   var resetServer = function() {
     for (var contact in _peers) {
       closePeer(contact);
@@ -39,6 +38,8 @@ var onload = function() {
 
   //
   var _initPeer = function(peerId) {
+    console.log("server.js: _initPeer(" + peerId + ").  _peers = " +
+        JSON.stringify(_peers));
     if (!_peers[peerId]) {
       _peers[peerId] = {};
     }
@@ -109,9 +110,11 @@ var onload = function() {
         });
       });
     });
+    console.log('_initPeer(' + peerId + ') complete.');
   };
 
   freedom.on('start', function() {
+    console.log("Starting server.");
     resetServer();
     _active = true;
   });
@@ -122,8 +125,11 @@ var onload = function() {
   //
   // TODO: make sure callers set the peerId.
   freedom.on('handleSignalFromPeer', function(msg) {
-    console.log("server handleSignalFromPeer:", msg);
-    if (!_active) return;
+    console.log("server handleSignalFromPeer:" + JSON.stringify(msg));
+      if (!_active) {
+          console.log("server is not active, returning");
+          return;
+      }
 
     // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));

@@ -25,7 +25,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'myAccess': false,
       'friendsAccess': false
     };
-    $scope.instances = $scope.model.instances;
 
     //
     $scope.currentContact = {};  // Visible for the individual contact page.
@@ -41,16 +40,34 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     $scope.splashPage = !$scope.loggedIn();
 
+    // On the contacts details page, dynamically update |currentInstance| to
+    // reflect user actions and state changes in the DOM.
+    $scope.updateCurrentInstance = function() {
+      if (!$scope.currentInstance) {
+        return;
+      }
+      $scope.$apply(function() {
+        $scope.currentInstance = $scope.instances[$scope.currentInstance.instanceId];
+      });
+    }
+    // Attach to the App-Extension channel.
+    $scope.onAppData.addListener($scope.updateCurrentInstance);
+
     // TODO: fix using watchs on the contact of interest. Currently updates are
     // not correctly propegated.
     //
     // Opening the detailed contact view.
-    $scope.toggleContact = function(c) {
+    $scope.viewContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
-      console.log(c);
-      console.log($scope.model);
+      // Watch the instance on the model to keep the UI up to date.
+      // $scope.$watch('instances', function(v) {
+        // $scope.$apply(function() {
+          // $scope.currentInstance = $scope.instanceOfUserId(c.userId);
+        // });
+      // });
       $scope.rosterNudge = true;
+      $scope.notificationSeen(c);
     };
 
     // Toggling the 'options' page which is just the splash page.
