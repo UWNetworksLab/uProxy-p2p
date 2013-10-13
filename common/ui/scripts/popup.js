@@ -91,7 +91,8 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       var searchText = $scope.search,
           compareString = c.name.toLowerCase();
       // First, compare filters.
-      if ($scope.filters.online && !c.online) {
+      if (($scope.filters.online && !c.online) ||
+          ($scope.filters.uproxy && !c.canUProxy)) {
         return true;
       }
       // Otherwise, if there is no search text, this contact is visible.
