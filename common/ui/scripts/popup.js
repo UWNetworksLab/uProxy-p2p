@@ -20,12 +20,20 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // Initial filter state.
     $scope.filters = {
-      'all': true,
+      'alpha': true,
       'online': true,
       'myAccess': false,
-      'friendsAccess': false
+      'friendsAccess': false,
+      'uproxy': false
     };
-    $scope.instances = $scope.model.instances;
+
+    $scope.filterTips = {
+      'uproxy': 'Only show contacts with UProxy installed.',
+      'myAccess': 'Show contacts who provide me access.',
+      'friendsAccess': 'Show contacts who use me for access.',
+      'online': 'Show offline contacts.',
+      'alpha': 'Sort alphabetically',
+    };
 
     //
     $scope.currentContact = {};  // Visible for the individual contact page.
@@ -39,22 +47,42 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       return JSON.stringify(contact);
     };
 
-    // Whether UProxy is logged in to *any* network.
-    $scope.loggedIn = function() {
-      return $scope.isOnline('google') || $scope.isOnline('facebook');
-    };
     $scope.splashPage = !$scope.loggedIn();
 
-    // TODO: fix using watchs on the contact of interest. Currently updates are
-    // not correctly propegated.
-    //
+    // On the contacts details page, dynamically update |currentInstance| to
+    // reflect user actions and state changes in the DOM.
+    $scope.updateCurrentInstance = function() {
+      if (!$scope.currentInstance) {
+        return;
+      }
+      $scope.$apply(function() {
+        $scope.currentInstance = $scope.instances[$scope.currentInstance.instanceId];
+      });
+    }
+    // Attach to the App-Extension channel.
+    $scope.onAppData.addListener($scope.updateCurrentInstance);
+
+    // On an update to the roster, update the variously sorted lists.
+    // TODO(finish)
+    $scope.updateSortedContacts = function() {
+      $scope.alphabeticalContacts = []
+      // .sort()
+    };
+    $scope.onAppData.addListener($scope.updateSortedContacts);
+
     // Opening the detailed contact view.
-    $scope.toggleContact = function(c) {
+    $scope.viewContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
-      console.log(c);
-      console.log($scope.model);
+      console.log('current instance ' + $scope.currentInstance);
+      // Watch the instance on the model to keep the UI up to date.
+      // $scope.$watch('instances', function(v) {
+        // $scope.$apply(function() {
+          // $scope.currentInstance = $scope.instanceOfUserId(c.userId);
+        // });
+      // });
       $scope.rosterNudge = true;
+      $scope.notificationSeen(c);
     };
 
     // Toggling the 'options' page which is just the splash page.
@@ -62,12 +90,29 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.splashPage = !$scope.splashPage;
     };
 
+    $scope.toggleFilter = function(filter) {
+      if (undefined === $scope.filters[filter]) {
+        return;
+      }
+      console.log('Toggling ' + filter + ' : ' + $scope.filters[filter]);
+      $scope.filters[filter] = !$scope.filters[filter];
+
+    };
+
+    // Display the help tooltip for the filter.
+    $scope.showFilter = function(filter) {
+      $scope.filterTip = $scope.filterTips[filter];
+      $scope.showFilterTip = true;
+    };
+
     // Multifiter function for determining whether a contact should be hidden.
+    // Returns |true| if contact |c| should *not* appear in the roster.
     $scope.contactIsFiltered = function(c) {
       var searchText = $scope.search,
           compareString = c.name.toLowerCase();
       // First, compare filters.
-      if (!$scope.filters.offline && !c.online) {
+      if (($scope.filters.online && !c.online) ||
+          ($scope.filters.uproxy && !c.canUProxy)) {
         return true;
       }
       // Otherwise, if there is no search text, this contact is visible.

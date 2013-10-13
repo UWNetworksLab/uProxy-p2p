@@ -19,8 +19,26 @@ var onFreedomStateChange = new chrome.Event();
 
 var model = {};  // Singleton angularjs model for either popup or options.
 
+var Icon = function() {
+  this.set = function(path) {
+    console.log('Setting browser icon to: ' + path);
+    chrome.browserAction.setIcon({
+      path: path
+    });
+  };
+  this.label = function(text) {
+    console.log('Setting browser badge to: ' + text);
+    chrome.browserAction.setBadgeText({
+      text: text
+    });
+  };
+};
+
+var icon = new Icon();
+
 freedom.onConnected.addListener(function () {
   freedom.on('state-change', function (patchMsg) {
+    // console.log('Patch: ' + JSON.stringify(patchMsg));
     console.log(patchMsg);
     // if (patchMsg[0].path.indexOf('roster') > 0) console.log(patchMsg);
     onFreedomStateChange.dispatch(patchMsg);

@@ -47,11 +47,12 @@ ul
   background-color: #bbb
 
 .btn
-  border: 1px solid #aaa
+  border: 1px solid #ccc
   color: #333
   background: #fff
   border-radius: 2px
   cursor: pointer
+  @include smooth
 .btn:hover, .btn:focus
   border-color: #999
   box-shadow: 0 1px 3px #aaa
@@ -76,6 +77,7 @@ ul
   cursor: pointer
 
 #header
+  height: 64px
 
 .title
   padding: 0 8px
@@ -92,7 +94,7 @@ ul
 
 #options-btn
   position: absolute
-  top: 4px
+  bottom: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
@@ -103,7 +105,7 @@ ul
   text-decoration: none
   opacity: 0.6
   cursor: pointer
-  #include smooth
+  @include smooth
 #options-btn:active, #options-btn:focus
   opacity: 0.9
 #options-btn:hover
@@ -113,18 +115,17 @@ ul
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
 .tip
-  position: absolute
+  display: inline-block
   margin: 0
   padding: 6px 8px
-  right: 10px
-  width: 300px
+  max-width: 270px
   background-color: #fcfcfc
   font-size: $fontSize * 0.9
   color: #444
   border: 1px solid #eee
   text-align: left
   cursor: default
-  opacity: 1
+  opacity: 0.9
   @include smooth
 
 .tip.ng-hide
@@ -132,20 +133,47 @@ ul
   pointer-events: none
   opacity: 0
 
-// ---------------------------- Login Splash -----------------------------------
+// For centering the tooltip.
+.tool
+  position: absolute
+  display: block
+  width: 100%
+  text-align: center
+
+#filterTooltip
+  position: fixed
+  z-index: 50
+  top: 60px
+  opacity: 0.9
+  @include smooth
+
+#filterTooltip .tip
+  background-color: #000
+  color: #ccc
+
+#filterTooltip.ng-hide
+  display: block !important
+  opacity: 0
+  pointer-events: none
+
+#not-connected
+  text-align: center
+  padding: 16px
+
+//---------------------------- Login Splash -----------------------------------
 #login-splash
   position: absolute
   text-align: center
   padding-top: 30px
+  width: 100%
   height: 100%
   bottom: 0
   z-index: 40
   background-color: #fff
-  @include smooth
+  @include smooth-slow
 #login-splash.ng-hide
   display: block !important
   height: 0
-  opacity: 0
 
 .network-btn
   display: inline-block
@@ -156,6 +184,7 @@ ul
 .uproxy-banner
   font-size: $fontSize * 2
   font-weight: 600
+  margin-top: 23px
   text-shadow: 2px 2px 2px #888
   cursor: default
 .uproxy-banner img
@@ -208,7 +237,7 @@ ul
 #search-btn
   position: absolute
   z-index: 40
-  right: 0
+  right: 4px
   top: 0
   width: 26px
   height: 30px
@@ -222,42 +251,78 @@ ul
   outline: none
 
 #filters
-  position: relative
+  z-index: 20
   display: block
   width: 100%
   background-color: #fafafa
+  height: 30px
   text-align: center
   overflow: hidden
-  z-index: 20
-  padding: 2px
+  padding: 0
   box-shadow: 0 1px 2px #aaa
 
 .filter
   margin: 0
-  padding: 2px 16px
+  padding: 0
   border: none
-  background-color: #fafafa
-  color: #999
+  height: 24px
+  width: 30px
+  line-height: 0
+  background: transparent no-repeat center
+  background-size: contain !important
+  font-size: $fontSize * 1.5
+  font-weight: 900
+  color: #222
+  opacity: 0.4
   @include smooth
-
-.filter:hover
-  background-color: #fbfbfb
-  box-shadow: 0 0 2px #aaa inset
-
 .filter:active, .filter:focus
   outline: none
-  box-shadow: 0 0 3px #888 inset
-  color: #666
+  opacity: 0.3
+.filter:hover
+  cursor: pointer
+  opacity: 0.2
+
+.filter.on
+  opacity: 1.0
+.filter.on:active, .filter.on:focus
+  outline: none
+  opacity: 0.8
+.filter.on:hover
+  cursor: pointer
+  opacity: 0.75
+
+#my-access
+  background-image: url('../icons/arrow-up.png')
+
+#friends-access
+  background-image: url('../icons/arrow-down.png')
+
+#uproxy-filter
+  background-image: url('../icons/uproxy-19.png')
+
+#online-filter
+  background-image: url('../icons/online.png')
 
 // --------------------------- Roster & Contacts -------------------------------
 #roster
-  position: relative
+  width: 100%
   @include smooth
+
+#roster-text
+  position: absolute
+  text-align: center
+  top: 100px
+  width: 80%
+  padding: 10%
+  z-index: 500
+  color: #444
+  text-shadow: 0 2px 2px #ccc
+  pointer-events: none
 
 #contacts-frame
   position: relative
   min-height: 520px
-  white-space: no-wrap
+  white-space: nowrap
   overflow-y: auto
   overflow-x: hidden
   border-top: 1px solid #eee
@@ -279,9 +344,10 @@ ul
 .contacts li
   position: relative
   z-index: 0
+  min-height: 16px
   cursor: default
   padding: 6px 37px
-  white-space: no-wrap
+  white-space: nowrap
   overflow: hidden
   border: 1px solid transparent
   border-left: none
@@ -317,16 +383,30 @@ img.contact-image
 
 .c-icons
   position: absolute
-  right: 4px
+  right: 12px
   color: #222
   font-size: $fontSize * 0.8
   font-weight: 900
-
 .c-icon
   padding: 1px
   @include smooth
 .c-icon:hover
   color: #888
+
+// Red ! shows up on the corner of contacts who have had a change.
+.c-notification
+  position: absolute
+  right: 0
+  bottom: 0
+  background-color: #800
+  color: #fff
+  font-size: $fontSize * 0.6
+  font-weight: 900
+  width: 12px
+  height: 12px
+  line-height: 14px
+  text-align: center
+  opacity: 0.7
 
 img.c-icon
   vertical-align: middle
@@ -334,14 +414,12 @@ img.c-icon
 img.c-icon:hover
   opacity: 0.5
 
-
 #contact-details
   display: inline-block
   position: fixed
-  width: 400px
+  width: 100%
   top: 40px
   left: 0
-  // color: #aaa
   @include smooth
 
 #contact-details.ng-hide
@@ -349,15 +427,57 @@ img.c-icon:hover
   opacity: 0
   left: 400px
 
+.contact-status
+  text-align: center
+  text-shadow: 0px 1px 1px #ccc
+  padding: 8px
+
+.contact-name
+  text-align: center
+
+#contact-details img.contact-image
+  position: relative
+  width: 100px
+  height: 100px
+  margin: 8px
+  border-color: #ddd
+  background-size: contain
+  box-shadow: 2px 3px 5px 1px #ccc
+
+.chat-btn
+  display: inline-block
+  background: transparent url('../icons/chat.png') no-repeat center center
+  background-size: contain
+  border: 1px none #000
+  outline: none
+  padding: 4px
+  width: 40px
+  height: 40px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  @include smooth
+.chat-btn:active, .chat-btn:focus
+  opacity: 0.7
+.chat-btn:hover
+  opacity: 0.3
+
+.instance-actions
+  text-align: center
+
+.instance-actions .btn
+  padding: 8px 16px
+  margin-top: 16px
+  text-shadow: 0 2px #888
+  border-radius: 3px
+
 .client-details
   position: relative
   display: block
   padding: 8px
-  margin: 2px
-  height: 53px
-  width: 82%
+  margin: 8px
   border: 1px solid #eee
-  font-size: $fontSize * 0.5
+  font-size: $fontSize * 0.75
   font-family: monospace
   @include smooth
 
@@ -383,29 +503,13 @@ img.c-icon:hover
   top: -2px
   box-shadow: 0 2px 6px 1px #ddd
 
-.network-details
-  position: relative
-  display: block
-  padding: 8px
-  margin: 2px
-  height: 53px
-  width: 82%
-  border: 1px solid #eee
-  font-size: $fontSize * 0.5
-  font-family: monospace
-  @include smooth
-
-.network-details:hover
-  border-color: #ddd
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
-
 .box-for-proxy
-  display: inline-block
 
 .box-for-client
-  display: inline-block
 
+.instance-id
+  font-size: $fontSize * 0.6
+  font-family: monospace
 
 #status
   position: fixed
@@ -485,12 +589,14 @@ details
   padding: 2%
   padding-bottom: 100px
   overflow-y: auto
-  overflow-x: hidden
+  overflow-x: auto
   background-color: #000
   color: #aff
   pre
     font-size: $fontSize * .6
     margin-bottom: 100px
+    width: 100%
+    white-space: pre-wrap
   form[name=sendMsgForm]
     margin-bottom: 3px
 

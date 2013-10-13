@@ -38,11 +38,15 @@ ul {
   background-color: #bbbbbb; }
 
 .btn {
-  border: 1px solid #aaaaaa;
+  border: 1px solid #cccccc;
   color: #333333;
   background: white;
   border-radius: 2px;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 .btn:hover, .btn:focus {
   border-color: #999999;
@@ -68,6 +72,9 @@ ul {
   outline: none;
   cursor: pointer; }
 
+#header {
+  height: 64px; }
+
 .title {
   padding: 0 8px; }
 
@@ -82,7 +89,7 @@ ul {
 
 #options-btn {
   position: absolute;
-  top: 4px;
+  bottom: 4px;
   right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
@@ -92,7 +99,11 @@ ul {
   height: 20px;
   text-decoration: none;
   opacity: 0.6;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
 
 #options-btn:active, #options-btn:focus {
   opacity: 0.9; }
@@ -101,18 +112,17 @@ ul {
   opacity: 0.3; }
 
 .tip {
-  position: absolute;
+  display: inline-block;
   margin: 0;
   padding: 6px 8px;
-  right: 10px;
-  width: 300px;
+  max-width: 270px;
   background-color: #fcfcfc;
   font-size: 14.4px;
   color: #444444;
   border: 1px solid #eeeeee;
   text-align: left;
   cursor: default;
-  opacity: 1;
+  opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -123,23 +133,52 @@ ul {
   pointer-events: none;
   opacity: 0; }
 
-#login-splash {
+.tool {
   position: absolute;
-  text-align: center;
-  padding-top: 30px;
-  height: 100%;
-  bottom: 0;
-  z-index: 40;
-  background-color: white;
+  display: block;
+  width: 100%;
+  text-align: center; }
+
+#filterTooltip {
+  position: fixed;
+  z-index: 50;
+  top: 60px;
+  opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
 
+#filterTooltip .tip {
+  background-color: black;
+  color: #cccccc; }
+
+#filterTooltip.ng-hide {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none; }
+
+#not-connected {
+  text-align: center;
+  padding: 16px; }
+
+#login-splash {
+  position: absolute;
+  text-align: center;
+  padding-top: 30px;
+  width: 100%;
+  height: 100%;
+  bottom: 0;
+  z-index: 40;
+  background-color: white;
+  -webkit-transition: all 0.5s !important;
+  -moz-transition: all 0.5s !important;
+  -o-transition: all 0.5s !important;
+  transition: all 0.5s !important; }
+
 #login-splash.ng-hide {
   display: block !important;
-  height: 0;
-  opacity: 0; }
+  height: 0; }
 
 .network-btn {
   display: inline-block;
@@ -151,6 +190,7 @@ ul {
 .uproxy-banner {
   font-size: 32px;
   font-weight: 600;
+  margin-top: 23px;
   text-shadow: 2px 2px 2px #888888;
   cursor: default; }
 
@@ -211,7 +251,7 @@ ul {
 #search-btn {
   position: absolute;
   z-index: 40;
-  right: 0;
+  right: 4px;
   top: 0;
   width: 26px;
   height: 30px;
@@ -225,47 +265,87 @@ ul {
   outline: none; }
 
 #filters {
-  position: relative;
+  z-index: 20;
   display: block;
   width: 100%;
   background-color: #fafafa;
+  height: 30px;
   text-align: center;
   overflow: hidden;
-  z-index: 20;
-  padding: 2px;
+  padding: 0;
   box-shadow: 0 1px 2px #aaaaaa; }
 
 .filter {
   margin: 0;
-  padding: 2px 16px;
+  padding: 0;
   border: none;
-  background-color: #fafafa;
-  color: #999999;
+  height: 24px;
+  width: 30px;
+  line-height: 0;
+  background: transparent no-repeat center;
+  background-size: contain !important;
+  font-size: 24px;
+  font-weight: 900;
+  color: #222222;
+  opacity: 0.4;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.filter:hover {
-  background-color: #fbfbfb;
-  box-shadow: 0 0 2px #aaaaaa inset; }
 
 .filter:active, .filter:focus {
   outline: none;
-  box-shadow: 0 0 3px #888888 inset;
-  color: #666666; }
+  opacity: 0.3; }
+
+.filter:hover {
+  cursor: pointer;
+  opacity: 0.2; }
+
+.filter.on {
+  opacity: 1; }
+
+.filter.on:active, .filter.on:focus {
+  outline: none;
+  opacity: 0.8; }
+
+.filter.on:hover {
+  cursor: pointer;
+  opacity: 0.75; }
+
+#my-access {
+  background-image: url("../icons/arrow-up.png"); }
+
+#friends-access {
+  background-image: url("../icons/arrow-down.png"); }
+
+#uproxy-filter {
+  background-image: url("../icons/uproxy-19.png"); }
+
+#online-filter {
+  background-image: url("../icons/online.png"); }
 
 #roster {
-  position: relative;
+  width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+
+#roster-text {
+  position: absolute;
+  text-align: center;
+  top: 100px;
+  width: 80%;
+  padding: 10%;
+  z-index: 500;
+  color: #444444;
+  text-shadow: 0 2px 2px #cccccc;
+  pointer-events: none; }
 
 #contacts-frame {
   position: relative;
   min-height: 520px;
-  white-space: no-wrap;
+  white-space: nowrap;
   overflow-y: auto;
   overflow-x: hidden;
   border-top: 1px solid #eeeeee;
@@ -293,9 +373,10 @@ ul {
 .contacts li {
   position: relative;
   z-index: 0;
+  min-height: 16px;
   cursor: default;
   padding: 6px 37px;
-  white-space: no-wrap;
+  white-space: nowrap;
   overflow: hidden;
   border: 1px solid transparent;
   border-left: none;
@@ -328,7 +409,7 @@ img.contact-image {
 
 .c-icons {
   position: absolute;
-  right: 4px;
+  right: 12px;
   color: #222222;
   font-size: 12.8px;
   font-weight: 900; }
@@ -343,6 +424,20 @@ img.contact-image {
 .c-icon:hover {
   color: #888888; }
 
+.c-notification {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background-color: #880000;
+  color: white;
+  font-size: 9.6px;
+  font-weight: 900;
+  width: 12px;
+  height: 12px;
+  line-height: 14px;
+  text-align: center;
+  opacity: 0.7; }
+
 img.c-icon {
   vertical-align: middle;
   margin-top: -4px; }
@@ -353,7 +448,7 @@ img.c-icon:hover {
 #contact-details {
   display: inline-block;
   position: fixed;
-  width: 400px;
+  width: 100%;
   top: 40px;
   left: 0;
   -webkit-transition: all 0.23s !important;
@@ -366,15 +461,62 @@ img.c-icon:hover {
   opacity: 0;
   left: 400px; }
 
+.contact-status {
+  text-align: center;
+  text-shadow: 0px 1px 1px #cccccc;
+  padding: 8px; }
+
+.contact-name {
+  text-align: center; }
+
+#contact-details img.contact-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 8px;
+  border-color: #dddddd;
+  background-size: contain;
+  box-shadow: 2px 3px 5px 1px #cccccc; }
+
+.chat-btn {
+  display: inline-block;
+  background: transparent url("../icons/chat.png") no-repeat center center;
+  background-size: contain;
+  border: 1px none black;
+  outline: none;
+  padding: 4px;
+  width: 40px;
+  height: 40px;
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+.chat-btn:active, .chat-btn:focus {
+  opacity: 0.7; }
+
+.chat-btn:hover {
+  opacity: 0.3; }
+
+.instance-actions {
+  text-align: center; }
+
+.instance-actions .btn {
+  padding: 8px 16px;
+  margin-top: 16px;
+  text-shadow: 0 2px #888888;
+  border-radius: 3px; }
+
 .client-details {
   position: relative;
   display: block;
   padding: 8px;
-  margin: 2px;
-  height: 53px;
-  width: 82%;
+  margin: 8px;
   border: 1px solid #eeeeee;
-  font-size: 8px;
+  font-size: 12px;
   font-family: monospace;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -406,31 +548,9 @@ img.c-icon:hover {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd; }
 
-.network-details {
-  position: relative;
-  display: block;
-  padding: 8px;
-  margin: 2px;
-  height: 53px;
-  width: 82%;
-  border: 1px solid #eeeeee;
-  font-size: 8px;
-  font-family: monospace;
-  -webkit-transition: all 0.23s !important;
-  -moz-transition: all 0.23s !important;
-  -o-transition: all 0.23s !important;
-  transition: all 0.23s !important; }
-
-.network-details:hover {
-  border-color: #dddddd;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
-
-.box-for-proxy {
-  display: inline-block; }
-
-.box-for-client {
-  display: inline-block; }
+.instance-id {
+  font-size: 9.6px;
+  font-family: monospace; }
 
 #status {
   position: fixed;
@@ -480,12 +600,14 @@ details > *:not(summary) {
   padding: 2%;
   padding-bottom: 100px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   background-color: black;
   color: #aaffff; }
   #debug pre {
     font-size: 9.6px;
-    margin-bottom: 100px; }
+    margin-bottom: 100px;
+    width: 100%;
+    white-space: pre-wrap; }
   #debug form[name=sendMsgForm] {
     margin-bottom: 3px; }
 

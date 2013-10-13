@@ -19,7 +19,6 @@
 
   </head>
   <body ng-cloak ng-controller="OptionsCtrl" id="options">
-
     <h3>{{'options'|i18n}}</h3>
     <div id="options-left">
       <label>
@@ -43,18 +42,16 @@
     <h4>Instances</h4>
     <div id="contacts-frame">
       <ul class="contacts">
-        <li ng-repeat="instance in model.instances">
-          <h4>{{ model.roster[instance.userId].name }}</h4>
-          <p>{{ instance.clientId }}<p>
-          <p class="instance-description">
-            {{ instance.description }}
+        <li ng-repeat='instance in model.instances'>
+          <h4>{{ instance.rosterInfo.name }}</h4>
+          <p>
+            {{ model.instanceToClient[instance.instanceId] }}
+          <br>{{ instance.description }}
+          <br>{{ instance.instanceId }}
+          <br>Notification: {{ instance.notify }}
           </p>
-          <div class="client-details">
-            Instance ID: {{ instance.instanceId }}
-            <p>Key Hash: {{ instance.keyHash }}</p>
-          </div>
           <div class="trust">
-            Trust as Proxy: {{ instance.trust.asProxy }}
+            Proxy: {{ instance.trust.asProxy }}
             <div class="box-for-proxy"
                 ng-switch="instance.trust.asProxy">
               <button class="btn" ng-switch-when="yes"
@@ -67,10 +64,14 @@
                 </button>
                 <span>Pending...</span>
               </div>
-              <button class="btn" ng-switch-when="offered"
-                  ng-click="acceptAccess(instance)">
-                Accept Access
-              </button>
+              <div ng-switch-when="offered">
+                <button class="btn" ng-click="acceptOffer(instance)">
+                  Accept Access
+                </button>
+                <button class="btn" ng-click="declineOffer(instance)">
+                  No Thanks
+                </button>
+              </div>
               <button class="btn" ng-switch-default
                   ng-click="requestAccess(instance)">
                 Request
@@ -78,7 +79,7 @@
             </div>
 
             <br>
-            Trust as Client: {{ instance.trust.asClient }}
+            Client: {{ instance.trust.asClient }}
             <div class="box-for-client"
                 ng-switch="instance.trust.asClient">
               <button class="btn" ng-switch-when="no"
