@@ -15,43 +15,45 @@ var getJSON = function(url, successHandler, errorHandler) {
 };
 
 describe("state-storage", function() {
-  describe("state storage test", function() {
-    it("test1", function() {
-      var exampleState = null;
+  it("Load example storage", function() {
 
-      console.log("test1");
+    jasmine.log("jasmine log test");
 
-/*       runs(function() {
-        getJSON('example-state.json', function(v) {
-          console.log(exampleState);
-          exampleState = v;
-        }, function(e) {
-          console.error("error:",e);
-          throw("Error: " + e);
-        });
+    // jasmine.getEnv().addReporter(new jasmine.ConsoleReporter(console.log));
+
+    var exampleState = null;
+    jasmine.log("jasmine log test");
+    console.log("console log test\n\n");
+
+/*
+     runs(function() {
+      getJSON('common/backend/test/example-state.json', function(v) {
+        console.log(exampleState);
+        exampleState = v;
+      }, function(e) {
+        console.error("error:",e);
+        throw("Error: " + e);
       });
+    });
 
-      waitsFor(function() {
-        return exampleState;
-      }, "exampleState to be read.", 1000);
+    waitsFor(function() {
+      return exampleState !== null;
+    }, "exampleState to be read.", 1000);
+
+
 */
 
+    /* var state = null;
 
+    ("")
 
+    var req = new XMLHttpRequest;
+    req.overrideMimeType("application/json");
+    req.open('GET', "");
+    var target = this;
+    req.onload  = function(x) { state = JSON.parse(x) };
+    req.send();
+*/
 
-      /* var state = null;
-
-      ("")
-
-      var req = new XMLHttpRequest;
-      req.overrideMimeType("application/json");
-      req.open('GET', "");
-      var target = this;
-      req.onload  = function(x) { state = JSON.parse(x) };
-      req.send();
-  */
-
-    });
   });
-
 });  // util

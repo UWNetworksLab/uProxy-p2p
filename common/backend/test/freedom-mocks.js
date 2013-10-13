@@ -21,4 +21,7 @@ MockStorage.prototype.clear = function() {
   return { done: function (callback) { callback(); } };
 };
 
-var storage = new MockStorage();
+var freedom = {};
+freedom.storage = new MockStorage();
+
+var DEBUG = true;

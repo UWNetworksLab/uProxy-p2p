@@ -11,6 +11,9 @@
  */
 'use strict';
 
+// JS Hint
+/* global freedom: false */
+
 // Called once when uproxy.js is loaded.
 // TODO: WebWorkers startup errors are hard to debug.
 // Once fixed, the setTimeout will no longer be needed.
@@ -32,9 +35,6 @@ var log = {
 // passing to manage contacts privilages and initiate proxying.
 var identity = freedom.identity();
 
-// Storage is used for saving settings to the browsre local storage available
-// to the extension.
-var storage = freedom.storage();
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -49,14 +49,6 @@ var server = freedom.uproxyserver();
 // privileged part of freedom, so we can just set this to be freedom.
 var uiChannel = freedom;
 
-// enum of state ids that we need to worry about.
-var StateEntries = {
-  ME: 'me',
-  OPTIONS: 'options',
-  INSTANCEIDS: 'instanceIds', // only exists for local storage state.
-  INSTANCES: 'instances',   // only exists for in-memory state.
-};
-
 var Trust = {
   NO: 'no',
   REQUESTED: 'requested',
@@ -70,130 +62,19 @@ var ProxyState = {
   RUNNING: 'running'
 }
 
+// TODO: consider how this should be defined.
 var VALID_NETWORKS = {
   GOOGLE: 'google',
   FACEBOOK: 'facebook',
 };
 
-//var TrustType = {
-//  PROXY: 'asProxy',
-//  CLIENT: 'asClient'
-//};
+// Storage is used for saving settings to the browsre local storage available
+// to the extension.
+var stateStorage = new UProxyStateStorage();
 
-// Keys that we don't save to local storage each time.
-// Format: each key is a dot-delimited path.
+var state = stateStorage.state;
+
 //
-// TODO(mollying): allow * to denote any-value for a single element of
-// a path.
-//
-// TODO(mollying): doesn't seem to be used, remove?
-var TRANSIENT_STATE_KEYS = [];
-
-// Initial empty state
-var RESET_STATE = {
-  // debugging stuff
-  '_debug': DEBUG,  // debug state.
-  '_msgLog': [],  //
-
-  // A table from network identifier to your status on that network
-  // (online/offline/idle, etc)
-  'identityStatus': {},
-
-  // me : {
-  //   description : string,  // descirption of this installed instance
-  //   instanceId : string,   // id for this installed instance
-  //   keyHash : string,      // hash of your public key for peer connections
-  //   peerAsProxy : string,  // proxying clientId if connected else null
-  //   peersAsClients : [     // clientIds using me as a proxy.
-  //     clientId, ... ]
-  //   [userIdX] : {
-  //     userId : string,     // same as key [userIdX].
-  //     name : string,       // user-friendly name given by network
-  //     url : string         // ?
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string   // unique id for the network connected to.
-  //         status: string
-  //       }, ... clientIdX
-  //     }
-  //   }, ... userIdX
-  // }
-  // Local client's information.
-  'me': {
-    'description': '',
-    'instanceId': '',
-    'keyHash': '',
-    'identities': {},
-    'peerAsProxy': null,
-    'peersAsClients': []
-  },
-
-  // roster: {
-  //   [userIdX]: {
-  //     userId: string,
-  //     name: string,
-  //     url: string,
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string
-  //         status: string
-  //       }, ... clientIdX
-  //     },
-  //   } ... userIdX
-  // }
-  // Merged contact lists from each identity provider.
-  'roster': {},
-
-  // instances: {
-  //   [instanceIdX]: {
-  //     // From Network/identity:
-  //     name: string,
-  //     userId: string,
-  //     network: string,
-  //     url: string,
-  //     // Instance specific
-  //     description: string,
-  //     // annotation: string, // TODO
-  //     instanceId: string,
-  //     keyhash: string,
-  //     trust: {
-  //       asProxy: Trust
-  //       asClient: Trust
-  //     }
-  //     status {
-  //       activeProxy: boolean
-  //       activeClient: boolean
-  //     }
-  //   }
-  // }
-
-  // instanceId -> instance. Active UProxy installations.
-  'instances': {},
-
-  // ID mappings.
-  // TODO: Make these mappings properly properly reflect that an instance can
-  // be connected to multiple networks and therefore have multiple client ids.
-  // TODO: add mappings between networks?
-  'clientToInstance': {},      // instanceId -> clientId
-  'instanceToClient': {},      // clientId -> instanceId
-
-  // Options coming from local storage and setable by the options page.
-  // TODO: put real values in here.
-  'options': {
-    'allowNonRoutableAddresses': false,
-    // See: https://gist.github.com/zziuni/3741933
-    // http://www.html5rocks.com/en/tutorials/webrtc/basics/
-    //   'stun:stun.l.google.com:19302'
-    'stunServers': ['stunServer1', 'stunServer2'],
-    'turnServers': ['turnServer1', 'turnServer2']
-  }
-};
-var state = cloneDeep(RESET_STATE);
-
 var DEFAULT_PROXY_STATUS = {
     proxy: ProxyState.OFF,
     client: ProxyState.OFF
@@ -217,46 +98,6 @@ var DEFAULT_INSTANCE = {
     url: ''
   }
 };
-
-// If one is running UProxy for the first time, or without any available
-// instance data, generate an instance for oneself.
-function _generateMyInstance() {
-  var i, val, hex, id, key, instanceIds = [];
-
-  var me = cloneDeep(RESET_STATE.me);
-
-  // Create an instanceId if we don't have one yet.
-  // Just generate 20 random 8-bit numbers, print them out in hex.
-  // TODO: check use of randomness: why not one big random number that is
-  // serialised?
-  for (i = 0; i < 20; i++) {
-    // 20 bytes for the instance ID.  This we can keep.
-    val = Math.floor(Math.random() * 256);
-    hex = val.toString(16);
-    me.instanceId = me.instanceId +
-        ('00'.substr(0, 2 - hex.length) + hex);
-
-    // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
-    val = Math.floor(Math.random() * 256);
-    hex = val.toString(16);
-
-    me.keyHash = ((i > 0)? (me.keyHash + ':') : '')  +
-        ('00'.substr(0, 2 - hex.length) + hex);
-
-    // TODO: separate this out and use full space of possible names by
-    // using the whole of the .
-    if (i < 4) {
-      id = (i & 1) ? nouns[val] : adjectives[val];
-      if (me.description !== null) {
-        me.description = me.description + " " + id;
-      } else {
-        me.description = id;
-      }
-    }
-  }
-
-  return me;
-}
 
 // --------------------------------------------------------------------------
 //  General UI interaction
@@ -362,8 +203,11 @@ uiChannel.on('login', function(network) {
 
 uiChannel.on('logout', function(network) {
   identity.logout(null, network);
-  state.clientToInstance = {};  // Clear the clientsToInstance table.
-  _saveNetworkState(network, false);
+  // TODO: only remove clients from the network we are logging out of.
+  // Clear the clientsToInstance table.
+  state.clientToInstance = {};
+  state.me.networkDefaults[network].autoconnect = false;
+
 });
 
 uiChannel.on('ignore', function (userId) {
@@ -381,7 +225,7 @@ uiChannel.on('echo', function (msg) {
 
 uiChannel.on('change-option', function (data) {
   state.options[data.key] = data.value;
-  _saveToStorage('options', state.options);
+  stateStorage.saveOptionsToStorage();
   log.debug('saved options ' + JSON.stringify(state.options));
   uiChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
   // TODO: Handle changes that might affect proxying
@@ -429,17 +273,6 @@ uiChannel.on('notification-seen', function (userId) {
   // Don't need to re-sync with UI - expect UI to have done the change.
   // _SyncInstance(instance);
 });
-
-// --------------------------------------------------------------------------
-//  Data management
-// --------------------------------------------------------------------------
-
-function instanceOfUserId(userId) {
-  for (var i in state.instances) {
-    if (state.instances[i].rosterInfo.userId == userId) return state.instances[i];
-  }
-  return null;
-};
 
 // --------------------------------------------------------------------------
 //  Proxying
@@ -632,15 +465,6 @@ function _handleMessage(msgInfo, beingSent) {
   handler(msgInfo, msgInfo.to);
 }
 
-// A simple predicate function to see if we can talk to this client.
-function _isMessageableUproxy(client) {
-  // TODO(uzimizu): Make identification of whether or not this is a uproxy
-  // client more sensible.
-  var retval = (client.status == 'online' || client.status == 'messageable')
-      && (client.clientId.indexOf('/uproxy') > 0);
-  return retval;
-}
-
 // Update data for a user, typically when new client data shows up. Notifies all
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
@@ -709,7 +533,7 @@ function updateUser(newData) {
 // Examine |client| and synchronize instance data if it's a new UProxy client.
 // Returns true if |client| is a valid uproxy client.
 function _checkUProxyClientSynchronization(client) {
-  if (!_isMessageableUproxy(client)) {
+  if (!stateStorage.isMessageableUproxyClient(client)) {
     return false;
   }
   var clientId = client.clientId;
@@ -818,10 +642,7 @@ function receiveInstance(msg) {
     instance.rosterInfo = msg.data.rosterInfo;
     sendConsent(instance);
   }
-  _saveInstance(instanceId);
-  // TODO: optimise to only save when different to what was in storage before.
-  _saveToStorage(StateEntries.INSTANCEIDS,
-      Object.keys(state[StateEntries.INSTANCES]));
+  stateStorage.saveInstance(instance);
 
   // _saveInstance(instanceId, userId);
   // Update UI's view of instances and mapping.
@@ -1010,11 +831,9 @@ function _Login(network) {
 
 server.emit("start");
 // Load state from storage and when done, emit an total state update.
-_loadStateFromStorage(state, function () { });
+_loadStateFromStorage(state, function () {
 
-// Only logon to networks if local storage says we were online previously.
-checkPastNetworkConnection(VALID_NETWORKS.GOOGLE);
-checkPastNetworkConnection(VALID_NETWORKS.FACEBOOK);
+});
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

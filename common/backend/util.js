@@ -21,6 +21,20 @@ FinalCallback.prototype._oneOfManyCallbacks = function () {
   if (!this.callsWaiting) this.finalCallback();
 };
 
+// Creates an object that has only the keys of |restrictionObject| and for each
+// key, 'k', it has the value from |objectToRestrict| if it exists, else it has
+// the valye from restrictionObject.
+function restrictToObject(restrictionObject, objectToRestrict) {
+  var selectedPartsOfObjectToRestrict = {};
+  for (var k in restrictionObject) {
+    if (k in objectToRestrict) {
+      selectedPartsOfObjectToRestrict[k] = objectToRestrict[k];
+    } else {
+      selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
+    }
+  }
+}
+
 /**
  * Convert a freedom promise-style interface into a
  * callback-style interface as used in the Chrome API.
