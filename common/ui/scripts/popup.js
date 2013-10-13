@@ -20,10 +20,11 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // Initial filter state.
     $scope.filters = {
-      'all': true,
+      'alpha': true,
       'online': true,
       'myAccess': false,
-      'friendsAccess': false
+      'friendsAccess': false,
+      'uproxy': false
     };
 
     //
@@ -75,12 +76,22 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.splashPage = !$scope.splashPage;
     };
 
+    $scope.toggleFilter = function(filter) {
+      if (undefined === $scope.filters[filter]) {
+        return;
+      }
+      console.log('Toggling ' + filter + ' : ' + $scope.filters[filter]);
+      $scope.filters[filter] = !$scope.filters[filter];
+
+    };
+
     // Multifiter function for determining whether a contact should be hidden.
+    // Returns |true| if contact |c| should *not* appear in the roster.
     $scope.contactIsFiltered = function(c) {
       var searchText = $scope.search,
           compareString = c.name.toLowerCase();
       // First, compare filters.
-      if (!$scope.filters.offline && !c.online) {
+      if ($scope.filters.online && !c.online) {
         return true;
       }
       // Otherwise, if there is no search text, this contact is visible.

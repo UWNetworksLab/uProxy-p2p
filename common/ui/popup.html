@@ -67,7 +67,7 @@
         </div>
       </section>
 
-      <div ng-hide="splashPage">
+      <div ng-hide="splashPage" tabindex="-1">
         <section id="header">
           <section id="search-section" ng-hide="rosterNudge">
             <input type="text" id="search-contacts" placeholder="search contacts"
@@ -79,12 +79,21 @@
             <button type="search" id="search-btn"></button>
 
             <section id="filters">
-              <button id="all-access" class="filter">All</button>
-              <button id="my-access" class="filter">My Access</button>
-              <button id="friends-access" class="filter">Friends' Access</button>
-              <input type="checkbox" id="offline-filter" class="filter" ng-model="filters.offline">
-                Offline
-              </button>
+              <button id="alpha-filter" class="filter"
+                      ng-class="{on:filters.alpha}"
+                      ng-click="toggleFilter('alpha')">A</button>
+              <button id="my-access" class="filter"
+                      ng-class="{on:filters.myAccess}"
+                      ng-click="toggleFilter('myAccess')"></button>
+              <button id="friends-access" class="filter"
+                      ng-class="{on:filters.friendsAccess}"
+                      ng-click="toggleFilter('friendsAccess')"></button>
+              <button id="uproxy-filter" class="filter"
+                      ng-class="{on:filters.uproxy}"
+                      ng-click="toggleFilter('uproxy')"></button>
+              <button id="online-filter" class="filter"
+                      ng-class="{on:filters.online}"
+                      ng-click="toggleFilter('online')"></button>
             </section>
           </section>
           <section id="contact-header" ng-show="rosterNudge">
