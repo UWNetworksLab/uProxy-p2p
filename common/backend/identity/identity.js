@@ -91,7 +91,13 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
       continuation(ret);
     });
   } else {
-    console.log("Error: identity provider missing for contact: " + to);
+    console.log();
+    try {
+      throw new Error("Error: identity provider missing for contact: " + to +
+          ", current reverse index: " + JSON.stringify(this.reverseIndex));
+    } catch (e) {
+      console.log("call stack: " + e.stack);
+    }
   }
 };
 

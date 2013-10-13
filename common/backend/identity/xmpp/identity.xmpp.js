@@ -113,11 +113,15 @@ IdentityProvider.prototype.getProfile = function(id, continuation) {
 
 // Send a message to someone.
 IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
-  this.client.send(
-      new window.XMPP.Element('message', {
+  try {
+    this.client.send(
+        new window.XMPP.Element('message', {
           to: to,
-          type: 'chat'
-      }).c('body').t(JSON.stringify(msg)));
+          type: 'normal'
+        }).c('body').t(JSON.stringify(msg)));
+  } catch (e) {
+    console.log(e.stack);
+  }
   continuation();
 };
 
