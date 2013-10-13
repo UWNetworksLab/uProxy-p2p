@@ -1,4 +1,4 @@
-state: {
+{
   "_debug": true,
   "_msgLog": [],
   "identityStatus": {
@@ -17,10 +17,10 @@ state: {
       "infmally.uproxytest.1@gmail.com": {
         "userId": "infmally.uproxytest.1@gmail.com",
         "network": "google",
-        "name": "infmally.uproxytest.1@gmail.com",
+        "name": "Inf Mally",
         "clients": {
-          "infmally.uproxytest.1@gmail.com/uproxy": {
-            "clientId": "infmally.uproxytest.1@gmail.com/uproxy",
+          "91eth6ezhyqdy0uguqkeoih10y@public.talk.google.com/uproxy17F4BF7F": {
+            "clientId": "91eth6ezhyqdy0uguqkeoih10y@public.talk.google.com/uproxy17F4BF7F",
             "network": "google",
             "status": "messageable"
           }

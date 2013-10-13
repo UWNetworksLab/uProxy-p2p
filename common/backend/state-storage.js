@@ -4,152 +4,40 @@
  *   scraps/local_storage_example.js
  */
 // Stuff for jshint.
+// -- uproxy.js
 /* global freedom: false */
 /* global console: false */
-/* global isDefined: false */
-/* global FinalCallback: false */
+/* global log: false */
+// -- nouns-and-adjectives.js
 /* global nouns: false */
 /* global adjectives: false */
-/* global log: false */
-/* global DEFAULT_PROXY_STATUS: false */
+// -- copnstants.js
 /* global DEBUG: false */
+/* global DEFAULT_LOAD_STATE: false */
+/* global DEFAULT_SAVE_STATE: false */
+/* global DEFAULT_INSTANCE: false */
+/* global DEFAULT_PROXY_STATUS: false */
+/* global StateEntries: false */
+// -- util.js
+/* global isDefined: false */
+/* global FinalCallback: false */
 /* global cloneDeep: false */
 /* global restrictToObject: false */
-/* global state: true */
 "use strict";
-
-// --------------------------------------------------------------------------
-// Initial empty state
-// --------------------------------------------------------------------------
-// enum of state ids that we need to worry about.
-var StateEntries = {
-  ME: 'me',
-  OPTIONS: 'options',
-  INSTANCEIDS: 'instanceIds', // only exists for local storage state.
-  INSTANCES: 'instances',   // only exists for in-memory state.
-};
-
-var RESET_STATE = {
-  // debugging stuff
-  '_debug': DEBUG,  // debug state.
-  '_msgLog': [],  //
-
-  // A table from network identifier to your status on that network
-  // (online/offline/idle, etc)
-  'identityStatus': {},
-
-  // me : {
-  //   description : string,  // descirption of this installed instance
-  //   instanceId : string,   // id for this installed instance
-  //   keyHash : string,      // hash of your public key for peer connections
-  //   peerAsProxy : string,  // proxying clientId if connected else null
-  //   peersAsClients : [     // clientIds using me as a proxy.
-  //     clientId, ... ]
-  //   networkDefaults : {    // network connection defaults
-  //     [networkNameX]: {    // identifier for the network
-  //       autoconnect: boolean  // if true connects at startup
-  //     }, ...
-  //   },
-  //   [userIdX] : {
-  //     userId : string,     // same as key [userIdX].
-  //     name : string,       // user-friendly name given by network
-  //     url : string         // ?
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string   // unique id for the network connected to.
-  //         status: string
-  //       }, ...
-  //     }
-  //   }, ... // userIdX
-  // }
-  // Local client's information.
-  'me': {
-    'description': '',
-    'instanceId': '',
-    'keyHash': '',
-    'identities': {},
-    'peerAsProxy': null,
-    'peersAsClients': [],
-    'networkDefaults' : {}
-  },
-
-  // roster: {
-  //   [userIdX]: {
-  //     userId: string,
-  //     name: string,
-  //     url: string,
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string
-  //         status: string
-  //       }, ... clientIdX
-  //     },
-  //   } ... userIdX
-  // }
-  // Merged contact lists from each identity provider.
-  'roster': {},
-
-  // instances: {
-  //   [instanceIdX]: {
-  //     // From Network/identity:
-  //     name: string,
-  //     userId: string,
-  //     network: string,
-  //     url: string,
-  //     // Instance specific
-  //     description: string,
-  //     // annotation: string, // TODO
-  //     instanceId: string,
-  //     keyhash: string,
-  //     trust: {
-  //       asProxy: Trust
-  //       asClient: Trust
-  //     }
-  //     status {
-  //       activeProxy: boolean
-  //       activeClient: boolean
-  //     }
-  //   }
-  // }
-
-  // instanceId -> instance. Active UProxy installations.
-  'instances': {},
-
-  // ID mappings.
-  // TODO: Make these mappings properly properly reflect that an instance can
-  // be connected to multiple networks and therefore have multiple client ids.
-  // TODO: add mappings between networks?
-  'clientToInstance': {},      // instanceId -> clientId
-  'instanceToClient': {},      // clientId -> instanceId
-
-  // Options coming from local storage and setable by the options page.
-  // TODO: put real values in here.
-  'options': {
-    // TODO: connect this option to the actual proxy config code.
-    'allowNonRoutableAddresses': false,
-    // See: https://gist.github.com/zziuni/3741933
-    // http://www.html5rocks.com/en/tutorials/webrtc/basics/
-    //   'stun:stun.l.google.com:19302'
-    // Public Google Stun server:
-    //
-    'stunServers': ['stun:stun.l.google.com:19302',
-                    'stun.services.mozilla.com'],
-    // TODO: These may need to be set dynamically. see:
-    // https://code.google.com/p/webrtc/source/browse/trunk/samples/js/apprtc/apprtc.py#430
-    // e.g. https://computeengineondemand.appspot.com/turn?username=UNIQUE_IDENTIFIER_FROM_ANYWHERE&key=4080218913
-    'turnServers': ['turnServer1', 'turnServer2']
-  }
-};
 
 // --------------------------------------------------------------------------
 function UProxyState() {
   this.storage = freedom.storage();
-  this.state = cloneDeep(RESET_STATE);
+  this.state = cloneDeep(DEFAULT_LOAD_STATE);
 }
+
+UProxyState.prototype.reset = function(callback) {
+  this.state = cloneDeep(DEFAULT_LOAD_STATE);
+  this.storage.clear().done(function() {
+    console.log("Cleared storage.");
+    this.loadStateFromStorage(this.state, callback);
+  }.bind(this));
+};
 
 // --------------------------------------------------------------------------
 // Wrapper functions for Freedom storage API to work with json instead of
@@ -181,7 +69,7 @@ UProxyState.prototype._saveKeyAsJson = function (key, val, callback) {
 UProxyState.prototype._generateMyInstance = function () {
   var i, val, hex, id, key;
 
-  var me = cloneDeep(RESET_STATE.me);
+  var me = cloneDeep(DEFAULT_LOAD_STATE.me);
 
   // Create an instanceId if we don't have one yet.
   // Just generate 20 random 8-bit numbers, print them out in hex.
@@ -231,34 +119,25 @@ UProxyState.prototype.isMessageableUproxyClient = function(client) {
 //  Users's profile for this instance
 // --------------------------------------------------------------------------
 // Saving your "me" state involves saving all fields that are state.me & that
-// are in the RESET_STATE. RESET_STATE defines all fields that should be saved
-// . If something is dynamic, it is not in RESET_STATE and should not be
-// saved.
+// are in the DEFAULT_SAVE_STATE.
 UProxyState.prototype.saveMeToStorage = function (callback) {
-  this._saveKeyAsJson(StateEntries.ME,
-                      restrictToObject(RESET_STATE.me, this.state.me),
-                      callback);
+  this._saveKeyAsJson(
+      StateEntries.ME,
+      restrictToObject(cloneDeep(DEFAULT_SAVE_STATE.me), this.state.me),
+      callback);
 };
 
 UProxyState.prototype.loadMeFromStorage = function (callback) {
-  this._loadKeyAsJson(StateEntries.ME, function(v) {
-    if (v === null) {
+  this._loadKeyAsJson(StateEntries.ME, function(me) {
+    if (me === null) {
       this.state.me = this._generateMyInstance();
-      this._saveMeToStorage(callback);
+      this.saveMeToStorage(callback);
       log.debug("****** Saving new self-definition *****");
       log.debug("  state.me = " + JSON.stringify(this.state.me));
     } else {
       log.debug("++++++ Loaded self-definition ++++++");
-      log.debug("  state.me = " + JSON.stringify(v));
-      this.state.me = v;
-      // Put back any fields that weren't saved (say, from a version change).
-      for (var k in RESET_STATE.me) {
-        if (!(k in this.state.me)) {
-          log.debug(" -- adding back property " + k);
-          this.state.me[k] = cloneDeep(RESET_STATE.me[k]);
-        }
-      }
-      log.debug("  state.me, post repair = " + JSON.stringify(this.state.me));
+      log.debug("  state.me = " + JSON.stringify(me));
+      this.state.me = restrictToObject(this.state.me, me);
       if(callback) { callback(); }
     }
   }.bind(this), null);
@@ -268,19 +147,22 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
 //  Options
 // --------------------------------------------------------------------------
 UProxyState.prototype.saveOptionsToStorage = function(callback) {
-  this._saveKeyAsJson(StateEntries.ME,
-                      restrictToObject(RESET_STATE.options, this.state.options),
-                      callback);
+  this._saveKeyAsJson(
+      StateEntries.OPTIONS,
+      restrictToObject(cloneDeep(DEFAULT_SAVE_STATE.options), this.state.options),
+      callback);
 };
 
 UProxyState.prototype.loadOptionsFromStorage = function(callback) {
   this._loadKeyAsJson(StateEntries.OPTIONS, function (loadedOptions) {
-    this.state.options = loadedOptions;
-  }.bind(this), RESET_STATE.options);
+    this.state.options =
+        restrictToObject(cloneDeep(DEFAULT_LOAD_STATE.options), loadedOptions);
+    if (callback) { callback(); }
+  }.bind(this), {});
 };
 
 // --------------------------------------------------------------------------
-//  Instances
+//  Syncronizing Instances
 // --------------------------------------------------------------------------
 // Give back the instance from a user ID (currently by searching through all
 // user ids)
@@ -293,8 +175,8 @@ UProxyState.prototype.instanceOfUserId = function(userId) {
   return null;
 };
 
-// Called when a new userId is available. CHECK: (or we get a new instance
-// message). We check to see if we need to update our instance information.
+// Called when a new userId is available. & when a new instance
+// happens. We check to see if we need to update our instance information.
 // Assumes that an instacne already exists for this userId.
 UProxyState.prototype.syncInstanceFromUserID = function(userId) {
   var user = this.state.roster[userId];
@@ -347,6 +229,51 @@ UProxyState.prototype.syncRosterFromInstanceId = function(instanceId) {
   }
 };
 
+
+// Called when a new userId is available. & when a new instance
+// happens. We check to see if we need to update our instance information.
+// Assumes that an instacne already exists for this userId.
+UProxyState.prototype.syncInstanceFromInstanceMessage =
+    function(userId, clientId, data) {
+  var instanceId = data.instanceId;
+
+  // Before everything, remember the clientId - instanceId relation.
+  var oldClientId = this.state.instanceToClient[instanceId];
+
+  // Update the client instance relationship.
+  this.state.clientToInstance[clientId] = instanceId;
+  this.state.instanceToClient[instanceId] = clientId;
+
+  // Obsolete client will never have further communications.
+  if (oldClientId && (oldClientId != clientId)) {
+    log.debug('Deleting obsolete client ' + oldClientId);
+    var user = this.state.roster[userId];
+    if (user) {
+      delete user.clients[oldClientId];
+    } else {
+      console.error('Warning: no user for ' + userId);
+    }
+    delete this.state.clientToInstance[oldClientId];
+  }
+
+  if (instanceId in this.state.instances) {
+    this.state.instances[instanceId].rosterInfo = data.rosterInfo;
+  } else {
+    var instance = cloneDeep(DEFAULT_INSTANCE);
+    instance.instanceId = data.instanceId;
+    instance.description = data.description;
+    instance.keyHash = data.keyHash;
+    instance.rosterInfo = data.rosterInfo;
+    log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
+    this.state.instances[instanceId] = instance;
+  }
+
+  this.syncRosterFromInstanceId(instanceId);
+};
+
+// --------------------------------------------------------------------------
+//  Loading & Saving Instances
+// --------------------------------------------------------------------------
 // Note: users of this assume that the callback *will* be calld if specified.
 UProxyState.prototype.loadInstanceFromId = function(instanceId, callback) {
   this._loadKeyAsJson("instance/" + instanceId, function(instance) {
@@ -354,7 +281,7 @@ UProxyState.prototype.loadInstanceFromId = function(instanceId, callback) {
       console.error("Load error: instance " + instanceId + " not found");
     } else {
       console.log("instance " + instanceId + " loaded");
-      instance.status = DEFAULT_PROXY_STATUS;
+      instance.status = cloneDeep(DEFAULT_PROXY_STATUS);
       this.state.instances[instanceId] = instance;
       this.syncRosterFromInstanceId(instanceId);
     }
@@ -364,13 +291,13 @@ UProxyState.prototype.loadInstanceFromId = function(instanceId, callback) {
 
 // Loads all instances from storage. Takes in a FinalCallbacker to make sure
 // that the desired callback is called when the last instance is loaded.
-UProxyState.prototype._loadInstances = function(finalCallbacker) {
+UProxyState.prototype.loadAllInstances = function(callback) {
+  var finalCallbacker = new FinalCallback(callback);
   // Set the state |instances| from the local storage entries.
   // Load each instance in instance IDs.
   this._loadKeyAsJson(StateEntries.INSTANCEIDS, function(instanceIds) {
     for (var i = 0; i < instanceIds.length; i++) {
-      this.loadInstanceFromId(
-          instanceIds[i], finalCallbacker.makeCountedCallback());
+      this.loadInstanceFromId(i, finalCallbacker.makeCountedCallback());
     }
   }.bind(this), []);
 };
@@ -378,11 +305,12 @@ UProxyState.prototype._loadInstances = function(finalCallbacker) {
 // Save the instance to local storage. Assumes that both the Instance
 // notification and XMPP user and client information exist and are up-to-date.
 // |instanceId| - string instance identifier (a 40-char hex string)
-// |userId| - The userId such as 918a2e3f74b69c2d18f34e6@public.talk.google.com.
 UProxyState.prototype.saveInstance = function(instanceId, callback) {
-  // TODO: optimise to only save when different to what was in storage before.
+  var finalCallbacker = new FinalCallback(callback);
+  // TODO: optimise to only save when different to what was in storage;
   this._saveKeyAsJson(StateEntries.INSTANCEIDS,
-      Object.keys(state[StateEntries.INSTANCES]), callback);
+      Object.keys(this.state[StateEntries.INSTANCES]),
+      finalCallbacker.makeCountedCallback());
 
   var instance = this.state.instances[instanceId];
   // Be obscenely strict here, to make sure we don't propagate buggy
@@ -399,11 +327,28 @@ UProxyState.prototype.saveInstance = function(instanceId, callback) {
     notify: Boolean(instance.notify),
     rosterInfo: instance.rosterInfo
   };
-  log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
+  log.debug('saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instanceDataToSave));
-  this._saveKeyAsJson("instance/" + instanceId, instanceDataToSave, callback);
+  this._saveKeyAsJson("instance/" + instanceId, instanceDataToSave,
+      finalCallbacker.makeCountedCallback());
 };
 
+UProxyState.prototype.saveAllInstances = function(callback) {
+  var finalCallbacker = new FinalCallback(callback);
+  for(var instanceId in this.state.instances) {
+    this.saveInstance(instanceId,
+        finalCallbacker.makeCountedCallback());
+  }
+  // Note that despite the fact that the instanceIds are written when we write
+  // each instance, we need to write them again anyway, incase they got removed,
+  // in which case we need to write the empty list.
+  this._saveKeyAsJson(StateEntries.INSTANCEIDS,
+      Object.keys(this.state[StateEntries.INSTANCES]),
+      finalCallbacker.makeCountedCallback());
+};
+
+// --------------------------------------------------------------------------
+//  Whole state
 // --------------------------------------------------------------------------
 // Load all aspects of the state concurrently. Note: we make the callback only
 // once the last of the loading operations has completed. We do this using the
@@ -412,7 +357,15 @@ UProxyState.prototype.loadStateFromStorage = function(callback) {
   var finalCallbacker = new FinalCallback(callback);
   this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
   this.loadOptionsFromStorage(finalCallbacker.makeCountedCallback());
-  this._loadInstances(finalCallbacker);
+  this.loadAllInstances(finalCallbacker.makeCountedCallback());
 };
+
+UProxyState.prototype.saveStateToStorage = function(callback) {
+  var finalCallbacker = new FinalCallback(callback);
+  this.saveMeToStorage(finalCallbacker.makeCountedCallback());
+  this.saveOptionsToStorage(finalCallbacker.makeCountedCallback());
+  this.saveAllInstances(finalCallbacker.makeCountedCallback());
+};
+
 
 // --------------------------------------------------------------------------

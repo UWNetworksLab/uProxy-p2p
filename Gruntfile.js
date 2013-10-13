@@ -81,8 +81,10 @@ var firefox_concat_src = [
 //var sources = ['common/backend/spec/*.js'];
 var sourcesToTest = [
   'common/backend/test/freedom-mocks.js',
-  'common/backend/state-Storage.js',
-  'common/backend/util.js'
+  'common/backend/util.js',
+  'common/backend/nouns-and-adjectives.js',
+  'common/backend/constants.js',
+  'common/backend/state-Storage.js'
 ];
 
 module.exports = function(grunt) {

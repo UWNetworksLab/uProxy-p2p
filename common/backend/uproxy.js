@@ -19,7 +19,7 @@
 // Once fixed, the setTimeout will no longer be needed.
 
 /*global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives */   // for jslint.
-var DEBUG = true; // XXX get this from somewhere else
+
 console.log('Uproxy backend, running in worker ' + self.location.href);
 
 var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
@@ -35,7 +35,6 @@ var log = {
 // passing to manage contacts privilages and initiate proxying.
 var identity = freedom.identity();
 
-
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
 // through the peer connection.
@@ -49,55 +48,11 @@ var server = freedom.uproxyserver();
 // privileged part of freedom, so we can just set this to be freedom.
 var uiChannel = freedom;
 
-var Trust = {
-  NO: 'no',
-  REQUESTED: 'requested',
-  OFFERED: 'offered',
-  YES: 'yes'
-};
-
-var ProxyState = {
-  OFF: 'off',
-  READY: 'ready',
-  RUNNING: 'running'
-}
-
-// TODO: consider how this should be defined.
-var VALID_NETWORKS = {
-  GOOGLE: 'google',
-  FACEBOOK: 'facebook',
-};
-
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
 var stateStorage = new UProxyStateStorage();
 
 var state = stateStorage.state;
-
-//
-var DEFAULT_PROXY_STATUS = {
-    proxy: ProxyState.OFF,
-    client: ProxyState.OFF
-};
-
-// Instance object.
-var DEFAULT_INSTANCE = {
-  instanceId: null,  // Primary key.
-  keyHash: null,
-  trust: {
-    asProxy: Trust.NO,
-    asClient: Trust.NO
-  },
-  status: DEFAULT_PROXY_STATUS,
-  description: '',
-  notify: false,      // Whether UI should show state-change notification.
-  rosterInfo: {       // Info corresponding to its roster entry.
-    userId: '',
-    name: '',
-    network: '',
-    url: ''
-  }
-};
 
 // --------------------------------------------------------------------------
 //  General UI interaction
@@ -118,19 +73,16 @@ function sendFullStateToUI() {
 };
 
 // Define freedom bindings.
-uiChannel.on('reset', function () { reset(); });
+uiChannel.on('reset', reset);
 
 // Logs out of networks and resets data.
 function reset() {
   log.debug('reset');
   identity.logout(null, null);
-  state = cloneDeep(RESET_STATE);
-  storage.clear().done(function() {
-    console.log("Cleared storage.");
-    _loadStateFromStorage(state, function () {
-      console.log("Emiting a state-change");
-      sendFullStateToUI();
-    });
+  stateStorage.reset(function() {
+    // TODO: refactor so this isn't needed.
+    state = stateStorage.state;
+    sendFullStateToUI();
   });
 }
 
@@ -138,9 +90,7 @@ function reset() {
 // The intent is to reset its model - but this may or may not always be
 // necessary. Improvements to come.
 uiChannel.on('open-popup', function () {
-  log.debug('open-popup');
-  log.debug('state:', state);
-  // Send the extension the full state.
+  log.debug('open-popup. state:', state);
   sendFullStateToUI();
 });
 
@@ -234,7 +184,6 @@ uiChannel.on('change-option', function (data) {
 // Updating our own UProxy instance's description.
 uiChannel.on('update-description', function (data) {
   state.me.description = data;  // UI side already up-to-date.
-  _fetchMyInstance(true);       // Reset local instance data.
 
   // TODO(uzimizu): save to storage
   var payload = JSON.stringify({
@@ -246,9 +195,7 @@ uiChannel.on('update-description', function (data) {
   // Send the new description to ALL currently online friend instances.
   for (var instanceId in state.instances) {
     var clientId = state.instanceToClient[instanceId];
-    if (!clientId)  // || 'offline' == state.roster[state.instances[instanceId]].clients[clientId].status)
-      continue;
-    identity.sendMessage(clientId, payload);
+    if (clientId) identity.sendMessage(clientId, payload);
   }
 });
 
@@ -269,9 +216,9 @@ uiChannel.on('notification-seen', function (userId) {
   }
   // _removeNotification(user);
   // instance.notify = false;
-  // _saveInstance(id);
+  // stateStorage.saveInstance(id);
   // Don't need to re-sync with UI - expect UI to have done the change.
-  // _SyncInstance(instance);
+  // _syncInstanceUI(instance);
 });
 
 // --------------------------------------------------------------------------
@@ -311,7 +258,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     log.error('Instance ' + peerInstanceId + ' does not exist! Cannot proxy...')
     return false;
   }
-  if ('yes' != state.instances[peerInstanceId].trust.asProxy) {
+  if (Trust.YES != state.instances[peerInstanceId].trust.asProxy) {
     log.debug('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
@@ -320,7 +267,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   _SyncUI('/me/peerAsProxy', peerInstanceId);
   instance.status.proxy = ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
-  _SyncInstance(instance, 'status');
+  _syncInstanceUI(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
@@ -345,7 +292,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
       // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
   instance.status.proxy = ProxyState.OFF;
-  _SyncInstance(instance, 'status');
+  _syncInstanceUI(instance, 'status');
 }
 
 // peerconnection-client -- sent from client on other side.
@@ -399,7 +346,8 @@ uiChannel.on('instance-trust-change', function (data) {
 // |received| - boolean of source of this action.
 function _updateTrust(instanceId, action, received) {
   received = received || false;
-  var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ? !received : received;
+  var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ?
+      !received : received;
   var trustValue = TrustOp[action];
   var instance = state.instances[instanceId];
   if (!instance) {
@@ -412,7 +360,9 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   // Update UI. TODO(uzimizu): Local storage as well?
-  _SyncInstance(instance);
+  stateStorage.saveInstance(instanceId);
+  stateStorage.syncRosterFromInstanceId(instanceId);
+
   // uiChannel.emit('state-change', [{
       // op: 'replace', path: '/instances/' + instance.instanceId, value: instance
   // }]);
@@ -445,11 +395,11 @@ function _handleMessage(msgInfo, beingSent) {
     if (!instanceId) {
       // TODO(uzimizu): Attach instanceId to the message and verify.
       log.error('Could not find instance for the trust modification!');
-      return false;
+      return;
     }
     _addNotification(instanceId);
     _updateTrust(instanceId, msgType, true);  // received = true
-    return true;
+    return;
   }
 
   // Other type of message - instance or proxy state update.
@@ -460,7 +410,7 @@ function _handleMessage(msgInfo, beingSent) {
   }
   if (!handler) {
     log.error('No handler for sent message type: ' + msgType);
-    return false;
+    return;
   }
   handler(msgInfo, msgInfo.to);
 }
@@ -524,7 +474,6 @@ function updateUser(newData) {
       path: '/roster/' + userId,
       value: user
   }]);
-  return true;
 }
 
 // TODO(uzimizu): Figure out best way to request new users to install UProxy if
@@ -550,51 +499,29 @@ function _checkUProxyClientSynchronization(client) {
   return true;
 }
 
-
 // --------------------------------------------------------------------------
 //  Instance - Client mapping and consent
 // --------------------------------------------------------------------------
-// The instance data for the local UProxy can be cached, since it is typically
-// the same unless something like |description| is explicitly updated. Consent
-// bits are sent individually, after initial instance notifications.
-function _getMyId() {
-  for (var id in state.me.identities) {
-    return id;
-  }
-}
-
-var _myInstanceData = null;
-function _fetchMyInstance(resetCache) {
-  resetCache = resetCache || false;
-  if (!_myInstanceData || resetCache) {
-      var me = state.me; // state.me.identities[_getMyId()];
-    _myInstanceData = JSON.stringify({
-      type: 'notify-instance',
-      instanceId: '' + state.me.instanceId,
-      description: '' + state.me.description,
-      keyHash: '' + state.me.keyHash,
-      rosterInfo: {
-        userId: me.userId,
-        name: me.name,
-        network: me.network,
-        url: me.url
-      }
-    });
-    log.debug('preparing new instance payload.');
-    log.debug(JSON.stringify(me));
-    log.debug(_myInstanceData);
-  }
-  return _myInstanceData;
+function makeMyInstanceMessage() {
+  return JSON.stringify({
+    type: 'notify-instance',
+    instanceId: '' + state.me.instanceId,
+    description: '' + state.me.description,
+    keyHash: '' + state.me.keyHash,
+    rosterInfo: {
+      userId: state.me.userId,
+      name: state.me.name,
+      network: state.me.network,
+      url: state.me.url
+    }
+  });
 }
 
 // Send a notification about my instance data to a particular clientId.
 // Assumes |client| corresponds to a valid UProxy instance, but does not assume
 // that we've received the other side's Instance data yet.
 function sendInstance(client) {
-  if ('manual' == client.network) {
-    return false;
-  }
-  var instancePayload = _fetchMyInstance();
+  var instancePayload = makeMyInstanceMessage();
   log.debug(JSON.stringify(instancePayload));
   identity.sendMessage(client.clientId, instancePayload);
   return true;
@@ -609,43 +536,24 @@ function sendInstance(client) {
 // not (yet) in the roster.
 function receiveInstance(msg) {
   log.debug('receiveInstance(from: ' + msg.fromUserId + ')');
-  var instanceId  = msg.data.instanceId,
-      userId      = msg.fromUserId,
-      clientId    = msg.fromClientId,
-      oldClientId = state.instanceToClient[instanceId],
-      instanceOp  = 'replace';  // Intended JSONpatch operation.
+  var instanceId  = msg.data.instanceId;
+  var userId      = msg.fromUserId;
+  var clientId    = msg.fromClientId;
 
-  // Before everything, remember the clientId - instanceId relation.
-  state.clientToInstance[clientId] = instanceId;
-  state.instanceToClient[instanceId] = clientId;
+  // Intended JSONpatch operation.
+  var instanceOp  = (instanceId in state.instances) ? 'replace' : 'add';
 
-  // Obsolete client will never have further communications.
-  if (oldClientId && (oldClientId != clientId)) {
-    log.debug('Deleting obsolete client ' + oldClientId);
-    var user = state.roster[userId];
-    if (user) {
-      delete user.clients[oldClientId];
-    } else {
-      log.debug('Warning: no user for ' + userId);
-    }
-    delete state.clientToInstance[oldClientId];
+  // Update the local instance information.
+  stateStorage.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
+  stateStorage.saveInstance(instanceId);
+
+  // If we've had relationships to this instance, send them our consent bits.
+  if (instanceOp == 'replace') {
+    sendConsent(state.instances[instanceId]);
   }
 
-  // Update the local instance table.
-  var instance = state.instances[instanceId];
-  if (!instance) {
-    instanceOp = 'add';
-    instance = _prepareNewInstance(msg.data);
-    state.instances[instanceId] = instance;
-  } else {
-    // If we've had relationships to this instance, send them our consent bits.
-    instance.rosterInfo = msg.data.rosterInfo;
-    sendConsent(instance);
-  }
-  stateStorage.saveInstance(instance);
-
-  // _saveInstance(instanceId, userId);
   // Update UI's view of instances and mapping.
+  // TODO: This can probably be made smaller.
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
@@ -656,17 +564,6 @@ function receiveInstance(msg) {
     { op: 'replace', path: '/instanceToClient', value: state.instanceToClient }
   ]);
   return true;
-}
-
-// Prepare and return new instance object. Assumes new |instanceId|.
-function _prepareNewInstance(data) {
-  var instance = DEFAULT_INSTANCE;
-  instance.instanceId = data.instanceId;
-  instance.description = data.description;
-  instance.keyHash = data.keyHash;
-  instance.rosterInfo = data.rosterInfo;
-  log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
-  return instance;
 }
 
 // Send consent bits to re-synchronize consent with remote |instance|.
@@ -708,18 +605,18 @@ function receiveConsent(msg) {
   var oldTrustAsClient = instance.trust.asClient;
   var myConsent = _determineConsent(instance.trust);
   instance.trust.asProxy = consent.asProxy?
-      (myConsent.asClient? 'yes' : 'offered') :
-      (myConsent.asClient? 'requested' : 'no');
+      (myConsent.asClient? Trust.YES : Trust.OFFERED) :
+      (myConsent.asClient? Trust.REQUESTED : Trust.NO);
   instance.trust.asClient = consent.asClient?
-      (myConsent.asProxy? 'yes' : 'requested') :
-      (myConsent.asProxy? 'offered' : 'no');
+      (myConsent.asProxy? Trust.TES : Trust.REQUESTED) :
+      (myConsent.asProxy? Trust.OFFERED : Trust.NO);
   // Apply state change notification if the trust state changed.
   if (oldTrustAsProxy != instance.trust.asProxy ||
       oldTrustAsClient != instance.trust.asClient) {
     _addNotification(instanceId);
   }
-  _saveInstance(instanceId);
-  _SyncInstance(instance, 'trust');
+  stateStorage.saveInstance(instanceId);
+  _syncInstanceUI(instance, 'trust');
   return true;
 }
 
@@ -729,8 +626,8 @@ function receiveConsent(msg) {
 // consent to being their client. If the local state for trusting them to
 // be our client is Yes or Offered, we consent to being their proxy.
 function _determineConsent(trust) {
-  return { asProxy:  ["yes", "offered"].indexOf(trust.asClient) >= 0,
-           asClient: ["yes", "requested"].indexOf(trust.asProxy) >= 0 };
+  return { asProxy:  [Trust.YES, Trust.OFFERED].indexOf(trust.asClient) >= 0,
+           asClient: [Trust.YES, Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
 }
 
 function _validateKeyHash(keyHash) {
@@ -747,8 +644,8 @@ function _addNotification(instanceId) {
     return false;
   }
   instance.notify = true;
-  _saveInstance(instanceId);
-  _SyncInstance(instance, 'notify');
+  stateStorage.saveInstance(instanceId);
+  _syncInstanceUI(instance, 'notify');
   var user = state.roster[instance.rosterInfo.userId];
   if (!user) {
     console.error('User does not exist for instance ' + instance);
@@ -774,8 +671,8 @@ function _removeNotification(instanceId) {
     return false;
   }
   instance.notify = false;
-  _saveInstance(instanceId);
-  _SyncInstance(instance, 'notify');
+  stateStorage.saveInstance(instanceId);
+  _syncInstanceUI(instance, 'notify');
   return true;
 }
 
@@ -792,7 +689,7 @@ function handleUpdateDescription(msg) {
   }
   instance.description = description;
   // _SyncUI('/instances/' + instanceId + '/description', description);
-  _SyncInstance(instance, 'description');
+  _syncInstanceUI(instance, 'description');
   return true;
 }
 
@@ -808,11 +705,12 @@ function _SyncUI(path, value, op) {
   }]);
 }
 // Helper to consolidate syncing the instance on the UI side.
-function _SyncInstance(instance, field) {
+function _syncInstanceUI(instance, field) {
   var fieldStr = field? '/' + field : '';
   _SyncUI('/instances/' + instance.instanceId + fieldStr,
           field? instance[field] : instance);
 }
+
 
 function _Login(network) {
   network = network || undefined;
@@ -824,15 +722,24 @@ function _Login(network) {
     network: network
   }, sendFullStateToUI);
   if (network) {
-    _saveNetworkState(network, true);
+    stateStorage.me.networkDefaults[network].autoconnect = true;
+  } else {
+    stateStorage.me.networkDefaults[network].autoconnect = false;
   }
+  stateStorage.saveMeToStorage();
 }
 
 
 server.emit("start");
-// Load state from storage and when done, emit an total state update.
-_loadStateFromStorage(state, function () {
-
+// Load state from storage and when done login to relevant networks and
+// emit an total state update.
+stateStorage.loadStateFromStorage(function () {
+  for(network in stateStore.state.me.networkDefaults) {
+    if (stateStore.state.me.networkDefaults[network].autoconnect) {
+      _Login(network);
+    }
+  }
+  _SyncUI('',stateStore.state);
 });
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

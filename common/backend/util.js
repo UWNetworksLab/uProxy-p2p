@@ -8,9 +8,13 @@
 function FinalCallback(finalCallback) {
   this.callsWaiting = 0;
   this.finalCallback = finalCallback;
+  if(typeof finalCallback != 'function') {
+    throw "FinalCallback: given a non-function: " + finalCallback;
+  }
 }
 
 FinalCallback.prototype.makeCountedCallback = function () {
+  if(!this.finalCallback) { return null; }
   // A way to make sure that we only call the callback once, and that it happens only for the last callback. Assumes: callbacks happen in call order.
   this.callsWaiting++;
   return this._oneOfManyCallbacks.bind(this);
@@ -33,6 +37,7 @@ function restrictToObject(restrictionObject, objectToRestrict) {
       selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
     }
   }
+  return selectedPartsOfObjectToRestrict;
 }
 
 /**
