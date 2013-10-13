@@ -8,7 +8,7 @@
 function FinalCallback(finalCallback) {
   this.callsWaiting = 0;
   this.finalCallback = finalCallback;
-  if(typeof finalCallback != 'function') {
+  if(finalCallback && (typeof finalCallback != 'function')) {
     throw "FinalCallback: given a non-function: " + finalCallback;
   }
 }

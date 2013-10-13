@@ -11,23 +11,14 @@
  */
 'use strict';
 
-// JS Hint
-/* global freedom: false */
+// JS-Hint/JS-lint
+/* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
+   Trust, freedom: false, UProxyState: false, console: false, DEBUG: false,
+   ProxyState: false, state: true, log, stateStorage */
 
-// Called once when uproxy.js is loaded.
-// TODO: WebWorkers startup errors are hard to debug.
-// Once fixed, the setTimeout will no longer be needed.
-
-/*global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives */   // for jslint.
-
-console.log('Uproxy backend, running in worker ' + self.location.href);
-
-var window = {};  //XXX: Makes chrome debugging saner, not needed otherwise.
-
-var log = {
-  debug: DEBUG ? makeLogger('debug') : function(){},
-  error: makeLogger('error')
-};
+// The channel to speak to the UI part of uproxy. The UI is running from the
+// privileged part of freedom, so we can just set this to be freedom.
+var uiChannel = freedom;
 
 // Channels with module interface to speak to the various providers.
 
@@ -44,15 +35,6 @@ var client = freedom.uproxyclient();
 // through the peer connection.
 var server = freedom.uproxyserver();
 
-// The channel to speak to the UI part of uproxy. The UI is running from the
-// privileged part of freedom, so we can just set this to be freedom.
-var uiChannel = freedom;
-
-// Storage is used for saving settings to the browsre local storage available
-// to the extension.
-var stateStorage = new UProxyStateStorage();
-
-var state = stateStorage.state;
 
 // --------------------------------------------------------------------------
 //  General UI interaction
@@ -61,19 +43,10 @@ var state = stateStorage.state;
 function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
   uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
-  //
-  // Note: this is not the same as replace: replace only works if the path is
-  // already there.
-/*   for(var k in state) {
-    uiChannel.emit('state-change', [{op: 'replace', path: '/' + k, value: state[k]}]);
-     uiChannel.emit('state-change', [{op: 'remove', path: '/' + k}]);
-    uiChannel.emit('state-change', [{op: 'add', path: '/' + k, value: state[k]}]);
-
-  } */
-};
+}
 
 // Define freedom bindings.
-uiChannel.on('reset', reset);
+uiChannel.on('reset', function () { reset(); });
 
 // Logs out of networks and resets data.
 function reset() {
@@ -203,7 +176,7 @@ uiChannel.on('update-description', function (data) {
 uiChannel.on('notification-seen', function (userId) {
   var user = state.roster[userId];
   if (!user) {
-    log.error('User ' + id + ' does not exist!');
+    log.error('User ' + userId + ' does not exist!');
     return false;
   }
   user.hasNotification = false;
@@ -255,7 +228,7 @@ server.on('sendSignalToPeer', function(data) {
 function startUsingPeerAsProxyServer(peerInstanceId) {
   var instance = state.instances[peerInstanceId];
   if (!instance) {
-    log.error('Instance ' + peerInstanceId + ' does not exist! Cannot proxy...')
+    log.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
   if (Trust.YES != state.instances[peerInstanceId].trust.asProxy) {
@@ -263,8 +236,6 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     return false;
   }
   // TODO: Cleanly disable any previous proxying session.
-  state.me.peerAsProxy = peerInstanceId;
-  _SyncUI('/me/peerAsProxy', peerInstanceId);
   instance.status.proxy = ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
   _syncInstanceUI(instance, 'status');
@@ -280,14 +251,10 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 function stopUsingPeerAsProxyServer(peerInstanceId) {
   var instance = state.instances[peerInstanceId];
   if (!instance) {
-    log.error('Instance ' + peerInstanceId + ' does not exist!')
+    log.error('Instance ' + peerInstanceId + ' does not exist!');
     return false;
   }
   // TODO: Handle revoked permissions notifications.
-
-  // TODO: check permission first.
-  state.me.peerAsProxy = null;
-  _SyncUI('/me/peerAsProxy', '');
   // uiChannel.emit('state-change',
       // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
@@ -430,7 +397,7 @@ function updateUser(newData) {
     userOp = 'add';
   }
   var user = state.roster[userId];
-  var instance = instanceOfUserId(userId);
+  var instance = stateStorage.instanceOfUserId(userId);
   var onGoogle = false,   // Flag updates..
       onFB = false,
       online = false,
@@ -489,8 +456,8 @@ function _checkUProxyClientSynchronization(client) {
   var clientIsNew = !(clientId in state.clientToInstance);
 
   if (clientIsNew) {
-    log.debug('Aware of new UProxy client. Sending instance data.'
-        + JSON.stringify(client));
+    log.debug('Aware of new UProxy client. Sending instance data.' +
+        JSON.stringify(client));
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
     state.clientToInstance[clientId] = null;
@@ -557,7 +524,7 @@ function receiveInstance(msg) {
   uiChannel.emit('state-change', [{
       op: instanceOp,
       path: '/instances/' + instanceId,
-      value: instance
+      value: state.instances[instanceId]
   }]);
   uiChannel.emit('state-change', [
     { op: 'replace', path: '/clientToInstance', value: state.clientToInstance },
@@ -711,7 +678,6 @@ function _syncInstanceUI(instance, field) {
           field? instance[field] : instance);
 }
 
-
 function _Login(network) {
   network = network || undefined;
   identity.login({
@@ -728,25 +694,3 @@ function _Login(network) {
   }
   stateStorage.saveMeToStorage();
 }
-
-
-server.emit("start");
-// Load state from storage and when done login to relevant networks and
-// emit an total state update.
-stateStorage.loadStateFromStorage(function () {
-  for(network in stateStore.state.me.networkDefaults) {
-    if (stateStore.state.me.networkDefaults[network].autoconnect) {
-      _Login(network);
-    }
-  }
-  _SyncUI('',stateStore.state);
-});
-
-// Now that this module has got itself setup, it sends a 'ready' message to the
-// freedom background page.
-uiChannel.emit('ready');
-
-//TODO(willscott): WebWorkers startup errors are hard to debug.
-// Once fixed, the setTimeout will no longer be needed.
-//};  // onload
-//setTimeout(onload, 0);

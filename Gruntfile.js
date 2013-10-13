@@ -84,7 +84,8 @@ var sourcesToTest = [
   'common/backend/util.js',
   'common/backend/nouns-and-adjectives.js',
   'common/backend/constants.js',
-  'common/backend/state-Storage.js'
+  'common/backend/state-Storage.js',
+  'common/backend/uproxy.js'
 ];
 
 module.exports = function(grunt) {

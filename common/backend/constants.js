@@ -66,9 +66,6 @@ var DEFAULT_LOAD_STATE = {
   //   description : string,  // descirption of this installed instance
   //   instanceId : string,   // id for this installed instance
   //   keyHash : string,      // hash of your public key for peer connections
-  //   peerAsProxy : string,  // proxying clientId if connected else null
-  //   peersAsClients : [     // clientIds using me as a proxy.
-  //     clientId, ... ]
   //   networkDefaults : {    // network connection defaults
   //     [networkNameX]: {    // identifier for the network
   //       autoconnect: boolean  // if true connects at startup
@@ -94,9 +91,10 @@ var DEFAULT_LOAD_STATE = {
     'instanceId': '',
     'keyHash': '',
     'identities': {},
-    'peerAsProxy': null,
-    'peersAsClients': [],
-    'networkDefaults' : {}
+    'networkDefaults' : {
+      'google': {'autoconnect': false},
+      'facebook': {'autoconnect': false}
+    }
   },
 
   // roster: {

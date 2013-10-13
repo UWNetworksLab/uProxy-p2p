@@ -8,6 +8,7 @@
       "constants.js",
       "state-storage.js",
       "uproxy.js",
+      "start-uproxy.js",
       "test/uproxy_local_test_proxying.js"
     ]
   },

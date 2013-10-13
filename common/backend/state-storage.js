@@ -34,8 +34,8 @@ function UProxyState() {
 UProxyState.prototype.reset = function(callback) {
   this.state = cloneDeep(DEFAULT_LOAD_STATE);
   this.storage.clear().done(function() {
-    console.log("Cleared storage.");
-    this.loadStateFromStorage(this.state, callback);
+    console.log("Cleared storage, now loading again...");
+    this.loadStateFromStorage(callback);
   }.bind(this));
 };
 
@@ -297,7 +297,8 @@ UProxyState.prototype.loadAllInstances = function(callback) {
   // Load each instance in instance IDs.
   this._loadKeyAsJson(StateEntries.INSTANCEIDS, function(instanceIds) {
     for (var i = 0; i < instanceIds.length; i++) {
-      this.loadInstanceFromId(i, finalCallbacker.makeCountedCallback());
+      this.loadInstanceFromId(instanceIds[i],
+          finalCallbacker.makeCountedCallback());
     }
   }.bind(this), []);
 };
@@ -354,6 +355,7 @@ UProxyState.prototype.saveAllInstances = function(callback) {
 // once the last of the loading operations has completed. We do this using the
 // FinalCaller class.
 UProxyState.prototype.loadStateFromStorage = function(callback) {
+  this.state = restrictToObject(DEFAULT_LOAD_STATE, this.state);
   var finalCallbacker = new FinalCallback(callback);
   this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
   this.loadOptionsFromStorage(finalCallbacker.makeCountedCallback());
