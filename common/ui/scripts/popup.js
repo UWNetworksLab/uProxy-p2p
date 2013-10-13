@@ -27,6 +27,14 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'uproxy': false
     };
 
+    $scope.filterTips = {
+      'uproxy': 'Only show contacts with UProxy installed.',
+      'myAccess': 'Show contacts who provide me access.',
+      'friendsAccess': 'Show contacts who use me for access.',
+      'online': 'Show offline contacts.',
+      'alpha': 'Sort alphabetically',
+    };
+
     //
     $scope.currentContact = {};  // Visible for the individual contact page.
     $scope.currentInstance = null;  // Visible for the individual contact page.
@@ -54,9 +62,14 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // Attach to the App-Extension channel.
     $scope.onAppData.addListener($scope.updateCurrentInstance);
 
-    // TODO: fix using watchs on the contact of interest. Currently updates are
-    // not correctly propegated.
-    //
+    // On an update to the roster, update the variously sorted lists.
+    // TODO(finish)
+    $scope.updateSortedContacts = function() {
+      $scope.alphabeticalContacts = []
+      // .sort()
+    };
+    $scope.onAppData.addListener($scope.updateSortedContacts);
+
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
       $scope.currentContact = c;
@@ -83,6 +96,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       console.log('Toggling ' + filter + ' : ' + $scope.filters[filter]);
       $scope.filters[filter] = !$scope.filters[filter];
 
+    };
+
+    // Display the help tooltip for the filter.
+    $scope.showFilter = function(filter) {
+      $scope.filterTip = $scope.filterTips[filter];
+      $scope.showFilterTip = true;
     };
 
     // Multifiter function for determining whether a contact should be hidden.

@@ -136,6 +136,25 @@ ul {
   width: 100%;
   text-align: center; }
 
+#filterTooltip {
+  position: fixed;
+  z-index: 50;
+  top: 60px;
+  opacity: 0.9;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#filterTooltip .tip {
+  background-color: black;
+  color: #cccccc; }
+
+#filterTooltip.ng-hide {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none; }
+
 #not-connected {
   text-align: center;
   padding: 16px; }

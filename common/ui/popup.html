@@ -80,21 +80,38 @@
 
             <section id="filters">
               <button id="alpha-filter" class="filter"
+                      ng-mouseenter="showFilter('alpha')"
+                      ng-mouseleave="showFilterTip=false"
                       ng-class="{on:filters.alpha}"
                       ng-click="toggleFilter('alpha')">A</button>
               <button id="my-access" class="filter"
+                      ng-mouseenter="showFilter('myAccess')"
+                      ng-mouseleave="showFilterTip=false"
                       ng-class="{on:filters.myAccess}"
                       ng-click="toggleFilter('myAccess')"></button>
               <button id="friends-access" class="filter"
+                      ng-mouseenter="showFilter('friendsAccess')"
+                      ng-mouseleave="showFilterTip=false"
                       ng-class="{on:filters.friendsAccess}"
                       ng-click="toggleFilter('friendsAccess')"></button>
               <button id="uproxy-filter" class="filter"
+                      ng-mouseenter="showFilter('uproxy')"
+                      ng-mouseenter="filterTip=filterTips.uproxy"
+                      ng-mouseleave="showFilterTip=false"
                       ng-class="{on:filters.uproxy}"
                       ng-click="toggleFilter('uproxy')"></button>
               <button id="online-filter" class="filter"
+                      ng-mouseenter="showFilter('online')"
+                      ng-mouseleave="showFilterTip=false"
                       ng-class="{on:filters.online}"
                       ng-click="toggleFilter('online')"></button>
+              <br>
             </section>
+            <div class="tool" id="filterTooltip" ng-show="showFilterTip">
+              <div class="tip">
+                {{filterTip}}
+              </div>
+            </div>
           </section>
           <section id="contact-header" ng-show="rosterNudge">
             <button class="btn-back" ng-click="rosterNudge=false"></button>

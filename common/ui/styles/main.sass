@@ -139,6 +139,22 @@ ul
   width: 100%
   text-align: center
 
+#filterTooltip
+  position: fixed
+  z-index: 50
+  top: 60px
+  opacity: 0.9
+  @include smooth
+
+#filterTooltip .tip
+  background-color: #000
+  color: #ccc
+
+#filterTooltip.ng-hide
+  display: block !important
+  opacity: 0
+  pointer-events: none
+
 #not-connected
   text-align: center
   padding: 16px
