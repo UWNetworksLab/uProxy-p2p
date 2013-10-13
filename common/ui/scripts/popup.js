@@ -74,6 +74,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.viewContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
+      console.log('current instance ' + $scope.currentInstance);
       // Watch the instance on the model to keep the UI up to date.
       // $scope.$watch('instances', function(v) {
         // $scope.$apply(function() {

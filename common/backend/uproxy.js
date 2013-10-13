@@ -899,30 +899,32 @@ function _checkUProxyClientSynchronization(client) {
 // --------------------------------------------------------------------------
 //  Instance - Client mapping and consent
 // --------------------------------------------------------------------------
-// The instance data for the local UProxy can be cached, since it is typically
-// the same unless something like |description| is explicitly updated. Consent
-// bits are sent individually, after initial instance notifications.
 function _getMyId() {
   for (var id in state.me.identities) {
     return id;
   }
 }
 
+// The instance data for the local UProxy can be cached, since it is typically
+// the same unless something like |description| is explicitly updated. Consent
+// bits are sent individually, after initial instance notifications.
 var _myInstanceData = null;
 function _fetchMyInstance(resetCache) {
   resetCache = resetCache || false;
   if (!_myInstanceData || resetCache) {
-      var me = state.me; // state.me.identities[_getMyId()];
+    // You might have multiple identities. Get the first one, which is kind of
+    // hackish... but we'l figure out something better later.
+    var identity = state.me.identities[_getMyId()];
     _myInstanceData = JSON.stringify({
       type: 'notify-instance',
       instanceId: '' + state.me.instanceId,
       description: '' + state.me.description,
       keyHash: '' + state.me.keyHash,
       rosterInfo: {
-        userId: me.userId,
-        name: me.name,
-        network: me.network,
-        url: me.url
+        userId: identity.userId,
+        name: identity.name,
+        network: identity.network,
+        url: identity.url
       }
     });
     log.debug('preparing new instance payload.');
