@@ -72,6 +72,9 @@ ul {
   outline: none;
   cursor: pointer; }
 
+#header {
+  height: 64px; }
+
 .title {
   padding: 0 8px; }
 
@@ -248,7 +251,7 @@ ul {
 #search-btn {
   position: absolute;
   z-index: 40;
-  right: 0;
+  right: 4px;
   top: 0;
   width: 26px;
   height: 30px;
@@ -303,7 +306,7 @@ ul {
 
 .filter.on:active, .filter.on:focus {
   outline: none;
-  opacity: 0.95; }
+  opacity: 0.8; }
 
 .filter.on:hover {
   cursor: pointer;
@@ -322,8 +325,6 @@ ul {
   background-image: url("../icons/online.png"); }
 
 #roster {
-  position: absolute;
-  top: 60px;
   width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
