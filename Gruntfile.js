@@ -83,7 +83,7 @@ var sourcesToTest = [
   'common/backend/util.js',
   'common/backend/nouns-and-adjectives.js',
   'common/backend/constants.js',
-  'common/backend/state-Storage.js',
+  'common/backend/state-storage.js',
   'common/backend/uproxy.js',
   'common/backend/start-uproxy.js'
 ];
