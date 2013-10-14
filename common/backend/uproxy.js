@@ -62,8 +62,10 @@ function reset() {
 // Called from extension whenever the user clicks opens the extension popup.
 // The intent is to reset its model - but this may or may not always be
 // necessary. Improvements to come.
-bgAppPageChannel.on('open-popup', function () {
-  log.debug('open-popup. state:', store.state);
+bgAppPageChannel.on('ui-ready', function () {
+  log.debug('ui-ready');
+  log.debug('state:', store.state);
+  // Send the extension the full state.
   sendFullStateToUI();
 });
 
@@ -214,7 +216,7 @@ function receiveSignalFromClientPeer(msg) {
   console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
   server.emit('handleSignalFromPeer',
-      {peerId: msg.fromClientId, data: msg.data});
+      {peerId: msg.fromClientId, data: JSON.stringify(msg.data)});
 }
 
 // peerconnection-server -- sent from server on other side.
@@ -222,7 +224,7 @@ function receiveSignalFromServerPeer(msg) {
   console.log('receiveSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
   client.emit('handleServerSignalToPeer',
-      {peerId: msg.fromClientId, data: msg.data});
+      {peerId: msg.fromClientId, data: JSON.stringify(msg.data)});
 }
 
 // --------------------------------------------------------------------------
@@ -278,11 +280,8 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   store.saveInstance(instanceId);
-  //store.syncRosterFromInstanceId(instanceId);
-
-  // bgAppPageChannel.emit('state-change', [{
-      // op: 'replace', path: '/instances/' + instance.instanceId, value: instance
-  // }]);
+  _syncInstanceUI(instance, 'trust');
+  log.debug('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
 
@@ -553,8 +552,8 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
-            JSON.stringify(msg));
+  // log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
+            // JSON.stringify(msg));
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = store.state.instances[instanceId];

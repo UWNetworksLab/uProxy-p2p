@@ -6,8 +6,6 @@
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/options.js -->
-    <!-- <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script> -->
-    <script src="bower_components/json-patch/jsonpatch.js"></script>
     <script src="bower_components/lodash/dist/lodash.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-lodash/angular-lodash.js"></script>
@@ -24,19 +22,19 @@
       <label>
         Networks:
       </label>
-      <button class="btn" ng-show="!isOnline('loopback')"
+      <button class="btn" ng-show="!ui.isOnline('loopback')"
             ng-click="login('loopback')">Loop</button>
-      <button class="btn" ng-show="isOnline('loopback')"
+      <button class="btn" ng-show="ui.isOnline('loopback')"
             ng-click="logout('loopback')">Loop</button>
 
-      <button class="btn" ng-show="!isOnline('google')"
+      <button class="btn" ng-show="!ui.isOnline('google')"
             ng-click="login('google')">Login G+</button>
-      <button class="btn" ng-show="isOnline('google')"
+      <button class="btn" ng-show="ui.isOnline('google')"
             ng-click="logout('google')">Logout G+</button>
 
-      <button class="btn" ng-show="!isOnline('facebook')"
+      <button class="btn" ng-show="!ui.isOnline('facebook')"
             ng-click="login('facebook')">Login FB</button>
-      <button class="btn" ng-show="isOnline('facebook')"
+      <button class="btn" ng-show="ui.isOnline('facebook')"
             ng-click="logout('facebook')">Logout FB</button>
 
     <h4>Instances</h4>
@@ -54,10 +52,23 @@
             Proxy: {{ instance.trust.asProxy }}
             <div class="box-for-proxy"
                 ng-switch="instance.trust.asProxy">
-              <button class="btn" ng-switch-when="yes"
-                  ng-click="startAccess(instance)">
-                Start
-              </button>
+
+              <div ng-switch-when="yes">
+                <button class="btn"
+                    ng-show="'off'==instance.status.proxy"
+                    ng-click="startAccess(instance)">
+                  Start
+                </button>
+                <div class="btn"
+                    ng-show="'ready'==instance.status.proxy">
+                  Setting up proxy...
+                </div>
+                <button class="btn"
+                    ng-hide="'off'==instance.status.proxy"
+                    ng-click="stopAccess(instance)">
+                  Stop
+                </button>
+              </div>
               <div ng-switch-when="requested">
                 <button class="btn" ng-click="cancelRequest(instance)">
                   Cancel

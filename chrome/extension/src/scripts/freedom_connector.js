@@ -75,6 +75,9 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
 FreedomConnector.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
   this.connected = false;
+  this.port_.disconnect();
+  delete this.port_.onMessage;
+  delete this.port_.onDisconnect;
   this.port_ = null;
   this.listeners_ = {};
   this.onDisconnected.dispatch();

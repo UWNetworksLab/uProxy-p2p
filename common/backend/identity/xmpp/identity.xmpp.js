@@ -326,7 +326,6 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
-  console.log(stanza)
   // console.log(stanza.attrs.from);
   if(window.presence) {
     window.presence.push(stanza);
