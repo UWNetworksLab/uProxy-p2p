@@ -3,6 +3,8 @@ uproxy.crx
 .DS_Store
 .grunt
 *.swp
+*.swo
+*.swn
 *.un~
 *~
 _SpecRunner.html

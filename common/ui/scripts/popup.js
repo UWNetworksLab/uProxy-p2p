@@ -13,11 +13,10 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
-    $scope.advancedOptions = false;
+    $scope.optionsTooltip = false;
 
     // Initial filter state.
     $scope.filters = {
-      'alpha': true,
       'online': true,
       'myAccess': false,
       'friendsAccess': false,
@@ -28,7 +27,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'myAccess': 'Show contacts who provide me access.',
       'friendsAccess': 'Show contacts who use me for access.',
       'online': 'Show offline contacts.',
-      'alpha': 'Sort alphabetically',
     };
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
@@ -65,11 +63,27 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
       $scope.notificationSeen(c);
+      if (!$scope.ui.isProxying) {
+        $scope.ui.proxy = null;
+      }
+    };
+
+    $scope.logonToGoogle = function() {
+      $scope.login('google');
+      $scope.splashPage = false;
+      $scope.ui.splashPage = $scope.splashPage;
     };
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.ui.splashPage = !$scope.ui.splashPage;
+      $scope.splashPage = !$scope.splashPage;
+      $scope.ui.splashPage = $scope.splashPage;
+      $scope.optionsTooltip = false;
+      // $scope.ui.splashPage = !$scope.ui.splashPage;
+    };
+
+    $scope.toggleSearch = function() {
+      $scope.ui.searchBar = !$scope.ui.searchBar;
     };
 
     $scope.toggleFilter = function(filter) {

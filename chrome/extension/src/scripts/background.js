@@ -45,25 +45,65 @@ var roster = new Roster();
 // User Interface state holder.
 // TODO(uzimizu): move UI into its own file in common so firefox can use it.
 var UI = function() {
+  this.ICON_DIR = '../common/ui/icons/';
+
   this.notifications = 0;
-  // Keep track of currently viewed contact and instance.
-  this.contact = null;
-  this.instance = null;
   this.splashPage = !this.loggedIn();
   this.rosterNudge = false;
   this.advancedOptions = false;
+  this.searchBar = true;
+
+  this.isProxying = false;  // Whether we are proxying through someone.
+  this.accessIds = 0;  // How many people are proxying through us.
+
+  // Keep track of currently viewed contact and instance.
+  this.contact = null;
+  this.instance = null;
+
+  // If we are proxying, keep track of the instance.
+  this.proxy = null;
 };
+
 UI.prototype.setNotifications = function(n) {
   if (n > 0) {
-    icon.label('' + n);
+    this.setLabel(n);
   } else {
-    icon.label('');
+    this.setLabel('');
   }
-  this.notificatiosn = n < 0? 0 : n;
+  this.notifications = n < 0? 0 : n;
 };
 UI.prototype.decNotifications = function(n) {
   this.setNotifications(this.notifications - 1);
 };
+
+UI.prototype.setIcon = function(iconFile) {
+  chrome.browserAction.setIcon({
+    path: this.ICON_DIR + iconFile
+  });
+};
+UI.prototype.setLabel = function(text) {
+  chrome.browserAction.setBadgeText({ text: '' + text });
+};
+
+UI.prototype.setProxying = function(isProxying) {
+  this.isProxying = isProxying;
+  if (isProxying) {
+    this.setIcon('uproxy-19-p.png');
+  } else {
+    this.setIcon('uproxy-19.png');
+  }
+};
+
+UI.prototype.setClients = function(numClients) {
+  this.numClients = numClients;
+  if (numClients > 0) {
+    chrome.browserAction.setBadgeBackgroundColor({color: '#008'});
+    this.setLabel('↓');
+  } else {
+    chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
+  }
+}
+
 // Determine whether UProxy is connected to |network|.
 UI.prototype.isOnline = function(network) {
   return (model && model.identityStatus &&
@@ -82,41 +122,59 @@ UI.prototype.loggedIn = function() {
 UI.prototype.loggedOut = function() {
   return this.isOffline('google') && this.isOffline('facebook');
 };
-var ui = new UI();
+
+
+// Make sure counters and UI-only state holders correctly reflect the model.
+UI.prototype.synchronize = function() {
+  // Count up notifications
+  var n = 0;
+  for (var userId in model.roster) {
+    var user = model.roster[userId];
+    if (user.hasNotification) {
+      n++;
+    }
+  }
+  this.setNotifications(n);
+
+  // Run through instances, count up clients.
+  var c = 0;
+  for (var iId in model.instances) {
+    var instance = model.instances[iId];
+    if ('running' == instance.status.client) {
+      c++;
+    }
+    if ('running' == instance.status.proxy) {
+      this.isProxying = true;
+    }
+  }
+  this.setClients(c);
+
+  // Generate list ordered by names.
+  var uids = Object.keys(model.roster);
+  var names = uids.map(function(id) { return model.roster[id].name; });
+  names.sort();
+};
+
+var ui = new UI();  // This singleton is referenced in both options and popup.
 
 // Connect to the App.
-console.log('Connecting to App...');
-var connectedToApp = false;
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
     name: 'uproxy-extension-to-app-port' });
+
 
 
 function wireUItoApp() {
   console.log('Wiring UI to backend...');
   appChannel.on('state-change', function(patchMsg) {
-    // console.log(patchMsg[0]);
     if (patchMsg[0].path === '') {
       model = patchMsg[0].value;
     } else {
+      // Check if the operation should be add or replace.
+      patchMsg.op = 'replace';
       jsonpatch.apply(model, patchMsg);
-      console.log(model);
     }
 
-    // Count up notifications
-    var notifications = 0;
-    for (var userId in model.roster) {
-      var user = model.roster[userId];
-      notifications += user.hasNotification? 1:0;
-    }
-    ui.notifications = notifications;
-    ui.setNotifications(notifications);
-
-    // Generate list ordered by names.
-    var uids = Object.keys(model.roster);
-    var names = uids.map(function(id) { return model.roster[id].name; });
-    names.sort();
-    // console.log(names);
-
+    ui.synchronize();
     /*
     // Run through roster if necessary.
     if (patch[0].path.indexOf('roster') >= 0) {
@@ -155,26 +213,29 @@ function wireUItoApp() {
     onStateChange.dispatch(patchMsg);
   });
 }
-  // Attach state-change listener to update UI from the backend.
+// Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(wireUItoApp);
 
+
 function reconnectToApp() {
-  console.log('Disconnected. Attempting to reconnect to app...');
+  console.log('Disconnected from App! Attempting to reconnect...');
   appChannel.connect();
 }
 
+
 function initialize() {
+  // ui-ready tells uproxy.js to send over *all* the state.
   appChannel.emit('ui-ready');
 }
 
 // Automatically attempt to reconnect when disconnected.
 appChannel.onConnected.addListener(initialize);
 appChannel.onDisconnected.addListener(reconnectToApp);
-
-// appChannel.onDisconnected.removeListener(wireUItoApp);
-
 window.onunload = function() {
-  // appChannel.removeListener(onStateChange);
   appChannel.onConnected.removeListener(wireUItoApp);
 };
+
+
+console.log('Connecting to App...');
+var connectedToApp = false;
 appChannel.connect();

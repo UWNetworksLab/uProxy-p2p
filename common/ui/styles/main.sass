@@ -16,6 +16,11 @@ $fontSize: 16px
   -o-transition: all 0.5s !important
   transition: all 0.5s !important
 
+// Custom hidden behavior
+@mixin un-ng-hide
+  display: block !important
+  pointer-events: none
+
 body
   font-family: Eurostile, sans-serif
   height: 100%
@@ -77,13 +82,13 @@ ul
   cursor: pointer
 
 #header
-  height: 64px
+  // height: 64px
 
 .title
   padding: 0 8px
 
 #contact-header
-  h1
+  & h1
     position: fixed
     width: 80%
     padding: 0 10%
@@ -91,10 +96,12 @@ ul
     top: 10px
     pointer-events: none
     white-space: nowrap
+    font-size: $fontSize * 1.2
 
 #options-btn
-  position: absolute
-  bottom: 4px
+  position: fixed
+  z-index: 400
+  top: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
@@ -106,11 +113,20 @@ ul
   opacity: 0.6
   cursor: pointer
   @include smooth
-#options-btn:active, #options-btn:focus
-  opacity: 0.9
-#options-btn:hover
-  opacity: 0.3
+  &:active, &:focus
+    opacity: 0.9
+  &:hover
+    opacity: 0.3
 
+#options-btn-tip
+  position: fixed
+  top: 20px
+  right: 2px
+  background-color: #000
+  color: #ccc
+  opacity: 0.85
+  &.ng-hide
+    opacity: 0
 
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
@@ -129,8 +145,7 @@ ul
   @include smooth
 
 .tip.ng-hide
-  display: block !important
-  pointer-events: none
+  @include un-ng-hide
   opacity: 0
 
 // For centering the tooltip.
@@ -143,18 +158,18 @@ ul
 #filterTooltip
   position: fixed
   z-index: 50
-  top: 60px
-  opacity: 0.9
+  top: 30px
+  opacity: 0.85
+  font-size: $fontSize * 0.9
+  pointer-events: none
   @include smooth
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
 
 #filterTooltip .tip
   background-color: #000
   color: #ccc
-
-#filterTooltip.ng-hide
-  display: block !important
-  opacity: 0
-  pointer-events: none
 
 #not-connected
   text-align: center
@@ -162,18 +177,21 @@ ul
 
 //---------------------------- Login Splash -----------------------------------
 #login-splash
-  position: absolute
+  position: fixed
   text-align: center
   padding-top: 30px
   width: 100%
-  height: 100%
+  height: 600px
   bottom: 0
   z-index: 40
   background-color: #fff
   @include smooth-slow
-#login-splash.ng-hide
-  display: block !important
-  height: 0
+  &.ng-hide
+    @include un-ng-hide
+    // height: 0
+    // padding: 0
+    // opacity: 0
+    top: 600px
 
 .network-btn
   display: inline-block
@@ -221,75 +239,81 @@ ul
 #search-contacts
   position: relative
   z-index: 30
-  width: 358px
+  width: 328px
   margin: 0
   padding: 8px 20px
   border: 1px solid #aaa
   outline: none
   color: #333
   @include smooth
-#search-contacts:hover
-  box-shadow: 0 1px 3px #888 inset
-#search-contacts:focus
-  outline: none
-  box-shadow: 0 1px 2px #aaa
+  &:hover
+    box-shadow: 0 1px 2px #ddd inset
+  &:focus
+    outline: none
+    box-shadow: 0 1px 2px #ccc
+  &.ng-hide
+    @include un-ng-hide
+    height: 0
+    padding: 0
+    border: none
 
-#search-btn
-  position: absolute
-  z-index: 40
-  right: 4px
-  top: 0
-  width: 26px
-  height: 30px
-  padding: 12px
-  border: none
-  background: transparent url('../icons/search.png') no-repeat center
-  background-size: 80%
-
-#search-btn:hover, #search-btn:focus
-  opacity: 0.5
-  outline: none
-
-#filters
+// Goes at the top of the popup. Contais a bunch of icons which modify the
+// current view mode, or change roster filters.
+#actions
   z-index: 20
   display: block
   width: 100%
   background-color: #fafafa
   height: 30px
-  text-align: center
+  text-align: left
   overflow: hidden
   padding: 0
   box-shadow: 0 1px 2px #aaa
 
+// The search button toggles the actual textfield containing the user's search
+// query.
+#search-btn
+  z-index: 40
+  width: 50px
+  height: 16px
+  padding: 8px
+  border: none
+  background: transparent url('../icons/search.png') no-repeat center
+  background-size: 16px
+  cursor: pointer
+
+  &:hover, &:focus
+    opacity: 0.5
+    outline: none
+
 .filter
   margin: 0
-  padding: 0
+  padding: 8px
+  height: 16px
+  width: 40px
   border: none
-  height: 24px
-  width: 30px
   line-height: 0
   background: transparent no-repeat center
-  background-size: contain !important
+  background-size: 16px !important
   font-size: $fontSize * 1.5
   font-weight: 900
   color: #222
   opacity: 0.4
+  cursor: pointer
   @include smooth
-.filter:active, .filter:focus
-  outline: none
-  opacity: 0.3
-.filter:hover
-  cursor: pointer
-  opacity: 0.2
-
-.filter.on
-  opacity: 1.0
-.filter.on:active, .filter.on:focus
-  outline: none
-  opacity: 0.8
-.filter.on:hover
-  cursor: pointer
-  opacity: 0.75
+  &:active, &:focus
+    outline: none
+    opacity: 0.3
+  &:hover
+    opacity: 0.2
+  // When the filter is on, the opacity changes are different.
+  &.on
+    opacity: 1.0
+    &:active, &:focus
+      outline: none
+      opacity: 0.8
+    &:hover
+      opacity: 0.75
 
 #my-access
   background-image: url('../icons/arrow-up.png')
@@ -303,9 +327,41 @@ ul
 #online-filter
   background-image: url('../icons/online.png')
 
+.icon-btn
+  z-index: 40
+  width: 42px
+  height: 24px
+  padding: 8px
+  margin-bottom: 5px
+  border: none
+  vertical-align: middle
+  background: transparent no-repeat center
+  background-size: 24px !important
+  cursor: pointer
+  outline: none
+  padding: 0
+  &:active, &:focus
+    opacity: 0.8
+  &:hover
+    opacity: 0.7
+
+#start-btn
+  background-image: url('../icons/uproxy-19.png')
+#stop-btn
+  background-image: url('../icons/stop.png')
+
+// --------------------------- Primary view ------------------------------------
+#main-view
+  z-index: 100
+  @include smooth-slow
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+
 // --------------------------- Roster & Contacts -------------------------------
 #roster
   width: 100%
+  outline: none
   @include smooth
 
 #roster-text
@@ -329,7 +385,7 @@ ul
   @include smooth
 
 #contacts-frame.ng-hide
-  display: block !important
+  @include un-ng-hide
   left: -400px
 
 .contacts
@@ -357,22 +413,19 @@ ul
   text-shadow: 2px 2px 2px #ccc
   @include smooth
 
-.contacts li:hover, .contacts li:focus
-  background-color: #fff
-  border-color: #ddd
-  color: #000
-  z-index: 50
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
-  outline: none
+  &:hover, &:focus
+    background-color: #fff
+    border-color: #ddd
+    color: #000
+    z-index: 50
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
+    outline: none
 
-.contacts li.ng-hide
-  // display: block !important
-  // pointer-events: none
-  // height: 0px
-  // padding: 0
-.contacts li.offline
-  color: #888
+  &.ng-hide
+
+  &.offline
+    color: #888
 
 img.contact-image
   position: absolute
@@ -392,8 +445,8 @@ img.contact-image
 .c-icon
   padding: 1px
   @include smooth
-.c-icon:hover
-  color: #888
+  &:hover
+    color: #888
 
 // Red ! shows up on the corner of contacts who have had a change.
 .c-notification
@@ -520,41 +573,41 @@ img.c-icon:hover
   width: 100%
   font-size: $fontSize * 0.8
   color: #888
-  padding: 8px 0
+  padding: 8px 20px
   cursor: default
   border-top: 1px solid #eee
   background-color: #fff
   text-align: center
 
-// .contact-hover
-  // position: absolute !important
-  // bottom: -10px
-  // left: 0
-  // opacity: 1.0
-  // @include smooth
-//
-// .contact-hover.ng-hide
-  // display: block !important
-  // z-index: -500
-  // opacity: 0 !important
-  // pointer-events: none
+#status-proxy
+  padding-bottom: 12px
+  margin-bottom: 16px
+  border-bottom: 1px solid #eee
+  color: #333
+  text-align: left
+  @include smooth-slow
 
-// .contact-details.ng-hide-add,
-// .contact-details.ng-hide-remove
-  // @include smooth
-  // display: block !important
-//
-// .contact-details.ng-hide-add.ng-hide-add-active,
-// .contact-details.ng-hide-remove
-  // @include smooth
-  // opacity: 0
-  // height: 0
-//
-// .contact-details.ng-hide-add,
-// .contact-details.ng-hide-remove.ng-hide-remove-active
-  // opacity: 1
-  // height: 50px
-//
+#status-proxy.ng-hide
+  @include un-ng-hide
+  opacity: 0
+  height: 0
+
+#status-tooltips
+  position: absolute
+  left: 20px
+  bottom: 67px
+  text-align: left !important
+#status-tooltips .tip
+  position: absolute
+
+#status-network
+  display: none
+  position: absolute
+  right: 0
+
+
+
+
 .contact-actions
   display: none
 
@@ -601,6 +654,10 @@ details
     white-space: pre-wrap
   form[name=sendMsgForm]
     margin-bottom: 3px
+
+.dbg
+  position: fixed
+  z-index: 500
 
 details.advanced
   margin-top: 15px
