@@ -79,17 +79,13 @@ var onload = function() {
         closeConnection.bind(null, channelLabel));
 
     _sctpPc.send({'channelLabel' : channelLabel,
-                  'text': JSON.stringify({host: address, port: port})},
-                 function () {
-                   console.log('client.js/onConnection: _sctpPc.send() returned.');
-                   connectedCallback({ipAddrString: '127.0.0.1', port: 0});
-                 });
+                  'text': JSON.stringify({host: address, port: port})});
 
     // TODO: we are not connected yet... should we have some message passing
     // back from the other end of the data channel to tell us when it has
     // happened, instead of just pretended?
     // TODO: determine if these need to be accurate.
-//    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
+    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
   };
 
   freedom.on('start', function(options) {

@@ -6,6 +6,7 @@ console.log('Uproxy backend, running in worker ' + self.location.href);
 //XXX: Makes chrome debugging saner, not needed otherwise.
 var window = {};
 
+
 var log = {
   debug: DEBUG ? makeLogger('debug') : function(){},
   error: makeLogger('error')
@@ -29,4 +30,4 @@ store.loadStateFromStorage(function () {
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
-uiChannel.emit('ready');
+bgAppPageChannel.emit('ready');
