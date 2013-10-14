@@ -44,8 +44,10 @@ var roster = new Roster();
 
 // User Interface state holder.
 var UI = function() {
-  this.view = 0;
   this.notifications = 0;
+  // Keep track of currently viewed contact and instance.
+  this.contact = null;
+  this.instance = null;
 };
 UI.prototype.setNotifications = function(n) {
   if (n > 0) {

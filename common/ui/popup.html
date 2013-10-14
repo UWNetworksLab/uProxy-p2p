@@ -105,7 +105,7 @@
           </section>
           <section id="contact-header" ng-show="rosterNudge">
             <button class="btn-back" ng-click="rosterNudge=false"></button>
-            <h1>{{currentContact.name}}</h1>
+            <h1>{{ui.contact.name}}</h1>
           </section>
         </section>
 
@@ -148,91 +148,91 @@
               <div class="contact-name">
                 <img class="contact-image" ng-src='{{contact.imageData}}'>
               </div>
-              <br>Network: {{ currentContact.network }}
+              <br>Network: {{ ui.contact.network }}
               <p>
-              {{ currentContact.name }} does
-              <span ng-hide="currentInstance">not</span>
+              {{ ui.contact.name }} does
+              <span ng-hide="ui.instance">not</span>
               have UProxy installed.
               </p>
 
-              <div ng-show="currentInstance">
+              <div ng-show="ui.instance">
                 <div class="instance-actions">
                   <p>
-                    {{currentInstance.description}}
+                    {{ui.instance.description}}
                   </p>
                   <div class="instance-id" ng-show="rosterNudge">
-                    {{currentInstance.instanceId}}
+                    {{ui.instance.instanceId}}
                   </div>
                   <div class="box-for-proxy"
-                      ng-switch="currentInstance.trust.asProxy">
+                      ng-switch="ui.instance.trust.asProxy">
                     <div ng-switch-when="yes">
                       <button class="btn"
-                          ng-show="'off'==currentInstance.status.proxy"
-                          ng-click="startAccess(currentInstance)">
+                          ng-show="'off'==ui.instance.status.proxy"
+                          ng-click="startAccess(ui.instance)">
                         Start
                       </button>
                       <div class="btn"
-                          ng-show="'ready'==currentInstance.status.proxy">
+                          ng-show="'ready'==ui.instance.status.proxy">
                         Setting up proxy...
                       </div>
                       <button class="btn"
-                          ng-hide="'off'==currentInstance.status.proxy"
-                          ng-click="stopAccess(currentInstance)">
+                          ng-hide="'off'==ui.instance.status.proxy"
+                          ng-click="stopAccess(ui.instance)">
                         Stop
                       </button>
                     </div>
                     <div ng-switch-when="requested">
-                      <button class="btn" ng-click="cancelRequest(currentInstance)">
+                      <button class="btn" ng-click="cancelRequest(ui.instance)">
                         Cancel
                       </button>
                       <span>Pending...</span>
                     </div>
                     <div ng-switch-when="offered">
-                      <button class="btn" ng-click="acceptOffer(currentInstance)">
+                      <button class="btn" ng-click="acceptOffer(ui.instance)">
                         Accept Access
                       </button>
-                      <button class="btn" ng-click="declineOffer(currentInstance)">
+                      <button class="btn" ng-click="declineOffer(ui.instance)">
                         No Thanks
                       </button>
                     </div>
                     <button class="btn"
                         ng-switch-default
-                        ng-click="requestAccess(currentInstance)">
+                        ng-click="requestAccess(ui.instance)">
                       Request
                     </button>
                   </div>
 
                   <div class="box-for-client"
-                      ng-switch="currentInstance.trust.asClient">
+                      ng-switch="ui.instance.trust.asClient">
                     <button class="btn" ng-switch-when="no"
-                        ng-click="offerAccess(currentInstance)">
+                        ng-click="offerAccess(ui.instance)">
                       Offer Access
                     </button>
                     <div ng-switch-when="requested">
-                      <button class="btn" ng-click="grantAccess(currentInstance)">
+                      <button class="btn" ng-click="grantAccess(ui.instance)">
                         Grant
                       </button>
-                      <button class="btn" ng-click="denyAccess(currentInstance)">
+                      <button class="btn" ng-click="denyAccess(ui.instance)">
                         Ignore
                       </button>
                     </div>
                     <button class="btn" ng-switch-default
-                        ng-click="revokeAccess(currentInstance)">
+                        ng-click="revokeAccess(ui.instance)">
                       Revoke Access
                     </button>
                   </div>
                 </div>
               </div>
-              <a class="chat-btn" href="{{ currentContact.url }}"
+              <a class="chat-btn" href="{{ ui.contact.url }}"
                  target="_blank"
                  ng-mouseenter="chatButtonHovered=true"
                  ng-mouseleave="chatButtonHovered=false">
               </a>
               <div class="tool">
               <p class="tip" ng-show="chatButtonHovered" >
-                Ask {{ currentContact.name }} to
-                <span ng-hide="currentInstance">install</span>
-                <span ng-show="currentInstance">run</span>
+                Ask {{ ui.contact.name }} to
+                <span ng-hide="ui.instance">install</span>
+                <span ng-show="ui.instance">run</span>
                 UProxy.
               </p>
               </div>
@@ -240,7 +240,7 @@
 
             <!--
             <h5>Clients</h5>
-            <div class="client-details" ng-repeat="client in currentContact.clients">
+            <div class="client-details" ng-repeat="client in ui.contact.clients">
               {{ client.clientId }}
               <br>Network: {{ client.network }}
               <br>Status: {{ client.status }}
@@ -254,12 +254,12 @@
       <section id="status">
 
         <div ng-show="model.me.peerAsProxy">
-          Proxying via {{currentInstance.rosterInfo.name}}.
+          Proxying via {{ui.instance.rosterInfo.name}}.
           <br>{{model.me.peerAsProxy}}
           </br>
           <button class="btn"
-              ng-hide="'off'==currentInstance.status.proxy"
-              ng-click="stopAccess(currentInstance)">
+              ng-hide="'off'==ui.instance.status.proxy"
+              ng-click="stopAccess()">
             Stop
           </button>
         </div>

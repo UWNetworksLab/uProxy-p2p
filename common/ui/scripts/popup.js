@@ -32,9 +32,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'online': 'Show offline contacts.',
       'alpha': 'Sort alphabetically',
     };
-    $scope.currentContact = {};  // Visible for the individual contact page.
-    $scope.currentInstance = null;  // Visible for the individual contact page.
-
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
     };
@@ -47,11 +44,11 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // On the contacts details page, dynamically update |currentInstance| to
     // reflect user actions and state changes in the DOM.
     $scope.updateCurrentInstance = function() {
-      if (!$scope.currentInstance) {
+      if (!$scope.ui.instance) {
         return;
       }
       $scope.$apply(function() {
-        $scope.currentInstance = $scope.instances[$scope.currentInstance.instanceId];
+        $scope.ui.instance = $scope.instances[$scope.ui.instance.instanceId];
       });
     }
     // Attach to the App-Extension channel.
@@ -61,15 +58,14 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // TODO(finish)
     $scope.updateSortedContacts = function() {
       $scope.alphabeticalContacts = []
-      // .sort()
     };
     // $scope.onAppData.addListener($scope.updateSortedContacts);
 
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
-      $scope.currentContact = c;
-      $scope.currentInstance = $scope.instanceOfUserId(c.userId);
-      console.log('current instance ' + $scope.currentInstance);
+      $scope.ui.contact = c;
+      $scope.ui.instance = $scope.instanceOfUserId(c.userId);
+      console.log('current instance ' + $scope.ui.instance);
       $scope.rosterNudge = true;
       $scope.notificationSeen(c);
     };

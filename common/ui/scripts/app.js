@@ -136,6 +136,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         icon.set('../common/ui/icons/uproxy-19-p.png');
       };
       $rootScope.stopAccess = function(instance) {
+        instance = instance || ui.instance;
         appChannel.emit('stop-proxying', instance.instanceId);
         icon.set('../common/ui/icons/uproxy-19.png');
       };
