@@ -7,7 +7,6 @@ if (!window) {
 }
 console.log('SOCKS5 server: ' + self.location.href);
 
-window.socket = freedom['core.socket']();
 window.core = freedom.core();
 // Defined in webclient.js
 var NetClient = window.NetClient;
@@ -83,7 +82,6 @@ var onload = function() {
           console.error("Message received for non-existent channel. Msg: " +
             JSON.stringify(message));
         }
-
         // Buffer from the peer is data for the destination.
         netClients[message.channelLabel].send(message.buffer);
       } else {
@@ -112,7 +110,7 @@ var onload = function() {
         });
         //});
       });
-      
+
     });
     console.log('_initPeer(' + peerId + ') complete.');
   };

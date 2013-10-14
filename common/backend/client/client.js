@@ -59,6 +59,7 @@ var onload = function() {
 
   // A simple wrapper function to send data to the peer.
   var _sendToPeer = function (channelLabel, buffer) {
+    console.log("_sendToPeer (buffer) to channelLabel: " + channelLabel);
     _sctpPc.send({'channelLabel': channelLabel, 'buffer': buffer});
   }
 
