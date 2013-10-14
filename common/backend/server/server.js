@@ -1,14 +1,15 @@
 //XXX: needed for chrome debugging, used by socks.js and tcp-server.js.
 "use strict";
 
-var window = {};
+var window;
+if (!window) {
+  window = {};
+}
 console.log('SOCKS5 server: ' + self.location.href);
 
 window.socket = freedom['core.socket']();
-
 // Defined in webclient.js
 var NetClient = window.NetClient;
-
 
 var onload = function() {
   var _active = true;  // this variable can only make things worse.
@@ -95,6 +96,7 @@ var onload = function() {
       sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
       chan.channel.done(function(channel) {
         // When
+        console.log("Server channel to sctpPc created");
         channel.on('message', function(msg) {
           freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
         });

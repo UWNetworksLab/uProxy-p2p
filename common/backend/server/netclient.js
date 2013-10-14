@@ -3,6 +3,10 @@
  * native socket object.
 */
 'use strict';
+var window;
+if (!window) {
+  window = {};
+}
 
 // TODO: write a unit test using this and tcp-server.
 (function(exports) {
