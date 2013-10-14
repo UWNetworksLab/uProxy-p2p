@@ -1,3 +1,12 @@
+console.log('simple-proxy-test.js, running in worker ' + self.location.href);
+
+var window;
+if (!window) {
+  window = {};
+  console.log("tcp-server: making up a fake window.  Good luck with that.");
+}
+
+
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -46,3 +55,4 @@ function stop() {
 
 freedom.on("start", start);
 freedom.on("stop", stop);
+window.socket = freedom['core.socket']();

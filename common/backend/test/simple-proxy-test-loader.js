@@ -1,4 +1,5 @@
 window.freedomcfg = function(register) {
+  console.log("Registering core.socket");
   register("core.socket", Socket_chrome);
 }
 

@@ -3,7 +3,9 @@
   "description": "Make a simple proxying thing",
   "app": {
     "script": [
-      "simple-proxy-test.js"
+      "simple-proxy-test.js",
+      "../client/tcp-server.js",
+      "../test/tcp-echo-server.js"
     ]
   },
   "dependencies": {
@@ -15,6 +17,6 @@
     }
   },
   "permissions": [
-    "core.sctp-peerconnection"
+    "core.sctp-peerconnection", "core.socket"
   ]
 }

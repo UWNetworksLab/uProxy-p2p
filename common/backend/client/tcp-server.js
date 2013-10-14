@@ -18,7 +18,6 @@ https://github.com/GoogleChrome/chrome-app-samples/tree/master/tcpserver
 */
 'use strict';
 
-
 /**
  * Converts an array buffer to a string of hex codes and interpretations as
  * a char code.
@@ -55,7 +54,8 @@ function getStringOfArrayBuffer(buf) {
   var DEFAULT_MAX_CONNECTIONS = 50;
 
   // Define some local variables here.
-  var socket = exports.socket || (typeof chrome != 'undefined' && chrome.socket);
+  // TODO: throw an Error if this isn't here.
+  var socket = exports.socket; //|| (typeof chrome != 'undefined' && chrome.socket);
 
   /**
    * Create an instance of the server
@@ -216,20 +216,19 @@ function getStringOfArrayBuffer(buf) {
    */
   TcpServer.prototype._onListenComplete = function(resultCode) {
     if (resultCode === 0) {
-
       socket.on('onConnection', function accept(acceptValue) {
-	if (this.serverSocketId !== acceptValue.serverSocketId) {
-	  return;
-	}
+	    if (this.serverSocketId !== acceptValue.serverSocketId) {
+	      return;
+	    }
 
-	var connectionsCount = Object.keys(this.openConnections).length;
-	if (connectionsCount >= this.maxConnections) {
+	    var connectionsCount = Object.keys(this.openConnections).length;
+	    if (connectionsCount >= this.maxConnections) {
           socket.disconnect(acceptValue.clientSocketId);
           socket.destroy(acceptValue.clientSocketId);
           console.warn('TcpServer: too many connections: ' + connectionsCount);
           return;
-      }
-	this._createTcpConnection(acceptValue.clientSocketId);
+        }
+	    this._createTcpConnection(acceptValue.clientSocketId);
       }.bind(this));
 
       this.callbacks.listening && this.callbacks.listening();
@@ -337,6 +336,9 @@ function getStringOfArrayBuffer(buf) {
    */
   TcpConnection.prototype.send = function(msg, callback) {
     // Register sent callback.
+    if ((typeof msg) != "string") {
+      console.log("TcpConnection.send: got non-string object.");
+    }
     _stringToArrayBuffer(msg + '\n', function(msg) {
       // TODO: need bind?
       this.sendRaw(msg, callback);

@@ -155,7 +155,7 @@ module.exports = function(grunt) {
         // Files being tested
         src: sourcesToTest,
         options: {
-          specs: 'common/backend/spec/*Spec.js'
+          specs: 'common/backend/spec/utilSpec.js'
         }
       }
     },
@@ -287,4 +287,3 @@ function minimatchArray(file, arr) {
   }
   return result;
 };
-
