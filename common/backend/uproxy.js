@@ -195,6 +195,15 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
                'peerId': peerInstanceId});
+
+  // This is a temporary hack which makes the other end aware of your proxying.
+  // TODO(uzimizu): Remove this once proxying is happening *for real*.
+  identity.sendMessage(
+      state.instanceToClient[peerInstanceId],
+      JSON.stringify({
+          type: 'newly-active-client',
+          instanceId: state.me.instanceId
+      }));
 }
 
 function stopUsingPeerAsProxyServer(peerInstanceId) {
@@ -209,6 +218,14 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("stop");
   instance.status.proxy = ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
+
+  // TODO: this is also a temporary hack.
+  identity.sendMessage(
+      state.instanceToClient[peerInstanceId],
+      JSON.stringify({
+          type: 'newly-inactive-client',
+          instanceId: state.me.instanceId
+      }));
 }
 
 // peerconnection-client -- sent from client on other side.
@@ -225,6 +242,33 @@ function receiveSignalFromServerPeer(msg) {
   // sanitize from the identity service
   client.emit('handleServerSignalToPeer',
       {peerId: msg.fromClientId, data: msg.data.data});
+}
+
+
+// TODO(uzimizu): This is a HACK!
+function handleNewlyActiveClient(msg) {
+  var instanceId = msg.data.instanceId;
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Cannot be proxy for nonexistent instance.');
+    return;
+  }
+  log.debug('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
+  // state.me.instancePeer
+  instance.status.client = ProxyState.RUNNING;
+  _SyncInstance(instance, 'status');
+}
+
+function handleInactiveClient(msg) {
+  var instanceId = msg.data.instanceId;
+  var instance = state.instances[instanceId];
+  if (!instance) {
+    log.error('Cannot be proxy for nonexistent instance.');
+    return;
+  }
+  log.debug('STOPPED PROXYING FOR CLIENT INSTANCE: ' + instanceId);
+  instance.status.client = ProxyState.OFF;
+  _SyncInstance(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
@@ -346,7 +390,9 @@ var _msgReceivedHandlers = {
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
     'peerconnection-server' : receiveSignalFromServerPeer,
-    'peerconnection-client' : receiveSignalFromClientPeer
+    'peerconnection-client' : receiveSignalFromClientPeer,
+    'newly-active-client' : handleNewlyActiveClient,
+    'newly-inactive-client' : handleInactiveClient
 };
 
 //
