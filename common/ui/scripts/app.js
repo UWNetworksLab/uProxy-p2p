@@ -119,6 +119,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.stopAccess = function(instance) {
         instance = instance || ui.instance;
         appChannel.emit('stop-proxying', instance.instanceId);
+        // ui.proxy = null;
         ui.setProxying(false);
       };
 

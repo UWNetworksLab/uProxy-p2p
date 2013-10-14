@@ -17,7 +17,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // Initial filter state.
     $scope.filters = {
-      'alpha': true,
       'online': true,
       'myAccess': false,
       'friendsAccess': false,
@@ -28,7 +27,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'myAccess': 'Show contacts who provide me access.',
       'friendsAccess': 'Show contacts who use me for access.',
       'online': 'Show offline contacts.',
-      'alpha': 'Sort alphabetically',
     };
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;
@@ -70,6 +68,10 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
       $scope.ui.splashPage = !$scope.ui.splashPage;
+    };
+
+    $scope.toggleSearch = function() {
+      $scope.ui.searchBar = !$scope.ui.searchBar;
     };
 
     $scope.toggleFilter = function(filter) {

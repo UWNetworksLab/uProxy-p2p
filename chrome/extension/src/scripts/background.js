@@ -51,6 +51,7 @@ var UI = function() {
   this.splashPage = !this.loggedIn();
   this.rosterNudge = false;
   this.advancedOptions = false;
+  this.searchBar = true;
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.
@@ -143,6 +144,9 @@ UI.prototype.synchronize = function() {
     var instance = model.instances[iId];
     if ('running' == instance.status.client) {
       c++;
+    }
+    if ('running' == instance.status.proxy) {
+      this.isProxying = true;
     }
   }
   this.setClients(c);

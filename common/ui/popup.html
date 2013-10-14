@@ -60,20 +60,10 @@
       <div ng-hide="ui.splashPage" tabindex="-1">
         <section id="header">
           <section id="search-section" ng-hide="ui.rosterNudge">
-            <input type="text" id="search-contacts" placeholder="search contacts"
-                ng-model="search"
-                ng-blur="searchFocused=false"
-                ng-focus="searchFocused=true">
-            </input>
-
-            <button type="search" id="search-btn"></button>
-
-            <section id="filters">
-              <button id="alpha-filter" class="filter"
-                      ng-mouseenter="showFilter('alpha')"
-                      ng-mouseleave="showFilterTip=false"
-                      ng-class="{on:filters.alpha}"
-                      ng-click="toggleFilter('alpha')">A</button>
+            <section id="actions">
+              <button id="search-btn" type="search"
+                      ng-class="{on:ui.searchBar}"
+                      ng-click="toggleSearch()"></button>
               <button id="my-access" class="filter"
                       ng-mouseenter="showFilter('myAccess')"
                       ng-mouseleave="showFilterTip=false"
@@ -97,17 +87,25 @@
                       ng-click="toggleFilter('online')"></button>
               <br>
             </section>
-            <div class="tool" id="filterTooltip" ng-show="showFilterTip">
-              <div class="tip">
-                {{filterTip}}
-              </div>
-            </div>
+            <input type="text" id="search-contacts"
+                placeholder="search contacts"
+                ng-show="ui.searchBar"
+                ng-model="search"
+                ng-blur="searchFocused=false"
+                ng-focus="searchFocused=true">
+            </input>
           </section>
           <section id="contact-header" ng-show="ui.rosterNudge">
             <button class="btn-back" ng-click="ui.rosterNudge=false"></button>
             <h1>{{ui.contact.name}}</h1>
           </section>
         </section>
+
+        <div class="tool" id="filterTooltip" ng-show="showFilterTip">
+          <div class="tip">
+            {{filterTip}}
+          </div>
+        </div>
 
         <section id="roster">
           <div id="roster-text">
@@ -128,7 +126,7 @@
                 ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"
-                tabindex="{{ $index + 10 }}">
+                >
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
               <span class="c-icons">
@@ -242,16 +240,21 @@
       </div>
 
       <section id="status">
+        <div id="status-proxy" ng-show="ui.proxy">
 
-        <div ng-show="model.me.peerAsProxy">
-          Proxying via {{ui.proxy.rosterInfo.name}}.
-          <br>{{model.me.peerAsProxy}}
-          </br>
-          <button class="btn"
-              ng-hide="'off'==ui.proxy.status.proxy"
-              ng-click="stopAccess()">
-            Stop
-          </button>
+          <div ng-hide="'off'==ui.proxy.status.proxy">
+            Proxying via {{ui.proxy.rosterInfo.name}}.<br>
+            <button id="stop-btn" class="icon-btn" ng-click="stopAccess()">
+            </button>
+          </div>
+
+          <div ng-show="'off'==ui.proxy.status.proxy">
+            Proxied via {{ui.proxy.rosterInfo.name}}.<br>
+            <button id="start-btn" class="icon-btn" ng-click="startAccess(ui.proxy)">
+            </button>
+          </div>
+
+          <div class="instance-id">{{ui.proxy.instanceId}}</div>
         </div>
 
         <span ng-show="ui.loggedIn()">

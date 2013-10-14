@@ -72,9 +72,6 @@ ul {
   outline: none;
   cursor: pointer; }
 
-#header {
-  height: 64px; }
-
 .title {
   padding: 0 8px; }
 
@@ -142,8 +139,10 @@ ul {
 #filterTooltip {
   position: fixed;
   z-index: 50;
-  top: 60px;
+  top: 30px;
   opacity: 0.9;
+  font-size: 14.4px;
+  pointer-events: none;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -155,8 +154,8 @@ ul {
 
 #filterTooltip.ng-hide {
   display: block !important;
-  opacity: 0;
-  pointer-events: none; }
+  pointer-events: none;
+  opacity: 0; }
 
 #not-connected {
   text-align: center;
@@ -177,7 +176,7 @@ ul {
   transition: all 0.5s !important; }
 
 #login-splash.ng-hide {
-  display: block !important;
+  pointer-events: none;
   height: 0; }
 
 .network-btn {
@@ -240,77 +239,72 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  #search-contacts:hover {
+    box-shadow: 0 1px 2px #aaaaaa inset; }
+  #search-contacts:focus {
+    outline: none;
+    box-shadow: 0 1px 2px #cccccc; }
+  #search-contacts.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    height: 0;
+    padding: 0;
+    border: none; }
 
-#search-contacts:hover {
-  box-shadow: 0 1px 3px #888888 inset; }
-
-#search-contacts:focus {
-  outline: none;
-  box-shadow: 0 1px 2px #aaaaaa; }
-
-#search-btn {
-  position: absolute;
-  z-index: 40;
-  right: 4px;
-  top: 0;
-  width: 26px;
-  height: 30px;
-  padding: 12px;
-  border: none;
-  background: transparent url("../icons/search.png") no-repeat center;
-  background-size: 80%; }
-
-#search-btn:hover, #search-btn:focus {
-  opacity: 0.5;
-  outline: none; }
-
-#filters {
+#actions {
   z-index: 20;
   display: block;
   width: 100%;
   background-color: #fafafa;
   height: 30px;
-  text-align: center;
+  text-align: left;
   overflow: hidden;
   padding: 0;
   box-shadow: 0 1px 2px #aaaaaa; }
 
+#search-btn {
+  z-index: 40;
+  width: 50px;
+  height: 16px;
+  padding: 8px;
+  border: none;
+  background: transparent url("../icons/search.png") no-repeat center;
+  background-size: 16px;
+  cursor: pointer; }
+  #search-btn:hover, #search-btn:focus {
+    opacity: 0.5;
+    outline: none; }
+
 .filter {
   margin: 0;
-  padding: 0;
+  padding: 8px;
+  height: 16px;
+  width: 40px;
   border: none;
-  height: 24px;
-  width: 30px;
   line-height: 0;
   background: transparent no-repeat center;
-  background-size: contain !important;
+  background-size: 16px !important;
   font-size: 24px;
   font-weight: 900;
   color: #222222;
   opacity: 0.4;
+  cursor: pointer;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.filter:active, .filter:focus {
-  outline: none;
-  opacity: 0.3; }
-
-.filter:hover {
-  cursor: pointer;
-  opacity: 0.2; }
-
-.filter.on {
-  opacity: 1; }
-
-.filter.on:active, .filter.on:focus {
-  outline: none;
-  opacity: 0.8; }
-
-.filter.on:hover {
-  cursor: pointer;
-  opacity: 0.75; }
+  .filter:active, .filter:focus {
+    outline: none;
+    opacity: 0.3; }
+  .filter:hover {
+    opacity: 0.2; }
+  .filter.on {
+    opacity: 1; }
+    .filter.on:active, .filter.on:focus {
+      outline: none;
+      opacity: 0.8; }
+    .filter.on:hover {
+      opacity: 0.75; }
 
 #my-access {
   background-image: url("../icons/arrow-up.png"); }
@@ -323,6 +317,28 @@ ul {
 
 #online-filter {
   background-image: url("../icons/online.png"); }
+
+.icon-btn {
+  z-index: 40;
+  width: 24px;
+  height: 24px;
+  padding: 8px;
+  border: none;
+  background: transparent no-repeat center;
+  background-size: 24px !important;
+  cursor: pointer;
+  outline: none;
+  padding: 0; }
+  .icon-btn:active, .icon-btn:focus {
+    opcaity: 0.8; }
+  .icon-btn:hover {
+    opacity: 0.7; }
+
+#start-btn {
+  background-image: url("../icons/uproxy-19.png"); }
+
+#stop-btn {
+  background-image: url("../icons/stop.png"); }
 
 #roster {
   width: 100%;
@@ -356,6 +372,7 @@ ul {
 
 #contacts-frame.ng-hide {
   display: block !important;
+  pointer-events: none;
   left: -400px; }
 
 .contacts {
@@ -567,6 +584,22 @@ img.c-icon:hover {
   border-top: 1px solid #eeeeee;
   background-color: white;
   text-align: center; }
+
+#status-proxy {
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eeeeee;
+  color: #333333;
+  -webkit-transition: all 0.5s !important;
+  -moz-transition: all 0.5s !important;
+  -o-transition: all 0.5s !important;
+  transition: all 0.5s !important; }
+
+#status-proxy.ng-hide {
+  display: block !important;
+  pointer-events: none;
+  opacity: 0;
+  height: 0; }
 
 .contact-actions {
   display: none; }

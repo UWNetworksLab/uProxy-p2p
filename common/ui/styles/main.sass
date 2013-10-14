@@ -16,6 +16,11 @@ $fontSize: 16px
   -o-transition: all 0.5s !important
   transition: all 0.5s !important
 
+// Custom hidden behavior
+@mixin un-ng-hide
+  display: block !important
+  pointer-events: none
+
 body
   font-family: Eurostile, sans-serif
   height: 100%
@@ -77,7 +82,7 @@ ul
   cursor: pointer
 
 #header
-  height: 64px
+  // height: 64px
 
 .title
   padding: 0 8px
@@ -129,8 +134,7 @@ ul
   @include smooth
 
 .tip.ng-hide
-  display: block !important
-  pointer-events: none
+  @include un-ng-hide
   opacity: 0
 
 // For centering the tooltip.
@@ -143,8 +147,10 @@ ul
 #filterTooltip
   position: fixed
   z-index: 50
-  top: 60px
+  top: 30px
   opacity: 0.9
+  font-size: $fontSize * 0.9
+  pointer-events: none
   @include smooth
 
 #filterTooltip .tip
@@ -152,9 +158,8 @@ ul
   color: #ccc
 
 #filterTooltip.ng-hide
-  display: block !important
+  @include un-ng-hide
   opacity: 0
-  pointer-events: none
 
 #not-connected
   text-align: center
@@ -172,7 +177,7 @@ ul
   background-color: #fff
   @include smooth-slow
 #login-splash.ng-hide
-  display: block !important
+  pointer-events: none
   height: 0
 
 .network-btn
@@ -228,68 +233,74 @@ ul
   outline: none
   color: #333
   @include smooth
-#search-contacts:hover
-  box-shadow: 0 1px 3px #888 inset
-#search-contacts:focus
-  outline: none
-  box-shadow: 0 1px 2px #aaa
+  &:hover
+    box-shadow: 0 1px 2px #aaa inset
+  &:focus
+    outline: none
+    box-shadow: 0 1px 2px #ccc
+  &.ng-hide
+    @include un-ng-hide
+    height: 0
+    padding: 0
+    border: none
 
-#search-btn
-  position: absolute
-  z-index: 40
-  right: 4px
-  top: 0
-  width: 26px
-  height: 30px
-  padding: 12px
-  border: none
-  background: transparent url('../icons/search.png') no-repeat center
-  background-size: 80%
-
-#search-btn:hover, #search-btn:focus
-  opacity: 0.5
-  outline: none
-
-#filters
+// Goes at the top of the popup. Contais a bunch of icons which modify the
+// current view mode, or change roster filters.
+#actions
   z-index: 20
   display: block
   width: 100%
   background-color: #fafafa
   height: 30px
-  text-align: center
+  text-align: left
   overflow: hidden
   padding: 0
   box-shadow: 0 1px 2px #aaa
 
+// The search button toggles the actual textfield containing the user's search
+// query.
+#search-btn
+  z-index: 40
+  width: 50px
+  height: 16px
+  padding: 8px
+  border: none
+  background: transparent url('../icons/search.png') no-repeat center
+  background-size: 16px
+  cursor: pointer
+
+  &:hover, &:focus
+    opacity: 0.5
+    outline: none
+
 .filter
   margin: 0
-  padding: 0
+  padding: 8px
+  height: 16px
+  width: 40px
   border: none
-  height: 24px
-  width: 30px
   line-height: 0
   background: transparent no-repeat center
-  background-size: contain !important
+  background-size: 16px !important
   font-size: $fontSize * 1.5
   font-weight: 900
   color: #222
   opacity: 0.4
+  cursor: pointer
   @include smooth
-.filter:active, .filter:focus
-  outline: none
-  opacity: 0.3
-.filter:hover
-  cursor: pointer
-  opacity: 0.2
-
-.filter.on
-  opacity: 1.0
-.filter.on:active, .filter.on:focus
-  outline: none
-  opacity: 0.8
-.filter.on:hover
-  cursor: pointer
-  opacity: 0.75
+  &:active, &:focus
+    outline: none
+    opacity: 0.3
+  &:hover
+    opacity: 0.2
+  // When the filter is on, the opacity changes are different.
+  &.on
+    opacity: 1.0
+    &:active, &:focus
+      outline: none
+      opacity: 0.8
+    &:hover
+      opacity: 0.75
 
 #my-access
   background-image: url('../icons/arrow-up.png')
@@ -302,6 +313,27 @@ ul
 
 #online-filter
   background-image: url('../icons/online.png')
+
+.icon-btn
+  z-index: 40
+  width: 24px
+  height: 24px
+  padding: 8px
+  border: none
+  background: transparent no-repeat center
+  background-size: 24px !important
+  cursor: pointer
+  outline: none
+  padding: 0
+  &:active, &:focus
+    opcaity: 0.8
+  &:hover
+    opacity: 0.7
+
+#start-btn
+  background-image: url('../icons/uproxy-19.png')
+#stop-btn
+  background-image: url('../icons/stop.png')
 
 // --------------------------- Roster & Contacts -------------------------------
 #roster
@@ -329,7 +361,7 @@ ul
   @include smooth
 
 #contacts-frame.ng-hide
-  display: block !important
+  @include un-ng-hide
   left: -400px
 
 .contacts
@@ -526,35 +558,18 @@ img.c-icon:hover
   background-color: #fff
   text-align: center
 
-// .contact-hover
-  // position: absolute !important
-  // bottom: -10px
-  // left: 0
-  // opacity: 1.0
-  // @include smooth
-//
-// .contact-hover.ng-hide
-  // display: block !important
-  // z-index: -500
-  // opacity: 0 !important
-  // pointer-events: none
+#status-proxy
+  padding-bottom: 12px
+  margin-bottom: 16px
+  border-bottom: 1px solid #eee
+  color: #333
+  @include smooth-slow
 
-// .contact-details.ng-hide-add,
-// .contact-details.ng-hide-remove
-  // @include smooth
-  // display: block !important
-//
-// .contact-details.ng-hide-add.ng-hide-add-active,
-// .contact-details.ng-hide-remove
-  // @include smooth
-  // opacity: 0
-  // height: 0
-//
-// .contact-details.ng-hide-add,
-// .contact-details.ng-hide-remove.ng-hide-remove-active
-  // opacity: 1
-  // height: 50px
-//
+#status-proxy.ng-hide
+  @include un-ng-hide
+  opacity: 0
+  height: 0
+
 .contact-actions
   display: none
 
