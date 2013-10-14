@@ -98,8 +98,9 @@ function wireUItoApp() {
     if (patchMsg[0].path === '') {
       model = patchMsg[0].value;
     } else {
+      // Check if the operation should be add or replace.
+      patchMsg.op = 'replace';
       jsonpatch.apply(model, patchMsg);
-      console.log(model);
     }
 
     // Count up notifications
