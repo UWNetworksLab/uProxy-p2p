@@ -20,6 +20,7 @@ var onload = function() {
   var _peerId = null;
   // The signalling channel
   var _signallingChannel = null;
+  var _messageQueue = [];
   // Each TcpConnection that is active, indexed by it's corresponding sctp
   // channel id.
   var _conns = {};
@@ -138,10 +139,10 @@ var onload = function() {
 
       // when the channel is complete, setup handlers.
       chan.channel.done(function(signallingChannel) {
-        _signallingChannel = signallingChannel;
+        console.log("Client channel to sctpPc created");
         // when the signalling channel gets a message, send that message to the
         // freedom 'fromClient' handlers.
-        _signallingChannel.on('message', function(msg) {
+        signallingChannel.on('message', function(msg) {
           freedom.emit('sendSignalToPeer', {
               peerId: _peerId,
               data: msg
@@ -150,8 +151,16 @@ var onload = function() {
 
         // When the signalling channel is ready, set the global variable.
         // _signallingChannel.on('ready', function() {});
-        console.log('Manually preparing a data channel to catalyze SDP handshake.');
-        _sctpPc.openDataChannel('foo', function() {console.log('wheeeee');});
+        signallingChannel.on('ready', function() {
+          _signallingChannel = signallingChannel;
+          console.log("Client channel to sctpPc ready.");
+          console.log('Manually preparing a data channel to catalyze SDP handshake.');
+          //Is this necessary?
+          _sctpPc.openDataChannel('foo', function() {console.log('wheeeee');});
+          while(_messageQueue.length > 0) {
+            _signallingChannel.emit('message', _messageQueue.shift());
+          }
+        });
         // _signallingChannel.emit('handleSignalFromPeer');
 
       });
@@ -167,7 +176,8 @@ var onload = function() {
     if (_signallingChannel) {
       _signallingChannel.emit('message', msg.data);
     } else {
-      console.log("Couldn't route incoming signaling message");
+      _messageQueue.push(msg.data);
+      //console.log("Couldn't route incoming signaling message");
     }
   });
 
