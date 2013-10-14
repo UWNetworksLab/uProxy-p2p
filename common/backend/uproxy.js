@@ -213,14 +213,16 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 function receiveSignalFromClientPeer(msg) {
   console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  server.emit('handleSignalFromPeer', {peerId: msg.fromClientId, data: msg.data});
+  server.emit('handleSignalFromPeer',
+      {peerId: msg.fromClientId, data: msg.data});
 }
 
 // peerconnection-server -- sent from server on other side.
 function receiveSignalFromServerPeer(msg) {
   console.log('receiveSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data});
+  client.emit('handleServerSignalToPeer',
+      {peerId: msg.fromClientId, data: msg.data});
 }
 
 // --------------------------------------------------------------------------
