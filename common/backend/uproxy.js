@@ -618,22 +618,21 @@ uiChannel.on('stop-proxying', function(peerInstanceId) {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
+// peerId is a client ID.
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId + ", which should map to " +
-                    state.instanceToClient[data.peerId]);
+                ', sending to client: ' + data.peerId + ", which should map to instance: " +
+                    state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
-  identity.sendMessage(
-      state.instanceToClient[data.peerId],
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId);
-  identity.sendMessage(
-      state.instanceToClient[data.peerId],
+                ', sending to client: ' + data.peerId);
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
@@ -648,7 +647,8 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     log.debug('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
-  log.debug('Starting peer connection...');
+  log.debug('Starting peer connection... to client id: ' +
+      state.instanceToClient[peerInstanceId]);
 
   // TODO: Cleanly disable any previous proxying session. This involves
   // terminating the SDP session.
@@ -662,7 +662,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': peerInstanceId});
+               'peerId': state.instanceToClient[peerInstanceId]});
 }
 
 function stopUsingPeerAsProxyServer(peerInstanceId) {
@@ -687,16 +687,16 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 function handleSignalFromClientPeer(msg) {
   console.log('handleSignalFromClientPeer: ' + msg.fromClientId);
   // sanitize from the identity service
-  server.emit('handleSignalFromPeer', {
-      peerId: msg.fromClientId, data: msg.data.data
-  });
+  server.emit('handleSignalFromPeer',
+      {peerId: msg.fromClientId, data: msg.data.data});
 }
 
 // peerconnection-server -- sent from server on other side.
 function handleSignalFromServerPeer(msg) {
   console.log('handleSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data.data});
+  client.emit('handleServerSignalToPeer',
+      {peerId: msg.fromClientId, data: msg.data.data});
 }
 
 // --------------------------------------------------------------------------
@@ -1172,6 +1172,10 @@ function _Login(network) {
     _saveNetworkState(network, true);
   }
 }
+
+uiChannel.on("test-proxy", function() {
+  _localTestProxying();
+});
 
 // --------------------------------------------------------------------------
 // Initialization
