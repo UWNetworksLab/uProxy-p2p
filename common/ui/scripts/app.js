@@ -209,13 +209,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      function updateDOM(patch) {
+      var updateDOM = function(patch) {
         $rootScope.$apply(function () {
           $rootScope.connectedToApp = true;
           // Also update pointers locally.
           $rootScope.instances = model.instances;
-          console.log(model);
-          console.log($rootScope.model);
           /*
           // Run through roster if necessary.
           if (patch[0].path.indexOf('roster') >= 0) {
@@ -250,9 +248,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           }
           */
         });
-      }
+      };
 
-      // onStateChange.addListener(updateDOM);
+      onStateChange.addListener(updateDOM);
       // onAppData.addListener($rootScope.onStateChange);
 
       // Can be called from nonUI threads (i.e. without a defined window

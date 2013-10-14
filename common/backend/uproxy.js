@@ -749,9 +749,7 @@ function _updateTrust(instanceId, action, received) {
   }
   // Update UI. TODO(uzimizu): Local storage as well?
   _SyncInstance(instance, 'trust');
-  // uiChannel.emit('state-change', [{
-      // op: 'replace', path: '/instances/' + instance.instanceId, value: instance
-  // }]);
+  log.debug('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
 
@@ -928,7 +926,6 @@ function _fetchMyInstance(resetCache) {
       }
     });
     log.debug('preparing new instance payload.');
-    log.debug(JSON.stringify(me));
     log.debug(_myInstanceData);
   }
   return _myInstanceData;

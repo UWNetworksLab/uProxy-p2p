@@ -42,18 +42,6 @@ var Roster = function() {
 };
 var roster = new Roster();
 
-// Update the model with a JSON patch.
-function applyPatch(patch) {
-  console.log(patch);
-  if (patch.path === '') {
-    console.log('resetting the model!');
-    model = patch.value;
-  } else {
-    jsonpatch.apply(model, patch);
-    console.log(model);
-  }
-}
-
 // Connect to the App.
 console.log('Connecting to App...');
 var connectedToApp = false;
@@ -63,8 +51,15 @@ var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
 
 function wireUItoApp() {
   console.log('Wiring UI to backend...');
+  // Update the model with a JSON patch.
   appChannel.on('state-change', function(patchMsg) {
-    applyPatch(patchMsg[0]);
+    console.log(patchMsg[0]);
+    if (patchMsg[0].path === '') {
+      model = patchMsg[0].value;
+    } else {
+      jsonpatch.apply(model, patchMsg);
+      console.log(model);
+    }
     // This event allows angular to bind listeners and update the DOM.
     onStateChange.dispatch(patchMsg);
   });
@@ -74,33 +69,18 @@ appChannel.onConnected.addListener(wireUItoApp);
 
 function reconnectToApp() {
   console.log('Disconnected. Attempting to reconnect to app...');
-  // checkAppConnection();
   appChannel.connect();
 }
 
-/*
-function checkAppConnection() {
-  if (connectedToApp) {
-    return;  // Already connected.
-  }
-  // Check that the extension is connected.
-  if (appChannel.connected) {
-    connectedToApp = true;
-    // $rootScope.startUI();
-  } else {
-    console.log('connecting.');
-    // appChannel.onConnected.addListener($rootScope.startUI);
-  }
-}*/
-
 function initialize() {
-  // appChannel.emit('ui-ready');
+  appChannel.emit('ui-ready');
 }
 
 // Automatically attempt to reconnect when disconnected.
 appChannel.onConnected.addListener(initialize);
 appChannel.onDisconnected.addListener(reconnectToApp);
-appChannel.onDisconnected.removeListener(wireUItoApp);
+
+// appChannel.onDisconnected.removeListener(wireUItoApp);
 
 window.onunload = function() {
   // appChannel.removeListener(onStateChange);
