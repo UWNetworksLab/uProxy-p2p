@@ -44,7 +44,7 @@ var onload = function() {
   }
 
   var _closePeer = function(close_client, label) {
-    var labelnm = JSON.stringify(label);
+    var labelnm = label; // JSON.stringify(label);
     if (labelnm === "{}") {
       var err = new Error();
       console.log("server.js: _closePeer: got a bad label.  Stack trace: " +
@@ -57,8 +57,8 @@ var onload = function() {
       var num_clients_found = 0;
       for (var i in _peers) {
         if (_peers[i].netClients[label]) {
-          netClients[label].close();
-          delete netClients[label];
+          _peers[i].netClients[label].close();
+          delete _peers[i].netClients[label];
           num_clients_found++;
         }
       }
@@ -129,8 +129,8 @@ var onload = function() {
         console.log("server.js: onCloseDataChannel: getting back an object: " +
             JSON.stringify(arg));
       }
-      console.log("server.js:onCloseDataChannel: got arg " + arg);
-      _closePeer(true, arg.channelid);
+      console.log("server.js:onCloseDataChannel: got arg " + arg.channelId);
+      _closePeer(true, arg.channelId);
     });
 
     var promise = freedom.core().createChannel();
