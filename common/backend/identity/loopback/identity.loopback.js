@@ -103,12 +103,13 @@ IdentityProvider.prototype.getProfile = function(id, continuation) {
 };
 
 // Send a message to someone.
-IdentityProvider.prototype.sendMessage= function(to, msg, continuation) {
+IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
   this.dispatchEvent('onMessage', {
     fromUserId: "Other User",
     fromClientId: "Other User.0", 
     toUserId: "Test User",
     toClientId: "Test User.0",
+    network: "loopback",
     message: msg
   });
   continuation();

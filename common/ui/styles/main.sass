@@ -77,6 +77,7 @@ ul
   cursor: pointer
 
 #header
+  height: 64px
 
 .title
   padding: 0 8px
@@ -138,6 +139,22 @@ ul
   display: block
   width: 100%
   text-align: center
+
+#filterTooltip
+  position: fixed
+  z-index: 50
+  top: 60px
+  opacity: 0.9
+  @include smooth
+
+#filterTooltip .tip
+  background-color: #000
+  color: #ccc
+
+#filterTooltip.ng-hide
+  display: block !important
+  opacity: 0
+  pointer-events: none
 
 #not-connected
   text-align: center
@@ -220,7 +237,7 @@ ul
 #search-btn
   position: absolute
   z-index: 40
-  right: 0
+  right: 4px
   top: 0
   width: 26px
   height: 30px
@@ -234,37 +251,60 @@ ul
   outline: none
 
 #filters
-  position: relative
+  z-index: 20
   display: block
   width: 100%
   background-color: #fafafa
+  height: 30px
   text-align: center
   overflow: hidden
-  z-index: 20
-  padding: 2px
+  padding: 0
   box-shadow: 0 1px 2px #aaa
 
 .filter
   margin: 0
-  padding: 2px 16px
+  padding: 0
   border: none
-  background-color: #fafafa
-  color: #999
+  height: 24px
+  width: 30px
+  line-height: 0
+  background: transparent no-repeat center
+  background-size: contain !important
+  font-size: $fontSize * 1.5
+  font-weight: 900
+  color: #222
+  opacity: 0.4
   @include smooth
-
-.filter:hover
-  background-color: #fbfbfb
-  box-shadow: 0 0 2px #aaa inset
-
 .filter:active, .filter:focus
   outline: none
-  box-shadow: 0 0 3px #888 inset
-  color: #666
+  opacity: 0.3
+.filter:hover
+  cursor: pointer
+  opacity: 0.2
+
+.filter.on
+  opacity: 1.0
+.filter.on:active, .filter.on:focus
+  outline: none
+  opacity: 0.8
+.filter.on:hover
+  cursor: pointer
+  opacity: 0.75
+
+#my-access
+  background-image: url('../icons/arrow-up.png')
+
+#friends-access
+  background-image: url('../icons/arrow-down.png')
+
+#uproxy-filter
+  background-image: url('../icons/uproxy-19.png')
+
+#online-filter
+  background-image: url('../icons/online.png')
 
 // --------------------------- Roster & Contacts -------------------------------
 #roster
-  position: absolute
-  top: 60px
   width: 100%
   @include smooth
 
@@ -331,6 +371,8 @@ ul
   // pointer-events: none
   // height: 0px
   // padding: 0
+.contacts li.offline
+  color: #888
 
 img.contact-image
   position: absolute
@@ -428,7 +470,7 @@ img.c-icon:hover
 .instance-actions .btn
   padding: 8px 16px
   margin-top: 16px
-  text-shadow: 0 2px #888
+  text-shadow: 0 1px 1px #888
   border-radius: 3px
 
 .client-details

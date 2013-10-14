@@ -117,7 +117,7 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
     this.client.send(
         new window.XMPP.Element('message', {
           to: to,
-          type: 'chat'
+          type: 'normal'
         }).c('body').t(JSON.stringify(msg)));
   } catch (e) {
     console.log(e.stack);
@@ -326,7 +326,6 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
-  console.log(stanza)
   // console.log(stanza.attrs.from);
   if(window.presence) {
     window.presence.push(stanza);

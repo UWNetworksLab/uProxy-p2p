@@ -1,12 +1,16 @@
 "use strict";
 
 // The port that the extension connects to.
-var extPort;
+var extPort = null;
 // A list of pending messages sent to the extension at the next possible
 // instance.
 var pendingMsgs = [];
 // true iff extension has connected to the app and extPort is connected.
 var connectedToExtension = false;
+
+// Remember which handlers freedom has installed.
+var installedFreedomHooks = [];
+
 // Constant
 var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
@@ -18,6 +22,7 @@ window.freedomcfg = function(register) {
 
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'common/backend/uproxy.json');
+
 // Uncomment for clearer but less portable module error messages.
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
 script.src = 'common/freedom/freedom.js';
@@ -29,7 +34,6 @@ script.onload = function() {
   uProxyAppChannel = freedom;
   uProxyAppChannel.on('ready', function() {
     console.log("uproxy.js is ready!");
-    //uProxyAppChannel.emit('start-proxy-localhost-test');
   });
 
   //var test_script = document.createElement('script');
@@ -45,37 +49,30 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // trying to do something even worse.
   if (port.sender.id !== EXTENSION_ID ||
       port.name !== 'uproxy-extension-to-app-port') {
-    console.log("Got connect from an unexpected extension id: "
-        + port.sender.id);
+    console.log('Got connect from an unexpected extension id: ' +
+        port.sender.id);
     return;
   }
-
-  extPort = port;
+  extPort = port;  // Update to the current port.
 
   // Because there is no callback when you call runtime.connect and it
   // sucessfully connects, the extension depends on a message to come back to
   // it form here, the app, so it knows the connection was successful and the
   // app is indeed present.
   extPort.postMessage("hello.");
-
   // TODO: remove this testing code.
   // setTimeout(function() { extPort.postMessage("ignore me."); }, 10);
-
   extPort.onMessage.addListener(onExtMsg);
   for (var i = 0; i < pendingMsgs.length; i++) {
+    console.log(pendingMsgs[i]);
     extPort.postMessage(pendingMsgs[i]);
   }
   connectedToExtension = true;
 });
 
-function sendMessage(msg) {
-  if (extPort) {
-    extPort.postMessage(msg);
-  } else {
-    pendingMsgs.push(msg);
-  }
-}
 
+// Receive a message from the extension.
+// This usually installs freedom handlers.
 function onExtMsg(msg) {
   console.log('got message from extension... ');
   console.log(msg);
@@ -83,6 +80,11 @@ function onExtMsg(msg) {
   if (msg.cmd == 'emit') {
     uProxyAppChannel.emit(msg.type, msg.data);
   } else if (msg.cmd == 'on') {
+    if (installedFreedomHooks.indexOf(msg.type) >= 0) {
+      console.log('freedom already has a hook for ' + msg.type);
+      return;
+    }
+    installedFreedomHooks.push(msg.type);
     uProxyAppChannel.on(msg.type, function (ret) {
       extPort.postMessage({
         cmd: 'on',

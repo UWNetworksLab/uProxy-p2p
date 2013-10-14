@@ -36,6 +36,7 @@ function IdentityProvider() {
   view.on('message', (function(data) {
     if (data.cmd && data.cmd == 'manual-msg' && data.message) {
       this.dispatchEvent('onMessage', {
+        network: 'manual',
         message: JSON.parse(data.message)
       });
     }

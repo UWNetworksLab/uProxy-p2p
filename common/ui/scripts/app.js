@@ -4,6 +4,9 @@
  * This is the primary frontend script. It maintains in-memory state which is
  * continuously patched from the backend (uproxy.js) and provides hooks for the
  * UI to modify state and send messages.
+ *
+ * It does not directly connect to the App - that would be redundant as
+ * everytime the popup was clicked, things would occur.
  */
 'use strict';
 
@@ -32,23 +35,25 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
-    'freedom',               // Via dependencyInjector - talks to backend.
-    'onFreedomStateChange',
-    'icon',
+    'ui',
+    'appChannel',               // via dependencyInjector.
+    'onStateChange',
     'model',
-    function($filter, $http, $rootScope,
-             appChannel, onFreedomStateChange,
-             icon, model) {
+    'roster',
+    'icon',
+    function($filter, $http, $rootScope, ui,
+             appChannel, onStateChange,
+             model, roster, icon) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
+      console.log(model);
+      $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
-      // $rootScope.VALID_NETWORKS = [
-        // 'google',
-        // 'facebook'
-      // ];
-      $rootScope.onAppData = onFreedomStateChange;
+
+      // Remember the state change hook.
+      $rootScope.update = onStateChange;
 
       $rootScope.resetState = function () {
         localStorage.clear();
@@ -69,25 +74,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[i];
         }
         return null;
-      };
-
-      // Determine whether UProxy is connected to |network|.
-      $rootScope.isOnline = function(network) {
-        return (model && model.identityStatus &&
-                model.identityStatus[network] &&
-                'online' == model.identityStatus[network].status);
-      };
-      $rootScope.isOffline = function(network) {
-        return (!model || !model.identityStatus ||
-                !model.identityStatus[network] ||
-                'offline' == model.identityStatus[network].status);
-      };
-      // Whether UProxy is logged in to *any* network.
-      $rootScope.loggedIn = function() {
-        return $rootScope.isOnline('google') || $rootScope.isOnline('facebook');
-      };
-      $rootScope.loggedOut = function() {
-        return $rootScope.isOffline('google') && $rootScope.isOffline('facebook');
       };
 
 
@@ -132,6 +118,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         icon.set('../common/ui/icons/uproxy-19-p.png');
       };
       $rootScope.stopAccess = function(instance) {
+        instance = instance || ui.instance;
         appChannel.emit('stop-proxying', instance.instanceId);
         icon.set('../common/ui/icons/uproxy-19.png');
       };
@@ -150,6 +137,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
+        console.log('instance trust change ' + action);
         appChannel.emit('instance-trust-change', {
           instanceId: id, action: action });
       };
@@ -162,11 +150,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
-        $rootScope.notifications--;
-        if ($rootScope.notifications == 0) {
-          $rootScope.notifications = '';
-        }
-        icon.label('' + $rootScope.notifications);
+        // $rootScope.notifications--;
+        // if ($rootScope.notifications == 0) {
+          // $rootScope.notifications = '';
+        // }
+        ui.decNotifications();
+        // icon.label('' + $rootScope.notifications);
       }
 
       $rootScope.changeOption = function (key, value) {
@@ -209,80 +198,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      $rootScope.onStateChange = function (patch) {
+      var updateDOM = function(patch) {
         $rootScope.$apply(function () {
           $rootScope.connectedToApp = true;
-          // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
-          // patches with an empty path don't seem to apply.
-          if (patch[0].path === '') {
-            angular.copy(patch[0].value, model);
-          } else {
-            jsonpatch.apply(model, patch);
-          }
           // Also update pointers locally.
           $rootScope.instances = model.instances;
-          // Count up notifications;
-          $rootScope.notifications = 0;
-          for (var userId in model.roster) {
-            $rootScope.notifications += model.roster[userId].hasNotification? 1 : 0;
-          }
-          if ($rootScope.notifications > 0) {
-            icon.label('' + $rootScope.notifications);
-            // {text: '↑', color: "#fff"})
-          }
         });
-      }
-
-      // Can be called from nonUI threads (i.e. without a defined window
-      // object.).
-      $rootScope.startUI = function() {
-        // call these in the Angular scope so that window is defined.
-        $rootScope.$apply(function() {
-          appChannel.onConnected.removeListener($rootScope.startUI);
-          $rootScope.onAppData.addListener($rootScope.onStateChange);
-          window.onunload = function() {
-            $rootScope.onAppData.removeListener($rootScope.onStateChange);
-          };
-          // TODO(uzimizu): Make this *not* resend all the things if not
-          // necessary...
-          appChannel.emit('open-popup');
-          //$rootScope.authGoog();
-          $rootScope.connectedToApp = true;
-        });
-      }
-
-      $rootScope.reconnect = function() {
-        console.log('Disconnected. Attempting to reconnect to app...');
-        $rootScope.$apply(function() {
-          $rootScope.connectedToApp = false;
-        });
-        appChannel.onDisconnected.removeListener($rootScope.reconnect);
-        // TODO(uzimizu): Delay the app connection check.
-        $rootScope.checkAppConnection();
-        // $timeout(
-          // function() { $rootScope.checkAppConnection();},
-          // 3000);
-      }
-
-      $rootScope.connectedToApp = false;
-      $rootScope.checkAppConnection = function() {
-        if ($rootScope.connectedToApp) {
-          return;  // Already connected.
-        }
-        // Check that the extension is connected.
-        if (appChannel.connected) {
-          $rootScope.connectedToApp = true;
-          $rootScope.startUI();
-
-        } else {
-          console.log('connecting.');
-          appChannel.onConnected.addListener($rootScope.startUI);
-          appChannel.connect();
-        }
-        // Automatically attempt to reconnect when disconnected.
-        appChannel.onDisconnected.addListener($rootScope.reconnect);
-      }
-
-      $rootScope.checkAppConnection();
+        // console.log($rootScope.model);
+      };
+      onStateChange.addListener(updateDOM);
     }  // run function
   ]);

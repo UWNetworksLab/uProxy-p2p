@@ -72,6 +72,9 @@ ul {
   outline: none;
   cursor: pointer; }
 
+#header {
+  height: 64px; }
+
 .title {
   padding: 0 8px; }
 
@@ -135,6 +138,25 @@ ul {
   display: block;
   width: 100%;
   text-align: center; }
+
+#filterTooltip {
+  position: fixed;
+  z-index: 50;
+  top: 60px;
+  opacity: 0.9;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+
+#filterTooltip .tip {
+  background-color: black;
+  color: #cccccc; }
+
+#filterTooltip.ng-hide {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none; }
 
 #not-connected {
   text-align: center;
@@ -229,7 +251,7 @@ ul {
 #search-btn {
   position: absolute;
   z-index: 40;
-  right: 0;
+  right: 4px;
   top: 0;
   width: 26px;
   height: 30px;
@@ -243,39 +265,66 @@ ul {
   outline: none; }
 
 #filters {
-  position: relative;
+  z-index: 20;
   display: block;
   width: 100%;
   background-color: #fafafa;
+  height: 30px;
   text-align: center;
   overflow: hidden;
-  z-index: 20;
-  padding: 2px;
+  padding: 0;
   box-shadow: 0 1px 2px #aaaaaa; }
 
 .filter {
   margin: 0;
-  padding: 2px 16px;
+  padding: 0;
   border: none;
-  background-color: #fafafa;
-  color: #999999;
+  height: 24px;
+  width: 30px;
+  line-height: 0;
+  background: transparent no-repeat center;
+  background-size: contain !important;
+  font-size: 24px;
+  font-weight: 900;
+  color: #222222;
+  opacity: 0.4;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
 
-.filter:hover {
-  background-color: #fbfbfb;
-  box-shadow: 0 0 2px #aaaaaa inset; }
-
 .filter:active, .filter:focus {
   outline: none;
-  box-shadow: 0 0 3px #888888 inset;
-  color: #666666; }
+  opacity: 0.3; }
+
+.filter:hover {
+  cursor: pointer;
+  opacity: 0.2; }
+
+.filter.on {
+  opacity: 1; }
+
+.filter.on:active, .filter.on:focus {
+  outline: none;
+  opacity: 0.8; }
+
+.filter.on:hover {
+  cursor: pointer;
+  opacity: 0.75; }
+
+#my-access {
+  background-image: url("../icons/arrow-up.png"); }
+
+#friends-access {
+  background-image: url("../icons/arrow-down.png"); }
+
+#uproxy-filter {
+  background-image: url("../icons/uproxy-19.png"); }
+
+#online-filter {
+  background-image: url("../icons/online.png"); }
 
 #roster {
-  position: absolute;
-  top: 60px;
   width: 100%;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -348,6 +397,9 @@ ul {
   top: -2px;
   box-shadow: 0 2px 6px 1px #dddddd;
   outline: none; }
+
+.contacts li.offline {
+  color: #888888; }
 
 img.contact-image {
   position: absolute;
@@ -458,7 +510,7 @@ img.c-icon:hover {
 .instance-actions .btn {
   padding: 8px 16px;
   margin-top: 16px;
-  text-shadow: 0 2px #888888;
+  text-shadow: 0 1px 1px #888888;
   border-radius: 3px; }
 
 .client-details {

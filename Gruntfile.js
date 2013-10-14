@@ -9,9 +9,8 @@
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
- *  copy:chrome_app - Copy 'common' files into the Chrome App
- *  copy:chrome_ext - Copy 'common' files into the Chrome Extension
- *  copy:firefox - Copy 'common' files into Firefox
+ *  build_chrome - build Chrome files
+ *  build_firefox - build Firefox
  *  concat:firefox - collect popup.html and options.html dependencies into
                      a single file.
  *  everything - 'setup', 'test', then 'build'
@@ -85,7 +84,8 @@ var sourcesToTest = [
   'common/backend/nouns-and-adjectives.js',
   'common/backend/constants.js',
   'common/backend/state-Storage.js',
-  'common/backend/uproxy.js'
+  'common/backend/uproxy.js',
+  'common/backend/start-uproxy.js'
 ];
 
 module.exports = function(grunt) {
@@ -262,7 +262,7 @@ module.exports = function(grunt) {
     'build_firefox',
     'test'
   ]);
-  grunt.registerTask('everything' ['setup', 'test', 'build']);
+  grunt.registerTask('everything' ['setup', 'build']);
   // Default task(s).
   grunt.registerTask('default', ['build']);
 };
