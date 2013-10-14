@@ -29,8 +29,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       return $sniffer;
     }]);
   })
-  // Run gets called every time the popup is openned. This initializes the main
-  // extension UI and makes sure it is in sync with the app.
+  // Run gets called every time an extension module is opened.
   .run([
     '$filter',
     '$http',
@@ -119,7 +118,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.stopAccess = function(instance) {
         instance = instance || ui.instance;
         appChannel.emit('stop-proxying', instance.instanceId);
-        // ui.proxy = null;
         ui.setProxying(false);
       };
 
@@ -163,34 +161,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
 
       var clearedAndRetried = false;
-      /**
-      $rootScope.authGoog = function () {
-        googleAuth.authorize(function () {
-          var accessToken = googleAuth.getAccessToken();
-          $http({method: 'GET', url: GOOG_PROFILE_URL, params: {'oauth_token': accessToken}}).then(
-            function getProfileSuccessHandler(resp) {
-              var email = resp.data.email;
-              appChannel.emit('goog-credentials', {email: email, token: accessToken});
-              clearedAndRetried = false;
-            },
-            function getProfileFailureHandler(resp) {
-              if (resp.status === 401) {
-                console.debug('request for', GOOG_PROFILE_URL, 'yielded 401 response');
-                if (clearedAndRetried) {
-                  console.debug('already cleared access token and tried again');
-                } else {
-                  console.debug('clearing access token and trying again');
-                  clearedAndRetried = true;
-                  googleAuth.clearAccessToken();
-                  //$rootScope.authGoog();
-                }
-              } else {
-                console.debug('request for', GOOG_PROFILE_URL, 'failed:', resp);
-              }
-            });
-        });
-      }
-      **/
 
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
@@ -202,10 +172,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         $rootScope.$apply(function () {
           $rootScope.connectedToApp = true;
           // Also update pointers locally.
-          $rootScope.instances = model.instances;
+          // $rootScope.instances = model.instances;
         });
         // console.log($rootScope.model);
       };
       onStateChange.addListener(updateDOM);
+      $rootScope.updateDOM = updateDOM;
+
+      console.log('app.js doing things.');
     }  // run function
   ]);

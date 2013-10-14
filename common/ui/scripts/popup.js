@@ -14,6 +14,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
     $scope.advancedOptions = false;
+    $scope.splashPage = $scope.ui.splashPage;
 
     // Initial filter state.
     $scope.filters = {
@@ -63,11 +64,22 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
       $scope.notificationSeen(c);
+      if (!$scope.ui.isProxying) {
+        $scope.ui.proxy = null;
+      }
+    };
+
+    $scope.logonToGoogle = function() {
+      $scope.login('google');
+      $scope.splashPage = false;
+      $scope.ui.splashPage = $scope.splashPage;
     };
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.ui.splashPage = !$scope.ui.splashPage;
+      $scope.splashPage = !$scope.splashPage;
+      $scope.ui.splashPage = $scope.splashPage;
+      // $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
     $scope.toggleSearch = function() {
@@ -108,4 +120,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       return true;  // Does not match the search text, should be hidden.
     };
+
+    // $scope.updateDOM();
+    console.log('popup.js doing things.');
   }]);

@@ -20,252 +20,252 @@
   </head>
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
-    <section>
-      <section id="login-splash" ng-show="ui.splashPage">
-        <div class='uproxy-banner'>
-        <img src='icons/uproxy-128.png'>proxy
-        </div>
-        <span class="description">Safe Passage for the Web.</span>
 
-        <input type="text" ng-model="model.me.description"
-            id="my-description"
-            placeholder="Device description"
-            ng-blur="updateDescription();descriptionHelp=false"
-            ng-focus="descriptionHelp=true">
-        </input>
-        <p class="tip" ng-show="descriptionHelp">
-          Please describe your device.
-          This description will be visible to your friends.
-        </p>
+    <div id="login-splash" ng-show="ui.splashPage">
+      <div class='uproxy-banner'>
+      <img src='icons/uproxy-128.png'>proxy
+      </div>
+      <span class="description">Safe Passage for the Web.</span>
 
-        <div id="networks-box">
-        <h3>Networks</h3>
+      <input type="text" ng-model="model.me.description"
+          id="my-description"
+          placeholder="Device description"
+          ng-blur="updateDescription();descriptionHelp=false"
+          ng-focus="descriptionHelp=true">
+      </input>
+      <p class="tip" ng-show="descriptionHelp">
+        Please describe your device.
+        This description will be visible to your friends.
+      </p>
 
-        <div class="network-btn">
-        <button class="btn" ng-show="!ui.isOnline('google')"
-              ng-click="login('google');ui.splashPage=false">G+</button>
-        <button class="btn" ng-show="ui.isOnline('google')"
-              ng-click="logout('google')">Logout G+</button>
-        </div>
+      <div id="networks-box">
+      <h3>Networks</h3>
 
-        <div class="network-btn">
-        <button class="btn" ng-show="!ui.isOnline('facebook')"
-              ng-click="login('facebook')">FB</button>
-        <button class="btn" ng-show="ui.isOnline('facebook')"
-              ng-click="logout('facebook')">Logout FB</button>
-        </div>
-        </div>
-      </section>
-
-      <div ng-hide="ui.splashPage" tabindex="-1">
-        <section id="header">
-          <section id="search-section" ng-hide="ui.rosterNudge">
-            <section id="actions">
-              <button id="search-btn" type="search"
-                      ng-class="{on:ui.searchBar}"
-                      ng-click="toggleSearch()"></button>
-              <button id="my-access" class="filter"
-                      ng-mouseenter="showFilter('myAccess')"
-                      ng-mouseleave="showFilterTip=false"
-                      ng-class="{on:filters.myAccess}"
-                      ng-click="toggleFilter('myAccess')"></button>
-              <button id="friends-access" class="filter"
-                      ng-mouseenter="showFilter('friendsAccess')"
-                      ng-mouseleave="showFilterTip=false"
-                      ng-class="{on:filters.friendsAccess}"
-                      ng-click="toggleFilter('friendsAccess')"></button>
-              <button id="uproxy-filter" class="filter"
-                      ng-mouseenter="showFilter('uproxy')"
-                      ng-mouseenter="filterTip=filterTips.uproxy"
-                      ng-mouseleave="showFilterTip=false"
-                      ng-class="{on:filters.uproxy}"
-                      ng-click="toggleFilter('uproxy')"></button>
-              <button id="online-filter" class="filter"
-                      ng-mouseenter="showFilter('online')"
-                      ng-mouseleave="showFilterTip=false"
-                      ng-class="{on:filters.online}"
-                      ng-click="toggleFilter('online')"></button>
-              <br>
-            </section>
-            <input type="text" id="search-contacts"
-                placeholder="search contacts"
-                ng-show="ui.searchBar"
-                ng-model="search"
-                ng-blur="searchFocused=false"
-                ng-focus="searchFocused=true">
-            </input>
-          </section>
-          <section id="contact-header" ng-show="ui.rosterNudge">
-            <button class="btn-back" ng-click="ui.rosterNudge=false"></button>
-            <h1>{{ui.contact.name}}</h1>
-          </section>
-        </section>
-
-        <div class="tool" id="filterTooltip" ng-show="showFilterTip">
-          <div class="tip">
-            {{filterTip}}
-          </div>
-        </div>
-
-        <section id="roster">
-          <div id="roster-text">
-            <span ng-show="ui.loggedOut()">
-              You aren't logged in to any network.
-            </span>
-            <span ng-hide="ui.loggedOut()">
-              {{ model.roster.length }}
-              <span ng-show=" isEmpty(model.roster)">
-                Loading Roster...
-              </span>
-            </span>
-          </div>
-
-          <section id="contacts-frame" ng-hide="ui.rosterNudge">
-          <ul class="contacts">
-            <li ng-repeat="contact in model.roster"
-                ng-click="viewContact(contact)"
-                ng-hide="contactIsFiltered(contact)"
-                ng-class="{offline:!contact.online}"
-                >
-              {{contact.name}}
-              <img class="contact-image" ng-src='{{contact.imageData}}'>
-              <span class="c-icons">
-                <span class="c-icon" ng-show='contact.onGoogle'> G+ </span>
-                <span class="c-icon" ng-show='contact.onFB'> FB </span>
-                <span ng-show="contact.canUProxy">
-                  <img class="c-icon" ng-show='contact.canUProxy' src='icons/uproxy-19.png'>
-                </span>
-              </span>
-              <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
-            </li>
-          </ul>
-          </section>
-
-          <div id="contact-details" ng-show="ui.rosterNudge">
-            <div class="contact-status">
-              <div class="contact-name">
-                <img class="contact-image" ng-src='{{contact.imageData}}'>
-              </div>
-              <br>Network: {{ ui.contact.network }}
-              <p>
-              {{ ui.contact.name }} does
-              <span ng-hide="ui.instance">not</span>
-              have UProxy installed.
-              </p>
-
-              <div ng-show="ui.instance">
-                <div class="instance-actions">
-                  <p>
-                    {{ui.instance.description}}
-                  </p>
-                  <div class="instance-id" ng-show="ui.rosterNudge">
-                    {{ui.instance.instanceId}}
-                  </div>
-                  <div class="box-for-proxy"
-                      ng-switch="ui.instance.trust.asProxy">
-                    <div ng-switch-when="yes">
-                      <button class="btn"
-                          ng-show="'off'==ui.instance.status.proxy"
-                          ng-click="startAccess(ui.instance)">
-                        Start
-                      </button>
-                      <div class="btn"
-                          ng-show="'ready'==ui.instance.status.proxy">
-                        Setting up proxy...
-                      </div>
-                      <button class="btn"
-                          ng-hide="'off'==ui.instance.status.proxy"
-                          ng-click="stopAccess(ui.instance)">
-                        Stop
-                      </button>
-                    </div>
-                    <div ng-switch-when="requested">
-                      <button class="btn" ng-click="cancelRequest(ui.instance)">
-                        Cancel
-                      </button>
-                      <span>Pending...</span>
-                    </div>
-                    <div ng-switch-when="offered">
-                      <button class="btn" ng-click="acceptOffer(ui.instance)">
-                        Accept Access
-                      </button>
-                      <button class="btn" ng-click="declineOffer(ui.instance)">
-                        No Thanks
-                      </button>
-                    </div>
-                    <button class="btn"
-                        ng-switch-default
-                        ng-click="requestAccess(ui.instance)">
-                      Request
-                    </button>
-                  </div>
-
-                  <div class="box-for-client"
-                      ng-switch="ui.instance.trust.asClient">
-                    <button class="btn" ng-switch-when="no"
-                        ng-click="offerAccess(ui.instance)">
-                      Offer Access
-                    </button>
-                    <div ng-switch-when="requested">
-                      <button class="btn" ng-click="grantAccess(ui.instance)">
-                        Grant
-                      </button>
-                      <button class="btn" ng-click="denyAccess(ui.instance)">
-                        Ignore
-                      </button>
-                    </div>
-                    <button class="btn" ng-switch-default
-                        ng-click="revokeAccess(ui.instance)">
-                      Revoke Access
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <a class="chat-btn" href="{{ ui.contact.url }}"
-                 target="_blank"
-                 ng-mouseenter="chatButtonHovered=true"
-                 ng-mouseleave="chatButtonHovered=false">
-              </a>
-              <div class="tool">
-              <p class="tip" ng-show="chatButtonHovered" >
-                Ask {{ ui.contact.name }} to
-                <span ng-hide="ui.instance">install</span>
-                <span ng-show="ui.instance">run</span>
-                UProxy.
-              </p>
-              </div>
-            </div>
-          </div>
-        </section>
+      <div class="network-btn">
+      <button class="btn" ng-show="!ui.isOnline('google')"
+            ng-click="logonToGoogle()">G+</button>
+      <button class="btn" ng-show="ui.isOnline('google')"
+            ng-click="logout('google')">Logout G+</button>
       </div>
 
-      <section id="status">
-        <div id="status-proxy" ng-show="ui.proxy">
+      <div class="network-btn">
+      <button class="btn" ng-show="!ui.isOnline('facebook')"
+            ng-click="login('facebook')">FB</button>
+      <button class="btn" ng-show="ui.isOnline('facebook')"
+            ng-click="logout('facebook')">Logout FB</button>
+      </div>
+      </div>
+    </div>
 
-          <div ng-hide="'off'==ui.proxy.status.proxy">
-            Proxying via {{ui.proxy.rosterInfo.name}}.<br>
-            <button id="stop-btn" class="icon-btn" ng-click="stopAccess()">
-            </button>
+    <div id="main-view" ng-hide="ui.splashPage" tabindex="-1">
+      <div id="header">
+        <div id="search-section" ng-hide="ui.rosterNudge">
+          <div id="actions">
+            <button id="search-btn" type="search"
+                    ng-class="{on:ui.searchBar}"
+                    ng-click="toggleSearch()"></button>
+            <button id="my-access" class="filter"
+                    ng-mouseenter="showFilter('myAccess')"
+                    ng-mouseleave="showFilterTip=false"
+                    ng-class="{on:filters.myAccess}"
+                    ng-click="toggleFilter('myAccess')"></button>
+            <button id="friends-access" class="filter"
+                    ng-mouseenter="showFilter('friendsAccess')"
+                    ng-mouseleave="showFilterTip=false"
+                    ng-class="{on:filters.friendsAccess}"
+                    ng-click="toggleFilter('friendsAccess')"></button>
+            <button id="uproxy-filter" class="filter"
+                    ng-mouseenter="showFilter('uproxy')"
+                    ng-mouseenter="filterTip=filterTips.uproxy"
+                    ng-mouseleave="showFilterTip=false"
+                    ng-class="{on:filters.uproxy}"
+                    ng-click="toggleFilter('uproxy')"></button>
+            <button id="online-filter" class="filter"
+                    ng-mouseenter="showFilter('online')"
+                    ng-mouseleave="showFilterTip=false"
+                    ng-class="{on:filters.online}"
+                    ng-click="toggleFilter('online')"></button>
+            <br>
           </div>
-
-          <div ng-show="'off'==ui.proxy.status.proxy">
-            Proxied via {{ui.proxy.rosterInfo.name}}.<br>
-            <button id="start-btn" class="icon-btn" ng-click="startAccess(ui.proxy)">
-            </button>
-          </div>
-
-          <div class="instance-id">{{ui.proxy.instanceId}}</div>
+          <input type="text" id="search-contacts"
+              placeholder="search contacts"
+              ng-show="ui.searchBar"
+              ng-model="search"
+              ng-blur="searchFocused=false"
+              ng-focus="searchFocused=true">
+          </input>
         </div>
 
-        <span ng-show="ui.loggedIn()">
-          <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
-        </span>
+        <div id="contact-header" ng-show="ui.rosterNudge">
+          <button class="btn-back" ng-click="ui.rosterNudge=false"></button>
+          <h1>{{ui.contact.name}}</h1>
+        </div>
+      </div>
 
-        <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
-        <span ng-show="ui.loggedOut()">Not Connected</span>
-        <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
-      </section>
+      <div class="tool" id="filterTooltip" ng-show="showFilterTip">
+        <div class="tip">
+          {{filterTip}}
+        </div>
+      </div>
 
-    </section>
+      <div id="roster">
+        <div id="roster-text">
+          <span ng-show="ui.loggedOut()">
+            You aren't logged in to any network.
+          </span>
+          <span ng-hide="ui.loggedOut()">
+            {{ model.roster.length }}
+            <span ng-show=" isEmpty(model.roster)">
+              Loading Roster...
+            </span>
+          </span>
+        </div>
+
+        <div id="contacts-frame" ng-hide="ui.rosterNudge">
+        <ul class="contacts">
+          <li ng-repeat="contact in model.roster"
+              ng-click="viewContact(contact)"
+              ng-hide="contactIsFiltered(contact)"
+              ng-class="{offline:!contact.online}"
+              >
+            {{contact.name}}
+            <img class="contact-image" ng-src='{{contact.imageData}}'>
+            <span class="c-icons">
+              <span class="c-icon" ng-show='contact.onGoogle'> G+ </span>
+              <span class="c-icon" ng-show='contact.onFB'> FB </span>
+              <span ng-show="contact.canUProxy">
+                <img class="c-icon" ng-show='contact.canUProxy' src='icons/uproxy-19.png'>
+              </span>
+            </span>
+            <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
+          </li>
+        </ul>
+        </div>
+
+        <div id="contact-details" ng-show="ui.rosterNudge">
+          <div class="contact-status">
+            <div class="contact-name">
+              <img class="contact-image" ng-src='{{contact.imageData}}'>
+            </div>
+            <br>Network: {{ ui.contact.network }}
+            <p>
+            {{ ui.contact.name }} does
+            <span ng-hide="ui.instance">not</span>
+            have UProxy installed.
+            </p>
+
+            <div ng-show="ui.instance">
+              <div class="instance-actions">
+                <p>
+                  {{ui.instance.description}}
+                </p>
+                <div class="instance-id" ng-show="ui.rosterNudge">
+                  {{ui.instance.instanceId}}
+                </div>
+                <div class="box-for-proxy"
+                    ng-switch="ui.instance.trust.asProxy">
+                  <div ng-switch-when="yes">
+                    <button class="btn"
+                        ng-show="'off'==ui.instance.status.proxy"
+                        ng-click="startAccess(ui.instance)">
+                      Start
+                    </button>
+                    <div class="btn"
+                        ng-show="'ready'==ui.instance.status.proxy">
+                      Setting up proxy...
+                    </div>
+                    <button class="btn"
+                        ng-hide="'off'==ui.instance.status.proxy"
+                        ng-click="stopAccess(ui.instance)">
+                      Stop
+                    </button>
+                  </div>
+                  <div ng-switch-when="requested">
+                    <button class="btn" ng-click="cancelRequest(ui.instance)">
+                      Cancel
+                    </button>
+                    <span>Pending...</span>
+                  </div>
+                  <div ng-switch-when="offered">
+                    <button class="btn" ng-click="acceptOffer(ui.instance)">
+                      Accept Access
+                    </button>
+                    <button class="btn" ng-click="declineOffer(ui.instance)">
+                      No Thanks
+                    </button>
+                  </div>
+                  <button class="btn"
+                      ng-switch-default
+                      ng-click="requestAccess(ui.instance)">
+                    Request
+                  </button>
+                </div>
+
+                <div class="box-for-client"
+                    ng-switch="ui.instance.trust.asClient">
+                  <button class="btn" ng-switch-when="no"
+                      ng-click="offerAccess(ui.instance)">
+                    Offer Access
+                  </button>
+                  <div ng-switch-when="requested">
+                    <button class="btn" ng-click="grantAccess(ui.instance)">
+                      Grant
+                    </button>
+                    <button class="btn" ng-click="denyAccess(ui.instance)">
+                      Ignore
+                    </button>
+                  </div>
+                  <button class="btn" ng-switch-default
+                      ng-click="revokeAccess(ui.instance)">
+                    Revoke Access
+                  </button>
+                </div>
+              </div>
+            </div>
+            <a class="chat-btn" href="{{ ui.contact.url }}"
+               target="_blank"
+               ng-mouseenter="chatButtonHovered=true"
+               ng-mouseleave="chatButtonHovered=false">
+            </a>
+            <div class="tool">
+            <p class="tip" ng-show="chatButtonHovered" >
+              Ask {{ ui.contact.name }} to
+              <span ng-hide="ui.instance">install</span>
+              <span ng-show="ui.instance">run</span>
+              UProxy.
+            </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="status">
+      <div id="status-proxy" ng-show="ui.proxy" ng-cloak>
+
+        <div ng-hide="'off'==ui.proxy.status.proxy">
+          Proxying via {{ui.proxy.rosterInfo.name}}...<br>
+          <button id="stop-btn" class="icon-btn" ng-click="stopAccess()">
+          </button>
+        </div>
+
+        <div ng-show="'off'==ui.proxy.status.proxy">
+          Previously proxied through {{ui.proxy.rosterInfo.name}}.<br>
+          <button id="start-btn" class="icon-btn" ng-click="startAccess(ui.proxy)">
+          </button>
+        </div>
+
+        <div class="instance-id">{{ui.proxy.instanceId}}</div>
+      </div>
+
+      <span ng-show="ui.loggedIn()">
+        <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
+      </span>
+
+      <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
+      <span ng-show="ui.loggedOut()">Not Connected</span>
+      <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
+    </div>
+
   </div></body>
 </html>

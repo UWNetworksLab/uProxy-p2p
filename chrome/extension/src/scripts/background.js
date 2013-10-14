@@ -82,7 +82,6 @@ UI.prototype.setIcon = function(iconFile) {
   });
 };
 UI.prototype.setLabel = function(text) {
-  console.log('setting label to ' + text);
   chrome.browserAction.setBadgeText({ text: '' + text });
 };
 
@@ -96,7 +95,6 @@ UI.prototype.setProxying = function(isProxying) {
 };
 
 UI.prototype.setClients = function(numClients) {
-  console.log('clients: ' + numClients);
   this.numClients = numClients;
   if (numClients > 0) {
     chrome.browserAction.setBadgeBackgroundColor({color: '#008'});

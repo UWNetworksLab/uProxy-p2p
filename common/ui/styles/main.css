@@ -85,8 +85,8 @@ ul {
   white-space: nowrap; }
 
 #options-btn {
-  position: absolute;
-  bottom: 4px;
+  position: fixed;
+  top: 4px;
   right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
   border: none;
@@ -162,11 +162,11 @@ ul {
   padding: 16px; }
 
 #login-splash {
-  position: absolute;
+  position: fixed;
   text-align: center;
   padding-top: 30px;
   width: 100%;
-  height: 100%;
+  height: 600px;
   bottom: 0;
   z-index: 40;
   background-color: white;
@@ -174,10 +174,10 @@ ul {
   -moz-transition: all 0.5s !important;
   -o-transition: all 0.5s !important;
   transition: all 0.5s !important; }
-
-#login-splash.ng-hide {
-  pointer-events: none;
-  height: 0; }
+  #login-splash.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    top: 600px; }
 
 .network-btn {
   display: inline-block;
@@ -240,7 +240,7 @@ ul {
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
   #search-contacts:hover {
-    box-shadow: 0 1px 2px #aaaaaa inset; }
+    box-shadow: 0 1px 2px #dddddd inset; }
   #search-contacts:focus {
     outline: none;
     box-shadow: 0 1px 2px #cccccc; }
@@ -339,6 +339,9 @@ ul {
 
 #stop-btn {
   background-image: url("../icons/stop.png"); }
+
+#main-view {
+  z-index: 100; }
 
 #roster {
   width: 100%;
@@ -646,6 +649,10 @@ details > *:not(summary) {
     white-space: pre-wrap; }
   #debug form[name=sendMsgForm] {
     margin-bottom: 3px; }
+
+.dbg {
+  position: fixed;
+  z-index: 500; }
 
 details.advanced {
   margin-top: 15px; }

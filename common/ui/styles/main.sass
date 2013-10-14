@@ -98,8 +98,8 @@ ul
     white-space: nowrap
 
 #options-btn
-  position: absolute
-  bottom: 4px
+  position: fixed
+  top: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
   border: none
@@ -167,18 +167,21 @@ ul
 
 //---------------------------- Login Splash -----------------------------------
 #login-splash
-  position: absolute
+  position: fixed
   text-align: center
   padding-top: 30px
   width: 100%
-  height: 100%
+  height: 600px
   bottom: 0
   z-index: 40
   background-color: #fff
   @include smooth-slow
-#login-splash.ng-hide
-  pointer-events: none
-  height: 0
+  &.ng-hide
+    @include un-ng-hide
+    // height: 0
+    // padding: 0
+    // opacity: 0
+    top: 600px
 
 .network-btn
   display: inline-block
@@ -234,7 +237,7 @@ ul
   color: #333
   @include smooth
   &:hover
-    box-shadow: 0 1px 2px #aaa inset
+    box-shadow: 0 1px 2px #ddd inset
   &:focus
     outline: none
     box-shadow: 0 1px 2px #ccc
@@ -334,6 +337,9 @@ ul
   background-image: url('../icons/uproxy-19.png')
 #stop-btn
   background-image: url('../icons/stop.png')
+
+#main-view
+  z-index: 100
 
 // --------------------------- Roster & Contacts -------------------------------
 #roster
@@ -616,6 +622,10 @@ details
     white-space: pre-wrap
   form[name=sendMsgForm]
     margin-bottom: 3px
+
+.dbg
+  position: fixed
+  z-index: 500
 
 details.advanced
   margin-top: 15px
