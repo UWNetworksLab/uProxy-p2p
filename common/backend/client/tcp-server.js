@@ -320,9 +320,10 @@ function getStringOfArrayBuffer(buf) {
    *
    */
   TcpConnection.prototype._bufferedCallRecv = function() {
-    if(this.recvOptions && this.recvOptions.minByteLength >
-        this.pendingReadBuffer.byteLength) return;
+    if(this.recvOptions && this.recvOptions.minByteLength && 
+        this.recvOptions.minByteLength > this.pendingReadBuffer.byteLength) return;
 
+    console.log("Sending " + this.pendingReadBuffer.byteLength + " bytes to the callback");
     var tmpBuf = this.pendingReadBuffer;
     this.pendingReadBuffer = null;
     this.callbacks.recv(tmpBuf);
@@ -413,6 +414,7 @@ function getStringOfArrayBuffer(buf) {
    */
   TcpConnection.prototype._onRead = function(readInfo) {
     if (readInfo.socketId !== this.socketId) {
+      console.error("onRead for socket " + readInfo.socketId + ", expecting "+this.socketId);
       return;
     }
     if (this.callbacks.recv && this._initialized) {
