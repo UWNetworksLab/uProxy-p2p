@@ -1,0 +1,20 @@
+{
+  "name": "simple proxy test",
+  "description": "Make a simple proxying thing",
+  "app": {
+    "script": [
+      "simple-proxy-test.js"
+    ]
+  },
+  "dependencies": {
+    "uproxyclient": {
+      "url": "../client/client.json"
+    },
+    "uproxyserver": {
+      "url": "../server/server.json"
+    }
+  },
+  "permissions": [
+    "core.sctp-peerconnection"
+  ]
+}
