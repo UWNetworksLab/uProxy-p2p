@@ -22,13 +22,14 @@ var onload = function() {
   // channel id.
   var _conns = {};
 
-    var printSelf = function () {
-        return JSON.stringify({ _socksServer: _socksServer,
-                                _sctpPc: _sctpPc,
-                                _peerId: _peerId,
-                                _signallingChannel: _signallingChannel,
-                                _conns: _conns});
-    }
+  var printSelf = function () {
+    return JSON.stringify({
+        _socksServer: _socksServer,
+        _sctpPc: _sctpPc,
+        _peerId: _peerId,
+        _signallingChannel: _signallingChannel,
+        _conns: _conns});
+  }
 
   // Stop running as a _socksServer. Close all connections both to data
   // channels and tcp.
@@ -89,15 +90,20 @@ var onload = function() {
     // back from the other end of the data channel to tell us when it has
     // happened, instead of just pretended?
     // TODO: determine if these need to be accurate.
-//    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
+    // connectedCallback({ipAddrString: '127.0.0.1', port: 0});
   };
 
+  // Set-up a session with a peer.
   freedom.on('start', function(options) {
-    console.log('Client: on(start)...');
-    shutdown();
+    console.log('Client: on(start)... ' + JSON.stringify(options));
+    _peerId = options.peerId;
+    if (!_peerId) {
+      console.error('Client: No Peer ID provided! Cannot connect.')
+      return false;
+    }
+    shutdown();  // Reset socks server.
     _socksServer = new window.SocksServer(options.host, options.port, onConnection);
     _socksServer.tcpServer.listen();
-    _peerId = options.peerId;
 
     // Create sctp connection to a peer.
     _sctpPc = freedom['core.sctp-peerconnection']();
@@ -123,11 +129,13 @@ var onload = function() {
     // When WebRTC data-channel transport is closed, shut everything down.
     _sctpPc.on('onCloseDataChannel', closeConnection);
 
-    // Create a freedom-channel to act as the signallin channel.
+    // Create a freedom-channel to act as the signaling channel.
     var promise = freedom.core().createChannel();
-    promise.done(function(chan) {  // When the signalling channel is created.
+    var _peerId = _peerId;  // Bind peerID to scope so promise can work.
+    promise.done(function(chan) {  // When the signaling channel is created.
       // chan.identifier is a freedom-_socksServer (not a socks _socksServer) for the
       // signalling channel used for signalling.
+      console.log('Preparing SCTP peer connection! peerId: ' + _peerId);
       _sctpPc.setup(chan.identifier, "client-to-" + _peerId, true);
 
       // when the channel is complete, setup handlers.
@@ -136,10 +144,18 @@ var onload = function() {
         // when the signalling channel gets a message, send that message to the
         // freedom 'fromClient' handlers.
         _signallingChannel.on('message', function(msg) {
-          freedom.emit('sendSignalToPeer', {peerId: _peerId, data: msg});
+          freedom.emit('sendSignalToPeer', {
+              peerId: _peerId,
+              data: msg
+          });
         });
+
         // When the signalling channel is ready, set the global variable.
         // _signallingChannel.on('ready', function() {});
+        console.log('Manually preparing a data channel to catalyze SDP handshake.');
+        _sctpPc.openDataChannel('foo', function() {console.log('wheeeee');});
+        // _signallingChannel.emit('handleSignalFromPeer');
+
       });
     });
   });

@@ -126,10 +126,10 @@ var onload = function() {
   // TODO: make sure callers set the peerId.
   freedom.on('handleSignalFromPeer', function(msg) {
     console.log("server handleSignalFromPeer:" + JSON.stringify(msg));
-      if (!_active) {
-          console.log("server is not active, returning");
-          return;
-      }
+    if (!_active) {
+      console.log("server is not active, returning");
+      return;
+    }
 
     // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));
