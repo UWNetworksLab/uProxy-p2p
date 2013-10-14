@@ -42,6 +42,24 @@ var Roster = function() {
 };
 var roster = new Roster();
 
+// User Interface state holder.
+var UI = function() {
+  this.view = 0;
+  this.notifications = 0;
+};
+UI.prototype.setNotifications = function(n) {
+  if (n > 0) {
+    icon.label('' + n);
+  } else {
+    icon.label('');
+  }
+  this.notificatiosn = n < 0? 0 : n;
+};
+UI.prototype.decNotifications = function(n) {
+  this.setNotifications(this.notifications - 1);
+};
+var ui = new UI();
+
 // Connect to the App.
 console.log('Connecting to App...');
 var connectedToApp = false;
@@ -51,15 +69,58 @@ var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
 
 function wireUItoApp() {
   console.log('Wiring UI to backend...');
-  // Update the model with a JSON patch.
   appChannel.on('state-change', function(patchMsg) {
-    console.log(patchMsg[0]);
+    // console.log(patchMsg[0]);
     if (patchMsg[0].path === '') {
       model = patchMsg[0].value;
     } else {
       jsonpatch.apply(model, patchMsg);
       console.log(model);
     }
+
+    // Count up notifications
+    var notifications = 0;
+    for (var userId in model.roster) {
+      var user = model.roster[userId];
+      notifications += user.hasNotification? 1:0;
+    }
+    ui.notifications = notifications;
+    ui.setNotifications(notifications);
+
+    /*
+    // Run through roster if necessary.
+    if (patch[0].path.indexOf('roster') >= 0) {
+      // - Ensure it's sorted alphabetically.
+      console.log('roster edit. ' + patch[0].path);
+      // - Count up notifications.
+      $rootScope.notifications = 0;
+      // var sortedIds = Object.keys(model.roster);
+      // console.log(sortedIds);
+      // sortedIds.sort();
+      // var sortedRoster = {};
+      var rosterByName = {};
+      for (var userId in model.roster) {
+        // sortedRoster[userId] = model.roster[userId];
+        var user = model.roster[userId];
+        roster.updateContact(user);
+        $rootScope.notifications += user.hasNotification? 1 : 0;
+        // rosterByName[user.name] = user;
+      }
+      // var sortedNames = Object.keys(rosterByName);
+      // console.log(sortedNames);
+      // var sortedRoster = {};
+      // sortedNames.sort();
+      // for (var name in sortedNames) {
+        // sortedRoster[name] = rosterByName[name];
+      // }
+      // $rootScope.roster = sortedRoster;
+      if ($rootScope.notifications > 0) {
+        icon.label('' + $rootScope.notifications);
+      }
+      $rootScope.roster = roster;
+    }
+    */
+
     // This event allows angular to bind listeners and update the DOM.
     onStateChange.dispatch(patchMsg);
   });

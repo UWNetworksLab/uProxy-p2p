@@ -35,20 +35,25 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
+    'ui',
     'appChannel',               // via dependencyInjector.
     'onStateChange',
     'model',
     'roster',
     'icon',
-    function($filter, $http, $rootScope,
+    function($filter, $http, $rootScope, ui,
              appChannel, onStateChange,
              model, roster, icon) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       console.log(model);
+      $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
+
+      // Remember the state change hook.
+      $rootScope.update = onStateChange;
 
       $rootScope.resetState = function () {
         localStorage.clear();
@@ -162,11 +167,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
-        $rootScope.notifications--;
-        if ($rootScope.notifications == 0) {
-          $rootScope.notifications = '';
-        }
-        icon.label('' + $rootScope.notifications);
+        // $rootScope.notifications--;
+        // if ($rootScope.notifications == 0) {
+          // $rootScope.notifications = '';
+        // }
+        ui.decNotifications();
+        // icon.label('' + $rootScope.notifications);
       }
 
       $rootScope.changeOption = function (key, value) {
@@ -214,95 +220,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           $rootScope.connectedToApp = true;
           // Also update pointers locally.
           $rootScope.instances = model.instances;
-          /*
-          // Run through roster if necessary.
-          if (patch[0].path.indexOf('roster') >= 0) {
-            // - Ensure it's sorted alphabetically.
-            console.log('roster edit. ' + patch[0].path);
-            // - Count up notifications.
-            $rootScope.notifications = 0;
-            // var sortedIds = Object.keys(model.roster);
-            // console.log(sortedIds);
-            // sortedIds.sort();
-            // var sortedRoster = {};
-            var rosterByName = {};
-            for (var userId in model.roster) {
-              // sortedRoster[userId] = model.roster[userId];
-              var user = model.roster[userId];
-              roster.updateContact(user);
-              $rootScope.notifications += user.hasNotification? 1 : 0;
-              // rosterByName[user.name] = user;
-            }
-            // var sortedNames = Object.keys(rosterByName);
-            // console.log(sortedNames);
-            // var sortedRoster = {};
-            // sortedNames.sort();
-            // for (var name in sortedNames) {
-              // sortedRoster[name] = rosterByName[name];
-            // }
-            // $rootScope.roster = sortedRoster;
-            if ($rootScope.notifications > 0) {
-              icon.label('' + $rootScope.notifications);
-            }
-            $rootScope.roster = roster;
-          }
-          */
         });
+        // console.log($rootScope.model);
       };
-
       onStateChange.addListener(updateDOM);
-      // onAppData.addListener($rootScope.onStateChange);
-
-      // Can be called from nonUI threads (i.e. without a defined window
-      // object.).
-      $rootScope.startUI = function() {
-        // call these in the Angular scope so that window is defined.
-        $rootScope.$apply(function() {
-          appChannel.onConnected.removeListener($rootScope.startUI);
-          $rootScope.onAppData.addListener($rootScope.onStateChange);
-          window.onunload = function() {
-            $rootScope.onAppData.removeListener($rootScope.onStateChange);
-          };
-          // TODO(uzimizu): Make this *not* resend all the things if not
-          // necessary...
-          appChannel.emit('open-popup');
-          //$rootScope.authGoog();
-          $rootScope.connectedToApp = true;
-        });
-      }
-
-      // $rootScope.onAppData.addListener($rootScope.onStateChange);
-      $rootScope.reconnect = function() {
-        console.log('Disconnected. Attempting to reconnect to app...');
-        $rootScope.$apply(function() {
-          $rootScope.connectedToApp = false;
-        });
-        appChannel.onDisconnected.removeListener($rootScope.reconnect);
-        // TODO(uzimizu): Delay the app connection check.
-        $rootScope.checkAppConnection();
-        // $timeout(
-          // function() { $rootScope.checkAppConnection();},
-          // 3000);
-      }
-
-      // $rootScope.connectedToApp = false;
-      $rootScope.checkAppConnection = function() {
-        if ($rootScope.connectedToApp) {
-          return;  // Already connected.
-        }
-        // Check that the extension is connected.
-        if (appChannel.connected) {
-          $rootScope.connectedToApp = true;
-          $rootScope.startUI();
-
-        } else {
-          console.log('connecting.');
-          appChannel.onConnected.addListener($rootScope.startUI);
-        }
-        // Automatically attempt to reconnect when disconnected.
-        appChannel.onDisconnected.addListener($rootScope.reconnect);
-      }
-
-      // $rootScope.checkAppConnection();
     }  // run function
   ]);

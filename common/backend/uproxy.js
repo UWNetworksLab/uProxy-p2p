@@ -1041,8 +1041,8 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
-            JSON.stringify(msg));
+  // log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
+            // JSON.stringify(msg));
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = state.instances[instanceId];

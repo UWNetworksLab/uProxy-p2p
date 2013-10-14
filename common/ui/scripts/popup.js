@@ -12,7 +12,6 @@
 var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
-
     // View states.
     $scope.splashPage = false;   // Splash / options page.
     $scope.rosterNudge = false;  // Full roster vs. Individual Contact Details
@@ -26,7 +25,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'friendsAccess': false,
       'uproxy': false
     };
-
     $scope.filterTips = {
       'uproxy': 'Only show contacts with UProxy installed.',
       'myAccess': 'Show contacts who provide me access.',
@@ -34,8 +32,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'online': 'Show offline contacts.',
       'alpha': 'Sort alphabetically',
     };
-
-    //
     $scope.currentContact = {};  // Visible for the individual contact page.
     $scope.currentInstance = null;  // Visible for the individual contact page.
 
@@ -46,7 +42,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.stringifyContact = function(contact) {
       return JSON.stringify(contact);
     };
-
     $scope.splashPage = !$scope.loggedIn();
 
     // On the contacts details page, dynamically update |currentInstance| to
@@ -60,7 +55,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       });
     }
     // Attach to the App-Extension channel.
-    $scope.onAppData.addListener($scope.updateCurrentInstance);
+    // $scope.onAppData.addListener($scope.updateCurrentInstance);
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(finish)
@@ -68,19 +63,13 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.alphabeticalContacts = []
       // .sort()
     };
-    $scope.onAppData.addListener($scope.updateSortedContacts);
+    // $scope.onAppData.addListener($scope.updateSortedContacts);
 
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
       $scope.currentContact = c;
       $scope.currentInstance = $scope.instanceOfUserId(c.userId);
       console.log('current instance ' + $scope.currentInstance);
-      // Watch the instance on the model to keep the UI up to date.
-      // $scope.$watch('instances', function(v) {
-        // $scope.$apply(function() {
-          // $scope.currentInstance = $scope.instanceOfUserId(c.userId);
-        // });
-      // });
       $scope.rosterNudge = true;
       $scope.notificationSeen(c);
     };
@@ -124,5 +113,4 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       return true;  // Does not match the search text, should be hidden.
     };
-
   }]);

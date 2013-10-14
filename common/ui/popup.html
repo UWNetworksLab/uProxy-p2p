@@ -20,16 +20,7 @@
   </head>
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
-    <section ng-hide="connectedToApp" id="not-connected" class="description">
-      Not connected to
-      <a href="https://github.com/UWNetworksLab/UProxy/tree/master/chrome/app" target="_blank">
-      UProxy app</a>. Please ensure it is
-      <!-- TODO: Make this sentence browser independent. -->
-      <a href="https://github.com/UWNetworksLab/UProxy/#testing-in-chrome" target="_blank">
-      installed</a> and running by checking your <code>chrome://extensions</code> page.
-    </section>
-
-    <section ng-show="connectedToApp">
+    <section>
       <section id="login-splash" ng-show="splashPage">
         <div class='uproxy-banner'>
         <img src='icons/uproxy-128.png'>proxy
@@ -133,7 +124,7 @@
 
           <section id="contacts-frame" ng-hide="rosterNudge">
           <ul class="contacts">
-            <li ng-repeat="contact in roster.all"
+            <li ng-repeat="contact in model.roster"
                 ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"
