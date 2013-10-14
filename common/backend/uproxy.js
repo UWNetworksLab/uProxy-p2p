@@ -50,7 +50,7 @@ bgAppPageChannel.on('reset', function () { reset(); });
 
 // Logs out of networks and resets data.
 function reset() {
-  log.debug('reset');
+  console.log('reset');
   identity.logout(null, null);
   store.reset(function() {
     // TODO: refactor so this isn't needed.
@@ -63,8 +63,8 @@ function reset() {
 // The intent is to reset its model - but this may or may not always be
 // necessary. Improvements to come.
 bgAppPageChannel.on('ui-ready', function () {
-  log.debug('ui-ready');
-  log.debug('state:', store.state);
+  console.log('ui-ready');
+  console.log('state:', store.state);
   // Send the extension the full state.
   sendFullStateToUI();
 });
@@ -98,7 +98,7 @@ bgAppPageChannel.on('echo', function (msg) {
 bgAppPageChannel.on('change-option', function (data) {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage();
-  log.debug('saved options ' + JSON.stringify(store.state.options));
+  console.log('saved options ' + JSON.stringify(store.state.options));
   bgAppPageChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
   // TODO: Handle changes that might affect proxying
 });
@@ -125,7 +125,7 @@ bgAppPageChannel.on('update-description', function (data) {
 bgAppPageChannel.on('notification-seen', function (userId) {
   var user = store.state.roster[userId];
   if (!user) {
-    log.error('User ' + userId + ' does not exist!');
+    console.error('User ' + userId + ' does not exist!');
     return false;
   }
   user.hasNotification = false;
@@ -177,11 +177,11 @@ server.on('sendSignalToPeer', function(data) {
 function startUsingPeerAsProxyServer(peerInstanceId) {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
-    log.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
+    console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
   if (Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
-    log.debug('Lacking permission to proxy through ' + peerInstanceId);
+    console.log('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
   // TODO: Cleanly disable any previous proxying session.
@@ -200,7 +200,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 function stopUsingPeerAsProxyServer(peerInstanceId) {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
-    log.error('Instance ' + peerInstanceId + ' does not exist!');
+    console.error('Instance ' + peerInstanceId + ' does not exist!');
     return false;
   }
   // TODO: Handle revoked permissions notifications.
@@ -252,7 +252,7 @@ bgAppPageChannel.on('instance-trust-change', function (data) {
   _updateTrust(data.instanceId, data.action, false);  // received = false
   var clientId = store.state.instanceToClient[iId];
   if (!clientId) {
-    log.debug('Warning! Cannot change trust level because client ID does not ' +
+    console.log('Warning! Cannot change trust level because client ID does not ' +
               'exist for instance ' + iId + ' - they are probably offline.');
     return false;
   }
@@ -271,7 +271,7 @@ function _updateTrust(instanceId, action, received) {
   var trustValue = TrustOp[action];
   var instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Cannot find instance ' + instanceId + ' for a trust change!');
+    console.error('Cannot find instance ' + instanceId + ' for a trust change!');
     return false;
   }
   if (asProxy) {
@@ -281,7 +281,7 @@ function _updateTrust(instanceId, action, received) {
   }
   store.saveInstance(instanceId);
   _syncInstanceUI(instance, 'trust');
-  log.debug('Instance trust changed. ' + JSON.stringify(instance.trust));
+  console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
 
@@ -292,7 +292,7 @@ function receiveTrustMessage(msgInfo) {
   var instanceId = store.state.clientToInstance[clientId];
   if (!instanceId) {
     // TODO(uzimizu): Attach instanceId to the message and verify.
-    log.error('Could not find instance for the trust modification!');
+    console.error('Could not find instance for the trust modification!');
     return;
   }
   _addNotification(instanceId);
@@ -304,7 +304,7 @@ function receiveTrustMessage(msgInfo) {
 // --------------------------------------------------------------------------
 // Update local user's online status (away, busy, etc.).
 identity.on('onStatus', function(data) {
-  log.debug('onStatus: data:' + JSON.stringify(data));
+  console.log('onStatus: data:' + JSON.stringify(data));
   if (data.userId) { // userId is only specified when connecting or online.
     store.state.identityStatus[data.network] = data;
     bgAppPageChannel.emit('state-change',
@@ -445,7 +445,7 @@ function _checkUProxyClientSynchronization(client) {
   var clientIsNew = !(clientId in store.state.clientToInstance);
 
   if (clientIsNew) {
-    log.debug('Aware of new UProxy client. Sending instance data.' +
+    console.log('Aware of new UProxy client. Sending instance data.' +
         JSON.stringify(client));
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
@@ -484,7 +484,7 @@ function makeMyInstanceMessage() {
 // that we've received the other side's Instance data yet.
 function sendInstance(client) {
   var instancePayload = makeMyInstanceMessage();
-  log.debug("sendInstance: " + JSON.stringify(instancePayload));
+  console.log("sendInstance: " + JSON.stringify(instancePayload));
   identity.sendMessage(client.clientId, instancePayload);
   return true;
 }
@@ -497,7 +497,7 @@ function sendInstance(client) {
 // instance data. Sometimes we get an instance data message from user that is
 // not (yet) in the roster.
 function receiveInstance(msg) {
-  log.debug('receiveInstance(from: ' + msg.fromUserId + ')');
+  console.log('receiveInstance(from: ' + msg.fromUserId + ')');
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;
   var clientId    = msg.fromClientId;
@@ -533,7 +533,7 @@ function receiveInstance(msg) {
 function sendConsent(instance) {
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
-    log.error('Instance ' + instance.instanceId + ' missing clientId!');
+    console.error('Instance ' + instance.instanceId + ' missing clientId!');
     return false;
   }
   var consentPayload = JSON.stringify({
@@ -552,13 +552,13 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  // log.debug('receiveConsent(from: ' + msg.fromUserId + '): ' +
+  // console.log('receiveConsent(from: ' + msg.fromUserId + '): ' +
             // JSON.stringify(msg));
   var consent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Instance for id: ' + instanceId + ' not found!');
+    console.error('Instance for id: ' + instanceId + ' not found!');
     return false;
   }
   // Determine my own consent bits, compare with their consent and remap.
@@ -592,7 +592,7 @@ function _determineConsent(trust) {
 }
 
 function _validateKeyHash(keyHash) {
-  log.debug('Warning: keyHash Validation not yet implemented...');
+  console.log('Warning: keyHash Validation not yet implemented...');
   return true;
 }
 
@@ -601,7 +601,7 @@ function _validateKeyHash(keyHash) {
 function _addNotification(instanceId) {
   var instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Could not find instance ' + instanceId);
+    console.error('Could not find instance ' + instanceId);
     return false;
   }
   instance.notify = true;
@@ -628,7 +628,7 @@ function _removeNotification(instanceId) {
 
   var instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Instance does not exist for ' + instanceId);
+    console.error('Instance does not exist for ' + instanceId);
     return false;
   }
   instance.notify = false;
@@ -640,12 +640,12 @@ function _removeNotification(instanceId) {
 // Update the description for an instanceId.
 // Assumes that |instanceId| is valid.
 function receiveUpdateDescription(msg) {
-  log.debug('Updating description! ' + JSON.stringify(msg));
+  console.log('Updating description! ' + JSON.stringify(msg));
   var description = msg.data.description,
       instanceId = msg.data.instanceId,
       instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Could not update description - no instance: ' + instanceId);
+    console.error('Could not update description - no instance: ' + instanceId);
     return false;
   }
   instance.description = description;
