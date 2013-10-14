@@ -123,14 +123,16 @@ var onload = function() {
   // msg.data : message body received peerId signalling channel, typically
   //            contains SDP headers.
   //
-  // TODO: make sure callers set the peerId.
   freedom.on('handleSignalFromPeer', function(msg) {
     console.log("server handleSignalFromPeer:" + JSON.stringify(msg));
     if (!_active) {
       console.log("server is not active, returning");
       return;
     }
-
+    if (!msg.peerId) {
+      console.error('No peer ID provided!.')
+      return;
+    }
     // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));
     // Make a peer for this id if it doesn't already exist.
@@ -138,8 +140,11 @@ var onload = function() {
       _initPeer(msg.peerId);
     }
     if (_peers[msg.peerId].signallingChannel){
+      // Send response to peer.
+      console.log('SENDING!!!!! ' + JSON.stringify(msg.data));
       _peers[msg.peerId].signallingChannel.emit('message', msg.data);
     } else {
+      console.log('signallingChannel not yet ready. Adding to queue... ' + msg.peerId + ' ... ' + _peers);
       _peers[msg.peerId].messageQueue.push(msg.data);
     }
   });
