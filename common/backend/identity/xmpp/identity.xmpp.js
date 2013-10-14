@@ -317,7 +317,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       var imageHash = this.getAttr(from, 'imageHash');
       vcard['imageData'] = imageData;
       vcard['imageHash'] = imageHash;
-      console.log(this.getAttr(from, 'imageData'));
+      //console.log(this.getAttr(from, 'imageData'));
       this.setAttr(from, 'imageData', imageData);
     }
     storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));
@@ -327,11 +327,11 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
   // console.log(stanza.attrs.from);
-  if(window.presence) {
-    window.presence.push(stanza);
-  } else {
-    window.presence = [stanza];
-  }
+  //if(window.presence) {
+  //  window.presence.push(stanza);
+  //} else {
+  //  window.presence = [stanza];
+  //}
   //Set status
   var status = stanza.getChildText("show") || "online";
   if (stanza.attrs.type == 'unavailable') {

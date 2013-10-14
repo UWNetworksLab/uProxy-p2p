@@ -36,11 +36,13 @@ var identity = freedom.identity();
 // to the extension.
 var storage = freedom.storage();
 
+// We use client in order to use our contacts as proxies.
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
 // through the peer connection.
 var client = freedom.uproxyclient();
 
+// Server allows us to act as a proxy for our contacts.
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
 var server = freedom.uproxyserver();
@@ -384,8 +386,8 @@ function _saveInstance(instanceId) {
     notify: Boolean(instanceInfo.notify),
     rosterInfo: instanceInfo.rosterInfo
   };
-  log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
-      JSON.stringify(instance));
+  // log.debug('_saveInstance: saving "instance/"' + instanceId + '": ' +
+      // JSON.stringify(instance));
   _saveToStorage("instance/" + instanceId, instance);
 }
 
@@ -521,7 +523,6 @@ identity.on('onMessage', function (msgInfo) {
   } catch(e) {
     msgInfo.unparseable = true;
   }
-  // By passing
   _handleMessage(msgInfo, false);  // beingSent = false
 });
 
@@ -533,10 +534,6 @@ uiChannel.on('logout', function(network) {
   identity.logout(null, network);
   state.clientToInstance = {};  // Clear the clientsToInstance table.
   _saveNetworkState(network, false);
-});
-
-uiChannel.on('ignore', function (userId) {
-  // TODO: fix.
 });
 
 uiChannel.on('invite-friend', function (userId) {
@@ -613,7 +610,6 @@ function instanceOfUserId(userId) {
 // --------------------------------------------------------------------------
 //  Proxying
 // --------------------------------------------------------------------------
-// TODO: say not if we havn't given them permission :)
 uiChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
   startUsingPeerAsProxyServer(peerInstanceId);
 });
@@ -622,25 +618,25 @@ uiChannel.on('stop-proxying', function(peerInstanceId) {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
+// peerId is a client ID.
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId + ", which should map to " +
-                    state.instanceToClient[data.peerId]);
+                ', sending to client: ' + data.peerId + ", which should map to instance: " +
+                    state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
-  identity.sendMessage(
-      state.instanceToClient[data.peerId],
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId);
-  identity.sendMessage(
-      state.instanceToClient[data.peerId],
+                ', sending to client: ' + data.peerId);
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
+// Begin SDP negotiations with peer. Assumes |peer| exists.
 function startUsingPeerAsProxyServer(peerInstanceId) {
   var instance = state.instances[peerInstanceId];
   if (!instance) {
@@ -651,11 +647,14 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     log.debug('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
-  // TODO: Cleanly disable any previous proxying session.
-  state.me.peerAsProxy = peerInstanceId;
-  _SyncUI('/me/peerAsProxy', peerInstanceId);
+  log.debug('Starting peer connection... to client id: ' +
+      state.instanceToClient[peerInstanceId]);
+
+  // TODO: Cleanly disable any previous proxying session. This involves
+  // terminating the SDP session.
+  // state.me.peerAsProxy = peerInstanceId;
+  // _SyncUI('/me/peerAsProxy', peerInstanceId);
   instance.status.proxy = ProxyState.RUNNING;
-  // _SyncUI('/instances/' + peerInstanceId, instance);
   _SyncInstance(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
@@ -663,7 +662,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': peerInstanceId});
+               'peerId': state.instanceToClient[peerInstanceId]});
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
@@ -684,8 +683,8 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   // TODO: Handle revoked permissions notifications.
 
   // TODO: check permission first.
-  state.me.peerAsProxy = null;
-  _SyncUI('/me/peerAsProxy', '');
+  // state.me.peerAsProxy = null;
+  // _SyncUI('/me/peerAsProxy', '');
   // uiChannel.emit('state-change',
       // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
@@ -703,16 +702,18 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 
 // peerconnection-client -- sent from client on other side.
 function handleSignalFromClientPeer(msg) {
-  console.log('handleSignalFromClientPeer: ' + JSON.stringify(msg));
+  console.log('handleSignalFromClientPeer: ' + msg.fromClientId);
   // sanitize from the identity service
-  server.emit('handleSignalFromPeer', {peerId: msg.fromClientId, data: msg.data});
+  server.emit('handleSignalFromPeer',
+      {peerId: msg.fromClientId, data: msg.data.data});
 }
 
 // peerconnection-server -- sent from server on other side.
 function handleSignalFromServerPeer(msg) {
   console.log('handleSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data});
+  client.emit('handleSignalFromPeer',
+      {peerId: msg.fromClientId, data: msg.data.data});
 }
 
 
@@ -1147,13 +1148,8 @@ function _addNotification(instanceId) {
     console.error('User does not exist for instance ' + instance);
     return false;
   }
-  // state.notifications += user.hasNotification? 1 : 0;
   user.hasNotification = true;
-  uiChannel.emit('state-change', [{
-      op: 'replace',
-      path: '/roster/' + user.userId + '/hasNotification',
-      value: true
-  }]);
+  _SyncUI('/roster/' + user.userId + '/hasNotification', true);
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
@@ -1221,8 +1217,15 @@ function _Login(network) {
   }
 }
 
+uiChannel.on("test-proxy", function() {
+  _localTestProxying();
+});
 
-server.emit("start");
+// --------------------------------------------------------------------------
+// Initialization
+// --------------------------------------------------------------------------
+server.emit("start");  // Always begin our proxy server first.
+
 // Load state from storage and when done, emit an total state update.
 _loadStateFromStorage(state, function () { });
 
