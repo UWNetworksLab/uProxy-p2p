@@ -688,7 +688,7 @@ function handleSignalFromClientPeer(msg) {
   console.log('handleSignalFromClientPeer: ' + msg.fromClientId);
   // sanitize from the identity service
   server.emit('handleSignalFromPeer', {
-      peerId: msg.fromClientId, data: msg.data
+      peerId: msg.fromClientId, data: msg.data.data
   });
 }
 
@@ -696,7 +696,7 @@ function handleSignalFromClientPeer(msg) {
 function handleSignalFromServerPeer(msg) {
   console.log('handleSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data});
+  client.emit('handleServerSignalToPeer', {peerId: msg.fromClientId, data: msg.data.data});
 }
 
 // --------------------------------------------------------------------------

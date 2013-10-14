@@ -8,6 +8,7 @@ if (!window) {
 console.log('SOCKS5 server: ' + self.location.href);
 
 window.socket = freedom['core.socket']();
+window.core = freedom.core();
 // Defined in webclient.js
 var NetClient = window.NetClient;
 
@@ -91,18 +92,17 @@ var onload = function() {
       }
     });
 
-    var promise = freedom.core().createChannel();
-    promise.done(function(chan) {
-      sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
+    window.core.createChannel().done(function(chan) {
+      var setupPromise = sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
       chan.channel.done(function(channel) {
-        // When
         console.log("Server channel to sctpPc created");
         channel.on('message', function(msg) {
           freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
         });
-        // sctpPc will emit 'ready' when it is ready, and at that point we
-        // have successfully initialised this peer connection and can set the
-        // signalling channel and process any messages we have been sent.
+          // sctpPc will emit 'ready' when it is ready, and at that point we
+          // have successfully initialised this peer connection and can set the
+          // signalling channel and process any messages we have been sent.
+        //setupPromise.done(function() {
         channel.on('ready', function() {
           console.log("Server channel to sctpPc ready.");
           peer.signallingChannel = channel;
@@ -110,7 +110,9 @@ var onload = function() {
             peer.signallingChannel.emit('message', peer.messageQueue.shift());
           }
         });
+        //});
       });
+      
     });
     console.log('_initPeer(' + peerId + ') complete.');
   };
@@ -144,6 +146,7 @@ var onload = function() {
     if (_peers[msg.peerId].signallingChannel){
       // Send response to peer.
       console.log('SENDING!!!!! ' + JSON.stringify(msg.data));
+      //window.tmp = _peers[msg.peerId];
       _peers[msg.peerId].signallingChannel.emit('message', msg.data);
     } else {
       console.log('signallingChannel not yet ready. Adding to queue... ' + msg.peerId + ' ... ' + _peers);

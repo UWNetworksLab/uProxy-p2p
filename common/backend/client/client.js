@@ -10,6 +10,8 @@ var window = {};
 console.log('SOCKS5 client: ' + self.location.href);
 
 window.socket = freedom['core.socket']();
+window.core = freedom.core();
+
 var onload = function() {
   // The socks TCP Server.
   var _socksServer = null;
@@ -41,7 +43,7 @@ var onload = function() {
     for (var channelLabel in _conns) {
       onClose(channelLabel, _conns[channelLabel]);
     }
-    if(_sctpPc) { _sctpPc.shutdown(); }
+    if(_sctpPc) { _sctpPc.close(); }
     _conns = {};
     _sctpPc = null;
     _peerId = null;
@@ -129,10 +131,9 @@ var onload = function() {
     // When WebRTC data-channel transport is closed, shut everything down.
     _sctpPc.on('onCloseDataChannel', closeConnection);
 
-    // Create a freedom-channel to act as the signaling channel.
-    var promise = freedom.core().createChannel();
     var _peerId = _peerId;  // Bind peerID to scope so promise can work.
-    promise.done(function(chan) {  // When the signaling channel is created.
+    // Create a freedom-channel to act as the signaling channel.
+    window.core.createChannel().done(function(chan) {  // When the signaling channel is created.
       // chan.identifier is a freedom-_socksServer (not a socks _socksServer) for the
       // signalling channel used for signalling.
       console.log('Preparing SCTP peer connection! peerId: ' + _peerId);
