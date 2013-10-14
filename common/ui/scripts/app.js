@@ -76,24 +76,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return null;
       };
 
-      // Determine whether UProxy is connected to |network|.
-      $rootScope.isOnline = function(network) {
-        return (model && model.identityStatus &&
-                model.identityStatus[network] &&
-                'online' == model.identityStatus[network].status);
-      };
-      $rootScope.isOffline = function(network) {
-        return (!model || !model.identityStatus ||
-                !model.identityStatus[network] ||
-                'offline' == model.identityStatus[network].status);
-      };
-      // Whether UProxy is logged in to *any* network.
-      $rootScope.loggedIn = function() {
-        return $rootScope.isOnline('google') || $rootScope.isOnline('facebook');
-      };
-      $rootScope.loggedOut = function() {
-        return $rootScope.isOffline('google') && $rootScope.isOffline('facebook');
-      };
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);

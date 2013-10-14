@@ -13,8 +13,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
-    $scope.splashPage = false;   // Splash / options page.
-    $scope.rosterNudge = false;  // Full roster vs. Individual Contact Details
     $scope.advancedOptions = false;
 
     // Initial filter state.
@@ -39,7 +37,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.stringifyContact = function(contact) {
       return JSON.stringify(contact);
     };
-    $scope.splashPage = !$scope.loggedIn();
 
     // On the contacts details page, dynamically update |currentInstance| to
     // reflect user actions and state changes in the DOM.
@@ -66,13 +63,13 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.ui.contact = c;
       $scope.ui.instance = $scope.instanceOfUserId(c.userId);
       console.log('current instance ' + $scope.ui.instance);
-      $scope.rosterNudge = true;
+      $scope.ui.rosterNudge = true;
       $scope.notificationSeen(c);
     };
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.splashPage = !$scope.splashPage;
+      $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
     $scope.toggleFilter = function(filter) {

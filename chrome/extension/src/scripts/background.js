@@ -18,13 +18,13 @@ var model = {};  // Singleton angularjs model for either popup or options.
 
 var Icon = function() {
   this.set = function(path) {
-    console.log('Setting browser icon to: ' + path);
+    // console.log('Setting browser icon to: ' + path);
     chrome.browserAction.setIcon({
       path: path
     });
   };
   this.label = function(text) {
-    console.log('Setting browser badge to: ' + text);
+    // console.log('Setting browser badge to: ' + text);
     chrome.browserAction.setBadgeText({
       text: text
     });
@@ -49,6 +49,9 @@ var UI = function() {
   // Keep track of currently viewed contact and instance.
   this.contact = null;
   this.instance = null;
+  this.splashPage = !this.loggedIn();
+  this.rosterNudge = false;
+  this.advancedOptions = false;
 };
 UI.prototype.setNotifications = function(n) {
   if (n > 0) {
@@ -60,6 +63,24 @@ UI.prototype.setNotifications = function(n) {
 };
 UI.prototype.decNotifications = function(n) {
   this.setNotifications(this.notifications - 1);
+};
+// Determine whether UProxy is connected to |network|.
+UI.prototype.isOnline = function(network) {
+  return (model && model.identityStatus &&
+          model.identityStatus[network] &&
+          'online' == model.identityStatus[network].status);
+};
+UI.prototype.isOffline = function(network) {
+  return (!model || !model.identityStatus ||
+          !model.identityStatus[network] ||
+          'offline' == model.identityStatus[network].status);
+};
+// Whether UProxy is logged in to *any* network.
+UI.prototype.loggedIn = function() {
+  return this.isOnline('google') || this.isOnline('facebook');
+};
+UI.prototype.loggedOut = function() {
+  return this.isOffline('google') && this.isOffline('facebook');
 };
 var ui = new UI();
 
@@ -94,7 +115,7 @@ function wireUItoApp() {
     var uids = Object.keys(model.roster);
     var names = uids.map(function(id) { return model.roster[id].name; });
     names.sort();
-    console.log(names);
+    // console.log(names);
 
     /*
     // Run through roster if necessary.

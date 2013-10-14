@@ -22,19 +22,19 @@
       <label>
         Networks:
       </label>
-      <button class="btn" ng-show="!isOnline('loopback')"
+      <button class="btn" ng-show="!ui.isOnline('loopback')"
             ng-click="login('loopback')">Loop</button>
-      <button class="btn" ng-show="isOnline('loopback')"
+      <button class="btn" ng-show="ui.isOnline('loopback')"
             ng-click="logout('loopback')">Loop</button>
 
-      <button class="btn" ng-show="!isOnline('google')"
+      <button class="btn" ng-show="!ui.isOnline('google')"
             ng-click="login('google')">Login G+</button>
-      <button class="btn" ng-show="isOnline('google')"
+      <button class="btn" ng-show="ui.isOnline('google')"
             ng-click="logout('google')">Logout G+</button>
 
-      <button class="btn" ng-show="!isOnline('facebook')"
+      <button class="btn" ng-show="!ui.isOnline('facebook')"
             ng-click="login('facebook')">Login FB</button>
-      <button class="btn" ng-show="isOnline('facebook')"
+      <button class="btn" ng-show="ui.isOnline('facebook')"
             ng-click="logout('facebook')">Logout FB</button>
 
     <h4>Instances</h4>

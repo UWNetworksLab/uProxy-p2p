@@ -21,7 +21,7 @@
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
     <section>
-      <section id="login-splash" ng-show="splashPage">
+      <section id="login-splash" ng-show="ui.splashPage">
         <div class='uproxy-banner'>
         <img src='icons/uproxy-128.png'>proxy
         </div>
@@ -42,24 +42,24 @@
         <h3>Networks</h3>
 
         <div class="network-btn">
-        <button class="btn" ng-show="!isOnline('google')"
-              ng-click="login('google');splashPage = false">G+</button>
-        <button class="btn" ng-show="isOnline('google')"
+        <button class="btn" ng-show="!ui.isOnline('google')"
+              ng-click="login('google');ui.splashPage=false">G+</button>
+        <button class="btn" ng-show="ui.isOnline('google')"
               ng-click="logout('google')">Logout G+</button>
         </div>
 
         <div class="network-btn">
-        <button class="btn" ng-show="!isOnline('facebook')"
+        <button class="btn" ng-show="!ui.isOnline('facebook')"
               ng-click="login('facebook')">FB</button>
-        <button class="btn" ng-show="isOnline('facebook')"
+        <button class="btn" ng-show="ui.isOnline('facebook')"
               ng-click="logout('facebook')">Logout FB</button>
         </div>
         </div>
       </section>
 
-      <div ng-hide="splashPage" tabindex="-1">
+      <div ng-hide="ui.splashPage" tabindex="-1">
         <section id="header">
-          <section id="search-section" ng-hide="rosterNudge">
+          <section id="search-section" ng-hide="ui.rosterNudge">
             <input type="text" id="search-contacts" placeholder="search contacts"
                 ng-model="search"
                 ng-blur="searchFocused=false"
@@ -103,18 +103,18 @@
               </div>
             </div>
           </section>
-          <section id="contact-header" ng-show="rosterNudge">
-            <button class="btn-back" ng-click="rosterNudge=false"></button>
+          <section id="contact-header" ng-show="ui.rosterNudge">
+            <button class="btn-back" ng-click="ui.rosterNudge=false"></button>
             <h1>{{ui.contact.name}}</h1>
           </section>
         </section>
 
         <section id="roster">
           <div id="roster-text">
-            <span ng-show="loggedOut()">
+            <span ng-show="ui.loggedOut()">
               You aren't logged in to any network.
             </span>
-            <span ng-hide="loggedOut()">
+            <span ng-hide="ui.loggedOut()">
               {{ model.roster.length }}
               <span ng-show=" isEmpty(model.roster)">
                 Loading Roster...
@@ -122,7 +122,7 @@
             </span>
           </div>
 
-          <section id="contacts-frame" ng-hide="rosterNudge">
+          <section id="contacts-frame" ng-hide="ui.rosterNudge">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
                 ng-click="viewContact(contact)"
@@ -143,7 +143,7 @@
           </ul>
           </section>
 
-          <div id="contact-details" ng-show="rosterNudge">
+          <div id="contact-details" ng-show="ui.rosterNudge">
             <div class="contact-status">
               <div class="contact-name">
                 <img class="contact-image" ng-src='{{contact.imageData}}'>
@@ -160,7 +160,7 @@
                   <p>
                     {{ui.instance.description}}
                   </p>
-                  <div class="instance-id" ng-show="rosterNudge">
+                  <div class="instance-id" ng-show="ui.rosterNudge">
                     {{ui.instance.instanceId}}
                   </div>
                   <div class="box-for-proxy"
@@ -264,12 +264,12 @@
           </button>
         </div>
 
-        <span ng-show="loggedIn()">
+        <span ng-show="ui.loggedIn()">
           <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
         </span>
 
         <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
-        <span ng-show="loggedOut()">Not Connected</span>
+        <span ng-show="ui.loggedOut()">Not Connected</span>
         <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
       </section>
 
