@@ -100,6 +100,7 @@ ul
 
 #options-btn
   position: fixed
+  z-index: 400
   top: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
@@ -112,11 +113,20 @@ ul
   opacity: 0.6
   cursor: pointer
   @include smooth
-#options-btn:active, #options-btn:focus
-  opacity: 0.9
-#options-btn:hover
-  opacity: 0.3
+  &:active, &:focus
+    opacity: 0.9
+  &:hover
+    opacity: 0.3
 
+#options-btn-tip
+  position: fixed
+  top: 20px
+  right: 2px
+  background-color: #000
+  color: #ccc
+  opacity: 0.85
+  &.ng-hide
+    opacity: 0
 
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
@@ -149,18 +159,17 @@ ul
   position: fixed
   z-index: 50
   top: 30px
-  opacity: 0.9
+  opacity: 0.85
   font-size: $fontSize * 0.9
   pointer-events: none
   @include smooth
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
 
 #filterTooltip .tip
   background-color: #000
   color: #ccc
-
-#filterTooltip.ng-hide
-  @include un-ng-hide
-  opacity: 0
 
 #not-connected
   text-align: center
@@ -230,7 +239,7 @@ ul
 #search-contacts
   position: relative
   z-index: 30
-  width: 358px
+  width: 328px
   margin: 0
   padding: 8px 20px
   border: 1px solid #aaa
@@ -320,17 +329,19 @@ ul
 
 .icon-btn
   z-index: 40
-  width: 24px
+  width: 42px
   height: 24px
   padding: 8px
+  margin-bottom: 5px
   border: none
+  vertical-align: middle
   background: transparent no-repeat center
   background-size: 24px !important
   cursor: pointer
   outline: none
   padding: 0
   &:active, &:focus
-    opcaity: 0.8
+    opacity: 0.8
   &:hover
     opacity: 0.7
 
@@ -350,6 +361,7 @@ ul
 // --------------------------- Roster & Contacts -------------------------------
 #roster
   width: 100%
+  outline: none
   @include smooth
 
 #roster-text
@@ -401,22 +413,19 @@ ul
   text-shadow: 2px 2px 2px #ccc
   @include smooth
 
-.contacts li:hover, .contacts li:focus
-  background-color: #fff
-  border-color: #ddd
-  color: #000
-  z-index: 50
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
-  outline: none
+  &:hover, &:focus
+    background-color: #fff
+    border-color: #ddd
+    color: #000
+    z-index: 50
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
+    outline: none
 
-.contacts li.ng-hide
-  // display: block !important
-  // pointer-events: none
-  // height: 0px
-  // padding: 0
-.contacts li.offline
-  color: #888
+  &.ng-hide
+
+  &.offline
+    color: #888
 
 img.contact-image
   position: absolute
@@ -436,8 +445,8 @@ img.contact-image
 .c-icon
   padding: 1px
   @include smooth
-.c-icon:hover
-  color: #888
+  &:hover
+    color: #888
 
 // Red ! shows up on the corner of contacts who have had a change.
 .c-notification
@@ -564,7 +573,7 @@ img.c-icon:hover
   width: 100%
   font-size: $fontSize * 0.8
   color: #888
-  padding: 8px 0
+  padding: 8px 20px
   cursor: default
   border-top: 1px solid #eee
   background-color: #fff
@@ -575,12 +584,29 @@ img.c-icon:hover
   margin-bottom: 16px
   border-bottom: 1px solid #eee
   color: #333
+  text-align: left
   @include smooth-slow
 
 #status-proxy.ng-hide
   @include un-ng-hide
   opacity: 0
   height: 0
+
+#status-tooltips
+  position: absolute
+  left: 20px
+  bottom: 67px
+  text-align: left !important
+#status-tooltips .tip
+  position: absolute
+
+#status-network
+  display: none
+  position: absolute
+  right: 0
+
+
+
 
 .contact-actions
   display: none

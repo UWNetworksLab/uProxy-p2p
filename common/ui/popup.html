@@ -148,10 +148,8 @@
               <img class="contact-image" ng-src='{{contact.imageData}}'>
             </div>
             <br>Network: {{ ui.contact.network }}
-            <p>
-            {{ ui.contact.name }} does
-            <span ng-hide="ui.instance">not</span>
-            have UProxy installed.
+            <p ng-hide="ui.instance">
+            {{ ui.contact.name }} does not have UProxy installed.
             </p>
 
             <div ng-show="ui.instance">
@@ -241,30 +239,53 @@
     </div>
 
     <div id="status">
-      <div id="status-proxy" ng-show="ui.proxy" ng-cloak>
+      <span id="status-proxy" ng-show="ui.proxy" ng-cloak>
 
         <div ng-hide="'off'==ui.proxy.status.proxy">
-          Proxying via {{ui.proxy.rosterInfo.name}}...<br>
-          <button id="stop-btn" class="icon-btn" ng-click="stopAccess()">
+          <button id="stop-btn" class="icon-btn"
+              ng-mouseenter="stopTooltip=true"
+              ng-mouseleave="stopTooltip=false"
+              ng-click="stopAccess()">
           </button>
+          {{ui.proxy.rosterInfo.name}} - Proxying
         </div>
 
         <div ng-show="'off'==ui.proxy.status.proxy">
-          Previously proxied through {{ui.proxy.rosterInfo.name}}.<br>
-          <button id="start-btn" class="icon-btn" ng-click="startAccess(ui.proxy)">
+          <button id="start-btn" class="icon-btn"
+              ng-mouseenter="startTooltip=true"
+              ng-mouseleave="startTooltip=false"
+              ng-click="startAccess(ui.proxy)">
           </button>
+          {{ui.proxy.rosterInfo.name}} - Not Proxying
         </div>
 
-        <div class="instance-id">{{ui.proxy.instanceId}}</div>
-      </div>
-
-      <span ng-show="ui.loggedIn()">
-        <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
+        <div class="tool" id="status-tooltips">
+          <div class="tip" ng-show="stopTooltip">
+            Stop proxying
+          </div>
+          <div class="tip" ng-show="startTooltip">
+            Re-activate proxying.
+          </div>
+        </div>
       </span>
 
-      <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
-      <span ng-show="ui.loggedOut()">Not Connected</span>
-      <button id="options-btn" ng-click="toggleOptions()" title="{{'options'|i18n}}"></button>
+      <span id="status-network">
+        <span ng-show="ui.loggedIn()">
+          <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
+        </span>
+        <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
+        <span ng-show="ui.loggedOut()">Not Connected</span>
+      </span>
+
+      <button id="options-btn" ng-click="toggleOptions()"
+          ng-mouseenter="optionsTooltip=true"
+          ng-mouseleave="optionsTooltip=false"
+          title="{{'options'|i18n}}">
+      </button>
+      <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
+        Toggle setup page.
+      </div>
+
     </div>
 
   </div></body>

@@ -87,6 +87,7 @@ ul {
 
 #options-btn {
   position: fixed;
+  z-index: 400;
   top: 4px;
   right: 8px;
   background: transparent url("../icons/settings.svg") no-repeat center center;
@@ -102,12 +103,20 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  #options-btn:active, #options-btn:focus {
+    opacity: 0.9; }
+  #options-btn:hover {
+    opacity: 0.3; }
 
-#options-btn:active, #options-btn:focus {
-  opacity: 0.9; }
-
-#options-btn:hover {
-  opacity: 0.3; }
+#options-btn-tip {
+  position: fixed;
+  top: 20px;
+  right: 2px;
+  background-color: black;
+  color: #cccccc;
+  opacity: 0.85; }
+  #options-btn-tip.ng-hide {
+    opacity: 0; }
 
 .tip {
   display: inline-block;
@@ -141,22 +150,21 @@ ul {
   position: fixed;
   z-index: 50;
   top: 30px;
-  opacity: 0.9;
+  opacity: 0.85;
   font-size: 14.4px;
   pointer-events: none;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  #filterTooltip.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0; }
 
 #filterTooltip .tip {
   background-color: black;
   color: #cccccc; }
-
-#filterTooltip.ng-hide {
-  display: block !important;
-  pointer-events: none;
-  opacity: 0; }
 
 #not-connected {
   text-align: center;
@@ -230,7 +238,7 @@ ul {
 #search-contacts {
   position: relative;
   z-index: 30;
-  width: 358px;
+  width: 328px;
   margin: 0;
   padding: 8px 20px;
   border: 1px solid #aaaaaa;
@@ -321,17 +329,19 @@ ul {
 
 .icon-btn {
   z-index: 40;
-  width: 24px;
+  width: 42px;
   height: 24px;
   padding: 8px;
+  margin-bottom: 5px;
   border: none;
+  vertical-align: middle;
   background: transparent no-repeat center;
   background-size: 24px !important;
   cursor: pointer;
   outline: none;
   padding: 0; }
   .icon-btn:active, .icon-btn:focus {
-    opcaity: 0.8; }
+    opacity: 0.8; }
   .icon-btn:hover {
     opacity: 0.7; }
 
@@ -354,6 +364,7 @@ ul {
 
 #roster {
   width: 100%;
+  outline: none;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -417,18 +428,16 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.contacts li:hover, .contacts li:focus {
-  background-color: white;
-  border-color: #dddddd;
-  color: black;
-  z-index: 50;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd;
-  outline: none; }
-
-.contacts li.offline {
-  color: #888888; }
+  .contacts li:hover, .contacts li:focus {
+    background-color: white;
+    border-color: #dddddd;
+    color: black;
+    z-index: 50;
+    top: -2px;
+    box-shadow: 0 2px 6px 1px #dddddd;
+    outline: none; }
+  .contacts li.offline {
+    color: #888888; }
 
 img.contact-image {
   position: absolute;
@@ -452,9 +461,8 @@ img.contact-image {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.c-icon:hover {
-  color: #888888; }
+  .c-icon:hover {
+    color: #888888; }
 
 .c-notification {
   position: absolute;
@@ -591,7 +599,7 @@ img.c-icon:hover {
   width: 100%;
   font-size: 12.8px;
   color: #888888;
-  padding: 8px 0;
+  padding: 8px 20px;
   cursor: default;
   border-top: 1px solid #eeeeee;
   background-color: white;
@@ -602,6 +610,7 @@ img.c-icon:hover {
   margin-bottom: 16px;
   border-bottom: 1px solid #eeeeee;
   color: #333333;
+  text-align: left;
   -webkit-transition: all 0.5s !important;
   -moz-transition: all 0.5s !important;
   -o-transition: all 0.5s !important;
@@ -612,6 +621,20 @@ img.c-icon:hover {
   pointer-events: none;
   opacity: 0;
   height: 0; }
+
+#status-tooltips {
+  position: absolute;
+  left: 20px;
+  bottom: 67px;
+  text-align: left !important; }
+
+#status-tooltips .tip {
+  position: absolute; }
+
+#status-network {
+  display: none;
+  position: absolute;
+  right: 0; }
 
 .contact-actions {
   display: none; }

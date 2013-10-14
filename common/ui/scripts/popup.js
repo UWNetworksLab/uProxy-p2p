@@ -13,8 +13,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
-    $scope.advancedOptions = false;
-    $scope.splashPage = $scope.ui.splashPage;
+    $scope.optionsTooltip = false;
 
     // Initial filter state.
     $scope.filters = {
@@ -79,6 +78,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.toggleOptions = function() {
       $scope.splashPage = !$scope.splashPage;
       $scope.ui.splashPage = $scope.splashPage;
+      $scope.optionsTooltip = false;
       // $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
