@@ -1,9 +1,9 @@
 /**
  * A FreeDOM interface to Chrome sockets
-     * TODO(willscott): Refactor into freedom-chrome.
-         * @constructor
-             * @private
-             */
+ * TODO(willscott): Refactor into freedom-chrome.
+ * @constructor
+ * @private
+ */
 var Socket_chrome = function(channel) {
   this.appChannel = channel;
   this.sid = null;
@@ -17,17 +17,23 @@ var Socket_chrome = function(channel) {
 // https://code.google.com/p/chromium/codesearch#chromium/src/net/base/net_error_list.h
 
 /*
-    * Continuously reads data in from the given socket and dispatches the data to
-        * the socket user.
-        */
+ * Continuously reads data in from the given socket and dispatches the data to
+ * the socket user.
+ */
 var readSocket = function(socketId) {
   var dataRead = function (readInfo) {
     if (readInfo.resultCode > 0) {
       this.dispatchEvent('onData', {socketId: socketId, data: readInfo.data});
       readLoop();
-    } else if (readInfo.resultCode === 0 || readInfo.resultCode === -15) {
+    } else if (readInfo.resultCode === 0 || readInfo.resultCode === -15 ||
+        readInfo.resultCode === -2) {
       // The result code is -15 if the connection was closed, which can
       // can happen in usual program flow, so we will not log the error.
+      // console.warn('Got a disconnection for socket ' + socketId);
+      if (readInfo.resultCode === -2) {
+        console.log('HACKITY HACK: Ignoring an unexpected -2 from a socket.  ' +
+            'Deal with it later');
+      }
       this.dispatchEvent('onDisconnect', {socketId: socketId});
     } else {
       console.error('Error with result code ' + readInfo.resultCode +

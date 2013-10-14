@@ -51,7 +51,7 @@ function getStringOfArrayBuffer(buf) {
 
 (function(exports) {
 
-  var DEFAULT_MAX_CONNECTIONS = 50;
+  var DEFAULT_MAX_CONNECTIONS = 1048576;
 
   // Define some local variables here.
   // TODO: throw an Error if this isn't here.
@@ -74,12 +74,14 @@ function getStringOfArrayBuffer(buf) {
     this.callbacks = {
       listening: null,  // Called when server starts listening for connections.
       connection: null, // Called when a new socket connection happens.
-      disconnect: null  // Called when server stops listening for connections.
+      disconnect: null, // Called when server stops listening for connections.
+      // Called when a socket is closed from the other side.  Passed socketId as an arg.
+      socketRemotelyClosed: null
     };
 
     // Default callbacks for when we create new TcpConnections.
     this.connectionCallbacks = {
-      disconnect: null, // Called when a socket is disconnected.
+      disconnect: null, // Called when a socket is closed
       recv: null,       // Called when server receives data.
       sent: null,       // Called when server has sent data.
       // Called when a tcpConnection belonging to this server is created.
@@ -96,16 +98,18 @@ function getStringOfArrayBuffer(buf) {
   }
 
   /**
-   *
+   * This is called.
    */
   TcpServer.prototype.addToServer = function(tcpConnection) {
+    console.log("adding connection " + tcpConnection.socketId + " to server.");
     this.openConnections[tcpConnection.socketId] = tcpConnection;
   };
 
   /**
-   *
+   * This is never called.
    */
   TcpServer.prototype.removeFromServer = function(tcpConnection) {
+    console.log("removing connection " + tcpConnection.socketId + " from server");
     delete this.openConnections[tcpConnection.socketId];
   };
 
@@ -162,13 +166,13 @@ function getStringOfArrayBuffer(buf) {
   };
 
   /**
-   * Disconnects from the remote side
+   * Disconnects all sockets, and stops listening.
    *
    * @see http://developer.chrome.com/trunk/apps/socket.html#method-disconnect
    */
   TcpServer.prototype.disconnect = function() {
     if (this.serverSocketId) {
-      console.log(this.serverSocketId);
+      console.log('TcpServer: disconnecting server socket ' + this.serverSocketId);
       socket.disconnect(this.serverSocketId);
       socket.destroy(this.serverSocketId);
     }
@@ -231,6 +235,15 @@ function getStringOfArrayBuffer(buf) {
 	    this._createTcpConnection(acceptValue.clientSocketId);
       }.bind(this));
 
+      // The underlying socket_chrome socket.
+      socket.on('onDisconnect', function disconnect(socketInfo) {
+        console.log("connection " + socketInfo.socketId + " remotely disconnected.");
+        // this.callbacks.socketRemotelyClosed && this.socketRemotelyClosed(socketInfo.socketId);
+        var disconnect_cb = this.openConnections[socketInfo.socketId].callbacks.disconnect;
+        disconnect_cb && disconnect_cb(socketInfo.socketId);
+        this.openConnections[socketInfo.socketId].disconnect();
+        this.removeFromServer(socketInfo);
+      }.bind(this));
       this.callbacks.listening && this.callbacks.listening();
     } else {
       console.error('TcpServer: listen failed for ' + this.addr + ':' +
@@ -311,7 +324,8 @@ function getStringOfArrayBuffer(buf) {
       }
     } else {
       console.error('TcpConnection(' + this.socketId + '):' +
-          'no such event for on: ' + eventName);
+          'no such event for on: ' + eventName + ".  Available keys are " +
+              JSON.stringify({available_keys: Object.keys(this.callbacks)}));
     }
   };
 

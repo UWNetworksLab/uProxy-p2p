@@ -22,13 +22,17 @@ var onload = function() {
   // channel id.
   var _conns = {};
 
-    var printSelf = function () {
-        return "<refusing to do so.>" /*JSON.stringify({ _socksServer: _socksServer,
-                                _sctpPc: _sctpPc,
-                                _peerId: _peerId,
-                                _signallingChannel: _signallingChannel,
-                                _conns: _conns}) */ ;
-    }
+  var printSelf = function () {
+    var ret ="<failed to self-stringify.>";
+    try {
+      ret = JSON.stringify({ _socksServer: _socksServer,
+                             _sctpPc: _sctpPc,
+                             _peerId: _peerId,
+                             _signallingChannel: _signallingChannel,
+                             _conns: _conns});
+    } catch (e) {}
+    return ret;
+  }
 
   // Stop running as a _socksServer. Close all connections both to data
   // channels and tcp.
@@ -48,9 +52,9 @@ var onload = function() {
   };
 
   // Close a particular tcp-connection and data channel pair.
-  var closeConnection = function(channelLabel, conn) {
-    conn.disconnect();
-    _sctpPc.closeDataChannel.bind(_sctpPc, channelLabel);
+  var closeConnection = function(channelLabel) {
+    _conns[channelLabel].disconnect();
+    _sctpPc.closeDataChannel(channelLabel);
     delete _conns[channelLabel];
   };
 
@@ -74,22 +78,24 @@ var onload = function() {
     // When the TCP-connection receives data, send it on the sctp peer
     // on the corresponding channelLabel
     conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelLabel));
+
     // When the TCP-connection closes
     conn.tcpConnection.on('disconnect',
         closeConnection.bind(null, channelLabel));
 
     _sctpPc.send({'channelLabel' : channelLabel,
-                  'text': JSON.stringify({host: address, port: port})},
+                  'text': JSON.stringify({host: address, port: port})}/*,
+                 THIS DOES NOTHING HERE.
                  function () {
                    console.log('client.js/onConnection: _sctpPc.send() returned.');
                    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
-                 });
+                 } */);
 
     // TODO: we are not connected yet... should we have some message passing
     // back from the other end of the data channel to tell us when it has
     // happened, instead of just pretended?
     // TODO: determine if these need to be accurate.
-//    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
+    connectedCallback({ipAddrString: '127.0.0.1', port: 0});
   };
 
   freedom.on('start', function(options) {

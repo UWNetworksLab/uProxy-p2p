@@ -36,7 +36,39 @@ var onload = function() {
     sctpPc.send({'channelLabel': channelLabel, 'buffer': data});
   };
 
-  //
+  var _closeClient = function(sctpPc, channelLabel) {
+    var cl = channelLabel;
+    console.log('Closing DC ' + channelLabel);
+    _closePeer(false, cl);
+    sctpPc.closeDataChannel(cl);
+  }
+
+  var _closePeer = function(close_client, label) {
+    var labelnm = JSON.stringify(label);
+    if (labelnm === "{}") {
+      var err = new Error();
+      console.log("server.js: _closePeer: got a bad label.  Stack trace: " +
+          err.stack);
+    }
+
+    console.log("Peer DataChannel " + labelnm + " closed.");
+    if (close_client) {
+      console.log("Peer DataChannel " + labelnm + " closing NetClient socket..");
+      var num_clients_found = 0;
+      for (var i in _peers) {
+        if (_peers[i].netClients[label]) {
+          netClients[label].close();
+          delete netClients[label];
+          num_clients_found++;
+        }
+      }
+      if (num_clients_found === 0){
+        console.log("Peer DataChannel " + labelnm + " close: We don't seem to have " +
+            "that channel.");
+      }
+    }
+  }
+
   var _initPeer = function(peerId) {
     console.log("server.js: _initPeer(" + peerId + ").  _peers = " +
         JSON.stringify(_peers));
@@ -75,6 +107,7 @@ var onload = function() {
         // { host: string, port: number }
         netClients[message.channelLabel] = new window.NetClient(
             _sendDataToPeer.bind(null, sctpPc, message.channelLabel),
+            _closeClient.bind(null, sctpPc, message.channelLabel),
             JSON.parse(message.text));
       } else if (message.buffer) {
         if(!message.channelLabel in netClients) {
@@ -89,6 +122,15 @@ var onload = function() {
         console.error("Message received but missing valid data field. Msg: " +
             JSON.stringify(message));
       }
+    });
+
+    sctpPc.on('onCloseDataChannel', function(arg) {
+      if (typeof arg === "object") {
+        console.log("server.js: onCloseDataChannel: getting back an object: " +
+            JSON.stringify(arg));
+      }
+      console.log("server.js:onCloseDataChannel: got arg " + arg);
+      _closePeer(true, arg.channelid);
     });
 
     var promise = freedom.core().createChannel();
