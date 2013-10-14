@@ -29,7 +29,7 @@ script.onload = function() {
   uProxyAppChannel = freedom;
   uProxyAppChannel.on('ready', function() {
     console.log("uproxy.js is ready!");
-    uProxyAppChannel.emit('start-proxy-localhost-test');
+    // uProxyAppChannel.emit('start-proxy-localhost-test');
   });
 
   //var test_script = document.createElement('script');
