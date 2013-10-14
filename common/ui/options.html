@@ -52,10 +52,23 @@
             Proxy: {{ instance.trust.asProxy }}
             <div class="box-for-proxy"
                 ng-switch="instance.trust.asProxy">
-              <button class="btn" ng-switch-when="yes"
-                  ng-click="startAccess(instance)">
-                Start
-              </button>
+
+              <div ng-switch-when="yes">
+                <button class="btn"
+                    ng-show="'off'==instance.status.proxy"
+                    ng-click="startAccess(instance)">
+                  Start
+                </button>
+                <div class="btn"
+                    ng-show="'ready'==instance.status.proxy">
+                  Setting up proxy...
+                </div>
+                <button class="btn"
+                    ng-hide="'off'==instance.status.proxy"
+                    ng-click="stopAccess(instance)">
+                  Stop
+                </button>
+              </div>
               <div ng-switch-when="requested">
                 <button class="btn" ng-click="cancelRequest(instance)">
                   Cancel

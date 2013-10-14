@@ -43,6 +43,7 @@ var Roster = function() {
 var roster = new Roster();
 
 // User Interface state holder.
+// TODO(uzimizu): move UI into its own file in common so firefox can use it.
 var UI = function() {
   this.notifications = 0;
   // Keep track of currently viewed contact and instance.
@@ -88,6 +89,12 @@ function wireUItoApp() {
     }
     ui.notifications = notifications;
     ui.setNotifications(notifications);
+
+    // Generate list ordered by names.
+    var uids = Object.keys(model.roster);
+    var names = uids.map(function(id) { return model.roster[id].name; });
+    names.sort();
+    console.log(names);
 
     /*
     // Run through roster if necessary.
