@@ -67,7 +67,7 @@
         </div>
       </section>
 
-      <div ng-hide="splashPage">
+      <div ng-hide="splashPage" tabindex="-1">
         <section id="header">
           <section id="search-section" ng-hide="rosterNudge">
             <input type="text" id="search-contacts" placeholder="search contacts"
@@ -79,13 +79,39 @@
             <button type="search" id="search-btn"></button>
 
             <section id="filters">
-              <button id="all-access" class="filter">All</button>
-              <button id="my-access" class="filter">My Access</button>
-              <button id="friends-access" class="filter">Friends' Access</button>
-              <input type="checkbox" id="offline-filter" class="filter" ng-model="filters.offline">
-                Offline
-              </button>
+              <button id="alpha-filter" class="filter"
+                      ng-mouseenter="showFilter('alpha')"
+                      ng-mouseleave="showFilterTip=false"
+                      ng-class="{on:filters.alpha}"
+                      ng-click="toggleFilter('alpha')">A</button>
+              <button id="my-access" class="filter"
+                      ng-mouseenter="showFilter('myAccess')"
+                      ng-mouseleave="showFilterTip=false"
+                      ng-class="{on:filters.myAccess}"
+                      ng-click="toggleFilter('myAccess')"></button>
+              <button id="friends-access" class="filter"
+                      ng-mouseenter="showFilter('friendsAccess')"
+                      ng-mouseleave="showFilterTip=false"
+                      ng-class="{on:filters.friendsAccess}"
+                      ng-click="toggleFilter('friendsAccess')"></button>
+              <button id="uproxy-filter" class="filter"
+                      ng-mouseenter="showFilter('uproxy')"
+                      ng-mouseenter="filterTip=filterTips.uproxy"
+                      ng-mouseleave="showFilterTip=false"
+                      ng-class="{on:filters.uproxy}"
+                      ng-click="toggleFilter('uproxy')"></button>
+              <button id="online-filter" class="filter"
+                      ng-mouseenter="showFilter('online')"
+                      ng-mouseleave="showFilterTip=false"
+                      ng-class="{on:filters.online}"
+                      ng-click="toggleFilter('online')"></button>
+              <br>
             </section>
+            <div class="tool" id="filterTooltip" ng-show="showFilterTip">
+              <div class="tip">
+                {{filterTip}}
+              </div>
+            </div>
           </section>
           <section id="contact-header" ng-show="rosterNudge">
             <button class="btn-back" ng-click="rosterNudge=false"></button>
@@ -111,6 +137,7 @@
             <li ng-repeat="contact in model.roster"
                 ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
+                ng-class="{offline:!contact.online}"
                 tabindex="{{ $index + 10 }}">
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
@@ -131,7 +158,6 @@
               <div class="contact-name">
                 <img class="contact-image" ng-src='{{contact.imageData}}'>
               </div>
-
               <br>Network: {{ currentContact.network }}
               <p>
               {{ currentContact.name }} does
@@ -249,7 +275,7 @@
         </div>
 
         <span ng-show="loggedIn()">
-          <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
+          <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
         </span>
 
         <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>

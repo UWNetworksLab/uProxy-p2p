@@ -5,6 +5,7 @@ uproxy.crx
 *.swp
 *.un~
 *~
+_SpecRunner.html
 common/ui/styles/.sass-cache
 tmp
 node_modules

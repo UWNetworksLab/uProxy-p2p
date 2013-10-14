@@ -39,7 +39,6 @@ var server = freedom.uproxyserver();
 // --------------------------------------------------------------------------
 //  General UI interaction
 // --------------------------------------------------------------------------
-
 function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
   uiChannel.emit('state-change', [{op: 'replace', path: '', value: state}]);
@@ -71,7 +70,7 @@ uiChannel.on('open-popup', function () {
 // Update local user's online status (away, busy, etc.).
 identity.on('onStatus', function(data) {
   log.debug('onStatus: data:' + JSON.stringify(data));
-  if (data.userId) {
+  if (data.userId) { // userId is only specified when connecting or online.
     state.identityStatus[data.network] = data;
     uiChannel.emit('state-change',
         [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);
@@ -470,17 +469,26 @@ function _checkUProxyClientSynchronization(client) {
 // --------------------------------------------------------------------------
 //  Instance - Client mapping and consent
 // --------------------------------------------------------------------------
+function _getMyId() {
+  for (var id in state.me.identities) {
+    return id;
+  }
+}
+
+// Should only be called after we have received an onChange event with our own
+// details.
 function makeMyInstanceMessage() {
+  var firstIdentity = state.me.identities[_getMyId()];
   return JSON.stringify({
     type: 'notify-instance',
     instanceId: '' + state.me.instanceId,
     description: '' + state.me.description,
     keyHash: '' + state.me.keyHash,
     rosterInfo: {
-      userId: state.me.userId,
-      name: state.me.name,
-      network: state.me.network,
-      url: state.me.url
+      userId: firstIdentity.userId,
+      name: firstIdentity.name,
+      network: firstIdentity.network,
+      url: firstIdentity.url
     }
   });
 }
