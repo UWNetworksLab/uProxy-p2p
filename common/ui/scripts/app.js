@@ -4,6 +4,9 @@
  * This is the primary frontend script. It maintains in-memory state which is
  * continuously patched from the backend (uproxy.js) and provides hooks for the
  * UI to modify state and send messages.
+ *
+ * It does not directly connect to the App - that would be redundant as
+ * everytime the popup was clicked, things would occur.
  */
 'use strict';
 
@@ -32,23 +35,20 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
-    'freedom',               // Via dependencyInjector - talks to backend.
-    'onFreedomStateChange',
-    'icon',
+    'appChannel',               // via dependencyInjector.
+    'onStateChange',
     'model',
+    'roster',
+    'icon',
     function($filter, $http, $rootScope,
-             appChannel, onFreedomStateChange,
-             icon, model) {
+             appChannel, onStateChange,
+             model, roster, icon) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
+      console.log(model);
       $rootScope.model = model;
       $rootScope.notifications = 0;
-      // $rootScope.VALID_NETWORKS = [
-        // 'google',
-        // 'facebook'
-      // ];
-      $rootScope.onAppData = onFreedomStateChange;
 
       $rootScope.resetState = function () {
         localStorage.clear();
@@ -89,7 +89,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.loggedOut = function() {
         return $rootScope.isOffline('google') && $rootScope.isOffline('facebook');
       };
-
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
@@ -150,6 +149,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
+        console.log('instance trust change ' + action);
         appChannel.emit('instance-trust-change', {
           instanceId: id, action: action });
       };
@@ -209,29 +209,51 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      $rootScope.onStateChange = function (patch) {
+      function updateDOM(patch) {
         $rootScope.$apply(function () {
           $rootScope.connectedToApp = true;
-          // XXX jsonpatch can't mutate root object https://github.com/dharmafly/jsonpatch.js/issues/10
-          // patches with an empty path don't seem to apply.
-          if (patch[0].path === '') {
-            angular.copy(patch[0].value, model);
-          } else {
-            jsonpatch.apply(model, patch);
-          }
           // Also update pointers locally.
           $rootScope.instances = model.instances;
-          // Count up notifications;
-          $rootScope.notifications = 0;
-          for (var userId in model.roster) {
-            $rootScope.notifications += model.roster[userId].hasNotification? 1 : 0;
+          console.log(model);
+          console.log($rootScope.model);
+          /*
+          // Run through roster if necessary.
+          if (patch[0].path.indexOf('roster') >= 0) {
+            // - Ensure it's sorted alphabetically.
+            console.log('roster edit. ' + patch[0].path);
+            // - Count up notifications.
+            $rootScope.notifications = 0;
+            // var sortedIds = Object.keys(model.roster);
+            // console.log(sortedIds);
+            // sortedIds.sort();
+            // var sortedRoster = {};
+            var rosterByName = {};
+            for (var userId in model.roster) {
+              // sortedRoster[userId] = model.roster[userId];
+              var user = model.roster[userId];
+              roster.updateContact(user);
+              $rootScope.notifications += user.hasNotification? 1 : 0;
+              // rosterByName[user.name] = user;
+            }
+            // var sortedNames = Object.keys(rosterByName);
+            // console.log(sortedNames);
+            // var sortedRoster = {};
+            // sortedNames.sort();
+            // for (var name in sortedNames) {
+              // sortedRoster[name] = rosterByName[name];
+            // }
+            // $rootScope.roster = sortedRoster;
+            if ($rootScope.notifications > 0) {
+              icon.label('' + $rootScope.notifications);
+            }
+            $rootScope.roster = roster;
           }
-          if ($rootScope.notifications > 0) {
-            icon.label('' + $rootScope.notifications);
-            // {text: '↑', color: "#fff"})
-          }
+          */
         });
       }
+
+      // onStateChange.addListener(updateDOM);
+      // onAppData.addListener($rootScope.onStateChange);
 
       // Can be called from nonUI threads (i.e. without a defined window
       // object.).
@@ -251,6 +273,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         });
       }
 
+      // $rootScope.onAppData.addListener($rootScope.onStateChange);
       $rootScope.reconnect = function() {
         console.log('Disconnected. Attempting to reconnect to app...');
         $rootScope.$apply(function() {
@@ -264,7 +287,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           // 3000);
       }
 
-      $rootScope.connectedToApp = false;
+      // $rootScope.connectedToApp = false;
       $rootScope.checkAppConnection = function() {
         if ($rootScope.connectedToApp) {
           return;  // Already connected.
@@ -277,12 +300,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         } else {
           console.log('connecting.');
           appChannel.onConnected.addListener($rootScope.startUI);
-          appChannel.connect();
         }
         // Automatically attempt to reconnect when disconnected.
         appChannel.onDisconnected.addListener($rootScope.reconnect);
       }
 
-      $rootScope.checkAppConnection();
+      // $rootScope.checkAppConnection();
     }  // run function
   ]);

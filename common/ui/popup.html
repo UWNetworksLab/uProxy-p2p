@@ -6,7 +6,6 @@
     <link href="styles/main.css" rel="stylesheet">
 
     <!-- build:js scripts/popup.js -->
-    <script src="bower_components/jsonpatch/lib/jsonpatch.js"></script>
     <script src="bower_components/lodash/dist/lodash.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/angular-animate/angular-animate.js"></script>
@@ -134,7 +133,7 @@
 
           <section id="contacts-frame" ng-hide="rosterNudge">
           <ul class="contacts">
-            <li ng-repeat="contact in model.roster"
+            <li ng-repeat="contact in roster.all"
                 ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"

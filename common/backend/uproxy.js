@@ -465,8 +465,8 @@ function reset() {
 // Called from extension whenever the user clicks opens the extension popup.
 // The intent is to reset its model - but this may or may not always be
 // necessary. Improvements to come.
-uiChannel.on('open-popup', function () {
-  log.debug('open-popup');
+uiChannel.on('ui-ready', function () {
+  log.debug('ui-ready');
   log.debug('state:', state);
   // Send the extension the full state.
   sendFullStateToUI();
@@ -748,7 +748,7 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   // Update UI. TODO(uzimizu): Local storage as well?
-  _SyncInstance(instance);
+  _SyncInstance(instance, 'trust');
   // uiChannel.emit('state-change', [{
       // op: 'replace', path: '/instances/' + instance.instanceId, value: instance
   // }]);
