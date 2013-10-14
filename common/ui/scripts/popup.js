@@ -120,7 +120,4 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       return true;  // Does not match the search text, should be hidden.
     };
-
-    // $scope.updateDOM();
-    console.log('popup.js doing things.');
   }]);

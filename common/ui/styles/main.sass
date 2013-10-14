@@ -88,7 +88,7 @@ ul
   padding: 0 8px
 
 #contact-header
-  h1
+  & h1
     position: fixed
     width: 80%
     padding: 0 10%
@@ -96,6 +96,7 @@ ul
     top: 10px
     pointer-events: none
     white-space: nowrap
+    font-size: $fontSize * 1.2
 
 #options-btn
   position: fixed
@@ -338,8 +339,13 @@ ul
 #stop-btn
   background-image: url('../icons/stop.png')
 
+// --------------------------- Primary view ------------------------------------
 #main-view
   z-index: 100
+  @include smooth-slow
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
 
 // --------------------------- Roster & Contacts -------------------------------
 #roster

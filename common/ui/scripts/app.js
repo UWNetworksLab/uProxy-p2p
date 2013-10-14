@@ -82,6 +82,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.logout = function(network) {
         console.log('!!! logout ' + network);
         appChannel.emit('logout', network);
+        ui.proxy = null;
       };
 
       $rootScope.updateDescription = function() {
@@ -178,7 +179,5 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
       onStateChange.addListener(updateDOM);
       $rootScope.updateDOM = updateDOM;
-
-      console.log('app.js doing things.');
     }  // run function
   ]);

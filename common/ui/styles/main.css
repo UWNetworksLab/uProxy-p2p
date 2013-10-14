@@ -82,7 +82,8 @@ ul {
   text-align: center;
   top: 10px;
   pointer-events: none;
-  white-space: nowrap; }
+  white-space: nowrap;
+  font-size: 19.2px; }
 
 #options-btn {
   position: fixed;
@@ -341,7 +342,15 @@ ul {
   background-image: url("../icons/stop.png"); }
 
 #main-view {
-  z-index: 100; }
+  z-index: 100;
+  -webkit-transition: all 0.5s !important;
+  -moz-transition: all 0.5s !important;
+  -o-transition: all 0.5s !important;
+  transition: all 0.5s !important; }
+  #main-view.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0; }
 
 #roster {
   width: 100%;
