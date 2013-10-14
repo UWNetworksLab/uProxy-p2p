@@ -23,11 +23,11 @@ var onload = function() {
   var _conns = {};
 
     var printSelf = function () {
-        return JSON.stringify({ _socksServer: _socksServer,
+        return "<refusing to do so.>" /*JSON.stringify({ _socksServer: _socksServer,
                                 _sctpPc: _sctpPc,
                                 _peerId: _peerId,
                                 _signallingChannel: _signallingChannel,
-                                _conns: _conns});
+                                _conns: _conns}) */ ;
     }
 
   // Stop running as a _socksServer. Close all connections both to data
