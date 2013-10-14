@@ -199,10 +199,10 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
   identity.sendMessage(
-      state.instanceToClient[peerInstanceId],
+      store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-active-client',
-          instanceId: state.me.instanceId
+          instanceId: store.state.me.instanceId
       }));
 }
 
@@ -221,10 +221,10 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 
   // TODO: this is also a temporary hack.
   identity.sendMessage(
-      state.instanceToClient[peerInstanceId],
+      store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-inactive-client',
-          instanceId: state.me.instanceId
+          instanceId: store.state.me.instanceId
       }));
 }
 
@@ -248,7 +248,7 @@ function receiveSignalFromServerPeer(msg) {
 // TODO(uzimizu): This is a HACK!
 function handleNewlyActiveClient(msg) {
   var instanceId = msg.data.instanceId;
-  var instance = state.instances[instanceId];
+  var instance = store.state.instances[instanceId];
   if (!instance) {
     log.error('Cannot be proxy for nonexistent instance.');
     return;
@@ -256,19 +256,19 @@ function handleNewlyActiveClient(msg) {
   log.debug('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
   instance.status.client = ProxyState.RUNNING;
-  _SyncInstance(instance, 'status');
+  _syncInstanceUI(instance, 'status');
 }
 
 function handleInactiveClient(msg) {
   var instanceId = msg.data.instanceId;
-  var instance = state.instances[instanceId];
+  var instance = store.state.instances[instanceId];
   if (!instance) {
     log.error('Cannot be proxy for nonexistent instance.');
     return;
   }
   log.debug('STOPPED PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   instance.status.client = ProxyState.OFF;
-  _SyncInstance(instance, 'status');
+  _syncInstanceUI(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
