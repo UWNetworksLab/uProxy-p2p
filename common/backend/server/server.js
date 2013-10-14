@@ -80,6 +80,7 @@ var onload = function() {
         if(!message.channelLabel in netClients) {
           console.error("Message received for non-existent channel. Msg: " +
             JSON.stringify(message));
+          return;
         }
 
         // Buffer from the peer is data for the destination.

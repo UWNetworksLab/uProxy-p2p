@@ -14,7 +14,7 @@
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
    Trust, freedom: false, UProxyState: false, console: false, DEBUG: false,
-   ProxyState: false, state: true, log, stateStorage */
+   ProxyState: false, state: true, log, stateStorage, _localTestProxying */
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -55,6 +55,7 @@ function reset() {
   stateStorage.reset(function() {
     // TODO: refactor so this isn't needed.
     state = stateStorage.state;
+    console.log("reset state to: ", state);
     sendFullStateToUI();
   });
 }
@@ -659,6 +660,10 @@ function handleUpdateDescription(msg) {
   _syncInstanceUI(instance, 'description');
   return true;
 }
+
+uiChannel.on('start-proxy-localhost-test', function () {
+  _localTestProxying();
+});
 
 // --------------------------------------------------------------------------
 //  Updating the UI

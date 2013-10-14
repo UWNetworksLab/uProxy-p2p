@@ -65,15 +65,19 @@ describe("state-storage", function() {
     stateStorage.loadStateFromStorage();
     expect(stateStorage.state).toEqual(stateLoadedFromDefault);
   });
+  var wasResetCallbackCalled = false;
   it("* Reset works just like load from DEFAULT_LOAD_STATE", function() {
     // reseting the state and loading should be the same as the
     // DEFAULT_LOAD_STATE.
-    stateStorage.reset();
+    stateStorage.reset(function() { wasResetCallbackCalled = true; });
     expect(stateStorage.state.options)
         .toEqual(stateLoadedFromDefault.options);
     expect(stateStorage.state.instances)
         .toEqual(stateLoadedFromDefault.instances);
     expect(stateStorage.state.roster)
         .toEqual(stateLoadedFromDefault.roster);
+  });
+  it("* ... and check reset callback was called.", function() {
+    expect(wasResetCallbackCalled).toEqual(true);
   });
 });  // util

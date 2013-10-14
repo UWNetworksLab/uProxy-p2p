@@ -32,9 +32,9 @@ function UProxyState() {
 }
 
 UProxyState.prototype.reset = function(callback) {
-  this.state = cloneDeep(DEFAULT_LOAD_STATE);
   this.storage.clear().done(function() {
     console.log("Cleared storage, now loading again...");
+    this.state = cloneDeep(DEFAULT_LOAD_STATE);
     this.loadStateFromStorage(callback);
   }.bind(this));
 };
@@ -301,6 +301,10 @@ UProxyState.prototype.loadAllInstances = function(callback) {
           finalCallbacker.makeCountedCallback());
     }
   }.bind(this), []);
+
+  // There has to be at least one callback.
+  var atLeastOneCountedCallback = finalCallbacker.makeCountedCallback();
+  if (atLeastOneCountedCallback) atLeastOneCountedCallback();
 };
 
 // Save the instance to local storage. Assumes that both the Instance
