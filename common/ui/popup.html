@@ -137,6 +137,7 @@
             <li ng-repeat="contact in model.roster"
                 ng-click="viewContact(contact)"
                 ng-hide="contactIsFiltered(contact)"
+                ng-class="{offline:!contact.online}"
                 tabindex="{{ $index + 10 }}">
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
@@ -274,7 +275,7 @@
         </div>
 
         <span ng-show="loggedIn()">
-          <span ng-show="model.identityStatus.google.status == 'online'"> G+ </span>
+          <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
         </span>
 
         <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
