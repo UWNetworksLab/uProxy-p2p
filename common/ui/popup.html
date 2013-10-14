@@ -244,11 +244,11 @@
       <section id="status">
 
         <div ng-show="model.me.peerAsProxy">
-          Proxying via {{ui.instance.rosterInfo.name}}.
+          Proxying via {{ui.proxy.rosterInfo.name}}.
           <br>{{model.me.peerAsProxy}}
           </br>
           <button class="btn"
-              ng-hide="'off'==ui.instance.status.proxy"
+              ng-hide="'off'==ui.proxy.status.proxy"
               ng-click="stopAccess()">
             Stop
           </button>

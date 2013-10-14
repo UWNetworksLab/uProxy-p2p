@@ -35,15 +35,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
-    'ui',
+    'ui',                       // via dependencyInjector.
     'appChannel',               // via dependencyInjector.
     'onStateChange',
     'model',
     'roster',
-    'icon',
     function($filter, $http, $rootScope, ui,
              appChannel, onStateChange,
-             model, roster, icon) {
+             model, roster) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -113,14 +112,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // We don't need to tell them we'll start proxying, we can just try to
         // start. The SDP request will go through chat/identity network on its
         // own.
-        appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId)
-        // setIcon('icons/search.png');
-        icon.set('../common/ui/icons/uproxy-19-p.png');
+        appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId);
+        ui.proxy = instance;
+        ui.setProxying(true);
       };
       $rootScope.stopAccess = function(instance) {
         instance = instance || ui.instance;
         appChannel.emit('stop-proxying', instance.instanceId);
-        icon.set('../common/ui/icons/uproxy-19.png');
+        ui.setProxying(false);
       };
 
       // Providing access for a friend:
