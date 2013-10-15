@@ -7,10 +7,18 @@ console.log('Initializing chrome extension background page...');
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
 
+//Proxy Configer
+var proxyConfig = new window.BrowserProxyConfig();
+proxyConfig.clearConfig();
+
 // TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener(function (details) {
   console.log('onInstalled: previousVersion', details.previousVersion);
 });
+chrome.runtime.onSuspend.addListener(function () {
+  console.log('onSuspend');
+  //proxyConfig.stopUsingProxy();
+})
 
 var onStateChange = new chrome.Event();
 
@@ -182,6 +190,7 @@ function wireUItoApp() {
     }
 
     ui.synchronize();
+    checkRunningProxy();
     /*
     // Run through roster if necessary.
     if (patch[0].path.indexOf('roster') >= 0) {
@@ -234,6 +243,21 @@ function reconnectToApp() {
 function initialize() {
   // ui-ready tells uproxy.js to send over *all* the state.
   appChannel.emit('ui-ready');
+}
+
+function checkRunningProxy() {
+  if (model && model.instances) {
+    for (var k in model.instances) {
+      if (model.instances.hasOwnProperty(k) && model.instances[k].status &&
+          model.instances[k].status.proxy) {
+        if (model.instances[k].status.proxy == 'running') {
+          proxyConfig.startUsingProxy();
+          return;
+        } 
+      }
+    }
+  }
+  proxyConfig.stopUsingProxy();
 }
 
 // Automatically attempt to reconnect when disconnected.
