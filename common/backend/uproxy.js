@@ -143,7 +143,8 @@ bgAppPageChannel.on('notification-seen', function (userId) {
 //  Proxying
 // --------------------------------------------------------------------------
 // TODO: say not if we havn't given them permission :)
-bgAppPageChannel.on('start-using-peer-as-proxy-server', function(peerInstanceId) {
+bgAppPageChannel.on('start-using-peer-as-proxy-server',
+    function(peerInstanceId) {
   startUsingPeerAsProxyServer(peerInstanceId);
 });
 
