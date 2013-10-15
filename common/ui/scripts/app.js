@@ -115,6 +115,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Request access through a friend.
       $rootScope.requestAccess = function(instance) {
+
+        console.log("requestAccess: ", instance);
         $rootScope.instanceTrustChange(instance.instanceId, 'request-access');
       };
       $rootScope.cancelRequest = function(instance) {
