@@ -3,10 +3,16 @@
  * native socket object.
 */
 'use strict';
+var window;
+if (!window) {
+  window = {};
+}
+
+window.socket = freedom['core.socket']();
 
 // TODO: write a unit test using this and tcp-server.
 (function(exports) {
-  var socket = window.socket;
+  var socket = exports.socket;
 
   var NetClientState = {
     CREATING_SOCKET: 'CREATING_SOCKET',

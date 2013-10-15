@@ -31,6 +31,7 @@ var identity = freedom.identity();
 // through the peer connection.
 var client = freedom.uproxyclient();
 
+// Server allows us to act as a proxy for our contacts.
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
 var server = freedom.uproxyserver();
@@ -81,6 +82,7 @@ bgAppPageChannel.on('logout', function(network) {
   store.state.me.networkDefaults[network].autoconnect = false;
 
 });
+
 
 bgAppPageChannel.on('ignore', function (userId) {
   // TODO: fix.
@@ -155,6 +157,7 @@ bgAppPageChannel.on('stop-proxying', function(peerInstanceId) {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
+// peerId is a client ID.
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to ' + data.peerId + ", which should map to " +
@@ -174,6 +177,7 @@ server.on('sendSignalToPeer', function(data) {
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
+// Begin SDP negotiations with peer. Assumes |peer| exists.
 function startUsingPeerAsProxyServer(peerInstanceId) {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
@@ -184,6 +188,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     console.log('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
+
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
@@ -194,7 +199,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': peerInstanceId});
+               'peerId': store.state.instanceToClient[peerInstanceId]});
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.

@@ -16,3 +16,5 @@ function TcpEchoServer(address, port) {
   }, {minByteLength: 1});
   this.server.listen();
 }
+
+console.log("Installed TcpEchoServer");

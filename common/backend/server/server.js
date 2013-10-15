@@ -1,14 +1,15 @@
 //XXX: needed for chrome debugging, used by socks.js and tcp-server.js.
 "use strict";
 
-var window = {};
+var window;
+if (!window) {
+  window = {};
+}
 console.log('SOCKS5 server: ' + self.location.href);
 
-window.socket = freedom['core.socket']();
-
+window.core = freedom.core();
 // Defined in webclient.js
 var NetClient = window.NetClient;
-
 
 var onload = function() {
   var _active = true;  // this variable can only make things worse.
@@ -115,7 +116,6 @@ var onload = function() {
             JSON.stringify(message));
           return;
         }
-
         // Buffer from the peer is data for the destination.
         netClients[message.channelLabel].send(message.buffer);
       } else {
@@ -133,17 +133,17 @@ var onload = function() {
       _closePeer(true, arg.channelId);
     });
 
-    var promise = freedom.core().createChannel();
-    promise.done(function(chan) {
-      sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
+    window.core.createChannel().done(function(chan) {
+      var setupPromise = sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
       chan.channel.done(function(channel) {
-        // When
+        console.log("Server channel to sctpPc created");
         channel.on('message', function(msg) {
           freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
         });
-        // sctpPc will emit 'ready' when it is ready, and at that point we
-        // have successfully initialised this peer connection and can set the
-        // signalling channel and process any messages we have been sent.
+          // sctpPc will emit 'ready' when it is ready, and at that point we
+          // have successfully initialised this peer connection and can set the
+          // signalling channel and process any messages we have been sent.
+        //setupPromise.done(function() {
         channel.on('ready', function() {
           console.log("Server channel to sctpPc ready.");
           peer.signallingChannel = channel;
@@ -151,7 +151,9 @@ var onload = function() {
             peer.signallingChannel.emit('message', peer.messageQueue.shift());
           }
         });
+        //});
       });
+
     });
     console.log('_initPeer(' + peerId + ') complete.');
   };
@@ -166,14 +168,16 @@ var onload = function() {
   // msg.data : message body received peerId signalling channel, typically
   //            contains SDP headers.
   //
-  // TODO: make sure callers set the peerId.
   freedom.on('handleSignalFromPeer', function(msg) {
     console.log("server handleSignalFromPeer:" + JSON.stringify(msg));
-      if (!_active) {
-          console.log("server is not active, returning");
-          return;
-      }
-
+    if (!_active) {
+      console.log("server is not active, returning");
+      return;
+    }
+    if (!msg.peerId) {
+      console.error('No peer ID provided!.')
+      return;
+    }
     // TODO: Check for access control?
     console.log("sending to transport: " + JSON.stringify(msg.data));
     // Make a peer for this id if it doesn't already exist.
@@ -181,8 +185,12 @@ var onload = function() {
       _initPeer(msg.peerId);
     }
     if (_peers[msg.peerId].signallingChannel){
+      // Send response to peer.
+      console.log('SENDING!!!!! ' + JSON.stringify(msg.data));
+      //window.tmp = _peers[msg.peerId];
       _peers[msg.peerId].signallingChannel.emit('message', msg.data);
     } else {
+      console.log('signallingChannel not yet ready. Adding to queue... ' + msg.peerId + ' ... ' + _peers);
       _peers[msg.peerId].messageQueue.push(msg.data);
     }
   });

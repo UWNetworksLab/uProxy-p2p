@@ -3,7 +3,7 @@ console.log('simple-proxy-test.js, running in worker ' + self.location.href);
 var window;
 if (!window) {
   window = {};
-  console.log("tcp-server: making up a fake window.  Good luck with that.");
+  console.log("simple-proxy-test: making up a fake window.  Good luck with that.");
 }
 
 
