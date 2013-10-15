@@ -59,7 +59,8 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
       $scope.ui.contact = c;
-      $scope.ui.instance = $scope.instanceOfUserId(c.userId);
+      console.log('current contact ', c);
+      $scope.ui.instance = $scope.instanceOfContact(c);
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
       $scope.notificationSeen(c);

@@ -542,17 +542,17 @@ function receiveInstance(msg) {
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;
   var clientId    = msg.fromClientId;
-
-  // Intended JSONpatch operation.
   var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
-  // If we've had relationships to this instance, send them our consent bits.
-  if (instanceOp == 'replace') {
-    sendConsent(store.state.instances[instanceId]);
-  }
 
   // Update the local instance information.
   store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
   store.saveInstance(instanceId);
+
+  // Intended JSONpatch operation.
+  // If we've had relationships to this instance, send them our consent bits.
+  if (instanceOp == 'replace') {
+    sendConsent(store.state.instances[instanceId]);
+  }
 
   // Update UI's view of instances and mapping.
   // TODO: This can probably be made smaller.
