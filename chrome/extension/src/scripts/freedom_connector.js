@@ -97,10 +97,10 @@ FreedomConnector.prototype.onDisconnected_ = function() {
 
     this.port_.disconnect();
     this.onDisconnected.dispatch();
-    delete this.onDisconnected;
-    delete this.onConnected;
-    this.onDisconnected = new chrome.Event();
-    this.onConnected = new chrome.Event();
+    //delete this.onDisconnected;
+    //delete this.onConnected;
+    //this.onDisconnected = new chrome.Event();
+    //this.onConnected = new chrome.Event();
     this.port_ = null;
   }
 

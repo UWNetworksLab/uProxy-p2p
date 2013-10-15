@@ -14,7 +14,7 @@
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
    Trust, freedom: false, UProxyState: false, console: false, DEBUG: false,
-   ProxyState: false, log, store, _localTestProxying */
+   ProxyState: false, store, _localTestProxying */
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -246,10 +246,10 @@ function handleNewlyActiveClient(msg) {
   var instanceId = msg.data.instanceId;
   var instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Cannot be proxy for nonexistent instance.');
+    console.error('Cannot be proxy for nonexistent instance.');
     return;
   }
-  log.debug('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
+  console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
   instance.status.client = ProxyState.RUNNING;
   _syncInstanceUI(instance, 'status');
@@ -259,10 +259,9 @@ function handleInactiveClient(msg) {
   var instanceId = msg.data.instanceId;
   var instance = store.state.instances[instanceId];
   if (!instance) {
-    log.error('Cannot be proxy for nonexistent instance.');
+    console.error('Cannot be proxy for nonexistent instance.');
     return;
   }
-  log.debug('STOPPED PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   instance.status.client = ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 }
@@ -562,8 +561,10 @@ function receiveInstance(msg) {
       value: store.state.instances[instanceId]
   }]);
   bgAppPageChannel.emit('state-change', [
-    { op: 'replace', path: '/clientToInstance', value: store.state.clientToInstance },
-    { op: 'replace', path: '/instanceToClient', value: store.state.instanceToClient }
+    { op: 'replace', path: '/clientToInstance',
+      value: store.state.clientToInstance },
+    { op: 'replace', path: '/instanceToClient',
+      value: store.state.instanceToClient }
   ]);
   return true;
 }
@@ -572,6 +573,7 @@ function receiveInstance(msg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
+  console.log("sendConsent: ", instance);
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');
