@@ -58,6 +58,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('reset', null);
       };
 
+      // Takes in an entry from the roster table.
+      $rootScope.instanceOfContact = function(contact) {
+        for (var clientId in contact.clients) {
+          if(clientId in model.clientToInstance)
+            return model.clientToInstance[clientId];
+        }
+        return null;
+      };
+
       $rootScope.instanceOfClientId = function(clientId) {
         if (model.clientToInstance[clientId]) {
           return model.instances[model.clientToInstance[clientId]];
@@ -66,6 +75,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
       };
 
+/*
+      // Broken by hangouts: user-ids sent to us don't match those in roster.
       $rootScope.instanceOfUserId = function(userId) {
         for (var i in model.instances) {
           if (model.instances[i].rosterInfo.userId == userId)
@@ -73,7 +84,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
         return null;
       };
-
+*/
+      $rootScope.instanceOfUserId = function(userId) {
+        for (var userId in model.roster) {
+          var instance = $rootScope.instanceOfContact(model.roster[userId]);
+          if (instance) return instance;
+        }
+        return null;
+      };
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
