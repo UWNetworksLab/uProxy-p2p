@@ -44,12 +44,12 @@
       this.running = true;
       chrome.proxy.settings.get({
         incognito:false
-      }, (function(details) { 
+      }, (function(details) {
         this.preUproxyConfig = details.value; 
         this.currentConfig = chrome.proxy.settings.set({
           value: this.uproxyConfig, 
           scope: 'regular'
-        }, (function() {}).bind(this));
+        }, (function() {console.log('Successfully set');}).bind(this));
       }).bind(this));
     }
   };
