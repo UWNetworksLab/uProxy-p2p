@@ -31,10 +31,10 @@ var identity = freedom.identity();
 // through the peer connection.
 var client = freedom.uproxyclient();
 
+// Server allows us to act as a proxy for our contacts.
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
 var server = freedom.uproxyserver();
-
 
 // --------------------------------------------------------------------------
 //  General UI interaction
@@ -80,10 +80,6 @@ bgAppPageChannel.on('logout', function(network) {
   store.state.clientToInstance = {};
   store.state.me.networkDefaults[network].autoconnect = false;
 
-});
-
-bgAppPageChannel.on('ignore', function (userId) {
-  // TODO: fix.
 });
 
 bgAppPageChannel.on('invite-friend', function (userId) {
@@ -155,25 +151,25 @@ bgAppPageChannel.on('stop-proxying', function(peerInstanceId) {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
+// peerId is a client ID.
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId + ", which should map to " +
-                    store.state.instanceToClient[data.peerId]);
+                ', sending to client: ' + data.peerId + ", which should map to instance: " +
+                    state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
-  identity.sendMessage(
-      store.state.instanceToClient[data.peerId],
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to ' + data.peerId);
-  identity.sendMessage(
-      store.state.instanceToClient[data.peerId],
+                ', sending to client: ' + data.peerId);
+  identity.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
+// Begin SDP negotiations with peer. Assumes |peer| exists.
 function startUsingPeerAsProxyServer(peerInstanceId) {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
@@ -194,7 +190,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': peerInstanceId});
+               'peerId': state.instanceToClient[peerInstanceId]});
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
@@ -213,8 +209,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
     return false;
   }
   // TODO: Handle revoked permissions notifications.
-  // bgAppPageChannel.emit('state-change',
-      // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
+  // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
   client.emit("stop");
   instance.status.proxy = ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
@@ -229,8 +224,8 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 }
 
 // peerconnection-client -- sent from client on other side.
-function receiveSignalFromClientPeer(msg) {
-  console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
+function handleSignalFromClientPeer(msg) {
+  console.log('handleSignalFromClientPeer: from:' + msg.fromClientId);
   // sanitize from the identity service
   server.emit('handleSignalFromPeer',
       {peerId: msg.fromClientId, data: msg.data.data});
@@ -240,10 +235,9 @@ function receiveSignalFromClientPeer(msg) {
 function receiveSignalFromServerPeer(msg) {
   console.log('receiveSignalFromServerPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
-  client.emit('handleServerSignalToPeer',
+  client.emit('handleSignalFromPeer',
       {peerId: msg.fromClientId, data: msg.data.data});
 }
-
 
 // TODO(uzimizu): This is a HACK!
 function handleNewlyActiveClient(msg) {
@@ -415,7 +409,6 @@ identity.on('onMessage', function (msgInfo) {
   }
   _msgReceivedHandlers[msgType](msgInfo);
 });
-
 
 // Update data for a user, typically when new client data shows up. Notifies all
 // new UProxy clients of our instance data, and preserve existing hooks. Does
@@ -658,13 +651,8 @@ function _addNotification(instanceId) {
     console.error('User does not exist for instance ' + instance);
     return false;
   }
-  // store.state.notifications += user.hasNotification? 1 : 0;
   user.hasNotification = true;
-  bgAppPageChannel.emit('state-change', [{
-      op: 'replace',
-      path: '/roster/' + user.userId + '/hasNotification',
-      value: true
-  }]);
+  _SyncUI('/roster/' + user.userId + '/hasNotification', true);
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
