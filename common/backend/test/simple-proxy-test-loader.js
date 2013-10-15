@@ -14,4 +14,5 @@ script.onload = function() {
   console.log("Freedom loaded!");
   console.log("freedom.emit('start');  // to start proxy");
   console.log("freedom.emit('stop');   // to stop proxy");
+  console.log("var p = new TcpEchoServer('127.0.0.1', <portnum>);  // echo TCP server for telnet");
 };

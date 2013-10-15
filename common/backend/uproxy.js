@@ -211,6 +211,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   }
   // TODO: Handle revoked permissions notifications.
   // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
+
   client.emit("stop");
   instance.status.proxy = ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
@@ -226,7 +227,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 
 // peerconnection-client -- sent from client on other side.
 function receiveSignalFromClientPeer(msg) {
-  console.log('handleSignalFromClientPeer: from:' + msg.fromClientId);
+  console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service
   server.emit('handleSignalFromPeer',
       {peerId: msg.fromClientId, data: msg.data.data});

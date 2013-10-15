@@ -18,6 +18,13 @@ https://github.com/GoogleChrome/chrome-app-samples/tree/master/tcpserver
 */
 'use strict';
 
+// var window;
+// if (!window) {
+//   window = {};
+//   window.socket = Socket_chrome;
+//   console.log("Creating a fake 'window' for tcp-server.js");
+// }
+
 /**
  * Converts an array buffer to a string of hex codes and interpretations as
  * a char code.
@@ -55,7 +62,7 @@ function getStringOfArrayBuffer(buf) {
 
   // Define some local variables here.
   // TODO: throw an Error if this isn't here.
-  var socket = exports.socket; //|| (typeof chrome != 'undefined' && chrome.socket);
+  var socket = exports.socket;
 
   /**
    * Create an instance of the server
@@ -284,12 +291,14 @@ function getStringOfArrayBuffer(buf) {
     // TODO: _initialized is not checked everywhere that it might need to be checked
     this._initialized = false;
 
-    socket.on('onData', this._onRead.bind(this));
     socket.getInfo(socketId).done(function(socketInfo) {
       this.socketInfo = socketInfo;
       this._initialized = true;
+      socket.on('onData', this._onRead.bind(this, socketInfo, socketId));
+
       // Connection has been established, so make the connection callback.
-      console.log('TcpServer: client connected.');
+      console.log('TcpServer: client connected, socketInfo=' +
+          JSON.stringify(socketInfo));
       if (serverConnectionCallback) {
         serverConnectionCallback(this);
       }
@@ -428,9 +437,14 @@ function getStringOfArrayBuffer(buf) {
    * @param {Object} readInfo The incoming message.
    * See freedom core.socket onData event.
    */
-  TcpConnection.prototype._onRead = function(readInfo) {
+  TcpConnection.prototype._onRead = function(sockInfo, socketId, readInfo) {
     if (readInfo.socketId !== this.socketId) {
-      console.error("onRead for socket " + readInfo.socketId + ", expecting "+this.socketId);
+      var e = new Error();
+      console.error("onRead for socket " + readInfo.socketId + ", expecting " +
+          this.socketId + ", and  expected sockId " + socketId + ", dropping " +
+          readInfo.data.byteLength + " bytes: " +
+          getHexStringOfArrayBuffer(readInfo.data) + " for this=" +
+          JSON.stringify(this) + ", error log=" + e.stack);
       return;
     }
     if (this.callbacks.recv && this._initialized) {
