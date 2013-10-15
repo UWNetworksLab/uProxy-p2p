@@ -291,10 +291,10 @@ function getStringOfArrayBuffer(buf) {
     // TODO: _initialized is not checked everywhere that it might need to be checked
     this._initialized = false;
 
+    socket.on('onData', this._onRead.bind(this, {}, socketId));
     socket.getInfo(socketId).done(function(socketInfo) {
       this.socketInfo = socketInfo;
       this._initialized = true;
-      socket.on('onData', this._onRead.bind(this, socketInfo, socketId));
 
       // Connection has been established, so make the connection callback.
       console.log('TcpServer: client connected, socketInfo=' +
@@ -342,7 +342,7 @@ function getStringOfArrayBuffer(buf) {
    *
    */
   TcpConnection.prototype._bufferedCallRecv = function() {
-    if(this.recvOptions && this.recvOptions.minByteLength && 
+    if(this.recvOptions && this.recvOptions.minByteLength &&
         this.recvOptions.minByteLength > this.pendingReadBuffer.byteLength) return;
 
     console.log("Sending " + this.pendingReadBuffer.byteLength + " bytes to the callback");
@@ -439,13 +439,10 @@ function getStringOfArrayBuffer(buf) {
    */
   TcpConnection.prototype._onRead = function(sockInfo, socketId, readInfo) {
     if (readInfo.socketId !== this.socketId) {
-      var e = new Error();
-      console.error("onRead for socket " + readInfo.socketId + ", expecting " +
-          this.socketId + ", and  expected sockId " + socketId + ", dropping " +
-          readInfo.data.byteLength + " bytes: " +
-          getHexStringOfArrayBuffer(readInfo.data) + " for this=" +
-          JSON.stringify(this) + ", error log=" + e.stack);
+      console.log('onRead: skipping.');
       return;
+    } else {
+      console.log('onRead: found.');
     }
     if (this.callbacks.recv && this._initialized) {
       this._addPendingData(readInfo.data);

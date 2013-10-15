@@ -23,11 +23,8 @@ var Socket_chrome = function(channel) {
 var readSocket = function(socketId) {
   var saved_socketId = socketId;
   var dataRead = function (readInfo) {
-    console.log('socket_chrome.js: readSocket(' + JSON.stringify(readInfo) + "): returning ");
     if (readInfo.resultCode > 0) {
       var arg = {socketId: socketId, data: readInfo.data};
-      console.log('socket_chrome.js: readSocket(' + saved_socketId + "): returning "
-          + JSON.stringify(arg));
       this.dispatchEvent('onData', arg);
       readLoop();
     } else if (readInfo.resultCode === 0 || readInfo.resultCode === -15 ||
