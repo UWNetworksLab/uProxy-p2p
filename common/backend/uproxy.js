@@ -562,8 +562,10 @@ function receiveInstance(msg) {
       value: store.state.instances[instanceId]
   }]);
   bgAppPageChannel.emit('state-change', [
-    { op: 'replace', path: '/clientToInstance', value: store.state.clientToInstance },
-    { op: 'replace', path: '/instanceToClient', value: store.state.instanceToClient }
+    { op: 'replace', path: '/clientToInstance',
+      value: store.state.clientToInstance },
+    { op: 'replace', path: '/instanceToClient',
+      value: store.state.instanceToClient }
   ]);
   return true;
 }
@@ -572,6 +574,7 @@ function receiveInstance(msg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
+  console.log("sendConsent: ", instance);
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');
