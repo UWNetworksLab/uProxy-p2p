@@ -37,7 +37,7 @@ var _sendDataToPeer = function (sctpPc, channelLabel, data) {
 
 var _closeClient = function(sctpPc, channelLabel) {
   var cl = channelLabel;
-  console.log('Closing DC ' + channelLabel);
+  // console.log('Closing DC ' + channelLabel);
   _closePeer(false, cl);
   sctpPc.closeDataChannel(cl);
 }
@@ -45,14 +45,14 @@ var _closeClient = function(sctpPc, channelLabel) {
 var _closePeer = function(close_client, label) {
   var labelnm = label; // JSON.stringify(label);
   if (labelnm === "{}") {
-    var err = new Error();
+    /*var err = new Error();
     console.log("server.js: _closePeer: got a bad label.  Stack trace: " +
-        err.stack);
+        err.stack); */
   }
 
-  console.log("Peer DataChannel " + labelnm + " closed.");
+  // console.log("Peer DataChannel " + labelnm + " closed.");
   if (close_client) {
-    console.log("Peer DataChannel " + labelnm + " closing NetClient socket..");
+    // console.log("Peer DataChannel " + labelnm + " closing NetClient socket..");
     var num_clients_found = 0;
     for (var i in _peers) {
       if (_peers[i].netClients[label]) {
@@ -61,10 +61,10 @@ var _closePeer = function(close_client, label) {
         num_clients_found++;
       }
     }
-    if (num_clients_found === 0){
+/*    if (num_clients_found === 0){
       console.log("Peer DataChannel " + labelnm + " close: We don't seem to have " +
           "that channel.");
-    }
+    } */
   }
 }
 
@@ -93,7 +93,7 @@ var _initPeer = function(peerId) {
   _peers[peerId] = peer;
 
   sctpPc.on('onReceived', function(message) {
-    console.log("Server got message: " + JSON.stringify(message));
+    // console.log("Server got message: " + JSON.stringify(message));
     if (! message.channelLabel) {
       console.error("Message received but missing channelLabel. Msg: " +
           JSON.stringify(message));
@@ -123,18 +123,18 @@ var _initPeer = function(peerId) {
   });
 
   sctpPc.on('onCloseDataChannel', function(arg) {
-    if (typeof arg === "object") {
+/*    if (typeof arg === "object") {
       console.log("server.js: onCloseDataChannel: getting back an object: " +
           JSON.stringify(arg));
     }
-    console.log("server.js:onCloseDataChannel: got arg " + arg.channelId);
+    console.log("server.js:onCloseDataChannel: got arg " + arg.channelId); */
     _closePeer(true, arg.channelId);
   });
 
   _core.createChannel().done(function(chan) {
     sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
     chan.channel.done(function(channel) {
-      console.log("Server channel to sctpPc created");
+      // console.log("Server channel to sctpPc created");
       channel.on('message', function(msg) {
         freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
       });
@@ -143,7 +143,7 @@ var _initPeer = function(peerId) {
       // signalling channel and process any messages we have been sent.
       //setupPromise.done(function() {
       channel.on('ready', function() {
-        console.log("Server channel to sctpPc ready.");
+        // console.log("Server channel to sctpPc ready.");
         peer.signallingChannel = channel;
         while(peer.messageQueue.length > 0) {
           peer.signallingChannel.emit('message', peer.messageQueue.shift());

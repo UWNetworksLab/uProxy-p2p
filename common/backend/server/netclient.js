@@ -71,7 +71,7 @@ window.socket = freedom['core.socket']();
   };
 
   NetClient.prototype._onWrite = function(writeInfo) {
-    console.log("Bytes written: " + writeInfo.bytesWritten);
+    // console.log("Bytes written: " + writeInfo.bytesWritten);
     // TODO: change sockets to having an explicit failure rather than giving -1
     // in the bytesWritten field.
     if (writeInfo.bytesWritten < 0) {
@@ -100,7 +100,7 @@ window.socket = freedom['core.socket']();
   }
 
   NetClient.prototype._onClose = function() {
-    console.log("NetClient: closing socket " + this.socketId);
+    // console.log("NetClient: closing socket " + this.socketId);
     this.state = NetClientState.CLOSED;
     if (this.socketId) { socket.destroy(this.socketId); }
     this.socketId = null;
