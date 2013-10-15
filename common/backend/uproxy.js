@@ -367,7 +367,7 @@ identity.on('onChange', function(data) {
     if (store.state.me.identities[data.userId]) {
       // My card changed.
       store.state.me.identities[data.userId] = data;
-      _SyncUI('/me/clients/' + data.userId, data, 'add');
+      _SyncUI('/me/identities/' + data.userId, data, 'add');
       // TODO: Handle changes that might affect proxying
     } else {
       updateUser(data);  // Not myself.

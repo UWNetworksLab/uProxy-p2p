@@ -132,11 +132,11 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
     if (me === null) {
       this.state.me = this._generateMyInstance();
       this.saveMeToStorage(callback);
-      log.debug("****** Saving new self-definition *****");
-      log.debug("  state.me = " + JSON.stringify(this.state.me));
+      console.log("****** Saving new self-definition *****");
+      console.log("  state.me = " + JSON.stringify(this.state.me));
     } else {
-      log.debug("++++++ Loaded self-definition ++++++");
-      log.debug("  state.me = " + JSON.stringify(me));
+      console.log("++++++ Loaded self-definition ++++++");
+      console.log("  state.me = " + JSON.stringify(me));
       this.state.me = restrictToObject(this.state.me, me);
       if(callback) { callback(); }
     }
@@ -246,7 +246,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
 
   // Obsolete client will never have further communications.
   if (oldClientId && (oldClientId != clientId)) {
-    log.debug('Deleting obsolete client ' + oldClientId);
+    console.log('Deleting obsolete client ' + oldClientId);
     var user = this.state.roster[userId];
     if (user) {
       delete user.clients[oldClientId];
@@ -264,7 +264,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     instance.description = data.description;
     instance.keyHash = data.keyHash;
     instance.rosterInfo = data.rosterInfo;
-    log.debug('Prepared NEW Instance: ' + JSON.stringify(instance));
+    console.log('Prepared NEW Instance: ' + JSON.stringify(instance));
     this.state.instances[instanceId] = instance;
   }
 
@@ -332,7 +332,7 @@ UProxyState.prototype.saveInstance = function(instanceId, callback) {
     notify: Boolean(instance.notify),
     rosterInfo: instance.rosterInfo
   };
-  log.debug('saveInstance: saving "instance/"' + instanceId + '": ' +
+  console.log('saveInstance: saving "instance/"' + instanceId + '": ' +
       JSON.stringify(instanceDataToSave));
   this._saveKeyAsJson("instance/" + instanceId, instanceDataToSave,
       finalCallbacker.makeCountedCallback());
