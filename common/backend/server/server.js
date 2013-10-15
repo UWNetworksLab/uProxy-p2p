@@ -138,9 +138,9 @@ var _initPeer = function(peerId) {
       channel.on('message', function(msg) {
         freedom.emit('sendSignalToPeer', { peerId: peerId, data: msg });
       });
-        // sctpPc will emit 'ready' when it is ready, and at that point we
-        // have successfully initialised this peer connection and can set the
-        // signalling channel and process any messages we have been sent.
+      // sctpPc will emit 'ready' when it is ready, and at that point we
+      // have successfully initialised this peer connection and can set the
+      // signalling channel and process any messages we have been sent.
       //setupPromise.done(function() {
       channel.on('ready', function() {
         console.log("Server channel to sctpPc ready.");
