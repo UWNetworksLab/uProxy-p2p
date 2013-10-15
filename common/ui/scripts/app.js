@@ -62,7 +62,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.instanceOfContact = function(contact) {
         for (var clientId in contact.clients) {
           if(clientId in model.clientToInstance)
-            return model.clientToInstance[clientId];
+            return model.instances[model.clientToInstance[clientId]];
         }
         return null;
       };
@@ -155,7 +155,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
-        console.log('instance trust change ' + action);
+        console.log('instance trust change ' + action + ', ' + id);
         appChannel.emit('instance-trust-change', {
           instanceId: id, action: action });
       };
