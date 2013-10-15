@@ -25,13 +25,19 @@ var readSocket = function(socketId) {
     if (readInfo.resultCode > 0) {
       this.dispatchEvent('onData', {socketId: socketId, data: readInfo.data});
       readLoop();
-    } else if (readInfo.resultCode === 0 || readInfo.resultCode === -15) {
+    } else if (readInfo.resultCode === 0 || readInfo.resultCode === -15 ||
+        readInfo.resultCode === -2) {
       // The result code is -15 if the connection was closed, which can
       // can happen in usual program flow, so we will not log the error.
+      // console.warn('Got a disconnection for socket ' + socketId);
+      if (readInfo.resultCode === -2) {
+        console.log('HACKITY HACK: Ignoring an unexpected -2 from a socket.  ' +
+            'Deal with it later');
+      }
       this.dispatchEvent('onDisconnect', {socketId: socketId});
     } else {
       console.error('Error with result code ' + readInfo.resultCode +
-		    ' occured when reading from socket ' + socketId);
+		  ' occured when reading from socket ' + socketId);
     };
   }.bind(this);
   var readLoop = function () {
@@ -52,20 +58,20 @@ Socket_chrome.prototype.listen = function(socketId, address, port, callback) {
     callback(result);
     if (result === 0) {
       var acceptCallback = function (acceptInfo) {
-	if (acceptInfo.resultCode === 0) {
-	  this.dispatchEvent('onConnection',
-			     {serverSocketId: socketId,
-			      clientSocketId: acceptInfo.socketId});
-	  acceptLoop();
-	  readSocket.call(this, acceptInfo.socketId);
-	} else if (acceptInfo.resultCode !== -15) {
-	  console.error('Error ' + acceptInfo.resultCode
-			+ ' while trying to accept connection on socket '
-			+ socketId);
-	}
+	    if (acceptInfo.resultCode === 0) {
+	      this.dispatchEvent('onConnection',
+			                 {serverSocketId: socketId,
+			                  clientSocketId: acceptInfo.socketId});
+	      acceptLoop();
+	      readSocket.call(this, acceptInfo.socketId);
+	    } else if (acceptInfo.resultCode !== -15) {
+	      console.error('Error ' + acceptInfo.resultCode
+			  + ' while trying to accept connection on socket '
+			      + socketId);
+	    }
       }.bind(this);
       var acceptLoop = function() {
-	chrome.socket.accept(socketId, acceptCallback);
+	    chrome.socket.accept(socketId, acceptCallback);
       };
       acceptLoop();
     }

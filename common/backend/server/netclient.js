@@ -23,12 +23,15 @@ window.socket = freedom['core.socket']();
 
   // onResponse: function (buffer) { ... }
   // A function to handle the data from a packet that came from the destination.
+  // onClose: function() { ...}
+  // A function to handle closure of the socket.
   //
   // destination: { host : "string", port : number }
   // The destination host and port to connect to.
-  var NetClient = function(onResponse, destination) {
+  var NetClient = function(onResponse, onClose, destination) {
     this.socketId = null
     this.onResponse = onResponse;
+    this.onClose = onClose;
     this.queue = [];
     this.destination = destination;
     this.state = NetClientState.CREATING_SOCKET;
@@ -92,17 +95,17 @@ window.socket = freedom['core.socket']();
     }
   };
 
-  NetClient.prototype._onClose = function() {
-    console.log("Closing socket");
-    this.state = NetClientState.CLOSED;
-    socket.disconnect(this.socketId).done(this._onClosed.bind(this));
-  };
+  NetClient.prototype.close = function() {
+    this._onClose();
+  }
 
-  NetClient.prototype._onClosed = function() {
+  NetClient.prototype._onClose = function() {
+    console.log("NetClient: closing socket " + this.socketId);
+    this.state = NetClientState.CLOSED;
     if (this.socketId) { socket.destroy(this.socketId); }
     this.socketId = null;
+    this.onClose();
   };
 
   exports.NetClient = NetClient;
 })(window);
-

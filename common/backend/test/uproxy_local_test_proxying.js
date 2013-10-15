@@ -1,5 +1,14 @@
 
 function _localTestProxying() {
+  // Client is used to manage a peer connection to a contact that will proxy our
+  // connection. This module listens on a localhost port and forwards requests
+  // through the peer connection.
+  var client = freedom.uproxyclient();
+
+  // Server module; listens for peer connections and proxies their requests
+  // through the peer connection.
+  var server = freedom.uproxyserver();
+
   var pA = "pA";
   var pB = "pB";
   console.log("Setting up signalling");
@@ -19,7 +28,7 @@ function _localTestProxying() {
   });
   server.emit("start");
   client.emit("start",
-      {'host': '127.0.0.1', 'port': 9999,
+      {'host': '127.0.0.1', 'port': 8888,
         // peerId of the peer being routed to.
        'peerId': pB});
   console.log("ready...");

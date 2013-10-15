@@ -37,7 +37,39 @@ var onload = function() {
     sctpPc.send({'channelLabel': channelLabel, 'buffer': data});
   };
 
-  //
+  var _closeClient = function(sctpPc, channelLabel) {
+    var cl = channelLabel;
+    console.log('Closing DC ' + channelLabel);
+    _closePeer(false, cl);
+    sctpPc.closeDataChannel(cl);
+  }
+
+  var _closePeer = function(close_client, label) {
+    var labelnm = label; // JSON.stringify(label);
+    if (labelnm === "{}") {
+      var err = new Error();
+      console.log("server.js: _closePeer: got a bad label.  Stack trace: " +
+          err.stack);
+    }
+
+    console.log("Peer DataChannel " + labelnm + " closed.");
+    if (close_client) {
+      console.log("Peer DataChannel " + labelnm + " closing NetClient socket..");
+      var num_clients_found = 0;
+      for (var i in _peers) {
+        if (_peers[i].netClients[label]) {
+          _peers[i].netClients[label].close();
+          delete _peers[i].netClients[label];
+          num_clients_found++;
+        }
+      }
+      if (num_clients_found === 0){
+        console.log("Peer DataChannel " + labelnm + " close: We don't seem to have " +
+            "that channel.");
+      }
+    }
+  }
+
   var _initPeer = function(peerId) {
     console.log("server.js: _initPeer(" + peerId + ").  _peers = " +
         JSON.stringify(_peers));
@@ -76,6 +108,7 @@ var onload = function() {
         // { host: string, port: number }
         netClients[message.channelLabel] = new window.NetClient(
             _sendDataToPeer.bind(null, sctpPc, message.channelLabel),
+            _closeClient.bind(null, sctpPc, message.channelLabel),
             JSON.parse(message.text));
       } else if (message.buffer) {
         if(!message.channelLabel in netClients) {
@@ -91,8 +124,17 @@ var onload = function() {
       }
     });
 
-    window.core.createChannel().done(function(chan) {
-      var setupPromise = sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
+    sctpPc.on('onCloseDataChannel', function(arg) {
+      if (typeof arg === "object") {
+        console.log("server.js: onCloseDataChannel: getting back an object: " +
+            JSON.stringify(arg));
+      }
+      console.log("server.js:onCloseDataChannel: got arg " + arg.channelId);
+      _closePeer(true, arg.channelId);
+    });
+
+    freedom.core().createChannel().done(function(chan) {
+      sctpPc.setup(chan.identifier, "server-for-" + peerId, false);
       chan.channel.done(function(channel) {
         console.log("Server channel to sctpPc created");
         channel.on('message', function(msg) {

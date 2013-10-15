@@ -26,12 +26,15 @@ var onload = function() {
   var _conns = {};
 
   var printSelf = function () {
-    return JSON.stringify({
-        _socksServer: _socksServer,
-        _sctpPc: _sctpPc,
-        _peerId: _peerId,
-        _signallingChannel: _signallingChannel,
-        _conns: _conns});
+    var ret ="<failed to self-stringify.>";
+    try {
+      ret = JSON.stringify({ _socksServer: _socksServer,
+                             _sctpPc: _sctpPc,
+                             _peerId: _peerId,
+                             _signallingChannel: _signallingChannel,
+                             _conns: _conns});
+    } catch (e) {}
+    return ret;
   }
 
   // Stop running as a _socksServer. Close all connections both to data
@@ -52,9 +55,9 @@ var onload = function() {
   };
 
   // Close a particular tcp-connection and data channel pair.
-  var closeConnection = function(channelLabel, conn) {
-    conn.disconnect();
-    _sctpPc.closeDataChannel.bind(_sctpPc, channelLabel);
+  var closeConnection = function(channelLabel) {
+    _conns[channelLabel].disconnect();
+    _sctpPc.closeDataChannel(channelLabel);
     delete _conns[channelLabel];
   };
 
@@ -79,6 +82,7 @@ var onload = function() {
     // When the TCP-connection receives data, send it on the sctp peer
     // on the corresponding channelLabel
     conn.tcpConnection.on('recv', _sendToPeer.bind(null, channelLabel));
+
     // When the TCP-connection closes
     conn.tcpConnection.on('disconnect',
         closeConnection.bind(null, channelLabel));
