@@ -8,9 +8,13 @@
 function FinalCallback(finalCallback) {
   this.callsWaiting = 0;
   this.finalCallback = finalCallback;
+  if(finalCallback && (typeof finalCallback != 'function')) {
+    throw "FinalCallback: given a non-function: " + finalCallback;
+  }
 }
 
 FinalCallback.prototype.makeCountedCallback = function () {
+  if(!this.finalCallback) { return null; }
   // A way to make sure that we only call the callback once, and that it happens only for the last callback. Assumes: callbacks happen in call order.
   this.callsWaiting++;
   return this._oneOfManyCallbacks.bind(this);
@@ -20,6 +24,21 @@ FinalCallback.prototype._oneOfManyCallbacks = function () {
   this.callsWaiting--;
   if (!this.callsWaiting) this.finalCallback();
 };
+
+// Creates an object that has only the keys of |restrictionObject| and for each
+// key, 'k', it has the value from |objectToRestrict| if it exists, else it has
+// the valye from restrictionObject.
+function restrictToObject(restrictionObject, objectToRestrict) {
+  var selectedPartsOfObjectToRestrict = {};
+  for (var k in restrictionObject) {
+    if (k in objectToRestrict) {
+      selectedPartsOfObjectToRestrict[k] = objectToRestrict[k];
+    } else {
+      selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
+    }
+  }
+  return selectedPartsOfObjectToRestrict;
+}
 
 /**
  * Convert a freedom promise-style interface into a

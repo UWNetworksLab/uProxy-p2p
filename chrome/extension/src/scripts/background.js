@@ -171,9 +171,18 @@ var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
 
 function wireUItoApp() {
   console.log('Wiring UI to backend...');
+
   appChannel.on('state-change', function(patchMsg) {
+    console.log("state-change(patch: ", patchMsg);
+    // For resetting state, don't change model object (there are references to
+    // it Angular, instead, replace keys, so the watch can catch up);
     if (patchMsg[0].path === '') {
-      model = patchMsg[0].value;
+      for (var k in model) {
+        delete model[k];
+      }
+      for (var k in patchMsg[0].value) {
+        model[k] = patchMsg[0].value[k];
+      }
     } else {
       // Check if the operation should be add or replace.
       patchMsg.op = 'replace';
@@ -219,6 +228,7 @@ function wireUItoApp() {
     // This event allows angular to bind listeners and update the DOM.
     onStateChange.dispatch(patchMsg);
   });
+  console.log('Wiring UI to backend done.');
 }
 // Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(wireUItoApp);

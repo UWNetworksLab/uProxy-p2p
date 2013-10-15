@@ -23,6 +23,11 @@ function FreedomConnector(id, options) {
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1: [listener1_for_type1, ...], ... }
   this.listeners_ = {};
+  // Used to remember the callback we need to remove. Because we typically need
+  // to bind(this), it's useful to name the callback after the bind so we can
+  // actually remove it again.
+  this._currentMessageCallback = null;
+  this._currentDisconnectCallback = null;
 };
 
 // Try to connect to the app/extension running Freedom.
@@ -33,9 +38,12 @@ FreedomConnector.prototype.connect = function() {
   }
   console.info('Trying to connect to the app');
   this.port_ = chrome.runtime.connect(this.id_, this.options_);
-  this.port_.onDisconnect.addListener(this.onDisconnected_.bind(this));
-  this.firstMessageCallback_ = this.onFirstMessage_.bind(this);
-  this.port_.onMessage.addListener(this.firstMessageCallback_);
+
+  this._currentDisconnectCallback = this.onDisconnected_.bind(this);
+  this.port_.onDisconnect.addListener(this._currentDisconnectCallback);
+
+  this._currentMessageCallback = this.onFirstMessage_.bind(this);
+  this.port_.onMessage.addListener(this._currentMessageCallback);
 };
 
 // This function is used as the callback to listen to messages that should be
@@ -59,10 +67,11 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
   if (msg == 'hello.') {
     console.info('Got hello from UProxy App.');
     // No longer wait for first message.
-    this.port_.onMessage.removeListener(this.firstMessageCallback_);
+    this.port_.onMessage.removeListener(this._currentMessageCallback);
     // Relay any messages to this port to any function that has registered as
     // wanting to listen using an 'freedom.on' from this connector.
-    this.port_.onMessage.addListener(this.dispatchFreedomEvent_.bind(this));
+    this._currentMessageCallback = this.dispatchFreedomEvent_.bind(this);
+    this.port_.onMessage.addListener(this._currentMessageCallback);
     this.connected = true;
     // If we have an |onConnected| callback, call it.
     this.onConnected.dispatch();
@@ -75,12 +84,27 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
 FreedomConnector.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
   this.connected = false;
-  this.port_.disconnect();
-  delete this.port_.onMessage;
-  delete this.port_.onDisconnect;
-  this.port_ = null;
+  if(this.port_) {
+    if(this._currentMessageCallback) {
+      this.port_.onMessage.removeListener(this._currentMessageCallback);
+      this._currentMessageCallback = null;
+    }
+
+    if(this._currentDisconnectCallback) {
+      this.port_.onDisconnect.removeListener(this._currentDisconnectCallback);
+      this._currentDisconnectCallback = null;
+    }
+
+    this.port_.disconnect();
+    this.onDisconnected.dispatch();
+    delete this.onDisconnected;
+    delete this.onConnected;
+    this.onDisconnected = new chrome.Event();
+    this.onConnected = new chrome.Event();
+    this.port_ = null;
+  }
+
   this.listeners_ = {};
-  this.onDisconnected.dispatch();
 };
 
 

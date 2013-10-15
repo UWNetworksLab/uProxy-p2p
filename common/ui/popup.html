@@ -111,7 +111,7 @@
       <div id="roster">
         <div id="roster-text">
           <span ng-show="ui.loggedOut()">
-            You aren't logged in to any network.
+            You aren't logged in to a network.
           </span>
           <span ng-hide="ui.loggedOut()">
             {{ model.roster.length }}
@@ -149,7 +149,7 @@
             </div>
             <br>Network: {{ ui.contact.network }}
             <p ng-hide="ui.instance">
-            {{ ui.contact.name }} does not have UProxy installed.
+            {{ ui.contact.name }} is not running uProxy.
             </p>
 
             <div ng-show="ui.instance">
@@ -283,7 +283,7 @@
           title="{{'options'|i18n}}">
       </button>
       <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-        Toggle setup page.
+        Show/Hide the setup page.
       </div>
 
     </div>
