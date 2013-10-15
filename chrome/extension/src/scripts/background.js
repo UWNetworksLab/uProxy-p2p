@@ -184,8 +184,10 @@ function wireUItoApp() {
         model[k] = patchMsg[0].value[k];
       }
     } else {
-      // Check if the operation should be add or replace.
-      patchMsg.op = 'replace';
+      // NEEDS TO BE ADD BECAUSE THIS IS A HACK :)
+      for (var i in patchMsg) {
+        patchMsg[i].op = 'add';
+      }
       jsonpatch.apply(model, patchMsg);
     }
 

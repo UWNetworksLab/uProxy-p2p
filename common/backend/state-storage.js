@@ -175,34 +175,6 @@ UProxyState.prototype.instanceOfUserId = function(userId) {
   return null;
 };
 
-// Called when a new userId is available. & when a new instance
-// happens. We check to see if we need to update our instance information.
-// Assumes that an instacne already exists for this userId.
-UProxyState.prototype.syncInstanceFromUserID = function(userId) {
-  var user = this.state.roster[userId];
-  var instance = this.instanceOfUserId(userId);
-  if (!instance) {
-    console.error("No instance for userId: " + userId);
-    return;
-  }
-
-  // Look for client Id corresponding to this instance.
-  var instanceClientId = null;
-  for(var clientId in user.clients) {
-    if(this.isMessageableUproxyClient(user.clients[clientId])) {
-      instanceClientId = clientId;
-    }
-  }
-
-  if (instanceClientId) {
-      this.state.instanceToClient[instance.instanceId] = instanceClientId;
-      this.state.clientToInstance[instanceClientId] = instance.instanceId;
-  } else {
-      delete this.state.instanceToClient[instance.instanceId];
-      delete this.state.clientToInstance[instanceClientId];
-  }
-};
-
 // Should be called whenever an instance is created/loaded.
 // Assumes that the instance corresponding to instanceId has a userId. Although
 // the user doens't need to currently be in the roster - this function will add
@@ -223,9 +195,6 @@ UProxyState.prototype.syncRosterFromInstanceId = function(instanceId) {
     user.network = instance.rosterInfo.network;
     user.url = instance.rosterInfo.url;
     user.hasNotification = Boolean(instance.notify);
-  } else {
-    // Make sure the cleint-instance mappings are in sync/up to date.
-    this.syncInstanceFromUserID(userId);
   }
 };
 
@@ -239,7 +208,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
 
   // Before everything, remember the clientId - instanceId relation.
   var oldClientId = this.state.instanceToClient[instanceId];
-
+  console.log('syncing instance ' + instanceId + ' with client ' + clientId);
   // Update the client instance relationship.
   this.state.clientToInstance[clientId] = instanceId;
   this.state.instanceToClient[instanceId] = clientId;
@@ -256,17 +225,19 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     delete this.state.clientToInstance[oldClientId];
   }
 
-  if (instanceId in this.state.instances) {
-    this.state.instances[instanceId].rosterInfo = data.rosterInfo;
-  } else {
-    var instance = cloneDeep(DEFAULT_INSTANCE);
+  console.log(JSON.stringify(this.state.instanceToClient));
+  console.log(JSON.stringify(this.state.clientToInstance));
+
+  var instance = this.state.instances[instanceId];
+  if (!instance) {
+    console.log('Preparing NEW Instance... ');
+    instance = cloneDeep(DEFAULT_INSTANCE);
     instance.instanceId = data.instanceId;
-    instance.description = data.description;
     instance.keyHash = data.keyHash;
-    instance.rosterInfo = data.rosterInfo;
-    console.log('Prepared NEW Instance: ' + JSON.stringify(instance));
     this.state.instances[instanceId] = instance;
   }
+  instance.rosterInfo = data.rosterInfo;
+  instance.description = data.description;
 
   this.syncRosterFromInstanceId(instanceId);
 };
