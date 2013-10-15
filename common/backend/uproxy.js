@@ -155,7 +155,7 @@ bgAppPageChannel.on('stop-proxying', function(peerInstanceId) {
 client.on('sendSignalToPeer', function(data) {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to client: ' + data.peerId + ", which should map to instance: " +
-                    state.clientToInstance[data.peerId]);
+                    store.state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
   identity.sendMessage(data.peerId,
@@ -190,7 +190,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
   client.emit("start",
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
-               'peerId': state.instanceToClient[peerInstanceId]});
+               'peerId': store.state.instanceToClient[peerInstanceId]});
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
@@ -224,7 +224,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 }
 
 // peerconnection-client -- sent from client on other side.
-function handleSignalFromClientPeer(msg) {
+function receiveSignalFromClientPeer(msg) {
   console.log('handleSignalFromClientPeer: from:' + msg.fromClientId);
   // sanitize from the identity service
   server.emit('handleSignalFromPeer',
