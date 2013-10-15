@@ -253,7 +253,7 @@ function checkRunningProxy() {
         if (model.instances[k].status.proxy == 'running') {
           proxyConfig.startUsingProxy();
           return;
-        } 
+        }
       }
     }
   }
