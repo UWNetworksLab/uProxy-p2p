@@ -149,9 +149,7 @@ var _initPeer = function(peerId) {
           peer.signallingChannel.emit('message', peer.messageQueue.shift());
         }
       });
-      //});
     });
-
   });
   console.log('_initPeer(' + peerId + ') complete.');
 };
