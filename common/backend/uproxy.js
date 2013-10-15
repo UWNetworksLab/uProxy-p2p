@@ -262,7 +262,6 @@ function handleInactiveClient(msg) {
     console.error('Cannot be proxy for nonexistent instance.');
     return;
   }
-  console.log('STOPPED PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   instance.status.client = ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 }

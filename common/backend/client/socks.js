@@ -177,7 +177,7 @@
     result.raw = byteArray.subarray(0, result.dataOffset);
     result.data = byteArray.subarray(result.dataOffset,
                                      byteArray.length - result.dataOffset);
-    console.log(result);
+//    console.log(result);
     return result;
   };
 
@@ -198,18 +198,18 @@
 
     // When we start listening, print it out.
     this.tcpServer.on('listening', function() {
-      console.log('LISTENING ' + self.tcpServer.addr + ':' + self.tcpServer.port);
+      // console.log('LISTENING ' + self.tcpServer.addr + ':' + self.tcpServer.port);
     });
 
     // When we receieve a new connection make a new SocksClientConnection.
     // and log to info.
     this.tcpServer.on('connection', function(tcpConnection) {
-      console.log('CONNECTED(' + tcpConnection.socketId + ') ' +
-          tcpConnection.socketInfo.peerAddress + ':' + tcpConnection.socketInfo.peerPort);
+//      console.log('CONNECTED(' + tcpConnection.socketId + ') ' +
+//          tcpConnection.socketInfo.peerAddress + ':' + tcpConnection.socketInfo.peerPort);
       tcpConnection.on('recv', function(buffer) {
-        console.log('new SocksClientConnection (' + tcpConnection.socketId + '): \n' +
-            '* Got data: ' + JSON.stringify(tcpConnection.state()) + ';\n' +
-            '      data: ' + getHexStringOfArrayBuffer(buffer));
+//        console.log('new SocksClientConnection (' + tcpConnection.socketId + '): \n' +
+//            '* Got data: ' + JSON.stringify(tcpConnection.state()) + ';\n' +
+//            '      data: ' + getHexStringOfArrayBuffer(buffer));
         tcpConnection.socksClient =
             new SocksClientConnection(tcpConnection, buffer,
                                       self.destinationCallback);
@@ -236,8 +236,8 @@
     var self = this;
     var response;  // Uint8Array;
 
-    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): ' +
-        'Auth (length=' + buffer.byteLength + ')');
+/*    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): ' +
+        'Auth (length=' + buffer.byteLength + ')'); */
 
     // We are no longer at waiting for a proxy request on this tcp connection.
     // this.tcpConnection.on('recv', null);
@@ -283,18 +283,18 @@
   SocksClientConnection.prototype._handleRequest = function(buffer) {
     // We only handle one request per tcp connection. Note that pending data
     // will be stored and sent to the next non-null callback.
-    console.log('got response.');
+//    console.log('got response.');
     this.tcpConnection.on('recv', null);
 
-    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): handleRequest\n' +
+/*    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): handleRequest\n' +
         '*got data: ' + JSON.stringify(this.tcpConnection.state()) + '; \n' +
-        ' data: ' + getHexStringOfArrayBuffer(buffer));
+        ' data: ' + getHexStringOfArrayBuffer(buffer)); */
 
     var byteArray = new Uint8Array(buffer);
     this.result = SocksUtil.interpretSocksRequest(byteArray);
 
-    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): parsed request: ' +
-        JSON.stringify(this.result));
+//    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): parsed request: ' +
+//        JSON.stringify(this.result));
 
     if (this.result == null) {
       console.error('SocksClientConnection(' + this.tcpConnection.socketId + '): bad request ' +
@@ -312,9 +312,9 @@
       return;
     }
 
-    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): Request: ' +
+/*    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): Request: ' +
         '{cmd: ' + this.result.cmd + ', atyp: ' + this.result.atyp + '} ' +
-        'to: ' + this.result.addressString + ':' + this.result.port);
+        'to: ' + this.result.addressString + ':' + this.result.port); */
     // TODO: add a handler for failure to reach destination.
     this.destinationCallback(this, this.result.addressString, this.result.port,
         this._connectedToDestination.bind(this));
@@ -327,9 +327,9 @@
   SocksClientConnection.prototype._connectedToDestination = function(
       connectionDetails,
       continuation) {
-    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): ' +
+/*    console.log('SocksClientConnection(' + this.tcpConnection.socketId + '): ' +
         'connected to destination ' + connectionDetails.ipAddrString + ':' +
-        connectionDetails.port);
+        connectionDetails.port); */
     var response = [];
     // creating response
     response[0] = SocksUtil.VERSION5;
