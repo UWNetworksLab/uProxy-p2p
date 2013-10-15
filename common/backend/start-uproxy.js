@@ -1,17 +1,9 @@
-/* global console, UProxyState, server, bgAppPageChannel, makeLogger */
+/* global console, UProxyState, server, bgAppPageChannel */
 // Print info to console so you can find this web-worker
 console.log('Uproxy backend, running in worker ' + self.location.href);
 
 //XXX: Makes chrome debugging saner, not needed otherwise.
 var window = {};
-
-
-/*
-var log = {
-  debug: DEBUG ? makeLogger('debug') : function(){},
-  error: makeLogger('error')
-};
-*/
 
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.

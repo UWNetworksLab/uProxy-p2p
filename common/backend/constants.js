@@ -132,12 +132,11 @@ var DEFAULT_LOAD_STATE = {
   //       asClient: Trust
   //     }
   //     status {
-  //       activeProxy: boolean
-  //       activeClient: boolean
+  //       proxy: boolean
+  //       client: boolean
   //     }
   //   }
   // }
-
   // instanceId -> instance. Active UProxy installations.
   'instances': {},
 
