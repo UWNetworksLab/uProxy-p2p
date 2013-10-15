@@ -61,8 +61,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Takes in an entry from the roster table.
       $rootScope.instanceOfContact = function(contact) {
         for (var clientId in contact.clients) {
-          if(clientId in model.clientToInstance)
-            return model.instances[model.clientToInstance[clientId]];
+          var instanceId = model.clientToInstance[clientId];
+          if (instanceId) {
+            return model.instances[instanceId];
+          }
         }
         return null;
       };

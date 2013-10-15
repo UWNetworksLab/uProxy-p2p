@@ -334,8 +334,8 @@ function receiveTrustMessage(msgInfo) {
     console.error('Could not find instance for the trust modification!');
     return;
   }
-  _addNotification(instanceId);
   _updateTrust(instanceId, msgType, true);  // received = true
+  _addNotification(instanceId);
 }
 
 // --------------------------------------------------------------------------
@@ -381,6 +381,7 @@ var _msgReceivedHandlers = {
     'cancel-request': receiveTrustMessage,
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
+
     'notify-instance': receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
@@ -524,7 +525,7 @@ function makeMyInstanceMessage() {
 // that we've received the other side's Instance data yet.
 function sendInstance(client) {
   var instancePayload = makeMyInstanceMessage();
-  console.log("sendInstance: " + JSON.stringify(instancePayload));
+  console.log("sendInstance: " + JSON.stringify(instancePayload) + ' to ' + JSON.stringify(client));
   identity.sendMessage(client.clientId, instancePayload);
   return true;
 }
@@ -650,13 +651,14 @@ function _addNotification(instanceId) {
   instance.notify = true;
   store.saveInstance(instanceId);
   _syncInstanceUI(instance, 'notify');
-  var user = store.state.roster[instance.rosterInfo.userId];
-  if (!user) {
-    console.error('User does not exist for instance ' + instance);
-    return false;
-  }
-  user.hasNotification = true;
-  _SyncUI('/roster/' + user.userId + '/hasNotification', true);
+  // var user = store.state.roster[instance.rosterInfo.userId];
+  // if (!user) {
+    // console.error('User does not exist for instance ' + instance);
+    // return false;
+  // }
+  // console.log('adding notification for instance ' + instanceId + ' of user ' + user.userId);
+  // user.hasNotification = true;
+  // _SyncUI('/roster/' + user.userId + '/hasNotification', true);
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it

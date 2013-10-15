@@ -135,9 +135,22 @@ UI.prototype.loggedOut = function() {
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
   // Count up notifications
+  console.log('syncing ui model.');
+  console.log(model);
   var n = 0;
   for (var userId in model.roster) {
     var user = model.roster[userId];
+    var instanceId = null;
+    for (var clientId in user.clients) {
+      instanceId = model.clientToInstance[clientId];
+      if (instanceId) {
+        if (model.instances[instanceId].notify) {
+          console.log('found user ' + user.userId + ' with notification.');
+          user.hasNotification = true;
+          break;
+        }
+      }
+    }
     if (user.hasNotification) {
       n++;
     }
@@ -187,6 +200,9 @@ function wireUItoApp() {
       // NEEDS TO BE ADD BECAUSE THIS IS A HACK :)
       for (var i in patchMsg) {
         patchMsg[i].op = 'add';
+        // if (patchMsg[i].path.indexOf('roster') >= 0) {
+          //
+        // }
       }
       jsonpatch.apply(model, patchMsg);
     }

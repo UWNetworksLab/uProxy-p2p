@@ -208,8 +208,6 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
 
   // Before everything, remember the clientId - instanceId relation.
   var oldClientId = this.state.instanceToClient[instanceId];
-  console.log('syncing instance ' + instanceId + ' with client ' + clientId);
-  // Update the client instance relationship.
   this.state.clientToInstance[clientId] = instanceId;
   this.state.instanceToClient[instanceId] = clientId;
 
@@ -225,9 +223,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     delete this.state.clientToInstance[oldClientId];
   }
 
-  console.log(JSON.stringify(this.state.instanceToClient));
-  console.log(JSON.stringify(this.state.clientToInstance));
-
+  // Prepare new instance object if necessary.
   var instance = this.state.instances[instanceId];
   if (!instance) {
     console.log('Preparing NEW Instance... ');
