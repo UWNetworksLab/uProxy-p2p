@@ -138,11 +138,10 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.tip.ng-hide {
-  display: block !important;
-  pointer-events: none;
-  opacity: 0; }
+  .tip.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0; }
 
 .tool {
   position: absolute;
@@ -397,11 +396,10 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-#contacts-frame.ng-hide {
-  display: block !important;
-  pointer-events: none;
-  left: -400px; }
+  #contacts-frame.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    left: -400px; }
 
 .contacts {
   position: absolute;
@@ -486,9 +484,8 @@ img.contact-image {
 img.c-icon {
   vertical-align: middle;
   margin-top: -4px; }
-
-img.c-icon:hover {
-  opacity: 0.5; }
+  img.c-icon:hover {
+    opacity: 0.5; }
 
 #contact-details {
   display: inline-block;
@@ -539,12 +536,10 @@ img.c-icon:hover {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.chat-btn:active, .chat-btn:focus {
-  opacity: 0.7; }
-
-.chat-btn:hover {
-  opacity: 0.3; }
+  .chat-btn:active, .chat-btn:focus {
+    opacity: 0.7; }
+  .chat-btn:hover {
+    opacity: 0.3; }
 
 .instance-actions {
   text-align: center; }
@@ -567,11 +562,10 @@ img.c-icon:hover {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.client-details:hover {
-  border-color: #dddddd;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
+  .client-details:hover {
+    border-color: #dddddd;
+    top: -2px;
+    box-shadow: 0 2px 6px 1px #dddddd; }
 
 .instance-details {
   position: relative;
@@ -587,11 +581,10 @@ img.c-icon:hover {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.instance-details:hover {
-  border-color: #dddddd;
-  top: -2px;
-  box-shadow: 0 2px 6px 1px #dddddd; }
+  .instance-details:hover {
+    border-color: #dddddd;
+    top: -2px;
+    box-shadow: 0 2px 6px 1px #dddddd; }
 
 .instance-id {
   font-size: 9.6px;
