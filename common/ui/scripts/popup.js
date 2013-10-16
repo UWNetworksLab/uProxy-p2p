@@ -46,8 +46,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         $scope.ui.instance = $scope.instances[$scope.ui.instance.instanceId];
       });
     }
-    // Attach to the App-Extension channel.
-    // $scope.onAppData.addListener($scope.updateCurrentInstance);
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(finish)
@@ -58,8 +56,14 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
+      console.log("viewContact: c=\n", c);
+      for (var clientId in c.clients) {
+        if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
+          console.log("viewContact: sendInstance: " + clientId);
+          $scope.sendInstance(clientId);
+        }
+      }
       $scope.ui.contact = c;
-      console.log('current contact ', c);
       $scope.ui.instance = $scope.instanceOfContact(c);
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
@@ -67,20 +71,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       if (!$scope.ui.isProxying) {
         $scope.ui.proxy = null;
       }
-    };
-
-    $scope.logonToGoogle = function() {
-      $scope.login('google');
-      $scope.splashPage = false;
-      $scope.ui.splashPage = $scope.splashPage;
+      // $scope.ui.refreshDOM();
     };
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.splashPage = !$scope.splashPage;
-      $scope.ui.splashPage = $scope.splashPage;
-      $scope.optionsTooltip = false;
-      // $scope.ui.splashPage = !$scope.ui.splashPage;
+      $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
     $scope.toggleSearch = function() {
@@ -121,4 +117,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       return true;  // Does not match the search text, should be hidden.
     };
+
+    // Refresh local state variables when the popup is re-opened.
+    if ($scope.ui.contact) {
+      $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
+    }
+    if ($scope.ui.instance) {
+      $scope.ui.instance = $scope.model.instances[$scope.ui.instance.instanceId];
+    }
   }]);

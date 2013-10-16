@@ -78,6 +78,7 @@ var firefox_concat_src = [
 //TODO fix
 //var sources = ['common/backend/spec/*.js'];
 //var sources = ['common/backend/spec/*.js'];
+// These files loaded sequentially prior to spec files.
 var sourcesToTest = [
   'common/backend/test/freedom-mocks.js',
   'common/backend/util.js',
@@ -155,7 +156,7 @@ module.exports = function(grunt) {
         // Files being tested
         src: sourcesToTest,
         options: {
-          specs: 'common/backend/spec/utilSpec.js'
+          specs: 'common/backend/spec/*Spec.js'
         }
       }
     },

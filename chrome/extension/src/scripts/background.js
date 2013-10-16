@@ -7,9 +7,11 @@ console.log('Initializing chrome extension background page...');
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
 // Rate Limit for UI.synchronize (ms)
-var SYNCHRONIZE_TIMEOUT = 500;
+var SYNC_TIMEOUT = 500;
+var syncBlocked = false;
+var syncTimer = null;     // Keep reference to the timer.
 
-//Proxy Configer
+// Proxy Configuration.
 var proxyConfig = new window.BrowserProxyConfig();
 proxyConfig.clearConfig();
 
@@ -57,8 +59,10 @@ var roster = new Roster();
 var UI = function() {
   this.ICON_DIR = '../common/ui/icons/';
 
+  this.networks = ['google', 'facebook'];
+
   this.notifications = 0;
-  this.splashPage = !this.loggedIn();
+  // TODO: splash should be set by state.
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
@@ -73,6 +77,10 @@ var UI = function() {
 
   // If we are proxying, keep track of the instance.
   this.proxy = null;
+
+  // When the description changes while the text field loses focus, it
+  // automatically updates.
+  this.oldDescription = '';
 };
 
 UI.prototype.setNotifications = function(n) {
@@ -95,6 +103,10 @@ UI.prototype.setIcon = function(iconFile) {
 UI.prototype.setLabel = function(text) {
   chrome.browserAction.setBadgeText({ text: '' + text });
 };
+// Hackish way to fire the onStateChange dispatcher.
+UI.prototype.refreshDOM = function() {
+  onStateChange.dispatch();
+};
 
 UI.prototype.setProxying = function(isProxying) {
   this.isProxying = isProxying;
@@ -115,30 +127,13 @@ UI.prototype.setClients = function(numClients) {
   }
 }
 
-// Determine whether UProxy is connected to |network|.
-UI.prototype.isOnline = function(network) {
-  return (model && model.identityStatus &&
-          model.identityStatus[network] &&
-          'online' == model.identityStatus[network].status);
-};
-UI.prototype.isOffline = function(network) {
-  return (!model || !model.identityStatus ||
-          !model.identityStatus[network] ||
-          'offline' == model.identityStatus[network].status);
-};
-// Whether UProxy is logged in to *any* network.
-UI.prototype.loggedIn = function() {
-  return this.isOnline('google') || this.isOnline('facebook');
-};
-UI.prototype.loggedOut = function() {
-  return this.isOffline('google') && this.isOffline('facebook');
-};
-
-
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
+  if (this.syncBlocked) {  // When rate limited, ignore synchronizations.
+    return false;
+  }
   // Count up notifications
-  console.log('syncing ui model.');
+  // console.log('syncing ui model.');
   //console.log(model);
   var n = 0;
   for (var userId in model.roster) {
@@ -177,6 +172,7 @@ UI.prototype.synchronize = function() {
   var uids = Object.keys(model.roster);
   var names = uids.map(function(id) { return model.roster[id].name; });
   names.sort();
+  return true;
 };
 
 var ui = new UI();  // This singleton is referenced in both options and popup.
@@ -185,25 +181,23 @@ var ui = new UI();  // This singleton is referenced in both options and popup.
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
     name: 'uproxy-extension-to-app-port' });
 
+// Rate limit synchronizations.
 function rateLimitedUpdates() {
-  // Rate limit synchronizations
-  var time = new Date();
-  if ((time - this.lastSync) < SYNCHRONIZE_TIMEOUT) {
-    return;
-  }
-  this.lastSync = time;
-  
   ui.synchronize();
   checkRunningProxy();
+  onStateChange.dispatch();
 }
 
-function wireUItoApp() {
+function initialize() {
+  // ui-ready tells uproxy.js to send over *all* the state.
+  appChannel.emit('ui-ready');
   console.log('Wiring UI to backend...');
-
   appChannel.on('state-change', function(patchMsg) {
     //console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
+    // TODO: run the check below for each message?
+    // TODO: fix JSON patch :)
     if (patchMsg[0].path === '') {
       for (var k in model) {
         delete model[k];
@@ -215,14 +209,25 @@ function wireUItoApp() {
       // NEEDS TO BE ADD BECAUSE THIS IS A HACK :)
       for (var i in patchMsg) {
         patchMsg[i].op = 'add';
-        // if (patchMsg[i].path.indexOf('roster') >= 0) {
-          //
-        // }
       }
       jsonpatch.apply(model, patchMsg);
     }
 
-    setTimeout(rateLimitedUpdates, SYNCHRONIZE_TIMEOUT);
+    // Initiate first sync and start a timer if necessary, in order to
+    // rate-limit passes through the entire model & other checks.
+    if (!syncBlocked) {
+      syncBlocked = true;
+      rateLimitedUpdates();
+    }
+
+    if (!syncTimer) {
+      syncTimer = setTimeout(function() {
+        rateLimitedUpdates();
+        syncTimer = null;  // Allow future timers.
+        syncBlocked = false;
+      }, SYNC_TIMEOUT);
+    }
+
     /*
     // Run through roster if necessary.
     if (patch[0].path.indexOf('roster') >= 0) {
@@ -258,23 +263,8 @@ function wireUItoApp() {
     */
 
     // This event allows angular to bind listeners and update the DOM.
-    //onStateChange.dispatch(patchMsg);
   });
   console.log('Wiring UI to backend done.');
-}
-// Attach state-change listener to update UI from the backend.
-appChannel.onConnected.addListener(wireUItoApp);
-
-
-function reconnectToApp() {
-  console.log('Disconnected from App! Attempting to reconnect...');
-  appChannel.connect();
-}
-
-
-function initialize() {
-  // ui-ready tells uproxy.js to send over *all* the state.
-  appChannel.emit('ui-ready');
 }
 
 function checkRunningProxy() {
@@ -292,14 +282,12 @@ function checkRunningProxy() {
   proxyConfig.stopUsingProxy();
 }
 
-// Automatically attempt to reconnect when disconnected.
+function checkThatAppIsInstalled() {
+  appChannel.connect();
+  setTimeout(checkThatAppIsInstalled, new Date() + (SYNC_TIMEOUT * 2));
+}
+
+// Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(initialize);
-appChannel.onDisconnected.addListener(reconnectToApp);
-window.onunload = function() {
-  appChannel.onConnected.removeListener(wireUItoApp);
-};
 
-
-console.log('Connecting to App...');
-var connectedToApp = false;
-appChannel.connect();
+checkThatAppIsInstalled();

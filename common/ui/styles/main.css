@@ -1,3 +1,10 @@
+* {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box; }
+  *:focus {
+    outline: none; }
+
 @font-face {
   font-family: "Eurostile";
   src: url("eurostile.ttf") format("truetype"); }
@@ -20,22 +27,19 @@ ul {
 
 ::-webkit-scrollbar {
   width: 6px; }
-
-::-webkit-scrollbar:hover {
-  width: 10px; }
+  ::-webkit-scrollbar:hover {
+    width: 10px; }
 
 ::-webkit-scrollbar-track {
   background-color: #f9f9f9; }
-
-::-webkit-scrollbar-track:window-inactive {
-  background-color: #888888; }
+  ::-webkit-scrollbar-track:window-inactive {
+    background-color: #888888; }
 
 ::-webkit-scrollbar-thumb {
   background-color: #aaaaaa;
   height: 114.589px; }
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #bbbbbb; }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #bbbbbb; }
 
 .btn {
   border: 1px solid #cccccc;
@@ -77,8 +81,8 @@ ul {
 
 #contact-header h1 {
   position: fixed;
-  width: 80%;
-  padding: 0 10%;
+  width: 100%;
+  padding: 0 50px;
   text-align: center;
   top: 10px;
   pointer-events: none;
@@ -146,6 +150,10 @@ ul {
   width: 100%;
   text-align: center; }
 
+.app-missing-warning {
+  padding: 6px 8px;
+  color: #990000; }
+
 #filterTooltip {
   position: fixed;
   z-index: 50;
@@ -198,13 +206,11 @@ ul {
 .uproxy-banner {
   font-size: 32px;
   font-weight: 600;
-  margin-top: 23px;
   text-shadow: 2px 2px 2px #888888;
   cursor: default; }
-
-.uproxy-banner img {
-  vertical-align: middle;
-  margin-bottom: 23px; }
+  .uproxy-banner img {
+    vertical-align: middle;
+    margin-bottom: 23px; }
 
 .description {
   color: #222222;
@@ -223,10 +229,9 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-#my-description:hover {
-  box-shadow: 0px 3px 3px #dddddd;
-  border-color: #bbbbbb; }
+  #my-description:hover {
+    box-shadow: 0px 3px 3px #dddddd;
+    border-color: #bbbbbb; }
 
 #networks-box {
   margin-top: 30px; }
@@ -238,7 +243,7 @@ ul {
 #search-contacts {
   position: relative;
   z-index: 30;
-  width: 328px;
+  width: 370px;
   margin: 0;
   padding: 8px 20px;
   border: 1px solid #aaaaaa;
@@ -304,16 +309,16 @@ ul {
   transition: all 0.23s !important; }
   .filter:active, .filter:focus {
     outline: none;
-    opacity: 0.3; }
+    opacity: 0.25; }
   .filter:hover {
     opacity: 0.2; }
   .filter.on {
     opacity: 1; }
     .filter.on:active, .filter.on:focus {
       outline: none;
-      opacity: 0.8; }
+      opacity: 0.65; }
     .filter.on:hover {
-      opacity: 0.75; }
+      opacity: 0.6; }
 
 #my-access {
   background-image: url("../icons/arrow-up.png"); }
@@ -374,7 +379,7 @@ ul {
   position: absolute;
   text-align: center;
   top: 100px;
-  width: 80%;
+  width: 100%;
   padding: 10%;
   z-index: 500;
   color: #444444;
@@ -511,8 +516,8 @@ img.c-icon:hover {
 
 #contact-details img.contact-image {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   margin: 8px;
   border-color: #dddddd;
   background-size: contain;
@@ -615,12 +620,11 @@ img.c-icon:hover {
   -moz-transition: all 0.5s !important;
   -o-transition: all 0.5s !important;
   transition: all 0.5s !important; }
-
-#status-proxy.ng-hide {
-  display: block !important;
-  pointer-events: none;
-  opacity: 0;
-  height: 0; }
+  #status-proxy.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0;
+    height: 0; }
 
 #status-tooltips {
   position: absolute;
@@ -632,9 +636,10 @@ img.c-icon:hover {
   position: absolute; }
 
 #status-network {
-  display: none;
   position: absolute;
-  right: 0; }
+  right: 0;
+  bottom: 0;
+  padding: 8px; }
 
 .contact-actions {
   display: none; }
@@ -666,14 +671,18 @@ details > *:not(summary) {
   position: fixed;
   top: 0;
   right: 0;
-  width: 46%;
+  width: 50%;
   height: 100%;
   padding: 2%;
   padding-bottom: 100px;
   overflow-y: auto;
   overflow-x: auto;
   background-color: black;
-  color: #aaffff; }
+  color: #aaffff;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
   #debug pre {
     font-size: 9.6px;
     margin-bottom: 100px;
@@ -681,6 +690,10 @@ details > *:not(summary) {
     white-space: pre-wrap; }
   #debug form[name=sendMsgForm] {
     margin-bottom: 3px; }
+  #debug.big {
+    width: 100%; }
+  #debug:hover {
+    background-color: #0f0f0f; }
 
 .dbg {
   position: fixed;

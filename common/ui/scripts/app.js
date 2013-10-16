@@ -49,13 +49,39 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
+      $rootScope.uProxyAppConnectionStatus = appChannel.status;
 
       // Remember the state change hook.
       $rootScope.update = onStateChange;
 
+      //
+      $rootScope.isOnline = function(network) {
+        return (model.identityStatus[network] &&
+            model.identityStatus[network].status == 'online');
+      };
+      $rootScope.isOffline = function(network) {
+        return !$rootScope.isOnline(network);
+      };
+
+      // Determine whether UProxy is connected to some network.
+      $rootScope.loggedIn = function() {
+        for(var networkId in model.identityStatus) {
+          if(model.identityStatus[networkId].status == 'online') return true;
+        }
+        return false;
+      };
+
+      $rootScope.loggedOut = function() {
+        return !$rootScope.loggedIn();
+      };
+
       $rootScope.resetState = function () {
         localStorage.clear();
         appChannel.emit('reset', null);
+      };
+
+      $rootScope.sendInstance = function (clientId) {
+        appChannel.emit('send-instance', clientId);
       };
 
       // Takes in an entry from the roster table.
@@ -66,7 +92,23 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[instanceId];
           }
         }
+        // Now check user-id matching because if the client is not online, they
+        // will not have a client id.
+        for (var instanceId in model.instances) {
+          if (model.instances[instanceId].rosterInfo.userId == contact.userId)
+            return model.instances[instanceId];
+        }
         return null;
+      };
+
+      // A simple predicate function to see if we can talk to this client.
+      $rootScope.isMessageableUproxyClient = function(client) {
+        // TODO(uzimizu): Make identification of whether or not this is a uproxy
+        // client more sensible.
+        var retval = (client.status == 'online' ||
+                      client.status == 'messageable') &&
+                      (client.clientId.indexOf('/uproxy') > 0);
+        return retval;
       };
 
       $rootScope.instanceOfClientId = function(clientId) {
@@ -77,27 +119,43 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
       };
 
-/*
-      // Broken by hangouts: user-ids sent to us don't match those in roster.
-      $rootScope.instanceOfUserId = function(userId) {
-        for (var i in model.instances) {
-          if (model.instances[i].rosterInfo.userId == userId)
-            return model.instances[i];
+      $rootScope.prettyNetworkName = function(networkId) {
+        if (networkId == 'google') {
+          return 'G+';
+        } else if (networkId == 'facebook') {
+          return 'FB';
+        } else {
+          console.warn("No prettification for network: " + JSON.stringify(networkId));
+          return networkId;
         }
-        return null;
       };
-*/
+
       $rootScope.instanceOfUserId = function(userId) {
+        // First check active clients
+        // Do this first, because some users' IDs don't matchs their instance
+        // id that they sent over.
         for (var userId in model.roster) {
           var instance = $rootScope.instanceOfContact(model.roster[userId]);
           if (instance) return instance;
         }
+        // Now check user-id matching because if the client is not online, they
+        // will not have a client id.
+        for (var instanceId in model.instances) {
+          if (model.instances[instanceId].rosterInfo.userId == userId)
+            return model.instances[instanceId];
+        }
         return null;
+      };
+
+      $rootScope.showingSplashPage = function() {
+        return ui.splashPage || (!
+          $rootScope.uProxyAppConnectionStatus.connected);
       };
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
         appChannel.emit('login', network);
+        ui.splashPage = false;
       };
       $rootScope.logout = function(network) {
         console.log('!!! logout ' + network);
@@ -106,10 +164,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
 
       $rootScope.updateDescription = function() {
-        if ($rootScope.oldDescription != model.me.description) {
+        if (ui.oldDescription &&
+           (ui.oldDescription != model.me.description)) {
           appChannel.emit('update-description', model.me.description);
         }
-        $rootScope.oldDescription = model.me.description;
+        ui.oldDescription = model.me.description;
       }
 
       // These work the same even if |client| is an instance - so long as it
@@ -133,14 +192,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // We don't need to tell them we'll start proxying, we can just try to
         // start. The SDP request will go through chat/identity network on its
         // own.
-        appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId);
+        appChannel.emit('start-using-peer-as-proxy-server',
+            instance.instanceId);
         ui.proxy = instance;
         ui.setProxying(true);
       };
       $rootScope.stopAccess = function(instance) {
         instance = instance || ui.instance;
-        appChannel.emit('stop-proxying', instance.instanceId);
         ui.setProxying(false);
+        appChannel.emit('stop-proxying', instance.instanceId);
       };
 
       // Providing access for a friend:
@@ -158,8 +218,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
         console.log('instance trust change ' + action + ', ' + id);
-        appChannel.emit('instance-trust-change', {
-          instanceId: id, action: action });
+        appChannel.emit('instance-trust-change',
+          { instanceId: id, action: action });
       };
 
       // Notifications occur on the user level. The message sent to the app side
@@ -182,23 +242,20 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('change-option', {key: key, value: value});
       }
 
-      var clearedAndRetried = false;
-
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
       // through you. See:
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      var updateDOM = function(patch) {
+      var updateDOM = function() {
         $rootScope.$apply(function () {
-          $rootScope.connectedToApp = true;
-          // Also update pointers locally.
+          // Also update pointers locally ?
           // $rootScope.instances = model.instances;
         });
-        // console.log($rootScope.model);
       };
       onStateChange.addListener(updateDOM);
-      $rootScope.updateDOM = updateDOM;
     }  // run function
   ]);
+
+

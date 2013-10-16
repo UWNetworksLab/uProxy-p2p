@@ -1,5 +1,14 @@
 // Primary stylesheet for both popup and options page.
 // ----------------------------- Common Style ----------------------------------
+
+// This is a mega css reset. Fixes evil padding - width css shenanigans.
+*
+  box-sizing: border-box
+  -webkit-box-sizing: border-box
+  -moz-box-sizing: border-box
+  &:focus
+    outline: none
+
 $fontSize: 16px
 @font-face
   font-family: 'Eurostile'
@@ -39,17 +48,17 @@ ul
 // Prettier scrollbars.
 ::-webkit-scrollbar
   width: 6px
-::-webkit-scrollbar:hover
-  width: 10px
+  &:hover
+    width: 10px
 ::-webkit-scrollbar-track
   background-color: #f9f9f9
-::-webkit-scrollbar-track:window-inactive
-  background-color: #888
+  &:window-inactive
+    background-color: #888
 ::-webkit-scrollbar-thumb
   background-color: #aaa
   height: 114.589px
-::-webkit-scrollbar-thumb:hover
-  background-color: #bbb
+  &:hover
+    background-color: #bbb
 
 .btn
   border: 1px solid #ccc
@@ -90,8 +99,8 @@ ul
 #contact-header
   & h1
     position: fixed
-    width: 80%
-    padding: 0 10%
+    width: 100%
+    padding: 0 50px
     text-align: center
     top: 10px
     pointer-events: none
@@ -155,6 +164,10 @@ ul
   width: 100%
   text-align: center
 
+.app-missing-warning
+  padding: 6px 8px
+  color: #900
+
 #filterTooltip
   position: fixed
   z-index: 50
@@ -202,12 +215,11 @@ ul
 .uproxy-banner
   font-size: $fontSize * 2
   font-weight: 600
-  margin-top: 23px
   text-shadow: 2px 2px 2px #888
   cursor: default
-.uproxy-banner img
-  vertical-align: middle
-  margin-bottom: 23px
+  & img
+    vertical-align: middle
+    margin-bottom: 23px
 
 .description
   color: #222
@@ -224,9 +236,9 @@ ul
   box-shadow: 0 3px 1px #eee
   @include smooth
 
-#my-description:hover
-  box-shadow: 0px 3px 3px #ddd
-  border-color: #bbb
+  &:hover
+    box-shadow: 0px 3px 3px #ddd
+    border-color: #bbb
 
 // Selection of your social network connections.
 #networks-box
@@ -239,7 +251,7 @@ ul
 #search-contacts
   position: relative
   z-index: 30
-  width: 328px
+  width: 370px
   margin: 0
   padding: 8px 20px
   border: 1px solid #aaa
@@ -303,7 +315,7 @@ ul
   @include smooth
   &:active, &:focus
     outline: none
-    opacity: 0.3
+    opacity: 0.25
   &:hover
     opacity: 0.2
   // When the filter is on, the opacity changes are different.
@@ -311,9 +323,9 @@ ul
     opacity: 1.0
     &:active, &:focus
       outline: none
-      opacity: 0.8
+      opacity: 0.65
     &:hover
-      opacity: 0.75
+      opacity: 0.6
 
 #my-access
   background-image: url('../icons/arrow-up.png')
@@ -368,7 +380,7 @@ ul
   position: absolute
   text-align: center
   top: 100px
-  width: 80%
+  width: 100%
   padding: 10%
   z-index: 500
   color: #444
@@ -492,8 +504,8 @@ img.c-icon:hover
 
 #contact-details img.contact-image
   position: relative
-  width: 100px
-  height: 100px
+  width: 120px
+  height: 120px
   margin: 8px
   border-color: #ddd
   background-size: contain
@@ -586,11 +598,10 @@ img.c-icon:hover
   color: #333
   text-align: left
   @include smooth-slow
-
-#status-proxy.ng-hide
-  @include un-ng-hide
-  opacity: 0
-  height: 0
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+    height: 0
 
 #status-tooltips
   position: absolute
@@ -601,11 +612,10 @@ img.c-icon:hover
   position: absolute
 
 #status-network
-  display: none
   position: absolute
   right: 0
-
-
+  bottom: 0
+  padding: 8px
 
 
 .contact-actions
@@ -639,7 +649,7 @@ details
   position: fixed
   top: 0
   right: 0
-  width: 46%
+  width: 50%
   height: 100%
   padding: 2%
   padding-bottom: 100px
@@ -654,6 +664,11 @@ details
     white-space: pre-wrap
   form[name=sendMsgForm]
     margin-bottom: 3px
+  &.big
+    width: 100%
+  &:hover
+    background-color: #0f0f0f
+  @include smooth
 
 .dbg
   position: fixed

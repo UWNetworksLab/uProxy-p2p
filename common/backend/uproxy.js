@@ -69,18 +69,35 @@ bgAppPageChannel.on('ui-ready', function () {
   sendFullStateToUI();
 });
 
-bgAppPageChannel.on('login', function(network) {
-  _Login(network);
-});
+bgAppPageChannel.on('login', function(network) { login(network); });
+bgAppPageChannel.on('logout', function(network) { logout(network); });
 
-bgAppPageChannel.on('logout', function(network) {
+function login(network) {
+  network = network || undefined;
+  identity.login({
+    agent: 'uproxy',
+    version: '0.1',
+    url: 'https://github.com/UWNetworksLab/UProxy',
+    interactive: Boolean(network),
+    network: network
+  }, sendFullStateToUI);
+  if (network) {
+    store.state.me.networkDefaults[network].autoconnect = true;
+  } else {
+    store.state.me.networkDefaults[network].autoconnect = false;
+  }
+  store.saveMeToStorage();
+}
+
+function logout(network) {
   identity.logout(null, network);
   // TODO: only remove clients from the network we are logging out of.
   // Clear the clientsToInstance table.
   store.state.clientToInstance = {};
+  store.state.instanceToClient = {};
   store.state.me.networkDefaults[network].autoconnect = false;
-
-});
+  store.saveMeToStorage();
+}
 
 bgAppPageChannel.on('invite-friend', function (userId) {
   identity.sendMessage(userId, "Join UProxy!");
@@ -124,7 +141,7 @@ bgAppPageChannel.on('notification-seen', function (userId) {
     console.error('User ' + userId + ' does not exist!');
     return false;
   }
-  user.hasNotification = false;
+  // user.hasNotification = false;
   // Go through clients, remove notification flag from any uproxy instance.
   for (var clientId in user.clients) {
     var instanceId = store.state.clientToInstance[clientId];
@@ -132,11 +149,7 @@ bgAppPageChannel.on('notification-seen', function (userId) {
       _removeNotification(instanceId);
     }
   }
-  // _removeNotification(user);
-  // instance.notify = false;
-  // store.saveInstance(id);
   // Don't need to re-sync with UI - expect UI to have done the change.
-  // _syncInstanceUI(instance);
 });
 
 // --------------------------------------------------------------------------
@@ -381,7 +394,6 @@ var _msgReceivedHandlers = {
     'cancel-request': receiveTrustMessage,
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
-
     'notify-instance': receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
@@ -406,11 +418,13 @@ identity.on('onMessage', function (msgInfo) {
   // Call the relevant handler.
   var msgType = msgInfo.data.type;
   if (!(msgType in _msgReceivedHandlers)) {
-    console.error('No handler for message type: ' + msgType);
+    console.error('No handler for message type: ' +
+        JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
     return;
   }
   _msgReceivedHandlers[msgType](msgInfo);
 });
+
 
 // Update data for a user, typically when new client data shows up. Notifies all
 // new UProxy clients of our instance data, and preserve existing hooks. Does
@@ -438,7 +452,7 @@ function updateUser(newData) {
 
   for (var clientId in user.clients) {
     var client = user.clients[clientId];
-    if ('offline' == user.status) {  // Delete offline clients
+    if ('offline' == client.status) {  // Delete offline clients
       delete user.clients[clientId];
       continue;
     }
@@ -492,7 +506,7 @@ function _checkUProxyClientSynchronization(client) {
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
     store.state.clientToInstance[clientId] = null;
-    sendInstance(client);
+    sendInstance(clientId);
   }
   return true;
 }
@@ -509,14 +523,13 @@ function makeMyInstanceMessage() {
   var firstIdentity = store.state.me.identities[_getMyId()];
   return JSON.stringify({
     type: 'notify-instance',
-    instanceId: '' + store.state.me.instanceId,
+    instanceId:  '' + store.state.me.instanceId,
     description: '' + store.state.me.description,
-    keyHash: '' + store.state.me.keyHash,
+    keyHash:     '' + store.state.me.keyHash,
     rosterInfo: {
-      userId: firstIdentity.userId,
-      name: firstIdentity.name,
+      name:    firstIdentity.name,
       network: firstIdentity.network,
-      url: firstIdentity.url
+      url:     firstIdentity.url
     }
   });
 }
@@ -524,10 +537,11 @@ function makeMyInstanceMessage() {
 // Send a notification about my instance data to a particular clientId.
 // Assumes |client| corresponds to a valid UProxy instance, but does not assume
 // that we've received the other side's Instance data yet.
-function sendInstance(client) {
+function sendInstance(clientId) {
   var instancePayload = makeMyInstanceMessage();
-  console.log("sendInstance: " + JSON.stringify(instancePayload) + ' to ' + JSON.stringify(client));
-  identity.sendMessage(client.clientId, instancePayload);
+  console.log('sendInstance: ' + JSON.stringify(instancePayload) +
+              ' to ' + JSON.stringify(clientId));
+  identity.sendMessage(clientId, instancePayload);
   return true;
 }
 
@@ -557,11 +571,7 @@ function receiveInstance(msg) {
 
   // Update UI's view of instances and mapping.
   // TODO: This can probably be made smaller.
-  bgAppPageChannel.emit('state-change', [{
-      op: instanceOp,
-      path: '/instances/' + instanceId,
-      value: store.state.instances[instanceId]
-  }]);
+  _syncInstanceUI(store.state.instances[instanceId]);
   bgAppPageChannel.emit('state-change', [
     { op: 'replace', path: '/clientToInstance',
       value: store.state.clientToInstance },
@@ -575,7 +585,7 @@ function receiveInstance(msg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
-  console.log("sendConsent: ", instance);
+  console.log("sendConsent to instance: " + JSON.stringify(instance));
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');
@@ -690,10 +700,13 @@ function receiveUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  // _SyncUI('/instances/' + instanceId + '/description', description);
   _syncInstanceUI(instance, 'description');
   return true;
 }
+
+bgAppPageChannel.on('send-instance', function(clientId) {
+  sendInstance(clientId);
+});
 
 bgAppPageChannel.on('start-proxy-localhost-test', function () {
   _localTestProxying();
@@ -703,7 +716,7 @@ bgAppPageChannel.on('start-proxy-localhost-test', function () {
 //  Updating the UI
 // --------------------------------------------------------------------------
 function _SyncUI(path, value, op) {
-  op = op || 'replace';
+  op = op || 'add';
   bgAppPageChannel.emit('state-change', [{
       op: op,
       path: path,
@@ -715,21 +728,4 @@ function _syncInstanceUI(instance, field) {
   var fieldStr = field? '/' + field : '';
   _SyncUI('/instances/' + instance.instanceId + fieldStr,
           field? instance[field] : instance);
-}
-
-function _Login(network) {
-  network = network || undefined;
-  identity.login({
-    agent: 'uproxy',
-    version: '0.1',
-    url: 'https://github.com/UWNetworksLab/UProxy',
-    interactive: Boolean(network),
-    network: network
-  }, sendFullStateToUI);
-  if (network) {
-    store.state.me.networkDefaults[network].autoconnect = true;
-  } else {
-    store.state.me.networkDefaults[network].autoconnect = false;
-  }
-  store.saveMeToStorage();
 }

@@ -89,7 +89,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
     //this.client.addListener('stanza', function(s) {console.log(s.attrs.from);} );
     this.client.addListener('online', this.onOnline.bind(this));
     this.client.addListener('error', function(e) {
-      console.warn(e);
+      console.error(e);
       this.status = 'error';
       this.dispatchEvent('onStatus', {
           userId: this.credentials.userId,
@@ -124,7 +124,7 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
           type: 'normal'
         }).c('body').t(msg));
   } catch (e) {
-    console.log(e.stack);
+    console.error(e.stack);
   }
   continuation();
 };
@@ -192,7 +192,7 @@ IdentityProvider.prototype.sendChange = function (jid) {
   } else if (this.profile.roster[baseJid]) {
     this.dispatchEvent('onChange', this.profile.roster[baseJid]);
   } else {
-    console.log("Error - missing roster: "+baseJid);
+    console.error("Error - missing roster: "+baseJid);
   }
 };
 
@@ -334,11 +334,11 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
   // console.log(stanza.attrs.from);
-  //if(window.presence) {
-  //  window.presence.push(stanza);
-  //} else {
-  //  window.presence = [stanza];
-  //}
+  if(window.presence) {
+    window.presence.push(stanza);
+  } else {
+    window.presence = [stanza];
+  }
   //Set status
   var status = stanza.getChildText("show") || "online";
   if (stanza.attrs.type == 'unavailable') {
@@ -436,7 +436,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
       });
     } else {
       // This wasn't intended for me
-      console.log('Unprocessed message: '+ JSON.stringify(stanza.attrs));
+      console.error('Unprocessed message: '+ JSON.stringify(stanza.attrs));
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'get') {
     // Respond to capability requests from other users.
