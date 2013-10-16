@@ -19,6 +19,7 @@ proxyConfig.clearConfig();
 chrome.runtime.onInstalled.addListener(function (details) {
   console.log('onInstalled: previousVersion', details.previousVersion);
 });
+
 chrome.runtime.onSuspend.addListener(function () {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
@@ -27,22 +28,6 @@ chrome.runtime.onSuspend.addListener(function () {
 var onStateChange = new chrome.Event();
 
 var model = {};  // Singleton angularjs model for either popup or options.
-
-var Icon = function() {
-  this.set = function(path) {
-    // console.log('Setting browser icon to: ' + path);
-    chrome.browserAction.setIcon({
-      path: path
-    });
-  };
-  this.label = function(text) {
-    // console.log('Setting browser badge to: ' + text);
-    chrome.browserAction.setBadgeText({
-      text: text
-    });
-  };
-};
-var icon = new Icon();
 
 // For maintaining a single roster with various sort methods.
 var Roster = function() {
@@ -54,128 +39,9 @@ var Roster = function() {
 };
 var roster = new Roster();
 
-// User Interface state holder.
-// TODO(uzimizu): move UI into its own file in common so firefox can use it.
-var UI = function() {
-  this.ICON_DIR = '../common/ui/icons/';
-
-  this.networks = ['google', 'facebook'];
-
-  this.notifications = 0;
-  // TODO: splash should be set by state.
-  this.rosterNudge = false;
-  this.advancedOptions = false;
-  this.searchBar = true;
-  this.lastSync = new Date();
-
-  this.isProxying = false;  // Whether we are proxying through someone.
-  this.accessIds = 0;  // How many people are proxying through us.
-
-  // Keep track of currently viewed contact and instance.
-  this.contact = null;
-  this.instance = null;
-
-  // If we are proxying, keep track of the instance.
-  this.proxy = null;
-
-  // When the description changes while the text field loses focus, it
-  // automatically updates.
-  this.oldDescription = '';
-};
-
-UI.prototype.setNotifications = function(n) {
-  if (n > 0) {
-    this.setLabel(n);
-  } else {
-    this.setLabel('');
-  }
-  this.notifications = n < 0? 0 : n;
-};
-UI.prototype.decNotifications = function(n) {
-  this.setNotifications(this.notifications - 1);
-};
-
-UI.prototype.setIcon = function(iconFile) {
-  chrome.browserAction.setIcon({
-    path: this.ICON_DIR + iconFile
-  });
-};
-UI.prototype.setLabel = function(text) {
-  chrome.browserAction.setBadgeText({ text: '' + text });
-};
-// Hackish way to fire the onStateChange dispatcher.
-UI.prototype.refreshDOM = function() {
-  onStateChange.dispatch();
-};
-
-UI.prototype.setProxying = function(isProxying) {
-  this.isProxying = isProxying;
-  if (isProxying) {
-    this.setIcon('uproxy-19-p.png');
-  } else {
-    this.setIcon('uproxy-19.png');
-  }
-};
-
-UI.prototype.setClients = function(numClients) {
-  this.numClients = numClients;
-  if (numClients > 0) {
-    chrome.browserAction.setBadgeBackgroundColor({color: '#008'});
-    this.setLabel('↓');
-  } else {
-    chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
-  }
-}
-
-// Make sure counters and UI-only state holders correctly reflect the model.
-UI.prototype.synchronize = function() {
-  if (this.syncBlocked) {  // When rate limited, ignore synchronizations.
-    return false;
-  }
-  // Count up notifications
-  // console.log('syncing ui model.');
-  //console.log(model);
-  var n = 0;
-  for (var userId in model.roster) {
-    var user = model.roster[userId];
-    var instanceId = null;
-    for (var clientId in user.clients) {
-      instanceId = model.clientToInstance[clientId];
-      if (instanceId) {
-        if (model.instances[instanceId].notify) {
-          console.log('found user ' + user.userId + ' with notification.');
-          user.hasNotification = true;
-          break;
-        }
-      }
-    }
-    if (user.hasNotification) {
-      n++;
-    }
-  }
-  this.setNotifications(n);
-
-  // Run through instances, count up clients.
-  var c = 0;
-  for (var iId in model.instances) {
-    var instance = model.instances[iId];
-    if ('running' == instance.status.client) {
-      c++;
-    }
-    if ('running' == instance.status.proxy) {
-      this.isProxying = true;
-    }
-  }
-  this.setClients(c);
-
-  // Generate list ordered by names.
-  var uids = Object.keys(model.roster);
-  var names = uids.map(function(id) { return model.roster[id].name; });
-  names.sort();
-  return true;
-};
-
-var ui = new UI();  // This singleton is referenced in both options and popup.
+// This singleton is referenced in both options and popup.
+// UI object is defined in 'common/ui/scripts/ui.js'.
+var ui = new UI();
 
 // Connect to the App.
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
