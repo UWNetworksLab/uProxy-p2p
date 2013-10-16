@@ -62,7 +62,8 @@ var onload = function() {
       delete _conns[channelLabel];
     }
     if (_sctpPc) {
-      // we may get closeConnection calls after shutdown.
+      // we may get closeConnection calls after shutdown (from TCP
+      // disconnections).
       _sctpPc.closeDataChannel(channelLabel);
     }
   };
@@ -166,10 +167,11 @@ var onload = function() {
           console.log("Client channel to sctpPc ready.");
           console.log('Manually preparing a data channel to catalyze SDP handshake.');
           //Is this necessary?
-          _sctpPc.openDataChannel('foo', function() {console.log('wheeeee');});
-          while(_messageQueue.length > 0) {
-            _signallingChannel.emit('message', _messageQueue.shift());
-          }
+          _sctpPc.openDataChannel('foo', function() {
+            while(_messageQueue.length > 0) {
+              _signallingChannel.emit('message', _messageQueue.shift());
+            }
+            console.log('wheeeee');});
         });
         // _signallingChannel.emit('handleSignalFromPeer');
 

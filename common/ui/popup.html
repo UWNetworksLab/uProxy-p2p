@@ -68,21 +68,29 @@
             <button id="my-access" class="filter"
                     ng-mouseenter="showFilter('myAccess')"
                     ng-mouseleave="showFilterTip=false"
+                    ng-focus="showFilter('myAccess')"
+                    ng-blur="showFilterTip=false"
                     ng-class="{on:filters.myAccess}"
                     ng-click="toggleFilter('myAccess')"></button>
             <button id="friends-access" class="filter"
                     ng-mouseenter="showFilter('friendsAccess')"
+                    ng-focus="showFilter('friendsAccess')"
                     ng-mouseleave="showFilterTip=false"
+                    ng-blur="showFilterTip=false"
                     ng-class="{on:filters.friendsAccess}"
                     ng-click="toggleFilter('friendsAccess')"></button>
             <button id="uproxy-filter" class="filter"
                     ng-mouseenter="showFilter('uproxy')"
+                    ng-focus="showFilter('uproxy')"
                     ng-mouseenter="filterTip=filterTips.uproxy"
+                    ng-blur="showFilterTip=false"
                     ng-mouseleave="showFilterTip=false"
                     ng-class="{on:filters.uproxy}"
                     ng-click="toggleFilter('uproxy')"></button>
             <button id="online-filter" class="filter"
                     ng-mouseenter="showFilter('online')"
+                    ng-focus="showFilter('online')"
+                    ng-blur="showFilterTip=false"
                     ng-mouseleave="showFilterTip=false"
                     ng-class="{on:filters.online}"
                     ng-click="toggleFilter('online')"></button>
@@ -146,9 +154,10 @@
 
         <div id="contact-details" ng-show="ui.rosterNudge">
           <div class="contact-status">
-            <div class="contact-name">
-              <img class="contact-image" ng-src='{{ui.contact.imageData}}'>
-            </div>
+            <img ng-show="ui.contact.imageData" class="contact-image"
+                 ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
+            <img ng-hide="ui.contact.imageData" class="contact-image">
+
             <br>Network: {{ ui.contact.network }}
             <p ng-hide="ui.instance">
             {{ ui.contact.name }} is not running uProxy.

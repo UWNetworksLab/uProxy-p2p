@@ -152,10 +152,9 @@ ul
   cursor: default
   opacity: 0.9
   @include smooth
-
-.tip.ng-hide
-  @include un-ng-hide
-  opacity: 0
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
 
 // For centering the tooltip.
 .tool
@@ -315,7 +314,7 @@ ul
   @include smooth
   &:active, &:focus
     outline: none
-    opacity: 0.3
+    opacity: 0.25
   &:hover
     opacity: 0.2
   // When the filter is on, the opacity changes are different.
@@ -323,9 +322,9 @@ ul
     opacity: 1.0
     &:active, &:focus
       outline: none
-      opacity: 0.8
+      opacity: 0.65
     &:hover
-      opacity: 0.75
+      opacity: 0.6
 
 #my-access
   background-image: url('../icons/arrow-up.png')
@@ -395,10 +394,9 @@ ul
   overflow-x: hidden
   border-top: 1px solid #eee
   @include smooth
-
-#contacts-frame.ng-hide
-  @include un-ng-hide
-  left: -400px
+  &.ng-hide
+    @include un-ng-hide
+    left: -400px
 
 .contacts
   position: absolute
@@ -478,8 +476,8 @@ img.contact-image
 img.c-icon
   vertical-align: middle
   margin-top: -4px
-img.c-icon:hover
-  opacity: 0.5
+  &:hover
+    opacity: 0.5
 
 #contact-details
   display: inline-block
@@ -524,10 +522,10 @@ img.c-icon:hover
   opacity: 0.6
   cursor: pointer
   @include smooth
-.chat-btn:active, .chat-btn:focus
-  opacity: 0.7
-.chat-btn:hover
-  opacity: 0.3
+  &:active, &:focus
+    opacity: 0.7
+  &:hover
+    opacity: 0.3
 
 .instance-actions
   text-align: center
@@ -547,11 +545,10 @@ img.c-icon:hover
   font-size: $fontSize * 0.75
   font-family: monospace
   @include smooth
-
-.client-details:hover
-  border-color: #ddd
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
+  &:hover
+    border-color: #ddd
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
 
 .instance-details
   position: relative
@@ -564,11 +561,10 @@ img.c-icon:hover
   font-size: $fontSize * 0.5
   font-family: monospace
   @include smooth
-
-.instance-details:hover
-  border-color: #ddd
-  top: -2px
-  box-shadow: 0 2px 6px 1px #ddd
+  &:hover
+    border-color: #ddd
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
 
 .box-for-proxy
 
@@ -668,6 +664,7 @@ details
     width: 100%
   &:hover
     background-color: #0f0f0f
+  @include smooth
 
 .dbg
   position: fixed

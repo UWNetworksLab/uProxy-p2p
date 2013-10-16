@@ -166,10 +166,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
 
       $rootScope.updateDescription = function() {
-        if ($rootScope.oldDescription != model.me.description) {
+        if (ui.oldDescription &&
+           (ui.oldDescription != model.me.description)) {
           appChannel.emit('update-description', model.me.description);
         }
-        $rootScope.oldDescription = model.me.description;
+        ui.oldDescription = model.me.description;
       }
 
       // These work the same even if |client| is an instance - so long as it
