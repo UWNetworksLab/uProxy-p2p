@@ -6,6 +6,8 @@
   box-sizing: border-box
   -webkit-box-sizing: border-box
   -moz-box-sizing: border-box
+  &:focus
+    outline: none
 
 $fontSize: 16px
 @font-face
@@ -596,11 +598,10 @@ img.c-icon:hover
   color: #333
   text-align: left
   @include smooth-slow
-
-#status-proxy.ng-hide
-  @include un-ng-hide
-  opacity: 0
-  height: 0
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+    height: 0
 
 #status-tooltips
   position: absolute
@@ -613,6 +614,8 @@ img.c-icon:hover
 #status-network
   position: absolute
   right: 0
+  bottom: 0
+  padding: 8px
 
 
 .contact-actions

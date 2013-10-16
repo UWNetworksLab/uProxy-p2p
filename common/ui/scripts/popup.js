@@ -72,6 +72,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       if (!$scope.ui.isProxying) {
         $scope.ui.proxy = null;
       }
+      // $scope.ui.refreshDOM();
     };
 
     // Toggling the 'options' page which is just the splash page.
