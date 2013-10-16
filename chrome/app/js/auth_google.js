@@ -41,6 +41,7 @@ AuthGoogle.prototype.validate = function(token) {
 
 AuthGoogle.prototype.logout = function() {
   chrome.identity.removeCachedAuthToken({token: this.credentials.token}, (function() {
+    console.log('Logout - Google - Removing cached credentials');
     this.credentials = null;
   }).bind(this));
 };

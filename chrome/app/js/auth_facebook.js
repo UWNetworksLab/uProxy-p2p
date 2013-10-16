@@ -74,6 +74,8 @@ AuthFacebook.prototype.validate = function(token) {
 
 AuthFacebook.prototype.logout = function() {
   chrome.identity.removeCachedAuthToken({token: this.credentials.token}, (function() {
+    console.log('Logout - Facebook - Removing cached credentials');
     this.credentials = null;
+
   }).bind(this));
 };

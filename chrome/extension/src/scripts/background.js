@@ -6,6 +6,8 @@ console.log('Initializing chrome extension background page...');
 
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+// Rate Limit for UI.synchronize (ms)
+var SYNCHRONIZE_TIMEOUT = 500;
 
 //Proxy Configer
 var proxyConfig = new window.BrowserProxyConfig();
@@ -60,6 +62,7 @@ var UI = function() {
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
+  this.lastSync = new Date();
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.
@@ -136,7 +139,7 @@ UI.prototype.loggedOut = function() {
 UI.prototype.synchronize = function() {
   // Count up notifications
   console.log('syncing ui model.');
-  console.log(model);
+  //console.log(model);
   var n = 0;
   for (var userId in model.roster) {
     var user = model.roster[userId];
@@ -182,11 +185,23 @@ var ui = new UI();  // This singleton is referenced in both options and popup.
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
     name: 'uproxy-extension-to-app-port' });
 
+function rateLimitedUpdates() {
+  // Rate limit synchronizations
+  var time = new Date();
+  if ((time - this.lastSync) < SYNCHRONIZE_TIMEOUT) {
+    return;
+  }
+  this.lastSync = time;
+  
+  ui.synchronize();
+  checkRunningProxy();
+}
+
 function wireUItoApp() {
   console.log('Wiring UI to backend...');
 
   appChannel.on('state-change', function(patchMsg) {
-    console.log("state-change(patch: ", patchMsg);
+    //console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
     if (patchMsg[0].path === '') {
@@ -207,8 +222,7 @@ function wireUItoApp() {
       jsonpatch.apply(model, patchMsg);
     }
 
-    ui.synchronize();
-    checkRunningProxy();
+    setTimeout(rateLimitedUpdates, SYNCHRONIZE_TIMEOUT);
     /*
     // Run through roster if necessary.
     if (patch[0].path.indexOf('roster') >= 0) {
@@ -244,7 +258,7 @@ function wireUItoApp() {
     */
 
     // This event allows angular to bind listeners and update the DOM.
-    onStateChange.dispatch(patchMsg);
+    //onStateChange.dispatch(patchMsg);
   });
   console.log('Wiring UI to backend done.');
 }
