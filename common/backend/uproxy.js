@@ -435,7 +435,7 @@ function updateUser(newData) {
 
   for (var clientId in user.clients) {
     var client = user.clients[clientId];
-    if ('offline' == user.status) {  // Delete offline clients
+    if ('offline' == client.status) {  // Delete offline clients
       delete user.clients[clientId];
       continue;
     }
@@ -506,14 +506,14 @@ function makeMyInstanceMessage() {
   var firstIdentity = store.state.me.identities[_getMyId()];
   return JSON.stringify({
     type: 'notify-instance',
-    instanceId: '' + store.state.me.instanceId,
+    instanceId:  '' + store.state.me.instanceId,
     description: '' + store.state.me.description,
-    keyHash: '' + store.state.me.keyHash,
+    keyHash:     '' + store.state.me.keyHash,
     rosterInfo: {
-      userId: firstIdentity.userId,
-      name: firstIdentity.name,
+      userId:  firstIdentity.userId,
+      name:    firstIdentity.name,
       network: firstIdentity.network,
-      url: firstIdentity.url
+      url:     firstIdentity.url
     }
   });
 }
@@ -684,7 +684,6 @@ function receiveUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  // _SyncUI('/instances/' + instanceId + '/description', description);
   _syncInstanceUI(instance, 'description');
   return true;
 }
