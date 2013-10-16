@@ -7,9 +7,11 @@ console.log('Initializing chrome extension background page...');
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
 // Rate Limit for UI.synchronize (ms)
-var SYNCHRONIZE_TIMEOUT = 500;
+var SYNC_TIMEOUT = 500;
+var syncBlocked = false;
+var syncTimer = null;     // Keep reference to the timer.
 
-//Proxy Configer
+// Proxy Configuration.
 var proxyConfig = new window.BrowserProxyConfig();
 proxyConfig.clearConfig();
 
@@ -137,6 +139,9 @@ UI.prototype.loggedOut = function() {
 
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
+  if (this.syncBlocked) {  // When rate limited, ignore synchronizations.
+    return false;
+  }
   // Count up notifications
   console.log('syncing ui model.');
   //console.log(model);
@@ -177,6 +182,7 @@ UI.prototype.synchronize = function() {
   var uids = Object.keys(model.roster);
   var names = uids.map(function(id) { return model.roster[id].name; });
   names.sort();
+  return true;
 };
 
 var ui = new UI();  // This singleton is referenced in both options and popup.
@@ -185,16 +191,11 @@ var ui = new UI();  // This singleton is referenced in both options and popup.
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
     name: 'uproxy-extension-to-app-port' });
 
+// Rate limit synchronizations.
 function rateLimitedUpdates() {
-  // Rate limit synchronizations
-  var time = new Date();
-  if ((time - this.lastSync) < SYNCHRONIZE_TIMEOUT) {
-    return;
-  }
-  this.lastSync = time;
-  
   ui.synchronize();
   checkRunningProxy();
+  onStateChange.dispatch();
 }
 
 function wireUItoApp() {
@@ -222,7 +223,21 @@ function wireUItoApp() {
       jsonpatch.apply(model, patchMsg);
     }
 
-    setTimeout(rateLimitedUpdates, SYNCHRONIZE_TIMEOUT);
+    // Initiate first sync and start a timer if necessary, in order to
+    // rate-limit passes through the entire model & other checks.
+    if (!syncBlocked) {
+      syncBlocked = true;
+      rateLimitedUpdates();
+    }
+
+    if (!syncTimer) {
+      syncTimer = setTimeout(function() {
+        rateLimitedUpdates();
+        syncTimer = null;  // Allow future timers.
+        syncBlocked = false;
+      }, SYNC_TIMEOUT);
+    }
+
     /*
     // Run through roster if necessary.
     if (patch[0].path.indexOf('roster') >= 0) {
@@ -258,7 +273,6 @@ function wireUItoApp() {
     */
 
     // This event allows angular to bind listeners and update the DOM.
-    //onStateChange.dispatch(patchMsg);
   });
   console.log('Wiring UI to backend done.');
 }

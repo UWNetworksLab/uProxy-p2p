@@ -139,8 +139,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
       $rootScope.stopAccess = function(instance) {
         instance = instance || ui.instance;
-        appChannel.emit('stop-proxying', instance.instanceId);
         ui.setProxying(false);
+        appChannel.emit('stop-proxying', instance.instanceId);
       };
 
       // Providing access for a friend:
@@ -190,7 +190,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      var updateDOM = function(patch) {
+      var updateDOM = function() {
         $rootScope.$apply(function () {
           $rootScope.connectedToApp = true;
           // Also update pointers locally.
