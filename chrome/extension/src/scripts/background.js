@@ -77,6 +77,10 @@ var UI = function() {
 
   // If we are proxying, keep track of the instance.
   this.proxy = null;
+
+  // When the description changes while the text field loses focus, it
+  // automatically updates.
+  this.oldDescription = '';
 };
 
 UI.prototype.setNotifications = function(n) {

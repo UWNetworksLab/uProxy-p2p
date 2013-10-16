@@ -64,10 +64,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         }
       }
       $scope.ui.contact = c;
-      if (!c.imageData) {
-        // Required to refresh pic.
-        // $scope.ui.contact.imageData = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-      }
       $scope.ui.instance = $scope.instanceOfContact(c);
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
