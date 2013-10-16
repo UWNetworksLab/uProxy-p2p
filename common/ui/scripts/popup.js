@@ -118,11 +118,25 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       return true;  // Does not match the search text, should be hidden.
     };
 
+    $scope.$watch('ui.contact',function(){
+      var contact = $scope.ui.contact;
+      if (contact) {
+        console.log('current contact changed');
+        $scope.ui.contact = $scope.model.roster[contact.userId];
+      }
+    });
+    $scope.$watch('ui.instance',function(){
+      var instance = $scope.ui.instance;
+      if (instance) {
+        console.log('current instance changed');
+        $scope.ui.instance = $scope.model.instances[instance.instanceId];
+      }
+    });
     // Refresh local state variables when the popup is re-opened.
-    if ($scope.ui.contact) {
-      $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
-    }
-    if ($scope.ui.instance) {
-      $scope.ui.instance = $scope.model.instances[$scope.ui.instance.instanceId];
-    }
+    // if ($scope.ui.contact) {
+      // $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
+    // }
+    // if ($scope.ui.instance) {
+      // $scope.ui.instance = $scope.model.instances[$scope.ui.instance.instanceId];
+    // }
   }]);
