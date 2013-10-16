@@ -52,6 +52,74 @@ var DEFAULT_INSTANCE = {
   }
 };
 
+// Default for state.roster
+var DEFAULT_ROSTER_ENTRY = {
+  userId: '',
+  name: '',
+  url: '',
+  canUProxy: false,
+  onGoogle: false,
+  onFB: false,
+  imageData: {},
+  clients: {}  // Specified in DEFAULT_ROSTER_CLIENT_ENTRY
+};
+
+// Default for state.roster[*].clients
+var DEFAULT_ROSTER_CLIENT_ENTRY = {
+  clientId: '',
+  network: '',
+  status: ''
+};
+
+// Default for notify-instance messages
+var DEFAULT_INSTANCE_MESSAGE = {
+  type: 'notify-instance',
+  instanceId: null,
+  description: '',
+  keyHash: null,
+  rosterInfo: {}
+};
+
+// Default for DEFAULT_INSTANCE_MESSAGE.rosterInfo
+var DEFAULT_INSTANCE_MESSAGE_ROSTERINFO = {
+  name: null,
+  network: null,
+  url: ''
+};
+
+var DEFAULT_MY_IDENTITY = {
+  userId: null,  // should be same as key in DEFAULT_ME.identities[key].
+  name: '',  // user-friendly name given by network
+  url: '',
+  clients: {}  // specified by DEFAULT_MY_IDENTITY_CLIENT.
+};
+
+var DEFAULT_MY_IDENTITY_CLIENT = {
+  clientId: null,  // string, should be same as DEFAULT_MY_IDENTITY.clients[key]
+  network: null,  // string, name of network we're connected to.
+  status: null,  // string, online status of identity.
+};
+
+var DEFAULT_ME = {
+  // description of this installed instance
+  'description': '',
+  // id for this installed instance
+  'instanceId': '',
+  // hash of your public key for peer connections
+  'keyHash': '',
+  // Specified in DEFAULT_MY_IDENTITY, keyed by userId.
+  'identities': {},
+  // network connection defaults
+  'networkDefaults' : {
+    'google': {  // identifier for the network
+      'autoconnect': false  // whether to connect at startup.
+    },
+    'facebook': {
+      'autoconnect': false
+    }
+  }
+};
+
 // Contains default for values being loaded from state.
 var DEFAULT_LOAD_STATE = {
   // debugging stuff
@@ -62,79 +130,19 @@ var DEFAULT_LOAD_STATE = {
   // (online/offline/idle, etc)
   'identityStatus': {},
 
-  // me : {
-  //   description : string,  // descirption of this installed instance
-  //   instanceId : string,   // id for this installed instance
-  //   keyHash : string,      // hash of your public key for peer connections
-  //   networkDefaults : {    // network connection defaults
-  //     [networkNameX]: {    // identifier for the network
-  //       autoconnect: boolean  // if true connects at startup
-  //     }, ...
-  //   },
-  //   [userIdX] : {
-  //     userId : string,     // same as key [userIdX].
-  //     name : string,       // user-friendly name given by network
-  //     url : string         // ?
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string   // unique id for the network connected to.
-  //         status: string
-  //       }, ...
-  //     }
-  //   }, ... // userIdX
-  // }
   // Local client's information.
-  'me': {
-    'description': '',
-    'instanceId': '',
-    'keyHash': '',
-    'identities': {},
-    'networkDefaults' : {
-      'google': {'autoconnect': false},
-      'facebook': {'autoconnect': false}
-    }
-  },
+  'me': DEFAULT_ME,
 
   // roster: {
   //   [userIdX]: {
-  //     userId: string,
-  //     name: string,
-  //     url: string,
-  //     clients: {
-  //       [clientIdX]: {
-  //         clientId: string, // same as key [clientIdX].
-  //         // TODO: users should live in network, not visa-versa!
-  //         network: string
-  //         status: string
-  //       }, ... clientIdX
-  //     },
-  //   } ... userIdX
+  //     Specified in DEFAULT_ROSTER_ENTRY.
   // }
   // Merged contact lists from each identity provider.
   'roster': {},
 
   // instances: {
-  //   [instanceIdX]: {
-  //     // From Network/identity:
-  //     name: string,
-  //     userId: string,
-  //     network: string,
-  //     url: string,
-  //     // Instance specific
-  //     description: string,
-  //     // annotation: string, // TODO
-  //     instanceId: string,
-  //     keyhash: string,
-  //     trust: {
-  //       asProxy: Trust
-  //       asClient: Trust
-  //     }
-  //     status {
-  //       proxy: boolean
-  //       client: boolean
-  //     }
+  //   [instanceId]: {
+  //     Specified in DEFAULT_INSTANCE.
   //   }
   // }
   // instanceId -> instance. Active UProxy installations.
@@ -188,5 +196,3 @@ var DEFAULT_SAVE_STATE = {
   // 'instances': {},
   // 'instanceIds': [],
 };
-
-

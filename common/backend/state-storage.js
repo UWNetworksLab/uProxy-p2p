@@ -91,10 +91,10 @@ UProxyState.prototype._generateMyInstance = function () {
         ('00'.substr(0, 2 - hex.length) + hex);
 
     // TODO: separate this out and use full space of possible names by
-    // using the whole of the .
+    // using the whole of the available strings.
     if (i < 4) {
       id = (i & 1) ? nouns[val] : adjectives[val];
-      if (me.description !== null) {
+      if (me.description !== null && me.description.length > 0) {
         me.description = me.description + " " + id;
       } else {
         me.description = id;
@@ -204,6 +204,8 @@ UProxyState.prototype.syncRosterFromInstanceId = function(instanceId) {
 UProxyState.prototype.syncInstanceFromInstanceMessage =
     function(userId, clientId, data) {
   var instanceId = data.instanceId;
+  // Some local metadata isn't transmitted.  Add it in.
+  data = restrictToObject(DEFAULT_INSTANCE, data);
 
   // Before everything, remember the clientId - instanceId relation.
   var oldClientId = this.state.instanceToClient[instanceId];

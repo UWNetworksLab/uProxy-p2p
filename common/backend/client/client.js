@@ -167,11 +167,10 @@ var onload = function() {
           console.log("Client channel to sctpPc ready.");
           console.log('Manually preparing a data channel to catalyze SDP handshake.');
           //Is this necessary?
-          _sctpPc.openDataChannel('foo', function() {
-            while(_messageQueue.length > 0) {
-              _signallingChannel.emit('message', _messageQueue.shift());
-            }
-            console.log('wheeeee');});
+          _sctpPc.openDataChannel('foo', function() { console.log('wheeeee'); });
+          while(_messageQueue.length > 0) {
+            _signallingChannel.emit('message', _messageQueue.shift());
+          }
         });
         // _signallingChannel.emit('handleSignalFromPeer');
 

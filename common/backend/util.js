@@ -15,7 +15,9 @@ function FinalCallback(finalCallback) {
 
 FinalCallback.prototype.makeCountedCallback = function () {
   if(!this.finalCallback) { return null; }
-  // A way to make sure that we only call the callback once, and that it happens only for the last callback. Assumes: callbacks happen in call order.
+  // A way to make sure that we only call the callback once, and that
+  // it happens only for the last callback. Assumes: callbacks happen
+  // in call order.
   this.callsWaiting++;
   return this._oneOfManyCallbacks.bind(this);
 };
@@ -31,10 +33,14 @@ FinalCallback.prototype._oneOfManyCallbacks = function () {
 function restrictToObject(restrictionObject, objectToRestrict) {
   var selectedPartsOfObjectToRestrict = {};
   for (var k in restrictionObject) {
-    if (k in objectToRestrict) {
+    if (objectToRestrict && k in objectToRestrict) {
       selectedPartsOfObjectToRestrict[k] = objectToRestrict[k];
-    } else {
+    } else if (restrictionObject[k] !== null) {
       selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
+    } else {
+      throw new Error('Missing required key ' + k + '.\nObject: ' +
+          JSON.stringify(objectToRestrict) + '\nRestriction: ' +
+          JSON.stringify(restrictionObject));
     }
   }
   return selectedPartsOfObjectToRestrict;
