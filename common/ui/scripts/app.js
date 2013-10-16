@@ -45,7 +45,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
-      console.log(model);
+      //console.log(model);
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;

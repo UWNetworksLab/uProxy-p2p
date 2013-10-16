@@ -434,6 +434,7 @@ function updateUser(newData) {
       canUProxy = false;
   user.name = newData.name;
   user.clients = newData.clients;
+  user.imageData = newData.imageData;
 
   for (var clientId in user.clients) {
     var client = user.clients[clientId];

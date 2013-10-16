@@ -6,6 +6,8 @@ console.log('Initializing chrome extension background page...');
 
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+// Rate Limit for UI.synchronize (ms)
+var SYNCHRONIZE_TIMEOUT = 500;
 
 //Proxy Configer
 var proxyConfig = new window.BrowserProxyConfig();
@@ -62,6 +64,7 @@ var UI = function() {
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
+  this.lastSync = new Date();
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.
@@ -118,7 +121,7 @@ UI.prototype.setClients = function(numClients) {
 UI.prototype.synchronize = function() {
   // Count up notifications
   console.log('syncing ui model.');
-  console.log(model);
+  //console.log(model);
   var n = 0;
   for (var userId in model.roster) {
     var user = model.roster[userId];
@@ -164,11 +167,28 @@ var ui = new UI();  // This singleton is referenced in both options and popup.
 var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
     name: 'uproxy-extension-to-app-port' });
 
-function wireUItoApp() {
-  console.log('Wiring UI to backend...');
+function rateLimitedUpdates() {
+  // Rate limit synchronizations
+  var time = new Date();
+  if ((time - this.lastSync) < SYNCHRONIZE_TIMEOUT) {
+    return;
+  }
+  this.lastSync = time;
 
+  ui.synchronize();
+  checkRunningProxy();
+  console.log('Connecting to App...');
+  if (!appChannel.status.connected)
+    appChannel.connect();
+  }
+}
+
+function initialize() {
+  // ui-ready tells uproxy.js to send over *all* the state.
+  appChannel.emit('ui-ready');
+  console.log('Wiring UI to backend...');
   appChannel.on('state-change', function(patchMsg) {
-    console.log("state-change(patch: ", patchMsg);
+    //console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
     if (patchMsg[0].path === '') {
@@ -186,24 +206,9 @@ function wireUItoApp() {
       jsonpatch.apply(model, patchMsg);
     }
 
-    ui.synchronize();
-    checkRunningProxy();
+    setTimeout(rateLimitedUpdates, SYNCHRONIZE_TIMEOUT);
   });
   console.log('Wiring UI to backend done.');
-}
-// Attach state-change listener to update UI from the backend.
-appChannel.onConnected.addListener(wireUItoApp);
-
-
-function reconnectToApp() {
-  console.log('Disconnected from App! Attempting to reconnect...');
-  appChannel.connect();
-}
-
-
-function initialize() {
-  // ui-ready tells uproxy.js to send over *all* the state.
-  appChannel.emit('ui-ready');
 }
 
 function checkRunningProxy() {
@@ -221,14 +226,6 @@ function checkRunningProxy() {
   proxyConfig.stopUsingProxy();
 }
 
-// Automatically attempt to reconnect when disconnected.
+// Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(initialize);
-appChannel.onDisconnected.addListener(reconnectToApp);
-window.onunload = function() {
-  appChannel.onConnected.removeListener(wireUItoApp);
-};
 
-
-console.log('Connecting to App...');
-var connectedToApp = false;
-appChannel.connect();

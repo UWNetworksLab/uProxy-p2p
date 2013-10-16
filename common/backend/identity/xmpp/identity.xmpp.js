@@ -1,4 +1,5 @@
-var VCARD_TIMEOUT = 3000;
+var VCARD_REQUEST_TIMEOUT = 3000;
+var VCARD_THROTTLE_TIMEOUT = 500;
 var chrome = {
   socket: freedom['core.socket']()
 };
@@ -10,16 +11,19 @@ console.warn = function(f) {
 var window = {};
 var view = freedom['core.view']();
 var storage = freedom['core.storage']();
+//storage.clear();
 
 function IdentityProvider() {
   //DEBUG
   window.current = this;
-  console.log(NETWORK_NAME);
+  console.log(NETWORK_NAME + self.location.href);
 
   this.client = null;
   this.credentials = null;
   this.loginOpts = null;
   this.vCardRequestTime = {};
+  this.vCardRequestQueue = [];
+  this.vCardFetchTime = new Date();
 
   this.status = 'offline';
   //dispatchEvent is not bound until after constructor
@@ -92,7 +96,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
           network: NETWORK_ID,
           status: this.status,
           message: JSON.stringify(e)
-      })
+      });
       continuation();
     }.bind(this));
     this.client.addListener('stanza', this.onMessage.bind(this));
@@ -102,7 +106,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
 
 IdentityProvider.prototype.getProfile = function(id, continuation) {
   //TODO get profiles for other users
-  if (id == undefined) {
+  if (id === null || id === undefined) {
     continuation(this.profile);
   } else if (this.profile.me[id]) {
     continuation(this.profile);
@@ -118,7 +122,7 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
         new window.XMPP.Element('message', {
           to: to,
           type: 'normal'
-        }).c('body').t(JSON.stringify(msg)));
+        }).c('body').t(msg));
   } catch (e) {
     console.log(e.stack);
   }
@@ -129,6 +133,9 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
   //@TODO(ryscheng) debug, remove oAuth stuffies
   this.status = 'offline';
   userId = this.credentials.userId;
+  view.postMessage({
+    cmd: 'logout',
+  });
   this.dispatchEvent('onStatus', {
       userId: userId,
       network: NETWORK_ID,
@@ -311,7 +318,7 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       this.setAttr(from , 'imageUrl', photo.getChildText('EXTVAL'));
     } else if (photo && photo.getChildText('TYPE') &&
                photo.getChildText('BINVAL')) {
-      var imageData = 'data: ' +
+      var imageData = 'data:' +
           photo.getChildText('TYPE') + ';base64,' +
           photo.getChildText('BINVAL');
       var imageHash = this.getAttr(from, 'imageHash');
@@ -327,11 +334,11 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
   // console.log(stanza.attrs.from);
-  //if(window.presence) {
-  //  window.presence.push(stanza);
-  //} else {
-  //  window.presence = [stanza];
-  //}
+  if(window.presence) {
+    window.presence.push(stanza);
+  } else {
+    window.presence = [stanza];
+  }
   //Set status
   var status = stanza.getChildText("show") || "online";
   if (stanza.attrs.type == 'unavailable') {
@@ -363,7 +370,7 @@ IdentityProvider.prototype.onPresence = function(stanza) {
 IdentityProvider.prototype.getVCard = function(from, hash) {
   storage.get('vcard-'+getBaseJid(from)).done((function(result) {
     //Fetch vcard from server if not cached
-    if (result == null) {
+    if (result === null || result === undefined) {
       this.fetchVCard(from);
     } else {
       var resultObj = JSON.parse(result);
@@ -388,13 +395,27 @@ IdentityProvider.prototype.getVCard = function(from, hash) {
 IdentityProvider.prototype.fetchVCard = function(from) {
   var time = new Date();
   var baseJid = getBaseJid(from);
-  if (!this.vCardRequestTime[baseJid] || (time - this.vCardRequestTime[baseJid]) > VCARD_TIMEOUT) {
+  if (!this.vCardRequestTime[baseJid] || (time - this.vCardRequestTime[baseJid]) > VCARD_REQUEST_TIMEOUT) {
     this.vCardRequestTime[baseJid] = time;
-    console.log("Fetching VCard for " + getBaseJid(from));
+    this.vCardRequestQueue.push(baseJid);
+    this.checkVCardQueue();
+  }
+};
+
+IdentityProvider.prototype.checkVCardQueue = function() {
+  var time = new Date();
+  if (this.vCardRequestQueue.length < 1) {
+    return;
+  } else if ((time - this.vCardFetchTime) > VCARD_THROTTLE_TIMEOUT) {
+    var from = this.vCardRequestQueue.shift();
+    console.log("Fetching VCard for " + from);
+    this.vCardFetchTime = time;
     this.client.send(new window.XMPP.Element('iq', {
       type: 'get',
-      to: getBaseJid(from)
+      to: from
     }).c('vCard', {'xmlns': 'vcard-temp'}).up());
+  } else {
+    setTimeout(this.checkVCardQueue.bind(this), VCARD_THROTTLE_TIMEOUT);
   }
 };
 
@@ -410,7 +431,8 @@ IdentityProvider.prototype.onMessage = function(stanza) {
         fromClientId: stanza.attrs.from,
         toUserId: getBaseJid(stanza.attrs.to),
         toClientId: stanza.attrs.to,
-        message: JSON.parse(stanza.getChildText('body'))
+        message: stanza.getChildText('body')
+        //message: JSON.parse(stanza.getChildText('body'))
       });
     } else {
       // This wasn't intended for me
