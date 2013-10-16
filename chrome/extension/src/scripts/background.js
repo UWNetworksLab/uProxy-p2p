@@ -125,7 +125,7 @@ UI.prototype.synchronize = function() {
     return false;
   }
   // Count up notifications
-  console.log('syncing ui model.');
+  // console.log('syncing ui model.');
   //console.log(model);
   var n = 0;
   for (var userId in model.roster) {

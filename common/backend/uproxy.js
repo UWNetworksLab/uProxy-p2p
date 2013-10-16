@@ -69,18 +69,35 @@ bgAppPageChannel.on('ui-ready', function () {
   sendFullStateToUI();
 });
 
-bgAppPageChannel.on('login', function(network) {
-  _Login(network);
-});
+bgAppPageChannel.on('login', function(network) { login(network); });
+bgAppPageChannel.on('logout', function(network) { logout(network); });
 
-bgAppPageChannel.on('logout', function(network) {
+function login(network) {
+  network = network || undefined;
+  identity.login({
+    agent: 'uproxy',
+    version: '0.1',
+    url: 'https://github.com/UWNetworksLab/UProxy',
+    interactive: Boolean(network),
+    network: network
+  }, sendFullStateToUI);
+  if (network) {
+    store.state.me.networkDefaults[network].autoconnect = true;
+  } else {
+    store.state.me.networkDefaults[network].autoconnect = false;
+  }
+  store.saveMeToStorage();
+}
+
+function logout(network) {
   identity.logout(null, network);
   // TODO: only remove clients from the network we are logging out of.
   // Clear the clientsToInstance table.
   store.state.clientToInstance = {};
+  store.state.instanceToClient = {};
   store.state.me.networkDefaults[network].autoconnect = false;
-
-});
+  store.saveMeToStorage();
+}
 
 bgAppPageChannel.on('invite-friend', function (userId) {
   identity.sendMessage(userId, "Join UProxy!");
@@ -489,7 +506,7 @@ function _checkUProxyClientSynchronization(client) {
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
     store.state.clientToInstance[clientId] = null;
-    sendInstance(client);
+    sendInstance(clientId);
   }
   return true;
 }
@@ -521,11 +538,11 @@ function makeMyInstanceMessage() {
 // Send a notification about my instance data to a particular clientId.
 // Assumes |client| corresponds to a valid UProxy instance, but does not assume
 // that we've received the other side's Instance data yet.
-function sendInstance(client) {
+function sendInstance(clientId) {
   var instancePayload = makeMyInstanceMessage();
   console.log('sendInstance: ' + JSON.stringify(instancePayload) +
-              ' to ' + JSON.stringify(client));
-  identity.sendMessage(client.clientId, instancePayload);
+              ' to ' + JSON.stringify(clientId));
+  identity.sendMessage(clientId, instancePayload);
   return true;
 }
 
@@ -689,6 +706,10 @@ function receiveUpdateDescription(msg) {
   return true;
 }
 
+bgAppPageChannel.on('send-instance', function(clientId) {
+  sendInstance(clientId);
+});
+
 bgAppPageChannel.on('start-proxy-localhost-test', function () {
   _localTestProxying();
 });
@@ -709,21 +730,4 @@ function _syncInstanceUI(instance, field) {
   var fieldStr = field? '/' + field : '';
   _SyncUI('/instances/' + instance.instanceId + fieldStr,
           field? instance[field] : instance);
-}
-
-function _Login(network) {
-  network = network || undefined;
-  identity.login({
-    agent: 'uproxy',
-    version: '0.1',
-    url: 'https://github.com/UWNetworksLab/UProxy',
-    interactive: Boolean(network),
-    network: network
-  }, sendFullStateToUI);
-  if (network) {
-    store.state.me.networkDefaults[network].autoconnect = true;
-  } else {
-    store.state.me.networkDefaults[network].autoconnect = false;
-  }
-  store.saveMeToStorage();
 }

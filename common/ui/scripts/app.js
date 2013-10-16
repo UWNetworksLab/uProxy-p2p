@@ -80,6 +80,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('reset', null);
       };
 
+      $rootScope.sendInstance = function (clientId) {
+        appChannel.emit('send-instance', clientId);
+      };
+
       // Takes in an entry from the roster table.
       $rootScope.instanceOfContact = function(contact) {
         for (var clientId in contact.clients) {
