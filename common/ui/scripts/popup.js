@@ -54,20 +54,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     };
     // $scope.onAppData.addListener($scope.updateSortedContacts);
 
-
-// A simple predicate function to see if we can talk to this client.
-    $scope.isMessageableUproxyClient = function(client) {
-      // TODO(uzimizu): Make identification of whether or not this is a uproxy
-      // client more sensible.
-      var retval = (client.status == 'online' ||
-                    client.status == 'messageable') &&
-                    (client.clientId.indexOf('/uproxy') > 0);
-    };
-
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
+      console.log("viewContact: ", c);
       for (var clientId in c.clients) {
-        if (isMessageableUproxyClient(c.clients[clientId])) {
+        if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
+          console.log("viewContact: sendInstance: " + clientId);
           $scope.sendInstance(clientId);
         }
       }
