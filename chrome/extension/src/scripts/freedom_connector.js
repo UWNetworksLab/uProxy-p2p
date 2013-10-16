@@ -42,10 +42,12 @@ FreedomConnector.prototype.connect = function() {
   this.port_ = chrome.runtime.connect(this.id_, this.options_);
 
   try {
-    this.port_.postMessage({ cmd: 'hi' });
+    this.port_.postMessage("hi");  // message used just to check we can connect.
     this.status.connected = true;
   } catch (e) {
+    console.log("Tried to say hi to app, but failed.");
     this.status.connected = false;
+    this.port_ = null;
     return false;
   }
 
@@ -62,9 +64,7 @@ FreedomConnector.prototype.dispatchFreedomEvent_ = function(msg) {
   if (this.listeners_[msg.type]) {
     var handlers = this.listeners_[msg.type].slice(0);
     for (var i = 0; i < handlers.length; i++) {
-      if (handlers[i](msg.data) === false) {
-        break;
-      }
+      handlers[i](msg.data)
     }
   }
 };
@@ -77,12 +77,11 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
   if (msg == 'hello.') {
     console.info('Got hello from UProxy App.');
     // No longer wait for first message.
-    this.port_.onMessage.removeListener(this._currentMessageCallback);
     // Relay any messages to this port to any function that has registered as
     // wanting to listen using an 'freedom.on' from this connector.
+    this.port_.onMessage.removeListener(this._currentMessageCallback);
     this._currentMessageCallback = this.dispatchFreedomEvent_.bind(this);
     this.port_.onMessage.addListener(this._currentMessageCallback);
-    this.status.connected = true;
     // If we have an |onConnected| callback, call it.
     this.onConnected.dispatch();
   } else {

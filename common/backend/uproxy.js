@@ -406,7 +406,7 @@ identity.on('onMessage', function (msgInfo) {
   var msgType = msgInfo.data.type;
   if (!(msgType in _msgReceivedHandlers)) {
     console.error('No handler for message type: ' +
-        JSON.stringify(msgInfo.data));
+        JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
     return;
   }
   _msgReceivedHandlers[msgType](msgInfo);

@@ -7,7 +7,7 @@ console.log('Initializing chrome extension background page...');
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
 // Rate Limit for UI.synchronize (ms)
-var SYNCHRONIZE_TIMEOUT = 500;
+var SYNCHRONIZE_TIMEOUT = 300;
 
 //Proxy Configer
 var proxyConfig = new window.BrowserProxyConfig();
@@ -178,9 +178,6 @@ function rateLimitedUpdates() {
   ui.synchronize();
   checkRunningProxy();
   console.log('Connecting to App...');
-  if (!appChannel.status.connected) {
-    appChannel.connect();
-  }
 }
 
 function initialize() {
@@ -191,6 +188,8 @@ function initialize() {
     //console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
+    // TODO: run the check below for each message?
+    // TODO: fix JSON patch :)
     if (patchMsg[0].path === '') {
       for (var k in model) {
         delete model[k];
@@ -226,6 +225,12 @@ function checkRunningProxy() {
   proxyConfig.stopUsingProxy();
 }
 
+function checkThatAppIsInstalled() {
+  appChannel.connect();
+  setTimeout(checkThatAppIsInstalled, new Date() + (SYNCHRONIZE_TIMEOUT * 2));
+}
+
 // Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(initialize);
 
+checkThatAppIsInstalled();

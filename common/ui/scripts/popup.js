@@ -46,8 +46,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         $scope.ui.instance = $scope.instances[$scope.ui.instance.instanceId];
       });
     }
-    // Attach to the App-Extension channel.
-    // $scope.onAppData.addListener($scope.updateCurrentInstance);
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(finish)

@@ -88,6 +88,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[instanceId];
           }
         }
+        // Now check user-id matching because if the client is not online, they
+        // will not have a client id.
+        for (var instanceId in model.instances) {
+          if (model.instances[instanceId].rosterInfo.userId == contact.userId)
+            return model.instances[instanceId];
+        }
         return null;
       };
 
@@ -171,7 +177,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         // We don't need to tell them we'll start proxying, we can just try to
         // start. The SDP request will go through chat/identity network on its
         // own.
-        appChannel.emit('start-using-peer-as-proxy-server', instance.instanceId);
+        appChannel.emit('start-using-peer-as-proxy-server',
+            instance.instanceId);
         ui.proxy = instance;
         ui.setProxying(true);
       };
@@ -196,8 +203,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
         console.log('instance trust change ' + action + ', ' + id);
-        appChannel.emit('instance-trust-change', {
-          instanceId: id, action: action });
+        appChannel.emit('instance-trust-change',
+          { instanceId: id, action: action });
       };
 
       // Notifications occur on the user level. The message sent to the app side
