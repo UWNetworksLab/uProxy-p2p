@@ -315,7 +315,7 @@ ul
   @include smooth
   &:active, &:focus
     outline: none
-    opacity: 0.3
+    opacity: 0.25
   &:hover
     opacity: 0.2
   // When the filter is on, the opacity changes are different.
@@ -323,9 +323,9 @@ ul
     opacity: 1.0
     &:active, &:focus
       outline: none
-      opacity: 0.8
+      opacity: 0.65
     &:hover
-      opacity: 0.75
+      opacity: 0.6
 
 #my-access
   background-image: url('../icons/arrow-up.png')
@@ -668,6 +668,7 @@ details
     width: 100%
   &:hover
     background-color: #0f0f0f
+  @include smooth
 
 .dbg
   position: fixed

@@ -309,16 +309,16 @@ ul {
   transition: all 0.23s !important; }
   .filter:active, .filter:focus {
     outline: none;
-    opacity: 0.3; }
+    opacity: 0.25; }
   .filter:hover {
     opacity: 0.2; }
   .filter.on {
     opacity: 1; }
     .filter.on:active, .filter.on:focus {
       outline: none;
-      opacity: 0.8; }
+      opacity: 0.65; }
     .filter.on:hover {
-      opacity: 0.75; }
+      opacity: 0.6; }
 
 #my-access {
   background-image: url("../icons/arrow-up.png"); }
@@ -678,7 +678,11 @@ details > *:not(summary) {
   overflow-y: auto;
   overflow-x: auto;
   background-color: black;
-  color: #aaffff; }
+  color: #aaffff;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
   #debug pre {
     font-size: 9.6px;
     margin-bottom: 100px;
