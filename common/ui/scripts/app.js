@@ -225,9 +225,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
-        console.log('instance trust change ' + action + ', ' + id);
-        appChannel.emit('instance-trust-change',
-          { instanceId: id, action: action });
+        window.setTimeout(function() {
+          console.log('instance trust change ' + action + ', ' + id);
+          appChannel.emit('instance-trust-change',
+            { instanceId: id, action: action });
+        }, 1000);
+        ui.pendingTrustChange = true;
       };
 
       // Notifications occur on the user level. The message sent to the app side

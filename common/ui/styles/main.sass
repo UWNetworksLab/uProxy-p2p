@@ -67,13 +67,17 @@ ul
   border-radius: 2px
   cursor: pointer
   @include smooth
-.btn:hover, .btn:focus
-  border-color: #999
-  box-shadow: 0 1px 3px #aaa
-  outline: none
-.btn:active
-  box-shadow: 0 1px 3px #aaa inset
-  color: #777
+  &:hover, &:focus
+    border-color: #999
+    box-shadow: 0 1px 3px #aaa
+    outline: none
+  &:active
+    box-shadow: 0 1px 3px #aaa inset
+    color: #777
+  &:disabled
+    color: #999
+    border-color: #ccc
+    box-shadow: 0 1px 4px #aaa inset
 
 .btn-request
   position: absolute
@@ -123,12 +127,13 @@ ul
   cursor: pointer
   @include smooth
   &:active, &:focus
-    opacity: 0.9
+    opacity: 0.4
   &:hover
     opacity: 0.3
 
 #options-btn-tip
   position: fixed
+  z-index: 500
   top: 20px
   right: 2px
   background-color: #000
@@ -516,8 +521,9 @@ img.c-icon
   border: 1px none #000
   outline: none
   padding: 4px
-  width: 40px
-  height: 40px
+  margin: 8px
+  width: 30px
+  height: 30px
   text-decoration: none
   opacity: 0.6
   cursor: pointer

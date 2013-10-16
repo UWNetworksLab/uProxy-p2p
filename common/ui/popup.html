@@ -43,7 +43,7 @@
           This description will be visible to friends with UProxy.
         </p>
 
-        <div id="networks-box">
+        <div id="networks-box" ng-show="showingSplashPage()">
           <h3>Networks</h3>
 
           <div class="network-btn">
@@ -58,7 +58,20 @@
       </div>
     </div>
 
-    <div id="main-view" ng-hide="showingSplashPage()" tabindex="-1">
+    <button id="options-btn" ng-click="toggleOptions()"
+        ng-mouseenter="optionsTooltip=true"
+        ng-focus="optionsTooltip=true"
+        ng-mouseleave="optionsTooltip=false"
+        ng-blur="optionsTooltip=false"
+        title="{{'options'|i18n}}">
+    </button>
+    <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
+      <span ng-show="ui.splashPage && ui.rosterNudge">Show the contact again.</span>
+      <span ng-show="ui.splashPage && !ui.rosterNudge">Show the contact list.</span>
+      <span ng-hide="ui.splashPage">Show the setup page.</span>
+    </div>
+
+    <div id="main-view" ng-hide="showingSplashPage()">
       <div id="header">
         <div id="search-section" ng-hide="ui.rosterNudge">
           <div id="actions">
@@ -70,36 +83,36 @@
                     ng-mouseleave="showFilterTip=false"
                     ng-focus="showFilter('myAccess')"
                     ng-blur="showFilterTip=false"
-                    ng-class="{on:filters.myAccess}"
-                    ng-click="toggleFilter('myAccess')"></button>
+                    ng-class="{on:ui.filters.myAccess}"
+                    ng-click="ui.toggleFilter('myAccess')"></button>
             <button id="friends-access" class="filter"
                     ng-mouseenter="showFilter('friendsAccess')"
                     ng-focus="showFilter('friendsAccess')"
                     ng-mouseleave="showFilterTip=false"
                     ng-blur="showFilterTip=false"
-                    ng-class="{on:filters.friendsAccess}"
-                    ng-click="toggleFilter('friendsAccess')"></button>
+                    ng-class="{on:ui.filters.friendsAccess}"
+                    ng-click="ui.toggleFilter('friendsAccess')"></button>
             <button id="uproxy-filter" class="filter"
                     ng-mouseenter="showFilter('uproxy')"
                     ng-focus="showFilter('uproxy')"
                     ng-mouseenter="filterTip=filterTips.uproxy"
                     ng-blur="showFilterTip=false"
                     ng-mouseleave="showFilterTip=false"
-                    ng-class="{on:filters.uproxy}"
-                    ng-click="toggleFilter('uproxy')"></button>
+                    ng-class="{on:ui.filters.uproxy}"
+                    ng-click="ui.toggleFilter('uproxy')"></button>
             <button id="online-filter" class="filter"
                     ng-mouseenter="showFilter('online')"
                     ng-focus="showFilter('online')"
                     ng-blur="showFilterTip=false"
                     ng-mouseleave="showFilterTip=false"
-                    ng-class="{on:filters.online}"
-                    ng-click="toggleFilter('online')"></button>
+                    ng-class="{on:ui.filters.online}"
+                    ng-click="ui.toggleFilter('online')"></button>
             <br>
           </div>
           <input type="text" id="search-contacts"
               placeholder="search contacts"
               ng-show="ui.searchBar"
-              ng-model="search"
+              ng-model="ui.search"
               ng-blur="searchFocused=false"
               ng-focus="searchFocused=true">
           </input>
@@ -131,8 +144,9 @@
         <ul class="contacts">
           <li ng-repeat="contact in model.roster"
               ng-click="viewContact(contact)"
-              ng-hide="contactIsFiltered(contact)"
+              ng-hide="ui.contactIsFiltered(contact)"
               ng-class="{offline:!contact.online}"
+              tabIndex="{{ $index }}"
               >
             {{contact.name}}
             <img class="contact-image" ng-src='{{contact.imageData}}'>
@@ -159,7 +173,7 @@
             {{ ui.contact.name }} is not running uProxy.
             </p>
             <div ng-show="ui.instance">
-              <div class="instance-actions">
+              <div class="instance-actions" ng-show="ui.rosterNudge">
                 <p>
                   {{ui.instance.description}}
                 </p>
@@ -200,6 +214,7 @@
                   </div>
                   <button class="btn"
                       ng-switch-default
+                      ng-disabled="ui.pendingTrustChange"
                       ng-click="requestAccess(ui.instance)">
                     Request
                   </button>
@@ -228,6 +243,7 @@
             </div>
             <a class="chat-btn" href="{{ ui.contact.url }}"
                target="_blank"
+               ng-show="ui.rosterNudge"
                ng-mouseenter="chatButtonHovered=true"
                ng-mouseleave="chatButtonHovered=false">
             </a>
@@ -285,18 +301,6 @@
         </span>
         <span ng-show="! loggedIn()">Not Connected to a network</span>
       </span>
-
-      <button id="options-btn" ng-click="toggleOptions()"
-          ng-mouseenter="optionsTooltip=true"
-          ng-mouseleave="optionsTooltip=false"
-          title="{{'options'|i18n}}">
-      </button>
-      <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-        <span ng-show="ui.splashPage && ui.rosterNudge">Show the contact again.</span>
-        <span ng-show="ui.splashPage && !ui.rosterNudge">Show the contact list.</span>
-        <span ng-hide="ui.splashPage">Show the setup page.</span>
-      </div>
-
     </div>
 
   </div></body>
