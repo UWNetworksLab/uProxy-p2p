@@ -227,6 +227,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('change-option', {key: key, value: value});
       }
 
+      //
+      var updateDOM = function(patch) {
+        $rootScope.$apply(function () {
+          // Also update pointers locally ?
+          // $rootScope.instances = model.instances;
+        });
+      };
+      onStateChange.addListener(updateDOM);
+
       var clearedAndRetried = false;
     }  // run function
   ]);
