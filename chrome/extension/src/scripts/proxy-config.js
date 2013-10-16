@@ -26,7 +26,8 @@
         },
         // List of domains to bypass the proxy
         // Bypass Google/Facebook RESTful API endpoint (used by XMPP for auth)
-        bypassList: ["<local>", "www.googleapis.com", "graph.facebook.com"]
+        bypassList: ["<local>", "www.googleapis.com", "graph.facebook.com",
+                     "computeengineondemand.appspot.com"]
       }
     };
 
