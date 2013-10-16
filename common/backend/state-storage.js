@@ -198,7 +198,6 @@ UProxyState.prototype.syncRosterFromInstanceId = function(instanceId) {
   }
 };
 
-
 // Called when a new userId is available. & when a new instance
 // happens. We check to see if we need to update our instance information.
 // Assumes that an instacne already exists for this userId.
