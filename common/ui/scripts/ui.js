@@ -125,21 +125,35 @@ UI.prototype.contactIsFiltered = function(c) {
 
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
-  // Count up notifications
-  var n = 0;
+
+  var n = 0;  // Count up notifications
   for (var userId in model.roster) {
     var user = model.roster[userId];
     var instanceId = null;
     for (var clientId in user.clients) {
       instanceId = model.clientToInstance[clientId];
-      if (instanceId) {
-        if (model.instances[instanceId].notify) {
-          console.log('found user ' + user.userId + ' with notification.');
-          user.hasNotification = true;
-          break;
-        }
+      // TODO(uzimizu): Support multiple instances.
+      if (!instanceId) {
+        continue;
       }
+      // Find instance associated with the user.
+      var instance = model.instances[instanceId];
+      if (!instance) {
+        continue;
+      }
+      user.canUProxy = true;
+      console.log('found user ' + user.userId + ' with notification.');
+      user.hasNotification = true;
+
+      // Pass-over the trust value to user-level.
+      // TODO(uzimizu): Take the assumption of highest trust level, if there are
+      // multiple instances.
+      user.trust = instance.trust;
+      user.givesMe = ('no' != user.trust.asProxy);
+      user.usesMe = ('no' != user.trust.asClient);
+      break;
     }
+
     if (user.hasNotification) {
       n++;
     }

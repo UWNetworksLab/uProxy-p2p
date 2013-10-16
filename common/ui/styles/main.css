@@ -463,12 +463,28 @@ img.contact-image {
 
 .c-icon {
   padding: 1px;
+  width: 18px;
+  height: 16px;
+  line-height: 16px;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  background: transparent no-repeat center;
+  background-size: 14px !important;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  .c-icon.canUProxy {
+    background-image: url("../icons/uproxy-19.png"); }
+  .c-icon.givesMe {
+    background-image: url("../icons/arrow-up.png"); }
+  .c-icon.usesMe {
+    background-image: url("../icons/arrow-down.png"); }
+  .c-icon.grey {
+    opacity: 0.3; }
   .c-icon:hover {
-    color: #888888; }
+    opacity: 0.9; }
 
 .c-notification {
   position: absolute;

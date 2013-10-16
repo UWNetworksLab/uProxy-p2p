@@ -459,9 +459,26 @@ img.contact-image
   font-weight: 900
 .c-icon
   padding: 1px
+  width: 18px
+  height: 16px
+  line-height: 16px
+  display: inline-block
+  text-align: center
+  vertical-align: middle
+  background: transparent no-repeat center
+  background-size: 14px !important
   @include smooth
+  &.canUProxy
+    background-image: url('../icons/uproxy-19.png')
+  &.givesMe
+    background-image: url('../icons/arrow-up.png')
+  &.usesMe
+    background-image: url('../icons/arrow-down.png')
+  &.grey
+    opacity: 0.3
   &:hover
-    color: #888
+    opacity: 0.9
+
 
 // Red ! shows up on the corner of contacts who have had a change.
 .c-notification
