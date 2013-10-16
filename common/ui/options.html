@@ -168,7 +168,8 @@
     </div>
     </div>
 
-    <details id="debug" open ng-show="model._debug">
+    <details id="debug" open ng-show="model._debug"
+        ng-click="bigdebug=!bigdebug" ng-class="{big:bigdebug}">
       <summary>Debug</summary>
       <pre class="well">state: {{model|json}}</pre>
     </details>

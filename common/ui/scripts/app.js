@@ -80,6 +80,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('reset', null);
       };
 
+      $rootScope.sendInstance = function (clientId) {
+        appChannel.emit('send-instance', clientId);
+      };
+
       // Takes in an entry from the roster table.
       $rootScope.instanceOfContact = function(contact) {
         for (var clientId in contact.clients) {
@@ -95,6 +99,16 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[instanceId];
         }
         return null;
+      };
+
+      // A simple predicate function to see if we can talk to this client.
+      $rootScope.isMessageableUproxyClient = function(client) {
+        // TODO(uzimizu): Make identification of whether or not this is a uproxy
+        // client more sensible.
+        var retval = (client.status == 'online' ||
+                      client.status == 'messageable') &&
+                      (client.clientId.indexOf('/uproxy') > 0);
+        return retval;
       };
 
       $rootScope.instanceOfClientId = function(clientId) {

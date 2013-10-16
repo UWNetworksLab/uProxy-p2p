@@ -73,7 +73,7 @@ describe("uproxy.updateUser", function() {
       network: 'magic',
       status: 'messageable'
     };
-    expect(uproxy.sendInstance).toHaveBeenCalledWith(aliceClient);
+    expect(uproxy.sendInstance).toHaveBeenCalledWith(aliceClient.clientId);
   });
 });  // uproxy.updateUser
 
