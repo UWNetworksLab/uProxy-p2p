@@ -18,7 +18,8 @@ function UI(browserType) {
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
-  this.lastSync = new Date();
+  this.pendingProxyTrustChange = false;
+  this.pendingClientTrustChange = false;
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.
@@ -33,6 +34,14 @@ function UI(browserType) {
   // When the description changes while the text field loses focus, it
   // automatically updates.
   this.oldDescription = '';
+
+  // Initial filter state.
+  this.filters = {
+      'online': true,
+      'myAccess': false,
+      'friendsAccess': false,
+      'uproxy': false
+  };
 }
 
 UI.prototype.setNotifications = function(n) {
@@ -83,23 +92,75 @@ UI.prototype.setClients = function(numClients) {
 }
 
 
+// -------------------------------- Filters ------------------------------------
+// Toggling |filter| changes the visibility and ordering of roster entries.
+UI.prototype.toggleFilter = function(filter) {
+  if (undefined === this.filters[filter]) {
+    console.error('Filter "' + filter + '" is not a valid filter.');
+    return false;
+  }
+  console.log('Toggling ' + filter + ' : ' + this.filters[filter]);
+  this.filters[filter] = !this.filters[filter];
+};
+
+// Returns |true| if contact |c| should *not* appear in the roster.
+UI.prototype.contactIsFiltered = function(c) {
+  var searchText = this.search,
+      compareString = c.name.toLowerCase();
+  // First, compare filters.
+  if ((this.filters.online        && !c.online)    ||
+      (this.filters.uproxy        && !c.canUProxy) ||
+      (this.filters.myAccess      && !c.givesMe) ||
+      (this.filters.friendsAccess && !c.usesMe)) {
+    return true;
+  }
+  // Otherwise, if there is no search text, this contact is visible.
+  if (!searchText) {
+    return false;
+  }
+  if (compareString.indexOf(searchText) >= 0) {
+    return false;
+  }
+  return true;  // Does not match the search text, should be hidden.
+};
+
+
+
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
-  // Count up notifications
-  var n = 0;
+
+  var n = 0;  // Count up notifications
   for (var userId in model.roster) {
     var user = model.roster[userId];
     var instanceId = null;
+    var hasNotification = false;
+    var canUProxy = false;
     for (var clientId in user.clients) {
       instanceId = model.clientToInstance[clientId];
-      if (instanceId) {
-        if (model.instances[instanceId].notify) {
-          console.log('found user ' + user.userId + ' with notification.');
-          user.hasNotification = true;
-          break;
-        }
+      // TODO(uzimizu): Support multiple instances.
+      if (!instanceId) {
+        continue;
       }
+      // Find instance associated with the user.
+      var instance = model.instances[instanceId];
+      if (!instance) {
+        continue;
+      }
+      canUProxy = true;
+      if (instance.notify) {
+        console.log('found user ' + user.userId + ' with notification.');
+        hasNotification = true;
+      }
+      // Pass-over the trust value to user-level.
+      // TODO(uzimizu): Take the assumption of highest trust level, once support
+      // for multiple instances has arrived.
+      user.trust = instance.trust;
+      user.givesMe = ('no' != user.trust.asProxy);
+      user.usesMe = ('no' != user.trust.asClient);
+      break;
     }
+    user.canUProxy = canUProxy;
+    user.hasNotification = hasNotification;
     if (user.hasNotification) {
       n++;
     }
@@ -118,6 +179,9 @@ UI.prototype.synchronize = function() {
     }
   }
   this.setClients(c);
+
+  this.pendingProxyTrustChange = false;
+  this.pendingClientTrustChange = false;
 
   // Generate list ordered by names.
   var uids = Object.keys(model.roster);

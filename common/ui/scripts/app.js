@@ -65,14 +65,22 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Determine whether UProxy is connected to some network.
       $rootScope.loggedIn = function() {
-        for(var networkId in model.identityStatus) {
-          if(model.identityStatus[networkId].status == 'online') return true;
+        for (var networkId in model.identityStatus) {
+          if ('online' == model.identityStatus[networkId].status) {
+            return true;
+          }
         }
         return false;
       };
 
+      // This is *NOT* the inverse of loggedIn, because it is possible to be
+      // "logging in"
       $rootScope.loggedOut = function() {
-        return !$rootScope.loggedIn();
+        for(var networkId in model.identityStatus) {
+          if('offline' != model.identityStatus[networkId].status)
+            return false;
+        }
+        return true;
       };
 
       $rootScope.resetState = function () {
@@ -180,15 +188,19 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.requestAccess = function(instance) {
         console.log("requestAccess: ", instance);
         $rootScope.instanceTrustChange(instance.instanceId, 'request-access');
+        ui.pendingProxyTrustChange = true;
       };
       $rootScope.cancelRequest = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'cancel-request');
+        ui.pendingProxyTrustChange = true;
       }
       $rootScope.acceptOffer = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'accept-offer');
+        ui.pendingProxyTrustChange = true;
       };
       $rootScope.declineOffer = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'decline-offer');
+        ui.pendingProxyTrustChange = true;
       };
       $rootScope.startAccess = function(instance) {
         // We don't need to tell them we'll start proxying, we can just try to
@@ -208,18 +220,21 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Providing access for a friend:
       $rootScope.offerAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'offer');
+        ui.pendingClientTrustChange = true;
       };
       $rootScope.grantAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'allow');
+        ui.pendingClientTrustChange = true;
       };
       $rootScope.revokeAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'deny');
+        ui.pendingClientTrustChange = true;
       };
       $rootScope.denyAccess = $rootScope.revokeAccess;
 
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
-        console.log('instance trust change ' + action + ', ' + id);
+        // console.log('instance trust change ' + action + ', ' + id);
         appChannel.emit('instance-trust-change',
           { instanceId: id, action: action });
       };
@@ -232,12 +247,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
-        // $rootScope.notifications--;
-        // if ($rootScope.notifications == 0) {
-          // $rootScope.notifications = '';
-        // }
         ui.decNotifications();
-        // icon.label('' + $rootScope.notifications);
       }
 
       $rootScope.changeOption = function (key, value) {

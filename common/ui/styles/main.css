@@ -51,15 +51,17 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.btn:hover, .btn:focus {
-  border-color: #999999;
-  box-shadow: 0 1px 3px #aaaaaa;
-  outline: none; }
-
-.btn:active {
-  box-shadow: 0 1px 3px #aaaaaa inset;
-  color: #777777; }
+  .btn:hover, .btn:focus {
+    border-color: #999999;
+    box-shadow: 0 1px 3px #aaaaaa;
+    outline: none; }
+  .btn:active {
+    box-shadow: 0 1px 3px #aaaaaa inset;
+    color: #777777; }
+  .btn:disabled {
+    color: #999999;
+    border-color: #cccccc;
+    box-shadow: 0 1px 2px #bbbbbb inset; }
 
 .btn-request {
   position: absolute;
@@ -108,12 +110,13 @@ ul {
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
   #options-btn:active, #options-btn:focus {
-    opacity: 0.9; }
+    opacity: 0.4; }
   #options-btn:hover {
     opacity: 0.3; }
 
 #options-btn-tip {
   position: fixed;
+  z-index: 500;
   top: 20px;
   right: 2px;
   background-color: black;
@@ -198,9 +201,8 @@ ul {
 .network-btn {
   display: inline-block;
   margin: 8px; }
-
-.network-btn .btn {
-  font-size: 24px; }
+  .network-btn .btn {
+    font-size: 24px; }
 
 .uproxy-banner {
   font-size: 32px;
@@ -454,18 +456,34 @@ img.contact-image {
 .c-icons {
   position: absolute;
   right: 12px;
-  color: #222222;
+  color: #555555;
   font-size: 12.8px;
   font-weight: 900; }
 
 .c-icon {
+  display: inline-block;
   padding: 1px;
+  width: 18px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: middle;
+  background: transparent no-repeat center;
+  background-size: 14px !important;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  .c-icon.canUProxy {
+    background-image: url("../icons/uproxy-19.png"); }
+  .c-icon.givesMe {
+    background-image: url("../icons/arrow-up.png"); }
+  .c-icon.usesMe {
+    background-image: url("../icons/arrow-down.png"); }
+  .c-icon.grey {
+    opacity: 0.3; }
   .c-icon:hover {
-    color: #888888; }
+    opacity: 0.9; }
 
 .c-notification {
   position: absolute;
@@ -527,8 +545,9 @@ img.c-icon {
   border: 1px none black;
   outline: none;
   padding: 4px;
-  width: 40px;
-  height: 40px;
+  margin: 8px;
+  width: 30px;
+  height: 30px;
   text-decoration: none;
   opacity: 0.6;
   cursor: pointer;
