@@ -683,6 +683,10 @@ details > *:not(summary) {
     white-space: pre-wrap; }
   #debug form[name=sendMsgForm] {
     margin-bottom: 3px; }
+  #debug.big {
+    width: 100%; }
+  #debug:hover {
+    background-color: #0f0f0f; }
 
 .dbg {
   position: fixed;
