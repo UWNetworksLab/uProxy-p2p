@@ -16,7 +16,20 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     var ui = $scope.ui;
     $scope.optionsTooltip = false;
 
-    // Opening the detailed contact view.
+    var syncInstanceWatch = function(instanceId) {
+      // Check for new instance binding, to re-watch.
+      if (ui.instanceUnwatch) {
+        ui.instanceUnwatch();
+        ui.instanceUnwatch = null;
+      }
+      ui.instanceUnwatch = $scope.$watch(
+          'model.instances["' + instanceId + '"]', function() {
+            ui.instance = $scope.model.instances[instanceId];
+          });
+    };
+
+    // Open the detailed contact view, with a potential instance. Set the
+    // currently focused instance and ensure angular bindings work.
     $scope.viewContact = function(c) {
       console.log("viewContact: c=\n", c);
       for (var clientId in c.clients) {
@@ -26,14 +39,20 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         }
       }
       ui.contact = c;
-      ui.instance = $scope.instanceOfContact(c);
+      var instance = $scope.instanceOfContact(c);
+      if (instance) {
+        ui.instance = instance;
+        syncInstanceWatch(instance.instanceId);
+      } else {
+        ui.instance = null;
+      }
       console.log('current instance ' + ui.instance);
-      ui.rosterNudge = true;
+
       $scope.notificationSeen(c);
       if (!ui.isProxying) {
         ui.proxy = null;
       }
-      // $scope.ui.refreshDOM();
+      ui.rosterNudge = true;
     };
 
     $scope.filterTips = {
@@ -79,20 +98,23 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.showFilterTip = true;
     };
 
-    $scope.$watch('ui.contact',function(){
-      var contact = $scope.ui.contact;
+    $scope.$watch('ui.focus',function(){
+      var contact = ui.contact;
       if (contact) {
         console.log('current contact changed');
-        $scope.ui.contact = $scope.model.roster[contact.userId];
+        ui.contact = $scope.model.roster[contact.userId];
       }
-    });
-    $scope.$watch('ui.instance',function(){
-      var instance = $scope.ui.instance;
+      var instance = ui.instance;
       if (instance) {
         console.log('current instance changed');
-        $scope.ui.instance = $scope.model.instances[instance.instanceId];
+        ui.instance = $scope.model.instances[instance.instanceId];
       }
+      // $scope.$digest();
     });
+
+    if (ui.instance) {
+      syncInstanceWatch(ui.instance.instanceId);
+    }
     // Refresh local state variables when the popup is re-opened.
     // if ($scope.ui.contact) {
       // $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
