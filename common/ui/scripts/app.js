@@ -227,12 +227,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         appChannel.emit('change-option', {key: key, value: value});
       }
 
-<<<<<<< HEAD
-      //
-      var updateDOM = function(patch) {
-=======
-      var clearedAndRetried = false;
-
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
       // through you. See:
@@ -240,15 +234,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       var updateDOM = function() {
->>>>>>> 98a6366100054237213b97996b2cf53fa386a715
         $rootScope.$apply(function () {
           // Also update pointers locally ?
           // $rootScope.instances = model.instances;
         });
       };
       onStateChange.addListener(updateDOM);
-
-      var clearedAndRetried = false;
     }  // run function
   ]);
+
 

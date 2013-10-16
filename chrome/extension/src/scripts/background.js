@@ -276,7 +276,7 @@ function checkRunningProxy() {
 
 function checkThatAppIsInstalled() {
   appChannel.connect();
-  setTimeout(checkThatAppIsInstalled, new Date() + (SYNCHRONIZE_TIMEOUT * 2));
+  setTimeout(checkThatAppIsInstalled, new Date() + (SYNC_TIMEOUT * 2));
 }
 
 // Attach state-change listener to update UI from the backend.
