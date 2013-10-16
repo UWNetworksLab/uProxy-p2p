@@ -10,7 +10,7 @@ function AuthXmpp(cb) {
 };
 
 AuthXmpp.prototype.login = function(interactive) {
-  chrome.storage.get(CREDENTIALS_KEY, (function(data) {
+  chrome.storage.local.get(CREDENTIALS_KEY, (function(data) {
     if (data && data[CREDENTIALS_KEY] && data[CREDENTIALS_KEY] !== null) {
       this.credentialsCallback(data[CREDENTIALS_KEY]);
       return;
@@ -23,7 +23,7 @@ AuthXmpp.prototype.login = function(interactive) {
 };
 
 AuthXmpp.prototype.logout = function() {
-  chrome.storage.remove(CREDENTIALS_KEY);
+  chrome.storage.local.remove(CREDENTIALS_KEY);
 };
 
 /*** 
@@ -44,7 +44,7 @@ AuthXmpp.prototype.createDialog = function() {
       this.dialogWindow = child_win;
       this.dialogWindow.onClosed.addListener((function() {
         this.dialogWindow = null;
-        chrome.storage.get(CREDENTIALS_KEY, (function(data) {
+        chrome.storage.local.get(CREDENTIALS_KEY, (function(data) {
           if (data && data[CREDENTIALS_KEY] && data[CREDENTIALS_KEY] !== null) {
             this.credentialsCallback(data[CREDENTIALS_KEY]);
             return;

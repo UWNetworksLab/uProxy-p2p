@@ -8,13 +8,29 @@
   </head>
   <body>
     <div class='container span7'>
-      <form id='login-form' class="form-inline">
-        <legend>XMPP login</legend>
+      <form id='login-form' class="form-horizontal">
         <fieldset>
-        <input id='username' type="text" placeholder="Username (e.g. alice@jabber.org)">
-        <span class="help-block">Type in the full username with the domain</span>
-        <input id='password' type="password" placeholder="Password">
-        <button id='submit' class="btn">Log in</button>
+        <legend>XMPP login</legend>
+        <div class="control-group">
+          <label class="control-label" for="inputEmail">Username</label>
+          <div class="controls">
+            <input type="text" id="username" placeholder="Username (alice@jabber.org)">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="inputPassword">Password</label>
+          <div class="controls">
+            <input type="password" id="password" placeholder="Password">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <!-- label class="checkbox">
+            <input type="checkbox"> Remember me
+            </label -->
+            <button type="submit" class="btn">Sign in</button>
+          </div>
+        </div>
         </fieldset>
       </form>
     </div>
