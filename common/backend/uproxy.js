@@ -124,7 +124,7 @@ bgAppPageChannel.on('notification-seen', function (userId) {
     console.error('User ' + userId + ' does not exist!');
     return false;
   }
-  user.hasNotification = false;
+  // user.hasNotification = false;
   // Go through clients, remove notification flag from any uproxy instance.
   for (var clientId in user.clients) {
     var instanceId = store.state.clientToInstance[clientId];
@@ -132,11 +132,7 @@ bgAppPageChannel.on('notification-seen', function (userId) {
       _removeNotification(instanceId);
     }
   }
-  // _removeNotification(user);
-  // instance.notify = false;
-  // store.saveInstance(id);
   // Don't need to re-sync with UI - expect UI to have done the change.
-  // _syncInstanceUI(instance);
 });
 
 // --------------------------------------------------------------------------
@@ -412,6 +408,7 @@ identity.on('onMessage', function (msgInfo) {
   _msgReceivedHandlers[msgType](msgInfo);
 });
 
+
 // Update data for a user, typically when new client data shows up. Notifies all
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
@@ -525,7 +522,8 @@ function makeMyInstanceMessage() {
 // that we've received the other side's Instance data yet.
 function sendInstance(client) {
   var instancePayload = makeMyInstanceMessage();
-  console.log("sendInstance: " + JSON.stringify(instancePayload) + ' to ' + JSON.stringify(client));
+  console.log('sendInstance: ' + JSON.stringify(instancePayload) +
+              ' to ' + JSON.stringify(client));
   identity.sendMessage(client.clientId, instancePayload);
   return true;
 }

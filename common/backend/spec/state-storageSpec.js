@@ -6,7 +6,7 @@ function readJsonFile(location) {
   return JSON.parse(xhr.responseText);
 }
 
-// Depends on the MockStoage that executes everything syncronously.
+// Depends on the MockStorage that executes everything synchronously.
 describe("state-storage", function() {
   var exampleState = readJsonFile("common/backend/test/example-state.json");
   var exampleSavedState = readJsonFile("common/backend/test/example-saved-state.json");
@@ -80,4 +80,4 @@ describe("state-storage", function() {
   it("* ... and check reset callback was called.", function() {
     expect(wasResetCallbackCalled).toEqual(true);
   });
-});  // util
+});  // state-storage
