@@ -554,11 +554,7 @@ function receiveInstance(msg) {
 
   // Update UI's view of instances and mapping.
   // TODO: This can probably be made smaller.
-  bgAppPageChannel.emit('state-change', [{
-      op: instanceOp,
-      path: '/instances/' + instanceId,
-      value: store.state.instances[instanceId]
-  }]);
+  _syncInstanceUI(store.state.instances[instanceId]);
   bgAppPageChannel.emit('state-change', [
     { op: 'replace', path: '/clientToInstance',
       value: store.state.clientToInstance },
@@ -700,7 +696,7 @@ bgAppPageChannel.on('start-proxy-localhost-test', function () {
 //  Updating the UI
 // --------------------------------------------------------------------------
 function _SyncUI(path, value, op) {
-  op = op || 'replace';
+  op = op || 'add';
   bgAppPageChannel.emit('state-change', [{
       op: op,
       path: path,
