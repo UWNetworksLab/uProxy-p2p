@@ -119,14 +119,11 @@
 
       <div id="roster">
         <div id="roster-text">
-          <span ng-show="!loggedIn()">
+          <span ng-show="loggedOut()">
             You aren't logged in to a network. Goto your settings to login.
           </span>
-          <span ng-hide="loggedIn()">
-            {{ model.roster.length }}
-            <span ng-show=" isEmpty(model.roster)">
-              Loading Roster...
-            </span>
+          <span ng-hide="loggedOut() || loggedIn()">
+            Loading...
           </span>
         </div>
 

@@ -65,14 +65,22 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Determine whether UProxy is connected to some network.
       $rootScope.loggedIn = function() {
-        for(var networkId in model.identityStatus) {
-          if(model.identityStatus[networkId].status == 'online') return true;
+        for (var networkId in model.identityStatus) {
+          if ('online' == model.identityStatus[networkId].status) {
+            return true;
+          }
         }
         return false;
       };
 
+      // This is *NOT* the inverse of loggedIn, because it is possible to be
+      // "logging in"
       $rootScope.loggedOut = function() {
-        return !$rootScope.loggedIn();
+        for(var networkId in model.identityStatus) {
+          if('offline' != model.identityStatus[networkId].status)
+            return false;
+        }
+        return true;
       };
 
       $rootScope.resetState = function () {
