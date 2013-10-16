@@ -484,7 +484,7 @@ function updateUser(newData) {
   user.canUProxy = canUProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
-  user.onXMPP = onXMPP
+  user.onXMPP = onXMPP;
   bgAppPageChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
