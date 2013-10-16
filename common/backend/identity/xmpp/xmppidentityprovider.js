@@ -83,6 +83,8 @@ IdentityProvider.prototype.login = function(opts, continuation) {
     //Start XMPP client
     this.client = new window.XMPP.Client(
         CONNECT_OPTS(clientId, this.credentials.token));
+    //DEBUG
+    this.client.preferredSaslMechanism = "PLAIN";
 
     //TODO(willscott): Support Upgrade to TLS wrapped connection.
     this.client.connection.allowTLS = false;
