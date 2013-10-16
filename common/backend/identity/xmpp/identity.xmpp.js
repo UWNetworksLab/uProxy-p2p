@@ -334,11 +334,11 @@ IdentityProvider.prototype.onRoster = function(stanza) {
 // Fired when a contact is present.
 IdentityProvider.prototype.onPresence = function(stanza) {
   // console.log(stanza.attrs.from);
-  //if(window.presence) {
-  //  window.presence.push(stanza);
-  //} else {
-  //  window.presence = [stanza];
-  //}
+  if(window.presence) {
+    window.presence.push(stanza);
+  } else {
+    window.presence = [stanza];
+  }
   //Set status
   var status = stanza.getChildText("show") || "online";
   if (stanza.attrs.type == 'unavailable') {
