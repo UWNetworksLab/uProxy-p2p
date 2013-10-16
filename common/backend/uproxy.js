@@ -444,6 +444,7 @@ function updateUser(newData) {
   var instance = store.instanceOfUserId(userId);
   var onGoogle = false,   // Flag updates..
       onFB = false,
+      onXMPP = false,
       online = false,
       canUProxy = false;
   user.name = newData.name;
@@ -465,6 +466,8 @@ function updateUser(newData) {
       onGoogle = true;
     if (!onFB && 'facebook' == client.network)
       onFB = true;
+    if (!onXMPP && 'xmpp' == client.network)
+      onXMPP = true;
 
     if (!online && 'manual' != client.network &&
         ('messageable' == client.status || 'online' == client.status)) {
@@ -481,6 +484,7 @@ function updateUser(newData) {
   user.canUProxy = canUProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
+  user.onXMPP = onXMPP
   bgAppPageChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,

@@ -50,6 +50,7 @@ describe("uproxy.updateUser", function() {
       canUProxy: false,
       onGoogle: false,
       onFB: false,
+      onXMPP: false,
     });
   });
 

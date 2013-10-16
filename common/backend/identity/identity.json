@@ -13,6 +13,10 @@
       "url": "manual/identity.manual.json",
       "api": "identity"
     },
+    "xmppIdentity": {
+      "url": "xmpp/generic/identity.xmpp.json",
+      "api": "identity"
+    },
     "googleIdentity": {
       "url": "xmpp/google/identity.google.json",
       "api": "identity"
