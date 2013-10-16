@@ -56,7 +56,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // Opening the detailed contact view.
     $scope.viewContact = function(c) {
-      console.log("viewContact: ", c);
+      console.log("viewContact: c=\n", c);
       for (var clientId in c.clients) {
         if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
           console.log("viewContact: sendInstance: " + clientId);
@@ -64,7 +64,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         }
       }
       $scope.ui.contact = c;
-      console.log('current contact ', c);
       $scope.ui.instance = $scope.instanceOfContact(c);
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;

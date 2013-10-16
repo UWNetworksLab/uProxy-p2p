@@ -527,7 +527,6 @@ function makeMyInstanceMessage() {
     description: '' + store.state.me.description,
     keyHash:     '' + store.state.me.keyHash,
     rosterInfo: {
-      userId:  firstIdentity.userId,
       name:    firstIdentity.name,
       network: firstIdentity.network,
       url:     firstIdentity.url

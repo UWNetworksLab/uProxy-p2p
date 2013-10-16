@@ -233,6 +233,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     this.state.instances[instanceId] = instance;
   }
   instance.rosterInfo = data.rosterInfo;
+  instance.rosterInfo.userId = userId;
   instance.description = data.description;
 
   this.syncRosterFromInstanceId(instanceId);
