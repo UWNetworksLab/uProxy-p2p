@@ -16,8 +16,10 @@ function FreedomConnector(id, options) {
   this.onDisconnected = new chrome.Event();
   // A callback |function() {...}| to call when connected.
   this.onConnected = new chrome.Event();
-  // True iff connected.
-  this.connected = false;
+  // Status object for copnnected. This is an object so it can be bound in
+  // angular. connected = true iff connected to the app which is running
+  // freedom.
+  this.status = { connected: false };
   // The chrome.runtime.Port used to speak to the App/Extension running Freedom.
   this.port_ = null;
   // A freedom-type indexed object where each key provides a list of listener
@@ -32,12 +34,22 @@ function FreedomConnector(id, options) {
 
 // Try to connect to the app/extension running Freedom.
 FreedomConnector.prototype.connect = function() {
-  if(this.connected) {
-    console.info('Already connected.');
+  if(this.status.connected) {
+    // console.info('Already connected.');
     return;
   }
   console.info('Trying to connect to the app');
   this.port_ = chrome.runtime.connect(this.id_, this.options_);
+
+  try {
+    this.port_.postMessage("hi");  // message used just to check we can connect.
+    this.status.connected = true;
+  } catch (e) {
+    console.log("Tried to say hi to app, but failed.");
+    this.status.connected = false;
+    this.port_ = null;
+    return false;
+  }
 
   this._currentDisconnectCallback = this.onDisconnected_.bind(this);
   this.port_.onDisconnect.addListener(this._currentDisconnectCallback);
@@ -52,9 +64,7 @@ FreedomConnector.prototype.dispatchFreedomEvent_ = function(msg) {
   if (this.listeners_[msg.type]) {
     var handlers = this.listeners_[msg.type].slice(0);
     for (var i = 0; i < handlers.length; i++) {
-      if (handlers[i](msg.data) === false) {
-        break;
-      }
+      handlers[i](msg.data)
     }
   }
 };
@@ -67,12 +77,11 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
   if (msg == 'hello.') {
     console.info('Got hello from UProxy App.');
     // No longer wait for first message.
-    this.port_.onMessage.removeListener(this._currentMessageCallback);
     // Relay any messages to this port to any function that has registered as
     // wanting to listen using an 'freedom.on' from this connector.
+    this.port_.onMessage.removeListener(this._currentMessageCallback);
     this._currentMessageCallback = this.dispatchFreedomEvent_.bind(this);
     this.port_.onMessage.addListener(this._currentMessageCallback);
-    this.connected = true;
     // If we have an |onConnected| callback, call it.
     this.onConnected.dispatch();
   } else {
@@ -83,7 +92,7 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
 // Wrapper for disconnection.
 FreedomConnector.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
-  this.connected = false;
+  this.status.connected = false;
   if(this.port_) {
     if(this._currentMessageCallback) {
       this.port_.onMessage.removeListener(this._currentMessageCallback);
@@ -110,21 +119,26 @@ FreedomConnector.prototype.onDisconnected_ = function() {
 
 // send emit to Freedom.
 FreedomConnector.prototype.emit = function(t, d) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |emit| on a disconnected FreedomConnector.');
     return;
   }
-  this.port_.postMessage({
-    cmd: 'emit',
-    type: t,
-    data: d
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'emit',
+      type: t,
+      data: d
+    });
+  } catch (e) {
+    console.warn("emit: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };
 
 // Add the listener callback to be called when we get events of type |t|
 // from freedom.
 FreedomConnector.prototype.on = function(t, listener) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |on| on a disconnected FreedomConnector.');
     return;
   }
@@ -133,10 +147,15 @@ FreedomConnector.prototype.on = function(t, listener) {
   } else {
     this.listeners_[t] = [listener];
   }
-  this.port_.postMessage({
-    cmd: 'on',
-    type: t
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'on',
+      type: t
+    });
+  } catch (e) {
+    console.warn("on: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };
 
 // Add the listener callback to be called once when we get an event of type
@@ -144,7 +163,7 @@ FreedomConnector.prototype.on = function(t, listener) {
 // TODO: Test this.
 // Calls listener only once and then remove it.
 FreedomConnector.prototype.once = function(t, listener) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |once| on a disconnected FreedomConnector.');
     return;
   }
@@ -159,8 +178,13 @@ FreedomConnector.prototype.once = function(t, listener) {
   } else {
     this.listeners_[t] = [func];
   }
-  this.port_.postMessage({
-    cmd: 'once',
-    type: t
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'once',
+      type: t
+    });
+  } catch (e) {
+    console.warn("once: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };

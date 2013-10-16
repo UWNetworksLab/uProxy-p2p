@@ -59,8 +59,10 @@ var roster = new Roster();
 var UI = function() {
   this.ICON_DIR = '../common/ui/icons/';
 
+  this.networks = ['google', 'facebook'];
+
   this.notifications = 0;
-  this.splashPage = !this.loggedIn();
+  // TODO: splash should be set by state.
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
@@ -116,26 +118,6 @@ UI.prototype.setClients = function(numClients) {
     chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
   }
 }
-
-// Determine whether UProxy is connected to |network|.
-UI.prototype.isOnline = function(network) {
-  return (model && model.identityStatus &&
-          model.identityStatus[network] &&
-          'online' == model.identityStatus[network].status);
-};
-UI.prototype.isOffline = function(network) {
-  return (!model || !model.identityStatus ||
-          !model.identityStatus[network] ||
-          'offline' == model.identityStatus[network].status);
-};
-// Whether UProxy is logged in to *any* network.
-UI.prototype.loggedIn = function() {
-  return this.isOnline('google') || this.isOnline('facebook');
-};
-UI.prototype.loggedOut = function() {
-  return this.isOffline('google') && this.isOffline('facebook');
-};
-
 
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
@@ -198,13 +180,16 @@ function rateLimitedUpdates() {
   onStateChange.dispatch();
 }
 
-function wireUItoApp() {
+function initialize() {
+  // ui-ready tells uproxy.js to send over *all* the state.
+  appChannel.emit('ui-ready');
   console.log('Wiring UI to backend...');
-
   appChannel.on('state-change', function(patchMsg) {
     //console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
+    // TODO: run the check below for each message?
+    // TODO: fix JSON patch :)
     if (patchMsg[0].path === '') {
       for (var k in model) {
         delete model[k];
@@ -216,9 +201,6 @@ function wireUItoApp() {
       // NEEDS TO BE ADD BECAUSE THIS IS A HACK :)
       for (var i in patchMsg) {
         patchMsg[i].op = 'add';
-        // if (patchMsg[i].path.indexOf('roster') >= 0) {
-          //
-        // }
       }
       jsonpatch.apply(model, patchMsg);
     }
@@ -276,20 +258,6 @@ function wireUItoApp() {
   });
   console.log('Wiring UI to backend done.');
 }
-// Attach state-change listener to update UI from the backend.
-appChannel.onConnected.addListener(wireUItoApp);
-
-
-function reconnectToApp() {
-  console.log('Disconnected from App! Attempting to reconnect...');
-  appChannel.connect();
-}
-
-
-function initialize() {
-  // ui-ready tells uproxy.js to send over *all* the state.
-  appChannel.emit('ui-ready');
-}
 
 function checkRunningProxy() {
   if (model && model.instances) {
@@ -306,14 +274,12 @@ function checkRunningProxy() {
   proxyConfig.stopUsingProxy();
 }
 
-// Automatically attempt to reconnect when disconnected.
+function checkThatAppIsInstalled() {
+  appChannel.connect();
+  setTimeout(checkThatAppIsInstalled, new Date() + (SYNC_TIMEOUT * 2));
+}
+
+// Attach state-change listener to update UI from the backend.
 appChannel.onConnected.addListener(initialize);
-appChannel.onDisconnected.addListener(reconnectToApp);
-window.onunload = function() {
-  appChannel.onConnected.removeListener(wireUItoApp);
-};
 
-
-console.log('Connecting to App...');
-var connectedToApp = false;
-appChannel.connect();
+checkThatAppIsInstalled();

@@ -46,8 +46,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         $scope.ui.instance = $scope.instances[$scope.ui.instance.instanceId];
       });
     }
-    // Attach to the App-Extension channel.
-    // $scope.onAppData.addListener($scope.updateCurrentInstance);
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(finish)
@@ -69,18 +67,9 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
     };
 
-    $scope.logonToGoogle = function() {
-      $scope.login('google');
-      $scope.splashPage = false;
-      $scope.ui.splashPage = $scope.splashPage;
-    };
-
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.splashPage = !$scope.splashPage;
-      $scope.ui.splashPage = $scope.splashPage;
-      $scope.optionsTooltip = false;
-      // $scope.ui.splashPage = !$scope.ui.splashPage;
+      $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
     $scope.toggleSearch = function() {

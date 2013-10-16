@@ -5,8 +5,6 @@ var extPort = null;
 // A list of pending messages sent to the extension at the next possible
 // instance.
 var pendingMsgs = [];
-// true iff extension has connected to the app and extPort is connected.
-var connectedToExtension = false;
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
@@ -63,11 +61,11 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // TODO: remove this testing code.
   // setTimeout(function() { extPort.postMessage("ignore me."); }, 10);
   extPort.onMessage.addListener(onExtMsg);
+
   for (var i = 0; i < pendingMsgs.length; i++) {
     console.log(pendingMsgs[i]);
     extPort.postMessage(pendingMsgs[i]);
   }
-  connectedToExtension = true;
 });
 
 

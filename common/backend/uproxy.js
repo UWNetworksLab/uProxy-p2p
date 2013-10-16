@@ -377,7 +377,6 @@ var _msgReceivedHandlers = {
     'cancel-request': receiveTrustMessage,
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
-
     'notify-instance': receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
@@ -402,7 +401,8 @@ identity.on('onMessage', function (msgInfo) {
   // Call the relevant handler.
   var msgType = msgInfo.data.type;
   if (!(msgType in _msgReceivedHandlers)) {
-    console.error('No handler for message type: ' + msgType);
+    console.error('No handler for message type: ' +
+        JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
     return;
   }
   _msgReceivedHandlers[msgType](msgInfo);
@@ -569,7 +569,7 @@ function receiveInstance(msg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
-  console.log("sendConsent: ", instance);
+  console.log("sendConsent to instance: " + JSON.stringify(instance));
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');
