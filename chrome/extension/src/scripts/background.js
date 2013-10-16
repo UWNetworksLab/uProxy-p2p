@@ -55,8 +55,10 @@ var roster = new Roster();
 var UI = function() {
   this.ICON_DIR = '../common/ui/icons/';
 
+  this.networks = ['google', 'facebook'];
+
   this.notifications = 0;
-  this.splashPage = !this.loggedIn();
+  // TODO: splash should be set by state.
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
@@ -111,26 +113,6 @@ UI.prototype.setClients = function(numClients) {
     chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
   }
 }
-
-// Determine whether UProxy is connected to |network|.
-UI.prototype.isOnline = function(network) {
-  return (model && model.identityStatus &&
-          model.identityStatus[network] &&
-          'online' == model.identityStatus[network].status);
-};
-UI.prototype.isOffline = function(network) {
-  return (!model || !model.identityStatus ||
-          !model.identityStatus[network] ||
-          'offline' == model.identityStatus[network].status);
-};
-// Whether UProxy is logged in to *any* network.
-UI.prototype.loggedIn = function() {
-  return this.isOnline('google') || this.isOnline('facebook');
-};
-UI.prototype.loggedOut = function() {
-  return this.isOffline('google') && this.isOffline('facebook');
-};
-
 
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
@@ -200,51 +182,12 @@ function wireUItoApp() {
       // NEEDS TO BE ADD BECAUSE THIS IS A HACK :)
       for (var i in patchMsg) {
         patchMsg[i].op = 'add';
-        // if (patchMsg[i].path.indexOf('roster') >= 0) {
-          //
-        // }
       }
       jsonpatch.apply(model, patchMsg);
     }
 
     ui.synchronize();
     checkRunningProxy();
-    /*
-    // Run through roster if necessary.
-    if (patch[0].path.indexOf('roster') >= 0) {
-      // - Ensure it's sorted alphabetically.
-      console.log('roster edit. ' + patch[0].path);
-      // - Count up notifications.
-      $rootScope.notifications = 0;
-      // var sortedIds = Object.keys(model.roster);
-      // console.log(sortedIds);
-      // sortedIds.sort();
-      // var sortedRoster = {};
-      var rosterByName = {};
-      for (var userId in model.roster) {
-        // sortedRoster[userId] = model.roster[userId];
-        var user = model.roster[userId];
-        roster.updateContact(user);
-        $rootScope.notifications += user.hasNotification? 1 : 0;
-        // rosterByName[user.name] = user;
-      }
-      // var sortedNames = Object.keys(rosterByName);
-      // console.log(sortedNames);
-      // var sortedRoster = {};
-      // sortedNames.sort();
-      // for (var name in sortedNames) {
-        // sortedRoster[name] = rosterByName[name];
-      // }
-      // $rootScope.roster = sortedRoster;
-      if ($rootScope.notifications > 0) {
-        icon.label('' + $rootScope.notifications);
-      }
-      $rootScope.roster = roster;
-    }
-    */
-
-    // This event allows angular to bind listeners and update the DOM.
-    onStateChange.dispatch(patchMsg);
   });
   console.log('Wiring UI to backend done.');
 }

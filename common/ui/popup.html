@@ -21,43 +21,44 @@
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
 
-    <div id="login-splash" ng-show="ui.splashPage">
+    <div id="login-splash" ng-show="showingSplashPage()">
       <div class='uproxy-banner'>
       <img src='icons/uproxy-128.png'>proxy
       </div>
       <span class="description">Safe Passage for the Web.</span>
 
-      <input type="text" ng-model="model.me.description"
-          id="my-description"
-          placeholder="Device description"
-          ng-blur="updateDescription();descriptionHelp=false"
-          ng-focus="descriptionHelp=true">
-      </input>
-      <p class="tip" ng-show="descriptionHelp">
-        Please describe your device.
-        This description will be visible to your friends.
-      </p>
-
-      <div id="networks-box">
-      <h3>Networks</h3>
-
-      <div class="network-btn">
-      <button class="btn" ng-show="!ui.isOnline('google')"
-            ng-click="logonToGoogle()">G+</button>
-      <button class="btn" ng-show="ui.isOnline('google')"
-            ng-click="logout('google')">Logout G+</button>
+      <div class="app-missing-warning" ng-hide="uProxyAppConnectionStatus.connected">
+        You need to install the UProxy app as well as the UProxy extension.
       </div>
 
-      <div class="network-btn">
-      <button class="btn" ng-show="!ui.isOnline('facebook')"
-            ng-click="login('facebook')">FB</button>
-      <button class="btn" ng-show="ui.isOnline('facebook')"
-            ng-click="logout('facebook')">Logout FB</button>
-      </div>
+      <div ng-show="uProxyAppConnectionStatus.connected">
+        <input type="text" ng-model="model.me.description"
+            id="my-description"
+            placeholder="Device description"
+            ng-blur="updateDescription();descriptionHelp=false"
+            ng-focus="descriptionHelp=true">
+        </input>
+        <p class="tip" ng-show="descriptionHelp">
+          Please describe your device.
+          This description will be visible to friends with UProxy.
+        </p>
+
+        <div id="networks-box">
+          <h3>Networks</h3>
+
+          <div class="network-btn">
+            <span ng-repeat="network in ui.networks">
+              <button class="btn" ng-show="!isOnline(network)"
+                ng-click="login(network)">Login to {{ prettyNetworkName(network) }}</button>
+              <button class="btn" ng-show="isOnline(network)"
+                ng-click="logout(network)">Logout from {{ prettyNetworkName(network) }}</button>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div id="main-view" ng-hide="ui.splashPage" tabindex="-1">
+    <div id="main-view" ng-hide="showingSplashPage()" tabindex="-1">
       <div id="header">
         <div id="search-section" ng-hide="ui.rosterNudge">
           <div id="actions">
@@ -110,10 +111,10 @@
 
       <div id="roster">
         <div id="roster-text">
-          <span ng-show="ui.loggedOut()">
-            You aren't logged in to a network.
+          <span ng-show="!loggedIn()">
+            You aren't logged in to a network. Goto your settings to login.
           </span>
-          <span ng-hide="ui.loggedOut()">
+          <span ng-hide="loggedIn()">
             {{ model.roster.length }}
             <span ng-show=" isEmpty(model.roster)">
               Loading Roster...
@@ -269,11 +270,14 @@
       </span>
 
       <span id="status-network">
-        <span ng-show="ui.loggedIn()">
-          <span ng-show="model.identityStatus.google.status=='online'"> G+ </span>
+        <span ng-show="loggedIn()">
+          <span ng-repeat="identityState in model.identityStatus">
+            <span ng-show="identityState.status == 'connecting'"> Connecting to </span>
+            <span ng-show="identityState.status == 'online'"> Connected to </span>
+            {{prettyNetworkName(identityState.network)}}
+          </span>
         </span>
-        <span ng-show="model.identityStatus.google.status == 'connecting'"> Connecting to G+ </span>
-        <span ng-show="ui.loggedOut()">Not Connected</span>
+        <span ng-show="! loggedIn()">Not Connected to a network</span>
       </span>
 
       <button id="options-btn" ng-click="toggleOptions()"
@@ -282,7 +286,9 @@
           title="{{'options'|i18n}}">
       </button>
       <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-        Show/Hide the setup page.
+        <span ng-show="ui.splashPage && ui.instance">Show the contact again.</span>
+        <span ng-show="ui.splashPage && !ui.instance">Show the contact list.</span>
+        <span ng-hide="ui.splashPage">Show the setup page.</span>
       </div>
 
     </div>

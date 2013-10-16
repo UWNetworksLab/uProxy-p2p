@@ -69,18 +69,9 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
     };
 
-    $scope.logonToGoogle = function() {
-      $scope.login('google');
-      $scope.splashPage = false;
-      $scope.ui.splashPage = $scope.splashPage;
-    };
-
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
-      $scope.splashPage = !$scope.splashPage;
-      $scope.ui.splashPage = $scope.splashPage;
-      $scope.optionsTooltip = false;
-      // $scope.ui.splashPage = !$scope.ui.splashPage;
+      $scope.ui.splashPage = !$scope.ui.splashPage;
     };
 
     $scope.toggleSearch = function() {

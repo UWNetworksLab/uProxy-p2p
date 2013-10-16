@@ -574,7 +574,7 @@ function receiveInstance(msg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
-  console.log("sendConsent: ", instance);
+  console.log("sendConsent to instance: " + JSON.stringify(instance));
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');

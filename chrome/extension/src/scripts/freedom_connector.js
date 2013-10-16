@@ -16,8 +16,10 @@ function FreedomConnector(id, options) {
   this.onDisconnected = new chrome.Event();
   // A callback |function() {...}| to call when connected.
   this.onConnected = new chrome.Event();
-  // True iff connected.
-  this.connected = false;
+  // Status object for copnnected. This is an object so it can be bound in
+  // angular. connected = true iff connected to the app which is running
+  // freedom.
+  this.status = { connected: false };
   // The chrome.runtime.Port used to speak to the App/Extension running Freedom.
   this.port_ = null;
   // A freedom-type indexed object where each key provides a list of listener
@@ -32,7 +34,7 @@ function FreedomConnector(id, options) {
 
 // Try to connect to the app/extension running Freedom.
 FreedomConnector.prototype.connect = function() {
-  if(this.connected) {
+  if(this.status.connected) {
     console.info('Already connected.');
     return;
   }
@@ -72,7 +74,7 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
     // wanting to listen using an 'freedom.on' from this connector.
     this._currentMessageCallback = this.dispatchFreedomEvent_.bind(this);
     this.port_.onMessage.addListener(this._currentMessageCallback);
-    this.connected = true;
+    this.status.connected = true;
     // If we have an |onConnected| callback, call it.
     this.onConnected.dispatch();
   } else {
@@ -83,7 +85,7 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
 // Wrapper for disconnection.
 FreedomConnector.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
-  this.connected = false;
+  this.status.connected = false;
   if(this.port_) {
     if(this._currentMessageCallback) {
       this.port_.onMessage.removeListener(this._currentMessageCallback);
@@ -110,7 +112,7 @@ FreedomConnector.prototype.onDisconnected_ = function() {
 
 // send emit to Freedom.
 FreedomConnector.prototype.emit = function(t, d) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |emit| on a disconnected FreedomConnector.');
     return;
   }
@@ -124,7 +126,7 @@ FreedomConnector.prototype.emit = function(t, d) {
 // Add the listener callback to be called when we get events of type |t|
 // from freedom.
 FreedomConnector.prototype.on = function(t, listener) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |on| on a disconnected FreedomConnector.');
     return;
   }
@@ -144,7 +146,7 @@ FreedomConnector.prototype.on = function(t, listener) {
 // TODO: Test this.
 // Calls listener only once and then remove it.
 FreedomConnector.prototype.once = function(t, listener) {
-  if (!this.connected) {
+  if (!this.status.connected) {
     console.error('Cannot call |once| on a disconnected FreedomConnector.');
     return;
   }
