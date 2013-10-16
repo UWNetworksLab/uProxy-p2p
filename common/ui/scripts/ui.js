@@ -25,8 +25,9 @@ function UI(browserType) {
   this.accessIds = 0;  // How many people are proxying through us.
 
   // Keep track of currently viewed contact and instance.
-  this.contact = null;
+  this.contac = null;
   this.instance = null;
+  this.instanceUnwatch = null;  // For angular binding.
 
   // If we are proxying, keep track of the instance.
   this.proxy = null;
