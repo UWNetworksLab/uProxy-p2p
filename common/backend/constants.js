@@ -92,6 +92,7 @@ var DEFAULT_LOAD_STATE = {
     'keyHash': '',
     'identities': {},
     'networkDefaults' : {
+      'xmpp': {'autoconnect': false},
       'google': {'autoconnect': false},
       'facebook': {'autoconnect': false}
     }

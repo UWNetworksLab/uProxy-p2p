@@ -9,7 +9,7 @@ function ManualDialog(cb) {
 ManualDialog.prototype.createManualWindow = function() {
   chrome.app.window.create(
     //'submodules/uproxy-common/identity/manual/manualdialog.html',
-    'manualidentity/manualdialog.html',
+    'dialogs/manualidentity/manualdialog.html',
     {
       id: 'manual',
       minWidth: 600,

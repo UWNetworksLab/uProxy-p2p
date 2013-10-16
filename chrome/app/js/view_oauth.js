@@ -13,7 +13,14 @@ var View_oauth = function(channel) {
 
 View_oauth.prototype.open = function(args, continuation) {
   var file = args.file;
-  if (file == "google") {
+  if (file == "xmpp") {
+    this.authMan = new AuthXmpp((function(msg) {
+      this.dispatchEvent('message', {
+        cmd: 'auth',
+        message: msg
+      });
+    }).bind(this));
+  } else if (file == "google") {
     this.authMan = new AuthGoogle((function(msg) {
       this.dispatchEvent('message', {
         cmd: 'auth',

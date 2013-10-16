@@ -132,6 +132,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           return 'G+';
         } else if (networkId == 'facebook') {
           return 'FB';
+        } else if (networkId == 'xmpp') {
+          return 'XMPP'
         } else {
           console.warn("No prettification for network: " + JSON.stringify(networkId));
           return networkId;

@@ -50,6 +50,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
         status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
     });
     view.once('message', function(opts, cont, message) {
+      console.log("Identity Provider got credentials: " + JSON.stringify(message));
       if (message.cmd && message.cmd == 'auth') {
         this.credentials = message.message;
         this.login(opts, cont);

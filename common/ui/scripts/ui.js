@@ -11,7 +11,7 @@
 function UI(browserType) {
   this.ICON_DIR = '../common/ui/icons/';
 
-  this.networks = ['google', 'facebook'];
+  this.networks = ['google', 'facebook', 'xmpp'];
 
   this.notifications = 0;
   // TODO: splash should be set by state.
