@@ -61,7 +61,10 @@ var onload = function() {
       _conns[channelLabel].disconnect();
       delete _conns[channelLabel];
     }
-    _sctpPc.closeDataChannel(channelLabel);
+    if (_sctpPc) {
+      // we may get closeConnection calls after shutdown.
+      _sctpPc.closeDataChannel(channelLabel);
+    }
   };
 
   // A simple wrapper function to send data to the peer.
