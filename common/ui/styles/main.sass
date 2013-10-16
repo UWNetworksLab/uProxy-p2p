@@ -1,5 +1,12 @@
 // Primary stylesheet for both popup and options page.
 // ----------------------------- Common Style ----------------------------------
+
+// This is a mega css reset. Fixes evil padding - width css shenanigans.
+*
+  box-sizing: border-box
+  -webkit-box-sizing: border-box
+  -moz-box-sizing: border-box
+
 $fontSize: 16px
 @font-face
   font-family: 'Eurostile'
@@ -39,17 +46,17 @@ ul
 // Prettier scrollbars.
 ::-webkit-scrollbar
   width: 6px
-::-webkit-scrollbar:hover
-  width: 10px
+  &:hover
+    width: 10px
 ::-webkit-scrollbar-track
   background-color: #f9f9f9
-::-webkit-scrollbar-track:window-inactive
-  background-color: #888
+  &:window-inactive
+    background-color: #888
 ::-webkit-scrollbar-thumb
   background-color: #aaa
   height: 114.589px
-::-webkit-scrollbar-thumb:hover
-  background-color: #bbb
+  &:hover
+    background-color: #bbb
 
 .btn
   border: 1px solid #ccc
@@ -90,8 +97,8 @@ ul
 #contact-header
   & h1
     position: fixed
-    width: 80%
-    padding: 0 10%
+    width: 100%
+    padding: 0 50px
     text-align: center
     top: 10px
     pointer-events: none
@@ -202,12 +209,11 @@ ul
 .uproxy-banner
   font-size: $fontSize * 2
   font-weight: 600
-  margin-top: 23px
   text-shadow: 2px 2px 2px #888
   cursor: default
-.uproxy-banner img
-  vertical-align: middle
-  margin-bottom: 23px
+  & img
+    vertical-align: middle
+    margin-bottom: 23px
 
 .description
   color: #222
@@ -224,9 +230,9 @@ ul
   box-shadow: 0 3px 1px #eee
   @include smooth
 
-#my-description:hover
-  box-shadow: 0px 3px 3px #ddd
-  border-color: #bbb
+  &:hover
+    box-shadow: 0px 3px 3px #ddd
+    border-color: #bbb
 
 // Selection of your social network connections.
 #networks-box
@@ -239,7 +245,7 @@ ul
 #search-contacts
   position: relative
   z-index: 30
-  width: 328px
+  width: 370px
   margin: 0
   padding: 8px 20px
   border: 1px solid #aaa
@@ -368,7 +374,7 @@ ul
   position: absolute
   text-align: center
   top: 100px
-  width: 80%
+  width: 100%
   padding: 10%
   z-index: 500
   color: #444
@@ -636,7 +642,7 @@ details
   position: fixed
   top: 0
   right: 0
-  width: 46%
+  width: 50%
   height: 100%
   padding: 2%
   padding-bottom: 100px
