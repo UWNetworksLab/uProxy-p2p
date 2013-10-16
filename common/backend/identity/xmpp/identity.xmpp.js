@@ -436,7 +436,7 @@ IdentityProvider.prototype.onMessage = function(stanza) {
       });
     } else {
       // This wasn't intended for me
-      console.log('Unprocessed message: '+ JSON.stringify(stanza));
+      console.log('Unprocessed message: '+ JSON.stringify(stanza.attrs));
     }
   } else if (stanza.is('iq') && stanza.attrs.type == 'get') {
     // Respond to capability requests from other users.
