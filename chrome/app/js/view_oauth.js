@@ -50,6 +50,8 @@ View_oauth.prototype.postMessage = function(args, continuation) {
     this.manualDialog.sendMessage(args);
   } else if (this.authMan && args && args.cmd && args.cmd == 'login') {
     this.authMan.login(args.interactive);
+  } else if (this.authMan && args && args.cmd && args.cmd == 'logout') {
+    this.authMan.logout();
   } else {
     console.error("Unrecognized message to core.view: " + JSON.stringify(args));
   }
