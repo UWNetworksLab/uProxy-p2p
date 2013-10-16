@@ -35,11 +35,19 @@ function FreedomConnector(id, options) {
 // Try to connect to the app/extension running Freedom.
 FreedomConnector.prototype.connect = function() {
   if(this.status.connected) {
-    console.info('Already connected.');
+    // console.info('Already connected.');
     return;
   }
   console.info('Trying to connect to the app');
   this.port_ = chrome.runtime.connect(this.id_, this.options_);
+
+  try {
+    this.port_.postMessage({ cmd: 'hi' });
+    this.status.connected = true;
+  } catch (e) {
+    this.status.connected = false;
+    return false;
+  }
 
   this._currentDisconnectCallback = this.onDisconnected_.bind(this);
   this.port_.onDisconnect.addListener(this._currentDisconnectCallback);
@@ -116,11 +124,16 @@ FreedomConnector.prototype.emit = function(t, d) {
     console.error('Cannot call |emit| on a disconnected FreedomConnector.');
     return;
   }
-  this.port_.postMessage({
-    cmd: 'emit',
-    type: t,
-    data: d
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'emit',
+      type: t,
+      data: d
+    });
+  } catch (e) {
+    console.warn("emit: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };
 
 // Add the listener callback to be called when we get events of type |t|
@@ -135,10 +148,15 @@ FreedomConnector.prototype.on = function(t, listener) {
   } else {
     this.listeners_[t] = [listener];
   }
-  this.port_.postMessage({
-    cmd: 'on',
-    type: t
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'on',
+      type: t
+    });
+  } catch (e) {
+    console.warn("on: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };
 
 // Add the listener callback to be called once when we get an event of type
@@ -161,8 +179,13 @@ FreedomConnector.prototype.once = function(t, listener) {
   } else {
     this.listeners_[t] = [func];
   }
-  this.port_.postMessage({
-    cmd: 'once',
-    type: t
-  });
+  try {
+    this.port_.postMessage({
+      cmd: 'once',
+      type: t
+    });
+  } catch (e) {
+    console.warn("once: postMessage Failed. Disconnecting.");
+    this.onDisconnected_();
+  }
 };

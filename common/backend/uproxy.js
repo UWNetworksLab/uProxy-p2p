@@ -381,7 +381,6 @@ var _msgReceivedHandlers = {
     'cancel-request': receiveTrustMessage,
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
-
     'notify-instance': receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
@@ -406,7 +405,8 @@ identity.on('onMessage', function (msgInfo) {
   // Call the relevant handler.
   var msgType = msgInfo.data.type;
   if (!(msgType in _msgReceivedHandlers)) {
-    console.error('No handler for message type: ' + msgType);
+    console.error('No handler for message type: ' +
+        JSON.stringify(msgInfo.data));
     return;
   }
   _msgReceivedHandlers[msgType](msgInfo);

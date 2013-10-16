@@ -178,7 +178,7 @@ function rateLimitedUpdates() {
   ui.synchronize();
   checkRunningProxy();
   console.log('Connecting to App...');
-  if (!appChannel.status.connected)
+  if (!appChannel.status.connected) {
     appChannel.connect();
   }
 }
