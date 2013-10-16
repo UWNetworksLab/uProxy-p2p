@@ -77,7 +77,7 @@ ul
   &:disabled
     color: #999
     border-color: #ccc
-    box-shadow: 0 1px 4px #aaa inset
+    box-shadow: 0 1px 2px #bbb inset
 
 .btn-request
   position: absolute
@@ -205,16 +205,13 @@ ul
   @include smooth-slow
   &.ng-hide
     @include un-ng-hide
-    // height: 0
-    // padding: 0
-    // opacity: 0
     top: 600px
 
 .network-btn
   display: inline-block
   margin: 8px
-.network-btn .btn
-  font-size: $fontSize * 1.5
+  & .btn
+    font-size: $fontSize * 1.5
 
 .uproxy-banner
   font-size: $fontSize * 2
@@ -333,13 +330,10 @@ ul
 
 #my-access
   background-image: url('../icons/arrow-up.png')
-
 #friends-access
   background-image: url('../icons/arrow-down.png')
-
 #uproxy-filter
   background-image: url('../icons/uproxy-19.png')
-
 #online-filter
   background-image: url('../icons/online.png')
 
@@ -454,15 +448,15 @@ img.contact-image
 .c-icons
   position: absolute
   right: 12px
-  color: #222
+  color: #555
   font-size: $fontSize * 0.8
   font-weight: 900
 .c-icon
+  display: inline-block
   padding: 1px
   width: 18px
   height: 16px
   line-height: 16px
-  display: inline-block
   text-align: center
   vertical-align: middle
   background: transparent no-repeat center

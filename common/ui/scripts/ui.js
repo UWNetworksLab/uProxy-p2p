@@ -18,7 +18,8 @@ function UI(browserType) {
   this.rosterNudge = false;
   this.advancedOptions = false;
   this.searchBar = true;
-  this.pendingTrustChange = false;
+  this.pendingProxyTrustChange = false;
+  this.pendingClientTrustChange = false;
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.
@@ -107,8 +108,10 @@ UI.prototype.contactIsFiltered = function(c) {
   var searchText = this.search,
       compareString = c.name.toLowerCase();
   // First, compare filters.
-  if ((this.filters.online && !c.online) ||
-      (this.filters.uproxy && !c.canUProxy)) {
+  if ((this.filters.online        && !c.online)    ||
+      (this.filters.uproxy        && !c.canUProxy) ||
+      (this.filters.myAccess      && !c.givesMe) ||
+      (this.filters.friendsAccess && !c.usesMe)) {
     return true;
   }
   // Otherwise, if there is no search text, this contact is visible.
@@ -130,6 +133,8 @@ UI.prototype.synchronize = function() {
   for (var userId in model.roster) {
     var user = model.roster[userId];
     var instanceId = null;
+    var hasNotification = false;
+    var canUProxy = false;
     for (var clientId in user.clients) {
       instanceId = model.clientToInstance[clientId];
       // TODO(uzimizu): Support multiple instances.
@@ -141,19 +146,21 @@ UI.prototype.synchronize = function() {
       if (!instance) {
         continue;
       }
-      user.canUProxy = true;
-      console.log('found user ' + user.userId + ' with notification.');
-      user.hasNotification = true;
-
+      canUProxy = true;
+      if (instance.notify) {
+        console.log('found user ' + user.userId + ' with notification.');
+        hasNotification = true;
+      }
       // Pass-over the trust value to user-level.
-      // TODO(uzimizu): Take the assumption of highest trust level, if there are
-      // multiple instances.
+      // TODO(uzimizu): Take the assumption of highest trust level, once support
+      // for multiple instances has arrived.
       user.trust = instance.trust;
       user.givesMe = ('no' != user.trust.asProxy);
       user.usesMe = ('no' != user.trust.asClient);
       break;
     }
-
+    user.canUProxy = canUProxy;
+    user.hasNotification = hasNotification;
     if (user.hasNotification) {
       n++;
     }
@@ -172,7 +179,9 @@ UI.prototype.synchronize = function() {
     }
   }
   this.setClients(c);
-  this.pendingTrustChange = false;
+
+  this.pendingProxyTrustChange = false;
+  this.pendingClientTrustChange = false;
 
   // Generate list ordered by names.
   var uids = Object.keys(model.roster);

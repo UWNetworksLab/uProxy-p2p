@@ -13,7 +13,28 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
+    var ui = $scope.ui;
     $scope.optionsTooltip = false;
+
+    // Opening the detailed contact view.
+    $scope.viewContact = function(c) {
+      console.log("viewContact: c=\n", c);
+      for (var clientId in c.clients) {
+        if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
+          console.log("viewContact: sendInstance: " + clientId);
+          $scope.sendInstance(clientId);
+        }
+      }
+      ui.contact = c;
+      ui.instance = $scope.instanceOfContact(c);
+      console.log('current instance ' + ui.instance);
+      ui.rosterNudge = true;
+      $scope.notificationSeen(c);
+      if (!ui.isProxying) {
+        ui.proxy = null;
+      }
+      // $scope.ui.refreshDOM();
+    };
 
     $scope.filterTips = {
       'uproxy': 'Only show contacts with UProxy installed.',
@@ -42,25 +63,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.alphabeticalContacts = []
     };
 
-    // Opening the detailed contact view.
-    $scope.viewContact = function(c) {
-      console.log("viewContact: c=\n", c);
-      for (var clientId in c.clients) {
-        if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
-          console.log("viewContact: sendInstance: " + clientId);
-          $scope.sendInstance(clientId);
-        }
-      }
-      $scope.ui.contact = c;
-      $scope.ui.instance = $scope.instanceOfContact(c);
-      console.log('current instance ' + $scope.ui.instance);
-      $scope.ui.rosterNudge = true;
-      $scope.notificationSeen(c);
-      if (!$scope.ui.isProxying) {
-        $scope.ui.proxy = null;
-      }
-      // $scope.ui.refreshDOM();
-    };
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {

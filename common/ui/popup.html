@@ -184,30 +184,31 @@
                 <div class="instance-id" ng-show="ui.rosterNudge">
                   {{ui.instance.instanceId}}
                 </div>
+
                 <div class="box-for-proxy"
                     ng-switch="ui.instance.trust.asProxy">
                   <div ng-switch-when="yes">
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-show="'off'==ui.instance.status.proxy"
                         ng-click="startAccess(ui.instance)">
                       Start
                     </button>
                     <div class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-show="'ready'==ui.instance.status.proxy">
                       Setting up proxy...
                     </div>
                     <button class="btn"
                         ng-hide="'off'==ui.instance.status.proxy"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="stopAccess(ui.instance)">
                       Stop
                     </button>
                   </div>
                   <div ng-switch-when="requested">
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="cancelRequest(ui.instance)">
                       Cancel
                     </button>
@@ -215,19 +216,19 @@
                   </div>
                   <div ng-switch-when="offered">
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="acceptOffer(ui.instance)">
                       Accept Access
                     </button>
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="declineOffer(ui.instance)">
                       No Thanks
                     </button>
                   </div>
                   <button class="btn"
                       ng-switch-default
-                      ng-disabled="ui.pendingTrustChange"
+                      ng-disabled="ui.pendingProxyTrustChange"
                       ng-click="requestAccess(ui.instance)">
                     Request
                   </button>
@@ -236,24 +237,24 @@
                 <div class="box-for-client"
                     ng-switch="ui.instance.trust.asClient">
                   <button class="btn" ng-switch-when="no"
-                      ng-disabled="ui.pendingTrustChange"
+                      ng-disabled="ui.pendingClientTrustChange"
                       ng-click="offerAccess(ui.instance)">
                     Offer Access
                   </button>
                   <div ng-switch-when="requested">
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingClientTrustChange"
                         ng-click="grantAccess(ui.instance)">
                       Grant
                     </button>
                     <button class="btn"
-                        ng-disabled="ui.pendingTrustChange"
+                        ng-disabled="ui.pendingClientTrustChange"
                         ng-click="denyAccess(ui.instance)">
                       Ignore
                     </button>
                   </div>
                   <button class="btn" ng-switch-default
-                      ng-disabled="ui.pendingTrustChange"
+                      ng-disabled="ui.pendingClientTrustChange"
                       ng-click="revokeAccess(ui.instance)">
                     Revoke Access
                   </button>
