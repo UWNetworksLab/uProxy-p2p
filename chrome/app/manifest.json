@@ -30,6 +30,7 @@
     "videoCapture",
     "audioCapture",
     "https://apis.google.com/",
+    "https://*.appspot.com/",
     "https://www.facebook.com/",
     "https://graph.facebook.com/"
   ],

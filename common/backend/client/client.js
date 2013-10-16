@@ -40,6 +40,7 @@ var onload = function() {
   // Stop running as a _socksServer. Close all connections both to data
   // channels and tcp.
   var shutdown = function() {
+    console.log("Shutting down Peer client.");
     if (_socksServer) {
       _socksServer.tcpServer.disconnect();
       _socksServer = null;
@@ -56,9 +57,14 @@ var onload = function() {
 
   // Close a particular tcp-connection and data channel pair.
   var closeConnection = function(channelLabel) {
-    _conns[channelLabel].disconnect();
-    _sctpPc.closeDataChannel(channelLabel);
-    delete _conns[channelLabel];
+    if (_conns[channelLabel]) {
+      _conns[channelLabel].disconnect();
+      delete _conns[channelLabel];
+    }
+    if (_sctpPc) {
+      // we may get closeConnection calls after shutdown.
+      _sctpPc.closeDataChannel(channelLabel);
+    }
   };
 
   // A simple wrapper function to send data to the peer.
