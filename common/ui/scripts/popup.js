@@ -64,6 +64,10 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         }
       }
       $scope.ui.contact = c;
+      if (!c.imageData) {
+        // Required to refresh pic.
+        // $scope.ui.contact.imageData = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+      }
       $scope.ui.instance = $scope.instanceOfContact(c);
       console.log('current instance ' + $scope.ui.instance);
       $scope.ui.rosterNudge = true;
@@ -117,4 +121,12 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       }
       return true;  // Does not match the search text, should be hidden.
     };
+
+    // Refresh local state variables when the popup is re-opened.
+    if ($scope.ui.contact) {
+      $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
+    }
+    if ($scope.ui.instance) {
+      $scope.ui.instance = $scope.model.instances[$scope.ui.instance.instanceId];
+    }
   }]);
