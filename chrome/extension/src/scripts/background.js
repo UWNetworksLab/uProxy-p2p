@@ -99,6 +99,10 @@ UI.prototype.setIcon = function(iconFile) {
 UI.prototype.setLabel = function(text) {
   chrome.browserAction.setBadgeText({ text: '' + text });
 };
+// Hackish way to fire the onStateChange dispatcher.
+UI.prototype.refreshDOM = function() {
+  onStateChange.dispatch();
+};
 
 UI.prototype.setProxying = function(isProxying) {
   this.isProxying = isProxying;
