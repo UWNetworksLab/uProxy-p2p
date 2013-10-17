@@ -26,6 +26,16 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         !$scope.uProxyAppConnectionStatus.connected;
     };
 
+    var syncContactWatch = function(userId) {
+      if (ui.contactUnwatch) {
+        ui.contactUnwatch();
+        ui.contactUnwatch = null;
+      }
+      ui.contactUnwatch = $scope.$watch(
+          'model.roster["' + userId + '"]', function() {
+            ui.contact = $scope.model.roster[userId];
+      });
+    }
     var syncInstanceWatch = function(instanceId) {
       // Check for new instance binding, to re-watch.
       if (ui.instanceUnwatch) {
@@ -35,20 +45,21 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.instanceUnwatch = $scope.$watch(
           'model.instances["' + instanceId + '"]', function() {
             ui.instance = $scope.model.instances[instanceId];
-          });
+      });
     };
 
     // Open the detailed contact view, with a potential instance. Set the
     // currently focused instance and ensure angular bindings work.
     $scope.viewContact = function(c) {
-      console.log("viewContact: c=\n", c);
+      // console.log("viewContact: c=\n", c);
       for (var clientId in c.clients) {
         if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
           console.log("viewContact: sendInstance: " + clientId);
           $scope.sendInstance(clientId);
         }
       }
-      ui.contact = c;
+      $scope.ui.focusOnContact(c);
+      syncContactWatch(c.userId);
       var instance = $scope.instanceOfContact(c);
       if (instance) {
         ui.instance = instance;
@@ -57,14 +68,11 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         ui.instance = null;
       }
       console.log('current instance ' + ui.instance);
-
-      $scope.notificationSeen(c);
       if (!ui.isProxying) {
         ui.proxy = null;
       } else {
         ui.proxy = $scope.model.instances[proxy.instanceId];
       }
-      ui.rosterNudge = true;
     };
 
     $scope.filterTips = {
@@ -93,7 +101,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.updateSortedContacts = function() {
       $scope.alphabeticalContacts = []
     };
-
 
     // Toggling the 'options' page which is just the splash page.
     $scope.toggleOptions = function() {
@@ -124,9 +131,13 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       // $scope.$digest();
     });
 
+    if (ui.contact) {
+      syncContactWatch(ui.contact.userId);
+    }
     if (ui.instance) {
       syncInstanceWatch(ui.instance.instanceId);
     }
+
     // Refresh local state variables when the popup is re-opened.
     // if ($scope.ui.contact) {
       // $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];

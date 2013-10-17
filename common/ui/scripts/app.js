@@ -45,7 +45,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
-      //console.log(model);
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
@@ -233,16 +232,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           { instanceId: id, action: action });
       };
 
-      // Notifications occur on the user level. The message sent to the app side
-      // will also remove the notification flag from instances.
-      $rootScope.notificationSeen = function (user) {
-        if (!user.hasNotification) {
-          return;  // Ignore if user has no notification.
-        }
-        appChannel.emit('notification-seen', user.userId);
-        user.hasNotification = false;
-        ui.decNotifications();
-      }
+      // Bind UI functions to the scope, if they want to be accessed from DOM.
+      // $rootScope.returnToRoster = function() ui.returnToRoster;
+      // $rootScope.notificationSeen = ui.notificationSeen;
 
       $rootScope.changeOption = function (key, value) {
         appChannel.emit('change-option', {key: key, value: value});
