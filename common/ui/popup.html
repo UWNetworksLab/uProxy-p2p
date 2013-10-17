@@ -146,7 +146,6 @@
               ng-click="viewContact(contact)"
               ng-hide="ui.contactIsFiltered(contact)"
               ng-class="{offline:!contact.online}"
-              tabIndex="{{ $index }}"
               >
             {{contact.name}}
             <img class="contact-image" ng-src='{{contact.imageData}}'>
