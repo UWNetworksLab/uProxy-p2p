@@ -81,18 +81,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
         status: 'offline'
     };
     //Start XMPP client
-    var connectOpts = CONNECT_OPTS(clientId, this.credentials.token);
-    this.client = new window.XMPP.Client(connectOpts);
-    console.log("Logging into XMPP with options: " + JSON.stringify(connectOpts));
-    //DEBUG
-    //this.client.preferredSaslMechanism = "PLAIN";
-    //this.client.preferredSaslMechanism = "DIGEST-MD5";
-    //this.client.preferredSaslMechanism = "SCRAM-SHA-1";
-
-    //TODO(willscott): Support Upgrade to TLS wrapped connection.
-    this.client.connection.allowTLS = false;
-    //this.client.addListener('online', function(){this.client.send(new window.XMPP.Element('presence', {}));}.bind(this));
-    //this.client.addListener('stanza', function(s) {console.log(s.attrs.from);} );
+    this.client = CONNECT(clientId, this.credentials.token);
     this.client.addListener('online', this.onOnline.bind(this));
     this.client.addListener('error', function(e) {
       console.error(e);
