@@ -33,7 +33,6 @@ describe("uproxy.updateUser", function() {
     var count = Object.keys(store.state.roster).length;
     var userId = normalAlice.userId;
     expect(state.roster[userId]).toBeUndefined();
-    debugger;
     updateUser(normalAlice);
     expect(state.roster[userId]).toBeDefined();
     expect(Object.keys(state.roster).length).toBe(count + 1);
@@ -125,7 +124,8 @@ describe("uproxy.receiveInstance", function() {
 });
 
 
-// Returns an object representing a single user instance.
+// Returns an object representing a single user instance.  Conforms to
+// DEFAULT_INSTANCE.
 function makeUserInstance(instanceId, userId) {
   var result = cloneDeep(DEFAULT_INSTANCE);
   userId = userId + '@gmail.com';
@@ -146,6 +146,8 @@ function makeUserInstanceMessage(userInstance) {
   console.log('makeUserInstanceMessage(' + JSON.stringify(userInstance) + ')');
   var result = {
     fromUserId: userInstance.rosterInfo.userId,
+    fromClientId: userInstance.rosterInfo.userId + '/uproxy' +
+        userInstance.instanceId,
     toUserId: 'you-should-not-be-checking-this',
     data: {
       type: 'notify-instance',
@@ -207,7 +209,6 @@ function validateInstance(inst) {
     return store.state.clientToInstance[client] == inst.instanceId;
   }).length).toBe(1);
 
-  debugger;
   // Validate instanceToClient[] mapping.
   expect(store.state.instanceToClient).toBeDefined();
   expect(store.state.instanceToClient[inst.instanceId]).toBeDefined();
@@ -254,15 +255,17 @@ describe("uproxy.state.instance", function () {
   });
 
   it('onState-Roster-Instance', function() {
+    var completed = false;
+    store.reset(function() {completed = true; });
+    waitsFor(function() { return completed; }, "Reset never returned.", 50);
+
     // This should be the simplest way in.  You get a login for
     // yourself, then a roster, then instance notifications.
     var inst;
-    debugger;
     receiveStatus(selfInstanceMessage);
     for (inst in userInstances) {
       receiveChange(userInstances[inst]);
     }
-    debugger;
     // We have to wrap up the instance data in a message.
     for (inst in userInstances) {
       receiveInstance(makeUserInstanceMessage(userInstances[inst]));

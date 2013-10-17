@@ -54,7 +54,7 @@ var DEFAULT_INSTANCE = {
 
 // Default for state.roster
 var DEFAULT_ROSTER_ENTRY = {
-  userId: '',
+  userId: null,
   name: '',
   url: '',
   canUProxy: false,

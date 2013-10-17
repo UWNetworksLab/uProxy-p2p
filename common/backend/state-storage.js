@@ -188,7 +188,8 @@ UProxyState.prototype.syncRosterFromInstanceId = function(instanceId) {
   if (!user) {
     // TODO: do proper reconsilisation: probably we should do a diff check, and
     // maybe update instance.nodify.
-    user = this.state.roster[userId] = {};
+    this.state.roster[userId] = {};
+    user = this.state.roster[userId];
     user.clients = {};
     user.userId = userId;
     user.name = instance.rosterInfo.name;

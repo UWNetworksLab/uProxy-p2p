@@ -374,9 +374,14 @@ identity.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether online or
 // description.
-// |data| is guaranteed  to have userId.
-function receiveChange(data) {
+// |data| is guaranteed to have userId.
+function receiveChange(rawData) {
   try {
+    var data = restrictToObject(DEFAULT_ROSTER_ENTRY, data);
+    for (var c in data.clients) {
+      data.clients[c] = restrictToObject(DEFAULT_ROSTER_ENTRY, data.clients[c]);
+    }
+
     if (store.state.me.identities[data.userId]) {
       // My card changed.
       store.state.me.identities[data.userId] = data;
@@ -438,18 +443,18 @@ identity.on('onMessage', function (msgInfo) {
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
 //
-//  |newData| - Incoming JSON info for a single user.
+//  |data| - Incoming JSON info for a single user.  Conforms to DEFAULT_ROSTER_ENTRY.
 function updateUser(data) {
   var newData = restrictToObject(DEFAULT_ROSTER_ENTRY, data);
   for (var k in data.clients) {
     newData.clients[k] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY, data.clients[k]);
   }
   // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
-  var userId = newData.userId || newData.rosterInfo.userId,
+  var userId = newData.userId,
       userOp = 'replace',
       existingUser = store.state.roster[userId];
-  if (!existingUser) {
 
+  if (!existingUser) {
     store.state.roster[userId] = newData;
     userOp = 'add';
   }
@@ -463,14 +468,19 @@ function updateUser(data) {
   user.clients = newData.clients;
   user.imageData = newData.imageData;
 
-  for (var clientId in user.clients) {
-    var client = user.clients[clientId];
-    if ('offline' == client.status) {  // Delete offline clients
-      delete user.clients[clientId];
-      continue;
+  // Put in all the new clients.
+  for (var newClientId in newData.clients) {
+    if (! (newClientId in user.clients)) {
+      user.clients[newClientId] = newData.clients[newClientId];
     }
-    if (! (clientId in user.clients)) {
-      user.clients[clientId] = client;
+  }
+
+  // Prune and scan the client list for usability for UProxying.
+  for (var userClientId in user.clients) {
+    var client = user.clients[userClientId];
+    if ('offline' == client.status) {  // Delete offline clients
+      delete user.clients[userClientId];
+      continue;
     }
 
     // Determine network state / flags for filtering purposes.
@@ -668,14 +678,6 @@ function _addNotification(instanceId) {
   instance.notify = true;
   store.saveInstance(instanceId);
   _syncInstanceUI(instance, 'notify');
-  // var user = store.state.roster[instance.rosterInfo.userId];
-  // if (!user) {
-    // console.error('User does not exist for instance ' + instance);
-    // return false;
-  // }
-  // console.log('adding notification for instance ' + instanceId + ' of user ' + user.userId);
-  // user.hasNotification = true;
-  // _SyncUI('/roster/' + user.userId + '/hasNotification', true);
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
