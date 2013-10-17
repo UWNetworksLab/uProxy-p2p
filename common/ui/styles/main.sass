@@ -111,37 +111,6 @@ ul
     white-space: nowrap
     font-size: $fontSize * 1.2
 
-#options-btn
-  position: fixed
-  z-index: 400
-  top: 4px
-  right: 8px
-  background: transparent url('../icons/settings.svg') no-repeat center center
-  border: none
-  outline: none
-  padding: 4px
-  width: 20px
-  height: 20px
-  text-decoration: none
-  opacity: 0.6
-  cursor: pointer
-  @include smooth
-  &:active, &:focus
-    opacity: 0.4
-  &:hover
-    opacity: 0.3
-
-#options-btn-tip
-  position: fixed
-  z-index: 500
-  top: 20px
-  right: 2px
-  background-color: #000
-  color: #ccc
-  opacity: 0.85
-  &.ng-hide
-    opacity: 0
-
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
 .tip
@@ -245,17 +214,36 @@ ul
 #networks-box
   margin-top: 30px
 
-// ------------------------------ Searching ------------------------------------
-#search-section
+// --------------------------- Search / Filters --------------------------------
+// Goes at the top of the popup roster view.
+#roster-header
   position: relative
   z-index: 50
-#search-contacts
+// Contains a bunch of icons which modify the view / toggle filters.
+#actions
+  display: block
   position: relative
   z-index: 30
+  width: 100%
+  background-color: #fafafa
+  height: 30px
+  text-align: left
+  overflow: hidden
+  padding: 0
+  box-shadow: 0 1px 2px #aaa
+  @include smooth
+  &:hover
+    box-shadow: 0 1px 6px #aaa
+
+#search-contacts
+  display: block
+  position: relative
+  z-index: 20
   width: 370px
+  height: 34px
   margin: 0
   padding: 8px 20px
-  border: 1px solid #aaa
+  border: 1px solid #bbb
   outline: none
   color: #333
   @include smooth
@@ -266,26 +254,13 @@ ul
     box-shadow: 0 1px 2px #ccc
   &.ng-hide
     @include un-ng-hide
-    height: 0
-    padding: 0
-    border: none
+    margin-top: -34px
+    z-index: -1
+    opacity: 0
 
-// Goes at the top of the popup. Contais a bunch of icons which modify the
-// current view mode, or change roster filters.
-#actions
-  z-index: 20
-  display: block
-  width: 100%
-  background-color: #fafafa
-  height: 30px
-  text-align: left
-  overflow: hidden
-  padding: 0
-  box-shadow: 0 1px 2px #aaa
-
-// The search button toggles the actual textfield containing the user's search
-// query.
+// The search button toggles the actual textfield.
 #search-btn
+  position: relative
   z-index: 40
   width: 50px
   height: 16px
@@ -294,7 +269,7 @@ ul
   background: transparent url('../icons/search.png') no-repeat center
   background-size: 16px
   cursor: pointer
-
+  @include smooth
   &:hover, &:focus
     opacity: 0.5
     outline: none
@@ -354,6 +329,37 @@ ul
     opacity: 0.8
   &:hover
     opacity: 0.7
+
+#options-btn
+  position: fixed
+  z-index: 400
+  top: 4px
+  right: 8px
+  background: transparent url('../icons/settings.svg') no-repeat center center
+  border: none
+  outline: none
+  padding: 4px
+  width: 20px
+  height: 20px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  @include smooth
+  &:active, &:focus
+    opacity: 0.4
+  &:hover
+    opacity: 0.3
+
+#options-btn-tip
+  position: fixed
+  z-index: 500
+  top: 30px
+  right: 2px
+  background-color: #000
+  color: #ccc
+  opacity: 0.85
+  &.ng-hide
+    opacity: 0
 
 #start-btn
   background-image: url('../icons/uproxy-19.png')
