@@ -51,6 +51,8 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.notificationSeen(c);
       if (!ui.isProxying) {
         ui.proxy = null;
+      } else {
+        ui.proxy = $scope.model.instances[proxy.instanceId];
       }
       ui.rosterNudge = true;
     };
