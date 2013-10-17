@@ -3,10 +3,10 @@ var NETWORK_NAME = 'Generic XMPP Identity Provider';
 var CONNECT_OPTS = function(id, token) {
   var host = getDomainFromJid(id);
   var baseJid = stripResource(id);
-  console.log("Logging in " + baseJid + " with password " + token + " to host " + host);
   return {
     xmlns:'jabber:client',
     host: host,
+    //port: 5222,
     jid: baseJid,
     password: token
   };
