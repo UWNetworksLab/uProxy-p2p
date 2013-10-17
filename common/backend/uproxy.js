@@ -611,9 +611,7 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  // console.log('receiveConsent(from: ' + msg.fromUserId + '): ' +
-            // JSON.stringify(msg));
-  var consent     = msg.data.consent,     // Their view of consent.
+  var theirConsent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = store.state.instances[instanceId];
   if (!instance) {
@@ -624,12 +622,8 @@ function receiveConsent(msg) {
   var oldTrustAsProxy = instance.trust.asProxy;
   var oldTrustAsClient = instance.trust.asClient;
   var myConsent = _determineConsent(instance.trust);
-  instance.trust.asProxy = consent.asProxy?
-      (myConsent.asClient? Trust.YES : Trust.OFFERED) :
-      (myConsent.asClient? Trust.REQUESTED : Trust.NO);
-  instance.trust.asClient = consent.asClient?
-      (myConsent.asProxy? Trust.TES : Trust.REQUESTED) :
-      (myConsent.asProxy? Trust.OFFERED : Trust.NO);
+  instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
+
   // Apply state change notification if the trust state changed.
   if (oldTrustAsProxy != instance.trust.asProxy ||
       oldTrustAsClient != instance.trust.asClient) {
@@ -648,6 +642,17 @@ function receiveConsent(msg) {
 function _determineConsent(trust) {
   return { asProxy:  [Trust.YES, Trust.OFFERED].indexOf(trust.asClient) >= 0,
            asClient: [Trust.YES, Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
+}
+
+function _composeTrustFromConsent(myConsent, theirConsent) {
+  return {
+      asProxy: theirConsent.asProxy?
+          (myConsent.asClient? Trust.YES : Trust.OFFERED) :
+          (myConsent.asClient? Trust.REQUESTED : Trust.NO),
+      asClient: theirConsent.asClient?
+          (myConsent.asProxy? Trust.YES : Trust.REQUESTED) :
+          (myConsent.asProxy? Trust.OFFERED : Trust.NO)
+  };
 }
 
 function _validateKeyHash(keyHash) {
