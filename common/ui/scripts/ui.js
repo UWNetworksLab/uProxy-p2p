@@ -158,41 +158,61 @@ UI.prototype.decNotifications = function(n) {
 };
 
 // ------------------------------ Data Syncing ---------------------------------
+
+UI.prototype.syncUser = function(user) {
+  var instanceId = null,
+      instance = null,
+      online = false,           // For flag updates.
+      canUProxy = false,
+      hasNotification = false,
+      onGoogle = false,
+      onFB = false,
+      onXMPP = false;
+
+  for (var clientId in user.clients) {
+    // Determine network state / flags for filtering purposes.
+    var client = user.clients[clientId];
+    onGoogle = onGoogle || 'google' == client.network
+    onFB     = onFB     || 'facebook' == client.network
+    onXMPP   = onXMPP   || 'xmpp' == client.network
+    online = online || (
+        ('manual' != client.network) &&
+        ('messageable' == client.status || 'online' == client.status));
+
+    // Check if this client has a corresponding instance...
+    instanceId = model.clientToInstance[clientId];
+    if (!instanceId)  continue;
+    instance = model.instances[instanceId];
+    if (!instance)    continue;
+    canUProxy = true;  // At this point, we know this user can UProxy.
+    // TODO(uzimizu): Support multiple notifications, with messages.
+    hasNotification = hasNotification || instance.notify;
+
+    // Pass-over the trust value to user-level.
+    // TODO(uzimizu): When we have multiple instances,
+    // take the assumption of highest trust level.
+    user.trust = instance.trust;
+    user.givesMe = ('no' != user.trust.asProxy);
+    user.usesMe = ('no' != user.trust.asClient);
+    break;  // TODO(uzimizu): Support multiple instances.
+  }
+
+  // Apply user-level flags.
+  user.online = online;
+  user.canUProxy = canUProxy;
+  user.hasNotification = hasNotification;
+  user.onGoogle = onGoogle;
+  user.onFB = onFB;
+  user.onXMPP = onXMPP;
+}
+
 // Make sure counters and UI-only state holders correctly reflect the model.
 UI.prototype.synchronize = function() {
 
   var n = 0;  // Count up notifications
   for (var userId in model.roster) {
     var user = model.roster[userId];
-    var instanceId = null;
-    var hasNotification = false;
-    var canUProxy = false;
-    for (var clientId in user.clients) {
-      instanceId = model.clientToInstance[clientId];
-      // TODO(uzimizu): Support multiple instances.
-      if (!instanceId) {
-        continue;
-      }
-      // Find instance associated with the user.
-      var instance = model.instances[instanceId];
-      if (!instance) {
-        continue;
-      }
-      canUProxy = true;
-      if (instance.notify) {
-        console.log('found user ' + user.userId + ' with notification.');
-        hasNotification = true;
-      }
-      // Pass-over the trust value to user-level.
-      // TODO(uzimizu): Take the assumption of highest trust level, once support
-      // for multiple instances has arrived.
-      user.trust = instance.trust;
-      user.givesMe = ('no' != user.trust.asProxy);
-      user.usesMe = ('no' != user.trust.asClient);
-      break;
-    }
-    user.canUProxy = canUProxy;
-    user.hasNotification = hasNotification;
+    this.syncUser(user);
     if (user.hasNotification) {
       n++;
     }

@@ -442,49 +442,23 @@ function updateUser(newData) {
   }
   var user = store.state.roster[userId];
   var instance = store.instanceOfUserId(userId);
-  var onGoogle = false,   // Flag updates..
-      onFB = false,
-      onXMPP = false,
-      online = false,
-      canUProxy = false;
   user.name = newData.name;
   user.clients = newData.clients;
   user.imageData = newData.imageData;
 
   for (var clientId in user.clients) {
     var client = user.clients[clientId];
-    if ('offline' == client.status) {  // Delete offline clients
+    if ('offline' == client.status) {    // Delete offline clients.
       delete user.clients[clientId];
       continue;
     }
-    if (! (clientId in user.clients)) {
+    if (! (clientId in user.clients)) {  // Add new clients.
       user.clients[clientId] = client;
     }
-
-    // Determine network state / flags for filtering purposes.
-    if (!onGoogle && 'google' == client.network)
-      onGoogle = true;
-    if (!onFB && 'facebook' == client.network)
-      onFB = true;
-    if (!onXMPP && 'xmpp' == client.network)
-      onXMPP = true;
-
-    if (!online && 'manual' != client.network &&
-        ('messageable' == client.status || 'online' == client.status)) {
-      online = true;
-    }
-
     // Inform UProxy instances of each others' ephemeral clients.
-    var isUProxyClient = _checkUProxyClientSynchronization(client);
-    canUProxy = canUProxy || isUProxyClient;
+    _checkUProxyClientSynchronization(client);
   }
 
-  // Apply user-level flags.
-  user.online = online;
-  user.canUProxy = canUProxy;
-  user.onGoogle = onGoogle;
-  user.onFB = onFB;
-  user.onXMPP = onXMPP;
   bgAppPageChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
