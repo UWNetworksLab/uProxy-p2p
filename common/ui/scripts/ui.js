@@ -16,6 +16,7 @@ function UI(browserType) {
   this.notifications = 0;
   // TODO: splash should be set by state.
   this.rosterNudge = false;
+  this.splashPage = false;
   this.advancedOptions = false;
   this.searchBar = true;
   this.pendingProxyTrustChange = false;
@@ -25,7 +26,7 @@ function UI(browserType) {
   this.accessIds = 0;  // How many people are proxying through us.
 
   // Keep track of currently viewed contact and instance.
-  this.contac = null;
+  this.contact = null;
   this.instance = null;
   this.instanceUnwatch = null;  // For angular binding.
 

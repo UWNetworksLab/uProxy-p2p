@@ -54,7 +54,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Remember the state change hook.
       $rootScope.update = onStateChange;
 
-      //
       $rootScope.isOnline = function(network) {
         return (model.identityStatus[network] &&
             model.identityStatus[network].status == 'online');
@@ -76,8 +75,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // This is *NOT* the inverse of loggedIn, because it is possible to be
       // "logging in"
       $rootScope.loggedOut = function() {
-        for(var networkId in model.identityStatus) {
-          if('offline' != model.identityStatus[networkId].status)
+        for (var networkId in model.identityStatus) {
+          if ('offline' != model.identityStatus[networkId].status)
             return false;
         }
         return true;
@@ -155,11 +154,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[instanceId];
         }
         return null;
-      };
-
-      $rootScope.showingSplashPage = function() {
-        return ui.splashPage || (!
-          $rootScope.uProxyAppConnectionStatus.connected);
       };
 
       $rootScope.login = function(network) {

@@ -16,6 +16,16 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     var ui = $scope.ui;
     $scope.optionsTooltip = false;
 
+    // Reset view state if logged out.
+    if ($scope.loggedOut()) {
+      ui.splashPage = true;
+      ui.rosterNudge = false;
+    }
+    $scope.showingSplashPage = function() {
+      return ui.splashPage ||
+        !$scope.uProxyAppConnectionStatus.connected;
+    };
+
     var syncInstanceWatch = function(instanceId) {
       // Check for new instance binding, to re-watch.
       if (ui.instanceUnwatch) {
