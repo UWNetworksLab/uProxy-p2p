@@ -523,6 +523,8 @@ function _getMyId() {
   for (var id in store.state.me.identities) {
     return id;
   }
+  console.log('Warning: I don\'t have any identities yet.');
+  return null;
 }
 
 // Should only be called after we have received an onChange event with our own

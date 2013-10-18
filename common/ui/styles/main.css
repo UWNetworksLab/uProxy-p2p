@@ -83,6 +83,7 @@ ul {
 
 #contact-header {
   position: fixed;
+  z-index: 500;
   top: 0; }
   #contact-header h1 {
     position: fixed;
@@ -535,37 +536,58 @@ img.c-icon {
   img.c-icon:hover {
     opacity: 0.5; }
 
-#contact-details {
+#access {
   display: inline-block;
   position: fixed;
   width: 100%;
-  top: 40px;
+  height: 100%;
+  padding-top: 40px;
+  top: 0;
   left: 0;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  #access.ng-hide {
+    display: inline-block !important;
+    opacity: 0;
+    left: 400px; }
+  #access img.contact-image {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-color: #dddddd;
+    background-size: contain;
+    box-shadow: 2px 3px 7px #bbbbbb; }
 
-#contact-details.ng-hide {
-  display: inline-block !important;
-  opacity: 0;
-  left: 400px; }
+.bg-deco {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent no-repeat center;
+  pointer-events: none;
+  opacity: 0.2; }
+  .bg-deco#internets {
+    background-image: url("../icons/global_internet.png");
+    background-size: 180px; }
+  .bg-deco#path-left {
+    background-image: url("../icons/path-left.png");
+    opacity: 0.02; }
+  .bg-deco#path-right {
+    background-image: url("../icons/path-right.png");
+    opacity: 0.02; }
 
-.contact-status {
+.contact-info {
   text-align: center;
-  text-shadow: 0px 1px 1px #cccccc; }
+  text-shadow: 0px 1px 1px #cccccc;
+  width: 100%; }
+  .contact-info#my-info {
+    position: absolute;
+    bottom: 50px; }
 
 .contact-name {
   text-align: center; }
-
-#contact-details img.contact-image {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 8px;
-  border-color: #dddddd;
-  background-size: contain;
-  box-shadow: 2px 3px 7px #bbbbbb; }
 
 .detail-panel {
   position: fixed;
@@ -586,6 +608,7 @@ img.c-icon {
   outline: none;
   text-decoration: none;
   cursor: pointer;
+  font-size: 8px;
   opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -609,9 +632,8 @@ img.c-icon {
   position: absolute;
   display: inline-block;
   background: no-repeat center;
-  height: 115px;
-  width: 185px;
-  margin: 8px; }
+  height: 100px;
+  width: 148px; }
   .uproxy-box .uproxytip {
     position: absolute;
     width: 100%;
@@ -619,30 +641,36 @@ img.c-icon {
     color: #888888; }
   .uproxy-box.proxy {
     left: 0;
+    top: 150px;
     background-image: url("../icons/arrow-up.png");
     background-position-y: top; }
     .uproxy-box.proxy .uproxytip {
       bottom: 0; }
   .uproxy-box.client {
+    right: 0;
     background-image: url("../icons/arrow-down.png");
-    background-position-y: bottom; }
+    background-position-y: bottom;
+    width: 158px; }
     .uproxy-box.client .uproxytip {
       top: 0; }
     .uproxy-box.client.active {
       background-image: url("../icons/arrow-down-animate.gif"); }
     .uproxy-box.client .btn {
-      margin-top: 63px; }
+      margin-top: 47px; }
 
 .instance-actions {
   text-align: center;
-  font-size: 12.8px; }
-
-.instance-actions .btn {
-  padding: 8px 16px;
-  margin-top: 16px;
-  text-shadow: 0 1px 1px #888888;
-  border-radius: 3px;
-  opacity: 0.9; }
+  font-size: 12.8px;
+  position: absolute;
+  top: 130px;
+  width: 100%; }
+  .instance-actions .btn {
+    padding: 8px 16px;
+    margin-top: 16px;
+    text-shadow: 0 1px 1px #888888;
+    border-radius: 3px;
+    font-size: 12.8px;
+    opacity: 0.9; }
 
 .client-details {
   position: relative;

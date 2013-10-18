@@ -168,8 +168,12 @@
           </ul>
         </div>
 
-        <div id="contact-details" ng-show="ui.rosterNudge">
-          <div class="contact-status">
+        <div id="access" ng-show="ui.rosterNudge">
+          <div class="bg-deco" id="internets"></div>
+          <div class="bg-deco" id="path-left"></div>
+          <div class="bg-deco" id="path-right"></div>
+
+          <div class="contact-info">
             <img ng-show="ui.contact.imageData" class="contact-image"
                  ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
             <img ng-hide="ui.contact.imageData" class="contact-image">
@@ -178,114 +182,118 @@
             <span ng-show="ui.contact.onGoogle"> G+ </span>
             <span ng-show="ui.contact.onFB"> FB </span>
             </p>
-
-            <p ng-hide="ui.instance">
-            {{ ui.contact.name }} is not running uProxy.
-            </p>
-            <div ng-show="ui.instance">
-              <div class="instance-actions" ng-show="ui.rosterNudge">
-                <p>{{ui.instance.description}}
-                </p>
-
-                <div class="uproxy-box proxy"
-                    ng-switch="ui.instance.trust.asProxy">
-                  <div ng-switch-when="yes">
-                    <p class="uproxytip">You have access.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-show="'off'==ui.instance.status.proxy"
-                        ng-click="startAccess(ui.instance)">
-                      Start
-                    </button>
-                    <div class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-show="'ready'==ui.instance.status.proxy">
-                      Setting up proxy...
-                    </div>
-                    <button class="btn"
-                        ng-hide="'off'==ui.instance.status.proxy"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-click="stopAccess(ui.instance)">
-                      Stop
-                    </button>
-                  </div>
-                  <div ng-switch-when="requested">
-                    <p class="uproxytip">
-                      Requesting access from {{ui.contact.name}}...
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-click="cancelRequest(ui.instance)">
-                      Cancel
-                    </button>
-                  </div>
-                  <div ng-switch-when="offered">
-                    <p class="uproxytip">They've given you access.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-click="acceptOffer(ui.instance)">
-                      Accept Access
-                    </button>
-                    <button class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-click="declineOffer(ui.instance)">
-                      No Thanks
-                    </button>
-                  </div>
-                  <div ng-switch-default>
-                    <p class="uproxytip">No access yet.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingProxyTrustChange"
-                        ng-click="requestAccess(ui.instance)">
-                      Request
-                    </button>
-                  </div>
-                </div>
-
-                <div class="uproxy-box client"
-                    ng-switch="ui.instance.trust.asClient">
-                  <div ng-switch-when="no">
-                    <p class="uproxytip">You have not granted them access.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingClientTrustChange"
-                        ng-click="offerAccess(ui.instance)">
-                      Offer Access
-                    </button>
-                  </div>
-                  <div ng-switch-when="requested">
-                    <p class="uproxytip">They've requested access through you.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingClientTrustChange"
-                        ng-click="grantAccess(ui.instance)">
-                      Grant
-                    </button>
-                    <button class="btn"
-                        ng-disabled="ui.pendingClientTrustChange"
-                        ng-click="denyAccess(ui.instance)">
-                      Ignore
-                    </button>
-                  </div>
-                  <div ng-switch-default>
-                    <p class="uproxytip">You've given them access.
-                    </p>
-                    <button class="btn"
-                        ng-disabled="ui.pendingClientTrustChange"
-                        ng-click="revokeAccess(ui.instance)">
-                      Revoke Access
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
           </div>
 
-          <div class="detail-panel">
+          <p ng-hide="ui.instance">
+          {{ ui.contact.name }} is not running uProxy.
+          </p>
+
+          <div class="instance-actions" ng-show="ui.instance && ui.rosterNudge">
+            <p>{{ui.instance.description}}
+            </p>
+
+            <div class="uproxy-box proxy"
+                ng-switch="ui.instance.trust.asProxy">
+              <div ng-switch-when="yes">
+                <p class="uproxytip">You have access.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-show="'off'==ui.instance.status.proxy"
+                    ng-click="startAccess(ui.instance)">
+                  Start
+                </button>
+                <div class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-show="'ready'==ui.instance.status.proxy">
+                  Setting up proxy...
+                </div>
+                <button class="btn"
+                    ng-hide="'off'==ui.instance.status.proxy"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-click="stopAccess(ui.instance)">
+                  Stop
+                </button>
+              </div>
+              <div ng-switch-when="requested">
+                <p class="uproxytip">
+                  Requesting access from {{ui.contact.name}}...
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-click="cancelRequest(ui.instance)">
+                  Cancel
+                </button>
+              </div>
+              <div ng-switch-when="offered">
+                <p class="uproxytip">They've given you access.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-click="acceptOffer(ui.instance)">
+                  Accept Access
+                </button>
+                <button class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-click="declineOffer(ui.instance)">
+                  No Thanks
+                </button>
+              </div>
+              <div ng-switch-default>
+                <p class="uproxytip">No access yet.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingProxyTrustChange"
+                    ng-click="requestAccess(ui.instance)">
+                  Request
+                </button>
+              </div>
+            </div>
+
+            <div class="uproxy-box client"
+                ng-switch="ui.instance.trust.asClient">
+              <div ng-switch-when="no">
+                <p class="uproxytip">You have not granted them access.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingClientTrustChange"
+                    ng-click="offerAccess(ui.instance)">
+                  Offer Access
+                </button>
+              </div>
+              <div ng-switch-when="requested">
+                <p class="uproxytip">They've requested access through you.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingClientTrustChange"
+                    ng-click="grantAccess(ui.instance)">
+                  Grant
+                </button>
+                <button class="btn"
+                    ng-disabled="ui.pendingClientTrustChange"
+                    ng-click="denyAccess(ui.instance)">
+                  Ignore
+                </button>
+              </div>
+              <div ng-switch-default>
+                <p class="uproxytip">You've given them access.
+                </p>
+                <button class="btn"
+                    ng-disabled="ui.pendingClientTrustChange"
+                    ng-click="revokeAccess(ui.instance)">
+                  Revoke Access
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="contact-info" id="my-info">
+            <img class="contact-image"
+                 ng-src='{{ui.myPic}}'>
+          </div>
+
+          <div class="detail-panel" ng-hide="true">
             <button id="uproxy-btn" class="instance-btn">
             </button>
             <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"

@@ -228,8 +228,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
         // console.log('instance trust change ' + action + ', ' + id);
-        appChannel.emit('instance-trust-change',
-          { instanceId: id, action: action });
+        setTimeout(function() {
+          appChannel.emit('instance-trust-change',
+            { instanceId: id, action: action });
+        }, 0);
       };
 
       // Bind UI functions to the scope, if they want to be accessed from DOM.

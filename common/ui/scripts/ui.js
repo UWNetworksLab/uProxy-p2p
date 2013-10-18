@@ -159,6 +159,23 @@ UI.prototype.decNotifications = function(n) {
 
 // ------------------------------ Data Syncing ---------------------------------
 
+function _getMyId() {
+  for (var id in model.me.identities) {
+    return id;
+  }
+  return null;
+}
+
+UI.prototype.syncMe = function() {
+  var id = _getMyId();
+  if (!id) {
+    console.log('I don\'t exist yet! :(');
+  }
+  var identity = model.me.identities[id];
+  this.myName = identity.name;
+  this.myPic = identity.imageData || '';
+};
+
 UI.prototype.syncUser = function(user) {
   var instanceId = null,
       instance = null,
@@ -242,9 +259,10 @@ UI.prototype.synchronize = function() {
   this.pendingClientTrustChange = false;
 
   // Generate list ordered by names.
-  var uids = Object.keys(model.roster);
-  var names = uids.map(function(id) { return model.roster[id].name; });
-  names.sort();
+  // var uids = Object.keys(model.roster);
+  // var names = uids.map(function(id) { return model.roster[id].name; });
+  // names.sort();
+  this.syncMe();
   return true;
 };
 
