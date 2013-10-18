@@ -610,9 +610,11 @@ img.c-icon
 
 // Container for a user's profile picture and such
 .contact-info
+  position: relative
   text-align: center
   text-shadow: 0px 1px 1px #ccc
   width: 100%
+  z-index: 2
   @include smooth
   &#my-info
     position: fixed
@@ -633,13 +635,34 @@ img.c-icon
     border-color: #ddd
     background-size: contain
     box-shadow: 1px 2px 5px #ccc
+  & .details
+    position: absolute
+    top: 0
+    width: 100%
+    height: 100%
+    cursor: default
+    text-align: center
+    @include smooth-slow
+    &.ng-hide
+      @include un-ng-hide
+      opacity: 0
+    & .picCover
+      display: inline-block
+      background-color: #fff
+      width: 116px
+      height: 120px
+      opacity: 0.95
+    & .description
+      position: absolute
+      top: 0
+      width: 100%
 
 .contact-name
   text-align: center
 
-.detail-panel
-  position: fixed
-  bottom: 64px
+.mode-panel
+  position: absolute
+  bottom: 4px
   width: 100%
   text-align: center
 
