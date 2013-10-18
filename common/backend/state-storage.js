@@ -110,10 +110,10 @@ UProxyState.prototype._generateMyInstance = function () {
 UProxyState.prototype.isMessageableUproxyClient = function(client) {
   // TODO(uzimizu): Make identification of whether or not this is a uproxy
   // client more sensible.
-  var retval = (client.status == 'online' ||
-                client.status == 'messageable') &&
-                (client.clientId.indexOf('/uproxy') > 0);
-  return retval;
+  // var retval = (client.status == 'online' ||
+                // client.status == 'messageable') &&
+                // (client.clientId.indexOf('/uproxy') > 0);
+  return 'messageable' == client.status;
 };
 
 // --------------------------------------------------------------------------

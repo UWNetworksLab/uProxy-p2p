@@ -45,6 +45,7 @@ function IdentityProvider() {
 IdentityProvider.prototype.login = function(opts, continuation) {
   this.loginOpts = opts;
   if (!this.credentials) {
+    console.log("Identity provider authenticating");
     this.status = 'authenticating';
     this.dispatchEvent('onStatus', {
         status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
@@ -54,8 +55,10 @@ IdentityProvider.prototype.login = function(opts, continuation) {
       if (message.cmd && message.cmd == 'auth') {
         this.credentials = message.message;
         this.login(opts, cont);
+      } else if (message.cmd && message.cmd == 'error') {
+        cont(this.onError(message.message));
       } else {
-        cont(message);
+        cont(this.onError('Login: Unrecognized message from view - ' + JSON.stringify(message)));
       }
     }.bind(this, opts, continuation));
     view.postMessage({
@@ -64,6 +67,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
     });
     return;
   } else if (!this.client) {
+    console.log("Identity Provider connecting");
     var clientId = this.credentials.userId + '/' + this.loginOpts.agent;
     this.status = 'connecting';
     this.dispatchEvent('onStatus', {
@@ -76,27 +80,25 @@ IdentityProvider.prototype.login = function(opts, continuation) {
     this.profile.me[this.credentials.userId].userId = this.credentials.userId;
     this.profile.me[this.credentials.userId].clients = {};
     this.profile.me[this.credentials.userId].clients[clientId] = {
-        clientId: clientId,
-        network: NETWORK_ID,
-        status: 'offline'
+      clientId: clientId,
+      network: NETWORK_ID,
+      status: 'offline'
     };
     //Start XMPP client
-    this.client = CONNECT(clientId, this.credentials.token);
-    this.client.addListener('online', this.onOnline.bind(this));
-    this.client.addListener('error', function(e) {
-      console.error(e);
-      this.status = 'error';
-      this.dispatchEvent('onStatus', {
-          userId: this.credentials.userId,
-          network: NETWORK_ID,
-          status: this.status,
-          message: JSON.stringify(e)
-      });
-      continuation();
-    }.bind(this));
-    this.client.addListener('stanza', this.onMessage.bind(this));
+    this.client = CONNECT(this.loginOpts.agent, this.credentials, (function(e) {
+      continuation(this.onError(e));
+    }).bind(this));
+    this.client.addListener('online', (function() {
+      continuation(this.onOnline());
+    }).bind(this));
+    this.client.addListener('error', (function(e) {
+      continuation(this.onError(e));
+    }).bind(this));
+    if (this.client) { 
+      this.client.addListener('stanza', this.onMessage.bind(this));
+    }
   }
-  continuation();
+  //continuation();
 };
 
 IdentityProvider.prototype.getProfile = function(id, continuation) {
@@ -124,21 +126,29 @@ IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
   continuation();
 };
 
+
 IdentityProvider.prototype.logout = function(userId, networkName, continuation) {
   //@TODO(ryscheng) debug, remove oAuth stuffies
-  this.status = 'offline';
-  userId = this.credentials.userId;
+  if (this.credentials && this.credentials.userId) {
+    userId = this.credentials.userId;
+  } else {
+    userId = null;
+  }
   view.postMessage({
     cmd: 'logout',
   });
-  this.dispatchEvent('onStatus', {
+  this.status = 'offline';
+  var ret = {
       userId: userId,
       network: NETWORK_ID,
       status: this.status,
       message: 'Woo!'
-  });
-  this.profile.me[userId].clients = {};
-  this.dispatchEvent('onChange', this.profile.me[userId]);
+  };
+  this.dispatchEvent('onStatus', ret);
+  if (this.profile.me[userId]) {
+    this.profile.me[userId].clients = {};
+    this.dispatchEvent('onChange', this.profile.me[userId]);
+  }
   for (var id in this.profile.roster) {
     if (this.profile.roster.hasOwnProperty(id)) {
       this.profile.roster[id].clients = {};
@@ -146,14 +156,12 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
     }
   }
   this.credentials = null;
-  this.unannounce();
-  this.client.end();
-  this.client = null;
-  continuation({
-      userId: userId,
-      success: true,
-      message: 'Logout'
-  });
+  if (this.client) {
+    this.unannounce();
+    this.client.end();
+    this.client = null;
+  }
+  continuation(ret);
 };
 
 
@@ -229,16 +237,40 @@ IdentityProvider.prototype.setDeviceAttr = function (fullJid, attr, value) {
   this.sendChange(baseJid);
 };
 
+IdentityProvider.prototype.onError = function(error) {
+  console.log('Identity Login error');
+  console.error(error);
+  this.status = 'error';
+  var ret = {
+    userId: this.credentials.userId,
+    network: NETWORK_ID,
+    status: this.status,
+    message: error
+  };
+  view.postMessage({
+    cmd: 'logout',
+  });
+  
+  if (this.client) {
+    this.client.end();
+    this.client = null;
+  }
+  this.dispatchEvent('onStatus', ret);
+  this.credentials = null;
+  return ret;
+};
+
 IdentityProvider.prototype.onOnline = function() {
   // Send first presence message
   this.announce();
   this.status = 'online';
-  this.dispatchEvent('onStatus', {
+  var ret = {
       userId: this.credentials.userId,
       network: NETWORK_ID,
       status: this.status,
       message: "Woo!"
-  });
+  };
+  this.dispatchEvent('onStatus',ret);
   // Get roster request (for names)
   this.client.send(new window.XMPP.Element('iq', {type: 'get'})
       .c('query', {'xmlns': 'jabber:iq:roster'}).up());
@@ -251,6 +283,7 @@ IdentityProvider.prototype.onOnline = function() {
       clients[k].status = 'messageable';
     }
   }
+  return ret;
 };
 
 IdentityProvider.prototype.announce = function () {
@@ -268,7 +301,9 @@ IdentityProvider.prototype.announce = function () {
 };
 
 IdentityProvider.prototype.unannounce = function() {
-  this.client.send(new window.XMPP.Element('presence', {type: 'unavailable'}));
+  if (this.client) {
+    this.client.send(new window.XMPP.Element('presence', {type: 'unavailable'}));
+  }
 };
 
 IdentityProvider.prototype.onRoster = function(stanza) {
@@ -319,7 +354,6 @@ IdentityProvider.prototype.onRoster = function(stanza) {
       var imageHash = this.getAttr(from, 'imageHash');
       vcard['imageData'] = imageData;
       vcard['imageHash'] = imageHash;
-      //console.log(this.getAttr(from, 'imageData'));
       this.setAttr(from, 'imageData', imageData);
     }
     storage.set('vcard-'+getBaseJid(from), JSON.stringify(vcard));

@@ -68,7 +68,7 @@ var DEFAULT_ROSTER_ENTRY = {
   canUProxy: false,
   onGoogle: false,
   onFB: false,
-  imageData: {},
+  imageData: '',
   clients: {}  // Specified in DEFAULT_ROSTER_CLIENT_ENTRY
 };
 

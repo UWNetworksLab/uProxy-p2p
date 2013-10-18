@@ -1,24 +1,43 @@
 var NETWORK_ID = 'xmpp';
 var NETWORK_NAME = 'Generic XMPP Identity Provider';
+var DEFAULT_XMPP_PORT = 5222;
 
-var CONNECT = function(id, token) {
-  var host = getDomainFromJid(id);
-  var baseJid = stripResource(id);
+var CONNECT = function(agent, credentials, errorCallback) {
+  var host, port;
+  if (credentials.host) {
+    host = credentials.host;
+  } else if (getDomainFromJid(credentials.userId)) {
+    host = getDomainFromJid(credentials.userId);
+  } else {
+    errorCallback("Missing host");
+    return null;
+  }
+  if (credentials.port) {
+    port = credentials.port;
+  } else {
+    port = DEFAULT_XMPP_PORT;
+  }
+  var baseJid = stripResource(credentials.userId);
   var connectOpts = {
     xmlns:'jabber:client',
     host: host,
-    //port: 5222,
+    port: port,
     jid: baseJid,
-    password: token
+    password: credentials.token
   };
   console.log("Logging into XMPP with options: " + JSON.stringify(connectOpts));
-  var client = new window.XMPP.Client(connectOpts);
-  //DEBUG
-  client.preferredSaslMechanism = "PLAIN";
-  //client.preferredSaslMechanism = "DIGEST-MD5";
-  //client.preferredSaslMechanism = "SCRAM-SHA-1";
-  //TODO(willscott): Support Upgrade to TLS wrapped connection.
-  client.connection.allowTLS = false;
+  try {
+    var client = new window.XMPP.Client(connectOpts);
+    //DEBUG
+    client.preferredSaslMechanism = "PLAIN";
+    //client.preferredSaslMechanism = "DIGEST-MD5";
+    //client.preferredSaslMechanism = "SCRAM-SHA-1";
+    //TODO(willscott): Support Upgrade to TLS wrapped connection.
+    client.connection.allowTLS = false;
+  } catch (e) {
+    errorCallback(e);
+    return null;
+  }
   return client;
 };
 

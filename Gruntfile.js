@@ -135,15 +135,19 @@ module.exports = function(grunt) {
       },
       bower_install: {
         command: 'bower install',
-        options: {stdout: true, execOptions: {cwd: 'common/ui'}}
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
       },
       setup_freedom: {
         command: 'npm install',
-        options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
       },
       freedom: {
         command: 'grunt',
-        options: {stdout: true, execOptions: {cwd: 'common/freedom'}}
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
+      },
+      rickroll: {
+        command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {maxBuffer: 16777216}}
       },
     },
     clean: ['chrome/app/common/**',
@@ -261,6 +265,7 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk:download',
     'mozilla-cfx'
   ]);
+  grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
     'build_chrome',
     'build_firefox',
