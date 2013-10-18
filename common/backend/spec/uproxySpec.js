@@ -49,7 +49,7 @@ describe("uproxy.updateUser", function() {
       canUProxy: false,
       onGoogle: false,
       onFB: false,
-      imageData: {},
+      imageData: '',
       url: ''
     });
   });
