@@ -656,7 +656,7 @@ img.c-icon {
     height: 110px;
     border-color: #dddddd;
     background-size: contain;
-    box-shadow: 2px 3px 7px #bbbbbb; }
+    box-shadow: 1px 2px 5px #cccccc; }
 
 .contact-name {
   text-align: center; }

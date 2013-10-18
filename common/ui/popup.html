@@ -168,13 +168,18 @@
           </ul>
         </div>
 
-        <div class="contact-info" id="their-info" ng-show="ui.accessView">
+        <div class="contact-info" id="their-info" ng-show="ui.accessView"
+            ng-mouseenter="showTheirInfo=true"
+            ng-mouseleave="showTheirInfo=false">
           <img ng-show="ui.contact.imageData" class="contact-image"
                ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
           <img ng-hide="ui.contact.imageData" class="contact-image">
           <p style="display:none;">
           <span ng-show="ui.contact.onGoogle"> G+ </span>
           <span ng-show="ui.contact.onFB"> FB </span>
+          </p>
+          <p ng-show="showTheirInfo" class="description">
+            {{ui.instance.description}}
           </p>
         </div>
 
@@ -202,8 +207,6 @@
           </p>
 
           <div class="instance-actions" ng-show="ui.instance && ui.accessView">
-
-            <p ng-hide="true" class="description">{{ui.instance.description}}</p>
 
             <div class="uproxy-box proxy"
                 ng-switch="ui.instance.trust.asProxy">
