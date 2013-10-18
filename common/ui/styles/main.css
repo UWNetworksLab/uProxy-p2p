@@ -578,6 +578,7 @@ img.c-icon {
   .bg-deco#internets {
     background-image: url("../icons/global_internet.png");
     background-size: 180px;
+    background-position-y: 200px;
     -webkit-transition: all 0.5s !important;
     -moz-transition: all 0.5s !important;
     -o-transition: all 0.5s !important;
@@ -608,14 +609,14 @@ img.c-icon {
   transition: all 0.23s !important; }
   .contact-info#my-info {
     position: fixed;
-    bottom: 50px; }
+    bottom: 55px; }
     .contact-info#my-info.ng-hide {
       display: block !important;
       pointer-events: none;
       bottom: -100px; }
   .contact-info#their-info {
     position: fixed;
-    top: 50px; }
+    top: 40px; }
     .contact-info#their-info.ng-hide {
       display: block !important;
       pointer-events: none;
