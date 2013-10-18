@@ -214,6 +214,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.offerAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'offer');
         ui.pendingClientTrustChange = true;
+        // instance.trust.asClient = 'offered';
+        // ui.instance.trust.asClient = instance;
       };
       $rootScope.grantAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'allow');

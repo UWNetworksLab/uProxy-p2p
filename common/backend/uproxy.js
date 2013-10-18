@@ -72,10 +72,12 @@ bgAppPageChannel.on('ui-ready', function () {
   sendFullStateToUI();
 });
 
-bgAppPageChannel.on('login', function(network) { login(network); });
+// When the login moessage is sent from the extension, assume it's explicit.
+bgAppPageChannel.on('login', function(network) { login(network, true); });
 bgAppPageChannel.on('logout', function(network) { logout(network); });
 
-function login(network) {
+function login(network, explicit) {
+  explicit = explicit || false;
   network = network || undefined;
   identity.login({
     agent: 'uproxy',
@@ -85,9 +87,7 @@ function login(network) {
     network: network
   }, sendFullStateToUI);
   if (network) {
-    store.state.me.networkDefaults[network].autoconnect = true;
-  } else {
-    store.state.me.networkDefaults[network].autoconnect = false;
+    store.state.me.networkDefaults[network].autoconnect = explicit;
   }
   store.saveMeToStorage();
 }

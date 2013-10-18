@@ -16,7 +16,7 @@ server.emit("start");
 store.loadStateFromStorage(function () {
   for(var network in store.state.me.networkDefaults) {
     if (store.state.me.networkDefaults[network].autoconnect) {
-      login(network);
+      login(network, true);
     }
   }
   _SyncUI('',store.state);
