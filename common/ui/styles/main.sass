@@ -10,15 +10,17 @@
     outline: none
 
 $fontSize: 16px
+$defaultSmoothSpeed: 0.23s
+
 @font-face
   font-family: 'Eurostile'
   src: url('eurostile.ttf') format('truetype')
 
 @mixin smooth
-  -webkit-transition: all 0.23s !important
-  -moz-transition: all 0.23s !important
-  -o-transition: all 0.23s !important
-  transition: all 0.23s !important
+  -webkit-transition: all $defaultSmoothSpeed !important
+  -moz-transition: all $defaultSmoothSpeed !important
+  -o-transition: all $defaultSmoothSpeed !important
+  transition: all $defaultSmoothSpeed !important
 @mixin smooth-slow
   -webkit-transition: all 0.5s !important
   -moz-transition: all 0.5s !important
@@ -102,8 +104,11 @@ ul
 
 #contact-header
   position: fixed
-  z-index: 500
+  z-index: 300
+  width: 100%
   top: 0
+  padding-bottom: 4px
+  box-shadow: 0 1px 3px #eee
   & h1
     position: fixed
     width: 100%
@@ -342,7 +347,7 @@ ul
 
 #options-btn
   position: fixed
-  z-index: 400
+  z-index: 600
   top: 4px
   right: 8px
   background: transparent url('../icons/settings.svg') no-repeat center center
@@ -390,13 +395,14 @@ ul
   outline: none
   @include smooth
 
+// Appears to tell the user about the state (like being offline)
 #roster-text
   position: absolute
   text-align: center
   top: 100px
   width: 100%
   padding: 10%
-  z-index: 500
+  z-index: 1
   color: #444
   text-shadow: 0 2px 2px #ccc
   pointer-events: none
@@ -533,13 +539,6 @@ img.c-icon
     display: inline-block !important
     opacity: 0
     left: 400px
-  & img.contact-image
-    position: relative
-    width: 110px
-    height: 110px
-    border-color: #ddd
-    background-size: contain
-    box-shadow: 2px 3px 7px #bbb
 
 .bg-deco
   position: fixed
@@ -549,23 +548,45 @@ img.c-icon
   background: transparent no-repeat center
   pointer-events: none
   opacity: 0.2
+  @include smooth
+  &.faded
+    opacity: 0.02 !important
+  &.darker
+    opacity: 0.25 !important
+  &.active
+    opacity: 0.5 !important
   &#internets
     background-image: url('../icons/global_internet.png')
     background-size: 180px
+    @include smooth-slow
+    &.active
+      opacity: 1 !important
   &#path-left
     background-image: url('../icons/path-left.png')
-    opacity: 0.02
+    opacity: 0.07
   &#path-right
     background-image: url('../icons/path-right.png')
-    opacity: 0.02
+    opacity: 0.07
 
+// Container for a user's profile picture and such
 .contact-info
   text-align: center
   text-shadow: 0px 1px 1px #ccc
   width: 100%
   &#my-info
-    position: absolute
+    position: fixed
     bottom: 50px
+    @include smooth
+    &.ng-hide
+      @include un-ng-hide
+      bottom: -100px
+  & img.contact-image
+    position: relative
+    width: 110px
+    height: 110px
+    border-color: #ddd
+    background-size: contain
+    box-shadow: 2px 3px 7px #bbb
 
 .contact-name
   text-align: center
@@ -614,12 +635,15 @@ img.c-icon
   background: no-repeat center
   height: 100px
   width: 148px
-  white-space: nowrap
   & .uproxytip
     position: absolute
     width: 100%
     text-align: center
     color: #888
+    padding: 0 8px
+    background-color: #fff
+    opacity: 0.7
+    cursor: default
   &.proxy
     left: 0
     top: 150px
@@ -644,7 +668,7 @@ img.c-icon
   text-align: center
   font-size: $fontSize * 0.8
   position: absolute
-  top: 130px
+  top: 165px
   width: 100%
   & .btn
     padding: 6px 12px
@@ -653,6 +677,13 @@ img.c-icon
     border-radius: 3px
     font-size: 11px
     opacity: 0.9
+    &.black
+      background-color: #222
+      color: #ccc
+      border-color: #666
+      &:hover, &:focus
+        color: #fff
+        background-color: #444
 
 .client-details
   position: relative
@@ -727,18 +758,11 @@ img.c-icon
   bottom: 0
   padding: 8px
 
-
-.contact-actions
-  display: none
-
 #popup
   width: 370.8204px
   height: 600px
   .footer
     text-align: right
-
-.large-font
-  font-size: $fontSize * 1.5
 
 details
   & > summary

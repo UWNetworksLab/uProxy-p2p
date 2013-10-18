@@ -66,14 +66,14 @@
         title="{{'options'|i18n}}">
     </button>
     <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-      <span ng-show="ui.splashPage && ui.rosterNudge">Show the contact again.</span>
-      <span ng-show="ui.splashPage && !ui.rosterNudge">Show the contact list.</span>
+      <span ng-show="ui.splashPage && ui.accessView">Show the contact again.</span>
+      <span ng-show="ui.splashPage && !ui.accessView">Show the contact list.</span>
       <span ng-hide="ui.splashPage">Show the setup page.</span>
     </div>
 
     <div id="main-view" ng-hide="showingSplashPage()">
       <div id="header">
-        <div id="roster-header" ng-hide="ui.rosterNudge">
+        <div id="roster-header" ng-hide="ui.accessView">
           <div id="actions">
             <button id="search-btn" type="search"
                     ng-class="{on:ui.searchBar}"
@@ -118,7 +118,7 @@
           </input>
         </div>
 
-        <div id="contact-header" ng-show="ui.rosterNudge">
+        <div id="contact-header" ng-show="ui.accessView">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
           <h1>{{ui.contact.name}}</h1>
         </div>
@@ -140,7 +140,7 @@
           </span>
         </div>
 
-        <div id="roster-frame" ng-hide="ui.rosterNudge">
+        <div id="roster-frame" ng-hide="ui.accessView">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
                 ng-click="viewContact(contact)"
@@ -168,10 +168,21 @@
           </ul>
         </div>
 
-        <div id="access" ng-show="ui.rosterNudge">
-          <div class="bg-deco" id="internets"></div>
-          <div class="bg-deco" id="path-left"></div>
-          <div class="bg-deco" id="path-right"></div>
+        <div id="access" ng-show="ui.accessView">
+          <div id="internets" class="bg-deco" ng-class="{
+              active: 'running'==ui.instance.status.client ||
+                      'running'==ui.instance.status.proxy}"
+              ></div>
+          <div class="bg-deco" id="path-left"
+               ng-class="{faded:'no'==ui.contact.trust.asProxy,
+                          darker:'yes'==ui.contact.trust.asProxy,
+                          active:ui.contact.isActiveProxy }">
+          </div>
+          <div class="bg-deco" id="path-right"
+               ng-class="{faded:'no'==ui.contact.trust.asClient,
+                          darker:'yes'==ui.contact.trust.asClient,
+                          active:ui.contact.isActiveClient }">
+          </div>
 
           <div class="contact-info">
             <img ng-show="ui.contact.imageData" class="contact-image"
@@ -188,9 +199,9 @@
           {{ ui.contact.name }} is not running uProxy.
           </p>
 
-          <div class="instance-actions" ng-show="ui.instance && ui.rosterNudge">
-            <p>{{ui.instance.description}}
-            </p>
+          <div class="instance-actions" ng-show="ui.instance && ui.accessView">
+
+            <p ng-hide="true" class="description">{{ui.instance.description}}</p>
 
             <div class="uproxy-box proxy"
                 ng-switch="ui.instance.trust.asProxy">
@@ -226,9 +237,9 @@
                 </button>
               </div>
               <div ng-switch-when="offered">
-                <p class="uproxytip">They've given you access.
+                <p class="uproxytip">They've offered you access.
                 </p>
-                <button class="btn"
+                <button class="btn black"
                     ng-disabled="ui.pendingProxyTrustChange"
                     ng-click="acceptOffer(ui.instance)">
                   Accept
@@ -251,6 +262,7 @@
             </div>
 
             <div class="uproxy-box client"
+                ng-class="{active:'running'==ui.instance.status.client}"
                 ng-switch="ui.instance.trust.asClient">
               <div ng-switch-when="no">
                 <p class="uproxytip">You have not granted them access.
@@ -262,9 +274,9 @@
                 </button>
               </div>
               <div ng-switch-when="requested">
-                <p class="uproxytip">They've requested access through you.
+                <p class="uproxytip">They requested access through you.
                 </p>
-                <button class="btn"
+                <button class="btn black"
                     ng-disabled="ui.pendingClientTrustChange"
                     ng-click="grantAccess(ui.instance)">
                   Grant
@@ -288,17 +300,12 @@
 
           </div>
 
-          <div class="contact-info" id="my-info">
-            <img class="contact-image"
-                 ng-src='{{ui.myPic}}'>
-          </div>
-
           <div class="detail-panel" ng-hide="true">
             <button id="uproxy-btn" class="instance-btn">
             </button>
             <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
                target="_blank"
-               ng-show="ui.rosterNudge"
+               ng-show="ui.accessView"
                ng-mouseenter="chatButtonHovered=true"
                ng-mouseleave="chatButtonHovered=false">
             </a>
@@ -313,6 +320,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="contact-info" id="my-info" ng-show="ui.accessView">
+      <img class="contact-image"
+           ng-src='{{ui.myPic}}'>
     </div>
 
     <div id="status">

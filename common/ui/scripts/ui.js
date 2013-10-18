@@ -15,7 +15,7 @@ function UI(browserType) {
 
   this.notifications = 0;
   // TODO: splash should be set by state.
-  this.rosterNudge = false;
+  this.accessView = false;
   this.splashPage = false;
   this.advancedOptions = false;
   this.searchBar = true;
@@ -123,7 +123,7 @@ UI.prototype.focusOnContact = function(contact) {
   console.log('focusing on contact ' + contact);
   this.contact = contact;
   this.notificationSeen(contact);
-  this.rosterNudge = true;
+  this.accessView = true;
 };
 
 // Going back from the contact view to the roster view.
@@ -134,7 +134,7 @@ UI.prototype.returnToRoster = function() {
     this.notificationSeen(this.contact);  // Works if there *is* a contact.
     this.contact = null;
   }
-  this.rosterNudge = false;
+  this.accessView = false;
 }
 
 // Notifications occur on the user level. The message sent to the app side

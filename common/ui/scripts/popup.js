@@ -19,7 +19,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // Reset view state if logged out.
     if ($scope.loggedOut()) {
       ui.splashPage = true;
-      ui.rosterNudge = false;
+      ui.accessView = false;
     }
     $scope.showingSplashPage = function() {
       return ui.splashPage ||
