@@ -231,7 +231,9 @@ UI.prototype.syncUser = function(user) {
 }
 
 // Make sure counters and UI-only state holders correctly reflect the model.
-UI.prototype.synchronize = function() {
+// If |previousPatch| is provided, the search is optimized to only sync the
+// relevant entries.
+UI.prototype.synchronize = function(previousPatch) {
 
   var n = 0;  // Count up notifications
   for (var userId in model.roster) {

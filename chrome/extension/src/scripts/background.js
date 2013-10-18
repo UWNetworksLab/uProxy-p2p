@@ -7,7 +7,7 @@ console.log('Initializing chrome extension background page...');
 // Chrome App Id for UProxy Packaged Chrome App.
 var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
 // Rate Limit for UI.synchronize (ms)
-var SYNC_TIMEOUT = 500;
+var SYNC_TIMEOUT = 800;
 var syncBlocked = false;
 var syncTimer = null;     // Keep reference to the timer.
 
@@ -94,40 +94,6 @@ function initialize() {
       }, SYNC_TIMEOUT);
     }
 
-    /*
-    // Run through roster if necessary.
-    if (patch[0].path.indexOf('roster') >= 0) {
-      // - Ensure it's sorted alphabetically.
-      console.log('roster edit. ' + patch[0].path);
-      // - Count up notifications.
-      $rootScope.notifications = 0;
-      // var sortedIds = Object.keys(model.roster);
-      // console.log(sortedIds);
-      // sortedIds.sort();
-      // var sortedRoster = {};
-      var rosterByName = {};
-      for (var userId in model.roster) {
-        // sortedRoster[userId] = model.roster[userId];
-        var user = model.roster[userId];
-        roster.updateContact(user);
-        $rootScope.notifications += user.hasNotification? 1 : 0;
-        // rosterByName[user.name] = user;
-      }
-      // var sortedNames = Object.keys(rosterByName);
-      // console.log(sortedNames);
-      // var sortedRoster = {};
-      // sortedNames.sort();
-      // for (var name in sortedNames) {
-        // sortedRoster[name] = rosterByName[name];
-      // }
-      // $rootScope.roster = sortedRoster;
-      if ($rootScope.notifications > 0) {
-        icon.label('' + $rootScope.notifications);
-      }
-      $rootScope.roster = roster;
-    }
-    */
-
     // This event allows angular to bind listeners and update the DOM.
   });
   console.log('Wiring UI to backend done.');
@@ -138,7 +104,7 @@ function checkRunningProxy() {
     for (var k in model.instances) {
       if (model.instances.hasOwnProperty(k) && model.instances[k].status &&
           model.instances[k].status.proxy) {
-        if (model.instances[k].status.proxy == 'running') {
+        if ('running' == model.instances[k].status.proxy) {
           proxyConfig.startUsingProxy();
           return;
         }
@@ -150,7 +116,7 @@ function checkRunningProxy() {
 
 function checkThatAppIsInstalled() {
   appChannel.connect();
-  setTimeout(checkThatAppIsInstalled, new Date() + (SYNC_TIMEOUT * 2));
+  setTimeout(checkThatAppIsInstalled, SYNC_TIMEOUT * 5);
 }
 
 // Attach state-change listener to update UI from the backend.

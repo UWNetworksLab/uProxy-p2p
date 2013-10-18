@@ -168,6 +168,16 @@
           </ul>
         </div>
 
+        <div class="contact-info" id="their-info" ng-show="ui.accessView">
+          <img ng-show="ui.contact.imageData" class="contact-image"
+               ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
+          <img ng-hide="ui.contact.imageData" class="contact-image">
+          <p style="display:none;">
+          <span ng-show="ui.contact.onGoogle"> G+ </span>
+          <span ng-show="ui.contact.onFB"> FB </span>
+          </p>
+        </div>
+
         <div id="access" ng-show="ui.accessView">
           <div id="internets" class="bg-deco" ng-class="{
               active: 'running'==ui.instance.status.client ||
@@ -184,19 +194,8 @@
                           active:ui.contact.isActiveClient }">
           </div>
 
-          <div class="contact-info">
-            <img ng-show="ui.contact.imageData" class="contact-image"
-                 ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
-            <img ng-hide="ui.contact.imageData" class="contact-image">
-
-            <p style="display:none;">
-            <span ng-show="ui.contact.onGoogle"> G+ </span>
-            <span ng-show="ui.contact.onFB"> FB </span>
-            </p>
-          </div>
-
-          <p ng-hide="ui.instance">
-          {{ ui.contact.name }} is not running uProxy.
+          <p class="access-note" ng-hide="ui.instance">
+          {{ ui.contact.name }} does not have <b>uProxy</b>.
           </p>
 
           <div class="instance-actions" ng-show="ui.instance && ui.accessView">

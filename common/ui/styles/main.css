@@ -87,7 +87,8 @@ ul {
   width: 100%;
   top: 0;
   padding-bottom: 4px;
-  box-shadow: 0 1px 3px #eeeeee; }
+  box-shadow: 0 1px 3px #eeeeee;
+  background-color: white; }
   #contact-header h1 {
     position: fixed;
     width: 100%;
@@ -590,21 +591,35 @@ img.c-icon {
     background-image: url("../icons/path-right.png");
     opacity: 0.07; }
 
+.access-note {
+  position: absolute;
+  top: 270px;
+  width: 100%;
+  text-align: center;
+  cursor: default; }
+
 .contact-info {
   text-align: center;
   text-shadow: 0px 1px 1px #cccccc;
-  width: 100%; }
+  width: 100%;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
   .contact-info#my-info {
     position: fixed;
-    bottom: 50px;
-    -webkit-transition: all 0.23s !important;
-    -moz-transition: all 0.23s !important;
-    -o-transition: all 0.23s !important;
-    transition: all 0.23s !important; }
+    bottom: 50px; }
     .contact-info#my-info.ng-hide {
       display: block !important;
       pointer-events: none;
       bottom: -100px; }
+  .contact-info#their-info {
+    position: fixed;
+    top: 50px; }
+    .contact-info#their-info.ng-hide {
+      display: block !important;
+      pointer-events: none;
+      top: -100px; }
   .contact-info img.contact-image {
     position: relative;
     width: 110px;

@@ -109,6 +109,7 @@ ul
   top: 0
   padding-bottom: 4px
   box-shadow: 0 1px 3px #eee
+  background-color: #fff
   & h1
     position: fixed
     width: 100%
@@ -568,18 +569,33 @@ img.c-icon
     background-image: url('../icons/path-right.png')
     opacity: 0.07
 
+// Typically displayed when the contact does not have uproxy installed
+.access-note
+  position: absolute
+  top: 270px
+  width: 100%
+  text-align: center
+  cursor: default
+
+
 // Container for a user's profile picture and such
 .contact-info
   text-align: center
   text-shadow: 0px 1px 1px #ccc
   width: 100%
+  @include smooth
   &#my-info
     position: fixed
     bottom: 50px
-    @include smooth
     &.ng-hide
       @include un-ng-hide
       bottom: -100px
+  &#their-info
+    position: fixed
+    top: 50px
+    &.ng-hide
+      @include un-ng-hide
+      top: -100px
   & img.contact-image
     position: relative
     width: 110px
