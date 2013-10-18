@@ -305,7 +305,7 @@ describe("uproxy.state.instance", function () {
     }
 
     // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
-    // message.
+    // message.  receiveInstance expects a DEFAULT_INSTANCE_MESSAGE.
     for (inst in userRoster) {
       receiveInstance(makeInstanceMessage(userRoster[inst]));
     }
@@ -318,10 +318,55 @@ describe("uproxy.state.instance", function () {
   });
 
   // Like above, only we get all the instance messages first.
-  it('onState-Instance-Roster', function() {
+  it('onState-Instance-Roster-Bulk', function() {
+    // This should be the simplest way in.  You get a login for yourself, then
+    // a roster, then instance notifications.
+    var inst;
+    // receiveStatus expects a DEFAULT_STATUS message.
+    receiveStatus(selfInstanceAndStatusMessage);
 
+    // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
+    // message.
+    for (inst in userRoster) {
+      receiveInstance(makeInstanceMessage(userRoster[inst]));
+    }
+
+    // receiveChange expects a DEFAULT_INSTANCE message.
+    receiveChange(selfInstanceAndStatusMessage);
+    for (inst in userRoster) {
+      receiveChange(userRoster[inst]);
+    }
+
+    // Now check our state.
+    validateSelf(selfInstanceAndStatusMessage);
+    for (inst in userRoster) {
+      validateInstance(makeInstanceMessage(userRoster[inst]).data);
+    }
   });
-});
+
+  // We get each instance message before each roster update.
+  it('onState-Instance-Roster-Incremental', function() {
+    // This should be the simplest way in.  You get a login for yourself, then
+    // a roster, then instance notifications.
+    var inst;
+    // receiveStatus expects a DEFAULT_STATUS message.
+    receiveStatus(selfInstanceAndStatusMessage);
+    receiveChange(selfInstanceAndStatusMessage);
+
+    // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
+    // message.  receiveChange expects a DEFAULT_INSTANCE
+    // message. receiveInstance expects a DEFAULT_INSTANCE_MESSAGE.
+    for (inst in userRoster) {
+      receiveInstance(makeInstanceMessage(userRoster[inst]));
+      receiveChange(userRoster[inst]);
+    }
+
+    // Now check our state.
+    validateSelf(selfInstanceAndStatusMessage);
+    for (inst in userRoster) {
+      validateInstance(makeInstanceMessage(userRoster[inst]).data);
+    }
+  });});
 
 describe("uproxy.state.instance.fuzzer", function () {
   // Feed in randomized ordering of data, some of it bad, and make
