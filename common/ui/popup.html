@@ -206,13 +206,15 @@
           <div id="internets" class="bg-deco" ng-class="{
               active: 'running'==ui.instance.status.client ||
                       'running'==ui.instance.status.proxy}"
-              ></div>
+              ng-hide="ui.chatView"></div>
           <div class="bg-deco" id="path-left"
+               ng-hide="ui.chatView"
                ng-class="{faded:'no'==ui.contact.trust.asProxy,
                           darker:'yes'==ui.contact.trust.asProxy,
                           active:ui.contact.isActiveProxy }">
           </div>
           <div class="bg-deco" id="path-right"
+               ng-hide="ui.chatView"
                ng-class="{faded:'no'==ui.contact.trust.asClient,
                           darker:'yes'==ui.contact.trust.asClient,
                           active:ui.contact.isActiveClient }">
