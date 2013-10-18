@@ -156,7 +156,10 @@ module.exports = function(grunt) {
         // Files being tested
         src: sourcesToTest,
         options: {
-          specs: 'common/backend/spec/*Spec.js'
+          helpers: ['common/backend/test/example-state.jsonvar',
+                    'common/backend/test/example-saved-state.jsonvar'],
+          specs: 'common/backend/spec/*Spec.js',
+          keepRunner: true
         }
       }
     },

@@ -13,8 +13,11 @@
 
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
-   Trust, freedom: false, UProxyState: false, console: false, DEBUG: false,
-   ProxyState: false, store, _localTestProxying */
+   Trust, restrictToObject, freedom: false, UProxyState: false, console:
+   false, DEBUG: false, ProxyState: false, store, _localTestProxying,
+   DEFAULT_STATUS, DEFAULT_INSTANCE_MESSAGE, DEFAULT_MESSAGE_ENVELOPE,
+   DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, DEFAULT_ROSTER_ENTRY,
+   DEFAULT_ROSTER_CLIENT_ENTRY */
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -112,7 +115,8 @@ bgAppPageChannel.on('change-option', function (data) {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage();
   console.log('saved options ' + JSON.stringify(store.state.options));
-  bgAppPageChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key, value: data.value}]);
+  bgAppPageChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key,
+                                          value: data.value}]);
   // TODO: Handle changes that might affect proxying
 });
 
@@ -354,10 +358,19 @@ function receiveTrustMessage(msgInfo) {
 // --------------------------------------------------------------------------
 //  Messages
 // --------------------------------------------------------------------------
-// Update local user's online status (away, busy, etc.).
-identity.on('onStatus', function(data) {
+
+// Expects message in the format data = {
+//    message: string,
+//    network: string,
+//    status: string,
+//    userId: string
+// }
+//
+function receiveStatus(data) {
   console.log('onStatus: data:' + JSON.stringify(data));
-  if (data.userId) { // userId is only specified when connecting or online.
+  data = restrictToObject(DEFAULT_STATUS, data);
+  // userId is only specified when connecting or online.
+  if (data.userId.length) {
     store.state.identityStatus[data.network] = data;
     bgAppPageChannel.emit('state-change',
         [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);
@@ -365,13 +378,21 @@ identity.on('onStatus', function(data) {
       store.state.me.identities[data.userId] = {userId: data.userId};
     }
   }
-});
+}
+
+// Update local user's online status (away, busy, etc.).
+identity.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether online or
 // description.
-// |data| is guarenteed to have userId.
-identity.on('onChange', function(data) {
+// |data| is a DEFAULT_ROSTER_ENTRY.
+function receiveChange(rawData) {
   try {
+    var data = restrictToObject(DEFAULT_ROSTER_ENTRY, rawData);
+    for (var c in rawData.clients) {
+      data.clients[c] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY,
+                                         rawData.clients[c]);
+    }
     if (store.state.me.identities[data.userId]) {
       // My card changed.
       store.state.me.identities[data.userId] = data;
@@ -381,10 +402,14 @@ identity.on('onChange', function(data) {
       updateUser(data);  // Not myself.
     }
   } catch (e) {
-    console.log('Failure in onChange handler.  store.state.me = ' + JSON.stringify(store.state.me));
+    console.log('Failure in onChange handler.  store.state.me = ' +
+        JSON.stringify(store.state.me) + ', input message: ' +
+        JSON.stringify(rawData));
     console.log(e.stack);
   }
-});
+}
+
+identity.on('onChange', receiveChange);
 
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
@@ -430,12 +455,17 @@ identity.on('onMessage', function (msgInfo) {
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
 //
-//  |newData| - Incoming JSON info for a single user.
-function updateUser(newData) {
+//  |data| - Incoming JSON info for a single user.  Conforms to DEFAULT_ROSTER_ENTRY.
+function updateUser(data) {
+  var newData = restrictToObject(DEFAULT_ROSTER_ENTRY, data);
+  for (var k in data.clients) {
+    newData.clients[k] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY, data.clients[k]);
+  }
   // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = store.state.roster[userId];
+
   if (!existingUser) {
     store.state.roster[userId] = newData;
     userOp = 'add';
@@ -498,18 +528,23 @@ function _getMyId() {
 // Should only be called after we have received an onChange event with our own
 // details.
 function makeMyInstanceMessage() {
-  var firstIdentity = store.state.me.identities[_getMyId()];
-  return JSON.stringify({
-    type: 'notify-instance',
-    instanceId:  '' + store.state.me.instanceId,
-    description: '' + store.state.me.description,
-    keyHash:     '' + store.state.me.keyHash,
-    rosterInfo: {
-      name:    firstIdentity.name,
-      network: firstIdentity.network,
-      url:     firstIdentity.url
-    }
-  });
+  var result;
+  try {
+    var firstIdentity = store.state.me.identities[_getMyId()];
+    firstIdentity.network = firstIdentity.clients[Object.keys(
+        firstIdentity.clients)[0]].network;
+    result = restrictToObject(DEFAULT_INSTANCE_MESSAGE, store.state.me);
+    result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
+                                         firstIdentity);
+  } catch (e) {
+    console.log("Failed to repair identity when making an instance message.\n");
+    console.log("firstIdentity = " + JSON.stringify(
+        firstIdentity, null, " ") + "\n");
+    console.log("store.state.me = " + JSON.stringify(
+        store.state.me, null, " ") + "\n");
+    throw e;
+  }
+  return JSON.stringify(result);
 }
 
 // Send a notification about my instance data to a particular clientId.
@@ -530,8 +565,15 @@ function sendInstance(clientId) {
 // Note: does not assume that a roster entry exists for the user that send the
 // instance data. Sometimes we get an instance data message from user that is
 // not (yet) in the roster.
-function receiveInstance(msg) {
-  console.log('receiveInstance(from: ' + msg.fromUserId + ')');
+// |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
+function receiveInstance(rawMsg) {
+  console.log('receiveInstance(from: ' + rawMsg.fromUserId + ')');
+
+  var msg = restrictToObject(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+  msg.data = restrictToObject(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+  msg.data.rosterInfo = restrictToObject(
+      DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
+
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;
   var clientId    = msg.fromClientId;
@@ -645,14 +687,6 @@ function _addNotification(instanceId) {
   instance.notify = true;
   store.saveInstance(instanceId);
   _syncInstanceUI(instance, 'notify');
-  // var user = store.state.roster[instance.rosterInfo.userId];
-  // if (!user) {
-    // console.error('User does not exist for instance ' + instance);
-    // return false;
-  // }
-  // console.log('adding notification for instance ' + instanceId + ' of user ' + user.userId);
-  // user.hasNotification = true;
-  // _SyncUI('/roster/' + user.userId + '/hasNotification', true);
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
