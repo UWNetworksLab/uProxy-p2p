@@ -614,6 +614,7 @@ img.c-icon
   background: no-repeat center
   height: 100px
   width: 148px
+  white-space: nowrap
   & .uproxytip
     position: absolute
     width: 100%
@@ -624,6 +625,7 @@ img.c-icon
     top: 150px
     background-image: url('../icons/arrow-up.png')
     background-position-y: top
+    padding-top: 12px
     & .uproxytip
       bottom: 0
   &.client
@@ -645,11 +647,11 @@ img.c-icon
   top: 130px
   width: 100%
   & .btn
-    padding: 8px 16px
+    padding: 6px 12px
     margin-top: 16px
     text-shadow: 0 1px 1px #888
     border-radius: 3px
-    font-size: $fontSize * 0.8
+    font-size: 11px
     opacity: 0.9
 
 .client-details
@@ -781,6 +783,10 @@ details
 .dbg
   position: fixed
   z-index: 500
+
+#reset-box
+  position: fixed
+  bottom: 0
 
 details.advanced
   margin-top: 15px

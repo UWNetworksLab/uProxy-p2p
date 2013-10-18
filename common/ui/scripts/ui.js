@@ -170,6 +170,7 @@ UI.prototype.syncMe = function() {
   var id = _getMyId();
   if (!id) {
     console.log('I don\'t exist yet! :(');
+    return;
   }
   var identity = model.me.identities[id];
   this.myName = identity.name;
