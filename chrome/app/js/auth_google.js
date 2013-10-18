@@ -1,7 +1,8 @@
 var GOOGLE_TOKENINFO_URL = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
 
-function AuthGoogle(cb) {
-  this.credentialsCallback = cb;
+function AuthGoogle(credCallback, errorCallback) {
+  this.credentialsCallback = credCallback;
+  this.errorCallback = errorCallback;
   this.credentials = {
     userId: null,
     token: null
@@ -26,14 +27,14 @@ AuthGoogle.prototype.validate = function(token) {
       if (this.credentialsCallback) {
         this.credentialsCallback(this.credentials);
       } else {
-        console.error('Missing Google credentials callback');
+        this.errorCallback('Missing Google credentials callback');
       }
     } else {
-      console.error('Error validating Google oAuth token');
+      this.errorCallback('Error validating Google oAuth token');
     }
   }).bind(this), false);
   xhr.addEventListener('error', (function(evt) {
-    console.error('Error occurred while validating Google oAuth token');
+    this.errorCallback('Error occurred while validating Google oAuth token');
   }).bind(this), false);
   xhr.open('get', GOOGLE_TOKENINFO_URL+token, true);
   xhr.send();

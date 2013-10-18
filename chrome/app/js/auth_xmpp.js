@@ -1,10 +1,14 @@
 var CREDENTIALS_KEY = "xmpp-credentials-mvav24n24ovp48"
 
-function AuthXmpp(cb) {
-  this.credentialsCallback = cb;
+function AuthXmpp(credCallback, errorCallback) {
+  this.credentialsCallback = credCallback;
+  this.errorCallback = errorCallback;
   this.credentials = {
     userId: null,
-    token: null
+    token: null,
+    host: null,
+    port: null,
+    register: false
   };
   this.dialogWindow= null;
 };
@@ -17,7 +21,7 @@ AuthXmpp.prototype.login = function(interactive) {
     } else if (interactive) {
       this.createDialog();
     } else {
-      console.error('XMPP provider authentication: Credentials not cached and interactive is off');
+      console.log('XMPP provider authentication: Credentials not cached and interactive is off');
     }
   }).bind(this));
 };
@@ -49,7 +53,7 @@ AuthXmpp.prototype.createDialog = function() {
             this.credentialsCallback(data[CREDENTIALS_KEY]);
             return;
           } else {
-            console.error('XMPP provider authentication: No credentials provided into dialog window');
+            this.errorCallback('XMPP provider authentication: No credentials provided into dialog window');
           }
         }).bind(this));
       }).bind(this));
