@@ -6,8 +6,11 @@ var CONNECT = function(agent, credentials, errorCallback) {
   var host, port;
   if (credentials.host) {
     host = credentials.host;
-  } else {
+  } else if (getDomainFromJid(credentials.userId)) {
     host = getDomainFromJid(credentials.userId);
+  } else {
+    errorCallback("Missing host");
+    return null;
   }
   if (credentials.port) {
     port = credentials.port;
