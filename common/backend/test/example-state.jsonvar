@@ -1,4 +1,4 @@
-{
+var TESTDATA_EXAMPLE_STATE = {
   "_debug": true,
   "_msgLog": [],
   "identityStatus": {
@@ -103,4 +103,4 @@
       "turnServer2"
     ]
   }
-}
+};

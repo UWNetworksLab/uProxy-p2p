@@ -36,7 +36,7 @@ var DEFAULT_PROXY_STATUS = {
 // Instance object.
 var DEFAULT_INSTANCE = {
   instanceId: null,  // Primary key.
-  keyHash: null,
+  keyHash: '',
   trust: {
     asProxy: Trust.NO,
     asClient: Trust.NO
@@ -50,6 +50,14 @@ var DEFAULT_INSTANCE = {
     network: '',
     url: ''
   }
+};
+
+// Default identity.on('onStatus') message
+var DEFAULT_STATUS = {
+  message: '',
+  network: null,
+  status: '',
+  userId: null
 };
 
 // Default for state.roster
@@ -71,12 +79,20 @@ var DEFAULT_ROSTER_CLIENT_ENTRY = {
   status: ''
 };
 
-// Default for notify-instance messages
+// Any message we get from identity should have this format.
+var DEFAULT_MESSAGE_ENVELOPE = {
+  fromUserId: null,
+  fromClientId: null,
+  toUserId: null,
+  data: {}
+};
+
+// Default for notify-instance messages, not including the envelope.
 var DEFAULT_INSTANCE_MESSAGE = {
   type: 'notify-instance',
   instanceId: null,
   description: '',
-  keyHash: null,
+  keyHash: '',
   rosterInfo: {}
 };
 
@@ -84,7 +100,8 @@ var DEFAULT_INSTANCE_MESSAGE = {
 var DEFAULT_INSTANCE_MESSAGE_ROSTERINFO = {
   name: null,
   network: null,
-  url: ''
+  url: '',
+  userId: ''
 };
 
 var DEFAULT_MY_IDENTITY = {

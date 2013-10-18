@@ -13,10 +13,11 @@
 
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
-   Trust, restrictToObject, freedom: false, UProxyState: false, console: false,
-   DEBUG: false, ProxyState: false, store, _localTestProxying,
-   DEFAULT_INSTANCE_MESSAGE, DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
-   DEFAULT_ROSTER_ENTRY, DEFAULT_ROSTER_CLIENT_ENTRY */
+   Trust, restrictToObject, freedom: false, UProxyState: false, console:
+   false, DEBUG: false, ProxyState: false, store, _localTestProxying,
+   DEFAULT_STATUS, DEFAULT_INSTANCE_MESSAGE, DEFAULT_MESSAGE_ENVELOPE,
+   DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, DEFAULT_ROSTER_ENTRY,
+   DEFAULT_ROSTER_CLIENT_ENTRY */
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
@@ -357,8 +358,17 @@ function receiveTrustMessage(msgInfo) {
 // --------------------------------------------------------------------------
 //  Messages
 // --------------------------------------------------------------------------
+
+// Expects message in the format data = {
+//    message: string,
+//    network: string,
+//    status: string,
+//    userId: string
+// }
+//
 function receiveStatus(data) {
   console.log('onStatus: data:' + JSON.stringify(data));
+  data = restrictToObject(DEFAULT_STATUS, data);
   if (data.userId) { // userId is only specified when connecting or online.
     store.state.identityStatus[data.network] = data;
     bgAppPageChannel.emit('state-change',
@@ -374,14 +384,14 @@ identity.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether online or
 // description.
-// |data| is guaranteed to have userId.
+// |data| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
   try {
-    var data = restrictToObject(DEFAULT_ROSTER_ENTRY, data);
-    for (var c in data.clients) {
-      data.clients[c] = restrictToObject(DEFAULT_ROSTER_ENTRY, data.clients[c]);
+    var data = restrictToObject(DEFAULT_ROSTER_ENTRY, rawData);
+    for (var c in rawData.clients) {
+      data.clients[c] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY,
+                                         rawData.clients[c]);
     }
-
     if (store.state.me.identities[data.userId]) {
       // My card changed.
       store.state.me.identities[data.userId] = data;
@@ -392,7 +402,8 @@ function receiveChange(rawData) {
     }
   } catch (e) {
     console.log('Failure in onChange handler.  store.state.me = ' +
-        JSON.stringify(store.state.me));
+        JSON.stringify(store.state.me) + ', input message: ' +
+        JSON.stringify(rawData));
     console.log(e.stack);
   }
 }
@@ -568,8 +579,15 @@ function sendInstance(clientId) {
 // Note: does not assume that a roster entry exists for the user that send the
 // instance data. Sometimes we get an instance data message from user that is
 // not (yet) in the roster.
-function receiveInstance(msg) {
-  console.log('receiveInstance(from: ' + msg.fromUserId + ')');
+// |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
+function receiveInstance(rawMsg) {
+  console.log('receiveInstance(from: ' + rawMsg.fromUserId + ')');
+
+  var msg = restrictToObject(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+  msg.data = restrictToObject(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+  msg.data.rosterInfo = restrictToObject(
+      DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
+
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;
   var clientId    = msg.fromClientId;

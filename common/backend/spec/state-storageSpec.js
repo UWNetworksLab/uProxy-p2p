@@ -1,3 +1,5 @@
+// Note: this doesn't work when debugging in chrome: it hits the content
+// security policy.
 function readJsonFile(location) {
   var xhr = new XMLHttpRequest();
   xhr.open("get", location, false);
@@ -8,8 +10,9 @@ function readJsonFile(location) {
 
 // Depends on the MockStorage that executes everything synchronously.
 describe("state-storage", function() {
-  var exampleState = readJsonFile("common/backend/test/example-state.json");
-  var exampleSavedState = readJsonFile("common/backend/test/example-saved-state.json");
+  var exampleState = TESTDATA_EXAMPLE_STATE;
+  var exampleSavedState = TESTDATA_EXAMPLE_SAVED_STATE;
+
   var stateStorage = new UProxyState();
 
   it("* Example states are not null", function() {
