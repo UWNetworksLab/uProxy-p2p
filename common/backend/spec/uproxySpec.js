@@ -286,13 +286,12 @@ describe("uproxy.state.instance", function () {
     // top of on() and emit().
     sendMessageSpy = jasmine.createSpy('sendMessage');
     identity.sendMessage = sendMessageSpy;
-  });
-
-  it('onState-Roster-Instance', function() {
     var completed = false;
     store.reset(function() {completed = true; });
     waitsFor(function() { return completed; }, "Reset never returned.", 50);
+  });
 
+  it('onState-Roster-Instance', function() {
     // This should be the simplest way in.  You get a login for yourself, then
     // a roster, then instance notifications.
     var inst;
