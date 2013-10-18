@@ -81,15 +81,18 @@ ul {
 .title {
   padding: 0 8px; }
 
-#contact-header h1 {
+#contact-header {
   position: fixed;
-  width: 100%;
-  padding: 0 50px;
-  text-align: center;
-  top: 10px;
-  pointer-events: none;
-  white-space: nowrap;
-  font-size: 19.2px; }
+  top: 0; }
+  #contact-header h1 {
+    position: fixed;
+    width: 100%;
+    padding: 0 50px;
+    text-align: center;
+    top: 10px;
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 19.2px; }
 
 .tip {
   display: inline-block;
@@ -206,6 +209,10 @@ ul {
 #roster-header {
   position: relative;
   z-index: 50; }
+  #roster-header.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0; }
 
 #actions {
   display: block;
@@ -494,6 +501,12 @@ img.contact-image {
     background-image: url("../icons/arrow-up.png"); }
   .c-icon.usesMe {
     background-image: url("../icons/arrow-down.png"); }
+    .c-icon.usesMe.active {
+      background-color: white;
+      background-image: url("../icons/arrow-down-animate.gif");
+      border: 1px dotted #dddddd;
+      border-left: none;
+      border-right: none; }
   .c-icon.grey {
     opacity: 0.3; }
   .c-icon:hover {

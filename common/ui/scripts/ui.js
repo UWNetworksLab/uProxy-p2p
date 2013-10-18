@@ -165,6 +165,8 @@ UI.prototype.syncUser = function(user) {
       online = false,           // For flag updates.
       canUProxy = false,
       hasNotification = false,
+      isActiveClient = false,
+      isActiveProxy = false,
       onGoogle = false,
       onFB = false,
       onXMPP = false;
@@ -194,6 +196,8 @@ UI.prototype.syncUser = function(user) {
     user.trust = instance.trust;
     user.givesMe = ('no' != user.trust.asProxy);
     user.usesMe = ('no' != user.trust.asClient);
+    isActiveClient = isActiveClient || 'running'==instance.status.client;
+    isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
     break;  // TODO(uzimizu): Support multiple instances.
   }
 
@@ -201,6 +205,8 @@ UI.prototype.syncUser = function(user) {
   user.online = online;
   user.canUProxy = canUProxy;
   user.hasNotification = hasNotification;
+  user.isActiveClient = isActiveClient;
+  user.isActiveProxy = isActiveProxy;
   user.onGoogle = onGoogle;
   user.onFB = onFB;
   user.onXMPP = onXMPP;

@@ -151,10 +151,12 @@
             <img class="contact-image" ng-src='{{contact.imageData}}'>
             <span class="c-icons">
               <span class="c-icon givesMe"
-                  ng-class="{grey:'yes'!=contact.trust.asProxy}"
+                  ng-class="{grey:'yes'!=contact.trust.asProxy,
+                             active:contact.isActiveProxy }"
                   ng-show='contact.givesMe'></span>
               <span class="c-icon usesMe"
-                  ng-class="{grey:'yes'!=contact.trust.asClient}"
+                  ng-class="{grey:'yes'!=contact.trust.asClient,
+                             active:contact.isActiveClient }"
                   ng-show='contact.usesMe'></span>
               <span class="c-icon" ng-show='contact.onGoogle'>G+</span>
               <span class="c-icon" ng-show='contact.onFB'>FB</span>

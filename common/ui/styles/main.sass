@@ -101,6 +101,8 @@ ul
   padding: 0 8px
 
 #contact-header
+  position: fixed
+  top: 0
   & h1
     position: fixed
     width: 100%
@@ -219,6 +221,10 @@ ul
 #roster-header
   position: relative
   z-index: 50
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+
 // Contains a bunch of icons which modify the view / toggle filters.
 #actions
   display: block
@@ -474,6 +480,12 @@ img.contact-image
     background-image: url('../icons/arrow-up.png')
   &.usesMe
     background-image: url('../icons/arrow-down.png')
+    &.active
+      background-color: #fff
+      background-image: url('../icons/arrow-down-animate.gif')
+      border: 1px dotted #ddd
+      border-left: none
+      border-right: none
   &.grey
     opacity: 0.3
   &:hover
