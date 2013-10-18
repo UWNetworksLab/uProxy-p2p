@@ -79,7 +79,7 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'uproxy': 'Only show contacts with UProxy installed.',
       'myAccess': 'Show contacts who provide me access.',
       'friendsAccess': 'Show contacts who use me for access.',
-      'online': 'Show offline contacts.',
+      'online': 'Only show online contacts.',
     };
     var _getTrust = function(client) {
       return $scope.instances[client.instanceId].trust;

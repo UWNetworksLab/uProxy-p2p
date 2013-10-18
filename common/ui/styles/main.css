@@ -277,13 +277,21 @@ ul {
   background: transparent url("../icons/search.png") no-repeat center;
   background-size: 16px;
   cursor: pointer;
+  opacity: 0.3;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
   #search-btn:hover, #search-btn:focus {
-    opacity: 0.5;
+    opacity: 0.1;
     outline: none; }
+  #search-btn.on {
+    opacity: 1; }
+    #search-btn.on:active, #search-btn.on:focus {
+      outline: none;
+      opacity: 0.65; }
+    #search-btn.on:hover {
+      opacity: 0.6; }
 
 .filter {
   margin: 0;
@@ -297,7 +305,7 @@ ul {
   font-size: 24px;
   font-weight: 900;
   color: #222222;
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: pointer;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -305,9 +313,9 @@ ul {
   transition: all 0.23s !important; }
   .filter:active, .filter:focus {
     outline: none;
-    opacity: 0.25; }
+    opacity: 0.15; }
   .filter:hover {
-    opacity: 0.2; }
+    opacity: 0.1; }
   .filter.on {
     opacity: 1; }
     .filter.on:active, .filter.on:focus {
