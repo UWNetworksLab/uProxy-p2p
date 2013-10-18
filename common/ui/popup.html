@@ -160,7 +160,7 @@
                     ng-show='contact.usesMe'></span>
                 <span class="c-icon" ng-show='contact.onGoogle'>G+</span>
                 <span class="c-icon" ng-show='contact.onFB'>FB</span>
-                <span class="c-icon" ng-show='contact.onXMPP'> XMPP </span>
+                <span class="c-icon" ng-show='contact.onXMPP'> XM </span>
                 <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
               </span>
               <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
@@ -168,14 +168,38 @@
           </ul>
         </div>
 
-        <div class="contact-info" id="their-info" ng-show="ui.accessView">
+        <div class="contact-info" id="their-info"
+            ng-show="ui.accessView"
+            ng-mouseenter="theirInfoHovered=true"
+            ng-mouseleave="theirInfoHovered=false">
           <img ng-show="ui.contact.imageData" class="contact-image"
                ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
-          <img ng-hide="ui.contact.imageData" class="contact-image">
-          <p style="display:none;">
-          <span ng-show="ui.contact.onGoogle"> G+ </span>
-          <span ng-show="ui.contact.onFB"> FB </span>
-          </p>
+          <img ng-hide="ui.contact.imageData" class="contact-image"
+          >
+          <div class="details" ng-show="theirInfoHovered">
+            <div class="picCover"></div>
+            <div class="description">
+              <p>{{ui.instance.description}}</p>
+              <span ng-show="ui.contact.onGoogle"> G+ </span>
+              <span ng-show="ui.contact.onFB"> FB </span>
+            </div>
+
+            <div class="mode-panel">
+              <button id="uproxy-btn" class="instance-btn">
+              </button>
+              <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
+                 target="_blank"
+                 ng-show="ui.accessView"
+                 ng-mouseenter="chatButtonHovered=true"
+                 ng-mouseleave="chatButtonHovered=false">
+              </a>
+              <div class="tool">
+                <p class="tip" ng-show="chatButtonHovered">
+                  Chat with {{ ui.contact.name }}.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div id="access" ng-show="ui.accessView">
@@ -193,14 +217,15 @@
                           darker:'yes'==ui.contact.trust.asClient,
                           active:ui.contact.isActiveClient }">
           </div>
+          <div class="uproxy-deco" id="their-uproxy"
+              ng-show="ui.instance"></div>
+          <div class="uproxy-deco" id="my-uproxy"></div>
 
           <p class="access-note" ng-hide="ui.instance">
           {{ ui.contact.name }} does not have <b>uProxy</b>.
           </p>
 
           <div class="instance-actions" ng-show="ui.instance && ui.accessView">
-
-            <p ng-hide="true" class="description">{{ui.instance.description}}</p>
 
             <div class="uproxy-box proxy"
                 ng-switch="ui.instance.trust.asProxy">
@@ -297,25 +322,6 @@
               </div>
             </div>
 
-          </div>
-
-          <div class="detail-panel" ng-hide="true">
-            <button id="uproxy-btn" class="instance-btn">
-            </button>
-            <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
-               target="_blank"
-               ng-show="ui.accessView"
-               ng-mouseenter="chatButtonHovered=true"
-               ng-mouseleave="chatButtonHovered=false">
-            </a>
-            <div class="tool">
-            <p class="tip" ng-show="chatButtonHovered" >
-              Ask {{ ui.contact.name }} to
-              <span ng-hide="ui.instance">install</span>
-              <span ng-show="ui.instance">run</span>
-              UProxy.
-            </p>
-            </div>
           </div>
         </div>
       </div>

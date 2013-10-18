@@ -285,10 +285,18 @@ ul
   background: transparent url('../icons/search.png') no-repeat center
   background-size: 16px
   cursor: pointer
+  opacity: 0.3
   @include smooth
   &:hover, &:focus
-    opacity: 0.5
+    opacity: 0.1
     outline: none
+  &.on
+    opacity: 1.0
+    &:active, &:focus
+      outline: none
+      opacity: 0.65
+    &:hover
+      opacity: 0.6
 
 .filter
   margin: 0
@@ -302,14 +310,14 @@ ul
   font-size: $fontSize * 1.5
   font-weight: 900
   color: #222
-  opacity: 0.3
+  opacity: 0.2
   cursor: pointer
   @include smooth
   &:active, &:focus
     outline: none
-    opacity: 0.25
+    opacity: 0.15
   &:hover
-    opacity: 0.2
+    opacity: 0.1
   // When the filter is on, the opacity changes are different.
   &.on
     opacity: 1.0
@@ -541,6 +549,7 @@ img.c-icon
     opacity: 0
     left: 400px
 
+// This is the faded background image of the internets and arrows.
 .bg-deco
   position: fixed
   top: 0
@@ -570,6 +579,26 @@ img.c-icon
     background-image: url('../icons/path-right.png')
     opacity: 0.07
 
+// This is the uproxy icon on the diagram.
+.uproxy-deco
+  position: absolute
+  width: 20px
+  height: 20px
+  opacity: 0.25
+  background: transparent no-repeat center
+  background-image: url('../icons/uproxy-19.png')
+  background-size: 12px
+  @include smooth
+  &#their-uproxy
+    top: 167px
+    left: 122px
+  &#my-uproxy
+    bottom: 176px
+    right: 118px
+  &:hover
+    opacity: 0.6
+
+
 // Typically displayed when the contact does not have uproxy installed
 .access-note
   position: absolute
@@ -581,9 +610,11 @@ img.c-icon
 
 // Container for a user's profile picture and such
 .contact-info
+  position: relative
   text-align: center
   text-shadow: 0px 1px 1px #ccc
   width: 100%
+  z-index: 2
   @include smooth
   &#my-info
     position: fixed
@@ -603,14 +634,35 @@ img.c-icon
     height: 110px
     border-color: #ddd
     background-size: contain
-    box-shadow: 2px 3px 7px #bbb
+    box-shadow: 1px 2px 5px #ccc
+  & .details
+    position: absolute
+    top: 0
+    width: 100%
+    height: 100%
+    cursor: default
+    text-align: center
+    @include smooth-slow
+    &.ng-hide
+      @include un-ng-hide
+      opacity: 0
+    & .picCover
+      display: inline-block
+      background-color: #fff
+      width: 116px
+      height: 120px
+      opacity: 0.95
+    & .description
+      position: absolute
+      top: 0
+      width: 100%
 
 .contact-name
   text-align: center
 
-.detail-panel
-  position: fixed
-  bottom: 64px
+.mode-panel
+  position: absolute
+  bottom: 4px
   width: 100%
   text-align: center
 

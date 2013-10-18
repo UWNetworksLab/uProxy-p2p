@@ -277,13 +277,21 @@ ul {
   background: transparent url("../icons/search.png") no-repeat center;
   background-size: 16px;
   cursor: pointer;
+  opacity: 0.3;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
   #search-btn:hover, #search-btn:focus {
-    opacity: 0.5;
+    opacity: 0.1;
     outline: none; }
+  #search-btn.on {
+    opacity: 1; }
+    #search-btn.on:active, #search-btn.on:focus {
+      outline: none;
+      opacity: 0.65; }
+    #search-btn.on:hover {
+      opacity: 0.6; }
 
 .filter {
   margin: 0;
@@ -297,7 +305,7 @@ ul {
   font-size: 24px;
   font-weight: 900;
   color: #222222;
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: pointer;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -305,9 +313,9 @@ ul {
   transition: all 0.23s !important; }
   .filter:active, .filter:focus {
     outline: none;
-    opacity: 0.25; }
+    opacity: 0.15; }
   .filter:hover {
-    opacity: 0.2; }
+    opacity: 0.1; }
   .filter.on {
     opacity: 1; }
     .filter.on:active, .filter.on:focus {
@@ -592,6 +600,27 @@ img.c-icon {
     background-image: url("../icons/path-right.png");
     opacity: 0.07; }
 
+.uproxy-deco {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  opacity: 0.25;
+  background: transparent no-repeat center;
+  background-image: url("../icons/uproxy-19.png");
+  background-size: 12px;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+  .uproxy-deco#their-uproxy {
+    top: 167px;
+    left: 122px; }
+  .uproxy-deco#my-uproxy {
+    bottom: 176px;
+    right: 118px; }
+  .uproxy-deco:hover {
+    opacity: 0.6; }
+
 .access-note {
   position: absolute;
   top: 270px;
@@ -600,9 +629,11 @@ img.c-icon {
   cursor: default; }
 
 .contact-info {
+  position: relative;
   text-align: center;
   text-shadow: 0px 1px 1px #cccccc;
   width: 100%;
+  z-index: 2;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
@@ -627,14 +658,39 @@ img.c-icon {
     height: 110px;
     border-color: #dddddd;
     background-size: contain;
-    box-shadow: 2px 3px 7px #bbbbbb; }
+    box-shadow: 1px 2px 5px #cccccc; }
+  .contact-info .details {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+    text-align: center;
+    -webkit-transition: all 0.5s !important;
+    -moz-transition: all 0.5s !important;
+    -o-transition: all 0.5s !important;
+    transition: all 0.5s !important; }
+    .contact-info .details.ng-hide {
+      display: block !important;
+      pointer-events: none;
+      opacity: 0; }
+    .contact-info .details .picCover {
+      display: inline-block;
+      background-color: white;
+      width: 116px;
+      height: 120px;
+      opacity: 0.95; }
+    .contact-info .details .description {
+      position: absolute;
+      top: 0;
+      width: 100%; }
 
 .contact-name {
   text-align: center; }
 
-.detail-panel {
-  position: fixed;
-  bottom: 64px;
+.mode-panel {
+  position: absolute;
+  bottom: 4px;
   width: 100%;
   text-align: center; }
 
