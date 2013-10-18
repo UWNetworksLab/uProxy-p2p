@@ -187,8 +187,8 @@
             <div class="mode-panel">
               <button id="uproxy-btn" class="instance-btn">
               </button>
-              <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
-                 target="_blank"
+              <a class="chat-btn instance-btn"
+                 ng-click="ui.chatView=!ui.chatView"
                  ng-show="ui.accessView"
                  ng-mouseenter="chatButtonHovered=true"
                  ng-mouseleave="chatButtonHovered=false">
@@ -321,10 +321,22 @@
                 </button>
               </div>
             </div>
+          </div>
 
+          <div id="chat-box" ng-show="ui.chatView">
+            <textarea id="chat-log" ng-init="chatLog='Chatting...'"
+                readonly>{{chatLog}}</textarea>
+            <input type="text" id="chat-input" ng-model="chatText">
+            </input>
+            <input type="submit" id="chat-send" class="btn"
+                ng-click="chatLog = chatLog + '\n' + chatText;chatText=''">
+              Send
+            </input>
           </div>
         </div>
+
       </div>
+
     </div>
 
     <div class="contact-info" id="my-info" ng-show="ui.accessView">
