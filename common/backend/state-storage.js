@@ -49,7 +49,8 @@ UProxyState.prototype.reset = function(callback) {
 UProxyState.prototype._loadKeyAsJson =
     function (key, callback, defaultIfUndefined) {
   this.storage.get(key).done(function (result) {
-    console.log("Loaded from storage[" + key + "] (type: " + (typeof result) + "): " + result);
+    console.log("Loaded from storage[" + key + "] (type: " + (typeof result) + "): " +
+        result);
     if (isDefined(result)) {
       callback(JSON.parse(result));
     } else {

@@ -472,11 +472,14 @@ function updateUser(data) {
   }
   var user = store.state.roster[userId];
   var instance = store.instanceOfUserId(userId);
+  var clientId;
   user.name = newData.name;
-  user.clients = newData.clients;
   user.imageData = newData.imageData;
+  for (clientId in newData.clients) {
+    user.clients[clientId] = newData.clients[clientId];
+  }
 
-  for (var clientId in user.clients) {
+  for (clientId in user.clients) {
     var client = user.clients[clientId];
     if ('offline' == client.status) {    // Delete offline clients.
       delete user.clients[clientId];
