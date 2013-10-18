@@ -528,10 +528,18 @@ function _getMyId() {
 // Should only be called after we have received an onChange event with our own
 // details.
 function makeMyInstanceMessage() {
-  var firstIdentity = store.state.me.identities[_getMyId()];
-  var result = restrictToObject(DEFAULT_INSTANCE_MESSAGE, store.state.me);
-  result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
-                                       firstIdentity);
+  var result;
+  try {
+    var firstIdentity = store.state.me.identities[_getMyId()];
+    result = restrictToObject(DEFAULT_INSTANCE_MESSAGE, store.state.me);
+    result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
+                                         firstIdentity);
+  } catch (e) {
+    console.log("Failed to repair identity when making an instance message. \n");
+    console.log("  firstIdentity = " + JSON.stringify(firstIdentify, null, "   ") + "\n");
+    console.log("  store.state.me = " + JSON.stringify(store.state.me, null, "   ") + "\n");
+    throw e;
+  }
   return JSON.stringify(result);
 }
 
