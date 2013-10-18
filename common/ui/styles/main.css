@@ -92,7 +92,9 @@ ul {
     top: 10px;
     pointer-events: none;
     white-space: nowrap;
-    font-size: 19.2px; }
+    font-size: 17.6px;
+    font-weight: 100;
+    letter-spacing: 1px; }
 
 .tip {
   display: inline-block;
@@ -212,7 +214,8 @@ ul {
   #roster-header.ng-hide {
     display: block !important;
     pointer-events: none;
-    opacity: 0; }
+    opacity: 0;
+    z-index: -100; }
 
 #actions {
   display: block;
@@ -289,7 +292,7 @@ ul {
   font-size: 24px;
   font-weight: 900;
   color: #222222;
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: pointer;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
@@ -408,7 +411,7 @@ ul {
   text-shadow: 0 2px 2px #cccccc;
   pointer-events: none; }
 
-#contacts-frame {
+#roster-frame {
   position: relative;
   min-height: 520px;
   white-space: nowrap;
@@ -419,7 +422,7 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-  #contacts-frame.ng-hide {
+  #roster-frame.ng-hide {
     display: block !important;
     pointer-events: none;
     left: -400px; }
@@ -550,8 +553,7 @@ img.c-icon {
 
 .contact-status {
   text-align: center;
-  text-shadow: 0px 1px 1px #cccccc;
-  padding: 8px; }
+  text-shadow: 0px 1px 1px #cccccc; }
 
 .contact-name {
   text-align: center; }
@@ -563,38 +565,84 @@ img.c-icon {
   margin: 8px;
   border-color: #dddddd;
   background-size: contain;
-  box-shadow: 2px 3px 5px 1px #cccccc; }
+  box-shadow: 2px 3px 7px #bbbbbb; }
 
-.chat-btn {
+.detail-panel {
+  position: fixed;
+  bottom: 64px;
+  width: 100%;
+  text-align: center; }
+
+.instance-btn {
   display: inline-block;
-  background: transparent url("../icons/chat.png") no-repeat center center;
-  background-size: contain;
-  border: 1px none black;
-  outline: none;
+  background: transparent no-repeat center center;
+  background-size: 24px;
+  border: none;
+  width: 32px;
+  height: 32px;
   padding: 4px;
-  margin: 8px;
-  width: 30px;
-  height: 30px;
+  margin: 0 16px;
+  vertical-align: middle;
+  outline: none;
   text-decoration: none;
-  opacity: 0.6;
   cursor: pointer;
+  opacity: 0.9;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-  .chat-btn:active, .chat-btn:focus {
-    opacity: 0.7; }
-  .chat-btn:hover {
+  .instance-btn:active, .instance-btn:focus {
+    opacity: 0.4; }
+  .instance-btn:hover {
     opacity: 0.3; }
 
+#uproxy-btn {
+  background-image: url("../icons/uproxy-128.png");
+  outline: none;
+  text-decoration: none;
+  cursor: pointer; }
+
+.chat-btn {
+  background-image: url("../icons/chat.png"); }
+
+.uproxy-box {
+  position: absolute;
+  display: inline-block;
+  background: no-repeat center;
+  height: 115px;
+  width: 185px;
+  margin: 8px; }
+  .uproxy-box .uproxytip {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    color: #888888; }
+  .uproxy-box.proxy {
+    left: 0;
+    background-image: url("../icons/arrow-up.png");
+    background-position-y: top; }
+    .uproxy-box.proxy .uproxytip {
+      bottom: 0; }
+  .uproxy-box.client {
+    background-image: url("../icons/arrow-down.png");
+    background-position-y: bottom; }
+    .uproxy-box.client .uproxytip {
+      top: 0; }
+    .uproxy-box.client.active {
+      background-image: url("../icons/arrow-down-animate.gif"); }
+    .uproxy-box.client .btn {
+      margin-top: 63px; }
+
 .instance-actions {
-  text-align: center; }
+  text-align: center;
+  font-size: 12.8px; }
 
 .instance-actions .btn {
   padding: 8px 16px;
   margin-top: 16px;
   text-shadow: 0 1px 1px #888888;
-  border-radius: 3px; }
+  border-radius: 3px;
+  opacity: 0.9; }
 
 .client-details {
   position: relative;

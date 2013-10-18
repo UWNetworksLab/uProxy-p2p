@@ -140,32 +140,32 @@
           </span>
         </div>
 
-        <div id="contacts-frame" ng-hide="ui.rosterNudge">
-        <ul class="contacts">
-          <li ng-repeat="contact in model.roster"
-              ng-click="viewContact(contact)"
-              ng-hide="ui.contactIsFiltered(contact)"
-              ng-class="{offline:!contact.online}"
-              >
-            {{contact.name}}
-            <img class="contact-image" ng-src='{{contact.imageData}}'>
-            <span class="c-icons">
-              <span class="c-icon givesMe"
-                  ng-class="{grey:'yes'!=contact.trust.asProxy,
-                             active:contact.isActiveProxy }"
-                  ng-show='contact.givesMe'></span>
-              <span class="c-icon usesMe"
-                  ng-class="{grey:'yes'!=contact.trust.asClient,
-                             active:contact.isActiveClient }"
-                  ng-show='contact.usesMe'></span>
-              <span class="c-icon" ng-show='contact.onGoogle'>G+</span>
-              <span class="c-icon" ng-show='contact.onFB'>FB</span>
-              <span class="c-icon" ng-show='contact.onXMPP'> XMPP </span>
-              <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
-            </span>
-            <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
-          </li>
-        </ul>
+        <div id="roster-frame" ng-hide="ui.rosterNudge">
+          <ul class="contacts">
+            <li ng-repeat="contact in model.roster"
+                ng-click="viewContact(contact)"
+                ng-hide="ui.contactIsFiltered(contact)"
+                ng-class="{offline:!contact.online}"
+                >
+              {{contact.name}}
+              <img class="contact-image" ng-src='{{contact.imageData}}'>
+              <span class="c-icons">
+                <span class="c-icon givesMe"
+                    ng-class="{grey:'yes'!=contact.trust.asProxy,
+                               active:contact.isActiveProxy }"
+                    ng-show='contact.givesMe'></span>
+                <span class="c-icon usesMe"
+                    ng-class="{grey:'yes'!=contact.trust.asClient,
+                               active:contact.isActiveClient }"
+                    ng-show='contact.usesMe'></span>
+                <span class="c-icon" ng-show='contact.onGoogle'>G+</span>
+                <span class="c-icon" ng-show='contact.onFB'>FB</span>
+                <span class="c-icon" ng-show='contact.onXMPP'> XMPP </span>
+                <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
+              </span>
+              <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
+            </li>
+          </ul>
         </div>
 
         <div id="contact-details" ng-show="ui.rosterNudge">
@@ -174,22 +174,24 @@
                  ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
             <img ng-hide="ui.contact.imageData" class="contact-image">
 
-            <br>Network: {{ ui.contact.network }}
+            <p style="display:none;">
+            <span ng-show="ui.contact.onGoogle"> G+ </span>
+            <span ng-show="ui.contact.onFB"> FB </span>
+            </p>
+
             <p ng-hide="ui.instance">
             {{ ui.contact.name }} is not running uProxy.
             </p>
             <div ng-show="ui.instance">
               <div class="instance-actions" ng-show="ui.rosterNudge">
-                <p>
-                  {{ui.instance.description}}
+                <p>{{ui.instance.description}}
                 </p>
-                <div class="instance-id" ng-show="ui.rosterNudge">
-                  {{ui.instance.instanceId}}
-                </div>
 
-                <div class="box-for-proxy"
+                <div class="uproxy-box proxy"
                     ng-switch="ui.instance.trust.asProxy">
                   <div ng-switch-when="yes">
+                    <p class="uproxytip">You have access.
+                    </p>
                     <button class="btn"
                         ng-disabled="ui.pendingProxyTrustChange"
                         ng-show="'off'==ui.instance.status.proxy"
@@ -209,14 +211,18 @@
                     </button>
                   </div>
                   <div ng-switch-when="requested">
+                    <p class="uproxytip">
+                      Requesting access from {{ui.contact.name}}...
+                    </p>
                     <button class="btn"
                         ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="cancelRequest(ui.instance)">
                       Cancel
                     </button>
-                    <span>Pending...</span>
                   </div>
                   <div ng-switch-when="offered">
+                    <p class="uproxytip">They've given you access.
+                    </p>
                     <button class="btn"
                         ng-disabled="ui.pendingProxyTrustChange"
                         ng-click="acceptOffer(ui.instance)">
@@ -228,22 +234,31 @@
                       No Thanks
                     </button>
                   </div>
-                  <button class="btn"
-                      ng-switch-default
-                      ng-disabled="ui.pendingProxyTrustChange"
-                      ng-click="requestAccess(ui.instance)">
-                    Request
-                  </button>
+                  <div ng-switch-default>
+                    <p class="uproxytip">No access yet.
+                    </p>
+                    <button class="btn"
+                        ng-disabled="ui.pendingProxyTrustChange"
+                        ng-click="requestAccess(ui.instance)">
+                      Request
+                    </button>
+                  </div>
                 </div>
 
-                <div class="box-for-client"
+                <div class="uproxy-box client"
                     ng-switch="ui.instance.trust.asClient">
-                  <button class="btn" ng-switch-when="no"
-                      ng-disabled="ui.pendingClientTrustChange"
-                      ng-click="offerAccess(ui.instance)">
-                    Offer Access
-                  </button>
+                  <div ng-switch-when="no">
+                    <p class="uproxytip">You have not granted them access.
+                    </p>
+                    <button class="btn"
+                        ng-disabled="ui.pendingClientTrustChange"
+                        ng-click="offerAccess(ui.instance)">
+                      Offer Access
+                    </button>
+                  </div>
                   <div ng-switch-when="requested">
+                    <p class="uproxytip">They've requested access through you.
+                    </p>
                     <button class="btn"
                         ng-disabled="ui.pendingClientTrustChange"
                         ng-click="grantAccess(ui.instance)">
@@ -255,15 +270,25 @@
                       Ignore
                     </button>
                   </div>
-                  <button class="btn" ng-switch-default
-                      ng-disabled="ui.pendingClientTrustChange"
-                      ng-click="revokeAccess(ui.instance)">
-                    Revoke Access
-                  </button>
+                  <div ng-switch-default>
+                    <p class="uproxytip">You've given them access.
+                    </p>
+                    <button class="btn"
+                        ng-disabled="ui.pendingClientTrustChange"
+                        ng-click="revokeAccess(ui.instance)">
+                      Revoke Access
+                    </button>
+                  </div>
                 </div>
+
               </div>
             </div>
-            <a class="chat-btn" href="{{ ui.contact.url }}"
+          </div>
+
+          <div class="detail-panel">
+            <button id="uproxy-btn" class="instance-btn">
+            </button>
+            <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
                target="_blank"
                ng-show="ui.rosterNudge"
                ng-mouseenter="chatButtonHovered=true"

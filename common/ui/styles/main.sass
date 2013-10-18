@@ -111,7 +111,9 @@ ul
     top: 10px
     pointer-events: none
     white-space: nowrap
-    font-size: $fontSize * 1.2
+    font-size: $fontSize * 1.1
+    font-weight: 100
+    letter-spacing: 1px
 
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
@@ -224,6 +226,7 @@ ul
   &.ng-hide
     @include un-ng-hide
     opacity: 0
+    z-index: -100
 
 // Contains a bunch of icons which modify the view / toggle filters.
 #actions
@@ -292,7 +295,7 @@ ul
   font-size: $fontSize * 1.5
   font-weight: 900
   color: #222
-  opacity: 0.4
+  opacity: 0.3
   cursor: pointer
   @include smooth
   &:active, &:focus
@@ -397,7 +400,7 @@ ul
   text-shadow: 0 2px 2px #ccc
   pointer-events: none
 
-#contacts-frame
+#roster-frame
   position: relative
   min-height: 520px
   white-space: nowrap
@@ -529,7 +532,6 @@ img.c-icon
 .contact-status
   text-align: center
   text-shadow: 0px 1px 1px #ccc
-  padding: 8px
 
 .contact-name
   text-align: center
@@ -541,35 +543,83 @@ img.c-icon
   margin: 8px
   border-color: #ddd
   background-size: contain
-  box-shadow: 2px 3px 5px 1px #ccc
+  box-shadow: 2px 3px 7px #bbb
 
-.chat-btn
+.detail-panel
+  position: fixed
+  bottom: 64px
+  width: 100%
+  text-align: center
+
+.instance-btn
   display: inline-block
-  background: transparent url('../icons/chat.png') no-repeat center center
-  background-size: contain
-  border: 1px none #000
-  outline: none
+  background: transparent no-repeat center center
+  background-size: 24px
+  border: none
+  width: 32px
+  height: 32px
   padding: 4px
-  margin: 8px
-  width: 30px
-  height: 30px
+  margin: 0 16px
+  vertical-align: middle
+  outline: none
   text-decoration: none
-  opacity: 0.6
   cursor: pointer
+  opacity: 0.9
   @include smooth
   &:active, &:focus
-    opacity: 0.7
+    opacity: 0.4
   &:hover
     opacity: 0.3
 
+// View toggles on the bottom of the contact view.
+#uproxy-btn
+  background-image: url('../icons/uproxy-128.png')
+  outline: none
+  text-decoration: none
+  cursor: pointer
+
+.chat-btn
+  background-image: url('../icons/chat.png')
+
+// Contains the actual trust & action buttons
+.uproxy-box
+  position: absolute
+  display: inline-block
+  background: no-repeat center
+  height: 115px
+  width: 185px
+  margin: 8px
+  & .uproxytip
+    position: absolute
+    width: 100%
+    text-align: center
+    color: #888
+  &.proxy
+    left: 0
+    background-image: url('../icons/arrow-up.png')
+    background-position-y: top
+    & .uproxytip
+      bottom: 0
+  &.client
+    background-image: url('../icons/arrow-down.png')
+    background-position-y: bottom
+    & .uproxytip
+      top: 0
+    &.active
+      background-image: url('../icons/arrow-down-animate.gif')
+    & .btn
+      margin-top: 63px
+
 .instance-actions
   text-align: center
+  font-size: $fontSize * 0.8
 
 .instance-actions .btn
   padding: 8px 16px
   margin-top: 16px
   text-shadow: 0 1px 1px #888
   border-radius: 3px
+  opacity: 0.9
 
 .client-details
   position: relative
@@ -600,10 +650,6 @@ img.c-icon
     border-color: #ddd
     top: -2px
     box-shadow: 0 2px 6px 1px #ddd
-
-.box-for-proxy
-
-.box-for-client
 
 .instance-id
   font-size: $fontSize * 0.6
