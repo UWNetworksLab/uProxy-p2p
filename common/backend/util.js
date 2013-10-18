@@ -38,9 +38,11 @@ function restrictToObject(restrictionObject, objectToRestrict) {
     } else if (restrictionObject[k] !== null) {
       selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
     } else {
-      throw new Error('Missing required key ' + k + '.\nObject: ' +
+      var err = new Error('Missing required key ' + k + '.\nObject: ' +
           JSON.stringify(objectToRestrict) + '\nRestriction: ' +
           JSON.stringify(restrictionObject));
+      console.error("Failed object-restrict on " + err.stack);
+      throw err;
     }
   }
   return selectedPartsOfObjectToRestrict;

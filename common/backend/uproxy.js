@@ -369,7 +369,8 @@ function receiveTrustMessage(msgInfo) {
 function receiveStatus(data) {
   console.log('onStatus: data:' + JSON.stringify(data));
   data = restrictToObject(DEFAULT_STATUS, data);
-  if (data.userId) { // userId is only specified when connecting or online.
+  // userId is only specified when connecting or online.
+  if (data.userId.length) {
     store.state.identityStatus[data.network] = data;
     bgAppPageChannel.emit('state-change',
         [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);

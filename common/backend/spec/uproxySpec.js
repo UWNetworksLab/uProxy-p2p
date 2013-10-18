@@ -318,6 +318,10 @@ describe("uproxy.state.instance", function () {
     }
   });
 
+  // Like above, only we get all the instance messages first.
+  it('onState-Instance-Roster', function() {
+
+  });
 });
 
 describe("uproxy.state.instance.fuzzer", function () {

@@ -57,7 +57,7 @@ var DEFAULT_STATUS = {
   message: '',
   network: null,
   status: '',
-  userId: null
+  userId: ''
 };
 
 // Default for state.roster
