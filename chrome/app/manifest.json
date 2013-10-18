@@ -2,6 +2,7 @@
   "manifest_version": 2,
   "name": "UProxyApp",
   "description": "Ubiquitous Proxy [Alpha]",
+  "minimum_chrome_version": "31",
   "version": "0.0.4",
   "icons": {
       "128": "common/ui/icons/uproxy-128.png",
