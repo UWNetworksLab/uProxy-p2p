@@ -50,6 +50,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
         status: this.status, network: NETWORK_ID, message: "OAuth2 Sequence"
     });
     view.once('message', function(opts, cont, message) {
+      console.log("Identity Provider got credentials: " + JSON.stringify(message));
       if (message.cmd && message.cmd == 'auth') {
         this.credentials = message.message;
         this.login(opts, cont);
@@ -80,13 +81,7 @@ IdentityProvider.prototype.login = function(opts, continuation) {
         status: 'offline'
     };
     //Start XMPP client
-    this.client = new window.XMPP.Client(
-        CONNECT_OPTS(clientId, this.credentials.token));
-
-    //TODO(willscott): Support Upgrade to TLS wrapped connection.
-    this.client.connection.allowTLS = false;
-    //this.client.addListener('online', function(){this.client.send(new window.XMPP.Element('presence', {}));}.bind(this));
-    //this.client.addListener('stanza', function(s) {console.log(s.attrs.from);} );
+    this.client = CONNECT(clientId, this.credentials.token);
     this.client.addListener('online', this.onOnline.bind(this));
     this.client.addListener('error', function(e) {
       console.error(e);

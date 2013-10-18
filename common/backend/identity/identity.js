@@ -15,10 +15,10 @@ function IdentityProvider() {
   this.reverseIndex = {};
   this.providers = {
     // loopback: {
-      // ref: freedom.loopbackIdentity(),
-      // status: 'offline',
-      // userId: null,
-      // network: 'loopback'
+     // ref: freedom.loopbackIdentity(),
+     // status: 'offline',
+     // userId: null,
+     // network: 'loopback'
     // },
     //manual: {
     //  ref: freedom.manualIdentity(),
@@ -26,6 +26,12 @@ function IdentityProvider() {
     //  userId: null,
     //  network: 'manual'
     //},
+    xmpp: {
+      ref: freedom.xmppIdentity(),
+      status: 'offline',
+      userId: null,
+      network: 'xmpp'
+    },
     google: {
       ref: freedom.googleIdentity(),
       status: 'offline',

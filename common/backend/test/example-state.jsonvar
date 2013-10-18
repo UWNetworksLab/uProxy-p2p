@@ -14,6 +14,7 @@ var TESTDATA_EXAMPLE_STATE = {
     "instanceId": "67eadd8de62a164371b55f46489138a3a422ae16",
     "keyHash": "65:0c:74:be:67:a7:c8:ff:ce:8e:0f:54:aa:f8:8d:db:85:d9:92:c7",
     "networkDefaults" : {
+      "xmpp": {"autoconnect": false},
       "google": {"autoconnect": false},
       "facebook": {"autoconnect": false}
     },
@@ -61,7 +62,8 @@ var TESTDATA_EXAMPLE_STATE = {
       "online": true,
       "canUProxy": true,
       "onGoogle": true,
-      "onFB": false
+      "onFB": false,
+      "onXMPP": false
     }
   },
   "instances": {

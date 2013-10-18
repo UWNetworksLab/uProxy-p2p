@@ -133,7 +133,11 @@ var DEFAULT_ME = {
     },
     'facebook': {
       'autoconnect': false
+    },
+    'xmpp': {
+      'autoconnect': false
     }
+
   }
 };
 

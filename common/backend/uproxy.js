@@ -472,50 +472,23 @@ function updateUser(data) {
   }
   var user = store.state.roster[userId];
   var instance = store.instanceOfUserId(userId);
-  var onGoogle = false,   // Flag updates..
-      onFB = false,
-      online = false,
-      canUProxy = false;
   user.name = newData.name;
   user.clients = newData.clients;
   user.imageData = newData.imageData;
 
-  // Put in all the new clients.
-  for (var newClientId in newData.clients) {
-    if (! (newClientId in user.clients)) {
-      user.clients[newClientId] = newData.clients[newClientId];
-    }
-  }
-
-  // Prune and scan the client list for usability for UProxying.
-  for (var userClientId in user.clients) {
-    var client = user.clients[userClientId];
-    if ('offline' == client.status) {  // Delete offline clients
-      delete user.clients[userClientId];
+  for (var clientId in user.clients) {
+    var client = user.clients[clientId];
+    if ('offline' == client.status) {    // Delete offline clients.
+      delete user.clients[clientId];
       continue;
     }
-
-    // Determine network state / flags for filtering purposes.
-    if (!onGoogle && 'google' == client.network)
-      onGoogle = true;
-    if (!onFB && 'facebook' == client.network)
-      onFB = true;
-
-    if (!online && 'manual' != client.network &&
-        ('messageable' == client.status || 'online' == client.status)) {
-      online = true;
+    if (! (clientId in user.clients)) {  // Add new clients.
+      user.clients[clientId] = client;
     }
-
     // Inform UProxy instances of each others' ephemeral clients.
-    var isUProxyClient = _checkUProxyClientSynchronization(client);
-    canUProxy = canUProxy || isUProxyClient;
+    _checkUProxyClientSynchronization(client);
   }
 
-  // Apply user-level flags.
-  user.online = online;
-  user.canUProxy = canUProxy;
-  user.onGoogle = onGoogle;
-  user.onFB = onFB;
   bgAppPageChannel.emit('state-change', [{
       op: userOp,
       path: '/roster/' + userId,
@@ -642,9 +615,7 @@ function receiveConsent(msg) {
     console.error("msg.fromUserId (" + msg.fromUserId +
         ") is not in the roster");
   }
-  // console.log('receiveConsent(from: ' + msg.fromUserId + '): ' +
-            // JSON.stringify(msg));
-  var consent     = msg.data.consent,     // Their view of consent.
+  var theirConsent     = msg.data.consent,     // Their view of consent.
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = store.state.instances[instanceId];
   if (!instance) {
@@ -655,12 +626,8 @@ function receiveConsent(msg) {
   var oldTrustAsProxy = instance.trust.asProxy;
   var oldTrustAsClient = instance.trust.asClient;
   var myConsent = _determineConsent(instance.trust);
-  instance.trust.asProxy = consent.asProxy?
-      (myConsent.asClient? Trust.YES : Trust.OFFERED) :
-      (myConsent.asClient? Trust.REQUESTED : Trust.NO);
-  instance.trust.asClient = consent.asClient?
-      (myConsent.asProxy? Trust.TES : Trust.REQUESTED) :
-      (myConsent.asProxy? Trust.OFFERED : Trust.NO);
+  instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
+
   // Apply state change notification if the trust state changed.
   if (oldTrustAsProxy != instance.trust.asProxy ||
       oldTrustAsClient != instance.trust.asClient) {
@@ -679,6 +646,17 @@ function receiveConsent(msg) {
 function _determineConsent(trust) {
   return { asProxy:  [Trust.YES, Trust.OFFERED].indexOf(trust.asClient) >= 0,
            asClient: [Trust.YES, Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
+}
+
+function _composeTrustFromConsent(myConsent, theirConsent) {
+  return {
+      asProxy: theirConsent.asProxy?
+          (myConsent.asClient? Trust.YES : Trust.OFFERED) :
+          (myConsent.asClient? Trust.REQUESTED : Trust.NO),
+      asClient: theirConsent.asClient?
+          (myConsent.asProxy? Trust.YES : Trust.REQUESTED) :
+          (myConsent.asProxy? Trust.OFFERED : Trust.NO)
+  };
 }
 
 function _validateKeyHash(keyHash) {

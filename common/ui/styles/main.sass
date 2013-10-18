@@ -67,13 +67,17 @@ ul
   border-radius: 2px
   cursor: pointer
   @include smooth
-.btn:hover, .btn:focus
-  border-color: #999
-  box-shadow: 0 1px 3px #aaa
-  outline: none
-.btn:active
-  box-shadow: 0 1px 3px #aaa inset
-  color: #777
+  &:hover, &:focus
+    border-color: #999
+    box-shadow: 0 1px 3px #aaa
+    outline: none
+  &:active
+    box-shadow: 0 1px 3px #aaa inset
+    color: #777
+  &:disabled
+    color: #999
+    border-color: #ccc
+    box-shadow: 0 1px 2px #bbb inset
 
 .btn-request
   position: absolute
@@ -97,6 +101,8 @@ ul
   padding: 0 8px
 
 #contact-header
+  position: fixed
+  top: 0
   & h1
     position: fixed
     width: 100%
@@ -106,36 +112,6 @@ ul
     pointer-events: none
     white-space: nowrap
     font-size: $fontSize * 1.2
-
-#options-btn
-  position: fixed
-  z-index: 400
-  top: 4px
-  right: 8px
-  background: transparent url('../icons/settings.svg') no-repeat center center
-  border: none
-  outline: none
-  padding: 4px
-  width: 20px
-  height: 20px
-  text-decoration: none
-  opacity: 0.6
-  cursor: pointer
-  @include smooth
-  &:active, &:focus
-    opacity: 0.9
-  &:hover
-    opacity: 0.3
-
-#options-btn-tip
-  position: fixed
-  top: 20px
-  right: 2px
-  background-color: #000
-  color: #ccc
-  opacity: 0.85
-  &.ng-hide
-    opacity: 0
 
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
@@ -200,16 +176,13 @@ ul
   @include smooth-slow
   &.ng-hide
     @include un-ng-hide
-    // height: 0
-    // padding: 0
-    // opacity: 0
     top: 600px
 
 .network-btn
   display: inline-block
   margin: 8px
-.network-btn .btn
-  font-size: $fontSize * 1.5
+  & .btn
+    font-size: $fontSize * 1.5
 
 .uproxy-banner
   font-size: $fontSize * 2
@@ -243,17 +216,40 @@ ul
 #networks-box
   margin-top: 30px
 
-// ------------------------------ Searching ------------------------------------
-#search-section
+// --------------------------- Search / Filters --------------------------------
+// Goes at the top of the popup roster view.
+#roster-header
   position: relative
   z-index: 50
-#search-contacts
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+
+// Contains a bunch of icons which modify the view / toggle filters.
+#actions
+  display: block
   position: relative
   z-index: 30
+  width: 100%
+  background-color: #fafafa
+  height: 30px
+  text-align: left
+  overflow: hidden
+  padding: 0
+  box-shadow: 0 1px 2px #aaa
+  @include smooth
+  &:hover
+    box-shadow: 0 1px 6px #aaa
+
+#search-contacts
+  display: block
+  position: relative
+  z-index: 20
   width: 370px
+  height: 34px
   margin: 0
   padding: 8px 20px
-  border: 1px solid #aaa
+  border: 1px solid #bbb
   outline: none
   color: #333
   @include smooth
@@ -264,26 +260,13 @@ ul
     box-shadow: 0 1px 2px #ccc
   &.ng-hide
     @include un-ng-hide
-    height: 0
-    padding: 0
-    border: none
+    margin-top: -34px
+    z-index: -1
+    opacity: 0
 
-// Goes at the top of the popup. Contais a bunch of icons which modify the
-// current view mode, or change roster filters.
-#actions
-  z-index: 20
-  display: block
-  width: 100%
-  background-color: #fafafa
-  height: 30px
-  text-align: left
-  overflow: hidden
-  padding: 0
-  box-shadow: 0 1px 2px #aaa
-
-// The search button toggles the actual textfield containing the user's search
-// query.
+// The search button toggles the actual textfield.
 #search-btn
+  position: relative
   z-index: 40
   width: 50px
   height: 16px
@@ -292,7 +275,7 @@ ul
   background: transparent url('../icons/search.png') no-repeat center
   background-size: 16px
   cursor: pointer
-
+  @include smooth
   &:hover, &:focus
     opacity: 0.5
     outline: none
@@ -328,13 +311,10 @@ ul
 
 #my-access
   background-image: url('../icons/arrow-up.png')
-
 #friends-access
   background-image: url('../icons/arrow-down.png')
-
 #uproxy-filter
   background-image: url('../icons/uproxy-19.png')
-
 #online-filter
   background-image: url('../icons/online.png')
 
@@ -355,6 +335,37 @@ ul
     opacity: 0.8
   &:hover
     opacity: 0.7
+
+#options-btn
+  position: fixed
+  z-index: 400
+  top: 4px
+  right: 8px
+  background: transparent url('../icons/settings.svg') no-repeat center center
+  border: none
+  outline: none
+  padding: 4px
+  width: 20px
+  height: 20px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  @include smooth
+  &:active, &:focus
+    opacity: 0.4
+  &:hover
+    opacity: 0.3
+
+#options-btn-tip
+  position: fixed
+  z-index: 500
+  top: 30px
+  right: 2px
+  background-color: #000
+  color: #ccc
+  opacity: 0.85
+  &.ng-hide
+    opacity: 0
 
 #start-btn
   background-image: url('../icons/uproxy-19.png')
@@ -410,7 +421,7 @@ ul
 .contacts li
   position: relative
   z-index: 0
-  min-height: 16px
+  height: 30px
   cursor: default
   padding: 6px 37px
   white-space: nowrap
@@ -449,14 +460,37 @@ img.contact-image
 .c-icons
   position: absolute
   right: 12px
-  color: #222
+  color: #555
   font-size: $fontSize * 0.8
   font-weight: 900
 .c-icon
+  display: inline-block
   padding: 1px
+  width: 18px
+  height: 16px
+  line-height: 16px
+  text-align: center
+  vertical-align: middle
+  background: transparent no-repeat center
+  background-size: 14px !important
   @include smooth
+  &.canUProxy
+    background-image: url('../icons/uproxy-19.png')
+  &.givesMe
+    background-image: url('../icons/arrow-up.png')
+  &.usesMe
+    background-image: url('../icons/arrow-down.png')
+    &.active
+      background-color: #fff
+      background-image: url('../icons/arrow-down-animate.gif')
+      border: 1px dotted #ddd
+      border-left: none
+      border-right: none
+  &.grey
+    opacity: 0.3
   &:hover
-    color: #888
+    opacity: 0.9
+
 
 // Red ! shows up on the corner of contacts who have had a change.
 .c-notification
@@ -516,8 +550,9 @@ img.c-icon
   border: 1px none #000
   outline: none
   padding: 4px
-  width: 40px
-  height: 40px
+  margin: 8px
+  width: 30px
+  height: 30px
   text-decoration: none
   opacity: 0.6
   cursor: pointer

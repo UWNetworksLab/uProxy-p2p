@@ -51,15 +51,17 @@ ul {
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
-
-.btn:hover, .btn:focus {
-  border-color: #999999;
-  box-shadow: 0 1px 3px #aaaaaa;
-  outline: none; }
-
-.btn:active {
-  box-shadow: 0 1px 3px #aaaaaa inset;
-  color: #777777; }
+  .btn:hover, .btn:focus {
+    border-color: #999999;
+    box-shadow: 0 1px 3px #aaaaaa;
+    outline: none; }
+  .btn:active {
+    box-shadow: 0 1px 3px #aaaaaa inset;
+    color: #777777; }
+  .btn:disabled {
+    color: #999999;
+    border-color: #cccccc;
+    box-shadow: 0 1px 2px #bbbbbb inset; }
 
 .btn-request {
   position: absolute;
@@ -79,48 +81,18 @@ ul {
 .title {
   padding: 0 8px; }
 
-#contact-header h1 {
+#contact-header {
   position: fixed;
-  width: 100%;
-  padding: 0 50px;
-  text-align: center;
-  top: 10px;
-  pointer-events: none;
-  white-space: nowrap;
-  font-size: 19.2px; }
-
-#options-btn {
-  position: fixed;
-  z-index: 400;
-  top: 4px;
-  right: 8px;
-  background: transparent url("../icons/settings.svg") no-repeat center center;
-  border: none;
-  outline: none;
-  padding: 4px;
-  width: 20px;
-  height: 20px;
-  text-decoration: none;
-  opacity: 0.6;
-  cursor: pointer;
-  -webkit-transition: all 0.23s !important;
-  -moz-transition: all 0.23s !important;
-  -o-transition: all 0.23s !important;
-  transition: all 0.23s !important; }
-  #options-btn:active, #options-btn:focus {
-    opacity: 0.9; }
-  #options-btn:hover {
-    opacity: 0.3; }
-
-#options-btn-tip {
-  position: fixed;
-  top: 20px;
-  right: 2px;
-  background-color: black;
-  color: #cccccc;
-  opacity: 0.85; }
-  #options-btn-tip.ng-hide {
-    opacity: 0; }
+  top: 0; }
+  #contact-header h1 {
+    position: fixed;
+    width: 100%;
+    padding: 0 50px;
+    text-align: center;
+    top: 10px;
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 19.2px; }
 
 .tip {
   display: inline-block;
@@ -198,9 +170,8 @@ ul {
 .network-btn {
   display: inline-block;
   margin: 8px; }
-
-.network-btn .btn {
-  font-size: 24px; }
+  .network-btn .btn {
+    font-size: 24px; }
 
 .uproxy-banner {
   font-size: 32px;
@@ -235,17 +206,41 @@ ul {
 #networks-box {
   margin-top: 30px; }
 
-#search-section {
+#roster-header {
   position: relative;
   z-index: 50; }
+  #roster-header.ng-hide {
+    display: block !important;
+    pointer-events: none;
+    opacity: 0; }
 
-#search-contacts {
+#actions {
+  display: block;
   position: relative;
   z-index: 30;
+  width: 100%;
+  background-color: #fafafa;
+  height: 30px;
+  text-align: left;
+  overflow: hidden;
+  padding: 0;
+  box-shadow: 0 1px 2px #aaaaaa;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+  #actions:hover {
+    box-shadow: 0 1px 6px #aaaaaa; }
+
+#search-contacts {
+  display: block;
+  position: relative;
+  z-index: 20;
   width: 370px;
+  height: 34px;
   margin: 0;
   padding: 8px 20px;
-  border: 1px solid #aaaaaa;
+  border: 1px solid #bbbbbb;
   outline: none;
   color: #333333;
   -webkit-transition: all 0.23s !important;
@@ -260,22 +255,12 @@ ul {
   #search-contacts.ng-hide {
     display: block !important;
     pointer-events: none;
-    height: 0;
-    padding: 0;
-    border: none; }
-
-#actions {
-  z-index: 20;
-  display: block;
-  width: 100%;
-  background-color: #fafafa;
-  height: 30px;
-  text-align: left;
-  overflow: hidden;
-  padding: 0;
-  box-shadow: 0 1px 2px #aaaaaa; }
+    margin-top: -34px;
+    z-index: -1;
+    opacity: 0; }
 
 #search-btn {
+  position: relative;
   z-index: 40;
   width: 50px;
   height: 16px;
@@ -283,7 +268,11 @@ ul {
   border: none;
   background: transparent url("../icons/search.png") no-repeat center;
   background-size: 16px;
-  cursor: pointer; }
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
   #search-btn:hover, #search-btn:focus {
     opacity: 0.5;
     outline: none; }
@@ -348,6 +337,40 @@ ul {
     opacity: 0.8; }
   .icon-btn:hover {
     opacity: 0.7; }
+
+#options-btn {
+  position: fixed;
+  z-index: 400;
+  top: 4px;
+  right: 8px;
+  background: transparent url("../icons/settings.svg") no-repeat center center;
+  border: none;
+  outline: none;
+  padding: 4px;
+  width: 20px;
+  height: 20px;
+  text-decoration: none;
+  opacity: 0.6;
+  cursor: pointer;
+  -webkit-transition: all 0.23s !important;
+  -moz-transition: all 0.23s !important;
+  -o-transition: all 0.23s !important;
+  transition: all 0.23s !important; }
+  #options-btn:active, #options-btn:focus {
+    opacity: 0.4; }
+  #options-btn:hover {
+    opacity: 0.3; }
+
+#options-btn-tip {
+  position: fixed;
+  z-index: 500;
+  top: 30px;
+  right: 2px;
+  background-color: black;
+  color: #cccccc;
+  opacity: 0.85; }
+  #options-btn-tip.ng-hide {
+    opacity: 0; }
 
 #start-btn {
   background-image: url("../icons/uproxy-19.png"); }
@@ -416,7 +439,7 @@ ul {
 .contacts li {
   position: relative;
   z-index: 0;
-  min-height: 16px;
+  height: 30px;
   cursor: default;
   padding: 6px 37px;
   white-space: nowrap;
@@ -454,18 +477,40 @@ img.contact-image {
 .c-icons {
   position: absolute;
   right: 12px;
-  color: #222222;
+  color: #555555;
   font-size: 12.8px;
   font-weight: 900; }
 
 .c-icon {
+  display: inline-block;
   padding: 1px;
+  width: 18px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: middle;
+  background: transparent no-repeat center;
+  background-size: 14px !important;
   -webkit-transition: all 0.23s !important;
   -moz-transition: all 0.23s !important;
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
+  .c-icon.canUProxy {
+    background-image: url("../icons/uproxy-19.png"); }
+  .c-icon.givesMe {
+    background-image: url("../icons/arrow-up.png"); }
+  .c-icon.usesMe {
+    background-image: url("../icons/arrow-down.png"); }
+    .c-icon.usesMe.active {
+      background-color: white;
+      background-image: url("../icons/arrow-down-animate.gif");
+      border: 1px dotted #dddddd;
+      border-left: none;
+      border-right: none; }
+  .c-icon.grey {
+    opacity: 0.3; }
   .c-icon:hover {
-    color: #888888; }
+    opacity: 0.9; }
 
 .c-notification {
   position: absolute;
@@ -527,8 +572,9 @@ img.c-icon {
   border: 1px none black;
   outline: none;
   padding: 4px;
-  width: 40px;
-  height: 40px;
+  margin: 8px;
+  width: 30px;
+  height: 30px;
   text-decoration: none;
   opacity: 0.6;
   cursor: pointer;
