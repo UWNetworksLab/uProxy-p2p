@@ -10,15 +10,17 @@
     outline: none
 
 $fontSize: 16px
+$defaultSmoothSpeed: 0.23s
+
 @font-face
   font-family: 'Eurostile'
   src: url('eurostile.ttf') format('truetype')
 
 @mixin smooth
-  -webkit-transition: all 0.23s !important
-  -moz-transition: all 0.23s !important
-  -o-transition: all 0.23s !important
-  transition: all 0.23s !important
+  -webkit-transition: all $defaultSmoothSpeed !important
+  -moz-transition: all $defaultSmoothSpeed !important
+  -o-transition: all $defaultSmoothSpeed !important
+  transition: all $defaultSmoothSpeed !important
 @mixin smooth-slow
   -webkit-transition: all 0.5s !important
   -moz-transition: all 0.5s !important
@@ -101,6 +103,13 @@ ul
   padding: 0 8px
 
 #contact-header
+  position: fixed
+  z-index: 300
+  width: 100%
+  top: 0
+  padding-bottom: 4px
+  box-shadow: 0 1px 3px #eee
+  background-color: #fff
   & h1
     position: fixed
     width: 100%
@@ -109,38 +118,9 @@ ul
     top: 10px
     pointer-events: none
     white-space: nowrap
-    font-size: $fontSize * 1.2
-
-#options-btn
-  position: fixed
-  z-index: 400
-  top: 4px
-  right: 8px
-  background: transparent url('../icons/settings.svg') no-repeat center center
-  border: none
-  outline: none
-  padding: 4px
-  width: 20px
-  height: 20px
-  text-decoration: none
-  opacity: 0.6
-  cursor: pointer
-  @include smooth
-  &:active, &:focus
-    opacity: 0.4
-  &:hover
-    opacity: 0.3
-
-#options-btn-tip
-  position: fixed
-  z-index: 500
-  top: 20px
-  right: 2px
-  background-color: #000
-  color: #ccc
-  opacity: 0.85
-  &.ng-hide
-    opacity: 0
+    font-size: $fontSize * 1.1
+    font-weight: 100
+    letter-spacing: 1px
 
 // A tip is a helpful bit of text which shows up when you have focus upon a
 // particular input element.
@@ -245,17 +225,41 @@ ul
 #networks-box
   margin-top: 30px
 
-// ------------------------------ Searching ------------------------------------
-#search-section
+// --------------------------- Search / Filters --------------------------------
+// Goes at the top of the popup roster view.
+#roster-header
   position: relative
   z-index: 50
-#search-contacts
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+    z-index: -100
+
+// Contains a bunch of icons which modify the view / toggle filters.
+#actions
+  display: block
   position: relative
   z-index: 30
+  width: 100%
+  background-color: #fafafa
+  height: 30px
+  text-align: left
+  overflow: hidden
+  padding: 0
+  box-shadow: 0 1px 2px #aaa
+  @include smooth
+  &:hover
+    box-shadow: 0 1px 6px #aaa
+
+#search-contacts
+  display: block
+  position: relative
+  z-index: 20
   width: 370px
+  height: 34px
   margin: 0
   padding: 8px 20px
-  border: 1px solid #aaa
+  border: 1px solid #bbb
   outline: none
   color: #333
   @include smooth
@@ -266,26 +270,13 @@ ul
     box-shadow: 0 1px 2px #ccc
   &.ng-hide
     @include un-ng-hide
-    height: 0
-    padding: 0
-    border: none
+    margin-top: -34px
+    z-index: -1
+    opacity: 0
 
-// Goes at the top of the popup. Contais a bunch of icons which modify the
-// current view mode, or change roster filters.
-#actions
-  z-index: 20
-  display: block
-  width: 100%
-  background-color: #fafafa
-  height: 30px
-  text-align: left
-  overflow: hidden
-  padding: 0
-  box-shadow: 0 1px 2px #aaa
-
-// The search button toggles the actual textfield containing the user's search
-// query.
+// The search button toggles the actual textfield.
 #search-btn
+  position: relative
   z-index: 40
   width: 50px
   height: 16px
@@ -294,7 +285,7 @@ ul
   background: transparent url('../icons/search.png') no-repeat center
   background-size: 16px
   cursor: pointer
-
+  @include smooth
   &:hover, &:focus
     opacity: 0.5
     outline: none
@@ -311,7 +302,7 @@ ul
   font-size: $fontSize * 1.5
   font-weight: 900
   color: #222
-  opacity: 0.4
+  opacity: 0.3
   cursor: pointer
   @include smooth
   &:active, &:focus
@@ -355,6 +346,37 @@ ul
   &:hover
     opacity: 0.7
 
+#options-btn
+  position: fixed
+  z-index: 600
+  top: 4px
+  right: 8px
+  background: transparent url('../icons/settings.svg') no-repeat center center
+  border: none
+  outline: none
+  padding: 4px
+  width: 20px
+  height: 20px
+  text-decoration: none
+  opacity: 0.6
+  cursor: pointer
+  @include smooth
+  &:active, &:focus
+    opacity: 0.4
+  &:hover
+    opacity: 0.3
+
+#options-btn-tip
+  position: fixed
+  z-index: 500
+  top: 30px
+  right: 2px
+  background-color: #000
+  color: #ccc
+  opacity: 0.85
+  &.ng-hide
+    opacity: 0
+
 #start-btn
   background-image: url('../icons/uproxy-19.png')
 #stop-btn
@@ -374,18 +396,19 @@ ul
   outline: none
   @include smooth
 
+// Appears to tell the user about the state (like being offline)
 #roster-text
   position: absolute
   text-align: center
   top: 100px
   width: 100%
   padding: 10%
-  z-index: 500
+  z-index: 1
   color: #444
   text-shadow: 0 2px 2px #ccc
   pointer-events: none
 
-#contacts-frame
+#roster-frame
   position: relative
   min-height: 520px
   white-space: nowrap
@@ -468,6 +491,12 @@ img.contact-image
     background-image: url('../icons/arrow-up.png')
   &.usesMe
     background-image: url('../icons/arrow-down.png')
+    &.active
+      background-color: #fff
+      background-image: url('../icons/arrow-down-animate.gif')
+      border: 1px dotted #ddd
+      border-left: none
+      border-right: none
   &.grey
     opacity: 0.3
   &:hover
@@ -495,63 +524,183 @@ img.c-icon
   &:hover
     opacity: 0.5
 
-#contact-details
+// ------------------------------ Access View ----------------------------------
+// This is the view which slides in from the right, when you click on a
+// roster entry.
+#access
   display: inline-block
   position: fixed
   width: 100%
-  top: 40px
+  height: 100%
+  padding-top: 40px
+  top: 0
   left: 0
   @include smooth
+  &.ng-hide
+    display: inline-block !important
+    opacity: 0
+    left: 400px
 
-#contact-details.ng-hide
-  display: inline-block !important
-  opacity: 0
-  left: 400px
+.bg-deco
+  position: fixed
+  top: 0
+  width: 100%
+  height: 100%
+  background: transparent no-repeat center
+  pointer-events: none
+  opacity: 0.2
+  @include smooth
+  &.faded
+    opacity: 0.02 !important
+  &.darker
+    opacity: 0.25 !important
+  &.active
+    opacity: 0.5 !important
+  &#internets
+    background-image: url('../icons/global_internet.png')
+    background-size: 180px
+    background-position-y: 200px
+    @include smooth-slow
+    &.active
+      opacity: 1 !important
+  &#path-left
+    background-image: url('../icons/path-left.png')
+    opacity: 0.07
+  &#path-right
+    background-image: url('../icons/path-right.png')
+    opacity: 0.07
 
-.contact-status
+// Typically displayed when the contact does not have uproxy installed
+.access-note
+  position: absolute
+  top: 270px
+  width: 100%
+  text-align: center
+  cursor: default
+
+
+// Container for a user's profile picture and such
+.contact-info
   text-align: center
   text-shadow: 0px 1px 1px #ccc
-  padding: 8px
+  width: 100%
+  @include smooth
+  &#my-info
+    position: fixed
+    bottom: 55px
+    &.ng-hide
+      @include un-ng-hide
+      bottom: -100px
+  &#their-info
+    position: fixed
+    top: 40px
+    &.ng-hide
+      @include un-ng-hide
+      top: -100px
+  & img.contact-image
+    position: relative
+    width: 110px
+    height: 110px
+    border-color: #ddd
+    background-size: contain
+    box-shadow: 2px 3px 7px #bbb
 
 .contact-name
   text-align: center
 
-#contact-details img.contact-image
-  position: relative
-  width: 120px
-  height: 120px
-  margin: 8px
-  border-color: #ddd
-  background-size: contain
-  box-shadow: 2px 3px 5px 1px #ccc
+.detail-panel
+  position: fixed
+  bottom: 64px
+  width: 100%
+  text-align: center
 
-.chat-btn
+.instance-btn
   display: inline-block
-  background: transparent url('../icons/chat.png') no-repeat center center
-  background-size: contain
-  border: 1px none #000
-  outline: none
+  background: transparent no-repeat center center
+  background-size: 24px
+  border: none
+  width: 32px
+  height: 32px
   padding: 4px
-  margin: 8px
-  width: 30px
-  height: 30px
+  margin: 0 16px
+  vertical-align: middle
+  outline: none
   text-decoration: none
-  opacity: 0.6
   cursor: pointer
+  font-size: $fontSize * 0.5
+  opacity: 0.9
   @include smooth
   &:active, &:focus
-    opacity: 0.7
+    opacity: 0.4
   &:hover
     opacity: 0.3
 
+// View toggles on the bottom of the contact view.
+#uproxy-btn
+  background-image: url('../icons/uproxy-128.png')
+  outline: none
+  text-decoration: none
+  cursor: pointer
+
+.chat-btn
+  background-image: url('../icons/chat.png')
+
+// Contains the actual trust & action buttons
+.uproxy-box
+  position: absolute
+  display: inline-block
+  background: no-repeat center
+  height: 100px
+  width: 148px
+  & .uproxytip
+    position: absolute
+    width: 100%
+    text-align: center
+    color: #888
+    padding: 0 8px
+    background-color: #fff
+    opacity: 0.7
+    cursor: default
+  &.proxy
+    left: 0
+    top: 150px
+    background-image: url('../icons/arrow-up.png')
+    background-position-y: top
+    padding-top: 12px
+    & .uproxytip
+      bottom: 0
+  &.client
+    right: 0
+    background-image: url('../icons/arrow-down.png')
+    background-position-y: bottom
+    width: 158px
+    & .uproxytip
+      top: 0
+    &.active
+      background-image: url('../icons/arrow-down-animate.gif')
+    & .btn
+      margin-top: 47px
+
 .instance-actions
   text-align: center
-
-.instance-actions .btn
-  padding: 8px 16px
-  margin-top: 16px
-  text-shadow: 0 1px 1px #888
-  border-radius: 3px
+  font-size: $fontSize * 0.8
+  position: absolute
+  top: 165px
+  width: 100%
+  & .btn
+    padding: 6px 12px
+    margin-top: 16px
+    text-shadow: 0 1px 1px #888
+    border-radius: 3px
+    font-size: 11px
+    opacity: 0.9
+    &.black
+      background-color: #222
+      color: #ccc
+      border-color: #666
+      &:hover, &:focus
+        color: #fff
+        background-color: #444
 
 .client-details
   position: relative
@@ -582,10 +731,6 @@ img.c-icon
     border-color: #ddd
     top: -2px
     box-shadow: 0 2px 6px 1px #ddd
-
-.box-for-proxy
-
-.box-for-client
 
 .instance-id
   font-size: $fontSize * 0.6
@@ -630,18 +775,11 @@ img.c-icon
   bottom: 0
   padding: 8px
 
-
-.contact-actions
-  display: none
-
 #popup
   width: 370.8204px
   height: 600px
   .footer
     text-align: right
-
-.large-font
-  font-size: $fontSize * 1.5
 
 details
   & > summary
@@ -686,6 +824,10 @@ details
 .dbg
   position: fixed
   z-index: 500
+
+#reset-box
+  position: fixed
+  bottom: 0
 
 details.advanced
   margin-top: 15px

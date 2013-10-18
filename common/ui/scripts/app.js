@@ -45,7 +45,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
-      //console.log(model);
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
@@ -54,7 +53,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // Remember the state change hook.
       $rootScope.update = onStateChange;
 
-      //
       $rootScope.isOnline = function(network) {
         return (model.identityStatus[network] &&
             model.identityStatus[network].status == 'online');
@@ -76,8 +74,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // This is *NOT* the inverse of loggedIn, because it is possible to be
       // "logging in"
       $rootScope.loggedOut = function() {
-        for(var networkId in model.identityStatus) {
-          if('offline' != model.identityStatus[networkId].status)
+        for (var networkId in model.identityStatus) {
+          if ('offline' != model.identityStatus[networkId].status)
             return false;
         }
         return true;
@@ -157,11 +155,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return null;
       };
 
-      $rootScope.showingSplashPage = function() {
-        return ui.splashPage || (!
-          $rootScope.uProxyAppConnectionStatus.connected);
-      };
-
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
         appChannel.emit('login', network);
@@ -221,6 +214,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.offerAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'offer');
         ui.pendingClientTrustChange = true;
+        // instance.trust.asClient = 'offered';
+        // ui.instance.trust.asClient = instance;
       };
       $rootScope.grantAccess = function(instance) {
         $rootScope.instanceTrustChange(instance.instanceId, 'allow');
@@ -235,20 +230,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // |id| can be either a client id or a user id.
       $rootScope.instanceTrustChange = function (id, action) {
         // console.log('instance trust change ' + action + ', ' + id);
-        appChannel.emit('instance-trust-change',
-          { instanceId: id, action: action });
+        setTimeout(function() {
+          appChannel.emit('instance-trust-change',
+            { instanceId: id, action: action });
+        }, 0);
       };
 
-      // Notifications occur on the user level. The message sent to the app side
-      // will also remove the notification flag from instances.
-      $rootScope.notificationSeen = function (user) {
-        if (!user.hasNotification) {
-          return;  // Ignore if user has no notification.
-        }
-        appChannel.emit('notification-seen', user.userId);
-        user.hasNotification = false;
-        ui.decNotifications();
-      }
+      // Bind UI functions to the scope, if they want to be accessed from DOM.
+      // $rootScope.returnToRoster = function() ui.returnToRoster;
+      // $rootScope.notificationSeen = ui.notificationSeen;
 
       $rootScope.changeOption = function (key, value) {
         appChannel.emit('change-option', {key: key, value: value});
