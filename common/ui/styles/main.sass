@@ -549,6 +549,7 @@ img.c-icon
     opacity: 0
     left: 400px
 
+// This is the faded background image of the internets and arrows.
 .bg-deco
   position: fixed
   top: 0
@@ -577,6 +578,26 @@ img.c-icon
   &#path-right
     background-image: url('../icons/path-right.png')
     opacity: 0.07
+
+// This is the uproxy icon on the diagram.
+.uproxy-deco
+  position: absolute
+  width: 20px
+  height: 20px
+  opacity: 0.25
+  background: transparent no-repeat center
+  background-image: url('../icons/uproxy-19.png')
+  background-size: 12px
+  @include smooth
+  &#their-uproxy
+    top: 167px
+    left: 122px
+  &#my-uproxy
+    bottom: 176px
+    right: 118px
+  &:hover
+    opacity: 0.6
+
 
 // Typically displayed when the contact does not have uproxy installed
 .access-note

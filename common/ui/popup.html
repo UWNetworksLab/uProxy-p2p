@@ -193,6 +193,9 @@
                           darker:'yes'==ui.contact.trust.asClient,
                           active:ui.contact.isActiveClient }">
           </div>
+          <div class="uproxy-deco" id="their-uproxy"
+              ng-show="ui.instance"></div>
+          <div class="uproxy-deco" id="my-uproxy"></div>
 
           <p class="access-note" ng-hide="ui.instance">
           {{ ui.contact.name }} does not have <b>uProxy</b>.
