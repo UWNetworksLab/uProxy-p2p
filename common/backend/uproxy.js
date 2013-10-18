@@ -531,12 +531,14 @@ function makeMyInstanceMessage() {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyId()];
+    firstIdentity.network = firstIdentity.clients[Object.keys(
+        firstIdentity.clients)[0]].network;
     result = restrictToObject(DEFAULT_INSTANCE_MESSAGE, store.state.me);
     result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
   } catch (e) {
     console.log("Failed to repair identity when making an instance message. \n");
-    console.log("  firstIdentity = " + JSON.stringify(firstIdentify, null, "   ") + "\n");
+    console.log("  firstIdentity = " + JSON.stringify(firstIdentity, null, "   ") + "\n");
     console.log("  store.state.me = " + JSON.stringify(store.state.me, null, "   ") + "\n");
     throw e;
   }
