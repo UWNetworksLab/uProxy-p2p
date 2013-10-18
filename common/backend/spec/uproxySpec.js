@@ -243,28 +243,28 @@ function validateInstance(inst) {
       store.state.instanceToClient[inst.instanceId]);
 }
 
+// conforms both to DEFAULT_STATUS and DEFAULT_INSTANCE.
+var selfInstanceAndStatusMessage = {
+  userId: 'self@selfmail.com',
+  name: 'My self.',
+  network: 'google',
+  message: 'Woo!',
+  status: 'online',
+  description: 'my self in a test instance.',
+  instanceId: '0000000001',
+  keyHash: 'HASHFORINSTANCE-0000000001',
+  clients: {
+    'self@selfmail.com/uproxy00001': {
+      clientId: 'self@selfmail.com/uproxy00001',
+      network: 'testonly',
+      status: 'messageable'
+    }
+  }
+};
+
 describe("uproxy.state.instance", function () {
   // Try variants of [local state loading, network login,
   // instance ID reception].  Validate resulting state.
-
-  // conforms both to DEFAULT_STATUS and DEFAULT_INSTANCE.
-  var selfInstanceAndStatusMessage = {
-    userId: 'self@selfmail.com',
-    name: 'My self.',
-    network: 'google',
-    message: 'Woo!',
-    status: 'online',
-    description: 'my self in a test instance.',
-    instanceId: '0000000001',
-    keyHash: 'HASHFORINSTANCE-0000000001',
-    clients: {
-      'self@selfmail.com/uproxy00001': {
-        clientId: 'self@selfmail.com/uproxy00001',
-        network: 'testonly',
-        status: 'messageable'
-      }
-    }
-  };
 
   var userRoster = [
     makeUserRosterEntry('2222222222', 'secondUser'),
@@ -365,9 +365,100 @@ describe("uproxy.state.instance", function () {
     for (inst in userRoster) {
       validateInstance(makeInstanceMessage(userRoster[inst]).data);
     }
-  });});
+  });
+});
+
+function repeatObject(obj, num) {
+  var result = [];
+  while(num--) {
+    result.push(cloneDeep(obj));
+  }
+  return result;
+}
 
 describe("uproxy.state.instance.fuzzer", function () {
   // Feed in randomized ordering of data, some of it bad, and make
   // sure internal validation can survive.
+  var USER_STATE = {
+    roster: false,
+    instance: false
+  };
+
+  var numbers = [ "first", "second", "third", "fourth", "fifth", "sixth",
+                  "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth",
+                  "thirteenth", "fourteenth", "fifteenth", "sixteenth",
+                  "seventeenth", "eighteenth", "nineteenth", "twentieth" ];
+
+  var sendMessageSpy;
+
+  var check_all_instances = function(instances, check_roster_true,
+                                     check_instance_true) {
+    var i;
+    for (i in Object.keys(instances)) {
+      if (check_roster_true && !instances[i].roster) {
+        return false;
+      }
+      if (check_instance_true && !instances[i].instance) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  beforeEach(function () {
+    // Stub out extension-related communications.  This may not be
+    // necessary with freedom already stubbed out.
+    spyOn(uproxy, 'sendInstance');
+    spyOn(uproxy, '_SyncUI');
+    // identity's a MockChannel.  Add some spies for identity-specific APIs an
+    // top of on() and emit().
+    sendMessageSpy = jasmine.createSpy('sendMessage');
+    identity.sendMessage = sendMessageSpy;
+    var completed = false;
+    store.reset(function() {completed = true; });
+    waitsFor(function() { return completed; }, "Reset never returned.", 50);
+  });
+
+  it("keeps login at front, and randomizes instance and roster messages", function() {
+    var i, inst;
+    var states = repeatObject(USER_STATE, numbers.length);
+    var num_attempts = 0;
+    var userRoster = [];
+    for (i = 0; i < numbers.length; ++i) {
+      var nm = repeatObject('' + (i + 1), 8).toString().replace(/,/g, '');
+      userRoster.push(makeUserRosterEntry(nm, numbers[i] + 'User'));
+    }
+
+    // Log us in.
+    receiveStatus(selfInstanceAndStatusMessage);
+    receiveChange(selfInstanceAndStatusMessage);
+
+    // Now randomly send 5 instance or roster messages, and then see if we've
+    // gotten everyone.  This will clearly go a few times before finishing.
+    do {
+      for (i = 0; i < 5; ++i) {
+        var index = Math.floor(Math.random() * numbers.length);
+        var do_roster = Math.round(Math.random());
+        if (do_roster) {
+          receiveChange(userRoster[index]);
+          states[i].roster = true;
+        } else {
+          receiveInstance(makeInstanceMessage(userRoster[index]));
+          states[i].instance = true;
+        }
+      }
+      num_attempts++;
+    } while(!check_all_instances(states, true, true) && num_attempts < 100);
+
+    if (!check_all_instances(states, true, true)) {
+      console.warn("Didn't get all " + numbers.length +
+          " fake users with 500 tries.");
+    }
+
+    // Now check our state.
+    validateSelf(selfInstanceAndStatusMessage);
+    for (inst in userRoster) {
+      validateInstance(makeInstanceMessage(userRoster[inst]).data);
+    }
+  });
 });

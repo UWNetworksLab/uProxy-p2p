@@ -537,9 +537,11 @@ function makeMyInstanceMessage() {
     result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
   } catch (e) {
-    console.log("Failed to repair identity when making an instance message. \n");
-    console.log("  firstIdentity = " + JSON.stringify(firstIdentity, null, "   ") + "\n");
-    console.log("  store.state.me = " + JSON.stringify(store.state.me, null, "   ") + "\n");
+    console.log("Failed to repair identity when making an instance message.\n");
+    console.log("firstIdentity = " + JSON.stringify(
+        firstIdentity, null, " ") + "\n");
+    console.log("store.state.me = " + JSON.stringify(
+        store.state.me, null, " ") + "\n");
     throw e;
   }
   return JSON.stringify(result);
