@@ -187,8 +187,8 @@
             <div class="mode-panel">
               <button id="uproxy-btn" class="instance-btn">
               </button>
-              <a class="chat-btn instance-btn" href="{{ ui.contact.url }}"
-                 target="_blank"
+              <a class="chat-btn instance-btn"
+                 ng-click="ui.chatView=!ui.chatView"
                  ng-show="ui.accessView"
                  ng-mouseenter="chatButtonHovered=true"
                  ng-mouseleave="chatButtonHovered=false">
@@ -206,13 +206,15 @@
           <div id="internets" class="bg-deco" ng-class="{
               active: 'running'==ui.instance.status.client ||
                       'running'==ui.instance.status.proxy}"
-              ></div>
+              ng-hide="ui.chatView"></div>
           <div class="bg-deco" id="path-left"
+               ng-hide="ui.chatView"
                ng-class="{faded:'no'==ui.contact.trust.asProxy,
                           darker:'yes'==ui.contact.trust.asProxy,
                           active:ui.contact.isActiveProxy }">
           </div>
           <div class="bg-deco" id="path-right"
+               ng-hide="ui.chatView"
                ng-class="{faded:'no'==ui.contact.trust.asClient,
                           darker:'yes'==ui.contact.trust.asClient,
                           active:ui.contact.isActiveClient }">
@@ -321,10 +323,22 @@
                 </button>
               </div>
             </div>
+          </div>
 
+          <div id="chat-box" ng-show="ui.chatView">
+            <textarea id="chat-log" ng-init="chatLog='Chatting...'"
+                readonly>{{chatLog}}</textarea>
+            <input type="text" id="chat-input" ng-model="chatText">
+            </input>
+            <input type="submit" id="chat-send" class="btn"
+                ng-click="chatLog = chatLog + '\n' + chatText;chatText=''">
+              Send
+            </input>
           </div>
         </div>
+
       </div>
+
     </div>
 
     <div class="contact-info" id="my-info" ng-show="ui.accessView">
