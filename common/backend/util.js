@@ -44,7 +44,7 @@ function list_erase(list, obj_to_remove) {
 // For each key 'k', o[k] has the corresponding value from |input| if the key
 // exists, otherwise the default value from |template|.
 // Does not mutate |template| or |input|.
-function restrictToObject(template, input) {
+function restrictKeys(template, input) {
   var output = {},
       err;
   for (var k in template) {

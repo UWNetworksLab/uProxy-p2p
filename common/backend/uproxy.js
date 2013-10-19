@@ -13,7 +13,7 @@
 
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
-   Trust, restrictToObject, freedom: false, UProxyState: false, console:
+   Trust, restrictKeys, freedom: false, UProxyState: false, console:
    false, DEBUG: false, ProxyState: false, store, _localTestProxying,
    DEFAULT_STATUS, DEFAULT_INSTANCE_MESSAGE, DEFAULT_MESSAGE_ENVELOPE,
    DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, DEFAULT_ROSTER_ENTRY,
@@ -369,7 +369,7 @@ function receiveTrustMessage(msgInfo) {
 //
 function receiveStatus(data) {
   console.log('onStatus: data:' + JSON.stringify(data));
-  data = restrictToObject(DEFAULT_STATUS, data);
+  data = restrictKeys(DEFAULT_STATUS, data);
   // userId is only specified when connecting or online.
   if (data.userId.length) {
     store.state.identityStatus[data.network] = data;
@@ -389,9 +389,9 @@ identity.on('onStatus', receiveStatus);
 // |rawData| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
   try {
-    var data = restrictToObject(DEFAULT_ROSTER_ENTRY, rawData);
+    var data = restrictKeys(DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
-      data.clients[c] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY,
+      data.clients[c] = restrictKeys(DEFAULT_ROSTER_CLIENT_ENTRY,
                                          rawData.clients[c]);
     }
     if (store.state.me.identities[data.userId]) {
@@ -533,8 +533,8 @@ function makeMyInstanceMessage() {
     var firstIdentity = store.state.me.identities[_getMyId()];
     firstIdentity.network = firstIdentity.clients[Object.keys(
         firstIdentity.clients)[0]].network;
-    result = restrictToObject(DEFAULT_INSTANCE_MESSAGE, store.state.me);
-    result.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
+    result = restrictKeys(DEFAULT_INSTANCE_MESSAGE, store.state.me);
+    result.rosterInfo = restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
   } catch (e) {
     console.log("Failed to repair identity when making an instance message.\n");
@@ -569,9 +569,9 @@ function sendInstance(clientId) {
 function receiveInstance(rawMsg) {
   console.log('receiveInstance(from: ' + rawMsg.fromUserId + ')');
 
-  var msg = restrictToObject(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-  msg.data = restrictToObject(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-  msg.data.rosterInfo = restrictToObject(
+  var msg = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+  msg.data = restrictKeys(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+  msg.data.rosterInfo = restrictKeys(
       DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
 
   var instanceId  = msg.data.instanceId;

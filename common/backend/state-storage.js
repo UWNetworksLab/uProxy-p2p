@@ -22,7 +22,7 @@
 /* global isDefined: false */
 /* global FinalCallback: false */
 /* global cloneDeep: false */
-/* global restrictToObject: false */
+/* global restrictKeys: false */
 "use strict";
 
 // --------------------------------------------------------------------------
@@ -123,7 +123,7 @@ UProxyState.prototype.isMessageableUproxyClient = function(client) {
 UProxyState.prototype.saveMeToStorage = function (callback) {
   this._saveKeyAsJson(
       StateEntries.ME,
-      restrictToObject(cloneDeep(DEFAULT_SAVE_STATE.me), this.state.me),
+      restrictKeys(DEFAULT_SAVE_STATE.me, this.state.me),
       callback);
 };
 
@@ -137,10 +137,10 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
     } else {
       console.log("++++++ Loaded self-definition ++++++");
       console.log("  state.me = " + JSON.stringify(me));
-      this.state.me = restrictToObject(this.state.me, me);
+      this.state.me = restrictKeys(this.state.me, me);
       if(callback) { callback(); }
     }
-  }.bind(this), null);
+  }.bind(this), this.state.me);
 };
 
 // --------------------------------------------------------------------------
@@ -149,14 +149,14 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
 UProxyState.prototype.saveOptionsToStorage = function(callback) {
   this._saveKeyAsJson(
       StateEntries.OPTIONS,
-      restrictToObject(cloneDeep(DEFAULT_SAVE_STATE.options), this.state.options),
+      restrictKeys(DEFAULT_SAVE_STATE.options, this.state.options),
       callback);
 };
 
 UProxyState.prototype.loadOptionsFromStorage = function(callback) {
   this._loadKeyAsJson(StateEntries.OPTIONS, function (loadedOptions) {
     this.state.options =
-        restrictToObject(cloneDeep(DEFAULT_LOAD_STATE.options), loadedOptions);
+        restrictKeys(cloneDeep(DEFAULT_LOAD_STATE.options), loadedOptions);
     if (callback) { callback(); }
   }.bind(this), {});
 };
@@ -206,7 +206,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     function(userId, clientId, data) {
   var instanceId = data.instanceId;
   // Some local metadata isn't transmitted.  Add it in.
-  data = restrictToObject(DEFAULT_INSTANCE, data);
+  data = restrictKeys(DEFAULT_INSTANCE, data);
 
   // Before everything, remember the clientId - instanceId relation.
   var oldClientId = this.state.instanceToClient[instanceId];
@@ -329,9 +329,9 @@ UProxyState.prototype.saveAllInstances = function(callback) {
 // once the last of the loading operations has completed. We do this using the
 // FinalCaller class.
 UProxyState.prototype.loadStateFromStorage = function(callback) {
-  this.state = restrictToObject(this.state, DEFAULT_LOAD_STATE);
+  this.state = restrictKeys(this.state, DEFAULT_LOAD_STATE);
   // this.state = cloneDeep(DEFAULT_LOAD_STATE);
-  // this.state = restrictToObject(DEFAULT_LOAD_STATE, DE);
+  // this.state = restrictKeys(DEFAULT_LOAD_STATE, DE);
   var finalCallbacker = new FinalCallback(callback);
   this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
   this.loadOptionsFromStorage(finalCallbacker.makeCountedCallback());

@@ -85,13 +85,13 @@ var fakeInstanceSync = function(userId, clientId, data) {
 };
 
 describe("uproxy.receiveInstance", function() {
-  var instanceMsg = restrictToObject(DEFAULT_MESSAGE_ENVELOPE, {
+  var instanceMsg = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, {
     fromUserId: 'alice',
     fromClientId: 'alice-clientid',
     toUserId: '',
-    data: restrictToObject(DEFAULT_INSTANCE_MESSAGE, {
+    data: restrictKeys(DEFAULT_INSTANCE_MESSAGE, {
       instanceId: '12345',
-      rosterInfo: restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
+      rosterInfo: restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
         name: 'Alice Testuser',
         network: 'google'
       })
@@ -138,8 +138,8 @@ function makeUserRosterEntry(instanceId, userId, not_as_uproxy) {
   result.userId = userId;
   result.clients = {};
   // validate for missing fields.
-  result = restrictToObject(DEFAULT_ROSTER_ENTRY, result);
-  result.clients[clientId] = restrictToObject(
+  result = restrictKeys(DEFAULT_ROSTER_ENTRY, result);
+  result.clients[clientId] = restrictKeys(
       DEFAULT_ROSTER_CLIENT_ENTRY, {
         userId: userId,
         clientId: clientId,
@@ -161,7 +161,7 @@ function makeInstanceMessage(userRosterEntry) {
   result.fromUserId = userRosterEntry.userId;
   result.fromClientId = client.clientId;
   result.toUserId = 'you-should-not-be-checking-this';
-  result = restrictToObject(DEFAULT_MESSAGE_ENVELOPE, result);
+  result = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, result);
 
   var result_data = cloneDeep(DEFAULT_INSTANCE_MESSAGE);
   // pull the instanceID out of the clientID.
@@ -175,9 +175,9 @@ function makeInstanceMessage(userRosterEntry) {
   result_data.instanceId = instanceId;
   result_data.description = 'description for user ' + userRosterEntry.userId;
   result_data.keyHash = 'HASHFORINSTANCE-' + instanceId;
-  result_data = restrictToObject(DEFAULT_INSTANCE_MESSAGE, result_data);
+  result_data = restrictKeys(DEFAULT_INSTANCE_MESSAGE, result_data);
 
-  result_data.rosterInfo = restrictToObject(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
+  result_data.rosterInfo = restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
     name: userRosterEntry.name,
     network: client.network,
     userId: userRosterEntry.userId
