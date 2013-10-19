@@ -40,27 +40,28 @@ function list_erase(list, obj_to_remove) {
   }
 }
 
-// Creates an object that has only the keys of |restrictionObject| and for each
-// key, 'k', it has the value from |objectToRestrict| if it exists, else it has
-// the valye from restrictionObject.
-function restrictToObject(restrictionObject, objectToRestrict) {
-  var selectedPartsOfObjectToRestrict = {};
-  var err;
-  for (var k in restrictionObject) {
-    if (objectToRestrict && k in objectToRestrict) {
-      selectedPartsOfObjectToRestrict[k] = objectToRestrict[k];
-    } else if (restrictionObject[k] !== null) {
-      selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
+// Creates an object |o| that has only the keys from |template|.
+// For each key 'k', o[k] has the corresponding value from |input| if the key
+// exists, otherwise the default value from |template|.
+// Does not mutate |template| or |input|.
+function restrictToObject(template, input) {
+  var output = {},
+      err;
+  for (var k in template) {
+    if (input && k in input) {
+      output[k] = cloneDeep(input[k]);
+    } else if (template[k] !== null) {
+      output[k] = cloneDeep(template[k]);
     } else {
       err = new Error('Missing required key ' + k + '.\nObject: ' +
-          JSON.stringify(objectToRestrict, null, '  ') + '\nRestriction: ' +
-          JSON.stringify(restrictionObject, null, '  '));
+          JSON.stringify(input, null, '  ') + '\nRestriction: ' +
+          JSON.stringify(template, null, '  '));
       console.error("Failed object-restrict on " + err.stack);
       throw err;
     }
   }
-  var restricted_keys = Object.keys(restrictionObject);
-  var object_keys = Object.keys(objectToRestrict);
+  var restricted_keys = Object.keys(template);
+  var object_keys = Object.keys(input);
   var excess_keys = restricted_keys.reduce(function(prev, elem) {
     if (restricted_keys.indexOf(elem) < 0) {
       prev.push(prev);
@@ -71,12 +72,12 @@ function restrictToObject(restrictionObject, objectToRestrict) {
   }, []);
   if (excess_keys.length > 0) {
       err = new Error('Excess members in object:' + excess_keys +
-          '\nObject: ' + JSON.stringify(objectToRestrict, null, '  ') +
-          '\nRestriction: ' + JSON.stringify(restrictionObject, null, '  '));
+          '\nObject: ' + JSON.stringify(input, null, '  ') +
+          '\nRestriction: ' + JSON.stringify(template, null, '  '));
       console.error("Failed object-restrict on " + err.stack);
       throw err;
   }
-  return selectedPartsOfObjectToRestrict;
+  return output;
 }
 
 /**

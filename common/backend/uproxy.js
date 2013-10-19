@@ -44,6 +44,7 @@ var server = freedom.uproxyserver();
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
+  console.log('full state is: ', store.state);
   bgAppPageChannel.emit('state-change', [{op: 'replace', path: '',
       value: store.state}]);
 }
@@ -385,7 +386,7 @@ identity.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether online or
 // description.
-// |data| is a DEFAULT_ROSTER_ENTRY.
+// |rawData| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
   try {
     var data = restrictToObject(DEFAULT_ROSTER_ENTRY, rawData);
@@ -455,12 +456,9 @@ identity.on('onMessage', function (msgInfo) {
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
 //
-//  |data| - Incoming JSON info for a single user.  Conforms to DEFAULT_ROSTER_ENTRY.
-function updateUser(data) {
-  var newData = restrictToObject(DEFAULT_ROSTER_ENTRY, data);
-  for (var k in data.clients) {
-    newData.clients[k] = restrictToObject(DEFAULT_ROSTER_CLIENT_ENTRY, data.clients[k]);
-  }
+// |newData| - Incoming JSON info for a single user. Assumes to have been
+//             restricted to DEFAULT_ROSTER_ENTRY already.
+function updateUser(newData) {
   // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
   var userId = newData.userId,
       userOp = 'replace',
@@ -475,6 +473,7 @@ function updateUser(data) {
   var clientId;
   user.name = newData.name;
   user.imageData = newData.imageData;
+  user.url = newData.url;
   for (clientId in newData.clients) {
     user.clients[clientId] = newData.clients[clientId];
   }
@@ -492,11 +491,7 @@ function updateUser(data) {
     _checkUProxyClientSynchronization(client);
   }
 
-  bgAppPageChannel.emit('state-change', [{
-      op: userOp,
-      path: '/roster/' + userId,
-      value: user
-  }]);
+  _SyncUI('/roster/' + userId, user, userOp);
 }
 
 // TODO(uzimizu): Figure out best way to request new users to install UProxy if

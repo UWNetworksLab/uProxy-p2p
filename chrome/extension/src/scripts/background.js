@@ -59,7 +59,7 @@ function initialize() {
   appChannel.emit('ui-ready');
   console.log('Wiring UI to backend...');
   appChannel.on('state-change', function(patchMsg) {
-    //console.log("state-change(patch: ", patchMsg);
+    console.log("state-change(patch: ", patchMsg);
     // For resetting state, don't change model object (there are references to
     // it Angular, instead, replace keys, so the watch can catch up);
     // TODO: run the check below for each message?
@@ -78,6 +78,7 @@ function initialize() {
       }
       jsonpatch.apply(model, patchMsg);
     }
+    console.log('model is now: ', model);
 
     // Initiate first sync and start a timer if necessary, in order to
     // rate-limit passes through the entire model & other checks.

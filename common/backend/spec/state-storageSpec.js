@@ -35,6 +35,7 @@ describe("state-storage", function() {
     // example state back.
     stateStorage.loadStateFromStorage();
     stateReloadedDirectly = cloneDeep(stateStorage.state);
+    console.log(stateReloadedDirectly);
     expect(Object.keys(stateReloadedDirectly.roster).length).toEqual(1);
     expect(stateReloadedDirectly).toEqual(exampleState);
   });

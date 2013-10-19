@@ -47,10 +47,6 @@ describe("uproxy.updateUser", function() {
           status: 'messageable'
         }
       },
-      canUProxy: false,
-      onGoogle: false,
-      onFB: false,
-      imageData: '',
       url: ''
     });
   });
