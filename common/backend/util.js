@@ -27,23 +27,54 @@ FinalCallback.prototype._oneOfManyCallbacks = function () {
   if (!this.callsWaiting) this.finalCallback();
 };
 
+function linear_congruence_gen(prior) {
+  return (1 + prior * 16807) % 2147483647;
+}
+
+function list_erase(list, obj_to_remove) {
+  var index = list.indexOf(obj_to_remove);
+  if (index < 0) {
+    return list;
+  } else {
+    return list.splice(index, 1);
+  }
+}
+
 // Creates an object that has only the keys of |restrictionObject| and for each
 // key, 'k', it has the value from |objectToRestrict| if it exists, else it has
 // the valye from restrictionObject.
 function restrictToObject(restrictionObject, objectToRestrict) {
   var selectedPartsOfObjectToRestrict = {};
+  var err;
   for (var k in restrictionObject) {
     if (objectToRestrict && k in objectToRestrict) {
       selectedPartsOfObjectToRestrict[k] = objectToRestrict[k];
     } else if (restrictionObject[k] !== null) {
       selectedPartsOfObjectToRestrict[k] = restrictionObject[k];
     } else {
-      var err = new Error('Missing required key ' + k + '.\nObject: ' +
-          JSON.stringify(objectToRestrict) + '\nRestriction: ' +
-          JSON.stringify(restrictionObject));
+      err = new Error('Missing required key ' + k + '.\nObject: ' +
+          JSON.stringify(objectToRestrict, null, '  ') + '\nRestriction: ' +
+          JSON.stringify(restrictionObject, null, '  '));
       console.error("Failed object-restrict on " + err.stack);
       throw err;
     }
+  }
+  var restricted_keys = Object.keys(restrictionObject);
+  var object_keys = Object.keys(objectToRestrict);
+  var excess_keys = restricted_keys.reduce(function(prev, elem) {
+    if (restricted_keys.indexOf(elem) < 0) {
+      prev.push(prev);
+      return prev;
+    } else {
+      return prev;
+    }
+  }, []);
+  if (excess_keys.length > 0) {
+      err = new Error('Excess members in object:' + excess_keys +
+          '\nObject: ' + JSON.stringify(objectToRestrict, null, '  ') +
+          '\nRestriction: ' + JSON.stringify(restrictionObject, null, '  '));
+      console.error("Failed object-restrict on " + err.stack);
+      throw err;
   }
   return selectedPartsOfObjectToRestrict;
 }

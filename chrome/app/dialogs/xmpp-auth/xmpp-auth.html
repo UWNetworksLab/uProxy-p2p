@@ -3,11 +3,20 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../../thirdparty/bootstrap.min.css" rel="stylesheet" media="screen">
-    <!--script src='thirdparty/bootstrap.min.js'></script-->
+    <script src='../../thirdparty/jquery-1.10.2.min.js'></script>
+    <script src='../../thirdparty/bootstrap.min.js'></script>
     <script src='xmpp-auth.js'></script>
   </head>
   <body>
-    <div class='container span7'>
+    <div class="accordion" id="accordion2">
+    <div class="accordion-group">
+    <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+      Log in
+    </a>
+    </div>
+    <div id="collapseOne" class="accordion-body collapse in">
+    <div class="accordion-inner">
       <form id='login-form' class="form-horizontal">
         <fieldset>
         <legend>XMPP login</legend>
@@ -33,6 +42,24 @@
         </div>
         </fieldset>
       </form>
+
     </div>
+    </div>
+    </div>
+    <div class="accordion-group">
+    <div class="accordion-heading">
+    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+      Sign up for an account
+    </a>
+    </div>
+    <div id="collapseTwo" class="accordion-body collapse">
+    <div class="accordion-inner">
+      Anim pariatur cliche...
+    </div>
+    </div>
+    </div>
+    </div>
+
+
   </body>
 </html>

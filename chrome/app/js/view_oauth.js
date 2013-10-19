@@ -14,26 +14,11 @@ var View_oauth = function(channel) {
 View_oauth.prototype.open = function(args, continuation) {
   var file = args.file;
   if (file == "xmpp") {
-    this.authMan = new AuthXmpp((function(msg) {
-      this.dispatchEvent('message', {
-        cmd: 'auth',
-        message: msg
-      });
-    }).bind(this));
+    this.authMan = new AuthXmpp(this.dispatchAuth.bind(this), this.dispatchError.bind(this));
   } else if (file == "google") {
-    this.authMan = new AuthGoogle((function(msg) {
-      this.dispatchEvent('message', {
-        cmd: 'auth',
-        message: msg
-      });
-    }).bind(this));
+    this.authMan = new AuthGoogle(this.dispatchAuth.bind(this), this.dispatchError.bind(this));
   } else if (file == 'facebook') {
-    this.authMan = new AuthFacebook((function(msg) {
-      this.dispatchEvent('message', {
-        cmd: 'auth',
-        message: msg
-      });
-    }).bind(this));
+    this.authMan = new AuthFacebook(this.dispatchAuth.bind(this), this.dispatchError.bind(this));
   } else if (file == 'manual') {
     this.manualDialog = new ManualDialog((function(msg) {
       this.dispatchEvent('message', {
@@ -45,6 +30,20 @@ View_oauth.prototype.open = function(args, continuation) {
     console.warn("Authentication view provider asked to serve unknown file: " + file);
   }
   continuation();
+};
+
+View_oauth.prototype.dispatchAuth = function(msg) {
+  this.dispatchEvent('message', {
+    cmd: 'auth',
+    message: msg
+  });
+};
+
+View_oauth.prototype.dispatchError = function(msg) {
+  this.dispatchEvent('message', {
+    cmd: 'error',
+    message: msg
+  });
 };
 
 View_oauth.prototype.show = function(continuation) {

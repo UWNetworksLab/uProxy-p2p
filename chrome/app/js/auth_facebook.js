@@ -4,8 +4,9 @@ var FACEBOOK_REDIRECT_URI = 'https://hilnpmepiebcjhibkbkfkjkacnnclkmi.chromiumap
 var FACEBOOK_TOKENINFO_URL = 'https://graph.facebook.com/me?access_token=';
 var FACEBOOK_OAUTH_SCOPES = 'email,xmpp_login,user_online_presence,friends_online_presence';
 
-function AuthFacebook(cb) {
-  this.credentialsCallback = cb;
+function AuthFacebook(credCallback, errorCallback) {
+  this.credentialsCallback = credCallback;
+  this.errorCallback = errorCallback;
   this.credentials = {
     userId: null,
     token: null
@@ -37,11 +38,11 @@ AuthFacebook.prototype.login = function(interactive) {
     if (query.access_token) {
       this.validate(query.access_token);
     } else if (query.code) {
-      console.error('Facebook Auth: Received code, expecting token');
+      this.errorCallback('Facebook Auth: Received code, expecting token');
     } else if (query.error) {
-      console.error("Facebook Auth: " + query.error + ": " + query.error_reason);
+      this.errorCallback("Facebook Auth: " + query.error + ": " + query.error_reason);
     } else {
-      console.error("Facebook Auth failed: " + JSON.stringify(query));
+      this.errorCallback("Facebook Auth failed: " + JSON.stringify(query));
     }
   }).bind(this));
 
@@ -59,14 +60,14 @@ AuthFacebook.prototype.validate = function(token) {
       if (this.credentialsCallback) {
         this.credentialsCallback(this.credentials);
       } else {
-        console.error('Missing credentials callback for Facebook');
+        this.errorCallback('Missing credentials callback for Facebook');
       }
     } else {
-      console.error('Error validating Facebook oAuth token');
+      this.errorCallback('Error validating Facebook oAuth token');
     }
   }).bind(this), false);
   xhr.addEventListener('error', (function(evt) {
-    console.error('Error occurred while validating Facebook oAuth token');
+    this.errorCallback('Error occurred while validating Facebook oAuth token');
   }).bind(this), false);
   xhr.open('get', FACEBOOK_TOKENINFO_URL + token, true);
   xhr.send();

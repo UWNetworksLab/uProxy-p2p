@@ -21,6 +21,7 @@ function UI(browserType) {
   this.searchBar = true;
   this.pendingProxyTrustChange = false;
   this.pendingClientTrustChange = false;
+  this.chatView = false;
 
   this.isProxying = false;  // Whether we are proxying through someone.
   this.accessIds = 0;  // How many people are proxying through us.

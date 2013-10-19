@@ -7,6 +7,7 @@
  * requirement and ensures consistency.
  */
 
+/* jshint debug: true */
 var uproxy = this;        // Remember global uproxy context so spyOn works.
 var state = store.state;  // Depends on state-storage.js.
 
@@ -49,7 +50,7 @@ describe("uproxy.updateUser", function() {
       canUProxy: false,
       onGoogle: false,
       onFB: false,
-      imageData: {},
+      imageData: '',
       url: ''
     });
   });
@@ -113,12 +114,6 @@ describe("uproxy.receiveInstance", function() {
     expect(store.syncInstanceFromInstanceMessage)
       .toHaveBeenCalledWith('alice', 'alice-clientid',
                             instanceMsg.data);
-/*                            restrictToObject(DEFAULT_INSTANCE_MESSAGE, {
-                              instanceId: '12345',
-                              rosterInfo: restrictToObject(
-                                  DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
-
-                            })); */
     var fakeInstance = state.instances['12345'];
     expect(store.saveInstance).toHaveBeenCalledWith('12345');
     expect(uproxy._syncInstanceUI).toHaveBeenCalledWith(fakeInstance);
@@ -135,10 +130,15 @@ describe("uproxy.receiveInstance", function() {
 
 // Returns an object representing a single user instance.  Conforms to
 // DEFAULT_ROSTER_ENTRY.
-function makeUserRosterEntry(instanceId, userId) {
+function makeUserRosterEntry(instanceId, userId, not_as_uproxy) {
   var result = cloneDeep(DEFAULT_ROSTER_ENTRY);
   userId = userId + '@gmail.com';
-  var clientId = userId + '/uproxy' + instanceId;
+  var clientId;
+  if (not_as_uproxy) {
+    clientId = userId + '/other-messenger';
+  } else {
+    clientId = userId + '/uproxy' + instanceId;
+  }
   result.userId = userId;
   result.clients = {};
   // validate for missing fields.
@@ -160,7 +160,6 @@ function makeUserRosterEntry(instanceId, userId) {
 // |userInstance| should be the result value from a call to
 // makeUserRosterEntry(), a DEFAULT_ROSTER_ENTRY.
 function makeInstanceMessage(userRosterEntry) {
-  console.log('makeInstanceMessage(' + JSON.stringify(userRosterEntry) + ')');
   var result = cloneDeep(DEFAULT_MESSAGE_ENVELOPE);
   var client = userRosterEntry.clients[Object.keys(userRosterEntry.clients)[0]];
   result.fromUserId = userRosterEntry.userId;
@@ -170,8 +169,13 @@ function makeInstanceMessage(userRosterEntry) {
 
   var result_data = cloneDeep(DEFAULT_INSTANCE_MESSAGE);
   // pull the instanceID out of the clientID.
-  var instanceId = client.clientId.substr(userRosterEntry.userId.length +
-      '/uproxy'.length);
+  var instanceId;
+  if (client.clientId.indexOf('/uproxy') > 0) {
+    instanceId = client.clientId.substr(userRosterEntry.userId.length +
+        '/uproxy'.length);
+  } else {
+    throw new Error('Being asked to make an instance message for a non-uproxy client.');
+  }
   result_data.instanceId = instanceId;
   result_data.description = 'description for user ' + userRosterEntry.userId;
   result_data.keyHash = 'HASHFORINSTANCE-' + instanceId;
@@ -211,36 +215,44 @@ function validateInstance(inst) {
 
   // Validate instances.
   expect(store.state.instances).toBeDefined();
-  expect(store.state.instances[inst.instanceId]).toBeDefined();
-  expect(store.state.instances[inst.instanceId].instanceId).toBe(
-      inst.instanceId);
-  expect(store.state.instances[inst.instanceId].userID).toBe(inst.userId);
-  expect(store.state.instances[inst.instanceId].network).toBe(inst.network);
-  expect(store.state.instances[inst.instanceId].url).toBe(inst.url);
-  expect(store.state.instances[inst.instanceId].description).toBe(
-      inst.description);
-  expect(store.state.instances[inst.instanceId].keyHash).toBe(inst.keyHash);
-  expect(store.state.instances[inst.instanceId].trust).toBeDefined();
-  expect(store.state.instances[inst.instanceId].trust.asProxy).toBe(Trust.NO);
-  expect(store.state.instances[inst.instanceId].trust.asClient).toBe(Trust.NO);
-  expect(store.state.instances[inst.instanceId].status).toBeDefined();
-  expect(store.state.instances[inst.instanceId].status.proxy).toBe(
-      DEFAULT_PROXY_STATUS.proxy);
-  expect(store.state.instances[inst.instanceId].status.client).toBe(
-      DEFAULT_PROXY_STATUS.client);
+  try {
+    expect(store.state.instances[inst.instanceId]).toBeDefined();
+    expect(store.state.instances[inst.instanceId].instanceId).toBe(
+        inst.instanceId);
+    expect(store.state.instances[inst.instanceId].userID).toBe(inst.userId);
+    expect(store.state.instances[inst.instanceId].network).toBe(inst.network);
+    expect(store.state.instances[inst.instanceId].url).toBe(inst.url);
+    expect(store.state.instances[inst.instanceId].description).toBe(
+        inst.description);
+    expect(store.state.instances[inst.instanceId].keyHash).toBe(inst.keyHash);
+    expect(store.state.instances[inst.instanceId].trust).toBeDefined();
+    expect(store.state.instances[inst.instanceId].trust.asProxy).toBe(Trust.NO);
+    expect(store.state.instances[inst.instanceId].trust.asClient).toBe(Trust.NO);
+    expect(store.state.instances[inst.instanceId].status).toBeDefined();
+    expect(store.state.instances[inst.instanceId].status.proxy).toBe(
+        DEFAULT_PROXY_STATUS.proxy);
+    expect(store.state.instances[inst.instanceId].status.client).toBe(
+        DEFAULT_PROXY_STATUS.client);
 
-  // Validate clientToInstance[] mapping.
-  expect(store.state.clientToInstance).toBeDefined();
-  expect(Object.keys(store.state.clientToInstance).filter(function(client) {
-    return store.state.clientToInstance[client] == inst.instanceId;
-  }).length).toBe(1);
+    // Validate clientToInstance[] mapping.
+    expect(store.state.clientToInstance).toBeDefined();
+    expect(Object.keys(store.state.clientToInstance).filter(function(client) {
+      return store.state.clientToInstance[client] == inst.instanceId;
+    }).length).toBe(1);
 
-  // Validate instanceToClient[] mapping.
-  expect(store.state.instanceToClient).toBeDefined();
-  expect(store.state.instanceToClient[inst.instanceId]).toBeDefined();
-  // We don't have .in(), so reverse args and use .toContain()
-  expect(Object.keys(store.state.roster[inst.rosterInfo.userId].clients)).toContain(
-      store.state.instanceToClient[inst.instanceId]);
+    // Validate instanceToClient[] mapping.
+    expect(store.state.instanceToClient).toBeDefined();
+    expect(store.state.instanceToClient[inst.instanceId]).toBeDefined();
+    // We don't have .in(), so reverse args and use .toContain()
+    if (!store.state.roster[inst.rosterInfo.userId].clients[
+      store.state.instanceToClient[inst.instanceId]]) {
+      debugger;
+    }
+    expect(Object.keys(store.state.roster[inst.rosterInfo.userId].clients)).toContain(
+        store.state.instanceToClient[inst.instanceId]);
+  } catch (e) {
+    debugger;
+  }
 }
 
 // conforms both to DEFAULT_STATUS and DEFAULT_INSTANCE.
@@ -390,15 +402,16 @@ describe("uproxy.state.instance.fuzzer", function () {
                   "seventeenth", "eighteenth", "nineteenth", "twentieth" ];
 
   var sendMessageSpy;
+  var random_seed;
 
-  var check_all_instances = function(instances, check_roster_true,
-                                     check_instance_true) {
+  var check_all_instances = function(instances, check_roster, check_instance) {
     var i;
     for (i in Object.keys(instances)) {
-      if (check_roster_true && !instances[i].roster) {
+      // note: true is greater than false.
+      if (check_roster && (check_roster > instances[i].roster)) {
         return false;
       }
-      if (check_instance_true && !instances[i].instance) {
+      if (check_instance && (check_instance > instances[i].instance)) {
         return false;
       }
     }
@@ -417,9 +430,13 @@ describe("uproxy.state.instance.fuzzer", function () {
     var completed = false;
     store.reset(function() {completed = true; });
     waitsFor(function() { return completed; }, "Reset never returned.", 50);
+    // TODO(mollyling): Use a real random seed (e.g., the time), print it,
+    // and wire-up a way to set it on test entry.
+    random_seed = 1;
   });
 
-  it("keeps login at front, and randomizes instance and roster messages", function() {
+  it("keeps login at front, random single instance and roster message per user",
+     function() {
     var i, inst;
     var states = repeatObject(USER_STATE, numbers.length);
     var num_attempts = 0;
@@ -437,14 +454,16 @@ describe("uproxy.state.instance.fuzzer", function () {
     // gotten everyone.  This will clearly go a few times before finishing.
     do {
       for (i = 0; i < 5; ++i) {
-        var index = Math.floor(Math.random() * numbers.length);
-        var do_roster = Math.round(Math.random());
+        random_seed = linear_congruence_gen(random_seed);
+        var index = random_seed % numbers.length;
+        random_seed = linear_congruence_gen(random_seed);
+        var do_roster = random_seed % 2;
         if (do_roster) {
           receiveChange(userRoster[index]);
-          states[i].roster = true;
+          states[index].roster = true;
         } else {
           receiveInstance(makeInstanceMessage(userRoster[index]));
-          states[i].instance = true;
+          states[index].instance = true;
         }
       }
       num_attempts++;
@@ -461,4 +480,70 @@ describe("uproxy.state.instance.fuzzer", function () {
       validateInstance(makeInstanceMessage(userRoster[inst]).data);
     }
   });
+
+  it("keeps login at front, and random #s of instances and roster messages",
+     function() {
+    var i, inst, nm, roster_entry;
+    var state_template = cloneDeep(USER_STATE);
+    // Make the state template integers instead of bools
+    state_template.roster = 0;
+    state_template.instance = 0;
+
+    var kNumMinimumRosterMessages = 3;
+    var kNumMinimumInstanceMessages = 3;
+    var kNumInnerTries = 5;
+    var kNumAttempts = 500;
+    var states = repeatObject(state_template, numbers.length);
+    var num_attempts = 0;
+
+    // Log us in.
+    receiveStatus(selfInstanceAndStatusMessage);
+    receiveChange(selfInstanceAndStatusMessage);
+
+    // Now randomly send 5 instance or roster messages, and then see if we've
+    // gotten everyone.  This will clearly go a few times before finishing.
+    do {
+      for (i = 0; i < kNumInnerTries; ++i) {
+        random_seed = linear_congruence_gen(random_seed);
+        var index = random_seed % numbers.length;
+        random_seed = linear_congruence_gen(random_seed);
+        var do_roster = random_seed % 2;
+        nm = repeatObject('' + (index + 1), 8).toString().replace(/,/g, '');
+        random_seed = linear_congruence_gen(random_seed);
+        var is_uproxy = (random_seed % 2) > 0? true: false;
+        roster_entry = makeUserRosterEntry(nm, numbers[index] + 'User',
+                                           !is_uproxy);
+        if (roster_entry.userId == "secondUser@gmail.com") {
+          debugger;
+        }
+        if (do_roster) {
+          receiveChange(roster_entry);
+          states[index].roster++;
+        } else if (is_uproxy) {
+          receiveInstance(makeInstanceMessage(roster_entry));
+          states[index].instance++;
+        }
+      }
+      num_attempts++;
+    } while(!check_all_instances(states, kNumMinimumRosterMessages,
+                                 kNumMinimumInstanceMessages) &&
+                                     num_attempts < kNumAttempts);
+
+    if (!check_all_instances(states, kNumMinimumRosterMessages,
+                             kNumMinimumInstanceMessages)) {
+      console.warn("Didn't get all " + numbers.length +
+          " fake users with 500 tries.");
+      console.warn(" - state vector: " + states.map(function(o) {
+        return JSON.stringify(o); }).toString());
+    }
+
+    // Now check our state.
+    validateSelf(selfInstanceAndStatusMessage);
+    for (i = 0; i < numbers.length; i++) {
+      nm = repeatObject('' + (i + 1), 8).toString().replace(/,/g, '');
+      roster_entry = makeUserRosterEntry(nm, numbers[i] + 'User');
+      validateInstance(makeInstanceMessage(roster_entry).data);
+    }
+  });
+
 });
