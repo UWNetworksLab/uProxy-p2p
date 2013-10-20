@@ -102,6 +102,7 @@ function logout(network) {
   // Clear the clientsToInstance table.
   store.state.clientToInstance = {};
   store.state.instanceToClient = {};
+  _syncMappingsUI();
   store.state.me.networkDefaults[network].autoconnect = false;
   store.saveMeToStorage();
 }
@@ -576,7 +577,8 @@ function makeMyInstanceMessage() {
   try {
     var firstIdentity = store.state.me.identities[_getMyId()];
     if (!firstIdentity || firstIdentity.notReady ||
-        !firstIdentity.clients) {
+        !firstIdentity.clients ||
+        0 === Object.keys(firstIdentity.clients).length) {
       return null;
     }
     firstIdentity.network = firstIdentity.clients[Object.keys(
@@ -665,12 +667,7 @@ function receiveInstance(rawMsg) {
   // Update UI's view of instances and mapping.
   // TODO: This can probably be made smaller.
   _syncInstanceUI(store.state.instances[instanceId]);
-  bgAppPageChannel.emit('state-change', [
-    { op: 'replace', path: '/clientToInstance',
-      value: store.state.clientToInstance },
-    { op: 'replace', path: '/instanceToClient',
-      value: store.state.instanceToClient }
-  ]);
+  _syncMappingsUI();
   return true;
 }
 
@@ -818,4 +815,13 @@ function _syncInstanceUI(instance, field) {
   var fieldStr = field? '/' + field : '';
   _SyncUI('/instances/' + instance.instanceId + fieldStr,
           field? instance[field] : instance);
+}
+
+function _syncMappingsUI() {
+  bgAppPageChannel.emit('state-change', [
+    { op: 'replace', path: '/clientToInstance',
+      value: store.state.clientToInstance },
+    { op: 'replace', path: '/instanceToClient',
+      value: store.state.instanceToClient }
+  ]);
 }

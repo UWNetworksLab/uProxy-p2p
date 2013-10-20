@@ -92,12 +92,12 @@ IdentityProvider.prototype.getProfile = function(id, continuation) {
 // Send a message to someone.
 IdentityProvider.prototype.sendMessage = function(to, msg, continuation) {
   if (this.reverseIndex[to]) {
+    console.log('identity sending! ', to, msg);
     var key = this.reverseIndex[to];
     this.providers[key].ref.sendMessage(to, msg).done(function(ret) {
       continuation(ret);
     });
   } else {
-    console.log();
     try {
       throw new Error("Error: identity provider missing for contact: " + to +
           ", current reverse index: " + JSON.stringify(this.reverseIndex));
