@@ -242,7 +242,7 @@ IdentityProvider.prototype.onError = function(error) {
   console.error(error);
   this.status = 'error';
   var ret = {
-    userId: this.credentials.userId,
+    userId: this.credentials? this.credentials.userId : null,
     network: NETWORK_ID,
     status: this.status,
     message: error
@@ -250,7 +250,7 @@ IdentityProvider.prototype.onError = function(error) {
   view.postMessage({
     cmd: 'logout',
   });
-  
+
   if (this.client) {
     this.client.end();
     this.client = null;

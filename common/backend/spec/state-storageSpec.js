@@ -40,7 +40,7 @@ describe("state-storage", function() {
     expect(stateReloadedDirectly).toEqual(exampleState);
   });
   var stateLoadedFromDefault;
-  it("* Loading from DEAFAULT_LOAD_STATE has the same instances", function() {
+  it("* Loading from DEFAULT_LOAD_STATE has the same instances", function() {
     stateStorage.state = cloneDeep(DEFAULT_LOAD_STATE);
     stateStorage.loadStateFromStorage();
     stateLoadedFromDefault = cloneDeep(stateStorage.state);
@@ -74,12 +74,19 @@ describe("state-storage", function() {
     // reseting the state and loading should be the same as the
     // DEFAULT_LOAD_STATE.
     stateStorage.reset(function() { wasResetCallbackCalled = true; });
-    expect(stateStorage.state.options)
-        .toEqual(stateLoadedFromDefault.options);
-    expect(stateStorage.state.instances)
-        .toEqual(stateLoadedFromDefault.instances);
-    expect(stateStorage.state.roster)
-        .toEqual(stateLoadedFromDefault.roster);
+    expect(stateStorage.state.options).toEqual(DEFAULT_LOAD_STATE.options);
+    expect(stateStorage.state.roster).toEqual(DEFAULT_LOAD_STATE.roster);
+    expect(stateStorage.state.instances).toEqual(DEFAULT_LOAD_STATE.instances);
+    // expect(stateStorage.state).toEqual(stateLoadedFromDefault);
+    // expect(stateStorage.state.options)
+        // .toEqual(stateLoadedFromDefault.options);
+    // expect(stateStorage.state.instances)
+        // .toEqual(stateLoadedFromDefault.instances);
+        // .toEqual(DEFAULT_LOAD_STATE.instances);
+    // expect(stateStorage.state.roster)
+        // .toEqual(stateLoadedFromDefault.roster);
+    // expect(stateStorage.state.me)
+        // .toEqual(stateLoadedFromDefault.me);
   });
   it("* ... and check reset callback was called.", function() {
     expect(wasResetCallbackCalled).toEqual(true);

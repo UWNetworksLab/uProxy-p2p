@@ -46,8 +46,6 @@ function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
   console.log('full state is: ', store.state);
   bgAppPageChannel.emit('state-refresh', store.state);
-  // [{op: 'replace', path: '',
-      // value: store.state}]);
 }
 
 // Define freedom bindings.
@@ -69,9 +67,8 @@ function reset() {
 // necessary. Improvements to come.
 bgAppPageChannel.on('ui-ready', function () {
   console.log('ui-ready');
-  console.log('state:', store.state);
-  // Send the extension the full state.
-  sendFullStateToUI();
+  console.log('state: ', store.state);
+  sendFullStateToUI();  // Send the extension the full state.
 });
 
 // When the login moessage is sent from the extension, assume it's explicit.
@@ -632,7 +629,7 @@ function receiveConsent(msg) {
       instanceId  = msg.data.instanceId,  // InstanceId of the sender.
       instance    = store.state.instances[instanceId];
   if (!instance) {
-    console.error('Instance for id: ' + instanceId + ' not found!');
+    console.log('receiveConsent: Instance ' + instanceId + ' not found!');
     return false;
   }
   // Determine my own consent bits, compare with their consent and remap.

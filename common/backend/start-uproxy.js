@@ -19,7 +19,8 @@ store.loadStateFromStorage(function () {
       login(network, true);
     }
   }
-  _SyncUI('',store.state);
+  console.log('*** Finished initial load from storage. ***');
+  sendFullStateToUI();
 });
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

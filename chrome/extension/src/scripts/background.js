@@ -62,13 +62,28 @@ chrome.runtime.onSuspend.addListener(function () {
 // Called when appChannel is connected.
 function init() {
 
+  var finishStateChange = function() {
+    // Initiate first sync and start a timer if necessary, in order to
+    // rate-limit passes through the entire model & other checks.
+    if (!syncBlocked) {
+      syncBlocked = true;
+      rateLimitedUpdates();
+    }
+    if (!syncTimer) {
+      syncTimer = setTimeout(function() {
+        rateLimitedUpdates();
+        syncTimer = null;  // Allow future timers.
+        syncBlocked = false;
+      }, SYNC_TIMEOUT);
+    }
+  }
+
   // A full state-refresh should occur whenever the extension first connects to
   // the App, or when the user does a full reset.
   appChannel.on('state-refresh', function(state) {
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
-    console.log("state-refresh: ", state);
     // var currentKeys = Object.keys(model);
     for (var k in model) {
       delete model[k];
@@ -76,7 +91,8 @@ function init() {
     for (var k in state) {
       model[k] = state[k];
     }
-    console.log('model is now: ', model);
+    console.log('state-refresh: model = ', model);
+    finishStateChange();
   });
 
   // Normal state-changes should modify some path inside |model|.
@@ -92,20 +108,7 @@ function init() {
       }
     }
     jsonpatch.apply(model, patchMsg);
-
-    // Initiate first sync and start a timer if necessary, in order to
-    // rate-limit passes through the entire model & other checks.
-    if (!syncBlocked) {
-      syncBlocked = true;
-      rateLimitedUpdates();
-    }
-    if (!syncTimer) {
-      syncTimer = setTimeout(function() {
-        rateLimitedUpdates();
-        syncTimer = null;  // Allow future timers.
-        syncBlocked = false;
-      }, SYNC_TIMEOUT);
-    }
+    finishStateChange();
   });
 
   console.log('UI <------> APP wired.');
