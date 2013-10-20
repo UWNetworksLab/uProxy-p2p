@@ -49,8 +49,7 @@ var _memoizedInstanceMessage = null;
 //  General UI interaction
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
-  console.log("sending sendFullStateToUI state-change.");
-  console.log('full state is: ', store.state);
+  console.log("sending sendFullStateToUI state-change.", store.state);
   bgAppPageChannel.emit('state-refresh', store.state);
 }
 
@@ -105,6 +104,14 @@ function logout(network) {
   store.state.instanceToClient = {};
   store.state.me.networkDefaults[network].autoconnect = false;
   store.saveMeToStorage();
+}
+
+// Only logged in if at least one entry in identityStatus is 'online'.
+function iAmLoggedIn() {
+  var networks = Object.keys(store.state.identityStatus);
+  return networks.some(function(network) {
+    return 'online' == store.state.identityStatus[network].status;
+  });
 }
 
 bgAppPageChannel.on('invite-friend', function (userId) {
@@ -372,7 +379,7 @@ function receiveTrustMessage(msgInfo) {
 // }
 //
 function receiveStatus(data) {
-  console.log('onStatus: data:' + JSON.stringify(data));
+  console.log('onStatus: ' + JSON.stringify(data));
   data = restrictKeys(DEFAULT_STATUS, data);
   // userId is only specified when connecting or online.
   if (data.userId.length) {
@@ -395,6 +402,10 @@ identity.on('onStatus', receiveStatus);
 // the description.
 // |rawData| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
+  if (!iAmLoggedIn()) {
+    console.log('<--- XMPP(offline) [' + rawData.name + '] ignored\n', rawData);
+    return false;
+  }
   try {
     var data = restrictKeys(DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
@@ -402,14 +413,11 @@ function receiveChange(rawData) {
                                      rawData.clients[c]);
     }
 
-    // vCard for myself.
+    // vCard for myself - update if we have onStatus'd ourselves in the past.
     if (store.state.me.identities[data.userId]) {
-      store.state.me.identities[data.userId] = data;
-      _SyncUI('/me/identities/' + data.userId, data, 'add');
-      // If it's ourselves for the first time, it also means we can
-      // send instance messages to any queued up uProxy clientIDs.
-      sendQueuedInstanceMessages();
+      updateSelf(data);
       // TODO: Handle changes that might affect proxying
+
     } else {
       updateUser(data);  // Not myself.
     }
@@ -420,7 +428,6 @@ function receiveChange(rawData) {
     console.log(e.stack);
   }
 }
-
 identity.on('onChange', receiveChange);
 
 var _msgReceivedHandlers = {
@@ -442,18 +449,20 @@ var _msgReceivedHandlers = {
 
 //
 identity.on('onMessage', function (msgInfo) {
-  console.log('identity.on(onMessage): ' + JSON.stringify(msgInfo));
   // Replace the JSON str with actual data attributes, then flatten.
   msgInfo.messageText = msgInfo.message;
   delete msgInfo.message;
   try {
     msgInfo.data = JSON.parse(msgInfo.messageText);
   } catch(e) {
+    console.log(msgInfo);
     console.error("Message was not JSON");
     return;
   }
   // Call the relevant handler.
   var msgType = msgInfo.data.type;
+  console.log('<--- msg [' + msgType + '] -- ' + msgInfo.fromClientId + '\n',
+              msgInfo);
   if (!(msgType in _msgReceivedHandlers)) {
     console.error('No handler for message type: ' +
         JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
@@ -463,6 +472,23 @@ identity.on('onMessage', function (msgInfo) {
 });
 
 
+function updateSelf(data) {
+  console.log('<-- XMPP(self) [' + data.name + ']\n', data);
+  var myIdentities = store.state.me.identities;
+  var becomingReady = myIdentities[data.userId].notReady;
+  var loggedIn = Object.keys(data.clients).length > 0;
+
+  myIdentities[data.userId] = data;
+  _SyncUI('/me/identities/' + data.userId, data, 'add');
+
+  // If it's ourselves for the first time, it also means we can
+  // send instance messages to any queued up uProxy clientIDs.
+  if (loggedIn && becomingReady) {
+    sendQueuedInstanceMessages();
+  }
+}
+
+
 // Update data for a user, typically when new client data shows up. Notifies all
 // new UProxy clients of our instance data, and preserve existing hooks. Does
 // not do a complete replace - does a merge of any provided key values.
@@ -470,7 +496,7 @@ identity.on('onMessage', function (msgInfo) {
 // |newData| - Incoming JSON info for a single user. Assumes to have been
 //             restricted to DEFAULT_ROSTER_ENTRY already.
 function updateUser(newData) {
-  // console.log('Incoming user data from XMPP: ' + JSON.stringify(newData));
+  console.log('<--- XMPP(friend) [' + newData.name + ']\n', newData);
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = store.state.roster[userId];
@@ -518,8 +544,8 @@ function _checkUProxyClientSynchronization(client) {
   var clientIsNew = !(clientId in store.state.clientToInstance);
 
   if (clientIsNew) {
-    console.log('Aware of new UProxy client. Sending instance data.' +
-        JSON.stringify(client));
+    console.log('New uProxy Client (' + client.network + ')' + clientId + '\n',
+                client);
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
     store.state.clientToInstance[clientId] = null;
@@ -549,7 +575,8 @@ function makeMyInstanceMessage() {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyId()];
-    if (!firstIdentity || firstIdentity.notReady) {
+    if (!firstIdentity || firstIdentity.notReady ||
+        !firstIdentity.clients) {
       return null;
     }
     firstIdentity.network = firstIdentity.clients[Object.keys(
@@ -573,8 +600,7 @@ function makeMyInstanceMessage() {
 // that we've received the other side's Instance data yet.
 function sendInstance(clientId) {
   var instancePayload = makeMyInstanceMessage();
-  console.log('sendInstance: ' + JSON.stringify(instancePayload) +
-              ' to ' + JSON.stringify(clientId));
+  console.log('sendInstance -> ' + clientId, instancePayload);
   // Queue clientIDs if we're not ready to send instance message.
   if (!instancePayload) {
     _sendInstanceQueue.push(clientId);
@@ -588,6 +614,9 @@ function sendInstance(clientId) {
 // Only called when we receive an onChange notification for ourselves for the
 // first time, to send pending instance messages.
 function sendQueuedInstanceMessages() {
+  if (0 === _sendInstanceQueue.length) {
+    return;  // Don't need to do anything.
+  }
   var instancePayload = makeMyInstanceMessage();
   if (!instancePayload) {
     console.error('Still not ready to construct instance payload.');
@@ -611,7 +640,7 @@ function sendQueuedInstanceMessages() {
 // not (yet) in the roster.
 // |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
 function receiveInstance(rawMsg) {
-  console.log('receiveInstance(from: ' + rawMsg.fromUserId + ')');
+  console.log('receiveInstance from ' + rawMsg.fromUserId);
 
   var msg = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
   msg.data = restrictKeys(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
@@ -649,7 +678,7 @@ function receiveInstance(rawMsg) {
 // This happens *after* receiving an instance notification for an instance which
 // we already have a history with.
 function sendConsent(instance) {
-  console.log("sendConsent to instance: " + JSON.stringify(instance));
+  console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
   var clientId = store.state.instanceToClient[instance.instanceId];
   if (!clientId) {
     console.error('Instance ' + instance.instanceId + ' missing clientId!');
