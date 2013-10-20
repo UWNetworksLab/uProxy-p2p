@@ -25,6 +25,7 @@
 /* global restrictKeys: false */
 "use strict";
 
+
 // --------------------------------------------------------------------------
 function UProxyState() {
   this.storage = freedom.storage();
@@ -304,8 +305,8 @@ UProxyState.prototype.saveInstance = function(instanceId, callback) {
     notify: Boolean(instance.notify),
     rosterInfo: instance.rosterInfo
   };
-  console.log('saveInstance: saving "instance/"' + instanceId + '": ' +
-      JSON.stringify(instanceDataToSave));
+  console.log('saveInstance: saving "instance/"' + instanceId + '\n',
+              instanceDataToSave);
   this._saveKeyAsJson("instance/" + instanceId, instanceDataToSave,
       finalCallbacker.makeCountedCallback());
 };

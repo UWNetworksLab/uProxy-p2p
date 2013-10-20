@@ -19,7 +19,7 @@ store.loadStateFromStorage(function () {
       login(network, true);
     }
   }
-  console.log('*** Finished initial load from storage. ***');
+  // console.log('*** Finished initial load from storage. ***');
   sendFullStateToUI();
 });
 

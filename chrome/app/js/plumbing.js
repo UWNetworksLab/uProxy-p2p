@@ -72,8 +72,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
 // Receive a message from the extension.
 // This usually installs freedom handlers.
 function onExtMsg(msg) {
-  console.log('got message from extension... ');
-  console.log(msg);
+  console.log('extension message: ', msg);
 
   if (msg.cmd == 'emit') {
     uProxyAppChannel.emit(msg.type, msg.data);
