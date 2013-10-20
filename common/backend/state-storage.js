@@ -140,7 +140,7 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
       this.state.me = restrictKeys(this.state.me, me);
       if(callback) { callback(); }
     }
-  }.bind(this), this.state.me);
+  }.bind(this), null);
 };
 
 // --------------------------------------------------------------------------
@@ -168,7 +168,9 @@ UProxyState.prototype.loadOptionsFromStorage = function(callback) {
 // user ids)
 // TODO: consider creating a userId <-> instanceId multi-mapping.
 UProxyState.prototype.instanceOfUserId = function(userId) {
+  console.log('INSTANCE TABLE!!: ' + JSON.stringify(this.state.instances));
   for (var i in this.state.instances) {
+    console.log('INSTANCE: ' + JSON.stringify(this.state.instances[i]));
     if (this.state.instances[i].rosterInfo.userId == userId)
       return this.state.instances[i];
   }
@@ -329,7 +331,8 @@ UProxyState.prototype.saveAllInstances = function(callback) {
 // once the last of the loading operations has completed. We do this using the
 // FinalCaller class.
 UProxyState.prototype.loadStateFromStorage = function(callback) {
-  this.state = restrictKeys(this.state, DEFAULT_LOAD_STATE);
+  // this.state = restrictKeys(this.state, DEFAULT_LOAD_STATE);
+  this.state = restrictKeys(DEFAULT_LOAD_STATE, this.state);
   // this.state = cloneDeep(DEFAULT_LOAD_STATE);
   // this.state = restrictKeys(DEFAULT_LOAD_STATE, DE);
   var finalCallbacker = new FinalCallback(callback);

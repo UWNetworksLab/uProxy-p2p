@@ -65,9 +65,6 @@ var DEFAULT_ROSTER_ENTRY = {
   userId: null,
   name: '',
   url: '',
-  canUProxy: false,
-  onGoogle: false,
-  onFB: false,
   imageData: '',
   clients: {}  // Specified in DEFAULT_ROSTER_CLIENT_ENTRY
 };

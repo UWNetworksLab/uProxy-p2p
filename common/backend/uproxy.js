@@ -472,8 +472,8 @@ function updateUser(newData) {
   var instance = store.instanceOfUserId(userId);
   var clientId;
   user.name = newData.name;
-  user.imageData = newData.imageData;
-  user.url = newData.url;
+  user.imageData = newData.imageData || null;
+  user.url = newData.url || null;
   for (clientId in newData.clients) {
     user.clients[clientId] = newData.clients[clientId];
   }

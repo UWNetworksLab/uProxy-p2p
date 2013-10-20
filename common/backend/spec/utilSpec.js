@@ -63,11 +63,11 @@ describe("util", function() {
     });
   });
 
-  describe("restrictToObject", function() {
+  describe("restrictKeys", function() {
     it("Simple test", function() {
       var x = { a: 1, b: 2, c: {e: 3, f: 4} };
       var y = { b: { s: "a" }, c: {e: 3, f: 50}, d: 9 };
-      var yRestricted = restrictToObject(x,y);
+      var yRestricted = restrictKeys(x,y);
       expect(yRestricted).toEqual({ a: 1, b: { s: "a" }, c: {e: 3, f: 50} });
     });
   });
