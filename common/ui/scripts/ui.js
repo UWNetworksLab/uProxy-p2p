@@ -170,12 +170,13 @@ function _getMyId() {
 UI.prototype.syncMe = function() {
   var id = _getMyId();
   if (!id) {
-    console.log('I don\'t exist yet! :(');
+    console.log('My own identities missing for now....');
     return;
   }
   var identity = model.me.identities[id];
   this.myName = identity.name;
   this.myPic = identity.imageData || '';
+  console.log('Synced my own identity. ', identity);
 };
 
 UI.prototype.syncUser = function(user) {
@@ -266,7 +267,9 @@ UI.prototype.synchronize = function(previousPatch) {
   // var uids = Object.keys(model.roster);
   // var names = uids.map(function(id) { return model.roster[id].name; });
   // names.sort();
-  this.syncMe();
+  if (!this.myName) {
+    this.syncMe();
+  }
   return true;
 };
 

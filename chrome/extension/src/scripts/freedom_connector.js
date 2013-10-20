@@ -74,7 +74,7 @@ FreedomConnector.prototype.dispatchFreedomEvent_ = function(msg) {
 // When we connect Freedom, we expect Freedom's runtime.Port.onConnect callback
 // to send us the message 'hello.' which means we've connected successfully.
 FreedomConnector.prototype.onFirstMessage_ = function(msg) {
-  if (msg == 'hello.') {
+  if ('hello.' == msg) {
     console.info('Got hello from UProxy App.');
     // No longer wait for first message.
     // Relay any messages to this port to any function that has registered as

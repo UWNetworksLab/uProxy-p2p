@@ -168,9 +168,9 @@ UProxyState.prototype.loadOptionsFromStorage = function(callback) {
 // user ids)
 // TODO: consider creating a userId <-> instanceId multi-mapping.
 UProxyState.prototype.instanceOfUserId = function(userId) {
-  console.log('INSTANCE TABLE!!: ' + JSON.stringify(this.state.instances));
+  // console.log('INSTANCE TABLE!!: ' + JSON.stringify(this.state.instances));
   for (var i in this.state.instances) {
-    console.log('INSTANCE: ' + JSON.stringify(this.state.instances[i]));
+    // console.log('INSTANCE: ' + JSON.stringify(this.state.instances[i]));
     if (this.state.instances[i].rosterInfo.userId == userId)
       return this.state.instances[i];
   }

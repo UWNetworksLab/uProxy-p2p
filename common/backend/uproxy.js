@@ -45,8 +45,9 @@ var server = freedom.uproxyserver();
 function sendFullStateToUI() {
   console.log("sending sendFullStateToUI state-change.");
   console.log('full state is: ', store.state);
-  bgAppPageChannel.emit('state-change', [{op: 'replace', path: '',
-      value: store.state}]);
+  bgAppPageChannel.emit('state-refresh', store.state);
+  // [{op: 'replace', path: '',
+      // value: store.state}]);
 }
 
 // Define freedom bindings.
