@@ -588,8 +588,8 @@ img.c-icon {
     opacity: 0.5 !important; }
   .bg-deco#internets {
     background-image: url("../icons/global_internet.png");
-    background-size: 180px;
-    background-position-y: 200px;
+    background-size: 120px;
+    background-position-y: 238px;
     -webkit-transition: all 0.5s !important;
     -moz-transition: all 0.5s !important;
     -o-transition: all 0.5s !important;
