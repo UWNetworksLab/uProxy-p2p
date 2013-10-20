@@ -39,6 +39,12 @@ var client = freedom.uproxyclient();
 // through the peer connection.
 var server = freedom.uproxyserver();
 
+// Sometimes we receive other uproxy instances before we've received our own
+// XMPP onChange notification, which means we cannot yet build an instance
+// message.
+var _sendInstanceQueue = [];
+var _memoizedInstanceMessage = null;
+
 // --------------------------------------------------------------------------
 //  General UI interaction
 // --------------------------------------------------------------------------
@@ -374,7 +380,10 @@ function receiveStatus(data) {
     bgAppPageChannel.emit('state-change',
         [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);
     if (!store.state.me.identities[data.userId]) {
-      store.state.me.identities[data.userId] = {userId: data.userId};
+      store.state.me.identities[data.userId] = {
+        userId: data.userId,
+        notReady: true        // To remove on the first valid onChange.
+      };
     }
   }
 }
@@ -382,20 +391,24 @@ function receiveStatus(data) {
 // Update local user's online status (away, busy, etc.).
 identity.on('onStatus', receiveStatus);
 
-// Called when a contact (or ourselves) changes state, whether online or
-// description.
+// Called when a contact (or ourselves) changes state, whether being online or
+// the description.
 // |rawData| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
   try {
     var data = restrictKeys(DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
       data.clients[c] = restrictKeys(DEFAULT_ROSTER_CLIENT_ENTRY,
-                                         rawData.clients[c]);
+                                     rawData.clients[c]);
     }
+
+    // vCard for myself.
     if (store.state.me.identities[data.userId]) {
-      // My card changed.
       store.state.me.identities[data.userId] = data;
       _SyncUI('/me/identities/' + data.userId, data, 'add');
+      // If it's ourselves for the first time, it also means we can
+      // send instance messages to any queued up uProxy clientIDs.
+      sendQueuedInstanceMessages();
       // TODO: Handle changes that might affect proxying
     } else {
       updateUser(data);  // Not myself.
@@ -523,12 +536,22 @@ function _getMyId() {
   return null;
 }
 
-// Should only be called after we have received an onChange event with our own
-// details.
+
+// Generate my instance message, to send to other uProxy installations, to
+// inform them that we're also a uProxy installation and can engage in
+// shenanigans. However, we can only build the instance message if we've
+// received an onChange notification for ourselves to populate at least one
+// identity.
+//
+// Returns the JSON of the instance message if successful - otherwise it returns
+// null if we're not ready.
 function makeMyInstanceMessage() {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyId()];
+    if (!firstIdentity || firstIdentity.notReady) {
+      return null;
+    }
     firstIdentity.network = firstIdentity.clients[Object.keys(
         firstIdentity.clients)[0]].network;
     result = restrictKeys(DEFAULT_INSTANCE_MESSAGE, store.state.me);
@@ -552,9 +575,32 @@ function sendInstance(clientId) {
   var instancePayload = makeMyInstanceMessage();
   console.log('sendInstance: ' + JSON.stringify(instancePayload) +
               ' to ' + JSON.stringify(clientId));
+  // Queue clientIDs if we're not ready to send instance message.
+  if (!instancePayload) {
+    _sendInstanceQueue.push(clientId);
+    console.log('Queueing ' + clientId + ' for an instance message.');
+    return false;
+  }
   identity.sendMessage(clientId, instancePayload);
   return true;
 }
+
+// Only called when we receive an onChange notification for ourselves for the
+// first time, to send pending instance messages.
+function sendQueuedInstanceMessages() {
+  var instancePayload = makeMyInstanceMessage();
+  if (!instancePayload) {
+    console.error('Still not ready to construct instance payload.');
+    return false;
+  }
+  _sendInstanceQueue.forEach(function(clientId) {
+    identity.sendMessage(clientId, instancePayload);
+  });
+  _sendInstanceQueue = [];
+  return true;
+}
+
+
 
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
