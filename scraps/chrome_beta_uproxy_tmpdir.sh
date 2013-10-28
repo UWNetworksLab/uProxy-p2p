@@ -2,6 +2,9 @@
 
 ROOT_DIR="$(cd "$(dirname $0)"; cd ..; pwd)";
 PRG="$(basename "$0")"
+USERNAME=$2
+TOOL=$1
+
 
 function fail()
 {
@@ -39,15 +42,13 @@ function usage()
 # run the quanto-core
 function run_chrome_mac_chrome_beta ()
 {
-    USER_NAME="$1"
-    shift
-    CMD="/Applications/Google\ Chrome-beta.app/Contents/MacOS/Google\ Chrome --user-data-dir=${ROOT_DIR}/tmp/user_$USER_NAME --load-and-launch-app=${ROOT_DIR}/chrome/app --load-extension=${ROOT_DIR}/chrome/extension/src $@"
+    CMD="/Applications/Google\ Chrome-beta.app/Contents/MacOS/Google\ Chrome --user-data-dir=${ROOT_DIR}/tmp/user_${USERNAME} --load-and-launch-app=${ROOT_DIR}/chrome/app --load-extension=${ROOT_DIR}/chrome/extension/src $@"
     echo "Running: $CMD"
     echo
     bash -c "$CMD"
 }
 
-if [ "$1" = "mac" ] || [ "$1" = "go" ]; then
+if [ "$TOOL" = "mac" ]; then
     shift
     run_chrome_mac_chrome_beta
 else 
