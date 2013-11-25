@@ -389,8 +389,7 @@ function receiveStatus(data) {
         [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);
     if (!store.state.me.identities[data.userId]) {
       store.state.me.identities[data.userId] = {
-        userId: data.userId,
-        notReady: true        // To remove on the first valid onChange.
+        userId: data.userId
       };
     }
   }
@@ -403,10 +402,10 @@ identity.on('onStatus', receiveStatus);
 // the description.
 // |rawData| is a DEFAULT_ROSTER_ENTRY.
 function receiveChange(rawData) {
-  if (!iAmLoggedIn()) {
+  /* if (!iAmLoggedIn()) {
     console.log('<--- XMPP(offline) [' + rawData.name + '] ignored\n', rawData);
     return false;
-  }
+  } */
   try {
     var data = restrictKeys(DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
@@ -418,7 +417,6 @@ function receiveChange(rawData) {
     if (store.state.me.identities[data.userId]) {
       updateSelf(data);
       // TODO: Handle changes that might affect proxying
-
     } else {
       updateUser(data);  // Not myself.
     }
@@ -476,7 +474,6 @@ identity.on('onMessage', function (msgInfo) {
 function updateSelf(data) {
   console.log('<-- XMPP(self) [' + data.name + ']\n', data);
   var myIdentities = store.state.me.identities;
-  var becomingReady = myIdentities[data.userId].notReady;
   var loggedIn = Object.keys(data.clients).length > 0;
 
   myIdentities[data.userId] = data;
@@ -484,15 +481,16 @@ function updateSelf(data) {
 
   // If it's ourselves for the first time, it also means we can
   // send instance messages to any queued up uProxy clientIDs.
-  if (loggedIn && becomingReady) {
+  console.log('Self state: { loggedIn: "' + loggedIn + '".');
+  if (loggedIn) {
     sendQueuedInstanceMessages();
   }
 }
 
 
-// Update data for a user, typically when new client data shows up. Notifies all
-// new UProxy clients of our instance data, and preserve existing hooks. Does
-// not do a complete replace - does a merge of any provided key values.
+// Update data for a user, typically when new client data shows up. Notifies
+// all new UProxy clients of our instance data, and preserve existing hooks.
+// Does not do a complete replace - does a merge of any provided key values.
 //
 // |newData| - Incoming JSON info for a single user. Assumes to have been
 //             restricted to DEFAULT_ROSTER_ENTRY already.
@@ -570,14 +568,13 @@ function _getMyId() {
 // received an onChange notification for ourselves to populate at least one
 // identity.
 //
-// Returns the JSON of the instance message if successful - otherwise it returns
-// null if we're not ready.
+// Returns the JSON of the instance message if successful - otherwise it
+// returns null if we're not ready.
 function makeMyInstanceMessage() {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyId()];
-    if (!firstIdentity || firstIdentity.notReady ||
-        !firstIdentity.clients ||
+    if (!firstIdentity || !firstIdentity.clients ||
         0 === Object.keys(firstIdentity.clients).length) {
       return null;
     }
@@ -625,6 +622,7 @@ function sendQueuedInstanceMessages() {
     return false;
   }
   _sendInstanceQueue.forEach(function(clientId) {
+    console.log('Sending previously queued instance message to: ' + clientId + '.');
     identity.sendMessage(clientId, instancePayload);
   });
   _sendInstanceQueue = [];
