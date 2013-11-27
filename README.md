@@ -2,13 +2,9 @@ UProxy
 ======
 
 
-
 ### Layout
 
-This is the top-level [UProxy
-repository](https://github.com/UWNetworksLab/UProxy). It contains all code for
-UProxy. Browser-dependent components live in "chrome" and "firefox"
-subdirectories. Browser-independent components live in the 'common' subdirectory.
+This is the top-level [UProxy repository](https://github.com/UWNetworksLab/UProxy). It contains all code for UProxy. Browser-dependent components live in "chrome" and "firefox" subdirectories. Browser-independent components live in the 'common' subdirectory.
 
 UProxy current has 1 git submodule, 
 [freedom](https://github.com/UWNetworksLab/freedom), located in "common/freedom".
