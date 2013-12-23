@@ -2,10 +2,18 @@ uproxy.zip
 uproxy.crx
 .DS_Store
 .grunt
-*.swp
-*.swo
+*.swh
+*.swi
+*.swj
+*.swk
+*.swl
+*.swm
 *.swn
+*.swo
+*.swp
 *.un~
+*.xcf
+*.tar.gz
 *~
 _SpecRunner.html
 common/ui/styles/.sass-cache
@@ -14,5 +22,6 @@ node_modules
 chrome/app/common
 chrome/extension/src/common
 common/ui/bower_components
+common/ui/lib
 firefox/data/common/
 firefox/data/scripts/dependencies.js

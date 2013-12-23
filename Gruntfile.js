@@ -38,15 +38,7 @@ var chrome_ext_files = [
   'common/ui/icons/**',
   'common/ui/scripts/**',
   'common/ui/styles/**',
-  'common/ui/bower_components/angular/angular.js',
-  'common/ui/bower_components/angular-animate/angular-animate.js',
-  'common/ui/bower_components/angular-lodash/angular-lodash.js',
-  'common/ui/bower_components/angular-mocks/angular-mocks.js',
-  'common/ui/bower_components/angular-scenario/*.js',
-  'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/json-patch/jsonpatch.js',
-  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
-  'common/ui/bower_components/lodash/dist/lodash.js'
+  'common/ui/lib/**',
 ];
 var firefox_files = [
   'common/backend/**',
@@ -57,14 +49,7 @@ var firefox_files = [
   'common/ui/icons/**',
   'common/ui/scripts/**',
   'common/ui/styles/**',
-  'common/ui/bower_components/angular/angular.js',
-  'common/ui/bower_components/angular-lodash/angular-lodash.js',
-  'common/ui/bower_components/angular-mocks/angular-mocks.js',
-  'common/ui/bower_components/angular-scenario/*.js',
-  'common/ui/bower_components/jquery/jquery.js',
-  'common/ui/bower_components/json-patch/jsonpatch.js',
-  // 'common/ui/bower_components/jsonpatch/lib/jsonpatch.js',
-  'common/ui/bower_components/lodash/dist/lodash.js'
+  'common/ui/lib/**',
 ];
 
 // Firefox concat files
@@ -72,6 +57,14 @@ var firefox_concat_src = [
   'firefox/data/scripts/event_on_emit_shim.js',
   'firefox/data/scripts/freedom_shim_content.js',
   'firefox/data/scripts/injector.js'
+];
+
+// Files which make static UI testing work. Bsae directory = 'common/ui/'
+var ui_isolation_files = [
+  'popup.html',
+  'scripts/**',
+  'styles/**',
+  'lib/**',
 ];
 
 //Testing
@@ -96,6 +89,10 @@ module.exports = function(grunt) {
       chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
+      ui: {files: [{
+        expand: true, flatten: false, cwd: 'common/ui/',
+        src: ui_isolation_files, dest: 'uistatic/',
+      }]},
       watch: {files: []},
     },
     concat: {
@@ -118,7 +115,7 @@ module.exports = function(grunt) {
         files: ['common/**/*',
                 // bower components should only change when grunt is
                 // already being run
-                '!**/bower_components/**'],
+                '!**/lib/**'],
         tasks: ['copy:watch'],
         options: {spawn: false}
       },
@@ -265,10 +262,14 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk:download',
     'mozilla-cfx'
   ]);
+  grunt.registerTask('ui', [
+    'copy:ui',
+  ]);
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
     'build_chrome',
     'build_firefox',
+    'ui',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);
