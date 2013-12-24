@@ -65,6 +65,7 @@ var ui_isolation_files = [
   'scripts/**',
   'styles/**',
   'lib/**',
+  'icons/**',
 ];
 
 //Testing
@@ -91,7 +92,7 @@ module.exports = function(grunt) {
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
       ui: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
-        src: ui_isolation_files, dest: 'uistatic/',
+        src: ui_isolation_files, dest: 'uistatic/common/ui',
       }]},
       watch: {files: []},
     },

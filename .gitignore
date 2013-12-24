@@ -25,3 +25,4 @@ common/ui/bower_components
 common/ui/lib
 firefox/data/common/
 firefox/data/scripts/dependencies.js
+uistatic/common/

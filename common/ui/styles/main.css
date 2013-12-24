@@ -5,16 +5,26 @@
   *:focus {
     outline: none; }
 
+#popup {
+  width: 370.8204px;
+  height: 600px; }
+  #popup .footer {
+    text-align: right; }
+
 @font-face {
   font-family: "Eurostile";
   src: url("eurostile.ttf") format("truetype"); }
 
 body {
   font-family: Eurostile, sans-serif;
-  height: 100%;
+  position: absolute;
+  display: none;
+  height: 600px;
+  display: block;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  overflow-y: hidden;
   font-size: 16px; }
 
 h1, h2, h3, h4, h5 {
@@ -24,11 +34,6 @@ h1, h2, h3, h4, h5 {
 ul {
   list-style: none;
   padding: 0; }
-
-::-webkit-scrollbar {
-  width: 6px; }
-  ::-webkit-scrollbar:hover {
-    width: 10px; }
 
 ::-webkit-scrollbar-track {
   background-color: #f9f9f9; }
@@ -82,7 +87,7 @@ ul {
   padding: 0 8px; }
 
 #contact-header {
-  position: fixed;
+  position: absolute;
   z-index: 300;
   width: 100%;
   top: 0;
@@ -90,7 +95,7 @@ ul {
   box-shadow: 0 1px 3px #eeeeee;
   background-color: white; }
   #contact-header h1 {
-    position: fixed;
+    position: absolute;
     width: 100%;
     padding: 0 50px;
     text-align: center;
@@ -133,7 +138,7 @@ ul {
   color: #990000; }
 
 #filterTooltip {
-  position: fixed;
+  position: absolute;
   z-index: 50;
   top: 30px;
   opacity: 0.85;
@@ -157,7 +162,7 @@ ul {
   padding: 16px; }
 
 #login-splash {
-  position: fixed;
+  position: absolute;
   text-align: center;
   padding-top: 30px;
   width: 100%;
@@ -357,7 +362,7 @@ input[type=text] {
     opacity: 0.7; }
 
 #options-btn {
-  position: fixed;
+  position: absolute;
   z-index: 600;
   top: 4px;
   right: 8px;
@@ -380,7 +385,7 @@ input[type=text] {
     opacity: 0.3; }
 
 #options-btn-tip {
-  position: fixed;
+  position: absolute;
   z-index: 500;
   top: 30px;
   right: 2px;
@@ -552,7 +557,7 @@ img.c-icon {
 
 #access {
   display: inline-block;
-  position: fixed;
+  position: absolute;
   text-align: center;
   width: 100%;
   height: 100%;
@@ -569,7 +574,7 @@ img.c-icon {
     left: 400px; }
 
 .bg-deco {
-  position: fixed;
+  position: absolute;
   top: 0;
   width: 100%;
   height: 100%;
@@ -646,14 +651,14 @@ img.c-icon {
   -o-transition: all 0.23s !important;
   transition: all 0.23s !important; }
   .contact-info#my-info {
-    position: fixed;
+    position: absolute;
     bottom: 55px; }
     .contact-info#my-info.ng-hide {
       display: block !important;
       pointer-events: none;
       bottom: -100px; }
   .contact-info#their-info {
-    position: fixed;
+    position: absolute;
     top: 40px; }
     .contact-info#their-info.ng-hide {
       display: block !important;
@@ -863,7 +868,7 @@ img.c-icon {
   font-family: monospace; }
 
 #status {
-  position: fixed;
+  position: absolute;
   z-index: 50;
   bottom: 0;
   width: 100%;
@@ -906,12 +911,6 @@ img.c-icon {
   bottom: 0;
   padding: 8px; }
 
-#popup {
-  width: 370.8204px;
-  height: 600px; }
-  #popup .footer {
-    text-align: right; }
-
 details > summary {
   cursor: pointer; }
   details > summary:focus {
@@ -927,7 +926,7 @@ details > *:not(summary) {
   width: 50%; }
 
 #debug {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   width: 50%;
@@ -955,11 +954,11 @@ details > *:not(summary) {
     background-color: #0f0f0f; }
 
 .dbg {
-  position: fixed;
+  position: absolute;
   z-index: 500; }
 
 #reset-box {
-  position: fixed;
+  position: absolute;
   bottom: 0; }
 
 details.advanced {
