@@ -178,6 +178,12 @@ module.exports = function(grunt) {
         '-W097': true  // force: allow "strict use" in non function form.
       }
     },
+    typescript: {
+      ui: {
+        src: ['common/ui/scripts/ui.ts'],
+        dest: 'common/ui/scripts/ui.js'
+      }
+    },
     'mozilla-addon-sdk': {
       download: {
         options: {
@@ -210,6 +216,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-typescript');
 
   //On file change, see which distribution it affects and
   //update the copy:watch task to copy only those files
@@ -264,6 +271,7 @@ module.exports = function(grunt) {
     'mozilla-cfx'
   ]);
   grunt.registerTask('ui', [
+    'typescript:ui',
     'copy:ui',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);
