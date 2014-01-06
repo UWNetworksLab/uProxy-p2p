@@ -1,12 +1,17 @@
 /**
 * ui.ts
 *
+* Typically included from the manifest,.
+*
 * Common User Interface state holder and changer.
 * TODO: firefox bindings.
 */
 'use strict';
-// Main UI class.
-// Can be constructed with |browserType| being either 'chrome' or 'firefox'.
+if (undefined !== UI) {
+    console.log('ui.ts already included.');
+    return;
+}
+
 var UI = (function () {
     function UI(browserType) {
         this.ICON_DIR = '../common/ui/icons/';
@@ -17,9 +22,13 @@ var UI = (function () {
         this.splashPage = false;
         this.advancedOptions = false;
         this.searchBar = true;
+        this.search = '';
         this.pendingProxyTrustChange = false;
         this.pendingClientTrustChange = false;
         this.chatView = false;
+        this.numClients = 0;
+        this.myName = '';
+        this.myPic = null;
         this.isProxying = false;
         this.accessIds = 0;
         // Keep track of currently viewed contact and instance.
@@ -123,6 +132,15 @@ var UI = (function () {
         this.accessView = false;
     };
 
+    UI.prototype.setNotifications = function (n) {
+        this.setLabel(n > 0 ? n : '');
+        this.notifications = n < 0 ? 0 : n;
+    };
+
+    UI.prototype.decNotifications = function () {
+        this.setNotifications(this.notifications - 1);
+    };
+
     // Notifications occur on the user level. The message sent to the app side
     // will also remove the notification flag from the corresponding instance(s).
     UI.prototype.notificationSeen = function (user) {
@@ -132,15 +150,6 @@ var UI = (function () {
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
         this.decNotifications();
-    };
-
-    UI.prototype.setNotifications = function (n) {
-        this.setLabel(n > 0 ? n : '');
-        this.notifications = n < 0 ? 0 : n;
-    };
-
-    UI.prototype.decNotifications = function (n) {
-        this.setNotifications(this.notifications - 1);
     };
 
     UI.prototype.syncMe = function () {

@@ -26,3 +26,7 @@ common/ui/lib
 firefox/data/common/
 firefox/data/scripts/dependencies.js
 uistatic/common/
+uistatic/scripts/app.js
+uistatic/scripts/ui.js
+uistatic/scripts/options.js
+uistatic/scripts/popup.js
