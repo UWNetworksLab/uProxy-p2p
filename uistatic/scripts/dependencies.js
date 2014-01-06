@@ -6,13 +6,6 @@ var model = {
   identityStatus: {
   }
 };
-
-// var ui = {};
-// $.getScript('ui.js')
-  // .done(function(script) {
-    // console.log(script);
-    // ui = new UI();
-  // });
 var ui = new UI();
 
 var dependencyInjector = angular.module('dependencyInjector', [])

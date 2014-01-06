@@ -7,6 +7,10 @@
  * TODO: firefox bindings.
  */
 'use strict';
+if (undefined !== UI) {
+  console.log('ui.ts already included.');
+  return false;
+}
 
 declare var model:any;
 declare var chrome:any;
@@ -15,12 +19,6 @@ declare var onStateChange:any;
 
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
-
-if (undefined !== UI) {
-  console.log('ui.ts already included.');
-  return;
-}
-
 class UI {
   ICON_DIR : string = '../common/ui/icons/';
   networks = ['google', 'facebook', 'xmpp'];
