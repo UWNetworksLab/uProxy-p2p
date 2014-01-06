@@ -15,7 +15,7 @@
     "scripts": [
       "scripts/freedom_connector.js",
       "common/ui/scripts/ui.js",
-      "common/ui/bower_components/json-patch/jsonpatch.js",
+      "common/ui/lib/json-patch/jsonpatch.js",
       "scripts/proxy-config.js",
       "scripts/background.js"
     ]
