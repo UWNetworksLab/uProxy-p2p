@@ -11,13 +11,6 @@
 
 $fontSize: 16px
 $defaultSmoothSpeed: 0.23s
-$uiHeight: 600px
-
-#popup
-  width: 370.8204px
-  height: $uiHeight
-  .footer
-    text-align: right
 
 @font-face
   font-family: 'Eurostile'
@@ -41,14 +34,10 @@ $uiHeight: 600px
 
 body
   font-family: Eurostile, sans-serif
-  position: absolute
-  display: none
-  height: $uiHeight
-  display: block
+  height: 100%
   margin: 0
   padding: 0
   overflow: hidden
-  overflow-y: hidden
   font-size: $fontSize
 
 h1, h2, h3, h4, h5
@@ -59,7 +48,7 @@ ul
   padding: 0
 
 // Prettier scrollbars.
-  ::-webkit-scrollbar
+::-webkit-scrollbar
   width: 6px
   &:hover
     width: 10px
@@ -114,7 +103,7 @@ ul
   padding: 0 8px
 
 #contact-header
-  position: absolute
+  position: fixed
   z-index: 300
   width: 100%
   top: 0
@@ -122,7 +111,7 @@ ul
   box-shadow: 0 1px 3px #eee
   background-color: #fff
   & h1
-    position: absolute
+    position: fixed
     width: 100%
     padding: 0 50px
     text-align: center
@@ -164,7 +153,7 @@ ul
   color: #900
 
 #filterTooltip
-  position: absolute
+  position: fixed
   z-index: 50
   top: 30px
   opacity: 0.85
@@ -185,7 +174,7 @@ ul
 
 //---------------------------- Login Splash -----------------------------------
 #login-splash
-  position: absolute
+  position: fixed
   text-align: center
   padding-top: 30px
   width: 100%
@@ -372,7 +361,7 @@ input[type=text]
     opacity: 0.7
 
 #options-btn
-  position: absolute
+  position: fixed
   z-index: 600
   top: 4px
   right: 8px
@@ -392,7 +381,7 @@ input[type=text]
     opacity: 0.3
 
 #options-btn-tip
-  position: absolute
+  position: fixed
   z-index: 500
   top: 30px
   right: 2px
@@ -479,8 +468,6 @@ input[type=text]
     box-shadow: 0 2px 6px 1px #ddd
     outline: none
 
-  &.ng-hide
-
   &.offline
     color: #888
 
@@ -554,7 +541,7 @@ img.c-icon
 // roster entry.
 #access
   display: inline-block
-  position: absolute
+  position: fixed
   text-align: center
   width: 100%
   height: 100%
@@ -569,7 +556,7 @@ img.c-icon
 
 // This is the faded background image of the internets and arrows.
 .bg-deco
-  position: absolute
+  position: fixed
   top: 0
   width: 100%
   height: 100%
@@ -637,13 +624,13 @@ img.c-icon
   z-index: 2
   @include smooth
   &#my-info
-    position: absolute
+    position: fixed
     bottom: 55px
     &.ng-hide
       @include un-ng-hide
       bottom: -100px
   &#their-info
-    position: absolute
+    position: fixed
     top: 40px
     &.ng-hide
       @include un-ng-hide
@@ -839,7 +826,7 @@ img.c-icon
   font-family: monospace
 
 #status
-  position: absolute
+  position: fixed
   z-index: 50
   bottom: 0
   width: 100%
@@ -877,6 +864,12 @@ img.c-icon
   bottom: 0
   padding: 8px
 
+#popup
+  width: 370.8204px
+  height: 600px
+  .footer
+    text-align: right
+
 details
   & > summary
     cursor: pointer
@@ -893,7 +886,7 @@ details
   width: 50%
 
 #debug
-  position: absolute
+  position: fixed
   top: 0
   right: 0
   width: 50%
@@ -918,11 +911,11 @@ details
   @include smooth
 
 .dbg
-  position: absolute
+  position: fixed
   z-index: 500
 
 #reset-box
-  position: absolute
+  position: fixed
   bottom: 0
 
 details.advanced

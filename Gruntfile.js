@@ -178,6 +178,13 @@ module.exports = function(grunt) {
         '-W097': true  // force: allow "strict use" in non function form.
       }
     },
+    sass: {
+      main: {
+        files: {
+          'common/ui/styles/main.css': 'common/ui/styles/main.sass',
+        }
+      }
+    },
     typescript: {
       ui: {
         src: ['common/ui/scripts/ui.ts'],
@@ -213,6 +220,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
@@ -272,6 +280,7 @@ module.exports = function(grunt) {
   ]);
   grunt.registerTask('ui', [
     'typescript:ui',
+    'sass:main',
     'copy:ui',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);

@@ -17,6 +17,7 @@ uproxy.crx
 *~
 _SpecRunner.html
 common/ui/styles/.sass-cache
+common/ui/styles/main.css
 tmp
 node_modules
 chrome/app/common
