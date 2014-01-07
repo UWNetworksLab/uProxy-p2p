@@ -6,13 +6,6 @@ UProxy
 
 This is the top-level [UProxy repository](https://github.com/UWNetworksLab/UProxy). It contains all code for UProxy. Browser-dependent components live in "chrome" and "firefox" subdirectories. Browser-independent components live in the 'common' subdirectory.
 
-UProxy current has 1 git submodule,
-[freedom](https://github.com/UWNetworksLab/freedom), located in `common/freedom`.
-Freedom is a generic framework and modularization for
-building browser-based distributed applications. A *Freedom module* is a module
-that can run on any Freedom-supporting platform and be migrated to any other.
-
-
 ### Tools
 
 UProxy is built using the following tools:
