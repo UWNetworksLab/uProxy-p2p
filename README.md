@@ -80,19 +80,19 @@ updates to FreeDOM), you will have to run `./setup.sh` to update these dependenc
 
 UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
- *  build - Builds Chrome and Firefox extensions
- *  setup - Installs local dependencies and sets up environment
- *  xpi - Generates an .xpi for installation to Firefox.
- *  ff - Open up a firefox window with an instance of the extension running.
- *  test - Run unit tests
- *  watch - Watch for changes in 'common' and copy as necessary
- *  clean - Cleans up
- *  build_chrome - Build just Chrome
- *  build_firefox - Build just Firefox
- *  everything - 'setup', 'test', then 'build'
+ *  `build` - Builds Chrome and Firefox extensions
+ *  `setup` - Installs local dependencies and sets up environment
+ *  `xpi` - Generates an .xpi for installation to Firefox.
+ *  `ff` - Open up a firefox window with an instance of the extension running.
+ *  `test` - Run unit tests
+ *  `watch` - Watch for changes in 'common' and copy as necessary
+ *  `clean` - Cleans up
+ *  `build_chrome` - Build just Chrome
+ *  `build_firefox` - Build just Firefox
+ *  `everything` - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
-your distribution, then run `grunt watch`, which will rebuild as you make changes
+your distribution, then run `grunt watch`, which will rebuild as you make changes. (TODO: grunt watch is broken; fix it!)
 
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
@@ -105,38 +105,21 @@ reject submissions.
 
 #### Building the packaged Chrome extension
 
-- Run `grunt build` from the chrome/extension directory to lint the script, run tests,
-  and if those go well, build a packed extension. To test the built extension, go to
-  chrome://extensions and load it unpacked from the chrome/extension/dist
-  directory, or packed from the chrome/extension/package directory.
+- Run `grunt build` from the chrome/extension directory to lint the script, run tests, and if those go well, build a packed extension.
+
+- To test the built extension, go to `chrome://extensions` and load it both the uProxy extension and app using developer mode from the `chrome/extension/src` directory and the `chrome/app` directory.
 
 
 #### Fixing compilation and setup
 
-UPDATE THIS SECTION SOON
+The following hints may help you if it goes wrong and you need to debug and fix it.
 
-The `grunt everything` task should run all the steps needed to setup, test and
-compile UProxy. However the following hints should help you if it goes wrong and
-you need to debug and fix it.
+- A file called `package.json` provides details of node packages used to build uProxy. To download and install them in the right place (typically a subdirectory called `node_packages`) run `npm install`.
 
-1. Run `LOCAL=yes make` in each of the Freedom submodules
-   (chrome/app/submodules/uproxy-common/submodules/freedom and
-   firefox/submodules/uproxy-common/submodules/freedom). We intend to make this
-   more automated.
+- A file called `bower.json` provides details of packages for the UI, typically JavaScript for the browser. Run `bower install` to download and install the dependencies. They are typically installed in a directory called `lib` (as defined by a local file called `.bowerrc`).
 
-2. Anywhere there's a package.json (currently just chrome/extension), run `npm
-   install` to fetch required npm packages.
+- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `common/ui` directory and look out for error messages.
 
-3. Anywhere there's a bower.json (currently just chrome/extension), run `bower
-   install` to fetch required bower packages.
+- Check that you have the latest freedom.js.
 
-4. A number of grunt tasks are set up for the chrome extension to aid
-  development. Currently `grunt jshint` (a javascript linting task) is the only
-  development task that's useful, but once there are tests, `grunt test` will
-  run them for you. In the next version of generator-chrome-extension, `grunt
-  watch` will be supported, which does things like monitor for changes to
-  scripts, and when detected, linting them + running tests automatically,
-  monitoring changes to sass stylesheets and compiling them to css when
-  detected, etc. For now, compiling the sass to css can be accomplished via
-  `grunt compass:dist`, and then manually copying
-  chrome/extension/.tmp/styles/\*.css to chrome/extension/src/styles/. :\
+- If things are not working, check that you have a recent version of bower, npm, and node.
