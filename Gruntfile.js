@@ -65,6 +65,7 @@ var ui_isolation_files = [
   'scripts/**',
   'styles/**',
   'lib/**',
+  'icons/**',
 ];
 
 //Testing
@@ -91,7 +92,7 @@ module.exports = function(grunt) {
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
       ui: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
-        src: ui_isolation_files, dest: 'uistatic/',
+        src: ui_isolation_files, dest: 'uistatic/common/ui',
       }]},
       watch: {files: []},
     },
@@ -177,6 +178,19 @@ module.exports = function(grunt) {
         '-W097': true  // force: allow "strict use" in non function form.
       }
     },
+    sass: {
+      main: {
+        files: {
+          'common/ui/styles/main.css': 'common/ui/styles/main.sass',
+        }
+      }
+    },
+    typescript: {
+      ui: {
+        src: ['common/ui/scripts/ui.ts'],
+        dest: 'common/ui/scripts/ui.js'
+      }
+    },
     'mozilla-addon-sdk': {
       download: {
         options: {
@@ -206,9 +220,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-typescript');
 
   //On file change, see which distribution it affects and
   //update the copy:watch task to copy only those files
@@ -263,6 +279,8 @@ module.exports = function(grunt) {
     'mozilla-cfx'
   ]);
   grunt.registerTask('ui', [
+    'typescript:ui',
+    'sass:main',
     'copy:ui',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);

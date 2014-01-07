@@ -51,7 +51,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // Open the detailed contact view, with a potential instance. Set the
     // currently focused instance and ensure angular bindings work.
     $scope.viewContact = function(c) {
-      // console.log("viewContact: c=\n", c);
       for (var clientId in c.clients) {
         if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
           console.log("viewContact: sendInstance: " + clientId);
@@ -128,7 +127,6 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
         console.log('current instance changed');
         ui.instance = $scope.model.instances[instance.instanceId];
       }
-      // $scope.$digest();
     });
 
     if (ui.contact) {
@@ -137,12 +135,4 @@ var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
     if (ui.instance) {
       syncInstanceWatch(ui.instance.instanceId);
     }
-
-    // Refresh local state variables when the popup is re-opened.
-    // if ($scope.ui.contact) {
-      // $scope.ui.contact = $scope.model.roster[$scope.ui.contact.userId];
-    // }
-    // if ($scope.ui.instance) {
-      // $scope.ui.instance = $scope.model.instances[$scope.ui.instance.instanceId];
-    // }
   }]);
