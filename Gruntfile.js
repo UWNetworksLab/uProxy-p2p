@@ -237,7 +237,6 @@ module.exports = function(grunt) {
 
   //Setup task
   grunt.registerTask('setup', [
-    'shell:git_submodule',
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
