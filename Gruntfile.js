@@ -90,7 +90,7 @@ module.exports = function(grunt) {
       chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
-      ui: {files: [{
+      uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
       }]},
@@ -112,7 +112,7 @@ module.exports = function(grunt) {
     },
     watch: {
       common: {//Watch everything
-        //TODO this doesn't work as expected on VMsw
+        //TODO: this doesn't work, fix it.
         files: ['common/**/*',
                 // bower components should only change when grunt is
                 // already being run
@@ -247,7 +247,6 @@ module.exports = function(grunt) {
   grunt.registerTask('build_chrome', [
     'copy:chrome_app',
     'copy:chrome_ext',
-    'jsvalidate'
   ]);
   grunt.registerTask('build_firefox', [
     'concat:firefox',
@@ -266,13 +265,14 @@ module.exports = function(grunt) {
   grunt.registerTask('ui', [
     'typescript:ui',
     'sass:main',
-    'copy:ui',
+    'copy:uistatic',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
     'build_chrome',
     'build_firefox',
     'ui',
+    'jsvalidate',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);
