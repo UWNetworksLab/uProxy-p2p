@@ -7,6 +7,10 @@
  * TODO: firefox bindings.
  */
 'use strict';
+if (undefined !== UI) {
+  console.log('ui.ts already included.');
+  return false;
+}
 
 declare var model:any;
 declare var chrome:any;
@@ -15,7 +19,6 @@ declare var onStateChange:any;
 
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
-
 class UI {
   ICON_DIR : string = '../common/ui/icons/';
   networks = ['google', 'facebook', 'xmpp'];
@@ -25,9 +28,13 @@ class UI {
   splashPage = false;
   advancedOptions = false;
   searchBar = true;
+  search = '';
   pendingProxyTrustChange = false;
   pendingClientTrustChange = false;
   chatView = false;
+  numClients = 0;
+  myName = '';
+  myPic = null;
 
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.
@@ -144,6 +151,15 @@ class UI {
     this.accessView = false;
   }
 
+  setNotifications(n) {
+    this.setLabel(n > 0? n : '');
+    this.notifications = n < 0? 0 : n;
+  }
+
+  decNotifications() {
+    this.setNotifications(this.notifications - 1);
+  }
+
   // Notifications occur on the user level. The message sent to the app side
   // will also remove the notification flag from the corresponding instance(s).
   notificationSeen(user) {
@@ -154,16 +170,6 @@ class UI {
     user.hasNotification = false;
     this.decNotifications();
   }
-
-  setNotifications(n) {
-    this.setLabel(n > 0? n : '');
-    this.notifications = n < 0? 0 : n;
-  }
-
-  decNotifications(n) {
-    this.setNotifications(this.notifications - 1);
-  }
-
 
   syncMe() {
     var id = _getMyId();

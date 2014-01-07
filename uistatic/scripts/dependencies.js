@@ -2,14 +2,13 @@
 'use strict';
 
 console.log('This is not a real uProxy frontend.');
-
 var model = {
   identityStatus: {
   }
 };
 var ui = new UI();
 
-angular.module('dependencyInjector', [])
+var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
     return function (key) { return key; };
   })

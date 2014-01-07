@@ -17,6 +17,7 @@ uproxy.crx
 *~
 _SpecRunner.html
 common/ui/styles/.sass-cache
+common/ui/styles/main.css
 tmp
 node_modules
 chrome/app/common
@@ -26,3 +27,7 @@ common/ui/lib
 firefox/data/common/
 firefox/data/scripts/dependencies.js
 uistatic/common/
+uistatic/scripts/app.js
+uistatic/scripts/ui.js
+uistatic/scripts/options.js
+uistatic/scripts/popup.js

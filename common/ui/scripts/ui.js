@@ -1,38 +1,33 @@
-/**
-* ui.ts
-*
-* Common User Interface state holder and changer.
-* TODO: firefox bindings.
-*/
 'use strict';
-// Main UI class.
-// Can be constructed with |browserType| being either 'chrome' or 'firefox'.
+if (undefined !== UI) {
+    console.log('ui.ts already included.');
+    return false;
+}
+
 var UI = (function () {
     function UI(browserType) {
         this.ICON_DIR = '../common/ui/icons/';
         this.networks = ['google', 'facebook', 'xmpp'];
         this.notifications = 0;
-        // TODO: splash should be set by state.
         this.accessView = false;
         this.splashPage = false;
         this.advancedOptions = false;
         this.searchBar = true;
+        this.search = '';
         this.pendingProxyTrustChange = false;
         this.pendingClientTrustChange = false;
         this.chatView = false;
+        this.numClients = 0;
+        this.myName = '';
+        this.myPic = null;
         this.isProxying = false;
         this.accessIds = 0;
-        // Keep track of currently viewed contact and instance.
         this.contact = null;
         this.contactUnwatch = null;
         this.instance = null;
         this.instanceUnwatch = null;
-        // If we are proxying, keep track of the instance.
         this.proxy = null;
-        // When the description changes while the text field loses focus, it
-        // automatically updates.
         this.oldDescription = '';
-        // Initial filter state.
         this.filters = {
             'online': true,
             'myAccess': false,
@@ -40,9 +35,7 @@ var UI = (function () {
             'uproxy': false
         };
     }
-    // -------------------------- Browser Icons / Labels  --------------------------
     UI.prototype.setIcon = function (iconFile) {
-        // TODO: make this not require chrome
         chrome.browserAction.setIcon({
             path: this.ICON_DIR + iconFile
         });
@@ -52,7 +45,6 @@ var UI = (function () {
         chrome.browserAction.setBadgeText({ text: '' + text });
     };
 
-    // Hackish way to fire the onStateChange dispatcher.
     UI.prototype.refreshDOM = function () {
         onStateChange.dispatch();
     };
@@ -76,8 +68,6 @@ var UI = (function () {
         }
     };
 
-    // -------------------------------- Filters ------------------------------------
-    // Toggling |filter| changes the visibility and ordering of roster entries.
     UI.prototype.toggleFilter = function (filter) {
         if (undefined === this.filters[filter]) {
             console.error('Filter "' + filter + '" is not a valid filter.');
@@ -87,7 +77,6 @@ var UI = (function () {
         this.filters[filter] = !this.filters[filter];
     };
 
-    // Returns |true| if contact |c| should *not* appear in the roster.
     UI.prototype.contactIsFiltered = function (c) {
         var searchText = this.search, compareString = c.name.toLowerCase();
 
@@ -104,7 +93,6 @@ var UI = (function () {
         return true;
     };
 
-    // --------------------------- Focus & Notifications ---------------------------
     UI.prototype.focusOnContact = function (contact) {
         console.log('focusing on contact ' + contact);
         this.contact = contact;
@@ -112,7 +100,6 @@ var UI = (function () {
         this.accessView = true;
     };
 
-    // Going back from the contact view to the roster view.
     UI.prototype.returnToRoster = function () {
         console.log('returning to roster! ' + this.contact);
         if (this.contact && this.contact.hasNotification) {
@@ -123,8 +110,15 @@ var UI = (function () {
         this.accessView = false;
     };
 
-    // Notifications occur on the user level. The message sent to the app side
-    // will also remove the notification flag from the corresponding instance(s).
+    UI.prototype.setNotifications = function (n) {
+        this.setLabel(n > 0 ? n : '');
+        this.notifications = n < 0 ? 0 : n;
+    };
+
+    UI.prototype.decNotifications = function () {
+        this.setNotifications(this.notifications - 1);
+    };
+
     UI.prototype.notificationSeen = function (user) {
         if (!user.hasNotification) {
             return;
@@ -132,15 +126,6 @@ var UI = (function () {
         appChannel.emit('notification-seen', user.userId);
         user.hasNotification = false;
         this.decNotifications();
-    };
-
-    UI.prototype.setNotifications = function (n) {
-        this.setLabel(n > 0 ? n : '');
-        this.notifications = n < 0 ? 0 : n;
-    };
-
-    UI.prototype.decNotifications = function (n) {
-        this.setNotifications(this.notifications - 1);
     };
 
     UI.prototype.syncMe = function () {
@@ -159,14 +144,12 @@ var UI = (function () {
         var instanceId = null, instance = null, online = false, canUProxy = false, hasNotification = false, isActiveClient = false, isActiveProxy = false, onGoogle = false, onFB = false, onXMPP = false;
 
         for (var clientId in user.clients) {
-            // Determine network state / flags for filtering purposes.
             var client = user.clients[clientId];
             onGoogle = onGoogle || 'google' == client.network;
             onFB = onFB || 'facebook' == client.network;
             onXMPP = onXMPP || 'xmpp' == client.network;
             online = online || (('manual' != client.network) && ('messageable' == client.status || 'online' == client.status));
 
-            // Check if this client has a corresponding instance...
             instanceId = model.clientToInstance[clientId];
             if (!instanceId)
                 continue;
@@ -175,12 +158,8 @@ var UI = (function () {
                 continue;
             canUProxy = true;
 
-            // TODO(uzimizu): Support multiple notifications, with messages.
             hasNotification = hasNotification || instance.notify;
 
-            // Pass-over the trust value to user-level.
-            // TODO(uzimizu): When we have multiple instances,
-            // take the assumption of highest trust level.
             user.trust = instance.trust;
             user.givesMe = ('no' != user.trust.asProxy);
             user.usesMe = ('no' != user.trust.asClient);
@@ -189,7 +168,6 @@ var UI = (function () {
             break;
         }
 
-        // Apply user-level flags.
         user.online = online;
         user.canUProxy = canUProxy;
         user.hasNotification = hasNotification;
@@ -200,9 +178,6 @@ var UI = (function () {
         user.onXMPP = onXMPP;
     };
 
-    // Make sure counters and UI-only state holders correctly reflect the model.
-    // If |previousPatch| is provided, the search is optimized to only sync the
-    // relevant entries.
     UI.prototype.synchronize = function (previousPatch) {
         var n = 0;
         for (var userId in model.roster) {
@@ -214,7 +189,6 @@ var UI = (function () {
         }
         this.setNotifications(n);
 
-        // Run through instances, count up clients.
         var c = 0;
         for (var iId in model.instances) {
             var instance = model.instances[iId];
@@ -237,7 +211,6 @@ var UI = (function () {
     return UI;
 })();
 
-// ------------------------------ Data Syncing ---------------------------------
 function _getMyId() {
     for (var id in model.me.identities) {
         return id;
