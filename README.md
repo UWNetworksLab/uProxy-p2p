@@ -6,27 +6,18 @@ UProxy
 
 This is the top-level [UProxy repository](https://github.com/UWNetworksLab/UProxy). It contains all code for UProxy. Browser-dependent components live in "chrome" and "firefox" subdirectories. Browser-independent components live in the 'common' subdirectory.
 
-UProxy current has 1 git submodule, 
-[freedom](https://github.com/UWNetworksLab/freedom), located in "common/freedom".
-Freedom is a generic framework and modularization for
-building browser-based distributed applications. A *Freedom module* is a module
-that can run on any Freedom-supporting platform and be migrated to any other.
-
-
 ### Tools
 
-UProxy is built with the following tools:
+UProxy is built using the following tools:
 
-- [bower](http://bower.io)
-- [yeoman](http://yeoman.io)
-- [generator-angular](https://github.com/yeoman/generator-angular)
-- [generator-chrome-extension](https://github.com/yeoman/generator-chrome-extension)
-- [grunt](http://gruntjs.com)
-- [AngularJS](http://angularjs.org)
-
-Before jumping in, it's worth familiarizing yourself with any of these you may
-not have used before.
-
+ - We use [Grunt](http://gruntjs.com/) as the build system.
+ - We have now committed to writing our JavaScript as [TypeScript](http://www.typescriptlang.org/), this does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
+ - We use [Jasmine](http://pivotal.github.io/jasmine/) to write, run and do unit tests.
+We use git submodule to include the freedom library into uproxy.
+ - We use [Bower](http://bower.io) to install libraries that we use in the UI (specified in `common/ui/bower.json`) including AngularJS.
+ - We use [AngularJS](http://angularjs.org) for UI coding
+ - We use npm for installing node modules that we use for our build process (Specified in the package.json)
+ - We use [sass](http://sass-lang.com/) to write css in a nicer way.
 
 ### Development setup
 
@@ -35,20 +26,17 @@ not have used before.
 Note: you will either need to run these as root, or set the directories they
 modify (/usr/local) to being editable by your user (sudo chown -R $USER /usr/local)
 
-
-- [node](http://nodejs.org/) + npm: `brew install node # or similar for your
-  system`
+- [node](http://nodejs.org/) + npm: `brew install node # or similar for your system` (You may need to update you brew package manager, e.g. `brew update`)
 
     - You may need to set your $NODE_PATH environment variable appropriately
-      (e.g. /usr/local/share/npm/lib/node_modules).
+      (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
 
     - If you install npm things globally, you'll need to do so as the
       appropriate super-user.
 
 - [grunt](http://gruntjs.com/): `npm install -g grunt-cli`
 
-- [bower](http://bower.io/) 1.0: `npm install -g bower`. If you already have
-  bower installed at a lower version, run `npm update -g bower`.
+- [bower](http://bower.io/) 1.0 or later: `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
 
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, add your npm bin directory to your path
@@ -57,20 +45,17 @@ modify (/usr/local) to being editable by your user (sudo chown -R $USER /usr/loc
 - [compass](http://compass-style.org/):
   `gem install compass` (requires ruby, often comes installed, may need to be installed as super-user)
 
-    - This is assuming you have `ruby` and `rubygems` installed. 
-
-- [icu](https://sites.google.com/site/icuprojectuserguide/): Needed for
-  StringPrep.  sudo apt-get install icu-dev.
+    - This is assuming you have `ruby` and `rubygems` installed.
 
 #### Installation, setup, compilation, updating
 
-1. Clone UProxy and its submodules (and its submodules' submodules...): 
+1. Clone UProxy and its submodules (and its submodules' submodules...):
 `git clone https://github.com/UWNetworksLab/UProxy.git`
 
 2. Run `./setup.sh`. This will install all local dependencies,
 as appropriate to run in Chrome.
 The first time you run this, you'll see lots of npm, bower and grunt
-messages. Check the last couple of lines in case there is an error. 
+messages. Check the last couple of lines in case there is an error.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies,
 updates to FreeDOM), you will have to run `./setup.sh` to update these dependencies.
@@ -88,19 +73,19 @@ updates to FreeDOM), you will have to run `./setup.sh` to update these dependenc
 
 UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
- *  build - Builds Chrome and Firefox extensions
- *  setup - Installs local dependencies and sets up environment
- *  xpi - Generates an .xpi for installation to Firefox.
- *  ff - Open up a firefox window with an instance of the extension running.
- *  test - Run unit tests
- *  watch - Watch for changes in 'common' and copy as necessary
- *  clean - Cleans up
- *  build_chrome - Build just Chrome
- *  build_firefox - Build just Firefox
- *  everything - 'setup', 'test', then 'build'
+ *  `build` - Builds Chrome and Firefox extensions
+ *  `setup` - Installs local dependencies and sets up environment
+ *  `xpi` - Generates an .xpi for installation to Firefox.
+ *  `ff` - Open up a firefox window with an instance of the extension running.
+ *  `test` - Run unit tests
+ *  `watch` - Watch for changes in 'common' and copy as necessary
+ *  `clean` - Cleans up
+ *  `build_chrome` - Build just Chrome
+ *  `build_firefox` - Build just Firefox
+ *  `everything` - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
-your distribution, then run `grunt watch`, which will rebuild as you make changes
+your distribution, then run `grunt watch`, which will rebuild as you make changes. (TODO: grunt watch is broken; fix it!)
 
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
@@ -113,38 +98,21 @@ reject submissions.
 
 #### Building the packaged Chrome extension
 
-- Run `grunt build` from the chrome/extension directory to lint the script, run tests,
-  and if those go well, build a packed extension. To test the built extension, go to
-  chrome://extensions and load it unpacked from the chrome/extension/dist
-  directory, or packed from the chrome/extension/package directory.
+- Run `grunt build` from the chrome/extension directory to lint the script, run tests, and if those go well, build a packed extension.
+
+- To test the built extension, go to `chrome://extensions` and load it both the uProxy extension and app using developer mode from the `chrome/extension/src` directory and the `chrome/app` directory.
 
 
 #### Fixing compilation and setup
 
-UPDATE THIS SECTION SOON
+The following hints may help you if it goes wrong and you need to debug and fix it.
 
-The `grunt everything` task should run all the steps needed to setup, test and
-compile UProxy. However the following hints should help you if it goes wrong and
-you need to debug and fix it.
+- A file called `package.json` provides details of node packages used to build uProxy. To download and install them in the right place (typically a subdirectory called `node_packages`) run `npm install`.
 
-1. Run `LOCAL=yes make` in each of the Freedom submodules
-   (chrome/app/submodules/uproxy-common/submodules/freedom and
-   firefox/submodules/uproxy-common/submodules/freedom). We intend to make this
-   more automated.
+- A file called `bower.json` provides details of packages for the UI, typically JavaScript for the browser. Run `bower install` to download and install the dependencies. They are typically installed in a directory called `lib` (as defined by a local file called `.bowerrc`).
 
-2. Anywhere there's a package.json (currently just chrome/extension), run `npm
-   install` to fetch required npm packages.
+- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `common/ui` directory and look out for error messages.
 
-3. Anywhere there's a bower.json (currently just chrome/extension), run `bower
-   install` to fetch required bower packages.
+- Check that you have the latest freedom.js.
 
-4. A number of grunt tasks are set up for the chrome extension to aid
-  development. Currently `grunt jshint` (a javascript linting task) is the only
-  development task that's useful, but once there are tests, `grunt test` will
-  run them for you. In the next version of generator-chrome-extension, `grunt
-  watch` will be supported, which does things like monitor for changes to
-  scripts, and when detected, linting them + running tests automatically,
-  monitoring changes to sass stylesheets and compiling them to css when
-  detected, etc. For now, compiling the sass to css can be accomplished via
-  `grunt compass:dist`, and then manually copying
-  chrome/extension/.tmp/styles/\*.css to chrome/extension/src/styles/. :\
+- If things are not working, check that you have a recent version of bower, npm, and node.

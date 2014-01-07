@@ -1,6 +1,7 @@
 uproxy.zip
 uproxy.crx
 .DS_Store
+.sass-cache
 .grunt
 *.swh
 *.swi
