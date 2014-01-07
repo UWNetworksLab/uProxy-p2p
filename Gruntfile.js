@@ -24,7 +24,7 @@ var minimatch = require("minimatch");
 //NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
 var chrome_app_files = [
   'common/ui/icons/**',
-  'common/freedom/freedom.js',
+  'node_modules/freedom/freedom.js',
   'common/backend/**',
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
@@ -44,7 +44,7 @@ var firefox_files = [
   'common/backend/**',
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
-  'common/freedom/freedom.js',
+  'node_modules/freedom/freedom.js',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',
@@ -90,7 +90,7 @@ module.exports = function(grunt) {
       chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
       firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
-      ui: {files: [{
+      uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
       }]},
@@ -112,7 +112,7 @@ module.exports = function(grunt) {
     },
     watch: {
       common: {//Watch everything
-        //TODO this doesn't work as expected on VMsw
+        //TODO: this doesn't work, fix it.
         files: ['common/**/*',
                 // bower components should only change when grunt is
                 // already being run
@@ -127,21 +127,9 @@ module.exports = function(grunt) {
       }
     },
     shell: {
-      git_submodule: {
-        command: ['git submodule init', 'git submodule update'].join(';'),
-        options: {stdout: true}
-      },
       bower_install: {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
-      },
-      setup_freedom: {
-        command: 'npm install',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
-      },
-      freedom: {
-        command: 'grunt',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
       },
       rickroll: {
         command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
@@ -249,10 +237,7 @@ module.exports = function(grunt) {
 
   //Setup task
   grunt.registerTask('setup', [
-    'shell:git_submodule',
     'shell:bower_install',
-    'shell:setup_freedom',
-    'shell:freedom'
   ]);
   grunt.registerTask('test', [
     'jshint:all',
@@ -262,7 +247,6 @@ module.exports = function(grunt) {
   grunt.registerTask('build_chrome', [
     'copy:chrome_app',
     'copy:chrome_ext',
-    'jsvalidate'
   ]);
   grunt.registerTask('build_firefox', [
     'concat:firefox',
@@ -281,13 +265,14 @@ module.exports = function(grunt) {
   grunt.registerTask('ui', [
     'typescript:ui',
     'sass:main',
-    'copy:ui',
+    'copy:uistatic',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
     'build_chrome',
     'build_firefox',
     'ui',
+    'jsvalidate',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);
