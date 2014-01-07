@@ -24,7 +24,7 @@ var minimatch = require("minimatch");
 //NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
 var chrome_app_files = [
   'common/ui/icons/**',
-  'common/freedom/freedom.js',
+  'node_modules/freedom/freedom.js',
   'common/backend/**',
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
@@ -44,7 +44,7 @@ var firefox_files = [
   'common/backend/**',
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
-  'common/freedom/freedom.js',
+  'node_modules/freedom/freedom.js',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',
@@ -127,21 +127,9 @@ module.exports = function(grunt) {
       }
     },
     shell: {
-      git_submodule: {
-        command: ['git submodule init', 'git submodule update'].join(';'),
-        options: {stdout: true}
-      },
       bower_install: {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
-      },
-      setup_freedom: {
-        command: 'npm install',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
-      },
-      freedom: {
-        command: 'grunt',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/freedom'}}
       },
       rickroll: {
         command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
@@ -236,8 +224,6 @@ module.exports = function(grunt) {
   grunt.registerTask('setup', [
     'shell:git_submodule',
     'shell:bower_install',
-    'shell:setup_freedom',
-    'shell:freedom'
   ]);
   grunt.registerTask('test', [
     'jshint:all',

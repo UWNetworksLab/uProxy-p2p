@@ -21,7 +21,8 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mozilla-addon-sdk": "rpl/grunt-mozilla-addon-sdk",
     "minimatch": "~0.2.12",
-    "glob": "~3.2.6"
+    "glob": "~3.2.6",
+    "freedom": "~0.1.1"
   },
   "scripts": {
     "test": "grunt --verbose"
