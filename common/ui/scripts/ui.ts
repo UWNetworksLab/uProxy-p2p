@@ -284,5 +284,3 @@ function _getMyId() {
   }
   return null;
 }
-
-
