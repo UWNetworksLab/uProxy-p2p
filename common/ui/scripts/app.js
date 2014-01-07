@@ -10,15 +10,6 @@
  */
 'use strict';
 
-// TODO: client secret should not be public.
-/**
-var OAUTH_CONFIG = {
-  'client_id': '814927071113-ri9amn1jl73c7rbh2dvif2g78fok8vs9.apps.googleusercontent.com',
-  'client_secret': 'JxrMEKHEk9ELTTSPgZ8IfZu-',
-  'api_scope': 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/googletalk'
-};
-**/
-
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
@@ -256,7 +247,12 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           // $rootScope.instances = model.instances;
         });
       };
-      onStateChange.addListener(updateDOM);
+
+      // State change event handler is browser specific, or it might not exist
+      // at all.
+      if (onStateChange) {
+        onStateChange.addListener(updateDOM);
+      }
     }  // run function
   ]);
 
