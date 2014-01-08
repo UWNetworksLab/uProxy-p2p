@@ -2,10 +2,9 @@
 'use strict';
 
 console.log('This is not a real uProxy frontend.');
-var model = {
-  identityStatus: {
-  }
-};
+
+// Initialize model object to a mock. (state.js)
+var model = state || { identityStatus: {} };
 var ui = new UI();
 
 var dependencyInjector = angular.module('dependencyInjector', [])

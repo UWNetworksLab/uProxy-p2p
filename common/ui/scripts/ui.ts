@@ -1,8 +1,6 @@
 /**
  * ui.ts
  *
- * Typically included from the manifest,.
- *
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
