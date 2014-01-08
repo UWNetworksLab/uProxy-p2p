@@ -7,23 +7,24 @@
     "url": "https://github.com/UWNetworksLab/UProxy"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
+    "grunt": "~0.4.2",
     "grunt-contrib-jasmine": "~0.5.2",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-sass": "",
+    "grunt-contrib-sass": "~0.6.0",
     "grunt-contrib-yuidoc": "~0.4.0",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-copy": "~0.4.1",
     "grunt-jsvalidate": "~0.2.1",
     "grunt-spawn": "~1.0.41",
     "grunt-shell": "~0.3.1",
-    "grunt-typescript": "",
+    "grunt-typescript": "~0.2.7",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mozilla-addon-sdk": "rpl/grunt-mozilla-addon-sdk",
     "minimatch": "~0.2.12",
-    "glob": "~3.2.6"
+    "glob": "~3.2.6",
+    "freedom": "~0.1.1"
   },
   "scripts": {
     "test": "grunt --verbose"
