@@ -229,7 +229,7 @@
           {{ ui.contact.name }} does not have <b>uProxy</b>.
           </p>
 
-          <div class="instance-actions" ng-show="ui.instance && ui.accessView">
+          <div ng-controller="InstanceActions" class="instance-actions" ng-show="ui.instance && ui.accessView">
 
             <div class="uproxy-box proxy"
                 ng-switch="ui.instance.trust.asProxy">

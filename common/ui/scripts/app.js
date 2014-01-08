@@ -6,7 +6,8 @@
  * UI to modify state and send messages.
  *
  * It does not directly connect to the App - that would be redundant as
- * everytime the popup was clicked, things would occur.
+ * everytime the popup was clicked, everything reloads, while it's
+ * straightforward to let the background page connect to the App.
  */
 'use strict';
 
@@ -165,68 +166,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         ui.oldDescription = model.me.description;
       }
 
-      // These work the same even if |client| is an instance - so long as it
-      // contains the attribute |clientId|.
-
-      // Request access through a friend.
-      $rootScope.requestAccess = function(instance) {
-        console.log("requestAccess: ", instance);
-        $rootScope.instanceTrustChange(instance.instanceId, 'request-access');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.cancelRequest = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'cancel-request');
-        ui.pendingProxyTrustChange = true;
-      }
-      $rootScope.acceptOffer = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'accept-offer');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.declineOffer = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'decline-offer');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.startAccess = function(instance) {
-        // We don't need to tell them we'll start proxying, we can just try to
-        // start. The SDP request will go through chat/identity network on its
-        // own.
-        appChannel.emit('start-using-peer-as-proxy-server',
-            instance.instanceId);
-        ui.proxy = instance;
-        ui.setProxying(true);
-      };
-      $rootScope.stopAccess = function(instance) {
-        instance = instance || ui.instance;
-        ui.setProxying(false);
-        appChannel.emit('stop-proxying', instance.instanceId);
-      };
-
-      // Providing access for a friend:
-      $rootScope.offerAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'offer');
-        ui.pendingClientTrustChange = true;
-        // instance.trust.asClient = 'offered';
-        // ui.instance.trust.asClient = instance;
-      };
-      $rootScope.grantAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'allow');
-        ui.pendingClientTrustChange = true;
-      };
-      $rootScope.revokeAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'deny');
-        ui.pendingClientTrustChange = true;
-      };
-      $rootScope.denyAccess = $rootScope.revokeAccess;
-
-      // |id| can be either a client id or a user id.
-      $rootScope.instanceTrustChange = function (id, action) {
-        // console.log('instance trust change ' + action + ', ' + id);
-        setTimeout(function() {
-          appChannel.emit('instance-trust-change',
-            { instanceId: id, action: action });
-        }, 0);
-      };
-
       // Bind UI functions to the scope, if they want to be accessed from DOM.
       // $rootScope.returnToRoster = function() ui.returnToRoster;
       // $rootScope.notificationSeen = ui.notificationSeen;
@@ -254,6 +193,71 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         onStateChange.addListener(updateDOM);
       }
     }  // run function
-  ]);
+  ])
 
+  // This controller deals with modification of consent bits and the actual
+  // starting/stopping of proxying for one particular instance.
+  .controller('InstanceActions', ['$scope', 'ui', 'appChannel',
+      function($s, ui, appChannel) {
 
+    // Helper which changes consent bits.
+    // These work the same even if |client| is an instance - so long as it
+    // contains the attribute |clientId|.
+    // |id| can be either a client id or a user id.
+    var _modifyConsent = function (id, action) {
+      setTimeout(function() {
+        appChannel.emit('instance-trust-change',
+          { instanceId: id, action: action });
+      }, 0); // TODO: why is this a timeout?
+    };
+    var _modifyProxyConsent = function(instance, action) {
+      _modifyConsent(instance.id, action);
+      ui.pendingProxyTrustChange = true;
+    }
+    var _modifyClientConsent = function(instance, action) {
+      _modifyConsent(instance.id, action);
+      ui.pendingClientTrustChange = true;
+    }
+
+    // Consent to access through a friend.
+    $s.requestAccess = function(instance) {
+      _modifyProxyConsent(instance, 'request-access');
+    };
+    $s.cancelRequest = function(instance) {
+      _modifyProxyConsent(instance, 'cancel-request');
+    }
+    $s.acceptOffer = function(instance) {
+      _modifyProxyConsent(instance, 'accept-offer');
+    };
+    $s.declineOffer = function(instance) {
+      _modifyProxyConsent(instance, 'decline-offer');
+    };
+
+    // Consent to provide access for a friend:
+    $s.offerAccess = function(instance) {
+      _modifyClientConsent(instance, 'offer');
+    };
+    $s.grantAccess = function(instance) {
+      _modifyClientConsent(instance, 'allow');
+    };
+    $s.revokeAccess = function(instance) {
+      _modifyConsent(instance.instanceId, 'deny');
+    };
+    $s.denyAccess = $s.revokeAccess;
+
+    $s.startAccess = function(instance) {
+      // We don't need to tell them we'll start proxying, we can just try to
+      // start. The SDP request will go through chat/identity network on its
+      // own.
+      appChannel.emit('start-using-peer-as-proxy-server',
+          instance.instanceId);
+      ui.proxy = instance;
+      ui.setProxying(true);
+    };
+    $s.stopAccess = function(instance) {
+      instance = instance || ui.instance;
+      ui.setProxying(false);
+      appChannel.emit('stop-proxying', instance.instanceId);
+    };
+
+  }]);

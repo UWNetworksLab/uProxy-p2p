@@ -27,12 +27,14 @@ class UI {
   advancedOptions = false;
   searchBar = true;
   search = '';
-  pendingProxyTrustChange = false;
-  pendingClientTrustChange = false;
   chatView = false;
   numClients = 0;
   myName = '';
   myPic = null;
+  // Disable action buttons immediately after clicking, until state updates
+  // completely to prevent duplicate clicks.
+  pendingProxyTrustChange = false;
+  pendingClientTrustChange = false;
 
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.

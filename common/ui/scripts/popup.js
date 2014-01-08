@@ -2,14 +2,13 @@
  * popup.js
  *
  * This is the script which controls the beavior of the popup component of the
- * frontend. The popup contains a contacts list and filters which allow the user
- * to conveniently access all desired uproxy info and interactions.
+ * frontend. The popup contains a contacts list, filters, options, connection
+ * details, and any other functionality required by the user. It extends from
+ * the base UProxyExtension angular module defined in app.js.
  */
-
 'use strict';
 
-
-var popup = angular.module('UProxyExtension-popup', ['UProxyExtension'])
+angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.

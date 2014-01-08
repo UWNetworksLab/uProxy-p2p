@@ -15,8 +15,9 @@ var dependencyInjector = angular.module('dependencyInjector', [])
     status: {
       connected: true
     },
-    emit: function() {
-      console.log('Called emit on appchannel.');
+    emit: function(name, args) {
+      console.log('appChannel.emit("' + name + '",', args);
+      // ui.synchronize();  // Fake sync because there's no backend update.
     }
   })
   .constant('onStateChange', null)
