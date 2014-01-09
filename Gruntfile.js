@@ -4,7 +4,6 @@
  * grunt
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
- *  xpi - Generates an .xpi for installation to Firefox.
  *  ff - Open up a firefox window with an instance of the extension running.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
@@ -52,13 +51,6 @@ var firefox_files = [
   'common/ui/lib/**',
 ];
 
-// Firefox concat files
-var firefox_concat_src = [
-  'firefox/data/scripts/event_on_emit_shim.js',
-  'firefox/data/scripts/freedom_shim_content.js',
-  'firefox/data/scripts/injector.js'
-];
-
 // Files which make static UI testing work. Bsae directory = 'common/ui/'
 var ui_isolation_files = [
   'popup.html',
@@ -89,26 +81,12 @@ module.exports = function(grunt) {
     copy: {
       chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
-      firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
+      firefox: {files: [{src: firefox_files, dest: 'firefox/'}]},
       uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
       }]},
       watch: {files: []},
-    },
-    concat: {
-      firefox: {
-        src: firefox_concat_src,
-        dest: 'firefox/data/scripts/dependencies.js',
-        options: {
-        // Replace all 'use strict' statements in the code with a single one at the top
-          banner: "'use strict';\n",
-          process: function(src, filepath) {
-            return '// Source: ' + filepath + '\n' +
-              src.replace(/(^|\n)[ \t]*('use strict'|"use strict");?\s*/g, '$1');
-          }
-        }
-      }
     },
     watch: {
       common: {//Watch everything
@@ -118,11 +96,6 @@ module.exports = function(grunt) {
                 // already being run
                 '!**/lib/**'],
         tasks: ['copy:watch'],
-        options: {spawn: false}
-      },
-      firefox_dep: {
-        files: firefox_concat_src,
-        tasks: ['concat:firefox'],
         options: {spawn: false}
       }
     },
@@ -138,7 +111,7 @@ module.exports = function(grunt) {
     },
     clean: ['chrome/app/common/**',
             'chrome/extension/src/common/**',
-            'firefox/data/common/**',
+            'firefox/common/**',
             'tmp',
             'uproxy.xpi'],
     jasmine: {
@@ -178,27 +151,6 @@ module.exports = function(grunt) {
         src: ['common/ui/scripts/ui.ts'],
         dest: 'common/ui/scripts/ui.js'
       }
-    },
-    'mozilla-addon-sdk': {
-      download: {
-        options: {
-          revision: 'firefox24'
-        }
-      },
-      xpi: {
-        options: {
-          extension_dir: 'firefox',
-          dist_dir: '.'
-        }
-      }
-    },
-    'mozilla-cfx': {
-      debug_run: {
-        options: {
-          extension_dir: 'firefox',
-          command: 'run'
-        }
-      }
     }
   });
 
@@ -210,7 +162,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-jsvalidate');
-  grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
 
@@ -249,18 +200,10 @@ module.exports = function(grunt) {
     'copy:chrome_ext',
   ]);
   grunt.registerTask('build_firefox', [
-    'concat:firefox',
     'copy:firefox'
-  ]);
-  grunt.registerTask('xpi', [
-    'build_firefox',
-    'mozilla-addon-sdk:download',
-    'mozilla-addon-sdk:xpi'
   ]);
   grunt.registerTask('ff', [
     'build_firefox',
-    'mozilla-addon-sdk:download',
-    'mozilla-cfx'
   ]);
   grunt.registerTask('ui', [
     'typescript:ui',
