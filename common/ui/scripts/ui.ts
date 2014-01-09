@@ -4,7 +4,8 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
-'use strict';
+/// <reference path="notify.d.ts"/>
+
 if (undefined !== UI) {
   console.log('ui.ts already included.');
   return false;
@@ -14,43 +15,6 @@ declare var model:any;
 declare var chrome:any;
 declare var appChannel:any;
 declare var onStateChange:any;
-
-
-// Describes the interface for notification settings. Implementations will be
-// browser specific.
-interface INotifications {
-  setIcon(iconFile : string) : void;
-  setLabel(text : string) : void;
-  setColor(color : string) : void;
-}
-
-class chromeNotifications implements INotifications {
-  ICON_DIR : string = '../common/ui/icons/';
-  setIcon(iconFile : string) {
-    // TODO: make this not require chrome
-    chrome.browserAction.setIcon({
-      path: this.ICON_DIR + iconFile
-    });
-  }
-  setLabel(text : string) {
-    chrome.browserAction.setBadgeText({ text: '' + text });
-  }
-  setColor(color) {
-    chrome.browserAction.setBadgeBackgroundColor({color: color});
-  }
-}
-
-class mockNotifications implements INotifications {
-  setIcon(iconFile) {
-    console.log('setting icon to ' + iconFile);
-  }
-  setLabel(text) {
-    console.log('setting label to: ' + text);
-  }
-  setColor(color) {
-    console.log('setting background color of the badge to: ' + color);
-  }
-}
 
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
@@ -76,15 +40,16 @@ class UI {
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.
 
-  constructor(browserType) {
-    switch (browserType) {
-      case 'chrome':
-        this.notify = new chromeNotifications();
-        break;
-      default:
-        this.notify = new mockNotifications();
-        break;
-    }
+  constructor(notifier) {
+    this.notify = notifier;
+    // switch (browserType) {
+      // case 'chrome':
+        // this.notify = new chromeNotifications();
+        // break;
+      // default:
+        // this.notify = new mockNotifications();
+        // break;
+    // }
   }
 
   // Keep track of currently viewed contact and instance.
@@ -271,7 +236,7 @@ class UI {
   // Make sure counters and UI-only state holders correctly reflect the model.
   // If |previousPatch| is provided, the search is optimized to only sync the
   // relevant entries.
-  synchronize(previousPatch) {
+  synchronize(previousPatch?:any) {
     var n = 0;  // Count up notifications
     for (var userId in model.roster) {
       var user = model.roster[userId];

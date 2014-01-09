@@ -175,8 +175,18 @@ module.exports = function(grunt) {
     },
     typescript: {
       ui: {
-        src: ['common/ui/scripts/ui.ts'],
+        src: ['common/ui/scripts/ui.ts',
+              'common/ui/scripts/ui.ts',
+        ],
         dest: 'common/ui/scripts/ui.js'
+      },
+      uistatic: {
+        src: ['uistatic/scripts/dependencies.ts'],
+        dest: 'uistatic/scripts/dependencies.js'
+      },
+      chrome: {
+        src: ['chrome/extension/src/scripts/background.ts'],
+        dest: 'chrome/extension/src/scripts/background.js'
       }
     },
     'mozilla-addon-sdk': {
@@ -247,6 +257,7 @@ module.exports = function(grunt) {
   grunt.registerTask('build_chrome', [
     'copy:chrome_app',
     'copy:chrome_ext',
+    'typescript:chrome',
   ]);
   grunt.registerTask('build_firefox', [
     'concat:firefox',
@@ -266,6 +277,7 @@ module.exports = function(grunt) {
     'typescript:ui',
     'sass:main',
     'copy:uistatic',
+    'typescript:uistatic',
   ]);
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [

@@ -1,19 +1,35 @@
 /**
- * background.js
+ * background.ts
  *
  * This is the background page for the Extension. It maintains a chrome runtime
  * connection with the App, consistent state changes with the UI (see ui.js)
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
-'use strict';
+console.log('Initializing chrome extension background page...');
 /* jshint -W098 */
 
-console.log('Initializing chrome extension background page...');
+/// <reference path="../common/ui/scripts/notify.d.ts"/>
+class chromeNotifications implements INotifications {
+  ICON_DIR : string = '../common/ui/icons/';
+  setIcon(iconFile : string) {
+    // TODO: make this not require chrome
+    chrome.browserAction.setIcon({
+      path: this.ICON_DIR + iconFile
+    });
+  }
+  setLabel(text : string) {
+    chrome.browserAction.setBadgeText({ text: '' + text });
+  }
+  setColor(color) {
+    chrome.browserAction.setBadgeBackgroundColor({color: color});
+  }
+}
+
 
 // This singleton is referenced in both options and popup.
 // UI object is defined in 'common/ui/scripts/ui.js'.
-var ui = new UI('chrome');
+var ui = new UI(new chromeNotifications());
 
 // --------------------- Communicating with the App ----------------------------
 // Chrome App Id for UProxy Packaged Chrome App.
