@@ -15,10 +15,47 @@ declare var chrome:any;
 declare var appChannel:any;
 declare var onStateChange:any;
 
+
+// Describes the interface for notification settings. Implementations will be
+// browser specific.
+interface INotifications {
+  setIcon(iconFile : string) : void;
+  setLabel(text : string) : void;
+  setColor(color : string) : void;
+}
+
+class chromeNotifications implements INotifications {
+  ICON_DIR : string = '../common/ui/icons/';
+  setIcon(iconFile : string) {
+    // TODO: make this not require chrome
+    chrome.browserAction.setIcon({
+      path: this.ICON_DIR + iconFile
+    });
+  }
+  setLabel(text : string) {
+    chrome.browserAction.setBadgeText({ text: '' + text });
+  }
+  setColor(color) {
+    chrome.browserAction.setBadgeBackgroundColor({color: color});
+  }
+}
+
+class mockNotifications implements INotifications {
+  setIcon(iconFile) {
+    console.log('setting icon to ' + iconFile);
+  }
+  setLabel(text) {
+    console.log('setting label to: ' + text);
+  }
+  setColor(color) {
+    console.log('setting background color of the badge to: ' + color);
+  }
+}
+
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
 class UI {
-  ICON_DIR : string = '../common/ui/icons/';
+  notify : INotifications;
   networks = ['google', 'facebook', 'xmpp'];
   notifications = 0;
   // TODO: splash should be set by state.
@@ -40,6 +77,14 @@ class UI {
   accessIds = 0;  // How many people are proxying through us.
 
   constructor(browserType) {
+    switch (browserType) {
+      case 'chrome':
+        this.notify = new chromeNotifications();
+        break;
+      default:
+        this.notify = new mockNotifications();
+        break;
+    }
   }
 
   // Keep track of currently viewed contact and instance.
@@ -63,18 +108,6 @@ class UI {
       'uproxy': false
   };
 
-  // -------------------------- Browser Icons / Labels  --------------------------
-  setIcon(iconFile : string) {
-    // TODO: make this not require chrome
-    chrome.browserAction.setIcon({
-      path: this.ICON_DIR + iconFile
-    });
-  }
-
-  setLabel(text : string) {
-    chrome.browserAction.setBadgeText({ text: '' + text });
-  }
-
   // Hackish way to fire the onStateChange dispatcher.
   refreshDOM() {
     onStateChange.dispatch();
@@ -83,22 +116,21 @@ class UI {
   setProxying(isProxying : boolean) {
     this.isProxying = isProxying;
     if (isProxying) {
-      this.setIcon('uproxy-19-p.png');
+      this.notify.setIcon('uproxy-19-p.png');
     } else {
-      this.setIcon('uproxy-19.png');
+      this.notify.setIcon('uproxy-19.png');
     }
   }
 
   setClients(numClients) {
     this.numClients = numClients;
     if (numClients > 0) {
-      chrome.browserAction.setBadgeBackgroundColor({color: '#008'});
-      this.setLabel('↓');
+      this.notify.setColor('#008');
+      this.notify.setLabel('↓');
     } else {
-      chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
+      this.notify.setColor('#800');
     }
   }
-
 
   // -------------------------------- Filters ------------------------------------
   // Toggling |filter| changes the visibility and ordering of roster entries.
@@ -152,7 +184,7 @@ class UI {
   }
 
   setNotifications(n) {
-    this.setLabel(n > 0? n : '');
+    this.notify.setLabel(n > 0? n : '');
     this.notifications = n < 0? 0 : n;
   }
 
@@ -263,7 +295,7 @@ class UI {
     this.setClients(c);
     this.pendingProxyTrustChange = false;
     this.pendingClientTrustChange = false;
-
+    // console.log('meow');
     // Generate list ordered by names.
     // var uids = Object.keys(model.roster);
     // var names = uids.map(function(id) { return model.roster[id].name; });

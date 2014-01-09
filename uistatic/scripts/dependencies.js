@@ -5,7 +5,7 @@ console.log('This is not a real uProxy frontend.');
 
 // Initialize model object to a mock. (state.js)
 var model = state || { identityStatus: {} };
-var ui = new UI();
+var ui = new UI('fake');
 
 var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
@@ -17,7 +17,7 @@ var dependencyInjector = angular.module('dependencyInjector', [])
     },
     emit: function(name, args) {
       console.log('appChannel.emit("' + name + '",', args);
-      // ui.synchronize();  // Fake sync because there's no backend update.
+      ui.synchronize();  // Fake sync because there's no backend update.
     }
   })
   .constant('onStateChange', null)

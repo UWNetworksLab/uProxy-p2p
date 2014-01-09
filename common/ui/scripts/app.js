@@ -180,7 +180,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      var updateDOM = function() {
+      $rootScope.updateDOM = function() {
         $rootScope.$apply(function () {
           // Also update pointers locally ?
           // $rootScope.instances = model.instances;
@@ -190,7 +190,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // State change event handler is browser specific, or it might not exist
       // at all.
       if (onStateChange) {
-        onStateChange.addListener(updateDOM);
+        onStateChange.addListener($rootScope.updateDOM);
       }
     }  // run function
   ])

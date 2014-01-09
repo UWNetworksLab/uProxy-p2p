@@ -13,7 +13,7 @@ console.log('Initializing chrome extension background page...');
 
 // This singleton is referenced in both options and popup.
 // UI object is defined in 'common/ui/scripts/ui.js'.
-var ui = new UI();
+var ui = new UI('chrome');
 
 // --------------------- Communicating with the App ----------------------------
 // Chrome App Id for UProxy Packaged Chrome App.
