@@ -74,13 +74,13 @@ var ui_isolation_files = [
 //var sources = ['common/backend/spec/*.js'];
 // These files loaded sequentially prior to spec files.
 var sourcesToTest = [
-  'common/backend/test/freedom-mocks.js',
-  'common/backend/util.js',
-  'common/backend/nouns-and-adjectives.js',
-  'common/backend/constants.js',
-  'common/backend/state-storage.js',
-  'common/backend/uproxy.js',
-  'common/backend/start-uproxy.js'
+  'common/test/freedom-mocks.js',
+  'common/util.js',
+  'common/nouns-and-adjectives.js',
+  'common/constants.js',
+  'common/state-storage.js',
+  'common/uproxy.js',
+  'common/start-uproxy.js'
 ];
 
 module.exports = function(grunt) {
@@ -146,18 +146,18 @@ module.exports = function(grunt) {
         // Files being tested
         src: sourcesToTest,
         options: {
-          helpers: ['common/backend/test/example-state.jsonvar',
-                    'common/backend/test/example-saved-state.jsonvar'],
-          specs: 'common/backend/spec/*Spec.js',
+          helpers: ['common/test/example-state.jsonvar',
+                    'common/test/example-saved-state.jsonvar'],
+          specs: 'common/spec/*Spec.js',
           keepRunner: true
         }
       }
     },
     jsvalidate: {
-      files: sourcesToTest.concat(['common/backend/spec/*Spec.js'])
+      files: sourcesToTest.concat(['common/spec/*Spec.js'])
     },
     jshint: {
-      all: sourcesToTest.concat(['common/backend/spec/*Spec.js']),
+      all: sourcesToTest.concat(['common/spec/*Spec.js']),
       options: {
         // 'strict': true, // Better to have it in the file
         // 'globalstrict': true,
@@ -175,13 +175,16 @@ module.exports = function(grunt) {
     },
     typescript: {
       ui: {
-        src: ['common/ui/scripts/ui.ts',
-        ],
+        src: ['common/ui/scripts/ui.ts'],
         dest: 'common/ui/scripts/ui.js'
       },
       uistatic: {
         src: ['uistatic/scripts/dependencies.ts'],
         dest: 'uistatic/scripts/dependencies.js'
+      },
+      uproxy: {
+        src: ['common/uproxy.ts'],
+        dest: 'common/uproxy.js'
       },
       chrome: {
         src: ['chrome/extension/src/scripts/background.ts'],
@@ -257,6 +260,7 @@ module.exports = function(grunt) {
   // Grunt tasks prepended with an '_' do not include this step, in order to
   // prevent redundancy.
   grunt.registerTask('common', [
+    'typescript:uproxy',
     'typescript:ui',
     'sass:main',
   ]);

@@ -1,7 +1,7 @@
 /**
- * uproxy.js
+ * uproxy.ts
  *
- * This is the primary backend script. It maintains in-memory state,
+ * This is the primary uproxy code. It maintains in-memory state,
  * checkpoints information to local storage, and synchronizes state with the
  * front-end.
  *
@@ -9,7 +9,13 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
-'use strict';
+/// <reference path='ui/scripts/ui.d.ts' />
+
+// TODO: remove these once these 'modules' become typescripted.
+declare var freedom:any;
+declare var store:any;
+declare var Trust:any;
+declare var ProxyState:any;
 
 // JS-Hint/JS-lint
 /* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,

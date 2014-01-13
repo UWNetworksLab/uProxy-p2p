@@ -1,5 +1,13 @@
 /// <reference path="notify.d.ts" />
 
+declare module Interfaces {
+
+  interface IUI {
+    updateIdentity(identity) : void;
+  }
+
+}
+
 declare class UI {
     public notify: INotifications;
     public networks: string[];
