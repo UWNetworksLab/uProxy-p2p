@@ -14,7 +14,7 @@ org.uproxy.loadFreedom = function() {
   script.setAttribute("type", "application/javascript");
   script.setAttribute('data-manifest',
                       'chrome://uproxy-common/content/backend/uproxy.json');
-  script.textContent = '{"strongIsolation": true, "stayLocal": true}';
+  script.textContent = '{"strongIsolation": true, "stayLocal": true, "portType": "Worker"}';
   script.src = 'chrome://uproxy-freedom/content/freedom.js';
   document.documentElement.appendChild(script);
 
@@ -23,13 +23,13 @@ org.uproxy.loadFreedom = function() {
   // increase timeout to open debugger in time!
   setTimeout(function() {
   mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-freedom/content/freedom.js');
-  }, 10000);
+  }, 1000);
 };
 
 window.addEventListener('load', function loadFreedom() {
   window.freedomcfg = function(register) {
     register('core.socket', org.uproxy.Socket_firefox);
-    register('core.runtime', org.uproxy.Runtime_firefox);
+    register('core.storage', org.uproxy.Storage_firefox);
   };
   org.uproxy.loadFreedom();
 }, false);
