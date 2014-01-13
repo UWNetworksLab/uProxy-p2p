@@ -6,10 +6,14 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
+/// <reference path="../common/ui/scripts/ui.d.ts"/>
 console.log('Initializing chrome extension background page...');
 /* jshint -W098 */
 
-/// <reference path="../common/ui/scripts/notify.d.ts"/>
+declare var chrome:any;
+declare var jsonpatch:any;
+declare var FreedomConnector:any;
+
 class chromeNotifications implements INotifications {
   ICON_DIR : string = '../common/ui/icons/';
   setIcon(iconFile : string) {
@@ -41,6 +45,8 @@ appChannel.onConnected.addListener(init);
 var _extensionInitialized = false;
 
 // Proxy Configuration.
+// TODO: This is throwing a ts warning which is actually okay, but should be
+// fixed later once the rest of everything is more typescriptafied.
 var proxyConfig = new window.BrowserProxyConfig();
 proxyConfig.clearConfig();
 
@@ -133,11 +139,11 @@ function init() {
 
 
 function checkRunningProxy() {
-  if (model && model.instances) {
-    for (var k in model.instances) {
-      if (model.instances.hasOwnProperty(k) && model.instances[k].status &&
-          model.instances[k].status.proxy) {
-        if ('running' == model.instances[k].status.proxy) {
+  if (model && model['instances']) {
+    for (var k in model['instances']) {
+      if (model['instances'].hasOwnProperty(k) && model['instances'][k].status &&
+          model['instances'][k].status.proxy) {
+        if ('running' == model['instances'][k].status.proxy) {
           proxyConfig.startUsingProxy();
           return;
         }

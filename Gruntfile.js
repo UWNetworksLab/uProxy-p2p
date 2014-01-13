@@ -176,7 +176,6 @@ module.exports = function(grunt) {
     typescript: {
       ui: {
         src: ['common/ui/scripts/ui.ts',
-              'common/ui/scripts/ui.ts',
         ],
         dest: 'common/ui/scripts/ui.js'
       },
@@ -253,16 +252,36 @@ module.exports = function(grunt) {
     'jshint:all',
     'jasmine'
   ]);
-  //Build task
-  grunt.registerTask('build_chrome', [
+
+  // Build the common directory first, which platform-specific builds depend on.
+  // Grunt tasks prepended with an '_' do not include this step, in order to
+  // prevent redundancy.
+  grunt.registerTask('common', [
+    'typescript:ui',
+    'sass:main',
+  ]);
+
+  // Chrome build tasks.
+  grunt.registerTask('_build_chrome', [
     'copy:chrome_app',
     'copy:chrome_ext',
     'typescript:chrome',
   ]);
-  grunt.registerTask('build_firefox', [
+  grunt.registerTask('build_chrome', [
+    'common',
+    '_build_chrome',
+  ]);
+
+  // Firefox build tasks.
+  grunt.registerTask('_build_firefox', [
     'concat:firefox',
     'copy:firefox'
   ]);
+  grunt.registerTask('build_firefox', [
+    'common',
+    '_build_firefox'
+  ]);
+
   grunt.registerTask('xpi', [
     'build_firefox',
     'mozilla-addon-sdk:download',
@@ -273,17 +292,23 @@ module.exports = function(grunt) {
     'mozilla-addon-sdk:download',
     'mozilla-cfx'
   ]);
-  grunt.registerTask('ui', [
-    'typescript:ui',
-    'sass:main',
+
+  // Stand-alone UI.
+  grunt.registerTask('_ui', [
     'copy:uistatic',
     'typescript:uistatic',
   ]);
+  grunt.registerTask('ui', [
+    'common',
+    '_ui'
+  ]);
+
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
-    'build_chrome',
-    'build_firefox',
-    'ui',
+    'common',
+    '_build_chrome',
+    '_build_firefox',
+    '_ui',
     'jsvalidate',
     'test'
   ]);

@@ -1,5 +1,4 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../common/ui/scripts/notify.d.ts'/>
 /// <reference path='../common/ui/scripts/ui.d.ts'/>
 console.log('This is not a real uProxy frontend.');
 
@@ -10,6 +9,7 @@ declare var angular:any;
 // Initialize model object to a mock. (state.js)
 var model = state || { identityStatus: {} };
 
+/// <reference path='../common/ui/scripts/notify.d.ts'/>
 class mockNotifications implements INotifications {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);

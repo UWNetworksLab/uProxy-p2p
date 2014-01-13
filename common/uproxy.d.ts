@@ -5,7 +5,7 @@
  */
 
 
-interface Uproxy {
+interface IUproxy {
 
   // Clears all state and storage.
   reset() : void;
@@ -35,7 +35,7 @@ interface Uproxy {
 }
 
 
-interface UproxyOptions {
+interface IUproxyOptions {
   allowNonroutableAddresses(enabled : bool) : void;
   setStunServers(servers : string[]) : void;
   setTurnServers(servers : string[]) : void;

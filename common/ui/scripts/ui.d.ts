@@ -1,4 +1,5 @@
 /// <reference path="notify.d.ts" />
+
 declare class UI {
     public notify: INotifications;
     public networks: string[];
