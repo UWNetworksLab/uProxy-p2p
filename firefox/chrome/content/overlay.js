@@ -20,9 +20,12 @@ org.uproxy.loadFreedom = function() {
 
   var mozIJSSubScriptLoader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
         .getService(Components.interfaces.mozIJSSubScriptLoader);
+
   // increase timeout to open debugger in time!
   setTimeout(function() {
-  mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-freedom/content/freedom.js');
+    // Uncomment this line and use it when the npm version of freedom is updated
+    // mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-freedom/content/freedom.js');
+    mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-scraps/content/freedom.js');
   }, 1000);
 };
 

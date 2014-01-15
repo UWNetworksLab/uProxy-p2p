@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<overlay id="freedom-runtime-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:html="http://www.w3.org/1999/xhtml">
+<overlay id="uproxy-freedom-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:html="http://www.w3.org/1999/xhtml">
   
   <script type="application/x-javascript" src="chrome://uproxy/content/client_socket.js" />
   <script type="application/x-javascript" src="chrome://uproxy/content/server_socket.js" />
