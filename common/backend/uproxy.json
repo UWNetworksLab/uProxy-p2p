@@ -20,7 +20,7 @@
       "url": "server/server.json"
     },
     "identity": {
-      "url": "social/identity.json",
+      "url": "identity/identity.json",
       "api": "identity"
     },
     "storage": {
