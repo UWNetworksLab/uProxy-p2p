@@ -43,10 +43,7 @@ if (!org.uproxy) org.uproxy = {};
     // TODO: Only install the button when UProxy is first installed.
     // Users may want to (re)move the button without needing to do it
     // every time FF starts up.
-    setTimeout(function() {
       installButton("nav-bar", "uproxy-button");
-      
-    }, 10000);
   }
   window.addEventListener("load", setupButton);
 
