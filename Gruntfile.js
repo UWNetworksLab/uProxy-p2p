@@ -4,7 +4,7 @@
  * grunt
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
- *  ff - Open up a firefox window with an instance of the extension running.
+ *  xpi - Generates an .xpi for installation to Firefox.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
@@ -88,6 +88,18 @@ module.exports = function(grunt) {
       }]},
       watch: {files: []},
     },
+    compress: {
+      main: {
+        options: {
+          mode: 'zip',
+          archive: 'uproxy.xpi'
+        },
+        expand: true,
+        cwd: "firefox",
+        src: ['**'],
+        dest: '.'
+      }
+    },
     watch: {
       common: {//Watch everything
         //TODO: this doesn't work, fix it.
@@ -155,6 +167,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
@@ -194,6 +207,10 @@ module.exports = function(grunt) {
     'jshint:all',
     'jasmine'
   ]);
+  grunt.registerTask('xpi', [
+    "build_firefox",
+    "compress:main"
+  ]);
   //Build task
   grunt.registerTask('build_chrome', [
     'copy:chrome_app',
@@ -201,9 +218,6 @@ module.exports = function(grunt) {
   ]);
   grunt.registerTask('build_firefox', [
     'copy:firefox'
-  ]);
-  grunt.registerTask('ff', [
-    'build_firefox',
   ]);
   grunt.registerTask('ui', [
     'typescript:ui',
