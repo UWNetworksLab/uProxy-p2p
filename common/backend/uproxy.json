@@ -19,14 +19,14 @@
     "uproxyserver": {
       "url": "server/server.json"
     },
-    "storage": {
-      "url": "storage/storage.json",
-      "api": "storage"
-    }
     "identity": {
       "url": "social/identity.json",
       "api": "identity"
     },
+    "storage": {
+      "url": "storage/storage.json",
+      "api": "storage"
+    }
   },
   "permissions": [
     "core.sctp-peerconnection"
