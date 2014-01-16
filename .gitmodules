@@ -1,6 +1,3 @@
 [submodule "firefox/packages/pathfinder"]
 	path = firefox/packages/pathfinder
 	url = https://github.com/Paul-E/addon-pathfinder.git
-[submodule "common/freedom"]
-	path = common/freedom
-	url = git@github.com:UWNetworksLab/freedom.git

@@ -23,7 +23,7 @@ script.setAttribute('data-manifest', 'common/backend/uproxy.json');
 
 // Uncomment for clearer but less portable module error messages.
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
-script.src = 'common/freedom/freedom.js';
+script.src = 'node_modules/freedom/freedom.js';
 document.head.appendChild(script);
 
 // Once the script had loaded, uProxyAppChannel is set to freedom, which is a channel to the
