@@ -1,3 +1,0 @@
-[submodule "firefox/packages/pathfinder"]
-	path = firefox/packages/pathfinder
-	url = https://github.com/Paul-E/addon-pathfinder.git
