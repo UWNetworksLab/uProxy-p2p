@@ -116,6 +116,14 @@ module.exports = function(grunt) {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
       },
+      freedom_setup: {
+        command: 'npm install',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
+      },
+      freedom_build: {
+        command: 'grunt',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
+      },
       rickroll: {
         command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {maxBuffer: 16777216}}
@@ -201,6 +209,8 @@ module.exports = function(grunt) {
 
   //Setup task
   grunt.registerTask('setup', [
+    'shell:freedom_setup',
+    'shell:freedom_build',
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
