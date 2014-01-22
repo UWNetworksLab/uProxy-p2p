@@ -78,9 +78,8 @@ appChannel.onConnected.addListener(init);
 var _extensionInitialized = false;
 
 // Proxy Configuration.
-// TODO: This is throwing a ts warning which is actually okay, but should be
-// fixed later once the rest of everything is more typescriptafied.
-var proxyConfig = new window.BrowserProxyConfig();
+// TODO: This should be actually typed
+var proxyConfig = new window['BrowserProxyConfig']();
 proxyConfig.clearConfig();
 
 // Sometimes the ui-ready fails. Keep trying until we get a valid reset state.
@@ -98,7 +97,7 @@ var syncTimer = null;     // Keep reference to the timer.
 
 // Rate limit synchronizations.
 function rateLimitedUpdates() {
-  ui.synchronize();
+  ui.sync();
   checkRunningProxy();
   onStateChange.dispatch();
 }

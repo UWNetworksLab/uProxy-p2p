@@ -11,6 +11,7 @@
  */
 /// <reference path='ui/scripts/ui.d.ts' />
 /// <reference path='constants.d.ts' />
+import C = Constants;
 
 // TODO: remove these once these 'modules' become typescripted.
 declare var freedom:any;
@@ -210,7 +211,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
-  if (Constants.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
+  if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
     console.log('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
@@ -305,14 +306,14 @@ function handleInactiveClient(msg) {
 // action -> target trust level.
 var TrustOp = {
   // If Alice |action|'s Bob, then Bob acts as the client.
-  'allow': Constants.Trust.YES,
-  'offer': Constants.Trust.OFFERED,
-  'deny': Constants.Trust.NO,
+  'allow': C.Trust.YES,
+  'offer': C.Trust.OFFERED,
+  'deny': C.Trust.NO,
   // Bob acts as the proxy.
-  'request-access': Constants.Trust.REQUESTED,
-  'cancel-request': Constants.Trust.NO,
-  'accept-offer': Constants.Trust.YES,
-  'decline-offer': Constants.Trust.NO
+  'request-access': C.Trust.REQUESTED,
+  'cancel-request': C.Trust.NO,
+  'accept-offer': C.Trust.YES,
+  'decline-offer': C.Trust.NO
 };
 
 // The user clicked on something to change the trust w.r.t. another user.
@@ -384,7 +385,7 @@ function receiveTrustMessage(msgInfo) {
 //
 function receiveStatus(data) {
   console.log('onStatus: ' + JSON.stringify(data));
-  data = restrictKeys(Constants.DEFAULT_STATUS, data);
+  data = restrictKeys(C.DEFAULT_STATUS, data);
   // userId is only specified when connecting or online.
   if (data.userId.length) {
     store.state.identityStatus[data.network] = data;
@@ -410,9 +411,9 @@ function receiveChange(rawData) {
     return false;
   } */
   try {
-    var data = restrictKeys(Constants.DEFAULT_ROSTER_ENTRY, rawData);
+    var data = restrictKeys(C.DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
-      data.clients[c] = restrictKeys(Constants.DEFAULT_ROSTER_CLIENT_ENTRY,
+      data.clients[c] = restrictKeys(C.DEFAULT_ROSTER_CLIENT_ENTRY,
                                      rawData.clients[c]);
     }
 
@@ -583,8 +584,8 @@ function makeMyInstanceMessage() {
     }
     firstIdentity.network = firstIdentity.clients[Object.keys(
         firstIdentity.clients)[0]].network;
-    result = restrictKeys(Constants.DEFAULT_INSTANCE_MESSAGE, store.state.me);
-    result.rosterInfo = restrictKeys(Constants.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
+    result = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, store.state.me);
+    result.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
   } catch (e) {
     console.log("Failed to repair identity when making an instance message.\n");
@@ -645,10 +646,10 @@ function sendQueuedInstanceMessages() {
 function receiveInstance(rawMsg) {
   console.log('receiveInstance from ' + rawMsg.fromUserId);
 
-  var msg = restrictKeys(Constants.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-  msg.data = restrictKeys(Constants.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+  var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+  msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
   msg.data.rosterInfo = restrictKeys(
-      Constants.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
+      C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
 
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;

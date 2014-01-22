@@ -1,28 +1,28 @@
-declare class Constants {
-    constructor();
-    static DEBUG: boolean;
-    static Trust: {
+declare module Constants {
+    // constructor();
+    export var DEBUG:boolean;
+    export var Trust: {
         NO: string;
         REQUESTED: string;
         OFFERED: string;
         YES: string;
     };
-    static ProxyState: {
+    export var ProxyState: {
         OFF: string;
         READY: string;
         RUNNING: string;
     };
-    static StateEntries: {
+    export var StateEntries: {
         ME: string;
         OPTIONS: string;
         INSTANCEIDS: string;
         INSTANCES: string;
     };
-    static DEFAULT_PROXY_STATUS: {
+    export var DEFAULT_PROXY_STATUS: {
         proxy: string;
         client: string;
     };
-    static DEFAULT_INSTANCE: {
+    export var DEFAULT_INSTANCE: {
         instanceId: any;
         keyHash: string;
         trust: {
@@ -42,55 +42,55 @@ declare class Constants {
             url: string;
         };
     };
-    static DEFAULT_STATUS: {
+    export var DEFAULT_STATUS: {
         message: string;
         network: string;
         status: string;
         userId: string;
     };
-    static DEFAULT_ROSTER_ENTRY: {
+    export var DEFAULT_ROSTER_ENTRY: {
         userId: string;
         name: string;
         url: string;
         imageData: string;
         clients: {};
     };
-    static DEFAULT_ROSTER_CLIENT_ENTRY: {
+    export var DEFAULT_ROSTER_CLIENT_ENTRY: {
         clientId: string;
         network: string;
         status: string;
     };
-    static DEFAULT_MESSAGE_ENVELOPE: {
+    export var DEFAULT_MESSAGE_ENVELOPE: {
         fromUserId: string;
         fromClientId: string;
         toUserId: string;
         data: {};
     };
-    static DEFAULT_INSTANCE_MESSAGE: {
+    export var DEFAULT_INSTANCE_MESSAGE: {
         type: string;
         instanceId: string;
         description: string;
         keyHash: string;
         rosterInfo: {};
     };
-    static DEFAULT_INSTANCE_MESSAGE_ROSTERINFO: {
+    export var DEFAULT_INSTANCE_MESSAGE_ROSTERINFO: {
         name: string;
         network: string;
         url: string;
         userId: string;
     };
-    static DEFAULT_MY_IDENTITY: {
+    export var DEFAULT_MY_IDENTITY: {
         userId: string;
         name: string;
         url: string;
         clients: {};
     };
-    static DEFAULT_MY_IDENTITY_CLIENT: {
+    export var DEFAULT_MY_IDENTITY_CLIENT: {
         clientId: string;
         network: string;
         status: string;
     };
-    static DEFAULT_ME: {
+    export var DEFAULT_ME: {
         'description': string;
         'instanceId': string;
         'keyHash': string;
@@ -107,7 +107,7 @@ declare class Constants {
             };
         };
     };
-    static DEFAULT_LOAD_STATE: {
+    export var DEFAULT_LOAD_STATE: {
         '_debug': boolean;
         '_msgLog': any[];
         'identityStatus': {};
@@ -138,7 +138,7 @@ declare class Constants {
             'turnServers': string[];
         };
     };
-    static DEFAULT_SAVE_STATE: {
+    export var DEFAULT_SAVE_STATE: {
         'me': {
             'description': string;
             'instanceId': string;

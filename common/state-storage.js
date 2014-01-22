@@ -1,36 +1,10 @@
-/**
-* State storage.
-* To see the format used by localstorage, see the file:
-*   scraps/local_storage_example.js
-*/
-// Stuff for jshint.
-// -- uproxy.js
-/* global freedom: false */
-/* global console: false */
-/* global log: false */
-// -- nouns-and-adjectives.js
-/* global nouns: false */
-/* global adjectives: false */
-// -- copnstants.js
-/* global DEBUG: false */
-/* global DEFAULT_LOAD_STATE: false */
-/* global DEFAULT_SAVE_STATE: false */
-/* global DEFAULT_INSTANCE: false */
-/* global DEFAULT_PROXY_STATUS: false */
-/* global StateEntries: false */
-// -- util.js
-/* global isDefined: false */
-/* global FinalCallback: false */
-/* global cloneDeep: false */
-/* global restrictKeys: false */
-"use strict";
-// --------------------------------------------------------------------------
+var C = Constants;
+
 function UProxyState() {
     this.storage = freedom.storage();
-    this.state = cloneDeep(DEFAULT_LOAD_STATE);
+    this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
 }
 
-// Reseting state should clear all of local storage.
 UProxyState.prototype.reset = function (callback) {
     this.storage.clear().done(function () {
         console.log("Cleared storage, now loading again...");
@@ -39,13 +13,6 @@ UProxyState.prototype.reset = function (callback) {
     }.bind(this));
 };
 
-// --------------------------------------------------------------------------
-// Wrapper functions for Freedom storage API to work with json instead of
-// strings.
-//
-// TODO: Consider using a storage provider that works with JSON.
-//
-// Note: callback may be null.
 UProxyState.prototype._loadKeyAsJson = function (key, callback, defaultIfUndefined) {
     this.storage.get(key).done(function (result) {
         console.log("Loaded from storage[" + key + "] (type: " + (typeof result) + "): " + result);
@@ -57,26 +24,20 @@ UProxyState.prototype._loadKeyAsJson = function (key, callback, defaultIfUndefin
     });
 };
 
-// Callback may be null.
 UProxyState.prototype._saveKeyAsJson = function (key, val, callback) {
     this.storage.set(key, JSON.stringify(val)).done(callback);
 };
 
-// --------------------------------------------------------------------------
-// If one is running UProxy for the first time, or without any available
-// instance data, generate an instance for oneself.
 UProxyState.prototype._generateMyInstance = function () {
     var i, val, hex, id, key;
 
     var me = cloneDeep(DEFAULT_LOAD_STATE.me);
 
     for (i = 0; i < 20; i++) {
-        // 20 bytes for the instance ID.  This we can keep.
         val = Math.floor(Math.random() * 256);
         hex = val.toString(16);
         me.instanceId = me.instanceId + ('00'.substr(0, 2 - hex.length) + hex);
 
-        // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
         val = Math.floor(Math.random() * 256);
         hex = val.toString(16);
 
@@ -95,16 +56,10 @@ UProxyState.prototype._generateMyInstance = function () {
     return me;
 };
 
-// A simple predicate function to see if we can talk to this client.
 UProxyState.prototype.isMessageableUproxyClient = function (client) {
     return 'messageable' == client.status;
 };
 
-// --------------------------------------------------------------------------
-//  Users's profile for this instance
-// --------------------------------------------------------------------------
-// Saving your "me" state involves saving all fields that are state.me & that
-// are in the DEFAULT_SAVE_STATE.
 UProxyState.prototype.saveMeToStorage = function (callback) {
     this._saveKeyAsJson(StateEntries.ME, restrictKeys(DEFAULT_SAVE_STATE.me, this.state.me), callback);
 };
@@ -127,9 +82,6 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
     }.bind(this), null);
 };
 
-// --------------------------------------------------------------------------
-//  Options
-// --------------------------------------------------------------------------
 UProxyState.prototype.saveOptionsToStorage = function (callback) {
     this._saveKeyAsJson(StateEntries.OPTIONS, restrictKeys(DEFAULT_SAVE_STATE.options, this.state.options), callback);
 };
@@ -143,12 +95,6 @@ UProxyState.prototype.loadOptionsFromStorage = function (callback) {
     }.bind(this), {});
 };
 
-// --------------------------------------------------------------------------
-//  Syncronizing Instances
-// --------------------------------------------------------------------------
-// Give back the instance from a user ID (currently by searching through all
-// user ids)
-// TODO: consider creating a userId <-> instanceId multi-mapping.
 UProxyState.prototype.instanceOfUserId = function (userId) {
     for (var i in this.state.instances) {
         if (this.state.instances[i].rosterInfo.userId == userId)
@@ -157,18 +103,12 @@ UProxyState.prototype.instanceOfUserId = function (userId) {
     return null;
 };
 
-// Should be called whenever an instance is created/loaded.
-// Assumes that the instance corresponding to instanceId has a userId. Although
-// the user doens't need to currently be in the roster - this function will add
-// to the roster if the userId is not already present.
 UProxyState.prototype.syncRosterFromInstanceId = function (instanceId) {
     var instance = this.state.instances[instanceId];
     var userId = instance.rosterInfo.userId;
     var user = this.state.roster[userId];
 
     if (!user) {
-        // TODO: do proper reconsilisation: probably we should do a diff check, and
-        // maybe update instance.nodify.
         this.state.roster[userId] = {};
         user = this.state.roster[userId];
         user.clients = {};
@@ -180,16 +120,11 @@ UProxyState.prototype.syncRosterFromInstanceId = function (instanceId) {
     }
 };
 
-// Called when a new userId is available. & when a new instance
-// happens. We check to see if we need to update our instance information.
-// Assumes that an instacne already exists for this userId.
 UProxyState.prototype.syncInstanceFromInstanceMessage = function (userId, clientId, data) {
     var instanceId = data.instanceId;
 
-    // Some local metadata isn't transmitted.  Add it in.
     data = restrictKeys(DEFAULT_INSTANCE, data);
 
-    // Before everything, remember the clientId - instanceId relation.
     var oldClientId = this.state.instanceToClient[instanceId];
     this.state.clientToInstance[clientId] = instanceId;
     this.state.instanceToClient[instanceId] = clientId;
@@ -205,7 +140,6 @@ UProxyState.prototype.syncInstanceFromInstanceMessage = function (userId, client
         delete this.state.clientToInstance[oldClientId];
     }
 
-    // Prepare new instance object if necessary.
     var instance = this.state.instances[instanceId];
     if (!instance) {
         console.log('Preparing NEW Instance... ');
@@ -221,10 +155,6 @@ UProxyState.prototype.syncInstanceFromInstanceMessage = function (userId, client
     this.syncRosterFromInstanceId(instanceId);
 };
 
-// --------------------------------------------------------------------------
-//  Loading & Saving Instances
-// --------------------------------------------------------------------------
-// Note: users of this assume that the callback *will* be calld if specified.
 UProxyState.prototype.loadInstanceFromId = function (instanceId, callback) {
     this._loadKeyAsJson('instance/' + instanceId, function (instance) {
         if (!instance) {
@@ -241,13 +171,9 @@ UProxyState.prototype.loadInstanceFromId = function (instanceId, callback) {
     }.bind(this), null);
 };
 
-// Loads all instances from storage. Takes in a FinalCallbacker to make sure
-// that the desired callback is called when the last instance is loaded.
 UProxyState.prototype.loadAllInstances = function (callback) {
     var finalCallbacker = new FinalCallback(callback);
 
-    // Set the state |instances| from the local storage entries.
-    // Load each instance in instance IDs.
     this._loadKeyAsJson(StateEntries.INSTANCEIDS, function (instanceIds) {
         console.log('Loading Instance IDs: ', instanceIds);
         for (var i = 0; i < instanceIds.length; i++) {
@@ -255,33 +181,22 @@ UProxyState.prototype.loadAllInstances = function (callback) {
         }
     }.bind(this), []);
 
-    // There has to be at least one callback.
     var atLeastOneCountedCallback = finalCallbacker.makeCountedCallback();
     if (atLeastOneCountedCallback)
         atLeastOneCountedCallback();
 };
 
-// Save the instance to local storage. Assumes that both the Instance
-// notification and XMPP user and client information exist and are up-to-date.
-// |instanceId| - string instance identifier (a 40-char hex string)
 UProxyState.prototype.saveInstance = function (instanceId, callback) {
     var finalCallbacker = new FinalCallback(callback);
 
-    // TODO: optimise to only save when different to what was in storage;
     this._saveKeyAsJson(StateEntries.INSTANCEIDS, Object.keys(this.state[StateEntries.INSTANCES]), finalCallbacker.makeCountedCallback());
 
     var instance = this.state.instances[instanceId];
 
-    // Be obscenely strict here, to make sure we don't propagate buggy
-    // state across runs (or versions) of UProxy.
     var instanceDataToSave = {
-        // Instance stuff:
-        // annotation: getKeyWithDefault(instanceInfo, 'annotation',
-        //    instanceInfo.description),
         instanceId: instanceId,
         keyHash: instance.keyHash,
         trust: instance.trust,
-        // Overlay protocol used to get descriptions.
         description: instance.description,
         notify: Boolean(instance.notify),
         rosterInfo: instance.rosterInfo
@@ -296,18 +211,9 @@ UProxyState.prototype.saveAllInstances = function (callback) {
         this.saveInstance(instanceId, finalCallbacker.makeCountedCallback());
     }
 
-    // Note that despite the fact that the instanceIds are written when we write
-    // each instance, we need to write them again anyway, incase they got removed,
-    // in which case we need to write the empty list.
     this._saveKeyAsJson(StateEntries.INSTANCEIDS, Object.keys(this.state[StateEntries.INSTANCES]), finalCallbacker.makeCountedCallback());
 };
 
-// --------------------------------------------------------------------------
-//  Whole state
-// --------------------------------------------------------------------------
-// Load all aspects of the state concurrently. Note: we make the callback only
-// once the last of the loading operations has completed. We do this using the
-// FinalCaller class.
 UProxyState.prototype.loadStateFromStorage = function (callback) {
     this.state = restrictKeys(DEFAULT_LOAD_STATE, this.state);
     var finalCallbacker = new FinalCallback(callback);

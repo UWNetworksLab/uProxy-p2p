@@ -29,7 +29,8 @@ var chrome_app_files = [
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
   // scraps is a place for throwing example code for demonstrating stuff to each other.
-  'common/scraps/**'
+  'common/scraps/**',
+  'common/constants.js'
 ];
 var chrome_ext_files = [
   'common/scraps/**',
@@ -78,7 +79,7 @@ var sourcesToTest = [
   'common/util.js',
   'common/nouns-and-adjectives.js',
   'common/constants.js',
-  'common/state-storage.js',
+  'common/statestorage.js',
   'common/uproxy.js',
   'common/start-uproxy.js'
 ];
@@ -93,7 +94,7 @@ module.exports = function(grunt) {
       uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
-      }, {
+        }, {
         src: 'common/core.d.ts', dest: 'uistatic/common/core.d.ts'
       }]},
       watch: {files: []},
@@ -155,9 +156,9 @@ module.exports = function(grunt) {
         }
       }
     },
-    jsvalidate: {
-      files: sourcesToTest.concat(['common/spec/*Spec.js'])
-    },
+    // jsvalidate: {
+      // files: sourcesToTest.concat(['common/spec/*Spec.js'])
+    // },
     jshint: {
       all: sourcesToTest.concat(['common/spec/*Spec.js']),
       options: {
@@ -191,7 +192,15 @@ module.exports = function(grunt) {
       chrome: {
         src: ['chrome/extension/src/scripts/background.ts'],
         dest: 'chrome/extension/src/scripts/background.js'
-      }
+      },
+      constants: {
+        src: ['common/constants.ts'],
+        dest: 'common/constants.js'
+      },
+      statestorage: {
+        src: ['common/state-storage.ts'],
+        dest: 'common/state-storage.js'
+      },
     },
     'mozilla-addon-sdk': {
       download: {
@@ -220,10 +229,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
+  // grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.loadNpmTasks('grunt-jsvalidate');
+  // grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
@@ -254,7 +263,7 @@ module.exports = function(grunt) {
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
-    'jshint:all',
+    // 'jshint:all',
     'jasmine'
   ]);
 
@@ -264,6 +273,8 @@ module.exports = function(grunt) {
   grunt.registerTask('common', [
     'typescript:uproxy',
     'typescript:ui',
+    'typescript:constants',
+    'typescript:statestorage',
     'sass:main',
   ]);
 
@@ -315,7 +326,7 @@ module.exports = function(grunt) {
     '_build_chrome',
     '_build_firefox',
     '_ui',
-    'jsvalidate',
+    // 'jsvalidate',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);
