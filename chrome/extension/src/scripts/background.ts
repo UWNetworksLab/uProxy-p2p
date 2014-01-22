@@ -6,7 +6,9 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
-/// <reference path="../common/ui/scripts/ui.d.ts"/>
+/// <reference path='../common/core.d.ts'/>
+/// <reference path="../common/ui/scripts/ui.ts"/>
+
 console.log('Initializing chrome extension background page...');
 /* jshint -W098 */
 
@@ -14,8 +16,8 @@ declare var chrome:any;
 declare var jsonpatch:any;
 declare var FreedomConnector:any;
 
-class chromeNotifications implements INotifications {
-  ICON_DIR : string = '../common/ui/icons/';
+class ChromeNotifications implements INotifications {
+  ICON_DIR:string = '../common/ui/icons/';
   setIcon(iconFile : string) {
     // TODO: make this not require chrome
     chrome.browserAction.setIcon({
@@ -30,10 +32,41 @@ class chromeNotifications implements INotifications {
   }
 }
 
+class ChromeAppConnector implements Interfaces.ICore {
+  constuctor() {}
+  reset() {
+    console.log('Resetting.');
+  }
+  sendInstance(clientId) {
+    console.log('Sending instance ID to ' + clientId);
+  }
+  modifyConsent(instanceId, action) {
+    console.log('Modifying consent.');
+  }
+  start(instanceId) {
+    console.log('Starting to proxy through ' + instanceId);
+  }
+  stop(instanceId) {
+    console.log('Stopping proxy through ' + instanceId);
+  }
+  updateDescription(description) {
+    console.log('Updating description to ' + description);
+  }
+  changeOption(option) {
+    console.log('Changing option ' + option);
+  }
+
+  // Connection to the app.
+  _sendMessage(msg) {
+    console.log('Sending message.');
+  }
+}
 
 // This singleton is referenced in both options and popup.
 // UI object is defined in 'common/ui/scripts/ui.js'.
-var ui = new UI(new chromeNotifications());
+var ui = new UI(
+    new ChromeNotifications(),
+    new ChromeAppConnector());
 
 // --------------------- Communicating with the App ----------------------------
 // Chrome App Id for UProxy Packaged Chrome App.
@@ -55,7 +88,7 @@ function pollAppForInitialization() {
 }
 
 // ---------------------------- State Changes ----------------------------------
-var model = {};  // Singleton angularjs model for either popup or options.
+var model:any = {};  // Singleton angularjs model for either popup or options.
 var onStateChange = new chrome.Event();
 
 // Rate Limiting for state updates (ms)
@@ -106,7 +139,6 @@ function init() {
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
-    // var currentKeys = Object.keys(model);
     for (var k in model) {
       delete model[k];
     }

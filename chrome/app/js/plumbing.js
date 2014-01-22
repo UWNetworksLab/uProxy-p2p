@@ -18,10 +18,10 @@ window.freedomcfg = function(register) {
   register("core.storage", Storage_chrome);
 }
 
+// Start up freedom with data-manifest set to uproxy.json.
+// Uncomment for clearer but less portable module error messages.
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'common/uproxy.json');
-
-// Uncomment for clearer but less portable module error messages.
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
 script.src = 'common/freedom/freedom.js';
 document.head.appendChild(script);

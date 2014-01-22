@@ -5,6 +5,8 @@
  * TODO: firefox bindings.
  */
 /// <reference path="notify.d.ts"/>
+/// <reference path="../../core.d.ts"/>
+/// <reference path="ui.d.ts" />
 
 if (undefined !== UI) {
   console.log('ui.ts already included.');
@@ -16,10 +18,15 @@ declare var chrome:any;
 declare var appChannel:any;
 declare var onStateChange:any;
 
+
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
-class UI {
-  notify : INotifications;
+class UI implements IUI {
+
+  // Primary interactions between major components.
+  core:Interfaces.ICore;
+  notify:INotifications;
+
   networks = ['google', 'facebook', 'xmpp'];
   notifications = 0;
   // TODO: splash should be set by state.
@@ -40,16 +47,9 @@ class UI {
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.
 
-  constructor(notifier) {
+  constructor(public notifier:INotifications, core:Interfaces.ICore) {
     this.notify = notifier;
-    // switch (browserType) {
-      // case 'chrome':
-        // this.notify = new chromeNotifications();
-        // break;
-      // default:
-        // this.notify = new mockNotifications();
-        // break;
-    // }
+    this.core = core;
   }
 
   // Keep track of currently viewed contact and instance.
@@ -95,6 +95,16 @@ class UI {
     } else {
       this.notify.setColor('#800');
     }
+  }
+
+
+  // -------------------------------- Consent ------------------------------------
+  modifyConsent(id:string, action:Interfaces.Consent.Action) {
+    if (!this.core) {
+      console.log('UI not connected to core - cannot modify consent.');
+      return;
+    }
+    this.core.modifyConsent(id, action);
   }
 
   // -------------------------------- Filters ------------------------------------
@@ -168,6 +178,13 @@ class UI {
     this.decNotifications();
   }
 
+  syncInstance(instance : any) {}
+  updateMappings() {}
+
+  updateIdentity(identity) {}
+  sendConsent() {}
+  addNotification() {}
+
   syncMe() {
     var id = _getMyId();
     if (!id) {
@@ -236,7 +253,7 @@ class UI {
   // Make sure counters and UI-only state holders correctly reflect the model.
   // If |previousPatch| is provided, the search is optimized to only sync the
   // relevant entries.
-  synchronize(previousPatch?:any) {
+  sync(previousPatch?:any) {
     var n = 0;  // Count up notifications
     for (var userId in model.roster) {
       var user = model.roster[userId];

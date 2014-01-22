@@ -28,17 +28,17 @@ var chrome_app_files = [
   'common/backend/**',
   '!common/backend/spec/**',
   '!common/backend/identity/xmpp/node-xmpp/**',
-  // scraps is a palce for throwing example code for demonstrating stuff to each other.
+  // scraps is a place for throwing example code for demonstrating stuff to each other.
   'common/scraps/**'
 ];
 var chrome_ext_files = [
-  // scraps is a palce for throwing example code for demonstrating stuff to each other.
   'common/scraps/**',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',
   'common/ui/styles/**',
   'common/ui/lib/**',
+  'common/core.d.ts',
 ];
 var firefox_files = [
   'common/backend/**',
@@ -93,6 +93,8 @@ module.exports = function(grunt) {
       uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
+      }, {
+        src: 'common/core.d.ts', dest: 'uistatic/common/core.d.ts'
       }]},
       watch: {files: []},
     },

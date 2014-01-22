@@ -3,22 +3,51 @@ console.log('This is not a real uProxy frontend.');
 
 var model = state || { identityStatus: {} };
 
-var mockNotifications = (function () {
-    function mockNotifications() {
+var MockNotifications = (function () {
+    function MockNotifications() {
     }
-    mockNotifications.prototype.setIcon = function (iconFile) {
+    MockNotifications.prototype.setIcon = function (iconFile) {
         console.log('setting icon to ' + iconFile);
     };
-    mockNotifications.prototype.setLabel = function (text) {
+    MockNotifications.prototype.setLabel = function (text) {
         console.log('setting label to: ' + text);
     };
-    mockNotifications.prototype.setColor = function (color) {
+    MockNotifications.prototype.setColor = function (color) {
         console.log('setting background color of the badge to: ' + color);
     };
-    return mockNotifications;
+    return MockNotifications;
 })();
 
-var ui = new UI(new mockNotifications());
+var MockCore = (function () {
+    function MockCore() {
+    }
+    MockCore.prototype.constuctor = function () {
+    };
+    MockCore.prototype.reset = function () {
+        console.log('Resetting.');
+    };
+    MockCore.prototype.sendInstance = function (clientId) {
+        console.log('Sending instance ID to ' + clientId);
+    };
+    MockCore.prototype.modifyConsent = function (instanceId, action) {
+        console.log('Modifying consent.');
+    };
+    MockCore.prototype.start = function (instanceId) {
+        console.log('Starting to proxy through ' + instanceId);
+    };
+    MockCore.prototype.stop = function (instanceId) {
+        console.log('Stopping proxy through ' + instanceId);
+    };
+    MockCore.prototype.updateDescription = function (description) {
+        console.log('Updating description to ' + description);
+    };
+    MockCore.prototype.changeOption = function (option) {
+        console.log('Changing option ' + option);
+    };
+    return MockCore;
+})();
+
+var ui = new UI(new MockNotifications(), new MockCore());
 
 var dependencyInjector = angular.module('dependencyInjector', []).filter('i18n', function () {
     return function (key) {
@@ -30,6 +59,6 @@ var dependencyInjector = angular.module('dependencyInjector', []).filter('i18n',
     },
     emit: function (name, args) {
         console.log('appChannel.emit("' + name + '",', args);
-        ui.synchronize();
+        ui.sync();
     }
 }).constant('onStateChange', null).constant('ui', ui).constant('model', model).constant('roster', null);

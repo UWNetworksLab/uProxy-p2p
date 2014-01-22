@@ -206,8 +206,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     // |id| can be either a client id or a user id.
     var _modifyConsent = function (id, action) {
       setTimeout(function() {
-        appChannel.emit('instance-trust-change',
-          { instanceId: id, action: action });
+        ui.modifyConsent(id, action);
+        // appChannel.emit('instance-trust-change',
+          // { instanceId: id, action: action });
       }, 0); // TODO: why is this a timeout?
     };
     var _modifyProxyConsent = function(instance, action) {

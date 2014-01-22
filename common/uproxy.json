@@ -1,3 +1,4 @@
+// Freedom manifest for uProxy.
 {
   "name": "UProxy",
   "description": "The UProxy backend provides a mesh web proxy, access the web through your social connections.",
