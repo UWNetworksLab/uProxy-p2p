@@ -16,7 +16,6 @@ import C = Constants;
 // TODO: remove these once these 'modules' become typescripted.
 declare var freedom:any;
 declare var store:any;
-declare var Trust:any;
 declare var ProxyState:any;
 declare var restrictKeys:any;
 declare var _localTestProxying:any;
@@ -728,18 +727,18 @@ function receiveConsent(msg) {
 // consent to being their client. If the local state for trusting them to
 // be our client is Yes or Offered, we consent to being their proxy.
 function _determineConsent(trust) {
-  return { asProxy:  [Trust.YES, Trust.OFFERED].indexOf(trust.asClient) >= 0,
-           asClient: [Trust.YES, Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
+  return { asProxy:  [C.Trust.YES, C.Trust.OFFERED].indexOf(trust.asClient) >= 0,
+           asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
 }
 
 function _composeTrustFromConsent(myConsent, theirConsent) {
   return {
       asProxy: theirConsent.asProxy?
-          (myConsent.asClient? Trust.YES : Trust.OFFERED) :
-          (myConsent.asClient? Trust.REQUESTED : Trust.NO),
+          (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
+          (myConsent.asClient? C.Trust.REQUESTED : C.Trust.NO),
       asClient: theirConsent.asClient?
-          (myConsent.asProxy? Trust.YES : Trust.REQUESTED) :
-          (myConsent.asProxy? Trust.OFFERED : Trust.NO)
+          (myConsent.asProxy? C.Trust.YES : C.Trust.REQUESTED) :
+          (myConsent.asProxy? C.Trust.OFFERED : C.Trust.NO)
   };
 }
 

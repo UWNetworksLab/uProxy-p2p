@@ -10,7 +10,6 @@ declare var freedom:any;
 declare var cloneDeep:any;
 declare var adjectives:any;
 declare var nouns:any;
-declare var StateEntries:any;
 declare var FinalCallback:any;
 declare var restrictKeys:any;
 declare var isDefined:any;
@@ -112,13 +111,13 @@ UProxyState.prototype.isMessageableUproxyClient = function(client) {
 // are in the C.DEFAULT_SAVE_STATE.
 UProxyState.prototype.saveMeToStorage = function (callback) {
   this._saveKeyAsJson(
-      StateEntries.ME,
+      C.StateEntries.ME,
       restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me),
       callback);
 };
 
 UProxyState.prototype.loadMeFromStorage = function (callback) {
-  this._loadKeyAsJson(StateEntries.ME, function(me) {
+  this._loadKeyAsJson(C.StateEntries.ME, function(me) {
     if (null === me) {
       this.state.me = this._generateMyInstance();
       this.saveMeToStorage(callback);
@@ -138,13 +137,13 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
 // --------------------------------------------------------------------------
 UProxyState.prototype.saveOptionsToStorage = function(callback) {
   this._saveKeyAsJson(
-      StateEntries.OPTIONS,
+      C.StateEntries.OPTIONS,
       restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options),
       callback);
 };
 
 UProxyState.prototype.loadOptionsFromStorage = function(callback) {
-  this._loadKeyAsJson(StateEntries.OPTIONS, function (loadedOptions) {
+  this._loadKeyAsJson(C.StateEntries.OPTIONS, function (loadedOptions) {
     this.state.options =
         restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
     if (callback) { callback(); }
@@ -257,7 +256,7 @@ UProxyState.prototype.loadAllInstances = function(callback) {
   var finalCallbacker = new FinalCallback(callback);
   // Set the state |instances| from the local storage entries.
   // Load each instance in instance IDs.
-  this._loadKeyAsJson(StateEntries.INSTANCEIDS, function(instanceIds) {
+  this._loadKeyAsJson(C.StateEntries.INSTANCEIDS, function(instanceIds) {
     console.log('Loading Instance IDs: ', instanceIds);
     for (var i = 0; i < instanceIds.length; i++) {
       this.loadInstanceFromId(instanceIds[i],
@@ -276,8 +275,8 @@ UProxyState.prototype.loadAllInstances = function(callback) {
 UProxyState.prototype.saveInstance = function(instanceId, callback) {
   var finalCallbacker = new FinalCallback(callback);
   // TODO: optimise to only save when different to what was in storage;
-  this._saveKeyAsJson(StateEntries.INSTANCEIDS,
-      Object.keys(this.state[StateEntries.INSTANCES]),
+  this._saveKeyAsJson(C.StateEntries.INSTANCEIDS,
+      Object.keys(this.state[C.StateEntries.INSTANCES]),
       finalCallbacker.makeCountedCallback());
 
   var instance = this.state.instances[instanceId];
@@ -310,8 +309,8 @@ UProxyState.prototype.saveAllInstances = function(callback) {
   // Note that despite the fact that the instanceIds are written when we write
   // each instance, we need to write them again anyway, incase they got removed,
   // in which case we need to write the empty list.
-  this._saveKeyAsJson(StateEntries.INSTANCEIDS,
-      Object.keys(this.state[StateEntries.INSTANCES]),
+  this._saveKeyAsJson(C.StateEntries.INSTANCEIDS,
+      Object.keys(this.state[C.StateEntries.INSTANCES]),
       finalCallbacker.makeCountedCallback());
 };
 
