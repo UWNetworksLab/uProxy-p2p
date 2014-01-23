@@ -14,7 +14,6 @@
 
     <script src="scripts/app.js"></script>
     <script src="scripts/popup.js"></script>
-    <script src="scripts/ui.js"></script>
     <script src="../../scripts/state.js"></script>
     <script src="../../scripts/dependencies.js"></script>
     <!-- endbuild -->
@@ -29,11 +28,11 @@
       </div>
       <span class="description">Safe Passage for the Web.</span>
 
-      <div class="app-missing-warning" ng-hide="uProxyAppConnectionStatus.connected">
+      <div class="app-missing-warning" ng-hide="uProxyAppConnected">
         You need to install the UProxy app as well as the UProxy extension.
       </div>
 
-      <div ng-show="uProxyAppConnectionStatus.connected">
+      <div ng-show="uProxyAppConnected">
         <input type="text" ng-model="model.me.description"
             id="my-description"
             placeholder="Device description"

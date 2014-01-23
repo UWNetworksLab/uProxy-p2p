@@ -183,6 +183,7 @@ module.exports = function(grunt) {
       },
       uistatic: {
         src: ['uistatic/scripts/dependencies.ts'],
+              // 'uistatic/common/ui/scripts/ui.ts'],
         dest: 'uistatic/scripts/dependencies.js'
       },
       uproxy: {

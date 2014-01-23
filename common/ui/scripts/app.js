@@ -27,12 +27,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$http',
     '$rootScope',
     'ui',                       // via dependencyInjector.
-    'appChannel',               // via dependencyInjector.
+    // 'appChannel',               // via dependencyInjector.
     'onStateChange',
     'model',
     'roster',
     function($filter, $http, $rootScope, ui,
-             appChannel, onStateChange,
+             // appChannel,
+             onStateChange,
              model, roster) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
@@ -40,7 +41,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
-      $rootScope.uProxyAppConnectionStatus = appChannel.status;
+
+      $rootScope.uProxyAppConnected = ui.isConnected;
 
       // Remember the state change hook.
       $rootScope.update = onStateChange;
@@ -75,11 +77,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.resetState = function () {
         localStorage.clear();
-        appChannel.emit('reset', null);
+        // appChannel.emit('reset', null);
+        ui.reset();
       };
 
       $rootScope.sendInstance = function (clientId) {
-        appChannel.emit('send-instance', clientId);
+        // appChannel.emit('send-instance', clientId);
+        ui.sendInstance(clientId);
       };
 
       // Takes in an entry from the roster table.
@@ -149,30 +153,24 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
-        appChannel.emit('login', network);
-        ui.splashPage = false;
+        ui.login(network);
       };
       $rootScope.logout = function(network) {
         console.log('!!! logout ' + network);
-        appChannel.emit('logout', network);
-        ui.proxy = null;
+        ui.logout(network);
       };
 
       $rootScope.updateDescription = function() {
-        if (ui.oldDescription &&
-           (ui.oldDescription != model.me.description)) {
-          appChannel.emit('update-description', model.me.description);
-        }
-        ui.oldDescription = model.me.description;
+        ui.updateDescription(model.me.description);
       }
 
       // Bind UI functions to the scope, if they want to be accessed from DOM.
       // $rootScope.returnToRoster = function() ui.returnToRoster;
       // $rootScope.notificationSeen = ui.notificationSeen;
 
-      $rootScope.changeOption = function (key, value) {
-        appChannel.emit('change-option', {key: key, value: value});
-      }
+      // $rootScope.changeOption = function (key, value) {
+        // appChannel.emit('change-option', {key: key, value: value});
+      // }
 
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
@@ -197,8 +195,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
-  .controller('InstanceActions', ['$scope', 'ui', 'appChannel',
-      function($s, ui, appChannel) {
+  .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
 
     // Helper which changes consent bits.
     // These work the same even if |client| is an instance - so long as it
@@ -250,15 +247,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // We don't need to tell them we'll start proxying, we can just try to
       // start. The SDP request will go through chat/identity network on its
       // own.
-      appChannel.emit('start-using-peer-as-proxy-server',
-          instance.instanceId);
-      ui.proxy = instance;
-      ui.setProxying(true);
+      // appChannel.emit('start-using-peer-as-proxy-server',
+          // instance.instanceId);
+      ui.startProxying(instance);
     };
     $s.stopAccess = function(instance) {
-      instance = instance || ui.instance;
-      ui.setProxying(false);
-      appChannel.emit('stop-proxying', instance.instanceId);
+      // instance = instance || ui.instance;
+      ui.stopProxying();
+      // ui.setProxying(false);
+      // appChannel.emit('stop-proxying', instance.instanceId);
     };
 
   }]);

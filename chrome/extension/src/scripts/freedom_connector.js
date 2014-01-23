@@ -3,6 +3,7 @@
 // runtime.message.
 'use strict';
 
+// TODO: factor away this file
 // This is a fake freedom module builder that simply passes messages to a
 // |id| is the chrome extension/app Id that is running Freedom that we
 //   should speak to.

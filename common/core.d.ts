@@ -23,13 +23,15 @@ declare module Interfaces {
   }
 
   export interface ICore {
+    isConnected:boolean;
+
     // Clears all state and storage.
-    reset() : void;
+    reset():void;
 
     // Send your own instanceId to target clientId.
-    sendInstance(clientId : string) : void;
+    sendInstance(clientId:string):void;
 
-    modifyConsent(id:string, action:Consent.Action) : void;
+    modifyConsent(id:string, action:Consent.Action):void;
 
     // Consent
     // TODO clean this
@@ -43,17 +45,21 @@ declare module Interfaces {
     // revoke(instanceId : string) : void;
 
     // Using peer as a proxy.
-    start(instanceId : string) : void;
-    stop(instanceId : string) : void;
+    start(instanceId:string):void;
+    stop(instanceId:string):void;
 
-    updateDescription(description : string) : void;
-    changeOption(option : string) : void;
+    updateDescription(description:string):void;
+    changeOption(option:string):void;
+
+    // TODO: make network an actual type
+    login(network:string):void;
+    logout(network:string):void;
   }
 
   interface ICoreOptions {
-    allowNonroutableAddresses(enabled : boolean) : void;
-    setStunServers(servers : string[]) : void;
-    setTurnServers(servers : string[]) : void;
+    allowNonroutableAddresses(enabled:boolean):void;
+    setStunServers(servers:string[]):void;
+    setTurnServers(servers:string[]):void;
   }
 
 }

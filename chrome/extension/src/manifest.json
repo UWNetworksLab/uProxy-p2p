@@ -16,7 +16,6 @@
       "scripts/freedom_connector.js",
       "common/ui/lib/json-patch/jsonpatch.js",
       "scripts/proxy-config.js",
-      "common/ui/scripts/ui.js",
       "scripts/background.js"
     ]
   },

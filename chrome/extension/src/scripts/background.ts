@@ -8,9 +8,7 @@
 // Assumes that freedom_connector.js has been loaded.
 /// <reference path='../common/core.d.ts'/>
 /// <reference path="../common/ui/scripts/ui.ts"/>
-
 console.log('Initializing chrome extension background page...');
-/* jshint -W098 */
 
 declare var chrome:any;
 declare var jsonpatch:any;
@@ -32,48 +30,106 @@ class ChromeNotifications implements INotifications {
   }
 }
 
+
+// The app connector enables communication between this Extension and the
+// corresponding app.
 class ChromeAppConnector implements Interfaces.ICore {
-  constuctor() {}
+
+  UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+  appChannel = null;
+  isConnected:boolean = false;
+
+  // When the app connector is created, keep trying to establish a connection to
+  // the app.
+  constructor() {
+    // Need to constantly poll for the connection,
+    // because it is possible that the App doesn't even exist.
+
+    // Chrome App Id for UProxy Packaged Chrome App.
+    this.appChannel = new FreedomConnector(this.UPROXY_CHROME_APP_ID, {
+        name: 'uproxy-extension-to-app-port' });
+    this.appChannel.onConnected.addListener(() => {
+      init(this.appChannel);
+      this.isConnected = true;
+    });
+    this._checkAppConnection();
+  }
+
+  _checkAppConnection() {
+    console.log('Checking the app connection!!!',
+                this.appChannel);
+    this.appChannel.connect(); // Doesn't do anything if it's already connected.
+    setTimeout(()=>{
+      this._checkAppConnection();
+    }, SYNC_TIMEOUT * 5);
+  }
+
   reset() {
     console.log('Resetting.');
+    this._send('reset', null);
   }
+
   sendInstance(clientId) {
-    console.log('Sending instance ID to ' + clientId);
+    // console.log('Sending instance ID to ' + clientId);
+    this._send('send-instance', clientId);
   }
   modifyConsent(instanceId, action) {
     console.log('Modifying consent.');
+    this._send('instance-trust-change',
+      {
+        instanceId: instanceId,
+        action: action
+      }
+    );
   }
+
   start(instanceId) {
     console.log('Starting to proxy through ' + instanceId);
+    this._send('start-using-peer-as-proxy-server', instanceId);
   }
+
   stop(instanceId) {
     console.log('Stopping proxy through ' + instanceId);
+    this._send('stop-proxying', instanceId);
   }
+
   updateDescription(description) {
     console.log('Updating description to ' + description);
+    this._send('update-description', description);
   }
   changeOption(option) {
     console.log('Changing option ' + option);
   }
 
-  // Connection to the app.
-  _sendMessage(msg) {
+  login(network) {
+    this._send('login', network);
+  }
+
+  logout(network) {
+    this._send('logout', network);
+  }
+
+  // Send message to the connected app.
+  _send(msgType, payload) {
+    if (!this.appChannel.status.connected) {
+      this.appChannel.connect();
+    }
     console.log('Sending message.');
+    // TODO: factor the freedom connector juice into this file and simplify
+    // the baklavaness of this code.
+    this.appChannel.emit(msgType, payload);
   }
 }
 
 // This singleton is referenced in both options and popup.
 // UI object is defined in 'common/ui/scripts/ui.js'.
-var ui = new UI(
-    new ChromeNotifications(),
-    new ChromeAppConnector());
+if (undefined === ui) {
+  var ui = new UI(
+      new ChromeNotifications(),
+      new ChromeAppConnector());
+}
 
 // --------------------- Communicating with the App ----------------------------
-// Chrome App Id for UProxy Packaged Chrome App.
-var FREEDOM_CHROME_APP_ID = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
-var appChannel = new FreedomConnector(FREEDOM_CHROME_APP_ID, {
-    name: 'uproxy-extension-to-app-port' });
-appChannel.onConnected.addListener(init);
 
 var _extensionInitialized = false;
 
@@ -81,10 +137,6 @@ var _extensionInitialized = false;
 // TODO: This should be actually typed
 var proxyConfig = new window['BrowserProxyConfig']();
 proxyConfig.clearConfig();
-
-// Sometimes the ui-ready fails. Keep trying until we get a valid reset state.
-function pollAppForInitialization() {
-}
 
 // ---------------------------- State Changes ----------------------------------
 var model:any = {};  // Singleton angularjs model for either popup or options.
@@ -114,7 +166,7 @@ chrome.runtime.onSuspend.addListener(function () {
 
 // ---------------------------- Initialization ---------------------------------
 // Called when appChannel is connected.
-function init() {
+function init(appChannel) {
 
   var finishStateChange = function() {
     // Initiate first sync and start a timer if necessary, in order to
@@ -185,11 +237,3 @@ function checkRunningProxy() {
 }
 
 
-// Need to constantly poll for the connection,
-// because it is possible that the App doesn't even exist.
-function checkThatAppIsInstalled() {
-  appChannel.connect();
-  setTimeout(checkThatAppIsInstalled, SYNC_TIMEOUT * 5);
-}
-
-checkThatAppIsInstalled();
