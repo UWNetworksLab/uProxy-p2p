@@ -18,6 +18,7 @@ uproxy.crx
 *~
 _SpecRunner.html
 common/uproxy.js
+common/state-storage.js
 common/ui/styles/.sass-cache
 common/ui/styles/main.css
 common/ui/scripts/ui.js

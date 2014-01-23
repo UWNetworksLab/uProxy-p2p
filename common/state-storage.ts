@@ -3,28 +3,18 @@
  * To see the format used by localstorage, see the file:
  *   scraps/local_storage_example.js
  */
-// Stuff for jshint.
-// -- uproxy.js
-/* global freedom: false */
-/* global console: false */
-/* global log: false */
-// -- nouns-and-adjectives.js
-/* global nouns: false */
-/* global adjectives: false */
-// -- copnstants.js
-/* global DEBUG: false */
-/* global DEFAULT_LOAD_STATE: false */
-/* global DEFAULT_SAVE_STATE: false */
-/* global DEFAULT_INSTANCE: false */
-/* global DEFAULT_PROXY_STATUS: false */
-/* global StateEntries: false */
-// -- util.js
-/* global isDefined: false */
-/* global FinalCallback: false */
-/* global cloneDeep: false */
-/* global restrictKeys: false */
 /// <reference path='constants.d.ts' />
 import C = Constants;
+
+declare var freedom:any;
+declare var cloneDeep:any;
+declare var adjectives:any;
+declare var nouns:any;
+declare var StateEntries:any;
+declare var FinalCallback:any;
+declare var restrictKeys:any;
+declare var isDefined:any;
+
 
 // --------------------------------------------------------------------------
 function UProxyState() {
@@ -37,7 +27,7 @@ function UProxyState() {
 UProxyState.prototype.reset = function(callback) {
   this.storage.clear().done(function() {
     console.log("Cleared storage, now loading again...");
-    this.state = cloneDeep(DEFAULT_LOAD_STATE);
+    this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
     this.loadStateFromStorage(callback);
   }.bind(this));
 };
@@ -73,7 +63,7 @@ UProxyState.prototype._saveKeyAsJson = function (key, val, callback) {
 UProxyState.prototype._generateMyInstance = function () {
   var i, val, hex, id, key;
 
-  var me = cloneDeep(DEFAULT_LOAD_STATE.me);
+  var me = cloneDeep(C.DEFAULT_LOAD_STATE.me);
 
   // Create an instanceId if we don't have one yet.
   // Just generate 20 random 8-bit numbers, print them out in hex.
@@ -119,11 +109,11 @@ UProxyState.prototype.isMessageableUproxyClient = function(client) {
 //  Users's profile for this instance
 // --------------------------------------------------------------------------
 // Saving your "me" state involves saving all fields that are state.me & that
-// are in the DEFAULT_SAVE_STATE.
+// are in the C.DEFAULT_SAVE_STATE.
 UProxyState.prototype.saveMeToStorage = function (callback) {
   this._saveKeyAsJson(
       StateEntries.ME,
-      restrictKeys(DEFAULT_SAVE_STATE.me, this.state.me),
+      restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me),
       callback);
 };
 
@@ -149,14 +139,14 @@ UProxyState.prototype.loadMeFromStorage = function (callback) {
 UProxyState.prototype.saveOptionsToStorage = function(callback) {
   this._saveKeyAsJson(
       StateEntries.OPTIONS,
-      restrictKeys(DEFAULT_SAVE_STATE.options, this.state.options),
+      restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options),
       callback);
 };
 
 UProxyState.prototype.loadOptionsFromStorage = function(callback) {
   this._loadKeyAsJson(StateEntries.OPTIONS, function (loadedOptions) {
     this.state.options =
-        restrictKeys(cloneDeep(DEFAULT_LOAD_STATE.options), loadedOptions);
+        restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
     if (callback) { callback(); }
   }.bind(this), {});
 };
@@ -208,7 +198,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
     function(userId, clientId, data) {
   var instanceId = data.instanceId;
   // Some local metadata isn't transmitted.  Add it in.
-  data = restrictKeys(DEFAULT_INSTANCE, data);
+  data = restrictKeys(C.DEFAULT_INSTANCE, data);
 
   // Before everything, remember the clientId - instanceId relation.
   var oldClientId = this.state.instanceToClient[instanceId];
@@ -231,7 +221,7 @@ UProxyState.prototype.syncInstanceFromInstanceMessage =
   var instance = this.state.instances[instanceId];
   if (!instance) {
     console.log('Preparing NEW Instance... ');
-    instance = cloneDeep(DEFAULT_INSTANCE);
+    instance = cloneDeep(C.DEFAULT_INSTANCE);
     instance.instanceId = data.instanceId;
     instance.keyHash = data.keyHash;
     this.state.instances[instanceId] = instance;
@@ -253,7 +243,7 @@ UProxyState.prototype.loadInstanceFromId = function(instanceId, callback) {
       console.error('Load error: instance ' + instanceId + ' not found');
     } else {
       console.log('instance ' + instanceId + ' loaded');
-      instance.status = cloneDeep(DEFAULT_PROXY_STATUS);
+      instance.status = cloneDeep(C.DEFAULT_PROXY_STATUS);
       this.state.instances[instanceId] = instance;
       this.syncRosterFromInstanceId(instanceId);
     }
@@ -332,7 +322,7 @@ UProxyState.prototype.saveAllInstances = function(callback) {
 // once the last of the loading operations has completed. We do this using the
 // FinalCaller class.
 UProxyState.prototype.loadStateFromStorage = function(callback) {
-  this.state = restrictKeys(DEFAULT_LOAD_STATE, this.state);
+  this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
   var finalCallbacker = new FinalCallback(callback);
   this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
   this.loadOptionsFromStorage(finalCallbacker.makeCountedCallback());
