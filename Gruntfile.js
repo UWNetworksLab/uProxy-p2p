@@ -23,14 +23,16 @@ var minimatch = require("minimatch");
 //NOTE: This is ultimately what gets copied, so keep this precise
 //NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
 var chrome_app_files = [
-  'common/ui/icons/**',
+  'common/uproxy.json',
   'node_modules/freedom/freedom.js',
-  'common/backend/**',
-  '!common/backend/spec/**',
-  '!common/backend/identity/xmpp/node-xmpp/**',
+  'common/*.js',
+  // 'common/freedom/freedom.,
+  '!common/spec/**',
+  '!common/identity/xmpp/node-xmpp/**',
   // scraps is a place for throwing example code for demonstrating stuff to each other.
-  'common/scraps/**',
-  'common/constants.js'
+  // 'common/scraps/**',
+  'common/constants.js',
+  'common/ui/icons/**'
 ];
 var chrome_ext_files = [
   'common/scraps/**',
