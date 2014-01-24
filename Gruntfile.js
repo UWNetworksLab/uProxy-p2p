@@ -5,14 +5,11 @@
  *  build - Builds Chrome and Firefox extensions
  *  setup - Installs local dependencies and sets up environment
  *  xpi - Generates an .xpi for installation to Firefox.
- *  ff - Open up a firefox window with an instance of the extension running.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
  *  build_chrome - build Chrome files
  *  build_firefox - build Firefox
- *  concat:firefox - collect popup.html and options.html dependencies into
-                     a single file.
  *  everything - 'setup', 'test', then 'build'
  **/
 
@@ -28,6 +25,11 @@ var chrome_app_files = [
   'common/*.js',
   // 'common/freedom/freedom.,
   '!common/spec/**',
+  'common/storage/**',
+  'common/client/**',
+  'common/server/**',
+  'common/identity/**',
+  'common/transport/**',
   '!common/identity/xmpp/node-xmpp/**',
   // scraps is a place for throwing example code for demonstrating stuff to each other.
   // 'common/scraps/**',
@@ -53,13 +55,6 @@ var firefox_files = [
   'common/ui/scripts/**',
   'common/ui/styles/**',
   'common/ui/lib/**',
-];
-
-// Firefox concat files
-var firefox_concat_src = [
-  'firefox/data/scripts/event_on_emit_shim.js',
-  'firefox/data/scripts/freedom_shim_content.js',
-  'firefox/data/scripts/injector.js'
 ];
 
 // Files which make static UI testing work. Bsae directory = 'common/ui/'
@@ -92,7 +87,7 @@ module.exports = function(grunt) {
     copy: {
       chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
       chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
-      firefox: {files: [{src: firefox_files, dest: 'firefox/data/'}]},
+      firefox: {files: [{src: firefox_files, dest: 'firefox/'}]},
       uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
@@ -101,18 +96,16 @@ module.exports = function(grunt) {
       }]},
       watch: {files: []},
     },
-    concat: {
-      firefox: {
-        src: firefox_concat_src,
-        dest: 'firefox/data/scripts/dependencies.js',
+    compress: {
+      main: {
         options: {
-        // Replace all 'use strict' statements in the code with a single one at the top
-          banner: "'use strict';\n",
-          process: function(src, filepath) {
-            return '// Source: ' + filepath + '\n' +
-              src.replace(/(^|\n)[ \t]*('use strict'|"use strict");?\s*/g, '$1');
-          }
-        }
+          mode: 'zip',
+          archive: 'uproxy.xpi'
+        },
+        expand: true,
+        cwd: "firefox",
+        src: ['**'],
+        dest: '.'
       }
     },
     watch: {
@@ -124,17 +117,20 @@ module.exports = function(grunt) {
                 '!**/lib/**'],
         tasks: ['copy:watch'],
         options: {spawn: false}
-      },
-      firefox_dep: {
-        files: firefox_concat_src,
-        tasks: ['concat:firefox'],
-        options: {spawn: false}
       }
     },
     shell: {
       bower_install: {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
+      },
+      freedom_setup: {
+        command: 'npm install',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
+      },
+      freedom_build: {
+        command: 'grunt',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
       },
       rickroll: {
         command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
@@ -143,7 +139,7 @@ module.exports = function(grunt) {
     },
     clean: ['chrome/app/common/**',
             'chrome/extension/src/common/**',
-            'firefox/data/common/**',
+            'firefox/common/**',
             'tmp',
             'uproxy.xpi'],
     jasmine: {
@@ -158,9 +154,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    // jsvalidate: {
-      // files: sourcesToTest.concat(['common/spec/*Spec.js'])
-    // },
     jshint: {
       all: sourcesToTest.concat(['common/spec/*Spec.js']),
       options: {
@@ -229,13 +222,13 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   // grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  // grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
@@ -263,6 +256,8 @@ module.exports = function(grunt) {
 
   //Setup task
   grunt.registerTask('setup', [
+    'shell:freedom_setup',
+    'shell:freedom_build',
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
@@ -287,6 +282,7 @@ module.exports = function(grunt) {
     'copy:chrome_ext',
     'typescript:chrome',
   ]);
+
   grunt.registerTask('build_chrome', [
     'common',
     '_build_chrome',
@@ -294,7 +290,6 @@ module.exports = function(grunt) {
 
   // Firefox build tasks.
   grunt.registerTask('_build_firefox', [
-    'concat:firefox',
     'copy:firefox'
   ]);
   grunt.registerTask('build_firefox', [
@@ -303,9 +298,8 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('xpi', [
-    'build_firefox',
-    'mozilla-addon-sdk:download',
-    'mozilla-addon-sdk:xpi'
+    "build_firefox",
+    "compress:main"
   ]);
   grunt.registerTask('ff', [
     'build_firefox',
@@ -313,8 +307,14 @@ module.exports = function(grunt) {
     'mozilla-cfx'
   ]);
 
+  grunt.registerTask('build_firefox', [
+    'copy:firefox'
+  ]);
+
   // Stand-alone UI.
   grunt.registerTask('_ui', [
+    'typescript:ui',
+    'sass:main',
     'copy:uistatic',
     'typescript:uistatic',
   ]);
@@ -329,7 +329,6 @@ module.exports = function(grunt) {
     '_build_chrome',
     '_build_firefox',
     '_ui',
-    // 'jsvalidate',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);

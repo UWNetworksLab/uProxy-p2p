@@ -29,8 +29,8 @@ chrome/extension/src/common
 chrome/extension/src/scripts/background.js
 common/ui/bower_components
 common/ui/lib
-firefox/data/common/
-firefox/data/scripts/dependencies.js
+uproxy.xpi
+firefox/common/
 uistatic/common/
 uistatic/scripts/app.js
 uistatic/scripts/ui.js

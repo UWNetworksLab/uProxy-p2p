@@ -23,7 +23,7 @@ window.freedomcfg = function(register) {
 var script = document.createElement('script');
 script.setAttribute('data-manifest', 'common/uproxy.json');
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
-script.src = 'common/freedom/freedom.js';
+script.src = 'node_modules/freedom/freedom.js';
 document.head.appendChild(script);
 
 // Once the script had loaded, uProxyAppChannel is set to freedom, which is a channel to the

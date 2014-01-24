@@ -76,7 +76,6 @@ of supported Grunt commands:
  *  `build` - Builds Chrome and Firefox extensions
  *  `setup` - Installs local dependencies and sets up environment
  *  `xpi` - Generates an .xpi for installation to Firefox.
- *  `ff` - Open up a firefox window with an instance of the extension running.
  *  `test` - Run unit tests
  *  `watch` - Watch for changes in 'common' and copy as necessary
  *  `clean` - Cleans up
@@ -93,7 +92,9 @@ reject submissions.
 
 #### Testing in Firefox
 
-1. TODO
+See [Setting up the development environment](https://developer.mozilla.org/en-US/Add-ons/Setting_up_extension_development_environment).
+
+To avoid generating and installing xpi for every change, run `ln -s [UPROXY_DIR]/firefox ~/.mozilla/firefox/[PROFILE]/extensions/uproxy@uproxy.org` to create a symbolic link of the extension in the profile's extensions folder. Each time you load firefox with this profile it will load UProxy from the files in your development directory.
 
 
 #### Building the packaged Chrome extension
