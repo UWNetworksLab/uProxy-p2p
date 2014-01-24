@@ -4,6 +4,7 @@ if (undefined !== UI) {
 
 var UI = (function () {
     function UI(notifier, core) {
+        var _this = this;
         this.notifier = notifier;
         this.networks = ['google', 'facebook', 'xmpp'];
         this.notifications = 0;
@@ -35,7 +36,12 @@ var UI = (function () {
         };
         this.notify = notifier;
         this.core = core;
-        this.isConnected = this.core.isConnected;
+        core.onConnected = function () {
+            _this.isConnected = true;
+        };
+        core.onDisconnected = function () {
+            _this.isConnected = false;
+        };
     }
     UI.prototype.refreshDOM = function () {
         onStateChange.dispatch();
@@ -283,9 +289,14 @@ var MockNotifications = (function () {
 
 var MockCore = (function () {
     function MockCore() {
-        this.isConnected = true;
     }
     MockCore.prototype.constuctor = function () {
+    };
+    MockCore.prototype.onConnected = function () {
+        console.log('Fake onConnected! :D');
+    };
+    MockCore.prototype.onDisconnected = function () {
+        console.log('Fake onConnected! :D');
     };
     MockCore.prototype.reset = function () {
         console.log('Resetting.');
@@ -317,7 +328,9 @@ var MockCore = (function () {
     return MockCore;
 })();
 
-var ui = new UI(new MockNotifications(), new MockCore());
+var mockCore = new MockCore();
+var ui = new UI(new MockNotifications(), mockCore);
+mockCore.onConnected();
 
 var dependencyInjector = angular.module('dependencyInjector', []).filter('i18n', function () {
     return function (key) {

@@ -25,7 +25,7 @@ interface IUI {
 }
 
 interface CUI {
-  new(n:INotifications, c:Interfaces.ICore) : IUI;
+  new(n:INotifications, c:Interfaces.ICore):IUI;
 }
 
 // declare class UI implements IUI {

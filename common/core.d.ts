@@ -23,7 +23,9 @@ declare module Interfaces {
   }
 
   export interface ICore {
-    isConnected:boolean;
+    // Connection handlers between Core and UI
+    onConnected():void;
+    onDisconnected():void;
 
     // Clears all state and storage.
     reset():void;

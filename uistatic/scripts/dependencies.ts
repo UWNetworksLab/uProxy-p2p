@@ -27,8 +27,13 @@ class MockNotifications implements INotifications {
 }
 
 class MockCore implements Interfaces.ICore {
-  isConnected:boolean = true;
   constuctor() {}
+  onConnected() {
+    console.log('Fake onConnected! :D');
+  }
+  onDisconnected() {
+    console.log('Fake onConnected! :D');
+  }
   reset() {
     console.log('Resetting.');
   }
@@ -58,9 +63,9 @@ class MockCore implements Interfaces.ICore {
   }
 }
 
-var ui:IUI = new UI(
-    new MockNotifications(),
-    new MockCore());
+var mockCore = new MockCore();
+var ui:IUI = new UI(new MockNotifications(), mockCore);
+mockCore.onConnected();
 
 var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {

@@ -45,13 +45,24 @@ class UI implements IUI {
 
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.
+
   isConnected:boolean = false;
 
   constructor(public notifier:INotifications, core:Interfaces.ICore) {
     this.notify = notifier;
     this.core = core;
-    this.isConnected = this.core.isConnected;
+    core.onConnected = () => {
+      this.isConnected = true;
+    };
+    core.onDisconnected = () => {
+      this.isConnected = false;
+    };
+
   }
+
+  // isConnected():boolean {
+    // return this.core.isConnected;
+  // }
 
   // Keep track of currently viewed contact and instance.
   contact = null;

@@ -42,7 +42,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.model = model;
       $rootScope.notifications = 0;
 
-      $rootScope.uProxyAppConnected = ui.isConnected;
 
       // Remember the state change hook.
       $rootScope.update = onStateChange;

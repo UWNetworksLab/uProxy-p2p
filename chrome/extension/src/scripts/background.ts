@@ -37,7 +37,15 @@ class ChromeAppConnector implements Interfaces.ICore {
 
   UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
   appChannel = null;
-  isConnected:boolean = false;
+  // isConnected:boolean = false;
+
+  onConnected() {
+    console.warn('No UI yet for onConnected');
+  }
+
+  onDisconnected() {
+    console.warn('No UI yet for onDisconnected.');
+  }
 
   // When the app connector is created, keep trying to establish a connection to
   // the app.
@@ -50,7 +58,8 @@ class ChromeAppConnector implements Interfaces.ICore {
         name: 'uproxy-extension-to-app-port' });
     this.appChannel.onConnected.addListener(() => {
       init(this.appChannel);
-      this.isConnected = true;
+      // this.isConnected = true;
+      this.onConnected();
     });
     this._checkAppConnection();
   }
@@ -60,7 +69,7 @@ class ChromeAppConnector implements Interfaces.ICore {
                 this.appChannel);
     this.appChannel.connect(); // Doesn't do anything if it's already connected.
     setTimeout(()=>{
-      this._checkAppConnection();
+      this._checkAppConnection
     }, SYNC_TIMEOUT * 5);
   }
 
@@ -235,5 +244,3 @@ function checkRunningProxy() {
   }
   proxyConfig.stopUsingProxy();
 }
-
-

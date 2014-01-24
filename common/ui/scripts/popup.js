@@ -21,8 +21,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.accessView = false;
     }
     $scope.showingSplashPage = function() {
-      return ui.splashPage ||
-        !$scope.uProxyAppConnectionStatus.connected;
+      return ui.splashPage || !ui.isConnected;
     };
 
     var syncContactWatch = function(userId) {
