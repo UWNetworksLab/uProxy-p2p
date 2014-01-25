@@ -83,7 +83,7 @@ class ChromeAppConnector implements Interfaces.ICore {
     this._send('send-instance', clientId);
   }
   modifyConsent(instanceId, action) {
-    console.log('Modifying consent.');
+    console.log('Modifying consent.', instanceId);
     this._send('instance-trust-change',
       {
         instanceId: instanceId,
