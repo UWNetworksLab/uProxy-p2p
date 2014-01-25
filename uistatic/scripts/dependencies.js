@@ -106,6 +106,10 @@ var UI = (function () {
         this.oldDescription = description;
     };
 
+    UI.prototype.sendInstance = function (clientId) {
+        this.core.sendInstance(clientId);
+    };
+
     UI.prototype.toggleFilter = function (filter) {
         if (undefined === this.filters[filter]) {
             console.error('Filter "' + filter + '" is not a valid filter.');

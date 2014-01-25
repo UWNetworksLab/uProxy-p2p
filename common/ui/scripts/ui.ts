@@ -153,6 +153,10 @@ class UI implements IUI {
     this.oldDescription = description;
   }
 
+  sendInstance(clientId) {
+    this.core.sendInstance(clientId);
+  }
+
   // -------------------------------- Filters ----------------------------------
   // Toggling |filter| changes the visibility and ordering of roster entries.
   toggleFilter(filter) {
