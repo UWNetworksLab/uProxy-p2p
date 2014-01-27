@@ -64,7 +64,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       } else {
         ui.instance = null;
       }
-      console.log('current instance ' + ui.instance);
+      console.log('current instance ', ui.instance);
       if (!ui.isProxying) {
         ui.proxy = null;
       } else {

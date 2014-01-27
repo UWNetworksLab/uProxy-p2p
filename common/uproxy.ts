@@ -16,7 +16,6 @@ import C = Constants;
 // TODO: remove these once these 'modules' become typescripted.
 declare var freedom:any;
 declare var store:any;
-declare var ProxyState:any;
 declare var restrictKeys:any;
 declare var _localTestProxying:any;
 
@@ -215,7 +214,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     return false;
   }
   // TODO: Cleanly disable any previous proxying session.
-  instance.status.proxy = ProxyState.RUNNING;
+  instance.status.proxy = C.ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
   _syncInstanceUI(instance, 'status');
 
@@ -246,7 +245,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
 
   client.emit("stop");
-  instance.status.proxy = ProxyState.OFF;
+  instance.status.proxy = C.ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 
   // TODO: this is also a temporary hack.
@@ -284,7 +283,7 @@ function handleNewlyActiveClient(msg) {
   }
   console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
-  instance.status.client = ProxyState.RUNNING;
+  instance.status.client = C.ProxyState.RUNNING;
   _syncInstanceUI(instance, 'status');
 }
 
@@ -295,7 +294,7 @@ function handleInactiveClient(msg) {
     console.error('Cannot be proxy for nonexistent instance.');
     return;
   }
-  instance.status.client = ProxyState.OFF;
+  instance.status.client = C.ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 }
 

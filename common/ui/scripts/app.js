@@ -27,12 +27,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$http',
     '$rootScope',
     'ui',                       // via dependencyInjector.
-    // 'appChannel',               // via dependencyInjector.
     'onStateChange',
     'model',
     'roster',
     function($filter, $http, $rootScope, ui,
-             // appChannel,
              onStateChange,
              model, roster) {
       if (undefined === model) {
@@ -76,12 +74,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.resetState = function () {
         localStorage.clear();
-        // appChannel.emit('reset', null);
         ui.reset();
       };
 
       $rootScope.sendInstance = function (clientId) {
-        // appChannel.emit('send-instance', clientId);
         ui.sendInstance(clientId);
       };
 
@@ -203,16 +199,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     var _modifyConsent = function (id, action) {
       setTimeout(function() {
         ui.modifyConsent(id, action);
-        // appChannel.emit('instance-trust-change',
-          // { instanceId: id, action: action });
       }, 0); // TODO: why is this a timeout?
     };
     var _modifyProxyConsent = function(instance, action) {
-      _modifyConsent(instance.id, action);
+      _modifyConsent(instance.instanceId, action);
       ui.pendingProxyTrustChange = true;
     }
     var _modifyClientConsent = function(instance, action) {
-      _modifyConsent(instance.id, action);
+      _modifyConsent(instance.instanceId, action);
       ui.pendingClientTrustChange = true;
     }
 
@@ -238,7 +232,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       _modifyClientConsent(instance, 'allow');
     };
     $s.revokeAccess = function(instance) {
-      _modifyConsent(instance.instanceId, 'deny');
+      _modifyClientConsent(instance, 'deny');
     };
     $s.denyAccess = $s.revokeAccess;
 
@@ -246,15 +240,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // We don't need to tell them we'll start proxying, we can just try to
       // start. The SDP request will go through chat/identity network on its
       // own.
-      // appChannel.emit('start-using-peer-as-proxy-server',
-          // instance.instanceId);
       ui.startProxying(instance);
     };
+
     $s.stopAccess = function(instance) {
-      // instance = instance || ui.instance;
       ui.stopProxying();
-      // ui.setProxying(false);
-      // appChannel.emit('stop-proxying', instance.instanceId);
     };
 
   }]);

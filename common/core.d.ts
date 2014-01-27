@@ -53,6 +53,9 @@ declare module Interfaces {
     updateDescription(description:string):void;
     changeOption(option:string):void;
 
+    // TODO: improve the notifications feature
+    notificationSeen(userId:string):void;
+
     // TODO: make network an actual type
     login(network:string):void;
     logout(network:string):void;

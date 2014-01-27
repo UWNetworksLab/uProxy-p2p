@@ -57,12 +57,12 @@ var UI = (function () {
         }
     };
 
-    UI.prototype.modifyConsent = function (id, action) {
+    UI.prototype.modifyConsent = function (instanceId, action) {
         if (!this.core) {
             console.log('UI not connected to core - cannot modify consent.');
             return;
         }
-        this.core.modifyConsent(id, action);
+        this.core.modifyConsent(instanceId, action);
     };
 
     UI.prototype.startProxying = function (instance) {
@@ -108,6 +108,10 @@ var UI = (function () {
 
     UI.prototype.sendInstance = function (clientId) {
         this.core.sendInstance(clientId);
+    };
+
+    UI.prototype.reset = function () {
+        this.core.reset();
     };
 
     UI.prototype.toggleFilter = function (filter) {
@@ -165,7 +169,7 @@ var UI = (function () {
         if (!user.hasNotification) {
             return;
         }
-        appChannel.emit('notification-seen', user.userId);
+        this.core.notificationSeen(user.userId);
         user.hasNotification = false;
         this.decNotifications();
     };
@@ -328,6 +332,9 @@ var MockCore = (function () {
     };
     MockCore.prototype.logout = function (network) {
         console.log('Logging out of', network);
+    };
+    MockCore.prototype.notificationSeen = function (userId) {
+        console.log('Notification seen for ' + userId);
     };
     return MockCore;
 })();

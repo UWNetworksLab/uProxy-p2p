@@ -82,6 +82,7 @@ class ChromeAppConnector implements Interfaces.ICore {
     // console.log('Sending instance ID to ' + clientId);
     this._send('send-instance', clientId);
   }
+
   modifyConsent(instanceId, action) {
     console.log('Modifying consent.', instanceId);
     this._send('instance-trust-change',
@@ -116,6 +117,10 @@ class ChromeAppConnector implements Interfaces.ICore {
 
   logout(network) {
     this._send('logout', network);
+  }
+
+  notificationSeen(userId) {
+    this._send('notification-seen', userId);
   }
 
   // Send message to the connected app.

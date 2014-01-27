@@ -61,6 +61,9 @@ class MockCore implements Interfaces.ICore {
   logout(network) {
     console.log('Logging out of', network);
   }
+  notificationSeen(userId) {
+    console.log('Notification seen for ' + userId);
+  }
 }
 
 var mockCore = new MockCore();

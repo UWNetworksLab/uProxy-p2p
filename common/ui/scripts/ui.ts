@@ -14,7 +14,6 @@ if (undefined !== UI) {
 
 declare var model:any;
 declare var chrome:any;
-declare var appChannel:any;
 declare var onStateChange:any;
 
 
@@ -99,14 +98,13 @@ class UI implements IUI {
     }
   }
 
-
   // -------------------------------- Consent ----------------------------------
-  modifyConsent(id:string, action:Interfaces.Consent.Action) {
+  modifyConsent(instanceId:string, action:Interfaces.Consent.Action) {
     if (!this.core) {
       console.log('UI not connected to core - cannot modify consent.');
       return;
     }
-    this.core.modifyConsent(id, action);
+    this.core.modifyConsent(instanceId, action);
   }
 
   // ------------------------------- Proxying ----------------------------------
@@ -156,6 +154,8 @@ class UI implements IUI {
   sendInstance(clientId) {
     this.core.sendInstance(clientId);
   }
+
+  reset() { this.core.reset(); }
 
   // -------------------------------- Filters ----------------------------------
   // Toggling |filter| changes the visibility and ordering of roster entries.
@@ -223,7 +223,7 @@ class UI implements IUI {
     if (!user.hasNotification) {
       return;  // Ignore if user has no notification.
     }
-    appChannel.emit('notification-seen', user.userId);
+    this.core.notificationSeen(user.userId);
     user.hasNotification = false;
     this.decNotifications();
   }
