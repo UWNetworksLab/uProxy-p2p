@@ -11,7 +11,7 @@
  */
 /// <reference path='ui/scripts/ui.d.ts' />
 /// <reference path='constants.d.ts' />
-import C = Constants;
+// import C = Constants;
 
 // TODO: remove these once these 'modules' become typescripted.
 declare var freedom:any;

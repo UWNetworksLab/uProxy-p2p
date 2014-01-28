@@ -1,40 +1,40 @@
-var Constants;
-(function (Constants) {
-    Constants.DEBUG = true;
+var C;
+(function (C) {
+    C.DEBUG = true;
 
-    Constants.Trust = {
+    C.Trust = {
         NO: 'no',
         REQUESTED: 'requested',
         OFFERED: 'offered',
         YES: 'yes'
     };
 
-    Constants.ProxyState = {
+    C.ProxyState = {
         OFF: 'off',
         READY: 'ready',
         RUNNING: 'running'
     };
 
-    Constants.StateEntries = {
+    C.StateEntries = {
         ME: 'me',
         OPTIONS: 'options',
         INSTANCEIDS: 'instanceIds',
         INSTANCES: 'instances'
     };
 
-    Constants.DEFAULT_PROXY_STATUS = {
-        proxy: Constants.ProxyState.OFF,
-        client: Constants.ProxyState.OFF
+    C.DEFAULT_PROXY_STATUS = {
+        proxy: C.ProxyState.OFF,
+        client: C.ProxyState.OFF
     };
 
-    Constants.DEFAULT_INSTANCE = {
+    C.DEFAULT_INSTANCE = {
         instanceId: null,
         keyHash: '',
         trust: {
-            asProxy: Constants.Trust.NO,
-            asClient: Constants.Trust.NO
+            asProxy: C.Trust.NO,
+            asClient: C.Trust.NO
         },
-        status: Constants.DEFAULT_PROXY_STATUS,
+        status: C.DEFAULT_PROXY_STATUS,
         description: '',
         notify: false,
         rosterInfo: {
@@ -45,14 +45,14 @@ var Constants;
         }
     };
 
-    Constants.DEFAULT_STATUS = {
+    C.DEFAULT_STATUS = {
         message: '',
         network: null,
         status: '',
         userId: ''
     };
 
-    Constants.DEFAULT_ROSTER_ENTRY = {
+    C.DEFAULT_ROSTER_ENTRY = {
         userId: null,
         name: '',
         url: '',
@@ -60,20 +60,20 @@ var Constants;
         clients: {}
     };
 
-    Constants.DEFAULT_ROSTER_CLIENT_ENTRY = {
+    C.DEFAULT_ROSTER_CLIENT_ENTRY = {
         clientId: '',
         network: '',
         status: ''
     };
 
-    Constants.DEFAULT_MESSAGE_ENVELOPE = {
+    C.DEFAULT_MESSAGE_ENVELOPE = {
         fromUserId: null,
         fromClientId: null,
         toUserId: null,
         data: {}
     };
 
-    Constants.DEFAULT_INSTANCE_MESSAGE = {
+    C.DEFAULT_INSTANCE_MESSAGE = {
         type: 'notify-instance',
         instanceId: null,
         description: '',
@@ -81,27 +81,27 @@ var Constants;
         rosterInfo: {}
     };
 
-    Constants.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO = {
+    C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO = {
         name: null,
         network: null,
         url: '',
         userId: ''
     };
 
-    Constants.DEFAULT_MY_IDENTITY = {
+    C.DEFAULT_MY_IDENTITY = {
         userId: null,
         name: '',
         url: '',
         clients: {}
     };
 
-    Constants.DEFAULT_MY_IDENTITY_CLIENT = {
+    C.DEFAULT_MY_IDENTITY_CLIENT = {
         clientId: null,
         network: null,
         status: null
     };
 
-    Constants.DEFAULT_ME = {
+    C.DEFAULT_ME = {
         'description': '',
         'instanceId': '',
         'keyHash': '',
@@ -119,11 +119,11 @@ var Constants;
         }
     };
 
-    Constants.DEFAULT_LOAD_STATE = {
-        '_debug': Constants.DEBUG,
+    C.DEFAULT_LOAD_STATE = {
+        '_debug': C.DEBUG,
         '_msgLog': [],
         'identityStatus': {},
-        'me': Constants.DEFAULT_ME,
+        'me': C.DEFAULT_ME,
         'roster': {},
         'instances': {},
         'clientToInstance': {},
@@ -137,7 +137,7 @@ var Constants;
         }
     };
 
-    Constants.DEFAULT_SAVE_STATE = {
+    C.DEFAULT_SAVE_STATE = {
         'me': {
             'description': '',
             'instanceId': '',
@@ -152,4 +152,4 @@ var Constants;
             'turnServers': ['turnServer1', 'turnServer2']
         }
     };
-})(Constants || (Constants = {}));
+})(C || (C = {}));

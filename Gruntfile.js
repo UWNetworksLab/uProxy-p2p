@@ -190,7 +190,9 @@ module.exports = function(grunt) {
         src: ['common/**/*.ts'],
         dest: 'common/',
         options: {
-          base_path: 'common'
+          base_path: 'common',
+          target: 'es5',
+          // module: 'amd'
         }
       }
     },
@@ -249,10 +251,6 @@ module.exports = function(grunt) {
   // Grunt tasks prepended with an '_' do not include this step, in order to
   // prevent redundancy.
   grunt.registerTask('common', [
-    // 'typescript:uproxy',
-    // 'typescript:ui',
-    // 'typescript:constants',
-    // 'typescript:statestorage',
     'typescript:common',
     'sass:main',
   ]);

@@ -4,7 +4,6 @@
  *   scraps/local_storage_example.js
  */
 /// <reference path='constants.d.ts' />
-import C = Constants;
 
 declare var freedom:any;
 declare var cloneDeep:any;

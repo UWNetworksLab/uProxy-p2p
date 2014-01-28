@@ -1,5 +1,4 @@
-declare module Constants {
-    // constructor();
+declare module C {
     var DEBUG:boolean;
     var Trust: {
         NO: string;
