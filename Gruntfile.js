@@ -23,7 +23,6 @@ var chrome_app_files = [
   'common/uproxy.json',
   'node_modules/freedom/freedom.js',
   'common/*.js',
-  // 'common/freedom/freedom.,
   '!common/spec/**',
   'common/storage/**',
   'common/client/**',
@@ -32,7 +31,7 @@ var chrome_app_files = [
   'common/transport/**',
   '!common/identity/xmpp/node-xmpp/**',
   // scraps is a place for throwing example code for demonstrating stuff to each other.
-  // 'common/scraps/**',
+  'common/scraps/**',
   'common/constants.js',
   'common/ui/icons/**'
 ];
@@ -154,16 +153,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    jshint: {
-      all: sourcesToTest.concat(['common/spec/*Spec.js']),
-      options: {
-        // 'strict': true, // Better to have it in the file
-        // 'globalstrict': true,
-        'moz': true,   // Used for function closures and other stuff
-        '-W069': true,
-        '-W097': true  // force: allow "strict use" in non function form.
-      }
-    },
     sass: {
       main: {
         files: {
@@ -198,19 +187,6 @@ module.exports = function(grunt) {
         dest: 'common/state-storage.js'
       },
     },
-    'mozilla-addon-sdk': {
-      download: {
-        options: {
-          revision: 'firefox24'
-        }
-      },
-      xpi: {
-        options: {
-          extension_dir: 'firefox',
-          dist_dir: '.'
-        }
-      }
-    },
     'mozilla-cfx': {
       debug_run: {
         options: {
@@ -226,10 +202,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  // grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.loadNpmTasks('grunt-mozilla-addon-sdk');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
 
@@ -261,7 +235,6 @@ module.exports = function(grunt) {
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
-    // 'jshint:all',
     'jasmine'
   ]);
 
@@ -303,7 +276,6 @@ module.exports = function(grunt) {
   ]);
   grunt.registerTask('ff', [
     'build_firefox',
-    'mozilla-addon-sdk:download',
     'mozilla-cfx'
   ]);
 
