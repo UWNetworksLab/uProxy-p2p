@@ -191,8 +191,7 @@ module.exports = function(grunt) {
         dest: 'common/',
         options: {
           base_path: 'common',
-          target: 'es5',
-          // module: 'amd'
+          module: ''
         }
       }
     },

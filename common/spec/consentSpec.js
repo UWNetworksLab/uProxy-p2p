@@ -8,7 +8,7 @@
 
 var uproxy = this;        // Remember global uproxy context so spyOn works.
 var state = store.state;  // Depends on state-storage.js.
-var Trust = Constants.Trust;      // From constants.
+var Trust = C.Trust;      // From constants.
 
 describe('consent', function() {
   beforeEach(function() {
