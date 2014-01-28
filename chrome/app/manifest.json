@@ -1,3 +1,4 @@
+// Chrome app manifest.
 {
   "manifest_version": 2,
   "name": "UProxyApp",

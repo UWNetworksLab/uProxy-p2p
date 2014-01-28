@@ -17,12 +17,16 @@ uproxy.crx
 *.tar.gz
 *~
 _SpecRunner.html
+common/uproxy.js
+common/state-storage.js
 common/ui/styles/.sass-cache
 common/ui/styles/main.css
+common/ui/scripts/ui.js
 tmp
 node_modules
 chrome/app/common
 chrome/extension/src/common
+chrome/extension/src/scripts/background.js
 common/ui/bower_components
 common/ui/lib
 uproxy.xpi
