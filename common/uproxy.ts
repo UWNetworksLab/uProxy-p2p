@@ -555,7 +555,7 @@ function _checkUProxyClientSynchronization(client) {
   return true;
 }
 
-function _getMyId() {
+function _getMyStoredId() {
   for (var id in store.state.me.identities) {
     return id;
   }
@@ -575,7 +575,7 @@ function _getMyId() {
 function makeMyInstanceMessage() {
   var result;
   try {
-    var firstIdentity = store.state.me.identities[_getMyId()];
+    var firstIdentity = store.state.me.identities[_getMyStoredId()];
     if (!firstIdentity || !firstIdentity.clients ||
         0 === Object.keys(firstIdentity.clients).length) {
       return null;

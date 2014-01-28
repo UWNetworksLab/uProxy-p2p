@@ -186,6 +186,13 @@ module.exports = function(grunt) {
         src: ['common/state-storage.ts'],
         dest: 'common/state-storage.js'
       },
+      common: {
+        src: ['common/**/*.ts'],
+        dest: 'common/',
+        options: {
+          base_path: 'common'
+        }
+      }
     },
     'mozilla-cfx': {
       debug_run: {
@@ -242,10 +249,11 @@ module.exports = function(grunt) {
   // Grunt tasks prepended with an '_' do not include this step, in order to
   // prevent redundancy.
   grunt.registerTask('common', [
-    'typescript:uproxy',
-    'typescript:ui',
-    'typescript:constants',
-    'typescript:statestorage',
+    // 'typescript:uproxy',
+    // 'typescript:ui',
+    // 'typescript:constants',
+    // 'typescript:statestorage',
+    'typescript:common',
     'sass:main',
   ]);
 
