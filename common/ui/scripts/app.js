@@ -6,7 +6,8 @@
  * UI to modify state and send messages.
  *
  * It does not directly connect to the App - that would be redundant as
- * everytime the popup was clicked, things would occur.
+ * everytime the popup was clicked, everything reloads, while it's
+ * straightforward to let the background page connect to the App.
  */
 'use strict';
 
@@ -26,12 +27,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$http',
     '$rootScope',
     'ui',                       // via dependencyInjector.
-    'appChannel',               // via dependencyInjector.
     'onStateChange',
     'model',
     'roster',
     function($filter, $http, $rootScope, ui,
-             appChannel, onStateChange,
+             onStateChange,
              model, roster) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
@@ -39,7 +39,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.ui = ui;
       $rootScope.model = model;
       $rootScope.notifications = 0;
-      $rootScope.uProxyAppConnectionStatus = appChannel.status;
+
 
       // Remember the state change hook.
       $rootScope.update = onStateChange;
@@ -74,11 +74,11 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.resetState = function () {
         localStorage.clear();
-        appChannel.emit('reset', null);
+        ui.reset();
       };
 
       $rootScope.sendInstance = function (clientId) {
-        appChannel.emit('send-instance', clientId);
+        ui.sendInstance(clientId);
       };
 
       // Takes in an entry from the roster table.
@@ -148,92 +148,24 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.login = function(network) {
         console.log('!!! login ' + network);
-        appChannel.emit('login', network);
-        ui.splashPage = false;
+        ui.login(network);
       };
       $rootScope.logout = function(network) {
         console.log('!!! logout ' + network);
-        appChannel.emit('logout', network);
-        ui.proxy = null;
+        ui.logout(network);
       };
 
       $rootScope.updateDescription = function() {
-        if (ui.oldDescription &&
-           (ui.oldDescription != model.me.description)) {
-          appChannel.emit('update-description', model.me.description);
-        }
-        ui.oldDescription = model.me.description;
+        ui.updateDescription(model.me.description);
       }
-
-      // These work the same even if |client| is an instance - so long as it
-      // contains the attribute |clientId|.
-
-      // Request access through a friend.
-      $rootScope.requestAccess = function(instance) {
-        console.log("requestAccess: ", instance);
-        $rootScope.instanceTrustChange(instance.instanceId, 'request-access');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.cancelRequest = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'cancel-request');
-        ui.pendingProxyTrustChange = true;
-      }
-      $rootScope.acceptOffer = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'accept-offer');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.declineOffer = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'decline-offer');
-        ui.pendingProxyTrustChange = true;
-      };
-      $rootScope.startAccess = function(instance) {
-        // We don't need to tell them we'll start proxying, we can just try to
-        // start. The SDP request will go through chat/identity network on its
-        // own.
-        appChannel.emit('start-using-peer-as-proxy-server',
-            instance.instanceId);
-        ui.proxy = instance;
-        ui.setProxying(true);
-      };
-      $rootScope.stopAccess = function(instance) {
-        instance = instance || ui.instance;
-        ui.setProxying(false);
-        appChannel.emit('stop-proxying', instance.instanceId);
-      };
-
-      // Providing access for a friend:
-      $rootScope.offerAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'offer');
-        ui.pendingClientTrustChange = true;
-        // instance.trust.asClient = 'offered';
-        // ui.instance.trust.asClient = instance;
-      };
-      $rootScope.grantAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'allow');
-        ui.pendingClientTrustChange = true;
-      };
-      $rootScope.revokeAccess = function(instance) {
-        $rootScope.instanceTrustChange(instance.instanceId, 'deny');
-        ui.pendingClientTrustChange = true;
-      };
-      $rootScope.denyAccess = $rootScope.revokeAccess;
-
-      // |id| can be either a client id or a user id.
-      $rootScope.instanceTrustChange = function (id, action) {
-        // console.log('instance trust change ' + action + ', ' + id);
-        setTimeout(function() {
-          appChannel.emit('instance-trust-change',
-            { instanceId: id, action: action });
-        }, 0);
-      };
 
       // Bind UI functions to the scope, if they want to be accessed from DOM.
       // $rootScope.returnToRoster = function() ui.returnToRoster;
       // $rootScope.notificationSeen = ui.notificationSeen;
 
-      $rootScope.changeOption = function (key, value) {
-        appChannel.emit('change-option', {key: key, value: value});
-      }
+      // $rootScope.changeOption = function (key, value) {
+        // appChannel.emit('change-option', {key: key, value: value});
+      // }
 
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
@@ -241,7 +173,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      var updateDOM = function() {
+      $rootScope.updateDOM = function() {
         $rootScope.$apply(function () {
           // Also update pointers locally ?
           // $rootScope.instances = model.instances;
@@ -251,9 +183,68 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // State change event handler is browser specific, or it might not exist
       // at all.
       if (onStateChange) {
-        onStateChange.addListener(updateDOM);
+        onStateChange.addListener($rootScope.updateDOM);
       }
     }  // run function
-  ]);
+  ])
 
+  // This controller deals with modification of consent bits and the actual
+  // starting/stopping of proxying for one particular instance.
+  .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
 
+    // Helper which changes consent bits.
+    // These work the same even if |client| is an instance - so long as it
+    // contains the attribute |clientId|.
+    // |id| can be either a client id or a user id.
+    var _modifyConsent = function (id, action) {
+      setTimeout(function() {
+        ui.modifyConsent(id, action);
+      }, 0); // TODO: why is this a timeout?
+    };
+    var _modifyProxyConsent = function(instance, action) {
+      _modifyConsent(instance.instanceId, action);
+      ui.pendingProxyTrustChange = true;
+    }
+    var _modifyClientConsent = function(instance, action) {
+      _modifyConsent(instance.instanceId, action);
+      ui.pendingClientTrustChange = true;
+    }
+
+    // Consent to access through a friend.
+    $s.requestAccess = function(instance) {
+      _modifyProxyConsent(instance, 'request-access');
+    };
+    $s.cancelRequest = function(instance) {
+      _modifyProxyConsent(instance, 'cancel-request');
+    }
+    $s.acceptOffer = function(instance) {
+      _modifyProxyConsent(instance, 'accept-offer');
+    };
+    $s.declineOffer = function(instance) {
+      _modifyProxyConsent(instance, 'decline-offer');
+    };
+
+    // Consent to provide access for a friend:
+    $s.offerAccess = function(instance) {
+      _modifyClientConsent(instance, 'offer');
+    };
+    $s.grantAccess = function(instance) {
+      _modifyClientConsent(instance, 'allow');
+    };
+    $s.revokeAccess = function(instance) {
+      _modifyClientConsent(instance, 'deny');
+    };
+    $s.denyAccess = $s.revokeAccess;
+
+    $s.startAccess = function(instance) {
+      // We don't need to tell them we'll start proxying, we can just try to
+      // start. The SDP request will go through chat/identity network on its
+      // own.
+      ui.startProxying(instance);
+    };
+
+    $s.stopAccess = function(instance) {
+      ui.stopProxying();
+    };
+
+  }]);

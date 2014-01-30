@@ -22,4 +22,3 @@ function launchWebRtcTestWindow() {
     minHeight: 480
   });
 }
-

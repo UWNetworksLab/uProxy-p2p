@@ -1,7 +1,7 @@
 /**
- * uproxy.js
+ * uproxy.ts
  *
- * This is the primary backend script. It maintains in-memory state,
+ * This is the primary uproxy code. It maintains in-memory state,
  * checkpoints information to local storage, and synchronizes state with the
  * front-end.
  *
@@ -9,16 +9,17 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
-'use strict';
+/// <reference path='ui/scripts/ui.d.ts' />
+/// <reference path='constants.d.ts' />
+import C = Constants;
 
-// JS-Hint/JS-lint
-/* global self, makeLogger, freedom, cloneDeep, isDefined, nouns, adjectives,
-   Trust, restrictKeys, freedom: false, UProxyState: false, console:
-   false, DEBUG: false, ProxyState: false, store, _localTestProxying,
-   DEFAULT_STATUS, DEFAULT_INSTANCE_MESSAGE, DEFAULT_MESSAGE_ENVELOPE,
-   DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, DEFAULT_ROSTER_ENTRY,
-   DEFAULT_ROSTER_CLIENT_ENTRY */
+// TODO: remove these once these 'modules' become typescripted.
+declare var freedom:any;
+declare var store:any;
+declare var restrictKeys:any;
+declare var _localTestProxying:any;
 
+// TODO: refactor such that this reflects the UI interface.
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
 var bgAppPageChannel = freedom;
@@ -44,6 +45,7 @@ var server = freedom.uproxyserver();
 // message.
 var _sendInstanceQueue = [];
 var _memoizedInstanceMessage = null;
+
 
 // --------------------------------------------------------------------------
 //  General UI interaction
@@ -207,12 +209,12 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
-  if (Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
+  if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
     console.log('Lacking permission to proxy through ' + peerInstanceId);
     return false;
   }
   // TODO: Cleanly disable any previous proxying session.
-  instance.status.proxy = ProxyState.RUNNING;
+  instance.status.proxy = C.ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
   _syncInstanceUI(instance, 'status');
 
@@ -243,7 +245,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
 
   client.emit("stop");
-  instance.status.proxy = ProxyState.OFF;
+  instance.status.proxy = C.ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 
   // TODO: this is also a temporary hack.
@@ -281,7 +283,7 @@ function handleNewlyActiveClient(msg) {
   }
   console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
-  instance.status.client = ProxyState.RUNNING;
+  instance.status.client = C.ProxyState.RUNNING;
   _syncInstanceUI(instance, 'status');
 }
 
@@ -292,7 +294,7 @@ function handleInactiveClient(msg) {
     console.error('Cannot be proxy for nonexistent instance.');
     return;
   }
-  instance.status.client = ProxyState.OFF;
+  instance.status.client = C.ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 }
 
@@ -302,14 +304,14 @@ function handleInactiveClient(msg) {
 // action -> target trust level.
 var TrustOp = {
   // If Alice |action|'s Bob, then Bob acts as the client.
-  'allow': Trust.YES,
-  'offer': Trust.OFFERED,
-  'deny': Trust.NO,
+  'allow': C.Trust.YES,
+  'offer': C.Trust.OFFERED,
+  'deny': C.Trust.NO,
   // Bob acts as the proxy.
-  'request-access': Trust.REQUESTED,
-  'cancel-request': Trust.NO,
-  'accept-offer': Trust.YES,
-  'decline-offer': Trust.NO
+  'request-access': C.Trust.REQUESTED,
+  'cancel-request': C.Trust.NO,
+  'accept-offer': C.Trust.YES,
+  'decline-offer': C.Trust.NO
 };
 
 // The user clicked on something to change the trust w.r.t. another user.
@@ -381,7 +383,7 @@ function receiveTrustMessage(msgInfo) {
 //
 function receiveStatus(data) {
   console.log('onStatus: ' + JSON.stringify(data));
-  data = restrictKeys(DEFAULT_STATUS, data);
+  data = restrictKeys(C.DEFAULT_STATUS, data);
   // userId is only specified when connecting or online.
   if (data.userId.length) {
     store.state.identityStatus[data.network] = data;
@@ -407,9 +409,9 @@ function receiveChange(rawData) {
     return false;
   } */
   try {
-    var data = restrictKeys(DEFAULT_ROSTER_ENTRY, rawData);
+    var data = restrictKeys(C.DEFAULT_ROSTER_ENTRY, rawData);
     for (var c in rawData.clients) {
-      data.clients[c] = restrictKeys(DEFAULT_ROSTER_CLIENT_ENTRY,
+      data.clients[c] = restrictKeys(C.DEFAULT_ROSTER_CLIENT_ENTRY,
                                      rawData.clients[c]);
     }
 
@@ -580,8 +582,8 @@ function makeMyInstanceMessage() {
     }
     firstIdentity.network = firstIdentity.clients[Object.keys(
         firstIdentity.clients)[0]].network;
-    result = restrictKeys(DEFAULT_INSTANCE_MESSAGE, store.state.me);
-    result.rosterInfo = restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
+    result = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, store.state.me);
+    result.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
   } catch (e) {
     console.log("Failed to repair identity when making an instance message.\n");
@@ -642,10 +644,10 @@ function sendQueuedInstanceMessages() {
 function receiveInstance(rawMsg) {
   console.log('receiveInstance from ' + rawMsg.fromUserId);
 
-  var msg = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-  msg.data = restrictKeys(DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+  var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+  msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
   msg.data.rosterInfo = restrictKeys(
-      DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
+      C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
 
   var instanceId  = msg.data.instanceId;
   var userId      = msg.fromUserId;
@@ -724,18 +726,18 @@ function receiveConsent(msg) {
 // consent to being their client. If the local state for trusting them to
 // be our client is Yes or Offered, we consent to being their proxy.
 function _determineConsent(trust) {
-  return { asProxy:  [Trust.YES, Trust.OFFERED].indexOf(trust.asClient) >= 0,
-           asClient: [Trust.YES, Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
+  return { asProxy:  [C.Trust.YES, C.Trust.OFFERED].indexOf(trust.asClient) >= 0,
+           asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
 }
 
 function _composeTrustFromConsent(myConsent, theirConsent) {
   return {
       asProxy: theirConsent.asProxy?
-          (myConsent.asClient? Trust.YES : Trust.OFFERED) :
-          (myConsent.asClient? Trust.REQUESTED : Trust.NO),
+          (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
+          (myConsent.asClient? C.Trust.REQUESTED : C.Trust.NO),
       asClient: theirConsent.asClient?
-          (myConsent.asProxy? Trust.YES : Trust.REQUESTED) :
-          (myConsent.asProxy? Trust.OFFERED : Trust.NO)
+          (myConsent.asProxy? C.Trust.YES : C.Trust.REQUESTED) :
+          (myConsent.asProxy? C.Trust.OFFERED : C.Trust.NO)
   };
 }
 
@@ -800,7 +802,7 @@ bgAppPageChannel.on('start-proxy-localhost-test', function () {
 // --------------------------------------------------------------------------
 //  Updating the UI
 // --------------------------------------------------------------------------
-function _SyncUI(path, value, op) {
+function _SyncUI(path, value, op?) {
   op = op || 'add';
   bgAppPageChannel.emit('state-change', [{
       op: op,
@@ -809,7 +811,7 @@ function _SyncUI(path, value, op) {
   }]);
 }
 // Helper to consolidate syncing the instance on the UI side.
-function _syncInstanceUI(instance, field) {
+function _syncInstanceUI(instance, field?) {
   var fieldStr = field? '/' + field : '';
   _SyncUI('/instances/' + instance.instanceId + fieldStr,
           field? instance[field] : instance);

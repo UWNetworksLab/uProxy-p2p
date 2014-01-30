@@ -1,26 +1,30 @@
 /**
  * ui.ts
  *
- * Typically included from the manifest,.
- *
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
-'use strict';
+/// <reference path="notify.d.ts"/>
+/// <reference path="../../core.d.ts"/>
+/// <reference path="ui.d.ts" />
+
 if (undefined !== UI) {
-  console.log('ui.ts already included.');
-  return false;
+  console.error('ui.ts already included.');
 }
 
 declare var model:any;
 declare var chrome:any;
-declare var appChannel:any;
 declare var onStateChange:any;
+
 
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
-class UI {
-  ICON_DIR : string = '../common/ui/icons/';
+class UI implements IUI {
+
+  // Primary interactions between major components.
+  core:Interfaces.ICore;
+  notify:INotifications;
+
   networks = ['google', 'facebook', 'xmpp'];
   notifications = 0;
   // TODO: splash should be set by state.
@@ -29,18 +33,35 @@ class UI {
   advancedOptions = false;
   searchBar = true;
   search = '';
-  pendingProxyTrustChange = false;
-  pendingClientTrustChange = false;
   chatView = false;
   numClients = 0;
   myName = '';
   myPic = null;
+  // Disable action buttons immediately after clicking, until state updates
+  // completely to prevent duplicate clicks.
+  pendingProxyTrustChange = false;
+  pendingClientTrustChange = false;
 
   isProxying = false;  // Whether we are proxying through someone.
   accessIds = 0;  // How many people are proxying through us.
 
-  constructor(browserType) {
+  isConnected:boolean = false;
+
+  constructor(public notifier:INotifications, core:Interfaces.ICore) {
+    this.notify = notifier;
+    this.core = core;
+    core.onConnected = () => {
+      this.isConnected = true;
+    };
+    core.onDisconnected = () => {
+      this.isConnected = false;
+    };
+
   }
+
+  // isConnected():boolean {
+    // return this.core.isConnected;
+  // }
 
   // Keep track of currently viewed contact and instance.
   contact = null;
@@ -48,12 +69,11 @@ class UI {
   instance = null;
   instanceUnwatch = null;  // For angular binding.
 
-  // If we are proxying, keep track of the instance.
-  proxy = null;
+  proxy = null;  // If we are proxying, keep track of the instance.
 
   // When the description changes while the text field loses focus, it
   // automatically updates.
-  oldDescription : string = '';
+  oldDescription:string = '';
 
   // Initial filter state.
   filters = {
@@ -63,44 +83,81 @@ class UI {
       'uproxy': false
   };
 
-  // -------------------------- Browser Icons / Labels  --------------------------
-  setIcon(iconFile : string) {
-    // TODO: make this not require chrome
-    chrome.browserAction.setIcon({
-      path: this.ICON_DIR + iconFile
-    });
-  }
-
-  setLabel(text : string) {
-    chrome.browserAction.setBadgeText({ text: '' + text });
-  }
-
   // Hackish way to fire the onStateChange dispatcher.
   refreshDOM() {
     onStateChange.dispatch();
   }
 
-  setProxying(isProxying : boolean) {
-    this.isProxying = isProxying;
-    if (isProxying) {
-      this.setIcon('uproxy-19-p.png');
-    } else {
-      this.setIcon('uproxy-19.png');
-    }
-  }
-
   setClients(numClients) {
     this.numClients = numClients;
     if (numClients > 0) {
-      chrome.browserAction.setBadgeBackgroundColor({color: '#008'});
-      this.setLabel('↓');
+      this.notify.setColor('#008');
+      this.notify.setLabel('↓');
     } else {
-      chrome.browserAction.setBadgeBackgroundColor({color: '#800'});
+      this.notify.setColor('#800');
     }
   }
 
+  // -------------------------------- Consent ----------------------------------
+  modifyConsent(instanceId:string, action:Interfaces.Consent.Action) {
+    if (!this.core) {
+      console.log('UI not connected to core - cannot modify consent.');
+      return;
+    }
+    this.core.modifyConsent(instanceId, action);
+  }
 
-  // -------------------------------- Filters ------------------------------------
+  // ------------------------------- Proxying ----------------------------------
+  startProxying(instance) {
+    this.core.start(instance.instanceId);
+    this.proxy = instance;
+    this._setProxying(true);
+  }
+
+  stopProxying() {
+    if (!this.instance) {
+      console.warn('Stop Proxying called while not proxying.');
+      return;
+    }
+    this._setProxying(false);
+    this.core.stop(this.instance.instanceId);
+  }
+
+  _setProxying(isProxying : boolean) {
+    this.isProxying = isProxying;
+    if (isProxying) {
+      this.notify.setIcon('uproxy-19-p.png');
+    } else {
+      this.notify.setIcon('uproxy-19.png');
+    }
+  }
+
+  login(network) {
+    this.core.login(network);
+    this.splashPage = false;
+  }
+
+  logout(network) {
+    this.core.logout(network);
+    this.proxy = null;
+  }
+
+  updateDescription(description) {
+    // Only update on different description.
+    if (this.oldDescription &&
+       (this.oldDescription != description)) {
+      this.core.updateDescription(description);
+    }
+    this.oldDescription = description;
+  }
+
+  sendInstance(clientId) {
+    this.core.sendInstance(clientId);
+  }
+
+  reset() { this.core.reset(); }
+
+  // -------------------------------- Filters ----------------------------------
   // Toggling |filter| changes the visibility and ordering of roster entries.
   toggleFilter(filter) {
     if (undefined === this.filters[filter]) {
@@ -152,7 +209,7 @@ class UI {
   }
 
   setNotifications(n) {
-    this.setLabel(n > 0? n : '');
+    this.notify.setLabel(n > 0? n : '');
     this.notifications = n < 0? 0 : n;
   }
 
@@ -166,11 +223,19 @@ class UI {
     if (!user.hasNotification) {
       return;  // Ignore if user has no notification.
     }
-    appChannel.emit('notification-seen', user.userId);
+    this.core.notificationSeen(user.userId);
     user.hasNotification = false;
     this.decNotifications();
   }
 
+  syncInstance(instance : any) {}
+  updateMappings() {}
+
+  updateIdentity(identity) {}
+  sendConsent() {}
+  addNotification() {}
+
+  // Synchronize the data about the current user.
   syncMe() {
     var id = _getMyId();
     if (!id) {
@@ -183,6 +248,7 @@ class UI {
     console.log('Synced my own identity. ', identity);
   }
 
+  // Synchronize the data about some friend.
   syncUser(user) {
     var instanceId = null,
         instance = null,
@@ -239,7 +305,7 @@ class UI {
   // Make sure counters and UI-only state holders correctly reflect the model.
   // If |previousPatch| is provided, the search is optimized to only sync the
   // relevant entries.
-  synchronize(previousPatch) {
+  sync(previousPatch?:any) {
     var n = 0;  // Count up notifications
     for (var userId in model.roster) {
       var user = model.roster[userId];
@@ -263,7 +329,7 @@ class UI {
     this.setClients(c);
     this.pendingProxyTrustChange = false;
     this.pendingClientTrustChange = false;
-
+    // console.log('meow');
     // Generate list ordered by names.
     // var uids = Object.keys(model.roster);
     // var names = uids.map(function(id) { return model.roster[id].name; });
@@ -284,5 +350,3 @@ function _getMyId() {
   }
   return null;
 }
-
-

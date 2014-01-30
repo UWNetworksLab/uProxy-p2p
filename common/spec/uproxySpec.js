@@ -88,13 +88,13 @@ var fakeInstanceSync = function(userId, clientId, data) {
 };
 
 describe("uproxy.receiveInstance", function() {
-  var instanceMsg = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, {
+  var instanceMsg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, {
     fromUserId: 'alice',
     fromClientId: 'alice-clientid',
     toUserId: '',
-    data: restrictKeys(DEFAULT_INSTANCE_MESSAGE, {
+    data: restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, {
       instanceId: '12345',
-      rosterInfo: restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
+      rosterInfo: restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
         name: 'Alice Testuser',
         network: 'google'
       })
@@ -130,18 +130,18 @@ describe("uproxy.receiveInstance", function() {
 });
 
 // Returns an object representing a single user instance.  Conforms to
-// DEFAULT_ROSTER_ENTRY.
+// C.DEFAULT_ROSTER_ENTRY.
 function makeUserRosterEntry(instanceId, userId, not_as_uproxy) {
-  var result = cloneDeep(DEFAULT_ROSTER_ENTRY);
+  var result = cloneDeep(C.DEFAULT_ROSTER_ENTRY);
   userId = userId + '@gmail.com';
   var clientId;
   clientId = userId + (not_as_uproxy?
       '/other-messenger' : ('/uproxy' + instanceId));
   result.userId = userId;
   // validate for missing fields.
-  result = restrictKeys(DEFAULT_ROSTER_ENTRY, result);
+  result = restrictKeys(C.DEFAULT_ROSTER_ENTRY, result);
   result.clients[clientId] = restrictKeys(
-      DEFAULT_ROSTER_CLIENT_ENTRY, {
+      C.DEFAULT_ROSTER_CLIENT_ENTRY, {
         userId: userId,
         clientId: clientId,
         network: 'google',
@@ -152,19 +152,19 @@ function makeUserRosterEntry(instanceId, userId, not_as_uproxy) {
 }
 
 // Returns an instance message from a roster entry.
-// (DEFAULT_ROSTER_ENTRY ->
-//        DEFAULT_MESSAGE_ENVELOPE{data=DEFAULT_INSTANCE_MESSAGE}).
+// (C.DEFAULT_ROSTER_ENTRY ->
+//        C.DEFAULT_MESSAGE_ENVELOPE{data=C.DEFAULT_INSTANCE_MESSAGE}).
 // |userInstance| should be the result value from a call to
-// makeUserRosterEntry(), a DEFAULT_ROSTER_ENTRY.
+// makeUserRosterEntry(), a C.DEFAULT_ROSTER_ENTRY.
 function makeInstanceMessage(userRosterEntry) {
-  var result = cloneDeep(DEFAULT_MESSAGE_ENVELOPE);
+  var result = cloneDeep(C.DEFAULT_MESSAGE_ENVELOPE);
   var client = userRosterEntry.clients[Object.keys(userRosterEntry.clients)[0]];
   result.fromUserId = userRosterEntry.userId;
   result.fromClientId = client.clientId;
   result.toUserId = 'you-should-not-be-checking-this';
-  result = restrictKeys(DEFAULT_MESSAGE_ENVELOPE, result);
+  result = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, result);
 
-  var result_data = cloneDeep(DEFAULT_INSTANCE_MESSAGE);
+  var result_data = cloneDeep(C.DEFAULT_INSTANCE_MESSAGE);
   // pull the instanceID out of the clientID.
   var instanceId;
   if (client.clientId.indexOf('/uproxy') > 0) {
@@ -176,9 +176,9 @@ function makeInstanceMessage(userRosterEntry) {
   result_data.instanceId = instanceId;
   result_data.description = 'description for user ' + userRosterEntry.userId;
   result_data.keyHash = 'HASHFORINSTANCE-' + instanceId;
-  result_data = restrictKeys(DEFAULT_INSTANCE_MESSAGE, result_data);
+  result_data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, result_data);
 
-  result_data.rosterInfo = restrictKeys(DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
+  result_data.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
     name: userRosterEntry.name,
     network: client.network,
     userId: userRosterEntry.userId
@@ -224,8 +224,8 @@ function validateInstance(inst) {
     expect(modelInst.trust.asProxy).toBe(Trust.NO);
     expect(modelInst.trust.asClient).toBe(Trust.NO);
     expect(modelInst.status).toBeDefined();
-    expect(modelInst.status.proxy).toBe(DEFAULT_PROXY_STATUS.proxy);
-    expect(modelInst.status.client).toBe(DEFAULT_PROXY_STATUS.client);
+    expect(modelInst.status.proxy).toBe(C.DEFAULT_PROXY_STATUS.proxy);
+    expect(modelInst.status.client).toBe(C.DEFAULT_PROXY_STATUS.client);
 
     // Validate clientToInstance[] mapping.
     expect(store.state.clientToInstance).toBeDefined();
@@ -249,7 +249,7 @@ function validateInstance(inst) {
   }
 }
 
-// conforms both to DEFAULT_STATUS and DEFAULT_INSTANCE.
+// conforms both to C.DEFAULT_STATUS and C.DEFAULT_INSTANCE.
 var selfInstanceAndStatusMessage = {
   userId: 'self@selfmail.com',
   name: 'My self.',
@@ -301,17 +301,17 @@ describe("uproxy.state.instance", function () {
     // This should be the simplest way in.  You get a login for yourself, then
     // a roster, then instance notifications.
     var inst;
-    // receiveStatus expects a DEFAULT_STATUS message.
+    // receiveStatus expects a C.DEFAULT_STATUS message.
     receiveStatus(selfInstanceAndStatusMessage);
 
-    // receiveChange expects a DEFAULT_INSTANCE message.
+    // receiveChange expects a C.DEFAULT_INSTANCE message.
     receiveChange(selfInstanceAndStatusMessage);
     for (inst in userRoster) {
       receiveChange(userRoster[inst]);
     }
 
-    // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
-    // message.  receiveInstance expects a DEFAULT_INSTANCE_MESSAGE.
+    // We have to wrap up the instance data in a C.DEFAULT_INSTANCE_MESSAGE
+    // message.  receiveInstance expects a C.DEFAULT_INSTANCE_MESSAGE.
     for (inst in userRoster) {
       receiveInstance(makeInstanceMessage(userRoster[inst]));
     }
@@ -328,16 +328,16 @@ describe("uproxy.state.instance", function () {
     // This should be the simplest way in.  You get a login for yourself, then
     // a roster, then instance notifications.
     var inst;
-    // receiveStatus expects a DEFAULT_STATUS message.
+    // receiveStatus expects a C.DEFAULT_STATUS message.
     receiveStatus(selfInstanceAndStatusMessage);
 
-    // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
+    // We have to wrap up the instance data in a C.DEFAULT_INSTANCE_MESSAGE
     // message.
     for (inst in userRoster) {
       receiveInstance(makeInstanceMessage(userRoster[inst]));
     }
 
-    // receiveChange expects a DEFAULT_INSTANCE message.
+    // receiveChange expects a C.DEFAULT_INSTANCE message.
     receiveChange(selfInstanceAndStatusMessage);
     for (inst in userRoster) {
       receiveChange(userRoster[inst]);
@@ -355,13 +355,13 @@ describe("uproxy.state.instance", function () {
     // This should be the simplest way in.  You get a login for yourself, then
     // a roster, then instance notifications.
     var inst;
-    // receiveStatus expects a DEFAULT_STATUS message.
+    // receiveStatus expects a C.DEFAULT_STATUS message.
     receiveStatus(selfInstanceAndStatusMessage);
     receiveChange(selfInstanceAndStatusMessage);
 
-    // We have to wrap up the instance data in a DEFAULT_INSTANCE_MESSAGE
-    // message.  receiveChange expects a DEFAULT_INSTANCE
-    // message. receiveInstance expects a DEFAULT_INSTANCE_MESSAGE.
+    // We have to wrap up the instance data in a C.DEFAULT_INSTANCE_MESSAGE
+    // message.  receiveChange expects a C.DEFAULT_INSTANCE
+    // message. receiveInstance expects a C.DEFAULT_INSTANCE_MESSAGE.
     for (inst in userRoster) {
       receiveInstance(makeInstanceMessage(userRoster[inst]));
       receiveChange(userRoster[inst]);

@@ -10,8 +10,6 @@
  *  clean - Cleans up
  *  build_chrome - build Chrome files
  *  build_firefox - build Firefox
- *  concat:firefox - collect popup.html and options.html dependencies into
-                     a single file.
  *  everything - 'setup', 'test', then 'build'
  **/
 
@@ -22,22 +20,29 @@ var minimatch = require("minimatch");
 //NOTE: This is ultimately what gets copied, so keep this precise
 //NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
 var chrome_app_files = [
-  'common/ui/icons/**',
+  'common/uproxy.json',
   'node_modules/freedom/freedom.js',
-  'common/backend/**',
-  '!common/backend/spec/**',
-  '!common/backend/identity/xmpp/node-xmpp/**',
-  // scraps is a palce for throwing example code for demonstrating stuff to each other.
-  'common/scraps/**'
+  'common/*.js',
+  '!common/spec/**',
+  'common/storage/**',
+  'common/client/**',
+  'common/server/**',
+  'common/identity/**',
+  'common/transport/**',
+  '!common/identity/xmpp/node-xmpp/**',
+  // scraps is a place for throwing example code for demonstrating stuff to each other.
+  'common/scraps/**',
+  'common/constants.js',
+  'common/ui/icons/**'
 ];
 var chrome_ext_files = [
-  // scraps is a palce for throwing example code for demonstrating stuff to each other.
   'common/scraps/**',
   'common/ui/*.html',
   'common/ui/icons/**',
   'common/ui/scripts/**',
   'common/ui/styles/**',
   'common/ui/lib/**',
+  'common/core.d.ts',
 ];
 var firefox_files = [
   'common/backend/**',
@@ -66,13 +71,13 @@ var ui_isolation_files = [
 //var sources = ['common/backend/spec/*.js'];
 // These files loaded sequentially prior to spec files.
 var sourcesToTest = [
-  'common/backend/test/freedom-mocks.js',
-  'common/backend/util.js',
-  'common/backend/nouns-and-adjectives.js',
-  'common/backend/constants.js',
-  'common/backend/state-storage.js',
-  'common/backend/uproxy.js',
-  'common/backend/start-uproxy.js'
+  'common/test/freedom-mocks.js',
+  'common/util.js',
+  'common/nouns-and-adjectives.js',
+  'common/constants.js',
+  'common/state-storage.js',
+  'common/uproxy.js',
+  'common/start-uproxy.js'
 ];
 
 module.exports = function(grunt) {
@@ -85,6 +90,8 @@ module.exports = function(grunt) {
       uistatic: {files: [{
         expand: true, flatten: false, cwd: 'common/ui/',
         src: ui_isolation_files, dest: 'uistatic/common/ui',
+        }, {
+        src: 'common/core.d.ts', dest: 'uistatic/common/core.d.ts'
       }]},
       watch: {files: []},
     },
@@ -139,24 +146,11 @@ module.exports = function(grunt) {
         // Files being tested
         src: sourcesToTest,
         options: {
-          helpers: ['common/backend/test/example-state.jsonvar',
-                    'common/backend/test/example-saved-state.jsonvar'],
-          specs: 'common/backend/spec/*Spec.js',
+          helpers: ['common/test/example-state.jsonvar',
+                    'common/test/example-saved-state.jsonvar'],
+          specs: 'common/spec/*Spec.js',
           keepRunner: true
         }
-      }
-    },
-    jsvalidate: {
-      files: sourcesToTest.concat(['common/backend/spec/*Spec.js'])
-    },
-    jshint: {
-      all: sourcesToTest.concat(['common/backend/spec/*Spec.js']),
-      options: {
-        // 'strict': true, // Better to have it in the file
-        // 'globalstrict': true,
-        'moz': true,   // Used for function closures and other stuff
-        '-W069': true,
-        '-W097': true  // force: allow "strict use" in non function form.
       }
     },
     sass: {
@@ -170,6 +164,35 @@ module.exports = function(grunt) {
       ui: {
         src: ['common/ui/scripts/ui.ts'],
         dest: 'common/ui/scripts/ui.js'
+      },
+      uistatic: {
+        src: ['uistatic/scripts/dependencies.ts'],
+              // 'uistatic/common/ui/scripts/ui.ts'],
+        dest: 'uistatic/scripts/dependencies.js'
+      },
+      uproxy: {
+        src: ['common/uproxy.ts'],
+        dest: 'common/uproxy.js'
+      },
+      chrome: {
+        src: ['chrome/extension/src/scripts/background.ts'],
+        dest: 'chrome/extension/src/scripts/background.js'
+      },
+      constants: {
+        src: ['common/constants.ts'],
+        dest: 'common/constants.js'
+      },
+      statestorage: {
+        src: ['common/state-storage.ts'],
+        dest: 'common/state-storage.js'
+      },
+    },
+    'mozilla-cfx': {
+      debug_run: {
+        options: {
+          extension_dir: 'firefox',
+          command: 'run'
+        }
       }
     }
   });
@@ -179,10 +202,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.loadNpmTasks('grunt-jsvalidate');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
 
@@ -214,32 +235,72 @@ module.exports = function(grunt) {
     'shell:bower_install',
   ]);
   grunt.registerTask('test', [
-    'jshint:all',
     'jasmine'
   ]);
+
+  // Build the common directory first, which platform-specific builds depend on.
+  // Grunt tasks prepended with an '_' do not include this step, in order to
+  // prevent redundancy.
+  grunt.registerTask('common', [
+    'typescript:uproxy',
+    'typescript:ui',
+    'typescript:constants',
+    'typescript:statestorage',
+    'sass:main',
+  ]);
+
+  // Chrome build tasks.
+  grunt.registerTask('_build_chrome', [
+    'copy:chrome_app',
+    'copy:chrome_ext',
+    'typescript:chrome',
+  ]);
+
+  grunt.registerTask('build_chrome', [
+    'common',
+    '_build_chrome',
+  ]);
+
+  // Firefox build tasks.
+  grunt.registerTask('_build_firefox', [
+    'copy:firefox'
+  ]);
+  grunt.registerTask('build_firefox', [
+    'common',
+    '_build_firefox'
+  ]);
+
   grunt.registerTask('xpi', [
     "build_firefox",
     "compress:main"
   ]);
-  //Build task
-  grunt.registerTask('build_chrome', [
-    'copy:chrome_app',
-    'copy:chrome_ext',
+  grunt.registerTask('ff', [
+    'build_firefox',
+    'mozilla-cfx'
   ]);
+
   grunt.registerTask('build_firefox', [
     'copy:firefox'
   ]);
-  grunt.registerTask('ui', [
+
+  // Stand-alone UI.
+  grunt.registerTask('_ui', [
     'typescript:ui',
     'sass:main',
     'copy:uistatic',
+    'typescript:uistatic',
   ]);
+  grunt.registerTask('ui', [
+    'common',
+    '_ui'
+  ]);
+
   grunt.registerTask('buil', ['shell:rickroll']);
   grunt.registerTask('build', [
-    'build_chrome',
-    'build_firefox',
-    'ui',
-    'jsvalidate',
+    'common',
+    '_build_chrome',
+    '_build_firefox',
+    '_ui',
     'test'
   ]);
   grunt.registerTask('everything' ['setup', 'build']);

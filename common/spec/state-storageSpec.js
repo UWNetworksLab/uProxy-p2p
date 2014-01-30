@@ -20,7 +20,7 @@ describe("state-storage", function() {
     expect(exampleSavedState).not.toBe(null);
   });
   it("* Initial state is default state", function() {
-    expect(stateStorage.state).toEqual(DEFAULT_LOAD_STATE);
+    expect(stateStorage.state).toEqual(C.DEFAULT_LOAD_STATE);
   });
   it("* Saving state doesn't change state", function() {
     // Make state a deep-copy of exampleState.
@@ -40,8 +40,8 @@ describe("state-storage", function() {
     expect(stateReloadedDirectly).toEqual(exampleState);
   });
   var stateLoadedFromDefault;
-  it("* Loading from DEFAULT_LOAD_STATE has the same instances", function() {
-    stateStorage.state = cloneDeep(DEFAULT_LOAD_STATE);
+  it("* Loading from C.DEFAULT_LOAD_STATE has the same instances", function() {
+    stateStorage.state = cloneDeep(C.DEFAULT_LOAD_STATE);
     stateStorage.loadStateFromStorage();
     stateLoadedFromDefault = cloneDeep(stateStorage.state);
     expect(stateLoadedFromDefault.instances)
@@ -70,19 +70,19 @@ describe("state-storage", function() {
     expect(stateStorage.state).toEqual(stateLoadedFromDefault);
   });
   var wasResetCallbackCalled = false;
-  it("* Reset works just like load from DEFAULT_LOAD_STATE", function() {
+  it("* Reset works just like load from C.DEFAULT_LOAD_STATE", function() {
     // reseting the state and loading should be the same as the
-    // DEFAULT_LOAD_STATE.
+    // C.DEFAULT_LOAD_STATE.
     stateStorage.reset(function() { wasResetCallbackCalled = true; });
-    expect(stateStorage.state.options).toEqual(DEFAULT_LOAD_STATE.options);
-    expect(stateStorage.state.roster).toEqual(DEFAULT_LOAD_STATE.roster);
-    expect(stateStorage.state.instances).toEqual(DEFAULT_LOAD_STATE.instances);
+    expect(stateStorage.state.options).toEqual(C.DEFAULT_LOAD_STATE.options);
+    expect(stateStorage.state.roster).toEqual(C.DEFAULT_LOAD_STATE.roster);
+    expect(stateStorage.state.instances).toEqual(C.DEFAULT_LOAD_STATE.instances);
     // expect(stateStorage.state).toEqual(stateLoadedFromDefault);
     // expect(stateStorage.state.options)
         // .toEqual(stateLoadedFromDefault.options);
     // expect(stateStorage.state.instances)
         // .toEqual(stateLoadedFromDefault.instances);
-        // .toEqual(DEFAULT_LOAD_STATE.instances);
+        // .toEqual(C.DEFAULT_LOAD_STATE.instances);
     // expect(stateStorage.state.roster)
         // .toEqual(stateLoadedFromDefault.roster);
     // expect(stateStorage.state.me)
