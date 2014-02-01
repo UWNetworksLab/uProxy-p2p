@@ -13,70 +13,6 @@
  *  everything - 'setup', 'test', then 'build'
  **/
 
-var path = require("path");
-var minimatch = require("minimatch");
-
-//-----------------------------------------------------------------------------
-//List of all files for each distribution
-//NOTE: This is ultimately what gets copied, so keep this precise
-//NOTE: Keep all exclusion paths ('!' prefix) after the path they are in
-
-
-// Files for the uProxy chrome app
-var chrome_app = {
-  src: [ // in 'src' directory
-    'core/**',
-    '!core/spec/**',
-    'icons/**',
-    // scraps is a place for throwing example code for demonstrating stuff to each other.
-    'scraps/**',
-    '!**/*.ts'],
-  lib: [
-    'external_lib/bower_components/lodash/dist/lodash.min.js']
-};
-
-// Files for the uProxy chrome extension
-var chrome_ext = {
-  src: [ // in 'src' directory
-    'ui/**',
-    'icons/**',
-    '!**/*.ts'],
-  lib: [
-    'external_lib/bower_components/lodash/dist/lodash.js',
-    'external_lib/bower_components/angular/angular.js',
-    ]
-};
-
-// Files for uProxy in firefox
-var firefox = {
-  src: [
-    'core/**',
-    '!core/spec/**',
-    'ui/**',
-    'icons/**',
-    '!**/*.ts'],
-  lib: [
-    'external_lib/bower_components/lodash/dist/lodash.min.js']
-};
-
-// Files for the standalone UI
-var uistatic = {
-  src: [
-    'ui/popup.html',
-    'ui/scripts/**',
-    'ui/styles/**',
-    'icons/**',
-    'core/core.d.ts',
-    '!**/*.ts'],
-  lib: [
-    'external_lib/bower_components/lodash/dist/lodash.min.js']
-};
-
-//-----------------------------------------------------------------------------
-function copyUiFiles(dest) {
-  return
-}
-
 module.exports = function(grunt) {
   grunt.initConfig({
     'pkg': grunt.file.readJSON('package.json'),
@@ -104,7 +40,7 @@ module.exports = function(grunt) {
 
       generic_core: {files: [
         // Non-compiled generic stuff
-        {expand: true, cwd: 'src/core',
+        {expand: true, cwd: 'src/generic_core',
          src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/generic_ui'},
         // Icons
@@ -117,8 +53,21 @@ module.exports = function(grunt) {
          dest: 'build/generic_ui/lib'}
       ]},
 
-      // Chrome extension. Assumes the top-level task generic-ui completed.
-      chrome_ext: {files: [
+      // Static/independent UI. Assumes the top-level task generic_ui
+      // completed.
+      uistatic: {files: [
+        // The platform specific non-compiled stuff, and...
+        {expand: true, cwd: 'src/uistatic',
+         src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/uistatic/'},
+        // ... the generic ui stuff
+        {expand: true, cwd: 'build/generic_ui',
+         src: ['**'],
+         dest: 'build/uistatic/'}
+      ]},
+
+      // Chrome extension. Assumes the top-level task generic_ui completed.
+      chrome_extension: {files: [
         // The platform specific non-compiled stuff, and...
         {expand: true, cwd: 'src/chrome/extension/src',
          src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
@@ -129,7 +78,7 @@ module.exports = function(grunt) {
          dest: 'build/chrome_extension/'}
       ]},
 
-      // Chrome app. Assumes the top-level task generic-core completed.
+      // Chrome app. Assumes the top-level task generic_core completed.
       chrome_app: {files: [
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/chrome/app',
@@ -141,7 +90,7 @@ module.exports = function(grunt) {
          dest: 'build/chrome_app/'}
       ]},
 
-      // Firefox. Assumes the top-level tasks generic-core and generic-ui
+      // Firefox. Assumes the top-level tasks generic_core and generic_ui
       // completed.
       firefox: {files: [
         // The platform specific stuff, and...
@@ -193,7 +142,6 @@ module.exports = function(grunt) {
     'clean': ['build',
               'dist',
               'tmp',
-              'tscommand.tmp.txt',
               'node_modules',
               'external_lib/bower_components'],
 
@@ -203,16 +151,16 @@ module.exports = function(grunt) {
         // Files being tested
         src: [
           'src/scraps/freedom-mocks.js',
-          'src/core/util.js',
-          'src/core/nouns-and-adjectives.js',
-          'src/core/constants.js',
-          'src/core/state-storage.js',
-          'src/core/uproxy.js',
-          'src/core/start-uproxy.js'],
+          'src/generic_core/util.js',
+          'src/generic_core/nouns-and-adjectives.js',
+          'src/generic_core/constants.js',
+          'src/generic_core/state-storage.js',
+          'src/generic_core/uproxy.js',
+          'src/generic_core/start-uproxy.js'],
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
-          specs: 'src/core/spec/*Spec.js',
+          specs: 'src/generic_core/spec/*Spec.js',
           keepRunner: true
         }
       }
@@ -220,9 +168,9 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'sass': {
-      ui: {
+      generic_ui: {
         files: [
-          { src: ['src/ui/styles/main.sass'],
+          { src: ['src/generic_ui/styles/main.sass'],
             dest: 'build/generic_ui/styles/main.css' }]
       }
     },
@@ -245,14 +193,14 @@ module.exports = function(grunt) {
 
       // uistatic specific typescript
       uistatic: {
-        src: ["src/uistatic/scripts/dependencies.ts"],
+        src: ["src/uistatic/**/*.ts"],
         dest: 'build/uistatic/',
         options: { base_path: 'src/uistatic' }
       },
 
       // uProxy chrome extension specific typescript
       chrome_extension: {
-        src: ["src/chrome/extension/src/scripts/background.ts"],
+        src: ["src/chrome/extension/src/**/*.ts"],
         dest: 'build/chrome_extension/',
         options: { base_path: 'src/chrome/extension/src/' }
       },
@@ -278,7 +226,7 @@ module.exports = function(grunt) {
         }
       }
     }
-  });
+  });  // grunt.initConfig
 
   //-------------------------------------------------------------------------
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -290,7 +238,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
-  grunt.loadNpmTasks('grunt-ts');
 
   //-------------------------------------------------------------------------
   //Setup task
@@ -307,71 +254,57 @@ module.exports = function(grunt) {
   // Build the common directory first, which platform-specific builds depend on.
   // Grunt tasks prepended with an '_' do not include this step, in order to
   // prevent redundancy.
-  grunt.registerTask('generic_core', [
-    'typescript:core',
+  grunt.registerTask('build_generic_core', [
+    'typescript:generic_core',
+    'copy:generic_core'
   ]);
 
-  grunt.registerTask('generic_ui', [
-    'typescript:ui',
-    'sass:ui',
+  grunt.registerTask('build_generic_ui', [
+    'typescript:generic_ui',
+    'sass:generic_ui',
+    'copy:generic_ui'
   ]);
 
-  grunt.registerTask('uistatic', [
+  grunt.registerTask('build_uistatic', [
+    'build_generic_ui',
     'typescript:uistatic',
+    'copy:uistatic'
   ]);
-
 
   // Chrome build tasks.
-  grunt.registerTask('_build_chrome', [
-    'copy:chrome_app',
-    'copy:chrome_ext',
-    'typescript:chrome',
+  grunt.registerTask('build_chrome_extension', [
+    'build_generic_ui',
+    'typescript:chrome_extension',
+    'copy:chrome_extension',
   ]);
 
-  grunt.registerTask('build_chrome', [
-    'common',
-    '_build_chrome',
+  grunt.registerTask('build_chrome_app', [
+    'build_generic_core',
+    'typescript:chrome_app',
+    'copy:chrome_app',
   ]);
+
 
   // Firefox build tasks.
-  grunt.registerTask('_build_firefox', [
+  grunt.registerTask('build_firefox', [
+    'generic_ui',
+    'generic_core',
     'copy:firefox'
   ]);
-  grunt.registerTask('build_firefox', [
-    'common',
-    '_build_firefox'
-  ]);
-
-  grunt.registerTask('xpi', [
+  grunt.registerTask('build_firefox_xpi', [
     "build_firefox",
     "compress:main"
   ]);
-  grunt.registerTask('ff', [
+  grunt.registerTask('run_firefox', [
     'build_firefox',
-    'mozilla-cfx'
+    'mozilla-cfx:debug_run'
   ]);
 
-  grunt.registerTask('build_firefox', [
-    'copy:firefox'
-  ]);
-
-  // Stand-alone UI.
-  grunt.registerTask('_ui', [
-    'typescript:ui',
-    'sass:ui',
-    'copy:uistatic',
-    'typescript:uistatic',
-  ]);
-  grunt.registerTask('ui', [
-    'common',
-    '_ui'
-  ]);
 
   grunt.registerTask('build', [
-    'common',
-    '_build_chrome',
-    '_build_firefox',
-    '_ui',
+    'build_chrome_app',
+    'build_chrome_extension',
+    'build_firefox',
     'test'
   ]);
 
