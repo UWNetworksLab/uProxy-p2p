@@ -145,6 +145,7 @@ module.exports = function(grunt) {
               'dist',
               'tmp',
               'node_modules',
+              'test_output',
               'external_lib/bower_components'],
 
     //-------------------------------------------------------------------------
