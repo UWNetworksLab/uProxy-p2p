@@ -6,13 +6,14 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
-/// <reference path='../common/core.d.ts'/>
-/// <reference path="../common/ui/scripts/ui.ts"/>
+/// <reference path='../../../../core/core.d.ts'/>
+/// <reference path="../../../../ui/scripts/ui.d.ts"/>
 console.log('Initializing chrome extension background page...');
 
 declare var chrome:any;
 declare var jsonpatch:any;
 declare var FreedomConnector:any;
+declare var UI:CUI;
 
 class ChromeNotifications implements INotifications {
   ICON_DIR:string = '../common/ui/icons/';

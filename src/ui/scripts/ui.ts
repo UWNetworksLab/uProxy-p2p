@@ -5,7 +5,7 @@
  * TODO: firefox bindings.
  */
 /// <reference path="notify.d.ts"/>
-/// <reference path="../../core.d.ts"/>
+/// <reference path="../../core/core.d.ts"/>
 /// <reference path="ui.d.ts" />
 
 if (undefined !== UI) {

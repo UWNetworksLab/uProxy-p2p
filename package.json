@@ -1,10 +1,14 @@
 {
-  "name": "UProxy",
-  "description": "Hippity Hop",
-  "version": "0.1.0",
+  "name": "uProxy",
+  "description": "Share your pathway to the Internet",
+  "version": "0.1.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/UWNetworksLab/UProxy"
+  },
+  "bugs": {
+    "url" : "http://github.com/uproxy/uproxy/issues",
+    "email" : "info@uproxy.org"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -19,9 +23,11 @@
     "grunt-spawn": "~1.0.41",
     "grunt-shell": "~0.3.1",
     "grunt-typescript": "~0.2.7",
+    "grunt-ts": "~1.6.4",
     "grunt-contrib-watch": "~0.5.3",
     "minimatch": "~0.2.12",
     "glob": "~3.2.6",
+    "typescript": "0.9.5",
     "freedom": "0.1.0"
   },
   "scripts": {

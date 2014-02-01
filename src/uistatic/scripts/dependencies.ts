@@ -1,14 +1,13 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../common/ui/scripts/ui.d.ts'/>
-/// <reference path='../common/ui/scripts/ui.ts'/>
-/// <reference path='../common/core.d.ts'/>
+/// <reference path='../../ui/scripts/ui.d.ts'/>
+/// <reference path='../../core/core.d.ts'/>
 
 console.log('This is not a real uProxy frontend.');
 
 // declare var ui:any;
 declare var state:any;
 declare var angular:any;
-// declare var UI:CUI;
+declare var UI:CUI;
 
 // Initialize model object to a mock. (state.js)
 var model = state || { identityStatus: {} };
