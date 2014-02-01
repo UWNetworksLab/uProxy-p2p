@@ -144,6 +144,8 @@ module.exports = function(grunt) {
     'clean': ['build',
               'dist',
               'tmp',
+              '.sass-cache',
+              '.grunt',
               'node_modules',
               'test_output',
               'external_lib/bower_components'],

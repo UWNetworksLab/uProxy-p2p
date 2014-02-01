@@ -7,6 +7,9 @@ Configuration and setup files
  * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uproxy.
  * `bower.json` specified dependent libraries from Bower.
  * `package.json` specified dependent libraries from NPM.
+ * `.gitignore` what git should ignore
+ * `.bowerrc` tells bower where to put files
+ * `.travis.yml` Travis auto-testing
 
 Source code
  * `src` holds all source code; no compiled files.
@@ -19,10 +22,12 @@ Source code
  * `external_lib` holds external libraries we depend on.
  * `scraps` temporary holding for sharing scraps of code.
 
-Dynamically created directories (`grunt clean` will remove them)
+Dynamically created directories (`grunt clean` should remove them)
  * `build` created by grunt tasks; holds the built code, but none of the code that was compiled.
  * `dist` created by grunt tasks; holds final distirbution versions.
  * `test_output` created by grunt tasks; holds test-output files.
+ * `.grunt` holds grunt cache stuff
+ * `.sass-cache` holds sass cache stuff
 
 ## Glossary of frameworks you need to know about
 
@@ -32,3 +37,5 @@ Dynamically created directories (`grunt clean` will remove them)
  * Grunt (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building.
  * NPM (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory.
  * Bower (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in external_lib/bower_components)
+ * Travis: a continnuous build system.
+ * Coveralls: a continnuous coverage checking system.
