@@ -6,8 +6,8 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
-/// <reference path='../../../../core/core.d.ts'/>
-/// <reference path="../../../../ui/scripts/ui.d.ts"/>
+/// <reference path='../../../../generic_core/core.d.ts'/>
+/// <reference path="../../../../generic_ui/scripts/ui.d.ts"/>
 console.log('Initializing chrome extension background page...');
 
 declare var chrome:any;

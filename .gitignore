@@ -19,3 +19,4 @@ distr
 tmp
 node_modules
 external_lib/bower_components
+test_output

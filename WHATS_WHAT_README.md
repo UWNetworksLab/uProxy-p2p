@@ -2,15 +2,27 @@
 
 ## Layout of files
 
+Configuration and setup files
  * `setup.sh` a shell script, assumes you have `npm` installed, to setup uproxy (install and setup dependent libraries).
  * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uproxy.
  * `bower.json` specified dependent libraries from Bower.
  * `package.json` specified dependent libraries from NPM.
+
+Source code
  * `src` holds all source code; no compiled files.
+ * `src/chrome_app` code specific to the chrome app
+ * `src/chrome_extension` code specific to the chrome extension
+ * `src/firefox` code specific to filefox
+ * `src/generic_ui` generic user interface code
+ * `src/generic_core` generic uproxy core-functionality code
+ * `src/icons` icons
+ * `external_lib` holds external libraries we depend on.
+ * `scraps` temporary holding for sharing scraps of code.
+
+Dynamically created directories (`grunt clean` will remove them)
  * `build` created by grunt tasks; holds the built code, but none of the code that was compiled.
  * `dist` created by grunt tasks; holds final distirbution versions.
- * `external_lib` holds external libraries we depend on.
- * `scraps` holds scraps of code.
+ * `test_output` created by grunt tasks; holds test-output files.
 
 ## Glossary of frameworks you need to know about
 

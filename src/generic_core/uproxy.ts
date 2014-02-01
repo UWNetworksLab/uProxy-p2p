@@ -9,7 +9,7 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
-/// <reference path='../ui/scripts/ui.d.ts' />
+/// <reference path='../generic_ui/scripts/ui.d.ts' />
 /// <reference path='constants.d.ts' />
 // import C = Constants;
 

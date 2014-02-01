@@ -13,6 +13,8 @@
  *  everything - 'setup', 'test', then 'build'
  **/
 
+var minimatch = require("minimatch")
+
 module.exports = function(grunt) {
   grunt.initConfig({
     'pkg': grunt.file.readJSON('package.json'),
@@ -42,15 +44,15 @@ module.exports = function(grunt) {
         // Non-compiled generic stuff
         {expand: true, cwd: 'src/generic_core',
          src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
-         dest: 'build/generic_ui'},
+         dest: 'build/generic_core'},
         // Icons
         {expand: true, cwd: 'src',
          src: ['icons/**'],
-         dest: 'build/generic_ui'},
+         dest: 'build/generic_core'},
         // Libraries
         {expand: true, cwd: 'node_modules/freedom/',
          src: ['freedom.js'],
-         dest: 'build/generic_ui/lib'}
+         dest: 'build/generic_core/lib'}
       ]},
 
       // Static/independent UI. Assumes the top-level task generic_ui
@@ -69,7 +71,7 @@ module.exports = function(grunt) {
       // Chrome extension. Assumes the top-level task generic_ui completed.
       chrome_extension: {files: [
         // The platform specific non-compiled stuff, and...
-        {expand: true, cwd: 'src/chrome/extension/src',
+        {expand: true, cwd: 'src/chrome_extension',
          src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome_extension/'},
         // ... the generic ui stuff
@@ -81,7 +83,7 @@ module.exports = function(grunt) {
       // Chrome app. Assumes the top-level task generic_core completed.
       chrome_app: {files: [
         // The platform specific stuff, and...
-        {expand: true, cwd: 'src/chrome/app',
+        {expand: true, cwd: 'src/chrome_app',
          src: ['**', '!spec/**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome_app/'},
         // ... the generic core stuff
@@ -147,21 +149,22 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'jasmine': {
-      common: {
+      generic_core: {
         // Files being tested
         src: [
-          'src/scraps/freedom-mocks.js',
-          'src/generic_core/util.js',
-          'src/generic_core/nouns-and-adjectives.js',
-          'src/generic_core/constants.js',
-          'src/generic_core/state-storage.js',
-          'src/generic_core/uproxy.js',
-          'src/generic_core/start-uproxy.js'],
+          'src/scraps/test/freedom-mocks.js',
+          'build/generic_core/util.js',
+          'build/generic_core/nouns-and-adjectives.js',
+          'build/generic_core/constants.js',
+          'build/generic_core/state-storage.js',
+          'build/generic_core/uproxy.js',
+          'build/generic_core/start-uproxy.js'],
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
           specs: 'src/generic_core/spec/*Spec.js',
-          keepRunner: true
+          keepRunner: true,
+          outfile: 'test_output/_SpecRunner.html'
         }
       }
     },
@@ -179,16 +182,16 @@ module.exports = function(grunt) {
     'typescript': {
       // uProxy UI without any platform dependencies
       generic_ui: {
-        src: ["src/ui/**/*.ts"],
+        src: ["src/generic_core/core.d.ts", "src/generic_ui/**/*.ts"],
         dest: 'build/generic_ui',
-        options: { base_path: 'src/ui/' }
+        options: { base_path: 'src/generic_ui/' }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ["src/core/**/*.ts"],
+        src: ["src/generic_ui/scripts/ui.d.ts", "src/generic_core/**/*.ts"],
         dest: 'build/generic_core/',
-        options: { base_path: 'src/core/' }
+        options: { base_path: 'src/generic_core/' }
       },
 
       // uistatic specific typescript
@@ -200,9 +203,9 @@ module.exports = function(grunt) {
 
       // uProxy chrome extension specific typescript
       chrome_extension: {
-        src: ["src/chrome/extension/src/**/*.ts"],
+        src: ["src/chrome_extension/src/**/*.ts"],
         dest: 'build/chrome_extension/',
-        options: { base_path: 'src/chrome/extension/src/' }
+        options: { base_path: 'src/chrome_extension/src/' }
       },
 
       // uProxy chrome app specific typescript
@@ -247,10 +250,6 @@ module.exports = function(grunt) {
     'shell:bower_install',
   ]);
 
-  grunt.registerTask('test', [
-    'jasmine'
-  ]);
-
   // Build the common directory first, which platform-specific builds depend on.
   // Grunt tasks prepended with an '_' do not include this step, in order to
   // prevent redundancy.
@@ -287,8 +286,8 @@ module.exports = function(grunt) {
 
   // Firefox build tasks.
   grunt.registerTask('build_firefox', [
-    'generic_ui',
-    'generic_core',
+    'build_generic_ui',
+    'build_generic_core',
     'copy:firefox'
   ]);
   grunt.registerTask('build_firefox_xpi', [
@@ -300,6 +299,10 @@ module.exports = function(grunt) {
     'mozilla-cfx:debug_run'
   ]);
 
+  grunt.registerTask('test', [
+    'build_generic_core',
+    'jasmine:generic_core'
+  ]);
 
   grunt.registerTask('build', [
     'build_chrome_app',
