@@ -14,7 +14,7 @@ UProxy is built using the following tools:
  - We have now committed to writing our JavaScript as [TypeScript](http://www.typescriptlang.org/), this does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
  - We use [Jasmine](http://pivotal.github.io/jasmine/) to write, run and do unit tests.
 We use git submodule to include the freedom library into uproxy.
- - We use [Bower](http://bower.io) to install libraries that we use in the UI (specified in `common/ui/bower.json`) including AngularJS.
+ - We use [Bower](http://bower.io) to install libraries that we use in the UI (specified in `bower.json`) including AngularJS.
  - We use [AngularJS](http://angularjs.org) for UI coding
  - We use npm for installing node modules that we use for our build process (Specified in the package.json)
  - We use [sass](http://sass-lang.com/) to write css in a nicer way.
@@ -77,14 +77,17 @@ Note that if any local dependencies have changed (i.e. changes to bower dependen
 UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
 
- *  `build` - Builds Chrome and Firefox extensions
  *  `setup` - Installs local dependencies and sets up environment
- *  `xpi` - Generates an .xpi for installation to Firefox.
- *  `test` - Run unit tests
- *  `watch` - Watch for changes in 'common' and copy as necessary
+ *  `build` - Builds everything, making stuff in the `build` directory. Includes running tests.
+   *  `build_chrome` - Build Chrome app and extension
+   *  `build_chrome_app` - Build just Chrome app
+   *  `build_chrome_extension` - Build just Chrome extension
+   *  `build_firefox` - Build just Firefox
+   *  `build_uistatic` - Build the static ui.
  *  `clean` - Cleans up
- *  `build_chrome` - Build just Chrome
- *  `build_firefox` - Build just Firefox
+ *  `watch` - Watch for changes and recompile as needed.
+ *  `test` - Run unit tests
+ *  `xpi` - Generates an .xpi for installation to Firefox.
  *  `everything` - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
@@ -113,12 +116,10 @@ To avoid generating and installing xpi for every change, run `ln -s [UPROXY_DIR]
 
 The following hints may help you if it goes wrong and you need to debug and fix it.
 
-- A file called `package.json` provides details of node packages used to build uProxy. To download and install them in the right place (typically a subdirectory called `node_packages`) run `npm install`.
+- The file called `package.json` provides details of node packages used to build uProxy. To download and install them in the right place (typically a subdirectory called `node_packages`) run `npm install`.
 
 - A file called `bower.json` provides details of packages for the UI, typically JavaScript for the browser. Run `bower install` to download and install the dependencies. They are typically installed in a directory called `lib` (as defined by a local file called `.bowerrc`).
 
-- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `common/ui` directory and look out for error messages.
-
-- Check that you have the latest freedom.js.
+- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `bower install` and look out for error messages.
 
 - If things are not working, check that you have a recent version of bower, npm, and node.
