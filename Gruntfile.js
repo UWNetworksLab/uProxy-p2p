@@ -9,119 +9,24 @@
  *  watch - Watch for changes in 'common' and copy as necessary
  *  clean - Cleans up
  *  build_chrome - build Chrome files
+ *  build_chrome_extension - build Chrome extension files
+ *  build_chrome_app - build Chrome app files
  *  build_firefox - build Firefox
  *  everything - 'setup', 'test', then 'build'
  **/
 
-var path = require("path");
-var minimatch = require("minimatch");
-
-//List of all files for each distribution
-//NOTE: This is ultimately what gets copied, so keep this precise
-//NOTE: Keep all exclusion paths ('!' prefix) at the end of the array
-var chrome_app_files = [
-  'common/uproxy.json',
-  'node_modules/freedom/freedom.js',
-  'common/*.js',
-  '!common/spec/**',
-  'common/storage/**',
-  'common/client/**',
-  'common/server/**',
-  'common/identity/**',
-  'common/transport/**',
-  '!common/identity/xmpp/node-xmpp/**',
-  // scraps is a place for throwing example code for demonstrating stuff to each other.
-  'common/scraps/**',
-  'common/constants.js',
-  'common/ui/icons/**'
-];
-var chrome_ext_files = [
-  'common/scraps/**',
-  'common/ui/*.html',
-  'common/ui/icons/**',
-  'common/ui/scripts/**',
-  'common/ui/styles/**',
-  'common/ui/lib/**',
-  'common/core.d.ts',
-];
-var firefox_files = [
-  'common/backend/**',
-  '!common/backend/spec/**',
-  '!common/backend/identity/xmpp/node-xmpp/**',
-  'node_modules/freedom/freedom.js',
-  'common/ui/*.html',
-  'common/ui/icons/**',
-  'common/ui/scripts/**',
-  'common/ui/styles/**',
-  'common/ui/lib/**',
-];
-
-// Files which make static UI testing work. Bsae directory = 'common/ui/'
-var ui_isolation_files = [
-  'popup.html',
-  'scripts/**',
-  'styles/**',
-  'lib/**',
-  'icons/**',
-];
-
-//Testing
-//TODO fix
-//var sources = ['common/backend/spec/*.js'];
-//var sources = ['common/backend/spec/*.js'];
-// These files loaded sequentially prior to spec files.
-var sourcesToTest = [
-  'common/test/freedom-mocks.js',
-  'common/util.js',
-  'common/nouns-and-adjectives.js',
-  'common/constants.js',
-  'common/state-storage.js',
-  'common/uproxy.js',
-  'common/start-uproxy.js'
-];
+// var minimatch = require("minimatch");
+var TaskManager = require("./tools/taskmanager");
 
 module.exports = function(grunt) {
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
-    copy: {
-      chrome_app: {files: [{src: chrome_app_files, dest: 'chrome/app/'}]},
-      chrome_ext: {files: [{src: chrome_ext_files, dest: 'chrome/extension/src/'}]},
-      firefox: {files: [{src: firefox_files, dest: 'firefox/'}]},
-      uistatic: {files: [{
-        expand: true, flatten: false, cwd: 'common/ui/',
-        src: ui_isolation_files, dest: 'uistatic/common/ui',
-        }, {
-        src: 'common/core.d.ts', dest: 'uistatic/common/core.d.ts'
-      }]},
-      watch: {files: []},
-    },
-    compress: {
-      main: {
-        options: {
-          mode: 'zip',
-          archive: 'uproxy.xpi'
-        },
-        expand: true,
-        cwd: "firefox",
-        src: ['**'],
-        dest: '.'
-      }
-    },
-    watch: {
-      common: {//Watch everything
-        //TODO: this doesn't work, fix it.
-        files: ['common/**/*',
-                // bower components should only change when grunt is
-                // already being run
-                '!**/lib/**'],
-        tasks: ['copy:watch'],
-        options: {spawn: false}
-      }
-    },
-    shell: {
+    'pkg': grunt.file.readJSON('package.json'),
+
+    //-------------------------------------------------------------------------
+    'shell': {
       bower_install: {
         command: 'bower install',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'common/ui'}}
+        options: {stdout: true, stderr: true, failOnError: true}
       },
       freedom_setup: {
         command: 'npm install',
@@ -131,72 +36,304 @@ module.exports = function(grunt) {
         command: 'grunt',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
       },
-      rickroll: {
-        command: 'curl -L https://raw.github.com/keroserene/rickrollrc/master/roll.sh | bash',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {maxBuffer: 16777216}}
-      },
     },
-    clean: ['chrome/app/common/**',
-            'chrome/extension/src/common/**',
-            'firefox/common/**',
-            'tmp',
-            'uproxy.xpi'],
-    jasmine: {
-      common: {
-        // Files being tested
-        src: sourcesToTest,
-        options: {
-          helpers: ['common/test/example-state.jsonvar',
-                    'common/test/example-saved-state.jsonvar'],
-          specs: 'common/spec/*Spec.js',
-          keepRunner: true
-        }
+
+    //-------------------------------------------------------------------------
+    'clean': ['build',
+              'dist',
+              'tmp',
+              '.sass-cache',
+              '.grunt',
+              'node_modules',
+              'test_output',
+              'external_lib/bower_components'],
+
+    //-------------------------------------------------------------------------
+    'copy': {
+      // Generic (platform independent) UI stuff to be copied.
+      generic_ui: {files: [
+        // Non-compiled generic stuff
+        {expand: true, cwd: 'src/generic_ui',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/generic_ui'},
+        // Icons
+        {expand: true, cwd: 'src',
+         src: ['icons/**'],
+         dest: 'build/generic_ui'},
+        // Libraries
+        {expand: true, cwd: 'external_lib/bower_components/',
+         src: ['lodash/dist/lodash.js',
+               'angular/angular.js',
+               'angular-animate/angular-animate.js',
+               'json-patch/jsonpatch.js',
+               'angular-lodash/angular-lodash.js'],
+         dest: 'build/generic_ui/lib'}
+      ]},
+
+      generic_core: {files: [
+        // Non-compiled generic stuff
+        {expand: true, cwd: 'src/generic_core',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/generic_core'},
+        // Icons
+        {expand: true, cwd: 'src',
+         src: ['icons/**'],
+         dest: 'build/generic_core'},
+        // Libraries
+        {expand: true, cwd: 'node_modules/freedom/',
+         src: ['freedom.js'],
+         dest: 'build/generic_core/lib'}
+      ]},
+
+      // Static/independent UI. Assumes the top-level task generic_ui
+      // completed.
+      uistatic: {files: [
+        // The platform specific non-compiled stuff, and...
+        {expand: true, cwd: 'src/uistatic',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/uistatic/'},
+        // ... the generic ui stuff
+        {expand: true, cwd: 'build/generic_ui',
+         src: ['**'],
+         dest: 'build/uistatic/'}
+      ]},
+
+      // Chrome extension. Assumes the top-level task generic_ui completed.
+      chrome_extension: {files: [
+        // The platform specific non-compiled stuff, and...
+        {expand: true, cwd: 'src/chrome_extension',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/chrome_extension/'},
+        // ... the generic ui stuff
+        {expand: true, cwd: 'build/generic_ui',
+         src: ['**'],
+         dest: 'build/chrome_extension/'}
+      ]},
+
+      // Chrome app. Assumes the top-level task generic_core completed.
+      chrome_app: {files: [
+        // The platform specific stuff, and...
+        {expand: true, cwd: 'src/chrome_app',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/chrome_app/'},
+        // ... the generic core stuff
+        {expand: true, cwd: 'build/generic_core',
+         src: ['**'],
+         dest: 'build/chrome_app/'}
+      ]},
+
+      // Firefox. Assumes the top-level tasks generic_core and generic_ui
+      // completed.
+      firefox: {files: [
+        // The platform specific stuff, and...
+        {expand: true, cwd: 'src/firefox/',
+         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         dest: 'build/firefox/'},
+        // ... the generic core stuff
+        {expand: true, cwd: 'build/generic_core',
+         src: ['**'],
+         dest: 'build/firefox/'},
+        // ... the generic UI stuff
+        {expand: true, cwd: 'build/generic_ui',
+         src: ['**'],
+         dest: 'build/firefox/'}
+      ]}
+    },
+
+    //-------------------------------------------------------------------------
+    'sass': {
+      generic_ui: {
+        files: [
+          { expand: true, cwd: 'src/generic_ui',
+            src: ['**/*.sass'],
+            dest: 'build/generic_ui/',
+            ext: '.css'
+          }]
       }
     },
-    sass: {
-      main: {
-        files: {
-          'common/ui/styles/main.css': 'common/ui/styles/main.sass',
-        }
-      }
-    },
-    typescript: {
-      ui: {
-        src: ['common/ui/scripts/ui.ts'],
-        dest: 'common/ui/scripts/ui.js'
+
+    //-------------------------------------------------------------------------
+    'typescript': {
+      // uProxy UI without any platform dependencies
+      generic_ui: {
+        src: ["src/generic_core/core.d.ts", "src/generic_ui/**/*.ts"],
+        dest: 'build/generic_ui',
+        options: { base_path: 'src/generic_ui/' }
       },
+
+      // Core uProxy without any platform dependencies
+      generic_core: {
+        src: ["src/generic_ui/scripts/ui.d.ts", "src/generic_core/**/*.ts"],
+        dest: 'build/generic_core/',
+        options: { base_path: 'src/generic_core/' }
+      },
+
+      // uistatic specific typescript
       uistatic: {
-        src: ['uistatic/scripts/dependencies.ts'],
-              // 'uistatic/common/ui/scripts/ui.ts'],
-        dest: 'uistatic/scripts/dependencies.js'
+        src: ["src/generic_ui/scripts/ui.d.ts",
+              "src/generic_core/core.d.ts",
+              "src/generic_ui/scripts/ui.ts",
+              "src/uistatic/scripts/dependencies.ts"],
+        dest: 'build/uistatic/',
       },
-      uproxy: {
-        src: ['common/uproxy.ts'],
-        dest: 'common/uproxy.js'
+
+      // uProxy chrome extension specific typescript
+      chrome_extension: {
+        src: ["src/chrome_extension/**/*.ts"],
+        dest: 'build/chrome_extension/',
+        options: { base_path: 'src/chrome_extension/' }
       },
-      chrome: {
-        src: ['chrome/extension/src/scripts/background.ts'],
-        dest: 'chrome/extension/src/scripts/background.js'
+
+      // uProxy chrome app specific typescript
+      chrome_app: {
+        src: ["src/chrome_app/**/*.ts"],
+        dest: 'build/chrome_app/',
+        options: { base_path: 'src/chrome_app/' }
       },
-      constants: {
-        src: ['common/constants.ts'],
-        dest: 'common/constants.js'
-      },
-      statestorage: {
-        src: ['common/state-storage.ts'],
-        dest: 'common/state-storage.js'
+
+      // uProxy firefox specific typescript
+      firefox: {
+        src: ["src/firefox/**/*.ts"],
+        dest: 'build/firefox/',
+        options: { base_path: 'src/firefox/' }
       },
     },
+
+    //-------------------------------------------------------------------------
+    'concat': {
+      uistatic: {
+        files: [
+          {src: ['build/uistatic/src/generic_ui/scripts/ui.js',
+                 'build/uistatic/src/uistatic/scripts/dependencies.js'],
+           dest: 'build/uistatic/scripts/dependencies.js'}
+        ]
+      }
+    },
+
+    //-------------------------------------------------------------------------
+    'jasmine': {
+      generic_core: {
+        // Files being tested
+        src: [
+          'src/scraps/test/freedom-mocks.js',
+          'build/generic_core/uproxy_core/util.js',
+          'build/generic_core/uproxy_core/nouns-and-adjectives.js',
+          'build/generic_core/uproxy_core/constants.js',
+          'build/generic_core/uproxy_core/state-storage.js',
+          'build/generic_core/uproxy_core/uproxy.js',
+          'build/generic_core/uproxy_core/start-uproxy.js'],
+        options: {
+          helpers: ['src/scraps/test/example-state.jsonvar',
+                    'src/scraps/test/example-saved-state.jsonvar'],
+          specs: 'src/generic_core/uproxy_core/spec/*Spec.js',
+          keepRunner: true,
+          outfile: 'test_output/_SpecRunner.html'
+        }
+      }
+    },
+
+    //-------------------------------------------------------------------------
     'mozilla-cfx': {
       debug_run: {
         options: {
-          extension_dir: 'firefox',
+          extension_dir: 'dist/firefox',
           command: 'run'
         }
       }
+    },
+
+    //-------------------------------------------------------------------------
+    'compress': {
+      main: {
+        options: {
+          mode: 'zip',
+          archive: 'dist/uproxy.xpi'
+        },
+        expand: true,
+        cwd: "build/firefox",
+        src: ['**'],
+        dest: '.'
+      }
+    },
+
+  });  // grunt.initConfig
+
+  //---------------------------------------------------------------------------
+  // Helper function for watch.
+  // Combines the cwd and src params of a file to make an expanded src. Used
+  // to make a watch actually watch the dependent files.
+  // TODO: Write in typescript and specify types.
+  function makeSrcOfFiles(files_config_property) {
+    var srcs = [];
+    var files = grunt.config.get(files_config_property);
+    files.map(function(file) {
+      file.src.map(function(s) { srcs.push(file.cwd + '/' + s); });
+    });
+    if(srcs == []) {
+      throw("makeSrcOfFiles failed for: " + files_config_property);
     }
+    return srcs;
+  }
+  grunt.config.set('watch', {
+    typescript_generic_ui: {
+      files: '<%= typescript.generic_ui.src %>',
+      tasks: ['typescript:generic_ui']
+    },
+    typescript_generic_core: {
+      files: '<%= typescript.generic_core.src %>',
+      tasks: ['typescript:generic_core']
+    },
+    typescript_chrome_app: {
+      files: '<%= typescript.chrome_app.src %>',
+      tasks: ['typescript:chrome_app']
+    },
+    typescript_chrome_extension: {
+      files: '<%= typescript.chrome_extension.src %>',
+      tasks: ['typescript:chrome_extension']
+    },
+    typescript_uistatic: {
+      files: '<%= typescript.uistatic.src %>',
+      tasks: ['typescript:uistatic']
+    },
+    typescript_firefox: {
+      files: '<%= typescript.firefox.src %>',
+      tasks: ['typescript:firefox']
+    },
+    concat_uistatic: {
+      files: makeSrcOfFiles('concat.uistatic.files'),
+      tasks: ['concat:uistatic']
+    },
+    sass_generic_ui: {
+      files: makeSrcOfFiles('sass.generic_ui.files'),
+      tasks: ['sass:generic_ui']
+    },
+    copy_generic_ui: {
+      files: makeSrcOfFiles('copy.generic_ui.files'),
+      tasks: ['copy:generic_ui']
+    },
+    copy_generic_core: {
+      files: makeSrcOfFiles('copy.generic_core.files'),
+      tasks: ['copy:generic_core']
+    },
+    copy_uistatic: {
+      files: makeSrcOfFiles('copy.uistatic.files'),
+      tasks: ['copy:uistatic']
+    },
+    copy_chrome_extension: {
+      files: makeSrcOfFiles('copy.chrome_extension.files'),
+      tasks: ['copy:chrome_extension']
+    },
+    copy_chrome_app: {
+      files: makeSrcOfFiles('copy.chrome_app.files'),
+      tasks: ['copy:chrome_app']
+    },
+    copy_firefox: {
+      files: makeSrcOfFiles('copy.firefox.files'),
+      tasks: ['copy:firefox']
+    },
   });
 
+  //-------------------------------------------------------------------------
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
@@ -207,124 +344,96 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
 
-  //On file change, see which distribution it affects and
-  //update the copy:watch task to copy only those files
-  grunt.event.on('watch', function(action, filepath, target) {
-    grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
-    var files = [];
-    if (minimatchArray(filepath, chrome_app_files)) {
-      grunt.log.writeln(filepath + ' - watch copying to Chrome app');
-      files.push({src: filepath, dest: 'chrome/app/'});
-    }
-    if (minimatchArray(filepath, chrome_ext_files)) {
-      grunt.log.writeln(filepath + ' - watch copying to Chrome ext');
-      files.push({src: filepath, dest: 'chrome/extension/src/'});
-    }
-    if (minimatchArray(filepath, firefox_files)) {
-      grunt.log.writeln(filepath + ' - watch copying to Firefox');
-      files.push({src: filepath, dest: 'firefox/data/'});
-    }
-    grunt.config(['copy', 'watch', 'files'], files);
-    grunt.log.writeln("copy:watch is now: " + JSON.stringify(grunt.config(['copy', 'watch'])));
-  });
 
-  //Setup task
-  grunt.registerTask('setup', [
+  //-------------------------------------------------------------------------
+  // Define tasks. We use TaskManager to avoid pointless re-compilation.
+  var taskManager = new TaskManager.Manager();
+
+  taskManager.add('setup', [
     'shell:freedom_setup',
     'shell:freedom_build',
     'shell:bower_install',
   ]);
-  grunt.registerTask('test', [
-    'jasmine'
+
+  taskManager.add('build_generic_core', [
+    'typescript:generic_core',
+    'copy:generic_core'
   ]);
 
-  // Build the common directory first, which platform-specific builds depend on.
-  // Grunt tasks prepended with an '_' do not include this step, in order to
-  // prevent redundancy.
-  grunt.registerTask('common', [
-    'typescript:uproxy',
-    'typescript:ui',
-    'typescript:constants',
-    'typescript:statestorage',
-    'sass:main',
+  taskManager.add('build_generic_ui', [
+    'typescript:generic_ui',
+    'sass:generic_ui',
+    'copy:generic_ui'
   ]);
 
-  // Chrome build tasks.
-  grunt.registerTask('_build_chrome', [
+  taskManager.add('build_uistatic', [
+    'build_generic_ui',
+    'typescript:uistatic',
+    'concat:uistatic',
+    'copy:uistatic'
+  ]);
+
+  taskManager.add('build_chrome_extension', [
+    'build_generic_ui',
+    'typescript:chrome_extension',
+    'copy:chrome_extension',
+  ]);
+
+  taskManager.add('build_chrome_app', [
+    'build_generic_core',
+    'typescript:chrome_app',
     'copy:chrome_app',
-    'copy:chrome_ext',
-    'typescript:chrome',
   ]);
 
-  grunt.registerTask('build_chrome', [
-    'common',
-    '_build_chrome',
+  taskManager.add('build_chrome', [
+    'build_chrome_extension',
+    'build_chrome_app'
   ]);
 
-  // Firefox build tasks.
-  grunt.registerTask('_build_firefox', [
+    // Firefox build tasks.
+  taskManager.add('build_firefox', [
+    'build_generic_ui',
+    'build_generic_core',
     'copy:firefox'
   ]);
-  grunt.registerTask('build_firefox', [
-    'common',
-    '_build_firefox'
-  ]);
 
-  grunt.registerTask('xpi', [
+  taskManager.add('build_firefox_xpi', [
     "build_firefox",
     "compress:main"
   ]);
-  grunt.registerTask('ff', [
+
+  taskManager.add('run_firefox', [
     'build_firefox',
-    'mozilla-cfx'
+    'mozilla-cfx:debug_run'
   ]);
 
-  grunt.registerTask('build_firefox', [
-    'copy:firefox'
+  taskManager.add('test', [
+    'build_generic_core',
+    'jasmine:generic_core'
   ]);
 
-  // Stand-alone UI.
-  grunt.registerTask('_ui', [
-    'typescript:ui',
-    'sass:main',
-    'copy:uistatic',
-    'typescript:uistatic',
-  ]);
-  grunt.registerTask('ui', [
-    'common',
-    '_ui'
-  ]);
-
-  grunt.registerTask('buil', ['shell:rickroll']);
-  grunt.registerTask('build', [
-    'common',
-    '_build_chrome',
-    '_build_firefox',
-    '_ui',
+  taskManager.add('build', [
+    'build_chrome_app',
+    'build_chrome_extension',
+    'build_firefox',
+    'build_uistatic',
     'test'
   ]);
-  grunt.registerTask('everything' ['setup', 'build']);
+
+  taskManager.add('everything', ['setup', 'build']);
+
   // Default task(s).
-  grunt.registerTask('default', ['build']);
-};
+  taskManager.add('default', ['build']);
 
+  taskManager.list().forEach(function(n) {
+    console.log("\n * " + n + ": " + taskManager.get(n).join(", "));
+    console.log(" * " + n + "(unflat): " + taskManager.getUnflattened(n).join(", "));
+  });
 
-/**
- * UTILITIES
- **/
+  //-------------------------------------------------------------------------
+  //Setup tasks
+  taskManager.list().forEach(function(taskName) {
+    grunt.registerTask(taskName, taskManager.get(taskName));
+  });
 
-//minimatchArray will see if 'file' matches the set of patterns
-//described by 'arr'
-//NOTE: all exclusion strings ("!" prefix) must be at the end
-//of the array arr
-function minimatchArray(file, arr) {
-  var result = false;
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i].substr(0, 1) == "!") {
-      result &= minimatch(file, arr[i]);
-    } else {
-      result |= minimatch(file, arr[i]);
-    }
-  }
-  return result;
-};
+};  // module.exports = function(grunt) ...
