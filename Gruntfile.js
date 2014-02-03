@@ -315,6 +315,10 @@ module.exports = function(grunt) {
       files: makeSrcOfFiles('copy.generic_core.files'),
       tasks: ['copy:generic_core']
     },
+    copy_uistatic: {
+      files: makeSrcOfFiles('copy.uistatic.files'),
+      tasks: ['copy:uistatic']
+    },
     copy_chrome_extension: {
       files: makeSrcOfFiles('copy.chrome_extension.files'),
       tasks: ['copy:chrome_extension']

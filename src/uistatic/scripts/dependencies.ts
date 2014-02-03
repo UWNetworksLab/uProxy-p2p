@@ -8,7 +8,6 @@ console.log('This is not a real uProxy frontend.');
 // declare var ui:any;
 declare var state:any;
 declare var angular:any;
-declare var UI:CUI;
 
 // Initialize model object to a mock. (state.js)
 var model = state || { identityStatus: {} };

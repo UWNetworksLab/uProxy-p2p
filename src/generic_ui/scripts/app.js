@@ -64,6 +64,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // This is *NOT* the inverse of loggedIn, because it is possible to be
       // "logging in"
+      // Not Logged-out if state is not logged out for any network.
       $rootScope.loggedOut = function() {
         for (var networkId in model.identityStatus) {
           if ('offline' != model.identityStatus[networkId].status)
