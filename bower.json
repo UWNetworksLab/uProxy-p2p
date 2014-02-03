@@ -6,7 +6,8 @@
     "angular-animate": "1.2.10",
     "angular-lodash": "https://github.com/cabrel/angular-lodash.git",
     "bootstrap-sass": "~2.3.1",
-    "lodash": "~1.3.1"
+    "lodash": "~1.3.1",
+    "json-patch": "~0.4.0"
   },
   "devDependencies": {
     "angular-mocks": "v1.2.10",

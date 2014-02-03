@@ -5,7 +5,7 @@
  * TODO: firefox bindings.
  */
 /// <reference path="notify.d.ts"/>
-/// <reference path="../../generic_core/core.d.ts"/>
+/// <reference path="../../generic_core/uproxy_core/core.d.ts"/>
 /// <reference path="ui.d.ts" />
 
 if (undefined !== UI) {
@@ -15,7 +15,6 @@ if (undefined !== UI) {
 declare var model:any;
 declare var chrome:any;
 declare var onStateChange:any;
-
 
 // Main UI class.
 // Can be constructed with |browserType| being either 'chrome' or 'firefox'.

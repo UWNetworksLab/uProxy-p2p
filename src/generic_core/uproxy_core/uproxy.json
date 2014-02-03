@@ -8,23 +8,22 @@
       "constants.js",
       "state-storage.js",
       "uproxy.js",
-      "start-uproxy.js",
-      "test/uproxy_local_test_proxying.js"
+      "start-uproxy.js"
     ]
   },
   "dependencies": {
     "uproxyclient": {
-      "url": "client/client.json"
+      "url": "../client/client.json"
     },
     "uproxyserver": {
-      "url": "server/server.json"
+      "url": "../server/server.json"
     },
     "identity": {
-      "url": "identity/identity.json",
+      "url": "../identity/identity.json",
       "api": "identity"
     },
     "storage": {
-      "url": "storage/storage.json",
+      "url": "../storage/storage.json",
       "api": "storage"
     }
   },

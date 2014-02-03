@@ -1,10 +1,10 @@
 UProxy
 ======
 
+uProxy is a broswer extension that lets users share their internet connection.
 
-### Layout
+See the [WHATS_WHAT_README](https://github.com/UWNetworksLab/UProxy/blob/master/WHATS_WHAT_README.md) for more details on the directory layout.
 
-This is the top-level [UProxy repository](https://github.com/UWNetworksLab/UProxy). It contains all code for UProxy. Browser-dependent components live in "chrome" and "firefox" subdirectories. Browser-independent components live in the 'common' subdirectory.
 
 ### Tools
 
@@ -19,14 +19,17 @@ We use git submodule to include the freedom library into uproxy.
  - We use npm for installing node modules that we use for our build process (Specified in the package.json)
  - We use [sass](http://sass-lang.com/) to write css in a nicer way.
 
+
 ### Development setup
 
-#### Pre-Requirements
+#### Pre-Requirements to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
 modify (/usr/local) to being editable by your user (sudo chown -R $USER /usr/local)
 
-- [node](http://nodejs.org/) + npm: `brew install node # or similar for your system` (You may need to update you brew package manager, e.g. `brew update`)
+- [node](http://nodejs.org/) and the Node Package Manaager (NPM):
+
+    - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - You may need to set your $NODE_PATH environment variable appropriately
       (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
@@ -34,45 +37,46 @@ modify (/usr/local) to being editable by your user (sudo chown -R $USER /usr/loc
     - If you install npm things globally, you'll need to do so as the
       appropriate super-user.
 
-- [grunt](http://gruntjs.com/): `npm install -g grunt-cli`
+- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli
 
-- [bower](http://bower.io/) 1.0 or later: `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
+- [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
+
+- [bower](http://bower.io/) 1.0 or later: Install globally with `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
 
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, add your npm bin directory to your path
       (e.g. /usr/local/share/npm/bin/grunt).
 
-- [compass](http://compass-style.org/):
-  `gem install compass` (requires ruby, often comes installed, may need to be installed as super-user)
+- [sass](http://sass-lang.com/):
+  `sudo gem install sass` (requires ruby, often comes installed, may need to be installed as super-user)
 
     - This is assuming you have `ruby` and `rubygems` installed.
 
-#### Installation, setup, compilation, updating
+
+#### Setup of uProxy codebase
 
 1. Clone UProxy and its submodules (and its submodules' submodules...):
 `git clone https://github.com/UWNetworksLab/UProxy.git`
 
 2. Run `./setup.sh`. This will install all local dependencies,
-as appropriate to run in Chrome.
-The first time you run this, you'll see lots of npm, bower and grunt
-messages. Check the last couple of lines in case there is an error.
+as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
-Note that if any local dependencies have changed (i.e. changes to bower dependencies,
-updates to FreeDOM), you will have to run `./setup.sh` to update these dependencies.
+Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh` again to update these dependencies.
 
-
-#### Running in Chrome
+#### Installing and running uProxy in Chrome
 
 1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
 
-2. Click 'Load unpacked extension...' and select the 'chrome/app' directory.
+2. Click 'Load unpacked extension...' and select the 'build/chrome_app' directory.
 
-3. Click 'Load unpacked extension...' and select the 'chrome/extension/src' directory.
+3. Click 'Load unpacked extension...' and select the 'build/chrome_extension' directory.
 
-#### Development
+
+#### Development and re-building uProxy
 
 UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
+
  *  `build` - Builds Chrome and Firefox extensions
  *  `setup` - Installs local dependencies and sets up environment
  *  `xpi` - Generates an .xpi for installation to Firefox.
@@ -89,6 +93,7 @@ your distribution, then run `grunt watch`, which will rebuild as you make change
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
 reject submissions.
+
 
 #### Testing in Firefox
 

@@ -1,6 +1,7 @@
 // Fake dependency which mocks all interactions such that the UI can work.
 /// <reference path='../../generic_ui/scripts/ui.d.ts'/>
-/// <reference path='../../generic_core/core.d.ts'/>
+/// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
+/// <reference path='../../generic_ui/scripts/notify.d.ts'/>
 
 console.log('This is not a real uProxy frontend.');
 
@@ -12,7 +13,6 @@ declare var UI:CUI;
 // Initialize model object to a mock. (state.js)
 var model = state || { identityStatus: {} };
 
-/// <reference path='../common/ui/scripts/notify.d.ts'/>
 class MockNotifications implements INotifications {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);

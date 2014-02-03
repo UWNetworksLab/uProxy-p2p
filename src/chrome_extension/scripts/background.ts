@@ -6,8 +6,8 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that freedom_connector.js has been loaded.
-/// <reference path='../../../../generic_core/core.d.ts'/>
-/// <reference path="../../../../generic_ui/scripts/ui.d.ts"/>
+/// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
+/// <reference path="../../generic_ui/scripts/ui.d.ts"/>
 console.log('Initializing chrome extension background page...');
 
 declare var chrome:any;
@@ -16,7 +16,7 @@ declare var FreedomConnector:any;
 declare var UI:CUI;
 
 class ChromeNotifications implements INotifications {
-  ICON_DIR:string = '../common/ui/icons/';
+  ICON_DIR:string = 'icons/';
   setIcon(iconFile : string) {
     // TODO: make this not require chrome
     chrome.browserAction.setIcon({
@@ -137,7 +137,7 @@ class ChromeAppConnector implements Interfaces.ICore {
 }
 
 // This singleton is referenced in both options and popup.
-// UI object is defined in 'common/ui/scripts/ui.js'.
+// UI object is defined in 'generic_ui/scripts/ui.js'.
 if (undefined === ui) {
   var ui = new UI(
       new ChromeNotifications(),

@@ -21,9 +21,9 @@ window.freedomcfg = function(register) {
 // Start up freedom with data-manifest set to uproxy.json.
 // Uncomment for clearer but less portable module error messages.
 var script = document.createElement('script');
-script.setAttribute('data-manifest', 'common/uproxy.json');
+script.setAttribute('data-manifest', 'uproxy_core/uproxy.json');
 script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
-script.src = 'node_modules/freedom/freedom.js';
+script.src = 'lib/freedom.js';
 document.head.appendChild(script);
 
 // Once the script had loaded, uProxyAppChannel is set to freedom, which is a channel to the

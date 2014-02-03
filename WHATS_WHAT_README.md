@@ -10,6 +10,7 @@ Configuration and setup files
  * `.gitignore` what git should ignore
  * `.bowerrc` tells bower where to put files
  * `.travis.yml` Travis auto-testing
+* `tools` directory contains some typescript and javascript to help Grunt.
 
 Source code
  * `src` holds all source code; no compiled files.
