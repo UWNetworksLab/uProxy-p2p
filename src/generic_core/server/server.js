@@ -24,7 +24,7 @@ var resetServer = function() {
 // Close the peerId. Closes all tcp sockets open for this peer.
 var closePeer = function(peerId) {
   //conn.disconnect();
-  for (var i in _peers[peerId].netClients[peerId]) {
+  for (var i in _peers[peerId].netClients) {
     _peers[peerId].netClients[i].close();
   }
   _peers[peerId].sctpPc.shutdown();
