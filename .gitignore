@@ -13,6 +13,9 @@
 *.un~
 *.xcf
 *.tar.gz
+*.vpj
+*.vpw*
+*.vtg
 *~
 build
 distr
