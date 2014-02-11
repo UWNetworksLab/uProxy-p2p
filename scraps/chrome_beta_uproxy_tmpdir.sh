@@ -54,5 +54,3 @@ if [ "$TOOL" = "mac" ]; then
 else 
     usage
 fi
-
-      
