@@ -17,7 +17,6 @@
 declare var freedom:any;
 declare var store:any;
 declare var restrictKeys:any;
-declare var _localTestProxying:any;
 
 // TODO: refactor such that this reflects the UI interface.
 // The channel to speak to the UI part of uproxy. The UI is running from the
@@ -793,10 +792,6 @@ function receiveUpdateDescription(msg) {
 
 bgAppPageChannel.on('send-instance', function(clientId) {
   sendInstance(clientId);
-});
-
-bgAppPageChannel.on('start-proxy-localhost-test', function () {
-  _localTestProxying();
 });
 
 // --------------------------------------------------------------------------

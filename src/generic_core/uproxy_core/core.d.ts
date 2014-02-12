@@ -10,16 +10,14 @@ declare module Interfaces {
 
   module Consent {
     enum Action {
-      Request,
-      Cancel,
-      Accept,
-      Decline,
-      Offer,
-      Allow,
-      Deny,
+      REQUEST,
+      CANCEL,
+      ACCEPT,
+      DECLINE,
+      OFFER,
+      ALLOW,
+      DENY,
     }
-    // TODO distinguish client and proxy action types.
-    //enum ClientAction
   }
 
   export interface ICore {
