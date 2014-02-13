@@ -6,27 +6,83 @@
 // IGNORED state.
 
 module Consent {
-  // Action taken by the remote instance. These values are on the wire, so we need to distinguish
-  // the values for the remote as client vs proxy. i.e. we cannot have two enums.
-  export enum RemoteState {
-    NONE, REQUESTING, OFFERING, BOTH
+  // The different state's that uproxy consent can be in w.r.t. a peer. These are the values that
+  // get receieved or sent on the wire.
+  export interface State {
+    isRequesting : boolean;
+    isOffering : boolean;
   }
-  // Action taken by the user. These values are on the wire, so we need to distinguish
-  // the values for the remote as client vs proxy. i.e. we cannot have two enums.
+  // Action taken by the user. These values are not on the wire. They are passed as messaged from
+  // the UI to the core. They correspond to the different buttons that the user may be clicking
+  // on.
   export enum UserAction {
     // Actions made by user w.r.t. remote as a proxy, or
     REQUEST, CANCEL_REQUEST, ACCEPT_OFFER, IGNORE_OFFER,
     // Actions made by user w.r.t. remote as a client, or
     OFFER, CANCEL_OFFER, ALLOW_REQUEST, IGNORE_REQUEST
   }
-  // User-level consent state for a remote instance to be proxy client for the user.
+  // User-level consent state for a remote instance to be a proxy client for the user. This state
+  // is stored in local storage for each instance ID we know of.
   export enum ClientState {
     NONE, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
   }
+  export module ClientState {
+    // Get the user's request state to send to the remote from the proxyState value.
+    export function userIsOffering(clientState : ClientState) : boolean {
+      switch(clientState){
+        case NONE:
+        case REMOTE_REQUESTED:
+        case USER_IGNORED_REQUEST:
+          return false;
+        case USER_OFFERED:
+        case GRANTED:
+          return true;
+      }
+    }
+    export function remoteIsRequesting(clientState : ClientState) : boolean {
+      switch(clientState){
+        case NONE:
+        case USER_OFFERED:
+          return false;
+        case USER_IGNORED_REQUEST:
+        case REMOTE_REQUESTED:
+        case GRANTED:
+          return true;
+      }
+    }
+  }
+
   // User-level consent state for a remote instance to be a proxy server for the user.
   export enum ProxyState {
     NONE, USER_REQUESTED, REMOTE_OFFERED, USER_IGNORED_OFFER, GRANTED
   }
+  export module ProxyState {
+    // Get the user's request state to send to the remote from the proxyState value.
+    export function userIsRequesting(proxyState : ProxyState) : boolean {
+      switch(proxyState){
+        case NONE:
+        case REMOTE_OFFERED:
+        case USER_IGNORED_OFFER:
+          return false;
+        case USER_REQUESTED:
+        case GRANTED:
+          return true;
+      }
+    }
+    export function remoteIsOffering(proxyState : ProxyState) : boolean {
+      switch(proxyState){
+        case NONE:
+        case USER_REQUESTED:
+          return false;
+        case USER_IGNORED_OFFER:
+        case REMOTE_OFFERED:
+        case GRANTED:
+          return true;
+      }
+    }
+  }
+
+
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -73,39 +129,30 @@ module Consent {
 // Update consent state of the remote as a proxy for the user given new consent bits from remote.
 module Consent {
   // Use |t| as local var for readability.
-  var t : {[proxyState : number]: { [remoteState : number]:ProxyState } } = {};
-  // var t : {[s : ProxyState]: { [r : RemoteState]:ProxyState } } = {};
-  t[ProxyState.NONE]              [RemoteState.NONE]         = ProxyState.NONE;
-  t[ProxyState.NONE]              [RemoteState.REQUESTING]   = ProxyState.NONE;
-  t[ProxyState.NONE]              [RemoteState.OFFERING]     = ProxyState.REMOTE_OFFERED;
-  t[ProxyState.NONE]              [RemoteState.BOTH]         = ProxyState.REMOTE_OFFERED;
+  var t : {[proxyState : number]: { [remoteIsOffering : number]:ProxyState } } = {};
+  // var t : {[s : ProxyState]: { [r : State]:ProxyState } } = {};
+  // Current state          remoteIsOffering       = New state
+  t[ProxyState.NONE]              [0]              = ProxyState.REMOTE_OFFERED
+  t[ProxyState.NONE]              [1]              = ProxyState.NONE;
 
-  t[ProxyState.REMOTE_OFFERED]    [RemoteState.NONE]         = ProxyState.NONE;
-  t[ProxyState.REMOTE_OFFERED]    [RemoteState.REQUESTING]   = ProxyState.NONE;
-  t[ProxyState.REMOTE_OFFERED]    [RemoteState.OFFERING]     = ProxyState.REMOTE_OFFERED;
-  t[ProxyState.REMOTE_OFFERED]    [RemoteState.BOTH]         = ProxyState.REMOTE_OFFERED;
+  t[ProxyState.REMOTE_OFFERED]    [0]              = ProxyState.NONE;
+  t[ProxyState.REMOTE_OFFERED]    [1]              = ProxyState.REMOTE_OFFERED;
 
-  t[ProxyState.USER_REQUESTED]    [RemoteState.NONE]         = ProxyState.USER_REQUESTED;
-  t[ProxyState.USER_REQUESTED]    [RemoteState.REQUESTING]   = ProxyState.USER_REQUESTED;
-  t[ProxyState.USER_REQUESTED]    [RemoteState.OFFERING]     = ProxyState.GRANTED;
-  t[ProxyState.USER_REQUESTED]    [RemoteState.BOTH]         = ProxyState.GRANTED;
+  t[ProxyState.USER_REQUESTED]    [0]              = ProxyState.USER_REQUESTED;
+  t[ProxyState.USER_REQUESTED]    [1]              = ProxyState.GRANTED;
 
   // Note: to force a user to see a request they have ignored, the remote can cancel their request
   // and request again. At the end of the day, if someone is being too annoying, you can remove
   // them from your contact list. Unclear we can do better than this.
-  t[ProxyState.USER_IGNORED_OFFER][RemoteState.NONE]         = ProxyState.NONE;
-  t[ProxyState.USER_IGNORED_OFFER][RemoteState.REQUESTING]   = ProxyState.NONE;
-  t[ProxyState.USER_IGNORED_OFFER][RemoteState.OFFERING]     = ProxyState.USER_IGNORED_OFFER;
-  t[ProxyState.USER_IGNORED_OFFER][RemoteState.BOTH]         = ProxyState.USER_IGNORED_OFFER;
+  t[ProxyState.USER_IGNORED_OFFER][0]              = ProxyState.NONE;
+  t[ProxyState.USER_IGNORED_OFFER][1]              = ProxyState.USER_IGNORED_OFFER;
 
-  t[ProxyState.GRANTED]           [RemoteState.NONE]         = ProxyState.USER_REQUESTED;
-  t[ProxyState.GRANTED]           [RemoteState.REQUESTING]   = ProxyState.USER_REQUESTED;
-  t[ProxyState.GRANTED]           [RemoteState.OFFERING]     = ProxyState.GRANTED;
-  t[ProxyState.GRANTED]           [RemoteState.BOTH]         = ProxyState.GRANTED;
+  t[ProxyState.GRANTED]           [0]              = ProxyState.USER_REQUESTED;
+  t[ProxyState.GRANTED]           [1]              = ProxyState.GRANTED;
 
-  export function updateProxyStateFromRemoteState(remoteState : RemoteState, state : ProxyState)
+  export function updateProxyStateFromRemoteState(remoteState : State, state : ProxyState)
       : ProxyState {
-    return t[state][remoteState];
+    return t[state][+remoteState.isOffering];
   }
 }
 
@@ -113,38 +160,29 @@ module Consent {
 // Update consent state of the remote as a proxy for the user given new consent bits from remote.
 module Consent {
   // Use |t| as local var for readability.
-  var t : {[clientState: number]: { [remoteState : number]:ClientState } } = {};
-  // var t : {[s: ClientState]: { [r : RemoteState]:ClientState } } = {};
-  t[ClientState.NONE]              [RemoteState.NONE]         = ClientState.NONE;
-  t[ClientState.NONE]              [RemoteState.REQUESTING]   = ClientState.REMOTE_REQUESTED;
-  t[ClientState.NONE]              [RemoteState.OFFERING]     = ClientState.NONE;
-  t[ClientState.NONE]              [RemoteState.BOTH]         = ClientState.REMOTE_REQUESTED;
+  var t : {[clientState: number]: { [remoteIsRequesting : number]:ClientState } } = {};
+  // var t : {[s: ClientState]: { [r : State]:ClientState } } = {};
+  // Current state            remoteIsOffering     = New state
+  t[ClientState.NONE]                 [0]          = ClientState.NONE;
+  t[ClientState.NONE]                 [1]          = ClientState.REMOTE_REQUESTED;
 
-  t[ClientState.REMOTE_REQUESTED]  [RemoteState.NONE]         = ClientState.NONE;
-  t[ClientState.REMOTE_REQUESTED]  [RemoteState.REQUESTING]   = ClientState.REMOTE_REQUESTED;
-  t[ClientState.REMOTE_REQUESTED]  [RemoteState.OFFERING]     = ClientState.NONE;
-  t[ClientState.REMOTE_REQUESTED]  [RemoteState.BOTH]         = ClientState.REMOTE_REQUESTED;
+  t[ClientState.REMOTE_REQUESTED]     [0]          = ClientState.NONE;
+  t[ClientState.REMOTE_REQUESTED]     [1]          = ClientState.REMOTE_REQUESTED;
 
-  t[ClientState.USER_OFFERED]      [RemoteState.NONE]         = ClientState.USER_OFFERED;
-  t[ClientState.USER_OFFERED]      [RemoteState.REQUESTING]   = ClientState.GRANTED;
-  t[ClientState.USER_OFFERED]      [RemoteState.OFFERING]     = ClientState.USER_OFFERED;
-  t[ClientState.USER_OFFERED]      [RemoteState.BOTH]         = ClientState.GRANTED;
+  t[ClientState.USER_OFFERED]         [0]          = ClientState.USER_OFFERED;
+  t[ClientState.USER_OFFERED]         [1]          = ClientState.GRANTED;
 
   // Note: to force a user to see a request they have ignored, the remote can cancel their request
   // and request again. At the end of the day, if someone is being too annoying, you can remove
   // them from your contact list. Unclear we can do better than this.
-  t[ClientState.USER_IGNORED_REQUEST][RemoteState.NONE]       = ClientState.NONE;
-  t[ClientState.USER_IGNORED_REQUEST][RemoteState.REQUESTING] = ClientState.USER_IGNORED_REQUEST;
-  t[ClientState.USER_IGNORED_REQUEST][RemoteState.OFFERING]   = ClientState.NONE;
-  t[ClientState.USER_IGNORED_REQUEST][RemoteState.BOTH]       = ClientState.USER_IGNORED_REQUEST;
+  t[ClientState.USER_IGNORED_REQUEST] [0]          = ClientState.NONE;
+  t[ClientState.USER_IGNORED_REQUEST] [1]          = ClientState.USER_IGNORED_REQUEST;
 
-  t[ClientState.GRANTED]           [RemoteState.NONE]         = ClientState.USER_OFFERED;
-  t[ClientState.GRANTED]           [RemoteState.REQUESTING]   = ClientState.GRANTED;
-  t[ClientState.GRANTED]           [RemoteState.OFFERING]     = ClientState.USER_OFFERED;
-  t[ClientState.GRANTED]           [RemoteState.BOTH]         = ClientState.GRANTED;
+  t[ClientState.GRANTED]              [0]          = ClientState.USER_OFFERED;
+  t[ClientState.GRANTED]              [1]          = ClientState.GRANTED;
 
-  export function updateClientStateFromRemoteState(remoteState : RemoteState, state : ClientState)
+  export function updateClientStateFromRemoteState(remoteState : State, state : ClientState)
       : ClientState {
-    return t[state][remoteState];
+    return t[state][+remoteState.isRequesting];
   }
 }

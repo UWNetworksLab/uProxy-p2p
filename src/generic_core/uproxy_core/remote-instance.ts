@@ -1,53 +1,58 @@
 ///
 // remote-instance.ts
 //
-module RemoteInstance {
+module Remote {
 
-  enum ProxyType { SOCKS5, WEBRTC_SOCKS5, TOR, PSIPHON }
-  enum ObfuscationType { NONE, RANDOM }
-  enum NetworkType { GTALK, FB, XMPP }
-  enum NetworkStatus { ONLINE, OFFLINE }
+  export enum ProxyType { SOCKS5, WEBRTC_SOCKS5, TOR, PSIPHON }
+  export enum ObfuscationType { NONE, RANDOM }
+  export enum NetworkType { GTALK, FB, XMPP }
+  export enum NetworkStatus { ONLINE, OFFLINE }
 
   // Serializable network information.
-  interface SocialId {
+  export interface SocialId {
     type : NetworkType;
     id : string;
   }
 
   //
-  interface RemoteInstanceJson {
-    remoteAsProxyConsent : Consent.Status;
-    remoteAsClientConsent : Consent.Status;
+  export interface InstanceData {
+    remoteProxyState : Consent.ProxyState;
+    remoteClientState : Consent.ClientState;
 
     // instanceId, unique.
     instanceId : string;
     publicKey : string;
-    networkJson : NetworkJson;
+    socialId : SocialId;
   }
 
   //
-  class RemoteInstance {
-    remoteAsProxyConsent : Consent.ProxyState;
-    remoteAsClientConsent : Consent.ClientState;
+  class Instance implements InstanceData {
+    remoteProxyState : Consent.ProxyState;
+    remoteClientState : Consent.ClientState;
 
     // instanceId, unique.
     instanceId : string;
+    publicKey : string;
 
     //
     socialId : SocialId
     onlineStatus : NetworkStatus;
 
     //
-    constructor(json : RemoteInstanceJson) {
-      this.proxyConsent = json
-      this.accessConsent = {remoteConsent: false, localConsent: false};
+    constructor(data : InstanceData) {
+      function clone(x) { return JSON.parse(JSON.stringify(x)); }
+      this.remoteProxyState = clone(data.remoteProxyState);
+      this.remoteClientState = clone(data.remoteClientState);
+      this.instanceId = clone(data.instanceId);
+      this.publicKey = clone(data.publicKey);
+      this.socialId = clone(data.socialId);
     }
 
     //
     getJSON() {
       return {
-        offeredConsent: this.proxyConsent,
-        requestedConsent: this.accessConsent,
+        remoteProxyState: this.remoteProxyState,
+        remoteClientState: this.remoteClientState,
         instanceId: this.instanceId,
         publicKey: this.publicKey,
         socialId: this.socialId
@@ -55,4 +60,6 @@ module RemoteInstance {
     }
   }  // class remote instance.
 
+
 }  // module RemoteInstance
+
