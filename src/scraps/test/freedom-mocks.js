@@ -39,8 +39,8 @@ var freedom = new MockChannel();
 freedom.storage = function () { return new MockStorage({}); };
 
 freedom.identity = function () { return new MockChannel(); };
-freedom.uproxyclient = function () { return new MockChannel(); };
-freedom.uproxyserver = function () { return new MockChannel(); };
+freedom['SocksToRtc'] = function () { return new MockChannel(); };
+freedom['RtcToNet'] = function () { return new MockChannel(); };
 
 var DEBUG = true;
 
