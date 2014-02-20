@@ -12,11 +12,11 @@
     ]
   },
   "dependencies": {
-    "uproxyclient": {
-      "url": "../client/client.json"
+    "SocksToRtc": {
+      "url": "../socks-to-rtc/socks-to-rtc.json"
     },
-    "uproxyserver": {
-      "url": "../server/server.json"
+    "RtcToNet": {
+      "url": "../rtc-to-net/rtc-to-net.json"
     },
     "identity": {
       "url": "../identity/identity.json",
