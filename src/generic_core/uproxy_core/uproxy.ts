@@ -32,12 +32,12 @@ var identity = freedom.identity();
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
 // through the peer connection.
-var client = freedom.uproxyclient();
+var client = freedom['SocksToRtc']();
 
 // Server allows us to act as a proxy for our contacts.
 // Server module; listens for peer connections and proxies their requests
 // through the peer connection.
-var server = freedom.uproxyserver();
+var server = freedom['RtcToNet']();
 
 // Sometimes we receive other uproxy instances before we've received our own
 // XMPP onChange notification, which means we cannot yet build an instance

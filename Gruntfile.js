@@ -15,7 +15,6 @@
  *  everything - 'setup', 'test', then 'build'
  **/
 
-// var minimatch = require("minimatch");
 var TaskManager = require("./tools/taskmanager");
 
 module.exports = function(grunt) {
@@ -35,6 +34,10 @@ module.exports = function(grunt) {
       freedom_build: {
         command: 'grunt',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
+      },
+      socks_rtc_setup: {
+        command: 'npm install;grunt',
+        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/socks-rtc'}}
       },
     },
 
@@ -82,6 +85,9 @@ module.exports = function(grunt) {
         // Libraries
         {expand: true, cwd: 'node_modules/freedom/',
          src: ['freedom.js'],
+         dest: 'build/generic_core/lib'},
+        {expand: true, cwd: 'node_modules/socks-rtc/build/',
+         src: ['**'],
          dest: 'build/generic_core/lib'}
       ]},
 
