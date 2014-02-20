@@ -13,9 +13,9 @@ var installedFreedomHooks = [];
 var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
 window.freedomcfg = function(register) {
-  register("core.view", View_oauth);
-  register("core.socket", Socket_chrome);
-  register("core.storage", Storage_chrome);
+  register('core.view', View_oauth);
+  register('core.socket', Socket_chrome);
+  register('core.storage', Storage_chrome);
 }
 
 // Start up freedom with data-manifest set to uproxy.json.
@@ -31,7 +31,7 @@ var uProxyAppChannel = null;
 script.onload = function() {
   uProxyAppChannel = freedom;
   uProxyAppChannel.on('ready', function() {
-    console.log("uproxy.js is ready!");
+    console.log('uproxy.js is ready!');
   });
 
   //var test_script = document.createElement('script');
@@ -57,7 +57,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
   // sucessfully connects, the extension depends on a message to come back to
   // it form here, the app, so it knows the connection was successful and the
   // app is indeed present.
-  extPort.postMessage("hello.");
+  extPort.postMessage('hello.');
   // TODO: remove this testing code.
   // setTimeout(function() { extPort.postMessage("ignore me."); }, 10);
   extPort.onMessage.addListener(onExtMsg);

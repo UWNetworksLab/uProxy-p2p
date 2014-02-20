@@ -5,11 +5,12 @@
 // A little class that callbacks such that you can use it as the callback for
 // many operations, but only when the last of the operations you started is
 // completed, but the finalCallback actually get called.
+// TODO: Shouldn't this just be replaced with promises?
 function FinalCallback(finalCallback) {
   this.callsWaiting = 0;
   this.finalCallback = finalCallback;
   if(finalCallback && (typeof finalCallback != 'function')) {
-    throw "FinalCallback: given a non-function: " + finalCallback;
+    throw 'FinalCallback: given a non-function: ' + finalCallback;
   }
 }
 
@@ -181,15 +182,15 @@ function extractCryptoKey(sdpHeaders) {
   for (i in lines) {
     currentLine = lines[i];
     if (!midDataFound) {
-      if (currentLine === "a=mid:data") {
+      if (currentLine === 'a=mid:data') {
         midDataFound = true;
       }
     } else {
-      if (currentLine.indexOf("a=crypto:1") === 0) {
+      if (0 === currentLine.indexOf('a=crypto:1')) {
         keyParams = currentLine.substring(currentLine.indexOf(" ", 11) + 1).split(" ");
         for (j in keyParams) {
           keyParam = keyParams[j];
-          if (keyParam.indexOf("inline:" === 0)) {
+          if (keyParam.indexOf(0 === 'inline:')) {
             return keyParam.substring(7);
           }
         }

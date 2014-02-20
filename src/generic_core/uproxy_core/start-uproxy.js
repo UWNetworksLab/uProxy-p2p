@@ -9,7 +9,7 @@ var window = {};
 // to the extension.
 var store = new UProxyState();
 
-server.emit("start");
+server.emit('start');
 
 // Load state from storage and when done login to relevant networks and
 // emit an total state update.
