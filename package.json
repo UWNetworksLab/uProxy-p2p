@@ -27,7 +27,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "minimatch": "~0.2.12",
     "socks-rtc": "~0.1.0",
-    "freedom": "0.1.0",
+    "freedom": "~0.2.1",
     "typescript": "0.9.5"
   },
   "scripts": {

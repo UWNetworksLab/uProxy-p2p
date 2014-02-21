@@ -86,6 +86,11 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'node_modules/freedom/',
          src: ['freedom.js'],
          dest: 'build/generic_core/lib'},
+        // TODO: update the social provider to this when ready:
+        //   https://github.com/freedomjs/freedom-social-xmpp
+        {expand: true, cwd: 'node_modules/freedom/providers/social',
+         src: ['websocket-server/**'],
+         dest: 'build/generic_core/lib'},
         {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['**'],
          dest: 'build/generic_core/lib'}

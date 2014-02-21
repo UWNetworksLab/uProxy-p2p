@@ -38,7 +38,7 @@ MockChannel.prototype.emit = function (eventTypeString, value) {
 var freedom = new MockChannel();
 freedom.storage = function () { return new MockStorage({}); };
 
-freedom.identity = function () { return new MockChannel(); };
+freedom['social'] = function () { return new MockChannel(); };
 freedom['SocksToRtc'] = function () { return new MockChannel(); };
 freedom['RtcToNet'] = function () { return new MockChannel(); };
 

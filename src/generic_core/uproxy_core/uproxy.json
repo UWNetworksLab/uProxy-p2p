@@ -18,9 +18,9 @@
     "RtcToNet": {
       "url": "../lib/rtc-to-net/rtc-to-net.json"
     },
-    "identity": {
-      "url": "../identity/identity.json",
-      "api": "identity"
+    "social": {
+      "url": "../lib/websocket-server/social.ws.json",
+      "api": "social"
     },
     "storage": {
       "url": "../storage/storage.json",
@@ -28,6 +28,6 @@
     }
   },
   "permissions": [
-    "core.sctp-peerconnection"
+    "core.peerconnection"
   ]
 }
