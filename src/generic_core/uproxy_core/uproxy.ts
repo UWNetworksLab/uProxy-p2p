@@ -27,7 +27,8 @@ var bgAppPageChannel = freedom;
 
 // Identity is a module that speaks to chat networks and does some message
 // passing to manage contacts privilages and initiate proxying.
-var identity = freedom.identity();
+// var identity = freedom.identity();
+var social = freedom.social();
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -60,7 +61,7 @@ bgAppPageChannel.on('reset', function () { reset(); });
 // Logs out of networks and resets data.
 function reset() {
   console.log('reset');
-  identity.logout(null, null);
+  social.logout(null, null);
   store.reset(function() {
     // TODO: refactor so this isn't needed.
     console.log("reset state to: ", store.state);
@@ -84,7 +85,7 @@ bgAppPageChannel.on('logout', function(network) { logout(network); });
 function login(network, explicit) {
   explicit = explicit || false;
   network = network || undefined;
-  identity.login({
+  social.login({
     agent: 'uproxy',
     version: '0.1',
     url: 'https://github.com/UWNetworksLab/UProxy',
@@ -98,7 +99,7 @@ function login(network, explicit) {
 }
 
 function logout(network) {
-  identity.logout(null, network);
+  social.logout(null, network);
   // TODO: only remove clients from the network we are logging out of.
   // Clear the clientsToInstance table.
   store.state.clientToInstance = {};
@@ -117,7 +118,7 @@ function iAmLoggedIn() {
 }
 
 bgAppPageChannel.on('invite-friend', function (userId) {
-  identity.sendMessage(userId, "Join UProxy!");
+  social.sendMessage(userId, "Join UProxy!");
 });
 
 bgAppPageChannel.on('echo', function (msg) {
@@ -148,7 +149,7 @@ bgAppPageChannel.on('update-description', function (data) {
   // Send the new description to ALL currently online friend instances.
   for (var instanceId in store.state.instances) {
     var clientId = store.state.instanceToClient[instanceId];
-    if (clientId) identity.sendMessage(clientId, payload);
+    if (clientId) social.sendMessage(clientId, payload);
   }
 });
 
@@ -190,14 +191,14 @@ client.on('sendSignalToPeer', function(data) {
                     store.state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
-  identity.sendMessage(data.peerId,
+  social.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
 server.on('sendSignalToPeer', function(data) {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to client: ' + data.peerId);
-  identity.sendMessage(data.peerId,
+  social.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
@@ -226,7 +227,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
-  identity.sendMessage(
+  social.sendMessage(
       store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-active-client',
@@ -248,7 +249,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   _syncInstanceUI(instance, 'status');
 
   // TODO: this is also a temporary hack.
-  identity.sendMessage(
+  social.sendMessage(
       store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-inactive-client',
@@ -326,7 +327,7 @@ bgAppPageChannel.on('instance-trust-change', function (data) {
               'exist for instance ' + iId + ' - they are probably offline.');
     return false;
   }
-  identity.sendMessage(clientId, JSON.stringify({type: data.action}));
+  social.sendMessage(clientId, JSON.stringify({type: data.action}));
   return true;
 });
 
@@ -397,7 +398,7 @@ function receiveStatus(data) {
 }
 
 // Update local user's online status (away, busy, etc.).
-identity.on('onStatus', receiveStatus);
+social.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether being online or
 // the description.
@@ -428,7 +429,7 @@ function receiveChange(rawData) {
     console.log(e.stack);
   }
 }
-identity.on('onChange', receiveChange);
+social.on('onChange', receiveChange);
 
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
@@ -448,7 +449,7 @@ var _msgReceivedHandlers = {
 };
 
 //
-identity.on('onMessage', function (msgInfo) {
+social.on('onMessage', function (msgInfo) {
   // Replace the JSON str with actual data attributes, then flatten.
   msgInfo.messageText = msgInfo.message;
   delete msgInfo.message;
@@ -607,7 +608,7 @@ function sendInstance(clientId) {
     console.log('Queueing ' + clientId + ' for an instance message.');
     return false;
   }
-  identity.sendMessage(clientId, instancePayload);
+  social.sendMessage(clientId, instancePayload);
   return true;
 }
 
@@ -624,7 +625,7 @@ function sendQueuedInstanceMessages() {
   }
   _sendInstanceQueue.forEach(function(clientId) {
     console.log('Sending previously queued instance message to: ' + clientId + '.');
-    identity.sendMessage(clientId, instancePayload);
+    social.sendMessage(clientId, instancePayload);
   });
   _sendInstanceQueue = [];
   return true;
@@ -685,7 +686,7 @@ function sendConsent(instance) {
     instanceId: store.state.me.instanceId,            // Our own instanceId.
     consent: _determineConsent(instance.trust)  // My consent.
   });
-  identity.sendMessage(clientId, consentPayload);
+  social.sendMessage(clientId, consentPayload);
   return true;
 }
 
