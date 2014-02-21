@@ -28,7 +28,6 @@ var bgAppPageChannel = freedom;
 
 // Identity is a module that speaks to chat networks and does some message
 // passing to manage contacts privilages and initiate proxying.
-// var identity = freedom.identity();
 var social = freedom.social();
 
 // Client is used to manage a peer connection to a contact that will proxy our
