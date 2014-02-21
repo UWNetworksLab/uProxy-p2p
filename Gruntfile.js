@@ -27,14 +27,6 @@ module.exports = function(grunt) {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true}
       },
-      freedom_setup: {
-        command: 'npm install',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
-      },
-      freedom_build: {
-        command: 'grunt',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/freedom'}}
-      },
       socks_rtc_setup: {
         command: 'npm install;grunt',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/socks-rtc'}}
@@ -361,8 +353,6 @@ module.exports = function(grunt) {
   var taskManager = new TaskManager.Manager();
 
   taskManager.add('setup', [
-    'shell:freedom_setup',
-    'shell:freedom_build',
     'shell:bower_install',
   ]);
 
