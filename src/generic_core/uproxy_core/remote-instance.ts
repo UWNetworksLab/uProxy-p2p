@@ -3,15 +3,33 @@
 //
 module Remote {
 
-  export enum ProxyType { SOCKS5, WEBRTC_SOCKS5, TOR, PSIPHON }
-  export enum ObfuscationType { NONE, RANDOM }
-  export enum NetworkType { GTALK, FB, XMPP }
-  export enum NetworkStatus { ONLINE, OFFLINE }
+  export enum TransportType { SOCKS5, WEBRTC_SOCKS5, TOR, PSIPHON }
+  export enum ObfuscationType { NONE, RANDOM1 }
+  export enum SocialNetworkType { GTALK, FB, XMPP }
+  export enum SocialNetworkStatus { ONLINE, OFFLINE }
+
 
   // Serializable network information.
-  export interface SocialId {
+  export interface SocialConnectionData {
     type : NetworkType;
     id : string;
+  }
+
+  // Serializable network information.
+  export interface SocialConnection {
+    getJson() : string;
+  }
+
+  // Serializable network information.
+  export interface Transport {
+    access() : void;
+    () : void;
+
+    socksToWebrtc ?: {
+      publicKey : string;
+    }
+
+    getJson() : string;
   }
 
   //
@@ -21,8 +39,7 @@ module Remote {
 
     // instanceId, unique.
     instanceId : string;
-    publicKey : string;
-    socialId : SocialId;
+    socialConnection : SocialConnection;
   }
 
   //
@@ -32,11 +49,10 @@ module Remote {
 
     // instanceId, unique.
     instanceId : string;
-    publicKey : string;
 
     //
-    socialId : SocialId
-    onlineStatus : NetworkStatus;
+    transport : Transport;
+    socialConnection : SocialConnection;
 
     //
     constructor(data : InstanceData) {
@@ -54,8 +70,8 @@ module Remote {
         remoteProxyState: this.remoteProxyState,
         remoteClientState: this.remoteClientState,
         instanceId: this.instanceId,
-        publicKey: this.publicKey,
-        socialId: this.socialId
+        transport: this.transport_.getJson();
+        socialConnection: this.socialConnection_.getJson();
       }
     }
   }  // class remote instance.

@@ -17,9 +17,9 @@ module Consent {
   // as messaged from the UI to the core. They correspond to the different
   // buttons that the user may be clicking on.
   export enum UserAction {
-    // Actions made by user w.r.t. remote as a proxy, or
+    // Actions made by user w.r.t. remote as a proxy (changes ProxyState) or
     REQUEST, CANCEL_REQUEST, ACCEPT_OFFER, IGNORE_OFFER,
-    // Actions made by user w.r.t. remote as a client, or
+    // Actions made by user w.r.t. remote as a client (changes ClientState)
     OFFER, CANCEL_OFFER, ALLOW_REQUEST, IGNORE_REQUEST
   }
   // User-level consent state for a remote instance to be a proxy client for the
@@ -103,7 +103,7 @@ module Consent {
 //------------------------------------------------------------------------------
 // Actions by the user w.r.t. the remote instance as a proxy.
 module Consent {
-  var t:{[proxyState:number]:{[userAction:number]:State}} = {};
+  var t:{[proxyState:number]:{[userAction:number]:ProxyState}} = {};
   var S = ProxyState;
   var A = UserAction;
   t[S.NONE]               [A.REQUEST]        = S.USER_REQUESTED;
