@@ -13,18 +13,21 @@ declare module Freedom.social {
     onDisconnected   // The user has been disconnected.
   }
 
+  // Status indicates whether a the user or a contact is online, offline, or
+  // online with another client which means they can receve chat messages, but
+  // are not expected to react to them in whatever way this application does.
   enum Status {
     // Not connected to any social network. There are no guarantees other
     // methods or events will work until the user calls 'login'
     OFFLINE,
     // Online and using the same application (we can send them messages)
     ONLINE,
-    // Messages will appear as chat to the contact.
+    // Messages will appear as chat to the client.
     ONLINE_WITH_OTHER_CLIENT,
   }
 
-  interface Profile {
-    //
+  // The state of the user, or that of a contact, on the social network.
+  interface State {
     status: Status;
     // Name of network this client is logged into, and userId for it.
     // network: string;
@@ -44,7 +47,7 @@ declare module Freedom.social {
   }
 
   // Roster is a map from clientIds to their status
-  interface Roster { [clientId: string] : Profile; }
+  interface Roster { [clientId: string] : State; }
 
   /**
    * Event for an incoming messages
@@ -78,7 +81,7 @@ declare module Freedom {
      * Log into the network. Promise succeeds with filled out profile when we
      * are online. This will log the user out of any existing network/userId.
      **/
-    login(loginRequest:social.LoginRequest) : Promise<social.Profile>;
+    login(loginRequest:social.LoginRequest) : Promise<social.State>;
 
     /**
      * Returns all the Status for each roster enrty.
@@ -103,8 +106,8 @@ declare module Freedom {
     /**
      * Forget any tokens/credentials used for logging in with userId.
      **/
-    forgetLogin(userId: string) : Promise<social.Profile>;
-    forgetAllLogins() : Promise<social.Profile>;
+    forgetLogin(userId: string) : Promise<void>;
+    forgetAllLogins() : Promise<void>;
 
     // Generic Freedom Event stuff.
     // Bind an event handler to event type |eventType|. Every time |eventType|
