@@ -5,7 +5,11 @@
 // requested and offered, then it is GRANTED. Before either have happened, the
 // state is NONE. IGNORE_XXX actions can happen by the side that has not taken
 // any action. This puts the state into the IGNORED state.
-
+//
+// IGNORE states are particularly important when we want to work with an
+// external proxy that auto requests or offers access. e.g. Tor does both and
+// Psiphon always offers. The user wants to be able to be able to ignore these
+// services offer/request.
 module Consent {
   // The different state's that uproxy consent can be in w.r.t. a peer. These
   // are the values that get receieved or sent on the wire.
