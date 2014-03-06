@@ -9,8 +9,8 @@ declare module Freedom.social {
   // strings.
   enum EVENT {
     onMessage,       // receives a |IncomingMessage| value
-    onRosterUpdate,  // receives a |State| value for a contact.
-    onDisconnected   // The user has been disconnected.
+    onRosterUpdate,  // receives a |State| value for a contact
+    onUserUpdate     // The user's state has changed (typically disconnected)
   }
 
   // Status indicates whether a the user or a contact is online, offline, or
@@ -22,15 +22,15 @@ declare module Freedom.social {
     OFFLINE,
     // Online and using the same application (we can send them messages)
     ONLINE,
-    // Messages will appear as chat to the client.
+    // Messages will appear as chat to the client
     ONLINE_WITH_OTHER_CLIENT,
   }
 
-  // The state of the user, or that of a contact, on the social network.
+  // The state of the user, or that of a contact, on the social network
   interface State {
+    // Is the user/roster entry online/offline/online with another client
     status: Status;
-    // Name of network this client is logged into, and userId for it.
-    // network: string;
+    // The userId for the chat network
     userId: string;
     // Ephemeral client id for the network
     clientId?: string;
@@ -41,9 +41,6 @@ declare module Freedom.social {
     url?: string;
     // Image Data URI (e.g. data:image/png;base64,adkwe329...)
     imageDataUri?: string;
-    // TODO(Freedom): discuss caching - in uProxy we want to be able to have
-    // this information even before we connect to the network. So, we want it
-    // in uProxy's storage. Do we really want to have it twice?
   }
 
   // Roster is a map from clientIds to their status
@@ -62,11 +59,13 @@ declare module Freedom.social {
 
   // A request to login to a specific network as a specific agent
   interface LoginRequest {
-    agent: string;    // Name of the application
+    agent: string;    // Name of the application connecting to the network
     version: string;  // Version of application
     url: string;      // URL of application
-    // Prompt user for login. When |interactive === false|, promise fails
-    // unless the Social provider has a cached login token/credentials.
+    // When |interactive === true| social will always prompt user for login.
+    // Promise fails if the user did not login or provided invalid credentials.
+    // When |interactive === false|, promise fails unless the social provider
+    // has  cached tokens/credentials.
     interactive: boolean;
     // When true, social provider will remember the token/credentials.
     rememberLogin: boolean;
@@ -78,8 +77,14 @@ declare module Freedom.social {
 declare module Freedom {
   class social {
     /**
-     * Log into the network. Promise succeeds with filled out profile when we
-     * are online. This will log the user out of any existing network/userId.
+     * Log into the network. The promise succeeds once the user is logged in,
+     * and online, and the state is known. The state value in the successful
+     * promise is guarenteed to be filly filled out. Note: this will log the
+     * user out of any existing userId, and if the last userId is different to
+     * the current one, the social provider gaurentees that the old credentials
+     * are no longer in the social provider's cache (any subsiquent attempts at
+     * logging in with loginRequest.interactive=false will fail if credentials
+     * are needed).
      **/
     login(loginRequest:social.LoginRequest) : Promise<social.State>;
 
@@ -104,10 +109,10 @@ declare module Freedom {
     logout() : Promise<void>;
 
     /**
-     * Forget any tokens/credentials used for logging in with userId.
+     * Forget any tokens/credentials used for logging in with the last used
+     * userId.
      **/
-    forgetLogin(userId: string) : Promise<void>;
-    forgetAllLogins() : Promise<void>;
+    forgetLogins() : Promise<void>;
 
     // Generic Freedom Event stuff.
     // Bind an event handler to event type |eventType|. Every time |eventType|
