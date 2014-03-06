@@ -132,7 +132,7 @@ declare module Freedom {
      * Forget any tokens/credentials used for logging in with the last used
      * userId.
      **/
-    forgetLogins() : Promise<void>;
+    clearCachedCredentials() : Promise<void>;
   }  // class social
 
 }  // declare module Freedom
