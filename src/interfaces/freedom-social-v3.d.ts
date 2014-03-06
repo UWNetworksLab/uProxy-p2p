@@ -77,6 +77,26 @@ declare module Freedom.social {
 declare module Freedom {
   class social {
     /**
+     * Generic Freedom Event stuff.
+     * Bind an event handler to event type |eventType|. Every time |eventType|
+     *  event is raised, the function |f| will be called.
+     **/
+    on(eventType:string, f:Function);
+
+    /**
+     * Do a singleton event binding: |f| will only be called once, on the next
+     * event of type |eventType|
+     **/
+    once(eventType:string, f:Function);
+
+    /**
+     * Forms of usage for events:
+     *   on(EVENT.onMessage, handler: (State) => void);
+     *   on(EVENT.onRosterUpdate, handler: (State) => void);
+     *   on(EVENT.onMessage, handler: (IncomingMessage) => void);
+     **/
+
+    /**
      * Log into the network. The promise succeeds once the user is logged in,
      * and online, and the state is known. The state value in the successful
      * promise is guarenteed to be filly filled out. Note: this will log the
@@ -113,14 +133,6 @@ declare module Freedom {
      * userId.
      **/
     forgetLogins() : Promise<void>;
-
-    // Generic Freedom Event stuff.
-    // Bind an event handler to event type |eventType|. Every time |eventType|
-    // event is raised, the function |f| will be called.
-    on(eventType:string, f:Function);
-    // Do a singleton event binding: |f| will only be called once, on the next
-    // event of type |eventType|
-    once(eventType:string, f:Function);
   }  // class social
 
 }  // declare module Freedom
