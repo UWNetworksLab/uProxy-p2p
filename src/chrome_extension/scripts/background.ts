@@ -5,14 +5,14 @@
  * connection with the App, consistent state changes with the UI (see ui.js)
  * and holds the data model for both the popup and options page.
  */
-// Assumes that freedom_connector.js has been loaded.
+// Assumes that core_stub.ts has been loaded.
 /// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
 /// <reference path="../../generic_ui/scripts/ui.d.ts"/>
 console.log('Initializing chrome extension background page...');
 
 declare var chrome:any;
 declare var jsonpatch:any;
-declare var FreedomConnector:any;
+declare var CoreStub:any;
 declare var UI:CUI;
 
 class ChromeNotifications implements INotifications {
@@ -55,7 +55,7 @@ class ChromeAppConnector implements Interfaces.ICore {
     // because it is possible that the App doesn't even exist.
 
     // Chrome App Id for UProxy Packaged Chrome App.
-    this.appChannel = new FreedomConnector(this.UPROXY_CHROME_APP_ID, {
+    this.appChannel = new CoreStub(this.UPROXY_CHROME_APP_ID, {
         name: 'uproxy-extension-to-app-port' });
     this.appChannel.onConnected.addListener(() => {
       init(this.appChannel);

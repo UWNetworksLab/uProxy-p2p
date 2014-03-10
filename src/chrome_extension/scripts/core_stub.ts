@@ -1,4 +1,4 @@
-// Provides 'FreedomConnector' object that acts like freedomos.org
+// Provides 'CoreStub' object that acts like freedomos.org
 // freedom object, but posts/listens to messages from freedom via a chrome.
 // runtime.message.
 'use strict';
@@ -9,7 +9,7 @@
 //   should speak to.
 // |options| is the options passed the runtime connection. It has a 'name'
 //   field that can be used to name the connection to the freedom component.
-function FreedomConnector(id, options) {
+function CoreStub(id, options) {
   this.id_ = id;
   this.options_ = options;
   // A callback |function() {...}| to call when we are disconnected. e.g. when
@@ -34,7 +34,7 @@ function FreedomConnector(id, options) {
 };
 
 // Try to connect to the app/extension running Freedom.
-FreedomConnector.prototype.connect = function() {
+CoreStub.prototype.connect = function() {
   if(this.status.connected) {
     // console.info('Already connected.');
     return;
@@ -61,7 +61,7 @@ FreedomConnector.prototype.connect = function() {
 
 // This function is used as the callback to listen to messages that should be
 // passed to the freedom listeners in the extension.
-FreedomConnector.prototype.dispatchFreedomEvent_ = function(msg) {
+CoreStub.prototype.dispatchFreedomEvent_ = function(msg) {
   if (this.listeners_[msg.type]) {
     var handlers = this.listeners_[msg.type].slice(0);
     for (var i = 0; i < handlers.length; i++) {
@@ -74,7 +74,7 @@ FreedomConnector.prototype.dispatchFreedomEvent_ = function(msg) {
 // possible on the connector side of a runtime connection [25 Aug 2013])
 // When we connect Freedom, we expect Freedom's runtime.Port.onConnect callback
 // to send us the message 'hello.' which means we've connected successfully.
-FreedomConnector.prototype.onFirstMessage_ = function(msg) {
+CoreStub.prototype.onFirstMessage_ = function(msg) {
   if ('hello.' == msg) {
     console.info('Got hello from UProxy App.');
     // No longer wait for first message.
@@ -91,7 +91,7 @@ FreedomConnector.prototype.onFirstMessage_ = function(msg) {
 };
 
 // Wrapper for disconnection.
-FreedomConnector.prototype.onDisconnected_ = function() {
+CoreStub.prototype.onDisconnected_ = function() {
   console.log('Extension got disconnected from app.');
   this.status.connected = false;
   if(this.port_) {
@@ -119,9 +119,9 @@ FreedomConnector.prototype.onDisconnected_ = function() {
 
 
 // send emit to Freedom.
-FreedomConnector.prototype.emit = function(t, d) {
+CoreStub.prototype.emit = function(t, d) {
   if (!this.status.connected) {
-    console.error('Cannot call |emit| on a disconnected FreedomConnector.');
+    console.error('Cannot call |emit| on a disconnected CoreStub.');
     return;
   }
   try {
@@ -138,9 +138,9 @@ FreedomConnector.prototype.emit = function(t, d) {
 
 // Add the listener callback to be called when we get events of type |t|
 // from freedom.
-FreedomConnector.prototype.on = function(t, listener) {
+CoreStub.prototype.on = function(t, listener) {
   if (!this.status.connected) {
-    console.error('Cannot call |on| on a disconnected FreedomConnector.');
+    console.error('Cannot call |on| on a disconnected CoreStub.');
     return;
   }
   if (this.listeners_[t]) {
@@ -163,9 +163,9 @@ FreedomConnector.prototype.on = function(t, listener) {
 // |t|.
 // TODO: Test this.
 // Calls listener only once and then remove it.
-FreedomConnector.prototype.once = function(t, listener) {
+CoreStub.prototype.once = function(t, listener) {
   if (!this.status.connected) {
-    console.error('Cannot call |once| on a disconnected FreedomConnector.');
+    console.error('Cannot call |once| on a disconnected CoreStub.');
     return;
   }
   // Function that calls and removes the listener
