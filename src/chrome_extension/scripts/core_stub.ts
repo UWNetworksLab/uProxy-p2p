@@ -1,7 +1,6 @@
 // Provides 'CoreStub' object that acts like freedomos.org
 // freedom object, but posts/listens to messages from freedom via a chrome.
 // runtime.message.
-'use strict';
 
 // TODO: factor away this file
 // This is a fake freedom module builder that simply passes messages to a

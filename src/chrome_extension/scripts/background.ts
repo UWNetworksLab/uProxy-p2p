@@ -12,7 +12,6 @@ console.log('Initializing chrome extension background page...');
 
 declare var chrome:any;
 declare var jsonpatch:any;
-declare var CoreStub:any;
 declare var UI:CUI;
 
 class ChromeNotifications implements INotifications {
