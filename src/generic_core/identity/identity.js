@@ -113,6 +113,8 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
   for (var key in this.providers) {
     if (this.providers.hasOwnProperty(key)) {
       if ((userId == undefined && networkName == undefined) ||
+          // Freedom passes null as a string 'null', so check for that too.
+          (userId == 'null' && networkName == 'null') ||
           this.providers[key].userId == userId ||
           this.providers[key].network == networkName) {
         providerCount += 1;
