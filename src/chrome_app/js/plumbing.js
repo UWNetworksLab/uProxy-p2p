@@ -12,12 +12,6 @@ var installedFreedomHooks = [];
 // Constant
 var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
-window.freedomcfg = function(register) {
-  register('core.view', View_oauth);
-  register('core.socket', Socket_chrome);
-  register('core.storage', Storage_chrome);
-}
-
 // Start up freedom with data-manifest set to uproxy.json.
 // Uncomment for clearer but less portable module error messages.
 var script = document.createElement('script');
