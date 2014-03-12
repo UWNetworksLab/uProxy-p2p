@@ -1,8 +1,6 @@
-///
-// remote-instance.ts
-//
-
-
+/**
+ * remote-instance.ts
+ **/
 
 //
 class RemoteInstance {

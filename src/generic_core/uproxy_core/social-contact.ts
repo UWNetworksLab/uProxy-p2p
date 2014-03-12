@@ -1,5 +1,5 @@
-/// <reference path='../../interfaces/promise.d.ts' />
-/// <reference path='../../interfaces/freedom-social-v3.d.ts' />
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 module SocialNetworks {
   socialProvider: Freedom.social;
