@@ -65,6 +65,7 @@ function IdentityProvider() {
 
 // Either login to |network|, or try each provider.
 IdentityProvider.prototype.login = function(opts, continuation) {
+  console.log('dborkan: identity.js: IdentityProvider.prototype.login called');
   if (opts.network && this.providers[opts.network]) {
     this.providers[opts.network].ref.login(opts);
   } else if (opts.network) {
@@ -113,6 +114,8 @@ IdentityProvider.prototype.logout = function(userId, networkName, continuation) 
   for (var key in this.providers) {
     if (this.providers.hasOwnProperty(key)) {
       if ((userId == undefined && networkName == undefined) ||
+          // Freedom passes null as a string 'null', so check for that too.
+          (userId == 'null' && networkName == 'null') ||
           this.providers[key].userId == userId ||
           this.providers[key].network == networkName) {
         providerCount += 1;
