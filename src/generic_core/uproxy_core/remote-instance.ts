@@ -30,8 +30,8 @@ class RemoteInstance {
       remoteProxyState: this.remoteProxyState,
       remoteClientState: this.remoteClientState,
       instanceId: this.instanceId,
-      transport: this.transport_.getJson();
-      socialConnection: this.socialConnection_.getJson();
+      transport: this.transport_.getJson(),
+      socialConnection: this.socialConnection_.getJson()
     }
   }
 }  // class remote instance.
@@ -49,7 +49,7 @@ module RemoteInstance {
     // Json for the social connection.
     socialConnection : SocialConnection.Json;
     // Json for the transport provided by the instance.
-    trabsport : Transport.Json;
+    transport : Transport.Json;
   }
 
 

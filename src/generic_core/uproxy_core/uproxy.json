@@ -18,7 +18,7 @@
     "RtcToNet": {
       "url": "../lib/rtc-to-net/rtc-to-net.json"
     },
-    "social": {
+    "SOCIAL-websocket": {
       "url": "../lib/websocket-server/social.ws.json",
       "api": "social"
     },

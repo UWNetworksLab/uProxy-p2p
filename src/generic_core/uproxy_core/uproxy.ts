@@ -9,12 +9,12 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
+/// <reference path='social.ts' />
 /// <reference path='../../generic_ui/scripts/ui.d.ts' />
 /// <reference path='constants.d.ts' />
-// import C = Constants;
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 
 // TODO: remove these once these 'modules' become typescripted.
-declare var freedom:any;
 declare var store:any;
 declare var restrictKeys:any;
 
@@ -22,12 +22,6 @@ declare var restrictKeys:any;
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
 var bgAppPageChannel = freedom;
-
-// Channels with module interface to speak to the various providers.
-
-// Identity is a module that speaks to chat networks and does some message
-// passing to manage contacts privilages and initiate proxying.
-var social = freedom.social();
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -45,7 +39,6 @@ var server = freedom['RtcToNet']();
 var _sendInstanceQueue = [];
 var _memoizedInstanceMessage = null;
 
-
 // --------------------------------------------------------------------------
 //  General UI interaction
 // --------------------------------------------------------------------------
@@ -60,10 +53,11 @@ bgAppPageChannel.on('reset', function () { reset(); });
 // Logs out of networks and resets data.
 function reset() {
   console.log('reset');
-  social.logout(null, null);
-  store.reset(function() {
+  social.logout();
+  // TODO: convert store to use promises.
+  store.reset(() => {
     // TODO: refactor so this isn't needed.
-    console.log("reset state to: ", store.state);
+    console.log('reset state to: ', store.state);
     sendFullStateToUI();
   });
 }
@@ -78,34 +72,45 @@ bgAppPageChannel.on('ui-ready', function () {
 });
 
 // When the login moessage is sent from the extension, assume it's explicit.
-bgAppPageChannel.on('login', function(network) { login(network, true); });
-bgAppPageChannel.on('logout', function(network) { logout(network); });
+bgAppPageChannel.on('login', (network) => { Core.login(network, true); });
+bgAppPageChannel.on('logout', (network) => { Core.logout(network); });
 
-function login(network, explicit) {
-  explicit = explicit || false;
-  network = network || undefined;
-  social.login({
-    agent: 'uproxy',
-    version: '0.1',
-    url: 'https://github.com/UWNetworksLab/UProxy',
-    interactive: Boolean(network),
-    network: network
-  }, sendFullStateToUI);
-  if (network) {
-    store.state.me.networkDefaults[network].autoconnect = explicit;
+/**
+ * Primary uProxy core
+ */
+module Core {
+
+  // Access various social networks using the Social API.
+  // TODO: Enumerate all included social providers and create a network for each.
+  var networks = [];
+  networks['xmpp'] = new Social.Network('websocket');
+
+  export function login(network, explicit) {
+    explicit = explicit || false;
+    network = network || undefined;
+    social.login({  // :Social.LoginRequest
+        agent: 'uproxy',
+        version: '0.1',
+        url: 'https://github.com/UWNetworksLab/UProxy',
+        interactive: Boolean(network),
+        network: network
+    }).then(sendFullStateToUI);
+    if (undefined !== network) {
+      store.state.me.networkDefaults[network].autoconnect = explicit;
+    }
+    store.saveMeToStorage();
   }
-  store.saveMeToStorage();
-}
 
-function logout(network) {
-  social.logout(null, network);
-  // TODO: only remove clients from the network we are logging out of.
-  // Clear the clientsToInstance table.
-  store.state.clientToInstance = {};
-  store.state.instanceToClient = {};
-  _syncMappingsUI();
-  store.state.me.networkDefaults[network].autoconnect = false;
-  store.saveMeToStorage();
+  export function logout(network) {
+    social.logout(network);
+    // TODO: only remove clients from the network we are logging out of.
+    // Clear the clientsToInstance table.
+    store.state.clientToInstance = {};
+    store.state.instanceToClient = {};
+    _syncMappingsUI();
+    store.state.me.networkDefaults[network].autoconnect = false;
+    store.saveMeToStorage();
+  }
 }
 
 // Only logged in if at least one entry in identityStatus is 'online'.
@@ -219,7 +224,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
-  client.emit("start",
+  client.emit('start',
               {'host': '127.0.0.1', 'port': 9999,
                // peerId of the peer being routed to.
                'peerId': store.state.instanceToClient[peerInstanceId]});
@@ -243,7 +248,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   // TODO: Handle revoked permissions notifications.
   // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
 
-  client.emit("stop");
+  client.emit('stop');
   instance.status.proxy = C.ProxyState.OFF;
   _syncInstanceUI(instance, 'status');
 

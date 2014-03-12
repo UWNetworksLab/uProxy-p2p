@@ -15,7 +15,7 @@
  *  everything - 'setup', 'test', then 'build'
  **/
 
-var TaskManager = require("./tools/taskmanager");
+var TaskManager = require('./tools/taskmanager');
 
 module.exports = function(grunt) {
   grunt.initConfig({
@@ -159,44 +159,44 @@ module.exports = function(grunt) {
     'typescript': {
       // uProxy UI without any platform dependencies
       generic_ui: {
-        src: ["src/generic_core/core.d.ts", "src/generic_ui/**/*.ts"],
+        src: ['src/generic_core/core.d.ts', 'src/generic_ui/**/*.ts'],
         dest: 'build/generic_ui',
         options: { base_path: 'src/generic_ui/' }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ["src/generic_ui/scripts/ui.d.ts", "src/generic_core/**/*.ts"],
+        src: ['src/generic_ui/scripts/ui.d.ts', 'src/generic_core/**/*.ts'],
         dest: 'build/generic_core/',
         options: { base_path: 'src/generic_core/' }
       },
 
       // uistatic specific typescript
       uistatic: {
-        src: ["src/generic_ui/scripts/ui.d.ts",
-              "src/generic_core/core.d.ts",
-              "src/generic_ui/scripts/ui.ts",
-              "src/uistatic/scripts/dependencies.ts"],
+        src: ['src/generic_ui/scripts/ui.d.ts',
+              'src/generic_core/core.d.ts',
+              'src/generic_ui/scripts/ui.ts',
+              'src/uistatic/scripts/dependencies.ts'],
         dest: 'build/uistatic/',
       },
 
       // uProxy chrome extension specific typescript
       chrome_extension: {
-        src: ["src/chrome_extension/**/*.ts"],
+        src: ['src/chrome_extension/**/*.ts'],
         dest: 'build/chrome_extension/',
         options: { base_path: 'src/chrome_extension/' }
       },
 
       // uProxy chrome app specific typescript
       chrome_app: {
-        src: ["src/chrome_app/**/*.ts"],
+        src: ['src/chrome_app/**/*.ts'],
         dest: 'build/chrome_app/',
         options: { base_path: 'src/chrome_app/' }
       },
 
       // uProxy firefox specific typescript
       firefox: {
-        src: ["src/firefox/**/*.ts"],
+        src: ['src/firefox/**/*.ts'],
         dest: 'build/firefox/',
         options: { base_path: 'src/firefox/' }
       },
