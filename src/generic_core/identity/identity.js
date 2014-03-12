@@ -65,7 +65,6 @@ function IdentityProvider() {
 
 // Either login to |network|, or try each provider.
 IdentityProvider.prototype.login = function(opts, continuation) {
-  console.log('dborkan: identity.js: IdentityProvider.prototype.login called');
   if (opts.network && this.providers[opts.network]) {
     this.providers[opts.network].ref.login(opts);
   } else if (opts.network) {
