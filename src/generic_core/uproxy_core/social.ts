@@ -1,12 +1,44 @@
-/**
- * Wrapper around a network-specific social provider.
- */
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
+/**
+ * module Social - interactions for network-specific social providers.
+ *
+ * To add new social providers, list them as dependencies in the primary
+ * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
+ * name, and 'social' as the API.
+ *
+ * e.g.
+ *
+ *  "dependencies": {
+ *    ...
+ *    "SOCIAL-websocket": {
+ *      "url": "../lib/websocket-server/social.ws.json",
+ *      "api": "social"
+ *    },
+ *    ...
+ */
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
+  var networks:{[name:string]:freedom.Social}
+
+  /**
+   * Run through freedom keys and grab references to every social provider.
+   */
+  export function initializeNetworks() {
+    for (key in freedom) {
+      if (undefined === freedom[key].api) continue;
+      if ('social' === freedom[key].api) {
+        if (-1 == key.search(PREFIX)) {
+          console.warn('Social provider does not have ' + PREFIX + ' as prefix.');
+        } else {
+          networks[key.substring(PREFIX.length)] = new Social.Network(key);
+        }
+      }
+    }
+    console.log('Initialized ' + networks.length + ' networks.');
+  }
 
   /**
    * Social.Network - describes everything to do with one network.
@@ -14,7 +46,7 @@ module Social {
   export class Network {
     var contacts:Contact[];
     constructor(providerName:string) {
-      this.provider = freedom[PREFIX + providerName);
+      this.provider = freedom[providerName);
     }
   }
 

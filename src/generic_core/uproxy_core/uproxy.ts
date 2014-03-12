@@ -75,15 +75,13 @@ bgAppPageChannel.on('ui-ready', function () {
 bgAppPageChannel.on('login', (network) => { Core.login(network, true); });
 bgAppPageChannel.on('logout', (network) => { Core.logout(network); });
 
+
 /**
  * Primary uProxy core
  */
 module Core {
 
   // Access various social networks using the Social API.
-  // TODO: Enumerate all included social providers and create a network for each.
-  var networks = [];
-  networks['xmpp'] = new Social.Network('websocket');
 
   export function login(network, explicit) {
     explicit = explicit || false;
@@ -112,6 +110,10 @@ module Core {
     store.saveMeToStorage();
   }
 }
+
+// Prepare all the social providers from the manifest.
+Social.initializeNetworks();
+
 
 // Only logged in if at least one entry in identityStatus is 'online'.
 function iAmLoggedIn() {
