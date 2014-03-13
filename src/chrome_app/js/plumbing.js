@@ -84,15 +84,6 @@ function onExtMsg(msg) {
     installedFreedomHooks.push(msg.type);
     uProxyAppChannel.on(msg.type, function (ret) {
       extPort.postMessage({
-        cmd: 'on',
-        type: msg.type,
-        data: ret
-      });
-    });
-  } else if (msg.cmd == 'once') {
-    uProxyAppChannel.once(msg.type, function (ret) {
-      extPort.postMessage({
-        cmd: 'once',
         type: msg.type,
         data: ret
       });
