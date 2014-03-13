@@ -8,7 +8,7 @@
 /// <reference path="notify.d.ts"/>
 /// <reference path="../../generic_core/uproxy_core/core.d.ts"/>
 /// <reference path="ui.d.ts" />
-/// <reference path="../../../third_party/chrome.d.ts" />
+/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
 
 if (undefined !== UI) {
   console.error('ui.ts already included.');

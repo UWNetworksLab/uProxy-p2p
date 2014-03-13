@@ -9,7 +9,7 @@
 
 /// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
 /// <reference path="../../generic_ui/scripts/ui.d.ts"/>
-/// <reference path="../../../third_party/chrome.d.ts"/>
+/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
 
 console.log('Initializing chrome extension background page...');
 

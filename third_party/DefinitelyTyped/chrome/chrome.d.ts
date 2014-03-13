@@ -1446,6 +1446,7 @@ declare module chrome.runtime {
     
     interface Port {
         postMessage: Function;
+        disconnect: Function;  // TODO: added by Daniel
         sender?: MessageSender;
         onDisconnect: chrome.events.Event;
         onMessage: chrome.events.Event;
@@ -2404,4 +2405,19 @@ declare module chrome.windows {
     var onRemoved: WindowRemovedEvent;
     var onCreated: WindowCreatedEvent;
     var onFocusChanged: WindowFocusChangedEvent;
+}
+
+
+declare module chrome {
+    class Event {
+        addListener(callback: Function): void;
+        getRules(callback: (rules: events.Rule[]) => void): void;
+        getRules(ruleIdentifiers: string[], callback: (rules: events.Rule[]) => void): void;
+        hasListener(callback: Function): void;
+        removeRules(ruleIdentifiers?: string[], callback?: Function): void;
+        addRules(rules: events.Rule[], callback?: (rules: events.Rule[]) => void): void;
+        removeListener(callback: Function): void;
+        hasListeners(): boolean;
+        dispatch(): void;
+    }
 }

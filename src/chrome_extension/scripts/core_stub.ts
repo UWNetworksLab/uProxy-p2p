@@ -8,7 +8,7 @@
 // |options| is the options passed the runtime connection. It has a 'name'
 //   field that can be used to name the connection to the freedom component.
 
-/// <reference path="../../../third_party/chrome.d.ts"/>
+/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
 
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running
