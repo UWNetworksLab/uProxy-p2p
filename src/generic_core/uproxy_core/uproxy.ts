@@ -13,6 +13,7 @@
 /// <reference path='../../generic_ui/scripts/ui.d.ts' />
 /// <reference path='constants.d.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
 // TODO: remove these once these 'modules' become typescripted.
 declare var store:any;
@@ -198,17 +199,18 @@ bgAppPageChannel.on('notification-seen', function (userId) {
 //  Proxying
 // --------------------------------------------------------------------------
 // TODO: say not if we havn't given them permission :)
-bgAppPageChannel.on('start-using-peer-as-proxy-server',
-    function(peerInstanceId) {
+bgAppPageChannel.on(
+    'start-using-peer-as-proxy-server',
+    (peerInstanceId:string) => {
   startUsingPeerAsProxyServer(peerInstanceId);
 });
 
-bgAppPageChannel.on('stop-proxying', function(peerInstanceId) {
+bgAppPageChannel.on('stop-proxying', (peerInstanceId:string) => {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
 // peerId is a client ID.
-client.on('sendSignalToPeer', function(data) {
+client.on('sendSignalToPeer', (data:PeerSignal) => {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to client: ' + data.peerId + ", which should map to instance: " +
                     store.state.clientToInstance[data.peerId]);
@@ -219,7 +221,7 @@ client.on('sendSignalToPeer', function(data) {
 });
 
 // Make this take an actual peer object type.
-server.on('sendSignalToPeer', (data) => {
+server.on('sendSignalToPeer', (data:PeerSignal) => {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to client: ' + data.peerId);
   defaultNetwork.sendMessage(data.peerId,
@@ -227,7 +229,7 @@ server.on('sendSignalToPeer', (data) => {
 });
 
 // Begin SDP negotiations with peer. Assumes |peer| exists.
-function startUsingPeerAsProxyServer(peerInstanceId) {
+function startUsingPeerAsProxyServer = (peerInstanceId:string) => {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
@@ -259,7 +261,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
       }));
 }
 
-function stopUsingPeerAsProxyServer(peerInstanceId) {
+function stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist!');
@@ -282,6 +284,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
 }
 
 // peerconnection-client -- sent from client on other side.
+// TODO: typing for the msg so we don't get weird things like data.data... @_@
 function receiveSignalFromClientPeer(msg) {
   console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
   // sanitize from the identity service

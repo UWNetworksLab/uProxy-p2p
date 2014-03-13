@@ -144,31 +144,4 @@ module Social {
     }
   }
 
-  module Contact {
-
-    export interface Status {
-      // When a contact is online, they have a clientId, which is the ephemeral
-      // identifier for their connection to the social network.
-      online ?: {
-        clientId : string
-      }
-    }
-
-    // TODO: Isn't this described in freedom.Social.UserProfile?
-    /*
-    export interface Json {
-      // The network being connected to.
-      network :Network;
-      // User's ID on the social network (may be obfuscated, e.g. by hangouts)
-      userId :string;
-      // User's display name
-      name :string;
-      // User's homepage/URL
-      url :string;
-      // Image Data URI (e.g. data:image/png;base64,adkwe329...)
-      imageData :string;
-    }
-    */
-  }
-
 }  // module Social
