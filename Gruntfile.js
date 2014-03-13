@@ -85,7 +85,10 @@ module.exports = function(grunt) {
          dest: 'build/generic_core/lib'},
         {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['**'],
-         dest: 'build/generic_core/lib'}
+         dest: 'build/generic_core/lib'},
+        {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
+         src: ['**'],
+         dest: 'src/chrome-providers'}
       ]},
 
       // Static/independent UI. Assumes the top-level task generic_ui

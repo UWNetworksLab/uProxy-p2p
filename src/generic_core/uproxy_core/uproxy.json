@@ -7,6 +7,7 @@
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
+      "view_oauth.js",
       "uproxy.js",
       "start-uproxy.js"
     ]
@@ -25,7 +26,7 @@
     "storage": {
       "url": "../storage/storage.json",
       "api": "storage"
-    }
+    },
   },
   "permissions": [
     "core.peerconnection"
