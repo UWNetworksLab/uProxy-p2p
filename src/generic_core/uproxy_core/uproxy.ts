@@ -53,7 +53,9 @@ bgAppPageChannel.on('reset', function () { reset(); });
 // Logs out of networks and resets data.
 function reset() {
   console.log('reset');
-  social.logout();
+  for (var network in Social.networks) {
+    Social.networks[network].api.logout();
+  }
   // TODO: convert store to use promises.
   store.reset(() => {
     // TODO: refactor so this isn't needed.
@@ -83,51 +85,66 @@ module Core {
 
   // Access various social networks using the Social API.
 
-  export function login(network, explicit) {
-    explicit = explicit || false;
-    network = network || undefined;
-    social.login({  // :Social.LoginRequest
-        agent: 'uproxy',
-        version: '0.1',
-        url: 'https://github.com/UWNetworksLab/UProxy',
-        interactive: Boolean(network),
-        network: network
-    }).then(sendFullStateToUI);
-    if (undefined !== network) {
-      store.state.me.networkDefaults[network].autoconnect = explicit;
+  export function login(networkName:string, explicit:boolean=false) {
+    var network = Social.getNetwork(networkName);
+    if (null === network) {
+      console.warn('Could not login to ' + network);
+      return;
     }
+    network.api.login({  // :freedom.Social.LoginRequest
+          agent: 'uproxy',
+          version: '0.1',
+          url: 'https://github.com/UWNetworksLab/UProxy',
+          interactive: Boolean(network),
+          rememberLogin: true
+        })
+        .then(sendFullStateToUI)
+        .then(() => {
+          console.log('Successfully logged in to ' + networkName);
+        });
+
+    store.state.me.networkDefaults[networkName].autoconnect = explicit;
     store.saveMeToStorage();
   }
 
-  export function logout(network) {
-    social.logout(network);
+  export function logout(networkName:string) {
+    var network = Social.getNetwork(networkName);
+    if (null === network) {
+      console.warn('Could not logout of ' + networkName);
+      return;
+    }
+    network.api.logout().then(() => {
+      console.log('Successfully logged out of ' + networkName);
+    });
     // TODO: only remove clients from the network we are logging out of.
     // Clear the clientsToInstance table.
     store.state.clientToInstance = {};
     store.state.instanceToClient = {};
     _syncMappingsUI();
-    store.state.me.networkDefaults[network].autoconnect = false;
+    store.state.me.networkDefaults[networkName].autoconnect = false;
     store.saveMeToStorage();
   }
 }
 
 // Prepare all the social providers from the manifest.
 Social.initializeNetworks();
-
+// TODO: Remove this when we have multiple social providers 'for real'.
+var defaultNetwork = Social.networks['websocket'].api;
 
 // Only logged in if at least one entry in identityStatus is 'online'.
 function iAmLoggedIn() {
   var networks = Object.keys(store.state.identityStatus);
-  return networks.some(function(network) {
+  return networks.some((network) => {
     return 'online' == store.state.identityStatus[network].status;
   });
 }
 
-bgAppPageChannel.on('invite-friend', function (userId) {
-  social.sendMessage(userId, "Join UProxy!");
+bgAppPageChannel.on('invite-friend', (userId) => {
+  // TODO: make the invite mechanism an actual process.
+  defaultNetwork.sendMessage(userId, 'Join UProxy!');
 });
 
-bgAppPageChannel.on('echo', function (msg) {
+bgAppPageChannel.on('echo', (msg) => {
   // store.state._msgLog.push(msg);
   // bgAppPageChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
 });
@@ -155,7 +172,7 @@ bgAppPageChannel.on('update-description', function (data) {
   // Send the new description to ALL currently online friend instances.
   for (var instanceId in store.state.instances) {
     var clientId = store.state.instanceToClient[instanceId];
-    if (clientId) social.sendMessage(clientId, payload);
+    if (clientId) defaultNetwork.sendMessage(clientId, payload);
   }
 });
 
@@ -197,14 +214,15 @@ client.on('sendSignalToPeer', function(data) {
                     store.state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
-  social.sendMessage(data.peerId,
+  defaultNetwork.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-client', data: data.data}));
 });
 
-server.on('sendSignalToPeer', function(data) {
+// Make this take an actual peer object type.
+server.on('sendSignalToPeer', (data) => {
   console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
                 ', sending to client: ' + data.peerId);
-  social.sendMessage(data.peerId,
+  defaultNetwork.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
@@ -233,7 +251,7 @@ function startUsingPeerAsProxyServer(peerInstanceId) {
 
   // This is a temporary hack which makes the other end aware of your proxying.
   // TODO(uzimizu): Remove this once proxying is happening *for real*.
-  social.sendMessage(
+  defaultNetwork.sendMessage(
       store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-active-client',
@@ -255,7 +273,7 @@ function stopUsingPeerAsProxyServer(peerInstanceId) {
   _syncInstanceUI(instance, 'status');
 
   // TODO: this is also a temporary hack.
-  social.sendMessage(
+  defaultNetwork.sendMessage(
       store.state.instanceToClient[peerInstanceId],
       JSON.stringify({
           type: 'newly-inactive-client',
@@ -333,7 +351,7 @@ bgAppPageChannel.on('instance-trust-change', function (data) {
               'exist for instance ' + iId + ' - they are probably offline.');
     return false;
   }
-  social.sendMessage(clientId, JSON.stringify({type: data.action}));
+  defaultNetwork.sendMessage(clientId, JSON.stringify({type: data.action}));
   return true;
 });
 
@@ -404,7 +422,7 @@ function receiveStatus(data) {
 }
 
 // Update local user's online status (away, busy, etc.).
-social.on('onStatus', receiveStatus);
+defaultNetwork.on('onStatus', receiveStatus);
 
 // Called when a contact (or ourselves) changes state, whether being online or
 // the description.
@@ -435,7 +453,7 @@ function receiveChange(rawData) {
     console.log(e.stack);
   }
 }
-social.on('onChange', receiveChange);
+defaultNetwork.on('onChange', receiveChange);
 
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
@@ -455,7 +473,7 @@ var _msgReceivedHandlers = {
 };
 
 //
-social.on('onMessage', function (msgInfo) {
+defaultNetwork.on('onMessage', function (msgInfo) {
   // Replace the JSON str with actual data attributes, then flatten.
   msgInfo.messageText = msgInfo.message;
   delete msgInfo.message;
@@ -614,7 +632,7 @@ function sendInstance(clientId) {
     console.log('Queueing ' + clientId + ' for an instance message.');
     return false;
   }
-  social.sendMessage(clientId, instancePayload);
+  defaultNetwork.sendMessage(clientId, instancePayload);
   return true;
 }
 
@@ -631,7 +649,7 @@ function sendQueuedInstanceMessages() {
   }
   _sendInstanceQueue.forEach(function(clientId) {
     console.log('Sending previously queued instance message to: ' + clientId + '.');
-    social.sendMessage(clientId, instancePayload);
+    defaultNetwork.sendMessage(clientId, instancePayload);
   });
   _sendInstanceQueue = [];
   return true;
@@ -692,7 +710,7 @@ function sendConsent(instance) {
     instanceId: store.state.me.instanceId,            // Our own instanceId.
     consent: _determineConsent(instance.trust)  // My consent.
   });
-  social.sendMessage(clientId, consentPayload);
+  defaultNetwork.sendMessage(clientId, consentPayload);
   return true;
 }
 

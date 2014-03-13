@@ -2,7 +2,7 @@
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 /**
- * module Social - interactions for network-specific social providers.
+ * Social - interactions for network-specific social providers.
  *
  * To add new social providers, list them as dependencies in the primary
  * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
@@ -21,13 +21,18 @@
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
-  var networks:{[name:string]:freedom.Social}
+  export var networks:{[name:string]:Network}
+
+  // Serializable datastructure which only has an additional network field.
+  export interface ContactJSON extends freedom.Social.UserProfile {
+    network :string;
+  }
 
   /**
    * Run through freedom keys and grab references to every social provider.
    */
   export function initializeNetworks() {
-    for (key in freedom) {
+    for (var key in freedom) {
       if (undefined === freedom[key].api) continue;
       if ('social' === freedom[key].api) {
         if (-1 == key.search(PREFIX)) {
@@ -37,47 +42,92 @@ module Social {
         }
       }
     }
-    console.log('Initialized ' + networks.length + ' networks.');
+    console.log('Initialized ' + Object.keys(networks).length + ' networks.');
   }
 
   /**
-   * Social.Network - describes everything to do with one network.
+   * Retrieve reference to the network |networkName|.
+   */
+  export function getNetwork(networkName:string) : Network {
+    if (!(networkName in networks)) {
+      console.warn('Network does not exist: ' + networkName);
+      return null;
+    }
+    return networks[networkName];
+  }
+
+  /**
+   * Social.Network - encapsulates a single network on a social provider.
    */
   export class Network {
-    var contacts:Contact[];
-    constructor(providerName:string) {
-      this.provider = freedom[providerName);
+
+    public api       :freedom.Social;
+    public contacts  :Contact[];
+    public metadata  :any;  // Network name, description, icon, etc.
+    private provider :any;  // Special freedom object which is both a function
+                            // and contains keys. Cannot typescript-fy.
+
+    constructor(public name:string) {
+      this.provider = freedom[name];
+      this.metadata = this.provider.manifest;
+      this.api = this.provider();  // Instantiate the object.
+    }
+
+    /**
+     * Add a contact to the network.
+     */
+    public addContact = () => {
+      this.contacts[name] = new Contact(null);
     }
   }
 
+  /**
+   * Wrapper around freedom.Social.UserProfile to describe a contact and its
+   * interactions on a network.
+   */
   export class Contact {
 
-    status  :SocialContact.Status;
-    network :SocialContact.Network;
-    userId  :string;
+    public statusMessage :string;   // Optional detailed message about status.
+    public clientId :string;   // null when offline.
+    // clients :freedom.Social.Clients;  // Dict of clientId -> client
+    public profile  :ContactJSON;
+    public state    :freedom.Social.ClientState;
 
     // Create a new social connection from a json description.
-    constructor(json:SocialContact.Json) {
-      this.network = json.network;
-      this.userId = json.useId;
-      this.status = freedom.Social.Status.OFFLINE;
+    constructor(public network:Network) { //json:SocialContact.Json) {
+      // TODO: ACtually make this real.
+      this.state = {
+        userId: 'idunno',
+        clientId: 'idunno',
+        status: freedom.Social.Status.OFFLINE,
+        timestamp: Date.now()
+      }
+      this.profile = {
+        network: network.name,
+        userId: 'idunno',
+        name: 'person',
+        timestamp: Date.now()
+      }
     }
 
     /**
      * Send a message to this contact. Returns promise of the send.
      */
     send = (message:string) : Promise<void> => {
-      return new Promise((F, R) => {
-        if (freedom.Social.Status.ONLINE === this.status) {
-          freedom.social.sendMessage(online.clientId, message);
-          F();
+      return new Promise<void>((F, R) => {
+        if (freedom.Social.Status.ONLINE === this.state.status) {
+          this.network.api.sendMessage(this.clientId, message)
+              .then(F);
         } else {
-          Rt(new Error('Social Contact ' + this.userId + ' is not online.'));
+          R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
         }
       });
     }
 
-    onStatusChange = (statusChange:freedom.Social.Status) => {
+    /**
+     * Update the client. TODO: make it actually work
+     */
+    onStatusChange = (statusChange:freedom.Social.ClientState) => {
       switch (statusChange.status) {
         case freedom.Social.Status.OFFLINE:
           break;
@@ -86,36 +136,16 @@ module Social {
         case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
           break;
       }
-
-      /*
-      // Name of network this client is logged into, and userId for it.
-      network :string;
-      userId  :string;
-      // Status on the network
-      status :number;  // |status| will be an entry from STATUS.
-      statusMessage ?:string;   // Optional detailed message about status.
-      // Ephemeral client id for the network
-      clientId ?:string;
-      // Optional social network specific details
-      name ?:string;
-      url  ?:string;
-      imageData?: string;
-      */
     }
 
     // Serializable network information.
-    getJson = () : SocialContact.Json => {
-      return {
-        network: this.network,
-        userId: this.userId
-      }
+    getJson = () : freedom.Social.UserProfile => {
+      return this.profile;
     }
   }
 
   module Contact {
 
-    // TODO: Make this dynamic.
-    export enum Network { GTALK, FB, XMPP }
     export interface Status {
       // When a contact is online, they have a clientId, which is the ephemeral
       // identifier for their connection to the social network.
@@ -124,6 +154,8 @@ module Social {
       }
     }
 
+    // TODO: Isn't this described in freedom.Social.UserProfile?
+    /*
     export interface Json {
       // The network being connected to.
       network :Network;
@@ -136,4 +168,7 @@ module Social {
       // Image Data URI (e.g. data:image/png;base64,adkwe329...)
       imageData :string;
     }
+    */
   }
+
+}  // module Social

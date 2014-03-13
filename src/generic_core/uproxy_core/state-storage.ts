@@ -3,9 +3,9 @@
  * To see the format used by localstorage, see the file:
  *   scraps/local_storage_example.js
  */
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='constants.d.ts' />
 
-declare var freedom:any;
 declare var cloneDeep:any;
 declare var adjectives:any;
 declare var nouns:any;
@@ -16,7 +16,7 @@ declare var isDefined:any;
 
 // --------------------------------------------------------------------------
 function UProxyState() {
-  this.storage = freedom.storage();
+  this.storage = freedom['storage']();
   this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
 }
 
