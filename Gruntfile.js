@@ -79,16 +79,18 @@ module.exports = function(grunt) {
          src: ['freedom.js'],
          dest: 'build/generic_core/lib'},
         // TODO: update the social provider to this when ready:
-        //   https://github.com/freedomjs/freedom-social-xmpp
+        // {expand: true, cwd: 'node_modules/freedom-social-xmpp‎/node-xmpp-browser.js',
+        //  src: ['node-xmpp-browser.js'],
+        //  dest: 'build/generic_core/lib'}
         {expand: true, cwd: 'node_modules/freedom/providers/social',
          src: ['websocket-server/**'],
          dest: 'build/generic_core/lib'},
-        {expand: true, cwd: 'node_modules/socks-rtc/build/',
-         src: ['**'],
+        {expand: true, cwd: 'node_modules/socks-rtc/build/chrome-app/',
+         src: ['rtc-to-net/**'],
          dest: 'build/generic_core/lib'},
-        {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
-         src: ['**'],
-         dest: 'src/chrome-providers'}
+        {expand: true, cwd: 'node_modules/socks-rtc/build/chrome-app/',
+         src: ['socks-to-rtc/**'],
+         dest: 'build/generic_core/lib'}
       ]},
 
       // Static/independent UI. Assumes the top-level task generic_ui
@@ -125,7 +127,10 @@ module.exports = function(grunt) {
         // ... the generic core stuff
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
-         dest: 'build/chrome_app/'}
+         dest: 'build/chrome_app/'},
+        {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
+         src: ['**'],
+         dest: 'build/chrome_app/lib/freedom-providers'}
       ]},
 
       // Firefox. Assumes the top-level tasks generic_core and generic_ui
@@ -226,6 +231,7 @@ module.exports = function(grunt) {
           'build/generic_core/uproxy_core/nouns-and-adjectives.js',
           'build/generic_core/uproxy_core/constants.js',
           'build/generic_core/uproxy_core/state-storage.js',
+          'build/generic_core/uproxy_core/social.js',
           'build/generic_core/uproxy_core/uproxy.js',
           'build/generic_core/uproxy_core/start-uproxy.js'],
         options: {

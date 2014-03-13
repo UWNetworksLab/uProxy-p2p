@@ -62,7 +62,7 @@ module Social {
   export class Network {
 
     public api       :freedom.Social;
-    public contacts  :Contact[];
+    public contacts  :{[name:string]:Contact};
     public metadata  :any;  // Network name, description, icon, etc.
     private provider :any;  // Special freedom object which is both a function
                             // and contains keys. Cannot typescript-fy.
@@ -76,8 +76,8 @@ module Social {
     /**
      * Add a contact to the network.
      */
-    public addContact = () => {
-      this.contacts[name] = new Contact(null);
+    public addContact = (userid:string) => {
+      this.contacts[userid] = new Contact(null);
     }
   }
 

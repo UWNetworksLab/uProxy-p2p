@@ -12,16 +12,14 @@ class RemoteInstance {
 
   //
   transport : Transport;
-  socialConnection : SocialConnection;
+  //socialConnection : SocialConnection;
 
   //
-  constructor(data : InstanceData) {
+  constructor(data : RemoteInstance.Json) {
     function clone(x) { return JSON.parse(JSON.stringify(x)); }
     this.remoteProxyState = clone(data.remoteProxyState);
     this.remoteClientState = clone(data.remoteClientState);
     this.instanceId = clone(data.instanceId);
-    this.publicKey = clone(data.publicKey);
-    this.socialId = clone(data.socialId);
   }
 
   //
@@ -30,8 +28,8 @@ class RemoteInstance {
       remoteProxyState: this.remoteProxyState,
       remoteClientState: this.remoteClientState,
       instanceId: this.instanceId,
-      transport: this.transport_.getJson(),
-      socialConnection: this.socialConnection_.getJson()
+      transport: this.transport.getJson(),
+      //socialConnection: this.socialConnection_.getJson()
     }
   }
 }  // class remote instance.
@@ -47,7 +45,7 @@ module RemoteInstance {
     remoteClientState : Consent.ClientState;
 
     // Json for the social connection.
-    socialConnection : SocialConnection.Json;
+    //socialConnection : SocialConnection.Json;
     // Json for the transport provided by the instance.
     transport : Transport.Json;
   }
