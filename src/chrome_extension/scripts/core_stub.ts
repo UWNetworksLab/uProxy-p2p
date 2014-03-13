@@ -34,7 +34,7 @@ class CoreStub {
   private options_ :chrome.runtime.ConnectInfo;
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
-  private listeners_ :{[msgType :string] :Function[]};
+  private listeners_ :{[msgType :string] : Function[]};
   // The chrome.runtime.Port used to speak to the App/Extension running Freedom.  
   private port_ :chrome.runtime.Port;
   // Used to remember the callback we need to remove. Because we typically need
@@ -55,7 +55,7 @@ class CoreStub {
     this.currentDisconnectCallback_ = null;
   }
 
-  connect() {
+  connect() : boolean {
     if(this.status.connected) {
       // console.info('Already connected.');
       return;
@@ -126,7 +126,7 @@ class CoreStub {
   private dispatchFreedomEvent_(msg :{type :string; data :any}) {
     if (this.listeners_[msg.type]) {
       var handlers :Function[] = this.listeners_[msg.type].slice(0);
-      for (var i :number = 0; i < handlers.length; i++) {
+      for (var i = 0; i < handlers.length; i++) {
         handlers[i](msg.data)
       }
     }
