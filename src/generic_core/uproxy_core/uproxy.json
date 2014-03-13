@@ -8,6 +8,7 @@
       "constants.js",
       "state-storage.js",
       "view_oauth.js",
+      "social.js",
       "uproxy.js",
       "start-uproxy.js"
     ]

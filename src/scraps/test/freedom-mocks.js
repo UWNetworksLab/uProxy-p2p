@@ -35,10 +35,17 @@ MockChannel.prototype.emit = function (eventTypeString, value) {
   return null;
 };
 
-var freedom = new MockChannel();
-freedom.storage = function () { return new MockStorage({}); };
+function MockSocial() {}
+MockSocial.prototype.on = function() {}
+MockSocial.prototype.emit = function() {}
 
-freedom['social'] = function () { return new MockChannel(); };
+var freedom = new MockChannel();
+freedom['storage'] = function () { return new MockStorage({}); };
+var mockSocial = function () { return new MockSocial(); };
+mockSocial.api = 'social';
+mockSocial.manifest = 'I have no manifest :)';
+
+freedom['SOCIAL-websocket'] = mockSocial;
 freedom['SocksToRtc'] = function () { return new MockChannel(); };
 freedom['RtcToNet'] = function () { return new MockChannel(); };
 

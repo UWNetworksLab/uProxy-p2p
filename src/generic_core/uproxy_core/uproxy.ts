@@ -128,9 +128,10 @@ module Core {
 }
 
 // Prepare all the social providers from the manifest.
-Social.initializeNetworks();
+var networks = Social.initializeNetworks();
 // TODO: Remove this when we have multiple social providers 'for real'.
-var defaultNetwork = Social.networks['websocket'].api;
+var lol = networks['websocket'];
+var defaultNetwork = networks['websocket'].api;
 
 // Only logged in if at least one entry in identityStatus is 'online'.
 function iAmLoggedIn() {

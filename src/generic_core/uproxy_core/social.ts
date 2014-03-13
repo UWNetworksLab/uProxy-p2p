@@ -1,3 +1,4 @@
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
@@ -6,7 +7,8 @@
  *
  * To add new social providers, list them as dependencies in the primary
  * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
- * name, and 'social' as the API.
+ * name, and 'social' as the API. Then add them to the VALID_NETWORKS list
+ * below.
  *
  * e.g.
  *
@@ -21,7 +23,10 @@
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
-  export var networks:{[name:string]:Network}
+  var VALID_NETWORKS:string[] = [
+    'websocket'
+  ]
+  export var networks:{[name:string]:Network} = {}
 
   // Serializable datastructure which only has an additional network field.
   export interface ContactJSON extends freedom.Social.UserProfile {
@@ -32,17 +37,19 @@ module Social {
    * Run through freedom keys and grab references to every social provider.
    */
   export function initializeNetworks() {
-    for (var key in freedom) {
-      if (undefined === freedom[key].api) continue;
-      if ('social' === freedom[key].api) {
-        if (-1 == key.search(PREFIX)) {
-          console.warn('Social provider does not have ' + PREFIX + ' as prefix.');
-        } else {
-          networks[key.substring(PREFIX.length)] = new Social.Network(key);
-        }
-      }
-    }
+    // for (var key in freedom) {
+    VALID_NETWORKS.map((name:string) : Network => {
+      var dependency = PREFIX + name;
+      console.log(name + ' - ' + dependency);
+      if (undefined === freedom[dependency]) return;
+      console.log(freedom[dependency]);
+      if ('social' !== freedom[dependency].api) return;
+      var network = new Social.Network(name);
+      Social.networks[name] = network;
+      return new Social.Network(name);
+    });
     console.log('Initialized ' + Object.keys(networks).length + ' networks.');
+    return Social.networks;
   }
 
   /**
@@ -68,8 +75,10 @@ module Social {
                             // and contains keys. Cannot typescript-fy.
 
     constructor(public name:string) {
-      this.provider = freedom[name];
+      console.log('Initializing network ' + name);
+      this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
+      console.log('meow');
       this.api = this.provider();  // Instantiate the object.
     }
 
@@ -79,7 +88,8 @@ module Social {
     public addContact = (userid:string) => {
       this.contacts[userid] = new Contact(null);
     }
-  }
+
+  }  // class Social.Network
 
   /**
    * Wrapper around freedom.Social.UserProfile to describe a contact and its
@@ -142,6 +152,6 @@ module Social {
     getJson = () : freedom.Social.UserProfile => {
       return this.profile;
     }
-  }
+  }  // class Social.Contact
 
 }  // module Social
