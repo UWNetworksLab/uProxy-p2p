@@ -37,23 +37,23 @@ module Consent {
     // value.
     export function userIsOffering(clientState:ClientState) : boolean {
       switch(clientState){
-        case NONE:
-        case REMOTE_REQUESTED:
-        case USER_IGNORED_REQUEST:
+        case ClientState.NONE:
+        case ClientState.REMOTE_REQUESTED:
+        case ClientState.USER_IGNORED_REQUEST:
           return false;
-        case USER_OFFERED:
-        case GRANTED:
+        case ClientState.USER_OFFERED:
+        case ClientState.GRANTED:
           return true;
       }
     }
     export function remoteIsRequesting(clientState:ClientState) : boolean {
       switch(clientState){
-        case NONE:
-        case USER_OFFERED:
+        case ClientState.NONE:
+        case ClientState.USER_OFFERED:
           return false;
-        case USER_IGNORED_REQUEST:
-        case REMOTE_REQUESTED:
-        case GRANTED:
+        case ClientState.USER_IGNORED_REQUEST:
+        case ClientState.REMOTE_REQUESTED:
+        case ClientState.GRANTED:
           return true;
       }
     }
@@ -69,23 +69,23 @@ module Consent {
     // value.
     export function userIsRequesting(proxyState:ProxyState) : boolean {
       switch(proxyState){
-        case NONE:
-        case REMOTE_OFFERED:
-        case USER_IGNORED_OFFER:
+        case ProxyState.NONE:
+        case ProxyState.REMOTE_OFFERED:
+        case ProxyState.USER_IGNORED_OFFER:
           return false;
-        case USER_REQUESTED:
-        case GRANTED:
+        case ProxyState.USER_REQUESTED:
+        case ProxyState.GRANTED:
           return true;
       }
     }
     export function remoteIsOffering(proxyState:ProxyState) : boolean {
       switch(proxyState){
-        case NONE:
-        case USER_REQUESTED:
+        case ProxyState.NONE:
+        case ProxyState.USER_REQUESTED:
           return false;
-        case USER_IGNORED_OFFER:
-        case REMOTE_OFFERED:
-        case GRANTED:
+        case ProxyState.USER_IGNORED_OFFER:
+        case ProxyState.REMOTE_OFFERED:
+        case ProxyState.GRANTED:
           return true;
       }
     }
