@@ -28,8 +28,10 @@ class CoreStub {
   // A callback |function() {...}| to call when connected.
   onConnected :chrome.Event;
 
-  private id_ :string;  // TODO: comment what id means
-  private options_ :Object;  // TODO: what is the format of options?
+  // ID of Chrome App to connect to.
+  private appId_ :string;
+  // Options for connection to chrome app containing optional name param.
+  private options_ :chrome.runtime.ConnectInfo;
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
   private listeners_ :{[msgType :string] :Function[]};
@@ -42,7 +44,7 @@ class CoreStub {
   private currentDisconnectCallback_ :Function;
 
   constructor(id :string, options :Object) {
-    this.id_ = id;
+    this.appId_ = id;
     this.options_ = options;
     this.onDisconnected = new chrome.Event();
     this.onConnected = new chrome.Event();
@@ -59,7 +61,7 @@ class CoreStub {
       return;
     }
     console.info('Trying to connect to the app');
-    this.port_ = chrome.runtime.connect(this.id_, this.options_);
+    this.port_ = chrome.runtime.connect(this.appId_, this.options_);
 
     try {
       this.port_.postMessage("hi");  // message used just to check we can connect.
