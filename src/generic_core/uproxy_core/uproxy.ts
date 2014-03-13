@@ -229,7 +229,7 @@ server.on('sendSignalToPeer', (data:PeerSignal) => {
 });
 
 // Begin SDP negotiations with peer. Assumes |peer| exists.
-function startUsingPeerAsProxyServer = (peerInstanceId:string) => {
+var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
@@ -261,7 +261,7 @@ function startUsingPeerAsProxyServer = (peerInstanceId:string) => {
       }));
 }
 
-function stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
+var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist!');
