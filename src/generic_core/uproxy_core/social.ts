@@ -78,7 +78,6 @@ module Social {
       console.log('Initializing network ' + name);
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
-      console.log('meow');
       this.api = this.provider();  // Instantiate the object.
     }
 

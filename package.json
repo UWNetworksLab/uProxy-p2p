@@ -28,7 +28,7 @@
     "minimatch": "~0.2.12",
     "socks-rtc": "~0.1.3",
     "freedom-typescript-api": "~0.1.1",
-    "freedom-runtime-chrome": "~0.1.1"
+    "freedom-for-chrome": "~0.1.2"
   },
   "scripts": {
     "test": "grunt --verbose"

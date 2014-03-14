@@ -6,11 +6,13 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that core_stub.ts has been loaded.
+
 /// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
 /// <reference path="../../generic_ui/scripts/ui.d.ts"/>
+/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
+
 console.log('Initializing chrome extension background page...');
 
-declare var chrome:any;
 declare var jsonpatch:any;
 declare var UI:CUI;
 
@@ -129,9 +131,7 @@ class ChromeAppConnector implements Interfaces.ICore {
       this.appChannel.connect();
     }
     console.log('Sending message.');
-    // TODO: factor the freedom connector juice into this file and simplify
-    // the baklavaness of this code.
-    this.appChannel.emit(msgType, payload);
+    this.appChannel.sendToApp(msgType, payload);
   }
 }
 
@@ -231,7 +231,7 @@ function init(appChannel) {
   });
 
   console.log('UI <------> APP wired.');
-  appChannel.emit('ui-ready');  // Tell uproxy.js to send us a state-refresh.
+  appChannel.sendToApp('ui-ready');  // Tell uproxy.js to send us a state-refresh.
 }
 
 

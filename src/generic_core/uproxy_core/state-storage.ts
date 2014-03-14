@@ -4,7 +4,7 @@
  *   scraps/local_storage_example.js
  */
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='constants.d.ts' />
+/// <reference path='constants.ts' />
 
 declare var cloneDeep:any;
 declare var adjectives:any;

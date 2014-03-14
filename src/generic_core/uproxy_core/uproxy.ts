@@ -11,7 +11,7 @@
  */
 /// <reference path='social.ts' />
 /// <reference path='../../generic_ui/scripts/ui.d.ts' />
-/// <reference path='constants.d.ts' />
+/// <reference path='constants.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
@@ -130,7 +130,6 @@ module Core {
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
 // TODO: Remove this when we have multiple social providers 'for real'.
-var lol = networks['websocket'];
 var defaultNetwork = networks['websocket'].api;
 
 // Only logged in if at least one entry in identityStatus is 'online'.

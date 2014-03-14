@@ -400,7 +400,7 @@ module.exports = function(grunt) {
     'build_chrome_app'
   ]);
 
-    // Firefox build tasks.
+  // Firefox build tasks.
   taskManager.add('build_firefox', [
     'build_generic_ui',
     'build_generic_core',
