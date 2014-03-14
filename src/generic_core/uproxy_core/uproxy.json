@@ -27,7 +27,7 @@
     "storage": {
       "url": "../storage/storage.json",
       "api": "storage"
-    },
+    }
   },
   "permissions": [
     "core.peerconnection"

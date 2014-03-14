@@ -1,6 +1,7 @@
 /**
  * Configure Freedom
  **/
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 
 // Defined in src/chrome-providers/*.ts
 declare module TcpSocket { class Chrome {} }
