@@ -1,3 +1,5 @@
+// This file must be included *after* the freedom script and manifest are
+// loaded.
 "use strict";
 
 // The port that the extension connects to.
@@ -9,30 +11,17 @@ var pendingMsgs = [];
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
 
-// Constant
+// Constant ID of corresponding extension.
 var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
 
-// Start up freedom with data-manifest set to uproxy.json.
-// Uncomment for clearer but less portable module error messages.
-var script = document.createElement('script');
-script.setAttribute('data-manifest', 'uproxy_core/uproxy.json');
-script.textContent = '{"strongIsolation": true, "stayLocal": true, "debug": false}';
-script.src = 'lib/freedom.js';
-document.head.appendChild(script);
+//var test_script = document.createElement('script');
+//test_script.src = 'common/backend/test/sctp-peerconnection_test.js';
+//document.head.appendChild(test_script);
 
-// Once the script had loaded, uProxyAppChannel is set to freedom, which is a channel to the
-var uProxyAppChannel = null;
-script.onload = function() {
-  uProxyAppChannel = freedom;
-  uProxyAppChannel.on('ready', function() {
-    console.log('uproxy.js is ready!');
-  });
-
-  //var test_script = document.createElement('script');
-  //test_script.src = 'common/backend/test/sctp-peerconnection_test.js';
-  //document.head.appendChild(test_script);
-};
-
+var uProxyAppChannel = freedom;  // Guaranteed to exist.
+uProxyAppChannel.on('ready', function() {
+  console.log('uproxy.js is ready!');
+});
 
 // Called when an extension connects to the app.
 chrome.runtime.onConnectExternal.addListener(function(port) {
@@ -45,6 +34,7 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         port.sender.id);
     return;
   }
+  console.log('Connected to extension ' + EXTENSION_ID);
   extPort = port;  // Update to the current port.
 
   // Because there is no callback when you call runtime.connect and it
@@ -84,3 +74,5 @@ function onExtMsg(msg) {
     });
   }
 };
+
+console.log('Starting uProxy app...');

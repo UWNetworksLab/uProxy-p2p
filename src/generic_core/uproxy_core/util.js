@@ -2,6 +2,8 @@
 /* jshint -W083 */
 'use strict';
 
+console.log('starting a thing');
+
 // A little class that callbacks such that you can use it as the callback for
 // many operations, but only when the last of the operations you started is
 // completed, but the finalCallback actually get called.

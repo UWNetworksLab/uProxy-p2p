@@ -33,8 +33,10 @@ class ChromeNotifications implements INotifications {
 }
 
 
-// The app connector enables communication between this Extension and the
-// corresponding app.
+/**
+ * The app connector enables communication between this Extension and the
+ * corresponding app.
+ */
 class ChromeAppConnector implements Interfaces.ICore {
 
   UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';

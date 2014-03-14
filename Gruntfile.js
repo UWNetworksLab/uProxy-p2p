@@ -74,21 +74,17 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'src',
          src: ['icons/**'],
          dest: 'build/generic_core'},
-        // Libraries
-        {expand: true, cwd: 'node_modules/freedom/',
-         src: ['freedom.js'],
-         dest: 'build/generic_core/lib'},
         // TODO: update the social provider to this when ready:
         // {expand: true, cwd: 'node_modules/freedom-social-xmpp‎/node-xmpp-browser.js',
         //  src: ['node-xmpp-browser.js'],
         //  dest: 'build/generic_core/lib'}
-        {expand: true, cwd: 'node_modules/freedom/providers/social',
-         src: ['websocket-server/**'],
-         dest: 'build/generic_core/lib'},
-        {expand: true, cwd: 'node_modules/socks-rtc/build/chrome-app/',
+        // {expand: true, cwd: 'node_modules/freedom/providers/social',
+         // src: ['websocket-server/**'],
+         // dest: 'build/generic_core/lib'},
+        {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['rtc-to-net/**'],
          dest: 'build/generic_core/lib'},
-        {expand: true, cwd: 'node_modules/socks-rtc/build/chrome-app/',
+        {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['socks-to-rtc/**'],
          dest: 'build/generic_core/lib'}
       ]},
@@ -108,6 +104,10 @@ module.exports = function(grunt) {
 
       // Chrome extension. Assumes the top-level task generic_ui completed.
       chrome_extension: {files: [
+        // Libraries
+        {expand: true, cwd: 'node_modules/freedom-for-chrome/',
+         src: ['freedom.js'],
+         dest: 'build/chrome_extension/lib'},
         // The platform specific non-compiled stuff, and...
         {expand: true, cwd: 'src/chrome_extension',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
@@ -120,6 +120,10 @@ module.exports = function(grunt) {
 
       // Chrome app. Assumes the top-level task generic_core completed.
       chrome_app: {files: [
+        // Libraries
+        {expand: true, cwd: 'node_modules/freedom-for-chrome/',
+         src: ['freedom.js'],
+         dest: 'build/chrome_app/lib'},
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/chrome_app',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],

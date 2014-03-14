@@ -11,7 +11,7 @@
 var uproxy = this;        // Remember global uproxy context so spyOn works.
 var state = store.state;  // Depends on state-storage.js.
 
-describe("uproxy.updateUser", function() {
+describe('uproxy.updateUser', function() {
 
   // Stub out communications functions.
   beforeEach(function() {
@@ -87,7 +87,7 @@ var fakeInstanceSync = function(userId, clientId, data) {
   };
 };
 
-describe("uproxy.receiveInstance", function() {
+describe('uproxy.receiveInstance', function() {
   var instanceMsg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, {
     fromUserId: 'alice',
     fromClientId: 'alice-clientid',
@@ -269,7 +269,7 @@ var selfInstanceAndStatusMessage = {
 };
 
 /*
-describe("uproxy.state.instance", function () {
+describe('uproxy.state.instance', function () {
   // Try variants of [local state loading, network login,
   // instance ID reception].  Validate resulting state.
 
@@ -294,7 +294,7 @@ describe("uproxy.state.instance", function () {
     identity.sendMessage = sendMessageSpy;
     var completed = false;
     store.reset(function() {completed = true; });
-    waitsFor(function() { return completed; }, "Reset never returned.", 50);
+    waitsFor(function() { return completed; }, 'Reset never returned.', 50);
   });
 
   it('onState-Roster-Instance', function() {
@@ -383,7 +383,7 @@ function repeatObject(obj, num) {
   return result;
 }
 
-describe("uproxy.state.instance.fuzzer", function () {
+describe('uproxy.state.instance.fuzzer', function () {
   // Feed in randomized ordering of data, some of it bad, and make
   // sure internal validation can survive.
   var USER_STATE = {
@@ -391,10 +391,10 @@ describe("uproxy.state.instance.fuzzer", function () {
     instance: false
   };
 
-  var numbers = [ "first", "second", "third", "fourth", "fifth", "sixth",
-                  "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth",
-                  "thirteenth", "fourteenth", "fifteenth", "sixteenth",
-                  "seventeenth", "eighteenth", "nineteenth", "twentieth" ];
+  var numbers = [ 'first', 'second', 'third', 'fourth', 'fifth', 'sixth',
+                  'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth',
+                  'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth',
+                  'seventeenth', 'eighteenth', 'nineteenth', 'twentieth' ];
 
   var sendMessageSpy;
   var random_seed;
@@ -424,13 +424,13 @@ describe("uproxy.state.instance.fuzzer", function () {
     identity.sendMessage = sendMessageSpy;
     var completed = false;
     store.reset(function() {completed = true; });
-    waitsFor(function() { return completed; }, "Reset never returned.", 50);
+    waitsFor(function() { return completed; }, 'Reset never returned.', 50);
     // TODO(mollyling): Use a real random seed (e.g., the time), print it,
     // and wire-up a way to set it on test entry.
     random_seed = 1;
   });
 
-  it("keeps login at front, random single instance and roster message per user",
+  it('keeps login at front, random single instance and roster message per user',
      function() {
     var i, inst,
         states = repeatObject(USER_STATE, numbers.length),
@@ -466,8 +466,8 @@ describe("uproxy.state.instance.fuzzer", function () {
             num_attempts < MAX_ATTEMPTS);
 
     if (!check_all_instances(states, true, true)) {
-      console.warn("Didn't get all " + numbers.length +
-          " fake users with 500 tries.");
+      console.warn('Didn't get all ' + numbers.length +
+          ' fake users with 500 tries.');
     }
 
     // Now check our state.
@@ -477,7 +477,7 @@ describe("uproxy.state.instance.fuzzer", function () {
     }
   });
 
-  it("keeps login at front, and random #s of instances and roster messages",
+  it('keeps login at front, and random #s of instances and roster messages',
      function() {
     var i, inst, nm, roster_entry;
     var state_template = cloneDeep(USER_STATE);
@@ -509,7 +509,7 @@ describe("uproxy.state.instance.fuzzer", function () {
         var is_uproxy = (random_seed % 2) > 0? true: false;
         roster_entry = makeUserRosterEntry(nm, numbers[index] + 'User',
                                            !is_uproxy);
-        if (roster_entry.userId == "secondUser@gmail.com") {
+        if (roster_entry.userId == 'secondUser@gmail.com') {
           debugger;
         }
         if (do_roster) {
@@ -527,9 +527,9 @@ describe("uproxy.state.instance.fuzzer", function () {
 
     if (!check_all_instances(states, kNumMinimumRosterMessages,
                              kNumMinimumInstanceMessages)) {
-      console.warn("Didn't get all " + numbers.length +
-          " fake users with 500 tries.");
-      console.warn(" - state vector: " + states.map(function(o) {
+      console.warn('Didn't get all ' + numbers.length +
+          ' fake users with 500 tries.');
+      console.warn(' - state vector: ' + states.map(function(o) {
         return JSON.stringify(o); }).toString());
     }
 

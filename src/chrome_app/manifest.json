@@ -12,16 +12,7 @@
   },
   "app": {
     "background": {
-      "scripts": [
-        "js/manual_dialog.js",
-        "js/auth_google.js",
-        "js/auth_facebook.js",
-        "js/auth_xmpp.js",
-        "js/view_oauth.js",
-        "js/freedom-config.js",
-        "js/plumbing.js",
-        "js/background.js"
-      ]
+      "page": "uproxy.html"
     }
   },
   "permissions": [
