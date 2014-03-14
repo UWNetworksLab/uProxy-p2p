@@ -15,8 +15,6 @@
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
-console.log('uproxy ts file loading.');
-
 // TODO: remove these once these 'modules' become typescripted.
 declare var store:any;
 declare var restrictKeys:any;

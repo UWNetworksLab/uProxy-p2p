@@ -78,9 +78,9 @@ module.exports = function(grunt) {
         // {expand: true, cwd: 'node_modules/freedom-social-xmpp‎/node-xmpp-browser.js',
         //  src: ['node-xmpp-browser.js'],
         //  dest: 'build/generic_core/lib'}
-        // {expand: true, cwd: 'node_modules/freedom/providers/social',
-         // src: ['websocket-server/**'],
-         // dest: 'build/generic_core/lib'},
+        {expand: true, cwd: 'node_modules/freedom/providers/social',
+         src: ['websocket-server/**'],
+         dest: 'build/generic_core/lib'},
         {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['rtc-to-net/**'],
          dest: 'build/generic_core/lib'},

@@ -11,6 +11,9 @@
     "email" : "info@uproxy.org"
   },
   "devDependencies": {
+    "freedom": "~0.4.3",
+    "freedom-for-chrome": "~0.1.2",
+    "freedom-typescript-api": "~0.1.1",
     "glob": "~3.2.6",
     "grunt": "~0.4.2",
     "grunt-contrib-jasmine": "~0.6.1",
@@ -26,9 +29,7 @@
     "grunt-spawn": "~1.0.41",
     "grunt-shell": "~0.3.1",
     "minimatch": "~0.2.12",
-    "socks-rtc": "~0.1.4",
-    "freedom-typescript-api": "~0.1.1",
-    "freedom-for-chrome": "~0.1.2"
+    "socks-rtc": "~0.1.4"
   },
   "scripts": {
     "test": "grunt --verbose"
