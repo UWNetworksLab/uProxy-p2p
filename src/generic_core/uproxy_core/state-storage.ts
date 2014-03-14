@@ -278,6 +278,10 @@ UProxyState.prototype.saveInstance = function(instanceId, callback) {
       Object.keys(this.state[C.StateEntries.INSTANCES]),
       finalCallbacker.makeCountedCallback());
 
+  if (!(instanceId in this.state.instances)) {
+    console.warn('Attempted to save nonexisting instance: ' + instanceId);
+    return;
+  }
   var instance = this.state.instances[instanceId];
   // Be obscenely strict here, to make sure we don't propagate buggy
   // state across runs (or versions) of UProxy.
@@ -295,7 +299,7 @@ UProxyState.prototype.saveInstance = function(instanceId, callback) {
   };
   console.log('saveInstance: saving "instance/"' + instanceId + '\n',
               instanceDataToSave);
-  this._saveKeyAsJson("instance/" + instanceId, instanceDataToSave,
+  this._saveKeyAsJson('instance/' + instanceId, instanceDataToSave,
       finalCallbacker.makeCountedCallback());
 };
 

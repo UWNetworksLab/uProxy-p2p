@@ -103,7 +103,7 @@ describe("uproxy.receiveInstance", function() {
 
   beforeEach(function() {
     spyOn(store, 'syncInstanceFromInstanceMessage')
-        .andCallFake(fakeInstanceSync);
+        .and.callFake(fakeInstanceSync);
     spyOn(store, 'saveInstance');
     spyOn(uproxy, '_syncInstanceUI');
   });
