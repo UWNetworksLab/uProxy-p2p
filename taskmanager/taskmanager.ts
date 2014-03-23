@@ -67,26 +67,30 @@ module TaskManager {
 
   export class Manager {
     // Index from task name to flattened and de-duped list of subtasks.
-    taskIndex : Index = {};
+    private taskIndex_ : Index;
+
+    constructor() {
+      this.taskIndex_ = {};
+    }
 
     // Assumes all tasks are defined before being added.
     public add(name : string, subtasks : string[]) {
-      this.taskIndex[name] = subtasks;
+      this.taskIndex_[name] = subtasks;
     }
 
     public getUnflattened(name : string) {
-      if(! (name in this.taskIndex)) {
+      if(! (name in this.taskIndex_)) {
         throw(name + " is not in taskIndex.");
       }
-      return this.taskIndex[name];
+      return this.taskIndex_[name];
     }
 
     public get(name : string) {
-      return (new FlatteningState(name)).flatten(this.taskIndex);
+      return (new FlatteningState(name)).flatten(this.taskIndex_);
     }
 
     public list() {
-      return Object.keys(this.taskIndex);
+      return Object.keys(this.taskIndex_);
     }
   }  // class Manager
 
