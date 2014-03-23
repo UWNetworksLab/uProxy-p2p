@@ -95,3 +95,8 @@ module TaskManager {
   }  // class Manager
 
 }  // module TaskManager
+
+// A bit of a hack to allow this file to be compiled normally and still used by
+// commonjs-style require.
+var exports = (exports || {});
+exports.Manager = TaskManager.Manager;
