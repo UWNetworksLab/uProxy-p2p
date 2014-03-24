@@ -1,10 +1,9 @@
-// Chrome app manifest.
 {
   "manifest_version": 2,
   "name": "UProxyApp",
   "description": "Ubiquitous Proxy [Alpha]",
   "minimum_chrome_version": "31",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "icons": {
       "128": "icons/uproxy-128.png",
       "19": "icons/uproxy-19.png",
@@ -37,7 +36,7 @@
     "https://www.facebook.com/",
     "https://graph.facebook.com/"
   ],
-  "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDT20aY/lDUHQ2dpRK2htOHxHPedPT+mZujEMifUV4BA6jxQ4AuMRjriKXJiq0PpDyJFaAJG3JLxmOHeDaygp/KjgVPzeo4v0kKWHSj7GpS41C8e6glsBWnVem6DvBZ/hk0rLZ9oNlsNbvUooG4QArdVNiUvjp55Lp9x5gfyIQSWQIDAQAB",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB",
   "oauth2": {
       "client_id": "746567772449-c9fo4a4n67upif79643toqqfg6khv72j.apps.googleusercontent.com",
       "scopes": [
