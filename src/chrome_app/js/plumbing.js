@@ -10,7 +10,7 @@ var pendingMsgs = [];
 var installedFreedomHooks = [];
 
 // Constant
-var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
+var EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 window.freedomcfg = function(register) {
   register("core.view", View_oauth);
