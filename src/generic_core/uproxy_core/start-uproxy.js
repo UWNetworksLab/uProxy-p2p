@@ -7,7 +7,7 @@ var window = {};
 
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
-var store = new UProxyState();
+var store = new Core.State(); 
 
 server.emit('start');
 
