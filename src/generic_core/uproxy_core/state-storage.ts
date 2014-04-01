@@ -16,8 +16,11 @@ declare var isDefined:any;
 
 module Core {
 
-  var fStorage = freedom['storage']();
+  var fStorage = freedom['storage']();  // PLatform-independtn storage provider.
 
+  /**
+   * Wrapper for getting from storage.
+   */
   var storageGet = (key:string) : Promise<string> => {
     return new Promise<string>((F, R) => {
       fStorage.get(key).done(F);
@@ -37,6 +40,7 @@ module Core {
 
     /**
      * Resets state, and clears local storage.
+     * TODO: convert to promise.
      */
     public reset = (callback) => {
       fStorage.clear().done(() => {
@@ -47,13 +51,14 @@ module Core {
     }
 
     // --------------------------------------------------------------------------
-    // Wrapper functions for Freedom storage API to work with json instead of
-    // strings.
-    //
-    // TODO: Consider using a storage provider that works with JSON.
-    //
-    // Note: callback may be null.
-    private _loadKeyAsJson = (key, callback, defaultIfUndefined) => {
+    /**
+     * Wrapper functions for Freedom storage API to work with json instead of
+     * strings.
+     *
+     * TODO: Consider using a storage provider that works with JSON.
+     * TODO: convert to promise.
+     */
+    private loadKeyAsJson_ = (key, callback, defaultIfUndefined) => {
       storageGet(key).then((result) => {
         console.log('Loaded from storage[' + key + '] (type: ' +
                     (typeof result) + '): ' + result);
@@ -66,7 +71,7 @@ module Core {
     }
 
     // Callback may be null.
-    private _saveKeyAsJson = (key, val, callback) => {
+    private saveKeyAsJson_ = (key, val, callback?) => {
       fStorage.set(key, JSON.stringify(val)).done(callback);
     }
 
@@ -74,7 +79,7 @@ module Core {
      * If one is running UProxy for the first time, or without any available
      * instance data, generate an instance for oneself.
      */
-    private _generateMyInstance = () => {
+    private generateMyInstance_ = () => {
       var i, val, hex, id, key;
 
       var me = cloneDeep(C.DEFAULT_LOAD_STATE.me);
@@ -112,7 +117,10 @@ module Core {
       return me;
     }
 
-    // A simple predicate function to see if we can talk to this client.
+    /**
+     * A simple predicate function to see if we can talk to this client.
+     * TODO: remove with the new social presence indicators.
+     */
     public isMessageableUproxyClient = (client) => {
       return 'messageable' == client.status;
     }
@@ -120,22 +128,23 @@ module Core {
     // --------------------------------------------------------------------------
     //  Users's profile for this instance
     // --------------------------------------------------------------------------
+
     /**
      * Saving your 'me' state involves saving all fields that are state.me & that
      * are in the C.DEFAULT_SAVE_STATE.
      * TODO: Convert to promise.
      */
     public saveMeToStorage = (callback) => {
-      this._saveKeyAsJson(
+      this.saveKeyAsJson_(
           C.StateEntries.ME,
           restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me),
           callback);
     }
 
     public loadMeFromStorage = (callback) => {
-      this._loadKeyAsJson(C.StateEntries.ME, (me) => {
+      this.loadKeyAsJson_(C.StateEntries.ME, (me) => {
         if (null === me) {
-          this.state.me = this._generateMyInstance();
+          this.state.me = this.generateMyInstance_();
           this.saveMeToStorage(callback);
           console.log('****** Saving new self-definition *****');
           console.log('  state.me = ' + JSON.stringify(this.state.me));
@@ -152,14 +161,15 @@ module Core {
     //  Options
     // --------------------------------------------------------------------------
     public saveOptionsToStorage = (callback) => {
-      this._saveKeyAsJson(
+      this.saveKeyAsJson_(
           C.StateEntries.OPTIONS,
           restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options),
           callback);
     }
 
+    // TODO: convert to promise.
     public loadOptionsFromStorage = (callback) => {
-      this._loadKeyAsJson(C.StateEntries.OPTIONS, (loadedOptions) => {
+      this.loadKeyAsJson_(C.StateEntries.OPTIONS, (loadedOptions) => {
         this.state.options =
             restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
         if (callback) { callback(); }
@@ -180,19 +190,21 @@ module Core {
       return null;
     }
 
-    // Should be called whenever an instance is created/loaded.
-    // Assumes that the instance corresponding to instanceId has a userId. Although
-    // the user doens't need to currently be in the roster - this function will add
-    // to the roster if the userId is not already present.
-    public syncRosterFromInstanceId = (instanceId:string) => {
+    /**
+     * Should be called whenever an instance is created/loaded.
+     * Assumes that instance corresponding to |instanceId| has a userId.
+     * Although the user doesn't need to currently be in the roster - this
+     * function will add to the roster if the userId is not already present.
+     */
+    public syncRosterFromInstanceId = (instanceId:string) : void => {
       var instance = this.state.instances[instanceId];
       var userId = instance.rosterInfo.userId;
       var user = this.state.roster[userId];
 
       // Extrapolate the user & add to the roster.
       if (!user) {
-        // TODO: do proper reconsilisation: probably we should do a diff check, and
-        // maybe update instance.nodify.
+        // TODO: do proper reconciliation: probably do a diff check, and
+        // maybe update instance.modify.
         this.state.roster[userId] = {};
         user = this.state.roster[userId];
         user.clients = {};
@@ -204,10 +216,13 @@ module Core {
       }
     }
 
-    // Called when a new userId is available. & when a new instance
-    // happens. We check to see if we need to update our instance information.
-    // Assumes that an instacne already exists for this userId.
-    public syncInstanceFromInstanceMessage = (userId, clientId, data) => {
+    /**
+     * Called when a new userId is available, and when receiving new instances.
+     * - Check if we need to update instance information.
+     * - Assumes that instance already exists for this |userId|.
+     */
+    public syncInstanceFromInstanceMessage =
+        (userId:string, clientId:string, data) : void => {
       var instanceId = data.instanceId;
       // Some local metadata isn't transmitted.  Add it in.
       data = restrictKeys(C.DEFAULT_INSTANCE, data);
@@ -248,9 +263,13 @@ module Core {
     // --------------------------------------------------------------------------
     //  Loading & Saving Instances
     // --------------------------------------------------------------------------
-    // Note: users of this assume that the callback *will* be calld if specified.
+
+    /**
+     * Note: users of this assume that the callback *will* be calld if specified.
+     * TODO: convert to promise.
+     */
     public loadInstanceFromId = (instanceId, callback) => {
-      this._loadKeyAsJson('instance/' + instanceId, (instance) => {
+      this.loadKeyAsJson_('instance/' + instanceId, (instance) => {
         if (! instance) {
           console.error('Load error: instance ' + instanceId + ' not found');
         } else {
@@ -272,7 +291,7 @@ module Core {
       var finalCallbacker = new FinalCallback(callback);
       // Set the state |instances| from the local storage entries.
       // Load each instance in instance IDs.
-      this._loadKeyAsJson(C.StateEntries.INSTANCEIDS, (instanceIds) => {
+      this.loadKeyAsJson_(C.StateEntries.INSTANCEIDS, (instanceIds) => {
         console.log('Loading Instance IDs: ', instanceIds);
         for (var i = 0; i < instanceIds.length; i++) {
           this.loadInstanceFromId(instanceIds[i],
@@ -294,7 +313,7 @@ module Core {
     public saveInstance = (instanceId:string, callback) => {
       var finalCallbacker = new FinalCallback(callback);
       // TODO: optimise to only save when different to what was in storage;
-      this._saveKeyAsJson(C.StateEntries.INSTANCEIDS,
+      this.saveKeyAsJson_(C.StateEntries.INSTANCEIDS,
           Object.keys(this.state[C.StateEntries.INSTANCES]),
           finalCallbacker.makeCountedCallback());
 
@@ -320,7 +339,7 @@ module Core {
       };
       console.log('saveInstance: saving \'instance/\'' + instanceId,
                   instanceDataToSave);
-      this._saveKeyAsJson('instance/' + instanceId, instanceDataToSave,
+      this.saveKeyAsJson_('instance/' + instanceId, instanceDataToSave,
           finalCallbacker.makeCountedCallback());
     }
 
@@ -337,7 +356,7 @@ module Core {
       // Note that despite the fact that the instanceIds are written when we write
       // each instance, we need to write them again anyway, incase they got removed,
       // in which case we need to write the empty list.
-      this._saveKeyAsJson(C.StateEntries.INSTANCEIDS,
+      this.saveKeyAsJson_(C.StateEntries.INSTANCEIDS,
           Object.keys(this.state[C.StateEntries.INSTANCES]),
           finalCallbacker.makeCountedCallback());
     }
@@ -346,13 +365,14 @@ module Core {
     // --------------------------------------------------------------------------
     //  Whole state
     // --------------------------------------------------------------------------
+
     /**
      * Load all aspects of the state concurrently. Note: we make the callback only
      * once the last of the loading operations has completed. We do this using the
      * FinalCaller class.
      * TODO: convert to promise.
      */
-    public loadStateFromStorage = (callback) => {
+    public loadStateFromStorage = (callback?) => {
       this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
       var finalCallbacker = new FinalCallback(callback);
       this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
@@ -360,7 +380,7 @@ module Core {
       this.loadAllInstances(finalCallbacker.makeCountedCallback());
     }
 
-    public saveStateToStorage = (callback) => {
+    public saveStateToStorage = (callback?) => {
       var finalCallbacker = new FinalCallback(callback);
       this.saveMeToStorage(finalCallbacker.makeCountedCallback());
       this.saveOptionsToStorage(finalCallbacker.makeCountedCallback());
