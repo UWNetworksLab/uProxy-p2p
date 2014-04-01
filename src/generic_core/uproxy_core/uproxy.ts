@@ -58,12 +58,7 @@ function reset() {
   for (var network in Social.networks) {
     Social.networks[network].api.logout();
   }
-  // TODO: convert store to use promises.
-  store.reset(() => {
-    // TODO: refactor so this isn't needed.
-    console.log('reset state to: ', store.state);
-    sendFullStateToUI();
-  });
+  store.reset().then(sendFullStateToUI);
 }
 
 // Called from extension whenever the user clicks opens the extension popup.

@@ -36,13 +36,14 @@ module Core {
 
     /**
      * Resets state, and clears local storage.
-     * TODO: convert to promise.
      */
-    public reset = (callback) => {
-      fStorage.clear().done(() => {
+    public reset = () : Promise<void> => {
+      return new Promise<void>((F, R) => {
+        fStorage.clear().done(F);
+      }).then(() => {
         console.log('Cleared storage, now loading again...');
         this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
-        this.loadStateFromStorage(callback);
+        return this.loadStateFromStorage();
       });
     }
 
@@ -370,23 +371,22 @@ module Core {
      * Load all aspects of the state concurrently. Note: we make the callback only
      * once the last of the loading operations has completed. We do this using the
      * FinalCaller class.
-     * TODO: convert to promise.
      */
-    public loadStateFromStorage = (callback?) => {
+    public loadStateFromStorage = () : Promise<any> => {
       this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
       var loadedState: Promise<any>[] = [];
       loadedState.push(this.loadMeFromStorage());
       loadedState.push(this.loadOptionsFromStorage());
       loadedState.push(this.loadAllInstances());
-      Promise.all(loadedState).then(callback);
+      return Promise.all(loadedState);
     }
 
-    public saveStateToStorage = (callback?) => {
+    public saveStateToStorage = () : Promise<any> => {
       var savedState: Promise<any>[] = [];
       savedState.push(this.saveMeToStorage());
       savedState.push(this.saveOptionsToStorage());
       savedState.push(this.saveAllInstances());
-      Promise.all(savedState).then(callback);
+      return Promise.all(savedState);
     }
 
   }  // class State

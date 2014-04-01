@@ -73,7 +73,7 @@ describe("state-storage", function() {
   it("* Reset works just like load from C.DEFAULT_LOAD_STATE", function() {
     // reseting the state and loading should be the same as the
     // C.DEFAULT_LOAD_STATE.
-    stateStorage.reset(function() { wasResetCallbackCalled = true; });
+    stateStorage.reset().then(function() { wasResetCallbackCalled = true; });
     expect(stateStorage.state.options).toEqual(C.DEFAULT_LOAD_STATE.options);
     expect(stateStorage.state.roster).toEqual(C.DEFAULT_LOAD_STATE.roster);
     expect(stateStorage.state.instances).toEqual(C.DEFAULT_LOAD_STATE.instances);
