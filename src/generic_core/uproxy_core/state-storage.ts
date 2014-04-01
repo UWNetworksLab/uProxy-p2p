@@ -47,7 +47,8 @@ module Core {
     }
 
     // --------------------------------------------------------------------------
-    // Wrappers for Freedom storage API to work with json instead of strings.
+    // Promise-based wrappers for Freedom storage API to work with json instead
+    // of strings.
 
     /**
      * Promise loading a key from storage, as a JSON object.
@@ -146,22 +147,20 @@ module Core {
 
     /**
      * Load 'me' from storage, or generate a new instance.
-     * TODO: Convert to promise.
+     * TODO: Type loadKeyAsJson_ with the 'me' instance type.
      */
-    public loadMeFromStorage = (callback:(prev?:string)=>void) => {
-      this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
+    public loadMeFromStorage = () : Promise<any> => {
+      return this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
         if (null === me) {
           this.state.me = this.generateMyInstance_();
-          this.saveMeToStorage().then(callback);
           console.log('****** Saving new self-definition *****');
           console.log('  state.me = ' + JSON.stringify(this.state.me));
+          return this.saveMeToStorage();
         } else {
           console.log('++++++ Loaded self-definition ++++++');
           console.log('  state.me = ' + JSON.stringify(me));
           this.state.me = restrictKeys(this.state.me, me);
-          if (callback) {
-            callback();
-          }
+          return Promise.resolve(me);
         }
       });
     }
@@ -175,14 +174,10 @@ module Core {
           restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options));
     }
 
-    // TODO: convert to promise.
-    public loadOptionsFromStorage = (callback) => {
-      this.loadKeyAsJson_(C.StateEntries.OPTIONS, {}).then((loadedOptions) => {
+    public loadOptionsFromStorage = () : Promise<void> => {
+      return this.loadKeyAsJson_(C.StateEntries.OPTIONS, {}).then((loadedOptions) => {
         this.state.options =
             restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
-        if (callback) {
-          callback();
-        }
       });
     }
 
@@ -275,45 +270,37 @@ module Core {
     // --------------------------------------------------------------------------
 
     /**
-     * Note: users of this assume that the callback *will* be calld if specified.
-     * TODO: convert to promise.
+     * Promise the load of an :Instance corresponding to |instanceId|.
      */
-    public loadInstanceFromId = (instanceId:string, callback) => {
-      this.loadKeyAsJson_<Instance>('instance/' + instanceId, null)
+    public loadInstanceFromId = (instanceId:string) : Promise<Instance> => {
+      return this.loadKeyAsJson_<Instance>('instance/' + instanceId, null)
           .then((instance:Instance) => {
         if (!instance) {
-          console.error('Load error: instance ' + instanceId + ' not found');
+          return Promise.reject(new Error(
+              'Load error: instance ' + instanceId + ' not found.'));
         } else {
           console.log('instance ' + instanceId + ' loaded');
           instance.status = cloneDeep(C.DEFAULT_PROXY_STATUS);
           this.state.instances[instanceId] = instance;
           this.syncRosterFromInstanceId(instanceId);
         }
-        if(callback) { callback(); }
+        return Promise.resolve(instance);
       });
     }
 
     /**
      * Load all instances from storage. Takes in a FinalCallbacker to make sure
      * that the desired callback is called when the last instance is loaded.
-     * TODO: convert to promise.
      */
-    public loadAllInstances = (callback) => {
-      var finalCallbacker = new FinalCallback(callback);
-      // Set the state |instances| from the local storage entries.
-      // Load each instance in instance IDs.
-      this.loadKeyAsJson_<string[]>(C.StateEntries.INSTANCEIDS, [])
+    public loadAllInstances = () : Promise<Instance[]> => {
+      return this.loadKeyAsJson_<string[]>(C.StateEntries.INSTANCEIDS, [])
           .then((instanceIds:string[]) => {
-        console.log('Loading Instance IDs: ', instanceIds);
-        for (var i = 0; i < instanceIds.length; i++) {
-          this.loadInstanceFromId(instanceIds[i],
-              finalCallbacker.makeCountedCallback());
-        }
-      });
-
-      // There has to be at least one callback.
-      var atLeastOneCountedCallback = finalCallbacker.makeCountedCallback();
-      if (atLeastOneCountedCallback) atLeastOneCountedCallback();
+            var loadedInstances: Promise<Instance>[] = [];
+            console.log('Loading Instance IDs: ', instanceIds);
+            // Load each instance in instance IDs.
+            loadedInstances = instanceIds.map(this.loadInstanceFromId);
+            return Promise.all(loadedInstances);
+          });
     }
 
     /**
@@ -387,10 +374,11 @@ module Core {
      */
     public loadStateFromStorage = (callback?) => {
       this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
-      var finalCallbacker = new FinalCallback(callback);
-      this.loadMeFromStorage(finalCallbacker.makeCountedCallback());
-      this.loadOptionsFromStorage(finalCallbacker.makeCountedCallback());
-      this.loadAllInstances(finalCallbacker.makeCountedCallback());
+      var loadedState: Promise<any>[] = [];
+      loadedState.push(this.loadMeFromStorage());
+      loadedState.push(this.loadOptionsFromStorage());
+      loadedState.push(this.loadAllInstances());
+      Promise.all(loadedState).then(callback);
     }
 
     public saveStateToStorage = (callback?) => {
