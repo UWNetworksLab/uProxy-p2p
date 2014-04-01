@@ -13,7 +13,7 @@ describe("state-storage", function() {
   var exampleState = TESTDATA_EXAMPLE_STATE;
   var exampleSavedState = TESTDATA_EXAMPLE_SAVED_STATE;
 
-  var stateStorage = new UProxyState();
+  var stateStorage = new Core.State();
 
   it("* Example states are not null", function() {
     expect(exampleState).not.toBe(null);

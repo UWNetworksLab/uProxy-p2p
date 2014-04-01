@@ -4,6 +4,7 @@
  *   scraps/local_storage_example.js
  */
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='constants.ts' />
 
 declare var cloneDeep:any;
@@ -26,7 +27,7 @@ module Core {
   /**
    * Contains all state for uProxy's core.
    */
-  class State {
+  export class State {
 
     public state: any;
 
