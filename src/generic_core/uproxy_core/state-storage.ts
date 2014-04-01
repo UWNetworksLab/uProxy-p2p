@@ -13,19 +13,15 @@ declare var FinalCallback:any;
 declare var restrictKeys:any;
 declare var isDefined:any;
 
+// TODO: Fully type the 'instance', move into a .d.ts file, and utilize
+// throughout the rest of uProxy.
+interface Instance {
+  status: string;
+}
 
 module Core {
 
   var fStorage = freedom['storage']();  // PLatform-independtn storage provider.
-
-  /**
-   * Wrapper for getting from storage.
-   */
-  var storageGet = (key:string) : Promise<string> => {
-    return new Promise<string>((F, R) => {
-      fStorage.get(key).done(F);
-    });
-  }
 
   /**
    * Contains all state for uProxy's core.
@@ -51,21 +47,24 @@ module Core {
     }
 
     // --------------------------------------------------------------------------
+    // Wrappers for Freedom storage API to work with json instead of strings.
+
     /**
-     * Wrapper functions for Freedom storage API to work with json instead of
-     * strings.
+     * Promise loading a key from storage, as a JSON object.
+     * Use Generic <T> to indicate the type of the returned object.
      *
      * TODO: Consider using a storage provider that works with JSON.
-     * TODO: convert to promise.
      */
-    private loadKeyAsJson_ = (key, callback, defaultIfUndefined) => {
-      storageGet(key).then((result) => {
+    private loadKeyAsJson_ = <T>(key, defaultIfUndefined?) : Promise<T> => {
+      return new Promise<string>((F, R) => {
+        fStorage.get(key).done(F);
+      }).then((result) => {
         console.log('Loaded from storage[' + key + '] (type: ' +
                     (typeof result) + '): ' + result);
         if (isDefined(result)) {
-          callback(JSON.parse(result));
+          return Promise.resolve(JSON.parse(result));
         } else {
-          callback(defaultIfUndefined);
+          return Promise.resolve(defaultIfUndefined);
         }
       });
     }
@@ -141,8 +140,12 @@ module Core {
           callback);
     }
 
+    /**
+     * Load 'me' from storage, or generate a new instance.
+     * TODO: Convert to promise.
+     */
     public loadMeFromStorage = (callback) => {
-      this.loadKeyAsJson_(C.StateEntries.ME, (me) => {
+      this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
         if (null === me) {
           this.state.me = this.generateMyInstance_();
           this.saveMeToStorage(callback);
@@ -154,7 +157,7 @@ module Core {
           this.state.me = restrictKeys(this.state.me, me);
           if(callback) { callback(); }
         }
-      }, null);
+      });
     }
 
     // --------------------------------------------------------------------------
@@ -169,11 +172,13 @@ module Core {
 
     // TODO: convert to promise.
     public loadOptionsFromStorage = (callback) => {
-      this.loadKeyAsJson_(C.StateEntries.OPTIONS, (loadedOptions) => {
+      this.loadKeyAsJson_(C.StateEntries.OPTIONS, {}).then((loadedOptions) => {
         this.state.options =
             restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
-        if (callback) { callback(); }
-      }, {});
+        if (callback) {
+          callback();
+        }
+      });
     }
 
     // --------------------------------------------------------------------------
@@ -268,9 +273,10 @@ module Core {
      * Note: users of this assume that the callback *will* be calld if specified.
      * TODO: convert to promise.
      */
-    public loadInstanceFromId = (instanceId, callback) => {
-      this.loadKeyAsJson_('instance/' + instanceId, (instance) => {
-        if (! instance) {
+    public loadInstanceFromId = (instanceId:string, callback) => {
+      this.loadKeyAsJson_<Instance>('instance/' + instanceId, null)
+          .then((instance:Instance) => {
+        if (!instance) {
           console.error('Load error: instance ' + instanceId + ' not found');
         } else {
           console.log('instance ' + instanceId + ' loaded');
@@ -279,7 +285,7 @@ module Core {
           this.syncRosterFromInstanceId(instanceId);
         }
         if(callback) { callback(); }
-      }, null);
+      });
     }
 
     /**
@@ -291,13 +297,14 @@ module Core {
       var finalCallbacker = new FinalCallback(callback);
       // Set the state |instances| from the local storage entries.
       // Load each instance in instance IDs.
-      this.loadKeyAsJson_(C.StateEntries.INSTANCEIDS, (instanceIds) => {
+      this.loadKeyAsJson_<string[]>(C.StateEntries.INSTANCEIDS, [])
+          .then((instanceIds:string[]) => {
         console.log('Loading Instance IDs: ', instanceIds);
         for (var i = 0; i < instanceIds.length; i++) {
           this.loadInstanceFromId(instanceIds[i],
               finalCallbacker.makeCountedCallback());
         }
-      }, []);
+      });
 
       // There has to be at least one callback.
       var atLeastOneCountedCallback = finalCallbacker.makeCountedCallback();
