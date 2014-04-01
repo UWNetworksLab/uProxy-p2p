@@ -11,7 +11,7 @@
     "email" : "info@uproxy.org"
   },
   "devDependencies": {
-    "freedom": "0.1.0"
+    "freedom": "0.1.0",
     "glob": "~3.2.6",
     "globule": "~0.2.0",
     "grunt": "~0.4.2",
@@ -30,7 +30,7 @@
     "grunt-typescript": "~0.2.7",
     "minimatch": "~0.2.12",
     "rimraf": "~2.2.6",
-    "typescript": "~0.9.7",
+    "typescript": "~0.9.7"
   },
   "scripts": {
     "test": "grunt --verbose"
