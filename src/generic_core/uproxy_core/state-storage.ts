@@ -69,9 +69,14 @@ module Core {
       });
     }
 
-    // Callback may be null.
-    private saveKeyAsJson_ = (key, val, callback?) => {
-      fStorage.set(key, JSON.stringify(val)).done(callback);
+    /**
+     * Promise saving a key-value pair to storage, fulfilled with the previous
+     * value of |key| if it existed (according to the freedom interface.)
+     */
+    private saveKeyAsJson_ = (key:string, val:any) : Promise<string>=> {
+      return new Promise<string>((F, R) => {
+        fStorage.set(key, JSON.stringify(val)).done(F);
+      });
     }
 
     /**
@@ -131,31 +136,32 @@ module Core {
     /**
      * Saving your 'me' state involves saving all fields that are state.me & that
      * are in the C.DEFAULT_SAVE_STATE.
-     * TODO: Convert to promise.
+     * TODO: Fulfill with a conversion from string to the instance type.
      */
-    public saveMeToStorage = (callback) => {
-      this.saveKeyAsJson_(
+    public saveMeToStorage = () : Promise<string> => {
+      return this.saveKeyAsJson_(
           C.StateEntries.ME,
-          restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me),
-          callback);
+          restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me));
     }
 
     /**
      * Load 'me' from storage, or generate a new instance.
      * TODO: Convert to promise.
      */
-    public loadMeFromStorage = (callback) => {
+    public loadMeFromStorage = (callback:(prev?:string)=>void) => {
       this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
         if (null === me) {
           this.state.me = this.generateMyInstance_();
-          this.saveMeToStorage(callback);
+          this.saveMeToStorage().then(callback);
           console.log('****** Saving new self-definition *****');
           console.log('  state.me = ' + JSON.stringify(this.state.me));
         } else {
           console.log('++++++ Loaded self-definition ++++++');
           console.log('  state.me = ' + JSON.stringify(me));
           this.state.me = restrictKeys(this.state.me, me);
-          if(callback) { callback(); }
+          if (callback) {
+            callback();
+          }
         }
       });
     }
@@ -163,11 +169,10 @@ module Core {
     // --------------------------------------------------------------------------
     //  Options
     // --------------------------------------------------------------------------
-    public saveOptionsToStorage = (callback) => {
-      this.saveKeyAsJson_(
+    public saveOptionsToStorage = () : Promise<string> => {
+      return this.saveKeyAsJson_(
           C.StateEntries.OPTIONS,
-          restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options),
-          callback);
+          restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options));
     }
 
     // TODO: convert to promise.
@@ -312,26 +317,27 @@ module Core {
     }
 
     /**
-     * Save the instance to local storage. Assumes that both the Instance
-     * notification and XMPP user and client information exist and are up-to-date.
+     * Promise that |instance| for |instanceId| is saved to local storage.
+     * Assumes that both the Instance notification and XMPP user and client
+     * information exist and are up-to-date.
+     *
      * |instanceId| - string instance identifier (a 40-char hex string)
-     * TODO: convert to promise.
      */
-    public saveInstance = (instanceId:string, callback) => {
-      var finalCallbacker = new FinalCallback(callback);
-      // TODO: optimise to only save when different to what was in storage;
-      this.saveKeyAsJson_(C.StateEntries.INSTANCEIDS,
-          Object.keys(this.state[C.StateEntries.INSTANCES]),
-          finalCallbacker.makeCountedCallback());
-
+    public saveInstance = (instanceId:string) : Promise<any> => {
       if (!(instanceId in this.state.instances)) {
         console.warn('Attempted to save nonexisting instance: ' + instanceId);
         return;
       }
+      // TODO: optimise to only save when different to what was in storage;
+      var savedKeys: Promise<string>[] = [];
+      savedKeys.push(this.saveKeyAsJson_(
+          C.StateEntries.INSTANCEIDS,
+          Object.keys(this.state[C.StateEntries.INSTANCES])));
+
       var instance = this.state.instances[instanceId];
       // Be obscenely strict here, to make sure we don't propagate buggy
       // state across runs (or versions) of UProxy.
-      // TODO: make this a type.
+      // TODO: make this a type!
       var instanceDataToSave = {
         // Instance stuff:
         // annotation: getKeyWithDefault(instanceInfo, 'annotation',
@@ -346,26 +352,26 @@ module Core {
       };
       console.log('saveInstance: saving \'instance/\'' + instanceId,
                   instanceDataToSave);
-      this.saveKeyAsJson_('instance/' + instanceId, instanceDataToSave,
-          finalCallbacker.makeCountedCallback());
+      savedKeys.push(this.saveKeyAsJson_(
+          'instance/' + instanceId,
+          instanceDataToSave));
+      return Promise.all(savedKeys);
     }
 
     /**
      * Save all instances to local storage.
-     * TODO: convert to promise.
      */
-    public saveAllInstances = (callback) => {
-      var finalCallbacker = new FinalCallback(callback);
-      for(var instanceId in this.state.instances) {
-        this.saveInstance(instanceId,
-            finalCallbacker.makeCountedCallback());
-      }
+    public saveAllInstances = () : Promise<string[]> => {
+      // Promise the saving of each instance.
+      var savedInstances: Promise<any>[] = [];
+      savedInstances = Object.keys(this.state.instances).map(this.saveInstance);
       // Note that despite the fact that the instanceIds are written when we write
       // each instance, we need to write them again anyway, incase they got removed,
       // in which case we need to write the empty list.
-      this.saveKeyAsJson_(C.StateEntries.INSTANCEIDS,
-          Object.keys(this.state[C.StateEntries.INSTANCES]),
-          finalCallbacker.makeCountedCallback());
+      savedInstances.push(this.saveKeyAsJson_(
+          C.StateEntries.INSTANCEIDS,
+          Object.keys(this.state[C.StateEntries.INSTANCES])));
+      return Promise.all(savedInstances);
     }
 
 
@@ -388,10 +394,11 @@ module Core {
     }
 
     public saveStateToStorage = (callback?) => {
-      var finalCallbacker = new FinalCallback(callback);
-      this.saveMeToStorage(finalCallbacker.makeCountedCallback());
-      this.saveOptionsToStorage(finalCallbacker.makeCountedCallback());
-      this.saveAllInstances(finalCallbacker.makeCountedCallback());
+      var savedState: Promise<any>[] = [];
+      savedState.push(this.saveMeToStorage());
+      savedState.push(this.saveOptionsToStorage());
+      savedState.push(this.saveAllInstances());
+      Promise.all(savedState).then(callback);
     }
 
   }  // class State

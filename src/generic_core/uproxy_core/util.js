@@ -5,7 +5,7 @@
 // A little class that callbacks such that you can use it as the callback for
 // many operations, but only when the last of the operations you started is
 // completed, but the finalCallback actually get called.
-// TODO: Shouldn't this just be replaced with promises?
+// TODO: Replace this with promise.all
 function FinalCallback(finalCallback) {
   this.callsWaiting = 0;
   this.finalCallback = finalCallback;
