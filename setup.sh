@@ -27,11 +27,15 @@ echo "ROOT_DIR=$ROOT_DIR"
 echo "PRG=$PRG"
 
 if ! which grunt >/dev/null; then
-  npm install -g grunt
+  echo "The global 'grunt' command needs installation.  Try:"
+  echo "sudo npm install -g grunt"
+  exit 1
 fi
 
 if ! which bower >/dev/null; then
-  npm install -g bower
+  echo "The global 'bower' command needs installation.  Try:"
+  echo "sudo npm install -g bower"
+  exit 1
 fi
 
 runcmd() {
