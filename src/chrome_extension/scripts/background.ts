@@ -39,7 +39,8 @@ class ChromeNotifications implements INotifications {
  */
 class ChromeAppConnector implements Interfaces.ICore {
 
-  UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+  //UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
+  UPROXY_CHROME_APP_ID:string = 'fmdppkkepalnkeommjadgbhiohihdhii';
   appChannel = null;
   // isConnected:boolean = false;
 

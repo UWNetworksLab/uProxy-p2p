@@ -1,6 +1,6 @@
 {
   "name": "__MSG_appName__",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
   "minimum_chrome_version": "31",
@@ -33,8 +33,8 @@
     "proxy",
     "https://apis.google.com/"
   ],
-  "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCYcdjD0H0HL8DVcv1+r/e8WyOs4HCakDBlS4scDTopMT7h6AzA6DIacwmLME+jxti4W7lZn32RUdb885/67BJ+4vjTpm+hgC8Oi0AcScyZNtJBygkFI3NNc8Ssm8vaIQxeYAKOHkdw8Jo0yE/6MvLXdEatj3AkQ8Qd2O2LQNF8rwIDAQAB",
   "options_page": "options.html",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOOsgNK52HYy9483rhgsofyHTp/NbmXkpHNLoarN027kqKVPS3U36/L2XyPJOAtvy+DDR+kCro1JmdFWBwPAk5AqvSKvfLzuXkO+98T/3ZhqfAl4KIqc0C+PsWIYsANTAbKkXlP4bATEK6O5Mq0aItAHGLSmKoNrAAVrtxmETXaumcrq78amOpAZz7XrPdJVhrHd6uQbR90WeFEe8LBOqdnA4iKeuMI9IQdDLKGSizhYFZP78HKSk0ZY2uYeJFpya0iXAvbcuHRGY9/c7pP5UDo+FExdyrgJnIt7H1W5LWfy/mAMnR77dvCSfGX1vCD7faWntYvzZO4FlISh+h21+QIDAQAB",
   "oauth2": {
     "client_id": "746567772449-k9rvi4arejtdi9dkjl97lomfn74iqdum.apps.googleusercontent.com",
     "scopes": [

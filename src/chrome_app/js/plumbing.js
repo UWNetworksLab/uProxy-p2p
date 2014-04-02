@@ -12,7 +12,7 @@ var pendingMsgs = [];
 var installedFreedomHooks = [];
 
 // Constant ID of corresponding extension.
-var EXTENSION_ID = 'opedeinldpclhihojdgahbpjnndkfmhe';
+var EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 //var test_script = document.createElement('script');
 //test_script.src = 'common/backend/test/sctp-peerconnection_test.js';

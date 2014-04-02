@@ -55,7 +55,7 @@ class CoreStub {
     this.currentDisconnectCallback_ = null;
   }
 
-  connect() : boolean {
+  public connect() : boolean {
     if(this.status.connected) {
       // console.info('Already connected.');
       return;
@@ -81,7 +81,7 @@ class CoreStub {
   }
 
   // Send message to app.
-  sendToApp(type :string, data ?:any) {
+  public sendToApp(type :string, data ?:any) {
     if (!this.status.connected) {
       console.error('Cannot call |sendToApp| on a disconnected CoreStub.');
       return;
@@ -100,7 +100,7 @@ class CoreStub {
 
   // Add the listener callback to be called when we get events of type |t|
   // from freedom.
-  on(type :string, listener :Function) {
+  public on(type :string, listener :Function) {
     if (!this.status.connected) {
       console.error('Cannot call |on| on a disconnected CoreStub.');
       return;

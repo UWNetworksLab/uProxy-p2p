@@ -173,14 +173,14 @@ module.exports = function(grunt) {
       generic_ui: {
         src: ['src/generic_core/core.d.ts', 'src/generic_ui/**/*.ts'],
         dest: 'build/generic_ui',
-        options: { base_path: 'src/generic_ui/' }
+        options: { basePath: 'src/generic_ui/' }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
         src: ['src/generic_ui/scripts/ui.d.ts', 'src/generic_core/**/*.ts'],
         dest: 'build/generic_core/',
-        options: { base_path: 'src/generic_core/' }
+        options: { basePath: 'src/generic_core/' }
       },
 
       // uistatic specific typescript
@@ -196,21 +196,21 @@ module.exports = function(grunt) {
       chrome_extension: {
         src: ['src/chrome_extension/**/*.ts'],
         dest: 'build/chrome_extension/',
-        options: { base_path: 'src/chrome_extension/' }
+        options: { basePath: 'src/chrome_extension/' }
       },
 
       // uProxy chrome app specific typescript
       chrome_app: {
         src: ['src/chrome_app/**/*.ts'],
         dest: 'build/chrome_app/',
-        options: { base_path: 'src/chrome_app/' }
+        options: { basePath: 'src/chrome_app/' }
       },
 
       // uProxy firefox specific typescript
       firefox: {
         src: ['src/firefox/**/*.ts'],
         dest: 'build/firefox/',
-        options: { base_path: 'src/firefox/' }
+        options: { basePath: 'src/firefox/' }
       },
     },
 
