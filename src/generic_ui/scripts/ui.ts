@@ -7,6 +7,7 @@
 
 /// <reference path="notify.d.ts"/>
 /// <reference path="../../generic_core/uproxy_core/core.d.ts"/>
+/// <reference path='../../interfaces/commands.d.ts' />
 /// <reference path="ui.d.ts" />
 /// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
 
