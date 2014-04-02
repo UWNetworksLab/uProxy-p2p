@@ -21,10 +21,17 @@
 declare var store :Core.State;
 declare var restrictKeys :any;
 
-// TODO: refactor such that this reflects the UI interface.
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
 var bgAppPageChannel = freedom;
+
+/**
+ * Install a handler for a command from the UI.
+ */
+function onCommand(cmd :uProxy.Command, handler:any) {
+  // TODO: Figure out cleaner way to make freedom handle enums-as-strings
+  bgAppPageChannel.on('' + cmd, handler);
+}
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -46,12 +53,12 @@ var _memoizedInstanceMessage = null;
 //  General UI interaction
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
-  console.log("sending sendFullStateToUI state-change.", store.state);
+  console.log('sending sendFullStateToUI state-change.', store.state);
   bgAppPageChannel.emit('state-refresh', store.state);
 }
 
 // Define freedom bindings.
-bgAppPageChannel.on('reset', function () { reset(); });
+onCommand(uProxy.Command.RESET, reset);
 
 // Logs out of networks and resets data.
 function reset() {
@@ -65,15 +72,15 @@ function reset() {
 // Called from extension whenever the user clicks opens the extension popup.
 // The intent is to reset its model - but this may or may not always be
 // necessary. Improvements to come.
-bgAppPageChannel.on('ui-ready', function () {
+onCommand(uProxy.Command.READY, () => {
   console.log('ui-ready');
   console.log('state: ', store.state);
   sendFullStateToUI();  // Send the extension the full state.
 });
 
 // When the login moessage is sent from the extension, assume it's explicit.
-bgAppPageChannel.on('login', (network) => { Core.login(network, true); });
-bgAppPageChannel.on('logout', (network) => { Core.logout(network); });
+onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
+onCommand(uProxy.Command.LOGOUT, (network) => { Core.logout(network); });
 
 
 /**
@@ -205,12 +212,12 @@ function iAmLoggedIn() {
   });
 }
 
-bgAppPageChannel.on('invite-friend', (userId) => {
+onCommand(uProxy.Command.INVITE, (userId) => {
   // TODO: make the invite mechanism an actual process.
   defaultNetwork.sendMessage(userId, 'Join UProxy!');
 });
 
-bgAppPageChannel.on('change-option', function (data) {
+onCommand(uProxy.Command.CHANGE_OPTION, function (data) {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage();
   console.log('saved options ' + JSON.stringify(store.state.options));
@@ -220,7 +227,7 @@ bgAppPageChannel.on('change-option', function (data) {
 });
 
 // Updating our own UProxy instance's description.
-bgAppPageChannel.on('update-description', function (data) {
+onCommand(uProxy.Command.UPDATE_DESCRIPTION, function (data) {
   store.state.me.description = data;  // UI side already up-to-date.
 
   // TODO(uzimizu): save to storage
@@ -238,7 +245,7 @@ bgAppPageChannel.on('update-description', function (data) {
 });
 
 // Updating our own UProxy instance's description.
-bgAppPageChannel.on('notification-seen', function (userId) {
+onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
   var user = store.state.roster[userId];
   if (!user) {
     console.error('User ' + userId + ' does not exist!');
@@ -259,13 +266,12 @@ bgAppPageChannel.on('notification-seen', function (userId) {
 //  Proxying
 // --------------------------------------------------------------------------
 // TODO: say not if we havn't given them permission :)
-bgAppPageChannel.on(
-    'start-using-peer-as-proxy-server',
+onCommand(uProxy.Command.START_PROXYING,
     (peerInstanceId:string) => {
   startUsingPeerAsProxyServer(peerInstanceId);
 });
 
-bgAppPageChannel.on('stop-proxying', (peerInstanceId:string) => {
+onCommand(uProxy.Command.STOP_PROXYING, (peerInstanceId:string) => {
   stopUsingPeerAsProxyServer(peerInstanceId);
 });
 
@@ -389,6 +395,7 @@ function handleInactiveClient(msg) {
 //  Trust
 // --------------------------------------------------------------------------
 // action -> target trust level.
+// TODO: Remove once the new consent stuff is in.
 var TrustOp = {
   // If Alice |action|'s Bob, then Bob acts as the client.
   'allow': C.Trust.YES,
@@ -404,7 +411,7 @@ var TrustOp = {
 // The user clicked on something to change the trust w.r.t. another user.
 // Update trust level for an instance, and maybe send a messahe to the client
 // for the instance that we changed.
-bgAppPageChannel.on('instance-trust-change', function (data) {
+onCommand(uProxy.Command.MODIFY_CONSENT, (data) => {
   var iId = data.instanceId;
   // Set trust level locally, then notify through XMPP if possible.
   _updateTrust(data.instanceId, data.action, false);  // received = false
@@ -470,6 +477,7 @@ function receiveTrustMessage(msgInfo) {
 //
 function receiveStatus(data) {
   console.log('onStatus: ' + JSON.stringify(data));
+  // TODO: Remove after typing.
   data = restrictKeys(C.DEFAULT_STATUS, data);
   // userId is only specified when connecting or online.
   if (data.userId.length) {
@@ -824,7 +832,7 @@ function receiveUpdateDescription(msg) {
   return true;
 }
 
-bgAppPageChannel.on('send-instance', function(clientId) {
+onCommand(uProxy.Command.SEND_INSTANCE, (clientId) => {
   Core.sendInstance(clientId);
 });
 

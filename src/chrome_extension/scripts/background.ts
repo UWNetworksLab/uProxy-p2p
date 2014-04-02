@@ -80,17 +80,17 @@ class ChromeAppConnector implements Interfaces.ICore {
 
   reset() {
     console.log('Resetting.');
-    this._send('reset', null);
+    this._send(uProxy.Command.RESET, null);
   }
 
   sendInstance(clientId) {
     // console.log('Sending instance ID to ' + clientId);
-    this._send('send-instance', clientId);
+    this._send(uProxy.Command.SEND_INSTANCE, clientId);
   }
 
   modifyConsent(instanceId, action) {
     console.log('Modifying consent.', instanceId);
-    this._send('instance-trust-change',
+    this._send(uProxy.Command.MODIFY_CONSENT,
       {
         instanceId: instanceId,
         action: action
@@ -100,36 +100,40 @@ class ChromeAppConnector implements Interfaces.ICore {
 
   start(instanceId) {
     console.log('Starting to proxy through ' + instanceId);
-    this._send('start-using-peer-as-proxy-server', instanceId);
+    this._send(uProxy.Command.START_PROXYING, instanceId);
   }
 
   stop(instanceId) {
     console.log('Stopping proxy through ' + instanceId);
-    this._send('stop-proxying', instanceId);
+    this._send(uProxy.Command.STOP_PROXYING, instanceId);
   }
 
   updateDescription(description) {
     console.log('Updating description to ' + description);
-    this._send('update-description', description);
+    this._send(uProxy.Command.UPDATE_DESCRIPTION, description);
   }
   changeOption(option) {
     console.log('Changing option ' + option);
+    // this._send(uProxy.Command.CHANGE_OPTION, option);
   }
 
   login(network) {
-    this._send('login', network);
+    this._send(uProxy.Command.LOGIN, network);
   }
 
   logout(network) {
-    this._send('logout', network);
+    this._send(uProxy.Command.LOGOUT, network);
   }
 
   notificationSeen(userId) {
-    this._send('notification-seen', userId);
+    this._send(uProxy.Command.DISMISS_NOTIFICATION, userId);
   }
 
-  // Send message to the connected app.
-  _send(msgType, payload) {
+  /**
+   * Send a :uProxy.Command to the connected app, in response to any user
+   * interaction.
+   */
+  _send(msgType :uProxy.Command, payload :any) {
     if (!this.appChannel.status.connected) {
       this.appChannel.connect();
     }

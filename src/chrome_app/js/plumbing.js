@@ -19,7 +19,7 @@ var EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 //document.head.appendChild(test_script);
 
 var uProxyAppChannel = freedom;  // Guaranteed to exist.
-uProxyAppChannel.on('ready', function() {
+uProxyAppChannel.on(uProxy.Command.READY, function() {
   console.log('uproxy.js is ready!');
 });
 

@@ -8,7 +8,8 @@
 // |options| is the options passed the runtime connection. It has a 'name'
 //   field that can be used to name the connection to the freedom component.
 
-/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
+/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
+/// <reference path='../../interfaces/commands.d.ts' />
 
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running
@@ -64,10 +65,10 @@ class CoreStub {
     this.port_ = chrome.runtime.connect(this.appId_, this.options_);
 
     try {
-      this.port_.postMessage("hi");  // message used just to check we can connect.
+      this.port_.postMessage('hi');  // message used just to check we can connect.
       this.status.connected = true;
     } catch (e) {
-      console.log("Tried to say hi to app, but failed.");
+      console.log('Tried to say hi to app, but failed.');
       this.status.connected = false;
       this.port_ = null;
       return false;
@@ -81,7 +82,7 @@ class CoreStub {
   }
 
   // Send message to app.
-  public sendToApp(type :string, data ?:any) {
+  public sendToApp(type :uProxy.Command, data ?:any) {
     if (!this.status.connected) {
       console.error('Cannot call |sendToApp| on a disconnected CoreStub.');
       return;
@@ -93,7 +94,7 @@ class CoreStub {
         data: data
       });
     } catch (e) {
-      console.warn("sendToApp: postMessage Failed. Disconnecting.");
+      console.warn('sendToApp: postMessage Failed. Disconnecting.');
       this.onDisconnectedInternal_();
     }
   }
@@ -116,7 +117,7 @@ class CoreStub {
         type: type
       });
     } catch (e) {
-      console.warn("on: postMessage Failed. Disconnecting.");
+      console.warn('on: postMessage Failed. Disconnecting.');
       this.onDisconnectedInternal_();
     }
   }
