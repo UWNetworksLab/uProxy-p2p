@@ -9,7 +9,7 @@
 
 /* jshint debug: true */
 var uproxy = this;        // Remember global uproxy context so spyOn works.
-var state = store.state;  // Depends on state-storage.js.
+var state = Core.Store;   // Depends on state-storage.ts.
 
 describe('uproxy.updateUser', function() {
 
