@@ -81,6 +81,9 @@ module Core {
     private saveKeyAsJson_ = (key:string, val:any) : Promise<string>=> {
       return new Promise<string>((F, R) => {
         fStorage.set(key, JSON.stringify(val)).done(F);
+      }).then((val:string) => {
+        console.log('Saved to storage[' + key + ']. old val=' + val);
+        return val;
       });
     }
 
@@ -144,7 +147,6 @@ module Core {
      * TODO: Fulfill with a conversion from string to the instance type.
      */
     public saveMeToStorage = () : Promise<string> => {
-      console.log('Saving me to storage.');
       return this.saveKeyAsJson_(
           C.StateEntries.ME,
           restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me));
@@ -295,8 +297,11 @@ module Core {
         // a type mismatch with the Promise.reject above. Cannot get rid of this
         // type error and make the tests work until there's a right
         // implementation of the promise shim.
-        // return Promise.resolve(instance);
-        return instance;
+        // Actually, es6-promises are just wrong, and don't correctly do
+        // Promise.all or anything like that, either. So we'll hold off on all
+        // of this.
+        // return instance;
+        return Promise.resolve(instance);
       });
     }
 
@@ -357,7 +362,11 @@ module Core {
       savedKeys.push(this.saveKeyAsJson_(
           'instance/' + instanceId,
           instanceDataToSave));
-      return Promise.all(savedKeys);
+      console.log('omg saved keys??? ' + savedKeys);
+      // TODO: This won't work in jasmine currently :(
+      return Promise.all(savedKeys).then(() => {
+        console.log('Saved instance ' + instanceId);
+      });
     }
 
     /**
