@@ -171,14 +171,14 @@ module.exports = function(grunt) {
     'typescript': {
       // uProxy UI without any platform dependencies
       generic_ui: {
-        src: ['src/generic_core/core.d.ts', 'src/generic_ui/**/*.ts'],
+        src: ['src/generic_ui/**/*.ts'],
         dest: 'build/generic_ui',
         options: { basePath: 'src/generic_ui/' }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ['src/generic_ui/scripts/ui.d.ts', 'src/generic_core/**/*.ts'],
+        src: ['src/generic_core/**/*.ts'],
         dest: 'build/generic_core/',
         options: { basePath: 'src/generic_core/' }
       },
@@ -230,6 +230,7 @@ module.exports = function(grunt) {
       generic_core: {
         // Files being tested
         src: [
+          'external_lib/promise-3.2.0.js',
           'src/scraps/test/freedom-mocks.js',
           'build/generic_core/uproxy_core/util.js',
           'build/generic_core/uproxy_core/nouns-and-adjectives.js',

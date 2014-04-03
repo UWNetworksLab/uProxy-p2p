@@ -7,13 +7,13 @@ var window = {};
 
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
-var store = new UProxyState();
+var store = new Core.State();
 
 server.emit('start');
 
 // Load state from storage and when done login to relevant networks and
 // emit an total state update.
-store.loadStateFromStorage(function () {
+store.loadStateFromStorage().then(function () {
   for(var network in store.state.me.networkDefaults) {
     if (store.state.me.networkDefaults[network].autoconnect) {
       login(network, true);

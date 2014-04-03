@@ -10,6 +10,7 @@
  *  - Instances, which is a list of active UProxy installs.
  */
 /// <reference path='social.ts' />
+/// <reference path='state-storage.ts' />
 /// <reference path='../../generic_ui/scripts/ui.d.ts' />
 /// <reference path='constants.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
@@ -17,8 +18,8 @@
 /// <reference path='../../interfaces/commands.d.ts' />
 
 // TODO: remove these once these 'modules' become typescripted.
-declare var store:any;
-declare var restrictKeys:any;
+declare var store :Core.State;
+declare var restrictKeys :any;
 
 // TODO: refactor such that this reflects the UI interface.
 // The channel to speak to the UI part of uproxy. The UI is running from the
@@ -58,12 +59,7 @@ function reset() {
   for (var network in Social.networks) {
     Social.networks[network].api.logout();
   }
-  // TODO: convert store to use promises.
-  store.reset(() => {
-    // TODO: refactor so this isn't needed.
-    console.log('reset state to: ', store.state);
-    sendFullStateToUI();
-  });
+  store.reset().then(sendFullStateToUI);
 }
 
 // Called from extension whenever the user clicks opens the extension popup.
@@ -86,7 +82,6 @@ bgAppPageChannel.on('logout', (network) => { Core.logout(network); });
 module Core {
 
   // Access various social networks using the Social API.
-
   export function login(networkName:string, explicit:boolean=false) {
     var network = Social.getNetwork(networkName);
     if (null === network) {
@@ -126,7 +121,77 @@ module Core {
     store.state.me.networkDefaults[networkName].autoconnect = false;
     store.saveMeToStorage();
   }
-}
+
+  /**
+   * Send a notification about my instance data to a particular clientId.
+   * Assumes |client| corresponds to a valid uProxy instance, but does not assume
+   * that we've received the other side's instance data yet.
+   */
+  export function sendInstance(clientId) {
+    var instancePayload = makeMyInstanceMessage();
+    console.log('sendInstance -> ' + clientId, instancePayload);
+    // Queue clientIDs if we're not ready to send instance message.
+    if (!instancePayload) {
+      _sendInstanceQueue.push(clientId);
+      console.log('Queueing ' + clientId + ' for an instance message.');
+      return false;
+    }
+    defaultNetwork.sendMessage(clientId, instancePayload);
+    return true;
+  }
+
+  /**
+   * Primary handler for synchronizing Instance data. Updates an instance-client
+   * mapping, and emit state-changes to the UI. In no case will this function fail
+   * to generate or update an entry of the instance table.
+   * TODO: support instance being on multiple chat networks.
+   * Note: does not assume that a roster entry exists for the user that send the
+   * instance data. Sometimes we get an instance data message from user that is
+   * not (yet) in the roster.
+   * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
+   */
+  export function receiveInstance(rawMsg) : Promise<void> {
+    console.log('receiveInstance from ' + rawMsg.fromUserId);
+
+    var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
+    msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+    msg.data.rosterInfo = restrictKeys(
+        C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
+
+    var instanceId  = msg.data.instanceId;
+    var userId      = msg.fromUserId;
+    var clientId    = msg.fromClientId;
+
+    // Update the local instance information.
+    store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
+    return store.saveInstance(instanceId).then(() => {
+      console.log('saved');
+      // Intended JSONpatch operation.
+      // TODO: remove jsonpatch
+      var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
+      // If we've had relationships to this instance, send them our consent bits.
+      if (instanceOp == 'replace') {
+        sendConsent(store.state.instances[instanceId]);
+      }
+      // Update UI's view of instances and mapping.
+      // TODO: This can probably be made smaller.
+      _syncInstanceUI(store.state.instances[instanceId]);
+      _syncMappingsUI();
+    });
+  }
+
+  // Helper to consolidate syncing the instance on the UI side.
+  // TODO: Convert into an actual interface-specific update type.
+  export function _syncInstanceUI(instance, field?) {
+    if (!instance) {
+      console.error('Cannot sync with null instance.');
+    }
+    var fieldStr = field? '/' + field : '';
+    _SyncUI('/instances/' + instance.instanceId + fieldStr,
+            field? instance[field] : instance);
+  }
+
+}  // module Core
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
@@ -243,7 +308,7 @@ var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = C.ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
-  _syncInstanceUI(instance, 'status');
+  Core._syncInstanceUI(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
@@ -273,7 +338,7 @@ var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
 
   client.emit('stop');
   instance.status.proxy = C.ProxyState.OFF;
-  _syncInstanceUI(instance, 'status');
+  Core._syncInstanceUI(instance, 'status');
 
   // TODO: this is also a temporary hack.
   defaultNetwork.sendMessage(
@@ -312,7 +377,7 @@ function handleNewlyActiveClient(msg) {
   console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
   instance.status.client = C.ProxyState.RUNNING;
-  _syncInstanceUI(instance, 'status');
+  Core._syncInstanceUI(instance, 'status');
 }
 
 function handleInactiveClient(msg) {
@@ -323,7 +388,7 @@ function handleInactiveClient(msg) {
     return;
   }
   instance.status.client = C.ProxyState.OFF;
-  _syncInstanceUI(instance, 'status');
+  Core._syncInstanceUI(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
@@ -379,7 +444,7 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   store.saveInstance(instanceId);
-  _syncInstanceUI(instance, 'trust');
+  Core._syncInstanceUI(instance, 'trust');
   console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
@@ -467,7 +532,7 @@ var _msgReceivedHandlers = {
     'cancel-request': receiveTrustMessage,
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
-    'notify-instance': receiveInstance,
+    'notify-instance': Core.receiveInstance,
     'notify-consent': receiveConsent,
     'update-description': receiveUpdateDescription,
     'peerconnection-server' : receiveSignalFromServerPeer,
@@ -524,8 +589,9 @@ function updateSelf(data) {
 //
 // |newData| - Incoming JSON info for a single user. Assumes to have been
 //             restricted to DEFAULT_ROSTER_ENTRY already.
+// TODO: Use types!!
 function updateUser(newData) {
-  console.log('<--- XMPP(friend) [' + newData.name + ']\n', newData);
+  console.log('<--- XMPP(friend) [' + newData.name + ']', newData);
   var userId = newData.userId,
       userOp = 'replace',
       existingUser = store.state.roster[userId];
@@ -578,7 +644,7 @@ function _checkUProxyClientSynchronization(client) {
     // Set the instance mapping to null as opposed to undefined, to indicate
     // that we know the client is pending its corresponding instance data.
     store.state.clientToInstance[clientId] = null;
-    sendInstance(clientId);
+    Core.sendInstance(clientId);
   }
   return true;
 }
@@ -624,22 +690,6 @@ function makeMyInstanceMessage() {
   return JSON.stringify(result);
 }
 
-// Send a notification about my instance data to a particular clientId.
-// Assumes |client| corresponds to a valid UProxy instance, but does not assume
-// that we've received the other side's Instance data yet.
-function sendInstance(clientId) {
-  var instancePayload = makeMyInstanceMessage();
-  console.log('sendInstance -> ' + clientId, instancePayload);
-  // Queue clientIDs if we're not ready to send instance message.
-  if (!instancePayload) {
-    _sendInstanceQueue.push(clientId);
-    console.log('Queueing ' + clientId + ' for an instance message.');
-    return false;
-  }
-  defaultNetwork.sendMessage(clientId, instancePayload);
-  return true;
-}
-
 // Only called when we receive an onChange notification for ourselves for the
 // first time, to send pending instance messages.
 function sendQueuedInstanceMessages() {
@@ -659,45 +709,6 @@ function sendQueuedInstanceMessages() {
   return true;
 }
 
-
-
-// Primary handler for synchronizing Instance data. Updates an instance-client
-// mapping, and emit state-changes to the UI. In no case will this function fail
-// to generate or update an entry of the instance table.
-// TODO: support instance being on multiple chat networks.
-// Note: does not assume that a roster entry exists for the user that send the
-// instance data. Sometimes we get an instance data message from user that is
-// not (yet) in the roster.
-// |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
-function receiveInstance(rawMsg) {
-  console.log('receiveInstance from ' + rawMsg.fromUserId);
-
-  var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-  msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-  msg.data.rosterInfo = restrictKeys(
-      C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
-
-  var instanceId  = msg.data.instanceId;
-  var userId      = msg.fromUserId;
-  var clientId    = msg.fromClientId;
-  var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
-
-  // Update the local instance information.
-  store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
-  store.saveInstance(instanceId);
-
-  // Intended JSONpatch operation.
-  // If we've had relationships to this instance, send them our consent bits.
-  if (instanceOp == 'replace') {
-    sendConsent(store.state.instances[instanceId]);
-  }
-
-  // Update UI's view of instances and mapping.
-  // TODO: This can probably be made smaller.
-  _syncInstanceUI(store.state.instances[instanceId]);
-  _syncMappingsUI();
-  return true;
-}
 
 // Send consent bits to re-synchronize consent with remote |instance|.
 // This happens *after* receiving an instance notification for an instance which
@@ -744,7 +755,7 @@ function receiveConsent(msg) {
     _addNotification(instanceId);
   }
   store.saveInstance(instanceId);
-  _syncInstanceUI(instance, 'trust');
+  Core._syncInstanceUI(instance, 'trust');
   return true;
 }
 
@@ -784,7 +795,7 @@ function _addNotification(instanceId) {
   }
   instance.notify = true;
   store.saveInstance(instanceId);
-  _syncInstanceUI(instance, 'notify');
+  Core._syncInstanceUI(instance, 'notify');
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
@@ -799,7 +810,7 @@ function _removeNotification(instanceId) {
   }
   instance.notify = false;
   store.saveInstance(instanceId);
-  _syncInstanceUI(instance, 'notify');
+  Core._syncInstanceUI(instance, 'notify');
   return true;
 }
 
@@ -815,12 +826,12 @@ function receiveUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  _syncInstanceUI(instance, 'description');
+  Core._syncInstanceUI(instance, 'description');
   return true;
 }
 
 bgAppPageChannel.on('send-instance', function(clientId) {
-  sendInstance(clientId);
+  Core.sendInstance(clientId);
 });
 
 // --------------------------------------------------------------------------
@@ -834,12 +845,7 @@ function _SyncUI(path, value, op?) {
       value: value
   }]);
 }
-// Helper to consolidate syncing the instance on the UI side.
-function _syncInstanceUI(instance, field?) {
-  var fieldStr = field? '/' + field : '';
-  _SyncUI('/instances/' + instance.instanceId + fieldStr,
-          field? instance[field] : instance);
-}
+
 
 function _syncMappingsUI() {
   bgAppPageChannel.emit('state-change', [

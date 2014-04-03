@@ -1,5 +1,5 @@
 {
-  "name": "uProxy UI",
+  "name": "uProxy",
   "version": "0.1.4",
   "dependencies": {
     "angular": "1.2.0-rc.2",
