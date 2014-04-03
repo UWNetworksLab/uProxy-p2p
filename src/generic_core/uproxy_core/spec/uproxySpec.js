@@ -7,17 +7,18 @@
  * requirement and ensures consistency.
  */
 
-/* jshint debug: true */
-var uproxy = this;        // Remember global uproxy context so spyOn works.
-var state = Core.Store;   // Depends on state-storage.ts.
-
 describe('uproxy.updateUser', function() {
+
+  var uproxy = this;        // Remember global uproxy context so spyOn works.
+  var store = new Core.State();
+  var state = store.state;   // Depends on state-storage.ts.
 
   // Stub out communications functions.
   beforeEach(function() {
     spyOn(uproxy, 'sendInstance');
   });
 
+  // TODO: Fix async.
   it('does add user to roster.', function() {
     // Add a normal, non-UProxy client user.
     var normalAlice = {
@@ -118,9 +119,11 @@ describe('uproxy.receiveInstance', function() {
     expect(uproxy._syncInstanceUI).toHaveBeenCalledWith(fakeInstance);
   });
 
-  it('sends consent message for a pre-existing instance', function() {
+  it('sends consent message for a pre-existing instance', function(done) {
     spyOn(uproxy, 'sendConsent');
-    receiveInstance(instanceMsg);
+    x = receiveInstance(instanceMsg);
+    console.log(x);
+    x.then(done);
     var fakeInstance = state.instances['12345'];
     expect(uproxy.sendConsent).toHaveBeenCalledWith(fakeInstance);
   });

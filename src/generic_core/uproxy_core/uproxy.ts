@@ -655,7 +655,6 @@ function sendQueuedInstanceMessages() {
 }
 
 
-
 // Primary handler for synchronizing Instance data. Updates an instance-client
 // mapping, and emit state-changes to the UI. In no case will this function fail
 // to generate or update an entry of the instance table.
@@ -664,7 +663,7 @@ function sendQueuedInstanceMessages() {
 // instance data. Sometimes we get an instance data message from user that is
 // not (yet) in the roster.
 // |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
-function receiveInstance(rawMsg) {
+function receiveInstance(rawMsg) : Promise<void> {
   console.log('receiveInstance from ' + rawMsg.fromUserId);
 
   var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
@@ -679,7 +678,7 @@ function receiveInstance(rawMsg) {
 
   // Update the local instance information.
   store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
-  store.saveInstance(instanceId);
+  var saved = store.saveInstance(instanceId);
 
   // Intended JSONpatch operation.
   // If we've had relationships to this instance, send them our consent bits.
@@ -691,7 +690,7 @@ function receiveInstance(rawMsg) {
   // TODO: This can probably be made smaller.
   _syncInstanceUI(store.state.instances[instanceId]);
   _syncMappingsUI();
-  return true;
+  return saved;
 }
 
 // Send consent bits to re-synchronize consent with remote |instance|.

@@ -65,9 +65,11 @@ module Core {
         console.log('Loaded from storage[' + key + '] (type: ' +
                     (typeof result) + '): ' + result);
         if (isDefined(result)) {
-          return Promise.resolve(JSON.parse(result));
+          // return Promise.resolve(JSON.parse(result));
+          return <T>JSON.parse(result);
         } else {
-          return Promise.resolve(defaultIfUndefined);
+          // return Promise.resolve(defaultIfUndefined);
+          return <T>defaultIfUndefined;
         }
       });
     }
@@ -142,6 +144,7 @@ module Core {
      * TODO: Fulfill with a conversion from string to the instance type.
      */
     public saveMeToStorage = () : Promise<string> => {
+      console.log('Saving me to storage.');
       return this.saveKeyAsJson_(
           C.StateEntries.ME,
           restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me));
@@ -162,7 +165,7 @@ module Core {
           console.log('++++++ Loaded self-definition ++++++');
           console.log('  state.me = ' + JSON.stringify(me));
           this.state.me = restrictKeys(this.state.me, me);
-          return Promise.resolve(me);
+          return me;  //Promise.resolve(me);
         }
       });
     }
@@ -286,7 +289,14 @@ module Core {
           this.state.instances[instanceId] = instance;
           this.syncRosterFromInstanceId(instanceId);
         }
-        return Promise.resolve(instance);
+        // TODO: to get jasmine tests to work, we need to use es6-promises.
+        // Except es6-promises don't seem to propogte returned Promises
+        // correctly, so we just return the object here. Except this then causes
+        // a type mismatch with the Promise.reject above. Cannot get rid of this
+        // type error and make the tests work until there's a right
+        // implementation of the promise shim.
+        // return Promise.resolve(instance);
+        return instance;
       });
     }
 
@@ -300,8 +310,11 @@ module Core {
             var loadedInstances: Promise<Instance>[] = [];
             console.log('Loading Instance IDs: ', instanceIds);
             // Load each instance in instance IDs.
-            loadedInstances = instanceIds.map(this.loadInstanceFromId);
-            return Promise.all(loadedInstances);
+            loadedInstances = instanceIds.map((id) => { return this.loadInstanceFromId(id); });
+            return Promise.all(loadedInstances).then(() => {
+              console.log('Loaded ' + loadedInstances.length + ' instances.');
+              return loadedInstances;
+            });
           });
     }
 
@@ -373,21 +386,25 @@ module Core {
      * once the last of the loading operations has completed. We do this using the
      * FinalCaller class.
      */
-    public loadStateFromStorage = () : Promise<any> => {
+    public loadStateFromStorage = () : Promise<void> => {
       this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
       var loadedState: Promise<any>[] = [];
       loadedState.push(this.loadMeFromStorage());
       loadedState.push(this.loadOptionsFromStorage());
       loadedState.push(this.loadAllInstances());
-      return Promise.all(loadedState);
+      return Promise.all(loadedState).then(() => {
+        console.log('Finished loading state from storage.');
+      });
     }
 
-    public saveStateToStorage = () : Promise<any> => {
+    public saveStateToStorage = () : Promise<void> => {
       var savedState: Promise<any>[] = [];
       savedState.push(this.saveMeToStorage());
       savedState.push(this.saveOptionsToStorage());
       savedState.push(this.saveAllInstances());
-      return Promise.all(savedState);
+      return Promise.all(savedState).then(() => {
+        console.log('Finished saving state to storage.');
+      });;
     }
 
   }  // class State

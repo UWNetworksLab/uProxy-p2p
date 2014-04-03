@@ -230,6 +230,7 @@ module.exports = function(grunt) {
       generic_core: {
         // Files being tested
         src: [
+          'external_lib/promise-3.2.0.js',
           'src/scraps/test/freedom-mocks.js',
           'build/generic_core/uproxy_core/util.js',
           'build/generic_core/uproxy_core/nouns-and-adjectives.js',
