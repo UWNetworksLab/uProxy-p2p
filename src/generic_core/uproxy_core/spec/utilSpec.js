@@ -21,48 +21,6 @@ describe("util", function() {
     });
   });
 
-  describe("FinalCallback", function() {
-    it("Should handle multiple callbacks", function() {
-      var x = 0;
-      function upX () { x++; }
-      var finalCallbacker = new FinalCallback(upX);
-      var cb1 = finalCallbacker.makeCountedCallback();
-      var cb2 = finalCallbacker.makeCountedCallback();
-      var cb3 = finalCallbacker.makeCountedCallback();
-
-      expect(x).toEqual(0);
-      cb1();
-      expect(x).toEqual(0);
-      cb3();
-      expect(x).toEqual(0);
-      cb2();
-      expect(x).toEqual(1);
-    });
-
-    it("Can be nested", function() {
-      var x = 0;
-      function upX () { x++; }
-      var finalCallbacker = new FinalCallback(upX);
-      var cb1 = finalCallbacker.makeCountedCallback();
-      var cb2 = finalCallbacker.makeCountedCallback();
-      var cb3 = finalCallbacker.makeCountedCallback();
-
-      var finalCallbacker2 = new FinalCallback(cb2);
-      var cb4 = finalCallbacker2.makeCountedCallback();
-      var cb5 = finalCallbacker2.makeCountedCallback();
-
-      expect(x).toEqual(0);
-      cb1();
-      expect(x).toEqual(0);
-      cb5();
-      expect(x).toEqual(0);
-      cb3();
-      expect(x).toEqual(0);
-      cb4();
-      expect(x).toEqual(1);
-    });
-  });
-
   describe("restrictKeys", function() {
     it("Simple test", function() {
       var x = { a: 1, b: 2, c: {e: 3, f: 4} };

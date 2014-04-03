@@ -2,33 +2,6 @@
 /* jshint -W083 */
 'use strict';
 
-// A little class that callbacks such that you can use it as the callback for
-// many operations, but only when the last of the operations you started is
-// completed, but the finalCallback actually get called.
-// TODO: This has mostly been replaced by promise.all. Remove this once verified
-// that the new stuff works.
-function FinalCallback(finalCallback) {
-  this.callsWaiting = 0;
-  this.finalCallback = finalCallback;
-  if(finalCallback && (typeof finalCallback != 'function')) {
-    throw 'FinalCallback: given a non-function: ' + finalCallback;
-  }
-}
-
-FinalCallback.prototype.makeCountedCallback = function () {
-  if(!this.finalCallback) { return null; }
-  // A way to make sure that we only call the callback once, and that
-  // it happens only for the last callback. Assumes: callbacks happen
-  // in call order.
-  this.callsWaiting++;
-  return this._oneOfManyCallbacks.bind(this);
-};
-
-FinalCallback.prototype._oneOfManyCallbacks = function () {
-  this.callsWaiting--;
-  if (!this.callsWaiting) this.finalCallback();
-};
-
 function linear_congruence_gen(prior) {
   return (1 + prior * 16807) % 2147483647;
 }
@@ -42,6 +15,7 @@ function list_erase(list, obj_to_remove) {
   }
 }
 
+// TODO: Remove this once everything is already typed.
 // Creates an object |o| that has only the keys from |template|.
 // For each key 'k', o[k] has the corresponding value from |input| if the key
 // exists, otherwise the default value from |template|.
@@ -152,6 +126,7 @@ function getKeyWithDefault(object, key, def) {
 }
 
 /**
+ * TODO: Replace with the faster regex one from sas-rtc.
  * This function extracts the cryptographic key used to encrypt the data media
  * type (mid:data) from the provided sdp headers string. If no key can be
  * determined, this function returns null.
