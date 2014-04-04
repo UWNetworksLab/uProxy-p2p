@@ -17,6 +17,27 @@
 
 var TaskManager = require('./tools/taskmanager');
 
+// TODO: Move more file lists here.
+var FILES = {
+  jasminehelper: [
+    // Help Jasmine's PhantomJS understand promises.
+    'node_modules/es6-promise/dist/promise-*.js',
+    '!node_modules/es6-promise/dist/promise-*amd.js',
+    '!node_modules/es6-promise/dist/promise-*.min.js'
+  ],
+  jasminesrc: [
+    // Required files for testing.
+    'src/scraps/test/freedom-mocks.js',
+    'build/generic_core/uproxy_core/util.js',
+    'build/generic_core/uproxy_core/nouns-and-adjectives.js',
+    'build/generic_core/uproxy_core/constants.js',
+    'build/generic_core/uproxy_core/state-storage.js',
+    'build/generic_core/uproxy_core/social.js',
+    'build/generic_core/uproxy_core/uproxy.js',
+    'build/generic_core/uproxy_core/start-uproxy.js'
+  ],
+};
+
 module.exports = function(grunt) {
   grunt.initConfig({
     'pkg': grunt.file.readJSON('package.json'),
@@ -229,17 +250,8 @@ module.exports = function(grunt) {
     'jasmine': {
       generic_core: {
         // Files being tested
-        src: [
-          // 'external_lib/promise-3.2.0.js',
-          'node_modules/es6-promise/dist/promise-0.1.1.min.js',
-          'src/scraps/test/freedom-mocks.js',
-          'build/generic_core/uproxy_core/util.js',
-          'build/generic_core/uproxy_core/nouns-and-adjectives.js',
-          'build/generic_core/uproxy_core/constants.js',
-          'build/generic_core/uproxy_core/state-storage.js',
-          'build/generic_core/uproxy_core/social.js',
-          'build/generic_core/uproxy_core/uproxy.js',
-          'build/generic_core/uproxy_core/start-uproxy.js'],
+        src: FILES.jasminehelper
+              .concat(FILES.jasminesrc),
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
