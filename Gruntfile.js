@@ -242,7 +242,7 @@ module.exports = function(grunt) {
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
-          specs: 'src/generic_core/uproxy_core/spec/*Spec.js',
+          specs: 'src/generic_core/uproxy_core/**/*.spec.js',
           keepRunner: true,
           outfile: 'test_output/_SpecRunner.html'
         }
