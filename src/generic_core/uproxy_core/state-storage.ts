@@ -82,7 +82,7 @@ module Core {
       return new Promise<string>((F, R) => {
         fStorage.set(key, JSON.stringify(val)).done(F);
       }).then((val:string) => {
-        console.log('Saved to storage[' + key + ']. old val=' + val);
+        // console.log('Saved to storage[' + key + ']. old val=' + val);
         return val;
       });
     }
@@ -330,17 +330,16 @@ module Core {
      *
      * |instanceId| - string instance identifier (a 40-char hex string)
      */
-    public saveInstance = (instanceId:string) : Promise<any> => {
+    public saveInstance = (instanceId:string) : Promise<void> => {
       if (!(instanceId in this.state.instances)) {
         console.warn('Attempted to save nonexisting instance: ' + instanceId);
-        return;
+        return Promise.reject();
       }
       // TODO: optimise to only save when different to what was in storage;
       var savedKeys: Promise<string>[] = [];
       savedKeys.push(this.saveKeyAsJson_(
           C.StateEntries.INSTANCEIDS,
           Object.keys(this.state[C.StateEntries.INSTANCES])));
-
       var instance = this.state.instances[instanceId];
       // Be obscenely strict here, to make sure we don't propagate buggy
       // state across runs (or versions) of UProxy.
@@ -357,13 +356,11 @@ module Core {
         notify: Boolean(instance.notify),
         rosterInfo: instance.rosterInfo
       };
-      console.log('saveInstance: saving \'instance/\'' + instanceId,
-                  instanceDataToSave);
+      console.log('saveInstance: saving \'instance/' + instanceId + ' \'',
+                  JSON.stringify(instanceDataToSave));
       savedKeys.push(this.saveKeyAsJson_(
           'instance/' + instanceId,
           instanceDataToSave));
-      console.log('omg saved keys??? ' + savedKeys);
-      // TODO: This won't work in jasmine currently :(
       return Promise.all(savedKeys).then(() => {
         console.log('Saved instance ' + instanceId);
       });
