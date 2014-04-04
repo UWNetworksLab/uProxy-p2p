@@ -22,7 +22,7 @@ interface Instance {
 
 module Core {
 
-  var fStorage = freedom['storage']();  // PLatform-independtn storage provider.
+  var fStorage = freedom['storage']();  // Platform-independtn storage provider.
 
   /**
    * Contains all state for uProxy's core.
