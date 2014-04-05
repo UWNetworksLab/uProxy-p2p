@@ -3,7 +3,7 @@ node_js:
   - "0.10"
 
 script:
-  - ./tools/update.sh
+  - ./tools/test.sh
 
 notifications:
   irc: "irc.freenode.net#uproxy"
