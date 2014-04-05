@@ -10,6 +10,7 @@ function readJsonFile(location) {
 
 // jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000;
 var stateStorage = new Core.State();
+Core.DEBUG_STATESTORAGE = false;
 
 // Depends on the MockStorage that executes everything synchronously.
 describe('state-storage', function() {
@@ -45,11 +46,8 @@ describe('state-storage', function() {
   var stateLoadedFromDefault;
   it('* Loading from C.DEFAULT_LOAD_STATE has the same instances', function(done) {
     stateStorage.state = cloneDeep(C.DEFAULT_LOAD_STATE);
-    console.log(JSON.stringify(C.DEFAULT_LOAD_STATE));
     stateStorage.loadStateFromStorage().then(function() {;
       stateLoadedFromDefault = cloneDeep(stateStorage.state);
-      console.log(JSON.stringify(stateLoadedFromDefault));
-      console.log(JSON.stringify(stateReloadedDirectly));
       expect(stateLoadedFromDefault.instances)
           .toEqual(stateReloadedDirectly.instances);
     }).then(done);
@@ -59,7 +57,6 @@ describe('state-storage', function() {
     expect(Object.keys(stateLoadedFromDefault.roster).length).toEqual(1);
   });
   it('* ... but no clients for that entry.', function() {
-    console.log('Roster: ', JSON.stringify(stateLoadedFromDefault.roster));
     var firstKey = (Object.keys(stateLoadedFromDefault.roster))[0];
     expect(stateLoadedFromDefault.roster[firstKey].clients).toEqual({});
   });
