@@ -2,8 +2,8 @@ language: node_js
 node_js:
   - "0.10"
 
-script:
-  - ./tools/test.sh
+before_install: npm install grunt -g grunt-cli
+install: npm install
 
 notifications:
   irc: "irc.freenode.net#uproxy"
