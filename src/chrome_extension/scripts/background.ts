@@ -7,9 +7,9 @@
  */
 // Assumes that core_stub.ts has been loaded.
 
-/// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
-/// <reference path="../../generic_ui/scripts/ui.d.ts"/>
-/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
+/// <reference path='../../interfaces/core.d.ts' />
+/// <reference path='../../interfaces/ui.d.ts' />
+/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 /// <reference path='../../interfaces/commands.d.ts' />
 
 console.log('Initializing chrome extension background page...');

@@ -1,7 +1,7 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../../generic_ui/scripts/ui.d.ts'/>
-/// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
-/// <reference path='../../generic_ui/scripts/notify.d.ts'/>
+/// <reference path="../../interfaces/core.d.ts"/>
+/// <reference path="../../interfaces/notify.d.ts"/>
+/// <reference path="../../interfaces/ui.d.ts"/>
 
 console.log('This is not a real uProxy frontend.');
 
