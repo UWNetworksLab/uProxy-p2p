@@ -364,16 +364,16 @@ module.exports = function(grunt) {
   });
 
   //-------------------------------------------------------------------------
-  grunt.loadNpmTasks('grunt-contrib-copy');
+  // These should match exactly with those listed in package.json.
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
-
 
   //-------------------------------------------------------------------------
   // Define tasks. We use TaskManager to avoid pointless re-compilation.
