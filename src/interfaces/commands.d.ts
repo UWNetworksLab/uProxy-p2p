@@ -5,7 +5,7 @@ declare module uProxy {
    * This fully describes the set of commands which Core must respond to.
    */
   export enum Command {
-    READY,
+    READY = 50,
     REFRESH,
     RESET,
     LOGIN,

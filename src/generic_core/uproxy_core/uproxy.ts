@@ -15,11 +15,33 @@
 /// <reference path='constants.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
-/// <reference path='../../interfaces/commands.d.ts' />
 
 // TODO: remove these once these 'modules' become typescripted.
 declare var store :Core.State;
 declare var restrictKeys :any;
+
+module uProxy {
+  /**
+   * Commands are sent from the UI to the Core, always due to a user interaction.
+   * This fully describes the set of commands which Core must respond to.
+   */
+  export enum Command {
+    READY = 50,
+    REFRESH,
+    RESET,
+    LOGIN,
+    LOGOUT,
+    SEND_INSTANCE,
+    INVITE,
+    CHANGE_OPTION,
+    UPDATE_DESCRIPTION,
+    DISMISS_NOTIFICATION,  // TODO: replace with some better notifications pipeline.
+    START_PROXYING,
+    STOP_PROXYING,
+    MODIFY_CONSENT,  // TODO: make this work with the consent piece.
+  }
+
+}  // module uProxy
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
