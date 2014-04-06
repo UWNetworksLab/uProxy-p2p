@@ -7,19 +7,17 @@
  * requirement and ensures consistency.
  */
 
-describe('uproxy.updateUser', function() {
+// Assumes |store| is defined in start-uproxy.ts and state-storage.ts.
+var state = store.state;
 
-  var store = new Core.State();
-  var state = store.state;   // Depends on state-storage.ts.
+describe('uproxy.updateUser', function() {
 
   // Stub out communications functions.
   beforeEach(function() {
     spyOn(Core, 'sendInstance');
   });
 
-  // TODO: replace this test with the correct kind once we go to instance-centrc
-  // roster.
-  /*
+  // TODO: replace this test once we go to instance-centric roster.
   it('does add user to roster.', function() {
     // Add a normal, non-UProxy client user.
     var normalAlice = {
@@ -53,7 +51,6 @@ describe('uproxy.updateUser', function() {
       url: null
     });
   });
-  */
 
   it('calls sendInstance for uproxy-enabled users', function() {
     // Add a user with an active 'uproxy' client, and ensure that we send her
@@ -86,6 +83,7 @@ var fakeInstanceSync = function(userId, clientId, data) {
     instanceId: data.instanceId,
     rosterInfo: {
       userId: userId,
+      name: data.rosterInfo.name
     }
   };
 };
@@ -107,13 +105,12 @@ describe('Core.receiveInstance', function() {
   beforeEach(function() {
     spyOn(store, 'syncInstanceFromInstanceMessage')
         .and.callFake(fakeInstanceSync);
-    spyOn(store, 'saveInstance');
-    spyOn(Core, '_syncInstanceUI');
+    spyOn(store, 'saveInstance').and.callThrough();
+    spyOn(Core, 'syncInstanceUI_');
   });
 
   // TODO: fix once we find a working Promises/A+ implementation which works
   // with jasmine.
-  /*
   it('syncs and saves new instances.', function(done) {
     Core.receiveInstance(instanceMsg).then(function() {
       expect(store.syncInstanceFromInstanceMessage)
@@ -121,20 +118,19 @@ describe('Core.receiveInstance', function() {
                               instanceMsg.data);
       var fakeInstance = state.instances['12345'];
       expect(store.saveInstance).toHaveBeenCalledWith('12345');
-      expect(Core._syncInstanceUI).toHaveBeenCalledWith(fakeInstance);
+      expect(Core.syncInstanceUI_).toHaveBeenCalledWith(fakeInstance);
       done();
     });
   });
 
   it('sends consent message for a pre-existing instance', function(done) {
     spyOn(uproxy, 'sendConsent');
-    x = Core.receiveInstance(instanceMsg);
-    console.log(x);
-    x.then(done);
-    var fakeInstance = state.instances['12345'];
-    expect(uproxy.sendConsent).toHaveBeenCalledWith(fakeInstance);
+    Core.receiveInstance(instanceMsg).then(function() {
+      var fakeInstance = state.instances['12345'];
+      expect(uproxy.sendConsent).toHaveBeenCalledWith(fakeInstance);
+      done();
+    });
   });
-  */
 
   // CLEAR STATE BEFORE FUZZ TESTS.
   state.instances = [];

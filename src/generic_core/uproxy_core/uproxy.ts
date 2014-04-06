@@ -165,7 +165,6 @@ module Core {
     // Update the local instance information.
     store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
     return store.saveInstance(instanceId).then(() => {
-      console.log('saved');
       // Intended JSONpatch operation.
       // TODO: remove jsonpatch
       var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
@@ -175,14 +174,14 @@ module Core {
       }
       // Update UI's view of instances and mapping.
       // TODO: This can probably be made smaller.
-      _syncInstanceUI(store.state.instances[instanceId]);
+      Core.syncInstanceUI_(store.state.instances[instanceId]);
       _syncMappingsUI();
     });
   }
 
   // Helper to consolidate syncing the instance on the UI side.
   // TODO: Convert into an actual interface-specific update type.
-  export function _syncInstanceUI(instance, field?) {
+  export function syncInstanceUI_(instance, field?) {
     if (!instance) {
       console.error('Cannot sync with null instance.');
     }
@@ -209,11 +208,6 @@ function iAmLoggedIn() {
 bgAppPageChannel.on('invite-friend', (userId) => {
   // TODO: make the invite mechanism an actual process.
   defaultNetwork.sendMessage(userId, 'Join UProxy!');
-});
-
-bgAppPageChannel.on('echo', (msg) => {
-  // store.state._msgLog.push(msg);
-  // bgAppPageChannel.emit('state-change', [{op: 'add', path: '/_msgLog/-', value: msg}]);
 });
 
 bgAppPageChannel.on('change-option', function (data) {
@@ -308,7 +302,7 @@ var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = C.ProxyState.RUNNING;
   // _SyncUI('/instances/' + peerInstanceId, instance);
-  Core._syncInstanceUI(instance, 'status');
+  Core.syncInstanceUI_(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
@@ -338,7 +332,7 @@ var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
 
   client.emit('stop');
   instance.status.proxy = C.ProxyState.OFF;
-  Core._syncInstanceUI(instance, 'status');
+  Core.syncInstanceUI_(instance, 'status');
 
   // TODO: this is also a temporary hack.
   defaultNetwork.sendMessage(
@@ -377,7 +371,7 @@ function handleNewlyActiveClient(msg) {
   console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
   // state.me.instancePeer
   instance.status.client = C.ProxyState.RUNNING;
-  Core._syncInstanceUI(instance, 'status');
+  Core.syncInstanceUI_(instance, 'status');
 }
 
 function handleInactiveClient(msg) {
@@ -388,7 +382,7 @@ function handleInactiveClient(msg) {
     return;
   }
   instance.status.client = C.ProxyState.OFF;
-  Core._syncInstanceUI(instance, 'status');
+  Core.syncInstanceUI_(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
@@ -444,7 +438,7 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   store.saveInstance(instanceId);
-  Core._syncInstanceUI(instance, 'trust');
+  Core.syncInstanceUI_(instance, 'trust');
   console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
@@ -755,7 +749,7 @@ function receiveConsent(msg) {
     _addNotification(instanceId);
   }
   store.saveInstance(instanceId);
-  Core._syncInstanceUI(instance, 'trust');
+  Core.syncInstanceUI_(instance, 'trust');
   return true;
 }
 
@@ -795,7 +789,7 @@ function _addNotification(instanceId) {
   }
   instance.notify = true;
   store.saveInstance(instanceId);
-  Core._syncInstanceUI(instance, 'notify');
+  Core.syncInstanceUI_(instance, 'notify');
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
@@ -810,7 +804,7 @@ function _removeNotification(instanceId) {
   }
   instance.notify = false;
   store.saveInstance(instanceId);
-  Core._syncInstanceUI(instance, 'notify');
+  Core.syncInstanceUI_(instance, 'notify');
   return true;
 }
 
@@ -826,7 +820,7 @@ function receiveUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  Core._syncInstanceUI(instance, 'description');
+  Core.syncInstanceUI_(instance, 'description');
   return true;
 }
 

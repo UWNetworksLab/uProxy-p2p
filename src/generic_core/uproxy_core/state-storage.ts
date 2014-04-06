@@ -22,7 +22,10 @@ interface Instance {
 
 module Core {
 
-  var fStorage = freedom['storage']();  // PLatform-independtn storage provider.
+  var fStorage = freedom['storage']();  // Platform-independtn storage provider.
+
+  // Set false elsewhre to disable log messages (ie. from jasmine)
+  export var DEBUG_STATESTORAGE = true;
 
   /**
    * Contains all state for uProxy's core.
@@ -42,7 +45,7 @@ module Core {
       return new Promise<void>((F, R) => {
         fStorage.clear().done(F);
       }).then(() => {
-        console.log('Cleared storage, now loading again...');
+        dbg('Cleared storage, now loading again...');
         this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
         return this.loadStateFromStorage();
       });
@@ -62,13 +65,11 @@ module Core {
       return new Promise<string>((F, R) => {
         fStorage.get(key).done(F);
       }).then((result) => {
-        console.log('Loaded from storage[' + key + '] (type: ' +
-                    (typeof result) + '): ' + result);
+        // dbg('Loaded from storage[' + key + '] (type: ' +
+                    // (typeof result) + '): ' + result);
         if (isDefined(result)) {
-          // return Promise.resolve(JSON.parse(result));
           return <T>JSON.parse(result);
         } else {
-          // return Promise.resolve(defaultIfUndefined);
           return <T>defaultIfUndefined;
         }
       });
@@ -82,7 +83,7 @@ module Core {
       return new Promise<string>((F, R) => {
         fStorage.set(key, JSON.stringify(val)).done(F);
       }).then((val:string) => {
-        console.log('Saved to storage[' + key + ']. old val=' + val);
+        // dbg('Saved to storage[' + key + ']. old val=' + val);
         return val;
       });
     }
@@ -160,14 +161,14 @@ module Core {
       return this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
         if (null === me) {
           this.state.me = this.generateMyInstance_();
-          console.log('****** Saving new self-definition *****');
-          console.log('  state.me = ' + JSON.stringify(this.state.me));
+          dbg('****** Saving new self-definition *****');
+          dbg('  state.me = ' + JSON.stringify(this.state.me));
           return this.saveMeToStorage();
         } else {
-          console.log('++++++ Loaded self-definition ++++++');
-          console.log('  state.me = ' + JSON.stringify(me));
+          dbg('++++++ Loaded self-definition ++++++');
+          dbg('  state.me = ' + JSON.stringify(me));
           this.state.me = restrictKeys(this.state.me, me);
-          return me;  //Promise.resolve(me);
+          return me;
         }
       });
     }
@@ -230,6 +231,7 @@ module Core {
 
     /**
      * Called when a new userId is available, and when receiving new instances.
+     * TODO: Update when using new social API structured roster.
      * - Check if we need to update instance information.
      * - Assumes that instance already exists for this |userId|.
      */
@@ -246,7 +248,7 @@ module Core {
 
       // Obsolete client will never have further communications.
       if (oldClientId && (oldClientId != clientId)) {
-        console.log('Deleting obsolete client ' + oldClientId);
+        dbg('Deleting obsolete client ' + oldClientId);
         var user = this.state.roster[userId];
         if (user) {
           delete user.clients[oldClientId];
@@ -259,7 +261,7 @@ module Core {
       // Prepare new instance object if necessary.
       var instance = this.state.instances[instanceId];
       if (!instance) {
-        console.log('Preparing NEW Instance... ');
+        dbg('Preparing NEW Instance... ');
         instance = cloneDeep(C.DEFAULT_INSTANCE);
         instance.instanceId = data.instanceId;
         instance.keyHash = data.keyHash;
@@ -277,7 +279,7 @@ module Core {
     // --------------------------------------------------------------------------
 
     /**
-     * Promise the load of an :Instance corresponding to |instanceId|.
+     * Load :Instance corresponding to |instanceId| from storage.
      */
     public loadInstanceFromId = (instanceId:string) : Promise<Instance> => {
       return this.loadKeyAsJson_<Instance>('instance/' + instanceId, null)
@@ -286,61 +288,51 @@ module Core {
           return Promise.reject(new Error(
               'Load error: instance ' + instanceId + ' not found.'));
         } else {
-          console.log('instance ' + instanceId + ' loaded');
+          dbg('instance ' + instanceId + ' loaded');
           instance.status = cloneDeep(C.DEFAULT_PROXY_STATUS);
           this.state.instances[instanceId] = instance;
           this.syncRosterFromInstanceId(instanceId);
         }
-        // TODO: to get jasmine tests to work, we need to use es6-promises.
-        // Except es6-promises don't seem to propogte returned Promises
-        // correctly, so we just return the object here. Except this then causes
-        // a type mismatch with the Promise.reject above. Cannot get rid of this
-        // type error and make the tests work until there's a right
-        // implementation of the promise shim.
-        // Actually, es6-promises are just wrong, and don't correctly do
-        // Promise.all or anything like that, either. So we'll hold off on all
-        // of this.
-        // return instance;
         return Promise.resolve(instance);
       });
     }
 
     /**
-     * Load all instances from storage. Takes in a FinalCallbacker to make sure
-     * that the desired callback is called when the last instance is loaded.
+     * Promise loading all :Instances from storage.
      */
     public loadAllInstances = () : Promise<Instance[]> => {
       return this.loadKeyAsJson_<string[]>(C.StateEntries.INSTANCEIDS, [])
           .then((instanceIds:string[]) => {
             var loadedInstances: Promise<Instance>[] = [];
-            console.log('Loading Instance IDs: ', instanceIds);
+            dbg('Loading Instance IDs: ', instanceIds);
             // Load each instance in instance IDs.
             loadedInstances = instanceIds.map((id) => { return this.loadInstanceFromId(id); });
             return Promise.all(loadedInstances).then(() => {
-              console.log('Loaded ' + loadedInstances.length + ' instances.');
+              dbg('Loaded ' + loadedInstances.length + ' instances.');
               return loadedInstances;
             });
           });
     }
 
     /**
-     * Promise that |instance| for |instanceId| is saved to local storage.
+     * Save |instance| for |instanceId| to local storage.
      * Assumes that both the Instance notification and XMPP user and client
      * information exist and are up-to-date.
      *
-     * |instanceId| - string instance identifier (a 40-char hex string)
+     * |instanceId| - instance identifier (40-char hex string)
+     * TODO: Fix the Promise<any> once the typescript interface for Promises
+     * deals with Promise.reject the right way.
      */
     public saveInstance = (instanceId:string) : Promise<any> => {
       if (!(instanceId in this.state.instances)) {
         console.warn('Attempted to save nonexisting instance: ' + instanceId);
-        return;
+        return Promise.reject(new Error('no instance'));
       }
-      // TODO: optimise to only save when different to what was in storage;
+      // TODO: optimize to only save when different to what was in storage;
       var savedKeys: Promise<string>[] = [];
       savedKeys.push(this.saveKeyAsJson_(
           C.StateEntries.INSTANCEIDS,
           Object.keys(this.state[C.StateEntries.INSTANCES])));
-
       var instance = this.state.instances[instanceId];
       // Be obscenely strict here, to make sure we don't propagate buggy
       // state across runs (or versions) of UProxy.
@@ -357,32 +349,28 @@ module Core {
         notify: Boolean(instance.notify),
         rosterInfo: instance.rosterInfo
       };
-      console.log('saveInstance: saving \'instance/\'' + instanceId,
-                  instanceDataToSave);
+      dbg('saveInstance: saving \'instance/' + instanceId + ' \'',
+                  JSON.stringify(instanceDataToSave));
       savedKeys.push(this.saveKeyAsJson_(
           'instance/' + instanceId,
           instanceDataToSave));
-      console.log('omg saved keys??? ' + savedKeys);
-      // TODO: This won't work in jasmine currently :(
       return Promise.all(savedKeys).then(() => {
-        console.log('Saved instance ' + instanceId);
+        dbg('Saved instance ' + instanceId);
       });
     }
 
     /**
-     * Save all instances to local storage.
+     * Save all :Instances to local storage.
      */
     public saveAllInstances = () : Promise<string[]> => {
-      // Promise the saving of each instance.
-      var savedInstances: Promise<any>[] = [];
-      savedInstances = Object.keys(this.state.instances).map(this.saveInstance);
-      // Note that despite the fact that the instanceIds are written when we write
-      // each instance, we need to write them again anyway, incase they got removed,
-      // in which case we need to write the empty list.
-      savedInstances.push(this.saveKeyAsJson_(
-          C.StateEntries.INSTANCEIDS,
-          Object.keys(this.state[C.StateEntries.INSTANCES])));
-      return Promise.all(savedInstances);
+      var instanceIds :string[] = Object.keys(
+          this.state[C.StateEntries.INSTANCES]);
+      var savedData :Promise<any>[] = instanceIds.map(this.saveInstance);
+      // Re-write the instanceId table. This is necessary in case of some
+      // instanceIds were removed.
+      savedData.push(this.saveKeyAsJson_(
+          C.StateEntries.INSTANCEIDS, instanceIds));
+      return Promise.all(savedData);
     }
 
 
@@ -391,9 +379,7 @@ module Core {
     // --------------------------------------------------------------------------
 
     /**
-     * Load all aspects of the state concurrently. Note: we make the callback only
-     * once the last of the loading operations has completed. We do this using the
-     * FinalCaller class.
+     * Load all aspects of the state concurrently, from storage.
      */
     public loadStateFromStorage = () : Promise<void> => {
       this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
@@ -402,20 +388,37 @@ module Core {
       loadedState.push(this.loadOptionsFromStorage());
       loadedState.push(this.loadAllInstances());
       return Promise.all(loadedState).then(() => {
-        console.log('Finished loading state from storage.');
+        dbg('Finished loading state from storage.');
       });
     }
 
+    /**
+     * Save all aspects of the state concurrently, to storage.
+     */
     public saveStateToStorage = () : Promise<void> => {
       var savedState: Promise<any>[] = [];
       savedState.push(this.saveMeToStorage());
       savedState.push(this.saveOptionsToStorage());
       savedState.push(this.saveAllInstances());
       return Promise.all(savedState).then(() => {
-        console.log('Finished saving state to storage.');
-      });;
+        dbg('Finished saving state to storage.');
+      });
     }
 
   }  // class State
+
+
+  // TODO: Make logging better.
+  var modulePrefix_ = '[StateStorage] ';
+  var dbg = (...args:any[]) => { dbg_(console.log, args); }
+  var dbgWarn = (...args:any[]) => { dbg_(console.warn); }
+  var dbgErr = (...args:any[]) => { dbg(console.error); }
+  var dbg_ = (logger, ...args:any[]) => {
+    if (!DEBUG_STATESTORAGE) {
+     return;
+    }
+    logger.apply(Core, [modulePrefix_].concat(args));
+  }
+
 
 }  // module Core
