@@ -224,7 +224,7 @@ function init(appChannel) {
 
   // Normal state-changes should modify some path inside |model|.
   appChannel.on('state-change', function(patchMsg) {
-    console.log("state-change(patch: ", patchMsg);
+    console.log('state-change(patch: ', patchMsg);
     for (var i in patchMsg) {
       // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
       // TODO: verify the path and use replace when appropriate.

@@ -81,7 +81,9 @@ class CoreStub {
     this.port_.onMessage.addListener(this.currentMessageCallback_);
   }
 
-  // Send message to app.
+  /**
+   * Send message to app.
+   */
   public sendToApp(type :uProxy.Command, data ?:any) {
     if (!this.status.connected) {
       console.error('Cannot call |sendToApp| on a disconnected CoreStub.');

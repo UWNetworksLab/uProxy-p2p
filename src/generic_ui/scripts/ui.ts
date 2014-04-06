@@ -5,10 +5,10 @@
  * TODO: firefox bindings.
  */
 
-/// <reference path="../../interfaces/core.d.ts"/>
-/// <reference path="../../interfaces/notify.d.ts"/>
-/// <reference path="../../interfaces/ui.d.ts"/>
-/// <reference path="../../../third_party/DefinitelyTyped/chrome/chrome.d.ts"/>
+/// <reference path='../../interfaces/core.d.ts'/>
+/// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 
 if (undefined !== UI) {
   console.error('ui.ts already included.');

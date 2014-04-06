@@ -1,5 +1,5 @@
-/// <reference path="notify.d.ts" />
-/// <reference path="core.d.ts" />
+/// <reference path='notify.d.ts' />
+/// <reference path='core.d.ts' />
 
   // export interface IUI {
 interface IUI {
