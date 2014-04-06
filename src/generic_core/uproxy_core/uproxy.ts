@@ -26,7 +26,7 @@ module uProxy {
    * This fully describes the set of commands which Core must respond to.
    */
   export enum Command {
-    READY = 50,
+    READY,
     REFRESH,
     RESET,
     LOGIN,
@@ -79,8 +79,6 @@ function sendFullStateToUI() {
   bgAppPageChannel.emit('state-refresh', store.state);
 }
 
-// Define freedom bindings.
-onCommand(uProxy.Command.RESET, reset);
 
 // Logs out of networks and resets data.
 function reset() {
@@ -91,27 +89,16 @@ function reset() {
   store.reset().then(sendFullStateToUI);
 }
 
-// Called from extension whenever the user clicks opens the extension popup.
-// The intent is to reset its model - but this may or may not always be
-// necessary. Improvements to come.
-onCommand(uProxy.Command.READY, () => {
-  console.log('ui-ready');
-  console.log('state: ', store.state);
-  sendFullStateToUI();  // Send the extension the full state.
-});
-
-// When the login moessage is sent from the extension, assume it's explicit.
-onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
-onCommand(uProxy.Command.LOGOUT, (network) => { Core.logout(network); });
-
-
 /**
- * Primary uProxy core
+ * Primary uProxy backend. Handles which social networks one is connected to,
+ * sends updaes to the UI, and handles commands from the UI.
  */
 module Core {
 
-  // Access various social networks using the Social API.
-  export function login(networkName:string, explicit:boolean=false) {
+  /**
+   * Access various social networks using the Social API.
+   */
+  export var login = (networkName:string, explicit:boolean=false) => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not login to ' + network);
@@ -133,7 +120,10 @@ module Core {
     store.saveMeToStorage();
   }
 
-  export function logout(networkName:string) {
+  /**
+   * Log-out of |networkName|.
+   */
+  export var logout = (networkName:string) : void => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not logout of ' + networkName);
@@ -156,7 +146,7 @@ module Core {
    * Assumes |client| corresponds to a valid uProxy instance, but does not assume
    * that we've received the other side's instance data yet.
    */
-  export function sendInstance(clientId) {
+  export var sendInstance = (clientId:string) => {
     var instancePayload = makeMyInstanceMessage();
     console.log('sendInstance -> ' + clientId, instancePayload);
     // Queue clientIDs if we're not ready to send instance message.
@@ -179,7 +169,7 @@ module Core {
    * not (yet) in the roster.
    * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
    */
-  export function receiveInstance(rawMsg) : Promise<void> {
+  export var receiveInstance = (rawMsg) : Promise<void> => {
     console.log('receiveInstance from ' + rawMsg.fromUserId);
 
     var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
@@ -210,7 +200,7 @@ module Core {
 
   // Helper to consolidate syncing the instance on the UI side.
   // TODO: Convert into an actual interface-specific update type.
-  export function syncInstanceUI_(instance, field?) {
+  export var syncInstanceUI_ = (instance, field?) => {
     if (!instance) {
       console.error('Cannot sync with null instance.');
     }
@@ -219,7 +209,58 @@ module Core {
             field? instance[field] : instance);
   }
 
+  /**
+   * Update user's description of their current device.
+   */
+  export var updateDescription = (data) => {
+    store.state.me.description = data;  // UI side already up-to-date.
+    // TODO: save personal description to storage.
+    var payload = JSON.stringify({
+      type: 'update-description',
+      instanceId: '' + store.state.me.instanceId,
+      description: '' + store.state.me.description
+    });
+
+    // Send the new description to ALL currently online friend instances.
+    var instanceIds = Object.keys(store.state.instances);
+    instanceIds.map(toClientId)
+      .filter((clientId:string) => { return Boolean(clientId); })
+      .forEach((clientId:string) => {
+        defaultNetwork.sendMessage(clientId, payload);
+      });
+  }
+
+  /**
+   * Modify the consent value for an instance, because the user clicked on
+   * one of th consent buttons w.r.t another user.
+   * Update trust level for an instance, and possibly send a message to the client
+   * for the instance that we changed.
+   * TODO: Probably move this into the :Instance class once it exists.
+   * TODO: Type |data|.
+   */
+  export var modifyConsent = (data) => {
+    var iId = data.instanceId;
+    // Set trust level locally, then notify through XMPP if possible.
+    _updateTrust(data.instanceId, data.action, false);  // received = false
+    var clientId = toClientId(iId);
+    if (!clientId) {
+      console.log('Warning! Cannot change trust level because client ID does not ' +
+                'exist for instance ' + iId + ' - they are probably offline.');
+      return false;
+    }
+    defaultNetwork.sendMessage(clientId, JSON.stringify({type: data.action}));
+    return true;
+  }
+
+  /**
+   * Returns the |clientId| corresponding to |instanceId|.
+   */
+  var toClientId = (instanceId:string) : string => {
+    return store.state.instanceToClient[instanceId];
+  }
+
 }  // module Core
+
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
@@ -234,69 +275,9 @@ function iAmLoggedIn() {
   });
 }
 
-onCommand(uProxy.Command.INVITE, (userId) => {
-  // TODO: make the invite mechanism an actual process.
-  defaultNetwork.sendMessage(userId, 'Join UProxy!');
-});
-
-onCommand(uProxy.Command.CHANGE_OPTION, function (data) {
-  store.state.options[data.key] = data.value;
-  store.saveOptionsToStorage();
-  console.log('saved options ' + JSON.stringify(store.state.options));
-  bgAppPageChannel.emit('state-change', [{op: 'replace', path: '/options/'+data.key,
-                                          value: data.value}]);
-  // TODO: Handle changes that might affect proxying
-});
-
-// Updating our own UProxy instance's description.
-onCommand(uProxy.Command.UPDATE_DESCRIPTION, function (data) {
-  store.state.me.description = data;  // UI side already up-to-date.
-
-  // TODO(uzimizu): save to storage
-  var payload = JSON.stringify({
-    type: 'update-description',
-    instanceId: '' + store.state.me.instanceId,
-    description: '' + store.state.me.description
-  });
-
-  // Send the new description to ALL currently online friend instances.
-  for (var instanceId in store.state.instances) {
-    var clientId = store.state.instanceToClient[instanceId];
-    if (clientId) defaultNetwork.sendMessage(clientId, payload);
-  }
-});
-
-// Updating our own UProxy instance's description.
-onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
-  var user = store.state.roster[userId];
-  if (!user) {
-    console.error('User ' + userId + ' does not exist!');
-    return false;
-  }
-  // user.hasNotification = false;
-  // Go through clients, remove notification flag from any uproxy instance.
-  for (var clientId in user.clients) {
-    var instanceId = store.state.clientToInstance[clientId];
-    if (instanceId) {
-      _removeNotification(instanceId);
-    }
-  }
-  // Don't need to re-sync with UI - expect UI to have done the change.
-});
-
 // --------------------------------------------------------------------------
-//  Proxying
+// Signalling channel hooks.
 // --------------------------------------------------------------------------
-// TODO: say not if we havn't given them permission :)
-onCommand(uProxy.Command.START_PROXYING,
-    (peerInstanceId:string) => {
-  startUsingPeerAsProxyServer(peerInstanceId);
-});
-
-onCommand(uProxy.Command.STOP_PROXYING, (peerInstanceId:string) => {
-  stopUsingPeerAsProxyServer(peerInstanceId);
-});
-
 // peerId is a client ID.
 client.on('sendSignalToPeer', (data:PeerSignal) => {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
@@ -316,8 +297,12 @@ server.on('sendSignalToPeer', (data:PeerSignal) => {
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
 
+// --------------------------------------------------------------------------
+//  Proxying
+// --------------------------------------------------------------------------
 // Begin SDP negotiations with peer. Assumes |peer| exists.
 var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
+  // TODO: don't allow if we havn't given them permission :)
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
@@ -430,23 +415,6 @@ var TrustOp = {
   'decline-offer': C.Trust.NO
 };
 
-// The user clicked on something to change the trust w.r.t. another user.
-// Update trust level for an instance, and maybe send a messahe to the client
-// for the instance that we changed.
-onCommand(uProxy.Command.MODIFY_CONSENT, (data) => {
-  var iId = data.instanceId;
-  // Set trust level locally, then notify through XMPP if possible.
-  _updateTrust(data.instanceId, data.action, false);  // received = false
-  var clientId = store.state.instanceToClient[iId];
-  if (!clientId) {
-    console.log('Warning! Cannot change trust level because client ID does not ' +
-              'exist for instance ' + iId + ' - they are probably offline.');
-    return false;
-  }
-  defaultNetwork.sendMessage(clientId, JSON.stringify({type: data.action}));
-  return true;
-});
-
 // Update trust state for a particular instance. Emits change to UI.
 // |instanceId| - instance to change the trust levels upon.
 // |action| - Trust action to execute.
@@ -472,7 +440,6 @@ function _updateTrust(instanceId, action, received) {
   return true;
 }
 
-//
 function receiveTrustMessage(msgInfo) {
   var msgType = msgInfo.data.type;
   var clientId = msgInfo.fromClientId;
@@ -548,6 +515,7 @@ function receiveChange(rawData) {
 }
 defaultNetwork.on('onChange', receiveChange);
 
+// TODO: clean this up for the new consent bits.
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
     'offer': receiveTrustMessage,
@@ -565,8 +533,8 @@ var _msgReceivedHandlers = {
     'newly-inactive-client' : handleInactiveClient
 };
 
-//
-defaultNetwork.on('onMessage', function (msgInfo) {
+
+defaultNetwork.on('onMessage', (msgInfo) => {
   // Replace the JSON str with actual data attributes, then flatten.
   msgInfo.messageText = msgInfo.message;
   delete msgInfo.message;
@@ -607,13 +575,15 @@ function updateSelf(data) {
 }
 
 
-// Update data for a user, typically when new client data shows up. Notifies
-// all new UProxy clients of our instance data, and preserve existing hooks.
-// Does not do a complete replace - does a merge of any provided key values.
-//
-// |newData| - Incoming JSON info for a single user. Assumes to have been
-//             restricted to DEFAULT_ROSTER_ENTRY already.
-// TODO: Use types!!
+/**
+ * Update data for a user, typically when new client data shows up. Notifies
+ * all new UProxy clients of our instance data, and preserve existing hooks.
+ * Does not do a complete replace - does a merge of any provided key values.
+ *
+ * |newData| - Incoming JSON info for a single user. Assumes to have been
+ *             restricted to DEFAULT_ROSTER_ENTRY already.
+ * TODO: Use types!!
+ */
 function updateUser(newData) {
   console.log('<--- XMPP(friend) [' + newData.name + ']', newData);
   var userId = newData.userId,
@@ -649,9 +619,6 @@ function updateUser(newData) {
 
   _SyncUI('/roster/' + userId, user, userOp);
 }
-
-// TODO(uzimizu): Figure out best way to request new users to install UProxy if
-// they don't have any uproxy clients.
 
 // Examine |client| and synchronize instance data if it's a new UProxy client.
 // Returns true if |client| is a valid uproxy client.
@@ -854,9 +821,6 @@ function receiveUpdateDescription(msg) {
   return true;
 }
 
-onCommand(uProxy.Command.SEND_INSTANCE, (clientId) => {
-  Core.sendInstance(clientId);
-});
 
 // --------------------------------------------------------------------------
 //  Updating the UI
@@ -879,3 +843,56 @@ function _syncMappingsUI() {
       value: store.state.instanceToClient }
   ]);
 }
+
+
+// --------------------------------------------------------------------------
+// Register Core responses to UI commands.
+// --------------------------------------------------------------------------
+onCommand(uProxy.Command.READY, sendFullStateToUI);
+onCommand(uProxy.Command.RESET, reset);
+// When the login message is sent from the extension, assume it's explicit.
+onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
+onCommand(uProxy.Command.LOGOUT, Core.logout)
+
+onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
+onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
+
+onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
+onCommand(uProxy.Command.STOP_PROXYING, stopUsingPeerAsProxyServer);
+
+onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
+  store.state.options[data.key] = data.value;
+  store.saveOptionsToStorage().then(() => {;
+    console.log('saved options ' + JSON.stringify(store.state.options));
+    // TODO: Replace this JSON patch.
+    bgAppPageChannel.emit('state-change',
+        [{op: 'replace', path: '/options/'+data.key,
+         value: data.value}]);
+  });
+  // TODO: Handle changes that might affect proxying.
+});
+
+onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
+onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
+  // TODO: Implement an actual notifications/userlog pipeline.
+  var user = store.state.roster[userId];
+  if (!user) {
+    console.error('User ' + userId + ' does not exist!');
+    return false;
+  }
+  // user.hasNotification = false;
+  // Go through clients, remove notification flag from any uproxy instance.
+  for (var clientId in user.clients) {
+    var instanceId = store.state.clientToInstance[clientId];
+    if (instanceId) {
+      _removeNotification(instanceId);
+    }
+  }
+  // Don't need to re-sync with UI - expect UI to have done the change.
+});
+
+
+// TODO: make the invite mechanism an actual process.
+onCommand(uProxy.Command.INVITE, (userId:string) => {
+  defaultNetwork.sendMessage(userId, 'Join UProxy!');
+});
