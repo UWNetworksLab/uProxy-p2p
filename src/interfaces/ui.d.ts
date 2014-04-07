@@ -1,31 +1,27 @@
 /// <reference path='notify.d.ts' />
 /// <reference path='core.d.ts' />
 
-  // export interface IUI {
-interface IUI {
+// export interface IUI {
+declare module uProxy {
 
-  // constructor(
-      // notifier :INotifications,
-      // core:Interfaces.ICore);
+  interface UIAPI {
 
-  // new(
-      // notifier:INotifications,
-      // core:Interfaces.ICore):IUI;
+    // Global sync of all state.
+    sync(state? : string) : void;
 
-  // Global sync of all state.
-  sync(state? : string) : void;
+    // Update an instance.
+    syncInstance(instance : any) : void;
+    updateMappings() : void;
 
-  // Update an instance.
-  syncInstance(instance : any) : void;
-  updateMappings() : void;
+    updateIdentity(identity) : void;
+    sendConsent() : void;
+    addNotification() : void;
+  }
 
-  updateIdentity(identity) : void;
-  sendConsent() : void;
-  addNotification() : void;
 }
 
 interface CUI {
-  new(n:INotifications, c:Interfaces.ICore):IUI;
+  new(n:INotifications, c:uProxy.CoreAPI) : uProxy.UIAPI;
 }
 
 // declare class UI implements IUI {

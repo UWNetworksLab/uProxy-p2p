@@ -20,6 +20,7 @@ interface StatusObject {
 
 
 class CoreStub {
+
   // Status object whose connected boolean property indicates if we are
   // connected to the app.
   status :StatusObject;
@@ -124,9 +125,11 @@ class CoreStub {
     }
   }
 
-  // This function is used as the callback to listen to messages that should be
-  // passed to the freedom listeners in the extension.
-  private dispatchFreedomEvent_(msg :{type :string; data :any}) {
+  /**
+   * This function is used as the callback to listen to messages that should be
+   * passed to the freedom listeners in the extension.
+   */
+  private dispatchFreedomEvent_ = (msg :{type :string; data :any}) => {
     if (this.listeners_[msg.type]) {
       var handlers :Function[] = this.listeners_[msg.type].slice(0);
       for (var i = 0; i < handlers.length; i++) {
@@ -135,11 +138,13 @@ class CoreStub {
     }
   }
 
-  // This is used to know when we are connected to Freedom (there is no callback
-  // possible on the connector side of a runtime connection [25 Aug 2013])
-  // When we connect Freedom, we expect Freedom's runtime.Port.onConnect callback
-  // to send us the message 'hello.' which means we've connected successfully.
-  private onFirstMessage_(msg :string) {
+  /**
+   * This is used to know when we are connected to Freedom (there is no callback
+   * possible on the connector side of a runtime connection [25 Aug 2013])
+   * When we connect Freedom, we expect Freedom's runtime.Port.onConnect callback
+   * to send us the message 'hello.' which means we've connected successfully.
+   */
+  private onFirstMessage_ = (msg :string) => {
     if ('hello.' == msg) {
       console.info('Got hello from UProxy App.');
       // No longer wait for first message.
@@ -155,8 +160,10 @@ class CoreStub {
     }
   }
 
-  // Wrapper for disconnection.
-  private onDisconnectedInternal_() {
+  /**
+   * Wrapper for disconnection.
+   */
+  private onDisconnectedInternal_ = () => {
     console.log('Extension got disconnected from app.');
     this.status.connected = false;
     if(this.port_) {
@@ -172,10 +179,6 @@ class CoreStub {
 
       this.port_.disconnect();
       this.onDisconnected.dispatch();
-      //delete this.onDisconnected;
-      //delete this.onConnected;
-      //this.onDisconnected = new chrome.Event();
-      //this.onConnected = new chrome.Event();
       this.port_ = null;
     }
 

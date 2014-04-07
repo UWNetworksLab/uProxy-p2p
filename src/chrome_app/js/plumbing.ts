@@ -1,6 +1,9 @@
 // This file must be included *after* the freedom script and manifest are
 // loaded.
-'use strict';
+
+/// <reference path='../../interfaces/commands.d.ts' />
+/// <reference path='../../interfaces/core.d.ts' />
+/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 
 // The port that the extension connects to.
 var extPort = null;
@@ -15,7 +18,7 @@ var installedFreedomHooks = [];
 var EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 var uProxyAppChannel = freedom;  // Guaranteed to exist.
-uProxyAppChannel.on(uProxy.Command.READY, function() {
+uProxyAppChannel.on('' + uProxy.Command.READY, () => {
   console.log('uproxy.js is ready!');
 });
 
@@ -52,15 +55,19 @@ chrome.runtime.onConnectExternal.addListener((port) => {
 function onExtMsg(msg) {
   console.log('extension message: ', msg);
 
+  // Pass 'emit's from the UI to Core.
   if ('emit' == msg.cmd) {
     uProxyAppChannel.emit(msg.type, msg.data);
-  } else if (msg.cmd == 'on') {
+
+  // Install 'on' handlers by request from the UI.
+  } else if ('on' == msg.cmd) {
     if (installedFreedomHooks.indexOf(msg.type) >= 0) {
       console.log('freedom already has a hook for ' + msg.type);
       return;
     }
     installedFreedomHooks.push(msg.type);
-    uProxyAppChannel.on(msg.type, function (ret) {
+    // When it fires, send data back over Chrome App -> Extension port.
+    uProxyAppChannel.on(msg.type, (ret) => {
       extPort.postMessage({
         type: msg.type,
         data: ret

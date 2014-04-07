@@ -89,7 +89,7 @@ module.exports = function(grunt) {
       generic_core: {files: [
         // Non-compiled generic stuff
         {expand: true, cwd: 'src/generic_core',
-         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         src: ['**', '!**.spec.js', '!**.spec.ts', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/generic_core'},
         // Icons
         {expand: true, cwd: 'src',

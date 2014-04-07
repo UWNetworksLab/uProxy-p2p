@@ -6,8 +6,13 @@
  * platform-specific implementations.
  */
 
-declare module Interfaces {
+declare module Core {
+  // declare var onCommand: (cmd :uProxy.Command, handler:any) => void;
+}
 
+declare module uProxy {
+
+  // TODO: Remove this once we use the newer consent piece.
   module Consent {
     enum Action {
       REQUEST,
@@ -20,7 +25,7 @@ declare module Interfaces {
     }
   }
 
-  export interface ICore {
+  export interface CoreAPI {
     // Connection handlers between Core and UI
     onConnected():void;
     onDisconnected():void;

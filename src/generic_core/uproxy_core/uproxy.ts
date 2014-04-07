@@ -41,19 +41,21 @@ module uProxy {
     MODIFY_CONSENT,  // TODO: make this work with the consent piece.
   }
 
+  /**
+   * Updates can be one of the following types.
+   */
+  export enum Update {
+    ALL,
+    INSTANCE,
+    DESCRIPTION,
+    ID_MAPS,  // ClientId <---> InstanceId mappings.
+  }
+
 }  // module uProxy
 
 // The channel to speak to the UI part of uproxy. The UI is running from the
 // privileged part of freedom, so we can just set this to be freedom.
 var bgAppPageChannel = freedom;
-
-/**
- * Install a handler for a command from the UI.
- */
-function onCommand(cmd :uProxy.Command, handler:any) {
-  // TODO: Figure out cleaner way to make freedom handle enums-as-strings
-  bgAppPageChannel.on('' + cmd, handler);
-}
 
 // Client is used to manage a peer connection to a contact that will proxy our
 // connection. This module listens on a localhost port and forwards requests
@@ -94,6 +96,14 @@ function reset() {
  * sends updaes to the UI, and handles commands from the UI.
  */
 module Core {
+
+  /**
+   * Install a handler for a command from the UI.
+   */
+  export var onCommand = (cmd :uProxy.Command, handler:any) => {
+    // TODO: Figure out cleaner way to make freedom handle enums-as-strings
+    bgAppPageChannel.on('' + cmd, handler);
+  }
 
   /**
    * Access various social networks using the Social API.
@@ -848,19 +858,19 @@ function _syncMappingsUI() {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-onCommand(uProxy.Command.READY, sendFullStateToUI);
-onCommand(uProxy.Command.RESET, reset);
+Core.onCommand(uProxy.Command.READY, sendFullStateToUI);
+Core.onCommand(uProxy.Command.RESET, reset);
 // When the login message is sent from the extension, assume it's explicit.
-onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
-onCommand(uProxy.Command.LOGOUT, Core.logout)
+Core.onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
+Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
-onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
-onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
+Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
+Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
-onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
-onCommand(uProxy.Command.STOP_PROXYING, stopUsingPeerAsProxyServer);
+Core.onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
+Core.onCommand(uProxy.Command.STOP_PROXYING, stopUsingPeerAsProxyServer);
 
-onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
+Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage().then(() => {;
     console.log('saved options ' + JSON.stringify(store.state.options));
@@ -872,8 +882,8 @@ onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   // TODO: Handle changes that might affect proxying.
 });
 
-onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
-onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
+Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
+Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
   // TODO: Implement an actual notifications/userlog pipeline.
   var user = store.state.roster[userId];
   if (!user) {
@@ -893,6 +903,6 @@ onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
 
 
 // TODO: make the invite mechanism an actual process.
-onCommand(uProxy.Command.INVITE, (userId:string) => {
+Core.onCommand(uProxy.Command.INVITE, (userId:string) => {
   defaultNetwork.sendMessage(userId, 'Join UProxy!');
 });

@@ -17,33 +17,14 @@ console.log('Initializing chrome extension background page...');
 declare var jsonpatch:any;
 declare var UI:CUI;
 
-class ChromeNotifications implements INotifications {
-  ICON_DIR:string = 'icons/';
-  setIcon(iconFile : string) {
-    // TODO: make this not require chrome
-    chrome.browserAction.setIcon({
-      path: this.ICON_DIR + iconFile
-    });
-  }
-  setLabel(text : string) {
-    chrome.browserAction.setBadgeText({ text: '' + text });
-  }
-  setColor(color) {
-    chrome.browserAction.setBadgeBackgroundColor({color: color});
-  }
-}
-
-
 /**
  * The app connector enables communication between this Extension and the
  * corresponding app.
  */
-class ChromeAppConnector implements Interfaces.ICore {
+class ChromeAppConnector implements uProxy.CoreAPI {
 
-  //UPROXY_CHROME_APP_ID:string = 'hilnpmepiebcjhibkbkfkjkacnnclkmi';
   UPROXY_CHROME_APP_ID:string = 'fmdppkkepalnkeommjadgbhiohihdhii';
   appChannel = null;
-  // isConnected:boolean = false;
 
   onConnected() {
     console.warn('No UI yet for onConnected');
@@ -64,7 +45,6 @@ class ChromeAppConnector implements Interfaces.ICore {
         name: 'uproxy-extension-to-app-port' });
     this.appChannel.onConnected.addListener(() => {
       init(this.appChannel);
-      // this.isConnected = true;
       this.onConnected();
     });
     this._checkAppConnection();
@@ -186,6 +166,24 @@ chrome.runtime.onSuspend.addListener(function () {
   //proxyConfig.stopUsingProxy();
 })
 
+
+class ChromeNotifications implements INotifications {
+  ICON_DIR:string = 'icons/';
+  setIcon(iconFile : string) {
+    // TODO: make this not require chrome
+    chrome.browserAction.setIcon({
+      path: this.ICON_DIR + iconFile
+    });
+  }
+  setLabel(text : string) {
+    chrome.browserAction.setBadgeText({ text: '' + text });
+  }
+  setColor(color) {
+    chrome.browserAction.setBadgeBackgroundColor({color: color});
+  }
+}
+
+
 // ---------------------------- Initialization ---------------------------------
 // Called when appChannel is connected.
 function init(appChannel) {
@@ -208,7 +206,7 @@ function init(appChannel) {
 
   // A full state-refresh should occur whenever the extension first connects to
   // the App, or when the user does a full reset.
-  appChannel.on('state-refresh', function(state) {
+  appChannel.on('state-refresh', (state) => {
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
@@ -223,7 +221,7 @@ function init(appChannel) {
   });
 
   // Normal state-changes should modify some path inside |model|.
-  appChannel.on('state-change', function(patchMsg) {
+  appChannel.on('state-change', (patchMsg) => {
     console.log('state-change(patch: ', patchMsg);
     for (var i in patchMsg) {
       // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
@@ -243,6 +241,8 @@ function init(appChannel) {
 }
 
 
+
+
 function checkRunningProxy() {
   if (model && model['instances']) {
     for (var k in model['instances']) {
@@ -257,3 +257,5 @@ function checkRunningProxy() {
   }
   proxyConfig.stopUsingProxy();
 }
+
+

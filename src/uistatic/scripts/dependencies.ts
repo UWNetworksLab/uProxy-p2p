@@ -2,10 +2,11 @@
 /// <reference path='../../interfaces/core.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
-// declare var ui:any;
+// TODO: Type these.
 declare var state:any;
 declare var angular:any;
 
@@ -24,7 +25,7 @@ class MockNotifications implements INotifications {
   }
 }
 
-class MockCore implements Interfaces.ICore {
+class MockCore implements uProxy.CoreAPI {
   constuctor() {}
   onConnected() {
     console.log('Fake onConnected! :D');
@@ -65,7 +66,9 @@ class MockCore implements Interfaces.ICore {
 }
 
 var mockCore = new MockCore();
-var ui:IUI = new UI(new MockNotifications(), mockCore);
+var ui :uProxy.UIAPI = new UI.UserInterface(
+    new MockNotifications(),
+    mockCore);
 mockCore.onConnected();
 
 var dependencyInjector = angular.module('dependencyInjector', [])
