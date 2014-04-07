@@ -1,8 +1,12 @@
-// This file must be included *after* the freedom script and manifest are
-// loaded.
-
+/**
+ * plumbing.ts
+ *
+ * This file must be included *after* the freedom script and manifest are
+ * loaded.
+ */
 /// <reference path='../../interfaces/commands.d.ts' />
 /// <reference path='../../interfaces/core.d.ts' />
+/// <reference path='../../interfaces/chrome_glue.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 
 // The port that the extension connects to.
@@ -29,7 +33,7 @@ chrome.runtime.onConnectExternal.addListener((port) => {
   // trying to do something even worse.
   if (EXTENSION_ID !== port.sender.id ||
       port.name !== 'uproxy-extension-to-app-port') {
-    console.log('Got connect from an unexpected extension id: ' +
+    console.warn('Got connect from an unexpected extension id: ' +
         port.sender.id);
     return;
   }
@@ -40,7 +44,7 @@ chrome.runtime.onConnectExternal.addListener((port) => {
   // sucessfully connects, the extension depends on a message to come back to
   // it form here, the app, so it knows the connection was successful and the
   // app is indeed present.
-  extPort.postMessage('hello.');
+  extPort.postMessage(ChromeGlue.HELLO);
   extPort.onMessage.addListener(onExtMsg);
 
   for (var i = 0; i < pendingMsgs.length; i++) {

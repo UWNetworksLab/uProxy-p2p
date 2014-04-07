@@ -14,13 +14,7 @@ declare var onStateChange :chrome.Event;
 
 module UI {
 
-  // Main UI class.
-  // Can be constructed with |browserType| being either 'chrome' or 'firefox'.
   export class UserInterface implements uProxy.UIAPI {
-
-    // Primary interactions between major components.
-    core   :uProxy.CoreAPI;
-    notify :INotifications;
 
     // TODO: Make these networks correspond to the actual social bit.
     networks = ['google', 'facebook', 'xmpp'];
@@ -44,16 +38,17 @@ module UI {
     accessIds = 0;  // How many people are proxying through us.
     isConnected:boolean = false;
 
-    constructor(public notifier:INotifications, core:uProxy.CoreAPI) {
-      this.notify = notifier;
-      this.core = core;
-      core.onConnected = () => {
+    /**
+     * UI must be constructed with hooks to Notifications and Core.
+     */
+    constructor(public notify:INotifications,
+                public core:uProxy.CoreAPI) {
+      core.setConnectionHandler(() => {
         this.isConnected = true;
-      };
-      core.onDisconnected = () => {
+      });
+      core.setDisconnectionHandler(() => {
         this.isConnected = false;
-      };
-
+      });
     }
 
     // Keep track of currently viewed contact and instance.
@@ -191,7 +186,7 @@ module UI {
     focusOnContact = (contact) => {
       console.log('focusing on contact ' + contact);
       this.contact = contact;
-      this.notificationSeen(contact);
+      this.dismissNotification(contact);
       this.accessView = true;
     }
 
@@ -202,7 +197,7 @@ module UI {
       console.log('returning to roster! ' + this.contact);
       if (this.contact && this.contact.hasNotification) {
         console.log('sending notification seen');
-        this.notificationSeen(this.contact);  // Works if there *is* a contact.
+        this.dismissNotification(this.contact);  // Works if there *is* a contact.
         this.contact = null;
       }
       this.accessView = false;
@@ -221,11 +216,11 @@ module UI {
      * Notifications occur on the user level. The message sent to the app side
      * will also remove the notification flag from the corresponding instance(s).
      */
-    notificationSeen = (user) => {
+    dismissNotification = (user) => {
       if (!user.hasNotification) {
         return;  // Ignore if user has no notification.
       }
-      this.core.notificationSeen(user.userId);
+      this.core.dismissNotification(user.userId);
       user.hasNotification = false;
       this.decNotifications();
     }

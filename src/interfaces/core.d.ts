@@ -25,10 +25,13 @@ declare module uProxy {
     }
   }
 
+  /**
+   * The primary interface for interacting with the uProxy Core.
+   */
   export interface CoreAPI {
-    // Connection handlers between Core and UI
-    onConnected():void;
-    onDisconnected():void;
+
+    setConnectionHandler :(Function)=>void;
+    setDisconnectionHandler :(Function)=>void;
 
     // Clears all state and storage.
     reset():void;
@@ -57,7 +60,7 @@ declare module uProxy {
     changeOption(option:string):void;
 
     // TODO: improve the notifications feature
-    notificationSeen(userId:string):void;
+    dismissNotification(userId:string):void;
 
     // TODO: make network an actual type
     login(network:string):void;

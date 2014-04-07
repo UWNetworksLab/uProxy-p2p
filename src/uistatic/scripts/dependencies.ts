@@ -27,11 +27,11 @@ class MockNotifications implements INotifications {
 
 class MockCore implements uProxy.CoreAPI {
   constuctor() {}
-  onConnected() {
-    console.log('Fake onConnected! :D');
+  setConnectionHandler(handler:Function) {
+    console.log('Fake set onConnected to: ' + handler);
   }
-  onDisconnected() {
-    console.log('Fake onConnected! :D');
+  setDisconnectionHandler(handler:Function) {
+    console.log('Fake set onDisconnected to: ' + handler);
   }
   reset() {
     console.log('Resetting.');
@@ -60,7 +60,7 @@ class MockCore implements uProxy.CoreAPI {
   logout(network) {
     console.log('Logging out of', network);
   }
-  notificationSeen(userId) {
+  dismissNotification(userId) {
     console.log('Notification seen for ' + userId);
   }
 }
@@ -69,7 +69,6 @@ var mockCore = new MockCore();
 var ui :uProxy.UIAPI = new UI.UserInterface(
     new MockNotifications(),
     mockCore);
-mockCore.onConnected();
 
 var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {

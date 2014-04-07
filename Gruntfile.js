@@ -223,8 +223,8 @@ module.exports = function(grunt) {
       // uProxy chrome app specific typescript
       chrome_app: {
         src: ['src/chrome_app/**/*.ts'],
-        dest: 'build/chrome_app/',
-        options: { basePath: 'src/chrome_app/' }
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uProxy firefox specific typescript

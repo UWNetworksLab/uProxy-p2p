@@ -20,6 +20,7 @@
 declare var store :Core.State;
 declare var restrictKeys :any;
 
+// TODO: Figure out the best place to put Core <-> UI interface enums.
 module uProxy {
   /**
    * Commands are sent from the UI to the Core, always due to a user interaction.
@@ -53,8 +54,10 @@ module uProxy {
 
 }  // module uProxy
 
-// The channel to speak to the UI part of uproxy. The UI is running from the
-// privileged part of freedom, so we can just set this to be freedom.
+
+// This is the channel to speak to the UI component of uProxy.
+// The UI is running from the privileged part of freedom, so we can just set
+// this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
 // Client is used to manage a peer connection to a contact that will proxy our
