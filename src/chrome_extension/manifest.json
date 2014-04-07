@@ -13,12 +13,13 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/core_stub.js",
+      "scripts/core_connector.js",
       "scripts/notify.js",
       "scripts/ui.js",
       "lib/json-patch/jsonpatch.js",
       "scripts/proxy-config.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/chrome_glue.js"
     ]
   },
   "browser_action": {

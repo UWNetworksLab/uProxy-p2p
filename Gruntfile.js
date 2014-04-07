@@ -136,7 +136,11 @@ module.exports = function(grunt) {
         // ... the generic ui stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
-         dest: 'build/chrome_extension/'}
+         dest: 'build/chrome_extension/'},
+        // app-extension glue.
+        {expand: true, cwd: 'build/interfaces',
+         src: ['chrome_glue.js'],
+         dest: 'build/chrome_extension/scripts/'}
       ]},
 
       // Chrome app. Assumes the top-level task generic_core completed.
@@ -153,6 +157,10 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
          dest: 'build/chrome_app/'},
+        // app-extension glue.
+        {expand: true, cwd: 'build/interfaces',
+         src: ['chrome_glue.js'],
+         dest: 'build/chrome_app/scripts/'},
         {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
          src: ['**'],
          dest: 'build/chrome_app/lib/freedom-providers'}
@@ -222,7 +230,8 @@ module.exports = function(grunt) {
 
       // uProxy chrome app specific typescript
       chrome_app: {
-        src: ['src/chrome_app/**/*.ts'],
+        src: ['src/chrome_app/**/*.ts',
+              'src/interfaces/chrome_glue.ts'],
         dest: 'build/',
         options: { basePath: 'src/' }
       },

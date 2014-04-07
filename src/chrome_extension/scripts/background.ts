@@ -15,14 +15,26 @@
 
 console.log('Initializing chrome extension background page...');
 
-declare var jsonpatch:any;
+declare var jsonpatch:any;  // TODO: kill this.
+
+var core :ChromeCoreConnector;
+var ui   :uProxy.UIAPI;
 
 // This singleton is referenced in both options and popup.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 if (undefined === ui) {
-  var core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  var ui = new UI.UserInterface(new ChromeNotifications(), core);
-  core.setConnectionHandler(init);
+
+  core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+  ui = new UI.UserInterface(new ChromeNotifications(), core);
+
+  // Connect this Chrome Extension to the Chrome app.
+  core.connect()
+      .then(prepareUpdateHooks)
+      .then(() => {
+        // Tell the uProxy Core. to send us a state-refresh.
+        console.log('UI <------> APP wired.');
+        core.send(uProxy.Command.READY);
+      });
 }
 
 // --------------------- Communicating with the App ----------------------------
@@ -50,23 +62,23 @@ function rateLimitedUpdates() {
 }
 
 // TODO(): remove this if there's no use for it.
-chrome.runtime.onInstalled.addListener(function (details) {
+chrome.runtime.onInstalled.addListener((details) => {
   console.log('onInstalled: previousVersion', details.previousVersion);
 });
 
-chrome.runtime.onSuspend.addListener(function () {
+chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
 })
 
 
-// ---------------------------- Initialization ---------------------------------
 /**
- * Called when appChannel is connected.
+ * Primary initialization of the Chrome Extension. Installs hooks so that
+ * updates from the Chrome App side propogate to the UI.
  */
-function init(appChannel) {
+var prepareUpdateHooks = (port? :chrome.runtime.Port) => {
 
-  var finishStateChange = function() {
+  var finishStateChange = () => {
     // Initiate first sync and start a timer if necessary, in order to
     // rate-limit passes through the entire model & other checks.
     if (!syncBlocked) {
@@ -84,7 +96,7 @@ function init(appChannel) {
 
   // A full state-refresh should occur whenever the extension first connects to
   // the App, or when the user does a full reset.
-  appChannel.on('state-refresh', (state) => {
+  core.on('state-refresh', (state) => {
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
@@ -99,7 +111,7 @@ function init(appChannel) {
   });
 
   // Normal state-changes should modify some path inside |model|.
-  appChannel.on('state-change', (patchMsg) => {
+  core.on('state-change', (patchMsg) => {
     console.log('state-change(patch: ', patchMsg);
     for (var i in patchMsg) {
       // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
@@ -113,9 +125,6 @@ function init(appChannel) {
     jsonpatch.apply(model, patchMsg);
     finishStateChange();
   });
-
-  console.log('UI <------> APP wired.');
-  appChannel.sendToApp('ui-ready');  // Tell uproxy.js to send us a state-refresh.
 }
 
 
