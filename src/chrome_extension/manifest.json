@@ -13,8 +13,9 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/ui.js",
       "scripts/core_stub.js",
+      "scripts/notify.js",
+      "scripts/ui.js",
       "lib/json-patch/jsonpatch.js",
       "scripts/proxy-config.js",
       "scripts/background.js"
