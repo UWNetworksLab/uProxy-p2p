@@ -1,21 +1,22 @@
 <html>
   <head>
     <title>uProxy - APP</title>
-    <script type='text/javascript' src='scripts/manual_dialog.scripts'></script>
-    <script type='text/javascript' src='scripts/auth_google.scripts'></script>
-    <script type='text/javascript' src='scripts/auth_facebook.scripts'></script>
-    <script type='text/javascript' src='scripts/auth_xmpp.scripts'></script>
-    <script type='text/javascript' src='scripts/view_oauth.scripts'></script>
-    <script type='text/javascript' src='scripts/freedom-config.scripts'></script>
-    <script src='lib/freedom.scripts' data-manifest='uproxy_core/uproxy.json'>
+    <script type='text/javascript' src='scripts/manual_dialog.js'></script>
+    <script type='text/javascript' src='scripts/auth_google.js'></script>
+    <script type='text/javascript' src='scripts/auth_facebook.js'></script>
+    <script type='text/javascript' src='scripts/auth_xmpp.js'></script>
+    <script type='text/javascript' src='scripts/view_oauth.js'></script>
+    <script type='text/javascript' src='scripts/freedom-config.js'></script>
+    <script src='lib/freedom-for-chrome.js'
+            data-manifest='uproxy_core/uproxy.json'>
       {
         "strongIsolation": true,
         "stayLocal": true,
         "debug": false
       }
     </script>
-    <script type='text/javascript' src='scripts/plumbing.scripts'></script>
-    <script type='text/javascript' src='scripts/background.scripts'></script>
+    <script type='text/javascript' src='scripts/plumbing.js'></script>
+    <script type='text/javascript' src='scripts/background.js'></script>
   </head>
   <body>
     The uProxy App lives here.

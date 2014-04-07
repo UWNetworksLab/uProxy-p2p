@@ -143,7 +143,7 @@ module.exports = function(grunt) {
       chrome_app: {files: [
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
-         src: ['freedom.js'],
+         src: ['freedom-for-chrome.js'],
          dest: 'build/chrome_app/lib'},
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/chrome_app',
@@ -216,8 +216,8 @@ module.exports = function(grunt) {
       // uProxy chrome extension specific typescript
       chrome_extension: {
         src: ['src/chrome_extension/**/*.ts'],
-        dest: 'build/chrome_extension/',
-        options: { basePath: 'src/chrome_extension/' }
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uProxy chrome app specific typescript

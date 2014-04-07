@@ -8,14 +8,13 @@
 // Assumes that core_stub.ts has been loaded.
 
 /// <reference path='../../interfaces/core.d.ts' />
-/// <reference path='../../interfaces/ui.d.ts' />
+/// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 /// <reference path='../../interfaces/commands.d.ts' />
 
 console.log('Initializing chrome extension background page...');
 
 declare var jsonpatch:any;
-declare var UI:CUI;
 
 /**
  * The app connector enables communication between this Extension and the
@@ -124,9 +123,9 @@ class ChromeAppConnector implements uProxy.CoreAPI {
 }
 
 // This singleton is referenced in both options and popup.
-// UI object is defined in 'generic_ui/scripts/ui.js'.
+// UI object is defined in 'generic_ui/scripts/ui.ts'.
 if (undefined === ui) {
-  var ui = new UI(
+  var ui = new UI.UserInterface(
       new ChromeNotifications(),
       new ChromeAppConnector());
 }
@@ -141,7 +140,7 @@ var proxyConfig = new window['BrowserProxyConfig']();
 proxyConfig.clearConfig();
 
 // ---------------------------- State Changes ----------------------------------
-var model:any = {};  // Singleton angularjs model for either popup or options.
+var model :any = {};  // Singleton angularjs model for either popup or options.
 var onStateChange = new chrome.Event();
 
 // Rate Limiting for state updates (ms)
@@ -209,7 +208,7 @@ function init(appChannel) {
     console.log('state-change(patch: ', patchMsg);
     for (var i in patchMsg) {
       // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
-      // TODO: verify the path and use replace when appropriate.
+      // TODO: kill jsonpatch
       patchMsg[i].op = 'add';
       if ('' == patchMsg[i].path) {
         console.log('WARNING: There should never be a root state-change. \n' +
@@ -223,8 +222,6 @@ function init(appChannel) {
   console.log('UI <------> APP wired.');
   appChannel.sendToApp('ui-ready');  // Tell uproxy.js to send us a state-refresh.
 }
-
-
 
 
 function checkRunningProxy() {

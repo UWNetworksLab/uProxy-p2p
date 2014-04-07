@@ -10,7 +10,7 @@
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 
 declare var model         :any;
-declare var onStateChange :any;
+declare var onStateChange :chrome.Event;
 
 module UI {
 

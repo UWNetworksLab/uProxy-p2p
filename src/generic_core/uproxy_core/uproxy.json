@@ -7,7 +7,7 @@
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
-      "../js/view_oauth.js",
+      "../scripts/view_oauth.js",
       "social.js",
       "uproxy.js",
       "start-uproxy.js"
