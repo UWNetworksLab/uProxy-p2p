@@ -29,7 +29,7 @@ interface StatusObject {
 /**
  * Handles communication with the App.
  */
-class ChromeAppConnector implements uProxy.CoreAPI {
+class ChromeCoreConnector implements uProxy.CoreAPI {
 
   // Status object whose connected boolean property indicates if we are
   // connected to the app.

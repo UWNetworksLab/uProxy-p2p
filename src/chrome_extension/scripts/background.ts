@@ -7,7 +7,7 @@
  */
 // Assumes that core_stub.ts has been loaded.
 
-/// <reference path='core_stub.ts' />
+/// <reference path='core_connector.ts' />
 /// <reference path='../../interfaces/core.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
@@ -20,7 +20,7 @@ declare var jsonpatch:any;
 // This singleton is referenced in both options and popup.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 if (undefined === ui) {
-  var core = new ChromeAppConnector({ name: 'uproxy-extension-to-app-port' });
+  var core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   var ui = new UI.UserInterface(new ChromeNotifications(), core);
   core.setConnectionHandler(init);
 }
@@ -78,7 +78,7 @@ function init(appChannel) {
         rateLimitedUpdates();
         syncTimer = null;  // Allow future timers.
         syncBlocked = false;
-      }, SYNC_TIMEOUT);
+      }, 5000);
     }
   }
 
