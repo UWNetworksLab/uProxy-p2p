@@ -127,24 +127,22 @@ function checkRunningProxy() {
 }
 
 
+var connectToApp = () => {
+  // Connect this Chrome Extension to the Chrome app.
+  core.connect()
+      .then(prepareUpdateHooks)
+      .then(() => {
+        // Tell the uProxy Core. to send us a state-refresh.
+        console.log('UI <------> APP wired.');
+        core.send(uProxy.Command.READY);
+      });
+}
+
 // This singleton is referenced in both options and popup.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 if (undefined === ui) {
 
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   ui = new UI.UserInterface(new ChromeNotifications(), core);
-
-  prepareUpdateHooks();
-  core.connect();   // Begins polling.
-
-  // Connect this Chrome Extension to the Chrome app.
-  // core.connect()
-      // .then(prepareUpdateHooks)
-      // .then(() => {
-        // Tell the uProxy Core. to send us a state-refresh.
-        // console.log('UI <------> APP wired.');
-        // core.send(uProxy.Command.READY);
-      // });
+  connectToApp();
 }
-
-

@@ -58,11 +58,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.status = { connected: false };
     this.appPort_ = null;
     this.listeners_ = {};
-
-    // Prepare the disconnection promise.
-    this.disconnectPromise_ = new Promise<void>((F, R) => {
-      this.fulfillDisconnect_ = F;
-    });
   }
 
 
@@ -75,20 +70,32 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
   public connect = () : Promise<chrome.runtime.Port> => {
-    var connectPromise = this.connect_()
+    var connectPromise = this.connect_();
     // Separate the promise chain which deals with polling, since the user
     // only cares about the initial success.
-    connectPromise.then(() => {
-      // If connected, stop polling until the next disconnect.
-      return this.onceDisconnected()
-        .then(this.connect);
-    }, (e) => {
-      // Otherwise, keep polling.
-      console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
-      setTimeout(this.connect, SYNC_TIMEOUT);
-      return Promise.reject(new Error('No connection'));
-    });
+    connectPromise
+        .then(this.prepareForFutureDisconnect_)
+        .then(() => {
+          // If disconnected, return to polling for connections.
+          // This is longform so jasmine's spies can see it.
+          this.onceDisconnected().then(() => {
+            this.connect();
+          });
+        })
+        .catch((e) => {
+          // If connection failed, keep polling.
+          console.warn(e);
+          console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
+          setTimeout(this.connect, SYNC_TIMEOUT);
+        })
     return connectPromise;
+  }
+
+  /**
+   * Returns a promise fulfilled by this connector's disconnection.
+   */
+  public onceDisconnected = () : Promise<void> => {
+    return this.disconnectPromise_;
   }
 
   /**
@@ -112,15 +119,12 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         if (ChromeGlue.HELLO !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
-        console.log('Got hello from uProxy Chrome App: ' + msg);
         // Replace message listener for the updating mechanism.
         this.appPort_.onMessage.removeListener(ackResponse);
         this.appPort_.onMessage.addListener(this.dispatchFreedomEvent_);
         this.status.connected = true;
         F(this.appPort_);
       };
-      // TODO: Make sure the disconnection promise is refreshed.
-      this.appPort_.onDisconnect.addListener(this.fulfillDisconnect_);
       this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
       this.appPort_.postMessage('hi');
@@ -134,40 +138,45 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   /**
-   * Returns a promise which is fulfilled when the Core Connector disconnects.
+   * Helper which prepares a fresh disconnection promise. Should be called after
+   * setting up a successful connection to the App for the first time.
    */
-  public onceDisconnected = () : Promise<void> => {
-    return this.disconnectPromise_;
+  private prepareForFutureDisconnect_ = () => {
+    // If connected, stop polling until the next disconnect.
+    // Prepare the disconnection promise.
+    var fulfillDisconnect :Function;
+    this.disconnectPromise_ = new Promise<void>((F, R) => {
+      fulfillDisconnect = F;
+    }).then(() => {
+      console.log('Extension got disconnected from app.');
+      this.status.connected = false;
+      if (this.appPort_) {
+        this.appPort_.onDisconnect.removeListener(fulfillDisconnect);
+        this.appPort_.disconnect();
+        this.appPort_ = null;
+      }
+      this.listeners_ = {};
+    });
+    this.appPort_.onDisconnect.addListener(fulfillDisconnect);
   }
 
-  /**
-   * Send a message to the Chrome app.
-   */
-  public send = (type :uProxy.Command, data ?:any) => {
-    if (!this.status.connected) {
-      console.error('Cannot call |sendToApp| while disconnected from app.');
-      return;
-    }
-    try {
-      this.appPort_.postMessage({
-        cmd: 'emit',
-        type: type,
-        data: data
-      });
-    } catch (e) {
-      console.warn('sendToApp: postMessage Failed. Disconnecting.');
-      this.onDisconnectedInternal_();
-    }
-  }
+
+  // --- Receiving UPDATES ---
+  // TODO: Replace this with an actual Core->UI update mechanism, which means
+  // we'll use Enums instead of strings.
 
   /**
-   * Add the listener callback to be called when we get events of type |t|
-   * emitted from the Chrome App.
-   * TODO: Replace this with an actual Core->UI update mechanism.
+   * TODO: Implement the queueing. Right now this only works if core is
+   * connected. Then replace this docstring with:
+   *
+   * Attach handlers for updates emitted from the uProxy Core.
+   * This works whether or not Core is actually connected. If disconnected, it
+   * queues the handler message to be sent on the next successful connection.
+   *
    */
   public on = (type :string, listener :Function) => {
     if (!this.status.connected) {
-      console.error('Cannot call |on| on a disconnected CoreStub.');
+      console.error('Cannot call |on| while disconnected from app.');
       return;
     }
     // Attach listener to the event.
@@ -181,13 +190,12 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         type: type
       });
     } catch (e) {
-      console.warn('on: postMessage Failed. Disconnecting.');
-      this.onDisconnectedInternal_();
+      console.warn('on: postMessage Failed.');
+      console.warn(e);
     }
   }
 
-
-  // --- CoreAPI interface requirements ---
+  // --- CoreAPI interface requirements (sending COMMANDS) ---
 
   reset = () => {
     console.log('Resetting.');
@@ -195,7 +203,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   sendInstance = (clientId) => {
-    // console.log('Sending instance ID to ' + clientId);
     this.send(uProxy.Command.SEND_INSTANCE, clientId);
   }
 
@@ -242,6 +249,27 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   /**
+   * Send a message to the Chrome app.
+   */
+  public send = (type :uProxy.Command, data ?:any) => {
+    if (!this.status.connected) {
+      console.error('Cannot call |sendToApp| while disconnected from app.');
+      return;
+    }
+    try {
+      this.appPort_.postMessage({
+        cmd: 'emit',
+        type: type,
+        data: data
+      });
+    } catch (e) {
+      console.warn('sendToApp: postMessage Failed.');
+      console.warn(e);
+    }
+  }
+
+
+  /**
    * This function is used as the callback to listen to messages that should be
    * passed to the freedom listeners in the extension.
    */
@@ -250,24 +278,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       var handlers :Function[] = this.listeners_[msg.type].slice(0);
       handlers.forEach((handler) => { handler(msg.data); });
     }
-  }
-
-  /**
-   * Wrapper for disconnection.
-   */
-  private onDisconnectedInternal_ = () => {
-    console.log('Extension got disconnected from app.');
-    this.status.connected = false;
-    if (this.appPort_) {
-      this.appPort_.onDisconnect.removeListener(this.onDisconnectedInternal_);
-      // if (this.currentMessageCallback_) {
-        // this.appPort_.onMessage.removeListener(this.currentMessageCallback_);
-        // this.currentMessageCallback_ = null;
-      // }
-      this.appPort_.disconnect();
-      this.appPort_ = null;
-    }
-    this.listeners_ = {};
   }
 
 }  // class ChromeCoreConnector

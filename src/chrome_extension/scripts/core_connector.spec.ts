@@ -4,63 +4,68 @@
 // Mock for the Chrome App's port as if the App actually exists.
 var mockAppPort = () => {
   return {
+    name: 'mock-port',
     postMessage: (msg :string) => {},
     disconnect: () => {},
-    onDisconnect: {
-      addListener: () => {},
-      removeListener: () => {}
-    },
     onMessage: {
       addListener: () => {},
       removeListener: () => {}
     },
-    name: 'mock-port'
+    onDisconnect: {
+      addListener: () => {},
+      removeListener: () => {}
+    }
   };
 };
 
 
+// The ordering of the specs matter, as they provide a connect / disconnect
+// sequence on the connector object.
 describe('core-connector', () => {
 
-  var core :ChromeCoreConnector;
-  core = new ChromeCoreConnector();
+  var connector :ChromeCoreConnector;
+  connector = new ChromeCoreConnector();
   var connectPromise :Promise<chrome.runtime.Port>;
 
   beforeEach(() => {});
 
   it('attempts chrome.runtime.connect().', () => {
-    spyOn(core, 'connect').and.callThrough()
+    spyOn(connector, 'connect').and.callThrough()
     // Get chrome.runtime.connect to return null as if there were no App to
     // connect to.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
-    connectPromise = core.connect();
+    connectPromise = connector.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
   });
 
   it('fails to connect with no App present.', (done) => {
     connectPromise.catch((e) => {
-      expect(core.status.connected).toEqual(false);
-      expect(core['appPort_']).toEqual(null);
+      expect(connector.status.connected).toEqual(false);
+      expect(connector['appPort_']).toEqual(null);
     }).then(done);
   });
 
   it('continues polling while disconnected.', (done) => {
-    // Spying on core.connect with a fake will prevent it from polling again,
-    // after it's been caughts (So later we have to start fresh).
-    spyOn(core, 'connect').and.callFake(() => {
+    // Spying with a fake will prevent the actual implementations polling
+    // behavior after its caught. This allows the next spec to start fresh.
+    spyOn(connector, 'connect').and.callFake(() => {
       console.log('caught connection retry.');
       connectPromise = null;
       done();
     });
   });
 
+  var disconnect :Function = null;
+
   it('connects to App when present.', (done) => {
     var port = mockAppPort();
     var acker = null;
+    // A 'valid' chrome.runtime.Port indicates successful connection.
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
     spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
       if (null !== acker) {
         // This is the replacement addListener for the update mechanism.
-        expect(handler).toEqual(core['dispatchFreedomEvent_']);
+        expect(handler).toEqual(connector['dispatchFreedomEvent_']);
         return;
       }
       spyOn(port.onMessage, 'removeListener');
@@ -74,12 +79,42 @@ describe('core-connector', () => {
       acker(ChromeGlue.HELLO);
     });
 
+    // Capture the disconnection fulfillment or next spec.
+    spyOn(port.onDisconnect, 'addListener').and.callFake((f) => {
+      disconnect = f;
+    });
+
     // Begin successful connection attempt to App.
-    expect(core.status.connected).toEqual(false);
-    core.connect().then(() => {
+    expect(connector.status.connected).toEqual(false);
+    connector.connect().then((p :chrome.runtime.Port) => {
+      expect(connector['appPort_']).not.toBeNull();
+      expect(connector['appPort_']).toEqual(p);
       expect(port.onMessage.removeListener).toHaveBeenCalled();
-      expect(core.status.connected).toEqual(true);
+      expect(port.onDisconnect.addListener).toHaveBeenCalled();
+      expect(connector.status.connected).toEqual(true);
+      expect(connector.onceDisconnected()).not.toBeNull();
     }).then(done);
+  });
+
+  var resumedPolling = false;
+
+  it('disconnects from App when port disconnects.', (done) => {
+    expect(disconnect).not.toBeNull();
+    connector.onceDisconnected().then(() => {
+      expect(connector.status.connected).toEqual(false);
+      expect(connector['appPort_']).toBeFalsy();
+      expect(connector['listeners_']).toEqual({});
+    }).then(done);
+    // Catch re-connect() attempt for next spec.
+    spyOn(connector, 'connect').and.callFake(() => {
+      resumedPolling = true;
+    });
+    disconnect();
+  });
+
+  it('resumes polling once disconnected.', () => {
+    expect(resumedPolling).toEqual(true);
+    expect(connector.status.connected).toEqual(false);
   });
 
 });
