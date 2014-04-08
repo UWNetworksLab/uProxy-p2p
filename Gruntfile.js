@@ -273,7 +273,8 @@ module.exports = function(grunt) {
         src: FILES.jasminehelper
             .concat(FILES.jasmine_chrome)
             .concat([
-              'build/chrome_extension/scripts/core_connector.js'
+              'build/chrome_extension/scripts/core_connector.js',
+              'build/chrome_extension/scripts/chrome_glue.js'
             ]),
         options: {
           // helpers: ['src/scraps/test/example-state.jsonvar',

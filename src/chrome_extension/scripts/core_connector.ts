@@ -49,6 +49,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
 
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
+  private fulfillConnect_ :Function;
 
   /**
    * As soon as one constructs the CoreConnector, it will attempt to connect.
@@ -97,31 +98,34 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       console.warn('Already connected.');
       return Promise.resolve(this.appPort_);
     }
-    console.log('Attempting connection...');
     this.appPort_ = chrome.runtime.connect(this.appId_, this.options_);
     if (!this.appPort_) {
       return Promise.reject(new Error('Unable to connect to App.'));
     }
-    console.log('Connected on port ', this.appPort_);
+    console.log('Connected on port ', JSON.stringify(this.appPort_));
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
+      this.fulfillConnect_ = F;
       var ackConnection = (msg :string) => {
         if (ChromeGlue.HELLO !== msg) {
           R(new Error('Unexpected msg from uProxy Chrome App: ' + msg));
         }
-        console.log('Got hello from uProxy Chrome App:', msg);
+        console.log('Got hello from uProxy Chrome App:' + msg);
         // Replace message listener for the updating mechanism.
         this.appPort_.onMessage.removeListener(ackConnection);
         this.appPort_.onMessage.addListener(this.dispatchFreedomEvent_);
         this.status.connected = true;
-        F(this.appPort_);
+        this.fulfillConnect_(this.appPort_);
       };
+      // TODO: Make sure the disconnection promise is refreshed.
       this.appPort_.onDisconnect.addListener(this.fulfillDisconnect_);
       this.appPort_.onMessage.addListener(ackConnection);
       // Send 'hi', which should prompt App to respond with ack.
       this.appPort_.postMessage('hi');
     }).catch((e) => {
+      // TODO: Clean up the failure handling.
+      console.log(e);
       this.status.connected = false;
       this.appPort_ = null;
       return Promise.reject(new Error('Unable to connect to uProxy Chrome App.'));
