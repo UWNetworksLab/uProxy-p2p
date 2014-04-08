@@ -30,12 +30,6 @@ declare module uProxy {
    */
   export interface CoreAPI {
 
-    // TODO: This sort of connection / disconnection handler should probably not
-    // be in the Core API. This should be limited to the Chrome Glue side of
-    // things.
-    setConnectionHandler :(Function)=>void;
-    setDisconnectionHandler :(Function)=>void;
-
     // Clears all state and storage.
     reset():void;
 

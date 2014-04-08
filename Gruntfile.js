@@ -25,6 +25,11 @@ var FILES = {
     '!node_modules/es6-promise/dist/promise-*amd.js',
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ],
+  // Mocks for chrome app/extension APIs.
+  jasmine_chrome: [
+    // TODO: Update the path after reorganizing chrome directories.
+    'build/mocks/chrome_mocks.js'
+  ],
   jasminesrc: [
     // Required files for testing.
     'src/scraps/test/freedom-mocks.js',
@@ -131,7 +136,7 @@ module.exports = function(grunt) {
          dest: 'build/chrome_extension/lib'},
         // The platform specific non-compiled stuff, and...
         {expand: true, cwd: 'src/chrome_extension',
-         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome_extension/'},
         // ... the generic ui stuff
         {expand: true, cwd: 'build/generic_ui',
@@ -242,6 +247,13 @@ module.exports = function(grunt) {
         dest: 'build/firefox/',
         options: { basePath: 'src/firefox/' }
       },
+
+      // TODO: This is a temporary location for mocks. Needs to be reorganized.
+      mocks: {
+        src: ['src/scraps/test/**/*.ts'],
+        dest: 'build/mocks/',
+        options: { basePath: 'src/scraps/test/' }
+      },
     },
 
     //-------------------------------------------------------------------------
@@ -257,6 +269,20 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'jasmine': {
+      chrome_extension: {
+        src: FILES.jasminehelper
+            .concat(FILES.jasmine_chrome)
+            .concat([
+              'build/chrome_extension/scripts/core_connector.js'
+            ]),
+        options: {
+          // helpers: ['src/scraps/test/example-state.jsonvar',
+                    // 'src/scraps/test/example-saved-state.jsonvar'],
+          keepRunner: true,
+          outfile: 'test_output/_ChromeExtensionSpecRunner.html',
+          specs: 'build/chrome_extension/scripts/**/*.spec.js'
+        }
+      },
       generic_core: {
         // Files being tested
         src: FILES.jasminehelper
@@ -264,9 +290,9 @@ module.exports = function(grunt) {
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
-          specs: 'src/generic_core/uproxy_core/**/*.spec.js',
           keepRunner: true,
-          outfile: 'test_output/_SpecRunner.html'
+          outfile: 'test_output/_CoreSpecRunner.html',
+          specs: 'src/generic_core/uproxy_core/**/*.spec.js'
         }
       }
     },
@@ -444,9 +470,20 @@ module.exports = function(grunt) {
     'mozilla-cfx:debug_run'
   ]);
 
-  taskManager.add('test', [
+  taskManager.add('test_chrome_extension', [
+    'typescript:mocks',
+    'build_chrome_extension',
+    'jasmine:chrome_extension'
+  ]);
+
+  taskManager.add('test_core', [
     'build_generic_core',
     'jasmine:generic_core'
+  ]);
+
+  taskManager.add('test', [
+    'test_core',
+    'test_chrome_extension'
   ]);
 
   taskManager.add('build', [

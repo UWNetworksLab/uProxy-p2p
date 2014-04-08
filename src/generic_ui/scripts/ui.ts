@@ -43,12 +43,9 @@ module UI {
      */
     constructor(public notify:INotifications,
                 public core:uProxy.CoreAPI) {
-      core.setConnectionHandler(() => {
-        this.isConnected = true;
-      });
-      core.setDisconnectionHandler(() => {
-        this.isConnected = false;
-      });
+      // core.onceDisconnected().then(() => {
+        // this.isConnected = false;
+      // });
     }
 
     // Keep track of currently viewed contact and instance.

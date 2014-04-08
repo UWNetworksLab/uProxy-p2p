@@ -27,12 +27,6 @@ class MockNotifications implements INotifications {
 
 class MockCore implements uProxy.CoreAPI {
   constuctor() {}
-  setConnectionHandler(handler:Function) {
-    console.log('Fake set onConnected to: ' + handler);
-  }
-  setDisconnectionHandler(handler:Function) {
-    console.log('Fake set onDisconnected to: ' + handler);
-  }
   reset() {
     console.log('Resetting.');
   }

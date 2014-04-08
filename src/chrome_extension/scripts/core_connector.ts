@@ -1,15 +1,7 @@
 /**
- * core_stub.ts
+ * core_connector.ts
  *
- * Provides 'CoreStub' object that acts like freedomos.org
- * freedom object, but posts/listens to messages from freedom via a chrome.
- * runtime.message.
- *
- * |id| is the chrome extension/app Id that is running Freedom that we
- *   should speak to.
- * |options| is the options passed the runtime connection. It has a 'name'
- *   field that can be used to name the connection to the freedom component.
- *
+ * Handles all connection and communication with the uProxy Chrome App.
  */
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
@@ -17,7 +9,7 @@
 /// <reference path='../../interfaces/chrome_glue.ts' />
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
-var SYNC_TIMEOUT         :number = 4000;  // milliseconds.
+var SYNC_TIMEOUT         :number = 2000;  // milliseconds.
 
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running
@@ -28,72 +20,89 @@ interface StatusObject {
 
 
 /**
- * Handles communication with the App.
+ * Chrome-Extension-specific uProxy Core API implementation.
+ *
+ * This class hides all cross App-Extension communication wiring so that the
+ * uProxy UI may speak through this connector as if talking directly to Core.
+ *
+ * Propagates these messages:
+ *    Core --[ UPDATES  ]--> UI
+ *    UI   --[ COMMANDS ]--> Core
+ *
+ * Whilst disconnected, this continuously polls Chrome for the existence of the
+ * uProxy App, and automatically reconnects if possible. This is designed such
+ * that the user (which is the Extension / UI) won't have to deal with
+ * connectivity explicitly, but has the option to chain promises if desired.
  */
 class ChromeCoreConnector implements uProxy.CoreAPI {
 
-  // Status object whose connected boolean property indicates if we are
-  // connected to the app.
-  public status :StatusObject;
-  // A callback |function() {...}| to call when we are disconnected. e.g. when
-  // Freedom extension/app is removed/disabled.
-  private onDisconnected :chrome.Event;
-  // A callback |function() {...}| to call when connected.
-  private onConnected :chrome.Event;
+  private appId_   :string;               // ID of target Chrome App.
+  private appPort_ :chrome.runtime.Port;  // For speaking to App.
 
-  // ID of Chrome App to connect to.
-  private appId_ :string;
-  // Options for connection to chrome app containing optional name param.
-  private options_ :chrome.runtime.ConnectInfo;
+  // Status object indicating whether we're connected to the app.
+  public status :StatusObject;
+
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
+  // TODO: Replace with Core -> UI specified update API.
   private listeners_ :{[msgType :string] : Function[]};
-  // The chrome.runtime.Port used to speak to the App/Extension running Freedom.
-  private port_ :chrome.runtime.Port;
 
-  // Used to remember the callback we need to remove. Because we typically need
-  // to bind(this), it's useful to name the callback after the bind so we can
-  // actually remove it again.
-  private currentMessageCallback_ :Function;
-  private currentDisconnectCallback_ :Function;
-
-  constructor(options :Object) {
-    this.appId_ = UPROXY_CHROME_APP_ID;
-    this.options_ = options;
-    this.onDisconnected = new chrome.Event();
-    this.onConnected = new chrome.Event();
-    this.status = { connected: false };
-    this.port_ = null;
-    this.listeners_ = {};
-    this.currentMessageCallback_ = null;
-    this.currentDisconnectCallback_ = null;
-    // Begin connection check polling.
-    this.checkAppConnection_();
-  }
-
-  public setConnectionHandler = (handler :Function) => {
-    console.log('Attached connection handler ', handler);
-    this.onConnected.addListener(handler);
-  }
-
-  public setDisconnectionHandler = (handler :Function) => {
-    this.onDisconnected.addListener(handler);
-  }
+  private disconnectPromise_ :Promise<void>;
+  private fulfillDisconnect_ :Function;
 
   /**
-   * Connect the Chrome Extension to the Chrome App.
+   * As soon as one constructs the CoreConnector, it will attempt to connect.
+   */
+  constructor(private options_ ?:chrome.runtime.ConnectInfo) {
+    this.appId_ = UPROXY_CHROME_APP_ID;
+    this.status = { connected: false };
+    this.appPort_ = null;
+    this.listeners_ = {};
+
+    // Prepare the disconnection promise.
+    this.disconnectPromise_ = new Promise<void>((F, R) => {
+      this.fulfillDisconnect_ = F;
+    });
+  }
+
+
+  // --- Connectivity methods ---
+
+  /**
+   * Connect the Chrome Extension to the Chrome App, and continues polling if
+   * unsuccessful.
+   *
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
   public connect = () : Promise<chrome.runtime.Port> => {
-    if(this.status.connected) {
-      console.log('Already connected.');
-      return Promise.resolve(this.port_);
+    return this.connect_()
+        .then(() => {
+          // If connected, stop polling until the next disconnect.
+          return this.onceDisconnected()
+            .then(this.connect);
+        }).catch((e) => {
+          // Otherwise, keep polling.
+          console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
+          setTimeout(this.connect, SYNC_TIMEOUT);
+          return Promise.reject(new Error('No connection'));
+        });
+  }
+
+  /**
+   * Promise internal implementation of the connection sequence.
+   * Fails if there's no port available on that connector.
+   */
+  private connect_ = () : Promise<chrome.runtime.Port> => {
+    if (this.status.connected) {
+      console.warn('Already connected.');
+      return Promise.resolve(this.appPort_);
     }
-    console.info('Trying to connect to the app...');
-    this.port_ = chrome.runtime.connect(this.appId_, this.options_);
-    if (!this.port_) {
+    console.log('Attempting connection...');
+    this.appPort_ = chrome.runtime.connect(this.appId_, this.options_);
+    if (!this.appPort_) {
       return Promise.reject(new Error('Unable to connect to App.'));
     }
+    console.log('Connected on port ', this.appPort_);
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
@@ -103,25 +112,27 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         }
         console.log('Got hello from uProxy Chrome App:', msg);
         // Replace message listener for the updating mechanism.
-        this.port_.onMessage.removeListener(ackConnection);
-        this.port_.onMessage.addListener(this.dispatchFreedomEvent_);
+        this.appPort_.onMessage.removeListener(ackConnection);
+        this.appPort_.onMessage.addListener(this.dispatchFreedomEvent_);
         this.status.connected = true;
-        F(this.port_);
+        F(this.appPort_);
       };
-      // Prepare the disconnection promise.
-      this.port_.onDisconnect.addListener(this.currentDisconnectCallback_);
-      this.port_.onMessage.addListener(ackConnection);
+      this.appPort_.onDisconnect.addListener(this.fulfillDisconnect_);
+      this.appPort_.onMessage.addListener(ackConnection);
       // Send 'hi', which should prompt App to respond with ack.
-      this.port_.postMessage('hi');
+      this.appPort_.postMessage('hi');
     }).catch((e) => {
       this.status.connected = false;
-      this.port_ = null;
+      this.appPort_ = null;
       return Promise.reject(new Error('Unable to connect to uProxy Chrome App.'));
     });
-    // this.currentDisconnectCallback_ = this.onDisconnectedInternal_.bind(this);
-    // this.port_.onDisconnect.addListener(this.currentDisconnectCallback_);
-    // this.currentMessageCallback_ = this.onFirstMessage_;
-    // this.port_.onMessage.addListener(this.currentMessageCallback_);
+  }
+
+  /**
+   * Returns a promise which is fulfilled when the Core Connector disconnects.
+   */
+  public onceDisconnected = () : Promise<void> => {
+    return this.disconnectPromise_;
   }
 
   /**
@@ -133,7 +144,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       return;
     }
     try {
-      this.port_.postMessage({
+      this.appPort_.postMessage({
         cmd: 'emit',
         type: type,
         data: data
@@ -160,7 +171,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     }
     this.listeners_[type].push(listener);
     try {
-      this.port_.postMessage({
+      this.appPort_.postMessage({
         cmd: 'on',
         type: type
       });
@@ -170,7 +181,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     }
   }
 
-  // CoreAPI interface requirements:
+
+  // --- CoreAPI interface requirements ---
 
   reset = () => {
     console.log('Resetting.');
@@ -241,32 +253,16 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   private onDisconnectedInternal_ = () => {
     console.log('Extension got disconnected from app.');
     this.status.connected = false;
-    if (this.port_) {
-      if (this.currentMessageCallback_) {
-        this.port_.onMessage.removeListener(this.currentMessageCallback_);
-        this.currentMessageCallback_ = null;
-      }
-
-      if (this.currentDisconnectCallback_) {
-        this.port_.onDisconnect.removeListener(this.currentDisconnectCallback_);
-        this.currentDisconnectCallback_ = null;
-      }
-
-      this.port_.disconnect();
-      this.onDisconnected.dispatch();
-      this.port_ = null;
+    if (this.appPort_) {
+      this.appPort_.onDisconnect.removeListener(this.onDisconnectedInternal_);
+      // if (this.currentMessageCallback_) {
+        // this.appPort_.onMessage.removeListener(this.currentMessageCallback_);
+        // this.currentMessageCallback_ = null;
+      // }
+      this.appPort_.disconnect();
+      this.appPort_ = null;
     }
-
     this.listeners_ = {};
   }
 
-  /**
-   * Continuously check if we need to connect to the App.
-   */
-  private checkAppConnection_ = () => {
-    console.log('Checking the app connection.');
-    this.connect();  // Doesn't do anything if it's already connected.
-    setTimeout(this.checkAppConnection_, SYNC_TIMEOUT);
-  }
-
-}  // class ChromeAppConnector
+}  // class ChromeCoreConnector
