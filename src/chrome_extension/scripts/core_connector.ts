@@ -49,7 +49,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
 
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
-  private fulfillConnect_ :Function;
 
   /**
    * As soon as one constructs the CoreConnector, it will attempt to connect.
@@ -76,17 +75,20 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
   public connect = () : Promise<chrome.runtime.Port> => {
-    return this.connect_()
-        .then(() => {
-          // If connected, stop polling until the next disconnect.
-          return this.onceDisconnected()
-            .then(this.connect);
-        }).catch((e) => {
-          // Otherwise, keep polling.
-          console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
-          setTimeout(this.connect, SYNC_TIMEOUT);
-          return Promise.reject(new Error('No connection'));
-        });
+    var connectPromise = this.connect_()
+    // Separate the promise chain which deals with polling, since the user
+    // only cares about the initial success.
+    connectPromise.then(() => {
+      // If connected, stop polling until the next disconnect.
+      return this.onceDisconnected()
+        .then(this.connect);
+    }, (e) => {
+      // Otherwise, keep polling.
+      console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
+      setTimeout(this.connect, SYNC_TIMEOUT);
+      return Promise.reject(new Error('No connection'));
+    });
+    return connectPromise;
   }
 
   /**
@@ -102,33 +104,32 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     if (!this.appPort_) {
       return Promise.reject(new Error('Unable to connect to App.'));
     }
-    console.log('Connected on port ', JSON.stringify(this.appPort_));
+
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
-      this.fulfillConnect_ = F;
-      var ackConnection = (msg :string) => {
+      var ackResponse :Function = (msg :string) => {
         if (ChromeGlue.HELLO !== msg) {
-          R(new Error('Unexpected msg from uProxy Chrome App: ' + msg));
+          R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
-        console.log('Got hello from uProxy Chrome App:' + msg);
+        console.log('Got hello from uProxy Chrome App: ' + msg);
         // Replace message listener for the updating mechanism.
-        this.appPort_.onMessage.removeListener(ackConnection);
+        this.appPort_.onMessage.removeListener(ackResponse);
         this.appPort_.onMessage.addListener(this.dispatchFreedomEvent_);
         this.status.connected = true;
-        this.fulfillConnect_(this.appPort_);
+        F(this.appPort_);
       };
       // TODO: Make sure the disconnection promise is refreshed.
       this.appPort_.onDisconnect.addListener(this.fulfillDisconnect_);
-      this.appPort_.onMessage.addListener(ackConnection);
+      this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
       this.appPort_.postMessage('hi');
+
     }).catch((e) => {
-      // TODO: Clean up the failure handling.
       console.log(e);
       this.status.connected = false;
       this.appPort_ = null;
-      return Promise.reject(new Error('Unable to connect to uProxy Chrome App.'));
+      return Promise.reject(new Error('Unable to connect to uProxy App.'));
     });
   }
 

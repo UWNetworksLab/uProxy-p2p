@@ -29,6 +29,8 @@ describe('core-connector', () => {
 
   it('attempts chrome.runtime.connect().', () => {
     spyOn(core, 'connect').and.callThrough()
+    // Get chrome.runtime.connect to return null as if there were no App to
+    // connect to.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
     connectPromise = core.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
@@ -36,6 +38,7 @@ describe('core-connector', () => {
 
   it('fails to connect with no App present.', (done) => {
     connectPromise.catch((e) => {
+      expect(core.status.connected).toEqual(false);
       expect(core['appPort_']).toEqual(null);
     }).then(done);
   });
@@ -45,6 +48,7 @@ describe('core-connector', () => {
     // after it's been caughts (So later we have to start fresh).
     spyOn(core, 'connect').and.callFake(() => {
       console.log('caught connection retry.');
+      connectPromise = null;
       done();
     });
   });
@@ -52,22 +56,30 @@ describe('core-connector', () => {
   it('connects to App when present.', (done) => {
     var port = mockAppPort();
     var acker = null;
-    // Change the set of spies.
-    spyOn(core, 'connect').and.callThrough();
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
-    // Grab the ack function from the internals.
     spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
+      if (null !== acker) {
+        // This is the replacement addListener for the update mechanism.
+        expect(handler).toEqual(core['dispatchFreedomEvent_']);
+        return;
+      }
+      spyOn(port.onMessage, 'removeListener');
+      // Extract ack function from the depths of connector.
       acker = handler;
     });
+    // Short-circuit postMessage to pretend Chrome App ACKS correctly.
     spyOn(port, 'postMessage').and.callFake((msg) => {
       expect(port.postMessage).toHaveBeenCalledWith('hi');
-      // spyOn(this, 'acker').and.callThrough();
-      // This is where the Chrome App is expected to pass the ACK back.
+      expect(acker).not.toBeNull();
       acker(ChromeGlue.HELLO);
-      done();
     });
-    // TODO: There is some scope problem about the promise not fulfilling.
-    core.connect();
+
+    // Begin successful connection attempt to App.
+    expect(core.status.connected).toEqual(false);
+    core.connect().then(() => {
+      expect(port.onMessage.removeListener).toHaveBeenCalled();
+      expect(core.status.connected).toEqual(true);
+    }).then(done);
   });
 
 });
