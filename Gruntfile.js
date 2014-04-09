@@ -30,17 +30,6 @@ var FILES = {
     // TODO: Update the path after reorganizing chrome directories.
     'build/mocks/chrome_mocks.js'
   ],
-  jasminesrc: [
-    // Required files for testing.
-    'src/scraps/test/freedom-mocks.js',
-    'build/generic_core/uproxy_core/util.js',
-    'build/generic_core/uproxy_core/nouns-and-adjectives.js',
-    'build/generic_core/uproxy_core/constants.js',
-    'build/generic_core/uproxy_core/state-storage.js',
-    'build/generic_core/uproxy_core/social.js',
-    'build/generic_core/uproxy_core/uproxy.js',
-    'build/generic_core/uproxy_core/start-uproxy.js'
-  ],
 };
 
 module.exports = function(grunt) {
@@ -144,7 +133,7 @@ module.exports = function(grunt) {
          dest: 'build/chrome_extension/'},
         // app-extension glue.
         {expand: true, cwd: 'build/interfaces',
-         src: ['chrome_glue.js'],
+         src: ['uproxy.js', 'chrome_glue.js'],
          dest: 'build/chrome_extension/scripts/'}
       ]},
 
@@ -164,7 +153,7 @@ module.exports = function(grunt) {
          dest: 'build/chrome_app/'},
         // app-extension glue.
         {expand: true, cwd: 'build/interfaces',
-         src: ['chrome_glue.js'],
+         src: ['uproxy.js', 'chrome_glue.js'],
          dest: 'build/chrome_app/scripts/'},
         {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
          src: ['**'],
@@ -212,9 +201,10 @@ module.exports = function(grunt) {
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ['src/generic_core/**/*.ts'],
-        dest: 'build/generic_core/',
-        options: { basePath: 'src/generic_core/' }
+        src: ['src/generic_core/**/*.ts',
+              'src/interfaces/uproxy.ts'],
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uistatic specific typescript
@@ -285,9 +275,18 @@ module.exports = function(grunt) {
         }
       },
       generic_core: {
-        // Files being tested
         src: FILES.jasminehelper
-              .concat(FILES.jasminesrc),
+            .concat([
+              'src/scraps/test/freedom-mocks.js',
+              'build/interfaces/uproxy.js',
+              'build/generic_core/uproxy_core/util.js',
+              'build/generic_core/uproxy_core/nouns-and-adjectives.js',
+              'build/generic_core/uproxy_core/constants.js',
+              'build/generic_core/uproxy_core/state-storage.js',
+              'build/generic_core/uproxy_core/social.js',
+              'build/generic_core/uproxy_core/core.js',
+              'build/generic_core/uproxy_core/start-uproxy.js'
+            ]),
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],

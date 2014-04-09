@@ -3,10 +3,11 @@
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
+/// <reference path='../../interfaces/uproxy.ts'/>
+/// <reference path='../../interfaces/chrome_glue.ts' />
+
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path="../../interfaces/uproxy.d.ts"/>
-/// <reference path='../../interfaces/chrome_glue.ts' />
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 2000;  // milliseconds.

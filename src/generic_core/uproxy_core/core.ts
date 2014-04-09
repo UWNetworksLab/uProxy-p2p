@@ -9,11 +9,12 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
+/// <reference path='../../interfaces/uproxy.ts'/>
+/// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='state-storage.ts' />
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />
-/// <reference path='state-storage.ts' />
-/// <reference path="../../interfaces/uproxy.d.ts"/>
-/// <reference path="../../interfaces/ui.d.ts"/>
+
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 

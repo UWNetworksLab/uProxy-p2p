@@ -4,7 +4,7 @@
  * This file must be included *after* the freedom script and manifest are
  * loaded.
  */
-/// <reference path='../../interfaces/commands.d.ts' />
+/// <reference path='../../interfaces/uproxy.ts' />
 /// <reference path='../../interfaces/core.d.ts' />
 /// <reference path='../../interfaces/chrome_glue.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />

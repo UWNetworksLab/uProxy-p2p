@@ -6,7 +6,7 @@
  * between the Core and the UI.
  */
 
-declare module uProxy {
+module uProxy {
 
   /**
    * Commands are sent from the UI to the Core, always due to a user interaction.
