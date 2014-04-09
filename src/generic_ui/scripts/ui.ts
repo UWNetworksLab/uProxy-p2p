@@ -36,17 +36,12 @@ module UI {
 
     isProxying = false;  // Whether we are proxying through someone.
     accessIds = 0;  // How many people are proxying through us.
-    isConnected:boolean = false;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
      */
     constructor(public notify:INotifications,
-                public core:uProxy.CoreAPI) {
-      // core.onceDisconnected().then(() => {
-        // this.isConnected = false;
-      // });
-    }
+                public core:uProxy.CoreAPI) {}
 
     // Keep track of currently viewed contact and instance.
     contact = null;
