@@ -5,7 +5,7 @@
  */
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='../../interfaces/commands.d.ts' />
+/// <reference path="../../interfaces/uproxy.d.ts"/>
 /// <reference path='../../interfaces/chrome_glue.ts' />
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';

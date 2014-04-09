@@ -1,3 +1,11 @@
+/**
+ * uproxy.ts
+ *
+ * This file defines the base uProxy module. It contains Enums and other code
+ * which must be accessible from all parts of uProxy at runtime, especially
+ * between the Core and the UI.
+ */
+
 declare module uProxy {
 
   /**
@@ -17,7 +25,7 @@ declare module uProxy {
     DISMISS_NOTIFICATION,  // TODO: replace with some better notifications pipeline.
     START_PROXYING,
     STOP_PROXYING,
-    MODIFY_CONSENT,  // TODO: make this work with the consent piece.
+    MODIFY_CONSENT,       // TODO: make this work with the consent piece.
   }
 
   export enum Update {

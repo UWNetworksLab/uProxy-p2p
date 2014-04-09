@@ -12,6 +12,7 @@
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />
 /// <reference path='state-storage.ts' />
+/// <reference path="../../interfaces/uproxy.d.ts"/>
 /// <reference path="../../interfaces/ui.d.ts"/>
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
@@ -19,42 +20,6 @@
 // TODO: remove these once these 'modules' become typescripted.
 declare var store :Core.State;
 declare var restrictKeys :any;
-
-// TODO: Move Core <-> UI interface enums into a common file somewhere. This
-// will involve updating the folder structure..
-module uProxy {
-
-  /**
-   * Commands are sent from the UI to the Core, always due to a user interaction.
-   * This fully describes the set of commands which Core must respond to.
-   */
-  export enum Command {
-    READY,
-    REFRESH,
-    RESET,
-    LOGIN,
-    LOGOUT,
-    SEND_INSTANCE,
-    INVITE,
-    CHANGE_OPTION,
-    UPDATE_DESCRIPTION,
-    DISMISS_NOTIFICATION,  // TODO: replace with some better notifications pipeline.
-    START_PROXYING,
-    STOP_PROXYING,
-    MODIFY_CONSENT,  // TODO: make this work with the consent piece.
-  }
-
-  /**
-   * Updates can be one of the following types.
-   */
-  export enum Update {
-    ALL,
-    INSTANCE,
-    DESCRIPTION,
-    ID_MAPS,  // ClientId <---> InstanceId mappings.
-  }
-
-}  // module uProxy
 
 
 // This is the channel to speak to the UI component of uProxy.
