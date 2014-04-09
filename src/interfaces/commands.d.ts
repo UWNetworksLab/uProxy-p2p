@@ -20,4 +20,11 @@ declare module uProxy {
     MODIFY_CONSENT,  // TODO: make this work with the consent piece.
   }
 
+  export enum Update {
+    ALL,
+    INSTANCE,
+    DESCRIPTION,
+    ID_MAPS,  // ClientId <---> InstanceId mappings.
+  }
+
 }  // module uProxy

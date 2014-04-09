@@ -77,37 +77,43 @@ var prepareUpdateHooks = (port? :chrome.runtime.Port) => {
     }
   }
 
+  // TODO: Implement the rest of the fine-grained state updates. We begin with
+  // the simplest, total state update.
+  core.onUpdate(uProxy.Update.ALL, () => {
+    console.log('Received a FULL-STATE update.');
+  });
+
   // A full state-refresh should occur whenever the extension first connects to
   // the App, or when the user does a full reset.
-  core.on('state-refresh', (state) => {
+  // core.on('state-refresh', (state) => {
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
-    for (var k in model) {
-      delete model[k];
-    }
-    for (var k in state) {
-      model[k] = state[k];
-    }
-    console.log('state-refresh: model = ', model);
-    finishStateChange();
-  });
+    // for (var k in model) {
+      // delete model[k];
+    // }
+    // for (var k in state) {
+      // model[k] = state[k];
+    // }
+    // console.log('state-refresh: model = ', model);
+    // finishStateChange();
+  // });
 
   // Normal state-changes should modify some path inside |model|.
-  core.on('state-change', (patchMsg) => {
-    console.log('state-change(patch: ', patchMsg);
-    for (var i in patchMsg) {
+  // core.on('state-change', (patchMsg) => {
+    // console.log('state-change(patch: ', patchMsg);
+    // for (var i in patchMsg) {
       // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
       // TODO: kill jsonpatch
-      patchMsg[i].op = 'add';
-      if ('' == patchMsg[i].path) {
-        console.log('WARNING: There should never be a root state-change. \n' +
-                    'Use state-refresh');
-      }
-    }
-    jsonpatch.apply(model, patchMsg);
-    finishStateChange();
-  });
+      // patchMsg[i].op = 'add';
+      // if ('' == patchMsg[i].path) {
+        // console.log('WARNING: There should never be a root state-change. \n' +
+                    // 'Use state-refresh');
+      // }
+    // }
+    // jsonpatch.apply(model, patchMsg);
+    // finishStateChange();
+  // });
 }
 
 
@@ -134,7 +140,7 @@ var connectToApp = () => {
       .then(() => {
         // Tell the uProxy Core. to send us a state-refresh.
         console.log('UI <------> APP wired.');
-        core.send(uProxy.Command.READY);
+        core.sendCommand(uProxy.Command.READY);
       });
 }
 

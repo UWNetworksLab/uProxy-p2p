@@ -20,8 +20,10 @@
 declare var store :Core.State;
 declare var restrictKeys :any;
 
-// TODO: Figure out the best place to put Core <-> UI interface enums.
+// TODO: Move Core <-> UI interface enums into a common file somewhere. This
+// will involve updating the folder structure..
 module uProxy {
+
   /**
    * Commands are sent from the UI to the Core, always due to a user interaction.
    * This fully describes the set of commands which Core must respond to.

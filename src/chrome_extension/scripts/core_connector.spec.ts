@@ -55,17 +55,16 @@ describe('core-connector', () => {
     });
   });
 
+  var port = mockAppPort();
   var disconnect :Function = null;
 
   it('connects to App when present.', (done) => {
-    var port = mockAppPort();
     var acker = null;
     // A 'valid' chrome.runtime.Port indicates successful connection.
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
     spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
       if (null !== acker) {
-        // This is the replacement addListener for the update mechanism.
-        expect(handler).toEqual(connector['dispatchFreedomEvent_']);
+        expect(handler).toEqual(connector['receive_']);
         return;
       }
       spyOn(port.onMessage, 'removeListener');
@@ -90,7 +89,6 @@ describe('core-connector', () => {
       expect(connector['appPort_']).not.toBeNull();
       expect(connector['appPort_']).toEqual(p);
       expect(port.onMessage.removeListener).toHaveBeenCalled();
-      expect(port.onDisconnect.addListener).toHaveBeenCalled();
       expect(connector.status.connected).toEqual(true);
       expect(connector.onceDisconnected()).not.toBeNull();
     }).then(done);
@@ -98,7 +96,7 @@ describe('core-connector', () => {
 
   var resumedPolling = false;
 
-  it('disconnects from App when port disconnects.', (done) => {
+  it('gets disconnected when App disappears.', (done) => {
     expect(disconnect).not.toBeNull();
     connector.onceDisconnected().then(() => {
       expect(connector.status.connected).toEqual(false);
@@ -115,6 +113,67 @@ describe('core-connector', () => {
   it('resumes polling once disconnected.', () => {
     expect(resumedPolling).toEqual(true);
     expect(connector.status.connected).toEqual(false);
+  });
+
+  it('send_ queues message while disconnected.', () => {
+    var payload = { cmd: 'test1', type: 1 };
+    connector['send_'](payload);
+    expect(connector['queue_']).toEqual([
+        { cmd: 'test1', type: 1 }
+    ]);
+  });
+
+  it('queues messages in the right order.', () => {
+    var payload = { cmd: 'test2', type: 2 };
+    connector['send_'](payload);
+    expect(connector['queue_']).toEqual([
+        { cmd: 'test1', type: 1 },
+        { cmd: 'test2', type: 2 }
+    ]);
+  });
+
+  var flushed = false;
+
+  // This is a stripped down version of a previous spec, to get the
+  // ChromeAppConnector into a consistent state for testing the communications
+  // specs.
+  it('reconnects to App when it returns.', (done) => {
+    var port = mockAppPort();
+    var acker = null;
+    spyOn(chrome.runtime, 'connect').and.returnValue(port);
+    spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
+      if (null !== acker) { return; }
+      acker = handler;
+    });
+    spyOn(port, 'postMessage').and.callFake((msg) => {
+      acker(ChromeGlue.HELLO);
+    });
+    // Spy the queue flusher for the next spec.
+    spyOn(connector, 'flushQueue').and.callFake(() => {
+      flushed = true;
+    });
+    // Begin successful connection attempt to App.
+    expect(connector.status.connected).toEqual(false);
+    connector.connect().then(() => {
+      expect(connector.status.connected).toEqual(true);
+    }).then(done);
+  });
+
+  it('flushes queue upon connection.', () => {
+    expect(flushed).toEqual(true);
+  });
+
+  it('flushes the queue correctly.', () => {
+    var flushed = [];
+    spyOn(connector, 'send_').and.callFake((payload) => {
+      flushed.push(payload);
+    });
+    connector.flushQueue();
+    expect(connector['queue_']).toEqual([]);
+    expect(flushed).toEqual([
+        { cmd: 'test1', type: 1 },
+        { cmd: 'test2', type: 2 }
+    ]);
   });
 
 });

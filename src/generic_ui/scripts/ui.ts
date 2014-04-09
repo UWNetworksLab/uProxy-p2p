@@ -93,7 +93,8 @@ module UI {
     }
 
     // ------------------------------- Proxying ----------------------------------
-    // TODO: Type the Instance
+    // TODO Replace this with a 'Proxy Service'.
+    // TODO: Type the Instance.
     startProxying = (instance) => {
       this.core.start(instance.instanceId);
       this.proxy = instance;
@@ -117,6 +118,8 @@ module UI {
         this.notify.setIcon('uproxy-19.png');
       }
     }
+
+    // TODO: Get rid of this baklava code.
 
     login = (network) => {
       this.core.login(network);

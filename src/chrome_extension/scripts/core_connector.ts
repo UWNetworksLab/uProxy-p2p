@@ -36,16 +36,20 @@ interface StatusObject {
  */
 class ChromeCoreConnector implements uProxy.CoreAPI {
 
-  private appId_   :string;               // ID of target Chrome App.
-  private appPort_ :chrome.runtime.Port;  // For speaking to App.
+  private appId_   :string;                // ID of target Chrome App.
+  private appPort_ :chrome.runtime.Port;   // For speaking to App.
+  private queue_   :ChromeGlue.Payload[];  // Queue for outgoing appPort_ msgs.
 
   // Status object indicating whether we're connected to the app.
+  // TODO: Since this is equivalent to whether or not appPort_ is null, we
+  // should probably consider turning it into a function, while at the same time
+  // preserving potential angular bindings.
   public status :StatusObject;
 
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
   // TODO: Replace with Core -> UI specified update API.
-  private listeners_ :{[msgType :string] : Function[]};
+  private listeners_ :{[type :string] : Function[]};
 
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
@@ -57,6 +61,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.appId_ = UPROXY_CHROME_APP_ID;
     this.status = { connected: false };
     this.appPort_ = null;
+    this.queue_ = [];
     this.listeners_ = {};
   }
 
@@ -70,7 +75,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
   public connect = () : Promise<chrome.runtime.Port> => {
-    var connectPromise = this.connect_();
+    var connectPromise = this.connect_()
+        .then(this.flushQueue);
     // Separate the promise chain which deals with polling, since the user
     // only cares about the initial success.
     connectPromise
@@ -120,8 +126,10 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
         // Replace message listener for the updating mechanism.
+        // TODO: Merge the ack-response into the same format as the other
+        // payloads so that we don't need to swap out the handler.
         this.appPort_.onMessage.removeListener(ackResponse);
-        this.appPort_.onMessage.addListener(this.dispatchFreedomEvent_);
+        this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         F(this.appPort_);
       };
@@ -160,55 +168,103 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.appPort_.onDisconnect.addListener(fulfillDisconnect);
   }
 
-
-  // --- Receiving UPDATES ---
+  // --- Communication ---
   // TODO: Replace this with an actual Core->UI update mechanism, which means
   // we'll use Enums instead of strings.
 
   /**
-   * TODO: Implement the queueing. Right now this only works if core is
-   * connected. Then replace this docstring with:
-   *
    * Attach handlers for updates emitted from the uProxy Core.
    * This works whether or not Core is actually connected. If disconnected, it
    * queues the handler message to be sent on the next successful connection.
    *
    */
-  public on = (type :string, listener :Function) => {
-    if (!this.status.connected) {
-      console.error('Cannot call |on| while disconnected from app.');
-      return;
-    }
-    // Attach listener to the event.
+  public onUpdate = (update :uProxy.Update, handler :Function) => {
+    var type = '' + update;
     if (!(type in this.listeners_)) {
       this.listeners_[type] = [];
     }
-    this.listeners_[type].push(listener);
+    this.listeners_[type].push(handler);
+    var payload = {
+      cmd: 'on',
+      type: update
+    };
+    this.send_(payload);
+  }
+
+  /**
+   * Send a Command from the UI to the Core, as a result of some user
+   * interaction.
+   */
+  public sendCommand = (command :uProxy.Command, data ?:any) => {
+    var payload = {
+      cmd: 'emit',
+      type: command,
+      data: data
+    }
+    this.send_(payload);
+  }
+
+  /**
+   * Send a payload to the Chrome app.
+   * If currently connected to the App, immediately send. Otherwise, queue
+   * the message for the next successful connection.
+   */
+  private send_ = (payload :ChromeGlue.Payload) => {
+    if (!this.status.connected || null == this.appPort_) {
+      this.queue_.push(payload);
+      return;
+    }
     try {
-      this.appPort_.postMessage({
-        cmd: 'on',
-        type: type
-      });
+      this.appPort_.postMessage(payload);
     } catch (e) {
-      console.warn('on: postMessage Failed.');
       console.warn(e);
+      console.warn('ChromeCoreConnector.send_ postMessage failure.');
     }
   }
+
+  /**
+   * Receive messages from the chrome.runtime.Port.
+   * These *must* some form of uProxy.Update.
+   */
+  private receive_ = (msg :{type :string; data :any}) => {
+    if (msg.type in this.listeners_) {
+      var handlers :Function[] = this.listeners_[msg.type].slice(0);
+      handlers.forEach((handler) => { handler(msg.data); });
+    }
+  }
+
+  /**
+   * Helper which sends all payloads currently on the queue over to the Chrome
+   * App. Should be called everytime connection is renewed.
+   */
+  public flushQueue = (port?:chrome.runtime.Port) => {
+    while (0 < this.queue_.length) {
+      // Stop flushing if disconnected.
+      if (!this.status.connected) {
+        console.warn('Disconnected from App whilst flushing queue.');
+        break;
+      }
+      var payload = this.queue_.shift();
+      this.send_(payload);
+    }
+    return port;
+  }
+
 
   // --- CoreAPI interface requirements (sending COMMANDS) ---
 
   reset = () => {
     console.log('Resetting.');
-    this.send(uProxy.Command.RESET, null);
+    this.sendCommand(uProxy.Command.RESET, null);
   }
 
   sendInstance = (clientId) => {
-    this.send(uProxy.Command.SEND_INSTANCE, clientId);
+    this.sendCommand(uProxy.Command.SEND_INSTANCE, clientId);
   }
 
   modifyConsent = (instanceId, action) => {
     console.log('Modifying consent.', instanceId);
-    this.send(uProxy.Command.MODIFY_CONSENT,
+    this.sendCommand(uProxy.Command.MODIFY_CONSENT,
       {
         instanceId: instanceId,
         action: action
@@ -218,66 +274,34 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
 
   start = (instanceId) => {
     console.log('Starting to proxy through ' + instanceId);
-    this.send(uProxy.Command.START_PROXYING, instanceId);
+    this.sendCommand(uProxy.Command.START_PROXYING, instanceId);
   }
 
   stop = (instanceId) => {
     console.log('Stopping proxy through ' + instanceId);
-    this.send(uProxy.Command.STOP_PROXYING, instanceId);
+    this.sendCommand(uProxy.Command.STOP_PROXYING, instanceId);
   }
 
   updateDescription = (description) => {
     console.log('Updating description to ' + description);
-    this.send(uProxy.Command.UPDATE_DESCRIPTION, description);
+    this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
   }
 
   changeOption = (option) => {
     console.log('Changing option ' + option);
-    // this.send(uProxy.Command.CHANGE_OPTION, option);
+    // this.sendCommand(uProxy.Command.CHANGE_OPTION, option);
   }
 
   login = (network) => {
-    this.send(uProxy.Command.LOGIN, network);
+    this.sendCommand(uProxy.Command.LOGIN, network);
   }
 
   logout = (network) => {
-    this.send(uProxy.Command.LOGOUT, network);
+    this.sendCommand(uProxy.Command.LOGOUT, network);
   }
 
   dismissNotification = (userId) => {
-    this.send(uProxy.Command.DISMISS_NOTIFICATION, userId);
-  }
-
-  /**
-   * Send a message to the Chrome app.
-   */
-  public send = (type :uProxy.Command, data ?:any) => {
-    if (!this.status.connected) {
-      console.error('Cannot call |sendToApp| while disconnected from app.');
-      return;
-    }
-    try {
-      this.appPort_.postMessage({
-        cmd: 'emit',
-        type: type,
-        data: data
-      });
-    } catch (e) {
-      console.warn('sendToApp: postMessage Failed.');
-      console.warn(e);
-    }
-  }
-
-
-  /**
-   * This function is used as the callback to listen to messages that should be
-   * passed to the freedom listeners in the extension.
-   */
-  private dispatchFreedomEvent_ = (msg :{type :string; data :any}) => {
-    if (msg.type in this.listeners_) {
-      var handlers :Function[] = this.listeners_[msg.type].slice(0);
-      handlers.forEach((handler) => { handler(msg.data); });
-    }
+    this.sendCommand(uProxy.Command.DISMISS_NOTIFICATION, userId);
   }
 
 }  // class ChromeCoreConnector
