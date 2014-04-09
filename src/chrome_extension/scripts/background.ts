@@ -8,26 +8,19 @@
 // Assumes that core_stub.ts has been loaded.
 
 /// <reference path='core_connector.ts' />
-
 /// <reference path='../../interfaces/core.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 
-console.log('Initializing chrome extension background page...');
-
-declare var jsonpatch:any;  // TODO: kill this.
-
-var core :ChromeCoreConnector;
-var ui   :uProxy.UIAPI;
-
+var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-
-var _extensionInitialized = false;
+var core :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 
 // TODO: This should be *actually* typed.
 // Proxy Configuration.
 var proxyConfig = new window['BrowserProxyConfig']();
 proxyConfig.clearConfig();
+
 
 // ---------------------------- State Changes ----------------------------------
 var model :any = {};  // Singleton angularjs model for either popup or options.
@@ -37,13 +30,6 @@ var onStateChange = new chrome.Event();
 var syncBlocked = false;
 var syncTimer = null;     // Keep reference to the timer.
 
-// Rate limit synchronizations.
-function rateLimitedUpdates() {
-  ui.sync();
-  checkRunningProxy();
-  onStateChange.dispatch();
-}
-
 // TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('onInstalled: previousVersion', details.previousVersion);
@@ -52,70 +38,33 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
-})
+});
 
 
-/**
- * Primary initialization of the Chrome Extension. Installs hooks so that
- * updates from the Chrome App side propogate to the UI.
- */
-var prepareUpdateHooks = (port? :chrome.runtime.Port) => {
-
-  var finishStateChange = () => {
-    // Initiate first sync and start a timer if necessary, in order to
-    // rate-limit passes through the entire model & other checks.
-    if (!syncBlocked) {
-      syncBlocked = true;
-      rateLimitedUpdates();
-    }
-    if (!syncTimer) {
-      syncTimer = setTimeout(function() {
-        rateLimitedUpdates();
-        syncTimer = null;  // Allow future timers.
-        syncBlocked = false;
-      }, 5000);
-    }
-  }
-
-  // TODO: Implement the rest of the fine-grained state updates. We begin with
-  // the simplest, total state update.
-  core.onUpdate(uProxy.Update.ALL, (state :Object) => {
-    console.log('Received uProxy.Update.ALL:', state);
-    // For resetting state, don't nuke |model| with the new object...
-    // (there are references to it for Angular) instead, replace keys so the
-    // angular $watch can catch up.
-    for (var k in model) {
-      delete model[k];
-    }
-    for (var k in state) {
-      model[k] = state[k];
-    }
-    console.log('model = ', model);
-    finishStateChange();
-  });
-
-  // A full state-refresh should occur whenever the extension first connects to
-  // the App, or when the user does a full reset.
-  // core.on('state-refresh', (state) => {
-  // });
-
-  // Normal state-changes should modify some path inside |model|.
-  // core.on('state-change', (patchMsg) => {
-    // console.log('state-change(patch: ', patchMsg);
-    // for (var i in patchMsg) {
-      // NEEDS TO BE ADD, BECAUSE THIS IS A HACK :)
-      // TODO: kill jsonpatch
-      // patchMsg[i].op = 'add';
-      // if ('' == patchMsg[i].path) {
-        // console.log('WARNING: There should never be a root state-change. \n' +
-                    // 'Use state-refresh');
-      // }
-    // }
-    // jsonpatch.apply(model, patchMsg);
-    // finishStateChange();
-  // });
+// Rate limit synchronizations.
+function rateLimitedUpdates() {
+  ui.sync();
+  checkRunningProxy();
+  onStateChange.dispatch();
 }
 
+
+// TODO: Implement this as part of the angular services (don't exist yet).
+var finishStateChange = () => {
+  // Initiate first sync and start a timer if necessary, in order to
+  // rate-limit passes through the entire model & other checks.
+  if (!syncBlocked) {
+    syncBlocked = true;
+    rateLimitedUpdates();
+  }
+  if (!syncTimer) {
+    syncTimer = setTimeout(() => {
+      rateLimitedUpdates();
+      syncTimer = null;  // Allow future timers.
+      syncBlocked = false;
+    }, 5000);
+  }
+}
 
 function checkRunningProxy() {
   if (model && 'instances' in model) {
@@ -133,11 +82,41 @@ function checkRunningProxy() {
 }
 
 
-// This singleton is referenced in both options and popup.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
-if (undefined === ui) {
+/**
+ * Primary initialization of the Chrome Extension. Installs hooks so that
+ * updates from the Chrome App side propogate to the UI.
+ */
+function initUI() : UI.UserInterface {
+
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  ui = new UI.UserInterface(new ChromeNotifications(), core);
   core.connect();
-  prepareUpdateHooks();
+  var notifications = new ChromeNotifications();
+  var ui = new UI.UserInterface(notifications, core);
+
+  // Attach handlers for UPDATES received from core.
+  core.onUpdate(uProxy.Update.ALL, (state :Object) => {
+    console.log('Received uProxy.Update.ALL:', state);
+    // For resetting state, don't nuke |model| with the new object...
+    // (there are references to it for Angular) instead, replace keys so the
+    // angular $watch can catch up.
+    for (var k in model) {
+      delete model[k];
+    }
+    for (var k in state) {
+      model[k] = state[k];
+    }
+    console.log('model = ', model);
+    finishStateChange();
+  });
+
+  // TODO: Implement the rest of the fine-grained state updates.
+  // (We begin with the simplest, total state update, above.)
+
+  return ui;
+}
+
+console.log('Initializing chrome extension background page...');
+if (undefined === ui) {
+  ui = initUI();
 }
