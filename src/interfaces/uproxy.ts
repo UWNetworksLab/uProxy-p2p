@@ -13,7 +13,7 @@ module uProxy {
    * This fully describes the set of commands which Core must respond to.
    */
   export enum Command {
-    READY = 50,
+    READY = 1000,
     REFRESH,
     RESET,
     LOGIN,
@@ -29,7 +29,7 @@ module uProxy {
   }
 
   export enum Update {
-    ALL,
+    ALL = 2000,
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.

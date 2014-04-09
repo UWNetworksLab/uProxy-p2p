@@ -79,24 +79,24 @@ var prepareUpdateHooks = (port? :chrome.runtime.Port) => {
 
   // TODO: Implement the rest of the fine-grained state updates. We begin with
   // the simplest, total state update.
-  core.onUpdate(uProxy.Update.ALL, (data) => {
-    console.log('Received a FULL-STATE update.', data);
+  core.onUpdate(uProxy.Update.ALL, (state :Object) => {
+    console.log('Received uProxy.Update.ALL:', state);
+    // For resetting state, don't nuke |model| with the new object...
+    // (there are references to it for Angular) instead, replace keys so the
+    // angular $watch can catch up.
+    for (var k in model) {
+      delete model[k];
+    }
+    for (var k in state) {
+      model[k] = state[k];
+    }
+    console.log('model = ', model);
+    finishStateChange();
   });
 
   // A full state-refresh should occur whenever the extension first connects to
   // the App, or when the user does a full reset.
   // core.on('state-refresh', (state) => {
-    // For resetting state, don't nuke |model| with the new object...
-    // (there are references to it for Angular) instead, replace keys so the
-    // angular $watch can catch up.
-    // for (var k in model) {
-      // delete model[k];
-    // }
-    // for (var k in state) {
-      // model[k] = state[k];
-    // }
-    // console.log('state-refresh: model = ', model);
-    // finishStateChange();
   // });
 
   // Normal state-changes should modify some path inside |model|.

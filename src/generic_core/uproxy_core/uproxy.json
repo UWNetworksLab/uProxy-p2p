@@ -4,11 +4,11 @@
   "app": {
     "script": [
       "../scripts/uproxy.js",
+      "../scripts/view_oauth.js",
       "util.js",
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
-      "../scripts/view_oauth.js",
       "social.js",
       "core.js",
       "start-uproxy.js"

@@ -75,7 +75,6 @@ module.exports = function(grunt) {
          src: ['lodash/dist/lodash.js',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
-               'json-patch/jsonpatch.js',
                'angular-lodash/angular-lodash.js'],
          dest: 'build/generic_ui/lib'}
       ]},
@@ -267,8 +266,6 @@ module.exports = function(grunt) {
               'build/chrome_extension/scripts/chrome_glue.js'
             ]),
         options: {
-          // helpers: ['src/scraps/test/example-state.jsonvar',
-                    // 'src/scraps/test/example-saved-state.jsonvar'],
           keepRunner: true,
           outfile: 'test_output/_ChromeExtensionSpecRunner.html',
           specs: 'build/chrome_extension/scripts/**/*.spec.js'

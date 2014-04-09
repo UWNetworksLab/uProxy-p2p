@@ -8,6 +8,9 @@
  * TODO: Eliminate this someday, when we can make uProxy in chrome not be split
  * between an app and an extension.
  */
+
+console.log('Loaded Chrome App-Extension Glue.');
+
 module ChromeGlue {
 
   // Negotiation between Extension and App.

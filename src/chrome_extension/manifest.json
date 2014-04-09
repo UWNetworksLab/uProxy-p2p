@@ -14,11 +14,10 @@
     "persistent": true,
     "scripts": [
       "scripts/chrome_glue.js",
-      "scripts/core_connector.js",
-      "scripts/notify.js",
       "scripts/ui.js",
-      "lib/json-patch/jsonpatch.js",
+      "scripts/notify.js",
       "scripts/proxy-config.js",
+      "scripts/core_connector.js",
       "scripts/background.js"
     ]
   },

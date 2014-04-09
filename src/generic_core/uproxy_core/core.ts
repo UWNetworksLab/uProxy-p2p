@@ -48,8 +48,8 @@ var _memoizedInstanceMessage = null;
 //  General UI interaction
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
-  console.log('sending sendFullStateToUI state-change.', store.state);
-  bgAppPageChannel.emit('state-refresh', store.state);
+  console.log('sending ALL state to UI.', JSON.stringify(store.state));
+  Core.sendUpdate(uProxy.Update.ALL);
 }
 
 
@@ -68,12 +68,29 @@ function reset() {
  */
 module Core {
 
+  // TODO: Figure out cleaner way to make freedom handle enums-as-strings.
+
   /**
-   * Install a handler for a command from the UI.
+   * Install a handler for commands received from the UI.
    */
   export var onCommand = (cmd :uProxy.Command, handler:any) => {
-    // TODO: Figure out cleaner way to make freedom handle enums-as-strings
     bgAppPageChannel.on('' + cmd, handler);
+  }
+
+  /**
+   * Send an Update message to the UI.
+   */
+  export var sendUpdate = (update :uProxy.Update, data?:any) => {
+    switch(update) {
+      case uProxy.Update.ALL:
+        bgAppPageChannel.emit('' + update, store.state);
+        break
+
+      // TODO: Implement the finer-grained Update messages.
+      default:
+        console.warn('Not yet implemented.');
+        break;
+    }
   }
 
   /**
