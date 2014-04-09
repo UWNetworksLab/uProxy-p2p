@@ -117,46 +117,50 @@ module.exports = function(grunt) {
       ]},
 
       // Chrome extension. Assumes the top-level task generic_ui completed.
-      chrome_extension: {files: [
+      chrome_extension: {
+        nonull: true,
+        files: [
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
          src: ['freedom.js'],
          dest: 'build/chrome_extension/lib'},
         // The platform specific non-compiled stuff, and...
-        {expand: true, cwd: 'src/chrome_extension',
+        {expand: true, cwd: 'src/chrome/extension',
          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
-         dest: 'build/chrome_extension/'},
+         dest: 'build/chrome/extension/'},
         // ... the generic ui stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
-         dest: 'build/chrome_extension/'},
+         dest: 'build/chrome/extension/'},
         // app-extension glue.
         {expand: true, cwd: 'build/interfaces',
          src: ['uproxy.js', 'chrome_glue.js'],
-         dest: 'build/chrome_extension/scripts/'}
+         dest: 'build/chrome/extension/scripts/'}
       ]},
 
       // Chrome app. Assumes the top-level task generic_core completed.
-      chrome_app: {files: [
+      chrome_app: {
+        nonull: true,
+        files: [
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
          src: ['freedom-for-chrome.js'],
-         dest: 'build/chrome_app/lib'},
+         dest: 'build/chrome/app/lib'},
         // The platform specific stuff, and...
-        {expand: true, cwd: 'src/chrome_app',
+        {expand: true, cwd: 'src/chrome/app',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
-         dest: 'build/chrome_app/'},
+         dest: 'build/chrome/app/'},
         // ... the generic core stuff
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
-         dest: 'build/chrome_app/'},
+         dest: 'build/chrome/app/'},
         // app-extension glue.
         {expand: true, cwd: 'build/interfaces',
          src: ['uproxy.js', 'chrome_glue.js'],
-         dest: 'build/chrome_app/scripts/'},
+         dest: 'build/chrome/app/scripts/'},
         {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
          src: ['**'],
-         dest: 'build/chrome_app/lib/freedom-providers'}
+         dest: 'build/chrome/app/lib/freedom-providers'}
       ]},
 
       // Firefox. Assumes the top-level tasks generic_core and generic_ui
@@ -217,14 +221,14 @@ module.exports = function(grunt) {
 
       // uProxy chrome extension specific typescript
       chrome_extension: {
-        src: ['src/chrome_extension/**/*.ts'],
+        src: ['src/chrome/extension/**/*.ts'],
         dest: 'build/',
         options: { basePath: 'src/' }
       },
 
       // uProxy chrome app specific typescript
       chrome_app: {
-        src: ['src/chrome_app/**/*.ts',
+        src: ['src/chrome/app/**/*.ts',
               'src/interfaces/chrome_glue.ts'],
         dest: 'build/',
         options: { basePath: 'src/' }
@@ -262,13 +266,13 @@ module.exports = function(grunt) {
         src: FILES.jasminehelper
             .concat(FILES.jasmine_chrome)
             .concat([
-              'build/chrome_extension/scripts/core_connector.js',
-              'build/chrome_extension/scripts/chrome_glue.js'
+              'build/chrome/extension/scripts/core_connector.js',
+              'build/chrome/extension/scripts/chrome_glue.js'
             ]),
         options: {
           keepRunner: true,
           outfile: 'test_output/_ChromeExtensionSpecRunner.html',
-          specs: 'build/chrome_extension/scripts/**/*.spec.js'
+          specs: 'build/chrome/extension/scripts/**/*.spec.js'
         }
       },
       generic_core: {
