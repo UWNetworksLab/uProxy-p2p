@@ -3,7 +3,7 @@
  *
  * This is the Chrome-specific implementation of the Notifications API.
  */
-/// <reference path='../../interfaces/notify.d.ts' />
+/// <reference path='../../../interfaces/notify.d.ts' />
 
 class ChromeNotifications implements INotifications {
   ICON_DIR:string = 'icons/';

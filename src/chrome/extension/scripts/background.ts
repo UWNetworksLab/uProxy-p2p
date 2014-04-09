@@ -9,8 +9,7 @@
 
 /// <reference path='core_connector.ts' />
 
-/// <reference path='../../generic_ui/scripts/ui.ts' />
-/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 
 var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------

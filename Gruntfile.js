@@ -19,7 +19,7 @@ var TaskManager = require('./tools/taskmanager');
 
 // TODO: Move more file lists here.
 var FILES = {
-  jasminehelper: [
+  jasmine_helpers: [
     // Help Jasmine's PhantomJS understand promises.
     'node_modules/es6-promise/dist/promise-*.js',
     '!node_modules/es6-promise/dist/promise-*amd.js',
@@ -27,13 +27,13 @@ var FILES = {
   ],
   // Mocks for chrome app/extension APIs.
   jasmine_chrome: [
-    // TODO: Update the path after reorganizing chrome directories.
-    'build/mocks/chrome_mocks.js'
+    'build/chrome/test/chrome_mocks.js'
   ],
 };
 
 module.exports = function(grunt) {
   grunt.initConfig({
+
     'pkg': grunt.file.readJSON('package.json'),
 
     //-------------------------------------------------------------------------
@@ -42,10 +42,17 @@ module.exports = function(grunt) {
         command: 'bower install',
         options: {stdout: true, stderr: true, failOnError: true}
       },
+      // TODO: Get rid of this step once socks-rtc has this automatically done.
       socks_rtc_setup: {
         command: 'npm install;grunt',
         options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/socks-rtc'}}
       },
+      // Once compiled, take all .spec files out of the chrome extension and app
+      // directories and into the chrome/test directory, to keep a clean distro.
+      extract_chrome_tests: {
+        command: 'mkdir -p test; mv extension/scripts/*.spec.js test/',
+        options: { failOnError: true, execOptions: {cwd: 'build/chrome/' }}
+      }
     },
 
     //-------------------------------------------------------------------------
@@ -133,7 +140,7 @@ module.exports = function(grunt) {
          src: ['**'],
          dest: 'build/chrome/extension/'},
         // app-extension glue.
-        {expand: true, cwd: 'build/interfaces',
+        {expand: true, cwd: 'build/chrome/util',
          src: ['uproxy.js', 'chrome_glue.js'],
          dest: 'build/chrome/extension/scripts/'}
       ]},
@@ -155,7 +162,7 @@ module.exports = function(grunt) {
          src: ['**'],
          dest: 'build/chrome/app/'},
         // app-extension glue.
-        {expand: true, cwd: 'build/interfaces',
+        {expand: true, cwd: 'build/chrome/util',
          src: ['uproxy.js', 'chrome_glue.js'],
          dest: 'build/chrome/app/scripts/'},
         {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
@@ -219,19 +226,27 @@ module.exports = function(grunt) {
         dest: 'build/uistatic/',
       },
 
-      // uProxy chrome extension specific typescript
-      chrome_extension: {
-        src: ['src/chrome/extension/**/*.ts'],
+      // Compile typescript for all chrome components. This will do both the app
+      // and extension in one go, along with their specs, because they all share
+      // references to the same parts of uProxy. This avoids double-compiling,
+      // (which in this case, is beyond TaskManager's reach.)
+      // In the ideal world, there shouldn't be an App/Extension split.
+      // The shell:extract_chrome_tests will pull the specs outside of the
+      // actual distribution directory.
+      chrome: {
+        src: ['src/chrome/**/*.ts',
+              '!src/chrome/mocks/**'],
         dest: 'build/',
         options: { basePath: 'src/' }
       },
 
-      // uProxy chrome app specific typescript
-      chrome_app: {
-        src: ['src/chrome/app/**/*.ts',
-              'src/interfaces/chrome_glue.ts'],
-        dest: 'build/',
-        options: { basePath: 'src/' }
+      // Compile the Chrome mocks separately from above. Otherwise, there will
+      // be problematic mixing of Ambient / Non-Ambient contexts for things like
+      // the chrome.runtime declarations.
+      chrome_mocks: {
+        src: ['src/chrome/mocks/**/*.ts'],
+        dest: 'build/chrome/test/',
+        options: { basePath: 'src/chrome/mocks/' }
       },
 
       // uProxy firefox specific typescript
@@ -241,12 +256,6 @@ module.exports = function(grunt) {
         options: { basePath: 'src/firefox/' }
       },
 
-      // TODO: This is a temporary location for mocks. Needs to be reorganized.
-      mocks: {
-        src: ['src/scraps/test/**/*.ts'],
-        dest: 'build/mocks/',
-        options: { basePath: 'src/scraps/test/' }
-      },
     },
 
     //-------------------------------------------------------------------------
@@ -263,7 +272,7 @@ module.exports = function(grunt) {
     //-------------------------------------------------------------------------
     'jasmine': {
       chrome_extension: {
-        src: FILES.jasminehelper
+        src: FILES.jasmine_helpers
             .concat(FILES.jasmine_chrome)
             .concat([
               'build/chrome/extension/scripts/core_connector.js',
@@ -272,11 +281,11 @@ module.exports = function(grunt) {
         options: {
           keepRunner: true,
           outfile: 'test_output/_ChromeExtensionSpecRunner.html',
-          specs: 'build/chrome/extension/scripts/**/*.spec.js'
+          specs: 'build/chrome/test/**/*.spec.js'
         }
       },
       generic_core: {
-        src: FILES.jasminehelper
+        src: FILES.jasmine_helpers
             .concat([
               'src/scraps/test/freedom-mocks.js',
               'build/interfaces/uproxy.js',
@@ -316,13 +325,14 @@ module.exports = function(grunt) {
           archive: 'dist/uproxy.xpi'
         },
         expand: true,
-        cwd: "build/firefox",
+        cwd: 'build/firefox',
         src: ['**'],
         dest: '.'
       }
     },
 
   });  // grunt.initConfig
+
 
   //---------------------------------------------------------------------------
   // Helper function for watch.
@@ -336,7 +346,7 @@ module.exports = function(grunt) {
       file.src.map(function(s) { srcs.push(file.cwd + '/' + s); });
     });
     if(srcs == []) {
-      throw("makeSrcOfFiles failed for: " + files_config_property);
+      throw('makeSrcOfFiles failed for: ' + files_config_property);
     }
     return srcs;
   }
@@ -348,6 +358,10 @@ module.exports = function(grunt) {
     typescript_generic_core: {
       files: '<%= typescript.generic_core.src %>',
       tasks: ['typescript:generic_core']
+    },
+    typescript_chrome: {
+      files: '<%= typescript.chrome.src %>',
+      tasks: ['typescript:chrome']
     },
     typescript_chrome_app: {
       files: '<%= typescript.chrome_app.src %>',
@@ -439,21 +453,13 @@ module.exports = function(grunt) {
     'copy:uistatic'
   ]);
 
-  taskManager.add('build_chrome_extension', [
-    'build_generic_ui',
-    'typescript:chrome_extension',
-    'copy:chrome_extension',
-  ]);
-
-  taskManager.add('build_chrome_app', [
-    'build_generic_core',
-    'typescript:chrome_app',
-    'copy:chrome_app',
-  ]);
-
+  // The Chrome App and the Chrome Extension cannot be built separately. They
+  // share dependencies, which implies a directory structure.
   taskManager.add('build_chrome', [
-    'build_chrome_extension',
-    'build_chrome_app'
+    'typescript:chrome',
+    'copy:chrome_app',
+    'copy:chrome_extension',
+    'shell:extract_chrome_tests'
   ]);
 
   // Firefox build tasks.
@@ -464,8 +470,8 @@ module.exports = function(grunt) {
   ]);
 
   taskManager.add('build_firefox_xpi', [
-    "build_firefox",
-    "compress:main"
+    'build_firefox',
+    'compress:main'
   ]);
 
   taskManager.add('run_firefox', [
@@ -479,8 +485,8 @@ module.exports = function(grunt) {
   ]);
 
   taskManager.add('test_chrome_extension', [
-    'typescript:mocks',
-    'build_chrome_extension',
+    'build_chrome',
+    'typescript:chrome_mocks',
     'jasmine:chrome_extension'
   ]);
 
@@ -502,8 +508,8 @@ module.exports = function(grunt) {
   taskManager.add('default', ['build']);
 
   taskManager.list().forEach(function(n) {
-    console.log("\n * " + n + ": " + taskManager.get(n).join(", "));
-    console.log(" * " + n + "(unflat): " + taskManager.getUnflattened(n).join(", "));
+    console.log('\n * ' + n + ': ' + taskManager.get(n).join(', '));
+    console.log(' * ' + n + '(unflat): ' + taskManager.getUnflattened(n).join(', '));
   });
 
   //-------------------------------------------------------------------------
