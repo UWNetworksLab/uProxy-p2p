@@ -73,9 +73,9 @@ describe('core-connector', () => {
     });
     // Short-circuit postMessage to pretend Chrome App ACKS correctly.
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      expect(port.postMessage).toHaveBeenCalledWith('hi');
+      expect(port.postMessage).toHaveBeenCalledWith(ChromeGlue.CONNECT);
       expect(acker).not.toBeNull();
-      acker(ChromeGlue.HELLO);
+      acker(ChromeGlue.ACK);
     });
 
     // Capture the disconnection fulfillment or next spec.
@@ -87,6 +87,7 @@ describe('core-connector', () => {
     expect(connector.status.connected).toEqual(false);
     connector.connect().then((p :chrome.runtime.Port) => {
       expect(connector['appPort_']).not.toBeNull();
+      console.log(p);
       expect(connector['appPort_']).toEqual(p);
       expect(port.onMessage.removeListener).toHaveBeenCalled();
       expect(connector.status.connected).toEqual(true);
@@ -100,7 +101,7 @@ describe('core-connector', () => {
     expect(disconnect).not.toBeNull();
     connector.onceDisconnected().then(() => {
       expect(connector.status.connected).toEqual(false);
-      expect(connector['appPort_']).toBeFalsy();
+      expect(connector['appPort_']).toBeNull();
       expect(connector['listeners_']).toEqual({});
     }).then(done);
     // Catch re-connect() attempt for next spec.
@@ -146,7 +147,7 @@ describe('core-connector', () => {
       acker = handler;
     });
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      acker(ChromeGlue.HELLO);
+      acker(ChromeGlue.ACK);
     });
     // Spy the queue flusher for the next spec.
     spyOn(connector, 'flushQueue').and.callFake(() => {
@@ -175,5 +176,18 @@ describe('core-connector', () => {
         { cmd: 'test2', type: 2 }
     ]);
   });
+
+  it('onUpdate calls send.', () => {
+    spyOn(connector, 'send_');
+    // TODO: Cannot use the uProxy.Update enum until the 'common' communications
+    // connector.onUpdate(uProxy.Update.ALL, () => {});
+    // typescript file is ready.
+    // expect(connector['send_']).toHaveBeenCalledWith({
+      // cmd: 'on',
+      // type: uProxy.Update.ALL
+    // });
+  });
+
+  // TODO: Test the rest of the Update and Command functionality.
 
 });

@@ -79,8 +79,8 @@ var prepareUpdateHooks = (port? :chrome.runtime.Port) => {
 
   // TODO: Implement the rest of the fine-grained state updates. We begin with
   // the simplest, total state update.
-  core.onUpdate(uProxy.Update.ALL, () => {
-    console.log('Received a FULL-STATE update.');
+  core.onUpdate(uProxy.Update.ALL, (data) => {
+    console.log('Received a FULL-STATE update.', data);
   });
 
   // A full state-refresh should occur whenever the extension first connects to
@@ -133,22 +133,11 @@ function checkRunningProxy() {
 }
 
 
-var connectToApp = () => {
-  // Connect this Chrome Extension to the Chrome app.
-  core.connect()
-      .then(prepareUpdateHooks)
-      .then(() => {
-        // Tell the uProxy Core. to send us a state-refresh.
-        console.log('UI <------> APP wired.');
-        core.sendCommand(uProxy.Command.READY);
-      });
-}
-
 // This singleton is referenced in both options and popup.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 if (undefined === ui) {
-
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   ui = new UI.UserInterface(new ChromeNotifications(), core);
-  connectToApp();
+  core.connect();
+  prepareUpdateHooks();
 }

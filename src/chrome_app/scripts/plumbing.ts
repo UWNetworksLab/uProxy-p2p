@@ -44,7 +44,7 @@ chrome.runtime.onConnectExternal.addListener((port) => {
   // sucessfully connects, the extension depends on a message to come back to
   // it form here, the app, so it knows the connection was successful and the
   // app is indeed present.
-  extPort.postMessage(ChromeGlue.HELLO);
+  extPort.postMessage(ChromeGlue.ACK);
   extPort.onMessage.addListener(onExtMsg);
 
   for (var i = 0; i < pendingMsgs.length; i++) {
@@ -59,11 +59,11 @@ chrome.runtime.onConnectExternal.addListener((port) => {
 function onExtMsg(msg) {
   console.log('extension message: ', msg);
 
-  // Pass 'emit's from the UI to Core.
+  // Pass 'emit's from the UI to Core. These are uProxy.Commands.
   if ('emit' == msg.cmd) {
     uProxyAppChannel.emit(msg.type, msg.data);
 
-  // Install 'on' handlers by request from the UI.
+  // Install onUpdate handlers by request from the UI.
   } else if ('on' == msg.cmd) {
     if (installedFreedomHooks.indexOf(msg.type) >= 0) {
       console.log('freedom already has a hook for ' + msg.type);

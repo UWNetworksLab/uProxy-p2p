@@ -10,7 +10,9 @@
  */
 module ChromeGlue {
 
-  export var HELLO :string = 'hello.';
+  // Negotiation between Extension and App.
+  export var CONNECT :string = 'connect';
+  export var ACK :string = 'ack';
 
   /**
    * Common type for the message payloads sent between the App and the

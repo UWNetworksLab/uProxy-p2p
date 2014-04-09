@@ -75,8 +75,10 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
   public connect = () : Promise<chrome.runtime.Port> => {
-    var connectPromise = this.connect_()
-        .then(this.flushQueue);
+    var connectPromise = this.connect_().then(this.flushQueue);
+    connectPromise.then(() => {
+      this.sendCommand(uProxy.Command.READY);
+    });
     // Separate the promise chain which deals with polling, since the user
     // only cares about the initial success.
     connectPromise
@@ -115,27 +117,29 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     }
     this.appPort_ = chrome.runtime.connect(this.appId_, this.options_);
     if (!this.appPort_) {
+      this.appPort_ = null;
       return Promise.reject(new Error('Unable to connect to App.'));
     }
-
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
       var ackResponse :Function = (msg :string) => {
-        if (ChromeGlue.HELLO !== msg) {
+        if (ChromeGlue.ACK !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
         // Replace message listener for the updating mechanism.
         // TODO: Merge the ack-response into the same format as the other
         // payloads so that we don't need to swap out the handler.
+        console.log(this.appPort_);
         this.appPort_.onMessage.removeListener(ackResponse);
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         F(this.appPort_);
+        console.log('Connected to app.');
       };
       this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
-      this.appPort_.postMessage('hi');
+      this.appPort_.postMessage(ChromeGlue.CONNECT);
 
     }).catch((e) => {
       console.log(e);
@@ -163,7 +167,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         this.appPort_.disconnect();
         this.appPort_ = null;
       }
-      this.listeners_ = {};
     });
     this.appPort_.onDisconnect.addListener(fulfillDisconnect);
   }
@@ -174,9 +177,9 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
 
   /**
    * Attach handlers for updates emitted from the uProxy Core.
-   * This works whether or not Core is actually connected. If disconnected, it
-   * queues the handler message to be sent on the next successful connection.
    *
+   * These handlers persist through disconnections and reconnections, and may be
+   * installed whether or not the Extension is currently connected to the App.
    */
   public onUpdate = (update :uProxy.Update, handler :Function) => {
     var type = '' + update;
@@ -188,6 +191,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       cmd: 'on',
       type: update
     };
+    console.log('UI onUpdate for', JSON.stringify(payload));
     this.send_(payload);
   }
 
@@ -201,6 +205,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       type: command,
       data: data
     }
+    console.log('UI sending Command: ', JSON.stringify(payload));
     this.send_(payload);
   }
 
