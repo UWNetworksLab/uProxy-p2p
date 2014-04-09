@@ -9,7 +9,7 @@
       "state-storage.js",
       "../scripts/view_oauth.js",
       "social.js",
-      "uproxy.js",
+      "core.js",
       "start-uproxy.js"
     ]
   },
