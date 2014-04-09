@@ -5,7 +5,6 @@
  * loaded.
  */
 /// <reference path='../../interfaces/uproxy.ts' />
-/// <reference path='../../interfaces/core.d.ts' />
 /// <reference path='../../interfaces/chrome_glue.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 
@@ -23,7 +22,7 @@ var EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 var uProxyAppChannel = freedom;  // Guaranteed to exist.
 uProxyAppChannel.on('' + uProxy.Command.READY, () => {
-  console.log('uproxy.js is ready!');
+  console.log('uProxy is ready!');
 });
 
 // Called when an extension connects to the app.

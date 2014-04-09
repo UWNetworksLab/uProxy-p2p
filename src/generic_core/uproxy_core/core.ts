@@ -10,7 +10,6 @@
  *  - Instances, which is a list of active UProxy installs.
  */
 /// <reference path='../../interfaces/uproxy.ts'/>
-/// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='state-storage.ts' />
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />

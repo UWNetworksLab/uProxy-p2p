@@ -8,7 +8,7 @@
 // Assumes that core_stub.ts has been loaded.
 
 /// <reference path='core_connector.ts' />
-/// <reference path='../../interfaces/core.d.ts' />
+
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts' />
 
@@ -92,7 +92,6 @@ function initUI() : UI.UserInterface {
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   core.connect();
   var notifications = new ChromeNotifications();
-  var ui = new UI.UserInterface(notifications, core);
 
   // Attach handlers for UPDATES received from core.
   core.onUpdate(uProxy.Update.ALL, (state :Object) => {
@@ -113,7 +112,7 @@ function initUI() : UI.UserInterface {
   // TODO: Implement the rest of the fine-grained state updates.
   // (We begin with the simplest, total state update, above.)
 
-  return ui;
+  return new UI.UserInterface(core, notifications);
 }
 
 console.log('Initializing chrome extension background page...');

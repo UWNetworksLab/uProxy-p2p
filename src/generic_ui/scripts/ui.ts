@@ -4,9 +4,8 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
-/// <reference path='../../interfaces/core.d.ts'/>
+/// <reference path='../../interfaces/uproxy.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
-/// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 
 declare var model         :any;
@@ -40,8 +39,11 @@ module UI {
     /**
      * UI must be constructed with hooks to Notifications and Core.
      */
-    constructor(public notify:INotifications,
-                public core:uProxy.CoreAPI) {}
+    constructor(
+        public core   :uProxy.CoreAPI,
+        public notify :INotifications) {
+      console.log('Created the UserInterface');
+    }
 
     // Keep track of currently viewed contact and instance.
     contact = null;

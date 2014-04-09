@@ -194,8 +194,8 @@ module.exports = function(grunt) {
       // uProxy UI without any platform dependencies
       generic_ui: {
         src: ['src/generic_ui/**/*.ts'],
-        dest: 'build/generic_ui',
-        options: { basePath: 'src/generic_ui/' }
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // Core uProxy without any platform dependencies

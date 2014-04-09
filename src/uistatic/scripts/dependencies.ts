@@ -1,7 +1,6 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../../interfaces/core.d.ts'/>
+/// <reference path='../../interfaces/uproxy.ts' />
 /// <reference path='../../interfaces/notify.d.ts'/>
-/// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
@@ -61,8 +60,8 @@ class MockCore implements uProxy.CoreAPI {
 
 var mockCore = new MockCore();
 var ui :uProxy.UIAPI = new UI.UserInterface(
-    new MockNotifications(),
-    mockCore);
+    mockCore,
+    new MockNotifications());
 
 var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
@@ -80,4 +79,4 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .constant('onStateChange', null)
   .constant('ui', ui)
   .constant('model', model)
-  .constant('roster', null)
+  .constant('roster', null);
