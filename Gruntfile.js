@@ -409,6 +409,8 @@ module.exports = function(grunt) {
 
   //-------------------------------------------------------------------------
   // Define tasks. We use TaskManager to avoid pointless re-compilation.
+  // TODO: Make TaskManager understand timestamps so it avoids re-compliation
+  // things that have not been modified between compilations.
   var taskManager = new TaskManager.Manager();
 
   taskManager.add('setup', [
@@ -467,15 +469,15 @@ module.exports = function(grunt) {
     'mozilla-cfx:debug_run'
   ]);
 
+  taskManager.add('test_core', [
+    'build_generic_core',
+    'jasmine:generic_core'
+  ]);
+
   taskManager.add('test_chrome_extension', [
     'typescript:mocks',
     'build_chrome_extension',
     'jasmine:chrome_extension'
-  ]);
-
-  taskManager.add('test_core', [
-    'build_generic_core',
-    'jasmine:generic_core'
   ]);
 
   taskManager.add('test', [
@@ -488,10 +490,9 @@ module.exports = function(grunt) {
     'build_chrome_extension',
     'build_firefox',
     'build_uistatic',
-    'test'
   ]);
 
-  taskManager.add('everything', ['setup', 'build']);
+  taskManager.add('everything', ['setup', 'build', 'test']);
 
   // Default task(s).
   taskManager.add('default', ['build']);

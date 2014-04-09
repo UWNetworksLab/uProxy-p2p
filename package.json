@@ -36,6 +36,6 @@
     "typescript": "~0.9.7"
   },
   "scripts": {
-    "test": "grunt --verbose"
+    "test": "grunt test --verbose"
   }
 }
