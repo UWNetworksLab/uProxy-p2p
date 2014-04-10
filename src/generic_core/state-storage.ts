@@ -3,8 +3,8 @@
  * To see the format used by localstorage, see the file:
  *   scraps/local_storage_example.js
  */
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='constants.ts' />
 
 declare var cloneDeep:any;

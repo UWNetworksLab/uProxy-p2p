@@ -1,6 +1,6 @@
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 /**
  * Social - interactions for network-specific social providers.

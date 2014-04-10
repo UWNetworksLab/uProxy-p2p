@@ -4,7 +4,7 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
-/// <reference path='../../interfaces/uproxy.ts'/>
+/// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
 

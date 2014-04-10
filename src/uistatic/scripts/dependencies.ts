@@ -1,5 +1,5 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../../interfaces/uproxy.ts' />
+/// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 

@@ -9,13 +9,14 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active UProxy installs.
  */
-/// <reference path='../../interfaces/uproxy.ts'/>
+/// <reference path='../uproxy.ts'/>
 /// <reference path='state-storage.ts' />
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />
-
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
+// TODO: Create a copy rule which automatically moves all third_party
+// typescript declarations to a nicer path.
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
 // TODO: remove these once these 'modules' become typescripted.
 declare var store :Core.State;

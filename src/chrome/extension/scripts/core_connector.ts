@@ -3,7 +3,7 @@
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
-/// <reference path='../../../interfaces/uproxy.ts'/>
+/// <reference path='../../../uproxy.ts'/>
 /// <reference path='../../util/chrome_glue.ts' />
 
 /// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />

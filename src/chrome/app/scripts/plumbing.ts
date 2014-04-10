@@ -4,7 +4,7 @@
  * This file must be included *after* the freedom script and manifest are
  * loaded.
  */
-/// <reference path='../../../interfaces/uproxy.ts' />
+/// <reference path='../../../uproxy.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
 
 // The port that the extension connects to.
