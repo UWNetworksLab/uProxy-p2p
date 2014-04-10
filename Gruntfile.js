@@ -157,11 +157,11 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'src/chrome/app',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome/app/'},
-        // ... the generic core stuff
+        // ... the generic Core (no specs).
         {expand: true, cwd: 'build/generic_core',
-         src: ['**'],
-         dest: 'build/chrome/app/'},
-        // app-extension glue.
+         src: ['**', '!**/*.spec.js'],
+         dest: 'build/chrome/app/scripts/uproxy'},
+        // Include Chrome app-extension glue.
         {expand: true, cwd: 'build/chrome/util',
          src: ['uproxy.js', 'chrome_glue.js'],
          dest: 'build/chrome/app/scripts/'},
@@ -211,8 +211,7 @@ module.exports = function(grunt) {
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ['src/generic_core/**/*.ts',
-              'src/interfaces/uproxy.ts'],
+        src: ['src/generic_core/**/*.ts'],
         dest: 'build/',
         options: { basePath: 'src/' }
       },
@@ -496,8 +495,7 @@ module.exports = function(grunt) {
   ]);
 
   taskManager.add('build', [
-    'build_chrome_app',
-    'build_chrome_extension',
+    'build_chrome',
     'build_firefox',
     'build_uistatic',
   ]);
