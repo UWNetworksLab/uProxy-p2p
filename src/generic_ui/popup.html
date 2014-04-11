@@ -25,11 +25,11 @@
       </div>
       <span class="description">Safe Passage for the Web.</span>
 
-      <div class="app-missing-warning" ng-hide="ui.isConnected">
+      <div class="app-missing-warning" ng-hide="ui.core.status.connected">
         You need to install the UProxy app as well as the UProxy extension.
       </div>
 
-      <div ng-show="ui.isConnected">
+      <div ng-show="ui.core.status.connected">
         <input type="text" ng-model="model.me.description"
             id="my-description"
             placeholder="Device description"

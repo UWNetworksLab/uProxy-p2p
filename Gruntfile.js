@@ -25,16 +25,10 @@ var FILES = {
     '!node_modules/es6-promise/dist/promise-*amd.js',
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ],
-  jasminesrc: [
-    // Required files for testing.
-    'src/scraps/test/freedom-mocks.js',
-    'build/generic_core/uproxy_core/util.js',
-    'build/generic_core/uproxy_core/nouns-and-adjectives.js',
-    'build/generic_core/uproxy_core/constants.js',
-    'build/generic_core/uproxy_core/state-storage.js',
-    'build/generic_core/uproxy_core/social.js',
-    'build/generic_core/uproxy_core/uproxy.js',
-    'build/generic_core/uproxy_core/start-uproxy.js'
+  // Mocks for chrome app/extension APIs.
+  jasmine_chrome: [
+    // TODO: Update the path after reorganizing chrome directories.
+    'build/mocks/chrome_mocks.js'
   ],
 };
 
@@ -81,7 +75,6 @@ module.exports = function(grunt) {
          src: ['lodash/dist/lodash.js',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
-               'json-patch/jsonpatch.js',
                'angular-lodash/angular-lodash.js'],
          dest: 'build/generic_ui/lib'}
       ]},
@@ -89,7 +82,7 @@ module.exports = function(grunt) {
       generic_core: {files: [
         // Non-compiled generic stuff
         {expand: true, cwd: 'src/generic_core',
-         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         src: ['**', '!**.spec.js', '!**.spec.ts', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/generic_core'},
         // Icons
         {expand: true, cwd: 'src',
@@ -131,19 +124,23 @@ module.exports = function(grunt) {
          dest: 'build/chrome_extension/lib'},
         // The platform specific non-compiled stuff, and...
         {expand: true, cwd: 'src/chrome_extension',
-         src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
+         src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome_extension/'},
         // ... the generic ui stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
-         dest: 'build/chrome_extension/'}
+         dest: 'build/chrome_extension/'},
+        // app-extension glue.
+        {expand: true, cwd: 'build/interfaces',
+         src: ['uproxy.js', 'chrome_glue.js'],
+         dest: 'build/chrome_extension/scripts/'}
       ]},
 
       // Chrome app. Assumes the top-level task generic_core completed.
       chrome_app: {files: [
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
-         src: ['freedom.js'],
+         src: ['freedom-for-chrome.js'],
          dest: 'build/chrome_app/lib'},
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/chrome_app',
@@ -153,6 +150,10 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
          dest: 'build/chrome_app/'},
+        // app-extension glue.
+        {expand: true, cwd: 'build/interfaces',
+         src: ['uproxy.js', 'chrome_glue.js'],
+         dest: 'build/chrome_app/scripts/'},
         {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
          src: ['**'],
          dest: 'build/chrome_app/lib/freedom-providers'}
@@ -193,15 +194,16 @@ module.exports = function(grunt) {
       // uProxy UI without any platform dependencies
       generic_ui: {
         src: ['src/generic_ui/**/*.ts'],
-        dest: 'build/generic_ui',
-        options: { basePath: 'src/generic_ui/' }
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ['src/generic_core/**/*.ts'],
-        dest: 'build/generic_core/',
-        options: { basePath: 'src/generic_core/' }
+        src: ['src/generic_core/**/*.ts',
+              'src/interfaces/uproxy.ts'],
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uistatic specific typescript
@@ -216,15 +218,16 @@ module.exports = function(grunt) {
       // uProxy chrome extension specific typescript
       chrome_extension: {
         src: ['src/chrome_extension/**/*.ts'],
-        dest: 'build/chrome_extension/',
-        options: { basePath: 'src/chrome_extension/' }
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uProxy chrome app specific typescript
       chrome_app: {
-        src: ['src/chrome_app/**/*.ts'],
-        dest: 'build/chrome_app/',
-        options: { basePath: 'src/chrome_app/' }
+        src: ['src/chrome_app/**/*.ts',
+              'src/interfaces/chrome_glue.ts'],
+        dest: 'build/',
+        options: { basePath: 'src/' }
       },
 
       // uProxy firefox specific typescript
@@ -232,6 +235,13 @@ module.exports = function(grunt) {
         src: ['src/firefox/**/*.ts'],
         dest: 'build/firefox/',
         options: { basePath: 'src/firefox/' }
+      },
+
+      // TODO: This is a temporary location for mocks. Needs to be reorganized.
+      mocks: {
+        src: ['src/scraps/test/**/*.ts'],
+        dest: 'build/mocks/',
+        options: { basePath: 'src/scraps/test/' }
       },
     },
 
@@ -248,16 +258,38 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'jasmine': {
-      generic_core: {
-        // Files being tested
+      chrome_extension: {
         src: FILES.jasminehelper
-              .concat(FILES.jasminesrc),
+            .concat(FILES.jasmine_chrome)
+            .concat([
+              'build/chrome_extension/scripts/core_connector.js',
+              'build/chrome_extension/scripts/chrome_glue.js'
+            ]),
+        options: {
+          keepRunner: true,
+          outfile: 'test_output/_ChromeExtensionSpecRunner.html',
+          specs: 'build/chrome_extension/scripts/**/*.spec.js'
+        }
+      },
+      generic_core: {
+        src: FILES.jasminehelper
+            .concat([
+              'src/scraps/test/freedom-mocks.js',
+              'build/interfaces/uproxy.js',
+              'build/generic_core/uproxy_core/util.js',
+              'build/generic_core/uproxy_core/nouns-and-adjectives.js',
+              'build/generic_core/uproxy_core/constants.js',
+              'build/generic_core/uproxy_core/state-storage.js',
+              'build/generic_core/uproxy_core/social.js',
+              'build/generic_core/uproxy_core/core.js',
+              'build/generic_core/uproxy_core/start-uproxy.js'
+            ]),
         options: {
           helpers: ['src/scraps/test/example-state.jsonvar',
                     'src/scraps/test/example-saved-state.jsonvar'],
-          specs: 'src/generic_core/uproxy_core/**/*.spec.js',
           keepRunner: true,
-          outfile: 'test_output/_SpecRunner.html'
+          outfile: 'test_output/_CoreSpecRunner.html',
+          specs: 'src/generic_core/uproxy_core/**/*.spec.js'
         }
       }
     },
@@ -364,19 +396,21 @@ module.exports = function(grunt) {
   });
 
   //-------------------------------------------------------------------------
-  grunt.loadNpmTasks('grunt-contrib-copy');
+  // These should match exactly with those listed in package.json.
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-typescript');
 
-
   //-------------------------------------------------------------------------
   // Define tasks. We use TaskManager to avoid pointless re-compilation.
+  // TODO: Make TaskManager understand timestamps so it avoids re-compliation
+  // things that have not been modified between compilations.
   var taskManager = new TaskManager.Manager();
 
   taskManager.add('setup', [
@@ -435,9 +469,20 @@ module.exports = function(grunt) {
     'mozilla-cfx:debug_run'
   ]);
 
-  taskManager.add('test', [
+  taskManager.add('test_core', [
     'build_generic_core',
     'jasmine:generic_core'
+  ]);
+
+  taskManager.add('test_chrome_extension', [
+    'typescript:mocks',
+    'build_chrome_extension',
+    'jasmine:chrome_extension'
+  ]);
+
+  taskManager.add('test', [
+    'test_core',
+    'test_chrome_extension'
   ]);
 
   taskManager.add('build', [
@@ -445,10 +490,9 @@ module.exports = function(grunt) {
     'build_chrome_extension',
     'build_firefox',
     'build_uistatic',
-    'test'
   ]);
 
-  taskManager.add('everything', ['setup', 'build']);
+  taskManager.add('everything', ['setup', 'build', 'test']);
 
   // Default task(s).
   taskManager.add('default', ['build']);

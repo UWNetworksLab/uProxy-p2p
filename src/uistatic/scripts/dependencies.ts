@@ -1,11 +1,11 @@
 // Fake dependency which mocks all interactions such that the UI can work.
-/// <reference path='../../generic_ui/scripts/ui.d.ts'/>
-/// <reference path='../../generic_core/uproxy_core/core.d.ts'/>
-/// <reference path='../../generic_ui/scripts/notify.d.ts'/>
+/// <reference path='../../interfaces/uproxy.ts' />
+/// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
-// declare var ui:any;
+// TODO: Type these.
 declare var state:any;
 declare var angular:any;
 
@@ -24,14 +24,8 @@ class MockNotifications implements INotifications {
   }
 }
 
-class MockCore implements Interfaces.ICore {
+class MockCore implements uProxy.CoreAPI {
   constuctor() {}
-  onConnected() {
-    console.log('Fake onConnected! :D');
-  }
-  onDisconnected() {
-    console.log('Fake onConnected! :D');
-  }
   reset() {
     console.log('Resetting.');
   }
@@ -59,14 +53,15 @@ class MockCore implements Interfaces.ICore {
   logout(network) {
     console.log('Logging out of', network);
   }
-  notificationSeen(userId) {
+  dismissNotification(userId) {
     console.log('Notification seen for ' + userId);
   }
 }
 
 var mockCore = new MockCore();
-var ui:IUI = new UI(new MockNotifications(), mockCore);
-mockCore.onConnected();
+var ui :uProxy.UIAPI = new UI.UserInterface(
+    mockCore,
+    new MockNotifications());
 
 var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
@@ -84,4 +79,4 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .constant('onStateChange', null)
   .constant('ui', ui)
   .constant('model', model)
-  .constant('roster', null)
+  .constant('roster', null);

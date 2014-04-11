@@ -3,13 +3,14 @@
   "description": "The UProxy backend provides a mesh web proxy, access the web through your social connections.",
   "app": {
     "script": [
+      "../scripts/uproxy.js",
+      "../scripts/view_oauth.js",
       "util.js",
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
-      "../js/view_oauth.js",
       "social.js",
-      "uproxy.js",
+      "core.js",
       "start-uproxy.js"
     ]
   },
