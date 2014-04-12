@@ -63,7 +63,7 @@ module.exports = function(grunt) {
               '.grunt',
               'node_modules',
               'test_output',
-              'external_lib/bower_components'],
+              'third_party/lib'],
 
     //-------------------------------------------------------------------------
     'copy': {
@@ -78,7 +78,7 @@ module.exports = function(grunt) {
          src: ['icons/**'],
          dest: 'build/generic_ui'},
         // Libraries
-        {expand: true, cwd: 'external_lib/bower_components/',
+        {expand: true, cwd: 'third-party/lib/',
          src: ['lodash/dist/lodash.js',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
