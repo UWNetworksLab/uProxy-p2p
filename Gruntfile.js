@@ -132,7 +132,10 @@ module.exports = function(grunt) {
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
          src: ['freedom.js'],
-         dest: 'build/chrome_extension/lib'},
+         dest: 'build/chrome/extension/lib'},
+        {expand: true, cwd: 'third_party/lib',
+         src: ['**/*.js'],
+         dest: 'build/chrome/extension/lib'},
       ]},
 
       // Copy dependencies for the Chrome app.
