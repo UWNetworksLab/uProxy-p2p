@@ -317,7 +317,7 @@ module.exports = function(grunt) {
                     'src/scraps/test/example-saved-state.jsonvar'],
           keepRunner: true,
           outfile: 'test_output/_CoreSpecRunner.html',
-          specs: 'src/generic_core/**/*.spec.js'
+          specs: 'build/generic_core/**/*.spec.js'
         }
       }
     },
