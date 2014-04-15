@@ -1,3 +1,8 @@
+/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+
+declare var TESTDATA_EXAMPLE_STATE :Object;
+declare var TESTDATA_EXAMPLE_SAVED_STATE :Object;
+
 // Note: this doesn't work when debugging in chrome: it hits the content
 // security policy.
 function readJsonFile(location) {
