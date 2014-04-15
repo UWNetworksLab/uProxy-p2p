@@ -32,11 +32,15 @@ Sass).
 
 `firefox/` contains all the uProxy code specific to Firefox.
 
-`uistatic/` contains all the uProxy code specific to Firefox.
+`uistatic/` contains all the uProxy code for the user interface, such that it is
+independent of the Core. In this directory, uProxy's Core is mocked out, with
+fake state and handlers, so that one can test the UI as a standalone static
+webpage.
 
 `interfaces/` contains strictly `d.ts` files which declare Typescript
 interfaces that allow type checking. These only provide compile-time checking -
-they do not generate actual javascript files.
+they do not generate actual javascript files. The interfaces are referenced in
+multiple components.
 
 `interfaces/lib` contains third party `d.ts` files for quality type checking
 with external libraries, i.e. from
