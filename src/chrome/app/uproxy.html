@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>uProxy - APP</title>
+    <script type='text/javascript' src='scripts/manual_dialog.js'></script>
+    <script type='text/javascript' src='scripts/auth_google.js'></script>
+    <script type='text/javascript' src='scripts/auth_facebook.js'></script>
+    <script type='text/javascript' src='scripts/auth_xmpp.js'></script>
+    <script type='text/javascript' src='scripts/view_oauth.js'></script>
+    <script type='text/javascript' src='scripts/chrome_glue.js'></script>
+    <script type='text/javascript' src='scripts/freedom-config.js'></script>
+    <script src='lib/freedom-for-chrome.js'
+            data-manifest='scripts/uproxy.json'>
+      {
+        "strongIsolation": true,
+        "stayLocal": true,
+        "debug": false
+      }
+    </script>
+    <script type='text/javascript' src='scripts/plumbing.js'></script>
+    <script type='text/javascript' src='scripts/background.js'></script>
+  </head>
+  <body>
+    The uProxy App lives here.
+  </body>
+</html>

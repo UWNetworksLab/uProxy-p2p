@@ -1,23 +1,30 @@
 UProxy
 ======
 
-uProxy is a broswer extension that lets users share their internet connection.
+[uProxy](uproxy.org) is a broswer extension that lets users share their internet
+connection.
 
-See the [WHATS_WHAT_README](https://github.com/UWNetworksLab/UProxy/blob/master/WHATS_WHAT_README.md) for more details on the directory layout.
+See the
+[WHATS_WHAT_README](https://github.com/UWNetworksLab/UProxy/blob/master/WHATS_WHAT_README.md)
+for details on the directory layout and why it's structured that way..
 
 
 ### Tools
 
 UProxy is built using the following tools:
 
- - We use [Grunt](http://gruntjs.com/) as the build system.
- - We have now committed to writing our JavaScript as [TypeScript](http://www.typescriptlang.org/), this does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
- - We use [Jasmine](http://pivotal.github.io/jasmine/) to write, run and do unit tests.
-We use git submodule to include the freedom library into uproxy.
- - We use [Bower](http://bower.io) to install libraries that we use in the UI (specified in `bower.json`) including AngularJS.
- - We use [AngularJS](http://angularjs.org) for UI coding
- - We use npm for installing node modules that we use for our build process (Specified in the package.json)
- - We use [sass](http://sass-lang.com/) to write css in a nicer way.
+ - [TypeScript](http://www.typescriptlang.org/) as the primary language, which
+   compiles to JavaScript. This does type checking and has some syntax
+   improvements on JS, while letting us incrementally migrate and easily include
+   external JS packages and frameworks.
+ - [Grunt](http://gruntjs.com/) as the build system.
+ - We use [Jasmine](http://pivotal.github.io/jasmine/) for testing.
+ - We use [Bower](http://bower.io) to install libraries that we use in the UI
+   (specified in `bower.json`) including AngularJS.
+ - [AngularJS](http://angularjs.org) for UI coding.
+ - [npm](https://www.npmjs.org/) for installing node modules that we use for our
+   build process.  (Specified in `package.json`)
+ - [sass](http://sass-lang.com/) to write css more beautifully.
 
 
 ### Development setup
@@ -25,11 +32,15 @@ We use git submodule to include the freedom library into uproxy.
 #### Pre-Requirements to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
-modify (/usr/local) to being editable by your user (sudo chown -R $USER /usr/local)
+modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/local)
 
 - [node](http://nodejs.org/) and the Node Package Manaager (NPM):
 
     - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
+
+    - On Ubuntu, you can do `apt-get install nodejs`.
+
+    - On Archlinux, you can do 'pacman -S nodejs'.
 
     - You may need to set your $NODE_PATH environment variable appropriately
       (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
@@ -78,17 +89,15 @@ UProxy uses the Grunt build system for development. Here are a list
 of supported Grunt commands:
 
  *  `setup` - Installs local dependencies and sets up environment
- *  `build` - Builds everything, making stuff in the `build` directory. Includes running tests.
-   *  `build_chrome` - Build Chrome app and extension
-   *  `build_chrome_app` - Build just Chrome app
-   *  `build_chrome_extension` - Build just Chrome extension
-   *  `build_firefox` - Build just Firefox
+ *  `build` - Builds everything, making stuff in the `build` directory.
+   *  `build_chrome` - Build uProxy for Chrome, both app and extension.
+   *  `build_firefox` - Build uProxy for Firefox.
    *  `build_uistatic` - Build the static ui.
  *  `clean` - Cleans up
  *  `watch` - Watch for changes and recompile as needed.
- *  `test` - Run unit tests
+ *  `test` - Run all Jasmine specs.
  *  `xpi` - Generates an .xpi for installation to Firefox.
- *  `everything` - 'setup', 'test', then 'build'
+ *  `everything` - 'setup', 'build', and 'test'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
 your distribution, then run `grunt watch`, which will rebuild as you make changes. (TODO: grunt watch is broken; fix it!)
@@ -105,11 +114,15 @@ See [Setting up the development environment](https://developer.mozilla.org/en-US
 To avoid generating and installing xpi for every change, run `ln -s [UPROXY_DIR]/firefox ~/.mozilla/firefox/[PROFILE]/extensions/uproxy@uproxy.org` to create a symbolic link of the extension in the profile's extensions folder. Each time you load firefox with this profile it will load UProxy from the files in your development directory.
 
 
-#### Building the packaged Chrome extension
+#### Building for Chrome
 
-- Run `grunt build` from the chrome/extension directory to lint the script, run tests, and if those go well, build a packed extension.
+These are the steps to try uProxy in the Chrome browser.
 
-- To test the built extension, go to `chrome://extensions` and load it both the uProxy extension and app using developer mode from the `chrome/extension/src` directory and the `chrome/app` directory.
+- Run `grunt build_chrome` from the root directory of the repository to compile
+  all the typescript and prepare the assets.
+
+- In Chrome, go to `chrome://extensions` and load both `/build/chrome/app` and
+  `build/chrome/extension`. You need both 
 
 
 #### Fixing compilation and setup
