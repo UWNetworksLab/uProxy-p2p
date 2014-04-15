@@ -1,23 +1,32 @@
-src
+src/
 ===
 
 This is the primary uProxy source directory.
-It (should) all be Typescript, which will compile to javascript in the build
-directory.
-
-The file `uproxy.ts` contains all common code which all components of
-uProxy require in order for there to be consistency in how they interact with
-each other.
+It is all **Typescript**, which will compile to javascript (in `build/`) via the
+grunt tasks responsible for compilation.
+No outputs from the compilation process will ever end up in this directory.
 
 
-directories
+uproxy.ts
+---------
+
+The file `uproxy.ts` contains all common code for all components of
+uProxy. This is required for consistency between the various components, whether
+generic or platform specific. The grunt tasks relevant to the compilation
+process from typescript to javascript are responsible for copying this file to
+multiple places within `build/`.
+
+
+Directories
 -----------
 
-`generic_core` contains the primary functionality of uProxy, which deals mostly
-with the network stack, signalling and consent, and local storage.
+`generic_core/` contains the primary functionality for uProxy - the parts which
+do the actual proxying. This deals with the network stack, signalling, and
+consent. It also manages the user's state and local storage.
 
-`generic_ui` contains the user-interface related portion of uProxy. This
-involves Angular modules and controllers.
+`generic_ui/` contains the user-interface portion of uProxy. This is
+mostly Angular modules and controllers, as well as the CSS (which is written in
+Sass).
 
 `chrome/` contains all the uProxy code specific to Chrome.
 
