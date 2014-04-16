@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 declare var extractCryptoKey :Function;
 

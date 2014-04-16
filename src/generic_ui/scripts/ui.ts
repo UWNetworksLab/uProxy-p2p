@@ -6,7 +6,7 @@
  */
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
-/// <reference path='../../../third_party/DefinitelyTyped/chrome/chrome.d.ts'/>
+/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 declare var model         :any;
 declare var onStateChange :chrome.Event;

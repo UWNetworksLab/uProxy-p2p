@@ -9,6 +9,7 @@
 
 /// <reference path='core_connector.ts' />
 
+/// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
 
 var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
@@ -22,6 +23,7 @@ proxyConfig.clearConfig();
 
 
 // ---------------------------- State Changes ----------------------------------
+// TODO: Type the model.
 var model :any = {};  // Singleton angularjs model for either popup or options.
 var onStateChange = new chrome.Event();
 

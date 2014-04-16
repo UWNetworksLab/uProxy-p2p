@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 declare var TESTDATA_EXAMPLE_STATE :Object;
 declare var TESTDATA_EXAMPLE_SAVED_STATE :Object;

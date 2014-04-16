@@ -513,7 +513,6 @@ module.exports = function(grunt) {
   ]);
 
   taskManager.add('test_core', [
-    'copy:typescript_testing',
     'build_generic_core',
     'jasmine:generic_core'
   ]);

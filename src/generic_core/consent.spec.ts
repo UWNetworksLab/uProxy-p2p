@@ -5,7 +5,7 @@
  * been disconnected. This file ensures the logic for resolving the correct
  * trust values works.
  */
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 var uproxy = this;        // Remember global uproxy context so spyOn works.
 var state = Core.State;   // Depends on state-storage.js.

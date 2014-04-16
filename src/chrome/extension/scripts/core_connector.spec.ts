@@ -1,5 +1,5 @@
 /// <reference path='core_connector.ts' />
-/// <reference path='../../../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='../../../interfaces/lib/jasmine/jasmine.d.ts' />
 
 
 // Mock for the Chrome App's port as if the App actually exists.
