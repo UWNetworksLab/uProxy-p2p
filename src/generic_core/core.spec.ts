@@ -1,24 +1,29 @@
 /**
- * uproxySpec.js
+ * core.spec.ts
  *
  * There are a number of message types and interactions which prepare the
  * roster, clients, and instances. These have various caveats and edge cases,
  * and can also be received in different orders. This file lays out these
  * requirement and ensures consistency.
  */
+/// <reference path='state-storage.ts' />
+/// <reference path='constants.ts' />
+/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 // Assumes |store| is defined in start-uproxy.ts and state-storage.ts.
+declare var store :Core.State;
 var state = store.state;
+var Trust = C.Trust;
 
-describe('uproxy.updateUser', function() {
+describe('uproxy.updateUser', () => {
 
   // Stub out communications functions.
-  beforeEach(function() {
+  beforeEach(() => {
     spyOn(Core, 'sendInstance');
   });
 
   // TODO: replace this test once we go to instance-centric roster.
-  it('does add user to roster.', function() {
+  it('does add user to roster.', () => {
     // Add a normal, non-UProxy client user.
     var normalAlice = {
       userId: 'alice@foo.bar',
@@ -52,7 +57,7 @@ describe('uproxy.updateUser', function() {
     });
   });
 
-  it('calls sendInstance for uproxy-enabled users', function() {
+  it('calls sendInstance for uproxy-enabled users', () => {
     // Add a user with an active 'uproxy' client, and ensure that we send her
     // our instance data.
     var wonderAlice = {
@@ -76,7 +81,6 @@ describe('uproxy.updateUser', function() {
   });
 });  // uproxy.updateUser
 
-
 // Fake an entry in the instance table.
 var fakeInstanceSync = function(userId, clientId, data) {
   state.instances[data.instanceId] = {
@@ -88,7 +92,7 @@ var fakeInstanceSync = function(userId, clientId, data) {
   };
 };
 
-describe('Core.receiveInstance', function() {
+describe('Core.receiveInstance', () => {
   var instanceMsg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, {
     fromUserId: 'alice',
     fromClientId: 'alice-clientid',
@@ -102,34 +106,30 @@ describe('Core.receiveInstance', function() {
     }),
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     spyOn(store, 'syncInstanceFromInstanceMessage')
         .and.callFake(fakeInstanceSync);
     spyOn(store, 'saveInstance').and.callThrough();
     spyOn(Core, 'syncInstanceUI_');
   });
 
-  // TODO: fix once we find a working Promises/A+ implementation which works
-  // with jasmine.
-  it('syncs and saves new instances.', function(done) {
-    Core.receiveInstance(instanceMsg).then(function() {
+  it('syncs and saves new instances.', (done) => {
+    Core.receiveInstance(instanceMsg).then(() => {
       expect(store.syncInstanceFromInstanceMessage)
         .toHaveBeenCalledWith('alice', 'alice-clientid',
                               instanceMsg.data);
       var fakeInstance = state.instances['12345'];
       expect(store.saveInstance).toHaveBeenCalledWith('12345');
       expect(Core.syncInstanceUI_).toHaveBeenCalledWith(fakeInstance);
-      done();
-    });
+    }).then(done);
   });
 
-  it('sends consent message for a pre-existing instance', function(done) {
-    spyOn(uproxy, 'sendConsent');
-    Core.receiveInstance(instanceMsg).then(function() {
+  it('sends consent message for a pre-existing instance', (done) => {
+    spyOn(Core, 'sendConsent');
+    Core.receiveInstance(instanceMsg).then(() => {
       var fakeInstance = state.instances['12345'];
-      expect(uproxy.sendConsent).toHaveBeenCalledWith(fakeInstance);
-      done();
-    });
+      expect(Core.sendConsent).toHaveBeenCalledWith(fakeInstance);
+    }).then(done);
   });
 
   // CLEAR STATE BEFORE FUZZ TESTS.

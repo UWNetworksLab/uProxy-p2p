@@ -318,7 +318,7 @@ module.exports = function(grunt) {
         src: FILES.jasmine_helpers
             .concat([
               'src/scraps/test/freedom-mocks.js',
-              'build/interfaces/uproxy.js',
+              'build/uproxy.js',
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',

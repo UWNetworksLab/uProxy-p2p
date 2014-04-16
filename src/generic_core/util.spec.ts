@@ -1,10 +1,8 @@
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
-declare var extractCryptoKey :Function;
-
 describe('util', () => {
-  describe('extractCryptoKey', function() {
-    it('should handle complete SDP headers', function() {
+  describe('extractCryptoKey', () => {
+    it('should handle complete SDP headers', () => {
       var sdpHeaders = [
           'a=mid:audio',
           'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:ABCDEF',
@@ -17,7 +15,7 @@ describe('util', () => {
       expect(extracted).toEqual('ABCDEFG');
     });
 
-    it('should handle missing SDP headers', function() {
+    it('should handle missing SDP headers', () => {
       var sdpHeaders = '';
 
       var extracted = extractCryptoKey(sdpHeaders);
@@ -25,8 +23,8 @@ describe('util', () => {
     });
   });
 
-  describe('restrictKeys', function() {
-    it('Simple test', function() {
+  describe('restrictKeys', () => {
+    it('Simple test', () => {
       var x = { a: 1, b: 2, c: {e: 3, f: 4} };
       var y = { b: { s: 'a' }, c: {e: 3, f: 50}, d: 9 };
       var yRestricted = restrictKeys(x,y);

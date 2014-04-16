@@ -1,6 +1,8 @@
-/* jshint -W097 */
-/* jshint -W083 */
-'use strict';
+/**
+ * util.ts
+ *
+ * This file contains helpers for the uProxy Core.
+ */
 
 function linear_congruence_gen(prior) {
   return (1 + prior * 16807) % 2147483647;
@@ -20,7 +22,7 @@ function list_erase(list, obj_to_remove) {
 // For each key 'k', o[k] has the corresponding value from |input| if the key
 // exists, otherwise the default value from |template|.
 // Does not mutate |template| or |input|.
-function restrictKeys(template, input) {
+function restrictKeys(template, input) :any {
   var output = {},
       err;
   for (var k in template) {
@@ -36,9 +38,9 @@ function restrictKeys(template, input) {
       throw err;
     }
   }
-  var restricted_keys = Object.keys(template);
+  var restricted_keys :Array<string> = Object.keys(template);
   var object_keys = Object.keys(input);
-  var excess_keys = restricted_keys.reduce(function(prev, elem) {
+  var excess_keys = restricted_keys.reduce((prev :Array<any>, elem :any) => {
     if (restricted_keys.indexOf(elem) < 0) {
       prev.push(prev);
       return prev;
@@ -56,36 +58,6 @@ function restrictKeys(template, input) {
   return output;
 }
 
-/**
- * Convert a freedom promise-style interface into a
- * callback-style interface as used in the Chrome API.
- */
-// TODO:
-var promise2callback = function(object) {
-  for (var prop in object) {
-    if (object.hasOwnProperty(prop) && typeof object[prop] === 'function') {
-      var orig = object[prop];
-      var shim = function(base) {
-        var args = [];
-        for (var i = 1; i < arguments.length - 1; i++) {
-          args.push(arguments[i]);
-        }
-        var cb = arguments[arguments.length - 1];
-        if (typeof cb !== 'function') {
-          args.push(cb);
-          base.apply(object, args);
-        } else {
-          var promise = base.apply(object, args);
-          promise.done(cb);
-        }
-      }.bind(object, orig);
-      object[prop] = shim;
-    }
-  }
-  return object;
-};
-
-/* jshint -W117 */
 function makeLogger(level) {
   var logFunc = console[level];
   if (logFunc) {
@@ -101,9 +73,7 @@ function makeLogger(level) {
     console.log(s);
   };
 }
-/* jshint +W117 */
 
-//== XXX can get rid of these when we include lodash: ==//
 function isUndefined(val) {
   return typeof val == 'undefined';
 }
@@ -111,6 +81,7 @@ function isUndefined(val) {
 function isDefined(val) {
   return typeof val != 'undefined';
 }
+
 
 function cloneDeep(val) {
   return JSON.parse(JSON.stringify(val)); // quick and dirty
@@ -166,7 +137,7 @@ function extractCryptoKey(sdpHeaders) {
         keyParams = currentLine.substring(currentLine.indexOf(" ", 11) + 1).split(" ");
         for (j in keyParams) {
           keyParam = keyParams[j];
-          if (keyParam.indexOf(0 === 'inline:')) {
+          if (keyParam.indexOf('inline:') === 0) {
             return keyParam.substring(7);
           }
         }
@@ -176,5 +147,3 @@ function extractCryptoKey(sdpHeaders) {
 
   return null;
 }
-/* jshint +W097 */
-/* jshint +W083 */

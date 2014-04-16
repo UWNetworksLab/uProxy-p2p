@@ -1,18 +1,15 @@
 /**
- * State storage.
+ * state-storage.ts
+ *
  * To see the format used by localstorage, see the file:
  *   scraps/local_storage_example.js
  */
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='constants.ts' />
+/// <reference path='util.ts' />
+/// <reference path='nouns-and-adjectives.ts' />
 
-declare var cloneDeep:any;
-declare var adjectives:any;
-declare var nouns:any;
-declare var FinalCallback:any;
-declare var restrictKeys:any;
-declare var isDefined:any;
 
 // TODO: Fully type the 'instance', move into a .d.ts file, and utilize
 // throughout the rest of uProxy.
