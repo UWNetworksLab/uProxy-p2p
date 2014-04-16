@@ -29,8 +29,6 @@ describe('state-storage', () => {
     expect(exampleSavedState).not.toBe(null);
   });
   it('* Initial state is default state', () => {
-    console.log(JSON.stringify(stateStorage.state));
-    console.log(JSON.stringify(C.DEFAULT_LOAD_STATE));
     expect(stateStorage.state).toEqual(C.DEFAULT_LOAD_STATE);
   });
   it('* Saving state does not change state', (done) => {

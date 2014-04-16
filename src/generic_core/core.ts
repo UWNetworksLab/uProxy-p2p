@@ -14,6 +14,7 @@
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
+/// <reference path='../interfaces/instance.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
@@ -170,19 +171,17 @@ module Core {
     console.log('receiveInstance from ' + rawMsg.fromUserId);
 
     var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-    msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-    msg.data.rosterInfo = restrictKeys(
+    var instance :Instance = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+    instance.rosterInfo = restrictKeys(
         C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
 
-    var instanceId  = msg.data.instanceId;
+    var instanceId  = instance.instanceId;
     var userId      = msg.fromUserId;
     var clientId    = msg.fromClientId;
 
     // Update the local instance information.
-    store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
+    store.syncInstanceFromInstanceMessage(userId, clientId, instance);
     return store.saveInstance(instanceId).then(() => {
-      // Intended JSONpatch operation.
-      // TODO: remove jsonpatch
       var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
       // If we've had relationships to this instance, send them our consent bits.
       if (instanceOp == 'replace') {
@@ -198,8 +197,7 @@ module Core {
   // Send consent bits to re-synchronize consent with remote |instance|.
   // This happens *after* receiving an instance notification for an instance which
   // we already have a history with.
-  // TODO: Type the instance
-  export var sendConsent = (instance) => {
+  export var sendConsent = (instance:Instance) => {
     console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
     var clientId = store.state.instanceToClient[instance.instanceId];
     if (!clientId) {
@@ -217,14 +215,14 @@ module Core {
 
   // Assumes that when we receive consent there is a roster entry.
   // But does not assume there is an instance entry for this user.
-  export var receiveConsent = (msg) => {
+  export var receiveConsent = (msg:any) => {
     if (! (msg.fromUserId in store.state.roster)) {
       console.error("msg.fromUserId (" + msg.fromUserId +
           ") is not in the roster");
     }
-    var theirConsent     = msg.data.consent,     // Their view of consent.
-        instanceId  = msg.data.instanceId,  // InstanceId of the sender.
-        instance    = store.state.instances[instanceId];
+    var theirConsent = msg.data.consent,      // Their view of consent.
+        instanceId   = msg.data.instanceId,   // InstanceId of the sender.
+        instance     = store.getInstance(instanceId);
     if (!instance) {
       console.log('receiveConsent: Instance ' + instanceId + ' not found!');
       return false;
@@ -246,10 +244,10 @@ module Core {
   }
 
 
-
-  // Helper to consolidate syncing the instance on the UI side.
-  // TODO: Convert into an actual interface-specific update type.
-  export var syncInstanceUI_ = (instance, field?) => {
+  /**
+   * Helper to consolidate syncing the instance on the UI side.
+   */
+  export var syncInstanceUI_ = (instance:Instance, field?) => {
     if (!instance) {
       console.error('Cannot sync with null instance.');
     }
@@ -564,7 +562,8 @@ function receiveChange(rawData) {
 }
 defaultNetwork.on('onChange', receiveChange);
 
-// TODO: clean this up for the new consent bits.
+// TODO: clean this up with the new consent piece, and also put all
+// over-the-network stuff in its own module.
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
     'offer': receiveTrustMessage,
@@ -698,15 +697,17 @@ function _getMyStoredId() {
 }
 
 
-// Generate my instance message, to send to other uProxy installations, to
-// inform them that we're also a uProxy installation and can engage in
-// shenanigans. However, we can only build the instance message if we've
-// received an onChange notification for ourselves to populate at least one
-// identity.
-//
-// Returns the JSON of the instance message if successful - otherwise it
-// returns null if we're not ready.
-function makeMyInstanceMessage() {
+/**
+ * Generate my instance message, to send to other uProxy installations, to
+ * inform them that we're also a uProxy installation and can engage in
+ * shenanigans. However, we can only build the instance message if we've
+ * received an onChange notification for ourselves to populate at least one
+ * identity.
+ *
+ * Returns the JSON of the instance message if successful - otherwise it
+ * returns null if we're not ready.
+ */
+function makeMyInstanceMessage() : string {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyStoredId()];
@@ -742,7 +743,7 @@ function sendQueuedInstanceMessages() {
     console.error('Still not ready to construct instance payload.');
     return false;
   }
-  _sendInstanceQueue.forEach(function(clientId) {
+  _sendInstanceQueue.forEach((clientId) => {
     console.log('Sending previously queued instance message to: ' + clientId + '.');
     defaultNetwork.sendMessage(clientId, instancePayload);
   });
@@ -762,7 +763,7 @@ function _determineConsent(trust) {
            asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
 }
 
-function _composeTrustFromConsent(myConsent, theirConsent) {
+function _composeTrustFromConsent(myConsent, theirConsent) : InstanceTrust {
   return {
       asProxy: theirConsent.asProxy?
           (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
@@ -773,15 +774,15 @@ function _composeTrustFromConsent(myConsent, theirConsent) {
   };
 }
 
-function _validateKeyHash(keyHash) {
+function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
   return true;
 }
 
 // Set notification flag for Instance corresponding to |instanceId|, and also
 // set the notification flag for the userId.
-function _addNotification(instanceId) {
-  var instance = store.state.instances[instanceId];
+function _addNotification(instanceId:string) {
+  var instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Could not find instance ' + instanceId);
     return false;
@@ -793,10 +794,10 @@ function _addNotification(instanceId) {
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
 // exists.
-function _removeNotification(instanceId) {
+function _removeNotification(instanceId:string) {
   if (!instanceId) return;
 
-  var instance = store.state.instances[instanceId];
+  var instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Instance does not exist for ' + instanceId);
     return false;
@@ -807,13 +808,15 @@ function _removeNotification(instanceId) {
   return true;
 }
 
-// Update the description for an instanceId.
-// Assumes that |instanceId| is valid.
+/**
+ * Update the description for an instanceId.
+ * Assumes that |instanceId| is valid.
+ */
 function receiveUpdateDescription(msg) {
   console.log('Updating description! ' + JSON.stringify(msg));
   var description = msg.data.description,
       instanceId = msg.data.instanceId,
-      instance = store.state.instances[instanceId];
+      instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Could not update description - no instance: ' + instanceId);
     return false;
