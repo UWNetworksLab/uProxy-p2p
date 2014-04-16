@@ -1,9 +1,17 @@
-/* global console, UProxyState, server, bgAppPageChannel */
+/**
+ * start-uproxy.ts
+ *
+ * This is the entry point for the uProxy Core.
+ * It initializes Core.State, and emits a ready message to the UI if available.
+ */
+/// <reference path='core.ts' />
+
 // Print info to console so you can find this web-worker
 console.log('Uproxy backend, running in worker ' + self.location.href);
 
+
 //XXX: Makes chrome debugging saner, not needed otherwise.
-var window = {};
+// var window :Window = {};
 
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
@@ -16,13 +24,12 @@ server.emit('start');
 store.loadStateFromStorage().then(function () {
   for(var network in store.state.me.networkDefaults) {
     if (store.state.me.networkDefaults[network].autoconnect) {
-      login(network, true);
+      Core.login(network, true);
     }
   }
-  // console.log('*** Finished initial load from storage. ***');
   sendFullStateToUI();
 });
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
-bgAppPageChannel.emit('ready');
+bgAppPageChannel.emit('ready', null);

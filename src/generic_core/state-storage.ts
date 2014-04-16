@@ -1,28 +1,21 @@
 /**
- * State storage.
+ * state-storage.ts
+ *
  * To see the format used by localstorage, see the file:
  *   scraps/local_storage_example.js
  */
+/// <reference path='constants.ts' />
+/// <reference path='util.ts' />
+/// <reference path='nouns-and-adjectives.ts' />
+/// <reference path='../interfaces/instance.d.ts' />
+
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='constants.ts' />
 
-declare var cloneDeep:any;
-declare var adjectives:any;
-declare var nouns:any;
-declare var FinalCallback:any;
-declare var restrictKeys:any;
-declare var isDefined:any;
-
-// TODO: Fully type the 'instance', move into a .d.ts file, and utilize
-// throughout the rest of uProxy.
-interface Instance {
-  status: string;
-}
 
 module Core {
 
-  var fStorage = freedom['storage']();  // Platform-independtn storage provider.
+  var fStorage = freedom['storage']();  // Platform-independent provider.
 
   // Set false elsewhre to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;
@@ -92,7 +85,7 @@ module Core {
      * If one is running UProxy for the first time, or without any available
      * instance data, generate an instance for oneself.
      */
-    private generateMyInstance_ = () => {
+    private generateMyInstance_ = () : Instance => {
       var i, val, hex, id, key;
 
       var me = cloneDeep(C.DEFAULT_LOAD_STATE.me);
@@ -236,7 +229,7 @@ module Core {
      * - Assumes that instance already exists for this |userId|.
      */
     public syncInstanceFromInstanceMessage =
-        (userId:string, clientId:string, data) : void => {
+        (userId:string, clientId:string, data:Instance) : void => {
       var instanceId = data.instanceId;
       // Some local metadata isn't transmitted.  Add it in.
       data = restrictKeys(C.DEFAULT_INSTANCE, data);
@@ -312,6 +305,13 @@ module Core {
               return loadedInstances;
             });
           });
+    }
+
+    /**
+     * Access an :Instance from state.
+     */
+    public getInstance = (instanceId:string) : Instance => {
+      return this.state.instances[instanceId];
     }
 
     /**

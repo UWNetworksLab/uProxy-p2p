@@ -1,5 +1,5 @@
 /**
- * uproxy.ts
+ * core.ts
  *
  * This is the primary uproxy code. It maintains in-memory state,
  * checkpoints information to local storage, and synchronizes state with the
@@ -13,14 +13,14 @@
 /// <reference path='state-storage.ts' />
 /// <reference path='constants.ts' />
 /// <reference path='social.ts' />
+/// <reference path='util.ts' />
+/// <reference path='../interfaces/instance.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
-// TODO: remove these once these 'modules' become typescripted.
-declare var store :Core.State;
-declare var restrictKeys :any;
+declare var store :Core.State;  // From start-uproxy.ts.
 
 
 // This is the channel to speak to the UI component of uProxy.
@@ -167,23 +167,21 @@ module Core {
    * not (yet) in the roster.
    * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
    */
-  export var receiveInstance = (rawMsg) : Promise<void> => {
+  export var receiveInstance = (rawMsg :any) : Promise<void> => {
     console.log('receiveInstance from ' + rawMsg.fromUserId);
 
     var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-    msg.data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-    msg.data.rosterInfo = restrictKeys(
+    var instance :Instance = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
+    instance.rosterInfo = restrictKeys(
         C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
 
-    var instanceId  = msg.data.instanceId;
+    var instanceId  = instance.instanceId;
     var userId      = msg.fromUserId;
     var clientId    = msg.fromClientId;
 
     // Update the local instance information.
-    store.syncInstanceFromInstanceMessage(userId, clientId, msg.data);
+    store.syncInstanceFromInstanceMessage(userId, clientId, instance);
     return store.saveInstance(instanceId).then(() => {
-      // Intended JSONpatch operation.
-      // TODO: remove jsonpatch
       var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
       // If we've had relationships to this instance, send them our consent bits.
       if (instanceOp == 'replace') {
@@ -196,9 +194,60 @@ module Core {
     });
   }
 
-  // Helper to consolidate syncing the instance on the UI side.
-  // TODO: Convert into an actual interface-specific update type.
-  export var syncInstanceUI_ = (instance, field?) => {
+  // Send consent bits to re-synchronize consent with remote |instance|.
+  // This happens *after* receiving an instance notification for an instance which
+  // we already have a history with.
+  export var sendConsent = (instance:Instance) => {
+    console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
+    var clientId = store.state.instanceToClient[instance.instanceId];
+    if (!clientId) {
+      console.error('Instance ' + instance.instanceId + ' missing clientId!');
+      return false;
+    }
+    var consentPayload = JSON.stringify({
+      type: 'notify-consent',
+      instanceId: store.state.me.instanceId,            // Our own instanceId.
+      consent: _determineConsent(instance.trust)  // My consent.
+    });
+    defaultNetwork.sendMessage(clientId, consentPayload);
+    return true;
+  }
+
+  // Assumes that when we receive consent there is a roster entry.
+  // But does not assume there is an instance entry for this user.
+  export var receiveConsent = (msg:any) => {
+    if (! (msg.fromUserId in store.state.roster)) {
+      console.error("msg.fromUserId (" + msg.fromUserId +
+          ") is not in the roster");
+    }
+    var theirConsent = msg.data.consent,      // Their view of consent.
+        instanceId   = msg.data.instanceId,   // InstanceId of the sender.
+        instance     = store.getInstance(instanceId);
+    if (!instance) {
+      console.log('receiveConsent: Instance ' + instanceId + ' not found!');
+      return false;
+    }
+    // Determine my own consent bits, compare with their consent and remap.
+    var oldTrustAsProxy = instance.trust.asProxy;
+    var oldTrustAsClient = instance.trust.asClient;
+    var myConsent = _determineConsent(instance.trust);
+    instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
+
+    // Apply state change notification if the trust state changed.
+    if (oldTrustAsProxy != instance.trust.asProxy ||
+        oldTrustAsClient != instance.trust.asClient) {
+      _addNotification(instanceId);
+    }
+    store.saveInstance(instanceId);
+    Core.syncInstanceUI_(instance, 'trust');
+    return true;
+  }
+
+
+  /**
+   * Helper to consolidate syncing the instance on the UI side.
+   */
+  export var syncInstanceUI_ = (instance:Instance, field?) => {
     if (!instance) {
       console.error('Cannot sync with null instance.');
     }
@@ -513,7 +562,8 @@ function receiveChange(rawData) {
 }
 defaultNetwork.on('onChange', receiveChange);
 
-// TODO: clean this up for the new consent bits.
+// TODO: clean this up with the new consent piece, and also put all
+// over-the-network stuff in its own module.
 var _msgReceivedHandlers = {
     'allow': receiveTrustMessage,
     'offer': receiveTrustMessage,
@@ -523,7 +573,7 @@ var _msgReceivedHandlers = {
     'accept-offer': receiveTrustMessage,
     'decline-offer': receiveTrustMessage,
     'notify-instance': Core.receiveInstance,
-    'notify-consent': receiveConsent,
+    'notify-consent': Core.receiveConsent,
     'update-description': receiveUpdateDescription,
     'peerconnection-server' : receiveSignalFromServerPeer,
     'peerconnection-client' : receiveSignalFromClientPeer,
@@ -647,15 +697,17 @@ function _getMyStoredId() {
 }
 
 
-// Generate my instance message, to send to other uProxy installations, to
-// inform them that we're also a uProxy installation and can engage in
-// shenanigans. However, we can only build the instance message if we've
-// received an onChange notification for ourselves to populate at least one
-// identity.
-//
-// Returns the JSON of the instance message if successful - otherwise it
-// returns null if we're not ready.
-function makeMyInstanceMessage() {
+/**
+ * Generate my instance message, to send to other uProxy installations, to
+ * inform them that we're also a uProxy installation and can engage in
+ * shenanigans. However, we can only build the instance message if we've
+ * received an onChange notification for ourselves to populate at least one
+ * identity.
+ *
+ * Returns the JSON of the instance message if successful - otherwise it
+ * returns null if we're not ready.
+ */
+function makeMyInstanceMessage() : string {
   var result;
   try {
     var firstIdentity = store.state.me.identities[_getMyStoredId()];
@@ -665,6 +717,7 @@ function makeMyInstanceMessage() {
     }
     firstIdentity.network = firstIdentity.clients[Object.keys(
         firstIdentity.clients)[0]].network;
+    // TODO: Type the instance payload.
     result = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, store.state.me);
     result.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
                                          firstIdentity);
@@ -690,7 +743,7 @@ function sendQueuedInstanceMessages() {
     console.error('Still not ready to construct instance payload.');
     return false;
   }
-  _sendInstanceQueue.forEach(function(clientId) {
+  _sendInstanceQueue.forEach((clientId) => {
     console.log('Sending previously queued instance message to: ' + clientId + '.');
     defaultNetwork.sendMessage(clientId, instancePayload);
   });
@@ -699,54 +752,6 @@ function sendQueuedInstanceMessages() {
 }
 
 
-// Send consent bits to re-synchronize consent with remote |instance|.
-// This happens *after* receiving an instance notification for an instance which
-// we already have a history with.
-function sendConsent(instance) {
-  console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
-  var clientId = store.state.instanceToClient[instance.instanceId];
-  if (!clientId) {
-    console.error('Instance ' + instance.instanceId + ' missing clientId!');
-    return false;
-  }
-  var consentPayload = JSON.stringify({
-    type: 'notify-consent',
-    instanceId: store.state.me.instanceId,            // Our own instanceId.
-    consent: _determineConsent(instance.trust)  // My consent.
-  });
-  defaultNetwork.sendMessage(clientId, consentPayload);
-  return true;
-}
-
-// Assumes that when we receive consent there is a roster entry.
-// But does not assume there is an instance entry for this user.
-function receiveConsent(msg) {
-  if (! (msg.fromUserId in store.state.roster)) {
-    console.error("msg.fromUserId (" + msg.fromUserId +
-        ") is not in the roster");
-  }
-  var theirConsent     = msg.data.consent,     // Their view of consent.
-      instanceId  = msg.data.instanceId,  // InstanceId of the sender.
-      instance    = store.state.instances[instanceId];
-  if (!instance) {
-    console.log('receiveConsent: Instance ' + instanceId + ' not found!');
-    return false;
-  }
-  // Determine my own consent bits, compare with their consent and remap.
-  var oldTrustAsProxy = instance.trust.asProxy;
-  var oldTrustAsClient = instance.trust.asClient;
-  var myConsent = _determineConsent(instance.trust);
-  instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
-
-  // Apply state change notification if the trust state changed.
-  if (oldTrustAsProxy != instance.trust.asProxy ||
-      oldTrustAsClient != instance.trust.asClient) {
-    _addNotification(instanceId);
-  }
-  store.saveInstance(instanceId);
-  Core.syncInstanceUI_(instance, 'trust');
-  return true;
-}
 
 // For each direction (e.g., I proxy for you, or you proxy for me), there
 // is a logical AND of consent from both parties. If the local state for
@@ -758,7 +763,7 @@ function _determineConsent(trust) {
            asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
 }
 
-function _composeTrustFromConsent(myConsent, theirConsent) {
+function _composeTrustFromConsent(myConsent, theirConsent) : InstanceTrust {
   return {
       asProxy: theirConsent.asProxy?
           (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
@@ -769,15 +774,15 @@ function _composeTrustFromConsent(myConsent, theirConsent) {
   };
 }
 
-function _validateKeyHash(keyHash) {
+function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
   return true;
 }
 
 // Set notification flag for Instance corresponding to |instanceId|, and also
 // set the notification flag for the userId.
-function _addNotification(instanceId) {
-  var instance = store.state.instances[instanceId];
+function _addNotification(instanceId:string) {
+  var instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Could not find instance ' + instanceId);
     return false;
@@ -789,10 +794,10 @@ function _addNotification(instanceId) {
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
 // exists.
-function _removeNotification(instanceId) {
+function _removeNotification(instanceId:string) {
   if (!instanceId) return;
 
-  var instance = store.state.instances[instanceId];
+  var instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Instance does not exist for ' + instanceId);
     return false;
@@ -803,13 +808,15 @@ function _removeNotification(instanceId) {
   return true;
 }
 
-// Update the description for an instanceId.
-// Assumes that |instanceId| is valid.
+/**
+ * Update the description for an instanceId.
+ * Assumes that |instanceId| is valid.
+ */
 function receiveUpdateDescription(msg) {
   console.log('Updating description! ' + JSON.stringify(msg));
   var description = msg.data.description,
       instanceId = msg.data.instanceId,
-      instance = store.state.instances[instanceId];
+      instance = store.getInstance(instanceId);
   if (!instance) {
     console.error('Could not update description - no instance: ' + instanceId);
     return false;
@@ -862,10 +869,11 @@ Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage().then(() => {;
     console.log('saved options ' + JSON.stringify(store.state.options));
-    // TODO: Replace this JSON patch.
-    bgAppPageChannel.emit('state-change',
-        [{op: 'replace', path: '/options/'+data.key,
-         value: data.value}]);
+    // bgAppPageChannel.emit('state-change',
+        // [{op: 'replace', path: '/options/'+data.key,
+         // value: data.value}]);
+    // TODO: Make this fine-grained for just the Option.
+    sendFullStateToUI();
   });
   // TODO: Handle changes that might affect proxying.
 });

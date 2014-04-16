@@ -1,22 +1,21 @@
 /**
- * consentSpec.js
+ * consent.spec.ts
  *
  * Sometimes consent between two instances needs to be resolved after they've
  * been disconnected. This file ensures the logic for resolving the correct
  * trust values works.
  */
+/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
-var uproxy = this;        // Remember global uproxy context so spyOn works.
-var state = Core.State;   // Depends on state-storage.js.
 var Trust = C.Trust;      // From constants.
 
-describe('consent', function() {
-  beforeEach(function() {
+describe('consent', () => {
+  beforeEach(() => {
   });
 
   // Given Alice and Bob's consents to proxy through each other, generate the
   // correct Trust stanzas.
-  it('composes with another consent into trust', function() {
+  it('composes with another consent into trust', () => {
     expect(_composeTrustFromConsent(
         { asProxy: false, asClient: false },
         { asProxy: false, asClient: false }
@@ -141,7 +140,7 @@ describe('consent', function() {
   // whether or not she consents to having Bob be her proxy. Since there are 4
   // possible values for each direction (NO, OFFERED, REQUESTED, YES), the
   // cross product generates 16 total combinations.
-  it('determined from trust correctly', function() {
+  it('determined from trust correctly', () => {
 
     expect(_determineConsent({
         asProxy: Trust.NO,

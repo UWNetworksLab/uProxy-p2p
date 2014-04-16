@@ -216,6 +216,21 @@ module.exports = function(grunt) {
       }
     },
 
+    // DefinitelyTyped automatic definition installation.
+    // Installs .d.ts files into src/interfaces/lib.
+    // These files should be checked into the repo, but this grunt task is
+    // available to easily update to the latest.
+    // See https://github.com/DefinitelyTyped/tsd
+    'tsd': {
+      refresh: {
+        options: {
+          command: 'reinstall',
+          latest: true,
+          config: './tsd.json'
+        }
+      }
+    },
+
     //-------------------------------------------------------------------------
     'typescript': {
       // uProxy UI without any platform dependencies
@@ -303,7 +318,7 @@ module.exports = function(grunt) {
         src: FILES.jasmine_helpers
             .concat([
               'src/scraps/test/freedom-mocks.js',
-              'build/interfaces/uproxy.js',
+              'build/uproxy.js',
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',
@@ -317,7 +332,7 @@ module.exports = function(grunt) {
                     'src/scraps/test/example-saved-state.jsonvar'],
           keepRunner: true,
           outfile: 'test_output/_CoreSpecRunner.html',
-          specs: 'src/generic_core/**/*.spec.js'
+          specs: 'build/generic_core/**/*.spec.js'
         }
       }
     },
@@ -438,6 +453,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-tsd');
   grunt.loadNpmTasks('grunt-typescript');
 
   //-------------------------------------------------------------------------
@@ -518,7 +534,7 @@ module.exports = function(grunt) {
     'build_uistatic',
   ]);
 
-  taskManager.add('everything', ['setup', 'build', 'test']);
+  taskManager.add('everything', ['setup', 'tsd:refresh', 'build', 'test']);
 
   // Default task(s).
   taskManager.add('default', ['build']);

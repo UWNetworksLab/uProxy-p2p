@@ -1,7 +1,7 @@
 /*
  * background.ts is evaluated when the chrome app is loaded.
  */
-/// <reference path='../../../../third_party/DefinitelyTyped/chrome/chrome-app.d.ts' />
+/// <reference path='../../../interfaces/lib/chrome/chrome-app.d.ts' />
 
 // We use the launch window for debugging.
 // TODO: Have a version of the UI here also.

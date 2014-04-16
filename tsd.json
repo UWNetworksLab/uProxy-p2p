@@ -1,0 +1,18 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "src/interfaces/lib",
+  "bundle": "src/interfaces/lib/tsd.d.ts",
+  "installed": {
+    "chrome/chrome-app.d.ts": {
+      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+    },
+    "chrome/chrome.d.ts": {
+      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+    },
+    "jasmine/jasmine.d.ts": {
+      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+    }
+  }
+}
