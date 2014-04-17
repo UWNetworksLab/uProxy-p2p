@@ -18,7 +18,7 @@ fi
 
 if ! gem query -i -n sass >/dev/null; then
   echo "The 'sass' ruby gem needs installation. Try:"
-  echo "sudy gem install sass"
+  echo "sudo gem install sass"
   exit 1
 fi
 
