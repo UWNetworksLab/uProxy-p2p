@@ -12,7 +12,7 @@ var View_oauth:any;
 window.freedomcfg = function(register) {
   // Setup Freedom to use our providers (in src/chrome-providers)
   // TODO: uncomment once these aren't broken.
-  // register('core.view', View_oauth);
+  register('core.view', View_oauth);
   // register('core.socket', TcpSocket.Chrome);
   // register('core.udpsocket', UdpSocket.Chrome);
 }

@@ -21,6 +21,10 @@
     "RtcToNet": {
       "url": "../lib/rtc-to-net/rtc-to-net.json"
     },
+    "SOCIAL-google": {
+      "url": "../lib/freedom-social-xmpp/social.google.json",
+      "api": "social"
+    },
     "SOCIAL-websocket": {
       "url": "../lib/websocket-server/social.ws.json",
       "api": "social"
