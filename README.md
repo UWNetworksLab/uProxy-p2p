@@ -1,6 +1,8 @@
 UProxy
 ======
 
+[![Build Status](https://magnum.travis-ci.com/uProxy/uProxy.svg?token=HiP4RTme8LSvyrP9kNJq&branch=master)](https://magnum.travis-ci.com/uProxy/uProxy)
+
 [uProxy](uproxy.org) is a broswer extension that lets users share their internet
 connection.
 
