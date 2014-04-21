@@ -24,7 +24,8 @@ module Social {
 
   var PREFIX:string = 'SOCIAL-';
   var VALID_NETWORKS:string[] = [
-    'websocket'
+    'websocket',
+    'google'
   ]
   export var networks:{[name:string]:Network} = {}
 
@@ -46,7 +47,7 @@ module Social {
       if ('social' !== freedom[dependency].api) return;
       var network = new Social.Network(name);
       Social.networks[name] = network;
-      return new Social.Network(name);
+      return network;
     });
     console.log('Initialized ' + Object.keys(networks).length + ' networks.');
     return Social.networks;

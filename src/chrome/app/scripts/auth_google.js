@@ -7,6 +7,7 @@ function AuthGoogle(credCallback, errorCallback) {
     userId: null,
     token: null
   };
+  this.login(true);
 };
 
 AuthGoogle.prototype.login = function(interactive) {
@@ -19,11 +20,14 @@ AuthGoogle.prototype.validate = function(token) {
   var xhr = new XMLHttpRequest();
   xhr.addEventListener('load', (function(evt) {
     if (xhr.status == 200) {
-      var resp = JSON.parse(xhr.responseText);
-      this.credentials = {};
-      this.credentials.userId = resp.email;
-      this.credentials.token = token;
-      console.log('Google credentials: ' + JSON.stringify(this.credentials));
+      var response = JSON.parse(xhr.responseText);
+      this.credentials = {
+        userId: response.email,
+        jid: response.email,
+        oauth2_token: token,
+        oauth2_auth: 'http://www.google.com/talk/protocol/auth',
+        host: 'talk.google.com'
+      };
       if (this.credentialsCallback) {
         this.credentialsCallback(this.credentials);
       } else {
