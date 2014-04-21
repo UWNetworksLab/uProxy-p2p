@@ -94,11 +94,7 @@ module.exports = function(grunt) {
         // Icons
         {expand: true, cwd: 'src',
          src: ['icons/**'],
-         dest: 'build/'},
-        // TODO: update the social provider to this when ready:
-        // {expand: true, cwd: 'node_modules/freedom-social-xmpp‎/node-xmpp-browser.js',
-        //  src: ['node-xmpp-browser.js'],
-        //  dest: 'build/generic_core/lib'}
+         dest: 'build/'}
       ]},
 
       // Static/independent UI. Assumes the top-level task generic_ui

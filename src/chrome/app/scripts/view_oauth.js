@@ -11,7 +11,7 @@ var View_oauth = function(app, dispatchEvent) {
   this.manualDialog = null;
   this.socialNetworkName = null;
   if (app.manifest.name == 'Google Social Provider') {
-    this.socialNetworkName = 'google'
+    this.socialNetworkName = 'google';
   }
 };
 
