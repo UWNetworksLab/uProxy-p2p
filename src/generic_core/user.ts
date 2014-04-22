@@ -4,6 +4,7 @@
  * This file defines the uProxy User class. :User is a type relevant both in the
  * Core and the UI, which is why it is in the top-level directory.
  */
+/// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/user.d.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 
@@ -13,7 +14,8 @@ module Core {
    * Core.User
    *
    * Maintains a mapping between clientIds and instanceIds, while handling
-   * messages from its social provider.
+   * messages from its social provider regarding connection status, consent, and
+   * Instances.
    */
   export class User implements BaseUser {
 
@@ -46,17 +48,77 @@ module Core {
             'received ClientState with unexpected userId: ' + state.userId);
         return;
       }
-      // Check for existence
-      if (!(state.clientId in this.clients)) {
-        this.clients[state.clientId] = state.status;
-      }
+      // Update the client. (Adds anew if it doesn't exist yet)
+      this.clients[state.clientId] = state.status;
     }
 
     /**
      * Handle 'onMessage' events from the social provider, which can be any type
-     * of message from another contact.
+     * of message from another contact, then delegate the message to the correct
+     * handler.
+     * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (msg :freedom.Social.IncomingMessage) => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
+      if (incoming.from.userId != this.userId) {
+        console.error(this.userId +
+            ' received message with unexpected userId: ' + incoming.from.userId);
+        return;
+      }
+      var msg :uProxy.Message = JSON.parse(incoming.message);
+      var msgType :uProxy.MessageType = msg.type;
+      switch (msg.type) {
+        case uProxy.MessageType.INSTANCE:
+          this.handleInstance_(<Instance>msg.data);
+          break;
+        case uProxy.MessageType.CONSENT:
+          this.handleConsent_(msg.data);
+          break;
+        default:
+          console.error(this.userId + ' received invalid message.');
+      }
+    }
+
+    /**
+     * Receive an Instance message. Update the consent <--> instance mapping.
+     * Assumes the clientId associated with this instance is valid and belongs
+     * to this user.
+     */
+    private handleInstance_ = (instance :Instance) => {
+    }
+
+    /**
+     * Receive a consent message. Update the consent between the piece.
+     * Assumes the instance associated with the consent message is valid and
+     * belongs to this user.
+     */
+    private handleConsent_ = (consent :any) => {
+      // TODO: Put the new consent code in here.
+    }
+
+    // TODO: clean this up with the new consent piece, and also put all
+    // over-the-network stuff in its own module.
+    private _msgReceivedHandlers = {
+        'allow': receiveTrustMessage,
+        'offer': receiveTrustMessage,
+        'deny': receiveTrustMessage,
+        'request-access': receiveTrustMessage,
+        'cancel-request': receiveTrustMessage,
+        'accept-offer': receiveTrustMessage,
+        'decline-offer': receiveTrustMessage,
+        'notify-instance': Core.receiveInstance,
+        'notify-consent': Core.receiveConsent,
+        'update-description': receiveUpdateDescription,
+        'peerconnection-server' : receiveSignalFromServerPeer,
+        'peerconnection-client' : receiveSignalFromClientPeer,
+        'newly-active-client' : handleNewlyActiveClient,
+        'newly-inactive-client' : handleInactiveClient
+    };
+
+    /**
+     * Receive an Instance message.
+     */
+    private syncInstance = (instanceId) => {
+      // TODO
     }
 
     /**

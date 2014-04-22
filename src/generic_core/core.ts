@@ -18,6 +18,7 @@
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 /// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
 declare var store :Core.State;  // From start-uproxy.ts.
@@ -48,7 +49,7 @@ var _memoizedInstanceMessage = null;
 //  General UI interaction
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
-  console.log('sending ALL state to UI.', JSON.stringify(store.state));
+  console.log('sending ALL state to UI.'); // JSON.stringify(store.state));
   Core.sendUpdate(uProxy.Update.ALL);
 }
 
@@ -562,47 +563,34 @@ function receiveChange(rawData) {
 }
 defaultNetwork.on('onChange', receiveChange);
 
-// TODO: clean this up with the new consent piece, and also put all
-// over-the-network stuff in its own module.
-var _msgReceivedHandlers = {
-    'allow': receiveTrustMessage,
-    'offer': receiveTrustMessage,
-    'deny': receiveTrustMessage,
-    'request-access': receiveTrustMessage,
-    'cancel-request': receiveTrustMessage,
-    'accept-offer': receiveTrustMessage,
-    'decline-offer': receiveTrustMessage,
-    'notify-instance': Core.receiveInstance,
-    'notify-consent': Core.receiveConsent,
-    'update-description': receiveUpdateDescription,
-    'peerconnection-server' : receiveSignalFromServerPeer,
-    'peerconnection-client' : receiveSignalFromClientPeer,
-    'newly-active-client' : handleNewlyActiveClient,
-    'newly-inactive-client' : handleInactiveClient
-};
-
-
-defaultNetwork.on('onMessage', (msgInfo) => {
+/**
+ * When receiving a message from a social provider, delegate it to the correct
+ * user, and then delegate to the correct client.
+ *
+ * TODO: Generalize this for all networks once we have multiple social providers
+ * working.
+ */
+defaultNetwork.on('onMessage', (incoming :freedom.Social.IncomingMessage) => {
   // Replace the JSON str with actual data attributes, then flatten.
-  msgInfo.messageText = msgInfo.message;
-  delete msgInfo.message;
-  try {
-    msgInfo.data = JSON.parse(msgInfo.messageText);
-  } catch(e) {
-    console.log(msgInfo);
-    console.error("Message was not JSON");
-    return;
-  }
+  var clientState :freedom.Social.ClientState = incoming.from;
+
+  // TODO: Pass this along to the right user.
+  // msgInfo.messageText = msgInfo.message;
+  // delete msgInfo.message;
+  // try {
+    // msgInfo.data = JSON.parse(msgInfo.messageText);
+  // } catch(e) {
+    // console.log(msgInfo);
+    // console.error("Message was not JSON");
+    // return;
+  // }
   // Call the relevant handler.
-  var msgType = msgInfo.data.type;
-  console.log('<--- msg [' + msgType + '] -- ' + msgInfo.fromClientId + '\n',
-              msgInfo);
-  if (!(msgType in _msgReceivedHandlers)) {
-    console.error('No handler for message type: ' +
-        JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
-    return;
-  }
-  _msgReceivedHandlers[msgType](msgInfo);
+  // if (!(msgType in _msgReceivedHandlers)) {
+    // console.error('No handler for message type: ' +
+        // JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
+    // return;
+  // }
+  // _msgReceivedHandlers[msgType](msgInfo);
 });
 
 

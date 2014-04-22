@@ -32,6 +32,10 @@ module uProxy {
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
   }
 
+  /**
+   * Updates are sent from the Core to the UI, to update state which the UI must
+   * expose to the user.
+   */
   export enum Update {
     ALL = 2000,
     INSTANCE,
@@ -39,6 +43,20 @@ module uProxy {
     ID_MAPS,  // ClientId <---> InstanceId mappings.
   }
 
+  /**
+   * Messages are sent from Core to a remote Core - they are peer communications
+   * between uProxy users. This enum describes the possible Message types.
+   */
+  export enum MessageType {
+    INSTANCE = 3000,  // Instance messages notify the user about instances.
+    CONSENT
+  }
+
+  // Message should be the boundary for JSON parse / stringify.
+  export interface Message {
+    type :MessageType;
+    data :Object;
+  }
 
   // --- Core <--> UI Interfaces ---
 
