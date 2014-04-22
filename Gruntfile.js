@@ -29,6 +29,9 @@ var FILES = {
   jasmine_chrome: [
     'build/chrome/test/chrome_mocks.js'
   ],
+  // jasmine_social: [
+    // 'node_modules/freedom-typescript-api/interfaces/social.d.ts'
+  // ]
 };
 
 module.exports = function(grunt) {
@@ -321,6 +324,7 @@ module.exports = function(grunt) {
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',
+              'build/generic_core/user.js',
               'build/generic_core/state-storage.js',
               'build/generic_core/social.js',
               'build/generic_core/core.js',
