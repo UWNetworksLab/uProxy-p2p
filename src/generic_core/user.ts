@@ -7,22 +7,6 @@
 /// <reference path='../interfaces/user.d.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 
-
-
-// Status of a client; used for both this client (in which case it will be
-// either ONLINE or OFFLINE)
-module freedom.Social {
-  export enum Status {
-    OFFLINE = 4000,
-    // This client runs the same freedom.js app as you and is online
-    ONLINE,
-    // This client is online, but not with the same application/agent type
-    // (i.e. can be useful to invite others to your freedom.js app)
-    ONLINE_WITH_OTHER_APP,
-  }
-}
-
-
 module Core {
 
   /**
@@ -45,6 +29,7 @@ module Core {
     constructor(private profile :freedom.Social.UserProfile) {
       this.name = profile.name;
       this.userId = profile.userId;
+      this.clients = {};
       // TODO: Decide whether to contain the image, etc.
       this.clientToInstanceMap_ = {};
     }
@@ -53,9 +38,18 @@ module Core {
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
      * If the clientId specified does not yet exist, add the client to the list.
+     * If the userId of state does not match this user, throw an error.
      */
     public handleClientState = (state :freedom.Social.ClientState) => {
-      // check.
+      if (state.userId != this.userId) {
+        console.error(this.userId +
+            'received ClientState with unexpected userId: ' + state.userId);
+        return;
+      }
+      // Check for existence
+      if (!(state.clientId in this.clients)) {
+        this.clients[state.clientId] = state.status;
+      }
     }
 
     /**
@@ -71,6 +65,11 @@ module Core {
     private clientToInstance = () => {
     }
 
+    /**
+     * Remove a client from this User.
+     */
+    private removeClient_ = (clientId:string) => {
+    }
   }  // class User
 
 }  // module uProxy

@@ -24,13 +24,25 @@ describe('Core.User', () => {
     var clientState :freedom.Social.ClientState = {
       userId: 'abc',
       clientId: 'def',
-      status: uProxy.Status.ONLINE,
+      status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
     user.handleClientState(clientState);
     expect(Object.keys(user.clients)).toEqual([
       'def'
     ]);
+  });
+
+  it('throws error for onClientState with wrong userId', () => {
+    var clientState :freedom.Social.ClientState = {
+      userId: 'abcd',
+      clientId: 'def',
+      status: freedom.Social.Status.ONLINE,
+      timestamp: 12345
+    };
+    spyOn(console, 'error');
+    user.handleClientState(clientState);
+    expect(console.error).toHaveBeenCalled();
   });
 
 });  // uProxy.User
