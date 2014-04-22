@@ -1,25 +1,32 @@
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 /// <reference path='user.ts' />
+/// <reference path='social.ts' />
 
 
-class MockNetwork implements freedom.Social {
-  on = null;
-  once = null;
-  login = null;
-  logout = null;
-  clearCachedCredentials = null;
-  getUsers = null;
-  getClients = null;
-
-  sendMessage = (clientId, msg) => {
-    return Promise.resolve();
-  }
-}  // class MockNetwork
+// class MockNetwork implements Social.Network {
+  // roster
+  // api = {
+    // on: null,
+    // once: null,
+    // login: null,
+    // logout: null,
+    // clearCachedCredentials: null,
+    // getUsers: null,
+    // getClients: null,
+    // sendMessage: (clientId, msg) => {
+      // return Promise.resolve();
+    // }
+  // };
+// 
+// }  // class MockNetwork
 
 
 describe('Core.User', () => {
 
-  var network = new MockNetwork();
+  // var network = new MockNetwork();
+  // var network = new Social.Network('mock');
+  var network = jasmine.createSpyObj('network', ['api']);
+  // network.api['sendMessage'] = jasmine.createSpy();
 
   var profile :freedom.Social.UserProfile = {
     name: 'Alice',
@@ -45,9 +52,9 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(network, 'sendMessage');
-    user.handleClientState(clientState);
-    expect(network.sendMessage).toHaveBeenCalled();
+    spyOn(user, 'send');
+    user.handleClient(clientState);
+    expect(user.send).toHaveBeenCalled();
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([
@@ -63,13 +70,13 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(network, 'sendMessage');
-    user.handleClientState(clientState);
+    spyOn(user, 'send');
+    user.handleClient(clientState);
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient'
     ]);
-    expect(network.sendMessage).not.toHaveBeenCalled();
+    expect(user.send).not.toHaveBeenCalled();
   });
 
   it('handles DISCONNECTED client', () => {
@@ -79,7 +86,7 @@ describe('Core.User', () => {
       status: freedom.Social.Status.OFFLINE,
       timestamp: 12346
     };
-    user.handleClientState(clientState);
+    user.handleClient(clientState);
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.OFFLINE);
   });
@@ -92,7 +99,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     spyOn(console, 'error');
-    user.handleClientState(clientState);
+    user.handleClient(clientState);
     expect(console.error).toHaveBeenCalled();
   });
 
@@ -203,7 +210,7 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    user.handleClientState(clientState);
+    user.handleClient(clientState);
     user['syncInstance_']('fakeclient2', instance);
     expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
     expect(user.clientToInstance('fakeclient')).toEqual(null);

@@ -13,9 +13,10 @@ module Core {
   /**
    * Core.User
    *
-   * Maintains a mapping between clientIds and instanceIds, while handling
-   * messages from its social provider regarding connection status, consent, and
-   * Instances.
+   * Builts upon a freedom.Social.UserProfile.
+   * Maintains a mapping between a User's clientIds and instanceIds, while
+   * handling messages from its social provider to keep connection status,
+   * instance messages, and consent up-to-date.
    */
   export class User implements BaseUser {
 
@@ -31,7 +32,7 @@ module Core {
      * social provider. They maintain a reference to the social provider
      * |network| they are associated with.
      */
-    constructor(private network :freedom.Social,
+    constructor(private network :Social.Network,
                 private profile :freedom.Social.UserProfile) {
       this.name = profile.name;
       this.userId = profile.userId;
@@ -42,12 +43,26 @@ module Core {
     }
 
     /**
+     * Update the information about this user.
+     */
+    public update = (latestProfile :freedom.Social.UserProfile) => {
+      this.name = latestProfile.name;
+      this.profile = latestProfile;
+    }
+
+    /**
+     * TODO: implement.
+     */
+    public send = (clientId :string, payload :uProxy.Message) => {
+    }
+
+    /**
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
      * Most importantly, sends the local instance information as an 'Instance
      * Message' to the remote client if it is known to be uProxy-enabled.
      */
-    public handleClientState = (client :freedom.Social.ClientState) => {
+    public handleClient = (client :freedom.Social.ClientState) => {
       if (client.userId != this.userId) {
         console.error(this.userId +
             'received client with unexpected userId: ' + client.userId);
@@ -58,12 +73,15 @@ module Core {
       if (freedom.Social.Status.ONLINE == client.status &&
           clientIsNew) {
         // TODO: actually implement sending an InstanceMessage from here.
-        this.network.sendMessage(client.clientId, 'todo');
+        this.send(client.clientId, null);
         // Set the instance mapping to null as opposed to undefined, to indicate
         // that we know the client is pending its corresponding instance data.
         // this.clientToInstanceMap_[clientId] = '';
       }
       this.clients[client.clientId] = client.status;
+
+      // case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
+        // break;
     }
 
     /**
@@ -142,6 +160,7 @@ module Core {
      */
     private removeClient_ = (clientId:string) => {
     }
+
   }  // class User
 
 }  // module uProxy

@@ -49,7 +49,7 @@ var _memoizedInstanceMessage = null;
 //  General UI interaction
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
-  console.log('sending ALL state to UI.'); // JSON.stringify(store.state));
+  console.log('sending ALL state to UI.');
   Core.sendUpdate(uProxy.Update.ALL);
 }
 
@@ -311,7 +311,10 @@ module Core {
 
 
 // Prepare all the social providers from the manifest.
-var networks = Social.initializeNetworks();
+var networks = Social.initializeNetworks([
+  'websocket',
+  'google'
+]);
 // TODO: Remove this when we have multiple social providers 'for real'.
 var defaultNetwork = networks['websocket'].api;
 
@@ -561,39 +564,8 @@ function receiveChange(rawData) {
     console.log(e.stack);
   }
 }
-defaultNetwork.on('onChange', receiveChange);
 
-/**
- * When receiving a message from a social provider, delegate it to the correct
- * user, and then delegate to the correct client.
- *
- * TODO: Generalize this for all networks once we have multiple social providers
- * working.
- */
-defaultNetwork.on('onMessage', (incoming :freedom.Social.IncomingMessage) => {
-  // Replace the JSON str with actual data attributes, then flatten.
-  var clientState :freedom.Social.ClientState = incoming.from;
-
-  // TODO: Pass this along to the right user.
-  // msgInfo.messageText = msgInfo.message;
-  // delete msgInfo.message;
-  // try {
-    // msgInfo.data = JSON.parse(msgInfo.messageText);
-  // } catch(e) {
-    // console.log(msgInfo);
-    // console.error("Message was not JSON");
-    // return;
-  // }
-  // Call the relevant handler.
-  // if (!(msgType in _msgReceivedHandlers)) {
-    // console.error('No handler for message type: ' +
-        // JSON.stringify(msgInfo.data) + "; typeof: " + (typeof msgInfo.data));
-    // return;
-  // }
-  // _msgReceivedHandlers[msgType](msgInfo);
-});
-
-
+// TODO: remove once new social stuff works.
 function updateSelf(data) {
   console.log('<-- XMPP(self) [' + data.name + ']\n', data);
   var myIdentities = store.state.me.identities;
@@ -611,6 +583,7 @@ function updateSelf(data) {
 }
 
 
+// TODO: remove once new social stuff works.
 /**
  * Update data for a user, typically when new client data shows up. Notifies
  * all new UProxy clients of our instance data, and preserve existing hooks.
@@ -656,6 +629,7 @@ function updateUser(newData) {
   _SyncUI('/roster/' + userId, user, userOp);
 }
 
+// TODO: remove once new social stuff works.
 // Examine |client| and synchronize instance data if it's a new UProxy client.
 // Returns true if |client| is a valid uproxy client.
 function _checkUProxyClientSynchronization(client) {
@@ -676,6 +650,7 @@ function _checkUProxyClientSynchronization(client) {
   return true;
 }
 
+// TODO: remove once new social stuff works.
 function _getMyStoredId() {
   for (var id in store.state.me.identities) {
     return id;
