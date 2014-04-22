@@ -80,6 +80,19 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.api = this.provider();  // Instantiate the object.
+
+      this.api.on('onMessage', (data) => {
+        console.log(name + ': onMessage received!');
+        console.log('data: ' + JSON.stringify(data));
+      });
+      this.api.on('onUserProfile', (data) => {
+        console.log(name + ': onUserProfile received!');
+        console.log('data: ' + JSON.stringify(data));
+      });
+      this.api.on('onClientState', (data) => {
+        console.log(name + ': onClientState received!');
+        console.log('data: ' + JSON.stringify(data));
+      });
     }
 
     /**
