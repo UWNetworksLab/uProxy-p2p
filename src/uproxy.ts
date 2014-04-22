@@ -49,7 +49,8 @@ module uProxy {
    */
   export enum MessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
-    CONSENT
+    CONSENT,
+    DESCRIPTION
   }
 
   // Message should be the boundary for JSON parse / stringify.

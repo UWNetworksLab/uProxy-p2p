@@ -21,35 +21,49 @@ module Core {
 
     public name :string;
     public userId :string;
-    public clients;
-    private clientToInstanceMap_ :{ [clientId :string] :Instance };
+    public clients :{ [clientId :string] :freedom.Social.Status };
+    private instances_ :{ [instanceId :string] :Instance };
+    private clientToInstanceMap_ :{ [clientId :string] :string };
+    private instanceToClientMap_ :{ [instanceId :string] :string };
 
     /**
      * Users are constructed when receiving a :UserProfile message from the
-     * social provider.
+     * social provider. They maintain a reference to the social provider
+     * |network| they are associated with.
      */
-    constructor(private profile :freedom.Social.UserProfile) {
+    constructor(private network :freedom.Social,
+                private profile :freedom.Social.UserProfile) {
       this.name = profile.name;
       this.userId = profile.userId;
       this.clients = {};
       // TODO: Decide whether to contain the image, etc.
       this.clientToInstanceMap_ = {};
+      this.instanceToClientMap_ = {};
     }
 
     /**
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
-     * If the clientId specified does not yet exist, add the client to the list.
-     * If the userId of state does not match this user, throw an error.
+     * Most importantly, sends the local instance information as an 'Instance
+     * Message' to the remote client if it is known to be uProxy-enabled.
      */
-    public handleClientState = (state :freedom.Social.ClientState) => {
-      if (state.userId != this.userId) {
+    public handleClientState = (client :freedom.Social.ClientState) => {
+      if (client.userId != this.userId) {
         console.error(this.userId +
-            'received ClientState with unexpected userId: ' + state.userId);
+            'received client with unexpected userId: ' + client.userId);
         return;
       }
-      // Update the client. (Adds anew if it doesn't exist yet)
-      this.clients[state.clientId] = state.status;
+      var clientIsNew = !(client.clientId in this.clients);
+      // Send an instance message to newly ONLINE remote uProxy clients.
+      if (freedom.Social.Status.ONLINE == client.status &&
+          clientIsNew) {
+        // TODO: actually implement sending an InstanceMessage from here.
+        this.network.sendMessage(client.clientId, 'todo');
+        // Set the instance mapping to null as opposed to undefined, to indicate
+        // that we know the client is pending its corresponding instance data.
+        // this.clientToInstanceMap_[clientId] = '';
+      }
+      this.clients[client.clientId] = client.status;
     }
 
     /**
@@ -64,11 +78,17 @@ module Core {
             ' received message with unexpected userId: ' + incoming.from.userId);
         return;
       }
+      if (!(incoming.from.clientId in this.clients)) {
+        console.error(this.userId +
+            ' received message for non-existing client: ' +
+            incoming.from.clientId);
+        return;
+      }
       var msg :uProxy.Message = JSON.parse(incoming.message);
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.handleInstance_(<Instance>msg.data);
+          this.syncInstance_(incoming.from.clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(msg.data);
@@ -79,11 +99,22 @@ module Core {
     }
 
     /**
-     * Receive an Instance message. Update the consent <--> instance mapping.
+     * Receive an Instance message & update the consent <--> instance mapping.
      * Assumes the clientId associated with this instance is valid and belongs
      * to this user.
      */
-    private handleInstance_ = (instance :Instance) => {
+    private syncInstance_ = (clientId :string, instance :Instance) => {
+      // if (freedom.Social.Status.ONLINE !== this.clients[clientId]) {
+        // return false;
+      // }
+      var oldClientId = this.instanceToClientMap_[instance.instanceId];
+      if (oldClientId) {
+        // Remove old mapping if it exists.
+        this.clientToInstanceMap_[oldClientId] = null;
+      }
+      this.clientToInstanceMap_[clientId] = instance.instanceId;
+      this.instanceToClientMap_[instance.instanceId] = clientId;
+      // TODO: do the rest of the sync / storage stuff.
     }
 
     /**
@@ -95,36 +126,15 @@ module Core {
       // TODO: Put the new consent code in here.
     }
 
-    // TODO: clean this up with the new consent piece, and also put all
-    // over-the-network stuff in its own module.
-    private _msgReceivedHandlers = {
-        'allow': receiveTrustMessage,
-        'offer': receiveTrustMessage,
-        'deny': receiveTrustMessage,
-        'request-access': receiveTrustMessage,
-        'cancel-request': receiveTrustMessage,
-        'accept-offer': receiveTrustMessage,
-        'decline-offer': receiveTrustMessage,
-        'notify-instance': Core.receiveInstance,
-        'notify-consent': Core.receiveConsent,
-        'update-description': receiveUpdateDescription,
-        'peerconnection-server' : receiveSignalFromServerPeer,
-        'peerconnection-client' : receiveSignalFromClientPeer,
-        'newly-active-client' : handleNewlyActiveClient,
-        'newly-inactive-client' : handleInactiveClient
-    };
-
-    /**
-     * Receive an Instance message.
-     */
-    private syncInstance = (instanceId) => {
-      // TODO
-    }
-
     /**
      * Maintain a mapping between clientIds and instanceIds.
      */
-    private clientToInstance = () => {
+    public clientToInstance = (clientId :string) : string => {
+      return this.clientToInstanceMap_[clientId];
+    }
+
+    public instanceToClient= (instanceId :string) : string => {
+      return this.instanceToClientMap_[instanceId];
     }
 
     /**

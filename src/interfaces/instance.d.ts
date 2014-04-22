@@ -32,5 +32,5 @@ interface Instance {
   status      :string;
   description :string;
   notify      :boolean;   // TODO: replace with better notications
-  rosterInfo  :RosterInfo;
+  rosterInfo  ?:RosterInfo;
 }
