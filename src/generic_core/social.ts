@@ -111,15 +111,15 @@ module Social {
      * state upon success.
      * TODO: test this.
      */
-    public login = (remember:boolean = false) => {
+    public login = (remember:boolean = false) : Promise<void> => {
       var request :freedom.Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
-        url: 'nothing',
+        url: 'https://github.com/uProxy/uProxy',
         interactive: true,
         rememberLogin: remember
       }
-      this.api.login(request).then((client:freedom.Social.ClientState) => {
+      return this.api.login(request).then((client:freedom.Social.ClientState) => {
         console.log('Successfully logged in.');
         this.my = client;
       })
@@ -154,6 +154,7 @@ module Social {
       } else {
         this.roster[userId].update(profile);
       }
+      Core.sendUpdate(uProxy.Update.ALL);
     }
 
     /**

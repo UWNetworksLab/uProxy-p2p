@@ -103,19 +103,13 @@ module Core {
       console.warn('Could not login to ' + network);
       return;
     }
-    network.api.login({  // :freedom.Social.LoginRequest
-          agent: 'uproxy',
-          version: '0.1',
-          url: 'https://github.com/UWNetworksLab/UProxy',
-          interactive: Boolean(network),
-          rememberLogin: true
-        })
+    network.login(true)
         .then(sendFullStateToUI)
         .then(() => {
           console.log('Successfully logged in to ' + networkName);
         });
 
-    store.state.me.networkDefaults[networkName].autoconnect = explicit;
+    // store.state.me.networkDefaults[networkName].autoconnect = explicit;
     store.saveMeToStorage();
   }
 

@@ -34,6 +34,7 @@ module Core {
      */
     constructor(private network :Social.Network,
                 private profile :freedom.Social.UserProfile) {
+      console.log('New user: ' + profile.userId);
       this.name = profile.name;
       this.userId = profile.userId;
       this.clients = {};
