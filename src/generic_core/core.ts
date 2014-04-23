@@ -24,7 +24,6 @@
 
 declare var store :Core.State;  // From start-uproxy.ts.
 
-
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
 // this to be freedom, and communicate using 'emit's and 'on's.
@@ -51,7 +50,7 @@ var _memoizedInstanceMessage = null;
 // --------------------------------------------------------------------------
 function sendFullStateToUI() {
   console.log('sending ALL state to UI.');
-  Core.sendUpdate(uProxy.Update.ALL);
+  ui.update(uProxy.Update.ALL);
 }
 
 
@@ -64,31 +63,22 @@ function reset() {
   store.reset().then(sendFullStateToUI);
 }
 
-/**
- * Primary uProxy backend. Handles which social networks one is connected to,
- * sends updaes to the UI, and handles commands from the UI.
- */
-module Core {
-
-  // TODO: Figure out cleaner way to make freedom handle enums-as-strings.
-
-  /**
-   * Install a handler for commands received from the UI.
-   */
-  export var onCommand = (cmd :uProxy.Command, handler:any) => {
-    bgAppPageChannel.on('' + cmd, handler);
-  }
+// Entry-point into the UI.
+class UIConnector implements uProxy.UIAPI {
 
   /**
    * Send an Update message to the UI.
-   * TODO: Possibly refactor this so it's accessed 'from' a UI-adapter-ish
-   * object. ie. UI.update()...
+   * TODO: Turn this private and make outside accesses directly based on UIAPI.
    */
-  export var sendUpdate = (update :uProxy.Update, data?:any) => {
-    switch(update) {
+  public update = (type:uProxy.Update, data?:any) => {
+    switch(type) {
       case uProxy.Update.ALL:
         console.log('update [ALL]', store.state);
-        data = store.state;
+        // data = store.state;
+        var networkName :string;
+        for (networkName in Social.networks) {
+          Social.networks[networkName].notifyUI();
+        }
         break;
 
       case uProxy.Update.NETWORK:
@@ -105,7 +95,29 @@ module Core {
         console.warn('Not yet implemented.');
         return;
     }
-    bgAppPageChannel.emit('' + update, data);
+    bgAppPageChannel.emit('' + type, data);
+  }
+
+  public sync = () => {
+    // TODO
+  }
+
+}
+var ui = new UIConnector();
+
+/**
+ * Primary uProxy backend. Handles which social networks one is connected to,
+ * sends updaes to the UI, and handles commands from the UI.
+ */
+module Core {
+
+  // TODO: Figure out cleaner way to make freedom handle enums-as-strings.
+
+  /**
+   * Install a handler for commands received from the UI.
+   */
+  export var onCommand = (cmd :uProxy.Command, handler:any) => {
+    bgAppPageChannel.on('' + cmd, handler);
   }
 
   /**

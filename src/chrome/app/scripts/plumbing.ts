@@ -11,36 +11,19 @@ var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-
 var uProxyAppChannel = freedom;  // Guaranteed to exist.
-uProxyAppChannel.on('' + uProxy.Command.READY, () => {
-  console.log('uProxy is ready!');
-});
-
 
 /**
- * Chrome-App-specific uProxy UI API implementation.
- *
- * This class hides all cross App-Extension communication wiring so that the
- * uProxy Core may speak through this connector as if talking directly to UI.
- *
- * See the ChromeCoreConnector, which is the other-side of this class.
+ * See the ChromeCoreConnector, which communicates to this class.
  * TODO: Finish this class with tests and pull into its own file.
  */
-class ChromeUIConnector implements uProxy.UIAPI {
+class ChromeUIConnector {
 
-  private connected :boolean;
-  private queue_ :ChromeGlue.Payload[];
   private extPort_ :chrome.runtime.Port;    // The port that the extension connects to.
 
   constructor() {
-    connected = false;
     this.extPort_ = null;
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
-  }
-
-  public update = (update:uProxy.Update, data?:any) => {
-    console.log('Updating UI...')
   }
 
   /**
@@ -64,7 +47,6 @@ class ChromeUIConnector implements uProxy.UIAPI {
     // this app, so it knows the connection was successful.
     this.extPort_.postMessage(ChromeGlue.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
-    this.flushQueue(this.extPort_);
   }
 
   /**
@@ -73,10 +55,10 @@ class ChromeUIConnector implements uProxy.UIAPI {
    */
   private onExtMsg_ = (msg:ChromeGlue.Payload) => {
     console.log('extension message: ', msg);
-
+    var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core. These are uProxy.Commands.
     if ('emit' == msg.cmd) {
-      uProxyAppChannel.emit(msg.type, msg.data);
+      uProxyAppChannel.emit(msgType, msg.data);
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
@@ -86,8 +68,9 @@ class ChromeUIConnector implements uProxy.UIAPI {
       }
       installedFreedomHooks.push(msg.type);
       // When it fires, send data back over Chrome App -> Extension port.
-      uProxyAppChannel.on(msg.type, (ret) => {
-        extPort_.postMessage({
+      uProxyAppChannel.on(msgType, (ret) => {
+        this.extPort_.postMessage({
+          cmd: 'fired',
           type: msg.type,
           data: ret
         });
@@ -95,42 +78,6 @@ class ChromeUIConnector implements uProxy.UIAPI {
     }
   }
 
-  /**
-   * Helper which sends all payloads currently on the queue over to the Chrome
-   * UI. Should be called everytime connection is re-established.
-   */
-  public flushQueue = (port?:chrome.runtime.Port) => {
-    while (0 < this.queue_.length) {
-      // Stop flushing if disconnected.
-      if (!this.status.connected) {
-        console.warn('Disconnected from App whilst flushing queue.');
-        break;
-      }
-      var payload = this.queue_.shift();
-      this.send_(payload);
-    }
-    return port;
-  }
-
-  /**
-   * Send a payload to the Chrome extension.
-   * If currently connected to the extension, immediately send. Otherwise, queue
-   * the message for the next successful connection.
-   */
-  private send_ = (payload :ChromeGlue.Payload) => {
-    if (!this.connected || null == extPort_) {
-      this.queue_.push(payload);
-      return;
-    }
-    try {
-      this.extPort_.postMessage(payload);
-    } catch (e) {
-      console.warn(e);
-      console.warn('ChromeCoreConnector.send_ postMessage failure.');
-    }
-  }
 }
-
-var ui = new ChromeUIConnector();
-
+var connector = new ChromeUIConnector();
 console.log('Starting uProxy app...');

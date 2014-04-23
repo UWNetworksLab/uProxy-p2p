@@ -29,8 +29,8 @@ module Social {
 
   var PREFIX:string = 'SOCIAL-';
   var VALID_NETWORKS:string[] = [
+    'google',
     'websocket',
-    'google'
   ]
   export var networks:{[name:string]:Network} = {}
 
@@ -86,6 +86,7 @@ module Social {
 
     // Information about the local login.
     private my :freedom.Social.ClientState;
+    private online :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     /**
@@ -96,6 +97,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
+      this.online = false;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       // TODO: Update these event name-strings when freedom updates to
@@ -103,11 +105,8 @@ module Social {
       this.api.on('onUserProfile', this.handleUserProfile);
       this.api.on('onClientState', this.handleClientState);
       this.api.on('onMessage', this.handleMessage);
-      // Let the UI know that this network exists.
-      Core.sendUpdate(uProxy.Update.NETWORK, {
-        name: this.name,
-        online: false
-      });
+      console.log('Preparing Social.Network ' + name);
+      this.notifyUI();
     }
 
     /**
@@ -125,25 +124,27 @@ module Social {
       }
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
         // Upon successful login, remember local client information.
+        this.online = true;
         this.my = client;
-        var payload :UI.NetworkMessage = {
-          name: this.name,
-          online: true
-        }
-        // Send an update to the UI, indicating that this network is live.
-        Core.sendUpdate(uProxy.Update.NETWORK, payload);
-      })
+      }).then(this.notifyUI);
     }
 
     public logout = () : Promise<void> => {
       return this.api.logout().then(() => {
+        this.online = false;
         console.log(this.name + ': logged out.');
-        var payload :UI.NetworkMessage = {
-          name: this.name,
-          online: false
-        }
-        Core.sendUpdate(uProxy.Update.NETWORK, payload);
-      });
+      }).then(this.notifyUI);
+    }
+
+    /**
+     * Helper which tells the UI about the existence / status of this network.
+     */
+    public notifyUI = () => {
+      var payload :UI.NetworkMessage = {
+        name: this.name,
+        online: this.online
+      }
+      ui.update(uProxy.Update.NETWORK, payload);
     }
 
     /**
@@ -168,7 +169,7 @@ module Social {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
-        Core.sendUpdate(uProxy.Update.USER_SELF, payload);
+        ui.update(uProxy.Update.USER_SELF, payload);
         return;
       }
 
@@ -181,7 +182,7 @@ module Social {
         this.roster[userId].update(profile);
       }
       // Update UI with friend's information.
-      Core.sendUpdate(uProxy.Update.USER_SELF, payload);
+      ui.update(uProxy.Update.USER_SELF, payload);
     }
 
     /**

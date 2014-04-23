@@ -99,21 +99,24 @@ module uProxy {
 
   /**
    * The primary interface for the uProxy User Interface.
-   *
-   * TODO: Provide an analogue of this interface in the Chrome App, so that
-   * the Core can act as if it were speaking directly to the UI.
    */
   export interface UIAPI {
 
     // Global sync of all state.
     sync(state? : string) : void;
 
+    update(type:Update, data?:any) : void;
+    // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
+    // the below)...
+    // updateAll(data:Object) : void;
+    // updateNetwork(network:Social.Network) : void;
+    // updateUser(user:Core.User) : void;
+    // updateSelf(user:Core.User) : void;
     // Update an instance.
     // syncInstance(instance : any) : void;
-    updateMappings() : void;
-
-    updateIdentity(identity) : void;
-    addNotification() : void;
+    // updateMappings() : void;
+    // updateIdentity(identity) : void;
+    // addNotification() : void;
   }
 
 

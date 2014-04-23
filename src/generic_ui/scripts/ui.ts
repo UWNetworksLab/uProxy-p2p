@@ -44,6 +44,10 @@ module UI {
       console.log('Created the UserInterface');
     }
 
+    update = (type:uProxy.Update, data?:any) => {
+      // TODO: Implement.
+    }
+
     // Keep track of currently viewed contact and instance.
     contact = null;
     contactUnwatch = null;
