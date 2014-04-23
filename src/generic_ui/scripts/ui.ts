@@ -16,8 +16,6 @@ module UI {
 
   export class UserInterface implements uProxy.UIAPI {
 
-    // TODO: Make these networks correspond to the actual social bit.
-    networks = ['google', 'facebook', 'xmpp'];
     notifications = 0;
     // TODO: splash should be set by state.
     accessView = false;

@@ -103,6 +103,11 @@ module Social {
       this.api.on('onUserProfile', this.handleUserProfile);
       this.api.on('onClientState', this.handleClientState);
       this.api.on('onMessage', this.handleMessage);
+      // Let the UI know that this network exists.
+      Core.sendUpdate(uProxy.Update.NETWORK, {
+        name: this.name,
+        online: false
+      });
     }
 
     /**

@@ -34,9 +34,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     'onStateChange',
     'model',
     'roster',
-    function($filter, $http, $rootScope, ui,
-             onStateChange,
-             model, roster) {
+    function($filter, $http, $rootScope, ui, core,
+             onStateChange, model, roster) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -122,16 +121,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
 
       $rootScope.prettyNetworkName = function(networkId) {
-        if (networkId == 'google') {
-          return 'G+';
-        } else if (networkId == 'facebook') {
-          return 'FB';
-        } else if (networkId == 'xmpp') {
-          return 'XMPP'
-        } else {
-          console.warn("No prettification for network: " + JSON.stringify(networkId));
-          return networkId;
+        switch (networkId) {
+          case 'google': return 'G+';
+          case 'facebook': return 'FB';
+          case 'xmpp': return 'XMPP';
+          default:
+            console.warn("No prettification for network: " + JSON.stringify(networkId));
         }
+        return networkId;
       };
 
       // TODO: remove since there will be multiple instances for a userId

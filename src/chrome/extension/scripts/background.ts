@@ -127,6 +127,9 @@ function initUI() : UI.UserInterface {
     }
   });
 
+  // TODO: Implement the rest of the fine-grained state updates.
+  // (We begin with the simplest, total state update, above.)
+
   // TODO: factor into the UI class.
   function addUserToModel(payload :UI.UserMessage) {
     var network = model.networks[payload.network];
@@ -147,9 +150,6 @@ function initUI() : UI.UserInterface {
     console.log('uProxy.Update.USER_FRIEND:', payload);
     addUserToModel(payload);
   });
-
-  // TODO: Implement the rest of the fine-grained state updates.
-  // (We begin with the simplest, total state update, above.)
 
   return new UI.UserInterface(core, notifications);
 }
