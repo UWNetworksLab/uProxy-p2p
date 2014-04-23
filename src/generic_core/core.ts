@@ -15,6 +15,7 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
+/// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
@@ -80,12 +81,21 @@ module Core {
 
   /**
    * Send an Update message to the UI.
+   * TODO: Possibly refactor this so it's accessed 'from' a UI-adapter-ish
+   * object. ie. UI.update()...
    */
   export var sendUpdate = (update :uProxy.Update, data?:any) => {
     switch(update) {
       case uProxy.Update.ALL:
         bgAppPageChannel.emit('' + update, store.state);
-        break
+        console.log('update [ALL]', store.state);
+        break;
+
+      case uProxy.Update.USER_SELF:
+      case uProxy.Update.USER_FRIEND:
+        console.log('update [USER]', <UI.UserMessage>data);
+        bgAppPageChannel.emit('' + update, data);
+        break;
 
       // TODO: Implement the finer-grained Update messages.
       default:
@@ -193,6 +203,7 @@ module Core {
   // Send consent bits to re-synchronize consent with remote |instance|.
   // This happens *after* receiving an instance notification for an instance which
   // we already have a history with.
+  // TODO: Move this into the Instance class.
   export var sendConsent = (instance:Instance) => {
     console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
     var clientId = store.state.instanceToClient[instance.instanceId];
@@ -572,6 +583,7 @@ function receiveUpdateDescription(msg) {
 
 // --------------------------------------------------------------------------
 //  Updating the UI
+// TODO: Replace these methods with the new UI update mechanism once ready.
 // --------------------------------------------------------------------------
 function _SyncUI(path, value, op?) {
   op = op || 'add';
@@ -639,7 +651,6 @@ Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
   }
   // Don't need to re-sync with UI - expect UI to have done the change.
 });
-
 
 // TODO: make the invite mechanism an actual process.
 Core.onCommand(uProxy.Command.INVITE, (userId:string) => {

@@ -93,7 +93,6 @@ module Social {
      * handlers.
      */
     constructor(public name:string) {
-      // console.log('Initializing network ' + name);
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
@@ -120,7 +119,7 @@ module Social {
         rememberLogin: remember
       }
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
-        console.log('Successfully logged in.');
+        // Upon successful login, remember local client information.
         this.my = client;
       })
     }
@@ -135,18 +134,23 @@ module Social {
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
+      var payload :UI.UserMessage = {
+        network: this.name,
+        user: profile
+      };
       // Check if this is ourself.
       if (this.my && userId == this.my.userId) {
         console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
-        // TODO: update the UI.
-        // _SyncUI('/me/identities/' + data.userId, data, 'add');
         // Send our own InstanceMessage to any queued-up clients.
         if (freedom.Social.Status.ONLINE == this.my.status) {
           this.flushQueuedInstanceMessages();
         }
+        // Update UI with own information.
+        Core.sendUpdate(uProxy.Update.USER_SELF, payload);
         return;
       }
-      // Otherwise, this is a remote contact.
+
+      // Otherwise, this is a remote contact...
       console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
       if (!(userId in this.roster)) {
         // console.log('Received new UserProfile: ' + userId);
@@ -154,7 +158,8 @@ module Social {
       } else {
         this.roster[userId].update(profile);
       }
-      Core.sendUpdate(uProxy.Update.ALL);
+      // Update UI with friend's information.
+      Core.sendUpdate(uProxy.Update.USER_SELF, payload);
     }
 
     /**

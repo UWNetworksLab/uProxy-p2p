@@ -10,8 +10,11 @@
 /// <reference path='core_connector.ts' />
 /// <reference path='proxy-config.ts' />
 
+/// <reference path='../../../interfaces/ui.d.ts' />
 /// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
+
+/// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
@@ -23,9 +26,12 @@ var proxyConfig = new BrowserProxyConfig();
 proxyConfig.clearConfig();
 
 
+// Singleton model for angularjs hooks on both popup and options.
+var model :UI.Model = {
+  networks: {}
+};
+
 // ---------------------------- State Changes ----------------------------------
-// TODO: Type the model.
-var model :any = {};  // Singleton angularjs model for either popup or options.
 var onStateChange = new chrome.Event();
 
 // Rate Limiting for state updates (ms)
@@ -109,6 +115,27 @@ function initUI() : UI.UserInterface {
     }
     console.log('model = ', model);
     finishStateChange();
+  });
+
+  // TODO: factor into the UI class.
+  function addUserToModel(payload :UI.UserMessage) {
+    var network = model[payload.network];
+    if (!network) {
+      console.warn('Received USER for non-existing network.');
+      return;
+    }
+    var user = payload.user;
+    network.roster[user.userId] = user;
+  };
+
+  // Attach handlers for USER updates.
+  core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
+    console.log('uProxy.Update.USER_SELF:', payload);
+    addUserToModel(payload);
+  });
+  core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
+    console.log('uProxy.Update.USER_FRIEND:', payload);
+    addUserToModel(payload);
   });
 
   // TODO: Implement the rest of the fine-grained state updates.

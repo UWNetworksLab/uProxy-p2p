@@ -38,6 +38,10 @@ module uProxy {
    */
   export enum Update {
     ALL = 2000,
+    ROSTER,       // Single roster for one particular network.
+    USER_SELF,    // Local / myself on the network.
+    USER_FRIEND,  // Remote friend on the roster.
+    CLIENT,       // Single client for a User.
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
@@ -105,7 +109,7 @@ module uProxy {
     sync(state? : string) : void;
 
     // Update an instance.
-    syncInstance(instance : any) : void;
+    // syncInstance(instance : any) : void;
     updateMappings() : void;
 
     updateIdentity(identity) : void;
