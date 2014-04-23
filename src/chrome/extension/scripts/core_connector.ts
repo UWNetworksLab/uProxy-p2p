@@ -288,6 +288,11 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   updateDescription = (description) => {
+    // Only update on different description.
+    // if (this.oldDescription &&
+       // (this.oldDescription != description)) {
+      // this.core.updateDescription(description);
+    // }
     console.log('Updating description to ' + description);
     this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
   }

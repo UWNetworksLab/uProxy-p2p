@@ -113,7 +113,6 @@ module uProxy {
     updateMappings() : void;
 
     updateIdentity(identity) : void;
-    sendConsent() : void;
     addNotification() : void;
   }
 

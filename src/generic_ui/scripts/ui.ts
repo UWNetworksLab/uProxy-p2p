@@ -81,15 +81,6 @@ module UI {
       }
     }
 
-    // -------------------------------- Consent ----------------------------------
-    modifyConsent = (instanceId :string, action  :uProxy.Consent.Action) => {
-      if (!this.core) {
-        console.log('UI not connected to core - cannot modify consent.');
-        return;
-      }
-      this.core.modifyConsent(instanceId, action);
-    }
-
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
     // TODO: Type the Instance.
@@ -116,33 +107,6 @@ module UI {
         this.notify.setIcon('uproxy-19.png');
       }
     }
-
-    // TODO: Get rid of this baklava code.
-
-    login = (network) => {
-      this.core.login(network);
-      this.splashPage = false;
-    }
-
-    logout = (network) => {
-      this.core.logout(network);
-      this.proxy = null;
-    }
-
-    updateDescription = (description) => {
-      // Only update on different description.
-      if (this.oldDescription &&
-         (this.oldDescription != description)) {
-        this.core.updateDescription(description);
-      }
-      this.oldDescription = description;
-    }
-
-    sendInstance = (clientId) => {
-      this.core.sendInstance(clientId);
-    }
-
-    reset = () => { this.core.reset(); }
 
     // -------------------------------- Filters ----------------------------------
     /**
