@@ -70,7 +70,9 @@ module Social {
   /**
    * Social.Network - encapsulates a single network on a social provider.
    *
-   * It deals with all events from the social provider. 'onUserProfile' events
+   * Maintains the local uProxy client's interaction as a user on the network.
+   *
+   * Also, deals with events from the social provider. 'onUserProfile' events
    * directly affect the roster of this network, while 'onClientState' and
    * 'onMessage' are passed on to the relevant user, assuming the user exists.
    */
@@ -82,6 +84,10 @@ module Social {
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
 
+    // Information about the local login.
+    private my :freedom.Social.ClientState;
+    private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+
     /**
      * Initialize the social provider for this Network, and attach event
      * handlers.
@@ -91,6 +97,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
+      this.instanceMessageQueue_ = [];
       this.api = this.provider();
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
@@ -100,11 +107,47 @@ module Social {
     }
 
     /**
-     * Handler for receiving 'onUserProfile' messages. Updates or adds the user
-     * to this Network's roster.
+     * Wrapper around logging-in to the social-provider, and updating the local
+     * state upon success.
+     * TODO: test this.
+     */
+    public login = (remember:boolean = false) => {
+      var request :freedom.Social.LoginRequest = {
+        agent: 'uproxy',
+        version: '0.1',
+        url: 'nothing',
+        interactive: true,
+        rememberLogin: remember
+      }
+      this.api.login(request).then((client:freedom.Social.ClientState) => {
+        console.log('Successfully logged in.');
+        this.my = client;
+      })
+    }
+
+    /**
+     * Handler for receiving 'onUserProfile' messages. First, determines whether
+     * the UserProfile belongs to ourselves or a remote contact. Then,
+     * updates / adds the user data to the roster.
+     * Note that our own Instance Message is specific to one particular network,
+     * and can only be prepared after receiving our own vcard for the first
+     * time.
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
+      // Check if this is ourself.
+      if (this.my && userId == this.my.userId) {
+        console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
+        // TODO: update the UI.
+        // _SyncUI('/me/identities/' + data.userId, data, 'add');
+        // Send our own InstanceMessage to any queued-up clients.
+        if (freedom.Social.Status.ONLINE == this.my.status) {
+          this.flushQueuedInstanceMessages();
+        }
+        return;
+      }
+      // Otherwise, this is a remote contact.
+      console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
       if (!(userId in this.roster)) {
         // console.log('Received new UserProfile: ' + userId);
         this.roster[userId] = new Core.User(this, profile);
@@ -113,6 +156,10 @@ module Social {
       }
     }
 
+    /**
+     * Handler for receiving 'onClientState' messages. Passes these messages to
+     * the relevant user, which will manage its own clients.
+     */
     public handleClientState = (client :freedom.Social.ClientState) => {
       if (!(client.userId in this.roster)) {
         console.warn(
@@ -140,6 +187,44 @@ module Social {
 
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
+    }
+
+    /**
+     * Generate my instance message, to send to other uProxy installations, to
+     * inform them that we're also a uProxy installation to interact with.
+     *
+     * However, we can only build the instance message if we've
+     * received an onClientState event for ourself, to populate at least one
+     * identity.
+     */
+    private prepareInstanceMessage_ = () : uProxy.Message => {
+      return {
+        type: uProxy.MessageType.INSTANCE,
+        data: this.my
+      }
+    }
+
+    /**
+     * Often times, network will receive client IDs belonging to remote
+     * contacts known to be uProxy-enabled. This may happen prior to receiving
+     * the local vcard, which is required for constructing the local Instance
+     * Message. In this case, those instance messages must be queued.
+     */
+    public flushQueuedInstanceMessages = () => {
+      if (0 === this.instanceMessageQueue_.length) {
+        return;  // Don't need to do anything.
+      }
+      var instancePayload = JSON.stringify(this.prepareInstanceMessage_());
+      if (!instancePayload) {
+        console.error('Still not ready to construct instance payload.');
+        return false;
+      }
+      this.instanceMessageQueue_.forEach((clientId:string) => {
+        console.log('Sending queued instance message to: ' + clientId + '.');
+        this.api.sendMessage(clientId, instancePayload);
+      });
+      this.instanceMessageQueue_ = [];
+      return true;
     }
 
     /**

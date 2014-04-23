@@ -146,16 +146,17 @@ module Core {
    * that we've received the other side's instance data yet.
    */
   export var sendInstance = (clientId:string) => {
-    var instancePayload = makeMyInstanceMessage();
-    console.log('sendInstance -> ' + clientId, instancePayload);
+    console.warn('Core.sendInstance is deprecated Use Core.User.');
+    // var instancePayload = makeMyInstanceMessage();
+    // console.log('sendInstance -> ' + clientId, instancePayload);
     // Queue clientIDs if we're not ready to send instance message.
-    if (!instancePayload) {
-      _sendInstanceQueue.push(clientId);
-      console.log('Queueing ' + clientId + ' for an instance message.');
-      return false;
-    }
-    defaultNetwork.sendMessage(clientId, instancePayload);
-    return true;
+    // if (!instancePayload) {
+      // _sendInstanceQueue.push(clientId);
+      // console.log('Queueing ' + clientId + ' for an instance message.');
+      // return false;
+    // }
+    // defaultNetwork.sendMessage(clientId, instancePayload);
+    // return true;
   }
 
   /**
@@ -311,10 +312,7 @@ module Core {
 
 
 // Prepare all the social providers from the manifest.
-var networks = Social.initializeNetworks([
-  'websocket',
-  'google'
-]);
+var networks = Social.initializeNetworks();
 // TODO: Remove this when we have multiple social providers 'for real'.
 var defaultNetwork = networks['websocket'].api;
 
@@ -503,218 +501,6 @@ function receiveTrustMessage(msgInfo) {
   _updateTrust(instanceId, msgType, true);  // received = true
   _addNotification(instanceId);
 }
-
-// --------------------------------------------------------------------------
-//  Messages
-// --------------------------------------------------------------------------
-
-// Expects message in the format data = {
-//    message: string,
-//    network: string,
-//    status: string,
-//    userId: string
-// }
-//
-function receiveStatus(data) {
-  console.log('onStatus: ' + JSON.stringify(data));
-  // TODO: Remove after typing.
-  data = restrictKeys(C.DEFAULT_STATUS, data);
-  // userId is only specified when connecting or online.
-  if (data.userId.length) {
-    store.state.identityStatus[data.network] = data;
-    bgAppPageChannel.emit('state-change',
-        [{op: 'add', path: '/identityStatus/' + data.network, value: data}]);
-    if (!store.state.me.identities[data.userId]) {
-      store.state.me.identities[data.userId] = {
-        userId: data.userId
-      };
-    }
-  }
-}
-
-// Update local user's online status (away, busy, etc.).
-defaultNetwork.on('onStatus', receiveStatus);
-
-// Called when a contact (or ourselves) changes state, whether being online or
-// the description.
-// |rawData| is a DEFAULT_ROSTER_ENTRY.
-function receiveChange(rawData) {
-  /* if (!iAmLoggedIn()) {
-    console.log('<--- XMPP(offline) [' + rawData.name + '] ignored\n', rawData);
-    return false;
-  } */
-  try {
-    var data = restrictKeys(C.DEFAULT_ROSTER_ENTRY, rawData);
-    for (var c in rawData.clients) {
-      data.clients[c] = restrictKeys(C.DEFAULT_ROSTER_CLIENT_ENTRY,
-                                     rawData.clients[c]);
-    }
-
-    // vCard for myself - update if we have onStatus'd ourselves in the past.
-    if (store.state.me.identities[data.userId]) {
-      updateSelf(data);
-      // TODO: Handle changes that might affect proxying
-    } else {
-      updateUser(data);  // Not myself.
-    }
-  } catch (e) {
-    console.log('Failure in onChange handler.  store.state.me = ' +
-        JSON.stringify(store.state.me) + ', input message: ' +
-        JSON.stringify(rawData));
-    console.log(e.stack);
-  }
-}
-
-// TODO: remove once new social stuff works.
-function updateSelf(data) {
-  console.log('<-- XMPP(self) [' + data.name + ']\n', data);
-  var myIdentities = store.state.me.identities;
-  var loggedIn = Object.keys(data.clients).length > 0;
-
-  myIdentities[data.userId] = data;
-  _SyncUI('/me/identities/' + data.userId, data, 'add');
-
-  // If it's ourselves for the first time, it also means we can
-  // send instance messages to any queued up uProxy clientIDs.
-  console.log('Self state: { loggedIn: "' + loggedIn + '".');
-  if (loggedIn) {
-    sendQueuedInstanceMessages();
-  }
-}
-
-
-// TODO: remove once new social stuff works.
-/**
- * Update data for a user, typically when new client data shows up. Notifies
- * all new UProxy clients of our instance data, and preserve existing hooks.
- * Does not do a complete replace - does a merge of any provided key values.
- *
- * |newData| - Incoming JSON info for a single user. Assumes to have been
- *             restricted to DEFAULT_ROSTER_ENTRY already.
- * TODO: Use types!!
- */
-function updateUser(newData) {
-  console.log('<--- XMPP(friend) [' + newData.name + ']', newData);
-  var userId = newData.userId,
-      userOp = 'replace',
-      existingUser = store.state.roster[userId];
-
-  if (!existingUser) {
-    store.state.roster[userId] = newData;
-    userOp = 'add';
-  }
-  var user = store.state.roster[userId];
-  var instance = store.instanceOfUserId(userId);
-  var clientId;
-  user.name = newData.name;
-  user.imageData = newData.imageData || null;
-  user.url = newData.url || null;
-  for (clientId in newData.clients) {
-    user.clients[clientId] = newData.clients[clientId];
-  }
-
-  for (clientId in user.clients) {
-    var client = user.clients[clientId];
-    if ('offline' == client.status) {    // Delete offline clients.
-      delete user.clients[clientId];
-      continue;
-    }
-    if (! (clientId in user.clients)) {  // Add new clients.
-      user.clients[clientId] = client;
-    }
-    // Inform UProxy instances of each others' ephemeral clients.
-    _checkUProxyClientSynchronization(client);
-  }
-
-  _SyncUI('/roster/' + userId, user, userOp);
-}
-
-// TODO: remove once new social stuff works.
-// Examine |client| and synchronize instance data if it's a new UProxy client.
-// Returns true if |client| is a valid uproxy client.
-function _checkUProxyClientSynchronization(client) {
-  if (!store.isMessageableUproxyClient(client)) {
-    return false;
-  }
-  var clientId = client.clientId;
-  var clientIsNew = !(clientId in store.state.clientToInstance);
-
-  if (clientIsNew) {
-    console.log('New uProxy Client (' + client.network + ')' + clientId + '\n',
-                client);
-    // Set the instance mapping to null as opposed to undefined, to indicate
-    // that we know the client is pending its corresponding instance data.
-    store.state.clientToInstance[clientId] = null;
-    Core.sendInstance(clientId);
-  }
-  return true;
-}
-
-// TODO: remove once new social stuff works.
-function _getMyStoredId() {
-  for (var id in store.state.me.identities) {
-    return id;
-  }
-  console.log('Warning: I don\'t have any identities yet.');
-  return null;
-}
-
-
-/**
- * Generate my instance message, to send to other uProxy installations, to
- * inform them that we're also a uProxy installation and can engage in
- * shenanigans. However, we can only build the instance message if we've
- * received an onChange notification for ourselves to populate at least one
- * identity.
- *
- * Returns the JSON of the instance message if successful - otherwise it
- * returns null if we're not ready.
- */
-function makeMyInstanceMessage() : string {
-  var result;
-  try {
-    var firstIdentity = store.state.me.identities[_getMyStoredId()];
-    if (!firstIdentity || !firstIdentity.clients ||
-        0 === Object.keys(firstIdentity.clients).length) {
-      return null;
-    }
-    firstIdentity.network = firstIdentity.clients[Object.keys(
-        firstIdentity.clients)[0]].network;
-    // TODO: Type the instance payload.
-    result = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, store.state.me);
-    result.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO,
-                                         firstIdentity);
-  } catch (e) {
-    console.log("Failed to repair identity when making an instance message.\n");
-    console.log("firstIdentity = " + JSON.stringify(
-        firstIdentity, null, " ") + "\n");
-    console.log("store.state.me = " + JSON.stringify(
-        store.state.me, null, " ") + "\n");
-    throw e;
-  }
-  return JSON.stringify(result);
-}
-
-// Only called when we receive an onChange notification for ourselves for the
-// first time, to send pending instance messages.
-function sendQueuedInstanceMessages() {
-  if (0 === _sendInstanceQueue.length) {
-    return;  // Don't need to do anything.
-  }
-  var instancePayload = makeMyInstanceMessage();
-  if (!instancePayload) {
-    console.error('Still not ready to construct instance payload.');
-    return false;
-  }
-  _sendInstanceQueue.forEach((clientId) => {
-    console.log('Sending previously queued instance message to: ' + clientId + '.');
-    defaultNetwork.sendMessage(clientId, instancePayload);
-  });
-  _sendInstanceQueue = [];
-  return true;
-}
-
-
 
 // For each direction (e.g., I proxy for you, or you proxy for me), there
 // is a logical AND of consent from both parties. If the local state for

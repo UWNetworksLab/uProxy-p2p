@@ -15,6 +15,7 @@ declare var store :Core.State;
 var state = store.state;
 var Trust = C.Trust;
 
+/*
 describe('uproxy.updateUser', () => {
 
   // Stub out communications functions.
@@ -56,7 +57,9 @@ describe('uproxy.updateUser', () => {
       url: null
     });
   });
+  */
 
+  /*
   it('calls sendInstance for uproxy-enabled users', () => {
     // Add a user with an active 'uproxy' client, and ensure that we send her
     // our instance data.
@@ -80,6 +83,7 @@ describe('uproxy.updateUser', () => {
     expect(Core.sendInstance).toHaveBeenCalledWith(aliceClient.clientId);
   });
 });  // uproxy.updateUser
+*/
 
 // Fake an entry in the instance table.
 var fakeInstanceSync = function(userId, clientId, data) {

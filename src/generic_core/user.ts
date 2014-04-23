@@ -51,9 +51,15 @@ module Core {
     }
 
     /**
-     * TODO: implement.
+     * Send a message to this user.
+     * Warns if clientId does not exist on the user.
      */
     public send = (clientId :string, payload :uProxy.Message) => {
+      if (!(clientId in this.clients)) {
+        console.warn('Cannot send message to non-existing client ' + clientId);
+        return;
+      }
+      this.network.api.sendMessage(clientId, JSON.stringify(payload));
     }
 
     /**
@@ -78,6 +84,8 @@ module Core {
         // that we know the client is pending its corresponding instance data.
         // this.clientToInstanceMap_[clientId] = '';
       }
+      // TODO: just delete OFFLINE clients, because they will never be useful
+      // again. Also, test that behavior later.
       this.clients[client.clientId] = client.status;
 
       // case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
