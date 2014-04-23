@@ -1939,6 +1939,10 @@ declare module chrome.types {
         incognito?: boolean;
     }
 
+    interface ChromeSettingClearDetails {
+        scope: string;
+    }
+
     interface ChromeSettingGetResultDetails {
         levelOfControl: string;
         value: any;
@@ -1955,7 +1959,8 @@ declare module chrome.types {
             callback?: Function;
         };
         set(details: ChromeSettingSetDetails, callback?: Function): void;
-        get(details: ChromeSettingGetDetails, callback?: ChromeSettingGetResultDetails): void;
+        get(details: ChromeSettingGetDetails, callback?: (ChromeSettingGetResultDetails) => void): void;
+        clear(details: ChromeSettingClearDetails, callback?: Function): void;
         onChange: ChromeSettingChangedEvent;
     }
 }
