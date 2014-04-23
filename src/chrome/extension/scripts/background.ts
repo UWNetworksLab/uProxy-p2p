@@ -8,6 +8,7 @@
 // Assumes that core_stub.ts has been loaded.
 
 /// <reference path='core_connector.ts' />
+/// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
@@ -18,7 +19,7 @@ var core :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 
 // TODO: This should be *actually* typed.
 // Proxy Configuration.
-var proxyConfig = new window['BrowserProxyConfig']();
+var proxyConfig = new BrowserProxyConfig();
 proxyConfig.clearConfig();
 
 
