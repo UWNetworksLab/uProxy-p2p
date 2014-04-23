@@ -81,10 +81,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         ui.reset();
       };
 
-      $rootScope.sendInstance = function (clientId) {
-        ui.sendInstance(clientId);
-      };
-
       // Takes in an entry from the roster table.
       $rootScope.instanceOfContact = function(contact) {
         for (var clientId in contact.clients) {

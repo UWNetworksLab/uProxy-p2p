@@ -16,6 +16,10 @@ declare module UI {
   export interface Model {
     networks :{ [name:string] :UI.Network };
     // TODO: Other top-level generic info...
+
+    // This is a 'global' roster - a combination of all User Profiles.
+    // TODO: remove. The way the UI works will soon change drastically.
+    roster :{ [userId:string] :freedom.Social.UserProfile }
   }
 
   /**

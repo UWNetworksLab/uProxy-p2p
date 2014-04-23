@@ -5,6 +5,7 @@
  * frontend. The popup contains a contacts list, filters, options, connection
  * details, and any other functionality required by the user. It extends from
  * the base UProxyExtension angular module defined in app.js.
+ * TODO: convert to typescript.
  */
 'use strict';
 
@@ -13,6 +14,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
   .controller('MainCtrl', ['$scope', function ($scope) {
     // View states.
     var ui = $scope.ui;
+    var core = $scope.core;
     $scope.optionsTooltip = false;
 
     // Reset view state if logged out.
@@ -21,7 +23,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.accessView = false;
     }
     $scope.showingSplashPage = function() {
-      return ui.splashPage || !ui.isConnected;
+      return ui.splashPage || !core.status.connected;
     };
 
     var syncContactWatch = function(userId) {

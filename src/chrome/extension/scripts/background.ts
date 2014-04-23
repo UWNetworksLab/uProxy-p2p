@@ -28,7 +28,8 @@ proxyConfig.clearConfig();
 
 // Singleton model for angularjs hooks on both popup and options.
 var model :UI.Model = {
-  networks: {}
+  networks: {},
+  roster: {}
 };
 
 // ---------------------------- State Changes ----------------------------------
@@ -139,6 +140,7 @@ function initUI() : UI.UserInterface {
     }
     var user = payload.user;
     network.roster[user.userId] = user;
+    model.roster[user.userId] = user;
   };
 
   // Attach handlers for USER updates.
