@@ -102,24 +102,34 @@ function initUI() : UI.UserInterface {
   var notifications = new ChromeNotifications();
 
   // Attach handlers for UPDATES received from core.
-  core.onUpdate(uProxy.Update.ALL, (state :Object) => {
+  core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
     console.log('Received uProxy.Update.ALL:', state);
     // For resetting state, don't nuke |model| with the new object...
     // (there are references to it for Angular) instead, replace keys so the
     // angular $watch can catch up.
-    for (var k in model) {
-      delete model[k];
-    }
-    for (var k in state) {
-      model[k] = state[k];
-    }
-    console.log('model = ', model);
+    // for (var k in model) {
+      // delete model[k];
+    // }
+    // for (var k in state) {
+      // model[k] = state[k];
+    // }
+    // console.log('model = ', model);
     finishStateChange();
+  });
+
+  core.onUpdate(uProxy.Update.NETWORK, (network :UI.NetworkMessage) => {
+    console.log('uProxy.Update.NETWORK', network, model.networks);
+    console.log(model);
+    model.networks[network.name] = {
+      name:   network.name,
+      online: network.online,
+      roster: {}
+    }
   });
 
   // TODO: factor into the UI class.
   function addUserToModel(payload :UI.UserMessage) {
-    var network = model[payload.network];
+    var network = model.networks[payload.network];
     if (!network) {
       console.warn('Received USER for non-existing network.');
       return;

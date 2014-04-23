@@ -38,7 +38,7 @@ module uProxy {
    */
   export enum Update {
     ALL = 2000,
-    ROSTER,       // Single roster for one particular network.
+    NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
     CLIENT,       // Single client for a User.

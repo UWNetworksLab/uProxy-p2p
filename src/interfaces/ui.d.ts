@@ -23,20 +23,22 @@ declare module UI {
    */
   export interface Network {
     name   :string;
-    roster :Roster;
+    online :boolean;
+    roster :{ [userId:string] :freedom.Social.UserProfile }
   }
 
-  export interface Roster {
-    users :{ [userId:string] :UI.User }
-  }
-
-  export interface User extends BaseUser {
-  }
+  // export interface User extends BaseUser {
+  // }
 
   // Payloads for crossing the Core -> User boundary.
+  export interface NetworkMessage {
+    name    :string;
+    online  :boolean;
+  }
+
   export interface UserMessage {
     network :string;
-    user :freedom.Social.UserProfile;
+    user    :freedom.Social.UserProfile;
   }
 
   // TODO: clients and instance UI types.

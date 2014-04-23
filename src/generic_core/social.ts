@@ -121,7 +121,24 @@ module Social {
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
         // Upon successful login, remember local client information.
         this.my = client;
+        var payload :UI.NetworkMessage = {
+          name: this.name,
+          online: true
+        }
+        // Send an update to the UI, indicating that this network is live.
+        Core.sendUpdate(uProxy.Update.NETWORK, payload);
       })
+    }
+
+    public logout = () : Promise<void> => {
+      return this.api.logout().then(() => {
+        console.log(this.name + ': logged out.');
+        var payload :UI.NetworkMessage = {
+          name: this.name,
+          online: false
+        }
+        Core.sendUpdate(uProxy.Update.NETWORK, payload);
+      });
     }
 
     /**

@@ -87,21 +87,25 @@ module Core {
   export var sendUpdate = (update :uProxy.Update, data?:any) => {
     switch(update) {
       case uProxy.Update.ALL:
-        bgAppPageChannel.emit('' + update, store.state);
         console.log('update [ALL]', store.state);
+        data = store.state;
+        break;
+
+      case uProxy.Update.NETWORK:
+        console.log('update [NETWORK]', <UI.NetworkMessage>data);
         break;
 
       case uProxy.Update.USER_SELF:
       case uProxy.Update.USER_FRIEND:
         console.log('update [USER]', <UI.UserMessage>data);
-        bgAppPageChannel.emit('' + update, data);
         break;
 
       // TODO: Implement the finer-grained Update messages.
       default:
         console.warn('Not yet implemented.');
-        break;
+        return;
     }
+    bgAppPageChannel.emit('' + update, data);
   }
 
   /**
