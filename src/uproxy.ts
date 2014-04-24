@@ -32,13 +32,36 @@ module uProxy {
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
   }
 
+  /**
+   * Updates are sent from the Core to the UI, to update state which the UI must
+   * expose to the user.
+   */
   export enum Update {
     ALL = 2000,
+    NETWORK,      // One particular network.
+    USER_SELF,    // Local / myself on the network.
+    USER_FRIEND,  // Remote friend on the roster.
+    CLIENT,       // Single client for a User.
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
   }
 
+  /**
+   * Messages are sent from Core to a remote Core - they are peer communications
+   * between uProxy users. This enum describes the possible Message types.
+   */
+  export enum MessageType {
+    INSTANCE = 3000,  // Instance messages notify the user about instances.
+    CONSENT,
+    DESCRIPTION
+  }
+
+  // Message should be the boundary for JSON parse / stringify.
+  export interface Message {
+    type :MessageType;
+    data :Object;
+  }
 
   // --- Core <--> UI Interfaces ---
 
@@ -76,22 +99,24 @@ module uProxy {
 
   /**
    * The primary interface for the uProxy User Interface.
-   *
-   * TODO: Provide an analogue of this interface in the Chrome App, so that
-   * the Core can act as if it were speaking directly to the UI.
    */
   export interface UIAPI {
 
     // Global sync of all state.
     sync(state? : string) : void;
 
+    update(type:Update, data?:any) : void;
+    // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
+    // the below)...
+    // updateAll(data:Object) : void;
+    // updateNetwork(network:Social.Network) : void;
+    // updateUser(user:Core.User) : void;
+    // updateSelf(user:Core.User) : void;
     // Update an instance.
-    syncInstance(instance : any) : void;
-    updateMappings() : void;
-
-    updateIdentity(identity) : void;
-    sendConsent() : void;
-    addNotification() : void;
+    // syncInstance(instance : any) : void;
+    // updateMappings() : void;
+    // updateIdentity(identity) : void;
+    // addNotification() : void;
   }
 
 

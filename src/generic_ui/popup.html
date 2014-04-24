@@ -25,15 +25,15 @@
       </div>
       <span class="description">Safe Passage for the Web.</span>
 
-      <div class="app-missing-warning" ng-hide="ui.core.status.connected">
+      <div class="app-missing-warning" ng-hide="core.status.connected">
         You need to install the UProxy app as well as the UProxy extension.
       </div>
 
-      <div ng-show="ui.core.status.connected">
+      <div ng-show="core.status.connected">
         <input type="text" ng-model="model.me.description"
             id="my-description"
             placeholder="Device description"
-            ng-blur="updateDescription();descriptionHelp=false"
+            ng-blur="core.updateDescription();descriptionHelp=false"
             ng-focus="descriptionHelp=true">
         </input>
         <p class="tip" ng-show="descriptionHelp">
@@ -45,11 +45,11 @@
           <h3>Networks</h3>
 
           <div class="network-btn">
-            <span ng-repeat="network in ui.networks">
+            <span ng-repeat="(network, detail) in model.networks">
               <button class="btn" ng-show="!isOnline(network)"
-                ng-click="login(network)">Login to {{ prettyNetworkName(network) }}</button>
+                ng-click="core.login(network)">Login to {{ prettyNetworkName(network) }}</button>
               <button class="btn" ng-show="isOnline(network)"
-                ng-click="logout(network)">Logout from {{ prettyNetworkName(network) }}</button>
+                ng-click="core.logout(network)">Logout from {{ prettyNetworkName(network) }}</button>
             </span>
           </div>
         </div>

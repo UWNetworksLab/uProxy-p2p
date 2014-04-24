@@ -1,9 +1,7 @@
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
-
 /**
- * Social - interactions for network-specific social providers.
+ * social.ts
+ *
+ * Interactions for network-specific social providers.
  *
  * To add new social providers, list them as dependencies in the primary
  * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
@@ -20,36 +18,41 @@
  *    },
  *    ...
  */
+/// <reference path='user.ts' />
+
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
+
+
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
   var VALID_NETWORKS:string[] = [
+    'google',
     'websocket',
-    'google'
   ]
   export var networks:{[name:string]:Network} = {}
 
-  // Serializable datastructure which only has an additional network field.
-  export interface ContactJSON extends freedom.Social.UserProfile {
-    network :string;
-  }
-
   /**
-   * Run through freedom keys and grab references to every social provider.
+   * Run through possible network names and grab references to every social provider.
    */
-  export function initializeNetworks() {
-    // for (var key in freedom) {
-    VALID_NETWORKS.map((name:string) : Network => {
+  export function initializeNetworks(networks:string[] = VALID_NETWORKS) {
+    networks.map((name:string) : Network => {
       var dependency = PREFIX + name;
-      console.log(name + ' - ' + dependency);
-      if (undefined === freedom[dependency]) return;
-      console.log(freedom[dependency]);
-      if ('social' !== freedom[dependency].api) return;
+      if (undefined === freedom[dependency]) {
+        console.warn(name + ' does not exist as a freedom provider.');
+        return;
+      }
+      if ('social' !== freedom[dependency].api) {
+        console.warn(name + ' does not implement the social api.');
+        return;
+      }
       var network = new Social.Network(name);
       Social.networks[name] = network;
       return network;
     });
-    console.log('Initialized ' + Object.keys(networks).length + ' networks.');
+    // console.log('Initialized ' + Object.keys(networks).length + ' networks.');
     return Social.networks;
   }
 
@@ -66,105 +69,227 @@ module Social {
 
   /**
    * Social.Network - encapsulates a single network on a social provider.
+   *
+   * Maintains the local uProxy client's interaction as a user on the network.
+   *
+   * Also, deals with events from the social provider. 'onUserProfile' events
+   * directly affect the roster of this network, while 'onClientState' and
+   * 'onMessage' are passed on to the relevant user, assuming the user exists.
    */
   export class Network {
 
-    public api       :freedom.Social;
-    public contacts  :{[name:string]:Contact};
+    public roster    :{[name:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
-    private provider :any;  // Special freedom object which is both a function
-                            // and contains keys. Cannot typescript-fy.
 
+    private api       :freedom.Social;
+    private provider :any;  // Special freedom object which is both a function
+                            // and object... cannot typescript.
+    // Information about the local login.
+    private myClient :freedom.Social.ClientState;
+    private online :boolean;
+    private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+
+    /**
+     * Initialize the social provider for this Network, and attach event
+     * handlers.
+     */
     constructor(public name:string) {
-      console.log('Initializing network ' + name);
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
-      this.api = this.provider();  // Instantiate the object.
-
-      this.api.on('onMessage', (data) => {
-        console.log(name + ': onMessage received!');
-        console.log('data: ' + JSON.stringify(data));
-      });
-      this.api.on('onUserProfile', (data) => {
-        console.log(name + ': onUserProfile received!');
-        console.log('data: ' + JSON.stringify(data));
-      });
-      this.api.on('onClientState', (data) => {
-        console.log(name + ': onClientState received!');
-        console.log('data: ' + JSON.stringify(data));
-      });
+      this.roster = {};
+      this.online = false;
+      this.instanceMessageQueue_ = [];
+      this.api = this.provider();
+      this.myClient = null;
+      // TODO: Update these event name-strings when freedom updates to
+      // typescript and Enums.
+      this.api.on('onUserProfile', this.handleUserProfile);
+      this.api.on('onClientState', this.handleClientState);
+      this.api.on('onMessage', this.handleMessage);
+      console.log('Preparing Social.Network ' + name);
+      this.notifyUI();
     }
 
     /**
-     * Add a contact to the network.
+     * Wrapper around logging-in to the social-provider, and updating the local
+     * state upon success.
+     * TODO: test this.
      */
-    public addContact = (userid:string) => {
-      this.contacts[userid] = new Contact(null);
+    public login = (remember:boolean = false) : Promise<void> => {
+      var request :freedom.Social.LoginRequest = {
+        agent: 'uproxy',
+        version: '0.1',
+        url: 'https://github.com/uProxy/uProxy',
+        interactive: true,
+        rememberLogin: remember
+      }
+      return this.api.login(request).then((client:freedom.Social.ClientState) => {
+        // Upon successful login, remember local client information.
+        this.online = true;
+        this.myClient = client;
+      }).then(this.notifyUI);
     }
+
+    public logout = () : Promise<void> => {
+      return this.api.logout().then(() => {
+        this.online = false;
+        console.log(this.name + ': logged out.');
+      }).then(this.notifyUI);
+    }
+
+    /**
+     * Helper which tells the UI about the existence / status of this network.
+     */
+    public notifyUI = () => {
+      var payload :UI.NetworkMessage = {
+        name: this.name,
+        online: this.online
+      }
+      ui.update(uProxy.Update.NETWORK, payload);
+    }
+
+    /**
+     * Handler for receiving 'onUserProfile' messages. First, determines whether
+     * the UserProfile belongs to ourselves or a remote contact. Then,
+     * updates / adds the user data to the roster.
+     * Note that our own Instance Message is specific to one particular network,
+     * and can only be prepared after receiving our own vcard for the first
+     * time.
+     */
+    public handleUserProfile = (profile :freedom.Social.UserProfile) => {
+      var userId = profile.userId;
+      var payload :UI.UserMessage = {
+        network: this.name,
+        user: profile
+      };
+      // Check if this is ourself.
+      if (this.myClient && userId == this.myClient.userId) {
+        console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
+        // Send our own InstanceMessage to any queued-up clients.
+        if (freedom.Social.Status.ONLINE == this.myClient.status) {
+          this.flushQueuedInstanceMessages();
+        }
+        // Update UI with own information.
+        ui.update(uProxy.Update.USER_SELF, payload);
+        return;
+      }
+
+      // Otherwise, this is a remote contact...
+      console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
+      if (!(userId in this.roster)) {
+        // console.log('Received new UserProfile: ' + userId);
+        this.roster[userId] = new Core.User(this, profile);
+      } else {
+        this.roster[userId].update(profile);
+      }
+      // Update UI with friend's information.
+      ui.update(uProxy.Update.USER_FRIEND, payload);
+    }
+
+    /**
+     * Handler for receiving 'onClientState' messages. Passes these messages to
+     * the relevant user, which will manage its own clients.
+     */
+    public handleClientState = (client :freedom.Social.ClientState) => {
+      if (!(client.userId in this.roster)) {
+        console.warn(
+            'network ' + this.name + ' received client state for unexpected ' +
+            'userId: ' + client.userId);
+        return;
+      }
+      this.roster[client.userId].handleClient(client);
+    }
+
+    /**
+     * When receiving a message from a social provider, delegate it to the correct
+     * user, which will delegate to the correct client.
+     */
+    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
+      if (!(incoming.from.userId in this.roster)) {
+        console.warn(
+            'network ' + this.name + ' received message for unexpected ' +
+            'userId: ' + incoming.from.userId);
+        return;
+      }
+      var msg :uProxy.Message = JSON.parse(incoming.message);
+      this.roster[incoming.from.userId].handleMessage(incoming);
+    }
+
+    public getUser = (userId :string) : Core.User => {
+      return this.roster[userId];
+    }
+
+    /**
+     * Generate my instance message, to send to other uProxy installations, to
+     * inform them that we're also a uProxy installation to interact with.
+     *
+     * However, we can only build the instance message if we've
+     * received an onClientState event for ourself, to populate at least one
+     * identity.
+     */
+    private prepareInstanceHandshake_ = () : uProxy.Message => {
+      return {
+        type: uProxy.MessageType.INSTANCE,
+        data: this.myClient
+      }
+    }
+
+    /**
+     * Notify remote uProxy installation that we are also a uProxy installation.
+     *
+     * Sends this network's instance handshake to a target clientId. This is one
+     * of the few cases where we send directly to a clientId instead of an
+     * instanceId - because there is not yet a known instanceId.
+     */
+    public sendInstanceHandshake = (clientId:string) : void => {
+      // Only send to clientId if it's known to be ONLINE.
+      // TODO: Fix the null once we've created our own instance mesage.
+      var instanceMessage = 'please-implement-me';
+      this.api.sendMessage(clientId, instanceMessage);
+    }
+
+    /**
+     * Often times, network will receive client IDs belonging to remote
+     * contacts known to be uProxy-enabled. This may happen prior to receiving
+     * the local vcard, which is required for constructing the local Instance
+     * Message. In this case, those instance messages must be queued.
+     */
+    public flushQueuedInstanceMessages = () => {
+      if (0 === this.instanceMessageQueue_.length) {
+        return;  // Don't need to do anything.
+      }
+      var instancePayload = JSON.stringify(this.prepareInstanceHandshake_());
+      if (!instancePayload) {
+        console.error('Still not ready to construct instance payload.');
+        return false;
+      }
+      this.instanceMessageQueue_.forEach((clientId:string) => {
+        console.log('Sending queued instance message to: ' + clientId + '.');
+        this.api.sendMessage(clientId, instancePayload);
+      });
+      this.instanceMessageQueue_ = [];
+      return true;
+    }
+
+    /**
+     * Send a message to one particular instance. Returns promise of the send.
+     * Assumes the instance exists.
+     * TODO: make this real and test it.
+     */
+    send = (instanceId:string, message:string) : Promise<void> => {
+      console.log('[To be implemented] Network.send(' +
+                  instanceId + '): ' + message);
+      return new Promise<void>((F, R) => {
+        // if (freedom.Social.Status.ONLINE === this.state.status) {
+          // this.network.api.sendMessage(this.clientId, message)
+              // .then(F);
+        // } else {
+          // R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
+        // }
+      });
+    }
+
 
   }  // class Social.Network
-
-  /**
-   * Wrapper around freedom.Social.UserProfile to describe a contact and its
-   * interactions on a network.
-   */
-  export class Contact {
-
-    public statusMessage :string;   // Optional detailed message about status.
-    public clientId :string;   // null when offline.
-    // clients :freedom.Social.Clients;  // Dict of clientId -> client
-    public profile  :ContactJSON;
-    public state    :freedom.Social.ClientState;
-
-    // Create a new social connection from a json description.
-    constructor(public network:Network) { //json:SocialContact.Json) {
-      // TODO: ACtually make this real.
-      this.state = {
-        userId: 'idunno',
-        clientId: 'idunno',
-        status: freedom.Social.Status.OFFLINE,
-        timestamp: Date.now()
-      }
-      this.profile = {
-        network: network.name,
-        userId: 'idunno',
-        name: 'person',
-        timestamp: Date.now()
-      }
-    }
-
-    /**
-     * Send a message to this contact. Returns promise of the send.
-     */
-    send = (message:string) : Promise<void> => {
-      return new Promise<void>((F, R) => {
-        if (freedom.Social.Status.ONLINE === this.state.status) {
-          this.network.api.sendMessage(this.clientId, message)
-              .then(F);
-        } else {
-          R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
-        }
-      });
-    }
-
-    /**
-     * Update the client. TODO: make it actually work
-     */
-    onStatusChange = (statusChange:freedom.Social.ClientState) => {
-      switch (statusChange.status) {
-        case freedom.Social.Status.OFFLINE:
-          break;
-        case freedom.Social.Status.ONLINE:
-          break;
-        case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
-          break;
-      }
-    }
-
-    // Serializable network information.
-    getJson = () : freedom.Social.UserProfile => {
-      return this.profile;
-    }
-  }  // class Social.Contact
 
 }  // module Social

@@ -29,6 +29,9 @@ var FILES = {
   jasmine_chrome: [
     'build/chrome/test/chrome_mocks.js'
   ],
+  // jasmine_social: [
+    // 'node_modules/freedom-typescript-api/interfaces/social.d.ts'
+  // ]
 };
 
 module.exports = function(grunt) {
@@ -94,7 +97,12 @@ module.exports = function(grunt) {
         // Icons
         {expand: true, cwd: 'src',
          src: ['icons/**'],
-         dest: 'build/'}
+         dest: 'build/'},
+        // Separately-compiled typescript for broken Enum libs.
+        // TODO: Remove once social.d.ts is fixed.
+        {expand: true, cwd: 'src/scraps',
+         src: ['social-enum.js'],
+         dest: 'build/generic_core/'}
       ]},
 
       // Static/independent UI. Assumes the top-level task generic_ui
@@ -321,6 +329,8 @@ module.exports = function(grunt) {
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',
+              'build/generic_core/social-enum.js',
+              'build/generic_core/user.js',
               'build/generic_core/state-storage.js',
               'build/generic_core/social.js',
               'build/generic_core/core.js',

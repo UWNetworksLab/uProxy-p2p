@@ -288,6 +288,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   updateDescription = (description) => {
+    // TODO: determine if novelty check is necessary.
     console.log('Updating description to ' + description);
     this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
   }

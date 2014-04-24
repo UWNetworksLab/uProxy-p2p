@@ -8,6 +8,8 @@
  * It does not directly connect to the App - that would be redundant as
  * everytime the popup was clicked, everything reloads, while it's
  * straightforward to let the background page connect to the App.
+ *
+ * TODO: convert to typescript.
  */
 'use strict';
 
@@ -26,17 +28,19 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     '$filter',
     '$http',
     '$rootScope',
-    'ui',                       // via dependencyInjector.
+    // via dependencyInjector:
+    'ui',
+    'core',
     'onStateChange',
     'model',
     'roster',
-    function($filter, $http, $rootScope, ui,
-             onStateChange,
-             model, roster) {
+    function($filter, $http, $rootScope, ui, core,
+             onStateChange, model, roster) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       $rootScope.ui = ui;
+      $rootScope.core = core;
       $rootScope.model = model;
       $rootScope.notifications = 0;
 
@@ -44,8 +48,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.update = onStateChange;
 
       $rootScope.isOnline = function(network) {
-        return (model.identityStatus[network] &&
-            model.identityStatus[network].status == 'online');
+        return (model.networks[network] && model.networks[network].online)
       };
       $rootScope.isOffline = function(network) {
         return !$rootScope.isOnline(network);
@@ -53,8 +56,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       // Determine whether UProxy is connected to some network.
       $rootScope.loggedIn = function() {
-        for (var networkId in model.identityStatus) {
-          if ('online' == model.identityStatus[networkId].status) {
+        for (var networkId in model.networks) {
+          if (model.networks[networkId].online) {
             return true;
           }
         }
@@ -65,9 +68,10 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // "logging in"
       // Not Logged-out if state is not logged out for any network.
       $rootScope.loggedOut = function() {
-        for (var networkId in model.identityStatus) {
-          if ('offline' != model.identityStatus[networkId].status)
+        for (var networkId in model.networks) {
+          if (!model.networks[networkId].online) {
             return false;
+          }
         }
         return true;
       };
@@ -75,10 +79,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $rootScope.resetState = function () {
         localStorage.clear();
         ui.reset();
-      };
-
-      $rootScope.sendInstance = function (clientId) {
-        ui.sendInstance(clientId);
       };
 
       // Takes in an entry from the roster table.
@@ -117,18 +117,17 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
 
       $rootScope.prettyNetworkName = function(networkId) {
-        if (networkId == 'google') {
-          return 'G+';
-        } else if (networkId == 'facebook') {
-          return 'FB';
-        } else if (networkId == 'xmpp') {
-          return 'XMPP'
-        } else {
-          console.warn("No prettification for network: " + JSON.stringify(networkId));
-          return networkId;
+        switch (networkId) {
+          case 'google': return 'G+';
+          case 'facebook': return 'FB';
+          case 'xmpp': return 'XMPP';
+          default:
+            console.warn("No prettification for network: " + JSON.stringify(networkId));
         }
+        return networkId;
       };
 
+      // TODO: remove since there will be multiple instances for a userId
       $rootScope.instanceOfUserId = function(userId) {
         // First check active clients
         // Do this first, because some users' IDs don't matchs their instance
@@ -145,27 +144,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         }
         return null;
       };
-
-      $rootScope.login = function(network) {
-        console.log('!!! login ' + network);
-        ui.login(network);
-      };
-      $rootScope.logout = function(network) {
-        console.log('!!! logout ' + network);
-        ui.logout(network);
-      };
-
-      $rootScope.updateDescription = function() {
-        ui.updateDescription(model.me.description);
-      }
-
-      // Bind UI functions to the scope, if they want to be accessed from DOM.
-      // $rootScope.returnToRoster = function() ui.returnToRoster;
-      // $rootScope.notificationSeen = ui.notificationSeen;
-
-      // $rootScope.changeOption = function (key, value) {
-        // appChannel.emit('change-option', {key: key, value: value});
-      // }
 
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
@@ -191,11 +169,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
   .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
+    // TODO: below is ALL obsolete once the CoreConnector consent bits work.
 
     // Helper which changes consent bits.
     // These work the same even if |client| is an instance - so long as it
     // contains the attribute |clientId|.
     // |id| can be either a client id or a user id.
+    /*
     var _modifyConsent = function (id, action) {
       setTimeout(function() {
         ui.modifyConsent(id, action);
@@ -209,8 +189,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       _modifyConsent(instance.instanceId, action);
       ui.pendingClientTrustChange = true;
     }
-
+    */
     // Consent to access through a friend.
+    /*
     $s.requestAccess = function(instance) {
       _modifyProxyConsent(instance, 'request-access');
     };
@@ -246,5 +227,5 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     $s.stopAccess = function(instance) {
       ui.stopProxying();
     };
-
+    */
   }]);

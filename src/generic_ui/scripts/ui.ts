@@ -5,18 +5,17 @@
  * TODO: firefox bindings.
  */
 /// <reference path='../../uproxy.ts'/>
+/// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
-declare var model         :any;
+declare var model         :UI.Model;
 declare var onStateChange :chrome.Event;
 
 module UI {
 
   export class UserInterface implements uProxy.UIAPI {
 
-    // TODO: Make these networks correspond to the actual social bit.
-    networks = ['google', 'facebook', 'xmpp'];
     notifications = 0;
     // TODO: splash should be set by state.
     accessView = false;
@@ -43,6 +42,10 @@ module UI {
         public core   :uProxy.CoreAPI,
         public notify :INotifications) {
       console.log('Created the UserInterface');
+    }
+
+    update = (type:uProxy.Update, data?:any) => {
+      // TODO: Implement.
     }
 
     // Keep track of currently viewed contact and instance.
@@ -80,15 +83,6 @@ module UI {
       }
     }
 
-    // -------------------------------- Consent ----------------------------------
-    modifyConsent = (instanceId :string, action  :uProxy.Consent.Action) => {
-      if (!this.core) {
-        console.log('UI not connected to core - cannot modify consent.');
-        return;
-      }
-      this.core.modifyConsent(instanceId, action);
-    }
-
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
     // TODO: Type the Instance.
@@ -115,33 +109,6 @@ module UI {
         this.notify.setIcon('uproxy-19.png');
       }
     }
-
-    // TODO: Get rid of this baklava code.
-
-    login = (network) => {
-      this.core.login(network);
-      this.splashPage = false;
-    }
-
-    logout = (network) => {
-      this.core.logout(network);
-      this.proxy = null;
-    }
-
-    updateDescription = (description) => {
-      // Only update on different description.
-      if (this.oldDescription &&
-         (this.oldDescription != description)) {
-        this.core.updateDescription(description);
-      }
-      this.oldDescription = description;
-    }
-
-    sendInstance = (clientId) => {
-      this.core.sendInstance(clientId);
-    }
-
-    reset = () => { this.core.reset(); }
 
     // -------------------------------- Filters ----------------------------------
     /**
@@ -230,21 +197,23 @@ module UI {
     addNotification = () => {}
 
     // Synchronize the data about the current user.
-    syncMe = () => {
-      var id = _getMyId();
-      if (!id) {
-        console.log('My own identities missing for now....');
-        return;
-      }
-      var identity = model.me.identities[id];
-      this.myName = identity.name;
-      this.myPic = identity.imageData || '';
-      console.log('Synced my own identity. ', identity);
-    }
+    // syncMe = () => {
+      // var id = _getMyId();
+      // if (!id) {
+        // console.log('My own identities missing for now....');
+        // return;
+      // }
+      // var identity = model.me.identities[id];
+      // this.myName = identity.name;
+      // this.myPic = identity.imageData || '';
+      // console.log('Synced my own identity. ', identity);
+    // }
 
     /**
      * Synchronize data about some friend.
+     * TODO: Redo all this for the new paradigm.
      */
+    /*
     syncUser = (user) => {
       var instanceId = null,
           instance = null,
@@ -298,54 +267,46 @@ module UI {
       user.onFB = onFB;
       user.onXMPP = onXMPP;
     }
+    */
 
     /*
      * Make sure counters and UI-only state holders correctly reflect the model.
      * If |previousPatch| is provided, the search is optimized to only sync the
      * relevant entries.
+     * TODO: Redo this for the new paradigm of network rosters.
      */
     sync = (previousPatch?:any) => {
-      var n = 0;  // Count up notifications
-      for (var userId in model.roster) {
-        var user = model.roster[userId];
-        this.syncUser(user);
-        if (user.hasNotification) {
-          n++;
-        }
-      }
-      this.setNotifications(n);
+      // var n = 0;  // Count up notifications
+      // for (var userId in model.roster) {
+        // var user = model.roster[userId];
+        // this.syncUser(user);
+        // if (user.hasNotification) {
+          // n++;
+        // }
+      // }
+      // this.setNotifications(n);
       // Run through instances, count up clients.
-      var c = 0;
-      for (var iId in model.instances) {
-        var instance = model.instances[iId];
-        if ('running' == instance.status.client) {
-          c++;
-        }
-        if ('running' == instance.status.proxy) {
-          this.isProxying = true;
-        }
-      }
-      this.setClients(c);
-      this.pendingProxyTrustChange = false;
-      this.pendingClientTrustChange = false;
+      // var c = 0;
+      // for (var iId in model.instances) {
+        // var instance = model.instances[iId];
+        // if ('running' == instance.status.client) {
+          // c++;
+        // }
+        // if ('running' == instance.status.proxy) {
+          // this.isProxying = true;
+        // }
+      // }
+      // this.setClients(c);
+      // this.pendingProxyTrustChange = false;
+      // this.pendingClientTrustChange = false;
 
       // Generate list ordered by names.
-      if (!this.myName) {
-        this.syncMe();
-      }
-      return true;
+      // if (!this.myName) {
+        // this.syncMe();
+      // }
+      // return true;
     }
 
   }  // class UserInterface
 
 }  // module UI
-
-
-// ------------------------------ Data Syncing ---------------------------------
-
-function _getMyId() {
-  for (var id in model.me.identities) {
-    return id;
-  }
-  return null;
-}
