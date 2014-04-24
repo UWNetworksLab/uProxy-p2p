@@ -3,30 +3,13 @@
 /// <reference path='social.ts' />
 
 
-// class MockNetwork implements Social.Network {
-  // roster
-  // api = {
-    // on: null,
-    // once: null,
-    // login: null,
-    // logout: null,
-    // clearCachedCredentials: null,
-    // getUsers: null,
-    // getClients: null,
-    // sendMessage: (clientId, msg) => {
-      // return Promise.resolve();
-    // }
-  // };
-// 
-// }  // class MockNetwork
-
-
 describe('Core.User', () => {
 
-  // var network = new MockNetwork();
-  // var network = new Social.Network('mock');
-  var network = jasmine.createSpyObj('network', ['api']);
-  // network.api['sendMessage'] = jasmine.createSpy();
+  // Prepare a fake Social.Network object to construct User on top of.
+  var network = jasmine.createSpyObj('network', [
+      'api',
+      'sendInstanceHandshake'
+  ]);
 
   var profile :freedom.Social.UserProfile = {
     name: 'Alice',
@@ -52,9 +35,9 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(user, 'send');
+    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
-    expect(user.send).toHaveBeenCalled();
+    expect(user.sendInstanceHandshake).toHaveBeenCalled();
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([
@@ -70,13 +53,13 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(user, 'send');
+    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient'
     ]);
-    expect(user.send).not.toHaveBeenCalled();
+    expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
   it('handles DISCONNECTED client', () => {

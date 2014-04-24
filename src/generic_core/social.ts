@@ -78,14 +78,14 @@ module Social {
    */
   export class Network {
 
-    public api       :freedom.Social;
     public roster    :{[name:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
+
+    private api       :freedom.Social;
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
-
     // Information about the local login.
-    private my :freedom.Social.ClientState;
+    private myClient :freedom.Social.ClientState;
     private online :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
@@ -100,6 +100,7 @@ module Social {
       this.online = false;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
+      this.myClient = null;
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
       this.api.on('onUserProfile', this.handleUserProfile);
@@ -125,7 +126,7 @@ module Social {
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
         // Upon successful login, remember local client information.
         this.online = true;
-        this.my = client;
+        this.myClient = client;
       }).then(this.notifyUI);
     }
 
@@ -162,10 +163,10 @@ module Social {
         user: profile
       };
       // Check if this is ourself.
-      if (this.my && userId == this.my.userId) {
+      if (this.myClient && userId == this.myClient.userId) {
         console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
         // Send our own InstanceMessage to any queued-up clients.
-        if (freedom.Social.Status.ONLINE == this.my.status) {
+        if (freedom.Social.Status.ONLINE == this.myClient.status) {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
@@ -182,7 +183,7 @@ module Social {
         this.roster[userId].update(profile);
       }
       // Update UI with friend's information.
-      ui.update(uProxy.Update.USER_SELF, payload);
+      ui.update(uProxy.Update.USER_FRIEND, payload);
     }
 
     /**
@@ -226,11 +227,25 @@ module Social {
      * received an onClientState event for ourself, to populate at least one
      * identity.
      */
-    private prepareInstanceMessage_ = () : uProxy.Message => {
+    private prepareInstanceHandshake_ = () : uProxy.Message => {
       return {
         type: uProxy.MessageType.INSTANCE,
-        data: this.my
+        data: this.myClient
       }
+    }
+
+    /**
+     * Notify remote uProxy installation that we are also a uProxy installation.
+     *
+     * Sends this network's instance handshake to a target clientId. This is one
+     * of the few cases where we send directly to a clientId instead of an
+     * instanceId - because there is not yet a known instanceId.
+     */
+    public sendInstanceHandshake = (clientId:string) : void => {
+      // Only send to clientId if it's known to be ONLINE.
+      // TODO: Fix the null once we've created our own instance mesage.
+      var instanceMessage = 'please-implement-me';
+      this.api.sendMessage(clientId, instanceMessage);
     }
 
     /**
@@ -243,7 +258,7 @@ module Social {
       if (0 === this.instanceMessageQueue_.length) {
         return;  // Don't need to do anything.
       }
-      var instancePayload = JSON.stringify(this.prepareInstanceMessage_());
+      var instancePayload = JSON.stringify(this.prepareInstanceHandshake_());
       if (!instancePayload) {
         console.error('Still not ready to construct instance payload.');
         return false;
@@ -257,21 +272,23 @@ module Social {
     }
 
     /**
-     * Send a message to one particular clientId. Returns promise of the send.
+     * Send a message to one particular instance. Returns promise of the send.
+     * Assumes the instance exists.
      * TODO: make this real and test it.
      */
-    /*
-    send = (message:string) : Promise<void> => {
+    send = (instanceId:string, message:string) : Promise<void> => {
+      console.log('[To be implemented] Network.send(' +
+                  instanceId + '): ' + message);
       return new Promise<void>((F, R) => {
-        if (freedom.Social.Status.ONLINE === this.state.status) {
-          this.network.api.sendMessage(this.clientId, message)
-              .then(F);
-        } else {
-          R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
-        }
+        // if (freedom.Social.Status.ONLINE === this.state.status) {
+          // this.network.api.sendMessage(this.clientId, message)
+              // .then(F);
+        // } else {
+          // R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
+        // }
       });
     }
-    */
+
 
   }  // class Social.Network
 

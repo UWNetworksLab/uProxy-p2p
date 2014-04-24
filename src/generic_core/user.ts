@@ -38,6 +38,7 @@ module Core {
       this.name = profile.name;
       this.userId = profile.userId;
       this.clients = {};
+      this.instances_ = {};
       // TODO: Decide whether to contain the image, etc.
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
@@ -52,15 +53,20 @@ module Core {
     }
 
     /**
-     * Send a message to this user.
-     * Warns if clientId does not exist on the user.
+     * Send a message to an Instance belonging to this user.
+     * Warns if instanceId does not exist on this user.
      */
-    public send = (clientId :string, payload :uProxy.Message) => {
-      if (!(clientId in this.clients)) {
-        console.warn('Cannot send message to non-existing client ' + clientId);
+    public send = (instanceId :string, payload :uProxy.Message) => {
+      if (!(instanceId in this.instances_)) {
+        console.warn('Cannot send message to non-existing instance ' + instanceId);
         return;
       }
-      this.network.api.sendMessage(clientId, JSON.stringify(payload));
+      // TODO: Use the send method off the Instance object, once it exists.
+      this.network.send(instanceId, JSON.stringify(payload));
+    }
+
+    public sendInstanceHandshake = (clientId:string) => {
+      this.network.sendInstanceHandshake(clientId);
     }
 
     /**
@@ -80,7 +86,7 @@ module Core {
       if (freedom.Social.Status.ONLINE == client.status &&
           clientIsNew) {
         // TODO: actually implement sending an InstanceMessage from here.
-        this.send(client.clientId, null);
+        this.sendInstanceHandshake(client.clientId);
         // Set the instance mapping to null as opposed to undefined, to indicate
         // that we know the client is pending its corresponding instance data.
         // this.clientToInstanceMap_[clientId] = '';
