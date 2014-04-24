@@ -6,6 +6,7 @@
  * and holds the data model for both the popup and options page.
  */
 // Assumes that core_stub.ts has been loaded.
+// UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
 /// <reference path='core_connector.ts' />
 /// <reference path='proxy-config.ts' />
@@ -75,23 +76,17 @@ var finishStateChange = () => {
   }
 }
 
+/**
+ * Start proxying if one instance has their proxy status enabled.
+ * Otherwise, stop all proxying.
+ */
 function checkRunningProxy() {
-  if (model && 'instances' in model) {
-    for (var k in model['instances']) {
-      if (model['instances'].hasOwnProperty(k) && model['instances'][k].status &&
-          model['instances'][k].status.proxy) {
-        if ('running' == model['instances'][k].status.proxy) {
-          proxyConfig.startUsingProxy();
-          return;
-        }
-      }
-    }
-  }
+  // TODO: Make this work with the new UI model.
+  // proxyConfig.startUsingProxy();
   proxyConfig.stopUsingProxy();
 }
 
 
-// UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
@@ -105,16 +100,10 @@ function initUI() : UI.UserInterface {
   // Attach handlers for UPDATES received from core.
   core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
     console.log('Received uProxy.Update.ALL:', state);
-    // For resetting state, don't nuke |model| with the new object...
-    // (there are references to it for Angular) instead, replace keys so the
-    // angular $watch can catch up.
-    // for (var k in model) {
-      // delete model[k];
-    // }
-    // for (var k in state) {
-      // model[k] = state[k];
-    // }
-    // console.log('model = ', model);
+    // TODO: Implement this after a better payload message is implemented.
+    // There is now a difference between the UI Model and the state object
+    // from the core, so one-to-one mappinsg from the old json-patch code cannot
+    // work.
     finishStateChange();
   });
 
