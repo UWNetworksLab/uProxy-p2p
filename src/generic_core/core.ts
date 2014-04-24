@@ -58,7 +58,7 @@ function sendFullStateToUI() {
 function reset() {
   console.log('reset');
   for (var network in Social.networks) {
-    Social.networks[network].api.logout();
+    Social.networks[network].logout();
   }
   store.reset().then(sendFullStateToUI);
 }
@@ -98,8 +98,16 @@ class UIConnector implements uProxy.UIAPI {
     bgAppPageChannel.emit('' + type, data);
   }
 
+  public syncInstance = (instance, field?:any) => {
+    // TODO: (the interface may change)
+  }
+
+  public syncMappings = () => {
+    // TODO: (the interface may change)
+  }
+
   public sync = () => {
-    // TODO
+    // TODO: (the interface may change)
   }
 
 }
@@ -110,8 +118,6 @@ var ui = new UIConnector();
  * sends updaes to the UI, and handles commands from the UI.
  */
 module Core {
-
-  // TODO: Figure out cleaner way to make freedom handle enums-as-strings.
 
   /**
    * Install a handler for commands received from the UI.
@@ -126,7 +132,7 @@ module Core {
   export var login = (networkName:string, explicit:boolean=false) => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
-      console.warn('Could not login to ' + network);
+      console.warn('Could not login to ' + networkName);
       return;
     }
     network.login(true)
@@ -135,7 +141,7 @@ module Core {
           console.log('Successfully logged in to ' + networkName);
         });
 
-    // store.state.me.networkDefaults[networkName].autoconnect = explicit;
+    // TODO: save the auto-login default.
     store.saveMeToStorage();
   }
 
@@ -148,15 +154,15 @@ module Core {
       console.warn('Could not logout of ' + networkName);
       return;
     }
-    network.api.logout().then(() => {
+    network.logout().then(() => {
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: only remove clients from the network we are logging out of.
     // Clear the clientsToInstance table.
     store.state.clientToInstance = {};
     store.state.instanceToClient = {};
-    _syncMappingsUI();
-    store.state.me.networkDefaults[networkName].autoconnect = false;
+    ui.syncMappings();
+    // TODO: disable auto-login
     store.saveMeToStorage();
   }
 
@@ -164,19 +170,10 @@ module Core {
    * Send a notification about my instance data to a particular clientId.
    * Assumes |client| corresponds to a valid uProxy instance, but does not assume
    * that we've received the other side's instance data yet.
+   * TODO: Implement this in Core.User
    */
   export var sendInstance = (clientId:string) => {
     console.warn('Core.sendInstance is deprecated Use Core.User.');
-    // var instancePayload = makeMyInstanceMessage();
-    // console.log('sendInstance -> ' + clientId, instancePayload);
-    // Queue clientIDs if we're not ready to send instance message.
-    // if (!instancePayload) {
-      // _sendInstanceQueue.push(clientId);
-      // console.log('Queueing ' + clientId + ' for an instance message.');
-      // return false;
-    // }
-    // defaultNetwork.sendMessage(clientId, instancePayload);
-    // return true;
   }
 
   /**
@@ -188,6 +185,7 @@ module Core {
    * instance data. Sometimes we get an instance data message from user that is
    * not (yet) in the roster.
    * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
+   * TODO: Implement this in Core.User
    */
   export var receiveInstance = (rawMsg :any) : Promise<void> => {
     console.log('receiveInstance from ' + rawMsg.fromUserId);
@@ -211,8 +209,8 @@ module Core {
       }
       // Update UI's view of instances and mapping.
       // TODO: This can probably be made smaller.
-      Core.syncInstanceUI_(store.state.instances[instanceId]);
-      _syncMappingsUI();
+      ui.syncInstance(store.state.instances[instanceId]);
+      ui.syncMappings();
     });
   }
 
@@ -240,8 +238,8 @@ module Core {
   // But does not assume there is an instance entry for this user.
   export var receiveConsent = (msg:any) => {
     if (! (msg.fromUserId in store.state.roster)) {
-      console.error("msg.fromUserId (" + msg.fromUserId +
-          ") is not in the roster");
+      console.error('msg.fromUserId (' + msg.fromUserId +
+                    ') is not in the roster');
     }
     var theirConsent = msg.data.consent,      // Their view of consent.
         instanceId   = msg.data.instanceId,   // InstanceId of the sender.
@@ -262,21 +260,8 @@ module Core {
       _addNotification(instanceId);
     }
     store.saveInstance(instanceId);
-    Core.syncInstanceUI_(instance, 'trust');
+    ui.syncInstance(instance, 'trust');
     return true;
-  }
-
-
-  /**
-   * Helper to consolidate syncing the instance on the UI side.
-   */
-  export var syncInstanceUI_ = (instance:Instance, field?) => {
-    if (!instance) {
-      console.error('Cannot sync with null instance.');
-    }
-    var fieldStr = field? '/' + field : '';
-    _SyncUI('/instances/' + instance.instanceId + fieldStr,
-            field? instance[field] : instance);
   }
 
   /**
@@ -335,15 +320,8 @@ module Core {
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
 // TODO: Remove this when we have multiple social providers 'for real'.
-var defaultNetwork = networks['websocket'].api;
+var defaultNetwork = networks['websocket']['api'];
 
-// Only logged in if at least one entry in identityStatus is 'online'.
-function iAmLoggedIn() {
-  var networks = Object.keys(store.state.identityStatus);
-  return networks.some((network) => {
-    return 'online' == store.state.identityStatus[network].status;
-  });
-}
 
 // --------------------------------------------------------------------------
 // Signalling channel hooks.
@@ -351,7 +329,7 @@ function iAmLoggedIn() {
 // peerId is a client ID.
 client.on('sendSignalToPeer', (data:PeerSignal) => {
     console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to client: ' + data.peerId + ", which should map to instance: " +
+                ', sending to client: ' + data.peerId + ', which should map to instance: ' +
                     store.state.clientToInstance[data.peerId]);
   // TODO: don't use 'message' as a field in a message! that's confusing!
   // data.peerId is an instance ID.  convert.
@@ -384,8 +362,7 @@ var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
   }
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = C.ProxyState.RUNNING;
-  // _SyncUI('/instances/' + peerInstanceId, instance);
-  Core.syncInstanceUI_(instance, 'status');
+  ui.syncInstance(instance, 'status');
 
   // TODO: sync properly between the extension and the app on proxy settings
   // rather than this cooincidentally the same data.
@@ -411,11 +388,10 @@ var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
     return false;
   }
   // TODO: Handle revoked permissions notifications.
-  // [{op: 'replace', path: '/me/peerAsProxy', value: ''}]);
 
   client.emit('stop');
   instance.status.proxy = C.ProxyState.OFF;
-  Core.syncInstanceUI_(instance, 'status');
+  ui.syncInstance(instance, 'status');
 
   // TODO: this is also a temporary hack.
   defaultNetwork.sendMessage(
@@ -443,7 +419,7 @@ function receiveSignalFromServerPeer(msg) {
       {peerId: msg.fromClientId, data: msg.data.data});
 }
 
-// TODO(uzimizu): This is a HACK!
+// TODO: move this into User, or some sort of proxy service object.
 function handleNewlyActiveClient(msg) {
   var instanceId = msg.data.instanceId;
   var instance = store.state.instances[instanceId];
@@ -452,9 +428,8 @@ function handleNewlyActiveClient(msg) {
     return;
   }
   console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
-  // state.me.instancePeer
   instance.status.client = C.ProxyState.RUNNING;
-  Core.syncInstanceUI_(instance, 'status');
+  ui.syncInstance(instance, 'status');
 }
 
 function handleInactiveClient(msg) {
@@ -465,7 +440,7 @@ function handleInactiveClient(msg) {
     return;
   }
   instance.status.client = C.ProxyState.OFF;
-  Core.syncInstanceUI_(instance, 'status');
+  ui.syncInstance(instance, 'status');
 }
 
 // --------------------------------------------------------------------------
@@ -505,7 +480,7 @@ function _updateTrust(instanceId, action, received) {
     instance.trust.asClient = trustValue;
   }
   store.saveInstance(instanceId);
-  Core.syncInstanceUI_(instance, 'trust');
+  ui.syncInstance(instance, 'trust');
   console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
   return true;
 }
@@ -559,7 +534,7 @@ function _addNotification(instanceId:string) {
   }
   instance.notify = true;
   store.saveInstance(instanceId);
-  Core.syncInstanceUI_(instance, 'notify');
+  ui.syncInstance(instance, 'notify');
 }
 
 // Remove notification flag for Instance corresponding to |instanceId|, if it
@@ -574,7 +549,7 @@ function _removeNotification(instanceId:string) {
   }
   instance.notify = false;
   store.saveInstance(instanceId);
-  Core.syncInstanceUI_(instance, 'notify');
+  ui.syncInstance(instance, 'notify');
   return true;
 }
 
@@ -592,32 +567,8 @@ function receiveUpdateDescription(msg) {
     return false;
   }
   instance.description = description;
-  Core.syncInstanceUI_(instance, 'description');
+  ui.syncInstance(instance, 'description');
   return true;
-}
-
-
-// --------------------------------------------------------------------------
-//  Updating the UI
-// TODO: Replace these methods with the new UI update mechanism once ready.
-// --------------------------------------------------------------------------
-function _SyncUI(path, value, op?) {
-  op = op || 'add';
-  bgAppPageChannel.emit('state-change', [{
-      op: op,
-      path: path,
-      value: value
-  }]);
-}
-
-
-function _syncMappingsUI() {
-  bgAppPageChannel.emit('state-change', [
-    { op: 'replace', path: '/clientToInstance',
-      value: store.state.clientToInstance },
-    { op: 'replace', path: '/instanceToClient',
-      value: store.state.instanceToClient }
-  ]);
 }
 
 
@@ -640,9 +591,6 @@ Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.state.options[data.key] = data.value;
   store.saveOptionsToStorage().then(() => {;
     console.log('saved options ' + JSON.stringify(store.state.options));
-    // bgAppPageChannel.emit('state-change',
-        // [{op: 'replace', path: '/options/'+data.key,
-         // value: data.value}]);
     // TODO: Make this fine-grained for just the Option.
     sendFullStateToUI();
   });

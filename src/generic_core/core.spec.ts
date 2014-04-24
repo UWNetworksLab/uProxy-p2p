@@ -15,75 +15,6 @@ declare var store :Core.State;
 var state = store.state;
 var Trust = C.Trust;
 
-/*
-describe('uproxy.updateUser', () => {
-
-  // Stub out communications functions.
-  beforeEach(() => {
-    spyOn(Core, 'sendInstance');
-  });
-
-  // TODO: replace this test once we go to instance-centric roster.
-  it('does add user to roster.', () => {
-    // Add a normal, non-UProxy client user.
-    var normalAlice = {
-      userId: 'alice@foo.bar',
-      name: 'Alice No UProxy',
-      clients: {
-        'alice@foo.bar/normal12345': {
-          clientId: 'alice@foo.bar/normal12345',
-          network: 'magic',
-          status: 'messageable'
-        }
-      }
-    };
-    var count = Object.keys(store.state.roster).length;
-    var userId = normalAlice.userId;
-    expect(state.roster[userId]).toBeUndefined();
-    updateUser(normalAlice);
-    expect(state.roster[userId]).toBeDefined();
-    expect(Object.keys(state.roster).length).toBe(count + 1);
-    expect(store.state.roster[userId]).toEqual({
-      userId: 'alice@foo.bar',
-      name: 'Alice No UProxy',
-      clients: {
-        'alice@foo.bar/normal12345': {
-          clientId: 'alice@foo.bar/normal12345',
-          network: 'magic',
-          status: 'messageable'
-        }
-      },
-      imageData: null,
-      url: null
-    });
-  });
-  */
-
-  /*
-  it('calls sendInstance for uproxy-enabled users', () => {
-    // Add a user with an active 'uproxy' client, and ensure that we send her
-    // our instance data.
-    var wonderAlice = {
-      userId: 'alice@censored.nationstate',
-      name: 'Alice UProxy',
-      clients: {
-        'alice@foo.bar/uproxy1337': {
-          clientId: 'alice@foo.bar/uproxy1337',
-          network: 'magic',
-          status: 'messageable'
-        }
-      }
-    };
-    updateUser(wonderAlice);
-    var aliceClient = {
-      clientId: 'alice@foo.bar/uproxy1337',
-      network: 'magic',
-      status: 'messageable'
-    };
-    expect(Core.sendInstance).toHaveBeenCalledWith(aliceClient.clientId);
-  });
-});  // uproxy.updateUser
-*/
 
 // Fake an entry in the instance table.
 var fakeInstanceSync = function(userId, clientId, data) {
@@ -96,6 +27,7 @@ var fakeInstanceSync = function(userId, clientId, data) {
   };
 };
 
+// TODO: Replace these tests with instance tests in Social.Network.
 describe('Core.receiveInstance', () => {
   var instanceMsg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, {
     fromUserId: 'alice',
@@ -114,7 +46,7 @@ describe('Core.receiveInstance', () => {
     spyOn(store, 'syncInstanceFromInstanceMessage')
         .and.callFake(fakeInstanceSync);
     spyOn(store, 'saveInstance').and.callThrough();
-    spyOn(Core, 'syncInstanceUI_');
+    spyOn(ui, 'syncInstance');
   });
 
   it('syncs and saves new instances.', (done) => {
@@ -124,7 +56,7 @@ describe('Core.receiveInstance', () => {
                               instanceMsg.data);
       var fakeInstance = state.instances['12345'];
       expect(store.saveInstance).toHaveBeenCalledWith('12345');
-      expect(Core.syncInstanceUI_).toHaveBeenCalledWith(fakeInstance);
+      expect(ui.syncInstance).toHaveBeenCalledWith(fakeInstance);
     }).then(done);
   });
 
@@ -280,6 +212,8 @@ var selfInstanceAndStatusMessage = {
 };
 
 /*
+TODO: Re-enable these tests / fuzzers when the new Instance code is ready.
+
 describe('uproxy.state.instance', function () {
   // Try variants of [local state loading, network login,
   // instance ID reception].  Validate resulting state.
