@@ -3,6 +3,22 @@
  *
  * This file defines the uProxy User class. :User is a type relevant both in the
  * Core and the UI, which is why it is in the top-level directory.
+ *
+ * Here is further information on the interactions between Clients and
+ * Instances.
+ *
+ * Clients hold state for 'a user logged onto a network from a specific device'.
+ * They are also ephemeral, so once the client logs out, it is gone forever
+ * (the next time the user logs on from the same device to the same network,
+ * there will be a new client ID).
+ *
+ * An Instance is specific to a client running uProxy. More precisely, an
+ * Instance represents 'a uProxy installation on a device for a user', and are
+ * semi-permanent. Since clients are ephemeral, an Instance can/will be
+ * associated with multiple clients over its lifetime, as its uProxy clients
+ * login and logout. There will however, only ever be one client at a time.
+ * The tricky bit is that the Instance is associated not with the 'human' chat
+ * client, but with the 'uProxy' non-human client.
  */
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/user.d.ts' />
