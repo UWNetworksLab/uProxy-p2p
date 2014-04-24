@@ -29,8 +29,8 @@ interface Instance {
   instanceId  :string;
   keyHash     :string;
   trust       :InstanceTrust;  // TODO: replace with new consent piece.
-  status      :string;
+  status      ?:string;
   description :string;
-  notify      :boolean;   // TODO: replace with better notications
+  notify      ?:boolean;   // TODO: replace with better notications
   rosterInfo  ?:RosterInfo;
 }

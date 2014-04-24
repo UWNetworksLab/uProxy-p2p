@@ -330,6 +330,7 @@ module.exports = function(grunt) {
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',
               'build/generic_core/social-enum.js',
+              'build/generic_core/remote-instance.js',
               'build/generic_core/user.js',
               'build/generic_core/state-storage.js',
               'build/generic_core/social.js',
