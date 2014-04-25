@@ -74,6 +74,50 @@ module Core {
     }
 
     /**
+     * Modify the consent for this instance, *locally*. (User clicked on one of
+     * the consent buttons in the UI.) Sends updated consent bits to the
+     * remote instance afterwards.
+     *
+     * Gives a warning for UserActions which are invalid for the current state.
+     */
+    public modifyConsent = (action :Consent.UserAction) => {
+      switch(action) {
+        // Actions affecting our consent towards the remote as our proxy.
+        case Consent.UserAction.REQUEST:
+        case Consent.UserAction.CANCEL_REQUEST:
+        case Consent.UserAction.ACCEPT_OFFER:
+        case Consent.UserAction.IGNORE_OFFER:
+          var newProxyConsent = Consent.userActionOnProxyState(
+              action, this.consent.asProxy);
+          if (newProxyConsent) {
+            this.consent.asProxy = newProxyConsent;
+          } else {
+            console.warn('Invalid proxy consent transition!',
+                this.consent.asProxy, action);
+            return;
+          }
+          break;
+        // Actions affecting our consent towards the remote as our client.
+        case Consent.UserAction.OFFER:
+        case Consent.UserAction.CANCEL_OFFER:
+        case Consent.UserAction.ALLOW_REQUEST:
+        case Consent.UserAction.IGNORE_REQUEST:
+          var newClientConsent = Consent.userActionOnClientState(
+              action, this.consent.asClient);
+          if (newClientConsent) {
+            this.consent.asClient = newClientConsent;
+          } else {
+            console.warn('Invalid client consent transition!',
+                this.consent.asClient, action);
+            return;
+          }
+          break;
+      }
+      // Send new consent bits to the remote client.
+      this.sendConsent();
+    }
+
+    /**
      * Send consent bits to re-synchronize consent with remote |instance|.
      * This is expected *after* receiving an instance notification for an
      * already existing instance.
@@ -89,73 +133,18 @@ module Core {
       this.send(consentPayload);
     }
 
-    // action -> target trust level.
-    // TODO: Remove once the new consent stuff is in.
-    private TrustOp = {
-      // If Alice |action|'s Bob, then Bob acts as the client.
-      'allow': C.Trust.YES,
-      'offer': C.Trust.OFFERED,
-      'deny': C.Trust.NO,
-      // Bob acts as the proxy.
-      'request-access': C.Trust.REQUESTED,
-      'cancel-request': C.Trust.NO,
-      'accept-offer': C.Trust.YES,
-      'decline-offer': C.Trust.NO
-    };
-
     /**
-     * Update trust state for this instance. Emits change to UI.
-     * |action| - Trust action to execute.
-     * |received| - boolean of source of this action.
+     * Receive consent bits from the remote, and update consent values
+     * accordingly.
      */
-    private _updateTrust(action, received) {
-      received = received || false;
-      var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ?
-          !received : received;
-      var trustValue = this.TrustOp[action];
-      // var instance = store.state.instances[instanceId];
-      // if (!instance) {
-        // console.error('Cannot find instance ' + instanceId + ' for a trust change!');
-        // return false;
-      // }
-      if (asProxy) {
-        this.trust.asProxy = trustValue;
-      } else {
-        this.trust.asClient = trustValue;
-      }
-      store.saveInstance(this.instanceId);
-      ui.syncInstance(this, 'trust');
-      console.log('Instance trust changed. ' + JSON.stringify(this.trust));
-      return true;
-    }
-
-    /**
-     * Modify the consent for this instance, locally. (User clicked on one of
-     * the consent buttons in the UI.) Sends bits to the remote afterwards.
-     *
-     * Gives a warning for UserActions which are invalid for the current state.
-     */
-    public modifyConsent = (action :Consent.UserAction) => {
-      switch(action) {
-        // Actions affecting our consent towards the remote as our proxy.
-        case Consent.UserAction.REQUEST:
-        case Consent.UserAction.CANCEL_REQUEST:
-        case Consent.UserAction.ACCEPT_OFFER:
-        case Consent.UserAction.IGNORE_OFFER:
-          this.consent.asProxy = Consent.userActionOnProxyState(
-              action, this.consent.asProxy);
-          break;
-        // Actions affecting our consent towards the remote as our client.
-        case Consent.UserAction.OFFER:
-        case Consent.UserAction.CANCEL_OFFER:
-        case Consent.UserAction.ALLOW_REQUEST:
-        case Consent.UserAction.IGNORE_REQUEST:
-          this.consent.asClient = Consent.userActionOnClientState(
-              action, this.consent.asClient);
-          break;
-      }
-      // Send new consent bits to the remote client.
-      this.sendConsent();
+    public receiveConsent = (bits:Consent.State) => {
+      this.consent.asProxy = Consent.updateProxyStateFromRemoteState(
+          bits, this.consent.asProxy);
+      this.consent.asClient = Consent.updateClientStateFromRemoteState(
+          bits, this.consent.asClient);
+      // TODO: save to storage and update ui.
+      // store.saveInstance(this.instanceId);
+      // ui.syncInstance(this, 'trust');
     }
 
     // getJSON() {

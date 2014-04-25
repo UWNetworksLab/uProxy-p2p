@@ -31,7 +31,7 @@ module Consent {
   // user. This state is stored in local storage for each instance ID we know
   // of.
   export enum ClientState {
-    NONE, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
+    NONE = 6000, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
   }
   export module ClientState {
     // Get the user's request state to send to the remote from the proxyState
@@ -63,7 +63,7 @@ module Consent {
   // User-level consent state for a remote instance to be a proxy server for the
   // user.
   export enum ProxyState {
-    NONE, USER_REQUESTED, REMOTE_OFFERED, USER_IGNORED_OFFER, GRANTED
+    NONE = 6100, USER_REQUESTED, REMOTE_OFFERED, USER_IGNORED_OFFER, GRANTED
   }
   export module ProxyState {
     // Get the user's request state to send to the remote from the proxyState
@@ -130,7 +130,7 @@ module Consent {
   t.set(S.USER_OFFERED,         A.CANCEL_OFFER,   S.NONE);
   t.set(S.REMOTE_REQUESTED,     A.ALLOW_REQUEST,  S.GRANTED);
   t.set(S.REMOTE_REQUESTED,     A.IGNORE_REQUEST, S.USER_IGNORED_REQUEST);
-  t.set(S.USER_IGNORED_REQUEST, A.OFFER,          S.GRANTED);
+  t.set(S.USER_IGNORED_REQUEST, A.ALLOW_REQUEST,  S.GRANTED);
   t.set(S.GRANTED,              A.CANCEL_OFFER,   S.REMOTE_REQUESTED);
   export function userActionOnClientState(
       action:UserAction, state:ClientState) : ClientState {
@@ -174,7 +174,7 @@ module Consent {
 // bits from remote.
 module Consent {
   var t = new FSM<ClientState, number>();
-  // Current state    --- remoteIsOffering --->  New state
+  // Current state    --- remoteIsRequesting --->  New state
   t.set(ClientState.NONE,                0,   ClientState.NONE);
   t.set(ClientState.NONE,                1,   ClientState.REMOTE_REQUESTED);
 
