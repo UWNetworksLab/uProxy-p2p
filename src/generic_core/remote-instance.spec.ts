@@ -19,12 +19,7 @@ describe('Core.RemoteInstance', () => {
     var handshake :Instance = {
       instanceId: 'fakeinstance',
       keyHash:    'fakehash',
-      trust: {
-        asClient: 'nope',
-        asProxy: 'nope'
-      },
       description: 'totally fake',
-      notify: false
     }
     instance = new Core.RemoteInstance(network, handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
@@ -209,9 +204,66 @@ describe('Core.RemoteInstance', () => {
       expect(instance.consent.asProxy).toEqual(Consent.ProxyState.GRANTED);
     });
 
+    it('receiving consent bits sends update to UI', () => {
+      instance.consent.asClient = Consent.ClientState.NONE;
+      instance.consent.asProxy = Consent.ProxyState.NONE;
+      spyOn(ui, 'syncInstance');
+      instance.receiveConsent({
+        isRequesting: false,
+        isOffering:   false
+      });
+      expect(ui.syncInstance).toHaveBeenCalled();
+    });
+
   });
 
-  it('sends updates with an Instance Handshake', () => {
+  it('sends and receives consent bits in the same format', () => {
+    var consentBits :uProxy.Message;
+    spyOn(instance, 'send').and.callFake((payload) => {
+      consentBits = payload;
+    });
+    instance.sendConsent();
+    expect(consentBits.type).toEqual(uProxy.MessageType.CONSENT);
+    var data :ConsentMessage = <ConsentMessage>consentBits.data;
+    // The instanceID sent on the wire should not be of the remote's, but of the
+    // local uProxy client's.
+    expect(data.instanceId).not.toEqual('fakeInstance');
+    expect(data.consent).toEqual({
+      isRequesting: false,
+      isOffering: false
+    });
+  });
+
+  it('two remote instances establish mutual consent', () => {
+    var alice = new Core.RemoteInstance(network, {
+      instanceId: 'instance-alice',
+      keyHash:    'fake-hash-alice',
+      description: 'alice peer',
+    });
+    var bob = new Core.RemoteInstance(network, {
+      instanceId: 'instance-bob',
+      keyHash:    'fake-hash-bob',
+      description: 'alice peer',
+    });
+    // Fake a working signaling channel, and assume only consent messages pass
+    // over it. In reality, the interaction would be between a LocalInstance
+    // and a RemoteInstance, and there would be other messages.
+    spyOn(alice, 'send').and.callFake((payload) => {
+      expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
+      bob.receiveConsent(payload.data.consent);
+    });
+    spyOn(bob, 'send').and.callFake((payload) => {
+      expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
+      alice.receiveConsent(payload.data.consent);
+    });
+    // Alice wants to proxy through Bob.
+    alice.modifyConsent(Consent.UserAction.REQUEST);
+    expect(alice.consent.asProxy).toEqual(Consent.ProxyState.USER_REQUESTED);
+    expect(bob.consent.asClient).toEqual(Consent.ClientState.REMOTE_REQUESTED);
+    // Bob accepts / offers
+    bob.modifyConsent(Consent.UserAction.OFFER);
+    expect(alice.consent.asProxy).toEqual(Consent.ProxyState.GRANTED);
+    expect(bob.consent.asClient).toEqual(Consent.ClientState.GRANTED);
   });
 
 });

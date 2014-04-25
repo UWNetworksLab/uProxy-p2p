@@ -14,6 +14,10 @@ interface ConsentState {
   asProxy :Consent.ProxyState;
 }
 
+interface ConsentMessage {
+  instanceId :string;
+  consent    :Consent.State;
+}
 
 module Core {
 
@@ -34,10 +38,8 @@ module Core {
     public description   :string;
 
     public consent       :ConsentState;
+    private clientId     :string;       // TODO: Do we need this here?
     private transport    :Transport;
-    // private proxyConsent  :Consent.ProxyState;
-    // private clientConsent :Consent.ClientState;
-    private clientId     :string;  // Do we need this here?
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -55,7 +57,12 @@ module Core {
     }
 
     /**
-     * Send a message to this instance.
+     * Send a message to this instance. Queues messages if the instance is
+     * currently not reachable. (Its client went offline, and a new one may show
+     * up in the future)
+     *
+     * TODO: Implement queueing. First we need to know that the social API's
+     * sendMessage propogates error messages.
      */
     public send = (msg:uProxy.Message) => {
       // The overlay social network is responsible for mapping ourselves to the
@@ -125,9 +132,9 @@ module Core {
     public sendConsent = () => {
       var consentPayload :uProxy.Message = {
         type: uProxy.MessageType.CONSENT,
-        data: {
+        data: <ConsentMessage>{
           instanceId: null, //TODO /.me.instanceId,  // local uProxy instance id.
-          consent: this.trust
+          consent: this.getConsentBits()
         }
       };
       this.send(consentPayload);
@@ -144,7 +151,19 @@ module Core {
           bits, this.consent.asClient);
       // TODO: save to storage and update ui.
       // store.saveInstance(this.instanceId);
-      // ui.syncInstance(this, 'trust');
+      ui.syncInstance(this, 'trust');
+    }
+
+    /**
+     * Return the pair of boolean consent bits indicating client and proxy
+     * consent status, from the user's point of view. These bits will be sent on
+     * thewire.
+     */
+    public getConsentBits = () : Consent.State => {
+      return {
+        isRequesting: Consent.ProxyState.userIsRequesting(this.consent.asProxy),
+        isOffering: Consent.ClientState.userIsOffering(this.consent.asClient)
+      };
     }
 
     // getJSON() {

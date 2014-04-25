@@ -34,7 +34,7 @@ module Consent {
     NONE = 6000, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
   }
   export module ClientState {
-    // Get the user's request state to send to the remote from the proxyState
+    // Get the user's request state to send to the remote from the clientState
     // value.
     export function userIsOffering(clientState:ClientState) : boolean {
       switch(clientState){
@@ -110,6 +110,7 @@ module Consent {
   var A = UserAction;
   t.set(S.NONE,               A.REQUEST,        S.USER_REQUESTED);
   t.set(S.USER_REQUESTED,     A.CANCEL_REQUEST, S.NONE);
+  t.set(S.REMOTE_OFFERED,     A.REQUEST,        S.GRANTED);
   t.set(S.REMOTE_OFFERED,     A.ACCEPT_OFFER,   S.GRANTED);
   t.set(S.REMOTE_OFFERED,     A.IGNORE_OFFER,   S.USER_IGNORED_OFFER);
   t.set(S.USER_IGNORED_OFFER, A.ACCEPT_OFFER,   S.GRANTED);
@@ -128,6 +129,7 @@ module Consent {
   var A = UserAction;
   t.set(S.NONE,                 A.OFFER,          S.USER_OFFERED);
   t.set(S.USER_OFFERED,         A.CANCEL_OFFER,   S.NONE);
+  t.set(S.REMOTE_REQUESTED,     A.OFFER,          S.GRANTED);
   t.set(S.REMOTE_REQUESTED,     A.ALLOW_REQUEST,  S.GRANTED);
   t.set(S.REMOTE_REQUESTED,     A.IGNORE_REQUEST, S.USER_IGNORED_REQUEST);
   t.set(S.USER_IGNORED_REQUEST, A.ALLOW_REQUEST,  S.GRANTED);

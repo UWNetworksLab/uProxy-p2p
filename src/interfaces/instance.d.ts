@@ -27,10 +27,10 @@ interface RosterInfo {
 
 interface Instance {
   instanceId  :string;
-  keyHash     :string;
-  trust       :InstanceTrust;  // TODO: replace with new consent piece.
-  status      ?:string;
   description :string;
+  keyHash     :string;
+  trust       ?:InstanceTrust;  // TODO: replace with new consent piece.
+  status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications
   rosterInfo  ?:RosterInfo;
 }
