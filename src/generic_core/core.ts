@@ -155,24 +155,16 @@ module Core {
   }
 
   /**
-   * Update user's description of their current device.
+   * Update user's description of their current device. This applies to all
+   * local instances for every network the user is currently logged onto. Those
+   * local instances will then propogate their description update to all
+   * instances.
    */
-  export var updateDescription = (data) => {
-    store.state.me.description = data;  // UI side already up-to-date.
-    // TODO: save personal description to storage.
-    var payload = JSON.stringify({
-      type: 'update-description',
-      instanceId: '' + store.state.me.instanceId,
-      description: '' + store.state.me.description
-    });
-
-    // Send the new description to ALL currently online friend instances.
-    var instanceIds = Object.keys(store.state.instances);
-    instanceIds.map(toClientId)
-      .filter((clientId:string) => { return Boolean(clientId); })
-      .forEach((clientId:string) => {
-        defaultNetwork.sendMessage(clientId, payload);
-      });
+  export var updateDescription = (description:string) => {
+    for (var network in Social.networks) {
+      var myself = Social.networks[network].getLocalInstance();
+      myself.updateDescription(description);
+    }
   }
 
   /**
@@ -201,7 +193,6 @@ module Core {
   }
 
 }  // module Core
-
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();

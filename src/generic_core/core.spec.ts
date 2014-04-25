@@ -51,6 +51,30 @@ describe('Core', () => {
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
   });
 
+  it('updateDescription updates the LocalInstance for all networks', () => {
+    var networkA = <Social.Network><any>jasmine.createSpy('networkA');
+    networkA.getLocalInstance = null;
+    var networkB = <Social.Network><any>jasmine.createSpy('networkB');
+    networkB.getLocalInstance = null;
+    Social.networks = {
+      'networkA': networkA,
+      'networkB': networkB
+    };
+    var myselfA = new Core.LocalInstance();
+    var myselfB = new Core.LocalInstance();
+    myselfA.description = 'my description is boring';
+    myselfB.description = 'my description is boring';
+    spyOn(networkA, 'getLocalInstance').and.callFake(() => {
+      return myselfA;
+    });
+    spyOn(networkB, 'getLocalInstance').and.callFake(() => {
+      return myselfB;
+    });
+    Core.updateDescription('new description is really cool!');
+    expect(myselfA.description).toEqual('new description is really cool!');
+    expect(myselfB.description).toEqual('new description is really cool!');
+  });
+
 });
 
 // Validate that |inst| is present and proper inside

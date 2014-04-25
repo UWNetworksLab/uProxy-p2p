@@ -9,6 +9,7 @@
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
+      "local-instance.js",
       "remote-instance.js",
       "user.js",
       "social-enum.js",

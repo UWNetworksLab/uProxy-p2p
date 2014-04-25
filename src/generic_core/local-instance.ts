@@ -24,6 +24,10 @@ module Core {
       this.instanceId = LocalInstance.generateInstanceID();
       this.description = this.generateRandomDescription_();
       this.keyHash = this.generateKeyHash();
+      console.log('Generated LocalInstance: ',
+          this.instanceId,
+          this.description,
+          this.keyHash);
     }
 
     /**
@@ -68,6 +72,23 @@ module Core {
         words.push((i & 1) ? nouns[index] : adjectives[index]);
       }
       return words.join(' ');
+    }
+
+    /**
+     * Update this local instance's description.
+     */
+    public updateDescription = (description:string) => {
+      this.description = description;
+      // TODO: save personal description to storage.
+      // TODO: Send the new description to ALL currently online friend instances.
+    }
+
+    /**
+     * This method prepares the local instance's handshake, to be sent to all
+     * peers, notifying them that we are a uProxy installation.
+     */
+    public getInstanceHandshake = () => {
+      // TODO.
     }
 
   }  // class Core.LocalInstance

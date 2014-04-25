@@ -88,9 +88,10 @@ module Social {
     private api       :freedom.Social;
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
+
     // Information about the local login.
     private myClient   :freedom.Social.ClientState;
-    private myInstance :any;
+    private myInstance :Core.LocalInstance;
     private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
@@ -110,6 +111,13 @@ module Social {
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
+      // Load local instance from storage, or create a new one if this is the
+      // first time this uProxy installation, on this device, has interacted
+      // with this network.
+      var localInstanceExists = false;
+      if (!localInstanceExists) {
+        this.myInstance = new Core.LocalInstance();
+      }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
       this.api.on('onUserProfile', this.handleUserProfile);
@@ -133,7 +141,7 @@ module Social {
         rememberLogin: remember
       }
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
-        // Upon successful login, remember local client information.
+        // Upon successful login, save local client information.
         this.online = true;
         this.myClient = client;
       }).then(this.notifyUI);
@@ -144,6 +152,10 @@ module Social {
         this.online = false;
         console.log(this.name + ': logged out.');
       }).then(this.notifyUI);
+    }
+
+    public getLocalInstance = () : Core.LocalInstance => {
+      return this.myInstance;
     }
 
     /**
