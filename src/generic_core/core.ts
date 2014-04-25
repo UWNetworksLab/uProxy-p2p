@@ -48,7 +48,6 @@ class UIConnector implements uProxy.UIAPI {
     switch(type) {
       case uProxy.Update.ALL:
         console.log('update [ALL]', store.state);
-        // data = store.state;
         var networkName :string;
         for (networkName in Social.networks) {
           Social.networks[networkName].notifyUI();
@@ -155,26 +154,6 @@ module Core {
     store.saveMeToStorage();
   }
 
-  // Send consent bits to re-synchronize consent with remote |instance|.
-  // This happens *after* receiving an instance notification for an instance which
-  // we already have a history with.
-  // TODO: Move this into the Instance class.
-  export var sendConsent = (instance:Instance) => {
-    console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
-    var clientId = store.state.instanceToClient[instance.instanceId];
-    if (!clientId) {
-      console.error('Instance ' + instance.instanceId + ' missing clientId!');
-      return false;
-    }
-    var consentPayload = JSON.stringify({
-      type: 'notify-consent',
-      instanceId: store.state.me.instanceId,            // Our own instanceId.
-      consent: _determineConsent(instance.trust)  // My consent.
-    });
-    defaultNetwork.sendMessage(clientId, consentPayload);
-    return true;
-  }
-
   // Assumes that when we receive consent there is a roster entry.
   // But does not assume there is an instance entry for this user.
   export var receiveConsent = (msg:any) => {
@@ -227,25 +206,21 @@ module Core {
   }
 
   /**
-   * Modify the consent value for an instance, because the user clicked on
-   * one of th consent buttons w.r.t another user.
-   * Update trust level for an instance, and possibly send a message to the client
-   * for the instance that we changed.
-   * TODO: Probably move this into the :Instance class once it exists.
-   * TODO: Type |data|.
+   * Modifies the local consent value as the result of a local user action.
+   * This is a distinct pathway from receiving consent bits over the wire, which
+   * is handled directly inside the relevant Social.Network.
    */
-  export var modifyConsent = (data) => {
-    var iId = data.instanceId;
-    // Set trust level locally, then notify through XMPP if possible.
-    _updateTrust(data.instanceId, data.action, false);  // received = false
-    var clientId = toClientId(iId);
-    if (!clientId) {
-      console.log('Warning! Cannot change trust level because client ID does not ' +
-                'exist for instance ' + iId + ' - they are probably offline.');
-      return false;
+  export var modifyConsent = (command:any) => {
+    // Determine which Network, User, and Instance...
+    var network = Social.getNetwork(command.network);
+    if (!network) {  // Error msg emitted above.
+      return;
     }
-    defaultNetwork.sendMessage(clientId, JSON.stringify({type: data.action}));
-    return true;
+    var user = network.getUser(command.user);
+    var instance = user.getInstance(command.instanceId);
+    // Set the instance's new consent levels. It will take care of sending new
+    // consent bits over the wire.
+    instance.modifyConsent(command.consent);
   }
 
   /**
@@ -384,60 +359,6 @@ function handleInactiveClient(msg) {
   ui.syncInstance(instance, 'status');
 }
 
-// --------------------------------------------------------------------------
-//  Trust
-// --------------------------------------------------------------------------
-// action -> target trust level.
-// TODO: Remove once the new consent stuff is in.
-var TrustOp = {
-  // If Alice |action|'s Bob, then Bob acts as the client.
-  'allow': C.Trust.YES,
-  'offer': C.Trust.OFFERED,
-  'deny': C.Trust.NO,
-  // Bob acts as the proxy.
-  'request-access': C.Trust.REQUESTED,
-  'cancel-request': C.Trust.NO,
-  'accept-offer': C.Trust.YES,
-  'decline-offer': C.Trust.NO
-};
-
-// Update trust state for a particular instance. Emits change to UI.
-// |instanceId| - instance to change the trust levels upon.
-// |action| - Trust action to execute.
-// |received| - boolean of source of this action.
-function _updateTrust(instanceId, action, received) {
-  received = received || false;
-  var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ?
-      !received : received;
-  var trustValue = TrustOp[action];
-  var instance = store.state.instances[instanceId];
-  if (!instance) {
-    console.error('Cannot find instance ' + instanceId + ' for a trust change!');
-    return false;
-  }
-  if (asProxy) {
-    instance.trust.asProxy = trustValue;
-  } else {
-    instance.trust.asClient = trustValue;
-  }
-  store.saveInstance(instanceId);
-  ui.syncInstance(instance, 'trust');
-  console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
-  return true;
-}
-
-function receiveTrustMessage(msgInfo) {
-  var msgType = msgInfo.data.type;
-  var clientId = msgInfo.fromClientId;
-  var instanceId = store.state.clientToInstance[clientId];
-  if (!instanceId) {
-    // TODO(uzimizu): Attach instanceId to the message and verify.
-    console.error('Could not find instance for the trust modification!');
-    return;
-  }
-  _updateTrust(instanceId, msgType, true);  // received = true
-  _addNotification(instanceId);
-}
 
 // For each direction (e.g., I proxy for you, or you proxy for me), there
 // is a logical AND of consent from both parties. If the local state for

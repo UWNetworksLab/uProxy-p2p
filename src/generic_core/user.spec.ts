@@ -8,6 +8,7 @@ describe('Core.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
+      'send',
       'sendInstanceHandshake'
   ]);
 

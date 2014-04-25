@@ -80,7 +80,7 @@ module Core {
         return;
       }
       // TODO: Use the send method off the Instance object, once it exists.
-      this.network.send(instanceId, JSON.stringify(payload));
+      this.network.send(instanceId, payload);
     }
 
     public sendInstanceHandshake = (clientId:string) => {
@@ -203,8 +203,14 @@ module Core {
      * Assumes the instance associated with the consent message is valid and
      * belongs to this user.
      */
-    private handleConsent_ = (consent :any) => {
-      // TODO: Put the new consent code in here.
+    private handleConsent_ = (consentMessage :any) => {
+      var instanceId = consentMessage.instanceId;
+      var instance = this.instances_[instanceId];
+      if (!instance) {
+        console.warn('Cannot update consent for non-existing instance!');
+        return;
+      }
+      instance.modifyConsent(consentMessage.consent);
     }
 
     /**

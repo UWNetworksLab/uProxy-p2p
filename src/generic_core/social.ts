@@ -75,6 +75,10 @@ module Social {
    * Also, deals with events from the social provider. 'onUserProfile' events
    * directly affect the roster of this network, while 'onClientState' and
    * 'onMessage' are passed on to the relevant user, assuming the user exists.
+   *
+   * NOTE: All JSON stringify / parse happens automatically through the
+   * network's communication methods. The rest of the code should deal purely
+   * with the data objects.
    */
   export class Network {
 
@@ -85,8 +89,9 @@ module Social {
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
     // Information about the local login.
-    private myClient :freedom.Social.ClientState;
-    private online :boolean;
+    private myClient   :freedom.Social.ClientState;
+    private myInstance :any;
+    private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     // Sometimes we receive other uproxy instances before we've received our own
@@ -285,9 +290,10 @@ module Social {
      * Assumes the instance exists.
      * TODO: make this real and test it.
      */
-    send = (instanceId:string, message:string) : Promise<void> => {
+    send = (instanceId:string, message:uProxy.Message) : Promise<void> => {
       console.log('[To be implemented] Network.send(' +
                   instanceId + '): ' + message);
+      var str = JSON.stringify(message);
       return new Promise<void>((F, R) => {
         // if (freedom.Social.Status.ONLINE === this.state.status) {
           // this.network.api.sendMessage(this.clientId, message)
