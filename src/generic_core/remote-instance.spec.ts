@@ -1,3 +1,11 @@
+/*
+ * remote-instance.spec.ts
+ *
+ * This file ensures that interactions with a remote instance are correct. For
+ * instance, sometimes consent between two instances needs to be resolved after
+ * they've been disconnected. This must ensure that we resolve the
+ * correct consent values between remote instances.
+ */
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 /// <reference path='remote-instance.ts' />
 

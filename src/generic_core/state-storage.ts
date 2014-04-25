@@ -179,6 +179,7 @@ module Core {
      * - Check if we need to update instance information.
      * - Assumes that instance already exists for this |userId|.
      */
+    /*
     public syncInstanceFromInstanceMessage =
         (userId:string, clientId:string, data:Instance) : void => {
       var instanceId = data.instanceId;
@@ -217,6 +218,7 @@ module Core {
 
       this.syncRosterFromInstanceId(instanceId);
     }
+    */
 
     // --------------------------------------------------------------------------
     //  Loading & Saving Instances

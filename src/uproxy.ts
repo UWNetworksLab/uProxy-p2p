@@ -6,9 +6,9 @@
  * between the Core and the UI.
  */
 // TODO: Move the notifications somewhere better.
+/// <reference path='generic_core/consent.ts' />
 
 module uProxy {
-
 
   // --- Communications ---
 
@@ -80,7 +80,7 @@ module uProxy {
     // Send your own instanceId to target clientId.
     sendInstance(clientId:string):void;
 
-    modifyConsent(id:string, action:Consent.Action):void;
+    modifyConsent(id:string, action:Consent.UserAction):void;
 
     // Using peer as a proxy.
     start(instanceId:string):void;
@@ -119,24 +119,10 @@ module uProxy {
     // addNotification() : void;
   }
 
-
   interface ICoreOptions {
     allowNonroutableAddresses(enabled:boolean):void;
     setStunServers(servers:string[]):void;
     setTurnServers(servers:string[]):void;
   }
-
-  // TODO: Remove this once we use the newer consent piece.
-  export module Consent {
-    export enum Action {
-      REQUEST,
-      CANCEL,
-      ACCEPT,
-      DECLINE,
-      OFFER,
-      ALLOW,
-      DENY,
-    }
-  }  // module Consent
 
 }  // module uProxy

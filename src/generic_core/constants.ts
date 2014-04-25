@@ -1,12 +1,9 @@
 module C {
-  export var DEBUG = true;
 
-  export var Trust = {
-      NO: 'no',
-      REQUESTED: 'requested',
-      OFFERED: 'offered',
-      YES: 'yes'
-  };
+  // TODO: remove all the unused constants as corresponding classes / types are
+  // implemented.
+
+  export var DEBUG = true;
 
   export var ProxyState = {
       OFF: 'off',
@@ -24,24 +21,6 @@ module C {
   export var DEFAULT_PROXY_STATUS = {
       proxy: C.ProxyState.OFF,
       client: C.ProxyState.OFF
-  };
-
-  export var DEFAULT_INSTANCE = {
-      instanceId: null,
-      keyHash: '',
-      trust: {
-          asProxy: Trust.NO,
-          asClient: Trust.NO
-      },
-      status: C.DEFAULT_PROXY_STATUS,
-      description: '',
-      notify: false,
-      rosterInfo: {
-          userId: '',
-          name: '',
-          network: '',
-          url: ''
-      }
   };
 
   export var DEFAULT_STATUS = {

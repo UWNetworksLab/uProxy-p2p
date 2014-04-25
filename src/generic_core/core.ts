@@ -154,36 +154,6 @@ module Core {
     store.saveMeToStorage();
   }
 
-  // Assumes that when we receive consent there is a roster entry.
-  // But does not assume there is an instance entry for this user.
-  export var receiveConsent = (msg:any) => {
-    if (! (msg.fromUserId in store.state.roster)) {
-      console.error('msg.fromUserId (' + msg.fromUserId +
-                    ') is not in the roster');
-    }
-    var theirConsent = msg.data.consent,      // Their view of consent.
-        instanceId   = msg.data.instanceId,   // InstanceId of the sender.
-        instance     = store.getInstance(instanceId);
-    if (!instance) {
-      console.log('receiveConsent: Instance ' + instanceId + ' not found!');
-      return false;
-    }
-    // Determine my own consent bits, compare with their consent and remap.
-    var oldTrustAsProxy = instance.trust.asProxy;
-    var oldTrustAsClient = instance.trust.asClient;
-    var myConsent = _determineConsent(instance.trust);
-    instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
-
-    // Apply state change notification if the trust state changed.
-    if (oldTrustAsProxy != instance.trust.asProxy ||
-        oldTrustAsClient != instance.trust.asClient) {
-      _addNotification(instanceId);
-    }
-    store.saveInstance(instanceId);
-    ui.syncInstance(instance, 'trust');
-    return true;
-  }
-
   /**
    * Update user's description of their current device.
    */
@@ -263,19 +233,19 @@ server.on('sendSignalToPeer', (data:PeerSignal) => {
 
 // --------------------------------------------------------------------------
 //  Proxying
+// TODO: Move this into Instance class.
 // --------------------------------------------------------------------------
 // Begin SDP negotiations with peer. Assumes |peer| exists.
 var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  // TODO: don't allow if we havn't given them permission :)
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
-  if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
-    console.log('Lacking permission to proxy through ' + peerInstanceId);
-    return false;
-  }
+  // if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
+    // console.log('Lacking permission to proxy through ' + peerInstanceId);
+    // return false;
+  // }
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = C.ProxyState.RUNNING;
   ui.syncInstance(instance, 'status');
@@ -359,33 +329,12 @@ function handleInactiveClient(msg) {
   ui.syncInstance(instance, 'status');
 }
 
-
-// For each direction (e.g., I proxy for you, or you proxy for me), there
-// is a logical AND of consent from both parties. If the local state for
-// trusting them to be a proxy (trust.asProxy) is Yes or Requested, we
-// consent to being their client. If the local state for trusting them to
-// be our client is Yes or Offered, we consent to being their proxy.
-function _determineConsent(trust) {
-  return { asProxy:  [C.Trust.YES, C.Trust.OFFERED].indexOf(trust.asClient) >= 0,
-           asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
-}
-
-function _composeTrustFromConsent(myConsent, theirConsent) : InstanceTrust {
-  return {
-      asProxy: theirConsent.asProxy?
-          (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
-          (myConsent.asClient? C.Trust.REQUESTED : C.Trust.NO),
-      asClient: theirConsent.asClient?
-          (myConsent.asProxy? C.Trust.YES : C.Trust.REQUESTED) :
-          (myConsent.asProxy? C.Trust.OFFERED : C.Trust.NO)
-  };
-}
-
 function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
   return true;
 }
 
+// TODO: Move notifications into its own service.
 // Set notification flag for Instance corresponding to |instanceId|, and also
 // set the notification flag for the userId.
 function _addNotification(instanceId:string) {

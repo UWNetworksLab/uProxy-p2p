@@ -34,7 +34,6 @@ module Core {
     public instanceId    :string;
     public keyHash       :string
     //socialConnection : SocialConnection;
-    public trust         :InstanceTrust;
     public description   :string;
 
     public consent       :ConsentState;

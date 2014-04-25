@@ -7,121 +7,11 @@
  * requirement and ensures consistency.
  */
 /// <reference path='state-storage.ts' />
-/// <reference path='constants.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 // Assumes |store| is defined in start-uproxy.ts and state-storage.ts.
 declare var store :Core.State;
 var state = store.state;
-var Trust = C.Trust;
-
-
-// Fake an entry in the instance table.
-var fakeInstanceSync = function(userId, clientId, data) {
-  state.instances[data.instanceId] = {
-    instanceId: data.instanceId,
-    rosterInfo: {
-      userId: userId,
-      name: data.rosterInfo.name
-    }
-  };
-};
-
-// TODO: Replace these tests with instance tests in Social.Network.
-describe('Core.receiveInstance', () => {
-  var instanceMsg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, {
-    fromUserId: 'alice',
-    fromClientId: 'alice-clientid',
-    toUserId: '',
-    data: restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, {
-      instanceId: '12345',
-      rosterInfo: restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
-        name: 'Alice Testuser',
-        network: 'google'
-      })
-    }),
-  });
-
-  beforeEach(() => {
-    spyOn(store, 'syncInstanceFromInstanceMessage')
-        .and.callFake(fakeInstanceSync);
-    spyOn(store, 'saveInstance').and.callThrough();
-    spyOn(ui, 'syncInstance');
-  });
-
-  // CLEAR STATE BEFORE FUZZ TESTS.
-  state.instances = [];
-});
-
-// Returns an object representing a single user instance.  Conforms to
-// C.DEFAULT_ROSTER_ENTRY.
-function makeUserRosterEntry(instanceId, userId, not_as_uproxy) {
-  var result = cloneDeep(C.DEFAULT_ROSTER_ENTRY);
-  userId = userId + '@gmail.com';
-  var clientId;
-  clientId = userId + (not_as_uproxy?
-      '/other-messenger' : ('/uproxy' + instanceId));
-  result.userId = userId;
-  // validate for missing fields.
-  result = restrictKeys(C.DEFAULT_ROSTER_ENTRY, result);
-  result.clients[clientId] = restrictKeys(
-      C.DEFAULT_ROSTER_CLIENT_ENTRY, {
-        userId: userId,
-        clientId: clientId,
-        network: 'google',
-        status: 'online',
-        name: 'User' + userId,
-      });
-  return result;
-}
-
-// Returns an instance message from a roster entry.
-// (C.DEFAULT_ROSTER_ENTRY ->
-//        C.DEFAULT_MESSAGE_ENVELOPE{data=C.DEFAULT_INSTANCE_MESSAGE}).
-// |userInstance| should be the result value from a call to
-// makeUserRosterEntry(), a C.DEFAULT_ROSTER_ENTRY.
-function makeInstanceMessage(userRosterEntry) {
-  var result = cloneDeep(C.DEFAULT_MESSAGE_ENVELOPE);
-  var client = userRosterEntry.clients[Object.keys(userRosterEntry.clients)[0]];
-  result.fromUserId = userRosterEntry.userId;
-  result.fromClientId = client.clientId;
-  result.toUserId = 'you-should-not-be-checking-this';
-  result = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, result);
-
-  var result_data = cloneDeep(C.DEFAULT_INSTANCE_MESSAGE);
-  // pull the instanceID out of the clientID.
-  var instanceId;
-  if (client.clientId.indexOf('/uproxy') > 0) {
-    instanceId = client.clientId.substr(userRosterEntry.userId.length +
-        '/uproxy'.length);
-  } else {
-    throw new Error('Being asked to make an instance message for a non-uproxy client.');
-  }
-  result_data.instanceId = instanceId;
-  result_data.description = 'description for user ' + userRosterEntry.userId;
-  result_data.keyHash = 'HASHFORINSTANCE-' + instanceId;
-  result_data = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, result_data);
-
-  result_data.rosterInfo = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, {
-    name: userRosterEntry.name,
-    network: client.network,
-    userId: userRosterEntry.userId
-  });
-  result.data = result_data;
-  return result;
-}
-
-// Validate the 'me' description in |self| against store.state.me.
-function validateSelf(self) {
-  expect(store.state.me.instanceId).toBeDefined();
-  expect(store.state.me.keyHash).toBeDefined();
-  expect(store.state.me.description).toBeDefined();
-  // These should be properly generated, not the fake ones we entered
-  // in originally.
-  expect(store.state.me.instanceId).not.toBe(self.instanceId);
-  expect(store.state.me.keyHash).not.toBe(self.keyHash);
-  expect(store.state.me.description).not.toBe(self.description);
-}
 
 // Validate that |inst| is present and proper inside
 // store.state. |inst| should be the return value from a call to
@@ -134,63 +24,8 @@ function validateInstance(inst) {
   // 3. Validate instanceToClient[] has this instance, and that it's
   //    properly mapped.
   // Validate instances.
-  expect(store.state.instances).toBeDefined();
-  try {
-    var modelInst = store.state.instances[inst.instanceId];
-    expect(modelInst).toBeDefined();
-    expect(modelInst.instanceId).toBe(inst.instanceId);
-    expect(modelInst.userID).toBe(inst.userId);
-    expect(modelInst.network).toBe(inst.network);
-    expect(modelInst.url).toBe(inst.url);
-    expect(modelInst.description).toBe(inst.description);
-    expect(modelInst.keyHash).toBe(inst.keyHash);
-    expect(modelInst.trust).toBeDefined();
-    expect(modelInst.trust.asProxy).toBe(Trust.NO);
-    expect(modelInst.trust.asClient).toBe(Trust.NO);
-    expect(modelInst.status).toBeDefined();
-    expect(modelInst.status.proxy).toBe(C.DEFAULT_PROXY_STATUS.proxy);
-    expect(modelInst.status.client).toBe(C.DEFAULT_PROXY_STATUS.client);
-
-    // Validate clientToInstance[] mapping.
-    expect(store.state.clientToInstance).toBeDefined();
-    expect(Object.keys(store.state.clientToInstance).filter(function(client) {
-      return store.state.clientToInstance[client] == inst.instanceId;
-    }).length).toBe(1);
-
-    // Validate instanceToClient[] mapping.
-    expect(store.state.instanceToClient).toBeDefined();
-    expect(store.state.instanceToClient[inst.instanceId]).toBeDefined();
-    var user = store.state.roster[inst.rosterInfo.userId];
-    // We don't have .in(), so reverse args and use .toContain()
-    if (!user.clients[store.state.instanceToClient[inst.instanceId]]) {
-      debugger;
-    }
-    console.log(user.clients);
-    expect(Object.keys(user.clients)).toContain(
-        store.state.instanceToClient[inst.instanceId]);
-  } catch (e) {
-    debugger;
-  }
+  // TODO: re-implement for the new instance code maybe.
 }
-
-// conforms both to C.DEFAULT_STATUS and C.DEFAULT_INSTANCE.
-var selfInstanceAndStatusMessage = {
-  userId: 'self@selfmail.com',
-  name: 'My self.',
-  network: 'google',
-  message: 'Woo!',
-  status: 'online',
-  description: 'my self in a test instance.',
-  instanceId: '0000000001',
-  keyHash: 'HASHFORINSTANCE-0000000001',
-  clients: {
-    'self@selfmail.com/uproxy00001': {
-      clientId: 'self@selfmail.com/uproxy00001',
-      network: 'testonly',
-      status: 'messageable'
-    }
-  }
-};
 
 /*
 TODO: Re-enable these tests / fuzzers when the new Instance code is ready.
