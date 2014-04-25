@@ -43,7 +43,7 @@ describe('Core.RemoteInstance', () => {
     instance.consent.asProxy = Consent.ProxyState.NONE;
   });
 
-  describe('consent as your proxy', () => {
+  describe('local consent towards remote proxy', () => {
 
     it('can request access, and cancel that request', () => {
       instance.modifyConsent(Consent.UserAction.REQUEST);
@@ -77,7 +77,7 @@ describe('Core.RemoteInstance', () => {
           .toEqual(Consent.ProxyState.REMOTE_OFFERED);
     });
 
-    it('invalid transitions do not modify.', () => {
+    it('invalid transitions do not modify consent', () => {
       spyOn(console, 'warn');
       instance.consent.asProxy = Consent.ProxyState.NONE;
       instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
@@ -96,7 +96,7 @@ describe('Core.RemoteInstance', () => {
     tmpProxyConsent = instance.consent.asProxy;
   });
 
-  describe('consent as your client', () => {
+  describe('local consent towards remote client', () => {
 
     it('can offer access, and cancel that offer', () => {
       instance.modifyConsent(Consent.UserAction.OFFER);
@@ -130,7 +130,7 @@ describe('Core.RemoteInstance', () => {
           .toEqual(Consent.ClientState.REMOTE_REQUESTED);
     });
 
-    it('invalid transitions do not modify.', () => {
+    it('invalid transitions do not modify consent', () => {
       spyOn(console, 'warn');
       instance.consent.asClient = Consent.ClientState.NONE;
       instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
@@ -146,6 +146,69 @@ describe('Core.RemoteInstance', () => {
 
   it('client consent modifications did not touch proxy consent', () => {
     expect(instance.consent.asProxy).toEqual(tmpProxyConsent);
+  });
+
+  describe('receiving consent bits', () => {
+
+    it('remote maintains no consent', () => {
+      instance.consent.asClient = Consent.ClientState.NONE;
+      instance.consent.asProxy = Consent.ProxyState.NONE;
+      instance.receiveConsent({
+        isRequesting: false,
+        isOffering:   false
+      });
+      expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
+      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
+    });
+
+    it('remote cancels their consent', () => {
+      instance.consent.asClient = Consent.ClientState.REMOTE_REQUESTED;
+      instance.consent.asProxy = Consent.ProxyState.REMOTE_OFFERED;
+      instance.receiveConsent({
+        isRequesting: false,
+        isOffering:   false
+      });
+      expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
+      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
+    });
+
+    it('remote reduces mutual consent', () => {
+      instance.consent.asClient = Consent.ClientState.GRANTED;
+      instance.consent.asProxy = Consent.ProxyState.GRANTED;
+      instance.receiveConsent({
+        isRequesting: false,
+        isOffering:   false
+      });
+      expect(instance.consent.asClient).toEqual(
+          Consent.ClientState.USER_OFFERED);
+      expect(instance.consent.asProxy).toEqual(
+          Consent.ProxyState.USER_REQUESTED);
+    });
+
+    it('remote gives consent', () => {
+      instance.consent.asClient = Consent.ClientState.NONE;
+      instance.consent.asProxy = Consent.ProxyState.NONE;
+      instance.receiveConsent({
+        isRequesting: true,
+        isOffering:   true
+      });
+      expect(instance.consent.asClient).toEqual(
+          Consent.ClientState.REMOTE_REQUESTED);
+      expect(instance.consent.asProxy).toEqual(
+          Consent.ProxyState.REMOTE_OFFERED);
+    });
+
+    it('remote establishes mutual consent', () => {
+      instance.consent.asClient = Consent.ClientState.USER_OFFERED;
+      instance.consent.asProxy = Consent.ProxyState.USER_REQUESTED;
+      instance.receiveConsent({
+        isRequesting: true,
+        isOffering:   true
+      });
+      expect(instance.consent.asClient).toEqual(Consent.ClientState.GRANTED);
+      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.GRANTED);
+    });
+
   });
 
   it('sends updates with an Instance Handshake', () => {

@@ -158,8 +158,10 @@ module Core {
     // }
   }  // class Core.RemoteInstance
 
+  // TODO: Implement obfuscation.
   export enum ObfuscationType {NONE, RANDOM1 }
 
+  // TODO: Determine if we need this JSON format.
   // Json format for a remote instance.
   export interface InstanceJson {
     // instanceId, unique.

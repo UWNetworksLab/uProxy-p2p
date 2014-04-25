@@ -144,8 +144,8 @@ module Consent {
 module Consent {
   var t = new FSM<ProxyState, number>();
   // Current state    --- remoteIsOffering --->  New state
-  t.set(ProxyState.NONE,               0,        ProxyState.REMOTE_OFFERED);
-  t.set(ProxyState.NONE,               1,        ProxyState.NONE);
+  t.set(ProxyState.NONE,               0,        ProxyState.NONE);
+  t.set(ProxyState.NONE,               1,        ProxyState.REMOTE_OFFERED);
 
   t.set(ProxyState.REMOTE_OFFERED,     0,        ProxyState.NONE);
   t.set(ProxyState.REMOTE_OFFERED,     1,        ProxyState.REMOTE_OFFERED);
