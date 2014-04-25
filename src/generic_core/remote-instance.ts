@@ -1,11 +1,9 @@
 /**
  * remote-instance.ts
  *
- * This file defines the uProxy Instance class for remote installations.
- *
- * Instance information must be passed across the signalling channel so that
- * any pair of uProxy installations can speak to one another regarding consent
- * and status.
+ * This file defines the uProxy Instance class for remote installations. It
+ * allows any pair of uProxy installations to speak to one another regarding
+ * consent, proxying status, and any other signalling information.
  */
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='consent.ts' />
@@ -19,6 +17,14 @@ interface ConsentState {
 
 module Core {
 
+  /**
+   * RemoteInstance - represents a remote uProxy installation.
+   *
+   * There are two pathways to modifying the consent of this remote instance.
+   * - Locally, via a user command from the UI.
+   * - Remotely, via consent bits sent over the wire by a friend.
+   *
+   */
   export class RemoteInstance implements Instance {
 
     public instanceId    :string;
@@ -27,21 +33,24 @@ module Core {
     public trust         :InstanceTrust;
     public description   :string;
 
-    private transport             :Transport;
-    private proxyConsent  :Consent.ProxyState;
-    private clientConsent :Consent.ClientState;
-
-    private clientId     :string;
+    public consent       :ConsentState;
+    private transport    :Transport;
+    // private proxyConsent  :Consent.ProxyState;
+    // private clientConsent :Consent.ClientState;
+    private clientId     :string;  // Do we need this here?
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
-     * handshake.
+     * handshake. Typically, instances are initialized with the lowest consent
+     * values.
      */
     constructor(
         public network :Social.Network,
         handshake : Instance) {
-      // this.remoteProxyState = clone(data.remoteProxyState);
-      // this.remoteClientState = clone(data.remoteClientState);
+      this.consent = {
+        asClient: Consent.ClientState.NONE,
+        asProxy: Consent.ProxyState.NONE
+      };
       this.update(handshake);
     }
 
@@ -121,20 +130,31 @@ module Core {
     }
 
     /**
-     * Modify the consent for this instance, because the user clicked on one of
-     * the consent buttons. This updates the trust level locally, and sends a
-     * message to the remote client.
-     * TODO: Type |data|.
+     * Modify the consent for this instance, locally. (User clicked on one of
+     * the consent buttons in the UI.) Sends bits to the remote afterwards.
+     *
+     * Gives a warning for UserActions which are invalid for the current state.
      */
-    public modifyConsent = (data) => {
-      // Set trust level locally, then notify through XMPP if possible.
-      // _updateTrust(data.instanceId, data.action, false);  // received = false
-      // if (!clientId) {
-        // console.log('Warning! Cannot change trust level because client ID does not ' +
-                  // 'exist for instance ' + iId + ' - they are probably offline.');
-        // return false;
-      // }
-      // Send consent message to the remote client.
+    public modifyConsent = (action :Consent.UserAction) => {
+      switch(action) {
+        // Actions affecting our consent towards the remote as our proxy.
+        case Consent.UserAction.REQUEST:
+        case Consent.UserAction.CANCEL_REQUEST:
+        case Consent.UserAction.ACCEPT_OFFER:
+        case Consent.UserAction.IGNORE_OFFER:
+          this.consent.asProxy = Consent.userActionOnProxyState(
+              action, this.consent.asProxy);
+          break;
+        // Actions affecting our consent towards the remote as our client.
+        case Consent.UserAction.OFFER:
+        case Consent.UserAction.CANCEL_OFFER:
+        case Consent.UserAction.ALLOW_REQUEST:
+        case Consent.UserAction.IGNORE_REQUEST:
+          this.consent.asClient = Consent.userActionOnClientState(
+              action, this.consent.asClient);
+          break;
+      }
+      // Send new consent bits to the remote client.
       this.sendConsent();
     }
 

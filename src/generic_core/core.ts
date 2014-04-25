@@ -220,7 +220,7 @@ module Core {
     var instance = user.getInstance(command.instanceId);
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire.
-    instance.modifyConsent(command.consent);
+    instance.modifyConsent(command.consentAction);
   }
 
   /**
