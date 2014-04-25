@@ -4,6 +4,48 @@
  * This file contains helpers for the uProxy Core.
  */
 
+
+/**
+ * This is the beginning of a generic Finite-State-Machine.
+ * Operates on States of type S using transitions of type T. Assumes S and T are
+ * Enums of some variety.
+ *
+ * This is utilized for pieces like the Consent.
+ *
+ * States are implied by numbers, which although we might want to use Enums,
+ * typescript fails to provide us the ability to index by anything other
+ * than 'string' or 'number'. [TS1023]
+ *
+ * This particular implementation does not care about accept/reject states. It
+ * just provides the means for preparing th transition table.
+ */
+class FSM<S, T> {
+
+  private table:{[start:number]:{[transition:number]:S}} = {}
+
+  /**
+   * Sets a transition on the state machine, and auto-creates new states.
+   */
+  public set = (start:S, transition:T, dest:S) => {
+    // Typescript is not smart enough to propogate the fact that an Enum type is
+    // in fact a subtype of number, through to this point.
+    // Therefore, abuse double-casting.
+    var startIndex = <number><any>start;
+    var transitionIndex = <number><any>transition;
+    if (!this.table[startIndex]) {
+      this.table[startIndex] = {};
+    }
+    this.table[startIndex][transitionIndex] = dest;
+  }
+
+  public get = (start:S, transition:T) : S => {
+    var startIndex = <number><any>start;
+    var transitionIndex = <number><any>transition;
+    return this.table[startIndex][transitionIndex];
+  }
+
+}
+
 function linear_congruence_gen(prior) {
   return (1 + prior * 16807) % 2147483647;
 }
