@@ -63,6 +63,13 @@ module uProxy {
     data :Object;
   }
 
+  export interface ConsentCommand {
+    network    :string;
+    userId     :string;
+    instanceId :string;
+    action     :Consent.UserAction;
+  }
+
   // --- Core <--> UI Interfaces ---
 
   /**
@@ -80,7 +87,7 @@ module uProxy {
     // Send your own instanceId to target clientId.
     sendInstance(clientId:string):void;
 
-    modifyConsent(id:string, action:Consent.UserAction):void;
+    modifyConsent(command:ConsentCommand):void;
 
     // Using peer as a proxy.
     start(instanceId:string):void;

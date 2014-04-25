@@ -180,17 +180,17 @@ module Core {
    * This is a distinct pathway from receiving consent bits over the wire, which
    * is handled directly inside the relevant Social.Network.
    */
-  export var modifyConsent = (command:any) => {
+  export var modifyConsent = (command:uProxy.ConsentCommand) => {
     // Determine which Network, User, and Instance...
     var network = Social.getNetwork(command.network);
     if (!network) {  // Error msg emitted above.
       return;
     }
-    var user = network.getUser(command.user);
+    var user = network.getUser(command.userId);
     var instance = user.getInstance(command.instanceId);
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire.
-    instance.modifyConsent(command.consentAction);
+    instance.modifyConsent(command.action);
   }
 
   /**

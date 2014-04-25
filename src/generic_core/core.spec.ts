@@ -7,11 +7,51 @@
  * requirement and ensures consistency.
  */
 /// <reference path='state-storage.ts' />
+/// <reference path='social.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 // Assumes |store| is defined in start-uproxy.ts and state-storage.ts.
 declare var store :Core.State;
 var state = store.state;
+
+describe('Core', () => {
+
+  // Set up a fake network -> roster -> user -> instance chain.
+  var network = <Social.Network><any>jasmine.createSpy('network');
+  network.getUser = null;
+  var user = <Core.User><any>jasmine.createSpy('user');
+  user.getInstance = null;
+  var alice = new Core.RemoteInstance(network, {
+    instanceId: 'instance-alice',
+    keyHash:    'fake-hash-alice',
+    description: 'alice peer',
+  });
+
+  it('passes modifyConsent to the correct instance', () => {
+    spyOn(Social, 'getNetwork').and.callFake(() => {
+      return network;
+    });
+    spyOn(network, 'getUser').and.callFake(() => {
+      return user;
+    });
+    spyOn(user, 'getInstance').and.callFake(() => {
+      return alice;
+    });
+    spyOn(alice, 'modifyConsent');
+    var command :uProxy.ConsentCommand = {
+      network: 'fake-network',
+      userId: 'user-alice',
+      instanceId: 'instance-alice',
+      action: Consent.UserAction.REQUEST
+    }
+    Core.modifyConsent(command);
+    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network');
+    expect(network.getUser).toHaveBeenCalledWith('user-alice');
+    expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
+    expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
+  });
+
+});
 
 // Validate that |inst| is present and proper inside
 // store.state. |inst| should be the return value from a call to
