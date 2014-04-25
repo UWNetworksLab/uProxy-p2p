@@ -29,39 +29,13 @@ declare var store :Core.State;  // From start-uproxy.ts.
 // this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
-// Client is used to manage a peer connection to a contact that will proxy our
-// connection. This module listens on a localhost port and forwards requests
-// through the peer connection.
+// The socks-rtc client and server allows us to proxy through / for other uProxy
+// peers. See [https://github.com/uProxy/socks-rtc] for more information.
 var client = freedom['SocksToRtc']();
-
-// Server allows us to act as a proxy for our contacts.
-// Server module; listens for peer connections and proxies their requests
-// through the peer connection.
 var server = freedom['RtcToNet']();
+// The Core's responsibility is to pass messages across the signalling
+// channel using the User / Instance mechanisms.
 
-// Sometimes we receive other uproxy instances before we've received our own
-// XMPP onChange notification, which means we cannot yet build an instance
-// message.
-var _sendInstanceQueue = [];
-var _memoizedInstanceMessage = null;
-
-// --------------------------------------------------------------------------
-//  General UI interaction
-// --------------------------------------------------------------------------
-function sendFullStateToUI() {
-  console.log('sending ALL state to UI.');
-  ui.update(uProxy.Update.ALL);
-}
-
-
-// Logs out of networks and resets data.
-function reset() {
-  console.log('reset');
-  for (var network in Social.networks) {
-    Social.networks[network].logout();
-  }
-  store.reset().then(sendFullStateToUI);
-}
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -108,6 +82,8 @@ class UIConnector implements uProxy.UIAPI {
 
   public sync = () => {
     // TODO: (the interface may change)
+    console.log('sending ALL state to UI.');
+    ui.update(uProxy.Update.ALL);
   }
 
 }
@@ -120,6 +96,17 @@ var ui = new UIConnector();
 module Core {
 
   /**
+   * Logs out of all networks and resets data.
+   */
+  export var reset = () => {
+    console.log('reset');
+    for (var network in Social.networks) {
+      Social.networks[network].logout();
+    }
+    store.reset().then(ui.sync);
+  }
+
+  /**
    * Install a handler for commands received from the UI.
    */
   export var onCommand = (cmd :uProxy.Command, handler:any) => {
@@ -128,6 +115,7 @@ module Core {
 
   /**
    * Access various social networks using the Social API.
+   * TODO: write a test for this.
    */
   export var login = (networkName:string, explicit:boolean=false) => {
     var network = Social.getNetwork(networkName);
@@ -136,7 +124,7 @@ module Core {
       return;
     }
     network.login(true)
-        .then(sendFullStateToUI)
+        .then(ui.sync)
         .then(() => {
           console.log('Successfully logged in to ' + networkName);
         });
@@ -147,6 +135,7 @@ module Core {
 
   /**
    * Log-out of |networkName|.
+   * TODO: write a test for this.
    */
   export var logout = (networkName:string) : void => {
     var network = Social.getNetwork(networkName);
@@ -164,54 +153,6 @@ module Core {
     ui.syncMappings();
     // TODO: disable auto-login
     store.saveMeToStorage();
-  }
-
-  /**
-   * Send a notification about my instance data to a particular clientId.
-   * Assumes |client| corresponds to a valid uProxy instance, but does not assume
-   * that we've received the other side's instance data yet.
-   * TODO: Implement this in Core.User
-   */
-  export var sendInstance = (clientId:string) => {
-    console.warn('Core.sendInstance is deprecated Use Core.User.');
-  }
-
-  /**
-   * Primary handler for synchronizing Instance data. Updates an instance-client
-   * mapping, and emit state-changes to the UI. In no case will this function fail
-   * to generate or update an entry of the instance table.
-   * TODO: support instance being on multiple chat networks.
-   * Note: does not assume that a roster entry exists for the user that send the
-   * instance data. Sometimes we get an instance data message from user that is
-   * not (yet) in the roster.
-   * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
-   * TODO: Implement this in Core.User
-   */
-  export var receiveInstance = (rawMsg :any) : Promise<void> => {
-    console.log('receiveInstance from ' + rawMsg.fromUserId);
-
-    var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-    var instance :Instance = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-    instance.rosterInfo = restrictKeys(
-        C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
-
-    var instanceId  = instance.instanceId;
-    var userId      = msg.fromUserId;
-    var clientId    = msg.fromClientId;
-
-    // Update the local instance information.
-    store.syncInstanceFromInstanceMessage(userId, clientId, instance);
-    return store.saveInstance(instanceId).then(() => {
-      var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
-      // If we've had relationships to this instance, send them our consent bits.
-      if (instanceOp == 'replace') {
-        sendConsent(store.state.instances[instanceId]);
-      }
-      // Update UI's view of instances and mapping.
-      // TODO: This can probably be made smaller.
-      ui.syncInstance(store.state.instances[instanceId]);
-      ui.syncMappings();
-    });
   }
 
   // Send consent bits to re-synchronize consent with remote |instance|.
@@ -575,13 +516,14 @@ function receiveUpdateDescription(msg) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-Core.onCommand(uProxy.Command.READY, sendFullStateToUI);
-Core.onCommand(uProxy.Command.RESET, reset);
+Core.onCommand(uProxy.Command.READY, ui.sync);
+Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
 Core.onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
-Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
+// TODO: UI-initiated Instance Handshakes need to be made specific to a network.
+// Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
 Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
 Core.onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
@@ -592,7 +534,7 @@ Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.saveOptionsToStorage().then(() => {;
     console.log('saved options ' + JSON.stringify(store.state.options));
     // TODO: Make this fine-grained for just the Option.
-    sendFullStateToUI();
+    ui.sync();
   });
   // TODO: Handle changes that might affect proxying.
 });

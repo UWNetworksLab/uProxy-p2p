@@ -18,14 +18,21 @@ describe('Core.User', () => {
   };
   var user :Core.User;
 
+  beforeEach(() => {
+    spyOn(ui, 'syncInstance');
+  });
+
   it('creates with the correct userId', () => {
     user = new Core.User(network, profile);
     expect(user.userId).toEqual('fakeuser');
     expect(user.name).toEqual('Alice');
   });
 
-  it('created with an empty clientId list', () => {
+  it('created with an empty client and instance tables', () => {
+    expect(user.clients).toEqual({});
+    expect(user['instances_']).toEqual({});
     expect(user['clientToInstanceMap_']).toEqual({});
+    expect(user['instanceToClientMap_']).toEqual({});
   });
 
   it('sends an instance message to newly ONLINE clients', () => {
@@ -62,7 +69,23 @@ describe('Core.User', () => {
     expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
-  it('handles DISCONNECTED client', () => {
+  it('does not send instance messages to non-uProxy clients', () => {
+    var clientState :freedom.Social.ClientState = {
+      userId: 'fakeuser',
+      clientId: 'fakeclient-not-uproxy',
+      status: freedom.Social.Status.ONLINE_WITH_OTHER_APP,
+      timestamp: 12345
+    };
+    spyOn(user, 'sendInstanceHandshake');
+    user.handleClient(clientState);
+    expect(Object.keys(user.clients).length).toEqual(1);
+    expect(Object.keys(user.clients)).toEqual([
+      'fakeclient',
+    ]);
+    expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
+  });
+
+  it('deletes DISCONNECTED client', () => {
     var clientState :freedom.Social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
@@ -70,8 +93,25 @@ describe('Core.User', () => {
       timestamp: 12346
     };
     user.handleClient(clientState);
+    expect(Object.keys(user.clients).length).toEqual(0);
+    expect(user.clients['fakeclient']).not.toBeDefined();
+  });
+
+  it('re-adds an re-sends instance message to new ONLINE clients', () => {
+    var clientState :freedom.Social.ClientState = {
+      userId: 'fakeuser',
+      clientId: 'fakeclient',
+      status: freedom.Social.Status.ONLINE,
+      timestamp: 12345
+    };
+    spyOn(user, 'sendInstanceHandshake');
+    user.handleClient(clientState);
+    expect(user.sendInstanceHandshake).toHaveBeenCalled();
     expect(Object.keys(user.clients).length).toEqual(1);
-    expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.OFFLINE);
+    expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
+    expect(Object.keys(user.clients)).toEqual([
+      'fakeclient'
+    ]);
   });
 
   it('logs an error when receiving a ClientState with wrong userId', () => {
@@ -170,7 +210,6 @@ describe('Core.User', () => {
       trust: null,
       status: null,
       description: 'fake instance',
-      notify: null
     };
     user['syncInstance_']('fakeclient', instance);
     expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
@@ -184,7 +223,6 @@ describe('Core.User', () => {
       trust: null,
       status: null,
       description: 'fake instance',
-      notify: null
     };
     // New client.
     var clientState :freedom.Social.ClientState = {
@@ -198,6 +236,31 @@ describe('Core.User', () => {
     expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
     expect(user.clientToInstance('fakeclient')).toEqual(null);
     expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
+  });
+
+  it('sends consent message if Instance already exists', () => {
+    var instance :Instance = {
+      instanceId: 'fakeinstance',
+      keyHash: null,
+      trust: null,
+      description: 'fake instance',
+    };
+    var userInstance = user.getInstance('fakeinstance');
+    expect(userInstance).toBeDefined();
+    spyOn(userInstance, 'sendConsent');
+    user['syncInstance_']('fakeclient', instance);
+    expect(userInstance.sendConsent).toHaveBeenCalled();
+  });
+
+  it('syncs UI after updating instance', () => {
+    var instance :Instance = {
+      instanceId: 'fakeinstance',
+      keyHash: null,
+      trust: null,
+      description: 'fake instance',
+    };
+    user['syncInstance_']('fakeclient', instance);
+    expect(ui.syncInstance).toHaveBeenCalled();
   });
 
 });  // uProxy.User

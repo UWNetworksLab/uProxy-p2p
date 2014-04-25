@@ -9,40 +9,7 @@
  */
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='consent.ts' />
-
-/*
-// Taken from consent.d.ts. Need to move into its own file, but not a .d.ts file
-// because there are Enums.
-module Consent {
-  // Action taken by the remote instance. These values are on the wire, so we
-  // need to distinguish the values for the remote as client vs proxy. i.e. we
-  // cannot have two enums.
-  export enum RemoteState {
-    NONE, REQUESTING, OFFERING, BOTH
-  }
-  // Action taken by the user. These values are on the wire, so we need to
-  // distinguish the values for the remote as client vs proxy. i.e. we cannot
-  // have two enums.
-  export enum UserAction {
-    // Actions made by user w.r.t. remote as a proxy, or
-    REQUEST, CANCEL_REQUEST, ACCEPT_OFFER, IGNORE_OFFER,
-    // Actions made by user w.r.t. remote as a client, or
-    OFFER, CANCEL_OFFER, ALLOW_REQUEST, IGNORE_REQUEST
-  }
-  // User-level consent state for a remote instance to be proxy client for the
-  // user.
-  export enum ClientState {
-    NONE, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
-  }
-  // User-level consent state for a remote instance to be a proxy server for the
-  // user.
-  export enum ProxyState {
-    NONE, USER_REQUESTED, REMOTE_OFFERED, USER_IGNORED_OFFER, GRANTED
-  }
-}
-*/
 /// <reference path='social.ts' />
-
 
 module Core {
 
@@ -65,11 +32,31 @@ module Core {
     constructor(
         public network :Social.Network,
         handshake : Instance) {
-      function clone(x) { return JSON.parse(JSON.stringify(x)); }
       // this.remoteProxyState = clone(data.remoteProxyState);
       // this.remoteClientState = clone(data.remoteClientState);
-      this.instanceId = handshake.instanceId;
+      this.update(handshake);
+    }
+
+    /**
+     * Send a message to this instance.
+     */
+    public send = (msg:string) => {
+    }
+
+    /**
+     * Update the information about this remote instance as a result of its
+     * Instance Message.
+     * Assumes that |data| actually belongs to this instance.
+     */
+    public update = (data :Instance) => {
       // TODO: copy the rest of the data.
+      this.instanceId = data.instanceId;
+    }
+
+    /**
+     * Send local consent bits to this remote instance.
+     */
+    public sendConsent = () => {
     }
 
     //

@@ -89,6 +89,10 @@ module Social {
     private online :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
+    // Sometimes we receive other uproxy instances before we've received our own
+    // XMPP client state, which means we cannot yet build an instance message.
+    private sendInstanceQueue_ :string[] = [];
+
     /**
      * Initialize the social provider for this Network, and attach event
      * handlers.
@@ -203,6 +207,11 @@ module Social {
     /**
      * When receiving a message from a social provider, delegate it to the correct
      * user, which will delegate to the correct client.
+     *
+     * TODO: it is possible that the roster entry does not yet exist for a user,
+     * yet we receive a message from them. Perhaps the right behavior is not to
+     * throw away those messages, but to create a place-holder user until we
+     * receive more user information.
      */
     public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
       if (!(incoming.from.userId in this.roster)) {

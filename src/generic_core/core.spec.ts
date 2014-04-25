@@ -49,25 +49,6 @@ describe('Core.receiveInstance', () => {
     spyOn(ui, 'syncInstance');
   });
 
-  it('syncs and saves new instances.', (done) => {
-    Core.receiveInstance(instanceMsg).then(() => {
-      expect(store.syncInstanceFromInstanceMessage)
-        .toHaveBeenCalledWith('alice', 'alice-clientid',
-                              instanceMsg.data);
-      var fakeInstance = state.instances['12345'];
-      expect(store.saveInstance).toHaveBeenCalledWith('12345');
-      expect(ui.syncInstance).toHaveBeenCalledWith(fakeInstance);
-    }).then(done);
-  });
-
-  it('sends consent message for a pre-existing instance', (done) => {
-    spyOn(Core, 'sendConsent');
-    Core.receiveInstance(instanceMsg).then(() => {
-      var fakeInstance = state.instances['12345'];
-      expect(Core.sendConsent).toHaveBeenCalledWith(fakeInstance);
-    }).then(done);
-  });
-
   // CLEAR STATE BEFORE FUZZ TESTS.
   state.instances = [];
 });
