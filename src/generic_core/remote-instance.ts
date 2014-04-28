@@ -40,7 +40,6 @@ module Core {
     public description   :string;
 
     public consent       :ConsentState;
-    private clientId     :string;       // TODO: Do we need this here?
     private transport    :Transport;
 
     /**
@@ -68,8 +67,8 @@ module Core {
      * messages.
      */
     public send = (msg:uProxy.Message) => {
-      // The overlay social network is responsible for mapping ourselves to the
-      // clientId.
+      // The parent User is responsible for mapping the instanceId to the
+      // correct clientId so that the social network can pass the message along.
       this.user.send(this.instanceId, msg);
     }
 

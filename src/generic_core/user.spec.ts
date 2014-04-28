@@ -8,10 +8,11 @@ describe('Core.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
-      'send',
+      // 'send',
       'sendInstanceHandshake',
       'getLocalInstanceId'
   ]);
+  network['send'] = () => {};
 
   var profile :freedom.Social.UserProfile = {
     name: 'Alice',
@@ -19,6 +20,7 @@ describe('Core.User', () => {
     timestamp: 456
   };
   var user :Core.User;
+  var instance :Core.RemoteInstance;
 
   beforeEach(() => {
     spyOn(console, 'log');
@@ -140,7 +142,7 @@ describe('Core.User', () => {
     };
   }
 
-  describe('communications', () => {
+  describe('handlers', () => {
 
     it('handles an INSTANCE message', () => {
       spyOn(user, 'syncInstance_');
@@ -207,21 +209,22 @@ describe('Core.User', () => {
 
   });  // describe communications
 
-  describe('client <---> instance', () => {
+  var instanceData :Instance = {
+    instanceId: 'fakeinstance',
+    keyHash: null,
+    status: null,
+    description: 'fake instance',
+  };
 
-    var instanceData :Instance = {
-      instanceId: 'fakeinstance',
-      keyHash: null,
-      status: null,
-      description: 'fake instance',
-    };
-    var instance :Core.RemoteInstance;
+  describe('client <---> instance', () => {
 
     beforeEach(() => {
       if (instance) {
         spyOn(instance, 'update');
         spyOn(instance, 'send');
       }
+      // Don't test reconnection promises in this sub-suite.
+      spyOn(user, 'fulfillReconnection_');
     });
 
     it('syncs clientId <--> instanceId mapping', () => {
@@ -242,7 +245,6 @@ describe('Core.User', () => {
         status: freedom.Social.Status.ONLINE,
         timestamp: 12345
       };
-      // spyOn(instance, 'update');
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
@@ -253,11 +255,10 @@ describe('Core.User', () => {
     });
 
     it('sends consent message if Instance already exists', () => {
-      var userInstance = user.getInstance('fakeinstance');
-      expect(userInstance).toBeDefined();
-      spyOn(userInstance, 'sendConsent');
+      expect(instance).toBeDefined();
+      spyOn(instance, 'sendConsent');
       user['syncInstance_']('fakeclient', instanceData);
-      expect(userInstance.sendConsent).toHaveBeenCalled();
+      expect(instance.sendConsent).toHaveBeenCalled();
     });
 
     it('syncs UI after updating instance', () => {
@@ -266,5 +267,135 @@ describe('Core.User', () => {
     });
 
   });  // describe client <---> instance
+
+  it('warns when sending message to non-existing instanceId', () => {
+    // console.warn.calls.reset();
+    user.send('nobody', null);
+    expect(console.warn).toHaveBeenCalledWith(
+        'Cannot send message to non-existing instance nobody');
+  });
+
+  describe('instance sending promises', () => {
+
+    var msg :uProxy.Message = {
+      type: uProxy.MessageType.INSTANCE,
+      data: 'foo'
+    };
+    var reconnect = null;
+    var reconnected = false;
+
+    beforeEach(() => {
+      // Pretend that Social.Network.send always returns a successful promise.
+      spyOn(network, 'send').and.returnValue(Promise.resolve());
+      if (instance) {
+        spyOn(instance, 'update');
+        spyOn(instance, 'send');
+      }
+    })
+
+    it('sending message to online instanceId fulfills promise with clientId',
+        (done) => {
+      instance = user.getInstance('fakeinstance');
+      user.send('fakeinstance', msg).then((clientId) => {
+        expect(clientId).toEqual('fakeclient');
+      }).then(done);
+    });
+
+    var reconnectPromise;
+
+    it('sending message to offline instanceId prepares reconnection promise',
+        () => {
+      user['removeClient_']('fakeclient');
+      user['removeClient_']('fakeclient2');
+      expect(Object.keys(user.clients).length).toEqual(0);
+      expect(user.clients['fakeclient']).not.toBeDefined();
+      reconnectPromise = user.send('fakeinstance', msg).then((clientId) => {
+        expect(clientId).toEqual('newclient');
+        reconnected = true;
+      });
+      reconnect = user['reconnections_']['fakeinstance'];
+      expect(reconnect.promise).toBeDefined();
+      expect(reconnect.fulfill).toBeDefined();
+    });
+
+    it('delivers pending messages & fulfills with new client ID on reconnect',
+        (done) => {
+      spyOn(user, 'fulfillReconnection_').and.callThrough();
+      spyOn(user, 'syncInstance_').and.callThrough();
+      // Simulate a full reconnection to a new client.
+      var clientState = {
+        userId: 'fakeuser',
+        clientId: 'newclient',
+        status: freedom.Social.Status.ONLINE,
+        timestamp: 12345
+      };
+      user.handleClient(clientState);
+      user.handleMessage({
+        from: clientState,
+        message: JSON.stringify({
+          type: uProxy.MessageType.INSTANCE,
+          data: instanceData
+        })
+      });
+      expect(user['fulfillReconnection_']).toHaveBeenCalled();
+      expect(reconnectPromise).toBeDefined();
+      reconnectPromise.then(() => {
+        expect(reconnected).toEqual(true);
+        expect(network.send).toHaveBeenCalledWith('newclient', {
+          type: uProxy.MessageType.INSTANCE,
+          data: 'foo'
+        });
+      }).then(done);
+    });
+
+    it('round-trip future delivery of multiple pending messages', (done) => {
+      var n = 10;
+      var messages = [];
+      var promises = [];
+      // Disconnect the client.
+      user.handleClient({
+        userId: 'fakeuser',
+        clientId: 'newclient',
+        status: freedom.Social.Status.OFFLINE,
+        timestamp: 12345
+      });
+      expect(user.clients['newclient']).not.toBeDefined();
+      for (var i = 0 ; i < n ; ++i) {
+        promises.push(user.send('fakeinstance', <uProxy.Message>{
+          type: uProxy.MessageType.INSTANCE,
+          data: i
+        }));
+      }
+      expect(Object.keys(user['reconnections_']).length).toEqual(1);
+      var newClientState = {
+        userId: 'fakeuser',
+        clientId: 'even-newer-client',
+        status: freedom.Social.Status.ONLINE,
+        timestamp: 12345
+      };
+      user.handleClient(newClientState);
+      user.handleMessage({
+        from: newClientState,
+        message: JSON.stringify({
+          type: uProxy.MessageType.INSTANCE,
+          data: instanceData
+        })
+      });
+      // Expect all reconnections and messages to fire and become empty.
+      Promise.all(promises).then((vals) => {
+        expect(network.send.calls.count()).toEqual(n);
+        var sum = 0;
+        for (var i = 0 ; i < n ; ++i) {
+          // Ensure each message sent correctly.
+          var args = network.send.calls.argsFor(i);
+          expect(args[0]).toEqual('even-newer-client');
+          sum += parseInt(args[1].data);
+        }
+        expect(sum).toEqual(n * (n - 1) / 2);
+        expect(user['reconnections_']).toEqual({});
+      }).then(done);
+    });
+
+  });  // describe instance sending promises
 
 });  // uProxy.User

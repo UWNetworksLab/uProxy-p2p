@@ -28,6 +28,11 @@
 
 module Core {
 
+  interface InstanceReconnection {
+    promise :Promise<string>;  // Fulfilled with new clientID upon reconnection.
+    fulfill :Function;         // Call fulfill when instance reconnects.
+  }
+
   /**
    * Core.User
    *
@@ -35,6 +40,8 @@ module Core {
    * Maintains a mapping between a User's clientIds and instanceIds, while
    * handling messages from its social provider to keep connection status,
    * instance messages, and consent up-to-date.
+   *
+   * NOTE: Deals with communications purely in terms of instanceIds.
    */
   export class User implements BaseUser {
 
@@ -44,6 +51,12 @@ module Core {
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
+
+    // Sometimes, sending messages to an instance fails because the client
+    // corresponding to the instance has gone offline. In that case, we save a
+    // promise for the next connection of that instance, for the future delivery
+    // of that message.
+    private reconnections_ :{ [instanceId :string] :InstanceReconnection };
 
     /**
      * Users are constructed when receiving a :UserProfile message from the
@@ -57,6 +70,7 @@ module Core {
       this.userId = profile.userId;
       this.clients = {};
       this.instances_ = {};
+      this.reconnections_ = {};
       // TODO: Decide whether to contain the image, etc.
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
@@ -87,13 +101,28 @@ module Core {
         return Promise.reject(new Error('no instance'));
       }
       var clientId = this.instanceToClientMap_[instanceId];
+      var promise = Promise.resolve(clientId);
       if (!clientId) {
-        return new Promise((F, R) => {
-          // TODO: fulfill and send once the instance gains a client.
-        });
+        // If this instance is currently offline...
+        if (!this.reconnections_[instanceId]) {
+          // Prepares a reconnection promise if necessary,
+          promise = new Promise<string>((F, R) => {
+            this.reconnections_[instanceId] = {
+              promise: promise,
+              fulfill: F
+            }
+          });
+        } else {
+          // or access the existing one, to attach the pending message to.
+          promise = this.reconnections_[instanceId].promise;
+        }
       }
-      return this.network.send(clientId, payload).then(() => {
-        return clientId;
+      return <Promise<string>>promise.then((clientId) => {
+        // clientId may have changed by the time this promise fulfills.
+        clientId = this.instanceToClientMap_[instanceId];
+        return this.network.send(clientId, payload).then(() => {
+          return clientId;
+        });
       });
     }
 
@@ -204,6 +233,7 @@ module Core {
       // Create or update the Instance object.
       var existingInstance = this.instances_[instanceId];
       if (existingInstance) {
+        this.fulfillReconnection_(instanceId);
         existingInstance.update(instance);
         // Send consent, if we have had past relationships with this instance.
         existingInstance.sendConsent();
@@ -232,6 +262,22 @@ module Core {
     }
 
     /**
+     * Fulfill the reconnection (delivers pending messages) if it's there.
+     */
+    private fulfillReconnection_ = (instanceId:string) => {
+      var newClientId = this.instanceToClientMap_[instanceId];
+      if (!newClientId) {
+        console.warn('Expected valid new clientId for ' + instanceId);
+      }
+      var reconnect:InstanceReconnection = this.reconnections_[instanceId];
+      if (reconnect) {
+        reconnect.fulfill(newClientId);
+      }
+      // TODO: Make sure this doesn't affect multiple .thens().
+      delete this.reconnections_[instanceId];
+    }
+
+    /**
      * Maintain a mapping between clientIds and instanceIds.
      */
     public clientToInstance = (clientId :string) : string => {
@@ -248,7 +294,7 @@ module Core {
      */
     private removeClient_ = (clientId:string) => {
       delete this.clients[clientId];
-      var instanceId = this.instanceToClientMap_[clientId];
+      var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
         delete this.instanceToClientMap_[instanceId];
       }
