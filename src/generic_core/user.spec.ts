@@ -43,9 +43,8 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
-    expect(user.sendInstanceHandshake).toHaveBeenCalled();
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([
@@ -54,6 +53,7 @@ describe('Core.User', () => {
   });
 
   it('does not re-send instance messages to the same client', () => {
+    network.sendInstanceHandshake.calls.reset();
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
     var clientState :freedom.Social.ClientState = {
       userId: 'fakeuser',
@@ -61,29 +61,28 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient'
     ]);
-    expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
+    expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
   it('does not send instance messages to non-uProxy clients', () => {
+    network.sendInstanceHandshake.calls.reset();
     var clientState :freedom.Social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient-not-uproxy',
       status: freedom.Social.Status.ONLINE_WITH_OTHER_APP,
       timestamp: 12345
     };
-    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient',
     ]);
-    expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
+    expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
   it('deletes DISCONNECTED client', () => {
@@ -105,9 +104,8 @@ describe('Core.User', () => {
       status: freedom.Social.Status.ONLINE,
       timestamp: 12345
     };
-    spyOn(user, 'sendInstanceHandshake');
     user.handleClient(clientState);
-    expect(user.sendInstanceHandshake).toHaveBeenCalled();
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(Object.keys(user.clients).length).toEqual(1);
     expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([

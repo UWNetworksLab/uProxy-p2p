@@ -83,10 +83,6 @@ module Core {
       this.network.send(instanceId, payload);
     }
 
-    public sendInstanceHandshake = (clientId:string) => {
-      this.network.sendInstanceHandshake(clientId);
-    }
-
     /**
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
@@ -101,12 +97,12 @@ module Core {
         return;
       }
       var clientIsNew = !(client.clientId in this.clients);
-      // Send an instance message to newly ONLINE remote uProxy clients.
       switch (client.status) {
+        // Send an instance message to newly ONLINE remote uProxy clients.
         case freedom.Social.Status.ONLINE:
           this.clients[client.clientId] = client.status;
           if (clientIsNew) {
-            this.sendInstanceHandshake(client.clientId);
+            this.network.sendInstanceHandshake(client.clientId);
           }
           break;
         case freedom.Social.Status.OFFLINE:

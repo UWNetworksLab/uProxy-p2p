@@ -3,11 +3,24 @@
 
 describe('Core.LocalInstance', () => {
 
+  var instance :Core.LocalInstance;
+
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+  });
+
   it('initializes with valid id, description, and keyhash', () => {
-    var instance = new Core.LocalInstance();
+    instance = new Core.LocalInstance();
     expect(instance.instanceId).toBeDefined();
     expect(instance.description).toBeDefined();
     expect(instance.keyHash).toBeDefined();
+  });
+
+  it('provides an instance handshake', () => {
+    var id = instance['instanceId'];
+    var handshake = instance.getInstanceHandshake();
+    expect(handshake.instanceId).toEqual(id);
   });
 
   // TODO: more specs.

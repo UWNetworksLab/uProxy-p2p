@@ -260,6 +260,9 @@ module Social {
       this.roster[incoming.from.userId].handleMessage(incoming);
     }
 
+    /**
+     * Returns the User corresponding to |userId|.
+     */
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
@@ -267,30 +270,30 @@ module Social {
     /**
      * Generate my instance message, to send to other uProxy installations, to
      * inform them that we're also a uProxy installation to interact with.
-     *
-     * However, we can only build the instance message if we've
-     * received an onClientState event for ourself, to populate at least one
-     * identity.
      */
-    private prepareInstanceHandshake_ = () : uProxy.Message => {
+    private getInstanceHandshake_ = () : uProxy.Message => {
       return {
         type: uProxy.MessageType.INSTANCE,
-        data: this.myClient
+        data: this.myInstance.getInstanceHandshake()
       }
     }
 
     /**
      * Notify remote uProxy installation that we are also a uProxy installation.
      *
-     * Sends this network's instance handshake to a target clientId. This is one
-     * of the few cases where we send directly to a clientId instead of an
-     * instanceId - because there is not yet a known instanceId.
+     * Sends this network's instance handshake to a target clientId.
+     * Assumes that clientId is ONLINE.
+     *
+     * NOTE: This is one of the few cases where we send a Message directly to a
+     * |clientId| rather than |instanceId|. This is because there is not yet a
+     * known instanceId, and also because this is internal to Social.Network
+     * mechanics.
      */
     public sendInstanceHandshake = (clientId:string) : void => {
-      // Only send to clientId if it's known to be ONLINE.
-      // TODO: Fix the null once we've created our own instance mesage.
-      var instanceMessage = 'please-implement-me';
-      this.api.sendMessage(clientId, instanceMessage);
+      // TODO: Should we memoize the instance handshake, or calculate it fresh
+      // each time?
+      var handshake = this.getInstanceHandshake_();
+      this.send_(clientId, handshake);
     }
 
     /**
@@ -303,14 +306,14 @@ module Social {
       if (0 === this.instanceMessageQueue_.length) {
         return;  // Don't need to do anything.
       }
-      var instancePayload = JSON.stringify(this.prepareInstanceHandshake_());
+      var instancePayload = this.getInstanceHandshake_();
       if (!instancePayload) {
         console.error('Still not ready to construct instance payload.');
         return false;
       }
       this.instanceMessageQueue_.forEach((clientId:string) => {
         console.log('Sending queued instance message to: ' + clientId + '.');
-        this.api.sendMessage(clientId, instancePayload);
+        this.send_(clientId, instancePayload);
       });
       this.instanceMessageQueue_ = [];
       return true;
@@ -318,13 +321,12 @@ module Social {
 
     /**
      * Send a message to one particular instance. Returns promise of the send.
-     * Assumes the instance exists.
-     * TODO: make this real and test it.
+     * Assumes the instance exists (i.e. has an ONLINE clientId associated).
      */
-    send = (instanceId:string, message:uProxy.Message) : Promise<void> => {
+    public send = (instanceId:string, msg:uProxy.Message) : Promise<void> => {
       console.log('[To be implemented] Network.send(' +
-                  instanceId + '): ' + message);
-      var str = JSON.stringify(message);
+                  instanceId + '): ' + msg);
+      var str = JSON.stringify(msg);
       return new Promise<void>((F, R) => {
         // if (freedom.Social.Status.ONLINE === this.state.status) {
           // this.network.api.sendMessage(this.clientId, message)
@@ -335,6 +337,15 @@ module Social {
       });
     }
 
+    /**
+     * Private send method sends directly to the clientId, because that is what
+     * the social provides deal with.
+     */
+    private send_ = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+      var msgString = JSON.stringify(msg);
+      // TODO: implement
+      return new Promise<void>((F, R) => {});
+    }
 
   }  // class Social.Network
 

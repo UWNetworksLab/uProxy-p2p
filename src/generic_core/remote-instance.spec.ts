@@ -22,6 +22,11 @@ describe('Core.RemoteInstance', () => {
   var tmpClientConsent :Consent.ClientState;
   var tmpProxyConsent :Consent.ProxyState;
 
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+  });
+
   it('constructs from a received Instance Handshake', () => {
 
     var handshake :Instance = {

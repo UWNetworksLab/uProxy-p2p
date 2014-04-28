@@ -54,9 +54,8 @@ describe('Social.Network', () => {
         status: freedom.Social.Status.ONLINE,
         timestamp: 12345
       }
-      spyOn(network['api'], 'login').and.callFake(() => {
-        return Promise.resolve(fakeSuccessClient);
-      });
+      spyOn(network['api'], 'login').and.returnValue(
+          Promise.resolve(fakeSuccessClient));
       spyOn(network, 'notifyUI');
       network.login().then(() => {
         expect(network['myClient']).toEqual(fakeSuccessClient);
@@ -67,10 +66,9 @@ describe('Social.Network', () => {
 
     it('warns if network login fails', (done) => {
       network['online'] = false;
-      spyOn(network['api'], 'login').and.callFake(() => {
-        // Pretend the social API's login failed.
-        return Promise.reject(new Error('mock failure'));
-      });
+      // Pretend the social API's login failed.
+      spyOn(network['api'], 'login').and.returnValue(
+          Promise.reject(new Error('mock failure')));
       spyOn(network, 'notifyUI');
       network.login().then(() => {
         expect(console.warn).toHaveBeenCalledWith('Could not login to mock');
@@ -90,9 +88,8 @@ describe('Social.Network', () => {
 
     it('can logout', (done) => {
       network['online'] = true;
-      spyOn(network['api'], 'logout').and.callFake(() => {
-        return Promise.resolve();
-      });
+      // Pretend the social API's logout succeeded.
+      spyOn(network['api'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network['myClient']).toEqual(null);
@@ -204,5 +201,17 @@ describe('Social.Network', () => {
     });
 
   });  // describe events & communication
+
+  it('sends instance handshake', () => {
+    spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
+      'fake-instance-handshake');
+    spyOn(network, 'send_');
+    network.sendInstanceHandshake('fakeclient');
+    expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
+    expect(network['send_']).toHaveBeenCalledWith('fakeclient', {
+        type: uProxy.MessageType.INSTANCE,
+        data: 'fake-instance-handshake'
+    });
+  });
 
 });
