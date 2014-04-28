@@ -205,10 +205,10 @@ describe('Social.Network', () => {
   it('sends instance handshake', () => {
     spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
       'fake-instance-handshake');
-    spyOn(network, 'send_');
+    spyOn(network, 'send');
     network.sendInstanceHandshake('fakeclient');
     expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
-    expect(network['send_']).toHaveBeenCalledWith('fakeclient', {
+    expect(network.send).toHaveBeenCalledWith('fakeclient', {
         type: uProxy.MessageType.INSTANCE,
         data: 'fake-instance-handshake'
     });

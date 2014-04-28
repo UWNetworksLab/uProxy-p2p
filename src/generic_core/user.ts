@@ -52,7 +52,7 @@ module Core {
      */
     constructor(private network :Social.Network,
                 private profile :freedom.Social.UserProfile) {
-      // console.log('New user: ' + profile.userId);
+      console.log('New user: ' + profile.userId);
       this.name = profile.name;
       this.userId = profile.userId;
       this.clients = {};
@@ -73,14 +73,28 @@ module Core {
     /**
      * Send a message to an Instance belonging to this user.
      * Warns if instanceId does not exist on this user.
+     * If the instanceId does exist, but is currently offline (i.e. has no
+     * client associated), then it delays the send until the next time that
+     * instance becomes online using promises.
+     *
+     * Returns a promise that the message was sent to the instanceId, fulfilled
+     * with the clientId of the recipient.
      */
-    public send = (instanceId :string, payload :uProxy.Message) => {
+    public send = (instanceId :string, payload :uProxy.Message)
+        : Promise<string> => {
       if (!(instanceId in this.instances_)) {
         console.warn('Cannot send message to non-existing instance ' + instanceId);
-        return;
+        return Promise.reject(new Error('no instance'));
       }
-      // TODO: Use the send method off the Instance object, once it exists.
-      this.network.send(instanceId, payload);
+      var clientId = this.instanceToClientMap_[instanceId];
+      if (!clientId) {
+        return new Promise((F, R) => {
+          // TODO: fulfill and send once the instance gains a client.
+        });
+      }
+      return this.network.send(clientId, payload).then(() => {
+        return clientId;
+      });
     }
 
     /**
@@ -158,6 +172,13 @@ module Core {
     }
 
     /**
+     * Helper which returns the local user's instance ID.
+     */
+    public getLocalInstanceId = () : string => {
+      return this.network.getLocalInstanceId();
+    }
+
+    /**
      * Synchronize with new remote instance data, update the instance-client
      * mapping, save to storage, and update the UI.
      * Assumes the clientId associated with this instance is valid and belongs
@@ -186,8 +207,9 @@ module Core {
         existingInstance.update(instance);
         // Send consent, if we have had past relationships with this instance.
         existingInstance.sendConsent();
+      } else {
+        this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
       }
-      this.instances_[instanceId] = new Core.RemoteInstance(this.network, instance);
 
       ui.syncInstance(store.state.instances[instanceId]);
       ui.syncMappings();

@@ -24,10 +24,14 @@ module Core {
   /**
    * RemoteInstance - represents a remote uProxy installation.
    *
+   * These remote instances are semi-permanent, and belong only to one user.
+   * They can be online or offline depending on if they are associated with a
+   * client. Interface-wise, this class is only aware of its parent User, and
+   * does not have any direct interaction with the network it belongs to.
+   *
    * There are two pathways to modifying the consent of this remote instance.
    * - Locally, via a user command from the UI.
    * - Remotely, via consent bits sent over the wire by a friend.
-   *
    */
   export class RemoteInstance implements Instance {
 
@@ -45,8 +49,8 @@ module Core {
      * values.
      */
     constructor(
-        public network :Social.Network,
-        handshake      :Instance) {
+        public user :Core.User,  // The User which this instance belongs to.
+        handshake   :Instance) {
       this.consent = {
         asClient: Consent.ClientState.NONE,
         asProxy:  Consent.ProxyState.NONE
@@ -59,13 +63,14 @@ module Core {
      * currently not reachable. (Its client went offline, and a new one may show
      * up in the future)
      *
-     * TODO: Implement queueing. First we need to know that the social API's
-     * sendMessage propogates error messages.
+     * TODO: Implement queueing using promises.
+     * First we need to know that the social API's sendMessage propogates error
+     * messages.
      */
     public send = (msg:uProxy.Message) => {
       // The overlay social network is responsible for mapping ourselves to the
       // clientId.
-      this.network.send(this.instanceId, msg);
+      this.user.send(this.instanceId, msg);
     }
 
     /**
@@ -134,7 +139,7 @@ module Core {
       var consentPayload :uProxy.Message = {
         type: uProxy.MessageType.CONSENT,
         data: <ConsentMessage>{
-          instanceId: null, //TODO /.me.instanceId,  // local uProxy instance id.
+          instanceId: this.user.getLocalInstanceId(),
           consent: this.getConsentBits()
         }
       };

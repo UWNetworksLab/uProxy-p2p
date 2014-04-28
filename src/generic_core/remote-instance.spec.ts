@@ -12,10 +12,9 @@
 describe('Core.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
-  var network = jasmine.createSpyObj('network', [
-      'api',
+  var user = <Core.User><any>jasmine.createSpyObj('user', [
       'send',
-      'sendInstanceHandshake'
+      'getLocalInstanceId'
   ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
@@ -34,7 +33,7 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    instance = new Core.RemoteInstance(network, handshake);
+    instance = new Core.RemoteInstance(user, handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
   });
 
@@ -60,6 +59,10 @@ describe('Core.RemoteInstance', () => {
   });
 
   describe('local consent towards remote proxy', () => {
+
+    beforeEach(() => {
+      spyOn(instance, 'sendConsent');
+    });
 
     it('can request access, and cancel that request', () => {
       instance.modifyConsent(Consent.UserAction.REQUEST);
@@ -93,18 +96,21 @@ describe('Core.RemoteInstance', () => {
           .toEqual(Consent.ProxyState.REMOTE_OFFERED);
     });
 
-    it('invalid transitions do not modify consent', () => {
-      spyOn(console, 'warn');
-      instance.consent.asProxy = Consent.ProxyState.NONE;
-      instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
-      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
-      instance.modifyConsent(Consent.UserAction.ACCEPT_OFFER);
-      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
-      instance.modifyConsent(Consent.UserAction.IGNORE_OFFER);
-      expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
-      expect(console.warn).toHaveBeenCalled();
+    afterEach(() => {
+      expect(instance.sendConsent).toHaveBeenCalled();
     });
 
+  });
+
+  it('invalid proxy transitions do not modify consent', () => {
+    instance.consent.asProxy = Consent.ProxyState.NONE;
+    instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+    expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
+    instance.modifyConsent(Consent.UserAction.ACCEPT_OFFER);
+    expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
+    instance.modifyConsent(Consent.UserAction.IGNORE_OFFER);
+    expect(instance.consent.asProxy).toEqual(Consent.ProxyState.NONE);
+    expect(console.warn).toHaveBeenCalled();
   });
 
   it('proxy consent modifications did not touch client consent', () => {
@@ -113,6 +119,10 @@ describe('Core.RemoteInstance', () => {
   });
 
   describe('local consent towards remote client', () => {
+
+    beforeEach(() => {
+      spyOn(instance, 'sendConsent');
+    });
 
     it('can offer access, and cancel that offer', () => {
       instance.modifyConsent(Consent.UserAction.OFFER);
@@ -146,18 +156,21 @@ describe('Core.RemoteInstance', () => {
           .toEqual(Consent.ClientState.REMOTE_REQUESTED);
     });
 
-    it('invalid transitions do not modify consent', () => {
-      spyOn(console, 'warn');
-      instance.consent.asClient = Consent.ClientState.NONE;
-      instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
-      expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
-      instance.modifyConsent(Consent.UserAction.ALLOW_REQUEST);
-      expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
-      instance.modifyConsent(Consent.UserAction.IGNORE_REQUEST);
-      expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
-      expect(console.warn).toHaveBeenCalled();
+    afterEach(() => {
+      expect(instance.sendConsent).toHaveBeenCalled();
     });
 
+  });
+
+  it('invalid client transitions do not modify consent', () => {
+    instance.consent.asClient = Consent.ClientState.NONE;
+    instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+    expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
+    instance.modifyConsent(Consent.UserAction.ALLOW_REQUEST);
+    expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
+    instance.modifyConsent(Consent.UserAction.IGNORE_REQUEST);
+    expect(instance.consent.asClient).toEqual(Consent.ClientState.NONE);
+    expect(console.warn).toHaveBeenCalled();
   });
 
   it('client consent modifications did not touch proxy consent', () => {
@@ -256,12 +269,12 @@ describe('Core.RemoteInstance', () => {
   });
 
   it('two remote instances establish mutual consent', () => {
-    var alice = new Core.RemoteInstance(network, {
+    var alice = new Core.RemoteInstance(user, {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(network, {
+    var bob = new Core.RemoteInstance(user, {
       instanceId: 'instance-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',

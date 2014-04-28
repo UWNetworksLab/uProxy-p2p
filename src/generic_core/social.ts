@@ -79,6 +79,10 @@ module Social {
    * NOTE: All JSON stringify / parse happens automatically through the
    * network's communication methods. The rest of the code should deal purely
    * with the data objects.
+   *
+   * Furthermore, at the Social.Network level, all communications deal directly
+   * with the clientIds. This is because instanceIds occur at the User level, as
+   * the User manages the instance <--> client mappings. (see 'user.ts')
    */
   export class Network {
 
@@ -268,6 +272,13 @@ module Social {
     }
 
     /**
+     * Helper which returns the local user's instance ID on this network.
+     */
+    public getLocalInstanceId = () : string => {
+      return this.myInstance.instanceId;
+    }
+
+    /**
      * Generate my instance message, to send to other uProxy installations, to
      * inform them that we're also a uProxy installation to interact with.
      */
@@ -293,7 +304,7 @@ module Social {
       // TODO: Should we memoize the instance handshake, or calculate it fresh
       // each time?
       var handshake = this.getInstanceHandshake_();
-      this.send_(clientId, handshake);
+      this.send(clientId, handshake);
     }
 
     /**
@@ -313,38 +324,19 @@ module Social {
       }
       this.instanceMessageQueue_.forEach((clientId:string) => {
         console.log('Sending queued instance message to: ' + clientId + '.');
-        this.send_(clientId, instancePayload);
+        this.send(clientId, instancePayload);
       });
       this.instanceMessageQueue_ = [];
       return true;
     }
 
     /**
-     * Send a message to one particular instance. Returns promise of the send.
-     * Assumes the instance exists (i.e. has an ONLINE clientId associated).
-     */
-    public send = (instanceId:string, msg:uProxy.Message) : Promise<void> => {
-      console.log('[To be implemented] Network.send(' +
-                  instanceId + '): ' + msg);
-      var str = JSON.stringify(msg);
-      return new Promise<void>((F, R) => {
-        // if (freedom.Social.Status.ONLINE === this.state.status) {
-          // this.network.api.sendMessage(this.clientId, message)
-              // .then(F);
-        // } else {
-          // R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
-        // }
-      });
-    }
-
-    /**
      * Private send method sends directly to the clientId, because that is what
      * the social provides deal with.
      */
-    private send_ = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);
-      // TODO: implement
-      return new Promise<void>((F, R) => {});
+      return this.api.sendMessage(clientId, msgString);
     }
 
   }  // class Social.Network
