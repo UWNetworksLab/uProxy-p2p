@@ -90,6 +90,8 @@ module Social {
                             // and object... cannot typescript.
 
     // Information about the local login.
+    // |myClient| should exist whilst logged in, and should be null whilst
+    // logged out.
     private myClient   :freedom.Social.ClientState;
     private myInstance :Core.LocalInstance;
     private online     :boolean;
@@ -111,6 +113,7 @@ module Social {
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
+      // TODO(keroserene):
       // Load local instance from storage, or create a new one if this is the
       // first time this uProxy installation, on this device, has interacted
       // with this network.
@@ -128,11 +131,15 @@ module Social {
     }
 
     /**
-     * Wrapper around logging-in to the social-provider, and updating the local
-     * state upon success.
-     * TODO: test this.
+     * Wrapper around logging-in to the social-provider. Updates the local
+     * client information, and send an update to the UI upon success. Does
+     * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
+      if (this.online) {
+        console.warn('Already logged in to ' + this.name);
+        return Promise.resolve();
+      }
       var request :freedom.Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -144,12 +151,24 @@ module Social {
         // Upon successful login, save local client information.
         this.online = true;
         this.myClient = client;
-      }).then(this.notifyUI);
+      }).then(this.notifyUI)
+        .catch(() => {
+          console.warn('Could not login to ' + this.name);
+        });
     }
 
+    /**
+     * Wrapper around logging-out of the social provider. Does nothing if
+     * already logged-out.
+     */
     public logout = () : Promise<void> => {
+      if (!this.online) {
+        console.warn('Already logged out of ' + this.name);
+        return Promise.resolve();
+      }
       return this.api.logout().then(() => {
         this.online = false;
+        this.myClient = null;
         console.log(this.name + ': logged out.');
       }).then(this.notifyUI);
     }
