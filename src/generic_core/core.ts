@@ -29,39 +29,13 @@ declare var store :Core.State;  // From start-uproxy.ts.
 // this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
-// Client is used to manage a peer connection to a contact that will proxy our
-// connection. This module listens on a localhost port and forwards requests
-// through the peer connection.
+// The socks-rtc client and server allows us to proxy through / for other uProxy
+// peers. See [https://github.com/uProxy/socks-rtc] for more information.
 var client = freedom['SocksToRtc']();
-
-// Server allows us to act as a proxy for our contacts.
-// Server module; listens for peer connections and proxies their requests
-// through the peer connection.
 var server = freedom['RtcToNet']();
+// The Core's responsibility is to pass messages across the signalling
+// channel using the User / Instance mechanisms.
 
-// Sometimes we receive other uproxy instances before we've received our own
-// XMPP onChange notification, which means we cannot yet build an instance
-// message.
-var _sendInstanceQueue = [];
-var _memoizedInstanceMessage = null;
-
-// --------------------------------------------------------------------------
-//  General UI interaction
-// --------------------------------------------------------------------------
-function sendFullStateToUI() {
-  console.log('sending ALL state to UI.');
-  ui.update(uProxy.Update.ALL);
-}
-
-
-// Logs out of networks and resets data.
-function reset() {
-  console.log('reset');
-  for (var network in Social.networks) {
-    Social.networks[network].logout();
-  }
-  store.reset().then(sendFullStateToUI);
-}
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -74,7 +48,6 @@ class UIConnector implements uProxy.UIAPI {
     switch(type) {
       case uProxy.Update.ALL:
         console.log('update [ALL]', store.state);
-        // data = store.state;
         var networkName :string;
         for (networkName in Social.networks) {
           Social.networks[networkName].notifyUI();
@@ -108,6 +81,8 @@ class UIConnector implements uProxy.UIAPI {
 
   public sync = () => {
     // TODO: (the interface may change)
+    console.log('sending ALL state to UI.');
+    ui.update(uProxy.Update.ALL);
   }
 
 }
@@ -120,6 +95,17 @@ var ui = new UIConnector();
 module Core {
 
   /**
+   * Logs out of all networks and resets data.
+   */
+  export var reset = () => {
+    console.log('reset');
+    for (var network in Social.networks) {
+      Social.networks[network].logout();
+    }
+    store.reset().then(ui.sync);
+  }
+
+  /**
    * Install a handler for commands received from the UI.
    */
   export var onCommand = (cmd :uProxy.Command, handler:any) => {
@@ -128,6 +114,7 @@ module Core {
 
   /**
    * Access various social networks using the Social API.
+   * TODO: write a test for this.
    */
   export var login = (networkName:string, explicit:boolean=false) => {
     var network = Social.getNetwork(networkName);
@@ -136,7 +123,7 @@ module Core {
       return;
     }
     network.login(true)
-        .then(sendFullStateToUI)
+        .then(ui.sync)
         .then(() => {
           console.log('Successfully logged in to ' + networkName);
         });
@@ -147,6 +134,7 @@ module Core {
 
   /**
    * Log-out of |networkName|.
+   * TODO: write a test for this.
    */
   export var logout = (networkName:string) : void => {
     var network = Social.getNetwork(networkName);
@@ -167,144 +155,34 @@ module Core {
   }
 
   /**
-   * Send a notification about my instance data to a particular clientId.
-   * Assumes |client| corresponds to a valid uProxy instance, but does not assume
-   * that we've received the other side's instance data yet.
-   * TODO: Implement this in Core.User
+   * Update user's description of their current device. This applies to all
+   * local instances for every network the user is currently logged onto. Those
+   * local instances will then propogate their description update to all
+   * instances.
    */
-  export var sendInstance = (clientId:string) => {
-    console.warn('Core.sendInstance is deprecated Use Core.User.');
+  export var updateDescription = (description:string) => {
+    for (var network in Social.networks) {
+      var myself = Social.networks[network].getLocalInstance();
+      myself.updateDescription(description);
+    }
   }
 
   /**
-   * Primary handler for synchronizing Instance data. Updates an instance-client
-   * mapping, and emit state-changes to the UI. In no case will this function fail
-   * to generate or update an entry of the instance table.
-   * TODO: support instance being on multiple chat networks.
-   * Note: does not assume that a roster entry exists for the user that send the
-   * instance data. Sometimes we get an instance data message from user that is
-   * not (yet) in the roster.
-   * |rawMsg| is a DEFAULT_MESSAGE_ENVELOPE{data = DEFAULT_INSTANCE_MESSAGE}.
-   * TODO: Implement this in Core.User
+   * Modifies the local consent value as the result of a local user action.
+   * This is a distinct pathway from receiving consent bits over the wire, which
+   * is handled directly inside the relevant Social.Network.
    */
-  export var receiveInstance = (rawMsg :any) : Promise<void> => {
-    console.log('receiveInstance from ' + rawMsg.fromUserId);
-
-    var msg = restrictKeys(C.DEFAULT_MESSAGE_ENVELOPE, rawMsg);
-    var instance :Instance = restrictKeys(C.DEFAULT_INSTANCE_MESSAGE, rawMsg.data);
-    instance.rosterInfo = restrictKeys(
-        C.DEFAULT_INSTANCE_MESSAGE_ROSTERINFO, rawMsg.data.rosterInfo);
-
-    var instanceId  = instance.instanceId;
-    var userId      = msg.fromUserId;
-    var clientId    = msg.fromClientId;
-
-    // Update the local instance information.
-    store.syncInstanceFromInstanceMessage(userId, clientId, instance);
-    return store.saveInstance(instanceId).then(() => {
-      var instanceOp  = (instanceId in store.state.instances) ? 'replace' : 'add';
-      // If we've had relationships to this instance, send them our consent bits.
-      if (instanceOp == 'replace') {
-        sendConsent(store.state.instances[instanceId]);
-      }
-      // Update UI's view of instances and mapping.
-      // TODO: This can probably be made smaller.
-      ui.syncInstance(store.state.instances[instanceId]);
-      ui.syncMappings();
-    });
-  }
-
-  // Send consent bits to re-synchronize consent with remote |instance|.
-  // This happens *after* receiving an instance notification for an instance which
-  // we already have a history with.
-  // TODO: Move this into the Instance class.
-  export var sendConsent = (instance:Instance) => {
-    console.log('sendConsent[' + instance.rosterInfo.name + ']', instance);
-    var clientId = store.state.instanceToClient[instance.instanceId];
-    if (!clientId) {
-      console.error('Instance ' + instance.instanceId + ' missing clientId!');
-      return false;
+  export var modifyConsent = (command:uProxy.ConsentCommand) => {
+    // Determine which Network, User, and Instance...
+    var network = Social.getNetwork(command.network);
+    if (!network) {  // Error msg emitted above.
+      return;
     }
-    var consentPayload = JSON.stringify({
-      type: 'notify-consent',
-      instanceId: store.state.me.instanceId,            // Our own instanceId.
-      consent: _determineConsent(instance.trust)  // My consent.
-    });
-    defaultNetwork.sendMessage(clientId, consentPayload);
-    return true;
-  }
-
-  // Assumes that when we receive consent there is a roster entry.
-  // But does not assume there is an instance entry for this user.
-  export var receiveConsent = (msg:any) => {
-    if (! (msg.fromUserId in store.state.roster)) {
-      console.error('msg.fromUserId (' + msg.fromUserId +
-                    ') is not in the roster');
-    }
-    var theirConsent = msg.data.consent,      // Their view of consent.
-        instanceId   = msg.data.instanceId,   // InstanceId of the sender.
-        instance     = store.getInstance(instanceId);
-    if (!instance) {
-      console.log('receiveConsent: Instance ' + instanceId + ' not found!');
-      return false;
-    }
-    // Determine my own consent bits, compare with their consent and remap.
-    var oldTrustAsProxy = instance.trust.asProxy;
-    var oldTrustAsClient = instance.trust.asClient;
-    var myConsent = _determineConsent(instance.trust);
-    instance.trust = _composeTrustFromConsent(myConsent, theirConsent);
-
-    // Apply state change notification if the trust state changed.
-    if (oldTrustAsProxy != instance.trust.asProxy ||
-        oldTrustAsClient != instance.trust.asClient) {
-      _addNotification(instanceId);
-    }
-    store.saveInstance(instanceId);
-    ui.syncInstance(instance, 'trust');
-    return true;
-  }
-
-  /**
-   * Update user's description of their current device.
-   */
-  export var updateDescription = (data) => {
-    store.state.me.description = data;  // UI side already up-to-date.
-    // TODO: save personal description to storage.
-    var payload = JSON.stringify({
-      type: 'update-description',
-      instanceId: '' + store.state.me.instanceId,
-      description: '' + store.state.me.description
-    });
-
-    // Send the new description to ALL currently online friend instances.
-    var instanceIds = Object.keys(store.state.instances);
-    instanceIds.map(toClientId)
-      .filter((clientId:string) => { return Boolean(clientId); })
-      .forEach((clientId:string) => {
-        defaultNetwork.sendMessage(clientId, payload);
-      });
-  }
-
-  /**
-   * Modify the consent value for an instance, because the user clicked on
-   * one of th consent buttons w.r.t another user.
-   * Update trust level for an instance, and possibly send a message to the client
-   * for the instance that we changed.
-   * TODO: Probably move this into the :Instance class once it exists.
-   * TODO: Type |data|.
-   */
-  export var modifyConsent = (data) => {
-    var iId = data.instanceId;
-    // Set trust level locally, then notify through XMPP if possible.
-    _updateTrust(data.instanceId, data.action, false);  // received = false
-    var clientId = toClientId(iId);
-    if (!clientId) {
-      console.log('Warning! Cannot change trust level because client ID does not ' +
-                'exist for instance ' + iId + ' - they are probably offline.');
-      return false;
-    }
-    defaultNetwork.sendMessage(clientId, JSON.stringify({type: data.action}));
-    return true;
+    var user = network.getUser(command.userId);
+    var instance = user.getInstance(command.instanceId);
+    // Set the instance's new consent levels. It will take care of sending new
+    // consent bits over the wire.
+    instance.modifyConsent(command.action);
   }
 
   /**
@@ -315,7 +193,6 @@ module Core {
   }
 
 }  // module Core
-
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
@@ -347,19 +224,19 @@ server.on('sendSignalToPeer', (data:PeerSignal) => {
 
 // --------------------------------------------------------------------------
 //  Proxying
+// TODO: Move this into Instance class.
 // --------------------------------------------------------------------------
 // Begin SDP negotiations with peer. Assumes |peer| exists.
 var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  // TODO: don't allow if we havn't given them permission :)
   var instance = store.state.instances[peerInstanceId];
   if (!instance) {
     console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
     return false;
   }
-  if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
-    console.log('Lacking permission to proxy through ' + peerInstanceId);
-    return false;
-  }
+  // if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
+    // console.log('Lacking permission to proxy through ' + peerInstanceId);
+    // return false;
+  // }
   // TODO: Cleanly disable any previous proxying session.
   instance.status.proxy = C.ProxyState.RUNNING;
   ui.syncInstance(instance, 'status');
@@ -443,87 +320,12 @@ function handleInactiveClient(msg) {
   ui.syncInstance(instance, 'status');
 }
 
-// --------------------------------------------------------------------------
-//  Trust
-// --------------------------------------------------------------------------
-// action -> target trust level.
-// TODO: Remove once the new consent stuff is in.
-var TrustOp = {
-  // If Alice |action|'s Bob, then Bob acts as the client.
-  'allow': C.Trust.YES,
-  'offer': C.Trust.OFFERED,
-  'deny': C.Trust.NO,
-  // Bob acts as the proxy.
-  'request-access': C.Trust.REQUESTED,
-  'cancel-request': C.Trust.NO,
-  'accept-offer': C.Trust.YES,
-  'decline-offer': C.Trust.NO
-};
-
-// Update trust state for a particular instance. Emits change to UI.
-// |instanceId| - instance to change the trust levels upon.
-// |action| - Trust action to execute.
-// |received| - boolean of source of this action.
-function _updateTrust(instanceId, action, received) {
-  received = received || false;
-  var asProxy = ['allow', 'deny', 'offer'].indexOf(action) < 0 ?
-      !received : received;
-  var trustValue = TrustOp[action];
-  var instance = store.state.instances[instanceId];
-  if (!instance) {
-    console.error('Cannot find instance ' + instanceId + ' for a trust change!');
-    return false;
-  }
-  if (asProxy) {
-    instance.trust.asProxy = trustValue;
-  } else {
-    instance.trust.asClient = trustValue;
-  }
-  store.saveInstance(instanceId);
-  ui.syncInstance(instance, 'trust');
-  console.log('Instance trust changed. ' + JSON.stringify(instance.trust));
-  return true;
-}
-
-function receiveTrustMessage(msgInfo) {
-  var msgType = msgInfo.data.type;
-  var clientId = msgInfo.fromClientId;
-  var instanceId = store.state.clientToInstance[clientId];
-  if (!instanceId) {
-    // TODO(uzimizu): Attach instanceId to the message and verify.
-    console.error('Could not find instance for the trust modification!');
-    return;
-  }
-  _updateTrust(instanceId, msgType, true);  // received = true
-  _addNotification(instanceId);
-}
-
-// For each direction (e.g., I proxy for you, or you proxy for me), there
-// is a logical AND of consent from both parties. If the local state for
-// trusting them to be a proxy (trust.asProxy) is Yes or Requested, we
-// consent to being their client. If the local state for trusting them to
-// be our client is Yes or Offered, we consent to being their proxy.
-function _determineConsent(trust) {
-  return { asProxy:  [C.Trust.YES, C.Trust.OFFERED].indexOf(trust.asClient) >= 0,
-           asClient: [C.Trust.YES, C.Trust.REQUESTED].indexOf(trust.asProxy) >= 0 };
-}
-
-function _composeTrustFromConsent(myConsent, theirConsent) : InstanceTrust {
-  return {
-      asProxy: theirConsent.asProxy?
-          (myConsent.asClient? C.Trust.YES : C.Trust.OFFERED) :
-          (myConsent.asClient? C.Trust.REQUESTED : C.Trust.NO),
-      asClient: theirConsent.asClient?
-          (myConsent.asProxy? C.Trust.YES : C.Trust.REQUESTED) :
-          (myConsent.asProxy? C.Trust.OFFERED : C.Trust.NO)
-  };
-}
-
 function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
   return true;
 }
 
+// TODO: Move notifications into its own service.
 // Set notification flag for Instance corresponding to |instanceId|, and also
 // set the notification flag for the userId.
 function _addNotification(instanceId:string) {
@@ -575,13 +377,14 @@ function receiveUpdateDescription(msg) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-Core.onCommand(uProxy.Command.READY, sendFullStateToUI);
-Core.onCommand(uProxy.Command.RESET, reset);
+Core.onCommand(uProxy.Command.READY, ui.sync);
+Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
 Core.onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
-Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
+// TODO: UI-initiated Instance Handshakes need to be made specific to a network.
+// Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
 Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
 Core.onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
@@ -592,7 +395,7 @@ Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.saveOptionsToStorage().then(() => {;
     console.log('saved options ' + JSON.stringify(store.state.options));
     // TODO: Make this fine-grained for just the Option.
-    sendFullStateToUI();
+    ui.sync();
   });
   // TODO: Handle changes that might affect proxying.
 });

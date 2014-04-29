@@ -33,7 +33,7 @@ class MockCore implements uProxy.CoreAPI {
   sendInstance(clientId) {
     console.log('Sending instance ID to ' + clientId);
   }
-  modifyConsent(instanceId, action) {
+  modifyConsent(command) {
     console.log('Modifying consent.');
   }
   start(instanceId) {

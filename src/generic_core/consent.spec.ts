@@ -1,262 +1,28 @@
 /**
  * consent.spec.ts
  *
- * Sometimes consent between two instances needs to be resolved after they've
- * been disconnected. This file ensures the logic for resolving the correct
- * trust values works.
+ * This spec just ensures that the various Enum types are actually defined, and
+ * distinct, once in Javascript-land.
+ *
+ * The majority of the consent-to-consent testing between peers happens at the
+ * Instance level. (See remote-instance.spec.ts)
  */
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='consent.ts' />
 
-var Trust = C.Trust;      // From constants.
+describe('Consent', () => {
 
-describe('consent', () => {
-  beforeEach(() => {
+  it('all Enums are defined in js', () => {
+    expect(Consent.UserAction).toBeDefined();
+    expect(Consent.ClientState).toBeDefined();
+    expect(Consent.ProxyState).toBeDefined();
   });
 
-  // Given Alice and Bob's consents to proxy through each other, generate the
-  // correct Trust stanzas.
-  it('composes with another consent into trust', () => {
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: false },
-        { asProxy: false, asClient: false }
-    )).toEqual({
-        asProxy: Trust.NO,
-        asClient: Trust.NO
-    });
-
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: false },
-        { asProxy: false, asClient: false }
-    )).toEqual({
-        asProxy: Trust.NO,
-        asClient: Trust.OFFERED
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: true },
-        { asProxy: false, asClient: false }
-    )).toEqual({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.NO
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: false },
-        { asProxy: true, asClient: false }
-    )).toEqual({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.NO
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: false },
-        { asProxy: false, asClient: true }
-    )).toEqual({
-        asProxy: Trust.NO,
-        asClient: Trust.REQUESTED
-    });
-
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: true },
-        { asProxy: false, asClient: false }
-    )).toEqual({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.OFFERED
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: false },
-        { asProxy: true, asClient: false }
-    )).toEqual({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.OFFERED
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: false },
-        { asProxy: false, asClient: true }
-    )).toEqual({
-        asProxy: Trust.NO,
-        asClient: Trust.YES
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: true },
-        { asProxy: true, asClient: false }
-    )).toEqual({
-        asProxy: Trust.YES,
-        asClient: Trust.NO
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: true },
-        { asProxy: false, asClient: true }
-    )).toEqual({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.REQUESTED
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: false },
-        { asProxy: true, asClient: true }
-    )).toEqual({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.REQUESTED
-    });
-
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: true },
-        { asProxy: true, asClient: false }
-    )).toEqual({
-        asProxy: Trust.YES,
-        asClient: Trust.OFFERED
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: true },
-        { asProxy: false, asClient: true }
-    )).toEqual({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.YES
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: false },
-        { asProxy: true, asClient: true }
-    )).toEqual({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.YES
-    });
-    expect(_composeTrustFromConsent(
-        { asProxy: false, asClient: true },
-        { asProxy: true, asClient: true }
-    )).toEqual({
-        asProxy: Trust.YES,
-        asClient: Trust.REQUESTED
-    });
-
-    expect(_composeTrustFromConsent(
-        { asProxy: true, asClient: true },
-        { asProxy: true, asClient: true }
-    )).toEqual({
-        asProxy: Trust.YES,
-        asClient: Trust.YES
-    });
-
-  });
-
-  // Given Alice's trust level for Bob whilst offline, pull out the boolean for
-  // only her side - whether or not she consents to being a proxy for Bob, and
-  // whether or not she consents to having Bob be her proxy. Since there are 4
-  // possible values for each direction (NO, OFFERED, REQUESTED, YES), the
-  // cross product generates 16 total combinations.
-  it('determined from trust correctly', () => {
-
-    expect(_determineConsent({
-        asProxy: Trust.NO,
-        asClient: Trust.NO
-    })).toEqual({
-        asProxy: false,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.NO
-    })).toEqual({
-        asProxy: false,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.NO
-    })).toEqual({
-        asProxy: false,
-        asClient: true
-    });
-    expect(_determineConsent({
-        asProxy: Trust.YES,
-        asClient: Trust.NO
-    })).toEqual({
-        asProxy: false,
-        asClient: true
-    });
-
-    expect(_determineConsent({
-        asProxy: Trust.NO,
-        asClient: Trust.OFFERED
-    })).toEqual({
-        asProxy: true,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.OFFERED
-    })).toEqual({
-        asProxy: true,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.OFFERED
-    })).toEqual({
-        asProxy: true,
-        asClient: true
-    });
-    expect(_determineConsent({
-        asProxy: Trust.YES,
-        asClient: Trust.OFFERED
-    })).toEqual({
-        asProxy: true,
-        asClient: true
-    });
-
-    expect(_determineConsent({
-        asProxy: Trust.NO,
-        asClient: Trust.REQUESTED
-    })).toEqual({
-        asProxy: false,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.REQUESTED
-    })).toEqual({
-        asProxy: false,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.REQUESTED
-    })).toEqual({
-        asProxy: false,
-        asClient: true
-    });
-    expect(_determineConsent({
-        asProxy: Trust.YES,
-        asClient: Trust.REQUESTED
-    })).toEqual({
-        asProxy: false,
-        asClient: true
-    });
-
-    expect(_determineConsent({
-        asProxy: Trust.NO,
-        asClient: Trust.YES
-    })).toEqual({
-        asProxy: true,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.OFFERED,
-        asClient: Trust.YES
-    })).toEqual({
-        asProxy: true,
-        asClient: false
-    });
-    expect(_determineConsent({
-        asProxy: Trust.REQUESTED,
-        asClient: Trust.YES
-    })).toEqual({
-        asProxy: true,
-        asClient: true
-    });
-    expect(_determineConsent({
-        asProxy: Trust.YES,
-        asClient: Trust.YES
-    })).toEqual({
-        asProxy: true,
-        asClient: true
-    });
+  it('all functions are defined', () => {
+    expect(Consent.userActionOnProxyState).toBeDefined();
+    expect(Consent.userActionOnClientState).toBeDefined();
+    expect(Consent.updateProxyStateFromRemoteState).toBeDefined();
+    expect(Consent.updateClientStateFromRemoteState).toBeDefined();
   });
 
 });  // consent

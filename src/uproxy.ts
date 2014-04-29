@@ -6,9 +6,9 @@
  * between the Core and the UI.
  */
 // TODO: Move the notifications somewhere better.
+/// <reference path='generic_core/consent.ts' />
 
 module uProxy {
-
 
   // --- Communications ---
 
@@ -63,6 +63,18 @@ module uProxy {
     data :Object;
   }
 
+  /**
+   * ConsentCommands are sent from the UI to the Core, to modify the consent of
+   * a :RemoteInstance in the local client. (This is not sent on the wire).
+   * This should only be associated with the Command.MODIFY_CONSENT command.
+   */
+  export interface ConsentCommand {
+    network    :string;
+    userId     :string;
+    instanceId :string;
+    action     :Consent.UserAction;
+  }
+
   // --- Core <--> UI Interfaces ---
 
   /**
@@ -80,7 +92,7 @@ module uProxy {
     // Send your own instanceId to target clientId.
     sendInstance(clientId:string):void;
 
-    modifyConsent(id:string, action:Consent.Action):void;
+    modifyConsent(command:ConsentCommand):void;
 
     // Using peer as a proxy.
     start(instanceId:string):void;
@@ -119,24 +131,10 @@ module uProxy {
     // addNotification() : void;
   }
 
-
   interface ICoreOptions {
     allowNonroutableAddresses(enabled:boolean):void;
     setStunServers(servers:string[]):void;
     setTurnServers(servers:string[]):void;
   }
-
-  // TODO: Remove this once we use the newer consent piece.
-  export module Consent {
-    export enum Action {
-      REQUEST,
-      CANCEL,
-      ACCEPT,
-      DECLINE,
-      OFFER,
-      ALLOW,
-      DENY,
-    }
-  }  // module Consent
 
 }  // module uProxy

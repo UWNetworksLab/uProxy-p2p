@@ -20,6 +20,8 @@
  * The tricky bit is that the Instance is associated not with the 'human' chat
  * client, but with the 'uProxy' non-human client.
  */
+/// <reference path='remote-instance.ts' />
+
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/user.d.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
@@ -39,7 +41,7 @@ module Core {
     public name :string;
     public userId :string;
     public clients :{ [clientId :string] :freedom.Social.Status };
-    private instances_ :{ [instanceId :string] :Instance };
+    private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
@@ -50,7 +52,7 @@ module Core {
      */
     constructor(private network :Social.Network,
                 private profile :freedom.Social.UserProfile) {
-      console.log('New user: ' + profile.userId);
+      // console.log('New user: ' + profile.userId);
       this.name = profile.name;
       this.userId = profile.userId;
       this.clients = {};
@@ -78,7 +80,7 @@ module Core {
         return;
       }
       // TODO: Use the send method off the Instance object, once it exists.
-      this.network.send(instanceId, JSON.stringify(payload));
+      this.network.send(instanceId, payload);
     }
 
     public sendInstanceHandshake = (clientId:string) => {
@@ -88,8 +90,9 @@ module Core {
     /**
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
-     * Most importantly, sends the local instance information as an 'Instance
-     * Message' to the remote client if it is known to be uProxy-enabled.
+     *  - Only adds uProxy clients to the clients table.
+     *  - Sends local instance information as an 'Instance Handshake' to the
+     *    remote client if it is known to be uProxy client.
      */
     public handleClient = (client :freedom.Social.ClientState) => {
       if (client.userId != this.userId) {
@@ -99,20 +102,27 @@ module Core {
       }
       var clientIsNew = !(client.clientId in this.clients);
       // Send an instance message to newly ONLINE remote uProxy clients.
-      if (freedom.Social.Status.ONLINE == client.status &&
-          clientIsNew) {
-        // TODO: actually implement sending an InstanceMessage from here.
-        this.sendInstanceHandshake(client.clientId);
-        // Set the instance mapping to null as opposed to undefined, to indicate
-        // that we know the client is pending its corresponding instance data.
-        // this.clientToInstanceMap_[clientId] = '';
+      switch (client.status) {
+        case freedom.Social.Status.ONLINE:
+          this.clients[client.clientId] = client.status;
+          if (clientIsNew) {
+            this.sendInstanceHandshake(client.clientId);
+          }
+          break;
+        case freedom.Social.Status.OFFLINE:
+          // Just delete OFFLINE clients, because they will never be ONLINE
+          // again as the same clientID.
+          this.removeClient_(client.clientId);
+          break;
+        case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
+          // TODO: Figure out potential invite or chat-mechanism for non-uProxy
+          // clients.
+          break;
+        default:
+          console.warn('Received client ' + client.clientId +
+              ' with invalid status: ' + client.status);
+          break;
       }
-      // TODO: just delete OFFLINE clients, because they will never be useful
-      // again. Also, test that behavior later.
-      this.clients[client.clientId] = client.status;
-
-      // case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
-        // break;
     }
 
     /**
@@ -147,23 +157,45 @@ module Core {
       }
     }
 
+    public getInstance = (instanceId:string) => {
+      return this.instances_[instanceId];
+    }
+
     /**
-     * Receive an Instance message & update the consent <--> instance mapping.
+     * Synchronize with new remote instance data, update the instance-client
+     * mapping, save to storage, and update the UI.
      * Assumes the clientId associated with this instance is valid and belongs
      * to this user.
+     * In no case will this function fail to generate or update an entry of
+     * this user's instance table.
      */
     private syncInstance_ = (clientId :string, instance :Instance) => {
-      // if (freedom.Social.Status.ONLINE !== this.clients[clientId]) {
-        // return false;
-      // }
+      if (freedom.Social.Status.ONLINE !== this.clients[clientId]) {
+        console.warn('Received an Instance Handshake from a non-uProxy client! '
+                     + clientId);
+        return false;
+      }
+      var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
         // Remove old mapping if it exists.
         this.clientToInstanceMap_[oldClientId] = null;
       }
-      this.clientToInstanceMap_[clientId] = instance.instanceId;
-      this.instanceToClientMap_[instance.instanceId] = clientId;
-      // TODO: do the rest of the sync / storage stuff.
+      this.clientToInstanceMap_[clientId] = instanceId;
+      this.instanceToClientMap_[instanceId] = clientId;
+
+      // Create or update the Instance object.
+      var existingInstance = this.instances_[instanceId];
+      if (existingInstance) {
+        existingInstance.update(instance);
+        // Send consent, if we have had past relationships with this instance.
+        existingInstance.sendConsent();
+      }
+      this.instances_[instanceId] = new Core.RemoteInstance(this.network, instance);
+
+      ui.syncInstance(store.state.instances[instanceId]);
+      ui.syncMappings();
+      // TODO: save to storage.
     }
 
     /**
@@ -171,8 +203,14 @@ module Core {
      * Assumes the instance associated with the consent message is valid and
      * belongs to this user.
      */
-    private handleConsent_ = (consent :any) => {
-      // TODO: Put the new consent code in here.
+    private handleConsent_ = (consentMessage :any) => {
+      var instanceId = consentMessage.instanceId;
+      var instance = this.instances_[instanceId];
+      if (!instance) {
+        console.warn('Cannot update consent for non-existing instance!');
+        return;
+      }
+      instance.modifyConsent(consentMessage.consent);
     }
 
     /**
@@ -187,9 +225,16 @@ module Core {
     }
 
     /**
-     * Remove a client from this User.
+     * Remove a client from this User. Also removes the client <--> instance
+     * mapping if it exists.
      */
     private removeClient_ = (clientId:string) => {
+      delete this.clients[clientId];
+      var instanceId = this.instanceToClientMap_[clientId];
+      if (instanceId) {
+        delete this.instanceToClientMap_[instanceId];
+      }
+      delete this.clientToInstanceMap_[clientId];
     }
 
   }  // class User

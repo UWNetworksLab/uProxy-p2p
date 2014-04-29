@@ -6,7 +6,6 @@
  */
 /// <reference path='constants.ts' />
 /// <reference path='util.ts' />
-/// <reference path='nouns-and-adjectives.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
@@ -81,56 +80,6 @@ module Core {
       });
     }
 
-    /**
-     * If one is running UProxy for the first time, or without any available
-     * instance data, generate an instance for oneself.
-     */
-    private generateMyInstance_ = () : Instance => {
-      var i, val, hex, id, key;
-
-      var me = cloneDeep(C.DEFAULT_LOAD_STATE.me);
-
-      // Create an instanceId if we don't have one yet.
-      // Just generate 20 random 8-bit numbers, print them out in hex.
-      //
-      // TODO: check use of randomness: why not one big random number that is
-      // serialised?
-      for (i = 0; i < 20; i++) {
-        // 20 bytes for the instance ID.  This we can keep.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-        me.instanceId = me.instanceId +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // 20 bytes for a fake key hash. TODO(mollyling): Get a real key hash.
-        val = Math.floor(Math.random() * 256);
-        hex = val.toString(16);
-
-        me.keyHash = ((i > 0)? (me.keyHash + ':') : '')  +
-            ('00'.substr(0, 2 - hex.length) + hex);
-
-        // TODO: separate this out and use full space of possible names by
-        // using the whole of the available strings.
-        if (i < 4) {
-          id = (i & 1) ? nouns[val] : adjectives[val];
-          if (me.description !== null && me.description.length > 0) {
-            me.description = me.description + ' ' + id;
-          } else {
-            me.description = id;
-          }
-        }
-      }
-      return me;
-    }
-
-    /**
-     * A simple predicate function to see if we can talk to this client.
-     * TODO: remove with the new social presence indicators.
-     */
-    public isMessageableUproxyClient = (client) => {
-      return 'messageable' == client.status;
-    }
-
     // --------------------------------------------------------------------------
     //  Users's profile for this instance
     // --------------------------------------------------------------------------
@@ -153,7 +102,9 @@ module Core {
     public loadMeFromStorage = () : Promise<any> => {
       return this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
         if (null === me) {
-          this.state.me = this.generateMyInstance_();
+          // TODO: We need to make the 'load me' specific to Networks. Actually,
+          // the state-storage class needs to be specified per network as well.
+          // this.state.me = this.generateMyInstance_();
           dbg('****** Saving new self-definition *****');
           dbg('  state.me = ' + JSON.stringify(this.state.me));
           return this.saveMeToStorage();
@@ -228,6 +179,7 @@ module Core {
      * - Check if we need to update instance information.
      * - Assumes that instance already exists for this |userId|.
      */
+    /*
     public syncInstanceFromInstanceMessage =
         (userId:string, clientId:string, data:Instance) : void => {
       var instanceId = data.instanceId;
@@ -266,6 +218,7 @@ module Core {
 
       this.syncRosterFromInstanceId(instanceId);
     }
+    */
 
     // --------------------------------------------------------------------------
     //  Loading & Saving Instances

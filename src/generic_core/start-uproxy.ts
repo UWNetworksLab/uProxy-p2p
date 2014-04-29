@@ -16,8 +16,10 @@ console.log('Uproxy backend, running in worker ' + self.location.href);
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
 var store = new Core.State();
-
 server.emit('start');
+
+// Pull the UI adapter out into its own file, and initialize here.
+declare var ui:UIConnector;
 
 // Load state from storage and when done login to relevant networks and
 // emit an total state update.
@@ -27,7 +29,7 @@ store.loadStateFromStorage().then(function () {
       Core.login(network, true);
     }
   }
-  sendFullStateToUI();
+  ui.sync();
 });
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

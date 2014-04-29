@@ -267,14 +267,9 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.SEND_INSTANCE, clientId);
   }
 
-  modifyConsent = (instanceId, action) => {
-    console.log('Modifying consent.', instanceId);
-    this.sendCommand(uProxy.Command.MODIFY_CONSENT,
-      {
-        instanceId: instanceId,
-        action: action
-      }
-    );
+  modifyConsent = (command:uProxy.ConsentCommand) => {
+    console.log('Modifying consent.', command);
+    this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
   }
 
   start = (instanceId) => {

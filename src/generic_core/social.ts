@@ -75,6 +75,10 @@ module Social {
    * Also, deals with events from the social provider. 'onUserProfile' events
    * directly affect the roster of this network, while 'onClientState' and
    * 'onMessage' are passed on to the relevant user, assuming the user exists.
+   *
+   * NOTE: All JSON stringify / parse happens automatically through the
+   * network's communication methods. The rest of the code should deal purely
+   * with the data objects.
    */
   export class Network {
 
@@ -84,10 +88,16 @@ module Social {
     private api       :freedom.Social;
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
+
     // Information about the local login.
-    private myClient :freedom.Social.ClientState;
-    private online :boolean;
+    private myClient   :freedom.Social.ClientState;
+    private myInstance :Core.LocalInstance;
+    private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+
+    // Sometimes we receive other uproxy instances before we've received our own
+    // XMPP client state, which means we cannot yet build an instance message.
+    private sendInstanceQueue_ :string[] = [];
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -101,6 +111,13 @@ module Social {
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
+      // Load local instance from storage, or create a new one if this is the
+      // first time this uProxy installation, on this device, has interacted
+      // with this network.
+      var localInstanceExists = false;
+      if (!localInstanceExists) {
+        this.myInstance = new Core.LocalInstance();
+      }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
       this.api.on('onUserProfile', this.handleUserProfile);
@@ -124,7 +141,7 @@ module Social {
         rememberLogin: remember
       }
       return this.api.login(request).then((client:freedom.Social.ClientState) => {
-        // Upon successful login, remember local client information.
+        // Upon successful login, save local client information.
         this.online = true;
         this.myClient = client;
       }).then(this.notifyUI);
@@ -135,6 +152,10 @@ module Social {
         this.online = false;
         console.log(this.name + ': logged out.');
       }).then(this.notifyUI);
+    }
+
+    public getLocalInstance = () : Core.LocalInstance => {
+      return this.myInstance;
     }
 
     /**
@@ -203,6 +224,11 @@ module Social {
     /**
      * When receiving a message from a social provider, delegate it to the correct
      * user, which will delegate to the correct client.
+     *
+     * TODO: it is possible that the roster entry does not yet exist for a user,
+     * yet we receive a message from them. Perhaps the right behavior is not to
+     * throw away those messages, but to create a place-holder user until we
+     * receive more user information.
      */
     public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
       if (!(incoming.from.userId in this.roster)) {
@@ -276,9 +302,10 @@ module Social {
      * Assumes the instance exists.
      * TODO: make this real and test it.
      */
-    send = (instanceId:string, message:string) : Promise<void> => {
+    send = (instanceId:string, message:uProxy.Message) : Promise<void> => {
       console.log('[To be implemented] Network.send(' +
                   instanceId + '): ' + message);
+      var str = JSON.stringify(message);
       return new Promise<void>((F, R) => {
         // if (freedom.Social.Status.ONLINE === this.state.status) {
           // this.network.api.sendMessage(this.clientId, message)
