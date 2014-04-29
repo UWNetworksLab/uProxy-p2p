@@ -8,7 +8,8 @@ class MockSocial {
   public login = () => {}
   public logout = () => {}
   public api = {
-    on: () => {}
+    on: () => {},
+    sendMessage: () => {}
   }
 }
 describe('Social.Network', () => {
@@ -23,6 +24,7 @@ describe('Social.Network', () => {
     // Spy / override log messages to keep test output clean.
     spyOn(console, 'log');
     spyOn(console, 'warn');
+    spyOn(console, 'error');
   });
 
   it('fails to initialize if api is not social', () => {
@@ -153,9 +155,14 @@ describe('Social.Network', () => {
       expect(user.handleClient).toHaveBeenCalledWith(clientState);
     });
 
-    it('warns if receiving ClientState with userId not in roster', () => {
-      var user = network.getUser('mockuser');
-      spyOn(user, 'handleClient');
+    it('adds placeholder when receiving ClientState with userId not in roster',
+        () => {
+      var user;
+      spyOn(network, 'getUser').and.callFake((userId) => {
+        user = network.roster[userId];
+        spyOn(user, 'handleClient');
+        return user;
+      });
       var clientState :freedom.Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
@@ -163,8 +170,7 @@ describe('Social.Network', () => {
         timestamp: 12345
       };
       network.handleClientState(clientState);
-      expect(user.handleClient).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalled();
+      expect(user.handleClient).toHaveBeenCalled();
     });
 
     it('passes |onMessage| to correct client', () => {
@@ -177,18 +183,22 @@ describe('Social.Network', () => {
           status: freedom.Social.Status.ONLINE,
           timestamp: 12345
         },
-        message: null
+        message: JSON.stringify({
+          'cats': 'meow'
+        })
       };
       network.handleMessage(msg);
-      expect(user.handleMessage).toHaveBeenCalledWith(msg);
+      expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
+        'cats': 'meow'
+      });
     });
 
-    it('warns if receiving Message with userId not in roster', () => {
+    it('adds placeholder when receiving Message with userId not in roster', () => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleMessage');
       var msg = {
         from: {
-          userId: 'im_not_here',
+          userId: 'im_still_not_here',
           clientId: 'fakeclient',
           status: freedom.Social.Status.ONLINE,
           timestamp: 12345
@@ -197,7 +207,8 @@ describe('Social.Network', () => {
       };
       network.handleMessage(msg);
       expect(user.handleMessage).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalled();
+      expect(network.getUser('im_still_not_here')).toBeDefined();
+      expect(console.warn).not.toHaveBeenCalled();
     });
 
   });  // describe events & communication

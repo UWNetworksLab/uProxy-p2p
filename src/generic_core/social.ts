@@ -204,9 +204,9 @@ module Social {
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
-      var payload :UI.UserMessage = {
+      var uiUpdate :UI.UserMessage = {  // To be sent to the UI.
         network: this.name,
-        user: profile
+        user:    profile
       };
       // Check if this is ourself.
       if (this.myClient && userId == this.myClient.userId) {
@@ -216,53 +216,66 @@ module Social {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
-        ui.update(uProxy.Update.USER_SELF, payload);
+        ui.update(uProxy.Update.USER_SELF, uiUpdate);
         return;
       }
 
       // Otherwise, this is a remote contact...
       console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
       if (!(userId in this.roster)) {
-        this.roster[userId] = new Core.User(this, profile);
-      } else {
-        this.roster[userId].update(profile);
+        this.addUser_(userId);
       }
+      this.getUser(userId).update(profile);
       // Update UI with friend's information.
-      ui.update(uProxy.Update.USER_FRIEND, payload);
+      ui.update(uProxy.Update.USER_FRIEND, uiUpdate);
     }
 
     /**
      * Handler for receiving 'onClientState' messages. Passes these messages to
      * the relevant user, which will manage its own clients.
+     *
+     * It is possible that the roster entry does not yet exist for a user,
+     * yet we receive a client state from them. In this case, create a
+     * place-holder user until we receive more user information.
      */
     public handleClientState = (client :freedom.Social.ClientState) => {
       if (!(client.userId in this.roster)) {
-        console.warn(
-            'network ' + this.name + ' received client state for unexpected ' +
-            'userId: ' + client.userId);
-        return;
+        console.log(
+            'network ' + this.name + ' received ClientState for userId: ' +
+            client.userId + ' before UserProfile.');
+        this.addUser_(client.userId);
       }
-      this.roster[client.userId].handleClient(client);
+      this.getUser(client.userId).handleClient(client);
     }
 
     /**
      * When receiving a message from a social provider, delegate it to the correct
      * user, which will delegate to the correct client.
      *
-     * TODO: it is possible that the roster entry does not yet exist for a user,
-     * yet we receive a message from them. Perhaps the right behavior is not to
-     * throw away those messages, but to create a place-holder user until we
-     * receive more user information.
+     * It is possible that the roster entry does not yet exist for a user,
+     * yet we receive a message from them. In this case, create a place-holder
+     * user until we receive more user information.
      */
     public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
-      if (!(incoming.from.userId in this.roster)) {
-        console.warn(
+      var userId = incoming.from.userId;
+      if (!(userId in this.roster)) {
+        console.log(
             'network ' + this.name + ' received message for unexpected ' +
-            'userId: ' + incoming.from.userId);
-        return;
+            'userId: ' + userId);
+        this.addUser_(userId);
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
-      this.roster[incoming.from.userId].handleMessage(incoming);
+      this.getUser(userId).handleMessage(incoming.from.clientId, msg);
+    }
+
+    /**
+     * Sometimes Network receives messages or ClientStates for userIds for which
+     * we've yet to receive a UserProfile. In any case, we can begin with an
+     * inital user.
+     */
+    private addUser_ = (userId :string) => {
+      console.log(this.name + ': added ' + userId);
+      this.roster[userId] = new Core.User(this, userId);
     }
 
     /**
@@ -327,13 +340,13 @@ module Social {
      * Helper which sends our instance handshake to a list of clients, returning
      * a promise that all handshaks have been sent.
      */
-    private sendInstanceHandshakes_ = (clientIds:string[]) : Promise<any> => {
+    private sendInstanceHandshakes_ = (clientIds:string[]) : Promise<void> => {
       var handshakes :Promise<void>[] = [];
       var handshake = this.getInstanceHandshake_();
       var cnt = clientIds.length;
       if (!handshake) {
         // TODO: Is this necessary?
-        return Promise.reject(new Error('Not ready to send handshake'));
+        throw Error('Not ready to send handshake');
       }
       clientIds.forEach((clientId:string) => {
         handshakes.push(this.send(clientId, handshake));
