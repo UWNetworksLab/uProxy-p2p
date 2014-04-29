@@ -8,17 +8,16 @@ describe('Core.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
-      // 'send',
       'sendInstanceHandshake',
       'getLocalInstanceId'
   ]);
   network['send'] = () => {};
 
-  var profile :freedom.Social.UserProfile = {
-    name: 'Alice',
-    userId: 'fakeuser',
-    timestamp: 456
-  };
+  // var profile :freedom.Social.UserProfile = {
+    // name: 'Alice',
+    // userId: 'fakeuser',
+    // timestamp: 456
+  // };
   var user :Core.User;
   var instance :Core.RemoteInstance;
 
@@ -29,9 +28,13 @@ describe('Core.User', () => {
   });
 
   it('creates with the correct userId', () => {
-    user = new Core.User(network, profile);
+    user = new Core.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
-    expect(user.name).toEqual('Alice');
+    expect(user['network']).toEqual(network);
+  });
+
+  it('creates with pending name if there was no profile', () => {
+    expect(user.name).toEqual('pending');
   });
 
   it('created with an empty client and instance tables', () => {
@@ -39,6 +42,29 @@ describe('Core.User', () => {
     expect(user['instances_']).toEqual({});
     expect(user['clientToInstanceMap_']).toEqual({});
     expect(user['instanceToClientMap_']).toEqual({});
+  });
+
+  describe('profile updates', () => {
+
+    it('updates name', () => {
+      user.update({
+        name: 'Alice',
+        userId: 'fakeuser',
+        timestamp: 42
+      });
+      expect(user.name).toEqual('Alice');
+    });
+
+    it('throws exception for unexpected userid', () => {
+      expect(() => {
+        user.update({
+          name: 'Alice',
+          userId: 'very-throwy-userid',
+          timestamp: 42
+        });
+      }).toThrow();
+    });
+
   });
 
   it('sends an instance message to newly ONLINE clients', () => {
