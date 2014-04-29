@@ -63,6 +63,11 @@ module uProxy {
     data :Object;
   }
 
+  /**
+   * ConsentCommands are sent from the UI to the Core, to modify the consent of
+   * a :RemoteInstance in the local client. (This is not sent on the wire).
+   * This should only be associated with the Command.MODIFY_CONSENT command.
+   */
   export interface ConsentCommand {
     network    :string;
     userId     :string;
