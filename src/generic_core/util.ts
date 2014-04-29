@@ -17,7 +17,7 @@
  * than 'string' or 'number'. [TS1023]
  *
  * This particular implementation does not care about accept/reject states. It
- * just provides the means for preparing th transition table.
+ * just provides the means for preparing the transition table.
  */
 class FSM<S, T> {
 
@@ -32,19 +32,30 @@ class FSM<S, T> {
     // Therefore, abuse double-casting.
     var startIndex = <number><any>start;
     var transitionIndex = <number><any>transition;
-    if (!this.table[startIndex]) {
+    if (!(startIndex in this.table)) {
       this.table[startIndex] = {};
     }
     this.table[startIndex][transitionIndex] = dest;
   }
 
+  /**
+   * Gets the destination state, given a start state and transition.
+   * If either the start state or transition don't exist on the FSM, returns
+   * null.
+   */
   public get = (start:S, transition:T) : S => {
     var startIndex = <number><any>start;
     var transitionIndex = <number><any>transition;
+    if (!(startIndex in this.table)) {
+      return null;
+    }
+    if (!(transitionIndex in this.table[startIndex])) {
+      return null;
+    }
     return this.table[startIndex][transitionIndex];
   }
 
-}
+}  // class FSM
 
 function linear_congruence_gen(prior) {
   return (1 + prior * 16807) % 2147483647;
