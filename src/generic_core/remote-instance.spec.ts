@@ -27,7 +27,6 @@ describe('Core.RemoteInstance', () => {
   });
 
   it('constructs from a received Instance Handshake', () => {
-
     var handshake :Instance = {
       instanceId: 'fakeinstance',
       keyHash:    'fakehash',
@@ -51,7 +50,6 @@ describe('Core.RemoteInstance', () => {
   });
 
   it('warns about invalid UserAction to modify consent', () => {
-    spyOn(console, 'warn');
     spyOn(instance, 'sendConsent');
     instance.modifyConsent(<Consent.UserAction>-1);
     expect(instance.sendConsent).not.toHaveBeenCalled();
@@ -251,11 +249,50 @@ describe('Core.RemoteInstance', () => {
 
   });
 
+  describe('preparing consent bits to send over the wire', () => {
+
+    it('proxy states whilst user is not requesting', () => {
+      instance.consent.asProxy = Consent.ProxyState.NONE;
+      expect(instance.getConsentBits().isRequesting).toEqual(false);
+      instance.consent.asProxy = Consent.ProxyState.REMOTE_OFFERED;
+      expect(instance.getConsentBits().isRequesting).toEqual(false);
+      instance.consent.asProxy = Consent.ProxyState.USER_IGNORED_OFFER;
+      expect(instance.getConsentBits().isRequesting).toEqual(false);
+    });
+
+    it('proxy states whilst user is requesting', () => {
+      instance.consent.asProxy = Consent.ProxyState.USER_REQUESTED;
+      expect(instance.getConsentBits().isRequesting).toEqual(true);
+      instance.consent.asProxy = Consent.ProxyState.GRANTED;
+      expect(instance.getConsentBits().isRequesting).toEqual(true);
+    });
+
+
+    it('client states whilst user is not offering', () => {
+      instance.consent.asClient = Consent.ClientState.NONE;
+      expect(instance.getConsentBits().isOffering).toEqual(false);
+      instance.consent.asClient = Consent.ClientState.REMOTE_REQUESTED;
+      expect(instance.getConsentBits().isOffering).toEqual(false);
+      instance.consent.asClient = Consent.ClientState.USER_IGNORED_REQUEST;
+      expect(instance.getConsentBits().isOffering).toEqual(false);
+    });
+
+    it('client states whilst user is offering', () => {
+      instance.consent.asClient = Consent.ClientState.USER_OFFERED;
+      expect(instance.getConsentBits().isOffering).toEqual(true);
+      instance.consent.asClient = Consent.ClientState.GRANTED;
+      expect(instance.getConsentBits().isOffering).toEqual(true);
+    });
+
+  });
+
   it('sends and receives consent bits in the same format', () => {
     var consentBits :uProxy.Message;
     spyOn(instance, 'send').and.callFake((payload) => {
       consentBits = payload;
     });
+    instance.consent.asClient = Consent.ClientState.NONE;
+    instance.consent.asProxy = Consent.ProxyState.NONE;
     instance.sendConsent();
     expect(consentBits.type).toEqual(uProxy.MessageType.CONSENT);
     var data :ConsentMessage = <ConsentMessage>consentBits.data;
