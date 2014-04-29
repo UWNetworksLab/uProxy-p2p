@@ -25,8 +25,4 @@ describe('Consent', () => {
     expect(Consent.updateClientStateFromRemoteState).toBeDefined();
   });
 
-  it('Enums have distinct values', () => {
-    expect(Consent.ClientState.NONE).not.toEqual(Consent.ProxyState.NONE);
-  });
-
 });  // consent

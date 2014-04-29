@@ -104,39 +104,38 @@ module Consent {
 //------------------------------------------------------------------------------
 // Actions by the user w.r.t. the remote instance as a proxy.
 module Consent {
-  // var t:{[proxyState:number]:{[userAction:number]:ProxyState}} = {};
-  var t = new FSM<ProxyState, UserAction>();
+  var fsm = new FSM<ProxyState, UserAction>();
   var S = ProxyState;
   var A = UserAction;
-  t.set(S.NONE,               A.REQUEST,        S.USER_REQUESTED);
-  t.set(S.USER_REQUESTED,     A.CANCEL_REQUEST, S.NONE);
-  t.set(S.REMOTE_OFFERED,     A.REQUEST,        S.GRANTED);
-  t.set(S.REMOTE_OFFERED,     A.ACCEPT_OFFER,   S.GRANTED);
-  t.set(S.REMOTE_OFFERED,     A.IGNORE_OFFER,   S.USER_IGNORED_OFFER);
-  t.set(S.USER_IGNORED_OFFER, A.ACCEPT_OFFER,   S.GRANTED);
-  t.set(S.GRANTED,            A.CANCEL_REQUEST, S.REMOTE_OFFERED);
+  fsm.set(S.NONE,               A.REQUEST,        S.USER_REQUESTED);
+  fsm.set(S.USER_REQUESTED,     A.CANCEL_REQUEST, S.NONE);
+  fsm.set(S.REMOTE_OFFERED,     A.REQUEST,        S.GRANTED);
+  fsm.set(S.REMOTE_OFFERED,     A.ACCEPT_OFFER,   S.GRANTED);
+  fsm.set(S.REMOTE_OFFERED,     A.IGNORE_OFFER,   S.USER_IGNORED_OFFER);
+  fsm.set(S.USER_IGNORED_OFFER, A.ACCEPT_OFFER,   S.GRANTED);
+  fsm.set(S.GRANTED,            A.CANCEL_REQUEST, S.REMOTE_OFFERED);
   export function userActionOnProxyState(
       action:UserAction, state:ProxyState) : ProxyState {
-    return t.get(state, action);
+    return fsm.get(state, action);
   }
 }
 
 //------------------------------------------------------------------------------
 // Actions made by the user w.r.t. remote as a client.
 module Consent {
-  var t = new FSM<ClientState, UserAction>();
+  var fsm = new FSM<ClientState, UserAction>();
   var S = ClientState;
   var A = UserAction;
-  t.set(S.NONE,                 A.OFFER,          S.USER_OFFERED);
-  t.set(S.USER_OFFERED,         A.CANCEL_OFFER,   S.NONE);
-  t.set(S.REMOTE_REQUESTED,     A.OFFER,          S.GRANTED);
-  t.set(S.REMOTE_REQUESTED,     A.ALLOW_REQUEST,  S.GRANTED);
-  t.set(S.REMOTE_REQUESTED,     A.IGNORE_REQUEST, S.USER_IGNORED_REQUEST);
-  t.set(S.USER_IGNORED_REQUEST, A.ALLOW_REQUEST,  S.GRANTED);
-  t.set(S.GRANTED,              A.CANCEL_OFFER,   S.REMOTE_REQUESTED);
+  fsm.set(S.NONE,                 A.OFFER,          S.USER_OFFERED);
+  fsm.set(S.USER_OFFERED,         A.CANCEL_OFFER,   S.NONE);
+  fsm.set(S.REMOTE_REQUESTED,     A.OFFER,          S.GRANTED);
+  fsm.set(S.REMOTE_REQUESTED,     A.ALLOW_REQUEST,  S.GRANTED);
+  fsm.set(S.REMOTE_REQUESTED,     A.IGNORE_REQUEST, S.USER_IGNORED_REQUEST);
+  fsm.set(S.USER_IGNORED_REQUEST, A.ALLOW_REQUEST,  S.GRANTED);
+  fsm.set(S.GRANTED,              A.CANCEL_OFFER,   S.REMOTE_REQUESTED);
   export function userActionOnClientState(
       action:UserAction, state:ClientState) : ClientState {
-    return t.get(state, action);
+    return fsm.get(state, action);
   }
 }
 
@@ -144,30 +143,30 @@ module Consent {
 // Update consent state of the remote as a proxy for the user given new consent
 // bits from remote.
 module Consent {
-  var t = new FSM<ProxyState, number>();
+  var fsm = new FSM<ProxyState, number>();
   // Current state    --- remoteIsOffering --->  New state
-  t.set(ProxyState.NONE,               0,        ProxyState.NONE);
-  t.set(ProxyState.NONE,               1,        ProxyState.REMOTE_OFFERED);
+  fsm.set(ProxyState.NONE,               0,        ProxyState.NONE);
+  fsm.set(ProxyState.NONE,               1,        ProxyState.REMOTE_OFFERED);
 
-  t.set(ProxyState.REMOTE_OFFERED,     0,        ProxyState.NONE);
-  t.set(ProxyState.REMOTE_OFFERED,     1,        ProxyState.REMOTE_OFFERED);
+  fsm.set(ProxyState.REMOTE_OFFERED,     0,        ProxyState.NONE);
+  fsm.set(ProxyState.REMOTE_OFFERED,     1,        ProxyState.REMOTE_OFFERED);
 
-  t.set(ProxyState.USER_REQUESTED,     0,        ProxyState.USER_REQUESTED);
-  t.set(ProxyState.USER_REQUESTED,     1,        ProxyState.GRANTED);
+  fsm.set(ProxyState.USER_REQUESTED,     0,        ProxyState.USER_REQUESTED);
+  fsm.set(ProxyState.USER_REQUESTED,     1,        ProxyState.GRANTED);
 
   // Note: to force a user to see a request they have ignored, the remote can
   // cancel their offer and offer again. At the end of the day, if someone
-  // is being too annoying, you can remove them from your contact list. Unclear
+  // is being too annoying, you can remove them from your contact lisfsm. Unclear
   // we can do better than this.
-  t.set(ProxyState.USER_IGNORED_OFFER, 0,        ProxyState.NONE);
-  t.set(ProxyState.USER_IGNORED_OFFER, 1,        ProxyState.USER_IGNORED_OFFER);
+  fsm.set(ProxyState.USER_IGNORED_OFFER, 0,        ProxyState.NONE);
+  fsm.set(ProxyState.USER_IGNORED_OFFER, 1,        ProxyState.USER_IGNORED_OFFER);
 
-  t.set(ProxyState.GRANTED,            0,        ProxyState.USER_REQUESTED);
-  t.set(ProxyState.GRANTED,            1,        ProxyState.GRANTED);
+  fsm.set(ProxyState.GRANTED,            0,        ProxyState.USER_REQUESTED);
+  fsm.set(ProxyState.GRANTED,            1,        ProxyState.GRANTED);
 
   export function updateProxyStateFromRemoteState(
       remoteState:State, state:ProxyState) : ProxyState {
-    return t.get(state, +remoteState.isOffering);
+    return fsm.get(state, +remoteState.isOffering);
   }
 }
 
@@ -175,29 +174,29 @@ module Consent {
 // Update consent state of the remote as a client for the user given new consent
 // bits from remote.
 module Consent {
-  var t = new FSM<ClientState, number>();
+  var fsm = new FSM<ClientState, number>();
   // Current state    --- remoteIsRequesting --->  New state
-  t.set(ClientState.NONE,                0,   ClientState.NONE);
-  t.set(ClientState.NONE,                1,   ClientState.REMOTE_REQUESTED);
+  fsm.set(ClientState.NONE,                0,   ClientState.NONE);
+  fsm.set(ClientState.NONE,                1,   ClientState.REMOTE_REQUESTED);
 
-  t.set(ClientState.REMOTE_REQUESTED,    0,   ClientState.NONE);
-  t.set(ClientState.REMOTE_REQUESTED,    1,   ClientState.REMOTE_REQUESTED);
+  fsm.set(ClientState.REMOTE_REQUESTED,    0,   ClientState.NONE);
+  fsm.set(ClientState.REMOTE_REQUESTED,    1,   ClientState.REMOTE_REQUESTED);
 
-  t.set(ClientState.USER_OFFERED,        0,   ClientState.USER_OFFERED);
-  t.set(ClientState.USER_OFFERED,        1,   ClientState.GRANTED);
+  fsm.set(ClientState.USER_OFFERED,        0,   ClientState.USER_OFFERED);
+  fsm.set(ClientState.USER_OFFERED,        1,   ClientState.GRANTED);
 
   // Note: to force a user to see a request they have ignored, the remote can
   // cancel their request and request again. At the end of the day, if someone
-  // is being too annoying, you can remove them from your contact list. Unclear
+  // is being too annoying, you can remove them from your contact lisfsm. Unclear
   // we can do better than this.
-  t.set(ClientState.USER_IGNORED_REQUEST,0,   ClientState.NONE);
-  t.set(ClientState.USER_IGNORED_REQUEST,1,   ClientState.USER_IGNORED_REQUEST);
+  fsm.set(ClientState.USER_IGNORED_REQUEST,0,   ClientState.NONE);
+  fsm.set(ClientState.USER_IGNORED_REQUEST,1,   ClientState.USER_IGNORED_REQUEST);
 
-  t.set(ClientState.GRANTED,             0,   ClientState.USER_OFFERED);
-  t.set(ClientState.GRANTED,             1,   ClientState.GRANTED);
+  fsm.set(ClientState.GRANTED,             0,   ClientState.USER_OFFERED);
+  fsm.set(ClientState.GRANTED,             1,   ClientState.GRANTED);
 
   export function updateClientStateFromRemoteState(
       remoteState:State, state:ClientState) : ClientState {
-    return t.get(state, +remoteState.isRequesting);
+    return fsm.get(state, +remoteState.isRequesting);
   }
 }
