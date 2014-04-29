@@ -184,23 +184,16 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
-      if (incoming.from.userId != this.userId) {
+    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+      if (!(clientId in this.clients)) {
         console.error(this.userId +
-            ' received message with unexpected userId: ' + incoming.from.userId);
+            ' received message for non-existing client: ' + clientId);
         return;
       }
-      if (!(incoming.from.clientId in this.clients)) {
-        console.error(this.userId +
-            ' received message for non-existing client: ' +
-            incoming.from.clientId);
-        return;
-      }
-      var msg :uProxy.Message = JSON.parse(incoming.message);
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(incoming.from.clientId, <Instance>msg.data);
+          this.syncInstance_(clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(msg.data);

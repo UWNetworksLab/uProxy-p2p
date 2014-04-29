@@ -156,80 +156,49 @@ describe('Core.User', () => {
     expect(console.error).toHaveBeenCalled();
   });
 
-  function makeAliceMessage(msg :uProxy.Message) :freedom.Social.IncomingMessage {
-    return {
-      from: {
-        userId: 'fakeuser',
-        clientId: 'fakeclient',
-        status: freedom.Social.Status.ONLINE,
-        timestamp: 12346
-      },
-      message: JSON.stringify(msg)
-    };
-  }
-
   describe('handlers', () => {
 
     it('handles an INSTANCE message', () => {
       spyOn(user, 'syncInstance_');
-      user.handleMessage(makeAliceMessage({
+      user.handleMessage('fakeclient', {
         type: uProxy.MessageType.INSTANCE,
         data: {
           'foo': 1
         }
-      }));
+      });
       expect(user['syncInstance_']).toHaveBeenCalled();
     });
 
     it('handles a CONSENT message', () => {
       spyOn(user, 'handleConsent_');
-      user.handleMessage(makeAliceMessage({
+      user.handleMessage('fakeclient', {
         type: uProxy.MessageType.CONSENT,
         data: {
           'bar': 2
         }
-      }));
+      });
       expect(user['handleConsent_']).toHaveBeenCalled();
     });
 
     it('errors when receiving a message with invalid MessageType', () => {
       spyOn(console, 'error');
-      user.handleMessage(makeAliceMessage({
+      user.handleMessage('fakeclient', {
         type: <uProxy.MessageType>0,
         data: {
           'baz': 3
         }
-      }));
+      });
       expect(console.error).toHaveBeenCalled();
     });
 
-    it('errors when receiving a message with wrong userId', () => {
-      var msg :freedom.Social.IncomingMessage = {
-        from: {
-          userId: 'REALLYfakeuser',
-          clientId: 'fakeclient',
-          status: freedom.Social.Status.ONLINE,
-          timestamp: 12346
-        },
-        message: 'hello'
-      };
-      spyOn(console, 'error');
-      user.handleMessage(msg);
-      expect(console.error).toHaveBeenCalled();
-    });
-
+    // TODO: Determine if we care about non-existing clients, or if we should
+    // queue and wait for the client to exist.
     it('errors when receiving a message with non-existing client', () => {
-      var msg :freedom.Social.IncomingMessage = {
-        from: {
-          userId: 'fakeuser',
-          clientId: 'REALLYfakeclient',
-          status: freedom.Social.Status.ONLINE,
-          timestamp: 12346
-        },
-        message: 'hello'
-      };
       spyOn(console, 'error');
-      user.handleMessage(msg);
+      user.handleMessage('REALLYfakeclient', {
+        type: uProxy.MessageType.CONSENT,
+        data: 'meow'
+      });
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -356,12 +325,9 @@ describe('Core.User', () => {
         timestamp: 12345
       };
       user.handleClient(clientState);
-      user.handleMessage({
-        from: clientState,
-        message: JSON.stringify({
-          type: uProxy.MessageType.INSTANCE,
-          data: instanceData
-        })
+      user.handleMessage('newclient', {
+        type: uProxy.MessageType.INSTANCE,
+        data: instanceData
       });
       expect(user['fulfillReconnection_']).toHaveBeenCalled();
       expect(reconnectPromise).toBeDefined();
@@ -400,12 +366,9 @@ describe('Core.User', () => {
         timestamp: 12345
       };
       user.handleClient(newClientState);
-      user.handleMessage({
-        from: newClientState,
-        message: JSON.stringify({
-          type: uProxy.MessageType.INSTANCE,
-          data: instanceData
-        })
+      user.handleMessage('even-newer-client', {
+        type: uProxy.MessageType.INSTANCE,
+        data: instanceData
       });
       // Expect all reconnections and messages to fire and become empty.
       Promise.all(promises).then((vals) => {
