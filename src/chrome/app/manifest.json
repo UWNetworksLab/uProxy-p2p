@@ -25,15 +25,8 @@
     "https://*.appspot.com/",
     "https://www.facebook.com/",
     "https://graph.facebook.com/",
-    "https://www.googleapis.com/*"
+    "https://www.googleapis.com/*",
+    "https://accounts.google.com/*"
   ],
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB",
-  "oauth2": {
-      "client_id": "746567772449-hkkfuprstl4uh7eedsi601c8qrpal011.apps.googleusercontent.com",
-      "scopes": [
-        "https://www.googleapis.com/auth/plus.login",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/googletalk"
-      ]
-  }
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB"
 }
