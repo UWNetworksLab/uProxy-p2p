@@ -89,7 +89,7 @@ module Social {
     public roster    :{[name:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
 
-    private api       :freedom.Social;
+    private api      :freedom.Social;
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
 
@@ -196,9 +196,11 @@ module Social {
      * Handler for receiving 'onUserProfile' messages. First, determines whether
      * the UserProfile belongs to ourselves or a remote contact. Then,
      * updates / adds the user data to the roster.
-     * Note that our own Instance Message is specific to one particular network,
-     * and can only be prepared after receiving our own vcard for the first
-     * time.
+     *
+     * NOTE: Our own 'Instance Handshake' is specific to this particular
+     * network, and can only be prepared after receiving our own vcard for the
+     * first time.
+     * TODO: Check if the above statement on vcard is actually true.
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
@@ -221,7 +223,6 @@ module Social {
       // Otherwise, this is a remote contact...
       console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
       if (!(userId in this.roster)) {
-        // console.log('Received new UserProfile: ' + userId);
         this.roster[userId] = new Core.User(this, profile);
       } else {
         this.roster[userId].update(profile);
@@ -283,6 +284,8 @@ module Social {
      * inform them that we're also a uProxy installation to interact with.
      */
     private getInstanceHandshake_ = () : uProxy.Message => {
+      // TODO: Should we memoize the instance handshake, or calculate it fresh
+      // each time?
       return {
         type: uProxy.MessageType.INSTANCE,
         data: this.myInstance.getInstanceHandshake()
@@ -300,11 +303,8 @@ module Social {
      * known instanceId, and also because this is internal to Social.Network
      * mechanics.
      */
-    public sendInstanceHandshake = (clientId:string) : void => {
-      // TODO: Should we memoize the instance handshake, or calculate it fresh
-      // each time?
-      var handshake = this.getInstanceHandshake_();
-      this.send(clientId, handshake);
+    public sendInstanceHandshake = (clientId:string) : Promise<void> => {
+      return this.sendInstanceHandshakes_([clientId]);
     }
 
     /**
@@ -315,19 +315,32 @@ module Social {
      */
     public flushQueuedInstanceMessages = () => {
       if (0 === this.instanceMessageQueue_.length) {
-        return;  // Don't need to do anything.
+        return Promise.resolve();  // Don't need to do anything.
       }
-      var instancePayload = this.getInstanceHandshake_();
-      if (!instancePayload) {
-        console.error('Still not ready to construct instance payload.');
-        return false;
+      return this.sendInstanceHandshakes_(this.instanceMessageQueue_)
+          .then(() => {
+            this.instanceMessageQueue_ = [];
+          });
+    }
+
+    /**
+     * Helper which sends our instance handshake to a list of clients, returning
+     * a promise that all handshaks have been sent.
+     */
+    private sendInstanceHandshakes_ = (clientIds:string[]) : Promise<any> => {
+      var handshakes :Promise<void>[] = [];
+      var handshake = this.getInstanceHandshake_();
+      var cnt = clientIds.length;
+      if (!handshake) {
+        // TODO: Is this necessary?
+        return Promise.reject(new Error('Not ready to send handshake'));
       }
-      this.instanceMessageQueue_.forEach((clientId:string) => {
-        console.log('Sending queued instance message to: ' + clientId + '.');
-        this.send(clientId, instancePayload);
+      clientIds.forEach((clientId:string) => {
+        handshakes.push(this.send(clientId, handshake));
+      })
+      return Promise.all(handshakes).then(() => {
+        console.log('Sent ' + cnt + ' instance handshake(s).');
       });
-      this.instanceMessageQueue_ = [];
-      return true;
     }
 
     /**

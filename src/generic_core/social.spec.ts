@@ -42,7 +42,7 @@ describe('Social.Network', () => {
 
   it('initializes with a LocalInstance', () => {
     expect(network['myInstance']).toBeDefined();
-    // TODO: Expect a local instance handshake message to be prepared too.
+    expect(network['getInstanceHandshake_']()).toBeDefined();
   });
 
   describe('login & logout', () => {
@@ -202,16 +202,17 @@ describe('Social.Network', () => {
 
   });  // describe events & communication
 
-  it('sends instance handshake', () => {
+  it('sends instance handshake', (done) => {
     spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
       'fake-instance-handshake');
-    spyOn(network, 'send');
-    network.sendInstanceHandshake('fakeclient');
-    expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
-    expect(network.send).toHaveBeenCalledWith('fakeclient', {
-        type: uProxy.MessageType.INSTANCE,
-        data: 'fake-instance-handshake'
-    });
+    spyOn(network, 'send').and.returnValue(Promise.resolve());
+    network.sendInstanceHandshake('fakeclient').then(() => {
+      expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
+      expect(network.send).toHaveBeenCalledWith('fakeclient', {
+          type: uProxy.MessageType.INSTANCE,
+          data: 'fake-instance-handshake'
+      });
+    }).then(done);
   });
 
 });
