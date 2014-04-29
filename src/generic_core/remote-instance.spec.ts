@@ -46,6 +46,14 @@ describe('Core.RemoteInstance', () => {
     instance.consent.asProxy = Consent.ProxyState.NONE;
   });
 
+  it('warns about invalid UserAction to modify consent', () => {
+    spyOn(console, 'warn');
+    spyOn(instance, 'sendConsent');
+    instance.modifyConsent(<Consent.UserAction>-1);
+    expect(instance.sendConsent).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('Invalid Consent.UserAction! -1');
+  });
+
   describe('local consent towards remote proxy', () => {
 
     it('can request access, and cancel that request', () => {

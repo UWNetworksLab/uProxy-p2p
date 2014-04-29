@@ -11,7 +11,7 @@
 
 interface ConsentState {
   asClient :Consent.ClientState;
-  asProxy :Consent.ProxyState;
+  asProxy  :Consent.ProxyState;
 }
 
 interface ConsentMessage {
@@ -33,7 +33,6 @@ module Core {
 
     public instanceId    :string;
     public keyHash       :string
-    //socialConnection : SocialConnection;
     public description   :string;
 
     public consent       :ConsentState;
@@ -47,10 +46,10 @@ module Core {
      */
     constructor(
         public network :Social.Network,
-        handshake : Instance) {
+        handshake      :Instance) {
       this.consent = {
         asClient: Consent.ClientState.NONE,
-        asProxy: Consent.ProxyState.NONE
+        asProxy:  Consent.ProxyState.NONE
       };
       this.update(handshake);
     }
@@ -118,6 +117,9 @@ module Core {
             return;
           }
           break;
+        default:
+          console.warn('Invalid Consent.UserAction! ' + action);
+          return;
       }
       // Send new consent bits to the remote client.
       this.sendConsent();
@@ -165,33 +167,9 @@ module Core {
       };
     }
 
-    // getJSON() {
-      // return {
-        // remoteProxyState: this.remoteProxyState,
-        // remoteClientState: this.remoteClientState,
-        // instanceId: this.instanceId,
-        // transport: this.transport.getJson(),
-        //socialConnection: this.socialConnection_.getJson()
-      // }
-    // }
   }  // class Core.RemoteInstance
 
   // TODO: Implement obfuscation.
   export enum ObfuscationType {NONE, RANDOM1 }
-
-  // TODO: Determine if we need this JSON format.
-  // Json format for a remote instance.
-  export interface InstanceJson {
-    // instanceId, unique.
-    instanceId : string;
-    //
-    remoteProxyState : Consent.ProxyState;
-    remoteClientState : Consent.ClientState;
-
-    // Json for the social connection.
-    //socialConnection : SocialConnection.Json;
-    // Json for the transport provided by the instance.
-    transport : Transport.Json;
-  }
 
 }  // module Core
