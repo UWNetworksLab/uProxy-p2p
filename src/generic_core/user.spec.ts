@@ -12,12 +12,6 @@ describe('Core.User', () => {
       'getLocalInstanceId'
   ]);
   network['send'] = () => {};
-
-  // var profile :freedom.Social.UserProfile = {
-    // name: 'Alice',
-    // userId: 'fakeuser',
-    // timestamp: 456
-  // };
   var user :Core.User;
   var instance :Core.RemoteInstance;
 

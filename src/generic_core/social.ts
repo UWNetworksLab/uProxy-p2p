@@ -101,10 +101,6 @@ module Social {
     private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
-    // Sometimes we receive other uproxy instances before we've received our own
-    // XMPP client state, which means we cannot yet build an instance message.
-    private sendInstanceQueue_ :string[] = [];
-
     /**
      * Initialize the social provider for this Network, and attach event
      * handlers.
@@ -357,8 +353,15 @@ module Social {
     }
 
     /**
-     * Private send method sends directly to the clientId, because that is what
-     * the social provides deal with.
+     * Send a message to a remote client.
+     *
+     * Assumes that |clientId| is valid. Social.Network does not manually manage
+     * lists of clients or instances. (That is handled in user.ts, which calls
+     * Network.send after doing the validation checks itself.)
+     *
+     * Still, it is expected that if there is a problem, such as the clientId
+     * being invalid / offline, the promise returned from the social provider
+     * will reject.
      */
     public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);

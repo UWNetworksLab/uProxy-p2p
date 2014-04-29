@@ -113,7 +113,7 @@ describe('Social.Network', () => {
 
   });  // describe login & logout
 
-  describe('events & communication', () => {
+  describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', () => {
       expect(Object.keys(network.roster).length).toEqual(0);
@@ -213,17 +213,62 @@ describe('Social.Network', () => {
 
   });  // describe events & communication
 
-  it('sends instance handshake', (done) => {
-    spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
-      'fake-instance-handshake');
-    spyOn(network, 'send').and.returnValue(Promise.resolve());
-    network.sendInstanceHandshake('fakeclient').then(() => {
-      expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
-      expect(network.send).toHaveBeenCalledWith('fakeclient', {
-          type: uProxy.MessageType.INSTANCE,
-          data: 'fake-instance-handshake'
-      });
-    }).then(done);
+  describe('outgoing communications', () => {
+
+    it('calls the social provider sendMessage', () => {
+      network['api'].sendMessage = jasmine.createSpy('sendMessage');
+      var msg = {
+        type: uProxy.MessageType.CONSENT,
+        data: {
+          'doge': 'wows'
+        }
+      };
+      network.send('someclient', msg);
+      expect(network['api'].sendMessage).toHaveBeenCalledWith(
+        'someclient', '{"type":3001,"data":{"doge":"wows"}}');
+    });
+
+    it('sends instance handshake', (done) => {
+      spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
+        'fake-instance-handshake');
+      spyOn(network, 'send').and.returnValue(Promise.resolve());
+      network.sendInstanceHandshake('fakeclient').then(() => {
+        expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
+        expect(network.send).toHaveBeenCalledWith('fakeclient', {
+            type: uProxy.MessageType.INSTANCE,
+            data: 'fake-instance-handshake'
+        });
+      }).then(done);
+    });
+
+  });
+
+  it('JSON.parse and stringify messages at the right layer', () => {
+    var user = network.getUser('mockuser');
+    spyOn(user, 'handleMessage');
+    var inMsg = {
+      from: {
+        userId: 'mockuser',
+        clientId: 'fakeclient',
+        status: freedom.Social.Status.ONLINE,
+        timestamp: 12345
+      },
+      message: JSON.stringify({
+        'elephants': 'have trunks'
+      })
+    };
+    spyOn(JSON, 'parse').and.callThrough();
+    network.handleMessage(inMsg);
+    expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
+    var outMsg = {
+      type: uProxy.MessageType.CONSENT,
+      data: {
+        'tigers': 'are also cats'
+      }
+    };
+    spyOn(JSON, 'stringify').and.callThrough();
+    network.send('fakeclient', outMsg)
+    expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
   });
 
 });
