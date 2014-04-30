@@ -1,6 +1,6 @@
-// freedom-mocks.js
-/* global console: false */
-"use strict";
+/**
+ * freedom-mocks.ts
+ */
 
 function MockStorage(init_store) {
   this._store = init_store;
