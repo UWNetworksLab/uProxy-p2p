@@ -5,6 +5,7 @@
  * installation.
  */
 /// <reference path='nouns-and-adjectives.ts' />
+/// <reference path='../interfaces/instance.d.ts' />
 
 module Core {
 
@@ -35,7 +36,7 @@ module Core {
      * Just generate 20 random 8-bit numbers, print them out in hex.
      */
     public static generateInstanceID = () : string => {
-      var hex, id;
+      var hex, id = '';
       // TODO: check use of randomness: why not one big random number that is
       // serialised?
       for (var i = 0; i < 20; i++) {
@@ -87,8 +88,12 @@ module Core {
      * This method prepares the local instance's handshake, to be sent to all
      * peers, notifying them that we are a uProxy installation.
      */
-    public getInstanceHandshake = () => {
-      // TODO.
+    public getInstanceHandshake = () :InstanceHandshake => {
+      return {
+        instanceId:  this.instanceId,
+        keyHash:     this.keyHash,
+        description: this.description
+      };
     }
 
   }  // class Core.LocalInstance

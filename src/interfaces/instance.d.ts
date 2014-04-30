@@ -11,12 +11,6 @@
  */
 
 
-interface InstanceTrust {
-  asProxy  :string;
-  asClient :string;
-}
-
-
 interface RosterInfo {
   userId  :string;
   name    :string;
@@ -29,8 +23,18 @@ interface Instance {
   instanceId  :string;
   description :string;
   keyHash     :string;
-  trust       ?:InstanceTrust;  // TODO: replace with new consent piece.
   status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications
   rosterInfo  ?:RosterInfo;
+}
+
+
+/**
+ * Instance Handshakes are sent between uProxy installations to notify each
+ * other about existence.
+ */
+interface InstanceHandshake {
+  instanceId  :string;
+  keyHash     :string;
+  description ?:string;  // TODO: Determine if description is actually optional.
 }
