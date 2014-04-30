@@ -1,53 +1,69 @@
 /**
  * freedom-mocks.ts
+ *
+ * This file must be compiled independently of all other typescript in uProxy.
  */
 
-function MockStorage(init_store) {
-  this._store = init_store;
+class MockStorage {
+
+  private store_;
+
+  constructor(init_store) {
+    this.store_ = init_store;
+  }
+
+  public get = (key) => {
+    var v = this.store_[key];
+    //console.log("\n  public get(" + key + "): " + this.store_[key]);
+    return { done: (callback) => { if(callback) callback(v); } };
+  }
+
+  public set = (key, value) => {
+    this.store_[key] = value;
+    //console.log("\n  public set(" + key + "): " + this.store_[key]);
+    return { done: (callback) => { if(callback) callback(); } };
+  }
+
+  public remove = (key) => {
+    //console.log("\n  public remove(" + key + ").");
+    delete this.store_[key];
+    return { done: (callback) => { if(callback) callback(); } };
+  }
+
+  public clear = () => {
+    this.store_ = {};
+    //console.log("\n  public clear.");
+    return { done: (callback) => { if(callback) callback(); } };
+  }
+
+}  // class MockStorage
+
+class MockChannel {
+
+  public on = (eventTypeString, callback) => {
+    return null;
+  }
+
+  public emit = (eventTypeString, value) => {
+    return null;
+  }
+
 }
-MockStorage.prototype.get = function(key) {
-  var v = this._store[key];
-  //console.log("\nMockStorage.prototype.get(" + key + "): " + this._store[key]);
-  return { done: function (callback) { if(callback) callback(v); } };
-};
-MockStorage.prototype.set = function(key, value) {
-  this._store[key] = value;
-  //console.log("\nMockStorage.prototype.set(" + key + "): " + this._store[key]);
-  return { done: function (callback) { if(callback) callback(); } };
-};
-MockStorage.prototype.remove = function(key) {
-  //console.log("\nMockStorage.prototype.remove(" + key + ").");
-  delete this._store[key];
-  return { done: function (callback) { if(callback) callback(); } };
-};
-MockStorage.prototype.clear = function() {
-  this._store = {};
-  //console.log("\nMockStorage.prototype.clear.");
-  return { done: function (callback) { if(callback) callback(); } };
-};
 
-// --
-function MockChannel() {}
-MockChannel.prototype.on = function (eventTypeString, callback) {
-  return null;
-};
-MockChannel.prototype.emit = function (eventTypeString, value) {
-  return null;
-};
-
-function MockSocial() {}
-MockSocial.prototype.on = function() {}
-MockSocial.prototype.emit = function() {}
+class MockSocial {
+  public on = () => {}
+  public emit = () => {}
+}
 
 var freedom = new MockChannel();
-freedom['storage'] = function () { return new MockStorage({}); };
-var mockSocial = function () { return new MockSocial(); };
-mockSocial.api = 'social';
-mockSocial.manifest = 'I have no manifest :)';
+freedom['storage'] = () => { return new MockStorage({}); };
+var mockSocial = () => { return new MockSocial(); };
+mockSocial['api'] = 'social';
+mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['SOCIAL-websocket'] = mockSocial;
-freedom['SocksToRtc'] = function () { return new MockChannel(); };
-freedom['RtcToNet'] = function () { return new MockChannel(); };
+freedom['SocksToRtc'] = () => { return new MockChannel(); };
+freedom['RtcToNet'] = () => { return new MockChannel(); };
 
 var DEBUG = true;
 
