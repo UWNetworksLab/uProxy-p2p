@@ -100,7 +100,7 @@ module.exports = function(grunt) {
          dest: 'build/'},
         // Separately-compiled typescript for broken Enum libs.
         // TODO: Remove once social.d.ts is fixed.
-        {expand: true, cwd: 'src/scraps',
+        {expand: true, cwd: 'third_party/freedom-ts-hacks/',
          src: ['social-enum.js'],
          dest: 'build/generic_core/'}
       ]},
@@ -324,7 +324,7 @@ module.exports = function(grunt) {
       generic_core: {
         src: FILES.jasmine_helpers
             .concat([
-              'src/scraps/test/freedom-mocks.js',
+              'src/mocks/freedom-mocks.js',
               'build/uproxy.js',
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
@@ -340,8 +340,8 @@ module.exports = function(grunt) {
               'build/generic_core/start-uproxy.js'
             ]),
         options: {
-          helpers: ['src/scraps/test/example-state.jsonvar',
-                    'src/scraps/test/example-saved-state.jsonvar'],
+          helpers: ['src/mocks/data/example-state.jsonvar',
+                    'src/mocks/data/example-saved-state.jsonvar'],
           keepRunner: true,
           outfile: 'test_output/_CoreSpecRunner.html',
           specs: 'build/generic_core/**/*.spec.js'

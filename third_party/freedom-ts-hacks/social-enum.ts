@@ -1,3 +1,6 @@
+// TODO: Incorporate this file into freedom-typescript-api.
+// Reminder: Do NOT put an Enum in a d.ts file! :)
+
 // Status of a client; used for both this client (in which case it will be
 // either ONLINE or OFFLINE)
 module freedom.Social {
