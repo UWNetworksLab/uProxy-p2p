@@ -268,13 +268,6 @@ describe('Core.User', () => {
 
   });  // describe client <---> instance
 
-  it('warns when sending message to non-existing instanceId', () => {
-    // console.warn.calls.reset();
-    user.send('nobody', null);
-    expect(console.warn).toHaveBeenCalledWith(
-        'Cannot send message to non-existing instance nobody');
-  });
-
   describe('instance sending promises', () => {
 
     var msg :uProxy.Message = {
@@ -298,6 +291,13 @@ describe('Core.User', () => {
       instance = user.getInstance('fakeinstance');
       user.send('fakeinstance', msg).then((clientId) => {
         expect(clientId).toEqual('fakeclient');
+      }).then(done);
+    });
+
+    it('sending message to invalid instanceId throws error', (done) => {
+      instance = user.getInstance('fakeinstance');
+      user.send('nobody', msg).catch((e) => {
+        expect(e.message).toEqual('Cannot send to invalid instance nobody');
       }).then(done);
     });
 

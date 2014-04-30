@@ -98,7 +98,8 @@ module Core {
         : Promise<string> => {
       if (!(instanceId in this.instances_)) {
         console.warn('Cannot send message to non-existing instance ' + instanceId);
-        return Promise.reject(new Error('no instance'));
+        return Promise.reject(new Error(
+            'Cannot send to invalid instance ' + instanceId));
       }
       var clientId = this.instanceToClientMap_[instanceId];
       var promise = Promise.resolve(clientId);
@@ -268,6 +269,9 @@ module Core {
       var newClientId = this.instanceToClientMap_[instanceId];
       if (!newClientId) {
         console.warn('Expected valid new clientId for ' + instanceId);
+        // Try again next time (keep the reconnection so messages can still be
+        // sent in the future).
+        return;
       }
       var reconnect:InstanceReconnection = this.reconnections_[instanceId];
       if (reconnect) {
