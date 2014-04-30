@@ -1,3 +1,5 @@
+// TODO: Incorporate this file into freedom-typescript-api.
+// Reminder: Do NOT put an Enum in a d.ts file! :)
 var freedom;
 (function (freedom) {
     // Status of a client; used for both this client (in which case it will be

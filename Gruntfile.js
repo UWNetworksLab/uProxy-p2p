@@ -100,7 +100,7 @@ module.exports = function(grunt) {
          dest: 'build/'},
         // Separately-compiled typescript for broken Enum libs.
         // TODO: Remove once social.d.ts is fixed.
-        {expand: true, cwd: 'src/scraps',
+        {expand: true, cwd: 'third_party/freedom-ts-hacks/',
          src: ['social-enum.js'],
          dest: 'build/generic_core/'}
       ]},
@@ -263,6 +263,15 @@ module.exports = function(grunt) {
         dest: 'build/uistatic/',
       },
 
+      // mocks to help jasmine along. These typescript files must be compiled
+      // independently from the rest of the code, because otherwise there will
+      // be many 'duplicate identifiers' and similar typescript conflicts.
+      mocks: {
+        src: ['src/mocks/**/*.ts'],
+        dest: 'build/mocks/',
+        options: { basePath: 'src/mocks/' }
+      },
+
       // Compile typescript for all chrome components. This will do both the app
       // and extension in one go, along with their specs, because they all share
       // references to the same parts of uProxy. This avoids double-compiling,
@@ -324,7 +333,7 @@ module.exports = function(grunt) {
       generic_core: {
         src: FILES.jasmine_helpers
             .concat([
-              'src/scraps/test/freedom-mocks.js',
+              'build/mocks/freedom-mocks.js',
               'build/uproxy.js',
               'build/generic_core/util.js',
               'build/generic_core/nouns-and-adjectives.js',
@@ -340,8 +349,8 @@ module.exports = function(grunt) {
               'build/generic_core/start-uproxy.js'
             ]),
         options: {
-          helpers: ['src/scraps/test/example-state.jsonvar',
-                    'src/scraps/test/example-saved-state.jsonvar'],
+          helpers: ['src/mocks/data/example-state.jsonvar',
+                    'src/mocks/data/example-saved-state.jsonvar'],
           keepRunner: true,
           outfile: 'test_output/_CoreSpecRunner.html',
           specs: 'build/generic_core/**/*.spec.js'
@@ -526,6 +535,7 @@ module.exports = function(grunt) {
 
   taskManager.add('test_core', [
     'build_generic_core',
+    'typescript:mocks',
     'jasmine:generic_core'
   ]);
 

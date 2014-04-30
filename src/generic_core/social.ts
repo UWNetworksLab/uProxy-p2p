@@ -79,25 +79,27 @@ module Social {
    * NOTE: All JSON stringify / parse happens automatically through the
    * network's communication methods. The rest of the code should deal purely
    * with the data objects.
+   *
+   * Furthermore, at the Social.Network level, all communications deal directly
+   * with the clientIds. This is because instanceIds occur at the User level, as
+   * the User manages the instance <--> client mappings. (see 'user.ts')
    */
   export class Network {
 
     public roster    :{[name:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
 
-    private api       :freedom.Social;
+    private api      :freedom.Social;
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
 
     // Information about the local login.
+    // |myClient| should exist whilst logged in, and should be null whilst
+    // logged out.
     private myClient   :freedom.Social.ClientState;
     private myInstance :Core.LocalInstance;
     private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
-
-    // Sometimes we receive other uproxy instances before we've received our own
-    // XMPP client state, which means we cannot yet build an instance message.
-    private sendInstanceQueue_ :string[] = [];
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -111,6 +113,7 @@ module Social {
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
+      // TODO(keroserene):
       // Load local instance from storage, or create a new one if this is the
       // first time this uProxy installation, on this device, has interacted
       // with this network.
@@ -128,11 +131,15 @@ module Social {
     }
 
     /**
-     * Wrapper around logging-in to the social-provider, and updating the local
-     * state upon success.
-     * TODO: test this.
+     * Wrapper around logging-in to the social-provider. Updates the local
+     * client information, and send an update to the UI upon success. Does
+     * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
+      if (this.online) {
+        console.warn('Already logged in to ' + this.name);
+        return Promise.resolve();
+      }
       var request :freedom.Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -144,12 +151,24 @@ module Social {
         // Upon successful login, save local client information.
         this.online = true;
         this.myClient = client;
-      }).then(this.notifyUI);
+      }).then(this.notifyUI)
+        .catch(() => {
+          console.warn('Could not login to ' + this.name);
+        });
     }
 
+    /**
+     * Wrapper around logging-out of the social provider. Does nothing if
+     * already logged-out.
+     */
     public logout = () : Promise<void> => {
+      if (!this.online) {
+        console.warn('Already logged out of ' + this.name);
+        return Promise.resolve();
+      }
       return this.api.logout().then(() => {
         this.online = false;
+        this.myClient = null;
         console.log(this.name + ': logged out.');
       }).then(this.notifyUI);
     }
@@ -173,15 +192,17 @@ module Social {
      * Handler for receiving 'onUserProfile' messages. First, determines whether
      * the UserProfile belongs to ourselves or a remote contact. Then,
      * updates / adds the user data to the roster.
-     * Note that our own Instance Message is specific to one particular network,
-     * and can only be prepared after receiving our own vcard for the first
-     * time.
+     *
+     * NOTE: Our own 'Instance Handshake' is specific to this particular
+     * network, and can only be prepared after receiving our own vcard for the
+     * first time.
+     * TODO: Check if the above statement on vcard is actually true.
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
-      var payload :UI.UserMessage = {
+      var uiUpdate :UI.UserMessage = {  // To be sent to the UI.
         network: this.name,
-        user: profile
+        user:    profile
       };
       // Check if this is ourself.
       if (this.myClient && userId == this.myClient.userId) {
@@ -191,87 +212,108 @@ module Social {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
-        ui.update(uProxy.Update.USER_SELF, payload);
+        ui.update(uProxy.Update.USER_SELF, uiUpdate);
         return;
       }
 
       // Otherwise, this is a remote contact...
       console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
       if (!(userId in this.roster)) {
-        // console.log('Received new UserProfile: ' + userId);
-        this.roster[userId] = new Core.User(this, profile);
-      } else {
-        this.roster[userId].update(profile);
+        this.addUser_(userId);
       }
+      this.getUser(userId).update(profile);
       // Update UI with friend's information.
-      ui.update(uProxy.Update.USER_FRIEND, payload);
+      ui.update(uProxy.Update.USER_FRIEND, uiUpdate);
     }
 
     /**
      * Handler for receiving 'onClientState' messages. Passes these messages to
      * the relevant user, which will manage its own clients.
+     *
+     * It is possible that the roster entry does not yet exist for a user,
+     * yet we receive a client state from them. In this case, create a
+     * place-holder user until we receive more user information.
      */
     public handleClientState = (client :freedom.Social.ClientState) => {
       if (!(client.userId in this.roster)) {
-        console.warn(
-            'network ' + this.name + ' received client state for unexpected ' +
-            'userId: ' + client.userId);
-        return;
+        console.log(
+            'network ' + this.name + ' received ClientState for userId: ' +
+            client.userId + ' before UserProfile.');
+        this.addUser_(client.userId);
       }
-      this.roster[client.userId].handleClient(client);
+      this.getUser(client.userId).handleClient(client);
     }
 
     /**
      * When receiving a message from a social provider, delegate it to the correct
      * user, which will delegate to the correct client.
      *
-     * TODO: it is possible that the roster entry does not yet exist for a user,
-     * yet we receive a message from them. Perhaps the right behavior is not to
-     * throw away those messages, but to create a place-holder user until we
-     * receive more user information.
+     * It is possible that the roster entry does not yet exist for a user,
+     * yet we receive a message from them. In this case, create a place-holder
+     * user until we receive more user information.
      */
     public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
-      if (!(incoming.from.userId in this.roster)) {
-        console.warn(
+      var userId = incoming.from.userId;
+      if (!(userId in this.roster)) {
+        console.log(
             'network ' + this.name + ' received message for unexpected ' +
-            'userId: ' + incoming.from.userId);
-        return;
+            'userId: ' + userId);
+        this.addUser_(userId);
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
-      this.roster[incoming.from.userId].handleMessage(incoming);
+      this.getUser(userId).handleMessage(incoming.from.clientId, msg);
     }
 
+    /**
+     * Sometimes Network receives messages or ClientStates for userIds for which
+     * we've yet to receive a UserProfile. In any case, we can begin with an
+     * inital user.
+     */
+    private addUser_ = (userId :string) => {
+      console.log(this.name + ': added ' + userId);
+      this.roster[userId] = new Core.User(this, userId);
+    }
+
+    /**
+     * Returns the User corresponding to |userId|.
+     */
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
 
     /**
+     * Helper which returns the local user's instance ID on this network.
+     */
+    public getLocalInstanceId = () : string => {
+      return this.myInstance.instanceId;
+    }
+
+    /**
      * Generate my instance message, to send to other uProxy installations, to
      * inform them that we're also a uProxy installation to interact with.
-     *
-     * However, we can only build the instance message if we've
-     * received an onClientState event for ourself, to populate at least one
-     * identity.
      */
-    private prepareInstanceHandshake_ = () : uProxy.Message => {
+    private getInstanceHandshake_ = () : uProxy.Message => {
+      // TODO: Should we memoize the instance handshake, or calculate it fresh
+      // each time?
       return {
         type: uProxy.MessageType.INSTANCE,
-        data: this.myClient
+        data: this.myInstance.getInstanceHandshake()
       }
     }
 
     /**
      * Notify remote uProxy installation that we are also a uProxy installation.
      *
-     * Sends this network's instance handshake to a target clientId. This is one
-     * of the few cases where we send directly to a clientId instead of an
-     * instanceId - because there is not yet a known instanceId.
+     * Sends this network's instance handshake to a target clientId.
+     * Assumes that clientId is ONLINE.
+     *
+     * NOTE: This is one of the few cases where we send a Message directly to a
+     * |clientId| rather than |instanceId|. This is because there is not yet a
+     * known instanceId, and also because this is internal to Social.Network
+     * mechanics.
      */
-    public sendInstanceHandshake = (clientId:string) : void => {
-      // Only send to clientId if it's known to be ONLINE.
-      // TODO: Fix the null once we've created our own instance mesage.
-      var instanceMessage = 'please-implement-me';
-      this.api.sendMessage(clientId, instanceMessage);
+    public sendInstanceHandshake = (clientId:string) : Promise<void> => {
+      return this.sendInstanceHandshakes_([clientId]);
     }
 
     /**
@@ -282,40 +324,49 @@ module Social {
      */
     public flushQueuedInstanceMessages = () => {
       if (0 === this.instanceMessageQueue_.length) {
-        return;  // Don't need to do anything.
+        return Promise.resolve();  // Don't need to do anything.
       }
-      var instancePayload = JSON.stringify(this.prepareInstanceHandshake_());
-      if (!instancePayload) {
-        console.error('Still not ready to construct instance payload.');
-        return false;
-      }
-      this.instanceMessageQueue_.forEach((clientId:string) => {
-        console.log('Sending queued instance message to: ' + clientId + '.');
-        this.api.sendMessage(clientId, instancePayload);
-      });
-      this.instanceMessageQueue_ = [];
-      return true;
+      return this.sendInstanceHandshakes_(this.instanceMessageQueue_)
+          .then(() => {
+            this.instanceMessageQueue_ = [];
+          });
     }
 
     /**
-     * Send a message to one particular instance. Returns promise of the send.
-     * Assumes the instance exists.
-     * TODO: make this real and test it.
+     * Helper which sends our instance handshake to a list of clients, returning
+     * a promise that all handshaks have been sent.
      */
-    send = (instanceId:string, message:uProxy.Message) : Promise<void> => {
-      console.log('[To be implemented] Network.send(' +
-                  instanceId + '): ' + message);
-      var str = JSON.stringify(message);
-      return new Promise<void>((F, R) => {
-        // if (freedom.Social.Status.ONLINE === this.state.status) {
-          // this.network.api.sendMessage(this.clientId, message)
-              // .then(F);
-        // } else {
-          // R(new Error('Social Contact ' + this.profile.userId + ' is not online.'));
-        // }
+    private sendInstanceHandshakes_ = (clientIds:string[]) : Promise<void> => {
+      var handshakes :Promise<void>[] = [];
+      var handshake = this.getInstanceHandshake_();
+      var cnt = clientIds.length;
+      if (!handshake) {
+        // TODO: Is this necessary?
+        throw Error('Not ready to send handshake');
+      }
+      clientIds.forEach((clientId:string) => {
+        handshakes.push(this.send(clientId, handshake));
+      })
+      return Promise.all(handshakes).then(() => {
+        console.log('Sent ' + cnt + ' instance handshake(s).');
       });
     }
 
+    /**
+     * Send a message to a remote client.
+     *
+     * Assumes that |clientId| is valid. Social.Network does not manually manage
+     * lists of clients or instances. (That is handled in user.ts, which calls
+     * Network.send after doing the validation checks itself.)
+     *
+     * Still, it is expected that if there is a problem, such as the clientId
+     * being invalid / offline, the promise returned from the social provider
+     * will reject.
+     */
+    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+      var msgString = JSON.stringify(msg);
+      return this.api.sendMessage(clientId, msgString);
+    }
 
   }  // class Social.Network
 

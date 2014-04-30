@@ -28,63 +28,116 @@
 
 module Core {
 
+  interface InstanceReconnection {
+    promise :Promise<string>;  // Fulfilled with new clientID upon reconnection.
+    fulfill :Function;         // Call fulfill when instance reconnects.
+  }
+
   /**
    * Core.User
    *
    * Builts upon a freedom.Social.UserProfile.
    * Maintains a mapping between a User's clientIds and instanceIds, while
-   * handling messages from its social provider to keep connection status,
+   * handling messages from its parent network to keep connection status,
    * instance messages, and consent up-to-date.
+   *
+   * NOTE: Deals with communications purely in terms of instanceIds.
    */
   export class User implements BaseUser {
 
     public name :string;
-    public userId :string;
     public clients :{ [clientId :string] :freedom.Social.Status };
+    public profile :freedom.Social.UserProfile;
+
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
+    // Sometimes, sending messages to an instance fails because the client
+    // corresponding to the instance has gone offline. In that case, we save a
+    // promise for the next connection of that instance, for the future delivery
+    // of that message.
+    private reconnections_ :{ [instanceId :string] :InstanceReconnection };
+
     /**
-     * Users are constructed when receiving a :UserProfile message from the
-     * social provider. They maintain a reference to the social provider
-     * |network| they are associated with.
+     * Users are constructed purely on the basis of receiving a userId.
+     * They may or may not have a :UserProfile (because the Network may have
+     * received a ClientState or Message for the user, prior to receiving the
+     * UserProfile from the social provider.)
+     *
+     * In any case, a User without a name is known to be 'pending', and should
+     * not appear in the UI until actually receiving and being updated with a
+     * full UserProfile.
      */
     constructor(private network :Social.Network,
-                private profile :freedom.Social.UserProfile) {
-      // console.log('New user: ' + profile.userId);
-      this.name = profile.name;
-      this.userId = profile.userId;
+                public userId   :string) {
+      console.log('New user: ' + userId);
+      this.name = 'pending';
+      this.profile = {
+        userId: this.userId,
+        timestamp: Date.now()
+      }
       this.clients = {};
       this.instances_ = {};
-      // TODO: Decide whether to contain the image, etc.
+      this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
     }
 
     /**
      * Update the information about this user.
+     * The userId must match.
      */
-    public update = (latestProfile :freedom.Social.UserProfile) => {
-      this.name = latestProfile.name;
-      this.profile = latestProfile;
+    public update = (profile :freedom.Social.UserProfile) => {
+      if (profile.userId != this.userId) {
+        throw Error('Updating User ' + this.userId +
+                    ' with unexpected userID: ' + profile.userId);
+      }
+      this.name = profile.name;
+      this.profile = profile;
     }
 
     /**
      * Send a message to an Instance belonging to this user.
      * Warns if instanceId does not exist on this user.
+     * If the instanceId does exist, but is currently offline (i.e. has no
+     * client associated), then it delays the send until the next time that
+     * instance becomes online using promises.
+     *
+     * Returns a promise that the message was sent to the instanceId, fulfilled
+     * with the clientId of the recipient.
      */
-    public send = (instanceId :string, payload :uProxy.Message) => {
+    public send = (instanceId :string, payload :uProxy.Message)
+        : Promise<string> => {
       if (!(instanceId in this.instances_)) {
         console.warn('Cannot send message to non-existing instance ' + instanceId);
-        return;
+        return Promise.reject(new Error(
+            'Cannot send to invalid instance ' + instanceId));
       }
-      // TODO: Use the send method off the Instance object, once it exists.
-      this.network.send(instanceId, payload);
-    }
-
-    public sendInstanceHandshake = (clientId:string) => {
-      this.network.sendInstanceHandshake(clientId);
+      var clientId = this.instanceToClientMap_[instanceId];
+      var promise = Promise.resolve(clientId);
+      if (!clientId) {
+        // If this instance is currently offline...
+        if (!this.reconnections_[instanceId]) {
+          // Prepares a reconnection promise if necessary,
+          promise = new Promise<string>((F, R) => {
+            this.reconnections_[instanceId] = {
+              promise: promise,
+              fulfill: F
+            }
+          });
+        } else {
+          // or access the existing one, to attach the pending message to.
+          promise = this.reconnections_[instanceId].promise;
+        }
+      }
+      return <Promise<string>>promise.then((clientId) => {
+        // clientId may have changed by the time this promise fulfills.
+        clientId = this.instanceToClientMap_[instanceId];
+        return this.network.send(clientId, payload).then(() => {
+          return clientId;
+        });
+      });
     }
 
     /**
@@ -101,12 +154,12 @@ module Core {
         return;
       }
       var clientIsNew = !(client.clientId in this.clients);
-      // Send an instance message to newly ONLINE remote uProxy clients.
       switch (client.status) {
+        // Send an instance message to newly ONLINE remote uProxy clients.
         case freedom.Social.Status.ONLINE:
           this.clients[client.clientId] = client.status;
           if (clientIsNew) {
-            this.sendInstanceHandshake(client.clientId);
+            this.network.sendInstanceHandshake(client.clientId);
           }
           break;
         case freedom.Social.Status.OFFLINE:
@@ -131,23 +184,16 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
-      if (incoming.from.userId != this.userId) {
+    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+      if (!(clientId in this.clients)) {
         console.error(this.userId +
-            ' received message with unexpected userId: ' + incoming.from.userId);
+            ' received message for non-existing client: ' + clientId);
         return;
       }
-      if (!(incoming.from.clientId in this.clients)) {
-        console.error(this.userId +
-            ' received message for non-existing client: ' +
-            incoming.from.clientId);
-        return;
-      }
-      var msg :uProxy.Message = JSON.parse(incoming.message);
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(incoming.from.clientId, <Instance>msg.data);
+          this.syncInstance_(clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(msg.data);
@@ -159,6 +205,13 @@ module Core {
 
     public getInstance = (instanceId:string) => {
       return this.instances_[instanceId];
+    }
+
+    /**
+     * Helper which returns the local user's instance ID.
+     */
+    public getLocalInstanceId = () : string => {
+      return this.network.getLocalInstanceId();
     }
 
     /**
@@ -187,11 +240,13 @@ module Core {
       // Create or update the Instance object.
       var existingInstance = this.instances_[instanceId];
       if (existingInstance) {
+        this.fulfillReconnection_(instanceId);
         existingInstance.update(instance);
         // Send consent, if we have had past relationships with this instance.
         existingInstance.sendConsent();
+      } else {
+        this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
       }
-      this.instances_[instanceId] = new Core.RemoteInstance(this.network, instance);
 
       ui.syncInstance(store.state.instances[instanceId]);
       ui.syncMappings();
@@ -214,6 +269,25 @@ module Core {
     }
 
     /**
+     * Fulfill the reconnection (delivers pending messages) if it's there.
+     */
+    private fulfillReconnection_ = (instanceId:string) => {
+      var newClientId = this.instanceToClientMap_[instanceId];
+      if (!newClientId) {
+        console.warn('Expected valid new clientId for ' + instanceId);
+        // Try again next time (keep the reconnection so messages can still be
+        // sent in the future).
+        return;
+      }
+      var reconnect:InstanceReconnection = this.reconnections_[instanceId];
+      if (reconnect) {
+        reconnect.fulfill(newClientId);
+      }
+      // TODO: Make sure this doesn't affect multiple .thens().
+      delete this.reconnections_[instanceId];
+    }
+
+    /**
      * Maintain a mapping between clientIds and instanceIds.
      */
     public clientToInstance = (clientId :string) : string => {
@@ -230,7 +304,7 @@ module Core {
      */
     private removeClient_ = (clientId:string) => {
       delete this.clients[clientId];
-      var instanceId = this.instanceToClientMap_[clientId];
+      var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
         delete this.instanceToClientMap_[instanceId];
       }

@@ -25,7 +25,8 @@ org.uproxy.loadFreedom = function() {
   setTimeout(function() {
     // Uncomment this line and use it when the npm version of freedom is updated
     // mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-freedom/content/freedom.js');
-    mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-scraps/content/freedom.js');
+    // TODO: use freedom from npm rather than scraps
+    //mozIJSSubScriptLoader.loadSubScript('chrome://uproxy-scraps/content/freedom.js');
   }, 1000);
 };
 
