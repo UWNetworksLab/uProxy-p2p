@@ -60,23 +60,12 @@ View_oauth.prototype.show = function(continuation) {
 };
 
 View_oauth.prototype.postMessage = function(args, continuation) {
-  /*
-  TODO: this function is not being invoked for login, so we are instead
-  executing login code in the AuthGoogle constructor.  We should figure
-  out what goes in this function and also get logout and manual commands working
-
-  if (this.manualDialog && args && args.cmd && 
-        (args.cmd == 'manual-send' || args.cmd == 'manual-recv')) {
-    this.manualDialog.sendMessage(args);
-  } else if (this.authMan && args && args.cmd && args.cmd == 'login') {
-    this.authMan.login(args.interactive);
-  } else if (this.authMan && args && args.cmd && args.cmd == 'logout') {
-    this.authMan.logout();
+  if (args == 'logout' && this.authMan) {
+    this.authMan.logout().then(continuation);
   } else {
     console.error("Unrecognized message to core.view: " + JSON.stringify(args));
+    continuation();
   }
-  */
-  continuation();
 };
 
 View_oauth.prototype.close = function(continuation) {

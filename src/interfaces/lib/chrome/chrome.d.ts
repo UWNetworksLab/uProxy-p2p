@@ -1020,7 +1020,13 @@ declare module chrome.history {
 // Identity
 ////////////////////
 declare module chrome.identity {
+    interface LaunchWebAuthFlowArgs {
+        url :string;
+        interactive :boolean;
+    }
     var getAuthToken: (options:any, cb:(token:{})=>void)=>void;
+    var launchWebAuthFlow: (options:LaunchWebAuthFlowArgs, cb:(responseURL:string)=>void)=>void;
+    var getRedirectURL: ()=>string;
 }
 
 
