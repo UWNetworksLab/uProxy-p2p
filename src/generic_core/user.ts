@@ -38,7 +38,7 @@ module Core {
    *
    * Builts upon a freedom.Social.UserProfile.
    * Maintains a mapping between a User's clientIds and instanceIds, while
-   * handling messages from its social provider to keep connection status,
+   * handling messages from its parent network to keep connection status,
    * instance messages, and consent up-to-date.
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
@@ -46,8 +46,9 @@ module Core {
   export class User implements BaseUser {
 
     public name :string;
-    public userId :string;
     public clients :{ [clientId :string] :freedom.Social.Status };
+    public profile :freedom.Social.UserProfile;
+
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
@@ -59,29 +60,41 @@ module Core {
     private reconnections_ :{ [instanceId :string] :InstanceReconnection };
 
     /**
-     * Users are constructed when receiving a :UserProfile message from the
-     * social provider. They maintain a reference to the social provider
-     * |network| they are associated with.
+     * Users are constructed purely on the basis of receiving a userId.
+     * They may or may not have a :UserProfile (because the Network may have
+     * received a ClientState or Message for the user, prior to receiving the
+     * UserProfile from the social provider.)
+     *
+     * In any case, a User without a name is known to be 'pending', and should
+     * not appear in the UI until actually receiving and being updated with a
+     * full UserProfile.
      */
     constructor(private network :Social.Network,
-                private profile :freedom.Social.UserProfile) {
-      console.log('New user: ' + profile.userId);
-      this.name = profile.name;
-      this.userId = profile.userId;
+                public userId   :string) {
+      console.log('New user: ' + userId);
+      this.name = 'pending';
+      this.profile = {
+        userId: this.userId,
+        timestamp: Date.now()
+      }
       this.clients = {};
       this.instances_ = {};
       this.reconnections_ = {};
-      // TODO: Decide whether to contain the image, etc.
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
     }
 
     /**
      * Update the information about this user.
+     * The userId must match.
      */
-    public update = (latestProfile :freedom.Social.UserProfile) => {
-      this.name = latestProfile.name;
-      this.profile = latestProfile;
+    public update = (profile :freedom.Social.UserProfile) => {
+      if (profile.userId != this.userId) {
+        throw Error('Updating User ' + this.userId +
+                    ' with unexpected userID: ' + profile.userId);
+      }
+      this.name = profile.name;
+      this.profile = profile;
     }
 
     /**
@@ -171,23 +184,16 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
-      if (incoming.from.userId != this.userId) {
+    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+      if (!(clientId in this.clients)) {
         console.error(this.userId +
-            ' received message with unexpected userId: ' + incoming.from.userId);
+            ' received message for non-existing client: ' + clientId);
         return;
       }
-      if (!(incoming.from.clientId in this.clients)) {
-        console.error(this.userId +
-            ' received message for non-existing client: ' +
-            incoming.from.clientId);
-        return;
-      }
-      var msg :uProxy.Message = JSON.parse(incoming.message);
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(incoming.from.clientId, <Instance>msg.data);
+          this.syncInstance_(clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(msg.data);
