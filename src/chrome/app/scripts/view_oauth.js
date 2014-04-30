@@ -61,11 +61,11 @@ View_oauth.prototype.show = function(continuation) {
 
 View_oauth.prototype.postMessage = function(args, continuation) {
   if (args == 'logout' && this.authMan) {
-    this.authMan.logout();
+    this.authMan.logout().then(continuation);
   } else {
     console.error("Unrecognized message to core.view: " + JSON.stringify(args));
+    continuation();
   }
-  continuation();
 };
 
 View_oauth.prototype.close = function(continuation) {

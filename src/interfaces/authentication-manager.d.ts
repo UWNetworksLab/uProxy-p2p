@@ -8,7 +8,7 @@
 
 interface AuthenticationManager {
   login  :(interactive :boolean)=>void;
-  logout :(callback :()=>void)=>void;
+  logout :()=>Promise<void>;
   // TODO: credentials may need to change format for each XMPP network.
   credentialsCallback :(credentials :GoogleTalkCredentials)=>void;
   errorCallback :(errorText :string)=>void;

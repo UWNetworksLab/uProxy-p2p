@@ -13,7 +13,14 @@ class AuthGoogle implements AuthenticationManager {
   }
 
   public login = (interactive) => {
-    var launchLoginPopup = () => {
+    // Always logout before logging in to Google.  This is to ensure that
+    // the user always gets to pick their Google account.  If we did not
+    // call logout first, the user might be logged into a different account
+    // (possibly by another app/extension, as all apps/extensions share
+    // the same sandboxed environment used by chrome.identity.launchWebAuthFlow)
+    // and would be unable to pick the right account for UProxy.
+    // Only invoke login popup after logout has been completed (asynchronously).
+    this.logout().then(() => {
       var googleOAuth2Url = 'https://accounts.google.com/o/oauth2/auth?' +
         'response_type=token' +
         '&redirect_uri=' + chrome.identity.getRedirectURL() +
@@ -42,16 +49,7 @@ class AuthGoogle implements AuthenticationManager {
 
             this.getCredentials_(token);
           });
-    }
-
-    // Always logout before logging in to Google.  This is to ensure that
-    // the user always gets to pick their Google account.  If we did not
-    // call logout first, the user might be logged into a different account
-    // (possibly by another app/extension, as all apps/extensions share
-    // the same sandboxed environment used by chrome.identity.launchWebAuthFlow)
-    // and would be unable to pick the right account for UProxy.
-    // Only invoke login popup after logout has been completed (asynchronously).
-    this.logout(launchLoginPopup);
+    });
   }
 
   private getCredentials_ = (token) => {
@@ -84,19 +82,19 @@ class AuthGoogle implements AuthenticationManager {
     xhr.send();
   }
 
-  public logout = (callback) => {
-    // Logout of Google so that next time login URL is invoked user can
-    // sign in with a different account.  This must be launched using
-    // launchWebAuthFlow so that sandboxed environment is logged out (so
-    // this can't be done using an xhr request).
-    console.log('About to log out of Google');
-    chrome.identity.launchWebAuthFlow(
-        {url: 'https://accounts.google.com/logout', interactive: false},
-        (responseUrl) => {
-          console.log('Successfully logged out of Google');
-          if (callback) {
-            callback();
-          }
-        });
+  public logout = () : Promise<void> => {
+    return new Promise<void>((F, R) => {
+      // Logout of Google so that next time login URL is invoked user can
+      // sign in with a different account.  This must be launched using
+      // launchWebAuthFlow so that sandboxed environment is logged out (so
+      // this can't be done using an xhr request).
+      console.log('About to log out of Google');
+      chrome.identity.launchWebAuthFlow(
+          {url: 'https://accounts.google.com/logout', interactive: false},
+          (responseUrl) => {
+            console.log('Successfully logged out of Google');
+            F();
+          });
+    });
   }
 }
