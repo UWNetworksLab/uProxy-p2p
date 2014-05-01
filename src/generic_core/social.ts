@@ -96,7 +96,7 @@ module Social {
     // Information about the local login.
     // |myClient| should exist whilst logged in, and should be null whilst
     // logged out.
-    private myClient   :freedom.Social.ClientState;
+    private myClient   :UProxyClient.State;
     private myInstance :Core.LocalInstance;
     private online     :boolean;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
@@ -147,10 +147,10 @@ module Social {
         interactive: true,
         rememberLogin: remember
       }
-      return this.api.login(request).then((client:freedom.Social.ClientState) => {
+      return this.api.login(request).then((freedomClient :freedom.Social.ClientState) => {
         // Upon successful login, save local client information.
         this.online = true;
-        this.myClient = client;
+        this.myClient = freedomClientToUproxyClient(freedomClient);
       }).then(this.notifyUI)
         .catch(() => {
           console.warn('Could not login to ' + this.name);
@@ -208,7 +208,7 @@ module Social {
       if (this.myClient && userId == this.myClient.userId) {
         console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
         // Send our own InstanceMessage to any queued-up clients.
-        if (freedom.Social.Status.ONLINE == this.myClient.status) {
+        if (UProxyClient.Status.ONLINE == this.myClient.status) {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
@@ -234,7 +234,9 @@ module Social {
      * yet we receive a client state from them. In this case, create a
      * place-holder user until we receive more user information.
      */
-    public handleClientState = (client :freedom.Social.ClientState) => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState) => {
+      var client :UProxyClient.State =
+        freedomClientToUproxyClient(freedomClient);
       if (!(client.userId in this.roster)) {
         console.log(
             'network ' + this.name + ' received ClientState for userId: ' +
@@ -367,7 +369,18 @@ module Social {
       var msgString = JSON.stringify(msg);
       return this.api.sendMessage(clientId, msgString);
     }
-
   }  // class Social.Network
-
 }  // module Social
+
+function freedomClientToUproxyClient(
+  freedomClientState :freedom.Social.ClientState) : UProxyClient.State {
+  // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
+  // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
+  // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.
+  return {
+    userId:    freedomClientState.userId,
+    clientId:  freedomClientState.clientId,
+    status:    UProxyClient.Status[freedomClientState.status],
+    timestamp: freedomClientState.timestamp
+  };
+}

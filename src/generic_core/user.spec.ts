@@ -62,16 +62,16 @@ describe('Core.User', () => {
   });
 
   it('sends an instance message to newly ONLINE clients', () => {
-    var clientState :freedom.Social.ClientState = {
+    var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: freedom.Social.Status.ONLINE,
+      status: UProxyClient.Status.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(Object.keys(user.clients).length).toEqual(1);
-    expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
+    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient'
     ]);
@@ -79,11 +79,11 @@ describe('Core.User', () => {
 
   it('does not re-send instance messages to the same client', () => {
     network.sendInstanceHandshake.calls.reset();
-    expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
-    var clientState :freedom.Social.ClientState = {
+    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: freedom.Social.Status.ONLINE,
+      status: UProxyClient.Status.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
@@ -96,10 +96,10 @@ describe('Core.User', () => {
 
   it('does not send instance messages to non-uProxy clients', () => {
     network.sendInstanceHandshake.calls.reset();
-    var clientState :freedom.Social.ClientState = {
+    var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient-not-uproxy',
-      status: freedom.Social.Status.ONLINE_WITH_OTHER_APP,
+      status: UProxyClient.Status.ONLINE_WITH_OTHER_APP,
       timestamp: 12345
     };
     user.handleClient(clientState);
@@ -111,10 +111,10 @@ describe('Core.User', () => {
   });
 
   it('deletes DISCONNECTED client', () => {
-    var clientState :freedom.Social.ClientState = {
+    var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: freedom.Social.Status.OFFLINE,
+      status: UProxyClient.Status.OFFLINE,
       timestamp: 12346
     };
     user.handleClient(clientState);
@@ -123,26 +123,26 @@ describe('Core.User', () => {
   });
 
   it('re-adds an re-sends instance message to new ONLINE clients', () => {
-    var clientState :freedom.Social.ClientState = {
+    var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: freedom.Social.Status.ONLINE,
+      status: UProxyClient.Status.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(Object.keys(user.clients).length).toEqual(1);
-    expect(user.clients['fakeclient']).toEqual(freedom.Social.Status.ONLINE);
+    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
     expect(Object.keys(user.clients)).toEqual([
       'fakeclient'
     ]);
   });
 
   it('logs an error when receiving a ClientState with wrong userId', () => {
-    var clientState :freedom.Social.ClientState = {
+    var clientState :UProxyClient.State = {
       userId: 'fakeuserd',
       clientId: 'fakeclient',
-      status: freedom.Social.Status.ONLINE,
+      status: UProxyClient.Status.ONLINE,
       timestamp: 12345
     };
     spyOn(console, 'error');
@@ -228,10 +228,10 @@ describe('Core.User', () => {
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
       // New client to be associated with the same instance.
-      var clientState :freedom.Social.ClientState = {
+      var clientState :UProxyClient.State = {
         userId: 'fakeuser',
         clientId: 'fakeclient2',
-        status: freedom.Social.Status.ONLINE,
+        status: UProxyClient.Status.ONLINE,
         timestamp: 12345
       };
       // Add the new client.
@@ -315,7 +315,7 @@ describe('Core.User', () => {
       var clientState = {
         userId: 'fakeuser',
         clientId: 'newclient',
-        status: freedom.Social.Status.ONLINE,
+        status: UProxyClient.Status.ONLINE,
         timestamp: 12345
       };
       user.handleClient(clientState);
@@ -342,7 +342,7 @@ describe('Core.User', () => {
       user.handleClient({
         userId: 'fakeuser',
         clientId: 'newclient',
-        status: freedom.Social.Status.OFFLINE,
+        status: UProxyClient.Status.OFFLINE,
         timestamp: 12345
       });
       expect(user.clients['newclient']).not.toBeDefined();
@@ -356,7 +356,7 @@ describe('Core.User', () => {
       var newClientState = {
         userId: 'fakeuser',
         clientId: 'even-newer-client',
-        status: freedom.Social.Status.ONLINE,
+        status: UProxyClient.Status.ONLINE,
         timestamp: 12345
       };
       user.handleClient(newClientState);
