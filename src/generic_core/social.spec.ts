@@ -12,6 +12,27 @@ class MockSocial {
     sendMessage: () => {}
   }
 }
+
+describe('freedomClientToUproxyClient', () => {
+  var freedomClient :freedom.Social.ClientState = {
+    userId: 'mockmyself',
+    clientId: 'fakemyself',
+    status: 'ONLINE',
+    timestamp: 12345
+  };
+  var uproxyClient = freedomClientToUproxyClient(freedomClient);
+
+  it('converts status to enum', () => {
+    expect(uproxyClient.status).toEqual(UProxyClient.Status.ONLINE);
+  });
+
+  it('copies non-status fields unchanged', () => {
+    expect(uproxyClient.userId).toEqual(freedomClient.userId);
+    expect(uproxyClient.clientId).toEqual(freedomClient.clientId);
+    expect(uproxyClient.timestamp).toEqual(freedomClient.timestamp);
+  });
+});
+
 describe('Social.Network', () => {
 
   var network :Social.Network;
@@ -50,17 +71,18 @@ describe('Social.Network', () => {
   describe('login & logout', () => {
 
     it('can login', (done) => {
-      var fakeSuccessClient :freedom.Social.ClientState = {
+      var fakeFreedomClient :freedom.Social.ClientState = {
         userId: 'mockmyself',
         clientId: 'fakemyself',
-        status: freedom.Social.Status.ONLINE,
+        status: 'ONLINE',
         timestamp: 12345
       }
       spyOn(network['api'], 'login').and.returnValue(
-          Promise.resolve(fakeSuccessClient));
+          Promise.resolve(fakeFreedomClient));
       spyOn(network, 'notifyUI');
       network.login().then(() => {
-        expect(network['myClient']).toEqual(fakeSuccessClient);
+        expect(network['myClient']).toEqual(
+            freedomClientToUproxyClient(fakeFreedomClient));
         expect(network['online']).toEqual(true);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
@@ -145,14 +167,15 @@ describe('Social.Network', () => {
     it('passes |onClientState| to correct client', () => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleClient');
-      var clientState :freedom.Social.ClientState = {
+      var freedomClientState :freedom.Social.ClientState = {
         userId: 'mockuser',
         clientId: 'fakeclient',
-        status: freedom.Social.Status.ONLINE,
+        status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(clientState);
-      expect(user.handleClient).toHaveBeenCalledWith(clientState);
+      network.handleClientState(freedomClientState);
+      expect(user.handleClient).toHaveBeenCalledWith(
+        freedomClientToUproxyClient(freedomClientState));
     });
 
     it('adds placeholder when receiving ClientState with userId not in roster',
@@ -163,13 +186,13 @@ describe('Social.Network', () => {
         spyOn(user, 'handleClient');
         return user;
       });
-      var clientState :freedom.Social.ClientState = {
+      var freedomClientState :freedom.Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
-        status: freedom.Social.Status.ONLINE,
+        status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(clientState);
+      network.handleClientState(freedomClientState);
       expect(user.handleClient).toHaveBeenCalled();
     });
 
@@ -180,7 +203,7 @@ describe('Social.Network', () => {
         from: {
           userId: 'mockuser',
           clientId: 'fakeclient',
-          status: freedom.Social.Status.ONLINE,
+          status: 'ONLINE',
           timestamp: 12345
         },
         message: JSON.stringify({
@@ -200,7 +223,7 @@ describe('Social.Network', () => {
         from: {
           userId: 'im_still_not_here',
           clientId: 'fakeclient',
-          status: freedom.Social.Status.ONLINE,
+          status: 'ONLINE',
           timestamp: 12345
         },
         message: null
@@ -250,7 +273,7 @@ describe('Social.Network', () => {
       from: {
         userId: 'mockuser',
         clientId: 'fakeclient',
-        status: freedom.Social.Status.ONLINE,
+        status: 'ONLINE',
         timestamp: 12345
       },
       message: JSON.stringify({

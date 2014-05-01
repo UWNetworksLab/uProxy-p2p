@@ -46,7 +46,7 @@ module Core {
   export class User implements BaseUser {
 
     public name :string;
-    public clients :{ [clientId :string] :freedom.Social.Status };
+    public clients :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom.Social.UserProfile;
 
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
@@ -147,7 +147,7 @@ module Core {
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :freedom.Social.ClientState) => {
+    public handleClient = (client :UProxyClient.State) => {
       if (client.userId != this.userId) {
         console.error(this.userId +
             'received client with unexpected userId: ' + client.userId);
@@ -156,24 +156,24 @@ module Core {
       var clientIsNew = !(client.clientId in this.clients);
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
-        case freedom.Social.Status.ONLINE:
+        case UProxyClient.Status.ONLINE:
           this.clients[client.clientId] = client.status;
           if (clientIsNew) {
             this.network.sendInstanceHandshake(client.clientId);
           }
           break;
-        case freedom.Social.Status.OFFLINE:
+        case UProxyClient.Status.OFFLINE:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID.
           this.removeClient_(client.clientId);
           break;
-        case freedom.Social.Status.ONLINE_WITH_OTHER_APP:
+        case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
           // TODO: Figure out potential invite or chat-mechanism for non-uProxy
           // clients.
           break;
         default:
           console.warn('Received client ' + client.clientId +
-              ' with invalid status: ' + client.status);
+              ' with invalid status: (' + client.status + ')');
           break;
       }
     }
@@ -223,7 +223,7 @@ module Core {
      * this user's instance table.
      */
     private syncInstance_ = (clientId :string, instance :Instance) => {
-      if (freedom.Social.Status.ONLINE !== this.clients[clientId]) {
+      if (UProxyClient.Status.ONLINE !== this.clients[clientId]) {
         console.warn('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
         return false;
