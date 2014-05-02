@@ -11,14 +11,6 @@
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 2000;  // milliseconds.
 
-// Status object for connected. This is an object so it can be bound in
-// angular. connected = true iff connected to the app which is running
-// freedom.
-interface StatusObject {
-  connected :boolean;
-}
-
-
 /**
  * Chrome-Extension-specific uProxy Core API implementation.
  *

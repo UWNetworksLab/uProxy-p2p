@@ -160,3 +160,11 @@ module UProxyClient {
     timestamp :number;
   }
 }
+
+
+// Status object for connected. This is an object so it can be bound in
+// angular. connected = true iff connected to the app which is running
+// freedom.
+interface StatusObject {
+  connected :boolean;
+}
