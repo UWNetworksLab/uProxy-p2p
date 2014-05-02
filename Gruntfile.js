@@ -81,7 +81,7 @@ module.exports = function(grunt) {
          src: ['icons/**'],
          dest: 'build/generic_ui'},
         // Libraries
-        {expand: true, cwd: 'third-party/lib/',
+        {expand: true, cwd: 'third_party/lib/',
          src: ['lodash/dist/lodash.js',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
