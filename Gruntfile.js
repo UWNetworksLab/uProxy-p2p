@@ -244,14 +244,14 @@ module.exports = function(grunt) {
       generic_ui: {
         src: ['src/generic_ui/**/*.ts'],
         dest: 'build/',
-        options: { basePath: 'src/' }
+        options: { basePath: 'src/', ignoreError: false }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
         src: ['src/generic_core/**/*.ts'],
         dest: 'build/',
-        options: { basePath: 'src/' }
+        options: { basePath: 'src/', ignoreError: false }
       },
 
       // uistatic specific typescript
@@ -269,7 +269,7 @@ module.exports = function(grunt) {
       mocks: {
         src: ['src/mocks/**/*.ts'],
         dest: 'build/mocks/',
-        options: { basePath: 'src/mocks/' }
+        options: { basePath: 'src/mocks/', ignoreError: false }
       },
 
       // Compile typescript for all chrome components. This will do both the app
@@ -283,7 +283,7 @@ module.exports = function(grunt) {
         src: ['src/chrome/**/*.ts',
               '!src/chrome/mocks/**'],
         dest: 'build/',
-        options: { basePath: 'src/' }
+        options: { basePath: 'src/', ignoreError: false }
       },
 
       // Compile the Chrome mocks separately from above. Otherwise, there will
@@ -292,14 +292,14 @@ module.exports = function(grunt) {
       chrome_mocks: {
         src: ['src/chrome/mocks/**/*.ts'],
         dest: 'build/chrome/test/',
-        options: { basePath: 'src/chrome/mocks/' }
+        options: { basePath: 'src/chrome/mocks/', ignoreError: false }
       },
 
       // uProxy firefox specific typescript
       firefox: {
         src: ['src/firefox/**/*.ts'],
         dest: 'build/firefox/',
-        options: { basePath: 'src/firefox/' }
+        options: { basePath: 'src/firefox/', ignoreError: false }
       },
 
     },
