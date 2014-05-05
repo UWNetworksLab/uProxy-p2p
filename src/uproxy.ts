@@ -107,6 +107,8 @@ module uProxy {
     // TODO: make network an actual type
     login(network:string):void;
     logout(network:string):void;
+
+    onUpdate(update:Update, handler:Function):void;
   }
 
   /**

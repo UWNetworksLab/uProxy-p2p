@@ -11,6 +11,7 @@
 
 declare var model         :UI.Model;
 declare var onStateChange :chrome.Event;
+declare var finishStateChange :() => void;
 
 module UI {
 
@@ -45,10 +46,49 @@ module UI {
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
+     * Upon construction, the UI installs update handlers on core.
      */
     constructor(
         public core   :uProxy.CoreAPI,
         public notify :INotifications) {
+      // Attach handlers for UPDATES received from core.
+      // TODO: Implement the rest of the fine-grained state updates.
+      // (We begin with the simplest, total state update, above.)
+      core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
+        console.log('Received uProxy.Update.ALL:', state);
+        // TODO: Implement this after a better payload message is implemented.
+        // There is now a difference between the UI Model and the state object
+        // from the core, so one-to-one mappinsg from the old json-patch code cannot
+        // work.
+        finishStateChange();
+      });
+
+      // Add or update the online status of a network.
+      core.onUpdate(uProxy.Update.NETWORK, (network :UI.NetworkMessage) => {
+        console.log('uProxy.Update.NETWORK', network, model.networks);
+        console.log(model);
+        if (!(network.name in model.networks)) {
+          // TODO: Turn this into a class.
+          model.networks[network.name] = {
+            name:   network.name,
+            online: network.online,
+            roster: {}
+          };
+        } else {
+          model.networks[network.name].online = network.online;
+        }
+      });
+
+      // Attach handlers for USER updates.
+      core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
+        console.log('uProxy.Update.USER_SELF:', payload);
+        // Instead of adding to the roster, update the local user information.
+      });
+      core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
+        console.log('uProxy.Update.USER_FRIEND:', payload);
+        this.syncUser_(payload);
+      });
+
       console.log('Created the UserInterface');
     }
 
@@ -220,61 +260,67 @@ module UI {
 
     /**
      * Synchronize data about some friend.
-     * TODO: Redo all this for the new paradigm.
      */
-    /*
-    syncUser = (user) => {
-      var instanceId = null,
-          instance = null,
-          online = false,           // For flag updates.
-          canUProxy = false,
-          hasNotification = false,
-          isActiveClient = false,
-          isActiveProxy = false,
-          onGoogle = false,
-          onFB = false,
-          onXMPP = false;
-
-      for (var clientId in user.clients) {
-        // Determine network state / flags for filtering purposes.
-        var client = user.clients[clientId];
-        onGoogle = onGoogle || 'google' == client.network
-        onFB     = onFB     || 'facebook' == client.network
-        onXMPP   = onXMPP   || 'xmpp' == client.network
-        online = online || (
-            ('manual' != client.network) &&
-            ('messageable' == client.status || 'online' == client.status));
-
-        // Check if this client has a corresponding instance...
-        instanceId = model.clientToInstance[clientId];
-        if (!instanceId)  continue;
-        instance = model.instances[instanceId];
-        if (!instance)    continue;
-        canUProxy = true;  // At this point, we know this user can UProxy.
-        // TODO(uzimizu): Support multiple notifications, with messages.
-        hasNotification = hasNotification || instance.notify;
-
-        // Pass-over the trust value to user-level.
-        // TODO(keroserene): When we have multiple instances,
-        // take the assumption of highest trust level.
-        user.trust = instance.trust;
-        user.givesMe = ('no' != user.trust.asProxy);
-        user.usesMe = ('no' != user.trust.asClient);
-        isActiveClient = isActiveClient || 'running'==instance.status.client;
-        isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
-        break;  // TODO(uzimizu): Support multiple instances.
+    private syncUser_ = (payload :UI.UserMessage) => {
+      var network = model.networks[payload.network];
+      if (!network) {
+        console.warn('Received USER for non-existing network.');
+        return;
       }
-
+      // Construct a UI-specific user object.
+      var profile = payload.user;
+      // Insert the user both in the network-specific roster and the global
+      // roster.
+      var user :UI.User;
+      if (!(profile.userId in network.roster)) {
+        user = {
+          name:            profile.name,
+          userId:          profile.userId,
+          url:             profile.url,
+          imageData:       profile.imageDataUri,
+          online:          false,
+          canUProxy:       false,
+          givesMe:         false,
+          usesMe:          false,
+          hasNotification: false,
+          clients:         {}
+        }
+        network.roster[profile.userId] = user;
+        model.roster[profile.userId] = user;
+      } else {
+        user = network.roster[profile.userId];
+        user.name = profile.name;
+        user.url = profile.url;
+        user.imageData = profile.imageDataUri;
+      }
+      var statuses = payload.clients;
+      // Is online if there is at least one client that is not 'OFFLINE'.
+      user.online = statuses.some((status) => {
+        return UProxyClient.Status.OFFLINE !== status;
+      });
+      // Has uProxy if there is at least one client that is 'ONLINE'.
+      user.canUProxy = statuses.some((status) => {
+        return UProxyClient.Status.ONLINE === status;
+      });
+      console.log('Updated ' + user.name + ' - known to be: ' +
+                  '\n online: ' + user.online +
+                  '\n uproxy-enabled: ' + user.canUProxy);
+    };
+    /*
+      // TODO(uzimizu): Support multiple notifications, with messages.
+      hasNotification = hasNotification || instance.notify;
+      // Pass-over the trust value to user-level.
+      // TODO(keroserene): When we have multiple instances,
+      // take the assumption of highest trust level.
+      user.trust = instance.trust;
+      user.givesMe = ('no' != user.trust.asProxy);
+      user.usesMe = ('no' != user.trust.asClient);
+      isActiveClient = isActiveClient || 'running'==instance.status.client;
+      isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
+      break;  // TODO(uzimizu): Support multiple instances.
+    }
       // Apply user-level flags.
       // TODO: Deprecate this once we move to instance-centrism.
-      user.online = online;
-      user.canUProxy = canUProxy;
-      user.hasNotification = hasNotification;
-      user.isActiveClient = isActiveClient;
-      user.isActiveProxy = isActiveProxy;
-      user.onGoogle = onGoogle;
-      user.onFB = onFB;
-      user.onXMPP = onXMPP;
     }
     */
 

@@ -60,6 +60,8 @@ class MockCore implements uProxy.CoreAPI {
   dismissNotification(userId) {
     console.log('Notification seen for ' + userId);
   }
+  onUpdate(update, handler) {
+  }
 }
 
 var mockCore = new MockCore();
