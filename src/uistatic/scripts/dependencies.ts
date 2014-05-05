@@ -26,7 +26,10 @@ class MockNotifications implements INotifications {
 }
 
 class MockCore implements uProxy.CoreAPI {
-  constuctor() {}
+  public status :StatusObject;
+  constructor() {
+    this.status = { connected: true };
+  }
   reset() {
     console.log('Resetting.');
   }
@@ -68,16 +71,8 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
     return function (key) { return key; };
   })
-  .constant('appChannel', {
-    status: {
-      connected: true
-    },
-    emit: function(name, args) {
-      console.log('appChannel.emit("' + name + '",', args);
-      ui.sync();  // Fake sync because there's no backend update.
-    }
-  })
   .constant('onStateChange', null)
   .constant('ui', ui)
   .constant('model', model)
+  .constant('core', mockCore)
   .constant('roster', null);

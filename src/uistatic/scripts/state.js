@@ -1,3 +1,4 @@
+// TODO: copy a valid extension state after the extension model is redefined.
 var state = {
   "_debug": true,
   "_msgLog": [],
@@ -241,5 +242,9 @@ var state = {
       "turnServer1",
       "turnServer2"
     ]
+  },
+  "networks": {
+    "google": {"name": "google", "online": true,"roster": {}},
+    "websocket": {"name": "websocket", "online": false,"roster": {}}
   }
 };
