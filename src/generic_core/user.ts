@@ -314,7 +314,12 @@ module Core {
     }
 
     private notifyUI = () => {
-      // Update the UI for this user, too.
+      // Update the UI for this user, but only if the user is ready to be
+      // visible on the UI.
+      if ('pending' == this.name) {
+        console.log('Not sending User ' + this.userId + ' yet');
+        return;
+      }
       ui.update(uProxy.Update.USER_FRIEND, <UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
