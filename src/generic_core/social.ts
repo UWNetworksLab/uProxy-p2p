@@ -211,10 +211,6 @@ module Social {
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
-      var uiUpdate :UI.UserMessage = {  // To be sent to the UI.
-        network: this.name,
-        user:    profile
-      };
       // Check if this is ourself, in which case we update our own info.
       if (this.myClient && userId == this.myClient.userId) {
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
@@ -223,10 +219,12 @@ module Social {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
-        ui.update(uProxy.Update.USER_SELF, uiUpdate);
+        ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
+          network: this.name,
+          user:    profile
+        });
         return;
       }
-
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
       this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
@@ -234,8 +232,6 @@ module Social {
         this.addUser_(userId);
       }
       this.getUser(userId).update(profile);
-      // Update UI with friend's information.
-      ui.update(uProxy.Update.USER_FRIEND, uiUpdate);
     }
 
     /**

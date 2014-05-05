@@ -31,19 +31,25 @@ declare module UI {
     roster :{ [userId:string] :User }
   }
 
-  // export interface User extends BaseUser {
-  // }
-
-  // Payloads for crossing the Core -> User boundary.
+  // Payloads for crossing the Core -> UI boundary.
   export interface NetworkMessage {
     name    :string;
     online  :boolean;
   }
 
   export interface UserMessage {
-    network :string;
-    user    :freedom.Social.UserProfile;
+    network   :string;
+    user      :freedom.Social.UserProfile;
+    clients   :UProxyClient.Status[];
+    instances :any[];
   }
+
+  export interface ClientMessage {
+    userId   :string;
+    clientId :string;
+    status   :UProxyClient.Status;
+  }
+
 
   // TODO: clients and instance UI types.
 
@@ -53,6 +59,8 @@ declare module UI {
    * TODO: Maybe convert into an actual class.
    */
   export interface User extends BaseUser {
+    url             :string;
+    imageData       :string;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
     online          :boolean;

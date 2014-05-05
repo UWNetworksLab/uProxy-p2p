@@ -130,7 +130,7 @@ function initUI() : UI.UserInterface {
   // (We begin with the simplest, total state update, above.)
 
   // TODO: factor into the UI class.
-  function addUserToModel(payload :UI.UserMessage) {
+  function updateUser(payload :UI.UserMessage) {
     var network = model.networks[payload.network];
     if (!network) {
       console.warn('Received USER for non-existing network.');
@@ -138,33 +138,58 @@ function initUI() : UI.UserInterface {
     }
     // Construct a UI-specific user object.
     var profile = payload.user;
-    var user :UI.User = {
-      name:            profile.name,
-      userId:          profile.userId,
-      url:             profile.url,
-      imageDataUri:    profile.imageDataUri,
-      online:          true,
-      canUProxy:       false,
-      givesMe:         false,
-      usesMe:          false,
-      hasNotification: false,
-      clients: {}
-    }
     // Insert the user both in the network-specific roster and the global
     // roster.
-    network.roster[user.userId] = user;
-    model.roster[user.userId] = user;
+    var user :UI.User;
+    if (!(profile.userId in network.roster)) {
+      user = {
+        name:            profile.name,
+        userId:          profile.userId,
+        url:             profile.url,
+        imageData:       profile.imageDataUri,
+        online:          false,
+        canUProxy:       false,
+        givesMe:         false,
+        usesMe:          false,
+        hasNotification: false,
+        clients:         {}
+      }
+      network.roster[profile.userId] = user;
+      model.roster[profile.userId] = user;
+    } else {
+      user = network.roster[profile.userId];
+      user.name = profile.name;
+      user.url = profile.url;
+      user.imageData = profile.imageDataUri;
+    }
+    var statuses = payload.clients;
+    // Is online if there is at least one client that is not 'OFFLINE'.
+    user.online = statuses.some((status) => {
+      return UProxyClient.Status.OFFLINE !== status;
+    });
+    // Has uProxy if there is at least one client that is 'ONLINE'.
+    user.canUProxy = statuses.some((status) => {
+      return UProxyClient.Status.ONLINE === status;
+    });
+    console.log('Updated ' + user.name + ' - known to be: ' +
+                '\n online: ' + user.online +
+                '\n uproxy-enabled: ' + user.canUProxy);
   };
 
   // Attach handlers for USER updates.
   core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
     console.log('uProxy.Update.USER_SELF:', payload);
-    addUserToModel(payload);
+    // Instead of adding to the roster, update the local user information.
   });
   core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
     console.log('uProxy.Update.USER_FRIEND:', payload);
-    addUserToModel(payload);
+    updateUser(payload);
   });
+
+  // core.onUpdate(uProxy.Update.CLIENT, (payload :UI.ClientMessage) => {
+    // console.log('uProxy.Update.CLIENT:', payload);
+    // updateClient(payload);
+  // });
 
   return new UI.UserInterface(core, notifications);
 }

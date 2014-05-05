@@ -151,7 +151,7 @@ module UProxyClient {
     // (i.e. can be useful to invite others to your freedom.js app)
     ONLINE_WITH_OTHER_APP,
   }
-  
+
   // Status of a client connected to a social network.
   export interface State {
     userId    :string;
