@@ -245,6 +245,6 @@ var state = {
   },
   "networks": {
     "google": {"name": "google", "online": true,"roster": {}},
-    "websocket":{"name": "websocket", "online": false,"roster": {}}
+    "websocket": {"name": "websocket", "online": false,"roster": {}}
   }
 };
