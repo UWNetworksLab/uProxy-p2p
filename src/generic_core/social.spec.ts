@@ -41,6 +41,14 @@ describe('Social.Network', () => {
   freedom['SOCIAL-mock'] = () => { return new MockSocial(); };
   freedom['SOCIAL-mock']['api'] = 'social';
 
+  var loginPromise :Promise<void>;
+  var fakeFreedomClient :freedom.Social.ClientState = {
+    userId: 'mockmyself',
+    clientId: 'fakemyself',
+    status: 'ONLINE',
+    timestamp: 12345
+  };
+
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
     spyOn(console, 'log');
@@ -71,12 +79,6 @@ describe('Social.Network', () => {
   describe('login & logout', () => {
 
     it('can login', (done) => {
-      var fakeFreedomClient :freedom.Social.ClientState = {
-        userId: 'mockmyself',
-        clientId: 'fakemyself',
-        status: 'ONLINE',
-        timestamp: 12345
-      }
       spyOn(network['api'], 'login').and.returnValue(
           Promise.resolve(fakeFreedomClient));
       spyOn(network, 'notifyUI');
@@ -134,6 +136,43 @@ describe('Social.Network', () => {
     });
 
   });  // describe login & logout
+
+  describe('handler promise delays', () => {
+
+    // Hijack the social api login promise to delay at the right time.
+    var userProfilePromise :Promise<void>;
+    var fakeLoginFulfill :Function;
+
+    it('delays handler until login', () => {
+      spyOn(network['api'], 'login').and.returnValue(
+          new Promise((F, R) => {
+            fakeLoginFulfill = F;
+          }));
+      spyOn(network, 'handleUserProfile');
+      expect(network['online']).toEqual(false);
+      expect(network['isOnline']).toBeDefined();
+      network.login();  // Will complete in the next spec.
+      userProfilePromise = network['handleUserProfile_']({
+        userId: 'mockuser',
+        name: 'mock1',
+        timestamp: 123456
+      });
+      expect(network.handleUserProfile).not.toHaveBeenCalled();
+    });
+
+    it('fires handler once logged-in', (done) => {
+      spyOn(network, 'handleUserProfile');
+      fakeLoginFulfill(fakeFreedomClient);
+      userProfilePromise.then(() => {
+        expect(network.handleUserProfile).toHaveBeenCalledWith({
+          userId: 'mockuser',
+          name: 'mock1',
+          timestamp: 123456
+        });
+      }).then(done);
+    });
+
+  });  // describe handler promise delays
 
   describe('incoming events', () => {
 

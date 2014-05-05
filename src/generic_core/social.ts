@@ -99,6 +99,8 @@ module Social {
     private myClient   :UProxyClient.State;
     private myInstance :Core.LocalInstance;
     private online     :boolean;
+    // Promise which delays all message handling until fully logged in.
+    private isOnline   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     /**
@@ -110,6 +112,7 @@ module Social {
       this.metadata = this.provider.manifest;
       this.roster = {};
       this.online = false;
+      this.isOnline = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
@@ -123,9 +126,9 @@ module Social {
       }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
-      this.api.on('onUserProfile', this.handleUserProfile);
-      this.api.on('onClientState', this.handleClientState);
-      this.api.on('onMessage', this.handleMessage);
+      this.api.on('onUserProfile', this.handleUserProfile_);
+      this.api.on('onClientState', this.handleClientState_);
+      this.api.on('onMessage', this.handleMessage_);
       this.log('prepared Social.Network.');
       this.notifyUI();
     }
@@ -146,16 +149,21 @@ module Social {
         url: 'https://github.com/uProxy/uProxy',
         interactive: true,
         rememberLogin: remember
-      }
-      return this.api.login(request).then((freedomClient :freedom.Social.ClientState) => {
-        // Upon successful login, save local client information.
-        this.online = true;
-        this.myClient = freedomClientToUproxyClient(freedomClient);
-        this.log('logged in uProxy as ' + JSON.stringify(this.myClient));
-      }).then(this.notifyUI)
-        .catch(() => {
-          console.warn('Could not login to ' + this.name);
-        });
+      };
+      this.isOnline = this.api.login(request)
+          .then((freedomClient :freedom.Social.ClientState) => {
+            // Upon successful login, save local client information.
+            this.online = true;
+            this.myClient = freedomClientToUproxyClient(freedomClient);
+            this.log('logged in uProxy as ' + JSON.stringify(this.myClient));
+          });
+      return this.isOnline
+          .then(this.notifyUI)
+          .catch(() => {
+            console.warn('Could not login to ' + this.name);
+            this.online = false;
+          });
+      // return this.isOnline;
     }
 
     /**
@@ -229,23 +237,60 @@ module Social {
     }
 
     /**
+     * Wrapper which ensures we are logged in before handling any profiles.
+     */
+    private handleUserProfile_ = (profile :freedom.Social.UserProfile)
+        : Promise<void> => {
+      if (!this.isOnline) {
+        this.error('Cannot handle UserProfile if not logged on.');
+        return;
+      }
+      return this.isOnline.then(() => {
+        this.log('received UserProfile for ' + profile.name);
+        this.handleUserProfile(profile);
+      })
+    }
+
+    /**
      * Handler for receiving 'onClientState' messages. Passes these messages to
      * the relevant user, which will manage its own clients.
      *
      * It is possible that the roster entry does not yet exist for a user,
      * yet we receive a client state from them. In this case, create a
      * place-holder user until we receive more user information.
+     *
+     * Assumes we are in fact fully logged in.
      */
-    public handleClientState = (freedomClient :freedom.Social.ClientState) => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState)
+        : void => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
-      this.log('received ClientState: ' + JSON.stringify(client));
+      if (this.myClient && client.userId == this.myClient.userId) {
+        // TODO: Should we do anything in particular for our own client?
+        this.log('received own ClientState: ' + JSON.stringify(client));
+        return;
+      }
       if (this.isNewFriend_(client.userId)) {
         this.log('received ClientState for ' + client.userId +
                  ' before UserProfile.');
         this.addUser_(client.userId);
       }
       this.getUser(client.userId).handleClient(client);
+    }
+
+    /**
+     * Wrapper which ensures we are logged in before handling any clients.
+     */
+    private handleClientState_ = (freedomClient:freedom.Social.ClientState)
+        : Promise<void> => {
+      if (!this.isOnline) {
+        this.error('Cannot handle ClientState if not logged on.');
+        return;
+      }
+      return this.isOnline.then(() => {
+        this.log('received ClientState for ' + JSON.stringify(freedomClient));
+        this.handleClientState(freedomClient);
+      })
     }
 
     /**
@@ -256,7 +301,8 @@ module Social {
      * yet we receive a message from them. In this case, create a place-holder
      * user until we receive more user information.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage)
+        : void => {
       var userId = incoming.from.userId;
       if (this.isNewFriend_(userId)) {
         this.log('received Message for ' + userId + ' before UserProfile.');
@@ -264,6 +310,21 @@ module Social {
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
       this.getUser(userId).handleMessage(incoming.from.clientId, msg);
+    }
+
+    /**
+     * Wrapper which ensures we are logged in before handling any messages.
+     */
+    private handleMessage_ = (incoming :freedom.Social.IncomingMessage)
+        : Promise<void> => {
+      if (!this.isOnline) {
+        this.error('Cannot handle Message if not logged on.');
+        return;
+      }
+      return this.isOnline.then(() => {
+        this.log('received Message: ' + JSON.stringify(incoming));
+        this.handleMessage(incoming);
+      });
     }
 
     /**
