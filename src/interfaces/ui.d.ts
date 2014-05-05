@@ -19,7 +19,7 @@ declare module UI {
 
     // This is a 'global' roster - a combination of all User Profiles.
     // TODO: remove. The way the UI works will soon change drastically.
-    roster :{ [userId:string] :freedom.Social.UserProfile }
+    roster :{ [userId:string] :User }
   }
 
   /**
@@ -28,7 +28,7 @@ declare module UI {
   export interface Network {
     name   :string;
     online :boolean;
-    roster :{ [userId:string] :freedom.Social.UserProfile }
+    roster :{ [userId:string] :User }
   }
 
   // export interface User extends BaseUser {
@@ -46,5 +46,20 @@ declare module UI {
   }
 
   // TODO: clients and instance UI types.
+
+
+  /**
+   * UI-specific User.
+   * TODO: Maybe convert into an actual class.
+   */
+  export interface User extends BaseUser {
+    // 'filter'-related flags which indicate whether the user should be
+    // currently visible in the UI.
+    online          :boolean;
+    canUProxy       :boolean;
+    givesMe         :boolean;
+    usesMe          :boolean;
+    hasNotification :boolean;
+  }
 
 }  // module UI

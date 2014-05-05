@@ -188,6 +188,8 @@ module Social {
 
     /**
      * Helper which tells the UI about the existence / status of this network.
+     * This should only be called upon logging in/out. It does not tell the UI
+     * about the roster.
      */
     public notifyUI = () => {
       var payload :UI.NetworkMessage = {

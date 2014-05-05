@@ -30,6 +30,7 @@ proxyConfig.clearConfig();
 // Singleton model for angularjs hooks on both popup and options.
 var model :UI.Model = {
   networks: {},
+  // 'global' roster, which is just the concatenation of all network rosters.
   roster: {}
 };
 
@@ -97,6 +98,8 @@ function initUI() : UI.UserInterface {
   core.connect();
   var notifications = new ChromeNotifications();
 
+  // TODO: Move these attachments into ui.ts
+
   // Attach handlers for UPDATES received from core.
   core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
     console.log('Received uProxy.Update.ALL:', state);
@@ -107,13 +110,19 @@ function initUI() : UI.UserInterface {
     finishStateChange();
   });
 
+  // Add or update the online status of a network.
   core.onUpdate(uProxy.Update.NETWORK, (network :UI.NetworkMessage) => {
     console.log('uProxy.Update.NETWORK', network, model.networks);
     console.log(model);
-    model.networks[network.name] = {
-      name:   network.name,
-      online: network.online,
-      roster: {}
+    if (!(network.name in model.networks)) {
+      // TODO: Turn this into a class.
+      model.networks[network.name] = {
+        name:   network.name,
+        online: network.online,
+        roster: {}
+      };
+    } else {
+      model.networks[network.name].online = network.online;
     }
   });
 
@@ -127,7 +136,22 @@ function initUI() : UI.UserInterface {
       console.warn('Received USER for non-existing network.');
       return;
     }
-    var user = payload.user;
+    // Construct a UI-specific user object.
+    var profile = payload.user;
+    var user :UI.User = {
+      name:            profile.name,
+      userId:          profile.userId,
+      url:             profile.url,
+      imageDataUri:    profile.imageDataUri,
+      online:          true,
+      canUProxy:       false,
+      givesMe:         false,
+      usesMe:          false,
+      hasNotification: false,
+      clients: {}
+    }
+    // Insert the user both in the network-specific roster and the global
+    // roster.
     network.roster[user.userId] = user;
     model.roster[user.userId] = user;
   };

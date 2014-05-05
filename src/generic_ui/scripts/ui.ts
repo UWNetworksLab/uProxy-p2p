@@ -14,6 +14,14 @@ declare var onStateChange :chrome.Event;
 
 module UI {
 
+  /**
+   * The User Interface class.
+   *
+   * Contains UI-related state and functions, which angular will access.
+   * Manipulates the payloads received from UPDATES from the Core in preparation
+   * for UI interaction.
+   * Any COMMANDs from the UI should be directly called from the 'core' object.
+   */
   export class UserInterface implements uProxy.UIAPI {
 
     notifications = 0;
@@ -49,7 +57,7 @@ module UI {
     }
 
     // Keep track of currently viewed contact and instance.
-    contact = null;
+    public contact :UI.User = null;
     contactUnwatch = null;
     instance = null;
     instanceUnwatch = null;  // For angular binding.
@@ -124,16 +132,17 @@ module UI {
     }
 
     /**
-     * Returns |true| if contact |c| should *not* appear in the roster.
+     * Returns |true| if contact |c| should *not* currently be visible in the
+     * roster.
      */
-    contactIsFiltered = (c) => {
+    contactIsFiltered = (user:UI.User) => {
       var searchText = this.search,
-          compareString = c.name.toLowerCase();
+          compareString = user.name.toLowerCase();
       // First, compare filters.
-      if ((this.filters.online        && !c.online)    ||
-          (this.filters.uproxy        && !c.canUProxy) ||
-          (this.filters.myAccess      && !c.givesMe)   ||
-          (this.filters.friendsAccess && !c.usesMe)) {
+      if ((this.filters.online        && !user.online)    ||
+          (this.filters.uproxy        && !user.canUProxy) ||
+          (this.filters.myAccess      && !user.givesMe)   ||
+          (this.filters.friendsAccess && !user.usesMe)) {
         return true;
       }
       // Otherwise, if there is no search text, this contact is visible.
@@ -147,7 +156,7 @@ module UI {
     }
 
     // --------------------------- Focus & Notifications ---------------------------
-    focusOnContact = (contact) => {
+    focusOnContact = (contact:UI.User) => {
       console.log('focusing on contact ' + contact);
       this.contact = contact;
       this.dismissNotification(contact);
