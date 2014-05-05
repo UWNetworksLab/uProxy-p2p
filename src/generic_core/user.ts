@@ -324,7 +324,9 @@ module Core {
         network: this.network.name,
         user: this.profile,
         clients: valuesOf(this.clients),
-        instances: valuesOf(this.instances_)
+        instances: valuesOf(this.instances_).map((instance) => {
+          return instance.serialize();
+        })
       });
     }
 

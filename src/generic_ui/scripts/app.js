@@ -98,16 +98,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return null;
       };
 
-      // A simple predicate function to see if we can talk to this client.
-      $rootScope.isMessageableUproxyClient = function(client) {
-        // TODO(uzimizu): Make identification of whether or not this is a uproxy
-        // client more sensible.
-        // var retval = (client.status == 'online' ||
-                      // client.status == 'messageable') &&
-                      // (client.clientId.indexOf('/uproxy') > 0);
-        return 'messageable' == client.status;
-      };
-
       $rootScope.instanceOfClientId = function(clientId) {
         if (model.clientToInstance[clientId]) {
           return model.instances[model.clientToInstance[clientId]];

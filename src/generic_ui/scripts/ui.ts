@@ -99,7 +99,7 @@ module UI {
     // Keep track of currently viewed contact and instance.
     public contact :UI.User = null;
     contactUnwatch = null;
-    instance = null;
+    instance :UI.Instance = null;
     instanceUnwatch = null;  // For angular binding.
 
     proxy = null;  // If we are proxying, keep track of the instance.
@@ -133,8 +133,7 @@ module UI {
 
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
-    // TODO: Type the Instance.
-    startProxying = (instance) => {
+    startProxying = (instance:UI.Instance) => {
       this.core.start(instance.instanceId);
       this.proxy = instance;
       this._setProxying(true);
@@ -196,11 +195,20 @@ module UI {
     }
 
     // --------------------------- Focus & Notifications ---------------------------
+    /**
+     * Handler for when the user clicks on the entry in the roster for a User.
+     * Sets the UI's 'current' User and Instance, if it exists.
+     */
     focusOnContact = (contact:UI.User) => {
       console.log('focusing on contact ' + contact);
       this.contact = contact;
       this.dismissNotification(contact);
       this.accessView = true;
+      // For now, default to the first instance that the user has.
+      // TODO: Support multiple instances in the UI.
+      if (contact.instances.length > 0) {
+        this.instance = contact.instances[0];
+      }
     }
 
     /*
@@ -283,7 +291,8 @@ module UI {
           givesMe:         false,
           usesMe:          false,
           hasNotification: false,
-          clients:         {}
+          clients:         {},
+          instances:       payload.instances
         }
         network.roster[profile.userId] = user;
         model.roster[profile.userId] = user;
@@ -292,6 +301,7 @@ module UI {
         user.name = profile.name;
         user.url = profile.url;
         user.imageData = profile.imageDataUri;
+        user.instances = payload.instances;
       }
       var statuses = payload.clients;
       // Is online if there is at least one client that is not 'OFFLINE'.

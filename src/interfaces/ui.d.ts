@@ -6,6 +6,7 @@
  * contain attributes / functionality not relevant to the UI.)
  */
 /// <reference path='user.d.ts' />
+/// <reference path='instance.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 declare module UI {
@@ -68,6 +69,17 @@ declare module UI {
     givesMe         :boolean;
     usesMe          :boolean;
     hasNotification :boolean;
+    instances       :UI.Instance[];
+  }
+
+  /**
+   * UI-specific Instance.
+   */
+  export interface Instance {
+    instanceId    :string;
+    description   :string;
+    keyHash       :string;
+    consent       :ConsentState;
   }
 
 }  // module UI
