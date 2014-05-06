@@ -8,10 +8,20 @@
  * It does not directly connect to the App - that would be redundant as
  * everytime the popup was clicked, everything reloads, while it's
  * straightforward to let the background page connect to the App.
- *
- * TODO: convert to typescript.
  */
+
+/// <reference path='../../interfaces/lib/angular.d.ts'/>
+/// <reference path='../../interfaces/instance.d.ts'/>
+/// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='../../uproxy.ts'/>
+
 'use strict';
+
+// TODO: remove this once extension model is cleaned up.
+interface modelForApp extends UI.Model {
+  clientToInstance :{[clientId :string] :string };
+  instances :{[instanceId :string] :Instance};
+}
 
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
@@ -26,16 +36,19 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   // Run gets called every time an extension module is opened.
   .run([
     '$filter',
-    '$http',
+    '$http', 
     '$rootScope',
     // via dependencyInjector:
     'ui',
     'core',
     'onStateChange',
     'model',
-    'roster',
-    function($filter, $http, $rootScope, ui, core,
-             onStateChange, model, roster) {
+    function($filter, $http, $rootScope,
+             ui :uProxy.UIAPI,
+             core :uProxy.CoreAPI,
+             // TODO: Change type to something cross-browser compatible
+             onStateChange :chrome.Event,
+             model :modelForApp) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
@@ -78,7 +91,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
 
       $rootScope.resetState = function () {
         localStorage.clear();
-        ui.reset();
+        core.reset();
       };
 
       // Takes in an entry from the roster table.
@@ -96,14 +109,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             return model.instances[instanceId];
         }
         return null;
-      };
-
-      $rootScope.instanceOfClientId = function(clientId) {
-        if (model.clientToInstance[clientId]) {
-          return model.instances[model.clientToInstance[clientId]];
-        } else {
-          return null;
-        }
       };
 
       $rootScope.prettyNetworkName = function(networkId) {
