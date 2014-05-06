@@ -99,15 +99,16 @@ describe('Social.Network', () => {
       }).then(done);
     });
 
-    it('warns if network login fails', (done) => {
+    it('errors if network login fails', (done) => {
       loginPromise = network['loggedIn_'];
       network['loggedIn_'] = null;
       // Pretend the social API's login failed.
       spyOn(network['api'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
       spyOn(network, 'notifyUI');
+      spyOn(network, 'error');
       network.login().catch(() => {
-        expect(console.warn).toHaveBeenCalledWith('Could not login to mock');
+        expect(network['error']).toHaveBeenCalledWith('Could not login.');
         expect(network.notifyUI).not.toHaveBeenCalled();
       }).then(done);
     });

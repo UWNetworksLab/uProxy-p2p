@@ -157,7 +157,7 @@ module Social {
       return this.loggedIn_
           .then(this.notifyUI)
           .catch(() => {
-            console.warn('Could not login to ' + this.name);
+            this.error('Could not login.');
             return Promise.reject(new Error('Could not login.'));
           });
     }
@@ -178,12 +178,16 @@ module Social {
       }).then(this.notifyUI);
     }
 
-    public isOnline = () : Boolean => {
+    public isOnline = () : boolean => {
       return Boolean(this.loggedIn_);
     }
 
     /**
      * Functor which delays until the network is logged on.
+     * Resulting function will instantly fail if not already in the process of
+     * logging in.
+     * TODO: This should either be factored into a wrapper class to 'sanitize'
+     * social providers async behavior, or directly into freedom.
      */
     private delayForLogin = (handler :Function) => {
       return (arg :any) => {
@@ -209,7 +213,7 @@ module Social {
     public notifyUI = () => {
       var payload :UI.NetworkMessage = {
         name: this.name,
-        online: Boolean(this.loggedIn_)
+        online: this.isOnline()
       }
       ui.update(uProxy.Update.NETWORK, payload);
     }
