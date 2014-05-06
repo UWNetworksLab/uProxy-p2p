@@ -16,6 +16,17 @@ declare var finishStateChange :() => void;
 module UI {
 
   /**
+   * All possible view states for the UI to be in.
+   */
+  export enum View {
+    SPLASH,
+    ROSTER,
+    ACCESS,
+    OPTIONS,
+    CHAT
+  }
+
+  /**
    * The User Interface class.
    *
    * Contains UI-related state and functions, which angular will access.
@@ -25,14 +36,14 @@ module UI {
    */
   export class UserInterface implements uProxy.UIAPI {
 
+    public view :View;
+    private splashPage :boolean;
+
     notifications = 0;
-    // TODO: splash should be set by state.
-    accessView = false;
-    splashPage = false;
     advancedOptions = false;
     searchBar = true;
     search = '';
-    chatView = false;
+    // chatView = false;
     numClients = 0;
     myName = '';
     myPic = null;
@@ -51,6 +62,10 @@ module UI {
     constructor(
         public core   :uProxy.CoreAPI,
         public notify :INotifications) {
+
+      this.view = View.SPLASH;
+      this.splashPage = true;
+
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
@@ -95,6 +110,14 @@ module UI {
     update = (type:uProxy.Update, data?:any) => {
       // TODO: Implement.
     }
+
+    // ------------------------------- Views ----------------------------------
+    public isSplash = () : boolean => {
+      return this.splashPage;
+    }
+    public isRoster = () : boolean => { return View.ROSTER == this.view; }
+    public isAccess = () : boolean => { return View.ACCESS == this.view; }
+
 
     // Keep track of currently viewed contact and instance.
     public contact :UI.User = null;
@@ -200,10 +223,10 @@ module UI {
      * Sets the UI's 'current' User and Instance, if it exists.
      */
     focusOnContact = (contact:UI.User) => {
+      this.view = View.ACCESS;
       console.log('focusing on contact ' + contact);
       this.contact = contact;
       this.dismissNotification(contact);
-      this.accessView = true;
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
       if (contact.instances.length > 0) {
@@ -212,16 +235,17 @@ module UI {
     }
 
     /*
-     * Going back from the contact view to the roster view.
+     * Change from the detailed access view back to the roster view.
+     * Clears the 'current user'.
      */
     returnToRoster = () => {
+      this.view = View.ROSTER;
       console.log('returning to roster! ' + this.contact);
       if (this.contact && this.contact.hasNotification) {
         console.log('sending notification seen');
         this.dismissNotification(this.contact);  // Works if there *is* a contact.
         this.contact = null;
       }
-      this.accessView = false;
     }
 
     setNotifications = (n) => {

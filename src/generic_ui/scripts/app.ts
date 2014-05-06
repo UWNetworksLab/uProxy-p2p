@@ -102,6 +102,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           case 'google': return 'G+';
           case 'facebook': return 'FB';
           case 'xmpp': return 'XMPP';
+          case 'websocket': return 'websocket';
           default:
             console.warn("No prettification for network: " + JSON.stringify(networkId));
         }

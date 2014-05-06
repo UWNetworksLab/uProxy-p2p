@@ -19,7 +19,7 @@
   <!-- TODO: i18n -->
   <body><div ng-cloak ng-controller="MainCtrl">
 
-    <div id="login-splash" ng-show="showingSplashPage()">
+    <div id="login-splash" ng-show="ui.isSplash()">
       <div class='uproxy-banner'>
       <img src='icons/uproxy-128.png'>proxy
       </div>
@@ -41,7 +41,7 @@
           This description will be visible to friends with UProxy.
         </p>
 
-        <div id="networks-box" ng-show="showingSplashPage()">
+        <div id="networks-box" ng-show="ui.isSplash()">
           <h3>Networks</h3>
 
           <div class="network-btn">
@@ -66,12 +66,12 @@
     <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
       <span ng-show="ui.splashPage && ui.accessView">Show the contact again.</span>
       <span ng-show="ui.splashPage && !ui.accessView">Show the contact list.</span>
-      <span ng-hide="ui.splashPage">Show the setup page.</span>
+      <span ng-show="ui.isRoster()">Show the setup page.</span>
     </div>
 
-    <div id="main-view" ng-hide="showingSplashPage()">
+    <div id="main-view" ng-hide="ui.isSplash()">
       <div id="header">
-        <div id="roster-header" ng-hide="ui.accessView">
+        <div id="roster-header" ng-show="ui.isRoster()">
           <div id="actions">
             <button id="search-btn" type="search"
                     ng-class="{on:ui.searchBar}"
@@ -116,7 +116,7 @@
           </input>
         </div>
 
-        <div id="contact-header" ng-show="ui.accessView">
+        <div id="contact-header" ng-show="ui.isAccess()">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
           <h1>{{ui.contact.name}}</h1>
         </div>
@@ -138,10 +138,10 @@
           </span>
         </div>
 
-        <div id="roster-frame" ng-hide="ui.accessView">
+        <div id="roster-frame" ng-show="ui.isRoster()">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
-                ng-click="viewContact(contact)"
+                ng-click="ui.focusOnContact(contact)"
                 ng-hide="ui.contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"
                 >
