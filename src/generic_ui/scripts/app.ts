@@ -19,8 +19,8 @@
 
 // TODO: remove this once extension model is cleaned up.
 interface modelForApp extends UI.Model {
-  clientToInstance :{ [clientId :string] :string };
-  instances :{ [instanceId: string] :Instance};
+  clientToInstance :{[clientId :string] :string };
+  instances :{[instanceId :string] :Instance};
 }
 
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
