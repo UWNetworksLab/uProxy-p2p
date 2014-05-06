@@ -2,13 +2,13 @@
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/lib/angular.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
 // TODO: Type these.
 declare var state:UI.Model;
-declare var angular:any;
 
 // Initialize model object to a mock. (state.js)
 var model = state;  // || { identityStatus: {} };
@@ -80,4 +80,3 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .constant('ui', ui)
   .constant('model', model)
   .constant('core', mockCore)
-  .constant('roster', null);
