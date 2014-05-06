@@ -61,6 +61,9 @@ class MockCore implements uProxy.CoreAPI {
     console.log('Notification seen for ' + userId);
   }
   onUpdate(update, handler) {
+    // In the 'real uProxy', this is where the UI installs update handlers for
+    // events received from the Core. Since this is a standalone UI, there is
+    // only a mock core, and all interaction is fake beyond this point.
   }
 }
 
