@@ -85,54 +85,54 @@ describe('Social.Network', () => {
       network.login().then(() => {
         expect(network['myClient']).toEqual(
             freedomClientToUproxyClient(fakeFreedomClient));
-        expect(network['online']).toEqual(true);
+        expect(network.isOnline()).toEqual(true);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
     });
 
-    it('warns if network login fails', (done) => {
-      network['online'] = false;
-      // Pretend the social API's login failed.
-      spyOn(network['api'], 'login').and.returnValue(
-          Promise.reject(new Error('mock failure')));
-      spyOn(network, 'notifyUI');
-      network.login().then(() => {
-        expect(console.warn).toHaveBeenCalledWith('Could not login to mock');
-        expect(network.notifyUI).not.toHaveBeenCalled();
-      }).then(done);
-    });
-
     it('does nothing to login if already logged in', (done) => {
-      network['online'] = true;
       spyOn(network, 'notifyUI');
       network.login().then(() => {
-        expect(network['online']).toEqual(true);
+        expect(network.isOnline()).toEqual(true);
         expect(network.notifyUI).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith('Already logged in to mock');
       }).then(done);
     });
 
+    it('warns if network login fails', (done) => {
+      loginPromise = network['loggedIn_'];
+      network['loggedIn_'] = null;
+      // Pretend the social API's login failed.
+      spyOn(network['api'], 'login').and.returnValue(
+          Promise.reject(new Error('mock failure')));
+      spyOn(network, 'notifyUI');
+      network.login().catch(() => {
+        expect(console.warn).toHaveBeenCalledWith('Could not login to mock');
+        expect(network.notifyUI).not.toHaveBeenCalled();
+      }).then(done);
+    });
+
     it('can logout', (done) => {
-      network['online'] = true;
+      network['loggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['api'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network['myClient']).toEqual(null);
-        expect(network['online']).toEqual(false);
+        expect(network.isOnline()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
     });
 
-    it('does nothing to logout if already logged out', () => {
-      network['online'] = false;
+    it('does nothing to logout if already logged out', (done) => {
+      network['loggedIn_'] = null;
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network['myClient']).toEqual(null);
-        expect(network['online']).toEqual(false);
+        expect(network.isOnline()).toEqual(false);
         expect(network.notifyUI).not.toHaveBeenCalled();
-        expect(console.warn).toHaveBeenCalledWith('Already loggout out of mock');
-      });
+        expect(console.warn).toHaveBeenCalledWith('Already logged out of mock');
+      }).then(done);
     });
 
   });  // describe login & logout
@@ -144,13 +144,13 @@ describe('Social.Network', () => {
     var fakeLoginFulfill :Function;
 
     it('delays handler until login', () => {
+      expect(network.isOnline()).toEqual(false);
       spyOn(network['api'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
           }));
       spyOn(network, 'handleUserProfile');
-      expect(network['online']).toEqual(false);
-      expect(network['isOnline']).toBeDefined();
+      expect(network['loggedIn_']).toBeDefined();
       network.login();  // Will complete in the next spec.
       userProfilePromise = network['handleUserProfile_']({
         userId: 'mockuser',

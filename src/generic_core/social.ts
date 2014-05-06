@@ -98,9 +98,8 @@ module Social {
     // logged out.
     private myClient   :UProxyClient.State;
     private myInstance :Core.LocalInstance;
-    private online     :boolean;
     // Promise which delays all message handling until fully logged in.
-    private isOnline   :Promise<void>;
+    private loggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     /**
@@ -111,8 +110,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
-      this.online = false;
-      this.isOnline = null;
+      this.loggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
@@ -139,7 +137,7 @@ module Social {
      * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
-      if (this.online) {
+      if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
         return Promise.resolve();
       }
@@ -150,20 +148,18 @@ module Social {
         interactive: true,
         rememberLogin: remember
       };
-      this.isOnline = this.api.login(request)
+      this.loggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
-            this.online = true;
             this.myClient = freedomClientToUproxyClient(freedomClient);
             this.log('logged in uProxy as ' + JSON.stringify(this.myClient));
           });
-      return this.isOnline
+      return this.loggedIn_
           .then(this.notifyUI)
           .catch(() => {
             console.warn('Could not login to ' + this.name);
-            this.online = false;
+            return Promise.reject(new Error('Could not login.'));
           });
-      // return this.isOnline;
     }
 
     /**
@@ -171,15 +167,19 @@ module Social {
      * already logged-out.
      */
     public logout = () : Promise<void> => {
-      if (!this.online) {
+      if (!this.isOnline()) {
         console.warn('Already logged out of ' + this.name);
         return Promise.resolve();
       }
+      this.loggedIn_ = null;
       return this.api.logout().then(() => {
-        this.online = false;
         this.myClient = null;
         this.log('logged out.');
       }).then(this.notifyUI);
+    }
+
+    public isOnline = () : Boolean => {
+      return Boolean(this.loggedIn_);
     }
 
     public getLocalInstance = () : Core.LocalInstance => {
@@ -194,7 +194,7 @@ module Social {
     public notifyUI = () => {
       var payload :UI.NetworkMessage = {
         name: this.name,
-        online: this.online
+        online: Boolean(this.loggedIn_)
       }
       ui.update(uProxy.Update.NETWORK, payload);
     }
@@ -239,11 +239,11 @@ module Social {
      */
     private handleUserProfile_ = (profile :freedom.Social.UserProfile)
         : Promise<void> => {
-      if (!this.isOnline) {
+      if (!this.loggedIn_) {
         this.error('Cannot handle UserProfile if not logged on.');
         return;
       }
-      return this.isOnline.then(() => {
+      return this.loggedIn_.then(() => {
         this.log('received UserProfile for ' + profile.name);
         this.handleUserProfile(profile);
       })
@@ -281,11 +281,11 @@ module Social {
      */
     private handleClientState_ = (freedomClient:freedom.Social.ClientState)
         : Promise<void> => {
-      if (!this.isOnline) {
+      if (!this.loggedIn_) {
         this.error('Cannot handle ClientState if not logged on.');
         return;
       }
-      return this.isOnline.then(() => {
+      return this.loggedIn_.then(() => {
         this.log('received ClientState for ' + JSON.stringify(freedomClient));
         this.handleClientState(freedomClient);
       })
@@ -315,11 +315,11 @@ module Social {
      */
     private handleMessage_ = (incoming :freedom.Social.IncomingMessage)
         : Promise<void> => {
-      if (!this.isOnline) {
+      if (!this.loggedIn_) {
         this.error('Cannot handle Message if not logged on.');
         return;
       }
-      return this.isOnline.then(() => {
+      return this.loggedIn_.then(() => {
         this.log('received Message: ' + JSON.stringify(incoming));
         this.handleMessage(incoming);
       });
