@@ -23,4 +23,3 @@ tmp
 node_modules
 third_party/lib
 test_output
-src/interfaces/lib
