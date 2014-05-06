@@ -9,16 +9,6 @@
 /// <reference path='consent.ts' />
 /// <reference path='social.ts' />
 
-interface ConsentState {
-  asClient :Consent.ClientState;
-  asProxy  :Consent.ProxyState;
-}
-
-interface ConsentMessage {
-  instanceId :string;
-  consent    :Consent.State;
-}
-
 module Core {
 
   /**
@@ -169,6 +159,18 @@ module Core {
         isRequesting: Consent.ProxyState.userIsRequesting(this.consent.asProxy),
         isOffering: Consent.ClientState.userIsOffering(this.consent.asClient)
       };
+    }
+
+    /**
+     * Get the raw attributes of the instance to be sent over to the UI.
+     */
+    public serialize = () : UI.Instance => {
+      return {
+        instanceId:  this.instanceId,
+        description: this.description,
+        keyHash:     this.keyHash,
+        consent:     this.consent
+      }
     }
 
   }  // class Core.RemoteInstance

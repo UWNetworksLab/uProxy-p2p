@@ -200,3 +200,8 @@ function extractCryptoKey(sdpHeaders) {
 
   return null;
 }
+
+
+function valuesOf(dict:{[keys:string]:any}) {
+  return Object.keys(dict).map((key) => { return dict[key]; });
+}

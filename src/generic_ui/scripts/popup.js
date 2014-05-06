@@ -42,30 +42,23 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
         ui.instanceUnwatch();
         ui.instanceUnwatch = null;
       }
-      ui.instanceUnwatch = $scope.$watch(
-          'model.instances["' + instanceId + '"]', function() {
-            ui.instance = $scope.model.instances[instanceId];
-      });
+      // ui.instanceUnwatch = $scope.$watch(
+          // 'model.instances["' + instanceId + '"]', function() {
+            // ui.instance = $scope.model.instances[instanceId];
+      // });
     };
 
     // Open the detailed contact view, with a potential instance. Set the
     // currently focused instance and ensure angular bindings work.
     $scope.viewContact = function(c) {
-      for (var clientId in c.clients) {
-        if ($scope.isMessageableUproxyClient(c.clients[clientId])) {
-          console.log("viewContact: sendInstance: " + clientId);
-          $scope.sendInstance(clientId);
-        }
-      }
-      $scope.ui.focusOnContact(c);
+      // Send our instance message to the contact if they are uProxy enabled.
+      // if (c.canUProxy) {
+        // console.log('viewContact: sendInstance: ' + clientId);
+        // core.sendInstance(clientId);
+      // }
+      ui.focusOnContact(c);
       syncContactWatch(c.userId);
-      var instance = $scope.instanceOfContact(c);
-      if (instance) {
-        ui.instance = instance;
-        syncInstanceWatch(instance.instanceId);
-      } else {
-        ui.instance = null;
-      }
+      syncInstanceWatch(instance.instanceId);
       console.log('current instance ', ui.instance);
       if (!ui.isProxying) {
         ui.proxy = null;

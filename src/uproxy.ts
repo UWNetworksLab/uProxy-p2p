@@ -107,6 +107,8 @@ module uProxy {
     // TODO: make network an actual type
     login(network:string):void;
     logout(network:string):void;
+
+    onUpdate(update:Update, handler:Function):void;
   }
 
   /**
@@ -151,7 +153,7 @@ module UProxyClient {
     // (i.e. can be useful to invite others to your freedom.js app)
     ONLINE_WITH_OTHER_APP,
   }
-  
+
   // Status of a client connected to a social network.
   export interface State {
     userId    :string;

@@ -95,6 +95,7 @@ module Core {
       }
       this.name = profile.name;
       this.profile = profile;
+      this.notifyUI();
     }
 
     /**
@@ -176,6 +177,7 @@ module Core {
               ' with invalid status: (' + client.status + ')');
           break;
       }
+      this.notifyUI();
     }
 
     /**
@@ -309,6 +311,23 @@ module Core {
         delete this.instanceToClientMap_[instanceId];
       }
       delete this.clientToInstanceMap_[clientId];
+    }
+
+    private notifyUI = () => {
+      // Update the UI for this user, but only if the user is ready to be
+      // visible on the UI.
+      if ('pending' == this.name) {
+        console.log('Not sending User ' + this.userId + ' yet');
+        return;
+      }
+      ui.update(uProxy.Update.USER_FRIEND, <UI.UserMessage>{
+        network: this.network.name,
+        user: this.profile,
+        clients: valuesOf(this.clients),
+        instances: valuesOf(this.instances_).map((instance) => {
+          return instance.serialize();
+        })
+      });
     }
 
   }  // class User

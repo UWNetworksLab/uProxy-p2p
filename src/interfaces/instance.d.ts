@@ -11,6 +11,17 @@
  */
 
 
+interface ConsentState {
+  asClient :Consent.ClientState;
+  asProxy  :Consent.ProxyState;
+}
+
+interface ConsentMessage {
+  instanceId :string;
+  consent    :Consent.State;
+}
+
+
 interface RosterInfo {
   userId  :string;
   name    :string;

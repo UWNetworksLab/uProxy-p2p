@@ -63,6 +63,11 @@ class UIConnector implements uProxy.UIAPI {
         console.log('update [USER]', <UI.UserMessage>data);
         break;
 
+      // TODO: re-enable once the CLIENT-specific messages work.
+      // case uProxy.Update.CLIENT:
+        // console.log('update [CLIENT]', <UI.ClientMessage>data);
+        // break;
+
       // TODO: Implement the finer-grained Update messages.
       default:
         console.warn('Not yet implemented.');

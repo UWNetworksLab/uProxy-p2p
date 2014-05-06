@@ -98,7 +98,8 @@ module Social {
     // logged out.
     private myClient   :UProxyClient.State;
     private myInstance :Core.LocalInstance;
-    private online     :boolean;
+    // Promise which delays all message handling until fully logged in.
+    private loggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     /**
@@ -109,7 +110,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
-      this.online = false;
+      this.loggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       this.myClient = null;
@@ -123,10 +124,10 @@ module Social {
       }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
-      this.api.on('onUserProfile', this.handleUserProfile);
-      this.api.on('onClientState', this.handleClientState);
-      this.api.on('onMessage', this.handleMessage);
-      console.log('Preparing Social.Network ' + name);
+      this.api.on('onUserProfile', this.delayForLogin(this.handleUserProfile));
+      this.api.on('onClientState', this.delayForLogin(this.handleClientState));
+      this.api.on('onMessage',     this.delayForLogin(this.handleMessage));
+      this.log('prepared Social.Network.');
       this.notifyUI();
     }
 
@@ -136,7 +137,7 @@ module Social {
      * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
-      if (this.online) {
+      if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
         return Promise.resolve();
       }
@@ -146,15 +147,19 @@ module Social {
         url: 'https://github.com/uProxy/uProxy',
         interactive: true,
         rememberLogin: remember
-      }
-      return this.api.login(request).then((freedomClient :freedom.Social.ClientState) => {
-        // Upon successful login, save local client information.
-        this.online = true;
-        this.myClient = freedomClientToUproxyClient(freedomClient);
-      }).then(this.notifyUI)
-        .catch(() => {
-          console.warn('Could not login to ' + this.name);
-        });
+      };
+      this.loggedIn_ = this.api.login(request)
+          .then((freedomClient :freedom.Social.ClientState) => {
+            // Upon successful login, save local client information.
+            this.myClient = freedomClientToUproxyClient(freedomClient);
+            this.log('logged in uProxy as ' + JSON.stringify(this.myClient));
+          });
+      return this.loggedIn_
+          .then(this.notifyUI)
+          .catch(() => {
+            this.error('Could not login.');
+            return Promise.reject(new Error('Could not login.'));
+          });
     }
 
     /**
@@ -162,15 +167,38 @@ module Social {
      * already logged-out.
      */
     public logout = () : Promise<void> => {
-      if (!this.online) {
+      if (!this.isOnline()) {
         console.warn('Already logged out of ' + this.name);
         return Promise.resolve();
       }
+      this.loggedIn_ = null;
       return this.api.logout().then(() => {
-        this.online = false;
         this.myClient = null;
-        console.log(this.name + ': logged out.');
+        this.log('logged out.');
       }).then(this.notifyUI);
+    }
+
+    public isOnline = () : boolean => {
+      return Boolean(this.loggedIn_);
+    }
+
+    /**
+     * Functor which delays until the network is logged on.
+     * Resulting function will instantly fail if not already in the process of
+     * logging in.
+     * TODO: This should either be factored into a wrapper class to 'sanitize'
+     * social providers async behavior, or directly into freedom.
+     */
+    private delayForLogin = (handler :Function) => {
+      return (arg :any) => {
+        if (!this.loggedIn_) {
+          this.error('Not logged in.');
+          return;
+        }
+        return this.loggedIn_.then(() => {
+          handler(arg);
+        });
+      }
     }
 
     public getLocalInstance = () : Core.LocalInstance => {
@@ -179,11 +207,13 @@ module Social {
 
     /**
      * Helper which tells the UI about the existence / status of this network.
+     * This should only be called upon logging in/out. It does not tell the UI
+     * about the roster.
      */
     public notifyUI = () => {
       var payload :UI.NetworkMessage = {
         name: this.name,
-        online: this.online
+        online: this.isOnline()
       }
       ui.update(uProxy.Update.NETWORK, payload);
     }
@@ -200,30 +230,27 @@ module Social {
      */
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
-      var uiUpdate :UI.UserMessage = {  // To be sent to the UI.
-        network: this.name,
-        user:    profile
-      };
-      // Check if this is ourself.
+      // Check if this is ourself, in which case we update our own info.
       if (this.myClient && userId == this.myClient.userId) {
-        console.log('<-- XMPP(self) [' + profile.name + ']\n', profile);
+        this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
         // Send our own InstanceMessage to any queued-up clients.
         if (UProxyClient.Status.ONLINE == this.myClient.status) {
           this.flushQueuedInstanceMessages();
         }
         // Update UI with own information.
-        ui.update(uProxy.Update.USER_SELF, uiUpdate);
+        ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
+          network: this.name,
+          user:    profile
+        });
         return;
       }
-
-      // Otherwise, this is a remote contact...
-      console.log('<--- XMPP(friend) [' + profile.name + ']', profile);
+      // Otherwise, this is a remote contact. Add them to the roster if
+      // necessary, and update their profile.
+      this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
       if (!(userId in this.roster)) {
         this.addUser_(userId);
       }
       this.getUser(userId).update(profile);
-      // Update UI with friend's information.
-      ui.update(uProxy.Update.USER_FRIEND, uiUpdate);
     }
 
     /**
@@ -233,14 +260,21 @@ module Social {
      * It is possible that the roster entry does not yet exist for a user,
      * yet we receive a client state from them. In this case, create a
      * place-holder user until we receive more user information.
+     *
+     * Assumes we are in fact fully logged in.
      */
-    public handleClientState = (freedomClient :freedom.Social.ClientState) => {
+    public handleClientState = (freedomClient :freedom.Social.ClientState)
+        : void => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
-      if (!(client.userId in this.roster)) {
-        console.log(
-            'network ' + this.name + ' received ClientState for userId: ' +
-            client.userId + ' before UserProfile.');
+      if (this.myClient && client.userId == this.myClient.userId) {
+        // TODO: Should we do anything in particular for our own client?
+        this.log('received own ClientState: ' + JSON.stringify(client));
+        return;
+      }
+      if (this.isNewFriend_(client.userId)) {
+        this.log('received ClientState for ' + client.userId +
+                 ' before UserProfile.');
         this.addUser_(client.userId);
       }
       this.getUser(client.userId).handleClient(client);
@@ -254,12 +288,11 @@ module Social {
      * yet we receive a message from them. In this case, create a place-holder
      * user until we receive more user information.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage) => {
+    public handleMessage = (incoming :freedom.Social.IncomingMessage)
+        : void => {
       var userId = incoming.from.userId;
-      if (!(userId in this.roster)) {
-        console.log(
-            'network ' + this.name + ' received message for unexpected ' +
-            'userId: ' + userId);
+      if (this.isNewFriend_(userId)) {
+        this.log('received Message for ' + userId + ' before UserProfile.');
         this.addUser_(userId);
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
@@ -270,10 +303,27 @@ module Social {
      * Sometimes Network receives messages or ClientStates for userIds for which
      * we've yet to receive a UserProfile. In any case, we can begin with an
      * inital user.
+     *
+     * Assumes that |userId| is in fact a new user. (There will be a problem if
+     * it overwrites an existing user in the roster.)
      */
     private addUser_ = (userId :string) => {
-      console.log(this.name + ': added ' + userId);
+      if (!this.isNewFriend_(userId)) {
+        this.error(this.name + ': cannot add already existing user!');
+        return;
+      }
+      this.log('added "' + userId + '" to roster.');
       this.roster[userId] = new Core.User(this, userId);
+    }
+
+    /**
+     * Helper to determine if |userId| is a "new friend" to be adde to the
+     * roster, and also isn't just our own userId, since we can receive XMPP
+     * messages for ourself too.
+     */
+    private isNewFriend_ = (userId:string) : boolean => {
+      return !(this.myClient && userId == this.myClient.userId) &&
+             !(userId in this.roster);
     }
 
     /**
@@ -350,7 +400,7 @@ module Social {
         handshakes.push(this.send(clientId, handshake));
       })
       return Promise.all(handshakes).then(() => {
-        console.log('Sent ' + cnt + ' instance handshake(s).');
+        this.log('sent ' + cnt + ' instance handshake(s).');
       });
     }
 
@@ -369,6 +419,18 @@ module Social {
       var msgString = JSON.stringify(msg);
       return this.api.sendMessage(clientId, msgString);
     }
+
+    /**
+     * Helper which logs messages clearly belonging to this Social.Network.
+     */
+    private log = (msg:string) : void => {
+      console.log('[' + this.name + '] ' + msg);
+    }
+
+    private error = (msg:string) : void => {
+      console.error('!!! [' + this.name + '] ' + msg);
+    }
+
   }  // class Social.Network
 }  // module Social
 

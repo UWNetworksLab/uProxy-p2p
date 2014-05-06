@@ -30,6 +30,7 @@ proxyConfig.clearConfig();
 // Singleton model for angularjs hooks on both popup and options.
 var model :UI.Model = {
   networks: {},
+  // 'global' roster, which is just the concatenation of all network rosters.
   roster: {}
 };
 
@@ -96,51 +97,6 @@ function initUI() : UI.UserInterface {
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   core.connect();
   var notifications = new ChromeNotifications();
-
-  // Attach handlers for UPDATES received from core.
-  core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
-    console.log('Received uProxy.Update.ALL:', state);
-    // TODO: Implement this after a better payload message is implemented.
-    // There is now a difference between the UI Model and the state object
-    // from the core, so one-to-one mappinsg from the old json-patch code cannot
-    // work.
-    finishStateChange();
-  });
-
-  core.onUpdate(uProxy.Update.NETWORK, (network :UI.NetworkMessage) => {
-    console.log('uProxy.Update.NETWORK', network, model.networks);
-    console.log(model);
-    model.networks[network.name] = {
-      name:   network.name,
-      online: network.online,
-      roster: {}
-    }
-  });
-
-  // TODO: Implement the rest of the fine-grained state updates.
-  // (We begin with the simplest, total state update, above.)
-
-  // TODO: factor into the UI class.
-  function addUserToModel(payload :UI.UserMessage) {
-    var network = model.networks[payload.network];
-    if (!network) {
-      console.warn('Received USER for non-existing network.');
-      return;
-    }
-    var user = payload.user;
-    network.roster[user.userId] = user;
-    model.roster[user.userId] = user;
-  };
-
-  // Attach handlers for USER updates.
-  core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
-    console.log('uProxy.Update.USER_SELF:', payload);
-    addUserToModel(payload);
-  });
-  core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
-    console.log('uProxy.Update.USER_FRIEND:', payload);
-    addUserToModel(payload);
-  });
 
   return new UI.UserInterface(core, notifications);
 }
