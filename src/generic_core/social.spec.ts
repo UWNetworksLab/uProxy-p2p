@@ -140,8 +140,12 @@ describe('Social.Network', () => {
   describe('handler promise delays', () => {
 
     // Hijack the social api login promise to delay at the right time.
-    var userProfilePromise :Promise<void>;
+    var handlerPromise :Promise<void>;
     var fakeLoginFulfill :Function;
+    var foo = jasmine.createSpyObj('foo', [
+        'bar',
+    ]);
+    // var delayed :Function;
 
     it('delays handler until login', () => {
       expect(network.isOnline()).toEqual(false);
@@ -149,26 +153,17 @@ describe('Social.Network', () => {
           new Promise((F, R) => {
             fakeLoginFulfill = F;
           }));
-      spyOn(network, 'handleUserProfile');
       expect(network['loggedIn_']).toBeDefined();
       network.login();  // Will complete in the next spec.
-      userProfilePromise = network['handleUserProfile_']({
-        userId: 'mockuser',
-        name: 'mock1',
-        timestamp: 123456
-      });
-      expect(network.handleUserProfile).not.toHaveBeenCalled();
+      // handlerPromise = delayed('hooray');
+      handlerPromise = network['delayForLogin'](foo.bar)('hooray');
+      expect(foo.bar).not.toHaveBeenCalled();
     });
 
     it('fires handler once logged-in', (done) => {
-      spyOn(network, 'handleUserProfile');
       fakeLoginFulfill(fakeFreedomClient);
-      userProfilePromise.then(() => {
-        expect(network.handleUserProfile).toHaveBeenCalledWith({
-          userId: 'mockuser',
-          name: 'mock1',
-          timestamp: 123456
-        });
+      handlerPromise.then(() => {
+        expect(foo['bar']).toHaveBeenCalledWith('hooray');
       }).then(done);
     });
 

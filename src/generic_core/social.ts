@@ -124,9 +124,9 @@ module Social {
       }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
-      this.api.on('onUserProfile', this.handleUserProfile_);
-      this.api.on('onClientState', this.handleClientState_);
-      this.api.on('onMessage', this.handleMessage_);
+      this.api.on('onUserProfile', this.delayForLogin(this.handleUserProfile));
+      this.api.on('onClientState', this.delayForLogin(this.handleClientState));
+      this.api.on('onMessage',     this.delayForLogin(this.handleMessage));
       this.log('prepared Social.Network.');
       this.notifyUI();
     }
@@ -182,6 +182,21 @@ module Social {
       return Boolean(this.loggedIn_);
     }
 
+    /**
+     * Functor which delays until the network is logged on.
+     */
+    private delayForLogin = (handler :Function) => {
+      return (arg :any) => {
+        if (!this.loggedIn_) {
+          this.error('Not logged in.');
+          return;
+        }
+        return this.loggedIn_.then(() => {
+          handler(arg);
+        });
+      }
+    }
+
     public getLocalInstance = () : Core.LocalInstance => {
       return this.myInstance;
     }
@@ -235,21 +250,6 @@ module Social {
     }
 
     /**
-     * Wrapper which ensures we are logged in before handling any profiles.
-     */
-    private handleUserProfile_ = (profile :freedom.Social.UserProfile)
-        : Promise<void> => {
-      if (!this.loggedIn_) {
-        this.error('Cannot handle UserProfile if not logged on.');
-        return;
-      }
-      return this.loggedIn_.then(() => {
-        this.log('received UserProfile for ' + profile.name);
-        this.handleUserProfile(profile);
-      })
-    }
-
-    /**
      * Handler for receiving 'onClientState' messages. Passes these messages to
      * the relevant user, which will manage its own clients.
      *
@@ -277,21 +277,6 @@ module Social {
     }
 
     /**
-     * Wrapper which ensures we are logged in before handling any clients.
-     */
-    private handleClientState_ = (freedomClient:freedom.Social.ClientState)
-        : Promise<void> => {
-      if (!this.loggedIn_) {
-        this.error('Cannot handle ClientState if not logged on.');
-        return;
-      }
-      return this.loggedIn_.then(() => {
-        this.log('received ClientState for ' + JSON.stringify(freedomClient));
-        this.handleClientState(freedomClient);
-      })
-    }
-
-    /**
      * When receiving a message from a social provider, delegate it to the correct
      * user, which will delegate to the correct client.
      *
@@ -308,21 +293,6 @@ module Social {
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
       this.getUser(userId).handleMessage(incoming.from.clientId, msg);
-    }
-
-    /**
-     * Wrapper which ensures we are logged in before handling any messages.
-     */
-    private handleMessage_ = (incoming :freedom.Social.IncomingMessage)
-        : Promise<void> => {
-      if (!this.loggedIn_) {
-        this.error('Cannot handle Message if not logged on.');
-        return;
-      }
-      return this.loggedIn_.then(() => {
-        this.log('received Message: ' + JSON.stringify(incoming));
-        this.handleMessage(incoming);
-      });
     }
 
     /**
