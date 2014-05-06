@@ -15,19 +15,11 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
 
-'use strict';
-
-// TODO: remove this once extension model is cleaned up.
-interface modelForApp extends UI.Model {
-  clientToInstance :{[clientId :string] :string };
-  instances :{[instanceId :string] :Instance};
-}
-
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
   //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
-  .config(function ($provide) {
+  .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
       $sniffer.csp = true;
       return $sniffer;
@@ -35,30 +27,24 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   })
   // Run gets called every time an extension module is opened.
   .run([
-    '$filter',
-    '$http', 
     '$rootScope',
     // via dependencyInjector:
     'ui',
     'core',
     'onStateChange',
     'model',
-    function($filter, $http, $rootScope,
+    function($rootScope :UI.RootScope,
              ui :uProxy.UIAPI,
              core :uProxy.CoreAPI,
              // TODO: Change type to something cross-browser compatible
              onStateChange :chrome.Event,
-             model :modelForApp) {
+             model :UI.modelForAngular) {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
       $rootScope.ui = ui;
       $rootScope.core = core;
       $rootScope.model = model;
-      $rootScope.notifications = 0;
-
-      // Remember the state change hook.
-      $rootScope.update = onStateChange;
 
       $rootScope.isOnline = function(network) {
         return (model.networks[network] && model.networks[network].online)
