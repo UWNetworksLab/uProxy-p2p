@@ -18,7 +18,11 @@
 
   </head>
   <!-- TODO: i18n -->
-  <body><div ng-cloak ng-controller="MainCtrl">
+  <body>
+  <div id="debug" ng-show="ui.DEBUG">
+    <pre class="well">state: {{model|json}}</pre>
+  </div>
+  <div ng-cloak ng-controller="MainCtrl" id='uproxy-popup'>
 
     <div id="login-splash" ng-show="ui.isSplash()">
       <div class='uproxy-banner'>
@@ -131,10 +135,10 @@
 
       <div id="roster">
         <div id="roster-text">
-          <span ng-show="loggedOut()">
+          <span ng-show="ui.loggedOut()">
             You aren't logged in to a network. Goto your settings to login.
           </span>
-          <span ng-hide="loggedOut() || loggedIn()">
+          <span ng-hide="ui.loggedOut() || ui.loggedIn()">
             Loading...
           </span>
         </div>
@@ -377,14 +381,14 @@
       </span>
 
       <span id="status-network">
-        <span ng-show="loggedIn()">
+        <span ng-show="ui.loggedIn()">
           <span ng-repeat="identityState in model.identityStatus">
             <span ng-show="identityState.status == 'connecting'"> Connecting to </span>
             <span ng-show="identityState.status == 'online'"> Connected to </span>
             {{prettyNetworkName(identityState.network)}}
           </span>
         </span>
-        <span ng-show="! loggedIn()">Not Connected to a network</span>
+        <span ng-show="!ui.loggedIn()">Not Connected to a network</span>
       </span>
     </div>
 

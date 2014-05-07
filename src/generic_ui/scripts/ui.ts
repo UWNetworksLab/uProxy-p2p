@@ -36,6 +36,28 @@ module UI {
   }
 
   /**
+   * Structure of the uProxy UI model object:
+   * TODO: Probably put the model in its own file.
+   */
+  export interface Model {
+    networks :{ [name:string] :UI.Network };
+    // TODO: Other top-level generic info...
+
+    // This is a 'global' roster - a combination of all User Profiles.
+    // TODO: remove. The way the UI works will soon change drastically.
+    roster :{ [userId:string] :User }
+  }
+
+  /**
+   * Specific to one particular Social network.
+   */
+  export interface Network {
+    name   :string;
+    online :boolean;
+    roster :{ [userId:string] :User }
+  }
+
+  /**
    * The User Interface class.
    *
    * Contains UI-related state and functions, which angular will access.
@@ -44,6 +66,8 @@ module UI {
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
   export class UserInterface implements uProxy.UIAPI {
+
+    public DEBUG = false;  // Set to true to show the model in the UI.
 
     // Appearance.
     public view :View;
@@ -201,7 +225,6 @@ module UI {
      * roster.
      */
     contactIsFiltered = (user:UI.User) => {
-      console.log(user);
       var searchText = this.search,
           compareString = user.name.toLowerCase();
       // First, compare filters.
@@ -297,6 +320,30 @@ module UI {
       } else {
         model.networks[network.name].online = network.online;
       }
+    }
+
+    // Determine whether UProxy is connected to some network.
+    // TODO: Make these functional and write specs.
+    public loggedIn = () => {
+      for (var networkId in model.networks) {
+        if (model.networks[networkId].online) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // This is *NOT* the inverse of loggedIn, because it is possible to be
+    // "logging in"
+    // Not Logged-out if state is not logged out for any network.
+    public loggedOut = () => {
+      return false;
+      for (var networkId in model.networks) {
+        if (!model.networks[networkId].online) {
+          return false;
+        }
+      }
+      return true;
     }
 
     // Synchronize the data about the current user.

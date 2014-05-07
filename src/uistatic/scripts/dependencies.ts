@@ -60,9 +60,17 @@ class MockCore implements uProxy.CoreAPI {
   }
   login(network) {
     console.log('Logging in to', network);
+    ui['syncNetwork_']({
+      name: 'google',
+      online: true
+    });
   }
   logout(network) {
     console.log('Logging out of', network);
+    ui['syncNetwork_']({
+      name: 'google',
+      online: false
+    });
   }
   dismissNotification(userId) {
     console.log('Notification seen for ' + userId);
@@ -89,9 +97,10 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .constant('core', mockCore)
 
 // Fake a bunch of interactions from core.
+// Starts off being 'offline' to a network.
 ui['syncNetwork_']({
   name: 'google',
-  online: true
+  online: false
 });
 
 ui['syncUser_']({
@@ -101,6 +110,11 @@ ui['syncUser_']({
     name: 'Alice uProxy',
     timestamp: Date.now()
   },
-  clients: [],
-  instances: []
+  clients: [
+    UProxyClient.Status.ONLINE
+  ],
+  instances: [
+  ]
 });
+
+ui['DEBUG'] = true;
