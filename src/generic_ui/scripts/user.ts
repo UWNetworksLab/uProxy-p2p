@@ -51,8 +51,7 @@ module UI {
     /**
      * Update clients and instances.
      */
-    public refresh = (statuses:UProxyClient.Status[], instances:any[]) => {
-      this.instances = instances;
+    public refreshStatus = (statuses:UProxyClient.Status[]) => {
       // Is online if there is at least one client that is not 'OFFLINE'.
       this.online = statuses.some((status) => {
         return UProxyClient.Status.OFFLINE !== status;
@@ -64,6 +63,14 @@ module UI {
       console.log('Updated ' + this.name + ' - known to be: ' +
                   '\n online: ' + this.online +
                   '\n uproxy-enabled: ' + this.canUProxy);
+    }
+
+    /**
+     * Set the instances on this user.
+     * TODO: Type instances.
+     */
+    public setInstances = (instances:any[]) => {
+      this.instances = instances;
     }
 
   }  // class UI.User

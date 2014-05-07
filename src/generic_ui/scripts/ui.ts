@@ -326,15 +326,15 @@ module UI {
       // Update / create if necessary a user, both in the network-specific
       // roster and the global roster.
       var user :UI.User;
-      if (!(profile.userId in network.roster)) {
+      user = network.roster[profile.userId];
+      if (!user) {
         user = new UI.User(profile.userId);
-        user.update(profile);
         network.roster[profile.userId] = user;
         model.roster[profile.userId] = user;
       }
-      user = network.roster[profile.userId];
       user.update(profile);
-      user.refresh(payload.clients, payload.instances);
+      user.refreshStatus(payload.clients);
+      user.setInstances(payload.instances);
     };
     /*
       // TODO(uzimizu): Support multiple notifications, with messages.
@@ -348,9 +348,6 @@ module UI {
       isActiveClient = isActiveClient || 'running'==instance.status.client;
       isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
       break;  // TODO(uzimizu): Support multiple instances.
-    }
-      // Apply user-level flags.
-      // TODO: Deprecate this once we move to instance-centrism.
     }
     */
 

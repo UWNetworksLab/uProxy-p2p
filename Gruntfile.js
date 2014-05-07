@@ -355,6 +355,17 @@ module.exports = function(grunt) {
           outfile: 'test_output/_CoreSpecRunner.html',
           specs: 'build/generic_core/**/*.spec.js'
         }
+      },
+      generic_ui: {
+        src: FILES.jasmine_helpers
+            .concat([
+              'build/generic_ui/scripts/user.js'
+            ]),
+        options: {
+          keepRunner: true,
+          outfile: 'test_output/_UiSpecRunner.html',
+          specs: 'build/generic_ui/scripts/**/*.spec.js'
+        }
       }
     },
 
@@ -537,6 +548,11 @@ module.exports = function(grunt) {
     'build_generic_core',
     'typescript:mocks',
     'jasmine:generic_core'
+  ]);
+
+  taskManager.add('test_ui', [
+    'build_generic_ui',
+    'jasmine:generic_ui'
   ]);
 
   taskManager.add('test_chrome_extension', [
