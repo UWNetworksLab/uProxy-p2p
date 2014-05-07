@@ -64,11 +64,11 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
     $scope.toggleOptions = () => {
       // ui.view = UI.View.ROSTER;
       console.log('Viewing splash page');
-      ui.splashPage = !ui.splashPage;
+      ui.toggles.splash = !ui.toggles.splash;
     };
 
     $scope.toggleSearch = () => {
-      ui.searchBar = !ui.searchBar;
+      ui.toggles.search = !ui.toggles.search;
     };
 
     // Display the help tooltip for the filter.

@@ -64,8 +64,8 @@
         title="{{'options'|i18n}}">
     </button>
     <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-      <span ng-show="ui.splashPage && ui.accessView">Show the contact again.</span>
-      <span ng-show="ui.splashPage && !ui.accessView">Show the contact list.</span>
+      <span ng-show="ui.isSplash() && ui.isAccess()">Show the contact again.</span>
+      <span ng-show="ui.isSplash() && !ui.isAccess()">Show the contact list.</span>
       <span ng-show="ui.isRoster()">Show the setup page.</span>
     </div>
 
@@ -74,7 +74,7 @@
         <div id="roster-header" ng-show="ui.isRoster()">
           <div id="actions">
             <button id="search-btn" type="search"
-                    ng-class="{on:ui.searchBar}"
+                    ng-class="{on:ui.toggles.search}"
                     ng-click="toggleSearch()"></button>
             <button id="my-access" class="filter"
                     ng-mouseenter="showFilter('myAccess')"
@@ -109,7 +109,7 @@
           </div>
           <input type="text" id="search-contacts"
               placeholder="search contacts"
-              ng-show="ui.searchBar"
+              ng-show="ui.toggles.search"
               ng-model="ui.search"
               ng-blur="searchFocused=false"
               ng-focus="searchFocused=true">
@@ -167,7 +167,7 @@
         </div>
 
         <div class="contact-info" id="their-info"
-            ng-show="ui.accessView"
+            ng-show="ui.isAccess()"
             ng-mouseenter="theirInfoHovered=true"
             ng-mouseleave="theirInfoHovered=false">
           <img ng-show="ui.contact.imageData" class="contact-image"
@@ -187,7 +187,7 @@
               </button>
               <a class="chat-btn instance-btn"
                  ng-click="ui.chatView=!ui.chatView"
-                 ng-show="ui.accessView"
+                 ng-show="ui.isAccess()"
                  ng-mouseenter="chatButtonHovered=true"
                  ng-mouseleave="chatButtonHovered=false">
               </a>
@@ -200,7 +200,7 @@
           </div>
         </div>
 
-        <div id="access" ng-show="ui.accessView">
+        <div id="access" ng-show="ui.isAccess()">
           <div id="internets" class="bg-deco" ng-class="{
               active: 'running'==ui.instance.status.client ||
                       'running'==ui.instance.status.proxy}"
@@ -225,7 +225,7 @@
           {{ ui.contact.name }} does not have <b>uProxy</b>.
           </p>
 
-          <div ng-controller="InstanceActions" class="instance-actions" ng-show="ui.instance && ui.accessView">
+          <div ng-controller="InstanceActions" class="instance-actions" ng-show="ui.instance && ui.isAccess()">
 
             <div class="uproxy-box proxy"
                 ng-switch="ui.instance.trust.asProxy">
@@ -339,7 +339,7 @@
 
     </div>
 
-    <div class="contact-info" id="my-info" ng-show="ui.accessView">
+    <div class="contact-info" id="my-info" ng-show="ui.isAccess()">
       <img class="contact-image"
            ng-src='{{ui.myPic}}'>
     </div>

@@ -16,14 +16,22 @@ declare var finishStateChange :() => void;
 module UI {
 
   /**
-   * All possible view states for the UI to be in.
+   * Enumeration of mutually-exclusive view states.
    */
   export enum View {
-    SPLASH,
     ROSTER,
     ACCESS,
     OPTIONS,
     CHAT
+  }
+
+  /**
+   * Boolean toggles which influence other appearances.
+   */
+  export interface Toggles {
+    splash  :boolean;
+    options :boolean;
+    search  :boolean;
   }
 
   /**
@@ -36,14 +44,14 @@ module UI {
    */
   export class UserInterface implements uProxy.UIAPI {
 
+    // Appearance.
     public view :View;
-    private splashPage :boolean;
+    public toggles :Toggles;
 
     notifications = 0;
     advancedOptions = false;
-    searchBar = true;
+    // TODO: Pull search / filters into its own class.
     search = '';
-    // chatView = false;
     numClients = 0;
     myName = '';
     myPic = null;
@@ -63,8 +71,13 @@ module UI {
         public core   :uProxy.CoreAPI,
         public notify :INotifications) {
 
-      this.view = View.SPLASH;
-      this.splashPage = true;
+      // TODO: Determine the best way to describe view transitions.
+      this.view = View.ROSTER;
+      this.toggles = {
+        splash:  true,
+        options: false,
+        search:  true
+      };
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -112,9 +125,7 @@ module UI {
     }
 
     // ------------------------------- Views ----------------------------------
-    public isSplash = () : boolean => {
-      return this.splashPage;
-    }
+    public isSplash = () : boolean => { return this.toggles.splash; }
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
     public isAccess = () : boolean => { return View.ACCESS == this.view; }
 
@@ -132,7 +143,7 @@ module UI {
     oldDescription :string = '';
 
     // Initial filter state.
-    filters = {
+    public filters = {
         'online': true,
         'myAccess': false,
         'friendsAccess': false,
