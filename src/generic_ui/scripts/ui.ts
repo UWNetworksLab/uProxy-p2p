@@ -95,7 +95,7 @@ module UI {
     public toggles :Toggles;
 
     // Current 'focus'
-    public user :User;
+    public user :User = null;
 
     notifications = 0;
     advancedOptions = false;
@@ -127,7 +127,6 @@ module UI {
         options: false,
         search:  true
       };
-      this.user = null;
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
