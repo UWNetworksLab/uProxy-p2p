@@ -1,37 +1,29 @@
-UProxy
-======
+# uProxy
 
 [![Build Status](https://magnum.travis-ci.com/uProxy/uProxy.svg?token=HiP4RTme8LSvyrP9kNJq&branch=master)](https://magnum.travis-ci.com/uProxy/uProxy)
 
-[uProxy](uproxy.org) is a broswer extension that lets users share their internet
-connection.
+[uProxy](uproxy.org) is a broswer extension that lets users share their internet connection.
 
-See the
-[WHATS_WHAT_README](https://github.com/UWNetworksLab/UProxy/blob/master/WHATS_WHAT_README.md)
-for details on the directory layout and why it's structured that way..
-
-
-### Tools
+## Tools
 
 UProxy is built using the following tools:
-
+ - [Grunt](http://gruntjs.com/) for build tasks.
  - [TypeScript](http://www.typescriptlang.org/) as the primary language, which
    compiles to JavaScript. This does type checking and has some syntax
-   improvements on JS, while letting us incrementally migrate and easily include
-   external JS packages and frameworks.
- - [Grunt](http://gruntjs.com/) as the build system.
- - We use [Jasmine](http://pivotal.github.io/jasmine/) for testing.
- - We use [Bower](http://bower.io) to install libraries that we use in the UI
-   (specified in `bower.json`) including AngularJS.
+   improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
+ - [Jasmine](http://pivotal.github.io/jasmine/) for testing.
  - [AngularJS](http://angularjs.org) for UI coding.
- - [npm](https://www.npmjs.org/) for installing node modules that we use for our
-   build process.  (Specified in `package.json`)
  - [sass](http://sass-lang.com/) to write css more beautifully.
 
+To manage dependencies we use:
+ - [npm](https://www.npmjs.org/) for installing node modules that we use for our build process.  (Specified in `package.json`)
+ - [Bower](http://bower.io) to install libraries that we use in the UI
+   (specified in `bower.json`) including AngularJS.
 
-### Development setup
 
-#### Pre-Requirements to build uProxy
+## Development setup
+
+### Pre-Requirements to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
 modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/local)
@@ -66,9 +58,9 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - This is assuming you have `ruby` and `rubygems` installed.
 
 
-#### Setup of uProxy codebase
+### Setup of uProxy codebase
 
-1. Clone UProxy and its submodules (and its submodules' submodules...):
+1. Clone uProxy and its submodules (and its submodules' submodules...):
 `git clone https://github.com/UWNetworksLab/UProxy.git`
 
 2. Run `./setup.sh`. This will install all local dependencies,
@@ -76,7 +68,7 @@ as appropriate to run in Chrome and Firefox. The first time you run this, you'll
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh` again to update these dependencies.
 
-#### Installing and running uProxy in Chrome
+### Installing and running uProxy in Chrome
 
 1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
 
@@ -85,38 +77,33 @@ Note that if any local dependencies have changed (i.e. changes to bower dependen
 3. Click 'Load unpacked extension...' and select the 'build/chrome_extension' directory.
 
 
-#### Development and re-building uProxy
+### Development and re-building uProxy
 
-UProxy uses the Grunt build system for development. Here are a list
-of supported Grunt commands:
+uProxy uses the Grunt build system for its build tasks. Here is a list
+of uProxy's Grunt commands:
 
  *  `setup` - Installs local dependencies and sets up environment
- *  `build` - Builds everything, making stuff in the `build` directory.
-   *  `build_chrome` - Build uProxy for Chrome, both app and extension.
-   *  `build_firefox` - Build uProxy for Firefox.
+ *  `build` - Builds everything, making stuff in the `build` directory (and runns tests).
+   *  `build_chrome` - Build Chrome app and extension
+   *  `build_chrome_app` - Build just Chrome app
+   *  `build_chrome_extension` - Build just Chrome extension
+   *  `build_firefox` - Build just Firefox
    *  `build_uistatic` - Build the static ui.
  *  `clean` - Cleans up
  *  `watch` - Watch for changes and recompile as needed.
- *  `test` - Run all Jasmine specs.
+ *  `test` - Run unit tests
  *  `xpi` - Generates an .xpi for installation to Firefox.
- *  `everything` - 'setup', 'build', and 'test'
+ *  `everything` - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
 your distribution, then run `grunt watch`, which will rebuild as you make changes. (TODO: grunt watch is broken; fix it!)
 
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
-reject submissions.
+reject submissions. :)
 
 
-#### Testing in Firefox
-
-See [Setting up the development environment](https://developer.mozilla.org/en-US/Add-ons/Setting_up_extension_development_environment).
-
-To avoid generating and installing xpi for every change, run `ln -s [UPROXY_DIR]/firefox ~/.mozilla/firefox/[PROFILE]/extensions/uproxy@uproxy.org` to create a symbolic link of the extension in the profile's extensions folder. Each time you load firefox with this profile it will load UProxy from the files in your development directory.
-
-
-#### Building for Chrome
+### Building & running for Chrome
 
 These are the steps to try uProxy in the Chrome browser.
 
@@ -124,10 +111,10 @@ These are the steps to try uProxy in the Chrome browser.
   all the typescript and prepare the assets.
 
 - In Chrome, go to `chrome://extensions` and load both `/build/chrome/app` and
-  `build/chrome/extension`. You need both 
+  `build/chrome/extension`. You need both the uProxy Chrome App and the Extension.
 
 
-#### Fixing compilation and setup
+### Fixing compilation and setup
 
 The following hints may help you if it goes wrong and you need to debug and fix it.
 
@@ -138,3 +125,45 @@ The following hints may help you if it goes wrong and you need to debug and fix 
 - If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `bower install` and look out for error messages.
 
 - If things are not working, check that you have a recent version of bower, npm, and node.
+
+
+## Layout of files
+
+Configuration and setup files
+ * `setup.sh` a shell script, assumes you have `npm` installed, to setup uproxy (install and setup dependent libraries).
+ * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uproxy.
+ * `bower.json` specified dependent libraries from Bower.
+ * `package.json` specified dependent libraries from NPM.
+ * `.gitignore` what git should ignore
+ * `.bowerrc` tells bower where to put files
+ * `.travis.yml` Travis auto-testing
+* `tools` directory contains some typescript and javascript to help Grunt.
+
+Source code
+ * `src` holds all source code; no compiled files.
+ * `src/generic_ui` generic user interface code
+ * `src/generic_core` generic uproxy core-functionality code
+ * `src/chrome_app` code specific to the chrome app
+ * `src/chrome_extension` code specific to the chrome extension
+ * `src/firefox` code specific to filefox
+ * `third_party` holds external libraries we depend on that are copied into this repository.
+ * `node_modules` dynamically generated npm module dependencies.
+ * `scraps` temporary holding for sharing scraps of code.
+
+Dynamically created directories (`grunt clean` should remove them)
+ * `build` created by grunt tasks; holds the built code, but none of the code that was compiled.
+ * `dist` created by grunt tasks; holds final distirbution versions.
+ * `test_output` created by grunt tasks; holds test-output files.
+ * `.grunt` holds grunt cache stuff
+ * `.sass-cache` holds sass cache stuff
+
+## Glossary of frameworks you need to know about
+
+ * AngularJS - a UI framework for html/JS apps.
+ * Jasmine - a testing framework for JavaScript.
+ * Karma - a test runner or angularjs.
+ * Grunt (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building.
+ * NPM (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory.
+ * Bower (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
+ * Travis: a continnuous build system.
+ * Coveralls: a continnuous coverage checking system.
