@@ -1,0 +1,97 @@
+<div class="instance-actions" ng-show="ui.instance && ui.isAccess()">
+
+  <div class="uproxy-box proxy"
+      ng-switch="ui.instance.trust.asProxy">
+    <div ng-switch-when="yes">
+      <p class="uproxytip">You have access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-show="'off'==ui.instance.status.proxy"
+          ng-click="startAccess(ui.instance)">
+        Start
+      </button>
+      <div class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-show="'ready'==ui.instance.status.proxy">
+        Setting up proxy...
+      </div>
+      <button class="btn"
+          ng-hide="'off'==ui.instance.status.proxy"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="stopAccess(ui.instance)">
+        Stop
+      </button>
+    </div>
+    <div ng-switch-when="requested">
+      <p class="uproxytip">
+        Requesting access from {{ui.user.name}}...
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="cancelRequest(ui.instance)">
+        Cancel
+      </button>
+    </div>
+    <div ng-switch-when="offered">
+      <p class="uproxytip">They've offered you access.
+      </p>
+      <button class="btn black"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="acceptOffer(ui.instance)">
+        Accept
+      </button>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="declineOffer(ui.instance)">
+        Decline
+      </button>
+    </div>
+    <div ng-switch-default>
+      <p class="uproxytip">No access yet.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="requestAccess(ui.instance)">
+        Request
+      </button>
+    </div>
+  </div>
+
+  <div class="uproxy-box client"
+      ng-class="{active:'running'==ui.instance.status.client}"
+      ng-switch="ui.instance.trust.asClient">
+    <div ng-switch-when="no">
+      <p class="uproxytip">You have not granted them access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="offerAccess(ui.instance)">
+        Offer Access
+      </button>
+    </div>
+    <div ng-switch-when="requested">
+      <p class="uproxytip">They requested access through you.
+      </p>
+      <button class="btn black"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="grantAccess(ui.instance)">
+        Grant
+      </button>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="denyAccess(ui.instance)">
+        Ignore
+      </button>
+    </div>
+    <div ng-switch-default>
+      <p class="uproxytip">You've given them access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="revokeAccess(ui.instance)">
+        Revoke Access
+      </button>
+    </div>
+  </div>
+</div>

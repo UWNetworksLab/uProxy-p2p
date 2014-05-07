@@ -125,9 +125,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     }  // run function
   ])
-  // The consent directive handles all consent activity.
-  // .directive('uproxyConsent', () => {
-  // });
+  /*
+   * uProxy Consent directive handles all consent commands.
+   */
+  .directive('uproxyConsent', () => {
+    return {
+      restrict: 'E',
+      templateUrl: 'consent.html'
+    };
+  })
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
   .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
