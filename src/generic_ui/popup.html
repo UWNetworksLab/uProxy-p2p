@@ -10,6 +10,7 @@
     <script src="lib/angular-animate/angular-animate.js"></script>
     <script src="lib/angular-lodash/angular-lodash.js"></script>
 
+    <script src="scripts/user.js"></script>
     <script src="scripts/app.js"></script>
     <script src="scripts/popup.js"></script>
     <script src="scripts/state.js"></script>
@@ -141,7 +142,7 @@
         <div id="roster-frame" ng-show="ui.isRoster()">
           <ul class="contacts">
             <li ng-repeat="contact in model.roster"
-                ng-click="ui.focusOnContact(contact)"
+                ng-click="ui.focusOnUser(contact)"
                 ng-hide="ui.contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"
                 >
@@ -170,16 +171,16 @@
             ng-show="ui.isAccess()"
             ng-mouseenter="theirInfoHovered=true"
             ng-mouseleave="theirInfoHovered=false">
-          <img ng-show="ui.contact.imageData" class="contact-image"
-               ng-src='{{ui.contact.imageData?ui.contact.imageData:""}}'>
-          <img ng-hide="ui.contact.imageData" class="contact-image"
+          <img ng-show="ui.user.imageData" class="contact-image"
+               ng-src='{{ui.user.imageData?ui.user.imageData:""}}'>
+          <img ng-hide="ui.user.imageData" class="contact-image"
           >
           <div class="details" ng-show="theirInfoHovered">
             <div class="picCover"></div>
             <div class="description">
               <p>{{ui.instance.description}}</p>
-              <span ng-show="ui.contact.onGoogle"> G+ </span>
-              <span ng-show="ui.contact.onFB"> FB </span>
+              <span ng-show="ui.user.onGoogle"> G+ </span>
+              <span ng-show="ui.user.onFB"> FB </span>
             </div>
 
             <div class="mode-panel">
@@ -193,7 +194,7 @@
               </a>
               <div class="tool">
                 <p class="tip" ng-show="chatButtonHovered">
-                  Chat with {{ ui.contact.name }}.
+                  Chat with {{ ui.user.name }}.
                 </p>
               </div>
             </div>
@@ -207,22 +208,22 @@
               ng-hide="ui.chatView"></div>
           <div class="bg-deco" id="path-left"
                ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.contact.trust.asProxy,
-                          darker:'yes'==ui.contact.trust.asProxy,
-                          active:ui.contact.isActiveProxy }">
+               ng-class="{faded:'no'==ui.user.trust.asProxy,
+                          darker:'yes'==ui.user.trust.asProxy,
+                          active:ui.user.isActiveProxy }">
           </div>
           <div class="bg-deco" id="path-right"
                ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.contact.trust.asClient,
-                          darker:'yes'==ui.contact.trust.asClient,
-                          active:ui.contact.isActiveClient }">
+               ng-class="{faded:'no'==ui.user.trust.asClient,
+                          darker:'yes'==ui.user.trust.asClient,
+                          active:ui.user.isActiveClient }">
           </div>
           <div class="uproxy-deco" id="their-uproxy"
               ng-show="ui.instance"></div>
           <div class="uproxy-deco" id="my-uproxy"></div>
 
           <p class="access-note" ng-hide="ui.instance">
-          {{ ui.contact.name }} does not have <b>uProxy</b>.
+          {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
           <div ng-controller="InstanceActions" class="instance-actions" ng-show="ui.instance && ui.isAccess()">
@@ -252,7 +253,7 @@
               </div>
               <div ng-switch-when="requested">
                 <p class="uproxytip">
-                  Requesting access from {{ui.contact.name}}...
+                  Requesting access from {{ui.user.name}}...
                 </p>
                 <button class="btn"
                     ng-disabled="ui.pendingProxyTrustChange"

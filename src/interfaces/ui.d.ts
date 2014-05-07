@@ -60,6 +60,7 @@ declare module UI {
    * UI-specific User.
    * TODO: Maybe convert into an actual class.
    */
+  /*
   export interface User extends BaseUser {
     url             :string;
     imageData       :string;
@@ -72,6 +73,7 @@ declare module UI {
     hasNotification :boolean;
     instances       :UI.Instance[];
   }
+  */
 
   /**
    * UI-specific Instance.
