@@ -36,21 +36,20 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
     - On Archlinux, you can do 'pacman -S nodejs'.
 
-    - You may need to set your $NODE_PATH environment variable appropriately
+    - You may need to set your `$NODE_PATH` environment variable appropriately
       (e.g. it might be: `/usr/local/share/npm/lib/node_modules`).
 
     - If you install npm things globally, you'll need to do so as the
       appropriate super-user.
 
-- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli
-
-- [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
-
 - [bower](http://bower.io/) 1.0 or later: Install globally with `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
 
     - To run binaries from globally-installed npm packages without
-      fully-qualifying paths, add your npm bin directory to your path
-      (e.g. /usr/local/share/npm/bin/grunt).
+      fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
+
+- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli
+
+- [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
 
 - [sass](http://sass-lang.com/):
   `sudo gem install sass` (requires ruby, often comes installed, may need to be installed as super-user)
@@ -61,20 +60,22 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 ### Setup of uProxy codebase
 
 1. Clone uProxy and its submodules (and its submodules' submodules...):
-`git clone https://github.com/UWNetworksLab/UProxy.git`
+`git clone https://github.com/uProxy/uProxy.git`
 
 2. Run `./setup.sh`. This will install all local dependencies,
 as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh` again to update these dependencies.
 
-### Installing and running uProxy in Chrome
 
-1. In Chrome, navigate to chrome://extensions, check 'Developer Mode'.
+### Building and installing and running for Chrome
 
-2. Click 'Load unpacked extension...' and select the 'build/chrome_app' directory.
+These are the steps to try uProxy in the Chrome browser.
 
-3. Click 'Load unpacked extension...' and select the 'build/chrome_extension' directory.
+- Run `grunt build_chrome` from the root directory of the repository to compile
+  all the typescript and prepare the assets.
+
+- In Chrome, go to `chrome://extensions` and click 'Load unpacked extension...' for both `/build/chrome/app` and `build/chrome/extension`. You need both the uProxy Chrome App and the Extension.
 
 
 ### Development and re-building uProxy
@@ -101,17 +102,6 @@ your distribution, then run `grunt watch`, which will rebuild as you make change
 Before submitting any changes to the repository, make sure to run `grunt test`
 to make sure it passes all unit tests. Failing tests are cause to immediately
 reject submissions. :)
-
-
-### Building & running for Chrome
-
-These are the steps to try uProxy in the Chrome browser.
-
-- Run `grunt build_chrome` from the root directory of the repository to compile
-  all the typescript and prepare the assets.
-
-- In Chrome, go to `chrome://extensions` and load both `/build/chrome/app` and
-  `build/chrome/extension`. You need both the uProxy Chrome App and the Extension.
 
 
 ### Fixing compilation and setup
