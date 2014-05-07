@@ -347,17 +347,7 @@ module UI {
     }
 
     // Synchronize the data about the current user.
-    // syncMe = () => {
-      // var id = _getMyId();
-      // if (!id) {
-        // console.log('My own identities missing for now....');
-        // return;
-      // }
-      // var identity = model.me.identities[id];
-      // this.myName = identity.name;
-      // this.myPic = identity.imageData || '';
-      // console.log('Synced my own identity. ', identity);
-    // }
+    // TODO: Be able to sync local instance, per network.
 
     /**
      * Synchronize data about some friend.

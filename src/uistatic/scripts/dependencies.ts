@@ -114,6 +114,14 @@ ui['syncUser_']({
     UProxyClient.Status.ONLINE
   ],
   instances: [
+    {
+      instanceId: 'alice-instance-01',
+      description: 'fake instance for alice',
+      consent: {
+        asClient: Consent.ClientState.NONE,
+        asProxy:  Consent.ProxyState.NONE
+      }
+    }
   ]
 });
 

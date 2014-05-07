@@ -31,10 +31,9 @@ declare module UI {
     status   :UProxyClient.Status;
   }
 
-  // TODO: instance UI type.
-
   /**
    * UI-specific Instance.
+   * TODO: Maybe turn this into an actual class. We'll see.
    */
   export interface Instance {
     instanceId    :string;

@@ -563,6 +563,7 @@ module.exports = function(grunt) {
 
   taskManager.add('test', [
     'test_core',
+    'test_ui',
     'test_chrome_extension'
   ]);
 

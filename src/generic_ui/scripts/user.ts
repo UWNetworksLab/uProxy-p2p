@@ -67,7 +67,6 @@ module UI {
 
     /**
      * Set the instances on this user.
-     * TODO: Type instances.
      */
     public setInstances = (instances:UI.Instance[]) => {
       this.instances = instances;
