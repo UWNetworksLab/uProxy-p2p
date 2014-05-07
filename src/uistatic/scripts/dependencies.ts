@@ -7,11 +7,17 @@
 
 console.log('This is not a real uProxy frontend.');
 
-// TODO: Type these.
-declare var state:UI.Model;
+// declare var state:UI.Model;
+declare var angular:ng.IAngularStatic;
+
+var model :UI.Model = {
+  networks: {},
+  // 'global' roster, which is just the concatenation of all network rosters.
+  roster: {}
+};
 
 // Initialize model object to a mock. (state.js)
-var model = state;  // || { identityStatus: {} };
+// var model = state;  // || { identityStatus: {} };
 
 class MockNotifications implements INotifications {
   setIcon(iconFile) {
@@ -53,9 +59,17 @@ class MockCore implements uProxy.CoreAPI {
   }
   login(network) {
     console.log('Logging in to', network);
+    ui['syncNetwork_']({
+      name: 'google',
+      online: true
+    });
   }
   logout(network) {
     console.log('Logging out of', network);
+    ui['syncNetwork_']({
+      name: 'google',
+      online: false
+    });
   }
   dismissNotification(userId) {
     console.log('Notification seen for ' + userId);
@@ -80,3 +94,34 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .constant('ui', ui)
   .constant('model', model)
   .constant('core', mockCore)
+
+// Fake a bunch of interactions from core.
+// Starts off being 'offline' to a network.
+ui['syncNetwork_']({
+  name: 'google',
+  online: false
+});
+
+ui['syncUser_']({
+  network: 'google',
+  user: {
+    userId: 'alice',
+    name: 'Alice uProxy',
+    timestamp: Date.now()
+  },
+  clients: [
+    UProxyClient.Status.ONLINE
+  ],
+  instances: [
+    {
+      instanceId: 'alice-instance-01',
+      description: 'fake instance for alice',
+      consent: {
+        asClient: Consent.ClientState.NONE,
+        asProxy:  Consent.ProxyState.NONE
+      }
+    }
+  ]
+});
+
+ui['DEBUG'] = true;

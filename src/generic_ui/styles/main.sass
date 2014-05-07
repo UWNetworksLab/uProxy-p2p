@@ -62,6 +62,12 @@ ul
   &:hover
     background-color: #bbb
 
+// Primary popup UI boundary.
+#uproxy-popup
+  width: 371px
+  height: 600px
+  position: fixed
+
 .btn
   border: 1px solid #ccc
   color: #333
@@ -174,7 +180,7 @@ ul
 
 //---------------------------- Login Splash -----------------------------------
 #login-splash
-  position: fixed
+  position: absolute
   text-align: center
   padding-top: 30px
   width: 100%
@@ -361,7 +367,7 @@ input[type=text]
     opacity: 0.7
 
 #options-btn
-  position: fixed
+  position: absolute
   z-index: 600
   top: 4px
   right: 8px
@@ -381,7 +387,7 @@ input[type=text]
     opacity: 0.3
 
 #options-btn-tip
-  position: fixed
+  position: absolute
   z-index: 500
   top: 30px
   right: 2px
@@ -542,7 +548,7 @@ img.c-icon
 // roster entry.
 #access
   display: inline-block
-  position: fixed
+  position: absolute
   text-align: center
   width: 100%
   height: 100%
@@ -557,7 +563,7 @@ img.c-icon
 
 // This is the faded background image of the internets and arrows.
 .bg-deco
-  position: fixed
+  position: absolute
   top: 0
   width: 100%
   height: 100%
@@ -625,13 +631,13 @@ img.c-icon
   z-index: 2
   @include smooth
   &#my-info
-    position: fixed
+    position: absolute
     bottom: 55px
     &.ng-hide
       @include un-ng-hide
       bottom: -100px
   &#their-info
-    position: fixed
+    position: absolute
     top: 40px
     &.ng-hide
       @include un-ng-hide
@@ -827,7 +833,7 @@ img.c-icon
   font-family: monospace
 
 #status
-  position: fixed
+  position: absolute
   z-index: 50
   bottom: 0
   width: 100%
@@ -886,8 +892,10 @@ details
 #options-left
   width: 50%
 
+
 #debug
   position: fixed
+  z-index: 100
   top: 0
   right: 0
   width: 50%

@@ -126,9 +126,9 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'src/chrome/extension',
          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome/extension/'},
-        // Source code (generic UI)
+        // Source code (generic UI), html, and icons, but no ui specs.
         {expand: true, cwd: 'build/generic_ui',
-         src: ['**'],
+         src: ['**', '!**/*.spec.js'],
          dest: 'build/chrome/extension/'},
         {expand: true, cwd: 'build/', flatten: true,
          src: ['uproxy.js', 'chrome/util/chrome_glue.js'],
@@ -355,6 +355,17 @@ module.exports = function(grunt) {
           outfile: 'test_output/_CoreSpecRunner.html',
           specs: 'build/generic_core/**/*.spec.js'
         }
+      },
+      generic_ui: {
+        src: FILES.jasmine_helpers
+            .concat([
+              'build/generic_ui/scripts/user.js'
+            ]),
+        options: {
+          keepRunner: true,
+          outfile: 'test_output/_UiSpecRunner.html',
+          specs: 'build/generic_ui/scripts/**/*.spec.js'
+        }
       }
     },
 
@@ -539,6 +550,11 @@ module.exports = function(grunt) {
     'jasmine:generic_core'
   ]);
 
+  taskManager.add('test_ui', [
+    'build_generic_ui',
+    'jasmine:generic_ui'
+  ]);
+
   taskManager.add('test_chrome_extension', [
     'build_chrome',
     'typescript:chrome_mocks',
@@ -547,6 +563,7 @@ module.exports = function(grunt) {
 
   taskManager.add('test', [
     'test_core',
+    'test_ui',
     'test_chrome_extension'
   ]);
 

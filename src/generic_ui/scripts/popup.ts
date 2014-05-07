@@ -5,26 +5,15 @@
  * frontend. The popup contains a contacts list, filters, options, connection
  * details, and any other functionality required by the user. It extends from
  * the base UProxyExtension angular module defined in app.js.
- * TODO: convert to typescript.
  */
-'use strict';
 
 angular.module('UProxyExtension-popup', ['UProxyExtension'])
   // Main extension controller.
-  .controller('MainCtrl', ['$scope', function ($scope) {
+  .controller('MainCtrl', ['$scope', ($scope) => {
     // View states.
     var ui = $scope.ui;
     var core = $scope.core;
-    $scope.optionsTooltip = false;
-
-    // Reset view state if logged out.
-    if ($scope.loggedOut()) {
-      ui.splashPage = true;
-      ui.accessView = false;
-    }
-    $scope.showingSplashPage = function() {
-      return ui.splashPage || !core.status.connected;
-    };
+    // $scope.optionsTooltip = false;
 
     var syncContactWatch = function(userId) {
       if (ui.contactUnwatch) {
@@ -41,29 +30,6 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       if (ui.instanceUnwatch) {
         ui.instanceUnwatch();
         ui.instanceUnwatch = null;
-      }
-      // ui.instanceUnwatch = $scope.$watch(
-          // 'model.instances["' + instanceId + '"]', function() {
-            // ui.instance = $scope.model.instances[instanceId];
-      // });
-    };
-
-    // Open the detailed contact view, with a potential instance. Set the
-    // currently focused instance and ensure angular bindings work.
-    $scope.viewContact = function(c) {
-      // Send our instance message to the contact if they are uProxy enabled.
-      // if (c.canUProxy) {
-        // console.log('viewContact: sendInstance: ' + clientId);
-        // core.sendInstance(clientId);
-      // }
-      ui.focusOnContact(c);
-      syncContactWatch(c.userId);
-      syncInstanceWatch(instance.instanceId);
-      console.log('current instance ', ui.instance);
-      if (!ui.isProxying) {
-        ui.proxy = null;
-      } else {
-        ui.proxy = $scope.model.instances[proxy.instanceId];
       }
     };
 
@@ -90,26 +56,28 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(uzimizu): actually implement variety of sorting methods
-    $scope.updateSortedContacts = function() {
+    $scope.updateSortedContacts = () => {
       $scope.alphabeticalContacts = []
     };
 
     // Toggling the 'options' page which is just the splash page.
-    $scope.toggleOptions = function() {
-      $scope.ui.splashPage = !$scope.ui.splashPage;
+    $scope.toggleOptions = () => {
+      // ui.view = UI.View.ROSTER;
+      console.log('Viewing splash page');
+      ui.toggles.splash = !ui.toggles.splash;
     };
 
-    $scope.toggleSearch = function() {
-      $scope.ui.searchBar = !$scope.ui.searchBar;
+    $scope.toggleSearch = () => {
+      ui.toggles.search = !ui.toggles.search;
     };
 
     // Display the help tooltip for the filter.
-    $scope.showFilter = function(filter) {
+    $scope.showFilter = (filter) => {
       $scope.filterTip = $scope.filterTips[filter];
       $scope.showFilterTip = true;
     };
 
-    $scope.$watch('ui.focus',function(){
+    $scope.$watch('ui.focus', () => {
       var contact = ui.contact;
       if (contact) {
         console.log('current contact changed');
@@ -128,4 +96,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
     if (ui.instance) {
       syncInstanceWatch(ui.instance.instanceId);
     }
+
   }]);

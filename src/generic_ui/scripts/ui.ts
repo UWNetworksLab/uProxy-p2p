@@ -4,6 +4,7 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
+/// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
@@ -16,6 +17,68 @@ declare var finishStateChange :() => void;
 module UI {
 
   /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    ROSTER,
+    ACCESS,
+    OPTIONS,
+    CHAT
+  }
+
+  /**
+   * Boolean toggles which influence other appearances.
+   */
+  export interface Toggles {
+    splash  :boolean;
+    options :boolean;
+    search  :boolean;
+  }
+
+  /**
+   * Structure of the uProxy UI model object:
+   * TODO: Probably put the model in its own file.
+   */
+  export interface Model {
+    networks :{ [name:string] :UI.Network };
+    // TODO: Other top-level generic info...
+
+    // This is a 'global' roster - a combination of all User Profiles.
+    // TODO: remove. The way the UI works will soon change drastically.
+    roster :{ [userId:string] :User }
+  }
+
+  // TODO: remove this once extension model is cleaned up.
+  export interface modelForAngular extends UI.Model {
+    clientToInstance :{[clientId :string] :string };
+    instances :{[instanceId :string] :UI.Instance};
+  }
+
+  export interface RootScope extends ng.IRootScopeService {
+    ui :uProxy.UIAPI;
+    core :uProxy.CoreAPI;
+    model :modelForAngular;
+    isOnline(network :string) : boolean;
+    isOffline(network :string) : boolean;
+    loggedIn() : boolean;
+    loggedOut() : boolean;
+    resetState() : void;
+    instanceOfContact(contact :User) : Instance;
+    prettyNetworkName(networkId :string) : string;
+    instanceOfUserId(userId :string) : Instance;
+    updateDOM() : void;
+  }
+
+  /**
+   * Specific to one particular Social network.
+   */
+  export interface Network {
+    name   :string;
+    online :boolean;
+    roster :{ [userId:string] :User }
+  }
+
+  /**
    * The User Interface class.
    *
    * Contains UI-related state and functions, which angular will access.
@@ -25,14 +88,19 @@ module UI {
    */
   export class UserInterface implements uProxy.UIAPI {
 
+    public DEBUG = false;  // Set to true to show the model in the UI.
+
+    // Appearance.
+    public view :View;
+    public toggles :Toggles;
+
+    // Current 'focus'
+    public user :User = null;
+
     notifications = 0;
-    // TODO: splash should be set by state.
-    accessView = false;
-    splashPage = false;
     advancedOptions = false;
-    searchBar = true;
+    // TODO: Pull search / filters into its own class.
     search = '';
-    chatView = false;
     numClients = 0;
     myName = '';
     myPic = null;
@@ -51,10 +119,19 @@ module UI {
     constructor(
         public core   :uProxy.CoreAPI,
         public notify :INotifications) {
+
+      // TODO: Determine the best way to describe view transitions.
+      this.view = View.ROSTER;
+      this.toggles = {
+        splash:  true,
+        options: false,
+        search:  true
+      };
+
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uProxy.Update.ALL, (state :Object) => { 
+      core.onUpdate(uProxy.Update.ALL, (state :Object) => {
         console.log('Received uProxy.Update.ALL:', state);
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
@@ -64,20 +141,7 @@ module UI {
       });
 
       // Add or update the online status of a network.
-      core.onUpdate(uProxy.Update.NETWORK, (network :UI.NetworkMessage) => {
-        console.log('uProxy.Update.NETWORK', network, model.networks);
-        console.log(model);
-        if (!(network.name in model.networks)) {
-          // TODO: Turn this into a class.
-          model.networks[network.name] = {
-            name:   network.name,
-            online: network.online,
-            roster: {}
-          };
-        } else {
-          model.networks[network.name].online = network.online;
-        }
-      });
+      core.onUpdate(uProxy.Update.NETWORK, this.syncNetwork_);
 
       // Attach handlers for USER updates.
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
@@ -96,6 +160,12 @@ module UI {
       // TODO: Implement.
     }
 
+    // ------------------------------- Views ----------------------------------
+    public isSplash = () : boolean => { return this.toggles.splash; }
+    public isRoster = () : boolean => { return View.ROSTER == this.view; }
+    public isAccess = () : boolean => { return View.ACCESS == this.view; }
+
+
     // Keep track of currently viewed contact and instance.
     public contact :UI.User = null;
     contactUnwatch = null;
@@ -109,7 +179,7 @@ module UI {
     oldDescription :string = '';
 
     // Initial filter state.
-    filters = {
+    public filters = {
         'online': true,
         'myAccess': false,
         'friendsAccess': false,
@@ -184,7 +254,7 @@ module UI {
           (this.filters.friendsAccess && !user.usesMe)) {
         return true;
       }
-      // Otherwise, if there is no search text, this contact is visible.
+      // Otherwise, if there is no search text, this.user is visible.
       if (!searchText) {
         return false;
       }
@@ -199,29 +269,30 @@ module UI {
      * Handler for when the user clicks on the entry in the roster for a User.
      * Sets the UI's 'current' User and Instance, if it exists.
      */
-    focusOnContact = (contact:UI.User) => {
-      console.log('focusing on contact ' + contact);
-      this.contact = contact;
-      this.dismissNotification(contact);
-      this.accessView = true;
+    public focusOnUser = (user:UI.User) => {
+      this.view = View.ACCESS;
+      console.log('focusing on user ' + user);
+      this.user = user;
+      this.dismissNotification(user);
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
-      if (contact.instances.length > 0) {
-        this.instance = contact.instances[0];
+      if (user.instances.length > 0) {
+        this.instance = user.instances[0];
       }
     }
 
     /*
-     * Going back from the contact view to the roster view.
+     * Change from the detailed access view back to the roster view.
+     * Clears the 'current user'.
      */
-    returnToRoster = () => {
-      console.log('returning to roster! ' + this.contact);
-      if (this.contact && this.contact.hasNotification) {
+    public returnToRoster = () => {
+      this.view = View.ROSTER;
+      console.log('returning to roster! ' + this.user);
+      if (this.user && this.user.hasNotification) {
         console.log('sending notification seen');
-        this.dismissNotification(this.contact);  // Works if there *is* a contact.
-        this.contact = null;
+        this.dismissNotification(this.user);  // Works if there *is* a contact.
+        this.user = null;
       }
-      this.accessView = false;
     }
 
     setNotifications = (n) => {
@@ -253,18 +324,50 @@ module UI {
     sendConsent = () => {}
     addNotification = () => {}
 
+    /**
+     * Synchronize a new network to be visible on this UI.
+     */
+    private syncNetwork_ = (network :UI.NetworkMessage) => {
+      console.log('uProxy.Update.NETWORK', network, model.networks);
+      console.log(model);
+      if (!(network.name in model.networks)) {
+        // TODO: Turn this into a class.
+        model.networks[network.name] = {
+          name:   network.name,
+          online: network.online,
+          roster: {}
+        };
+      } else {
+        model.networks[network.name].online = network.online;
+      }
+    }
+
+    // Determine whether UProxy is connected to some network.
+    // TODO: Make these functional and write specs.
+    public loggedIn = () => {
+      for (var networkId in model.networks) {
+        if (model.networks[networkId].online) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // This is *NOT* the inverse of loggedIn, because it is possible to be
+    // "logging in"
+    // Not Logged-out if state is not logged out for any network.
+    public loggedOut = () => {
+      return false;
+      for (var networkId in model.networks) {
+        if (!model.networks[networkId].online) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     // Synchronize the data about the current user.
-    // syncMe = () => {
-      // var id = _getMyId();
-      // if (!id) {
-        // console.log('My own identities missing for now....');
-        // return;
-      // }
-      // var identity = model.me.identities[id];
-      // this.myName = identity.name;
-      // this.myPic = identity.imageData || '';
-      // console.log('Synced my own identity. ', identity);
-    // }
+    // TODO: Be able to sync local instance, per network.
 
     /**
      * Synchronize data about some friend.
@@ -277,44 +380,18 @@ module UI {
       }
       // Construct a UI-specific user object.
       var profile = payload.user;
-      // Insert the user both in the network-specific roster and the global
-      // roster.
+      // Update / create if necessary a user, both in the network-specific
+      // roster and the global roster.
       var user :UI.User;
-      if (!(profile.userId in network.roster)) {
-        user = {
-          name:            profile.name,
-          userId:          profile.userId,
-          url:             profile.url,
-          imageData:       profile.imageDataUri,
-          online:          false,
-          canUProxy:       false,
-          givesMe:         false,
-          usesMe:          false,
-          hasNotification: false,
-          clients:         {},
-          instances:       payload.instances
-        }
+      user = network.roster[profile.userId];
+      if (!user) {
+        user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
         model.roster[profile.userId] = user;
-      } else {
-        user = network.roster[profile.userId];
-        user.name = profile.name;
-        user.url = profile.url;
-        user.imageData = profile.imageDataUri;
-        user.instances = payload.instances;
       }
-      var statuses = payload.clients;
-      // Is online if there is at least one client that is not 'OFFLINE'.
-      user.online = statuses.some((status) => {
-        return UProxyClient.Status.OFFLINE !== status;
-      });
-      // Has uProxy if there is at least one client that is 'ONLINE'.
-      user.canUProxy = statuses.some((status) => {
-        return UProxyClient.Status.ONLINE === status;
-      });
-      console.log('Updated ' + user.name + ' - known to be: ' +
-                  '\n online: ' + user.online +
-                  '\n uproxy-enabled: ' + user.canUProxy);
+      user.update(profile);
+      user.refreshStatus(payload.clients);
+      user.setInstances(payload.instances);
     };
     /*
       // TODO(uzimizu): Support multiple notifications, with messages.
@@ -328,9 +405,6 @@ module UI {
       isActiveClient = isActiveClient || 'running'==instance.status.client;
       isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
       break;  // TODO(uzimizu): Support multiple instances.
-    }
-      // Apply user-level flags.
-      // TODO: Deprecate this once we move to instance-centrism.
     }
     */
 

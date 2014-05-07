@@ -53,28 +53,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return !$rootScope.isOnline(network);
       };
 
-      // Determine whether UProxy is connected to some network.
-      $rootScope.loggedIn = function() {
-        for (var networkId in model.networks) {
-          if (model.networks[networkId].online) {
-            return true;
-          }
-        }
-        return false;
-      };
-
-      // This is *NOT* the inverse of loggedIn, because it is possible to be
-      // "logging in"
-      // Not Logged-out if state is not logged out for any network.
-      $rootScope.loggedOut = function() {
-        for (var networkId in model.networks) {
-          if (!model.networks[networkId].online) {
-            return false;
-          }
-        }
-        return true;
-      };
-
       $rootScope.resetState = function () {
         localStorage.clear();
         core.reset();
@@ -102,6 +80,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           case 'google': return 'G+';
           case 'facebook': return 'FB';
           case 'xmpp': return 'XMPP';
+          case 'websocket': return 'websocket';
           default:
             console.warn("No prettification for network: " + JSON.stringify(networkId));
         }
@@ -146,7 +125,9 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     }  // run function
   ])
-
+  // The consent directive handles all consent activity.
+  // .directive('uproxyConsent', () => {
+  // });
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
   .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
