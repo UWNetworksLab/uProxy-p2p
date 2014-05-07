@@ -126,9 +126,9 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'src/chrome/extension',
          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass'],
          dest: 'build/chrome/extension/'},
-        // Source code (generic UI)
+        // Source code (generic UI), but no ui specs.
         {expand: true, cwd: 'build/generic_ui',
-         src: ['**'],
+         src: ['**/*.js', '!**/*.spec.js'],
          dest: 'build/chrome/extension/'},
         {expand: true, cwd: 'build/', flatten: true,
          src: ['uproxy.js', 'chrome/util/chrome_glue.js'],
