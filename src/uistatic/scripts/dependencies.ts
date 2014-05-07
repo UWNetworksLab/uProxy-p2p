@@ -7,9 +7,8 @@
 
 console.log('This is not a real uProxy frontend.');
 
-// TODO: Type these.
 // declare var state:UI.Model;
-declare var angular:any;
+declare var angular:ng.IAngularStatic;
 
 var model :UI.Model = {
   networks: {},
