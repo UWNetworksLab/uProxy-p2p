@@ -16,8 +16,6 @@
 /// <reference path='../../uproxy.ts'/>
 
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
-  //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
-  //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
@@ -133,11 +131,14 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   .directive('uproxyConsent', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
+      $s.ProxyState = Consent.ProxyState;
+      $s.ClientState = Consent.ClientState;
       var _modifyConsent = (action:Consent.UserAction) => {
+        console.log($s.currentProxyState(), $s.currentClientState());
         $s.core.modifyConsent(<uProxy.ConsentCommand>{
           network:    $s.ui['network'],
           userId:     $s.ui.user.userId,
-          instanceId: $s.ui.instance,
+          instanceId: $s.ui.instance.instanceId,
           action:     action
         });
       }
@@ -167,6 +168,19 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       $s.ignoreRequest = () => {
         _modifyConsent(Consent.UserAction.IGNORE_REQUEST);
       };
+      // Current status indications need to return the enum strings.
+      $s.currentProxyState = () => {
+        if (!$s.ui.instance) {
+          return 'NONE';
+        }
+        return '' + $s.ProxyState[$s.ui.instance.consent.asProxy];
+      }
+      $s.currentClientState = () => {
+        if (!$s.ui.instance) {
+          return 'NONE';
+        }
+        return '' + $s.ClientState[$s.ui.instance.consent.asClient];
+      }
     };
     return {
       restrict: 'E',

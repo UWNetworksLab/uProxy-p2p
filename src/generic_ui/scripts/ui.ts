@@ -95,6 +95,8 @@ module UI {
     public toggles :Toggles;
 
     // Current 'focus'
+    // TODO: Replace the 'current focus' with the new InstancePath type.
+    public network :string = 'google';
     public user :User = null;
 
     notifications = 0;

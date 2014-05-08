@@ -1,8 +1,8 @@
 <div class="instance-actions" ng-show="ui.instance && ui.isAccess()">
 
   <div class="uproxy-box proxy"
-      ng-switch="ui.instance.trust.asProxy">
-    <div ng-switch-when="yes">
+      ng-switch="currentProxyState()">
+    <div ng-switch-when="GRANTED">
       <p class="uproxytip">You have access.
       </p>
       <button class="btn"
@@ -24,7 +24,7 @@
       </button>
     </div>
 
-    <div ng-switch-when="requested">
+    <div ng-switch-when="USER_REQUESTED">
       <p class="uproxytip">
         Requesting access from {{ui.user.name}}...
       </p>
@@ -34,7 +34,7 @@
         Cancel
       </button>
     </div>
-    <div ng-switch-when="offered">
+    <div ng-switch-when="REMOTE_OFFERED">
       <p class="uproxytip">They've offered you access.
       </p>
       <button class="btn black"
@@ -61,8 +61,8 @@
 
   <div class="uproxy-box client"
       ng-class="{active:'running'==ui.instance.status.client}"
-      ng-switch="ui.instance.trust.asClient">
-    <div ng-switch-when="no">
+      ng-switch="currentClientState()">
+    <div ng-switch-when="NONE">
       <p class="uproxytip">You have not granted them access.
       </p>
       <button class="btn"
@@ -71,7 +71,7 @@
         Offer Access
       </button>
     </div>
-    <div ng-switch-when="requested">
+    <div ng-switch-when="REMOTE_REQUESTED">
       <p class="uproxytip">They requested access through you.
       </p>
       <button class="btn black"

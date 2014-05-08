@@ -115,7 +115,11 @@ module.exports = function(grunt) {
         // ... the generic ui stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
-         dest: 'build/uistatic/'}
+         dest: 'build/uistatic/'},
+        // Common uProxy requirements
+        {expand: true, cwd: 'build/', flatten: true,
+         src: ['uproxy.js', 'generic_core/consent.js', 'generic_core/util.js'],
+         dest: 'build/uistatic/scripts'}
       ]},
 
       // Chrome extension. Assumes the top-level task generic_ui completed.
