@@ -68,6 +68,16 @@ module.exports = function(grunt) {
               'test_output',
               'third_party/lib'],
 
+    'connect': {
+      uistatic: {
+        options: {
+          port: 8855,
+          base: 'build/uistatic',
+          keepalive: true
+        }
+      }
+    },
+
     //-------------------------------------------------------------------------
     'copy': {
       // Generic (platform independent) UI stuff to be copied.
@@ -484,6 +494,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-sass');
@@ -575,6 +586,11 @@ module.exports = function(grunt) {
     'build_chrome',
     'build_firefox',
     'build_uistatic',
+  ]);
+
+  taskManager.add('run_uistatic', [
+    'build_uistatic',
+    'connect:uistatic'
   ]);
 
   taskManager.add('everything', ['setup', 'tsd:refresh', 'build', 'test']);

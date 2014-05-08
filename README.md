@@ -94,6 +94,7 @@ of uProxy's Grunt commands:
  *  `watch` - Watch for changes and recompile as needed.
  *  `test` - Run unit tests
  *  `xpi` - Generates an .xpi for installation to Firefox.
+ *  `run_uistatic` - Run the standalone UI on a local webserver.
  *  `everything` - 'setup', 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
