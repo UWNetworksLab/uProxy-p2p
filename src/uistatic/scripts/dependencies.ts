@@ -70,7 +70,6 @@ class MockCore implements uProxy.CoreAPI {
     // Fake the core interaction, assume it sent bits on the wire, and receive
     // the update from core.
     var userUpdate = generateFakeUserMessage();
-    // var instance = userUpdate.instances[0];
     var user = model.roster[command.userId];
     var instance = user.instances[0];
     switch (command.action) {
@@ -97,6 +96,7 @@ class MockCore implements uProxy.CoreAPI {
     console.log('Modified consent: ', command,
                 'new state: ', instance.consent);
     // Randomly generate a positive response from alice.
+    // TODO: Make two UIs side-by-side for an actual 'peer-to-peer' mock.
     if (Math.random() > 0.5) {
       console.log('Alice will respond...');
       setTimeout(() => {

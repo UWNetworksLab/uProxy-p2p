@@ -81,6 +81,10 @@ describe('UI.User', () => {
       consent: {
         asClient: Consent.ClientState.NONE,
         asProxy:  Consent.ProxyState.NONE
+      },
+      access: {
+        asClient: false,
+        asProxy: false
       }
     }]);
   });
