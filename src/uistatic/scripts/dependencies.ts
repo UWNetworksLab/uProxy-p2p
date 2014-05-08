@@ -96,6 +96,15 @@ class MockCore implements uProxy.CoreAPI {
     ui['syncUser_'](userUpdate);
     console.log('Modified consent: ', command,
                 'new state: ', instance.consent);
+    // Randomly generate a positive response from alice.
+    if (Math.random() > 0.5) {
+      console.log('Alice will respond...');
+      setTimeout(() => {
+        userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
+        userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
+        ui['syncUser_'](userUpdate);
+      }, 500);
+    }
   }
 
   start(instanceId) {

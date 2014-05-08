@@ -30,6 +30,7 @@ module Core {
     public description   :string;
 
     public consent       :ConsentState;
+    public access        :AccessState;
     private transport    :Transport;
 
     /**
@@ -169,7 +170,8 @@ module Core {
         instanceId:  this.instanceId,
         description: this.description,
         keyHash:     this.keyHash,
-        consent:     this.consent
+        consent:     this.consent,
+        access:      this.access
       }
     }
 
