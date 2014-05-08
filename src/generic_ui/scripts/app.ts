@@ -180,6 +180,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     };
     return {
+      // 'E' is an angular directive attribute.
+      // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
       templateUrl: 'consent.html',
       link: link
