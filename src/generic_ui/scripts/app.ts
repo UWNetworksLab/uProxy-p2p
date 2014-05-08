@@ -110,10 +110,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       $rootScope.updateDOM = function() {
-        $rootScope.$apply(function () {
-          // Also update pointers locally ?
-          // $rootScope.instances = model.instances;
-        });
+        $rootScope.$apply(() => {});
       };
 
       // State change event handler is browser specific, or it might not exist

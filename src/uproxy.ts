@@ -104,7 +104,6 @@ module uProxy {
     // TODO: improve the notifications feature
     dismissNotification(userId:string):void;
 
-    // TODO: make network an actual type
     login(network:string):void;
     logout(network:string):void;
 
