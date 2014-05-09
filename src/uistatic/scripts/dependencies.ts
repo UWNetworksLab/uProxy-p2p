@@ -49,6 +49,10 @@ function generateFakeUserMessage() : UI.UserMessage {
         consent: {
           asClient: Consent.ClientState.NONE,
           asProxy:  Consent.ProxyState.NONE
+        },
+        access: {
+          asClient: false,
+          asProxy: false
         }
       }
     ]
@@ -56,7 +60,10 @@ function generateFakeUserMessage() : UI.UserMessage {
 }
 
 class MockCore implements uProxy.CoreAPI {
+
   public status :StatusObject;
+  private proxy :UI.Instance = null;
+
   constructor() {
     this.status = { connected: true };
   }
@@ -107,12 +114,27 @@ class MockCore implements uProxy.CoreAPI {
     }
   }
 
-  start(instanceId) {
-    console.log('Starting to proxy through ' + instanceId);
+  // Fake starting and stopping proxying sessions.
+  start = (path) => {
+    console.log('Starting to proxy through ', path);
+    // TODO: Do a better way of accessing instances.
+    this.proxy = model.networks[path.network]
+        .roster[path.userId]
+        .instances[0];
+    console.log(this.proxy);
+    this.proxy.access.asProxy = true;
   }
-  stop(instanceId) {
-    console.log('Stopping proxy through ' + instanceId);
+
+  stop = () => {
+    if (!this.proxy) {
+      console.warn('No proxy to stop for.');
+      return;
+    }
+    console.log('Stopping proxy through ', this.proxy);
+    this.proxy.access.asProxy = false;
+    this.proxy = null;
   }
+
   updateDescription(description) {
     console.log('Updating description to ' + description);
   }

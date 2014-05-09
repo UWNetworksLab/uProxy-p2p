@@ -175,6 +175,17 @@ module Core {
       }
     }
 
+    /**
+     * Obtain the fully qualified path to this instance.
+     */
+    public getPath = () : InstancePath => {
+      return {
+        network:    this.user['network'].name,
+        userId:     this.user.userId,
+        instanceId: this.instanceId
+      }
+    }
+
   }  // class Core.RemoteInstance
 
   // TODO: Implement obfuscation.

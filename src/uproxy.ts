@@ -69,6 +69,7 @@ module uProxy {
    * This should only be associated with the Command.MODIFY_CONSENT command.
    */
   export interface ConsentCommand {
+    // TODO: Replace these 3 with InstancePath.
     network    :string;
     userId     :string;
     instanceId :string;
@@ -87,27 +88,31 @@ module uProxy {
   export interface CoreAPI {
 
     // Clears all state and storage.
-    reset():void;
+    reset() : void;
 
     // Send your own instanceId to target clientId.
-    sendInstance(clientId:string):void;
+    sendInstance(clientId :string) : void;
 
-    modifyConsent(command:ConsentCommand):void;
+    modifyConsent(command :ConsentCommand) : void;
 
     // Using peer as a proxy.
-    start(instanceId:string):void;
-    stop(instanceId:string):void;
+    start(instancePath :InstancePath) : void;
+    // TODO: Maybe in the future there will be the capacity to actually proxy
+    // thorugh more than one remote instance at the same time. If that occurs,
+    // then stop will need to take an :InstancePath as an argument. Otherwise,
+    // nothing is necessary, since the instance is implied.
+    stop () : void;
 
-    updateDescription(description:string):void;
-    changeOption(option:string):void;
+    updateDescription(description :string) : void;
+    changeOption(option :string) : void;
 
     // TODO: improve the notifications feature
-    dismissNotification(userId:string):void;
+    dismissNotification(userId :string) : void;
 
-    login(network:string):void;
-    logout(network:string):void;
+    login(network :string) : void;
+    logout(network :string) : void;
 
-    onUpdate(update:Update, handler:Function):void;
+    onUpdate(update :Update, handler :Function) : void;
   }
 
   /**

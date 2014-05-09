@@ -96,10 +96,12 @@ module UI {
     public view :View;
     public toggles :Toggles;
 
-    // Current 'focus'
-    // TODO: Replace the 'current focus' with the new InstancePath type.
+    // Keep track of currently viewed contact and instance.
+    // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
+    public instance :UI.Instance = null;
+    public proxy :UI.Instance = null;  // If we are proxying, keep track of the instance.
 
     notifications = 0;
     advancedOptions = false;
@@ -115,6 +117,22 @@ module UI {
 
     isProxying = false;  // Whether we are proxying through someone.
     accessIds = 0;  // How many people are proxying through us.
+
+    contactUnwatch = null;
+    instanceUnwatch = null;  // For angular binding.
+
+
+    // When the description changes while the text field loses focus, it
+    // automatically updates.
+    oldDescription :string = '';
+
+    // Initial filter state.
+    public filters = {
+        'online': true,
+        'myAccess': false,
+        'friendsAccess': false,
+        'uproxy': false
+    };
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -169,27 +187,6 @@ module UI {
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
     public isAccess = () : boolean => { return View.ACCESS == this.view; }
 
-
-    // Keep track of currently viewed contact and instance.
-    public contact :UI.User = null;
-    contactUnwatch = null;
-    instance :UI.Instance = null;
-    instanceUnwatch = null;  // For angular binding.
-
-    proxy = null;  // If we are proxying, keep track of the instance.
-
-    // When the description changes while the text field loses focus, it
-    // automatically updates.
-    oldDescription :string = '';
-
-    // Initial filter state.
-    public filters = {
-        'online': true,
-        'myAccess': false,
-        'friendsAccess': false,
-        'uproxy': false
-    };
-
     /**
      * Hackish way to fire the onStateChange dispatcher.
      * This is required because angular only listens / updates the DOM for
@@ -216,19 +213,37 @@ module UI {
 
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
-    startProxying = (instance:UI.Instance) => {
-      this.core.start(instance.instanceId);
-      this.proxy = instance;
+    /**
+     * Starts proxying by updating UI-specific state, then passing the start
+     * COMMAND to the core.
+     * Assumes that there is a 'current instance' available.
+     */
+    public startProxying = () => {
+      if (!this.user || !this.instance) {
+        console.warn('Cannot stop proxying without a current instance.');
+      }
+      // Prepare the instance path.
+      var path = <InstancePath>{
+        network: 'google',
+        userId: this.user.userId,
+        instanceId: this.instance.instanceId
+      };
+      this.core.start(path);
+      this.proxy = this.instance;
       this._setProxying(true);
     }
 
-    stopProxying = () => {
+    /**
+     * Stops proxying by updating UI-specific state, and passing the stop
+     * COMMAND to the core.
+     */
+    public stopProxying = () => {
       if (!this.instance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
       this._setProxying(false);
-      this.core.stop(this.instance.instanceId);
+      this.core.stop();
     }
 
     _setProxying = (isProxying : boolean) => {

@@ -96,6 +96,7 @@ var ui = new UIConnector();
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updaes to the UI, and handles commands from the UI.
+ * TODO: Convert this into a class, actually implementing the CoreAPI.
  */
 module Core {
 
@@ -195,6 +196,18 @@ module Core {
    */
   var toClientId = (instanceId:string) : string => {
     return store.state.instanceToClient[instanceId];
+  }
+
+  /**
+   * Begin using a peer as a proxy server.
+   */
+  export var start = (instancePath:InstancePath) => {
+  }
+
+  /**
+   * Stop proxying with the current instance, if it exists.
+   */
+  export var stop = () => {
   }
 
 }  // module Core
@@ -392,8 +405,8 @@ Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 // Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
 Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
-Core.onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
-Core.onCommand(uProxy.Command.STOP_PROXYING, stopUsingPeerAsProxyServer);
+Core.onCommand(uProxy.Command.START_PROXYING, Core.start);
+Core.onCommand(uProxy.Command.STOP_PROXYING, Core.stop);
 
 Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.state.options[data.key] = data.value;

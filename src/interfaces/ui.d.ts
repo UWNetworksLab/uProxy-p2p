@@ -32,6 +32,16 @@ declare module UI {
   }
 
   /**
+   * Proxy-state message is sent from the Core to the UI to indicate changes in
+   * the current proxying state.
+   */
+  export interface ProxyMessage {
+    network :string;
+    userId  :string;
+    access  :boolean;
+  }
+
+  /**
    * UI-specific Instance.
    * TODO: Maybe turn this into an actual class. We'll see.
    */

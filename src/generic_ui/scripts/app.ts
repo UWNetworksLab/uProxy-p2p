@@ -203,15 +203,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
    */
   .directive('uproxyProxyGadget', () => {
     var link = ($s, element, attrs) => {
-      // TODO: Replace these calls with the proxy service.
-      $s.start = () => {
-        console.log('Starting to proxy...');
-        $s.core.start($s.ui.instance.instanceId);
-      };
-      $s.stop = () => {
-        console.log('Stopping usage of proxy...');
-        $s.core.stop($s.ui.instance.instanceId);
-      };
+      $s.start = $s.ui.startProxying;
+      $s.stop = $s.ui.stopProxying
     };
     return {
       restrict: 'E',
