@@ -200,11 +200,6 @@ module Core {
     return store.state.instanceToClient[instanceId];
   }
 
-
-  // --------------------------------------------------------------------------
-  //  Proxying
-  // TODO: Move this into Instance class.
-  // --------------------------------------------------------------------------
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |peer| exists.
@@ -257,52 +252,70 @@ module Core {
     return user.getInstance(path.instanceId);
   }
 
+  export var getPathFromPeerId = (peerId :string) : InstancePath => {
+    var ids = peerId.split('#');
+    if (3 !== ids.length) {
+      console.warn('Malformed peerId: ' + peerId);
+    }
+    return {
+      network:    ids[0],
+      userId:     ids[1],
+      instanceId: ids[2]
+    };
+  }
+
+  export var getInstanceFromPeerId = (peerId :string) : Core.RemoteInstance => {
+    return getInstance(getPathFromPeerId(peerId));
+  }
+
 }  // module Core
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
-// TODO: Remove this when we have multiple social providers 'for real'.
-var defaultNetwork = networks['websocket']['api'];
 
+/*
 
-// --------------------------------------------------------------------------
-// Signalling channel hooks.
-// --------------------------------------------------------------------------
-// peerId is a client ID.
-client.on('sendSignalToPeer', (data:PeerSignal) => {
-    console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to client: ' + data.peerId + ', which should map to instance: ' +
-                    store.state.clientToInstance[data.peerId]);
-  // TODO: don't use 'message' as a field in a message! that's confusing!
-  // data.peerId is an instance ID.  convert.
-  defaultNetwork.sendMessage(data.peerId,
-      JSON.stringify({type: 'peerconnection-client', data: data.data}));
+Install signalling channel hooks. When we receive 'sendSignalToPeer' events
+emitted from the socks-rtc, it is uProxy's job to pass those signals through to
+XMPP / the target social provider, eventually reaching the appropriate remote
+instance. To accomplish this, it must identify the peer using a fully qualified
+InstancePath.
+
+The data sent over the signalling channel will be the full signal, and not just
+the data portion. This includes the |peerId| as part of the payload, which will
+allow the remote to verify the provinance of the signal.
+
+:PeerSignal is defined in SocksRTC.
+Expect peerId to be a #-connected InstancePath.
+TODO: Rename client and server.
+
+*/
+client.on('sendSignalToPeer', (signal :PeerSignal) => {
+  console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
+  var peer = Core.getInstanceFromPeerId(signal.peerId);
+  if (!peer) {
+    console.warn('Cannot send client signal to non-existing peer.');
+    return;
+  }
+  peer.send({
+    type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+    data: signal
+  });
 });
 
 // Make this take an actual peer object type.
-server.on('sendSignalToPeer', (data:PeerSignal) => {
-  console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to client: ' + data.peerId);
-  defaultNetwork.sendMessage(data.peerId,
-      JSON.stringify({type: 'peerconnection-server', data: data.data}));
+server.on('sendSignalToPeer', (signal :PeerSignal) => {
+  console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
+  var peer = Core.getInstanceFromPeerId(signal.peerId);
+  if (!peer) {
+    console.warn('Cannot send server signal to non-existing peer.');
+    return;
+  }
+  peer.send({
+    type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+    data: signal
+  });
 });
-
-// peerconnection-client -- sent from client on other side.
-// TODO: typing for the msg so we don't get weird things like data.data... @_@
-function receiveSignalFromClientPeer(msg) {
-  console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
-  // sanitize from the identity service
-  server.emit('handleSignalFromPeer',
-      {peerId: msg.fromClientId, data: msg.data.data});
-}
-
-// peerconnection-server -- sent from server on other side.
-function receiveSignalFromServerPeer(msg) {
-  console.log('receiveSignalFromServerPeer: ' + JSON.stringify(msg));
-  // sanitize from the identity service
-  client.emit('handleSignalFromPeer',
-      {peerId: msg.fromClientId, data: msg.data.data});
-}
 
 // TODO: move this into User, or some sort of proxy service object.
 function handleNewlyActiveClient(msg) {
@@ -429,5 +442,4 @@ Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
 
 // TODO: make the invite mechanism an actual process.
 Core.onCommand(uProxy.Command.INVITE, (userId:string) => {
-  defaultNetwork.sendMessage(userId, 'Join UProxy!');
 });

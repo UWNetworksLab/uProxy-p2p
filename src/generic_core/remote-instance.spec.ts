@@ -352,10 +352,11 @@ describe('Core.RemoteInstance', () => {
 
     it('can start proxying', () => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
+      spyOn(alice, 'getPeerId').and.returnValue('alice-peerId');
       alice.start();
       expect(client.emit).toHaveBeenCalledWith('start', {
           'host': '127.0.0.1', 'port': 9999,
-          'peerId': 'instance-alice'
+          'peerId': 'alice-peerId'
       });
       expect(alice.access.asProxy).toEqual(true);
     });
@@ -380,6 +381,49 @@ describe('Core.RemoteInstance', () => {
       expect(alice.access.asProxy).toEqual(false);
     });
 
-  });
+  });  // describe proxying
+
+  describe('signalling', () => {
+
+    var alice = new Core.RemoteInstance(user, {
+      instanceId: 'instance-alice',
+      keyHash:    'fake-hash-alice',
+      description: 'alice peer',
+    });
+
+    var fakeSignal = {
+      peerId: 'alice-peerId',
+      data: 'really fake signal'
+    };
+
+    beforeEach(() => {
+      spyOn(alice, 'getPath').and.returnValue('foobar');
+      spyOn(Core, 'getPathFromPeerId').and.returnValue('foobar');
+      spyOn(client, 'emit');
+      spyOn(server, 'emit');
+    });
+
+    it('handles signal from client peer as server', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(server.emit).toHaveBeenCalledWith(
+          'handleSignalFromPeer', fakeSignal);
+    });
+
+    it('handles signal from server peer as client', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
+      expect(client.emit).toHaveBeenCalledWith(
+          'handleSignalFromPeer', fakeSignal);
+      expect(server.emit).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid signals', () => {
+      alice.handleSignal(uProxy.MessageType.CONSENT, fakeSignal)
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(server.emit).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+  });  // describe signalling
 
 });

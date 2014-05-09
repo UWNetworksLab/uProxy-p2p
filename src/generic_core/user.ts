@@ -200,6 +200,11 @@ module Core {
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(msg.data);
           break;
+        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          var instance = this.getInstance(this.clientToInstance(clientId));
+          instance.handleSignal(msg.type, <PeerSignal>msg.data);
+          break;
         default:
           console.error(this.userId + ' received invalid message.');
       }

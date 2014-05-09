@@ -54,7 +54,12 @@ module uProxy {
   export enum MessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
     CONSENT,
-    DESCRIPTION
+    DESCRIPTION,
+    // These are for the signalling-channel. The payloads are arbitrary, and
+    // could be specified from uProxy, or could also be SDP headers forwarded
+    // from socks-rtc's RTCPeerConnection.
+    SIGNAL_FROM_CLIENT_PEER,
+    SIGNAL_FROM_SERVER_PEER,
   }
 
   // Message should be the boundary for JSON parse / stringify.
@@ -121,8 +126,8 @@ module uProxy {
   export interface UIAPI {
 
     // Global sync of all state.
-    sync(state? : string) : void;
 
+    sync(state? : string) : void;
     update(type:Update, data?:any) : void;
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...

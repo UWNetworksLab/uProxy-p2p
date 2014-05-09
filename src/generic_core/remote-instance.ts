@@ -51,6 +51,47 @@ module Core {
     }
 
     /**
+     * Send a message to this instance. Queues messages if the instance is
+     * currently not reachable. (Its client went offline, and a new one may show
+     * up in the future)
+     *
+     * TODO: Implement queueing using promises.
+     * First we need to know that the social API's sendMessage propogates error
+     * messages.
+     */
+    public send = (msg:uProxy.Message) => {
+      // The parent User is responsible for mapping the instanceId to the
+      // correct clientId so that the social network can pass the message along.
+      this.user.send(this.instanceId, msg);
+    }
+
+    /**
+     * Handle signals sent along the signalling channel from the remote
+     * instance, and pass it along to the relevant socks-rtc module.
+     * TODO: spec
+     */
+    public handleSignal = (type:uProxy.MessageType, signal:PeerSignal) => {
+      var path = Core.getPathFromPeerId(signal.peerId);
+      if (path != this.getPath()) {
+        console.warn('Signal from invalid Peer:', JSON.stringify(path));
+        return;
+      }
+      switch (type) {
+        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          // If the remote peer sent signal as the client, we act as server.
+          server.emit('handleSignalFromPeer', signal)
+          break;
+        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          // If the remote peer sent signal as the server, we act as client.
+          client.emit('handleSignalFromPeer', signal)
+          break;
+        default:
+          console.warn('Invalid signal! ' + uProxy.MessageType[type]);
+          return
+      }
+    }
+
+    /**
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
@@ -76,7 +117,7 @@ module Core {
       client.emit('start', {
           'host': '127.0.0.1', 'port': 9999,
            // Peer's peerId is the same as our instanceId..
-          'peerId': this.instanceId
+          'peerId': this.getPeerId()
       });
       this.access.asProxy = true;
     }
@@ -91,21 +132,6 @@ module Core {
       }
       client.emit('stop');
       this.access.asProxy = false;
-    }
-
-    /**
-     * Send a message to this instance. Queues messages if the instance is
-     * currently not reachable. (Its client went offline, and a new one may show
-     * up in the future)
-     *
-     * TODO: Implement queueing using promises.
-     * First we need to know that the social API's sendMessage propogates error
-     * messages.
-     */
-    public send = (msg:uProxy.Message) => {
-      // The parent User is responsible for mapping the instanceId to the
-      // correct clientId so that the social network can pass the message along.
-      this.user.send(this.instanceId, msg);
     }
 
     /**
@@ -229,6 +255,17 @@ module Core {
         userId:     this.user.userId,
         instanceId: this.instanceId
       }
+    }
+
+    /**
+     * PeerID is used for signalling and WebRTC peerconnection in the socks-rtc
+     * layer. It needs to be fully-qualified so that the Core can pass the
+     * signals back to the right remote instance.
+     * We assume that neither network, userId, or instanceId ever contains '#'.
+     */
+    public getPeerId = () : string => {
+      var path = this.getPath();
+      return path.network + '#' + path.userId + '#' + path.instanceId;
     }
 
   }  // class Core.RemoteInstance
