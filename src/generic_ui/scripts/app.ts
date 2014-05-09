@@ -73,7 +73,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return null;
       };
 
-      $rootScope.prettyNetworkName = function(networkId) {
+      $rootScope.prettyNetworkName = (networkId) => {
         switch (networkId) {
           case 'google': return 'G+';
           case 'facebook': return 'FB';
@@ -83,24 +83,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
             console.warn("No prettification for network: " + JSON.stringify(networkId));
         }
         return networkId;
-      };
-
-      // TODO: remove since there will be multiple instances for a userId
-      $rootScope.instanceOfUserId = function(userId) {
-        // First check active clients
-        // Do this first, because some users' IDs don't matchs their instance
-        // id that they sent over.
-        for (var userId in model.roster) {
-          var instance = $rootScope.instanceOfContact(model.roster[userId]);
-          if (instance) return instance;
-        }
-        // Now check user-id matching because if the client is not online, they
-        // will not have a client id.
-        for (var instanceId in model.instances) {
-          if (model.instances[instanceId].rosterInfo.userId == userId)
-            return model.instances[instanceId];
-        }
-        return null;
       };
 
       // TODO(): change the icon/text shown in the browser action, and maybe

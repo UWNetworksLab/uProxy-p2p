@@ -7,7 +7,6 @@
 
 console.log('This is not a real uProxy frontend.');
 
-// declare var state:UI.Model;
 declare var angular:ng.IAngularStatic;
 
 var model :UI.Model = {
@@ -15,9 +14,6 @@ var model :UI.Model = {
   // 'global' roster, which is just the concatenation of all network rosters.
   roster: {}
 };
-
-// Initialize model object to a mock. (state.js)
-// var model = state;  // || { identityStatus: {} };
 
 class MockNotifications implements INotifications {
   setIcon(iconFile) {
