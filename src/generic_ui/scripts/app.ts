@@ -197,26 +197,39 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     }
   })
 
-  .directive('uproxyAccessAction', () => {
+  /**
+   * uProxy Proxy Gadget directive contains the start and stop hooks for the
+   * actual proxying, hooked up to buttons.
+   */
+  .directive('uproxyProxyGadget', () => {
+    var link = ($s, element, attrs) => {
+      // TODO: Replace these calls with the proxy service.
+      $s.start = () => {
+        console.log('Starting to proxy...');
+        $s.core.start($s.ui.instance.instanceId);
+      };
+      $s.stop = () => {
+        console.log('Stopping usage of proxy...');
+        $s.core.stop($s.ui.instance.instanceId);
+      };
+    };
     return {
-      restrict: 'E'
+      restrict: 'E',
+      templateUrl: 'templates/proxy-gadget.html',
+      link: link
+    };
+  })
+
+  /**
+   * uProxy Client Gadget contains bandwidth / current usage indicators
+   * for when the remote client is current proxying through you.
+   * TODO: Implement.
+   */
+  .directive('uproxyClientGadget', () => {
+    var link = ($s, element, attrs) => {};
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/client-gadget.html',
+      link: link
     }
   });
-
-  // This controller deals with modification of consent bits and the actual
-  // starting/stopping of proxying for one particular instance.
-  // TODO: Create a proxy/client angular directive.
-  /*
-  .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
-    $s.startAccess = function(instance) {
-      // We don't need to tell them we'll start proxying, we can just try to
-      // start. The SDP request will go through chat/identity network on its
-      // own.
-      ui.startProxying(instance);
-    };
-
-    $s.stopAccess = function(instance) {
-      ui.stopProxying();
-    };
-  }]);
-  */

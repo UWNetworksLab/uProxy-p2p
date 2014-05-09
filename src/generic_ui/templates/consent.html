@@ -4,17 +4,8 @@
       ng-switch='currentProxyState()'>
 
     <div ng-switch-when='GRANTED'>
-      <p class='uproxytip'>You have access.
-      </p>
-      <uproxy-consent-action text='Start'
-          ng-hide='ui.instance.access.asProxy'
-          action='startAccess'
-      </uproxy-consent-action>
-      <!-- TODO: Include an indicator for when proxying is starting up.-->
-      <uproxy-consent-action text='Stop'
-          ng-show='ui.instance.access.asProxy'
-          action='stopAccess'
-      </uproxy-consent-action>
+      <p class='uproxytip'>You have access.</p>
+      <uproxy-proxy-gadget></uproxy-proxy-gadget>
     </div>
 
     <div ng-switch-when='USER_REQUESTED'>
