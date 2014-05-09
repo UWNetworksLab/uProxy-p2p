@@ -7,7 +7,6 @@
 
 console.log('This is not a real uProxy frontend.');
 
-// declare var state:UI.Model;
 declare var angular:ng.IAngularStatic;
 
 var model :UI.Model = {
@@ -15,9 +14,6 @@ var model :UI.Model = {
   // 'global' roster, which is just the concatenation of all network rosters.
   roster: {}
 };
-
-// Initialize model object to a mock. (state.js)
-// var model = state;  // || { identityStatus: {} };
 
 class MockNotifications implements INotifications {
   setIcon(iconFile) {
@@ -49,6 +45,10 @@ function generateFakeUserMessage() : UI.UserMessage {
         consent: {
           asClient: Consent.ClientState.NONE,
           asProxy:  Consent.ProxyState.NONE
+        },
+        access: {
+          asClient: false,
+          asProxy: false
         }
       }
     ]
@@ -56,7 +56,10 @@ function generateFakeUserMessage() : UI.UserMessage {
 }
 
 class MockCore implements uProxy.CoreAPI {
+
   public status :StatusObject;
+  private proxy :UI.Instance = null;
+
   constructor() {
     this.status = { connected: true };
   }
@@ -67,52 +70,72 @@ class MockCore implements uProxy.CoreAPI {
     console.log('Sending instance ID to ' + clientId);
   }
   modifyConsent(command) {
-    // Fake the core interaction, assume it sent bits on the wire, and receive
-    // the update from core.
-    var userUpdate = generateFakeUserMessage();
-    var user = model.roster[command.userId];
-    var instance = user.instances[0];
-    switch (command.action) {
-      case Consent.UserAction.REQUEST:
-      case Consent.UserAction.CANCEL_REQUEST:
-      case Consent.UserAction.ACCEPT_OFFER:
-      case Consent.UserAction.IGNORE_OFFER:
-        instance.consent.asProxy = Consent.userActionOnProxyState(
-            command.action, instance.consent.asProxy);
-        break;
-      case Consent.UserAction.OFFER:
-      case Consent.UserAction.CANCEL_OFFER:
-      case Consent.UserAction.ALLOW_REQUEST:
-      case Consent.UserAction.IGNORE_REQUEST:
-        instance.consent.asClient = Consent.userActionOnClientState(
-            command.action, instance.consent.asClient);
-        break;
-      default:
-        console.warn('Invalid Consent.UserAction! ' + command.action);
-        return;
-    }
-    userUpdate.instances[0].consent = instance.consent;
-    ui['syncUser_'](userUpdate);
-    console.log('Modified consent: ', command,
-                'new state: ', instance.consent);
-    // Randomly generate a positive response from alice.
-    // TODO: Make two UIs side-by-side for an actual 'peer-to-peer' mock.
-    if (Math.random() > 0.5) {
-      console.log('Alice will respond...');
-      setTimeout(() => {
-        userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
-        userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
-        ui['syncUser_'](userUpdate);
-      }, 500);
-    }
+    // Delay the actual core interaction to mimic the async nature. Also, to
+    // make this occur outside the angular context, ensuring that DOM refreshing
+    // from external callbacks works.
+    setTimeout(() => {
+      // Fake the core interaction, assume it sent bits on the wire, and receive
+      // the update from core.
+      var userUpdate = generateFakeUserMessage();
+      var user = model.roster[command.userId];
+      var instance = user.instances[0];
+      switch (command.action) {
+        case Consent.UserAction.REQUEST:
+        case Consent.UserAction.CANCEL_REQUEST:
+        case Consent.UserAction.ACCEPT_OFFER:
+        case Consent.UserAction.IGNORE_OFFER:
+          instance.consent.asProxy = Consent.userActionOnProxyState(
+              command.action, instance.consent.asProxy);
+          break;
+        case Consent.UserAction.OFFER:
+        case Consent.UserAction.CANCEL_OFFER:
+        case Consent.UserAction.ALLOW_REQUEST:
+        case Consent.UserAction.IGNORE_REQUEST:
+          instance.consent.asClient = Consent.userActionOnClientState(
+              command.action, instance.consent.asClient);
+          break;
+        default:
+          console.warn('Invalid Consent.UserAction! ' + command.action);
+          return;
+      }
+      userUpdate.instances[0].consent = instance.consent;
+      ui.syncUser(userUpdate);
+      console.log('Modified consent: ', command,
+                  'new state: ', instance.consent);
+      // Randomly generate a positive response from alice.
+      // TODO: Make two UIs side-by-side for an actual 'peer-to-peer' mock.
+      if (Math.random() > 0.5) {
+        console.log('Alice will respond...');
+        setTimeout(() => {
+          userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
+          userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
+          ui.syncUser(userUpdate);
+        }, 500);
+      }
+    }, 10);
   }
 
-  start(instanceId) {
-    console.log('Starting to proxy through ' + instanceId);
+  // Fake starting and stopping proxying sessions.
+  start = (path) => {
+    console.log('Starting to proxy through ', path);
+    // TODO: Do a better way of accessing instances.
+    this.proxy = model.networks[path.network]
+        .roster[path.userId]
+        .instances[0];
+    console.log(this.proxy);
+    this.proxy.access.asProxy = true;
   }
-  stop(instanceId) {
-    console.log('Stopping proxy through ' + instanceId);
+
+  stop = () => {
+    if (!this.proxy) {
+      console.warn('No proxy to stop for.');
+      return;
+    }
+    console.log('Stopping proxy through ', this.proxy);
+    this.proxy.access.asProxy = false;
+    this.proxy = null;
   }
+
   updateDescription(description) {
     console.log('Updating description to ' + description);
   }
@@ -126,7 +149,7 @@ class MockCore implements uProxy.CoreAPI {
       online: true
     });
     // Pretend we receive a bunch of user messages.
-    ui['syncUser_'](generateFakeUserMessage());
+    ui.syncUser(generateFakeUserMessage());
   }
   logout(network) {
     console.log('Logging out of', network);
@@ -154,7 +177,6 @@ var dependencyInjector = angular.module('dependencyInjector', [])
   .filter('i18n', function () {
     return function (key) { return key; };
   })
-  .constant('onStateChange', null)
   .constant('ui', ui)
   .constant('model', model)
   .constant('core', mockCore)

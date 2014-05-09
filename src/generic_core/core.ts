@@ -36,6 +36,8 @@ var server = freedom['RtcToNet']();
 // The Core's responsibility is to pass messages across the signalling
 // channel using the User / Instance mechanisms.
 
+// Keep track of the current remote proxy, if they exist.
+var proxy :Core.RemoteInstance = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -90,12 +92,22 @@ class UIConnector implements uProxy.UIAPI {
     ui.update(uProxy.Update.ALL);
   }
 
+  public syncUser = (payload:UI.UserMessage) => {
+    console.log('Core: UI.syncUser ' + JSON.stringify(payload));
+    this.update(uProxy.Update.USER_FRIEND, payload);
+  }
+
+  public refreshDOM = () => {
+    console.error('Cannot refresh DOM from the Core.');
+  };
+
 }
 var ui = new UIConnector();
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updaes to the UI, and handles commands from the UI.
+ * TODO: Convert this into a class, actually implementing the CoreAPI.
  */
 module Core {
 
@@ -197,109 +209,117 @@ module Core {
     return store.state.instanceToClient[instanceId];
   }
 
+  /**
+   * Begin using a peer as a proxy server.
+   * Starts SDP negotiations with a remote peer. Assumes |path| to the
+   * RemoteInstance exists.
+   */
+  export var start = (path :InstancePath) => {
+    // Disable any previous proxying session.
+    if (proxy) {
+      console.log('Existing proxying session! Terminating...');
+      stop();
+      proxy = null;
+    }
+    var remote = getInstance(path);
+    if (!remote) {
+      console.error('Instance ' + path.instanceId + ' does not exist for proxying.');
+      return;
+    }
+    remote.start();  // Will send an update to the UI.
+    // Remember this instance as our proxy.
+    proxy = remote;
+  }
+
+  /**
+   * Stop proxying with the current instance, if it exists.
+   */
+  export var stop = () => {
+    if (!proxy) {
+      console.error('Cannot stop proxying when there is no proxy');
+    }
+    proxy.stop();
+    proxy = null;
+    // TODO: Handle revoked permissions notifications.
+    // ui.syncInstance(instance, 'status');
+  }
+
+  /**
+   * Obtain the RemoteInstance corresponding to an instance path.
+   */
+  var getInstance = (path :InstancePath) : Core.RemoteInstance => {
+    var network = Social.getNetwork(path.network);
+    if (!network) {
+      console.error('No network ' + path.network);
+      return;
+    }
+    var user = network.getUser(path.userId);
+    if (!user) {
+      console.error('No user ' + path.userId);
+      return;
+    }
+    return user.getInstance(path.instanceId);
+  }
+
+  /**
+   * Obtain the InstancePath given a peerId. Assumes |peerId| is valid.
+   */
+  export var getPathFromPeerId = (peerId :string) : InstancePath => {
+    return JSON.parse(peerId);
+  }
+
+  export var getInstanceFromPeerId = (peerId :string) : Core.RemoteInstance => {
+    return getInstance(getPathFromPeerId(peerId));
+  }
+
 }  // module Core
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
-// TODO: Remove this when we have multiple social providers 'for real'.
-var defaultNetwork = networks['websocket']['api'];
 
+/*
 
-// --------------------------------------------------------------------------
-// Signalling channel hooks.
-// --------------------------------------------------------------------------
-// peerId is a client ID.
-client.on('sendSignalToPeer', (data:PeerSignal) => {
-    console.log('client(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to client: ' + data.peerId + ', which should map to instance: ' +
-                    store.state.clientToInstance[data.peerId]);
-  // TODO: don't use 'message' as a field in a message! that's confusing!
-  // data.peerId is an instance ID.  convert.
-  defaultNetwork.sendMessage(data.peerId,
-      JSON.stringify({type: 'peerconnection-client', data: data.data}));
+Install signalling channel hooks. When we receive 'sendSignalToPeer' events
+emitted from the socks-rtc, it is uProxy's job to pass those signals through to
+XMPP / the target social provider, eventually reaching the appropriate remote
+instance. To accomplish this, it must identify the peer using a fully qualified
+InstancePath.
+
+The data sent over the signalling channel will be the full signal, and not just
+the data portion. This includes the |peerId| as part of the payload, which will
+allow the remote to verify the provinance of the signal.
+
+:PeerSignal is defined in SocksRTC.
+Expect peerId to be a #-connected InstancePath.
+TODO: Rename client and server.
+
+*/
+client.on('sendSignalToPeer', (signal :PeerSignal) => {
+  console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
+  var instance = Core.getInstanceFromPeerId(signal.peerId);
+  if (!instance) {
+    console.warn('Cannot send client signal to non-existing RemoteInstance.');
+    return;
+  }
+  instance.send({
+    type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+    data: signal
+  });
 });
 
 // Make this take an actual peer object type.
-server.on('sendSignalToPeer', (data:PeerSignal) => {
-  console.log('server(sendSignalToPeer):' + JSON.stringify(data) +
-                ', sending to client: ' + data.peerId);
-  defaultNetwork.sendMessage(data.peerId,
-      JSON.stringify({type: 'peerconnection-server', data: data.data}));
+server.on('sendSignalToPeer', (signal :PeerSignal) => {
+  console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
+  var instance = Core.getInstanceFromPeerId(signal.peerId);
+  if (!instance) {
+    console.warn('Cannot send server signal to non-existing peer.');
+    return;
+  }
+  instance.send({
+    type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+    data: signal
+  });
 });
-
-// --------------------------------------------------------------------------
-//  Proxying
-// TODO: Move this into Instance class.
-// --------------------------------------------------------------------------
-// Begin SDP negotiations with peer. Assumes |peer| exists.
-var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  var instance = store.state.instances[peerInstanceId];
-  if (!instance) {
-    console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
-    return false;
-  }
-  // if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
-    // console.log('Lacking permission to proxy through ' + peerInstanceId);
-    // return false;
-  // }
-  // TODO: Cleanly disable any previous proxying session.
-  instance.status.proxy = C.ProxyState.RUNNING;
-  ui.syncInstance(instance, 'status');
-
-  // TODO: sync properly between the extension and the app on proxy settings
-  // rather than this cooincidentally the same data.
-  client.emit('start',
-              {'host': '127.0.0.1', 'port': 9999,
-               // peerId of the peer being routed to.
-               'peerId': store.state.instanceToClient[peerInstanceId]});
-
-  // This is a temporary hack which makes the other end aware of your proxying.
-  // TODO(uzimizu): Remove this once proxying is happening *for real*.
-  defaultNetwork.sendMessage(
-      store.state.instanceToClient[peerInstanceId],
-      JSON.stringify({
-          type: 'newly-active-client',
-          instanceId: store.state.me.instanceId
-      }));
-}
-
-var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  var instance = store.state.instances[peerInstanceId];
-  if (!instance) {
-    console.error('Instance ' + peerInstanceId + ' does not exist!');
-    return false;
-  }
-  // TODO: Handle revoked permissions notifications.
-
-  client.emit('stop');
-  instance.status.proxy = C.ProxyState.OFF;
-  ui.syncInstance(instance, 'status');
-
-  // TODO: this is also a temporary hack.
-  defaultNetwork.sendMessage(
-      store.state.instanceToClient[peerInstanceId],
-      JSON.stringify({
-          type: 'newly-inactive-client',
-          instanceId: store.state.me.instanceId
-      }));
-}
-
-// peerconnection-client -- sent from client on other side.
-// TODO: typing for the msg so we don't get weird things like data.data... @_@
-function receiveSignalFromClientPeer(msg) {
-  console.log('receiveSignalFromClientPeer: ' + JSON.stringify(msg));
-  // sanitize from the identity service
-  server.emit('handleSignalFromPeer',
-      {peerId: msg.fromClientId, data: msg.data.data});
-}
-
-// peerconnection-server -- sent from server on other side.
-function receiveSignalFromServerPeer(msg) {
-  console.log('receiveSignalFromServerPeer: ' + JSON.stringify(msg));
-  // sanitize from the identity service
-  client.emit('handleSignalFromPeer',
-      {peerId: msg.fromClientId, data: msg.data.data});
-}
 
 // TODO: move this into User, or some sort of proxy service object.
 function handleNewlyActiveClient(msg) {
@@ -392,8 +412,8 @@ Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 // Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
 Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
-Core.onCommand(uProxy.Command.START_PROXYING, startUsingPeerAsProxyServer);
-Core.onCommand(uProxy.Command.STOP_PROXYING, stopUsingPeerAsProxyServer);
+Core.onCommand(uProxy.Command.START_PROXYING, Core.start);
+Core.onCommand(uProxy.Command.STOP_PROXYING, Core.stop);
 
 Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   store.state.options[data.key] = data.value;
@@ -426,5 +446,4 @@ Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
 
 // TODO: make the invite mechanism an actual process.
 Core.onCommand(uProxy.Command.INVITE, (userId:string) => {
-  defaultNetwork.sendMessage(userId, 'Join UProxy!');
 });

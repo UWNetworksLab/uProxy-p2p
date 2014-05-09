@@ -11,12 +11,10 @@
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 declare var model         :UI.Model;
-// TODO: onStateChange needs to be a platform-independent event type. Maybe
-// shove into core connector.
-declare var onStateChange :chrome.Event;
-declare var finishStateChange :() => void;
 
 module UI {
+
+  var REFRESH_TIMEOUT :number = 500;  // ms.
 
   /**
    * Enumeration of mutually-exclusive view states.
@@ -65,10 +63,7 @@ module UI {
     loggedIn() : boolean;
     loggedOut() : boolean;
     resetState() : void;
-    instanceOfContact(contact :User) : Instance;
     prettyNetworkName(networkId :string) : string;
-    instanceOfUserId(userId :string) : Instance;
-    updateDOM() : void;
   }
 
   /**
@@ -96,10 +91,12 @@ module UI {
     public view :View;
     public toggles :Toggles;
 
-    // Current 'focus'
-    // TODO: Replace the 'current focus' with the new InstancePath type.
+    // Keep track of currently viewed contact and instance.
+    // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
+    public instance :UI.Instance = null;
+    public proxy :UI.Instance = null;  // If we are proxying, keep track of the instance.
 
     notifications = 0;
     advancedOptions = false;
@@ -108,13 +105,21 @@ module UI {
     numClients = 0;
     myName = '';
     myPic = null;
-    // Disable action buttons immediately after clicking, until state updates
-    // completely to prevent duplicate clicks.
-    pendingProxyTrustChange = false;
-    pendingClientTrustChange = false;
 
     isProxying = false;  // Whether we are proxying through someone.
     accessIds = 0;  // How many people are proxying through us.
+
+    // When the description changes while the text field loses focus, it
+    // automatically updates.
+    oldDescription :string = '';
+
+    // Initial filter state.
+    public filters = {
+        'online': true,
+        'myAccess': false,
+        'friendsAccess': false,
+        'uproxy': false
+    };
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -141,7 +146,6 @@ module UI {
         // There is now a difference between the UI Model and the state object
         // from the core, so one-to-one mappinsg from the old json-patch code cannot
         // work.
-        finishStateChange();
       });
 
       // Add or update the online status of a network.
@@ -154,7 +158,7 @@ module UI {
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
-        this.syncUser_(payload);
+        this.syncUser(payload);
       });
 
       console.log('Created the UserInterface');
@@ -169,39 +173,40 @@ module UI {
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
     public isAccess = () : boolean => { return View.ACCESS == this.view; }
 
-
-    // Keep track of currently viewed contact and instance.
-    public contact :UI.User = null;
-    contactUnwatch = null;
-    instance :UI.Instance = null;
-    instanceUnwatch = null;  // For angular binding.
-
-    proxy = null;  // If we are proxying, keep track of the instance.
-
-    // When the description changes while the text field loses focus, it
-    // automatically updates.
-    oldDescription :string = '';
-
-    // Initial filter state.
-    public filters = {
-        'online': true,
-        'myAccess': false,
-        'friendsAccess': false,
-        'uproxy': false
+    // Refreshing with angular from outside angular.
+    private refreshTimer = null;
+    private refreshNeeded :boolean = false;
+    private refreshFunction_ :Function = () => {
+      console.warn('Angular has not hooked into UI refresh!');
     };
 
     /**
-     * Hackish way to fire the onStateChange dispatcher.
-     * This is required because angular only listens / updates the DOM for
-     * attributes it is actively watching, or upon a user interaction (clicking
-     * on something). Sometimes the DOM needs to update purely based on some
-     * network event (i.e. receiving consent bits).
-     * TODO: Get rid of this, and actually use ngular watches the 'right' way.
+     * Rate-limited DOM refreshing.
+     * TODO: Put into a 'refreshing' service.
      */
-    private refreshDOM = () => {
-      // if (onStateChange) {
-        // onStateChange.dispatch();
-      // }
+    public refreshDOM = () => {
+      if (!this.refreshFunction_) {
+        return;
+      }
+      if (this.refreshTimer) {
+        this.refreshNeeded = true;
+      } else {
+        this.refreshFunction_();
+        this.refreshNeeded = false;
+        // Set a timeout for the next possible refresh, if it exists.
+        this.refreshTimer = setTimeout(() => {
+          this.refreshTimer = null;
+          if (this.refreshNeeded) {
+            this.refreshDOM();
+          }
+          this.refreshNeeded = false;
+        }, REFRESH_TIMEOUT);
+      }
+    }
+    public setRefreshHandler = (f :Function) => {
+      this.refreshDOM = () => {
+        f();
+      };
     }
 
     setClients = (numClients) => {
@@ -216,19 +221,39 @@ module UI {
 
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
-    startProxying = (instance:UI.Instance) => {
-      this.core.start(instance.instanceId);
-      this.proxy = instance;
+    /**
+     * Starts proxying by updating UI-specific state, then passing the start
+     * COMMAND to the core.
+     * Assumes that there is a 'current instance' available.
+     */
+    public startProxying = () => {
+      if (!this.user || !this.instance) {
+        console.warn('Cannot stop proxying without a current instance.');
+      }
+      // Prepare the instance path.
+      var path = <InstancePath>{
+        // TODO: Don't hardcode the network. This involves some changes to the
+        // model. Do this soon.
+        network: 'google',
+        userId: this.user.userId,
+        instanceId: this.instance.instanceId
+      };
+      this.core.start(path);
+      this.proxy = this.instance;
       this._setProxying(true);
     }
 
-    stopProxying = () => {
+    /**
+     * Stops proxying by updating UI-specific state, and passing the stop
+     * COMMAND to the core.
+     */
+    public stopProxying = () => {
       if (!this.instance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
       this._setProxying(false);
-      this.core.stop(this.instance.instanceId);
+      this.core.stop();
     }
 
     _setProxying = (isProxying : boolean) => {
@@ -385,7 +410,7 @@ module UI {
     /**
      * Synchronize data about some friend.
      */
-    private syncUser_ = (payload :UI.UserMessage) => {
+    public syncUser = (payload :UI.UserMessage) => {
       var network = model.networks[payload.network];
       if (!network) {
         console.warn('Received USER for non-existing network.');
@@ -405,22 +430,13 @@ module UI {
       user.update(profile);
       user.refreshStatus(payload.clients);
       user.setInstances(payload.instances);
+      // Update the 'current instance' of UI if this is the correct user.
+      if (this.user === user) {
+        this.instance = user.instances[0];
+      }
+      console.log('Synchronized user.', user);
       this.refreshDOM();
     };
-    /*
-      // TODO(uzimizu): Support multiple notifications, with messages.
-      hasNotification = hasNotification || instance.notify;
-      // Pass-over the trust value to user-level.
-      // TODO(keroserene): When we have multiple instances,
-      // take the assumption of highest trust level.
-      user.trust = instance.trust;
-      user.givesMe = ('no' != user.trust.asProxy);
-      user.usesMe = ('no' != user.trust.asClient);
-      isActiveClient = isActiveClient || 'running'==instance.status.client;
-      isActiveProxy = isActiveProxy || 'running'==instance.status.proxy;
-      break;  // TODO(uzimizu): Support multiple instances.
-    }
-    */
 
     /*
      * Make sure counters and UI-only state holders correctly reflect the model.
@@ -450,8 +466,6 @@ module UI {
         // }
       // }
       // this.setClients(c);
-      // this.pendingProxyTrustChange = false;
-      // this.pendingClientTrustChange = false;
 
       // Generate list ordered by names.
       // if (!this.myName) {

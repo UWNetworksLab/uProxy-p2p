@@ -1,4 +1,5 @@
 // Chrome-specific dependencies.
+// TODO: Convert to typescript
 'use strict';
 
 angular.module('dependencyInjector', [])
@@ -9,7 +10,6 @@ angular.module('dependencyInjector', [])
     };
   })
   // Singletons live in the Chrome Extension's background page.
-  .constant('onStateChange', chrome.extension.getBackgroundPage().onStateChange)
   .constant('ui', chrome.extension.getBackgroundPage().ui)
   .constant('core', chrome.extension.getBackgroundPage().core)
   .constant('model', chrome.extension.getBackgroundPage().model)

@@ -197,7 +197,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       type: command,
       data: data
     }
-    console.log('UI sending Command: ', JSON.stringify(payload));
+    console.log('UI sending Command ' + //uProxy.Command[command],
+        JSON.stringify(payload));
     this.send_(payload);
   }
 
@@ -266,14 +267,14 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
   }
 
-  start = (instanceId) => {
-    console.log('Starting to proxy through ' + instanceId);
-    this.sendCommand(uProxy.Command.START_PROXYING, instanceId);
+  start = (path) => {
+    console.log('Starting to proxy through ' + path);
+    this.sendCommand(uProxy.Command.START_PROXYING, path);
   }
 
-  stop = (instanceId) => {
-    console.log('Stopping proxy through ' + instanceId);
-    this.sendCommand(uProxy.Command.STOP_PROXYING, instanceId);
+  stop = () => {
+    console.log('Stopping proxy session.');
+    this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
   updateDescription = (description) => {

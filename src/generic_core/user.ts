@@ -95,6 +95,7 @@ module Core {
       }
       this.name = profile.name;
       this.profile = profile;
+      this.log('Updating...');
       this.notifyUI();
     }
 
@@ -154,6 +155,7 @@ module Core {
             'received client with unexpected userId: ' + client.userId);
         return;
       }
+      this.log('received client' + JSON.stringify(client));
       var clientIsNew = !(client.clientId in this.clients);
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
@@ -198,7 +200,12 @@ module Core {
           this.syncInstance_(clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
-          this.handleConsent_(msg.data);
+          this.handleConsent_(<ConsentMessage>msg.data);
+          break;
+        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          var instance = this.getInstance(this.clientToInstance(clientId));
+          instance.handleSignal(msg.type, <PeerSignal>msg.data);
           break;
         default:
           console.error(this.userId + ' received invalid message.');
@@ -230,6 +237,7 @@ module Core {
                      + clientId);
         return false;
       }
+      this.log('received instance' + JSON.stringify(instance));
       var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
@@ -250,6 +258,8 @@ module Core {
         this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
       }
 
+      this.notifyUI();
+      // TODO: Fix ui.syncInstance.
       ui.syncInstance(store.state.instances[instanceId]);
       ui.syncMappings();
       // TODO: save to storage.
@@ -260,14 +270,14 @@ module Core {
      * Assumes the instance associated with the consent message is valid and
      * belongs to this user.
      */
-    private handleConsent_ = (consentMessage :any) => {
+    private handleConsent_ = (consentMessage :ConsentMessage) => {
       var instanceId = consentMessage.instanceId;
       var instance = this.instances_[instanceId];
       if (!instance) {
         console.warn('Cannot update consent for non-existing instance!');
         return;
       }
-      instance.modifyConsent(consentMessage.consent);
+      instance.receiveConsent(consentMessage.consent);
     }
 
     /**
@@ -313,21 +323,41 @@ module Core {
       delete this.clientToInstanceMap_[clientId];
     }
 
-    private notifyUI = () => {
-      // Update the UI for this user, but only if the user is ready to be
-      // visible on the UI.
+    /**
+     * Send the latest full state about everything in this user to the UI.
+     * Only sends to UI if the user is ready to be visible. (has UserProfile)
+     */
+    public notifyUI = () => {
       if ('pending' == this.name) {
-        console.log('Not sending User ' + this.userId + ' yet');
+        this.log('Not showing UI without profile.');
         return;
       }
-      ui.update(uProxy.Update.USER_FRIEND, <UI.UserMessage>{
+      // TODO: Fully support multiple instances, with the UI to go with it.
+      // For now, only send instances which currently have a client mapped to
+      // them.
+      var instances = Object.keys(this.instances_).map((instanceId) => {
+        return this.instances_[instanceId].serialize();
+      });
+      console.log(JSON.stringify(Object.keys(this.instances_)));
+      console.log(JSON.stringify(instances));
+      // TODO: There is a bug in here somewhere. The UI message doesn't make it,
+      // sometimes.
+      ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
-        clients: valuesOf(this.clients),
-        instances: valuesOf(this.instances_).map((instance) => {
-          return instance.serialize();
-        })
-      });
+        clients: valuesOf(this.clients),  // These are actually just Statuses.
+        instances: instances
+      })
+      this.log('Sent myself to UI. \n' +
+          JSON.stringify(this.clientToInstanceMap_) + ' with ' +
+          JSON.stringify(instances));
+    }
+
+    /**
+     * Helper which logs messages clearly belonging to this Core.User.
+     */
+    private log = (msg:string) : void => {
+      console.log('[User ' + this.name + '] ' + msg);
     }
 
   }  // class User

@@ -25,13 +25,19 @@ module Core {
    */
   export class RemoteInstance implements Instance {
 
-    public instanceId    :string;
-    public keyHash       :string
-    public description   :string;
+    public instanceId  :string;
+    public keyHash     :string
+    public description :string;
 
-    public consent       :ConsentState;
-    public access        :AccessState;
-    private transport    :Transport;
+    public consent     :ConsentState = {
+      asClient: Consent.ClientState.NONE,
+      asProxy:  Consent.ProxyState.NONE
+    };
+    public access      :AccessState = {
+      asClient: false,
+      asProxy:  false
+    };
+    private transport  :Transport;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -41,10 +47,6 @@ module Core {
     constructor(
         public user :Core.User,  // The User which this instance belongs to.
         handshake   :Instance) {
-      this.consent = {
-        asClient: Consent.ClientState.NONE,
-        asProxy:  Consent.ProxyState.NONE
-      };
       this.update(handshake);
     }
 
@@ -61,6 +63,78 @@ module Core {
       // The parent User is responsible for mapping the instanceId to the
       // correct clientId so that the social network can pass the message along.
       this.user.send(this.instanceId, msg);
+    }
+
+    /**
+     * Handle signals sent along the signalling channel from the remote
+     * instance, and pass it along to the relevant socks-rtc module.
+     * TODO: spec
+     */
+    public handleSignal = (type:uProxy.MessageType, signal:PeerSignal) => {
+      var path = Core.getPathFromPeerId(signal.peerId);
+      if (path != this.getPath()) {
+        console.warn('Signal from invalid Peer:', JSON.stringify(path));
+        return;
+      }
+      switch (type) {
+        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          // If the remote peer sent signal as the client, we act as server.
+          server.emit('handleSignalFromPeer', signal)
+          break;
+        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          // If the remote peer sent signal as the server, we act as client.
+          client.emit('handleSignalFromPeer', signal)
+          break;
+        default:
+          console.warn('Invalid signal! ' + uProxy.MessageType[type]);
+          return
+      }
+    }
+
+    /**
+     * Begin to use this remote instance as a proxy server, if permission is
+     * currently granted.
+     */
+    public start = () : void => {
+      if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
+        console.warn('Lacking permission to proxy!');
+        return;
+      }
+      if (this.access.asProxy) {
+        // This should not happen. If it does, something else is broken. Still, we
+        // continue to actually proxy through the instance.
+        console.warn('Already proxying through ' + this.instanceId);
+        throw Error('Invalid proxy interaction!');
+      }
+      // TODO: sync properly between the extension and the app on proxy settings
+      // rather than this cooincidentally the same data.
+      // TODO: Convert socks-rtc's message types to Enums.
+
+      // Speak with socks-rtc to start the connection.
+      // The localhost host:port will be taken care of by WebRTC. The peerId is
+      // utilized to set the local and remote descriptions on the
+      // RTCPeerConnection.
+      // TODO: See if we can use promises here.
+      client.emit('start', {
+          'host': '127.0.0.1', 'port': 9999,
+           // Peer's peerId is the same as our InstancePath
+          'peerId': this.getPeerId()
+      });
+      this.access.asProxy = true;
+      this.user.notifyUI();
+    }
+
+    /**
+     * Stop using this remote instance as a proxy server.
+     */
+    public stop = () : void => {
+      if (!this.access.asProxy) {
+        console.error('Cannot stop proxying when not proxying.');
+        return;
+      }
+      client.emit('stop');
+      this.access.asProxy = false;
+      this.user.notifyUI();
     }
 
     /**
@@ -118,6 +192,8 @@ module Core {
       }
       // Send new consent bits to the remote client.
       this.sendConsent();
+      // Send an update to the UI.
+      this.user.notifyUI();
     }
 
     /**
@@ -147,7 +223,9 @@ module Core {
           bits, this.consent.asClient);
       // TODO: save to storage and update ui.
       // store.saveInstance(this.instanceId);
-      ui.syncInstance(this, 'trust');
+      // TODO: Make the UI update granular for just the consent, instead of the
+      // entire parent User for this instance.
+      this.user.notifyUI();
     }
 
     /**
@@ -173,6 +251,30 @@ module Core {
         consent:     this.consent,
         access:      this.access
       }
+    }
+
+    /**
+     * Obtain the fully qualified path to this instance.
+     */
+    public getPath = () : InstancePath => {
+      return {
+        network:    this.user['network'].name,
+        userId:     this.user.userId,
+        instanceId: this.instanceId
+      }
+    }
+
+    /**
+     * PeerID is used for signalling and WebRTC peerconnection in the socks-rtc
+     * layer. It needs to be fully-qualified so that the Core can pass the
+     * signals back to the right remote instance.
+     * TODO: Implement a wrapper for talking to socks-rtc which deals with
+     * converting InstancePath to and from JSON, as well as goes from the path
+     * to the instance. Most of the Core should never touch JSON like this.
+     */
+    public getPeerId = () : string => {
+      var path = this.getPath();
+      return JSON.stringify(path);
     }
 
   }  // class Core.RemoteInstance

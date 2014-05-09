@@ -29,9 +29,12 @@ var FILES = {
   jasmine_chrome: [
     'build/chrome/test/chrome_mocks.js'
   ],
-  // jasmine_social: [
-    // 'node_modules/freedom-typescript-api/interfaces/social.d.ts'
-  // ]
+  // Files which are required at run-time everywhere.
+  uproxy_common: [
+    'uproxy.js',
+    'generic_core/consent.js',
+    'generic_core/util.js'
+  ],
 };
 
 module.exports = function(grunt) {
@@ -128,7 +131,7 @@ module.exports = function(grunt) {
          dest: 'build/uistatic/'},
         // Common uProxy requirements
         {expand: true, cwd: 'build/', flatten: true,
-         src: ['uproxy.js', 'generic_core/consent.js', 'generic_core/util.js'],
+         src: FILES.uproxy_common,
          dest: 'build/uistatic/scripts'}
       ]},
 
@@ -147,6 +150,9 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'build/', flatten: true,
          src: ['uproxy.js', 'chrome/util/chrome_glue.js'],
          dest: 'build/chrome/extension/scripts/'},
+        {expand: true, cwd: 'build/', flatten: true,
+         src: FILES.uproxy_common,
+         dest: 'build/chrome/extension/scripts'},
         // Libraries
         {expand: true, cwd: 'node_modules/freedom-for-chrome/',
          src: ['freedom.js'],
@@ -197,9 +203,6 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
          src: ['**'],
          dest: 'build/chrome/app/lib/storage'},
-        // {expand: true, cwd: 'node_modules/socks-rtc/src/chrome-providers',
-         // src: ['**'],
-         // dest: 'build/chrome/app/lib/freedom-providers'}
 
         // uProxy Icons.
         {expand: true, cwd: 'build/icons',

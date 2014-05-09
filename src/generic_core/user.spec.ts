@@ -174,6 +174,17 @@ describe('Core.User', () => {
       expect(user['handleConsent_']).toHaveBeenCalled();
     });
 
+    it('handles a SIGNAL* messages', () => {
+      var instance = jasmine.createSpyObj('instance', ['handleSignal']);
+      spyOn(user, 'clientToInstance');
+      spyOn(user, 'getInstance').and.returnValue(instance);
+      user.handleMessage('fakeclient', {
+        type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+        data: {}
+      });
+      expect(instance.handleSignal).toHaveBeenCalled();
+    });
+
     it('errors when receiving a message with invalid MessageType', () => {
       spyOn(console, 'error');
       user.handleMessage('fakeclient', {

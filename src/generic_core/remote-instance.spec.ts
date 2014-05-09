@@ -14,7 +14,8 @@ describe('Core.RemoteInstance', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
       'send',
-      'getLocalInstanceId'
+      'getLocalInstanceId',
+      'notifyUI'
   ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
@@ -24,6 +25,7 @@ describe('Core.RemoteInstance', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
+    spyOn(console, 'error');
   });
 
   it('constructs from a received Instance Handshake', () => {
@@ -177,6 +179,10 @@ describe('Core.RemoteInstance', () => {
 
   describe('receiving consent bits', () => {
 
+    beforeEach(() => {
+      // spyOn(user, 'notifyUI');
+    });
+
     it('remote maintains no consent', () => {
       instance.consent.asClient = Consent.ClientState.NONE;
       instance.consent.asProxy = Consent.ProxyState.NONE;
@@ -244,7 +250,7 @@ describe('Core.RemoteInstance', () => {
         isRequesting: false,
         isOffering:   false
       });
-      expect(ui.syncInstance).toHaveBeenCalled();
+      expect(user.notifyUI).toHaveBeenCalled();
     });
 
   });
@@ -336,5 +342,93 @@ describe('Core.RemoteInstance', () => {
     expect(alice.consent.asProxy).toEqual(Consent.ProxyState.GRANTED);
     expect(bob.consent.asClient).toEqual(Consent.ClientState.GRANTED);
   });
+
+  describe('proxying', () => {
+
+    var alice = new Core.RemoteInstance(user, {
+      instanceId: 'instance-alice',
+      keyHash:    'fake-hash-alice',
+      description: 'alice peer',
+    });
+
+    beforeEach(() => {
+      spyOn(client, 'emit');
+    });
+
+    it('can start proxying', () => {
+      alice.consent.asProxy = Consent.ProxyState.GRANTED;
+      spyOn(alice, 'getPeerId').and.returnValue('alice-peerId');
+      alice.start();
+      expect(client.emit).toHaveBeenCalledWith('start', {
+          'host': '127.0.0.1', 'port': 9999,
+          'peerId': 'alice-peerId'
+      });
+      expect(alice.access.asProxy).toEqual(true);
+    });
+
+    it('can stop proxying', () => {
+      alice.stop();
+      expect(client.emit).toHaveBeenCalledWith('stop');
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
+    it('refuses to start proxy without permission', () => {
+      alice.consent.asProxy = Consent.ProxyState.NONE;
+      alice.access.asProxy = false;
+      alice.start();
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
+    it('does not stop proxying when already stopped', () => {
+      alice.stop();
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
+  });  // describe proxying
+
+  describe('signaling', () => {
+
+    var alice = new Core.RemoteInstance(user, {
+      instanceId: 'instance-alice',
+      keyHash:    'fake-hash-alice',
+      description: 'alice peer',
+    });
+
+    var fakeSignal = {
+      peerId: 'alice-peerId',
+      data: 'really fake signal'
+    };
+
+    beforeEach(() => {
+      spyOn(alice, 'getPath').and.returnValue('foobar');
+      spyOn(Core, 'getPathFromPeerId').and.returnValue('foobar');
+      spyOn(client, 'emit');
+      spyOn(server, 'emit');
+    });
+
+    it('handles signal from client peer as server', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(server.emit).toHaveBeenCalledWith(
+          'handleSignalFromPeer', fakeSignal);
+    });
+
+    it('handles signal from server peer as client', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
+      expect(client.emit).toHaveBeenCalledWith(
+          'handleSignalFromPeer', fakeSignal);
+      expect(server.emit).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid signals', () => {
+      alice.handleSignal(uProxy.MessageType.CONSENT, fakeSignal)
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(server.emit).not.toHaveBeenCalled();
+      expect(console.warn).toHaveBeenCalled();
+    });
+
+  });  // describe signalling
 
 });

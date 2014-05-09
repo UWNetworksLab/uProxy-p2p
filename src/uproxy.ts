@@ -7,6 +7,7 @@
  */
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
+/// <reference path='interfaces/ui.d.ts' />
 
 module uProxy {
 
@@ -54,7 +55,12 @@ module uProxy {
   export enum MessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
     CONSENT,
-    DESCRIPTION
+    DESCRIPTION,
+    // These are for the signalling-channel. The payloads are arbitrary, and
+    // could be specified from uProxy, or could also be SDP headers forwarded
+    // from socks-rtc's RTCPeerConnection.
+    SIGNAL_FROM_CLIENT_PEER,
+    SIGNAL_FROM_SERVER_PEER,
   }
 
   // Message should be the boundary for JSON parse / stringify.
@@ -69,6 +75,7 @@ module uProxy {
    * This should only be associated with the Command.MODIFY_CONSENT command.
    */
   export interface ConsentCommand {
+    // TODO: Replace these 3 with InstancePath.
     network    :string;
     userId     :string;
     instanceId :string;
@@ -87,49 +94,57 @@ module uProxy {
   export interface CoreAPI {
 
     // Clears all state and storage.
-    reset():void;
+    reset() : void;
 
     // Send your own instanceId to target clientId.
-    sendInstance(clientId:string):void;
+    sendInstance(clientId :string) : void;
 
-    modifyConsent(command:ConsentCommand):void;
+    modifyConsent(command :ConsentCommand) : void;
 
     // Using peer as a proxy.
-    start(instanceId:string):void;
-    stop(instanceId:string):void;
+    start(instancePath :InstancePath) : void;
+    // TODO: Maybe in the future there will be the capacity to actually proxy
+    // thorugh more than one remote instance at the same time. If that occurs,
+    // then stop will need to take an :InstancePath as an argument. Otherwise,
+    // nothing is necessary, since the instance is implied.
+    stop () : void;
 
-    updateDescription(description:string):void;
-    changeOption(option:string):void;
+    updateDescription(description :string) : void;
+    changeOption(option :string) : void;
 
     // TODO: improve the notifications feature
-    dismissNotification(userId:string):void;
+    dismissNotification(userId :string) : void;
 
-    login(network:string):void;
-    logout(network:string):void;
+    login(network :string) : void;
+    logout(network :string) : void;
 
-    onUpdate(update:Update, handler:Function):void;
+    onUpdate(update :Update, handler :Function) : void;
   }
 
   /**
    * The primary interface for the uProxy User Interface.
+   * Currently, the UI update message types are specified in ui.d.ts.
    */
   export interface UIAPI {
 
     // Global sync of all state.
-    sync(state? : string) : void;
 
+    sync(state? : string) : void;
     update(type:Update, data?:any) : void;
+
+    syncUser(UserMessage :UI.UserMessage) : void;
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
     // updateNetwork(network:Social.Network) : void;
-    // updateUser(user:Core.User) : void;
     // updateSelf(user:Core.User) : void;
     // Update an instance.
     // syncInstance(instance : any) : void;
     // updateMappings() : void;
     // updateIdentity(identity) : void;
     // addNotification() : void;
+    refreshDOM :Function;
+
   }
 
   interface ICoreOptions {

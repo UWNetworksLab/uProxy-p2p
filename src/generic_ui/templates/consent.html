@@ -1,0 +1,68 @@
+<div class='instance-actions' ng-show='ui.instance && ui.isAccess()'>
+
+  <div class='uproxy-box proxy'
+      ng-switch='currentProxyState()'>
+
+    <div ng-switch-when='GRANTED'>
+      <p class='uproxytip'>You have access.</p>
+      <uproxy-proxy-gadget></uproxy-proxy-gadget>
+    </div>
+
+    <div ng-switch-when='USER_REQUESTED'>
+      <p class='uproxytip'>
+        Requesting access from {{ui.user.name}}...
+      </p>
+      <uproxy-consent-action text='Cancel'
+          action='CANCEL_REQUEST'
+      </uproxy-consent-action>
+    </div>
+    <div ng-switch-when='REMOTE_OFFERED'>
+      <p class='uproxytip'>They've offered you access.
+      </p>
+      <uproxy-consent-action text='Accept'
+          action='ACCEPT_OFFER'
+          class='black'>
+      </uproxy-consent-action>
+      <uproxy-consent-action text='Decline'
+          action='IGNORE_OFFER'>
+      </uproxy-consent-action>
+    </div>
+    <div ng-switch-default>
+      <p class='uproxytip'>No access yet.
+      </p>
+      <uproxy-consent-action text='Request'
+          action='REQUEST'>
+      </uproxy-consent-action>
+    </div>
+  </div>
+
+  <div class='uproxy-box client'
+      ng-class="{active:ui.instance.access.asClient}"
+      ng-switch='currentClientState()'>
+    <div ng-switch-when='NONE'>
+      <p class='uproxytip'>You have not granted them access.
+      </p>
+      <uproxy-consent-action text='Offer Access'
+          action='OFFER'
+      </uproxy-consent-action>
+    </div>
+    <div ng-switch-when='REMOTE_REQUESTED'>
+      <p class='uproxytip'>They requested access through you.
+      </p>
+      <uproxy-consent-action text='Grant'
+          action='ALLOW_REQUEST'
+          class='black'
+      </uproxy-consent-action>
+      <uproxy-consent-action text='Ignore'
+          action='IGNORE_REQUEST'
+      </uproxy-consent-action>
+    </div>
+    <div ng-switch-default>
+      <p class='uproxytip'>You've given them access.
+      </p>
+      <uproxy-consent-action text='Revoke Access'
+          action='CANCEL_OFFER'
+      </uproxy-consent-action>
+    </div>
+  </div>
+</div>

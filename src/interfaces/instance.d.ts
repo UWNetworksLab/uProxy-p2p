@@ -30,12 +30,22 @@ interface AccessState {
   asProxy  :boolean;
 }
 
-
+// TODO: Probably remove this.
 interface RosterInfo {
   userId  :string;
   name    :string;
   network :string;
   url     :string;
+}
+
+
+/**
+ * InstancePath is required to retrieve Instance objects.
+ */
+interface InstancePath {
+  network: string;
+  userId:  string;
+  instanceId: string;
 }
 
 

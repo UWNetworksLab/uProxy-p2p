@@ -15,65 +15,58 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
 
-angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
+var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
       $sniffer.csp = true;
       return $sniffer;
     }]);
-  })
-  // Run gets called every time an extension module is opened.
-  .run([
+  });
+
+// Run gets called every time an extension module is opened. (e.g. opening the
+// chrome extension popup).
+app.run([
     '$rootScope',
     // via dependencyInjector:
     'ui',
     'core',
-    'onStateChange',
     'model',
-    function($rootScope :UI.RootScope,
-             ui :uProxy.UIAPI,
-             core :uProxy.CoreAPI,
-             // TODO: Change type to something cross-browser compatible
-             onStateChange :chrome.Event,
-             model :UI.modelForAngular) {
+    ($s :UI.RootScope,
+     ui :uProxy.UIAPI,
+     core :uProxy.CoreAPI,
+     model :UI.modelForAngular) => {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
-      $rootScope.ui = ui;
-      $rootScope.core = core;
-      $rootScope.model = model;
+      $s.ui = ui;
+      $s.core = core;
+      $s.model = model;
 
-      $rootScope.isOnline = function(network) {
+      // Set the UI's refresher to be the angular $apply, which will
+      // kick of a digest cycle from outside the angular context. (This is
+      // necesasry anytime there is a non-user-initiated callback, like
+      // receiving something over the wire).
+      $s.ui['setRefreshHandler'](() => {
+        $s.$apply(() => {
+          console.log($s.ui['instance']);
+          console.log('Refreshed the DOM!');
+        });
+      });
+
+      $s.isOnline = (network) => {
         return (model.networks[network] && model.networks[network].online)
       };
-      $rootScope.isOffline = function(network) {
-        return !$rootScope.isOnline(network);
+      $s.isOffline = (network) => {
+        return !$s.isOnline(network);
       };
 
-      $rootScope.resetState = function () {
+      $s.resetState = function () {
         localStorage.clear();
         core.reset();
       };
 
-      // Takes in an entry from the roster table.
-      $rootScope.instanceOfContact = function(contact) {
-        for (var clientId in contact.clients) {
-          var instanceId = model.clientToInstance[clientId];
-          if (instanceId) {
-            return model.instances[instanceId];
-          }
-        }
-        // Now check user-id matching because if the client is not online, they
-        // will not have a client id.
-        for (var instanceId in model.instances) {
-          if (model.instances[instanceId].rosterInfo.userId == contact.userId)
-            return model.instances[instanceId];
-        }
-        return null;
-      };
-
-      $rootScope.prettyNetworkName = function(networkId) {
+      $s.prettyNetworkName = (networkId) => {
         switch (networkId) {
           case 'google': return 'G+';
           case 'facebook': return 'FB';
@@ -85,47 +78,22 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
         return networkId;
       };
 
-      // TODO: remove since there will be multiple instances for a userId
-      $rootScope.instanceOfUserId = function(userId) {
-        // First check active clients
-        // Do this first, because some users' IDs don't matchs their instance
-        // id that they sent over.
-        for (var userId in model.roster) {
-          var instance = $rootScope.instanceOfContact(model.roster[userId]);
-          if (instance) return instance;
-        }
-        // Now check user-id matching because if the client is not online, they
-        // will not have a client id.
-        for (var instanceId in model.instances) {
-          if (model.instances[instanceId].rosterInfo.userId == userId)
-            return model.instances[instanceId];
-        }
-        return null;
-      };
-
       // TODO(): change the icon/text shown in the browser action, and maybe
       // add a butter-bar. This is important for when someone is proxying
       // through you. See:
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      $rootScope.updateDOM = function() {
-        $rootScope.$apply(() => {});
-      };
-
-      // State change event handler is browser specific, or it might not exist
-      // at all.
-      if (onStateChange) {
-        onStateChange.addListener($rootScope.updateDOM);
-      }
     }  // run function
-  ])
+  ]);
 
-  /*
-   * The uProxy Consent directive handles all consent commands from the UI to
-   * the Core, which handles passing consent bits over the wire.
-   */
-  .directive('uproxyConsent', () => {
+// TODO: Put these directives in their own dedicated files.
+
+/*
+ * The uProxy Consent directive handles all consent commands from the UI to
+ * the Core, which handles passing consent bits over the wire.
+ */
+app.directive('uproxyConsent', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
       $s.ProxyState = Consent.ProxyState;
@@ -139,32 +107,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           action:     action
         });
       }
-      // Consent to access through a friend:
-      $s.requestAccess = () => {
-        _modifyConsent(Consent.UserAction.REQUEST);
-      };
-      $s.cancelRequest = () => {
-        _modifyConsent(Consent.UserAction.CANCEL_REQUEST);
-      };
-      $s.acceptOffer = () => {
-        _modifyConsent(Consent.UserAction.ACCEPT_OFFER);
-      };
-      $s.ignoreOffer = () => {
-        _modifyConsent(Consent.UserAction.IGNORE_OFFER);
-      };
-      // Consent to provide access for a friend:
-      $s.offerAccess = () => {
-        _modifyConsent(Consent.UserAction.OFFER);
-      };
-      $s.cancelOffer = () => {
-        _modifyConsent(Consent.UserAction.CANCEL_OFFER);
-      };
-      $s.allowRequest = () => {
-        _modifyConsent(Consent.UserAction.ALLOW_REQUEST);
-      };
-      $s.ignoreRequest = () => {
-        _modifyConsent(Consent.UserAction.IGNORE_REQUEST);
-      };
       // Current status indications need to return the enum strings.
       $s.currentProxyState = () => {
         if (!$s.ui.instance) {
@@ -183,24 +125,74 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // 'E' is an angular directive attribute.
       // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
-      templateUrl: 'consent.html',
+      templateUrl: 'templates/consent.html',
       link: link
     };
   });
-  // This controller deals with modification of consent bits and the actual
-  // starting/stopping of proxying for one particular instance.
-  // TODO: Create a proxy/client angular directive.
-  /*
-  .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
-    $s.startAccess = function(instance) {
-      // We don't need to tell them we'll start proxying, we can just try to
-      // start. The SDP request will go through chat/identity network on its
-      // own.
-      ui.startProxying(instance);
-    };
 
-    $s.stopAccess = function(instance) {
-      ui.stopProxying();
+/**
+ * The uProxy Instance Action directive generates HTML with a button that
+ * links to a valid instance action.
+ *
+ * Usage: <uproxy-instance-action text='$stuff_for_this_button
+ *            action='$function_to_use'>
+ *        </uproxy-instance-action>
+ */
+app.directive('uproxyConsentAction', () => {
+    var link = ($s, element, attrs) => {
+      $s.text = attrs['text'];
+      // Function which sends a consent command to the Core based on the Enum
+      // string specified in the HTML.
+      $s.action = () => {
+        var actionEnumStr = <string>attrs['action'];
+        var action :Consent.UserAction = Consent.UserAction[actionEnumStr];
+        console.log(actionEnumStr, action);
+        console.log($s.currentProxyState(), $s.currentClientState());
+        $s.core.modifyConsent(<uProxy.ConsentCommand>{
+          network:    $s.ui['network'],
+          userId:     $s.ui.user.userId,
+          instanceId: $s.ui.instance.instanceId,
+          action:     action
+        });
+      };
+      $s.hide = attrs['hide'];
+      $s.disabled = attrs['disabled'];
+      // TODO: Disable action buttons immediately after clicking, until state
+      // updates completely to prevent duplicate clicks.
     };
-  }]);
-  */
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/instance-action.html',
+      link: link
+    }
+  });
+
+/**
+ * uProxy Proxy Gadget directive contains the start and stop hooks for the
+ * actual proxying, hooked up to buttons.
+ */
+app.directive('uproxyProxyGadget', () => {
+    var link = ($s, element, attrs) => {
+      $s.start = $s.ui.startProxying;
+      $s.stop = $s.ui.stopProxying
+    };
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/proxy-gadget.html',
+      link: link
+    };
+  });
+
+/**
+ * uProxy Client Gadget contains bandwidth / current usage indicators
+ * for when the remote client is current proxying through you.
+ * TODO: Implement.
+ */
+app.directive('uproxyClientGadget', () => {
+  var link = ($s, element, attrs) => {};
+  return {
+    restrict: 'E',
+    templateUrl: 'templates/client-gadget.html',
+    link: link
+  }
+});
