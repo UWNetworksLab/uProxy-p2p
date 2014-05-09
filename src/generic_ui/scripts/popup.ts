@@ -15,41 +15,13 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
     var core = $scope.core;
     // $scope.optionsTooltip = false;
 
-    var syncContactWatch = function(userId) {
-      if (ui.contactUnwatch) {
-        ui.contactUnwatch();
-        ui.contactUnwatch = null;
-      }
-      ui.contactUnwatch = $scope.$watch(
-          'model.roster["' + userId + '"]', function() {
-            ui.contact = $scope.model.roster[userId];
-      });
-    }
-    var syncInstanceWatch = function(instanceId) {
-      // Check for new instance binding, to re-watch.
-      if (ui.instanceUnwatch) {
-        ui.instanceUnwatch();
-        ui.instanceUnwatch = null;
-      }
-    };
-
+    // TODO: Move filters into a directive.
     $scope.filterTips = {
       'uproxy': 'Only show contacts with UProxy installed.',
       'myAccess': 'Show contacts who provide me access.',
       'friendsAccess': 'Show contacts who use me for access.',
       'online': 'Only show online contacts.',
     };
-
-    // On the contacts details page, dynamically update |currentInstance| to
-    // reflect user actions and state changes in the DOM.
-    // $scope.updateCurrentInstance = function() {
-      // if (!$scope.ui.instance) {
-        // return;
-      // }
-      // $scope.$apply(function() {
-        // $scope.ui.instance = $scope.instances[$scope.ui.instance.instanceId];
-      // });
-    // }
 
     // On an update to the roster, update the variously sorted lists.
     // TODO(uzimizu): actually implement variety of sorting methods
@@ -73,23 +45,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.filterTip = $scope.filterTips[filter];
       $scope.showFilterTip = true;
     };
-
-    /*
-    $scope.$watch('ui.focus', () => {
-      var contact = ui.contact;
-      if (contact) {
-        console.log('current contact changed');
-        ui.contact = $scope.model.roster[contact.userId];
-      }
-      var instance = ui.instance;
-      if (instance) {
-        console.log('current instance changed');
-        ui.instance = $scope.model.instances[instance.instanceId];
-      }
-    });
-    */
-    if (ui.instance) {
-      syncInstanceWatch(ui.instance.instanceId);
-    }
 
   }]);

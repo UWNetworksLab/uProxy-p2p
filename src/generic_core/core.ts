@@ -96,6 +96,10 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.USER_FRIEND, payload);
   }
 
+  public refreshDOM = () => {
+    console.error('Cannot refresh DOM from the Core.');
+  };
+
 }
 var ui = new UIConnector();
 

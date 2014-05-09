@@ -143,6 +143,8 @@ module uProxy {
     // updateMappings() : void;
     // updateIdentity(identity) : void;
     // addNotification() : void;
+    refreshDOM :Function;
+
   }
 
   interface ICoreOptions {

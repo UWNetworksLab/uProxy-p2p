@@ -23,57 +23,50 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       return $sniffer;
     }]);
   })
-  // Run gets called every time an extension module is opened.
+
+  // Run gets called every time an extension module is opened. (e.g. opening the
+  // chrome extension popup).
   .run([
     '$rootScope',
     // via dependencyInjector:
     'ui',
     'core',
-    'onStateChange',
     'model',
-    function($rootScope :UI.RootScope,
-             ui :uProxy.UIAPI,
-             core :uProxy.CoreAPI,
-             // TODO: Change type to something cross-browser compatible
-             onStateChange :chrome.Event,
-             model :UI.modelForAngular) {
+    ($s :UI.RootScope,
+     ui :uProxy.UIAPI,
+     core :uProxy.CoreAPI,
+     model :UI.modelForAngular) => {
       if (undefined === model) {
         console.error('model not found in dependency injections.');
       }
-      $rootScope.ui = ui;
-      $rootScope.core = core;
-      $rootScope.model = model;
+      $s.ui = ui;
+      $s.core = core;
+      $s.model = model;
 
-      $rootScope.isOnline = function(network) {
+      // Set the UI's refresher to be the angular $apply, which will
+      // kick of a digest cycle from outside the angular context. (This is
+      // necesasry anytime there is a non-user-initiated callback, like
+      // receiving something over the wire).
+      $s.ui['setRefreshHandler'](() => {
+        $s.$apply(() => {
+          console.log($s.ui['instance']);
+          console.log('Refreshed the DOM!');
+        });
+      });
+
+      $s.isOnline = (network) => {
         return (model.networks[network] && model.networks[network].online)
       };
-      $rootScope.isOffline = function(network) {
-        return !$rootScope.isOnline(network);
+      $s.isOffline = (network) => {
+        return !$s.isOnline(network);
       };
 
-      $rootScope.resetState = function () {
+      $s.resetState = function () {
         localStorage.clear();
         core.reset();
       };
 
-      // Takes in an entry from the roster table.
-      $rootScope.instanceOfContact = function(contact) {
-        for (var clientId in contact.clients) {
-          var instanceId = model.clientToInstance[clientId];
-          if (instanceId) {
-            return model.instances[instanceId];
-          }
-        }
-        // Now check user-id matching because if the client is not online, they
-        // will not have a client id.
-        for (var instanceId in model.instances) {
-          if (model.instances[instanceId].rosterInfo.userId == contact.userId)
-            return model.instances[instanceId];
-        }
-        return null;
-      };
-
-      $rootScope.prettyNetworkName = (networkId) => {
+      $s.prettyNetworkName = (networkId) => {
         switch (networkId) {
           case 'google': return 'G+';
           case 'facebook': return 'FB';
@@ -91,15 +84,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setBadgeText(...)
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
-      $rootScope.updateDOM = function() {
-        $rootScope.$apply(() => {});
-      };
-
-      // State change event handler is browser specific, or it might not exist
-      // at all.
-      if (onStateChange) {
-        onStateChange.addListener($rootScope.updateDOM);
-      }
     }  // run function
   ])
 
@@ -171,6 +155,8 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       };
       $s.hide = attrs['hide'];
       $s.disabled = attrs['disabled'];
+      // TODO: Disable action buttons immediately after clicking, until state
+      // updates completely to prevent duplicate clicks.
     };
     return {
       restrict: 'E',

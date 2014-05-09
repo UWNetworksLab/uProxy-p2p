@@ -34,13 +34,6 @@ var model :UI.Model = {
   roster: {}
 };
 
-// ---------------------------- State Changes ----------------------------------
-var onStateChange = new chrome.Event();
-
-// Rate Limiting for state updates (ms)
-var syncBlocked = false;
-var syncTimer = null;     // Keep reference to the timer.
-
 // TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('onInstalled: previousVersion', details.previousVersion);
@@ -51,32 +44,6 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-
-// Rate limit synchronizations.
-function rateLimitedUpdates() {
-  ui.sync();
-  checkRunningProxy();
-  onStateChange.dispatch();
-}
-
-
-// TODO: Implement this as part of the angular services (don't exist yet).
-var finishStateChange = () => {
-  // Initiate first sync and start a timer if necessary, in order to
-  // rate-limit passes through the entire model & other checks.
-  if (!syncBlocked) {
-    syncBlocked = true;
-    rateLimitedUpdates();
-  }
-  if (!syncTimer) {
-    syncTimer = setTimeout(() => {
-      rateLimitedUpdates();
-      syncTimer = null;  // Allow future timers.
-      syncBlocked = false;
-    }, 5000);
-  }
-}
-
 /**
  * Start proxying if one instance has their proxy status enabled.
  * Otherwise, stop all proxying.
@@ -86,7 +53,6 @@ function checkRunningProxy() {
   // proxyConfig.startUsingProxy();
   proxyConfig.stopUsingProxy();
 }
-
 
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
