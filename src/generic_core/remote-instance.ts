@@ -268,11 +268,13 @@ module Core {
      * PeerID is used for signalling and WebRTC peerconnection in the socks-rtc
      * layer. It needs to be fully-qualified so that the Core can pass the
      * signals back to the right remote instance.
-     * We assume that neither network, userId, or instanceId ever contains '#'.
+     * TODO: Implement a wrapper for talking to socks-rtc which deals with
+     * converting InstancePath to and from JSON, as well as goes from the path
+     * to the instance. Most of the Core should never touch JSON like this.
      */
     public getPeerId = () : string => {
       var path = this.getPath();
-      return path.network + '#' + path.userId + '#' + path.instanceId;
+      return JSON.stringify(path);
     }
 
   }  // class Core.RemoteInstance

@@ -93,6 +93,7 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public syncUser = (payload:UI.UserMessage) => {
+    console.log('Core: UI.syncUser ' + JSON.stringify(payload));
     this.update(uProxy.Update.USER_FRIEND, payload);
   }
 

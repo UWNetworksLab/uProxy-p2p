@@ -15,18 +15,18 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
 
-angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
+var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
       $sniffer.csp = true;
       return $sniffer;
     }]);
-  })
+  });
 
-  // Run gets called every time an extension module is opened. (e.g. opening the
-  // chrome extension popup).
-  .run([
+// Run gets called every time an extension module is opened. (e.g. opening the
+// chrome extension popup).
+app.run([
     '$rootScope',
     // via dependencyInjector:
     'ui',
@@ -85,13 +85,15 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
     }  // run function
-  ])
+  ]);
 
-  /*
-   * The uProxy Consent directive handles all consent commands from the UI to
-   * the Core, which handles passing consent bits over the wire.
-   */
-  .directive('uproxyConsent', () => {
+// TODO: Put these directives in their own dedicated files.
+
+/*
+ * The uProxy Consent directive handles all consent commands from the UI to
+ * the Core, which handles passing consent bits over the wire.
+ */
+app.directive('uproxyConsent', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
       $s.ProxyState = Consent.ProxyState;
@@ -126,17 +128,17 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       templateUrl: 'templates/consent.html',
       link: link
     };
-  })
+  });
 
-  /**
-   * The uProxy Instance Action directive generates HTML with a button that
-   * links to a valid instance action.
-   *
-   * Usage: <uproxy-instance-action text='$stuff_for_this_button
-   *            action='$function_to_use'>
-   *        </uproxy-instance-action>
-   */
-  .directive('uproxyConsentAction', () => {
+/**
+ * The uProxy Instance Action directive generates HTML with a button that
+ * links to a valid instance action.
+ *
+ * Usage: <uproxy-instance-action text='$stuff_for_this_button
+ *            action='$function_to_use'>
+ *        </uproxy-instance-action>
+ */
+app.directive('uproxyConsentAction', () => {
     var link = ($s, element, attrs) => {
       $s.text = attrs['text'];
       // Function which sends a consent command to the Core based on the Enum
@@ -163,13 +165,13 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       templateUrl: 'templates/instance-action.html',
       link: link
     }
-  })
+  });
 
-  /**
-   * uProxy Proxy Gadget directive contains the start and stop hooks for the
-   * actual proxying, hooked up to buttons.
-   */
-  .directive('uproxyProxyGadget', () => {
+/**
+ * uProxy Proxy Gadget directive contains the start and stop hooks for the
+ * actual proxying, hooked up to buttons.
+ */
+app.directive('uproxyProxyGadget', () => {
     var link = ($s, element, attrs) => {
       $s.start = $s.ui.startProxying;
       $s.stop = $s.ui.stopProxying
@@ -179,18 +181,18 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       templateUrl: 'templates/proxy-gadget.html',
       link: link
     };
-  })
-
-  /**
-   * uProxy Client Gadget contains bandwidth / current usage indicators
-   * for when the remote client is current proxying through you.
-   * TODO: Implement.
-   */
-  .directive('uproxyClientGadget', () => {
-    var link = ($s, element, attrs) => {};
-    return {
-      restrict: 'E',
-      templateUrl: 'templates/client-gadget.html',
-      link: link
-    }
   });
+
+/**
+ * uProxy Client Gadget contains bandwidth / current usage indicators
+ * for when the remote client is current proxying through you.
+ * TODO: Implement.
+ */
+app.directive('uproxyClientGadget', () => {
+  var link = ($s, element, attrs) => {};
+  return {
+    restrict: 'E',
+    templateUrl: 'templates/client-gadget.html',
+    link: link
+  }
+});

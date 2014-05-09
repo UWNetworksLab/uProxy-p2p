@@ -232,6 +232,8 @@ module UI {
       }
       // Prepare the instance path.
       var path = <InstancePath>{
+        // TODO: Don't hardcode the network. This involves some changes to the
+        // model. Do this soon.
         network: 'google',
         userId: this.user.userId,
         instanceId: this.instance.instanceId

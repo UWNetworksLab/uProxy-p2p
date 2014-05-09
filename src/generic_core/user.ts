@@ -258,6 +258,8 @@ module Core {
         this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
       }
 
+      this.notifyUI();
+      // TODO: Fix ui.syncInstance.
       ui.syncInstance(store.state.instances[instanceId]);
       ui.syncMappings();
       // TODO: save to storage.
@@ -333,18 +335,22 @@ module Core {
       // TODO: Fully support multiple instances, with the UI to go with it.
       // For now, only send instances which currently have a client mapped to
       // them.
-      // var instances = valuesOf(this.clientToInstanceMap_).map((clientId) => {
-        // return this.getInstance(this.clientToInstance(clientId)).serialize;
-      // });
-      this.log('Sending myself to UI. ' + JSON.stringify(this.clientToInstanceMap_));
+      var instances = Object.keys(this.instances_).map((instanceId) => {
+        return this.instances_[instanceId].serialize();
+      });
+      console.log(JSON.stringify(Object.keys(this.instances_)));
+      console.log(JSON.stringify(instances));
+      // TODO: There is a bug in here somewhere. The UI message doesn't make it,
+      // sometimes.
       ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
-        clients: valuesOf(this.clients),
-        instances: valuesOf(this.instances_).map((instanceId) => {
-          return this.instances_[instanceId].serialize();
-        }),
-      });
+        clients: valuesOf(this.clients),  // These are actually just Statuses.
+        instances: instances
+      })
+      this.log('Sent myself to UI. \n' +
+          JSON.stringify(this.clientToInstanceMap_) + ' with ' +
+          JSON.stringify(instances));
     }
 
     /**
