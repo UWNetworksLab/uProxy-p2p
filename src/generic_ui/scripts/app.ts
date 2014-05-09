@@ -120,6 +120,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     }  // run function
   ])
+
   /*
    * The uProxy Consent directive handles all consent commands from the UI to
    * the Core, which handles passing consent bits over the wire.
@@ -138,32 +139,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
           action:     action
         });
       }
-      // Consent to access through a friend:
-      $s.requestAccess = () => {
-        _modifyConsent(Consent.UserAction.REQUEST);
-      };
-      $s.cancelRequest = () => {
-        _modifyConsent(Consent.UserAction.CANCEL_REQUEST);
-      };
-      $s.acceptOffer = () => {
-        _modifyConsent(Consent.UserAction.ACCEPT_OFFER);
-      };
-      $s.ignoreOffer = () => {
-        _modifyConsent(Consent.UserAction.IGNORE_OFFER);
-      };
-      // Consent to provide access for a friend:
-      $s.offerAccess = () => {
-        _modifyConsent(Consent.UserAction.OFFER);
-      };
-      $s.cancelOffer = () => {
-        _modifyConsent(Consent.UserAction.CANCEL_OFFER);
-      };
-      $s.allowRequest = () => {
-        _modifyConsent(Consent.UserAction.ALLOW_REQUEST);
-      };
-      $s.ignoreRequest = () => {
-        _modifyConsent(Consent.UserAction.IGNORE_REQUEST);
-      };
       // Current status indications need to return the enum strings.
       $s.currentProxyState = () => {
         if (!$s.ui.instance) {
@@ -185,7 +160,49 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       templateUrl: 'templates/consent.html',
       link: link
     };
+  })
+
+  /**
+   * The uProxy Instance Action directive generates HTML with a button that
+   * links to a valid instance action.
+   *
+   * Usage: <uproxy-instance-action text='$stuff_for_this_button
+   *            action='$function_to_use'>
+   *        </uproxy-instance-action>
+   */
+  .directive('uproxyConsentAction', () => {
+    var link = ($s, element, attrs) => {
+      $s.text = attrs['text'];
+      // Function which sends a consent command to the Core based on the Enum
+      // string specified in the HTML.
+      $s.action = () => {
+        var actionEnumStr = <string>attrs['action'];
+        var action :Consent.UserAction = Consent.UserAction[actionEnumStr];
+        console.log(actionEnumStr, action);
+        console.log($s.currentProxyState(), $s.currentClientState());
+        $s.core.modifyConsent(<uProxy.ConsentCommand>{
+          network:    $s.ui['network'],
+          userId:     $s.ui.user.userId,
+          instanceId: $s.ui.instance.instanceId,
+          action:     action
+        });
+      };
+      $s.hide = attrs['hide'];
+      $s.disabled = attrs['disabled'];
+    };
+    return {
+      restrict: 'E',
+      templateUrl: 'templates/instance-action.html',
+      link: link
+    }
+  })
+
+  .directive('uproxyAccessAction', () => {
+    return {
+      restrict: 'E'
+    }
   });
+
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
   // TODO: Create a proxy/client angular directive.

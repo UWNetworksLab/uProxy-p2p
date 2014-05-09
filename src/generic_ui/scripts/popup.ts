@@ -8,12 +8,6 @@
  */
 
 angular.module('UProxyExtension-popup', ['UProxyExtension'])
-  .directive('uproxyConsent', () => {
-    return {
-      restrict: 'E',
-      templateUrl: 'consent.html'
-    };
-  })
   // Main extension controller.
   .controller('MainCtrl', ['$scope', ($scope) => {
     // View states.
