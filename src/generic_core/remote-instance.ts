@@ -189,6 +189,8 @@ module Core {
       }
       // Send new consent bits to the remote client.
       this.sendConsent();
+      // Send an update to the UI.
+      this.user.notifyUI();
     }
 
     /**
@@ -218,7 +220,9 @@ module Core {
           bits, this.consent.asClient);
       // TODO: save to storage and update ui.
       // store.saveInstance(this.instanceId);
-      ui.syncInstance(this, 'trust');
+      // TODO: Make the UI update granular for just the consent, instead of the
+      // entire parent User for this instance.
+      this.user.notifyUI();
     }
 
     /**

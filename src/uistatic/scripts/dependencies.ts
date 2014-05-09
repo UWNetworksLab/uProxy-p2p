@@ -99,7 +99,7 @@ class MockCore implements uProxy.CoreAPI {
         return;
     }
     userUpdate.instances[0].consent = instance.consent;
-    ui['syncUser_'](userUpdate);
+    ui.syncUser(userUpdate);
     console.log('Modified consent: ', command,
                 'new state: ', instance.consent);
     // Randomly generate a positive response from alice.
@@ -109,7 +109,7 @@ class MockCore implements uProxy.CoreAPI {
       setTimeout(() => {
         userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
         userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
-        ui['syncUser_'](userUpdate);
+        ui.syncUser(userUpdate);
       }, 500);
     }
   }
@@ -148,7 +148,7 @@ class MockCore implements uProxy.CoreAPI {
       online: true
     });
     // Pretend we receive a bunch of user messages.
-    ui['syncUser_'](generateFakeUserMessage());
+    ui.syncUser(generateFakeUserMessage());
   }
   logout(network) {
     console.log('Logging out of', network);

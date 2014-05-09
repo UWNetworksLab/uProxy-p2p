@@ -172,7 +172,7 @@ module UI {
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
-        this.syncUser_(payload);
+        this.syncUser(payload);
       });
 
       console.log('Created the UserInterface');
@@ -400,7 +400,7 @@ module UI {
     /**
      * Synchronize data about some friend.
      */
-    private syncUser_ = (payload :UI.UserMessage) => {
+    public syncUser = (payload :UI.UserMessage) => {
       var network = model.networks[payload.network];
       if (!network) {
         console.warn('Received USER for non-existing network.');

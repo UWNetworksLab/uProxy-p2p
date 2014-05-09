@@ -7,6 +7,7 @@
  */
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
+/// <reference path='interfaces/ui.d.ts' />
 
 module uProxy {
 
@@ -122,6 +123,7 @@ module uProxy {
 
   /**
    * The primary interface for the uProxy User Interface.
+   * Currently, the UI update message types are specified in ui.d.ts.
    */
   export interface UIAPI {
 
@@ -129,11 +131,12 @@ module uProxy {
 
     sync(state? : string) : void;
     update(type:Update, data?:any) : void;
+
+    syncUser(UserMessage :UI.UserMessage) : void;
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
     // updateNetwork(network:Social.Network) : void;
-    // updateUser(user:Core.User) : void;
     // updateSelf(user:Core.User) : void;
     // Update an instance.
     // syncInstance(instance : any) : void;

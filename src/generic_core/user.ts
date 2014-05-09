@@ -318,14 +318,16 @@ module Core {
       delete this.clientToInstanceMap_[clientId];
     }
 
-    private notifyUI = () => {
-      // Update the UI for this user, but only if the user is ready to be
-      // visible on the UI.
+    /**
+     * Send the latest full state about everything in this user to the UI.
+     * Only sends to UI if the user is ready to be visible. (has UserProfile)
+     */
+    public notifyUI = () => {
       if ('pending' == this.name) {
-        console.log('Not sending User ' + this.userId + ' yet');
+        console.log('Not showing ' + this.userId + ' without profile.');
         return;
       }
-      ui.update(uProxy.Update.USER_FRIEND, <UI.UserMessage>{
+      ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
         clients: valuesOf(this.clients),

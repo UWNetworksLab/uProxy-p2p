@@ -14,7 +14,8 @@ describe('Core.RemoteInstance', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
       'send',
-      'getLocalInstanceId'
+      'getLocalInstanceId',
+      'notifyUI'
   ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
@@ -178,6 +179,10 @@ describe('Core.RemoteInstance', () => {
 
   describe('receiving consent bits', () => {
 
+    beforeEach(() => {
+      // spyOn(user, 'notifyUI');
+    });
+
     it('remote maintains no consent', () => {
       instance.consent.asClient = Consent.ClientState.NONE;
       instance.consent.asProxy = Consent.ProxyState.NONE;
@@ -245,7 +250,7 @@ describe('Core.RemoteInstance', () => {
         isRequesting: false,
         isOffering:   false
       });
-      expect(ui.syncInstance).toHaveBeenCalled();
+      expect(user.notifyUI).toHaveBeenCalled();
     });
 
   });
@@ -383,7 +388,7 @@ describe('Core.RemoteInstance', () => {
 
   });  // describe proxying
 
-  describe('signalling', () => {
+  describe('signaling', () => {
 
     var alice = new Core.RemoteInstance(user, {
       instanceId: 'instance-alice',
