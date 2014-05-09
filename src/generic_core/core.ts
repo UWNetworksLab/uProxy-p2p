@@ -210,7 +210,8 @@ module Core {
 
   /**
    * Begin using a peer as a proxy server.
-   * Starts SDP negotiations with a remote peer. Assumes |peer| exists.
+   * Starts SDP negotiations with a remote peer. Assumes |path| to the
+   * RemoteInstance exists.
    */
   export var start = (path :InstancePath) => {
     // Disable any previous proxying session.
@@ -224,8 +225,7 @@ module Core {
       console.error('Instance ' + path.instanceId + ' does not exist for proxying.');
       return;
     }
-    remote.start();
-    // ui.syncInstance(instance, 'status');
+    remote.start();  // Will send an update to the UI.
     // Remember this instance as our proxy.
     proxy = remote;
   }
@@ -260,16 +260,11 @@ module Core {
     return user.getInstance(path.instanceId);
   }
 
+  /**
+   * Obtain the InstancePath given a peerId. Assumes |peerId| is valid.
+   */
   export var getPathFromPeerId = (peerId :string) : InstancePath => {
-    var ids = peerId.split('#');
-    if (3 !== ids.length) {
-      console.warn('Malformed peerId: ' + peerId);
-    }
-    return {
-      network:    ids[0],
-      userId:     ids[1],
-      instanceId: ids[2]
-    };
+    return JSON.parse(peerId);
   }
 
   export var getInstanceFromPeerId = (peerId :string) : Core.RemoteInstance => {
@@ -300,12 +295,12 @@ TODO: Rename client and server.
 */
 client.on('sendSignalToPeer', (signal :PeerSignal) => {
   console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
-  var peer = Core.getInstanceFromPeerId(signal.peerId);
-  if (!peer) {
-    console.warn('Cannot send client signal to non-existing peer.');
+  var instance = Core.getInstanceFromPeerId(signal.peerId);
+  if (!instance) {
+    console.warn('Cannot send client signal to non-existing RemoteInstance.');
     return;
   }
-  peer.send({
+  instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
     data: signal
   });
@@ -314,12 +309,12 @@ client.on('sendSignalToPeer', (signal :PeerSignal) => {
 // Make this take an actual peer object type.
 server.on('sendSignalToPeer', (signal :PeerSignal) => {
   console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
-  var peer = Core.getInstanceFromPeerId(signal.peerId);
-  if (!peer) {
+  var instance = Core.getInstanceFromPeerId(signal.peerId);
+  if (!instance) {
     console.warn('Cannot send server signal to non-existing peer.');
     return;
   }
-  peer.send({
+  instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
     data: signal
   });

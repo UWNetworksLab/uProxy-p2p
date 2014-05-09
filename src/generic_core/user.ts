@@ -95,6 +95,7 @@ module Core {
       }
       this.name = profile.name;
       this.profile = profile;
+      this.log('Updating...');
       this.notifyUI();
     }
 
@@ -154,6 +155,7 @@ module Core {
             'received client with unexpected userId: ' + client.userId);
         return;
       }
+      this.log('received client' + JSON.stringify(client));
       var clientIsNew = !(client.clientId in this.clients);
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
@@ -235,6 +237,7 @@ module Core {
                      + clientId);
         return false;
       }
+      this.log('received instance' + JSON.stringify(instance));
       var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
@@ -324,17 +327,31 @@ module Core {
      */
     public notifyUI = () => {
       if ('pending' == this.name) {
-        console.log('Not showing ' + this.userId + ' without profile.');
+        this.log('Not showing UI without profile.');
         return;
       }
+      // TODO: Fully support multiple instances, with the UI to go with it.
+      // For now, only send instances which currently have a client mapped to
+      // them.
+      // var instances = valuesOf(this.clientToInstanceMap_).map((clientId) => {
+        // return this.getInstance(this.clientToInstance(clientId)).serialize;
+      // });
+      this.log('Sending myself to UI. ' + JSON.stringify(this.clientToInstanceMap_));
       ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
         clients: valuesOf(this.clients),
-        instances: valuesOf(this.instances_).map((instance) => {
-          return instance.serialize();
-        })
+        instances: valuesOf(this.instances_).map((instanceId) => {
+          return this.instances_[instanceId].serialize();
+        }),
       });
+    }
+
+    /**
+     * Helper which logs messages clearly belonging to this Core.User.
+     */
+    private log = (msg:string) : void => {
+      console.log('[User ' + this.name + '] ' + msg);
     }
 
   }  // class User

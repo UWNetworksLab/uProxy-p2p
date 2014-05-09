@@ -432,6 +432,7 @@ module UI {
       if (this.user === user) {
         this.instance = user.instances[0];
       }
+      console.log('Synchronized user.', user);
       this.refreshDOM();
     };
 

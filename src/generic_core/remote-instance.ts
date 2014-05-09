@@ -104,6 +104,7 @@ module Core {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
+        throw Error('Invalid proxy interaction!');
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
@@ -116,10 +117,11 @@ module Core {
       // TODO: See if we can use promises here.
       client.emit('start', {
           'host': '127.0.0.1', 'port': 9999,
-           // Peer's peerId is the same as our instanceId..
+           // Peer's peerId is the same as our InstancePath
           'peerId': this.getPeerId()
       });
       this.access.asProxy = true;
+      this.user.notifyUI();
     }
 
     /**
@@ -132,6 +134,7 @@ module Core {
       }
       client.emit('stop');
       this.access.asProxy = false;
+      this.user.notifyUI();
     }
 
     /**
