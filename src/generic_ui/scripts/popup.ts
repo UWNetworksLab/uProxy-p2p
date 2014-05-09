@@ -39,9 +39,6 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       'friendsAccess': 'Show contacts who use me for access.',
       'online': 'Only show online contacts.',
     };
-    var _getTrust = function(client) {
-      return $scope.instances[client.instanceId].trust;
-    };
 
     // On the contacts details page, dynamically update |currentInstance| to
     // reflect user actions and state changes in the DOM.
@@ -77,6 +74,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.showFilterTip = true;
     };
 
+    /*
     $scope.$watch('ui.focus', () => {
       var contact = ui.contact;
       if (contact) {
@@ -89,10 +87,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
         ui.instance = $scope.model.instances[instance.instanceId];
       }
     });
-
-    if (ui.contact) {
-      syncContactWatch(ui.contact.userId);
-    }
+    */
     if (ui.instance) {
       syncInstanceWatch(ui.instance.instanceId);
     }

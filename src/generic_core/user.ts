@@ -198,7 +198,7 @@ module Core {
           this.syncInstance_(clientId, <Instance>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
-          this.handleConsent_(msg.data);
+          this.handleConsent_(<ConsentMessage>msg.data);
           break;
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
@@ -265,14 +265,14 @@ module Core {
      * Assumes the instance associated with the consent message is valid and
      * belongs to this user.
      */
-    private handleConsent_ = (consentMessage :any) => {
+    private handleConsent_ = (consentMessage :ConsentMessage) => {
       var instanceId = consentMessage.instanceId;
       var instance = this.instances_[instanceId];
       if (!instance) {
         console.warn('Cannot update consent for non-existing instance!');
         return;
       }
-      instance.modifyConsent(consentMessage.consent);
+      instance.receiveConsent(consentMessage.consent);
     }
 
     /**

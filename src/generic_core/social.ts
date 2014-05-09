@@ -296,6 +296,7 @@ module Social {
         this.addUser_(userId);
       }
       var msg :uProxy.Message = JSON.parse(incoming.message);
+      this.log('received <------ ' + incoming.message);
       this.getUser(userId).handleMessage(incoming.from.clientId, msg);
     }
 
@@ -417,6 +418,7 @@ module Social {
      */
     public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);
+      this.log('sending ------> ' + msgString);
       return this.api.sendMessage(clientId, msgString);
     }
 

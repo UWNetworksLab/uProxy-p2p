@@ -197,7 +197,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       type: command,
       data: data
     }
-    console.log('UI sending Command: ', JSON.stringify(payload));
+    console.log('UI sending Command ' + //uProxy.Command[command],
+        JSON.stringify(payload));
     this.send_(payload);
   }
 

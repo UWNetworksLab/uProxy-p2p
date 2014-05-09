@@ -6,6 +6,7 @@
       "uproxy.js",
       "view_oauth.js",
       "util.js",
+      "consent.js",
       "nouns-and-adjectives.js",
       "constants.js",
       "state-storage.js",
