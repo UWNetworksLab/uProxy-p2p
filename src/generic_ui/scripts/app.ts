@@ -16,8 +16,6 @@
 /// <reference path='../../uproxy.ts'/>
 
 angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
-  //.constant('googleAuth', new OAuth2('google', OAUTH_CONFIG))
-  //.constant('GOOG_PROFILE_URL', 'https://www.googleapis.com/oauth2/v1/userinfo')
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
@@ -112,10 +110,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       //   * chrome.browserAction.setIcon
       //   * https://developer.chrome.com/extensions/desktop_notifications.html
       $rootScope.updateDOM = function() {
-        $rootScope.$apply(function () {
-          // Also update pointers locally ?
-          // $rootScope.instances = model.instances;
-        });
+        $rootScope.$apply(() => {});
       };
 
       // State change event handler is browser specific, or it might not exist
@@ -125,60 +120,78 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     }  // run function
   ])
-  // The consent directive handles all consent activity.
-  // .directive('uproxyConsent', () => {
-  // });
+
+  /*
+   * The uProxy Consent directive handles all consent commands from the UI to
+   * the Core, which handles passing consent bits over the wire.
+   */
+  .directive('uproxyConsent', () => {
+    // TODO: Specify the scoping of the 'current user' in a better way.
+    var link = ($s, element, attrs) => {
+      $s.ProxyState = Consent.ProxyState;
+      $s.ClientState = Consent.ClientState;
+      var _modifyConsent = (action:Consent.UserAction) => {
+        console.log($s.currentProxyState(), $s.currentClientState());
+        $s.core.modifyConsent(<uProxy.ConsentCommand>{
+          network:    $s.ui['network'],
+          userId:     $s.ui.user.userId,
+          instanceId: $s.ui.instance.instanceId,
+          action:     action
+        });
+      }
+      // Consent to access through a friend:
+      $s.requestAccess = () => {
+        _modifyConsent(Consent.UserAction.REQUEST);
+      };
+      $s.cancelRequest = () => {
+        _modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+      };
+      $s.acceptOffer = () => {
+        _modifyConsent(Consent.UserAction.ACCEPT_OFFER);
+      };
+      $s.ignoreOffer = () => {
+        _modifyConsent(Consent.UserAction.IGNORE_OFFER);
+      };
+      // Consent to provide access for a friend:
+      $s.offerAccess = () => {
+        _modifyConsent(Consent.UserAction.OFFER);
+      };
+      $s.cancelOffer = () => {
+        _modifyConsent(Consent.UserAction.CANCEL_OFFER);
+      };
+      $s.allowRequest = () => {
+        _modifyConsent(Consent.UserAction.ALLOW_REQUEST);
+      };
+      $s.ignoreRequest = () => {
+        _modifyConsent(Consent.UserAction.IGNORE_REQUEST);
+      };
+      // Current status indications need to return the enum strings.
+      $s.currentProxyState = () => {
+        if (!$s.ui.instance) {
+          return 'NONE';
+        }
+        return '' + $s.ProxyState[$s.ui.instance.consent.asProxy];
+      }
+      $s.currentClientState = () => {
+        if (!$s.ui.instance) {
+          return 'NONE';
+        }
+        return '' + $s.ClientState[$s.ui.instance.consent.asClient];
+      }
+    };
+    return {
+      // 'E' is an angular directive attribute.
+      // See: https://docs.angularjs.org/guide/directive
+      restrict: 'E',
+      templateUrl: 'consent.html',
+      link: link
+    };
+  });
   // This controller deals with modification of consent bits and the actual
   // starting/stopping of proxying for one particular instance.
+  // TODO: Create a proxy/client angular directive.
+  /*
   .controller('InstanceActions', ['$scope', 'ui', function($s, ui) {
-    // TODO: below is ALL obsolete once the CoreConnector consent bits work.
-
-    // Helper which changes consent bits.
-    // These work the same even if |client| is an instance - so long as it
-    // contains the attribute |clientId|.
-    // |id| can be either a client id or a user id.
-    /*
-    var _modifyConsent = function (id, action) {
-      setTimeout(function() {
-        ui.modifyConsent(id, action);
-      }, 0); // TODO: why is this a timeout?
-    };
-    var _modifyProxyConsent = function(instance, action) {
-      _modifyConsent(instance.instanceId, action);
-      ui.pendingProxyTrustChange = true;
-    }
-    var _modifyClientConsent = function(instance, action) {
-      _modifyConsent(instance.instanceId, action);
-      ui.pendingClientTrustChange = true;
-    }
-    */
-    // Consent to access through a friend.
-    /*
-    $s.requestAccess = function(instance) {
-      _modifyProxyConsent(instance, 'request-access');
-    };
-    $s.cancelRequest = function(instance) {
-      _modifyProxyConsent(instance, 'cancel-request');
-    }
-    $s.acceptOffer = function(instance) {
-      _modifyProxyConsent(instance, 'accept-offer');
-    };
-    $s.declineOffer = function(instance) {
-      _modifyProxyConsent(instance, 'decline-offer');
-    };
-
-    // Consent to provide access for a friend:
-    $s.offerAccess = function(instance) {
-      _modifyClientConsent(instance, 'offer');
-    };
-    $s.grantAccess = function(instance) {
-      _modifyClientConsent(instance, 'allow');
-    };
-    $s.revokeAccess = function(instance) {
-      _modifyClientConsent(instance, 'deny');
-    };
-    $s.denyAccess = $s.revokeAccess;
-
     $s.startAccess = function(instance) {
       // We don't need to tell them we'll start proxying, we can just try to
       // start. The SDP request will go through chat/identity network on its
@@ -189,5 +202,5 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
     $s.stopAccess = function(instance) {
       ui.stopProxying();
     };
-    */
   }]);
+  */

@@ -227,6 +227,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     if (msg.type in this.listeners_) {
       var handlers :Function[] = this.listeners_[msg.type].slice(0);
       handlers.forEach((handler) => { handler(msg.data); });
+      // TODO: Fire a DOM update? Decide if this should happen here or during a
+      // ui.sync call.
     }
   }
 

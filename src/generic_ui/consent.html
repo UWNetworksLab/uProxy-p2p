@@ -1,0 +1,94 @@
+<div class="instance-actions" ng-show="ui.instance && ui.isAccess()">
+
+  <div class="uproxy-box proxy"
+      ng-switch="currentProxyState()">
+    <div ng-switch-when="GRANTED">
+      <p class="uproxytip">You have access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-hide="ui.instance.access.asProxy"
+          ng-click="startAccess(ui.instance)">
+        Start
+      </button>
+      <!-- TODO: Include an indicator for when proxying is starting up.-->
+      <button class="btn"
+          ng-show="ui.instance.access.asProxy"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="stopAccess(ui.instance)">
+        Stop
+      </button>
+    </div>
+
+    <div ng-switch-when="USER_REQUESTED">
+      <p class="uproxytip">
+        Requesting access from {{ui.user.name}}...
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="cancelRequest(ui.instance)">
+        Cancel
+      </button>
+    </div>
+    <div ng-switch-when="REMOTE_OFFERED">
+      <p class="uproxytip">They've offered you access.
+      </p>
+      <button class="btn black"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="acceptOffer(ui.instance)">
+        Accept
+      </button>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="declineOffer(ui.instance)">
+        Decline
+      </button>
+    </div>
+    <div ng-switch-default>
+      <p class="uproxytip">No access yet.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingProxyTrustChange"
+          ng-click="requestAccess(ui.instance)">
+        Request
+      </button>
+    </div>
+  </div>
+
+  <div class="uproxy-box client"
+      ng-class="{active:'running'==ui.instance.status.client}"
+      ng-switch="currentClientState()">
+    <div ng-switch-when="NONE">
+      <p class="uproxytip">You have not granted them access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="offerAccess(ui.instance)">
+        Offer Access
+      </button>
+    </div>
+    <div ng-switch-when="REMOTE_REQUESTED">
+      <p class="uproxytip">They requested access through you.
+      </p>
+      <button class="btn black"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="allowRequest(ui.instance)">
+        Grant
+      </button>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="ignoreRequest(ui.instance)">
+        Ignore
+      </button>
+    </div>
+    <div ng-switch-default>
+      <p class="uproxytip">You've given them access.
+      </p>
+      <button class="btn"
+          ng-disabled="ui.pendingClientTrustChange"
+          ng-click="cancelOffer(ui.instance)">
+        Revoke Access
+      </button>
+    </div>
+  </div>
+</div>

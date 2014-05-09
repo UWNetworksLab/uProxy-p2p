@@ -10,6 +10,8 @@
  * about their current status and consent level.
  */
 
+// TODO: Maybe wrap these in a module for everyting to do with Instances that
+// needs to be accessible both in core and UI.
 
 interface ConsentState {
   asClient :Consent.ClientState;
@@ -19,6 +21,13 @@ interface ConsentState {
 interface ConsentMessage {
   instanceId :string;
   consent    :Consent.State;
+}
+
+// Describing whether or not a remote instance is currently accessing or not,
+// assuming consent is GRANTED for that particular pathway.
+interface AccessState {
+  asClient :boolean;
+  asProxy  :boolean;
 }
 
 

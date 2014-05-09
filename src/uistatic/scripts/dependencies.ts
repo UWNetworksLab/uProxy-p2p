@@ -31,6 +31,30 @@ class MockNotifications implements INotifications {
   }
 }
 
+function generateFakeUserMessage() : UI.UserMessage {
+  return {
+    network: 'google',
+    user: {
+      userId: 'alice',
+      name: 'Alice uProxy',
+      timestamp: Date.now()
+    },
+    clients: [
+      UProxyClient.Status.ONLINE
+    ],
+    instances: [
+      {
+        instanceId: 'alice-instance-01',
+        description: 'fake instance for alice',
+        consent: {
+          asClient: Consent.ClientState.NONE,
+          asProxy:  Consent.ProxyState.NONE
+        }
+      }
+    ]
+  }
+}
+
 class MockCore implements uProxy.CoreAPI {
   public status :StatusObject;
   constructor() {
@@ -43,8 +67,46 @@ class MockCore implements uProxy.CoreAPI {
     console.log('Sending instance ID to ' + clientId);
   }
   modifyConsent(command) {
-    console.log('Modifying consent.');
+    // Fake the core interaction, assume it sent bits on the wire, and receive
+    // the update from core.
+    var userUpdate = generateFakeUserMessage();
+    var user = model.roster[command.userId];
+    var instance = user.instances[0];
+    switch (command.action) {
+      case Consent.UserAction.REQUEST:
+      case Consent.UserAction.CANCEL_REQUEST:
+      case Consent.UserAction.ACCEPT_OFFER:
+      case Consent.UserAction.IGNORE_OFFER:
+        instance.consent.asProxy = Consent.userActionOnProxyState(
+            command.action, instance.consent.asProxy);
+        break;
+      case Consent.UserAction.OFFER:
+      case Consent.UserAction.CANCEL_OFFER:
+      case Consent.UserAction.ALLOW_REQUEST:
+      case Consent.UserAction.IGNORE_REQUEST:
+        instance.consent.asClient = Consent.userActionOnClientState(
+            command.action, instance.consent.asClient);
+        break;
+      default:
+        console.warn('Invalid Consent.UserAction! ' + command.action);
+        return;
+    }
+    userUpdate.instances[0].consent = instance.consent;
+    ui['syncUser_'](userUpdate);
+    console.log('Modified consent: ', command,
+                'new state: ', instance.consent);
+    // Randomly generate a positive response from alice.
+    // TODO: Make two UIs side-by-side for an actual 'peer-to-peer' mock.
+    if (Math.random() > 0.5) {
+      console.log('Alice will respond...');
+      setTimeout(() => {
+        userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
+        userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
+        ui['syncUser_'](userUpdate);
+      }, 500);
+    }
   }
+
   start(instanceId) {
     console.log('Starting to proxy through ' + instanceId);
   }
@@ -63,6 +125,8 @@ class MockCore implements uProxy.CoreAPI {
       name: 'google',
       online: true
     });
+    // Pretend we receive a bunch of user messages.
+    ui['syncUser_'](generateFakeUserMessage());
   }
   logout(network) {
     console.log('Logging out of', network);
@@ -97,31 +161,9 @@ var dependencyInjector = angular.module('dependencyInjector', [])
 
 // Fake a bunch of interactions from core.
 // Starts off being 'offline' to a network.
-ui['syncNetwork_']({
+ui['syncNetwork_'](<UI.NetworkMessage>{
   name: 'google',
   online: false
-});
-
-ui['syncUser_']({
-  network: 'google',
-  user: {
-    userId: 'alice',
-    name: 'Alice uProxy',
-    timestamp: Date.now()
-  },
-  clients: [
-    UProxyClient.Status.ONLINE
-  ],
-  instances: [
-    {
-      instanceId: 'alice-instance-01',
-      description: 'fake instance for alice',
-      consent: {
-        asClient: Consent.ClientState.NONE,
-        asProxy:  Consent.ProxyState.NONE
-      }
-    }
-  ]
 });
 
 ui['DEBUG'] = true;

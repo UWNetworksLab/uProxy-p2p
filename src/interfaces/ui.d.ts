@@ -39,6 +39,7 @@ declare module UI {
     instanceId    :string;
     description   :string;
     consent       :ConsentState;
+    access        :AccessState;
     // TODO: rosterInfo is used in app.ts, remove if unnecessary.
     rosterInfo    ?:RosterInfo;
   }

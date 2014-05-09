@@ -11,6 +11,8 @@
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 declare var model         :UI.Model;
+// TODO: onStateChange needs to be a platform-independent event type. Maybe
+// shove into core connector.
 declare var onStateChange :chrome.Event;
 declare var finishStateChange :() => void;
 
@@ -95,6 +97,8 @@ module UI {
     public toggles :Toggles;
 
     // Current 'focus'
+    // TODO: Replace the 'current focus' with the new InstancePath type.
+    public network :string = 'google';
     public user :User = null;
 
     notifications = 0;
@@ -186,9 +190,18 @@ module UI {
         'uproxy': false
     };
 
-    // Hackish way to fire the onStateChange dispatcher.
-    refreshDOM = () => {
-      onStateChange.dispatch();
+    /**
+     * Hackish way to fire the onStateChange dispatcher.
+     * This is required because angular only listens / updates the DOM for
+     * attributes it is actively watching, or upon a user interaction (clicking
+     * on something). Sometimes the DOM needs to update purely based on some
+     * network event (i.e. receiving consent bits).
+     * TODO: Get rid of this, and actually use ngular watches the 'right' way.
+     */
+    private refreshDOM = () => {
+      // if (onStateChange) {
+        // onStateChange.dispatch();
+      // }
     }
 
     setClients = (numClients) => {
@@ -392,6 +405,7 @@ module UI {
       user.update(profile);
       user.refreshStatus(payload.clients);
       user.setInstances(payload.instances);
+      this.refreshDOM();
     };
     /*
       // TODO(uzimizu): Support multiple notifications, with messages.
