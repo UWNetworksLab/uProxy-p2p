@@ -8,14 +8,14 @@
       <button class="btn"
           ng-disabled="ui.pendingProxyTrustChange"
           ng-hide="ui.instance.access.asProxy"
-          ng-click="startAccess(ui.instance)">
+          ng-click="startAccess()">
         Start
       </button>
       <!-- TODO: Include an indicator for when proxying is starting up.-->
       <button class="btn"
           ng-show="ui.instance.access.asProxy"
           ng-disabled="ui.pendingProxyTrustChange"
-          ng-click="stopAccess(ui.instance)">
+          ng-click="stopAccess()">
         Stop
       </button>
     </div>
@@ -26,7 +26,7 @@
       </p>
       <button class="btn"
           ng-disabled="ui.pendingProxyTrustChange"
-          ng-click="cancelRequest(ui.instance)">
+          ng-click="cancelRequest()">
         Cancel
       </button>
     </div>
@@ -35,12 +35,12 @@
       </p>
       <button class="btn black"
           ng-disabled="ui.pendingProxyTrustChange"
-          ng-click="acceptOffer(ui.instance)">
+          ng-click="acceptOffer()">
         Accept
       </button>
       <button class="btn"
           ng-disabled="ui.pendingProxyTrustChange"
-          ng-click="declineOffer(ui.instance)">
+          ng-click="declineOffer()">
         Decline
       </button>
     </div>
@@ -49,7 +49,7 @@
       </p>
       <button class="btn"
           ng-disabled="ui.pendingProxyTrustChange"
-          ng-click="requestAccess(ui.instance)">
+          ng-click="requestAccess()">
         Request
       </button>
     </div>
@@ -63,7 +63,7 @@
       </p>
       <button class="btn"
           ng-disabled="ui.pendingClientTrustChange"
-          ng-click="offerAccess(ui.instance)">
+          ng-click="offerAccess()">
         Offer Access
       </button>
     </div>
@@ -72,12 +72,12 @@
       </p>
       <button class="btn black"
           ng-disabled="ui.pendingClientTrustChange"
-          ng-click="allowRequest(ui.instance)">
+          ng-click="allowRequest()">
         Grant
       </button>
       <button class="btn"
           ng-disabled="ui.pendingClientTrustChange"
-          ng-click="ignoreRequest(ui.instance)">
+          ng-click="ignoreRequest()">
         Ignore
       </button>
     </div>
@@ -86,7 +86,7 @@
       </p>
       <button class="btn"
           ng-disabled="ui.pendingClientTrustChange"
-          ng-click="cancelOffer(ui.instance)">
+          ng-click="cancelOffer()">
         Revoke Access
       </button>
     </div>

@@ -120,7 +120,6 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       }
     }  // run function
   ])
-
   /*
    * The uProxy Consent directive handles all consent commands from the UI to
    * the Core, which handles passing consent bits over the wire.
@@ -183,7 +182,7 @@ angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
       // 'E' is an angular directive attribute.
       // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
-      templateUrl: 'consent.html',
+      templateUrl: 'templates/consent.html',
       link: link
     };
   });
