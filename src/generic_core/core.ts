@@ -36,6 +36,8 @@ var server = freedom['RtcToNet']();
 // The Core's responsibility is to pass messages across the signalling
 // channel using the User / Instance mechanisms.
 
+// Keep track of the current remote proxy, if they exist.
+var proxy :Core.RemoteInstance = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -198,16 +200,61 @@ module Core {
     return store.state.instanceToClient[instanceId];
   }
 
+
+  // --------------------------------------------------------------------------
+  //  Proxying
+  // TODO: Move this into Instance class.
+  // --------------------------------------------------------------------------
   /**
    * Begin using a peer as a proxy server.
+   * Starts SDP negotiations with a remote peer. Assumes |peer| exists.
    */
-  export var start = (instancePath:InstancePath) => {
+  export var start = (path :InstancePath) => {
+    // Disable any previous proxying session.
+    if (proxy) {
+      console.log('Existing proxying session! Terminating...');
+      stop();
+      proxy = null;
+    }
+    var remote = getInstance(path);
+    if (!remote) {
+      console.error('Instance ' + path.instanceId + ' does not exist for proxying.');
+      return;
+    }
+    remote.start();
+    // ui.syncInstance(instance, 'status');
+    // Remember this instance as our proxy.
+    proxy = remote;
   }
 
   /**
    * Stop proxying with the current instance, if it exists.
    */
   export var stop = () => {
+    if (!proxy) {
+      console.error('Cannot stop proxying when there is no proxy');
+    }
+    proxy.stop();
+    proxy = null;
+    // TODO: Handle revoked permissions notifications.
+    // ui.syncInstance(instance, 'status');
+  }
+
+  /**
+   * Obtain the RemoteInstance corresponding to an instance path.
+   */
+  var getInstance = (path :InstancePath) : Core.RemoteInstance => {
+    var network = Social.getNetwork(path.network);
+    if (!network) {
+      console.error('No network ' + path.network);
+      return;
+    }
+    var user = network.getUser(path.userId);
+    if (!user) {
+      console.error('No user ' + path.userId);
+      return;
+    }
+    return user.getInstance(path.instanceId);
   }
 
 }  // module Core
@@ -239,63 +286,6 @@ server.on('sendSignalToPeer', (data:PeerSignal) => {
   defaultNetwork.sendMessage(data.peerId,
       JSON.stringify({type: 'peerconnection-server', data: data.data}));
 });
-
-// --------------------------------------------------------------------------
-//  Proxying
-// TODO: Move this into Instance class.
-// --------------------------------------------------------------------------
-// Begin SDP negotiations with peer. Assumes |peer| exists.
-var startUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  var instance = store.state.instances[peerInstanceId];
-  if (!instance) {
-    console.error('Instance ' + peerInstanceId + ' does not exist for proxying.');
-    return false;
-  }
-  // if (C.Trust.YES != store.state.instances[peerInstanceId].trust.asProxy) {
-    // console.log('Lacking permission to proxy through ' + peerInstanceId);
-    // return false;
-  // }
-  // TODO: Cleanly disable any previous proxying session.
-  instance.status.proxy = C.ProxyState.RUNNING;
-  ui.syncInstance(instance, 'status');
-
-  // TODO: sync properly between the extension and the app on proxy settings
-  // rather than this cooincidentally the same data.
-  client.emit('start',
-              {'host': '127.0.0.1', 'port': 9999,
-               // peerId of the peer being routed to.
-               'peerId': store.state.instanceToClient[peerInstanceId]});
-
-  // This is a temporary hack which makes the other end aware of your proxying.
-  // TODO(uzimizu): Remove this once proxying is happening *for real*.
-  defaultNetwork.sendMessage(
-      store.state.instanceToClient[peerInstanceId],
-      JSON.stringify({
-          type: 'newly-active-client',
-          instanceId: store.state.me.instanceId
-      }));
-}
-
-var stopUsingPeerAsProxyServer = (peerInstanceId:string) => {
-  var instance = store.state.instances[peerInstanceId];
-  if (!instance) {
-    console.error('Instance ' + peerInstanceId + ' does not exist!');
-    return false;
-  }
-  // TODO: Handle revoked permissions notifications.
-
-  client.emit('stop');
-  instance.status.proxy = C.ProxyState.OFF;
-  ui.syncInstance(instance, 'status');
-
-  // TODO: this is also a temporary hack.
-  defaultNetwork.sendMessage(
-      store.state.instanceToClient[peerInstanceId],
-      JSON.stringify({
-          type: 'newly-inactive-client',
-          instanceId: store.state.me.instanceId
-      }));
-}
 
 // peerconnection-client -- sent from client on other side.
 // TODO: typing for the msg so we don't get weird things like data.data... @_@

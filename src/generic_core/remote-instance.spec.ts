@@ -24,6 +24,7 @@ describe('Core.RemoteInstance', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
+    spyOn(console, 'error');
   });
 
   it('constructs from a received Instance Handshake', () => {
@@ -335,6 +336,50 @@ describe('Core.RemoteInstance', () => {
     bob.modifyConsent(Consent.UserAction.OFFER);
     expect(alice.consent.asProxy).toEqual(Consent.ProxyState.GRANTED);
     expect(bob.consent.asClient).toEqual(Consent.ClientState.GRANTED);
+  });
+
+  describe('proxying', () => {
+
+    var alice = new Core.RemoteInstance(user, {
+      instanceId: 'instance-alice',
+      keyHash:    'fake-hash-alice',
+      description: 'alice peer',
+    });
+
+    beforeEach(() => {
+      spyOn(client, 'emit');
+    });
+
+    it('can start proxying', () => {
+      alice.consent.asProxy = Consent.ProxyState.GRANTED;
+      alice.start();
+      expect(client.emit).toHaveBeenCalledWith('start', {
+          'host': '127.0.0.1', 'port': 9999,
+          'peerId': 'instance-alice'
+      });
+      expect(alice.access.asProxy).toEqual(true);
+    });
+
+    it('can stop proxying', () => {
+      alice.stop();
+      expect(client.emit).toHaveBeenCalledWith('stop');
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
+    it('refuses to start proxy without permission', () => {
+      alice.consent.asProxy = Consent.ProxyState.NONE;
+      alice.access.asProxy = false;
+      alice.start();
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
+    it('does not stop proxying when already stopped', () => {
+      alice.stop();
+      expect(client.emit).not.toHaveBeenCalled();
+      expect(alice.access.asProxy).toEqual(false);
+    });
+
   });
 
 });

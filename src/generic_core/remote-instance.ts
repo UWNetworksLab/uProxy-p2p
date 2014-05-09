@@ -25,13 +25,19 @@ module Core {
    */
   export class RemoteInstance implements Instance {
 
-    public instanceId    :string;
-    public keyHash       :string
-    public description   :string;
+    public instanceId  :string;
+    public keyHash     :string
+    public description :string;
 
-    public consent       :ConsentState;
-    public access        :AccessState;
-    private transport    :Transport;
+    public consent     :ConsentState = {
+      asClient: Consent.ClientState.NONE,
+      asProxy:  Consent.ProxyState.NONE
+    };
+    public access      :AccessState = {
+      asClient: false,
+      asProxy:  false
+    };
+    private transport  :Transport;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -41,11 +47,50 @@ module Core {
     constructor(
         public user :Core.User,  // The User which this instance belongs to.
         handshake   :Instance) {
-      this.consent = {
-        asClient: Consent.ClientState.NONE,
-        asProxy:  Consent.ProxyState.NONE
-      };
       this.update(handshake);
+    }
+
+    /**
+     * Begin to use this remote instance as a proxy server, if permission is
+     * currently granted.
+     */
+    public start = () : void => {
+      if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
+        console.warn('Lacking permission to proxy!');
+        return;
+      }
+      if (this.access.asProxy) {
+        // This should not happen. If it does, something else is broken. Still, we
+        // continue to actually proxy through the instance.
+        console.warn('Already proxying through ' + this.instanceId);
+      }
+      // TODO: sync properly between the extension and the app on proxy settings
+      // rather than this cooincidentally the same data.
+      // TODO: Convert socks-rtc's message types to Enums.
+
+      // Speak with socks-rtc to start the connection.
+      // The localhost host:port will be taken care of by WebRTC. The peerId is
+      // utilized to set the local and remote descriptions on the
+      // RTCPeerConnection.
+      // TODO: See if we can use promises here.
+      client.emit('start', {
+          'host': '127.0.0.1', 'port': 9999,
+           // Peer's peerId is the same as our instanceId..
+          'peerId': this.instanceId
+      });
+      this.access.asProxy = true;
+    }
+
+    /**
+     * Stop using this remote instance as a proxy server.
+     */
+    public stop = () : void => {
+      if (!this.access.asProxy) {
+        console.error('Cannot stop proxying when not proxying.');
+        return;
+      }
+      client.emit('stop');
+      this.access.asProxy = false;
     }
 
     /**
