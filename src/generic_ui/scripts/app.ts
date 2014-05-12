@@ -101,9 +101,11 @@ app.directive('uproxyConsent', () => {
       var _modifyConsent = (action:Consent.UserAction) => {
         console.log($s.currentProxyState(), $s.currentClientState());
         $s.core.modifyConsent(<uProxy.ConsentCommand>{
-          network:    $s.ui['network'],
-          userId:     $s.ui.user.userId,
-          instanceId: $s.ui.instance.instanceId,
+          path: {
+            network:    $s.ui['network'],
+            userId:     $s.ui.user.userId,
+            instanceId: $s.ui.instance.instanceId
+          },
           action:     action
         });
       }
@@ -135,8 +137,10 @@ app.directive('uproxyConsent', () => {
  * links to a valid instance action.
  *
  * Usage: <uproxy-instance-action text='$stuff_for_this_button
- *            action='$function_to_use'>
+ *            action='$Consent.UserAction'>
  *        </uproxy-instance-action>
+ *
+ * For $Consent.UserAction, refer to the enum in 'generic_core/consent.ts'.
  */
 app.directive('uproxyConsentAction', () => {
     var link = ($s, element, attrs) => {
@@ -146,12 +150,14 @@ app.directive('uproxyConsentAction', () => {
       $s.action = () => {
         var actionEnumStr = <string>attrs['action'];
         var action :Consent.UserAction = Consent.UserAction[actionEnumStr];
-        console.log(actionEnumStr, action);
-        console.log($s.currentProxyState(), $s.currentClientState());
         $s.core.modifyConsent(<uProxy.ConsentCommand>{
-          network:    $s.ui['network'],
-          userId:     $s.ui.user.userId,
-          instanceId: $s.ui.instance.instanceId,
+          // TODO: Maybe put the code which generates the :InstancePath in the
+          // ui.ts or a future UI.Instance class.
+          path: {
+            network:    $s.ui['network'],
+            userId:     $s.ui.user.userId,
+            instanceId: $s.ui.instance.instanceId
+          },
           action:     action
         });
       };

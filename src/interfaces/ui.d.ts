@@ -33,11 +33,12 @@ declare module UI {
 
   /**
    * Proxy-state message is sent from the Core to the UI to indicate changes in
-   * the current proxying state.
+   * the current proxying state when received over the network. (e.g. The other
+   * side has disconnected)
+   * TODO: Actually implemnt the passing of this to the UI.
    */
   export interface ProxyMessage {
-    network :string;
-    userId  :string;
+    path    :InstancePath;
     access  :boolean;
   }
 
@@ -50,9 +51,6 @@ declare module UI {
     description   :string;
     consent       :ConsentState;
     access        :AccessState;
-    // TODO: rosterInfo is used in app.ts, remove if unnecessary.
-    rosterInfo    ?:RosterInfo;
   }
-
 
 }  // module UI

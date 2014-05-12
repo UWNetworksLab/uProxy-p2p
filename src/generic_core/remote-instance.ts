@@ -79,11 +79,11 @@ module Core {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
-          server.emit('handleSignalFromPeer', signal)
+          rtcToNetServer.emit('handleSignalFromPeer', signal)
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
-          client.emit('handleSignalFromPeer', signal)
+          socksToRtcClient.emit('handleSignalFromPeer', signal)
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
@@ -115,7 +115,7 @@ module Core {
       // utilized to set the local and remote descriptions on the
       // RTCPeerConnection.
       // TODO: See if we can use promises here.
-      client.emit('start', {
+      socksToRtcClient.emit('start', {
           'host': '127.0.0.1', 'port': 9999,
            // Peer's peerId is the same as our InstancePath
           'peerId': this.getPeerId()
@@ -132,7 +132,7 @@ module Core {
         console.error('Cannot stop proxying when not proxying.');
         return;
       }
-      client.emit('stop');
+      socksToRtcClient.emit('stop');
       this.access.asProxy = false;
       this.user.notifyUI();
     }

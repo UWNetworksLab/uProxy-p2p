@@ -352,14 +352,14 @@ describe('Core.RemoteInstance', () => {
     });
 
     beforeEach(() => {
-      spyOn(client, 'emit');
+      spyOn(socksToRtcClient, 'emit');
     });
 
     it('can start proxying', () => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
       spyOn(alice, 'getPeerId').and.returnValue('alice-peerId');
       alice.start();
-      expect(client.emit).toHaveBeenCalledWith('start', {
+      expect(socksToRtcClient.emit).toHaveBeenCalledWith('start', {
           'host': '127.0.0.1', 'port': 9999,
           'peerId': 'alice-peerId'
       });
@@ -368,7 +368,7 @@ describe('Core.RemoteInstance', () => {
 
     it('can stop proxying', () => {
       alice.stop();
-      expect(client.emit).toHaveBeenCalledWith('stop');
+      expect(socksToRtcClient.emit).toHaveBeenCalledWith('stop');
       expect(alice.access.asProxy).toEqual(false);
     });
 
@@ -376,13 +376,13 @@ describe('Core.RemoteInstance', () => {
       alice.consent.asProxy = Consent.ProxyState.NONE;
       alice.access.asProxy = false;
       alice.start();
-      expect(client.emit).not.toHaveBeenCalled();
+      expect(socksToRtcClient.emit).not.toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
     });
 
     it('does not stop proxying when already stopped', () => {
       alice.stop();
-      expect(client.emit).not.toHaveBeenCalled();
+      expect(socksToRtcClient.emit).not.toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
     });
 
@@ -404,28 +404,28 @@ describe('Core.RemoteInstance', () => {
     beforeEach(() => {
       spyOn(alice, 'getPath').and.returnValue('foobar');
       spyOn(Core, 'getPathFromPeerId').and.returnValue('foobar');
-      spyOn(client, 'emit');
-      spyOn(server, 'emit');
+      spyOn(socksToRtcClient, 'emit');
+      spyOn(rtcToNetServer, 'emit');
     });
 
     it('handles signal from client peer as server', () => {
       alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
-      expect(client.emit).not.toHaveBeenCalled();
-      expect(server.emit).toHaveBeenCalledWith(
+      expect(socksToRtcClient.emit).not.toHaveBeenCalled();
+      expect(rtcToNetServer.emit).toHaveBeenCalledWith(
           'handleSignalFromPeer', fakeSignal);
     });
 
     it('handles signal from server peer as client', () => {
       alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
-      expect(client.emit).toHaveBeenCalledWith(
+      expect(socksToRtcClient.emit).toHaveBeenCalledWith(
           'handleSignalFromPeer', fakeSignal);
-      expect(server.emit).not.toHaveBeenCalled();
+      expect(rtcToNetServer.emit).not.toHaveBeenCalled();
     });
 
     it('rejects invalid signals', () => {
       alice.handleSignal(uProxy.MessageType.CONSENT, fakeSignal)
-      expect(client.emit).not.toHaveBeenCalled();
-      expect(server.emit).not.toHaveBeenCalled();
+      expect(socksToRtcClient.emit).not.toHaveBeenCalled();
+      expect(rtcToNetServer.emit).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
     });
 
