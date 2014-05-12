@@ -258,6 +258,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.RESET, null);
   }
 
+  // TODO: Reconnect this hook, which while we're testing, sends a new instance
+  // message anytime we click on the user in the UI.
   sendInstance = (clientId) => {
     this.sendCommand(uProxy.Command.SEND_INSTANCE, clientId);
   }
@@ -267,7 +269,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
   }
 
-  start = (path) => {
+  start = (path :InstancePath) => {
     console.log('Starting to proxy through ' + path);
     this.sendCommand(uProxy.Command.START_PROXYING, path);
   }
@@ -277,7 +279,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
-  updateDescription = (description) => {
+  updateDescription = (description :string) => {
     // TODO: determine if novelty check is necessary.
     console.log('Updating description to ' + description);
     this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
@@ -288,11 +290,11 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     // this.sendCommand(uProxy.Command.CHANGE_OPTION, option);
   }
 
-  login = (network) => {
+  login = (network :string) => {
     this.sendCommand(uProxy.Command.LOGIN, network);
   }
 
-  logout = (network) => {
+  logout = (network :string) => {
     this.sendCommand(uProxy.Command.LOGOUT, network);
   }
 

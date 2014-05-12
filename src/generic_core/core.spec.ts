@@ -39,9 +39,11 @@ describe('Core', () => {
     });
     spyOn(alice, 'modifyConsent');
     var command :uProxy.ConsentCommand = {
-      network: 'fake-network',
-      userId: 'user-alice',
-      instanceId: 'instance-alice',
+      path: {
+        network: 'fake-network',
+        userId: 'user-alice',
+        instanceId: 'instance-alice'
+      },
       action: Consent.UserAction.REQUEST
     }
     Core.modifyConsent(command);

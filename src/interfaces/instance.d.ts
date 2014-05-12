@@ -39,7 +39,9 @@ interface InstancePath {
   instanceId: string;
 }
 
-
+/**
+ * Base interface for all Instances.
+ */
 interface Instance {
   instanceId  :string;
   description :string;
