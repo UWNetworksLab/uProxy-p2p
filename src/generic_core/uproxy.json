@@ -21,10 +21,10 @@
   },
   "dependencies": {
     "SocksToRtc": {
-      "url": "../lib/socks-to-rtc/socks-to-rtc.json"
+      "url": "../lib/socks-rtc/socks-to-rtc/socks-to-rtc.json"
     },
     "RtcToNet": {
-      "url": "../lib/rtc-to-net/rtc-to-net.json"
+      "url": "../lib/socks-rtc/rtc-to-net/rtc-to-net.json"
     },
     "SOCIAL-google": {
       "url": "../lib/freedom-social-xmpp/social.google.json",
