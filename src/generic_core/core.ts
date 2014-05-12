@@ -31,8 +31,8 @@ var bgAppPageChannel = freedom;
 
 // The socks-rtc client and server allows us to proxy through / for other uProxy
 // peers. See [https://github.com/uProxy/socks-rtc] for more information.
-var client = freedom['SocksToRtc']();
-var server = freedom['RtcToNet']();
+var socksToRtcClient = freedom['SocksToRtc']();
+var rtcToNetServer = freedom['RtcToNet']();
 // The Core's responsibility is to pass messages across the signalling
 // channel using the User / Instance mechanisms.
 
@@ -289,10 +289,9 @@ allow the remote to verify the provinance of the signal.
 
 :PeerSignal is defined in SocksRTC.
 Expect peerId to be a #-connected InstancePath.
-TODO: Rename client and server.
 
 */
-client.on('sendSignalToPeer', (signal :PeerSignal) => {
+socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
   console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
   var instance = Core.getInstanceFromPeerId(signal.peerId);
   if (!instance) {
@@ -306,7 +305,7 @@ client.on('sendSignalToPeer', (signal :PeerSignal) => {
 });
 
 // Make this take an actual peer object type.
-server.on('sendSignalToPeer', (signal :PeerSignal) => {
+rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
   console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
   var instance = Core.getInstanceFromPeerId(signal.peerId);
   if (!instance) {
