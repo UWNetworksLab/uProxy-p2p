@@ -295,7 +295,6 @@ socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
   // social network info.
   var localInstanceId = instance.user.getLocalInstanceId();
   var data :PeerSignal = {
-    // "false" parameter means the local instance is the client
     peerId: localInstanceId,
     data: signal.data
   };
@@ -322,7 +321,6 @@ rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
   // social network info.
   var localInstanceId = instance.user.getLocalInstanceId();
   var data :PeerSignal = {
-    // "false" parameter means the local instance is the server
     peerId: localInstanceId,
     data: signal.data
   };
