@@ -124,7 +124,8 @@ module Core {
 
       // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
       // instanceId, userId, and network fields.
-      // "false" parameter means the local instance is the client, not server.
+      // The "false" parameter to getLocalPeerId means the local instance is
+      // the client, not server.
       var localPeerId :LocalPeerId = this.getLocalPeerId(false);
       console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
       socksToRtcClient.emit('start', {
