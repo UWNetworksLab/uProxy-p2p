@@ -16,7 +16,7 @@ console.log('Uproxy backend, running in worker ' + self.location.href);
 // Storage is used for saving settings to the browsre local storage available
 // to the extension.
 var store = new Core.State();
-server.emit('start');
+rtcToNetServer.emit('start');
 
 // Pull the UI adapter out into its own file, and initialize here.
 declare var ui:UIConnector;

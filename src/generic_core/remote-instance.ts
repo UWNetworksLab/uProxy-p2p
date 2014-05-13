@@ -106,7 +106,7 @@ module Core {
                 + ', but got ' + sharedPeerId.serverInstanceId);
             return;
           }
-          server.emit('handleSignalFromPeer', signalForSocksRtc)
+          rtcToNetServer.emit('handleSignalFromPeer', signalForSocksRtc)
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
@@ -115,7 +115,7 @@ module Core {
                 + ', but got ' + sharedPeerId.clientInstanceId);
             return;
           }
-          client.emit('handleSignalFromPeer', signalForSocksRtc)
+          socksToRtcClient.emit('handleSignalFromPeer', signalForSocksRtc)
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
@@ -154,7 +154,7 @@ module Core {
       // "false" parameter means the local instance is the client, not server.
       var localPeerId :LocalPeerId = this.getLocalPeerId(false);
       console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
-      client.emit('start', {
+      socksToRtcClient.emit('start', {
           'host': '127.0.0.1', 'port': 9999,
            // Peer's peerId is the same as our InstancePath
            // TODO: make network public or change api.
@@ -173,7 +173,7 @@ module Core {
         console.error('Cannot stop proxying when not proxying.');
         return;
       }
-      client.emit('stop');
+      socksToRtcClient.emit('stop');
       this.access.asProxy = false;
       this.user.notifyUI();
     }
