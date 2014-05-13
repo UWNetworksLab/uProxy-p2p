@@ -106,7 +106,7 @@ module Core {
                 + ', but got ' + sharedPeerId.serverInstanceId);
             return;
           }
-          rtcToNetServer.emit('handleSignalFromPeer', signalForSocksRtc)
+          rtcToNetServer.emit('handleSignalFromPeer', signalForSocksRtc);
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
@@ -115,7 +115,7 @@ module Core {
                 + ', but got ' + sharedPeerId.clientInstanceId);
             return;
           }
-          socksToRtcClient.emit('handleSignalFromPeer', signalForSocksRtc)
+          socksToRtcClient.emit('handleSignalFromPeer', signalForSocksRtc);
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);

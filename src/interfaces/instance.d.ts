@@ -30,15 +30,6 @@ interface AccessState {
   asProxy  :boolean;
 }
 
-// TODO: Probably remove this.
-interface RosterInfo {
-  userId  :string;
-  name    :string;
-  network :string;
-  url     :string;
-}
-
-
 /**
  * InstancePath is required to retrieve Instance objects.
  */
@@ -70,14 +61,15 @@ interface LocalPeerId {
   serverInstancePath :InstancePath;
 }
 
-
+/**
+ * Base interface for all Instances.
+ */
 interface Instance {
   instanceId  :string;
   description :string;
   keyHash     :string;
   status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications
-  rosterInfo  ?:RosterInfo;
 }
 
 
