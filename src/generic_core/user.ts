@@ -69,7 +69,7 @@ module Core {
      * not appear in the UI until actually receiving and being updated with a
      * full UserProfile.
      */
-    constructor(private network :Social.Network,
+    constructor(public network :Social.Network,
                 public userId   :string) {
       console.log('New user: ' + userId);
       this.name = 'pending';
@@ -218,6 +218,9 @@ module Core {
 
     /**
      * Helper which returns the local user's instance ID.
+     * TODO: this API is confusing because it doesn't return the instance
+     * for this (remote) user object, but instead returns information about the user
+     * running uproxy.  We should clean this up somehow.
      */
     public getLocalInstanceId = () : string => {
       return this.network.getLocalInstanceId();

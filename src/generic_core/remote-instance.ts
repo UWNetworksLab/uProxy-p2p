@@ -60,6 +60,7 @@ module Core {
      * messages.
      */
     public send = (msg:uProxy.Message) => {
+      this.log('RemoteInstance.send: ' + JSON.stringify(msg));
       // The parent User is responsible for mapping the instanceId to the
       // correct clientId so that the social network can pass the message along.
       this.user.send(this.instanceId, msg);
@@ -69,21 +70,47 @@ module Core {
      * Handle signals sent along the signalling channel from the remote
      * instance, and pass it along to the relevant socks-rtc module.
      * TODO: spec
+     * TODO: assuming that signal is valid, should we remove signal?
      */
-    public handleSignal = (type:uProxy.MessageType, signal:PeerSignal) => {
-      var path = Core.getPathFromPeerId(signal.peerId);
-      if (path != this.getPath()) {
-        console.warn('Signal from invalid Peer:', JSON.stringify(path));
-        return;
-      }
+    public handleSignal = (type:uProxy.MessageType, signalFromWire:PeerSignal) => {
+      this.log('RemoteInstance.handleSignal: ' + type + ', ' + signalFromWire);
+
+      // Shared peer id over the social network only contains the instance ids,
+      // not the full instance path.  We need to convert this to the
+      // local peer id by adding the full instance path info (including userId
+      // and network).
+      var sharedPeerId :SharedPeerId = JSON.parse(signalFromWire.peerId);
+      var localInstanceId :string = this.user.getLocalInstanceId();
+      var isLocalServer :boolean = (type == uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER);
+      var localPeerId :LocalPeerId = this.getLocalPeerId(isLocalServer);
+
+      // Signal sent to socks-rtc libraries should include local peer id (with network
+      // and userId info).
+      var signalForSocksRtc :PeerSignal = {
+        peerId: JSON.stringify(localPeerId),
+        data: signalFromWire.data
+      };
+      console.log('remote-instance.ts: handleSignal: signalForSocksRtc is '
+          + JSON.stringify(signalForSocksRtc));
+
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
-          server.emit('handleSignalFromPeer', signal)
+          if (sharedPeerId.serverInstanceId != localInstanceId) {
+            console.error('Message to unexpected server: ',
+                          JSON.stringify(localPeerId.serverInstancePath));
+            return;
+          }
+          server.emit('handleSignalFromPeer', signalForSocksRtc)
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
-          client.emit('handleSignalFromPeer', signal)
+          if (sharedPeerId.clientInstanceId != localInstanceId) {
+            console.error('Message to unexpected client: ',
+                          JSON.stringify(localPeerId.clientInstancePath));
+            return;
+          }
+          client.emit('handleSignalFromPeer', signalForSocksRtc)
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
@@ -96,6 +123,7 @@ module Core {
      * currently granted.
      */
     public start = () : void => {
+      this.log('RemoteInstance.start');
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
         return;
@@ -115,10 +143,16 @@ module Core {
       // utilized to set the local and remote descriptions on the
       // RTCPeerConnection.
       // TODO: See if we can use promises here.
+
+      // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
+      // instanceId, userId, and network fields.
+      var localPeerId :LocalPeerId = this.getLocalPeerId(false);
+      console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
       client.emit('start', {
           'host': '127.0.0.1', 'port': 9999,
            // Peer's peerId is the same as our InstancePath
-          'peerId': this.getPeerId()
+           // TODO: make network public or change api.
+          'peerId': JSON.stringify(localPeerId)
       });
       this.access.asProxy = true;
       this.user.notifyUI();
@@ -128,6 +162,7 @@ module Core {
      * Stop using this remote instance as a proxy server.
      */
     public stop = () : void => {
+      this.log('RemoteInstance.stop');
       if (!this.access.asProxy) {
         console.error('Cannot stop proxying when not proxying.');
         return;
@@ -143,6 +178,7 @@ module Core {
      * Assumes that |data| actually belongs to this instance.
      */
     public update = (data :Instance) => {
+      this.log('RemoteInstance.update');
       // TODO: copy the rest of the data.
       this.instanceId = data.instanceId;
     }
@@ -155,6 +191,7 @@ module Core {
      * Gives a warning for UserActions which are invalid for the current state.
      */
     public modifyConsent = (action :Consent.UserAction) => {
+      this.log('RemoteInstance.modifyConsent');
       switch(action) {
         // Actions affecting our consent towards the remote as our proxy.
         case Consent.UserAction.REQUEST:
@@ -202,6 +239,7 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
+      this.log('RemoteInstance.sendConsent');
       var consentPayload :uProxy.Message = {
         type: uProxy.MessageType.CONSENT,
         data: <ConsentMessage>{
@@ -217,6 +255,7 @@ module Core {
      * accordingly.
      */
     public receiveConsent = (bits:Consent.State) => {
+      this.log('RemoteInstance.receiveConsent');
       this.consent.asProxy = Consent.updateProxyStateFromRemoteState(
           bits, this.consent.asProxy);
       this.consent.asClient = Consent.updateClientStateFromRemoteState(
@@ -253,28 +292,60 @@ module Core {
       }
     }
 
-    /**
-     * Obtain the fully qualified path to this instance.
-     */
-    public getPath = () : InstancePath => {
-      return {
-        network:    this.user['network'].name,
-        userId:     this.user.userId,
+    private log = (msg:string) : void => {
+      console.log('[Remote Instance for ' + this.user.name + '] ' + msg);
+    }
+
+    public getLocalPeerId = (isLocalServer :boolean)
+        : LocalPeerId => {
+      // Construct local and remote instance paths.
+      var network :Social.Network = this.user.network;
+      var localInstancePath :InstancePath = {
+        network: network.name,
+        userId: network.myInstance.userId,
+        instanceId: network.myInstance.instanceId
+      }
+      var remoteInstancePath :InstancePath = {
+        network: network.name,
+        userId: this.user.userId,
         instanceId: this.instanceId
+      }
+
+      if (isLocalServer) {
+        // Local instance is the server, remote instance is the client.
+        return {
+          clientInstancePath: remoteInstancePath,
+          serverInstancePath: localInstancePath
+        };
+      } else {
+        // Local instance is the client, remote instance is the server.
+        return {
+          clientInstancePath: localInstancePath,
+          serverInstancePath: remoteInstancePath
+        };
       }
     }
 
-    /**
-     * PeerID is used for signalling and WebRTC peerconnection in the socks-rtc
-     * layer. It needs to be fully-qualified so that the Core can pass the
-     * signals back to the right remote instance.
-     * TODO: Implement a wrapper for talking to socks-rtc which deals with
-     * converting InstancePath to and from JSON, as well as goes from the path
-     * to the instance. Most of the Core should never touch JSON like this.
-     */
-    public getPeerId = () : string => {
-      var path = this.getPath();
-      return JSON.stringify(path);
+    public getSharedPeerId = (isLocalServer :boolean)
+        : SharedPeerId => {
+      // Construct local and remote instance paths.
+      var network :Social.Network = this.user.network;
+      var localInstanceId :string = network.myInstance.instanceId;
+      var remoteInstanceId :string = this.instanceId;
+
+      if (isLocalServer) {
+        // Local instance is the server, remote instance is the client.
+        return {
+          clientInstanceId: remoteInstanceId,
+          serverInstanceId: localInstanceId
+        };
+      } else {
+        // Local instance is the client, remote instance is the server.
+        return {
+          clientInstanceId: localInstanceId,
+          serverInstanceId: remoteInstanceId
+        };
+      }
     }
 
   }  // class Core.RemoteInstance
