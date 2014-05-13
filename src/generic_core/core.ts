@@ -286,7 +286,7 @@ socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
   var localPeerId :LocalPeerId = JSON.parse(signal.peerId);
   var instance = Core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
-    console.warn('Cannot send client signal to non-existing RemoteInstance.');
+    console.error('Cannot send client signal to non-existing RemoteInstance.');
     return;
   }
 
@@ -312,7 +312,7 @@ rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
   var localPeerId :LocalPeerId = JSON.parse(signal.peerId);
   var instance = Core.getInstance(localPeerId.clientInstancePath);
   if (!instance) {
-    console.warn('Cannot send server signal to non-existing peer.');
+    console.error('Cannot send server signal to non-existing peer.');
     return;
   }
 
