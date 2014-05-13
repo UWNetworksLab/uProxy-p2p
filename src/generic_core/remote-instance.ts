@@ -73,16 +73,21 @@ module Core {
      * TODO: assuming that signal is valid, should we remove signal?
      */
     public handleSignal = (type:uProxy.MessageType, signalFromWire:PeerSignal) => {
-      this.log('RemoteInstance.handleSignal: ' + type + ', ' + signalFromWire);
+      console.log('RemoteInstance.handleSignal: ' + type + ', ' + signalFromWire);
 
       // Shared peer id over the social network only contains the instance ids,
       // not the full instance path.  We need to convert this to the
       // local peer id by adding the full instance path info (including userId
       // and network).
+      console.log('about to parse peer id: ' + signalFromWire.peerId);
       var sharedPeerId :SharedPeerId = JSON.parse(signalFromWire.peerId);
+      console.log('sharedPeerId is ' + JSON.stringify(sharedPeerId));
       var localInstanceId :string = this.user.getLocalInstanceId();
+      console.log('localInstanceId is ' + localInstanceId);
       var isLocalServer :boolean = (type == uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER);
+      console.log('isLocalServer is ' + isLocalServer);
       var localPeerId :LocalPeerId = this.getLocalPeerId(isLocalServer);
+      console.log('localPeerId is ' + JSON.stringify(localPeerId));
 
       // Signal sent to socks-rtc libraries should include local peer id (with network
       // and userId info).
@@ -97,8 +102,8 @@ module Core {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
           if (sharedPeerId.serverInstanceId != localInstanceId) {
-            console.error('Message to unexpected server: ',
-                          JSON.stringify(localPeerId.serverInstancePath));
+            console.error('Message to unexpected server: expected ' + localInstanceId
+                + ', but got ' + sharedPeerId.serverInstanceId);
             return;
           }
           server.emit('handleSignalFromPeer', signalForSocksRtc)
@@ -106,8 +111,8 @@ module Core {
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
           if (sharedPeerId.clientInstanceId != localInstanceId) {
-            console.error('Message to unexpected client: ',
-                          JSON.stringify(localPeerId.clientInstancePath));
+            console.error('Message to unexpected server: expected ' + localInstanceId
+                + ', but got ' + sharedPeerId.clientInstanceId);
             return;
           }
           client.emit('handleSignalFromPeer', signalForSocksRtc)
@@ -146,6 +151,7 @@ module Core {
 
       // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
       // instanceId, userId, and network fields.
+      // "false" parameter means the local instance is the client, not server.
       var localPeerId :LocalPeerId = this.getLocalPeerId(false);
       console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
       client.emit('start', {

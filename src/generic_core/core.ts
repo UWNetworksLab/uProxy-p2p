@@ -295,8 +295,9 @@ client.on('sendSignalToPeer', (signal :PeerSignal) => {
   // When passing the PeerSignal over the social network, the signal.peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
-  var data = {  // TODO: type this
-    peerId: instance.getSharedPeerId(false),
+  var data :PeerSignal = {
+    // "false" parameter means the local instance is the client
+    peerId: JSON.stringify(instance.getSharedPeerId(false)),
     data: signal.data
   };
   console.log('client(sendSignalToPeer): sending data ' + JSON.stringify(data));
@@ -320,8 +321,9 @@ server.on('sendSignalToPeer', (signal :PeerSignal) => {
   // When passing the PeerSignal over the social network, the signal.peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
-  var data = {  // TODO: type this
-    peerId: instance.getSharedPeerId(true),
+  var data :PeerSignal = {
+    // "false" parameter means the local instance is the server
+    peerId: JSON.stringify(instance.getSharedPeerId(true)),
     data: signal.data
   };
   console.log('server(sendSignalToPeer): sending data ' + JSON.stringify(data));
