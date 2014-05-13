@@ -83,8 +83,8 @@ describe('Social.Network', () => {
           Promise.resolve(fakeFreedomClient));
       spyOn(network, 'notifyUI');
       network.login().then(() => {
-        expect(network['myClient']).toEqual(
-            freedomClientToUproxyClient(fakeFreedomClient));
+        expect(network['myInstance'].userId).toEqual(
+            fakeFreedomClient.userId);
         expect(network.isOnline()).toEqual(true);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
@@ -119,7 +119,6 @@ describe('Social.Network', () => {
       spyOn(network['api'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
-        expect(network['myClient']).toEqual(null);
         expect(network.isOnline()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
@@ -129,7 +128,6 @@ describe('Social.Network', () => {
       network['loggedIn_'] = null;
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
-        expect(network['myClient']).toEqual(null);
         expect(network.isOnline()).toEqual(false);
         expect(network.notifyUI).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith('Already logged out of mock');

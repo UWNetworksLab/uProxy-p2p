@@ -60,7 +60,6 @@ module Core {
      * messages.
      */
     public send = (msg:uProxy.Message) => {
-      this.log('RemoteInstance.send: ' + JSON.stringify(msg));
       // The parent User is responsible for mapping the instanceId to the
       // correct clientId so that the social network can pass the message along.
       this.user.send(this.instanceId, msg);
@@ -73,48 +72,23 @@ module Core {
      * TODO: assuming that signal is valid, should we remove signal?
      */
     public handleSignal = (type:uProxy.MessageType, signalFromWire:PeerSignal) => {
-      console.log('RemoteInstance.handleSignal: ' + type + ', ' + signalFromWire);
-
-      // Shared peer id over the social network only contains the instance ids,
-      // not the full instance path.  We need to convert this to the
-      // local peer id by adding the full instance path info (including userId
-      // and network).
-      console.log('about to parse peer id: ' + signalFromWire.peerId);
-      var sharedPeerId :SharedPeerId = JSON.parse(signalFromWire.peerId);
-      console.log('sharedPeerId is ' + JSON.stringify(sharedPeerId));
-      var localInstanceId :string = this.user.getLocalInstanceId();
-      console.log('localInstanceId is ' + localInstanceId);
+      // We are ignoring the peerId from signalFromWire for now.
+      // We need to construct a LocalPeerId object (containing both the client and server
+      // instanceIds, userIds, and networks) for communication with socks-rtc
       var isLocalServer :boolean = (type == uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER);
-      console.log('isLocalServer is ' + isLocalServer);
       var localPeerId :LocalPeerId = this.getLocalPeerId(isLocalServer);
-      console.log('localPeerId is ' + JSON.stringify(localPeerId));
-
-      // Signal sent to socks-rtc libraries should include local peer id (with network
-      // and userId info).
       var signalForSocksRtc :PeerSignal = {
         peerId: JSON.stringify(localPeerId),
         data: signalFromWire.data
       };
-      console.log('remote-instance.ts: handleSignal: signalForSocksRtc is '
-          + JSON.stringify(signalForSocksRtc));
 
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
-          if (sharedPeerId.serverInstanceId != localInstanceId) {
-            console.error('Message to unexpected server: expected ' + localInstanceId
-                + ', but got ' + sharedPeerId.serverInstanceId);
-            return;
-          }
           rtcToNetServer.emit('handleSignalFromPeer', signalForSocksRtc);
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
-          if (sharedPeerId.clientInstanceId != localInstanceId) {
-            console.error('Message to unexpected server: expected ' + localInstanceId
-                + ', but got ' + sharedPeerId.clientInstanceId);
-            return;
-          }
           socksToRtcClient.emit('handleSignalFromPeer', signalForSocksRtc);
           break;
         default:
@@ -128,7 +102,6 @@ module Core {
      * currently granted.
      */
     public start = () : void => {
-      this.log('RemoteInstance.start');
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
         return;
@@ -168,7 +141,6 @@ module Core {
      * Stop using this remote instance as a proxy server.
      */
     public stop = () : void => {
-      this.log('RemoteInstance.stop');
       if (!this.access.asProxy) {
         console.error('Cannot stop proxying when not proxying.');
         return;
@@ -184,7 +156,6 @@ module Core {
      * Assumes that |data| actually belongs to this instance.
      */
     public update = (data :Instance) => {
-      this.log('RemoteInstance.update');
       // TODO: copy the rest of the data.
       this.instanceId = data.instanceId;
     }
@@ -197,7 +168,6 @@ module Core {
      * Gives a warning for UserActions which are invalid for the current state.
      */
     public modifyConsent = (action :Consent.UserAction) => {
-      this.log('RemoteInstance.modifyConsent');
       switch(action) {
         // Actions affecting our consent towards the remote as our proxy.
         case Consent.UserAction.REQUEST:
@@ -245,7 +215,6 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      this.log('RemoteInstance.sendConsent');
       var consentPayload :uProxy.Message = {
         type: uProxy.MessageType.CONSENT,
         data: <ConsentMessage>{
@@ -261,7 +230,6 @@ module Core {
      * accordingly.
      */
     public receiveConsent = (bits:Consent.State) => {
-      this.log('RemoteInstance.receiveConsent');
       this.consent.asProxy = Consent.updateProxyStateFromRemoteState(
           bits, this.consent.asProxy);
       this.consent.asClient = Consent.updateClientStateFromRemoteState(
@@ -298,10 +266,6 @@ module Core {
       }
     }
 
-    private log = (msg:string) : void => {
-      console.log('[Remote Instance for ' + this.user.name + '] ' + msg);
-    }
-
     public getLocalPeerId = (isLocalServer :boolean)
         : LocalPeerId => {
       // Construct local and remote instance paths.
@@ -328,28 +292,6 @@ module Core {
         return {
           clientInstancePath: localInstancePath,
           serverInstancePath: remoteInstancePath
-        };
-      }
-    }
-
-    public getSharedPeerId = (isLocalServer :boolean)
-        : SharedPeerId => {
-      // Construct local and remote instance paths.
-      var network :Social.Network = this.user.network;
-      var localInstanceId :string = network.myInstance.instanceId;
-      var remoteInstanceId :string = this.instanceId;
-
-      if (isLocalServer) {
-        // Local instance is the server, remote instance is the client.
-        return {
-          clientInstanceId: remoteInstanceId,
-          serverInstanceId: localInstanceId
-        };
-      } else {
-        // Local instance is the client, remote instance is the server.
-        return {
-          clientInstanceId: localInstanceId,
-          serverInstanceId: remoteInstanceId
         };
       }
     }

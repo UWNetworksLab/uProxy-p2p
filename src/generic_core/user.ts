@@ -205,6 +205,13 @@ module Core {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
+          if (!instance) {
+            // TODO: this may occur due to a race condition where uProxy has received
+            // an onUserProfile and onClientState event, but not yet recieved and instance
+            // message, and the peer tries to start proxying.  We should fix this somehow.
+            console.error('failed to get instance for clientId ' + clientId);
+            return;
+          }
           instance.handleSignal(msg.type, <PeerSignal>msg.data);
           break;
         default:

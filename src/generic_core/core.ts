@@ -293,9 +293,10 @@ socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
   // When passing the PeerSignal over the social network, the signal.peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
+  var localInstanceId = instance.user.getLocalInstanceId();
   var data :PeerSignal = {
     // "false" parameter means the local instance is the client
-    peerId: JSON.stringify(instance.getSharedPeerId(false)),
+    peerId: localInstanceId,
     data: signal.data
   };
   console.log('client(sendSignalToPeer): sending data ' + JSON.stringify(data));
@@ -319,9 +320,10 @@ rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
   // When passing the PeerSignal over the social network, the signal.peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
+  var localInstanceId = instance.user.getLocalInstanceId();
   var data :PeerSignal = {
     // "false" parameter means the local instance is the server
-    peerId: JSON.stringify(instance.getSharedPeerId(true)),
+    peerId: localInstanceId,
     data: signal.data
   };
   console.log('server(sendSignalToPeer): sending data ' + JSON.stringify(data));

@@ -39,19 +39,6 @@ interface InstancePath {
   instanceId :string;
 }
 
-
-/**
- * SharedPeerId passed across XMPP should not contain revealing information
- * like network or userId.  This can be detected through the XMPP
- * protocol and doesn't need to be in the contents of the signalling
- * message.
- */
-interface SharedPeerId {
-  clientInstanceId :string;
-  serverInstanceId :string;
-}
-
-
 /**
  * LocalPeerId can contain the full instance paths so that we can easily
  * look up instance objects.
