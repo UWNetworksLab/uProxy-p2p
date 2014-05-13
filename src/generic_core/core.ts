@@ -280,54 +280,54 @@ allow the remote to verify the provinance of the signal.
 Expect peerId to be a #-connected InstancePath.
 
 */
-socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
-  console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
+socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
+  console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
 
-  var localPeerId :LocalPeerId = JSON.parse(signal.peerId);
+  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
   var instance = Core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
     console.error('Cannot send client signal to non-existing RemoteInstance.');
     return;
   }
 
-  // When passing the PeerSignal over the social network, the signal.peerId
+  // When passing the PeerSignal over the social network, the signal's peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
   var localInstanceId = instance.user.getLocalInstanceId();
-  var data :PeerSignal = {
+  var sharedSignal :PeerSignal = {
     peerId: localInstanceId,
-    data: signal.data
+    data: signalFromSocksRtc.data
   };
-  console.log('client(sendSignalToPeer): sending data ' + JSON.stringify(data));
+  console.log('client(sendSignalToPeer): sending sharedSignal ' + JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
-    data: data
+    data: sharedSignal
   });
 });
 
 // Make this take an actual peer object type.
-rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
-  console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
+rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
+  console.log('server(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
 
-  var localPeerId :LocalPeerId = JSON.parse(signal.peerId);
+  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
   var instance = Core.getInstance(localPeerId.clientInstancePath);
   if (!instance) {
     console.error('Cannot send server signal to non-existing peer.');
     return;
   }
 
-  // When passing the PeerSignal over the social network, the signal.peerId
+  // When passing the PeerSignal over the social network, the signal's peerId
   // should only contain instance ids, not potentially revealing user or
   // social network info.
   var localInstanceId = instance.user.getLocalInstanceId();
-  var data :PeerSignal = {
+  var sharedSignal :PeerSignal = {
     peerId: localInstanceId,
-    data: signal.data
+    data: signalFromSocksRtc.data
   };
-  console.log('server(sendSignalToPeer): sending data ' + JSON.stringify(data));
+  console.log('server(sendSignalToPeer): sending sharedSignal ' + JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-    data: data
+    data: sharedSignal
   });
 });
 
