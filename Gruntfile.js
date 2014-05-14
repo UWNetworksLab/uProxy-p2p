@@ -357,7 +357,7 @@ module.exports = function(grunt) {
               'build/generic_core/local-instance.js',
               'build/generic_core/remote-instance.js',
               'build/generic_core/user.js',
-              'build/generic_core/state-storage.js',
+              'build/generic_core/storage.js',
               'build/generic_core/social.js',
               'build/generic_core/core.js',
               'build/generic_core/start-uproxy.js'

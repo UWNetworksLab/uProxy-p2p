@@ -6,12 +6,10 @@
  * and can also be received in different orders. This file lays out these
  * requirement and ensures consistency.
  */
-/// <reference path='state-storage.ts' />
 /// <reference path='social.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
-// Assumes |store| is defined in start-uproxy.ts and state-storage.ts.
-declare var storage :Core.Storage;
+// declare var storage :Core.Storage;
 
 describe('Core', () => {
 

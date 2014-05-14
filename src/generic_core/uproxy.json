@@ -9,7 +9,7 @@
       "consent.js",
       "nouns-and-adjectives.js",
       "constants.js",
-      "state-storage.js",
+      "storage.js",
       "local-instance.js",
       "remote-instance.js",
       "user.js",

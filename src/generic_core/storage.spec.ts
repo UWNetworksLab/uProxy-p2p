@@ -1,4 +1,4 @@
-/// <reference path='state-storage.ts' />
+/// <reference path='storage.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 declare var TESTDATA_EXAMPLE_STATE :Object;
