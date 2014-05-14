@@ -12,6 +12,7 @@ class MockStorage {
     this.store_ = init_store;
   }
 
+  // TODO: Update to reflect promises when freedom does, too.
   public get = (key) => {
     var v = this.store_[key];
     //console.log("\n  public get(" + key + "): " + this.store_[key]);

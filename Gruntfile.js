@@ -363,8 +363,8 @@ module.exports = function(grunt) {
               'build/generic_core/start-uproxy.js'
             ]),
         options: {
-          helpers: ['src/mocks/data/example-state.jsonvar',
-                    'src/mocks/data/example-saved-state.jsonvar'],
+          // NOTE: Put any helper test-data files here:
+          helpers: [],
           keepRunner: true,
           outfile: 'test_output/_CoreSpecRunner.html',
           specs: 'build/generic_core/**/*.spec.js'
