@@ -46,4 +46,8 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       $scope.showFilterTip = true;
     };
 
+    $scope.login = (network) => {
+      ui.login(network);
+    };
+
   }]);

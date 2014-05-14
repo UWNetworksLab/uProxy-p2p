@@ -65,6 +65,14 @@ class UIConnector implements uProxy.UIAPI {
         console.log('update [USER]', <UI.UserMessage>data);
         break;
 
+      case uProxy.Update.REQUEST_SUCCEEDED:
+        console.log('update [REQUEST_SUCCEEDED]', <number>data);
+        break;
+
+      case uProxy.Update.REQUEST_FAILED:
+        console.log('update [REQUEST_FAILED]', <number>data);
+        break;
+
       // TODO: re-enable once the CLIENT-specific messages work.
       // case uProxy.Update.CLIENT:
         // console.log('update [CLIENT]', <UI.ClientMessage>data);
@@ -126,27 +134,61 @@ module Core {
    * Install a handler for commands received from the UI.
    */
   export var onCommand = (cmd :uProxy.Command, handler:any) => {
-    bgAppPageChannel.on('' + cmd, handler);
+    bgAppPageChannel.on('' + cmd,
+      (args) => {
+        // Call handler with args.data and ignore other fields in args
+        // like promiseId.
+        handler(args.data);
+      });
+  }
+
+  /**
+   * Install a handler for promise commands received from the UI.
+   * Promise commands return an ack or error to the UI.
+   */
+  export var onPromiseCommand = (cmd :uProxy.Command,
+                                 handler :(data ?:any) => Promise<void>) => {
+    var promiseCommandHandler = (args) => {
+      // Ensure promiseId is set for all requests
+      if (!args.promiseId) {
+        console.error('onPromiseCommand called for cmd ' + cmd +
+                      'with promiseId undefined');
+        return Promise.reject();
+      }
+
+      // Call handler function, then return success or failure to UI.
+      handler(args.data).then(
+        () => {
+          ui.update(uProxy.Update.REQUEST_SUCCEEDED, args.promiseId);
+        },
+        () => {
+          ui.update(uProxy.Update.REQUEST_FAILED, args.promiseId);
+        }
+      );
+    };
+    bgAppPageChannel.on('' + cmd, promiseCommandHandler);
   }
 
   /**
    * Access various social networks using the Social API.
    * TODO: write a test for this.
    */
-  export var login = (networkName:string, explicit:boolean=false) => {
+  export var login = (networkName:string, explicit:boolean=false) : Promise<void> => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not login to ' + networkName);
-      return;
+      return Promise.reject();
     }
-    network.login(true)
-        .then(ui.sync)
+    var loginPromise = network.login(true);
+    loginPromise.then(ui.sync)
         .then(() => {
           console.log('Successfully logged in to ' + networkName);
         });
 
     // TODO: save the auto-login default.
     store.saveMeToStorage();
+
+    return loginPromise;
   }
 
   /**
@@ -418,8 +460,8 @@ function receiveUpdateDescription(msg) {
 Core.onCommand(uProxy.Command.READY, ui.sync);
 Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-Core.onCommand(uProxy.Command.LOGIN,
-               (network) => { Core.login(network, true); });
+Core.onPromiseCommand(uProxy.Command.LOGIN,
+                      (network) => { return Core.login(network, true); });
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.

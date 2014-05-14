@@ -46,6 +46,8 @@ module uProxy {
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
+    REQUEST_SUCCEEDED,
+    REQUEST_FAILED
   }
 
   /**
@@ -113,7 +115,7 @@ module uProxy {
     // TODO: improve the notifications feature
     dismissNotification(userId :string) : void;
 
-    login(network :string) : void;
+    login(network :string) : Promise<void>;
     logout(network :string) : void;
 
     onUpdate(update :Update, handler :Function) : void;

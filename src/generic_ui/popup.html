@@ -55,7 +55,7 @@
           <div class="network-btn">
             <span ng-repeat="(network, detail) in model.networks">
               <button class="btn" ng-show="!isOnline(network)"
-                ng-click="core.login(network)">Login to {{ prettyNetworkName(network) }}</button>
+              ng-click="login(network)">Login to {{ prettyNetworkName(network) }}</button>
               <button class="btn" ng-show="isOnline(network)"
                 ng-click="core.logout(network)">Logout from {{ prettyNetworkName(network) }}</button>
             </span>

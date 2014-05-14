@@ -142,7 +142,7 @@ class MockCore implements uProxy.CoreAPI {
   changeOption(option) {
     console.log('Changing option ' + option);
   }
-  login(network) {
+  login = (network) : Promise<void> => {
     console.log('Logging in to', network);
     ui['syncNetwork_']({
       name: 'google',
@@ -150,6 +150,7 @@ class MockCore implements uProxy.CoreAPI {
     });
     // Pretend we receive a bunch of user messages.
     ui.syncUser(generateFakeUserMessage());
+    return Promise.resolve();
   }
   logout(network) {
     console.log('Logging out of', network);
