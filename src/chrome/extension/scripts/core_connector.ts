@@ -66,10 +66,10 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.queue_ = [];
     this.listeners_ = {};
 
-    this.onUpdate(uProxy.Update.REQUEST_SUCCEEDED,
-                  this.handleRequestSucceeded_);
-    this.onUpdate(uProxy.Update.REQUEST_FAILED,
-                  this.handleRequestFailed_);
+    this.onUpdate(uProxy.Update.COMMAND_FULFILLED,
+                  this.handleRequestFulfilled_);
+    this.onUpdate(uProxy.Update.COMMAND_REJECTED,
+                  this.handleRequestRejected_);
   }
 
 
@@ -256,8 +256,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     return promise;
   }
 
-  private handleRequestSucceeded_ = (promiseId :number) => {
-    console.log('request succeeded ' + promiseId);
+  private handleRequestFulfilled_ = (promiseId :number) => {
+    console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
     } else {
@@ -265,8 +265,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     }
   }
 
-  private handleRequestFailed_ = (promiseId :number) => {
-    console.log('request failed ' + promiseId);
+  private handleRequestRejected_ = (promiseId :number) => {
+    console.log('promise command rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
     } else {

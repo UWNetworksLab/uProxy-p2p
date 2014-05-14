@@ -59,7 +59,7 @@ class ChromeUIConnector {
     // Pass 'emit's from the UI to Core. These are uProxy.Commands.
     if ('emit' == msg.cmd) {
       uProxyAppChannel.emit(msgType,
-                            {data: msg.data, promiseId: msg.promiseId});
+                            <uProxy.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {

@@ -65,12 +65,12 @@ class UIConnector implements uProxy.UIAPI {
         console.log('update [USER]', <UI.UserMessage>data);
         break;
 
-      case uProxy.Update.REQUEST_SUCCEEDED:
-        console.log('update [REQUEST_SUCCEEDED]', <number>data);
+      case uProxy.Update.COMMAND_FULFILLED:
+        console.log('update [COMMAND_FULFILLED]', <number>data);
         break;
 
-      case uProxy.Update.REQUEST_FAILED:
-        console.log('update [REQUEST_FAILED]', <number>data);
+      case uProxy.Update.COMMAND_REJECTED:
+        console.log('update [COMMAND_REJECTED]', <number>data);
         break;
 
       // TODO: re-enable once the CLIENT-specific messages work.
@@ -135,7 +135,7 @@ module Core {
    */
   export var onCommand = (cmd :uProxy.Command, handler:any) => {
     bgAppPageChannel.on('' + cmd,
-      (args) => {
+      (args :uProxy.PromiseCommand) => {
         // Call handler with args.data and ignore other fields in args
         // like promiseId.
         handler(args.data);
@@ -148,7 +148,7 @@ module Core {
    */
   export var onPromiseCommand = (cmd :uProxy.Command,
                                  handler :(data ?:any) => Promise<void>) => {
-    var promiseCommandHandler = (args) => {
+    var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
         console.error('onPromiseCommand called for cmd ' + cmd +
@@ -159,10 +159,10 @@ module Core {
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
         () => {
-          ui.update(uProxy.Update.REQUEST_SUCCEEDED, args.promiseId);
+          ui.update(uProxy.Update.COMMAND_FULFILLED, args.promiseId);
         },
         () => {
-          ui.update(uProxy.Update.REQUEST_FAILED, args.promiseId);
+          ui.update(uProxy.Update.COMMAND_REJECTED, args.promiseId);
         }
       );
     };

@@ -46,8 +46,8 @@ module uProxy {
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
-    REQUEST_SUCCEEDED,
-    REQUEST_FAILED
+    COMMAND_FULFILLED,
+    COMMAND_REJECTED
   }
 
   /**
@@ -151,6 +151,11 @@ module uProxy {
     allowNonroutableAddresses(enabled:boolean):void;
     setStunServers(servers:string[]):void;
     setTurnServers(servers:string[]):void;
+  }
+
+  export interface PromiseCommand {
+    data ?:Object;  // Usually JSON.
+    promiseId :number;  // Values >= 1 means success/error should be returned.
   }
 
 }  // module uProxy
