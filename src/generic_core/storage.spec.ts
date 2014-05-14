@@ -61,4 +61,16 @@ describe('Core.Storage', () => {
     }).then(done);
   });
 
+  it('reset clears all keys', (done) => {
+    storage.reset().then(() => {
+      var birds = storage.load('birds').then((result) => {
+        expect(result).not.toBeDefined();
+      });
+      var cats = storage.load('cats').then((result) => {
+        expect(result).not.toBeDefined();
+      });
+      return Promise.all([birds, cats]);
+    }).then(done);
+  });
+
 });  // state-storage

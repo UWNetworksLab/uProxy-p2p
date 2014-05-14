@@ -3,7 +3,6 @@
  *
  * Provides a promise-based interface to the storage provider.
  */
-/// <reference path='constants.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 
@@ -79,6 +78,7 @@ module Core {
     //  Options
     // TODO: Move options to its own class and fix it.
     // --------------------------------------------------------------------------
+    /*
     public saveOptionsToStorage = () : Promise<string> => {
       return this.save(
           C.StateEntries.OPTIONS,
@@ -93,6 +93,7 @@ module Core {
             // restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
       });
     }
+    */
 
     // TODO: Move these into instance.
     /**

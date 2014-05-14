@@ -11,7 +11,6 @@
  */
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
-/// <reference path='constants.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
