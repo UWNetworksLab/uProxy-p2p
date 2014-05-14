@@ -32,7 +32,7 @@
     "grunt-lib-phantomjs": "~0.5.0",
     "grunt-shell": "~0.3.1",
     "grunt-tsd": "^0.1.0",
-    "grunt-typescript": "~0.2.7",
+    "grunt-typescript": ">=0.3.6",
     "minimatch": "~0.2.12",
     "rimraf": "~2.2.6",
     "socks-rtc": "~0.1.4",

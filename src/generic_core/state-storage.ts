@@ -1,8 +1,7 @@
 /**
  * state-storage.ts
  *
- * To see the format used by localstorage, see the file:
- *   scraps/local_storage_example.js
+ * Provides a promise-based interface to the storage provider.
  */
 /// <reference path='constants.ts' />
 /// <reference path='util.ts' />
@@ -22,13 +21,9 @@ module Core {
   /**
    * Contains all state for uProxy's core.
    */
-  export class State {
+  export class Storage {
 
-    public state: any;
-
-    constructor() {
-      this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
-    }
+    constructor() {}
 
     /**
      * Resets state, and clears local storage.
@@ -37,9 +32,8 @@ module Core {
       return new Promise<void>((F, R) => {
         fStorage.clear().done(F);
       }).then(() => {
-        dbg('Cleared storage, now loading again...');
-        this.state = cloneDeep(C.DEFAULT_LOAD_STATE);
-        return this.loadStateFromStorage();
+        dbg('Cleared all keys from storage.');
+        // TODO: Determine if we actually need any 'initial' state.
       });
     }
 
@@ -50,10 +44,11 @@ module Core {
     /**
      * Promise loading a key from storage, as a JSON object.
      * Use Generic <T> to indicate the type of the returned object.
+     * If the key does not exist, returns |defaultIfUndefined|.
      *
      * TODO: Consider using a storage provider that works with JSON.
      */
-    private loadKeyAsJson_ = <T>(key, defaultIfUndefined?) : Promise<T> => {
+    public load = <T>(key :string, defaultIfUndefined ?:T) : Promise<T> => {
       return new Promise<string>((F, R) => {
         fStorage.get(key).done(F);
       }).then((result) => {
@@ -71,7 +66,7 @@ module Core {
      * Promise saving a key-value pair to storage, fulfilled with the previous
      * value of |key| if it existed (according to the freedom interface.)
      */
-    private saveKeyAsJson_ = (key:string, val:any) : Promise<string>=> {
+    public save = <T>(key :string, val :T) : Promise<string>=> {
       return new Promise<string>((F, R) => {
         fStorage.set(key, JSON.stringify(val)).done(F);
       }).then((val:string) => {
@@ -81,173 +76,31 @@ module Core {
     }
 
     // --------------------------------------------------------------------------
-    //  Users's profile for this instance
-    // --------------------------------------------------------------------------
-
-    /**
-     * Saving your 'me' state involves saving all fields that are state.me & that
-     * are in the C.DEFAULT_SAVE_STATE.
-     * TODO: Fulfill with a conversion from string to the instance type.
-     */
-    public saveMeToStorage = () : Promise<string> => {
-      return this.saveKeyAsJson_(
-          C.StateEntries.ME,
-          restrictKeys(C.DEFAULT_SAVE_STATE.me, this.state.me));
-    }
-
-    /**
-     * Load 'me' from storage, or generate a new instance.
-     * TODO: Type loadKeyAsJson_ with the 'me' instance type.
-     */
-    public loadMeFromStorage = () : Promise<any> => {
-      return this.loadKeyAsJson_(C.StateEntries.ME, null).then((me) => {
-        if (null === me) {
-          // TODO: We need to make the 'load me' specific to Networks. Actually,
-          // the state-storage class needs to be specified per network as well.
-          // this.state.me = this.generateMyInstance_();
-          dbg('****** Saving new self-definition *****');
-          dbg('  state.me = ' + JSON.stringify(this.state.me));
-          return this.saveMeToStorage();
-        } else {
-          dbg('++++++ Loaded self-definition ++++++');
-          dbg('  state.me = ' + JSON.stringify(me));
-          this.state.me = restrictKeys(this.state.me, me);
-          return me;
-        }
-      });
-    }
-
-    // --------------------------------------------------------------------------
     //  Options
+    // TODO: Move options to its own class and fix it.
     // --------------------------------------------------------------------------
     public saveOptionsToStorage = () : Promise<string> => {
-      return this.saveKeyAsJson_(
+      return this.save(
           C.StateEntries.OPTIONS,
-          restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options));
+          null);
+          // restrictKeys(C.DEFAULT_SAVE_STATE.options, this.state.options));
     }
 
     public loadOptionsFromStorage = () : Promise<void> => {
-      return this.loadKeyAsJson_(C.StateEntries.OPTIONS, {}).then((loadedOptions) => {
-        this.state.options =
-            restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
+      return this.load(C.StateEntries.OPTIONS, {}).then((loadedOptions) => {
+        dbg('loaded options: ' + loadedOptions);
+        // this.state.options =
+            // restrictKeys(cloneDeep(C.DEFAULT_LOAD_STATE.options), loadedOptions);
       });
     }
 
-    // --------------------------------------------------------------------------
-    //  Syncronizing Instances
-    // --------------------------------------------------------------------------
-    // Give back the instance from a user ID (currently by searching through all
-    // user ids)
-    // TODO: consider creating a userId <-> instanceId multi-mapping.
-    public instanceOfUserId = (userId) => {
-      for (var i in this.state.instances) {
-        if (this.state.instances[i].rosterInfo.userId == userId)
-          return this.state.instances[i];
-      }
-      return null;
-    }
-
-    /**
-     * Should be called whenever an instance is created/loaded.
-     * Assumes that instance corresponding to |instanceId| has a userId.
-     * Although the user doesn't need to currently be in the roster - this
-     * function will add to the roster if the userId is not already present.
-     */
-    public syncRosterFromInstanceId = (instanceId:string) : void => {
-      var instance = this.state.instances[instanceId];
-      var userId = instance.rosterInfo.userId;
-      var user = this.state.roster[userId];
-
-      // Extrapolate the user & add to the roster.
-      if (!user) {
-        // TODO: do proper reconciliation: probably do a diff check, and
-        // maybe update instance.modify.
-        this.state.roster[userId] = {};
-        user = this.state.roster[userId];
-        user.clients = {};
-        user.userId = userId;
-        user.name = instance.rosterInfo.name;
-        user.network = instance.rosterInfo.network;
-        user.url = instance.rosterInfo.url;
-        user.hasNotification = Boolean(instance.notify);
-      }
-    }
-
-    /**
-     * Called when a new userId is available, and when receiving new instances.
-     * TODO: Update when using new social API structured roster.
-     * - Check if we need to update instance information.
-     * - Assumes that instance already exists for this |userId|.
-     */
-    /*
-    public syncInstanceFromInstanceMessage =
-        (userId:string, clientId:string, data:Instance) : void => {
-      var instanceId = data.instanceId;
-      // Some local metadata isn't transmitted.  Add it in.
-      data = restrictKeys(C.DEFAULT_INSTANCE, data);
-
-      // Before everything, remember the clientId - instanceId relation.
-      var oldClientId = this.state.instanceToClient[instanceId];
-      this.state.clientToInstance[clientId] = instanceId;
-      this.state.instanceToClient[instanceId] = clientId;
-
-      // Obsolete client will never have further communications.
-      if (oldClientId && (oldClientId != clientId)) {
-        dbg('Deleting obsolete client ' + oldClientId);
-        var user = this.state.roster[userId];
-        if (user) {
-          delete user.clients[oldClientId];
-        } else {
-          console.error('Warning: no user for ' + userId);
-        }
-        delete this.state.clientToInstance[oldClientId];
-      }
-
-      // Prepare new instance object if necessary.
-      var instance = this.state.instances[instanceId];
-      if (!instance) {
-        dbg('Preparing NEW Instance... ');
-        instance = cloneDeep(C.DEFAULT_INSTANCE);
-        instance.instanceId = data.instanceId;
-        instance.keyHash = data.keyHash;
-        this.state.instances[instanceId] = instance;
-      }
-      instance.rosterInfo = data.rosterInfo;
-      instance.rosterInfo.userId = userId;
-      instance.description = data.description;
-
-      this.syncRosterFromInstanceId(instanceId);
-    }
-    */
-
-    // --------------------------------------------------------------------------
-    //  Loading & Saving Instances
-    // --------------------------------------------------------------------------
-
-    /**
-     * Load :Instance corresponding to |instanceId| from storage.
-     */
-    public loadInstanceFromId = (instanceId:string) : Promise<Instance> => {
-      return this.loadKeyAsJson_<Instance>('instance/' + instanceId, null)
-          .then((instance:Instance) => {
-        if (!instance) {
-          return Promise.reject(new Error(
-              'Load error: instance ' + instanceId + ' not found.'));
-        } else {
-          dbg('instance ' + instanceId + ' loaded');
-          instance.status = cloneDeep(C.DEFAULT_PROXY_STATUS);
-          this.state.instances[instanceId] = instance;
-          this.syncRosterFromInstanceId(instanceId);
-        }
-        return Promise.resolve(instance);
-      });
-    }
-
+    // TODO: Move these into instance.
     /**
      * Promise loading all :Instances from storage.
      */
+    /*
     public loadAllInstances = () : Promise<Instance[]> => {
-      return this.loadKeyAsJson_<string[]>(C.StateEntries.INSTANCEIDS, [])
+      return this.load<string[]>(C.StateEntries.INSTANCEIDS, [])
           .then((instanceIds:string[]) => {
             var loadedInstances: Promise<Instance>[] = [];
             dbg('Loading Instance IDs: ', instanceIds);
@@ -258,14 +111,7 @@ module Core {
               return loadedInstances;
             });
           });
-    }
-
-    /**
-     * Access an :Instance from state.
-     */
-    public getInstance = (instanceId:string) : Instance => {
-      return this.state.instances[instanceId];
-    }
+    } */
 
     /**
      * Save |instance| for |instanceId| to local storage.
@@ -276,6 +122,7 @@ module Core {
      * TODO: Fix the Promise<any> once the typescript interface for Promises
      * deals with Promise.reject the right way.
      */
+    /*
     public saveInstance = (instanceId:string) : Promise<any> => {
       if (!(instanceId in this.state.instances)) {
         console.warn('Attempted to save nonexisting instance: ' + instanceId);
@@ -311,10 +158,12 @@ module Core {
         dbg('Saved instance ' + instanceId);
       });
     }
+    */
 
     /**
      * Save all :Instances to local storage.
      */
+     /*
     public saveAllInstances = () : Promise<string[]> => {
       var instanceIds :string[] = Object.keys(
           this.state[C.StateEntries.INSTANCES]);
@@ -325,40 +174,42 @@ module Core {
           C.StateEntries.INSTANCEIDS, instanceIds));
       return Promise.all(savedData);
     }
+    */
 
 
     // --------------------------------------------------------------------------
     //  Whole state
     // --------------------------------------------------------------------------
 
+    // TODO: Move this to the Network
     /**
      * Load all aspects of the state concurrently, from storage.
      */
-    public loadStateFromStorage = () : Promise<void> => {
-      this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
-      var loadedState: Promise<any>[] = [];
-      loadedState.push(this.loadMeFromStorage());
-      loadedState.push(this.loadOptionsFromStorage());
-      loadedState.push(this.loadAllInstances());
-      return Promise.all(loadedState).then(() => {
-        dbg('Finished loading state from storage.');
-      });
-    }
+    // public loadStateFromStorage = () : Promise<void> => {
+      // this.state = restrictKeys(C.DEFAULT_LOAD_STATE, this.state);
+      // var loadedState: Promise<any>[] = [];
+      // loadedState.push(this.loadMeFromStorage());
+      // loadedState.push(this.loadOptionsFromStorage());
+      // loadedState.push(this.loadAllInstances());
+      // return Promise.all(loadedState).then(() => {
+        // dbg('Finished loading state from storage.');
+      // });
+    // }
 
     /**
      * Save all aspects of the state concurrently, to storage.
      */
-    public saveStateToStorage = () : Promise<void> => {
-      var savedState: Promise<any>[] = [];
-      savedState.push(this.saveMeToStorage());
-      savedState.push(this.saveOptionsToStorage());
-      savedState.push(this.saveAllInstances());
-      return Promise.all(savedState).then(() => {
-        dbg('Finished saving state to storage.');
-      });
-    }
+    // public saveStateToStorage = () : Promise<void> => {
+      // var savedState: Promise<any>[] = [];
+      // savedState.push(this.saveMeToStorage());
+      // savedState.push(this.saveOptionsToStorage());
+      // savedState.push(this.saveAllInstances());
+      // return Promise.all(savedState).then(() => {
+        // dbg('Finished saving state to storage.');
+      // });
+    // }
 
-  }  // class State
+  }  // class Storage
 
 
   // TODO: Make logging better.
