@@ -172,6 +172,9 @@ module Social {
     }
 
     public isOnline = () : boolean => {
+      // TODO: we may want to check myInstance here.  If the user
+      // is only partly logged in (i.e. sitting in front of login popup_
+      // this.loggedIn_ promise will be defined and may lead to weird behavior.
       return Boolean(this.loggedIn_);
     }
 

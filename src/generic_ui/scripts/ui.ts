@@ -438,6 +438,15 @@ module UI {
       this.refreshDOM();
     };
 
+    public login = (network) => {
+      this.core.login(network).then(
+        () => {
+          this.view = UI.View.ROSTER;
+          this.toggles.splash = false;
+        },
+        () => { console.warn('login failed for ' + network) });
+    }
+
     /*
      * Make sure counters and UI-only state holders correctly reflect the model.
      * If |previousPatch| is provided, the search is optimized to only sync the

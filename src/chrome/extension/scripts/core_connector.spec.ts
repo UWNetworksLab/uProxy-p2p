@@ -103,7 +103,6 @@ describe('core-connector', () => {
     connector.onceDisconnected().then(() => {
       expect(connector.status.connected).toEqual(false);
       expect(connector['appPort_']).toBeNull();
-      expect(connector['listeners_']).toEqual({});
     }).then(done);
     // Catch re-connect() attempt for next spec.
     spyOn(connector, 'connect').and.callFake(() => {

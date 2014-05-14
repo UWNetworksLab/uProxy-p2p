@@ -46,6 +46,8 @@ module uProxy {
     INSTANCE,
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
+    COMMAND_FULFILLED,
+    COMMAND_REJECTED
   }
 
   /**
@@ -113,7 +115,7 @@ module uProxy {
     // TODO: improve the notifications feature
     dismissNotification(userId :string) : void;
 
-    login(network :string) : void;
+    login(network :string) : Promise<void>;
     logout(network :string) : void;
 
     onUpdate(update :Update, handler :Function) : void;
@@ -149,6 +151,11 @@ module uProxy {
     allowNonroutableAddresses(enabled:boolean):void;
     setStunServers(servers:string[]):void;
     setTurnServers(servers:string[]):void;
+  }
+
+  export interface PromiseCommand {
+    data ?:Object;  // Usually JSON.
+    promiseId :number;  // Values >= 1 means success/error should be returned.
   }
 
 }  // module uProxy
