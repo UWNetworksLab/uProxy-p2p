@@ -222,7 +222,8 @@ module Core {
     }
     var remote = getInstance(path);
     if (!remote) {
-      console.error('Instance ' + path.instanceId + ' does not exist for proxying.');
+      console.error('Instance ' + path.instanceId +
+                    ' does not exist for proxying.');
       return;
     }
     remote.start();  // Will send an update to the UI.
@@ -298,7 +299,8 @@ socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
     peerId: localInstanceId,
     data: signalFromSocksRtc.data
   };
-  console.log('client(sendSignalToPeer): sending sharedSignal ' + JSON.stringify(sharedSignal));
+  console.log('client(sendSignalToPeer): sending sharedSignal ' +
+              JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
     data: sharedSignal
@@ -324,7 +326,8 @@ rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
     peerId: localInstanceId,
     data: signalFromSocksRtc.data
   };
-  console.log('server(sendSignalToPeer): sending sharedSignal ' + JSON.stringify(sharedSignal));
+  console.log('server(sendSignalToPeer): sending sharedSignal ' +
+              JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
     data: sharedSignal
@@ -415,7 +418,8 @@ function receiveUpdateDescription(msg) {
 Core.onCommand(uProxy.Command.READY, ui.sync);
 Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-Core.onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
+Core.onCommand(uProxy.Command.LOGIN,
+               (network) => { Core.login(network, true); });
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.

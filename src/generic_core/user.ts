@@ -112,7 +112,8 @@ module Core {
     public send = (instanceId :string, payload :uProxy.Message)
         : Promise<string> => {
       if (!(instanceId in this.instances_)) {
-        console.warn('Cannot send message to non-existing instance ' + instanceId);
+        console.warn('Cannot send message to non-existing instance ' +
+                     instanceId);
         return Promise.reject(new Error(
             'Cannot send to invalid instance ' + instanceId));
       }
@@ -206,9 +207,10 @@ module Core {
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
           if (!instance) {
-            // TODO: this may occur due to a race condition where uProxy has received
-            // an onUserProfile and onClientState event, but not yet recieved and instance
-            // message, and the peer tries to start proxying.  We should fix this somehow.
+            // TODO: this may occur due to a race condition where uProxy has
+            // received an onUserProfile and onClientState event, but not yet
+            // recieved and instance message, and the peer tries to start
+            // proxying.  We should fix this somehow.
             console.error('failed to get instance for clientId ' + clientId);
             return;
           }
@@ -226,8 +228,8 @@ module Core {
     /**
      * Helper which returns the local user's instance ID.
      * TODO: this API is confusing because it doesn't return the instance
-     * for this (remote) user object, but instead returns information about the user
-     * running uproxy.  We should clean this up somehow.
+     * for this (remote) user object, but instead returns information about the
+     * user running uproxy.  We should clean this up somehow.
      */
     public getLocalInstanceId = () : string => {
       return this.network.getLocalInstanceId();

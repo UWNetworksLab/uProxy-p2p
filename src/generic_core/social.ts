@@ -35,7 +35,7 @@ module Social {
   export var networks:{[name:string]:Network} = {}
 
   /**
-   * Run through possible network names and grab references to every social provider.
+   * Go through network names and get references to each social provider.
    */
   export function initializeNetworks(networks:string[] = VALID_NETWORKS) {
     networks.map((name:string) : Network => {
@@ -52,7 +52,6 @@ module Social {
       Social.networks[name] = network;
       return network;
     });
-    // console.log('Initialized ' + Object.keys(networks).length + ' networks.');
     return Social.networks;
   }
 
@@ -226,12 +225,11 @@ module Social {
       var userId = profile.userId;
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
+        // TODO: we may want to verify that our status is ONLINE before
+        // sending out any instance messages.
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
         // Send our own InstanceMessage to any queued-up clients.
-        // TODO: our status should always be ONLINE
-        //if (UProxyClient.Status.ONLINE == this.myClient.status) {
-          this.flushQueuedInstanceMessages();
-        //}
+        this.flushQueuedInstanceMessages();
         // Update UI with own information.
         ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
           network: this.name,
@@ -276,8 +274,8 @@ module Social {
     }
 
     /**
-     * When receiving a message from a social provider, delegate it to the correct
-     * user, which will delegate to the correct client.
+     * When receiving a message from a social provider, delegate it to the
+     * correct user, which will delegate to the correct client.
      *
      * It is possible that the roster entry does not yet exist for a user,
      * yet we receive a message from them. In this case, create a place-holder
