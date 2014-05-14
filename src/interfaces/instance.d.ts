@@ -34,9 +34,18 @@ interface AccessState {
  * InstancePath is required to retrieve Instance objects.
  */
 interface InstancePath {
-  network: string;
-  userId:  string;
-  instanceId: string;
+  network :string;
+  userId :string;
+  instanceId :string;
+}
+
+/**
+ * LocalPeerId can contain the full instance paths so that we can easily
+ * look up instance objects.
+ */
+interface LocalPeerId {
+  clientInstancePath :InstancePath;
+  serverInstancePath :InstancePath;
 }
 
 /**

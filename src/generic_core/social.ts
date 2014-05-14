@@ -35,7 +35,7 @@ module Social {
   export var networks:{[name:string]:Network} = {}
 
   /**
-   * Run through possible network names and grab references to every social provider.
+   * Go through network names and get references to each social provider.
    */
   export function initializeNetworks(networks:string[] = VALID_NETWORKS) {
     networks.map((name:string) : Network => {
@@ -52,7 +52,6 @@ module Social {
       Social.networks[name] = network;
       return network;
     });
-    // console.log('Initialized ' + Object.keys(networks).length + ' networks.');
     return Social.networks;
   }
 
@@ -93,11 +92,7 @@ module Social {
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
 
-    // Information about the local login.
-    // |myClient| should exist whilst logged in, and should be null whilst
-    // logged out.
-    private myClient   :UProxyClient.State;
-    private myInstance :Core.LocalInstance;
+    public myInstance :Core.LocalInstance;
     // Promise which delays all message handling until fully logged in.
     private loggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
@@ -113,14 +108,13 @@ module Social {
       this.loggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
-      this.myClient = null;
       // TODO(keroserene):
       // Load local instance from storage, or create a new one if this is the
       // first time this uProxy installation, on this device, has interacted
       // with this network.
       var localInstanceExists = false;
       if (!localInstanceExists) {
-        this.myInstance = new Core.LocalInstance();
+        this.myInstance = new Core.LocalInstance(this.name);
       }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
@@ -151,8 +145,8 @@ module Social {
       this.loggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
-            this.myClient = freedomClientToUproxyClient(freedomClient);
-            this.log('logged in uProxy as ' + JSON.stringify(this.myClient));
+            this.myInstance.userId = freedomClient.userId;
+            this.log('logged into uProxy');
           });
       return this.loggedIn_
           .then(this.notifyUI)
@@ -173,7 +167,6 @@ module Social {
       }
       this.loggedIn_ = null;
       return this.api.logout().then(() => {
-        this.myClient = null;
         this.log('logged out.');
       }).then(this.notifyUI);
     }
@@ -231,12 +224,12 @@ module Social {
     public handleUserProfile = (profile :freedom.Social.UserProfile) => {
       var userId = profile.userId;
       // Check if this is ourself, in which case we update our own info.
-      if (this.myClient && userId == this.myClient.userId) {
+      if (userId == this.myInstance.userId) {
+        // TODO: we may want to verify that our status is ONLINE before
+        // sending out any instance messages.
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
         // Send our own InstanceMessage to any queued-up clients.
-        if (UProxyClient.Status.ONLINE == this.myClient.status) {
-          this.flushQueuedInstanceMessages();
-        }
+        this.flushQueuedInstanceMessages();
         // Update UI with own information.
         ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
           network: this.name,
@@ -267,7 +260,7 @@ module Social {
         : void => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
-      if (this.myClient && client.userId == this.myClient.userId) {
+      if (client.userId == this.myInstance.userId) {
         // TODO: Should we do anything in particular for our own client?
         this.log('received own ClientState: ' + JSON.stringify(client));
         return;
@@ -281,8 +274,8 @@ module Social {
     }
 
     /**
-     * When receiving a message from a social provider, delegate it to the correct
-     * user, which will delegate to the correct client.
+     * When receiving a message from a social provider, delegate it to the
+     * correct user, which will delegate to the correct client.
      *
      * It is possible that the roster entry does not yet exist for a user,
      * yet we receive a message from them. In this case, create a place-holder
@@ -323,7 +316,7 @@ module Social {
      * messages for ourself too.
      */
     private isNewFriend_ = (userId:string) : boolean => {
-      return !(this.myClient && userId == this.myClient.userId) &&
+      return !(userId == this.myInstance.userId) &&
              !(userId in this.roster);
     }
 

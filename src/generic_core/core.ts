@@ -222,7 +222,8 @@ module Core {
     }
     var remote = getInstance(path);
     if (!remote) {
-      console.error('Instance ' + path.instanceId + ' does not exist for proxying.');
+      console.error('Instance ' + path.instanceId +
+                    ' does not exist for proxying.');
       return;
     }
     remote.start();  // Will send an update to the UI.
@@ -245,7 +246,7 @@ module Core {
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
-  var getInstance = (path :InstancePath) : Core.RemoteInstance => {
+  export var getInstance = (path :InstancePath) : Core.RemoteInstance => {
     var network = Social.getNetwork(path.network);
     if (!network) {
       console.error('No network ' + path.network);
@@ -257,17 +258,6 @@ module Core {
       return;
     }
     return user.getInstance(path.instanceId);
-  }
-
-  /**
-   * Obtain the InstancePath given a peerId. Assumes |peerId| is valid.
-   */
-  export var getPathFromPeerId = (peerId :string) : InstancePath => {
-    return JSON.parse(peerId);
-  }
-
-  export var getInstanceFromPeerId = (peerId :string) : Core.RemoteInstance => {
-    return getInstance(getPathFromPeerId(peerId));
   }
 
 }  // module Core
@@ -291,30 +281,56 @@ allow the remote to verify the provinance of the signal.
 Expect peerId to be a #-connected InstancePath.
 
 */
-socksToRtcClient.on('sendSignalToPeer', (signal :PeerSignal) => {
-  console.log('client(sendSignalToPeer):' + JSON.stringify(signal));
-  var instance = Core.getInstanceFromPeerId(signal.peerId);
+socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
+  console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
+
+  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
+  var instance = Core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
-    console.warn('Cannot send client signal to non-existing RemoteInstance.');
+    console.error('Cannot send client signal to non-existing RemoteInstance.');
     return;
   }
+
+  // When passing the PeerSignal over the social network, the signal's peerId
+  // should only contain instance ids, not potentially revealing user or
+  // social network info.
+  var localInstanceId = instance.user.getLocalInstanceId();
+  var sharedSignal :PeerSignal = {
+    peerId: localInstanceId,
+    data: signalFromSocksRtc.data
+  };
+  console.log('client(sendSignalToPeer): sending sharedSignal ' +
+              JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
-    data: signal
+    data: sharedSignal
   });
 });
 
 // Make this take an actual peer object type.
-rtcToNetServer.on('sendSignalToPeer', (signal :PeerSignal) => {
-  console.log('server(sendSignalToPeer):' + JSON.stringify(signal));
-  var instance = Core.getInstanceFromPeerId(signal.peerId);
+rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
+  console.log('server(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
+
+  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
+  var instance = Core.getInstance(localPeerId.clientInstancePath);
   if (!instance) {
-    console.warn('Cannot send server signal to non-existing peer.');
+    console.error('Cannot send server signal to non-existing peer.');
     return;
   }
+
+  // When passing the PeerSignal over the social network, the signal's peerId
+  // should only contain instance ids, not potentially revealing user or
+  // social network info.
+  var localInstanceId = instance.user.getLocalInstanceId();
+  var sharedSignal :PeerSignal = {
+    peerId: localInstanceId,
+    data: signalFromSocksRtc.data
+  };
+  console.log('server(sendSignalToPeer): sending sharedSignal ' +
+              JSON.stringify(sharedSignal));
   instance.send({
     type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-    data: signal
+    data: sharedSignal
   });
 });
 
@@ -402,7 +418,8 @@ function receiveUpdateDescription(msg) {
 Core.onCommand(uProxy.Command.READY, ui.sync);
 Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-Core.onCommand(uProxy.Command.LOGIN, (network) => { Core.login(network, true); });
+Core.onCommand(uProxy.Command.LOGIN,
+               (network) => { Core.login(network, true); });
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.

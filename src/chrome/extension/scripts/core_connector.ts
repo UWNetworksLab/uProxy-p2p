@@ -3,6 +3,7 @@
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
+/// <reference path='background.ts'/>
 /// <reference path='../../../uproxy.ts'/>
 /// <reference path='../../util/chrome_glue.ts' />
 
@@ -272,11 +273,15 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   start = (path :InstancePath) => {
     console.log('Starting to proxy through ' + path);
     this.sendCommand(uProxy.Command.START_PROXYING, path);
+    // TODO: only do this in response to core successfully returning that socks-to-rtc
+    // is setup, so we don't set chrome's proxy to an invalid server.
+    proxyConfig.startUsingProxy();
   }
 
   stop = () => {
     console.log('Stopping proxy session.');
     this.sendCommand(uProxy.Command.STOP_PROXYING);
+    proxyConfig.stopUsingProxy();
   }
 
   updateDescription = (description :string) => {

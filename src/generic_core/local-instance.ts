@@ -14,6 +14,7 @@ module Core {
     public instanceId  :string;
     public description :string;
     public keyHash     :string;
+    public userId      :string;
 
     /**
      * Generate an isntance for oneself.
@@ -21,7 +22,7 @@ module Core {
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor() {
+    public constructor(public network :string) {
       this.instanceId = LocalInstance.generateInstanceID();
       this.description = this.generateRandomDescription_();
       this.keyHash = this.generateKeyHash();

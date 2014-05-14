@@ -11,7 +11,7 @@ describe('Core.LocalInstance', () => {
   });
 
   it('initializes with valid id, description, and keyhash', () => {
-    instance = new Core.LocalInstance();
+    instance = new Core.LocalInstance('network');
     expect(instance.instanceId).toBeDefined();
     expect(instance.description).toBeDefined();
     expect(instance.keyHash).toBeDefined();

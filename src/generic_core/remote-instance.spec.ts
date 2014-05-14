@@ -13,14 +13,18 @@ describe('Core.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
-      'send',
       'getLocalInstanceId',
-      'notifyUI'
+      'send',
+      'notifyUI',
   ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
   var tmpClientConsent :Consent.ClientState;
   var tmpProxyConsent :Consent.ProxyState;
+  var localPeerId = {
+    clientInstancePath: 'clientInstancePath',
+    serverInstancePath: 'serverInstancePath'
+  };
 
   beforeEach(() => {
     spyOn(console, 'log');
@@ -357,11 +361,11 @@ describe('Core.RemoteInstance', () => {
 
     it('can start proxying', () => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
-      spyOn(alice, 'getPeerId').and.returnValue('alice-peerId');
+      spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
       alice.start();
       expect(socksToRtcClient.emit).toHaveBeenCalledWith('start', {
           'host': '127.0.0.1', 'port': 9999,
-          'peerId': 'alice-peerId'
+          'peerId': JSON.stringify(localPeerId)
       });
       expect(alice.access.asProxy).toEqual(true);
     });
@@ -396,14 +400,13 @@ describe('Core.RemoteInstance', () => {
       description: 'alice peer',
     });
 
-    var fakeSignal = {
-      peerId: 'alice-peerId',
+    var fakeSignal :PeerSignal = {
+      peerId: JSON.stringify(localPeerId),
       data: 'really fake signal'
     };
 
     beforeEach(() => {
-      spyOn(alice, 'getPath').and.returnValue('foobar');
-      spyOn(Core, 'getPathFromPeerId').and.returnValue('foobar');
+      spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
       spyOn(socksToRtcClient, 'emit');
       spyOn(rtcToNetServer, 'emit');
     });
