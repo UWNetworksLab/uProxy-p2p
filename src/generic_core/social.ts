@@ -94,10 +94,8 @@ module Social {
 
     public myInstance :Core.LocalInstance;
     // Promise which delays all message handling until fully logged in.
-    private loggedIn_   :Promise<void>;
+    private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
-    // Set to true if a login is pending (e.g. waiting on user's password).
-    private isLoginPending_ :boolean = false;
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -107,7 +105,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
-      this.loggedIn_ = null;
+      this.onceLoggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       // TODO(keroserene):
@@ -133,7 +131,7 @@ module Social {
      * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
-      if (this.isLoginPending_) {
+      if (this.isLoginPending()) {
         // Login is already pending, reject promise so the caller knows
         // this request to login failed (the pending request may still succeed).
         console.warn('Login already pending for ' + this.name);
@@ -150,19 +148,17 @@ module Social {
         interactive: true,
         rememberLogin: remember
       };
-      this.isLoginPending_ = true;
-      this.loggedIn_ = this.api.login(request)
+      this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
-            this.isLoginPending_ = false;
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
-      return this.loggedIn_
+      return this.onceLoggedIn_
           .then(this.notifyUI)
           .catch(() => {
+            this.onceLoggedIn_ = null;
             this.error('Could not login.');
-            this.isLoginPending_ = false;
             return Promise.reject(new Error('Could not login.'));
           });
     }
@@ -176,7 +172,7 @@ module Social {
         console.warn('Already logged out of ' + this.name);
         return Promise.resolve();
       }
-      this.loggedIn_ = null;
+      this.onceLoggedIn_ = null;
       return this.api.logout().then(() => {
         this.myInstance.userId = null;
         this.log('logged out.');
@@ -189,6 +185,13 @@ module Social {
       return Boolean(this.myInstance.userId);
     }
 
+    // Returns true iff a login is pending (e.g. waiting on user's password).
+    public isLoginPending = () : boolean => {
+      // We are in a pending login state if the onceLoggedIn_ promise is
+      // defined, but we don't yet have the myInstance.userId set.
+      return Boolean(this.onceLoggedIn_) && !Boolean(this.myInstance.userId);
+    }
+
     /**
      * Functor which delays until the network is logged on.
      * Resulting function will instantly fail if not already in the process of
@@ -198,11 +201,11 @@ module Social {
      */
     private delayForLogin = (handler :Function) => {
       return (arg :any) => {
-        if (!this.loggedIn_) {
+        if (!this.onceLoggedIn_) {
           this.error('Not logged in.');
           return;
         }
-        return this.loggedIn_.then(() => {
+        return this.onceLoggedIn_.then(() => {
           handler(arg);
         });
       }
