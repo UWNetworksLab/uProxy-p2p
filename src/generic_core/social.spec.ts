@@ -61,7 +61,15 @@ describe('Social.Network', () => {
     expect(console.warn).toHaveBeenCalled();
   });
 
+  var loadedLocalInstance = false;
+
   it('successfully initializes if api is social', () => {
+    console.log(storage.load);
+    spyOn(storage, 'load').and.callFake(() => {
+      console.log('whoa');
+      loadedLocalInstance = true;
+      return Promise.resolve(undefined);
+    });
     Social.initializeNetworks(['mock']);
     network = Social.getNetwork('mock');
     expect(network.name).toEqual('mock');
@@ -72,8 +80,7 @@ describe('Social.Network', () => {
   });
 
   it('initializes with a LocalInstance', () => {
-    expect(network['myInstance']).toBeDefined();
-    expect(network['getInstanceHandshake_']()).toBeDefined();
+    expect(loadedLocalInstance).toEqual(true);
   });
 
   describe('login & logout', () => {

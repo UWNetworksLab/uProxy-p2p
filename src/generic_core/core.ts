@@ -216,6 +216,10 @@ module Core {
   export var updateDescription = (description:string) => {
     for (var network in Social.networks) {
       var myself = Social.networks[network].getLocalInstance();
+      if (!myself) {
+        console.error('No LocalInstance to set description for!');
+        return;
+      }
       myself.updateDescription(description);
     }
   }

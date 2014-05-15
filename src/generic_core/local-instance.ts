@@ -17,12 +17,20 @@ module Core {
     public userId      :string;
 
     /**
-     * Generate an isntance for oneself.
-     * This is generally required if one is running uProxy for the first time,
+     * Generate an instance for oneself, either from scratch or based on some
+     * Instance state loaded from storage.
+     *
+     * Generating is required if one is running uProxy for the first time,
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor(public network :string) {
+    public constructor(public network :string, load ?:Instance) {
+      if (load) {
+        this.instanceId = load.instanceId;
+        this.description = load.description;
+        this.keyHash = load.keyHash;
+        return;
+      }
       this.instanceId = LocalInstance.generateInstanceID();
       this.description = this.generateRandomDescription_();
       this.keyHash = this.generateKeyHash();

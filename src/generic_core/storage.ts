@@ -65,7 +65,7 @@ module Core {
           return <T>JSON.parse(result);
         } else {
           dbg('No key: ' + key);
-          return Promise.reject(new Error('Non-existent storage key'));
+          throw Error('Non-existent storage key');
         }
       });
     }
