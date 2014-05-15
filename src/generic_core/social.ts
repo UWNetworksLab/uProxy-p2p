@@ -33,7 +33,7 @@ module Social {
    * Go through network names and get references to each social provider.
    */
   export function initializeNetworks() {
-    for (var dependency:string in freedom) {
+    for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||
             'social' !== freedom[dependency].api) {
