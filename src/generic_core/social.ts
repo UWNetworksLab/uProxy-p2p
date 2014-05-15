@@ -5,8 +5,7 @@
  *
  * To add new social providers, list them as dependencies in the primary
  * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
- * name, and 'social' as the API. Then add them to the VALID_NETWORKS list
- * below.
+ * name.
  *
  * e.g.
  *
@@ -28,30 +27,24 @@
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
-  var VALID_NETWORKS:string[] = [
-    'google',
-    'websocket',
-  ]
   export var networks:{[name:string]:Network} = {}
 
   /**
    * Go through network names and get references to each social provider.
    */
-  export function initializeNetworks(networks:string[] = VALID_NETWORKS) {
-    networks.map((name:string) : Network => {
-      var dependency = PREFIX + name;
-      if (undefined === freedom[dependency]) {
-        console.warn(name + ' does not exist as a freedom provider.');
-        return;
+  export function initializeNetworks() {
+    for (var dependency in freedom) {
+      if (freedom.hasOwnProperty(dependency)) {
+        if (dependency.indexOf(PREFIX) !== 0 ||
+            'social' !== freedom[dependency].api) {
+          continue;
+        }
+
+        var name = dependency.substr(PREFIX.length);
+        var network = new Social.Network(name);
+        Social.networks[name] = network;
       }
-      if ('social' !== freedom[dependency].api) {
-        console.warn(name + ' does not implement the social api.');
-        return;
-      }
-      var network = new Social.Network(name);
-      Social.networks[name] = network;
-      return network;
-    });
+    }
     return Social.networks;
   }
 
