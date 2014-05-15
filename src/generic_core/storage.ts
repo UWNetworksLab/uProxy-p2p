@@ -18,6 +18,14 @@ module Core {
   export var DEBUG_STATESTORAGE = true;
 
   /**
+   * Some classes which make use of Storage should implement a consistent
+   * interface for accessing the Storage object.
+   */
+  export interface Persistent {
+    getStorePath :() => string;
+  }
+
+  /**
    * Contains all state for uProxy's core.
    */
   export class Storage {
@@ -43,20 +51,21 @@ module Core {
     /**
      * Promise loading a key from storage, as a JSON object.
      * Use Generic <T> to indicate the type of the returned object.
-     * If the key does not exist, returns |defaultIfUndefined|.
+     * If the key does not exist, rejects the promise.
      *
      * TODO: Consider using a storage provider that works with JSON.
      */
-    public load = <T>(key :string, defaultIfUndefined ?:T) : Promise<T> => {
+    public load = <T>(key :string) : Promise<T> => {
       return new Promise<string>((F, R) => {
         fStorage.get(key).done(F);
       }).then((result) => {
-        // dbg('Loaded from storage[' + key + '] (type: ' +
-                    // (typeof result) + '): ' + result);
+        dbg('Loaded from storage[' + key + '] (type: ' +
+                    (typeof result) + '): ' + result);
         if (isDefined(result)) {
           return <T>JSON.parse(result);
         } else {
-          return <T>defaultIfUndefined;
+          dbg('No key: ' + key);
+          return Promise.reject(new Error('Non-existent storage key'));
         }
       });
     }
@@ -69,7 +78,7 @@ module Core {
       return new Promise<string>((F, R) => {
         fStorage.set(key, JSON.stringify(val)).done(F);
       }).then((val:string) => {
-        // dbg('Saved to storage[' + key + ']. old val=' + val);
+        dbg('Saved to storage[' + key + ']. old val=' + val);
         return val;
       });
     }

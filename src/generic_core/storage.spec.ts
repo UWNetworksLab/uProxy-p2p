@@ -49,27 +49,24 @@ describe('Core.Storage', () => {
     });
   });
 
-  it('loads undefined for non-existing keys', (done) => {
-    storage.load('not-here').then((result) => {
-      expect(result).not.toBeDefined();
-    }).then(done);
-  });
-
-  it('uses default value for non-existing keys', (done) => {
-    storage.load('not-here', 12345).then((result) => {
-      expect(result).toEqual(12345);
-    }).then(done);
+  it('rejects for non-existing keys', (done) => {
+    storage.load('not-here').catch(done);
   });
 
   it('reset clears all keys', (done) => {
+    var birdReject = false;
+    var catReject = false;
     storage.reset().then(() => {
-      var birds = storage.load('birds').then((result) => {
-        expect(result).not.toBeDefined();
+      var birds = storage.load('birds').catch((err) => {
+        birdReject = true;
       });
-      var cats = storage.load('cats').then((result) => {
-        expect(result).not.toBeDefined();
+      var cats = storage.load('cats').catch((err) => {
+        catReject = true
       });
       return Promise.all([birds, cats]);
+    }).then(() => {
+      expect(birdReject).toEqual(true);
+      expect(catReject).toEqual(true);
     }).then(done);
   });
 
