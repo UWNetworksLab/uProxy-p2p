@@ -162,6 +162,7 @@ module Social {
           .then(this.notifyUI)
           .catch(() => {
             this.error('Could not login.');
+            this.isLoginPending_ = false;
             return Promise.reject(new Error('Could not login.'));
           });
     }
