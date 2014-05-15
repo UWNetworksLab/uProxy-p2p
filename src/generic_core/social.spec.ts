@@ -57,12 +57,12 @@ describe('Social.Network', () => {
   });
 
   it('fails to initialize if api is not social', () => {
-    Social.initializeNetworks(['badmock']);
-    expect(console.warn).toHaveBeenCalled();
+    Social.initializeNetworks();
+    expect(Social.networks['badmock']).not.toBeDefined();
   });
 
   it('successfully initializes if api is social', () => {
-    Social.initializeNetworks(['mock']);
+    Social.initializeNetworks();
     network = Social.getNetwork('mock');
     expect(network.name).toEqual('mock');
   });
