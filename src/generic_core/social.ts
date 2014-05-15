@@ -96,6 +96,8 @@ module Social {
     // Promise which delays all message handling until fully logged in.
     private loggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+    // Set to true if a login is pending (e.g. waiting on user's password).
+    private isLoginPending_ :boolean = false;
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -131,10 +133,16 @@ module Social {
      * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
-      if (this.isOnline()) {
+      if (this.isLoginPending_) {
+        // Login is already pending, reject promise so the caller knows
+        // this request to login failed (the pending request may still succeed).
+        console.warn('Login already pending for ' + this.name);
+        return Promise.reject();
+      } else if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
         return Promise.resolve();
       }
+
       var request :freedom.Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -142,9 +150,11 @@ module Social {
         interactive: true,
         rememberLogin: remember
       };
+      this.isLoginPending_ = true;
       this.loggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
+            this.isLoginPending_ = false;
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
@@ -167,15 +177,15 @@ module Social {
       }
       this.loggedIn_ = null;
       return this.api.logout().then(() => {
+        this.myInstance.userId = null;
         this.log('logged out.');
       }).then(this.notifyUI);
     }
 
     public isOnline = () : boolean => {
-      // TODO: we may want to check myInstance here.  If the user
-      // is only partly logged in (i.e. sitting in front of login popup_
-      // this.loggedIn_ promise will be defined and may lead to weird behavior.
-      return Boolean(this.loggedIn_);
+      // this.myInstance.userId is only set when the social API's login
+      // promise fulfills.
+      return Boolean(this.myInstance.userId);
     }
 
     /**
