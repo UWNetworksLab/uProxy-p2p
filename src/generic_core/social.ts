@@ -5,8 +5,7 @@
  *
  * To add new social providers, list them as dependencies in the primary
  * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
- * name, and 'social' as the API. Then add them to the VALID_NETWORKS list
- * below.
+ * name.
  *
  * e.g.
  *
@@ -28,30 +27,24 @@
 module Social {
 
   var PREFIX:string = 'SOCIAL-';
-  var VALID_NETWORKS:string[] = [
-    'google',
-    'websocket',
-  ]
   export var networks:{[name:string]:Network} = {}
 
   /**
    * Go through network names and get references to each social provider.
    */
-  export function initializeNetworks(networks:string[] = VALID_NETWORKS) {
-    networks.map((name:string) : Network => {
-      var dependency = PREFIX + name;
-      if (undefined === freedom[dependency]) {
-        console.warn(name + ' does not exist as a freedom provider.');
-        return;
+  export function initializeNetworks() {
+    for (var dependency in freedom) {
+      if (freedom.hasOwnProperty(dependency)) {
+        if (dependency.indexOf(PREFIX) !== 0 ||
+            'social' !== freedom[dependency].api) {
+          continue;
+        }
+
+        var name = dependency.substr(PREFIX.length);
+        var network = new Social.Network(name);
+        Social.networks[name] = network;
       }
-      if ('social' !== freedom[dependency].api) {
-        console.warn(name + ' does not implement the social api.');
-        return;
-      }
-      var network = new Social.Network(name);
-      Social.networks[name] = network;
-      return network;
-    });
+    }
     return Social.networks;
   }
 
@@ -95,7 +88,7 @@ module Social {
 
     public myInstance :Core.LocalInstance;
     // Promise which delays all message handling until fully logged in.
-    private loggedIn_   :Promise<void>;
+    private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
     private SaveKeys = {
@@ -110,7 +103,7 @@ module Social {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
       this.roster = {};
-      this.loggedIn_ = null;
+      this.onceLoggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
       // TODO: Update these event name-strings when freedom updates to
@@ -137,10 +130,16 @@ module Social {
      * nothing if already logged on.
      */
     public login = (remember:boolean = false) : Promise<void> => {
-      if (this.isOnline()) {
+      if (this.isLoginPending()) {
+        // Login is already pending, reject promise so the caller knows
+        // this request to login failed (the pending request may still succeed).
+        console.warn('Login already pending for ' + this.name);
+        return Promise.reject();
+      } else if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
         return Promise.resolve();
       }
+
       var request :freedom.Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -148,15 +147,16 @@ module Social {
         interactive: true,
         rememberLogin: remember
       };
-      this.loggedIn_ = this.api.login(request)
+      this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
-      return this.loggedIn_
+      return this.onceLoggedIn_
           .then(this.notifyUI)
           .catch(() => {
+            this.onceLoggedIn_ = null;
             this.error('Could not login.');
             return Promise.reject(new Error('Could not login.'));
           });
@@ -171,17 +171,24 @@ module Social {
         console.warn('Already logged out of ' + this.name);
         return Promise.resolve();
       }
-      this.loggedIn_ = null;
+      this.onceLoggedIn_ = null;
       return this.api.logout().then(() => {
+        this.myInstance.userId = null;
         this.log('logged out.');
       }).then(this.notifyUI);
     }
 
     public isOnline = () : boolean => {
-      // TODO: we may want to check myInstance here.  If the user
-      // is only partly logged in (i.e. sitting in front of login popup_
-      // this.loggedIn_ promise will be defined and may lead to weird behavior.
-      return Boolean(this.loggedIn_);
+      // this.myInstance.userId is only set when the social API's login
+      // promise fulfills.
+      return Boolean(this.myInstance.userId);
+    }
+
+    // Returns true iff a login is pending (e.g. waiting on user's password).
+    public isLoginPending = () : boolean => {
+      // We are in a pending login state if the onceLoggedIn_ promise is
+      // defined, but we don't yet have the myInstance.userId set.
+      return Boolean(this.onceLoggedIn_) && !Boolean(this.myInstance.userId);
     }
 
     /**
@@ -193,11 +200,11 @@ module Social {
      */
     private delayForLogin = (handler :Function) => {
       return (arg :any) => {
-        if (!this.loggedIn_) {
+        if (!this.onceLoggedIn_) {
           this.error('Not logged in.');
           return;
         }
-        return this.loggedIn_.then(() => {
+        return this.onceLoggedIn_.then(() => {
           handler(arg);
         });
       }

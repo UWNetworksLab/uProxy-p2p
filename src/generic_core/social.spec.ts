@@ -57,20 +57,18 @@ describe('Social.Network', () => {
   });
 
   it('fails to initialize if api is not social', () => {
-    Social.initializeNetworks(['badmock']);
-    expect(console.warn).toHaveBeenCalled();
+    Social.initializeNetworks();
+    expect(Social.networks['badmock']).not.toBeDefined();
   });
 
   var loadedLocalInstance = false;
 
   it('successfully initializes if api is social', () => {
-    console.log(storage.load);
     spyOn(storage, 'load').and.callFake(() => {
-      console.log('whoa');
       loadedLocalInstance = true;
       return Promise.resolve(undefined);
     });
-    Social.initializeNetworks(['mock']);
+    Social.initializeNetworks();
     network = Social.getNetwork('mock');
     expect(network.name).toEqual('mock');
   });
@@ -86,29 +84,39 @@ describe('Social.Network', () => {
   describe('login & logout', () => {
 
     it('can login', (done) => {
-      spyOn(network['api'], 'login').and.returnValue(
-          Promise.resolve(fakeFreedomClient));
+      var fulfillFunc;
+      var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
+      spyOn(network['api'], 'login').and.returnValue(onceLoggedIn);
       spyOn(network, 'notifyUI');
+      expect(network.isLoginPending()).toEqual(false);
       network.login().then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         expect(network.isOnline()).toEqual(true);
+        expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
+      expect(network.isLoginPending()).toEqual(true);
+      fulfillFunc(fakeFreedomClient);
     });
 
     it('does nothing to login if already logged in', (done) => {
       spyOn(network, 'notifyUI');
+      expect(network.isLoginPending()).toEqual(false);
       network.login().then(() => {
+        expect(network.isLoginPending()).toEqual(false);
         expect(network.isOnline()).toEqual(true);
         expect(network.notifyUI).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith('Already logged in to mock');
       }).then(done);
+      // isPendingLogin should be false right away, without waiting for async
+      // login to complete.
+      expect(network.isLoginPending()).toEqual(false);
     });
 
     it('errors if network login fails', (done) => {
-      loginPromise = network['loggedIn_'];
-      network['loggedIn_'] = null;
+      loginPromise = network['onceLoggedIn_'];
+      network['onceLoggedIn_'] = null;
       // Pretend the social API's login failed.
       spyOn(network['api'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
@@ -121,18 +129,19 @@ describe('Social.Network', () => {
     });
 
     it('can logout', (done) => {
-      network['loggedIn_'] = loginPromise;
+      network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['api'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
+        expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
     });
 
     it('does nothing to logout if already logged out', (done) => {
-      network['loggedIn_'] = null;
+      network['onceLoggedIn_'] = null;
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
@@ -159,7 +168,7 @@ describe('Social.Network', () => {
           new Promise((F, R) => {
             fakeLoginFulfill = F;
           }));
-      expect(network['loggedIn_']).toBeDefined();
+      expect(network['onceLoggedIn_']).toBeDefined();
       network.login();  // Will complete in the next spec.
       // handlerPromise = delayed('hooray');
       handlerPromise = network['delayForLogin'](foo.bar)('hooray');
