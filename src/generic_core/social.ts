@@ -150,6 +150,7 @@ module Social {
       this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
+            console.log(JSON.stringify(this.myInstance));
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
@@ -181,14 +182,14 @@ module Social {
     public isOnline = () : boolean => {
       // this.myInstance.userId is only set when the social API's login
       // promise fulfills.
-      return Boolean(this.myInstance.userId);
+      return Boolean(this.myInstance && this.myInstance.userId);
     }
 
     // Returns true iff a login is pending (e.g. waiting on user's password).
     public isLoginPending = () : boolean => {
       // We are in a pending login state if the onceLoggedIn_ promise is
       // defined, but we don't yet have the myInstance.userId set.
-      return Boolean(this.onceLoggedIn_) && !Boolean(this.myInstance.userId);
+      return Boolean(this.onceLoggedIn_) && !this.isOnline();
     }
 
     /**
@@ -222,15 +223,14 @@ module Social {
       var key = this.getStorePath() + '/' + this.SaveKeys.LOCAL_INSTANCE;
       return storage.load<Instance>(key).then((result) => {
         console.log(JSON.stringify(result));
-        if (!result) {
-          this.myInstance = new Core.LocalInstance(this.name);
-          storage.save(key, this.myInstance);
-          this.log('generated new local instance: ' +
-                   this.myInstance.instanceId);
-        } else {
-          this.myInstance = new Core.LocalInstance(this.name, result);
-          this.log('loaded local instance from storage');
-        }
+        this.myInstance = new Core.LocalInstance(this.name, result);
+        this.log('loaded local instance from storage');
+        return this.myInstance;
+      }, () => {
+        this.myInstance = new Core.LocalInstance(this.name);
+        storage.save(key, this.myInstance);
+        this.log('generated new local instance: ' +
+                 this.myInstance.instanceId);
         return this.myInstance;
       });
     }
