@@ -30,15 +30,11 @@ module Core {
    */
   export class Storage {
 
-    constructor() {}
-
     /**
      * Resets state, and clears local storage.
      */
     public reset = () : Promise<void> => {
-      return new Promise<void>((F, R) => {
-        fStorage.clear().done(F);
-      }).then(() => {
+      return fStorage.clear().then(() => {
         dbg('Cleared all keys from storage.');
         // TODO: Determine if we actually need any 'initial' state.
       });
@@ -56,9 +52,7 @@ module Core {
      * TODO: Consider using a storage provider that works with JSON.
      */
     public load = <T>(key :string) : Promise<T> => {
-      return new Promise<string>((F, R) => {
-        fStorage.get(key).done(F);
-      }).then((result) => {
+      return fStorage.get(key).then((result) => {
         dbg('Loaded from storage[' + key + '] (type: ' +
                     (typeof result) + '): ' + result);
         if (isDefined(result)) {
@@ -75,9 +69,7 @@ module Core {
      * value of |key| if it existed (according to the freedom interface.)
      */
     public save = <T>(key :string, val :T) : Promise<string>=> {
-      return new Promise<string>((F, R) => {
-        fStorage.set(key, JSON.stringify(val)).done(F);
-      }).then((val:string) => {
+      return fStorage.set(key, JSON.stringify(val)).then((val:string) => {
         dbg('Saved to storage[' + key + ']. old val=' + val);
         return val;
       });
