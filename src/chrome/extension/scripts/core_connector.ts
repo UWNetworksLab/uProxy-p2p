@@ -260,6 +260,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
+      delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('fulfill not found ' + promiseId);
     }
@@ -269,6 +270,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     console.log('promise command rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
+      delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('reject not found ' + promiseId);
     }
