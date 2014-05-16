@@ -10,8 +10,7 @@
  *  - Instances, which is a list of active UProxy installs.
  */
 /// <reference path='../uproxy.ts'/>
-/// <reference path='state-storage.ts' />
-/// <reference path='constants.ts' />
+/// <reference path='storage.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
@@ -22,7 +21,7 @@
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 /// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
-declare var store :Core.State;  // From start-uproxy.ts.
+var storage = new Core.Storage();  // From start-uproxy.ts.
 
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
@@ -49,7 +48,7 @@ class UIConnector implements uProxy.UIAPI {
   public update = (type:uProxy.Update, data?:any) => {
     switch(type) {
       case uProxy.Update.ALL:
-        console.log('update [ALL]', store.state);
+        // console.log('update [ALL]', store.state);
         var networkName :string;
         for (networkName in Social.networks) {
           Social.networks[networkName].notifyUI();
@@ -127,7 +126,7 @@ module Core {
     for (var network in Social.networks) {
       Social.networks[network].logout();
     }
-    store.reset().then(ui.sync);
+    storage.reset().then(ui.sync);
   }
 
   /**
@@ -186,8 +185,6 @@ module Core {
         });
 
     // TODO: save the auto-login default.
-    store.saveMeToStorage();
-
     return loginPromise;
   }
 
@@ -205,12 +202,9 @@ module Core {
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: only remove clients from the network we are logging out of.
-    // Clear the clientsToInstance table.
-    store.state.clientToInstance = {};
-    store.state.instanceToClient = {};
     ui.syncMappings();
     // TODO: disable auto-login
-    store.saveMeToStorage();
+    // store.saveMeToStorage();
   }
 
   /**
@@ -222,6 +216,10 @@ module Core {
   export var updateDescription = (description:string) => {
     for (var network in Social.networks) {
       var myself = Social.networks[network].getLocalInstance();
+      if (!myself) {
+        console.error('No LocalInstance to set description for!');
+        return;
+      }
       myself.updateDescription(description);
     }
   }
@@ -241,13 +239,6 @@ module Core {
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
     instance.modifyConsent(command.action);
-  }
-
-  /**
-   * Returns the |clientId| corresponding to |instanceId|.
-   */
-  var toClientId = (instanceId:string) : string => {
-    return store.state.instanceToClient[instanceId];
   }
 
   /**
@@ -377,6 +368,7 @@ rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
 });
 
 // TODO: move this into User, or some sort of proxy service object.
+/*
 function handleNewlyActiveClient(msg) {
   var instanceId = msg.data.instanceId;
   var instance = store.state.instances[instanceId];
@@ -399,6 +391,7 @@ function handleInactiveClient(msg) {
   instance.status.client = C.ProxyState.OFF;
   ui.syncInstance(instance, 'status');
 }
+*/
 
 function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
@@ -408,6 +401,7 @@ function _validateKeyHash(keyHash:string) {
 // TODO: Move notifications into its own service.
 // Set notification flag for Instance corresponding to |instanceId|, and also
 // set the notification flag for the userId.
+/*
 function _addNotification(instanceId:string) {
   var instance = store.getInstance(instanceId);
   if (!instance) {
@@ -434,11 +428,14 @@ function _removeNotification(instanceId:string) {
   ui.syncInstance(instance, 'notify');
   return true;
 }
+*/
 
 /**
  * Update the description for an instanceId.
  * Assumes that |instanceId| is valid.
+ * TODO: Move this into LocalInstance.
  */
+/*
 function receiveUpdateDescription(msg) {
   console.log('Updating description! ' + JSON.stringify(msg));
   var description = msg.data.description,
@@ -452,7 +449,7 @@ function receiveUpdateDescription(msg) {
   ui.syncInstance(instance, 'description');
   return true;
 }
-
+*/
 
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
@@ -472,18 +469,14 @@ Core.onCommand(uProxy.Command.START_PROXYING, Core.start);
 Core.onCommand(uProxy.Command.STOP_PROXYING, Core.stop);
 
 Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
-  store.state.options[data.key] = data.value;
-  store.saveOptionsToStorage().then(() => {;
-    console.log('saved options ' + JSON.stringify(store.state.options));
-    // TODO: Make this fine-grained for just the Option.
-    ui.sync();
-  });
+  console.warn('CHANGE_OPTION yet to be implemented!');
   // TODO: Handle changes that might affect proxying.
 });
 
 Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
 Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
   // TODO: Implement an actual notifications/userlog pipeline.
+  /*
   var user = store.state.roster[userId];
   if (!user) {
     console.error('User ' + userId + ' does not exist!');
@@ -497,6 +490,7 @@ Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
       _removeNotification(instanceId);
     }
   }
+  */
   // Don't need to re-sync with UI - expect UI to have done the change.
 });
 

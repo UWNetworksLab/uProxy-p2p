@@ -4,6 +4,8 @@
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+
 class MockStorage {
 
   private store_;
@@ -12,28 +14,36 @@ class MockStorage {
     this.store_ = init_store;
   }
 
+  public keys = () => {
+    return Object.keys(this.store_);
+  }
+
   public get = (key) => {
     var v = this.store_[key];
-    //console.log("\n  public get(" + key + "): " + this.store_[key]);
-    return { done: (callback) => { if(callback) callback(v); } };
+    console.log('[MockStorage] get ' + key);
+    if (v) {
+      return Promise.resolve(v);
+    }
+    return Promise.reject();  // new Error('non-existing key'));
   }
 
   public set = (key, value) => {
+    var prev = this.store_[key];
     this.store_[key] = value;
-    //console.log("\n  public set(" + key + "): " + this.store_[key]);
-    return { done: (callback) => { if(callback) callback(); } };
+    console.log('[MockStorage] set ' + key + ' : ' + value);
+    return Promise.resolve(prev);
   }
 
   public remove = (key) => {
     //console.log("\n  public remove(" + key + ").");
+    var prev = this.store_[key];
     delete this.store_[key];
-    return { done: (callback) => { if(callback) callback(); } };
+    return Promise.resolve(prev);
   }
 
   public clear = () => {
     this.store_ = {};
-    //console.log("\n  public clear.");
-    return { done: (callback) => { if(callback) callback(); } };
+    return Promise.resolve();
   }
 
 }  // class MockStorage

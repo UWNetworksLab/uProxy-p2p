@@ -17,12 +17,20 @@ module Core {
     public userId      :string;
 
     /**
-     * Generate an isntance for oneself.
-     * This is generally required if one is running uProxy for the first time,
+     * Generate an instance for oneself, either from scratch or based on some
+     * Instance state loaded from storage.
+     *
+     * Generating is required if one is running uProxy for the first time,
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor(public network :string) {
+    public constructor(public network :string, load ?:Instance) {
+      if (load) {
+        this.instanceId = load.instanceId;
+        this.description = load.description;
+        this.keyHash = load.keyHash;
+        return;
+      }
       this.instanceId = LocalInstance.generateInstanceID();
       this.description = this.generateRandomDescription_();
       this.keyHash = this.generateKeyHash();
@@ -89,11 +97,23 @@ module Core {
      * This method prepares the local instance's handshake, to be sent to all
      * peers, notifying them that we are a uProxy installation.
      */
-    public getInstanceHandshake = () :InstanceHandshake => {
+    public getInstanceHandshake = () : InstanceHandshake => {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
         description: this.description
+      };
+    }
+
+    /**
+     * Return JSON object of self, which can be serialized.
+     * TODO: Come up with a better typing for this.
+     */
+    public serialize = () : Instance => {
+      return {
+        instanceId:  this.instanceId,
+        description: this.description,
+        keyHash:     this.keyHash,
       };
     }
 

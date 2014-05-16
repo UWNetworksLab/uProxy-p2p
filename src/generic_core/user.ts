@@ -272,7 +272,7 @@ module Core {
 
       this.notifyUI();
       // TODO: Fix ui.syncInstance.
-      ui.syncInstance(store.state.instances[instanceId]);
+      ui.syncInstance(this.instances_[instanceId]);
       ui.syncMappings();
       // TODO: save to storage.
     }

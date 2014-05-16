@@ -76,8 +76,9 @@ module Social {
    * with the clientIds. This is because instanceIds occur at the User level, as
    * the User manages the instance <--> client mappings. (see 'user.ts')
    */
-  export class Network {
+  export class Network implements Core.Persistent {
 
+    // TODO: Review visibility of these attributes and the interface.
     public roster    :{[name:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
 
@@ -90,6 +91,10 @@ module Social {
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
 
+    private SaveKeys = {
+      LOCAL_INSTANCE: 'local-instance'
+    }
+
     /**
      * Initialize the social provider for this Network, and attach event
      * handlers.
@@ -101,21 +106,22 @@ module Social {
       this.onceLoggedIn_ = null;
       this.instanceMessageQueue_ = [];
       this.api = this.provider();
-      // TODO(keroserene):
-      // Load local instance from storage, or create a new one if this is the
-      // first time this uProxy installation, on this device, has interacted
-      // with this network.
-      var localInstanceExists = false;
-      if (!localInstanceExists) {
-        this.myInstance = new Core.LocalInstance(this.name);
-      }
       // TODO: Update these event name-strings when freedom updates to
       // typescript and Enums.
       this.api.on('onUserProfile', this.delayForLogin(this.handleUserProfile));
       this.api.on('onClientState', this.delayForLogin(this.handleClientState));
       this.api.on('onMessage',     this.delayForLogin(this.handleMessage));
-      this.log('prepared Social.Network.');
-      this.notifyUI();
+      this.prepareLocalInstance().then(() => {
+        this.log('prepared Social.Network.');
+        this.notifyUI();
+      });
+    }
+
+    /**
+     * Obtain the prefix for all storage keys associated with this Network.
+     */
+    public getStorePath = () => {
+      return this.name;
     }
 
     /**
@@ -144,6 +150,7 @@ module Social {
       this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
+            console.log(JSON.stringify(this.myInstance));
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
@@ -175,14 +182,14 @@ module Social {
     public isOnline = () : boolean => {
       // this.myInstance.userId is only set when the social API's login
       // promise fulfills.
-      return Boolean(this.myInstance.userId);
+      return Boolean(this.myInstance && this.myInstance.userId);
     }
 
     // Returns true iff a login is pending (e.g. waiting on user's password).
     public isLoginPending = () : boolean => {
       // We are in a pending login state if the onceLoggedIn_ promise is
       // defined, but we don't yet have the myInstance.userId set.
-      return Boolean(this.onceLoggedIn_) && !Boolean(this.myInstance.userId);
+      return Boolean(this.onceLoggedIn_) && !this.isOnline();
     }
 
     /**
@@ -202,6 +209,34 @@ module Social {
           handler(arg);
         });
       }
+    }
+
+    /**
+     * Returns the local instance. If it doesn't exist, load local instance
+     * from storage, or create a new one if this is the first time this uProxy
+     * installation, on this device, has interacted with this network.
+     */
+    public prepareLocalInstance = () : Promise<void> => {
+      if (this.myInstance) {
+        // return Promise.resolve(this.myInstance);
+        return Promise.resolve();
+      }
+      var key = this.getStorePath() + '/' + this.SaveKeys.LOCAL_INSTANCE;
+      return storage.load<Instance>(key).then((result :Instance) => {
+        console.log(JSON.stringify(result));
+        this.myInstance = new Core.LocalInstance(this.name, result);
+        this.log('loaded local instance from storage: ' +
+                 this.myInstance.instanceId);
+        return this.myInstance;
+      }, (e) => {
+        this.myInstance = new Core.LocalInstance(this.name);
+        this.log('generated new local instance: ' +
+                 this.myInstance.instanceId);
+        return storage.save<Instance>(key, this.myInstance.serialize()).then((prev) => {
+          this.log('saved new local instance to storage');
+          return this.myInstance;
+        });
+      });
     }
 
     public getLocalInstance = () : Core.LocalInstance => {
@@ -349,6 +384,9 @@ module Social {
      * inform them that we're also a uProxy installation to interact with.
      */
     private getInstanceHandshake_ = () : uProxy.Message => {
+      if (!this.myInstance) {
+        throw Error('No local instance available!');
+      }
       // TODO: Should we memoize the instance handshake, or calculate it fresh
       // each time?
       return {
