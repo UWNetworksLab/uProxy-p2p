@@ -68,7 +68,7 @@ app.run([
 
       $s.prettyNetworkName = (networkId) => {
         switch (networkId) {
-          case 'google': return 'G+';
+          case 'google': return 'Google';
           case 'facebook': return 'FB';
           case 'xmpp': return 'XMPP';
           case 'websocket': return 'websocket';
