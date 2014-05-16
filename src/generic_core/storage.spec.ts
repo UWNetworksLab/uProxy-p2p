@@ -7,6 +7,12 @@ Core.DEBUG_STATESTORAGE = false;
 // Depends on the MockStorage that executes everything synchronously.
 describe('Core.Storage', () => {
 
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+  })
+
   it('saves and loads to storage', (done) => {
     storage.save('birds', {
       'can': 'chirp'

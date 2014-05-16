@@ -53,15 +53,13 @@ module Core {
      * TODO: Consider using a storage provider that works with JSON.
      */
     public load = <T>(key :string) : Promise<T> => {
-      return fStorage.get(key).then((result) => {
-        dbg('Loaded from storage[' + key + '] (type: ' +
-                    (typeof result) + '): ' + result);
-        if (isDefined(result)) {
-          return <T>JSON.parse(result);
-        } else {
-          dbg('No key: ' + key);
-          throw Error('Non-existent storage key');
-        }
+      this.log('loading ' + key);
+      return fStorage.get(key).then((result :string) => {
+        this.log('Loaded [' + key + '] : ' + result);
+        return <T>JSON.parse(result);
+      }, (e) => {
+        this.log(e.message);
+        return <T>{};
       });
     }
 
@@ -69,10 +67,17 @@ module Core {
      * Promise saving a key-value pair to storage, fulfilled with the previous
      * value of |key| if it existed (according to the freedom interface.)
      */
-    public save = <T>(key :string, val :T) : Promise<string>=> {
-      return fStorage.set(key, JSON.stringify(val)).then((val:string) => {
-        dbg('Saved to storage[' + key + ']. old val=' + val);
-        return val;
+    public save = <T>(key :string, val :T) : Promise<T> => {
+      this.log('Saving ' + key + ': ' + val);
+      return fStorage.set(key, JSON.stringify(val)).then((prev:string) => {
+        this.log('Saved to storage[' + key + ']. old val=' + prev);
+        if (!prev) {
+          return undefined;
+        }
+        return <T>JSON.parse(prev);
+      }).catch((e) => {
+        this.log(e.message);
+        return <T>{};
       });
     }
 
@@ -212,11 +217,16 @@ module Core {
       // });
     // }
 
+    private log = (msg:string) => {
+      if (DEBUG_STATESTORAGE) {
+        console.log('[Storage] ' + msg);
+      }
+    }
   }  // class Storage
 
 
   // TODO: Make logging better.
-  var modulePrefix_ = '[StateStorage] ';
+  var modulePrefix_ = '[Storage] ';
   var dbg = (...args:any[]) => { dbg_(console.log, args); }
   var dbgWarn = (...args:any[]) => { dbg_(console.warn); }
   var dbgErr = (...args:any[]) => { dbg(console.error); }

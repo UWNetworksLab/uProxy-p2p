@@ -18,18 +18,19 @@ class MockStorage {
     return Object.keys(this.store_);
   }
 
-  // TODO: Update to reflect promises when freedom does, too.
   public get = (key) => {
     var v = this.store_[key];
+    console.log('[MockStorage] get ' + key);
     if (v) {
       return Promise.resolve(v);
     }
-    return Promise.reject(new Error('non-existing key'));
+    return Promise.reject();  // new Error('non-existing key'));
   }
 
   public set = (key, value) => {
     var prev = this.store_[key];
     this.store_[key] = value;
+    console.log('[MockStorage] set ' + key + ' : ' + value);
     return Promise.resolve(prev);
   }
 

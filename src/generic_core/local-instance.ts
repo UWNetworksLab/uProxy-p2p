@@ -97,11 +97,23 @@ module Core {
      * This method prepares the local instance's handshake, to be sent to all
      * peers, notifying them that we are a uProxy installation.
      */
-    public getInstanceHandshake = () :InstanceHandshake => {
+    public getInstanceHandshake = () : InstanceHandshake => {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
         description: this.description
+      };
+    }
+
+    /**
+     * Return JSON object of self, which can be serialized.
+     * TODO: Come up with a better typing for this.
+     */
+    public serialize = () : Instance => {
+      return {
+        instanceId:  this.instanceId,
+        description: this.description,
+        keyHash:     this.keyHash,
       };
     }
 

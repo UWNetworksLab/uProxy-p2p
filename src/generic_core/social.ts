@@ -216,22 +216,26 @@ module Social {
      * from storage, or create a new one if this is the first time this uProxy
      * installation, on this device, has interacted with this network.
      */
-    public prepareLocalInstance = () : Promise<Core.LocalInstance> => {
+    public prepareLocalInstance = () : Promise<void> => {
       if (this.myInstance) {
-        return Promise.resolve(this.myInstance);
+        // return Promise.resolve(this.myInstance);
+        return Promise.resolve();
       }
       var key = this.getStorePath() + '/' + this.SaveKeys.LOCAL_INSTANCE;
-      return storage.load<Instance>(key).then((result) => {
+      return storage.load<Instance>(key).then((result :Instance) => {
         console.log(JSON.stringify(result));
         this.myInstance = new Core.LocalInstance(this.name, result);
-        this.log('loaded local instance from storage');
-        return this.myInstance;
-      }, () => {
-        this.myInstance = new Core.LocalInstance(this.name);
-        storage.save(key, this.myInstance);
-        this.log('generated new local instance: ' +
+        this.log('loaded local instance from storage: ' +
                  this.myInstance.instanceId);
         return this.myInstance;
+      }, (e) => {
+        this.myInstance = new Core.LocalInstance(this.name);
+        this.log('generated new local instance: ' +
+                 this.myInstance.instanceId);
+        return storage.save<Instance>(key, this.myInstance.serialize()).then((prev) => {
+          this.log('saved new local instance to storage');
+          return this.myInstance;
+        });
       });
     }
 
