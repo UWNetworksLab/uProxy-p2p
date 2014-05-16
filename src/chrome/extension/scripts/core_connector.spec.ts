@@ -26,7 +26,7 @@ describe('core-connector', () => {
 
   var connector :ChromeCoreConnector;
   connector = new ChromeCoreConnector();
-  var connectPromise :Promise<chrome.runtime.Port>;
+  var connectPromise :Promise<void>;
 
   beforeEach(() => {});
 
@@ -86,34 +86,23 @@ describe('core-connector', () => {
 
     // Begin successful connection attempt to App.
     expect(connector.status.connected).toEqual(false);
-    connector.connect().then((p :chrome.runtime.Port) => {
+    connector.connect().then(() => {
       expect(connector['appPort_']).not.toBeNull();
-      console.log(p);
-      expect(connector['appPort_']).toEqual(p);
       expect(port.onMessage.removeListener).toHaveBeenCalled();
       expect(connector.status.connected).toEqual(true);
-      expect(connector.onceDisconnected()).not.toBeNull();
     }).then(done);
   });
 
   var resumedPolling = false;
 
-  it('gets disconnected when App disappears.', (done) => {
+  it('disconnection cleans up state and retries connect.', () => {
+    spyOn(window, 'setTimeout');
     expect(disconnect).not.toBeNull();
-    connector.onceDisconnected().then(() => {
-      expect(connector.status.connected).toEqual(false);
-      expect(connector['appPort_']).toBeNull();
-    }).then(done);
-    // Catch re-connect() attempt for next spec.
-    spyOn(connector, 'connect').and.callFake(() => {
-      resumedPolling = true;
-    });
     disconnect();
-  });
-
-  it('resumes polling once disconnected.', () => {
-    expect(resumedPolling).toEqual(true);
     expect(connector.status.connected).toEqual(false);
+    expect(connector['appPort_']).toBeNull();
+    expect(window.setTimeout).toHaveBeenCalledWith(connector.connect,
+                                                   SYNC_TIMEOUT);
   });
 
   it('send_ queues message while disconnected.', () => {

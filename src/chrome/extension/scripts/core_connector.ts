@@ -81,36 +81,16 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    *
    * Returns a promise fulfilled with the Chrome port upon connection.
    */
-  public connect = () : Promise<chrome.runtime.Port> => {
-    var connectPromise = this.connect_().then(this.flushQueue);
-    connectPromise.then(() => {
+  public connect = () : Promise<void> => {
+    console.log('trying to connect to app');
+    if (this.status.connected) {
+      console.warn('Already connected.');
+      return Promise.resolve();
+    }
+
+    return this.connect_().then(this.flushQueue).then(() => {
       this.sendCommand(uProxy.Command.READY);
     });
-    // Separate the promise chain which deals with polling, since the user
-    // only cares about the initial success.
-    connectPromise
-        .then(this.prepareForFutureDisconnect_)
-        .then(() => {
-          // If disconnected, return to polling for connections.
-          // This is longform so jasmine's spies can see it.
-          this.onceDisconnected().then(() => {
-            this.connect();
-          });
-        })
-        .catch((e) => {
-          // If connection failed, keep polling.
-          console.warn(e);
-          console.warn('Retrying in ' + (SYNC_TIMEOUT/1000) + 's...');
-          setTimeout(this.connect, SYNC_TIMEOUT);
-        })
-    return connectPromise;
-  }
-
-  /**
-   * Returns a promise fulfilled by this connector's disconnection.
-   */
-  public onceDisconnected = () : Promise<void> => {
-    return this.disconnectPromise_;
   }
 
   /**
@@ -118,19 +98,26 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Fails if there's no port available on that connector.
    */
   private connect_ = () : Promise<chrome.runtime.Port> => {
-    if (this.status.connected) {
-      console.warn('Already connected.');
-      return Promise.resolve(this.appPort_);
-    }
     this.appPort_ = chrome.runtime.connect(this.appId_, this.options_);
     if (!this.appPort_) {
-      this.appPort_ = null;
+      // This code is just a sanity check and not expected to be hit.  Even
+      // if the app is not running, this.appPort_ will still be set,
+      // but the onDisconnect even will be fired.
+      console.warn('connect_: Unable to connect to create this.appPort_.');
+      // Manually invoke disconnect handler which will retry connection.
+      this.onDisconnectHandler_();
       return Promise.reject(new Error('Unable to connect to App.'));
     }
+
+    // Immediately setup disconnect handler, which will be invoked both on a
+    // real disconnect and in the case where a connection could not be setup.
+    this.appPort_.onDisconnect.addListener(this.onDisconnectHandler_);
+
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
       var ackResponse :Function = (msg :string) => {
+        console.log('connect_: in ackResponse');
         if (ChromeGlue.ACK !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
@@ -142,40 +129,31 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         F(this.appPort_);
-        console.log('Connected to app.');
       };
       this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
-      this.appPort_.postMessage(ChromeGlue.CONNECT);
-
+      var postMessageRetVal = this.appPort_.postMessage(ChromeGlue.CONNECT);
     }).catch((e) => {
       console.log(e);
-      this.status.connected = false;
-      this.appPort_ = null;
+      // Manually invoke disconnect handler which will retry connection.
+      this.onDisconnectHandler_();
       return Promise.reject(new Error('Unable to connect to uProxy App.'));
     });
   }
 
-  /**
-   * Helper which prepares a fresh disconnection promise. Should be called after
-   * setting up a successful connection to the App for the first time.
-   */
-  private prepareForFutureDisconnect_ = () => {
-    // If connected, stop polling until the next disconnect.
-    // Prepare the disconnection promise.
-    var fulfillDisconnect :Function;
-    this.disconnectPromise_ = new Promise<void>((F, R) => {
-      fulfillDisconnect = F;
-    }).then(() => {
-      console.log('Extension got disconnected from app.');
-      this.status.connected = false;
-      if (this.appPort_) {
-        this.appPort_.onDisconnect.removeListener(fulfillDisconnect);
-        this.appPort_.disconnect();
-        this.appPort_ = null;
-      }
-    });
-    this.appPort_.onDisconnect.addListener(fulfillDisconnect);
+  private onDisconnectHandler_ = () => {
+    // Note this is invoked both when a connection to the app was established
+    // and then disconnected, and when a connection to the app could not
+    // be establish (i.e. this.appPort_.postMessage in connect_ failed).
+    console.log('Disconnected from app, previous status was ' +
+                this.status.connected);
+
+    // Update this.status and this.appPort_ to ensure we are disconnected.
+    this.status.connected = false;
+    this.appPort_ = null;
+
+    console.warn('Retrying connection in ' + (SYNC_TIMEOUT/1000) + 's...');
+    setTimeout(this.connect, SYNC_TIMEOUT);
   }
 
   // --- Communication ---
