@@ -7,12 +7,13 @@
 /// <reference path='../interfaces/instance.d.ts' />
 
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/storage.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 
 
 module Core {
 
-  var fStorage = freedom['storage']();  // Platform-independent provider.
+  var fStorage :freedom.Storage = freedom['storage']();  // Platform-independent provider.
 
   // Set false elsewhre to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;

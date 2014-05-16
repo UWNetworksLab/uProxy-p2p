@@ -14,8 +14,12 @@ class MockStorage {
     this.store_ = init_store;
   }
 
+  public keys = () => {
+    return Object.keys(this.store_);
+  }
+
   // TODO: Update to reflect promises when freedom does, too.
-  public get = (key) : Promise<string> => {
+  public get = (key) => {
     var v = this.store_[key];
     if (v) {
       return Promise.resolve(v);
