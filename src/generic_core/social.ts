@@ -79,7 +79,7 @@ module Social {
   export class Network implements Core.Persistent {
 
     // TODO: Review visibility of these attributes and the interface.
-    public roster    :{[name:string]:Core.User};
+    public roster    :{[userId:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
 
     private api      :freedom.Social;
@@ -121,7 +121,7 @@ module Social {
      * Obtain the prefix for all storage keys associated with this Network.
      */
     public getStorePath = () => {
-      return this.name;
+      return this.name + '/';
     }
 
     /**
@@ -221,7 +221,7 @@ module Social {
         // return Promise.resolve(this.myInstance);
         return Promise.resolve();
       }
-      var key = this.getStorePath() + '/' + this.SaveKeys.LOCAL_INSTANCE;
+      var key = this.getStorePath() + this.SaveKeys.LOCAL_INSTANCE;
       return storage.load<Instance>(key).then((result :Instance) => {
         console.log(JSON.stringify(result));
         this.myInstance = new Core.LocalInstance(this.name, result);
@@ -461,6 +461,20 @@ module Social {
       var msgString = JSON.stringify(msg);
       this.log('sending ------> ' + msgString);
       return this.api.sendMessage(clientId, msgString);
+    }
+
+    /**
+     * Serialize information about this network to be saved to storage or sent
+     * to UI.
+     */
+    public serialize = () => {
+      return {
+        name: this.name,
+        remember: false,
+        // Only save and load the userIds in the roster.
+        // The actual Users will be saved and loaded separately.
+        userIds: Object.keys(this.roster)
+      }
     }
 
     /**

@@ -43,7 +43,7 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser {
+  export class User implements BaseUser, Core.Persistent {
 
     public name :string;
     public clients :{ [clientId :string] :UProxyClient.Status };
@@ -82,6 +82,17 @@ module Core {
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+    }
+
+    /**
+     * Obtain the storage prefix of this User.
+     * Assumption: Although Alice's userId may appear differently to Bob and
+     * Charlie, the potentially-different userIds will remain the same,
+     * individually to Bob and Charlie. Therefore we can use userId as part of
+     * the storage prefix.
+     */
+    public getStorePath = () => {
+      return this.network.getStorePath() + this.userId + '/';
     }
 
     /**
@@ -370,6 +381,21 @@ module Core {
      */
     private log = (msg:string) : void => {
       console.log('[User ' + this.name + '] ' + msg);
+    }
+
+    /**
+     * Get the raw attributes of the User to be sent over UI or saved to
+     * storage.
+     */
+    public serialize = () => {
+      return {
+        userId: this.userId,
+        name: this.name,
+        // Only save and load the instanceIDs. The actual RemoteInstances will
+        // be saved and loaded separately.
+        instanceIds: Object.keys(this.instances_)
+        // Don't save the clients, because those are completely ephemeral.
+      }
     }
 
   }  // class User

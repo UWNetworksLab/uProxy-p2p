@@ -23,7 +23,7 @@ module Core {
    * - Locally, via a user command from the UI.
    * - Remotely, via consent bits sent over the wire by a friend.
    */
-  export class RemoteInstance implements Instance {
+  export class RemoteInstance implements Instance, Core.Persistent {
 
     public instanceId  :string;
     public keyHash     :string
@@ -48,6 +48,14 @@ module Core {
         public user :Core.User,  // The User which this instance belongs to.
         handshake   :Instance) {
       this.update(handshake);
+    }
+
+    /**
+     * Obtain the prefix for all storage keys associated with this Instance.
+     * Since the parent User's userId may change, only store the userId.
+     */
+    public getStorePath = () => {
+      return this.user.getStorePath() + this.instanceId + '/';
     }
 
     /**
@@ -255,7 +263,8 @@ module Core {
     }
 
     /**
-     * Get the raw attributes of the instance to be sent over to the UI.
+     * Get the raw attributes of the instance to be sent over to the UI or saved
+     * to storage.
      */
     public serialize = () : UI.Instance => {
       return {
