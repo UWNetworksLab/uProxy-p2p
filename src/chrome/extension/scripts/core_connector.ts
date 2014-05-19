@@ -132,7 +132,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       };
       this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
-      var postMessageRetVal = this.appPort_.postMessage(ChromeGlue.CONNECT);
+      this.appPort_.postMessage(ChromeGlue.CONNECT);
     }).catch((e) => {
       console.log(e);
       // Manually invoke disconnect handler which will retry connection.
