@@ -16,6 +16,7 @@ describe('Core.RemoteInstance', () => {
       'getLocalInstanceId',
       'send',
       'notifyUI',
+      'getStorePath'
   ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.

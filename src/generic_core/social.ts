@@ -436,14 +436,14 @@ module Social {
       var handshake = this.getInstanceHandshake_();
       var cnt = clientIds.length;
       if (!handshake) {
-        // TODO: Is this necessary?
         throw Error('Not ready to send handshake');
       }
       clientIds.forEach((clientId:string) => {
         handshakes.push(this.send(clientId, handshake));
       })
       return Promise.all(handshakes).then(() => {
-        this.log('sent ' + cnt + ' instance handshake(s).');
+        this.log('sent ' + cnt + ' instance handshake(s): ' +
+                 clientIds.join(', '));
       });
     }
 

@@ -41,13 +41,17 @@ module Core {
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
-     * handshake. Typically, instances are initialized with the lowest consent
-     * values.
+     * handshake, or loadig from storage. Typically, instances are initialized
+     * with the lowest consent values.
      */
     constructor(
         public user :Core.User,  // The User which this instance belongs to.
-        handshake   :Instance) {
-      this.update(handshake);
+        data        :Instance) {
+      this.update(<InstanceHandshake>data);
+      // Load consent state if it exists. Don't load access state.
+      if (data.consent) {
+        this.consent = data.consent;
+      }
     }
 
     /**
@@ -55,7 +59,7 @@ module Core {
      * Since the parent User's userId may change, only store the userId.
      */
     public getStorePath = () => {
-      return this.user.getStorePath() + this.instanceId + '/';
+      return this.user.getStorePath() + this.instanceId;
     }
 
     /**
@@ -164,9 +168,10 @@ module Core {
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :Instance) => {
-      // TODO: copy the rest of the data.
+    public update = (data :InstanceHandshake) => {
       this.instanceId = data.instanceId;
+      this.keyHash = data.keyHash;
+      this.description = data.description;
     }
 
     /**
@@ -212,8 +217,9 @@ module Core {
           console.warn('Invalid Consent.UserAction! ' + action);
           return;
       }
-      // Send new consent bits to the remote client.
+      // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();
+      this.saveToStorage();
       // Send an update to the UI.
       this.user.notifyUI();
     }
@@ -243,8 +249,7 @@ module Core {
           bits, this.consent.asProxy);
       this.consent.asClient = Consent.updateClientStateFromRemoteState(
           bits, this.consent.asClient);
-      // TODO: save to storage and update ui.
-      // store.saveInstance(this.instanceId);
+      this.saveToStorage();
       // TODO: Make the UI update granular for just the consent, instead of the
       // entire parent User for this instance.
       this.user.notifyUI();
@@ -260,6 +265,14 @@ module Core {
         isRequesting: Consent.ProxyState.userIsRequesting(this.consent.asProxy),
         isOffering: Consent.ClientState.userIsOffering(this.consent.asClient)
       };
+    }
+
+    private saveToStorage = () => {
+      var json = this.serialize();
+      storage.save<SerialRemoteInstance>(this.getStorePath(), json)
+          .then((old) => {
+        console.log('Saved instance ' + this.instanceId + ' to storage.');
+      });
     }
 
     /**

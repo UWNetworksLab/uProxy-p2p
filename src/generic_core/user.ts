@@ -209,7 +209,7 @@ module Core {
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <Instance>msg.data);
+          this.syncInstance_(clientId, <InstanceHandshake>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(<ConsentMessage>msg.data);
@@ -254,7 +254,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, instance :Instance) => {
+    private syncInstance_ = (clientId :string, instance :InstanceHandshake) => {
       if (UProxyClient.Status.ONLINE !== this.clients[clientId]) {
         console.warn('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
