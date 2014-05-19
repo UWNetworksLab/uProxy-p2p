@@ -9,7 +9,7 @@
 
 module Core {
 
-  export class LocalInstance implements Instance {
+  export class LocalInstance implements Instance, Core.Persistent {
 
     public instanceId  :string;
     public description :string;
@@ -24,11 +24,9 @@ module Core {
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor(public network :string, load ?:Instance) {
+    public constructor(public network :Social.Network, load ?:Instance) {
       if (load) {
-        this.instanceId = load.instanceId;
-        this.description = load.description;
-        this.keyHash = load.keyHash;
+        this.deserialize(load);
         return;
       }
       this.instanceId = LocalInstance.generateInstanceID();
@@ -38,6 +36,13 @@ module Core {
           this.instanceId,
           this.description,
           this.keyHash);
+    }
+
+    /**
+     * Obtain storag prefix for the LocalInstance.
+     */
+    public getStorePath = () => {
+      return this.network.getStorePath() + 'me';
     }
 
     /**
@@ -115,6 +120,11 @@ module Core {
         description: this.description,
         keyHash:     this.keyHash,
       };
+    }
+    public deserialize = (json) => {
+      this.instanceId = json.instanceId;
+      this.description = json.description;
+      this.keyHash = json.keyHash;
     }
 
   }  // class Core.LocalInstance

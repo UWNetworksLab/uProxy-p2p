@@ -34,16 +34,21 @@ module Core {
 
     /**
      * Return an object containing all the relevant attributes of this class.
+     * This returns an Object and not a string because JSON parse/stringify
+     * occurs only at the message-passing layer. If it occured at this
+     * interface, then there would be a lot of messy JSON code in every class
+     * which implemented Core.Persistent.
      */
     serialize :() => Object;
 
     /**
-     * From a serialized string, update the object with the new attributes.
-     * Serialize, and deserialize must map back and forth perfectly on the
+     * From the serialized attribute object, update with the new attributes.
+     * Serialize and deserialize must map back and forth perfectly on the
      * attribues that were saved.
      */
-    // deserialize :(json :string) => void;
-  }
+    deserialize :(json :Object) => void;
+
+  }  // interface Core.Persistent
 
   /**
    * Contains all state for uProxy's core.

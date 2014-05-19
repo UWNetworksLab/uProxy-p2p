@@ -4,6 +4,7 @@
 describe('Core.LocalInstance', () => {
 
   var instance :Core.LocalInstance;
+  var network = <Social.Network><any>jasmine.createSpy('network');
 
   beforeEach(() => {
     spyOn(console, 'log');
@@ -11,7 +12,7 @@ describe('Core.LocalInstance', () => {
   });
 
   it('initializes with valid id, description, and keyhash', () => {
-    instance = new Core.LocalInstance('network');
+    instance = new Core.LocalInstance(network);
     expect(instance.instanceId).toBeDefined();
     expect(instance.description).toBeDefined();
     expect(instance.keyHash).toBeDefined();

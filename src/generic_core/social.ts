@@ -90,9 +90,10 @@ module Social {
     // Promise which delays all message handling until fully logged in.
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+    private remember :boolean;
 
     private SaveKeys = {
-      LOCAL_INSTANCE: 'local-instance'
+      ME: 'me'
     }
 
     /**
@@ -102,6 +103,7 @@ module Social {
     constructor(public name:string) {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
+      this.remember = false;
       this.roster = {};
       this.onceLoggedIn_ = null;
       this.instanceMessageQueue_ = [];
@@ -221,15 +223,15 @@ module Social {
         // return Promise.resolve(this.myInstance);
         return Promise.resolve();
       }
-      var key = this.getStorePath() + this.SaveKeys.LOCAL_INSTANCE;
+      var key = this.getStorePath() + this.SaveKeys.ME;
       return storage.load<Instance>(key).then((result :Instance) => {
         console.log(JSON.stringify(result));
-        this.myInstance = new Core.LocalInstance(this.name, result);
+        this.myInstance = new Core.LocalInstance(this, result);
         this.log('loaded local instance from storage: ' +
                  this.myInstance.instanceId);
         return this.myInstance;
       }, (e) => {
-        this.myInstance = new Core.LocalInstance(this.name);
+        this.myInstance = new Core.LocalInstance(this);
         this.log('generated new local instance: ' +
                  this.myInstance.instanceId);
         return storage.save<Instance>(key, this.myInstance.serialize()).then((prev) => {
@@ -467,7 +469,7 @@ module Social {
      * Serialize information about this network to be saved to storage or sent
      * to UI.
      */
-    public serialize = () => {
+    public serialize = () : SerialNetwork => {
       return {
         name: this.name,
         remember: false,
@@ -475,6 +477,13 @@ module Social {
         // The actual Users will be saved and loaded separately.
         userIds: Object.keys(this.roster)
       }
+    }
+    public deserialize = (json :SerialNetwork) => {
+      if (this.name !== json.name) {
+        throw Error('Loading unexpected network name!' + json.name);
+      }
+      this.remember = json.remember;
+      // TODO load all users based on userIds.
     }
 
     /**
@@ -489,6 +498,13 @@ module Social {
     }
 
   }  // class Social.Network
+
+  export interface SerialNetwork {
+    name     :string;
+    remember :boolean;
+    userIds  :string[];
+  }
+
 }  // module Social
 
 function freedomClientToUproxyClient(

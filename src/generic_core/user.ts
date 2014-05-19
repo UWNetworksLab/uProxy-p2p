@@ -387,17 +387,31 @@ module Core {
      * Get the raw attributes of the User to be sent over UI or saved to
      * storage.
      */
-    public serialize = () => {
+    public serialize = () : SerialUser => {
       return {
         userId: this.userId,
         name: this.name,
-        // Only save and load the instanceIDs. The actual RemoteInstances will
-        // be saved and loaded separately.
         instanceIds: Object.keys(this.instances_)
-        // Don't save the clients, because those are completely ephemeral.
       }
+    }
+    public deserialize = (json :SerialUser) => {
+      this.userId = json.userId;
+      this.name = json.name;
+      // TODO: Load instances from storage.
+      // for (var instanceId in json.instanceIds) {
+        // storage.load
+      // }
     }
 
   }  // class User
+
+  export interface SerialUser {
+    userId      :string;
+    name        :string;
+    // Only save and load the instanceIDs. The actual RemoteInstances will
+    // be saved and loaded separately.
+    instanceIds :string[];
+    // Don't save the clients, because those are completely ephemeral.
+  }
 
 }  // module uProxy

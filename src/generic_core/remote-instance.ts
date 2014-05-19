@@ -265,8 +265,9 @@ module Core {
     /**
      * Get the raw attributes of the instance to be sent over to the UI or saved
      * to storage.
+     * TODO: Better typing for the serial object.
      */
-    public serialize = () : UI.Instance => {
+    public serialize = () : SerialRemoteInstance => {
       return {
         instanceId:  this.instanceId,
         description: this.description,
@@ -274,6 +275,13 @@ module Core {
         consent:     this.consent,
         access:      this.access
       }
+    }
+    public deserialize = (json :SerialRemoteInstance) => {
+      this.instanceId = json.instanceId,
+      this.description = json.description,
+      this.keyHash = json.keyHash,
+      this.consent = json.consent,
+      this.access = json.access
     }
 
     public getLocalPeerId = (isLocalServer :boolean)
@@ -307,6 +315,12 @@ module Core {
     }
 
   }  // class Core.RemoteInstance
+
+  export interface SerialRemoteInstance extends Instance {
+    keyHash :string;
+    consent :ConsentState;
+    access  :AccessState;
+  }
 
   // TODO: Implement obfuscation.
   export enum ObfuscationType {NONE, RANDOM1 }
