@@ -406,6 +406,7 @@ module Core {
         });
       }
       this.log('Loaded ' + json.instanceIds.length + ' RemoteInstances');
+      this.notifyUI();
     }
 
   }  // class User

@@ -482,7 +482,14 @@ module Social {
         throw Error('Loading unexpected network name!' + json.name);
       }
       this.remember = json.remember;
-      // TODO load all users based on userIds.
+      // Load all users based on userIds.
+      for (var userId in json.userIds) {
+        storage.load<Core.SerialUser>(this.getStorePath() + userId)
+            .then((json) => {
+          this.roster[userId] = new Core.User(this, userId);
+          this.roster[userId].deserialize(json);
+        });
+      }
     }
 
     /**
