@@ -89,6 +89,20 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     }
 
     return this.connect_().then(this.flushQueue).then(() => {
+      // Connect/reconnect listeners to app.  These will not have been queued,
+      // in order to prevent duplicate requests, and will need to be re-sent
+      // after each successful reconnection to the app.
+      for (var type in this.listeners_) {
+        // Convert type from string back to number (uProxy.Update enum) for
+        // payload to app.
+        var payload = {
+          cmd: 'on',
+          type: parseInt(type, 10)
+        };
+        console.log('Connecting listener for', JSON.stringify(payload));
+        this.send_(payload);
+      }
+
       this.sendCommand(uProxy.Command.READY);
     });
   }
@@ -177,7 +191,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       type: update
     };
     console.log('UI onUpdate for', JSON.stringify(payload));
-    this.send_(payload);
+    this.send_(payload, true);
   }
 
   /**
@@ -258,10 +272,14 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * Send a payload to the Chrome app.
    * If currently connected to the App, immediately send. Otherwise, queue
    * the message for the next successful connection.
+   * If skipQueue==true, payloads will not be enqueued when app is disconnected.
    */
-  private send_ = (payload :ChromeGlue.Payload) => {
+  private send_ = (payload :ChromeGlue.Payload,
+                   skipQueue ?:Boolean) => {
     if (!this.status.connected || null == this.appPort_) {
-      this.queue_.push(payload);
+      if (!skipQueue) {
+        this.queue_.push(payload);
+      }
       return;
     }
     try {
