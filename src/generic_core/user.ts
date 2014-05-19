@@ -43,7 +43,7 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser {
+  export class User implements BaseUser, Core.Persistent {
 
     public name :string;
     public clients :{ [clientId :string] :UProxyClient.Status };
@@ -82,6 +82,17 @@ module Core {
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+    }
+
+    /**
+     * Obtain the storage prefix of this User.
+     * Assumption: Although Alice's userId may appear differently to Bob and
+     * Charlie, the potentially-different userIds will remain the same,
+     * individually to Bob and Charlie. Therefore we can use userId as part of
+     * the storage prefix.
+     */
+    public getStorePath = () => {
+      return this.network.getStorePath() + this.userId + '/';
     }
 
     /**
@@ -198,7 +209,7 @@ module Core {
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <Instance>msg.data);
+          this.syncInstance_(clientId, <InstanceHandshake>msg.data);
           break;
         case uProxy.MessageType.CONSENT:
           this.handleConsent_(<ConsentMessage>msg.data);
@@ -243,7 +254,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, instance :Instance) => {
+    private syncInstance_ = (clientId :string, instance :InstanceHandshake) => {
       if (UProxyClient.Status.ONLINE !== this.clients[clientId]) {
         console.warn('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
@@ -372,6 +383,43 @@ module Core {
       console.log('[User ' + this.name + '] ' + msg);
     }
 
+    /**
+     * Get the raw attributes of the User to be sent over UI or saved to
+     * storage.
+     */
+    public serialize = () : SerialUser => {
+      return {
+        userId: this.userId,
+        name: this.name,
+        instanceIds: Object.keys(this.instances_)
+      }
+    }
+    public deserialize = (json :SerialUser) => {
+      this.userId = json.userId;
+      this.name = json.name;
+      this.instances_ = {};
+      // Load actual instance objects.
+      for (var instanceId in json.instanceIds) {
+        storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
+            .then((json) => {
+          this.instances_[instanceId] = new Core.RemoteInstance(this, json);
+        }).catch((e) => {
+          this.log('could not load instance ' + instanceId);
+        });
+      }
+      this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
+      this.notifyUI();
+    }
+
   }  // class User
+
+  export interface SerialUser {
+    userId      :string;
+    name        :string;
+    // Only save and load the instanceIDs. The actual RemoteInstances will
+    // be saved and loaded separately.
+    instanceIds :string[];
+    // Don't save the clients, because those are completely ephemeral.
+  }
 
 }  // module uProxy

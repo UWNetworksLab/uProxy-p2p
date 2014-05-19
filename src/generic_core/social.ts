@@ -79,7 +79,7 @@ module Social {
   export class Network implements Core.Persistent {
 
     // TODO: Review visibility of these attributes and the interface.
-    public roster    :{[name:string]:Core.User};
+    public roster    :{[userId:string]:Core.User};
     public metadata  :any;  // Network name, description, icon, etc.
 
     private api      :freedom.Social;
@@ -90,9 +90,10 @@ module Social {
     // Promise which delays all message handling until fully logged in.
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+    private remember :boolean;
 
     private SaveKeys = {
-      LOCAL_INSTANCE: 'local-instance'
+      ME: 'me'
     }
 
     /**
@@ -102,6 +103,7 @@ module Social {
     constructor(public name:string) {
       this.provider = freedom[PREFIX + name];
       this.metadata = this.provider.manifest;
+      this.remember = false;
       this.roster = {};
       this.onceLoggedIn_ = null;
       this.instanceMessageQueue_ = [];
@@ -121,7 +123,7 @@ module Social {
      * Obtain the prefix for all storage keys associated with this Network.
      */
     public getStorePath = () => {
-      return this.name;
+      return this.name + '/';
     }
 
     /**
@@ -150,7 +152,6 @@ module Social {
       this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
-            console.log(JSON.stringify(this.myInstance));
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
@@ -221,15 +222,15 @@ module Social {
         // return Promise.resolve(this.myInstance);
         return Promise.resolve();
       }
-      var key = this.getStorePath() + '/' + this.SaveKeys.LOCAL_INSTANCE;
+      var key = this.getStorePath() + this.SaveKeys.ME;
       return storage.load<Instance>(key).then((result :Instance) => {
         console.log(JSON.stringify(result));
-        this.myInstance = new Core.LocalInstance(this.name, result);
+        this.myInstance = new Core.LocalInstance(this, result);
         this.log('loaded local instance from storage: ' +
                  this.myInstance.instanceId);
         return this.myInstance;
       }, (e) => {
-        this.myInstance = new Core.LocalInstance(this.name);
+        this.myInstance = new Core.LocalInstance(this);
         this.log('generated new local instance: ' +
                  this.myInstance.instanceId);
         return storage.save<Instance>(key, this.myInstance.serialize()).then((prev) => {
@@ -435,14 +436,14 @@ module Social {
       var handshake = this.getInstanceHandshake_();
       var cnt = clientIds.length;
       if (!handshake) {
-        // TODO: Is this necessary?
         throw Error('Not ready to send handshake');
       }
       clientIds.forEach((clientId:string) => {
         handshakes.push(this.send(clientId, handshake));
       })
       return Promise.all(handshakes).then(() => {
-        this.log('sent ' + cnt + ' instance handshake(s).');
+        this.log('sent ' + cnt + ' instance handshake(s): ' +
+                 clientIds.join(', '));
       });
     }
 
@@ -464,6 +465,36 @@ module Social {
     }
 
     /**
+     * Serialize information about this network to be saved to storage or sent
+     * to UI.
+     */
+    public serialize = () : SerialNetwork => {
+      return {
+        name: this.name,
+        remember: false,
+        // Only save and load the userIds in the roster.
+        // The actual Users will be saved and loaded separately.
+        userIds: Object.keys(this.roster)
+      }
+    }
+    public deserialize = (json :SerialNetwork) => {
+      if (this.name !== json.name) {
+        throw Error('Loading unexpected network name!' + json.name);
+      }
+      this.remember = json.remember;
+      // Load all users based on userIds.
+      for (var userId in json.userIds) {
+        storage.load<Core.SerialUser>(this.getStorePath() + userId)
+            .then((json) => {
+          this.roster[userId] = new Core.User(this, userId);
+          this.roster[userId].deserialize(json);
+        }).catch((e) => {
+          this.error('could not load user ' + userId);
+        });
+      }
+    }
+
+    /**
      * Helper which logs messages clearly belonging to this Social.Network.
      */
     private log = (msg:string) : void => {
@@ -475,6 +506,13 @@ module Social {
     }
 
   }  // class Social.Network
+
+  export interface SerialNetwork {
+    name     :string;
+    remember :boolean;
+    userIds  :string[];
+  }
+
 }  // module Social
 
 function freedomClientToUproxyClient(

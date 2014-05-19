@@ -53,8 +53,9 @@ interface LocalPeerId {
  */
 interface Instance {
   instanceId  :string;
-  description :string;
   keyHash     :string;
+  description ?:string;
+  consent     ?:ConsentState;
   status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications
 }

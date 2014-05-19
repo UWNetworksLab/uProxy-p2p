@@ -59,8 +59,8 @@ describe('Core', () => {
       'networkA': networkA,
       'networkB': networkB
     };
-    var myselfA = new Core.LocalInstance('networkA');
-    var myselfB = new Core.LocalInstance('networkB');
+    var myselfA = new Core.LocalInstance(networkA);
+    var myselfB = new Core.LocalInstance(networkB);
     myselfA.description = 'my description is boring';
     myselfB.description = 'my description is boring';
     spyOn(networkA, 'getLocalInstance').and.callFake(() => {
