@@ -39,10 +39,10 @@ module Core {
     }
 
     /**
-     * Obtain storag prefix for the LocalInstance.
+     * Obtain storage prefix for the LocalInstance.
      */
     public getStorePath = () => {
-      return this.network.getStorePath() + 'me';
+      return this.network.getStorePath() + 'me/';
     }
 
     /**

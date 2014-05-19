@@ -488,6 +488,8 @@ module Social {
             .then((json) => {
           this.roster[userId] = new Core.User(this, userId);
           this.roster[userId].deserialize(json);
+        }).catch((e) => {
+          this.error('could not load user ' + userId);
         });
       }
     }

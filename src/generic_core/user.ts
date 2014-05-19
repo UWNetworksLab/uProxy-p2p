@@ -403,9 +403,11 @@ module Core {
         storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
             .then((json) => {
           this.instances_[instanceId] = new Core.RemoteInstance(this, json);
+        }).catch((e) => {
+          this.log('could not load instance ' + instanceId);
         });
       }
-      this.log('Loaded ' + json.instanceIds.length + ' RemoteInstances');
+      this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
       this.notifyUI();
     }
 
