@@ -397,10 +397,15 @@ module Core {
     public deserialize = (json :SerialUser) => {
       this.userId = json.userId;
       this.name = json.name;
-      // TODO: Load instances from storage.
-      // for (var instanceId in json.instanceIds) {
-        // storage.load
-      // }
+      this.instances_ = {};
+      // Load actual instance objects.
+      for (var instanceId in json.instanceIds) {
+        storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
+            .then((json) => {
+          this.instances_[instanceId] = new Core.RemoteInstance(this, json);
+        });
+      }
+      this.log('Loaded ' + json.instanceIds.length + ' RemoteInstances');
     }
 
   }  // class User

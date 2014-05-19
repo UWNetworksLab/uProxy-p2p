@@ -392,4 +392,29 @@ describe('Core.User', () => {
 
   });  // describe instance sending promises
 
+  describe('save & load', () => {
+
+    it('serializes', () => {
+      expect(user.serialize()).toEqual({
+        userId: 'fakeuser',
+        name: 'Alice',
+        instanceIds: ['fakeinstance']
+      });
+    });
+
+    it('deserializes', () => {
+      user.deserialize({
+        userId: 'fakeuser',
+        name: 'Alice Still',
+        instanceIds: []
+      })
+      expect(user.serialize()).toEqual({
+        userId: 'fakeuser',
+        name: 'Alice Still',
+        instanceIds: []
+      });
+    })
+
+  });  // describe save & load
+
 });  // uProxy.User
