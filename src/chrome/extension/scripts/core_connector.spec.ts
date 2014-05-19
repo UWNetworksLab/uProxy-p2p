@@ -85,11 +85,19 @@ describe('core-connector', () => {
     });
 
     // Begin successful connection attempt to App.
+    spyOn(connector, 'send_').and.callFake(() => {});
     expect(connector.status.connected).toEqual(false);
     connector.connect().then(() => {
       expect(connector['appPort_']).not.toBeNull();
       expect(port.onMessage.removeListener).toHaveBeenCalled();
       expect(connector.status.connected).toEqual(true);
+      // Check that onUpdate callbacks were successfully sent to app.
+      expect(connector['send_']).toHaveBeenCalledWith({
+        cmd: 'on', type: uProxy.Update.COMMAND_FULFILLED
+      });
+      expect(connector['send_']).toHaveBeenCalledWith({
+        cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
+      });
     }).then(done);
   });
 
