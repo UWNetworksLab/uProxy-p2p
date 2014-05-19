@@ -275,7 +275,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * If skipQueue==true, payloads will not be enqueued when app is disconnected.
    */
   private send_ = (payload :ChromeGlue.Payload,
-                   skipQueue ?:Boolean) => {
+                   skipQueue :Boolean = false) => {
     if (!this.status.connected || null == this.appPort_) {
       if (!skipQueue) {
         this.queue_.push(payload);
