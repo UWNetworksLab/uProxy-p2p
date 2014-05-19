@@ -152,7 +152,6 @@ module Social {
       this.onceLoggedIn_ = this.api.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
-            console.log(JSON.stringify(this.myInstance));
             this.myInstance.userId = freedomClient.userId;
             this.log('logged into uProxy');
           });
