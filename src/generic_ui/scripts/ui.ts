@@ -61,7 +61,6 @@ module UI {
     isOnline(network :string) : boolean;
     isOffline(network :string) : boolean;
     loggedIn() : boolean;
-    loggedOut() : boolean;
     resetState() : void;
     prettyNetworkName(networkId :string) : string;
   }
@@ -169,7 +168,9 @@ module UI {
     }
 
     // ------------------------------- Views ----------------------------------
-    public isSplash = () : boolean => { return this.toggles.splash; }
+    public isSplash = () : boolean => {
+      return this.toggles.splash || !this.loggedIn();
+    }
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
     public isAccess = () : boolean => { return View.ACCESS == this.view; }
 
@@ -389,19 +390,6 @@ module UI {
         }
       }
       return false;
-    }
-
-    // This is *NOT* the inverse of loggedIn, because it is possible to be
-    // "logging in"
-    // Not Logged-out if state is not logged out for any network.
-    public loggedOut = () => {
-      return false;
-      for (var networkId in model.networks) {
-        if (!model.networks[networkId].online) {
-          return false;
-        }
-      }
-      return true;
     }
 
     // Synchronize the data about the current user.

@@ -65,6 +65,7 @@
     </div>
 
     <button id="options-btn" ng-click="toggleOptions()"
+        ng-show="ui.loggedIn()"
         ng-mouseenter="optionsTooltip=true"
         ng-focus="optionsTooltip=true"
         ng-mouseleave="optionsTooltip=false"
@@ -138,10 +139,7 @@
 
       <div id="roster">
         <div id="roster-text">
-          <span ng-show="ui.loggedOut()">
-            You aren't logged in to a network. Goto your settings to login.
-          </span>
-          <span ng-hide="ui.loggedOut() || ui.loggedIn()">
+          <span ng-hide="ui.loggedIn()">
             Loading...
           </span>
         </div>
