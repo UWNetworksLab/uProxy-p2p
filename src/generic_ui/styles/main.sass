@@ -609,8 +609,6 @@ img.c-icon
   &#my-uproxy
     bottom: 176px
     right: 118px
-  &:hover
-    opacity: 0.6
 
 
 // Typically displayed when the contact does not have uproxy installed
@@ -657,9 +655,6 @@ img.c-icon
     cursor: default
     text-align: center
     @include smooth-slow
-    &.ng-hide
-      @include un-ng-hide
-      opacity: 0
     & .picCover
       display: inline-block
       background-color: #fff
@@ -671,8 +666,21 @@ img.c-icon
       top: 0
       width: 100%
 
+.contact-name-bar
+  position: absolute
+  left: 0
+  right: 0
+  bottom: 0
+  z-index: 2
+
 .contact-name
-  text-align: center
+  width: 110px
+  background-color: rgba(0, 0, 0, 0.5)
+  color: white
+  text-shadow: black 0px 5px 5px
+  word-wrap: break-word
+  display: inline-block
+  margin-left: 2px  // To compensate for image border.
 
 .mode-panel
   position: absolute

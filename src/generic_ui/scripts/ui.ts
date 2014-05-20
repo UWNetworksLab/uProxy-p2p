@@ -152,8 +152,11 @@ module UI {
 
       // Attach handlers for USER updates.
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
-        console.log('uProxy.Update.USER_SELF:', payload);
         // Instead of adding to the roster, update the local user information.
+        console.log('uProxy.Update.USER_SELF:', payload);
+        var profile :freedom.Social.UserProfile = payload.user;
+        this.myPic = profile.imageData;
+        this.myName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);

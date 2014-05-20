@@ -45,7 +45,7 @@ module UI {
       }
       this.name = profile.name;
       this.url = profile.url;
-      this.imageData = profile.imageDataUri;
+      this.imageData = profile.imageData;
     }
 
     /**
