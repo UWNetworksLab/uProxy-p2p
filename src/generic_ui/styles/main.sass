@@ -666,18 +666,21 @@ img.c-icon
       top: 0
       width: 100%
 
-.contact-name
+.contact-name-bar
   position: absolute
-  // Position in the center.  We cannot use text-align:center because that
-  // will appear 1px too far to the left, due to image borders.
-  left: 132px
-  width: 110px
+  left: 0
+  right: 0
   bottom: 0
   z-index: 2
+
+.contact-name
+  width: 110px
   background-color: rgba(0, 0, 0, 0.5)
   color: white
   text-shadow: black 0px 5px 5px
   word-wrap: break-word
+  display: inline-block
+  margin-left: 2px  // To compensate for image border.
 
 .mode-panel
   position: absolute

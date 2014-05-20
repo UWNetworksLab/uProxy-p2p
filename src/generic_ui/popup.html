@@ -176,7 +176,9 @@
 
         <div class="contact-info" id="their-info"
             ng-show="ui.isAccess()">
-          <p class="contact-name">{{ui.user.name}}</p>
+          <div class="contact-name-bar">
+            <p class="contact-name">{{ui.user.name}}</p>
+          </div>
           <img ng-show="ui.user.imageData" class="contact-image"
                ng-src='{{ui.user.imageData?ui.user.imageData:""}}'>
           <img ng-hide="ui.user.imageData" class="contact-image">
@@ -252,7 +254,9 @@
     </div>
 
     <div class="contact-info" id="my-info" ng-show="ui.isAccess()">
-      <p class="contact-name">You</p>
+      <div class="contact-name-bar">
+        <p class="contact-name">You</p>
+      </div>
       <img class="contact-image"
            ng-src='{{ui.myPic}}'>
     </div>

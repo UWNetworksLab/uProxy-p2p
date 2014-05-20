@@ -99,7 +99,7 @@ module UI {
 
     notifications = 0;
     advancedOptions = false;
-    // TODO: Pull search / filters into its own clacdss.
+    // TODO: Pull search / filters into its own class.
     search = '';
     numClients = 0;
     myName = '';
