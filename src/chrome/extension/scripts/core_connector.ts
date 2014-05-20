@@ -10,7 +10,7 @@
 /// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
-var SYNC_TIMEOUT         :number = 2000;  // milliseconds.
+var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
 
 interface FullfillAndReject {
   fulfill :Function;
