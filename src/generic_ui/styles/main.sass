@@ -609,8 +609,6 @@ img.c-icon
   &#my-uproxy
     bottom: 176px
     right: 118px
-  &:hover
-    opacity: 0.6
 
 
 // Typically displayed when the contact does not have uproxy installed
@@ -657,9 +655,6 @@ img.c-icon
     cursor: default
     text-align: center
     @include smooth-slow
-    &.ng-hide
-      @include un-ng-hide
-      opacity: 0
     & .picCover
       display: inline-block
       background-color: #fff
@@ -672,7 +667,17 @@ img.c-icon
       width: 100%
 
 .contact-name
-  text-align: center
+  position: absolute
+  // Position in the center.  We cannot use text-align:center because that
+  // will appear 1px too far to the left, due to image borders.
+  left: 132px
+  width: 110px
+  bottom: 0
+  z-index: 2
+  background-color: rgba(0, 0, 0, 0.5)
+  color: white
+  text-shadow: black 0px 5px 5px
+  word-wrap: break-word
 
 .mode-panel
   position: absolute

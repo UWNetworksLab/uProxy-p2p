@@ -175,13 +175,12 @@
         </div>
 
         <div class="contact-info" id="their-info"
-            ng-show="ui.isAccess()"
-            ng-mouseenter="theirInfoHovered=true"
-            ng-mouseleave="theirInfoHovered=false">
+            ng-show="ui.isAccess()">
+          <p class="contact-name">{{ui.user.name}}</p>
           <img ng-show="ui.user.imageData" class="contact-image"
                ng-src='{{ui.user.imageData?ui.user.imageData:""}}'>
-          <img ng-hide="ui.user.imageData" class="contact-image"
-          >
+          <img ng-hide="ui.user.imageData" class="contact-image">
+          <!--
           <div class="details" ng-show="theirInfoHovered">
             <div class="picCover"></div>
             <div class="description">
@@ -206,6 +205,7 @@
               </div>
             </div>
           </div>
+          -->
         </div>
 
         <div id="access" ng-show="ui.isAccess()">
@@ -252,6 +252,7 @@
     </div>
 
     <div class="contact-info" id="my-info" ng-show="ui.isAccess()">
+      <p class="contact-name">You</p>
       <img class="contact-image"
            ng-src='{{ui.myPic}}'>
     </div>
