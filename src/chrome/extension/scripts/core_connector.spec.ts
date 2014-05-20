@@ -104,7 +104,7 @@ describe('core-connector', () => {
   var resumedPolling = false;
 
   it('disconnection cleans up state and retries connect.', (done) => {
-    // This test may take up to 2 seconds (SYNC_TIMEOUT) before completion
+    // This test may take seconds (SYNC_TIMEOUT) before completion
     // due to setTimeout call in disconnect().  If we need to speed up this
     // test we could instead mock out window.setTimeout and verify that it
     // is called with the expected params.
