@@ -504,7 +504,8 @@ module Social {
       }
       this.remember = json.remember;
       // Load all users based on userIds.
-      for (var userId in json.userIds) {
+      for (var i = 0 ; i < json.userIds.length ; ++i) {
+        var userId = json.userIds[i];
         storage.load<Core.SerialUser>(this.getStorePath() + userId)
             .then((json) => {
           this.roster[userId] = new Core.User(this, userId);

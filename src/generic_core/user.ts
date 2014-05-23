@@ -400,7 +400,8 @@ module Core {
       this.name = json.name;
       this.instances_ = {};
       // Load actual instance objects.
-      for (var instanceId in json.instanceIds) {
+      for (var i = 0 ; i < json.instanceIds.length ; ++i) {
+        var instanceId = json.instanceIds[i];
         storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
             .then((json) => {
           this.instances_[instanceId] = new Core.RemoteInstance(this, json);
