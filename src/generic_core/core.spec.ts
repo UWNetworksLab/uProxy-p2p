@@ -18,6 +18,8 @@ describe('Core', () => {
   network.getUser = null;
   var user = <Core.User><any>jasmine.createSpy('user');
   user.getInstance = null;
+  user.notifyUI = () => {};
+  user.getStorePath = () => { return 'fake/userpath'; };
   var alice = new Core.RemoteInstance(user, {
     instanceId: 'instance-alice',
     keyHash:    'fake-hash-alice',
