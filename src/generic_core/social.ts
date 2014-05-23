@@ -113,7 +113,8 @@ module Social {
       this.api.on('onUserProfile', this.delayForLogin(this.handleUserProfile));
       this.api.on('onClientState', this.delayForLogin(this.handleClientState));
       this.api.on('onMessage',     this.delayForLogin(this.handleMessage));
-      this.prepareLocalInstance().then(() => {
+      // Begin loading everything relevant to this Network from local storage.
+      this.syncFromStorage().then(() => {
         this.log('prepared Social.Network.');
         this.notifyUI();
       });
@@ -210,6 +211,23 @@ module Social {
           handler(arg);
         });
       }
+    }
+
+    /**
+     * Check local storage for saved state about this Social.Network. If there
+     * exists actual state, load everything into memory. Otherwise, initialize
+     * to sane defaults.
+     */
+    public syncFromStorage = () : Promise<void> => {
+      var preparedMyself = this.prepareLocalInstance();
+      var preparedRoster = storage.load<SerialNetwork>(this.getStorePath())
+          .then((json) => {
+        this.log('loading previous state.');
+        this.deserialize(json);
+      }).catch((e) => {
+        this.log('freshly initialized.');
+      });
+      return Promise.all([preparedMyself, preparedRoster]);
     }
 
     /**
@@ -354,6 +372,8 @@ module Social {
       }
       this.log('added "' + userId + '" to roster.');
       this.roster[userId] = new Core.User(this, userId);
+      // Remember the new user.
+      this.saveToStorage();
     }
 
     /**
@@ -466,7 +486,8 @@ module Social {
 
     /**
      * Serialize information about this network to be saved to storage or sent
-     * to UI.
+     * to UI. This excludes the local instance information, which is
+     * saved/loaded separately.
      */
     public serialize = () : SerialNetwork => {
       return {
@@ -492,6 +513,13 @@ module Social {
           this.error('could not load user ' + userId);
         });
       }
+    }
+    private saveToStorage = () => {
+      var json = this.serialize();
+      storage.save<SerialNetwork>(this.getStorePath(), json)
+          .then((old) => {
+        this.log('saved to storage.');
+      });
     }
 
     /**
