@@ -339,12 +339,11 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
   }
 
-  start = (path :InstancePath) => {
+  start = (path :InstancePath) : Promise<void> => {
     console.log('Starting to proxy through ' + path);
-    this.sendCommand(uProxy.Command.START_PROXYING, path);
-    // TODO: only do this in response to core successfully returning that socks-to-rtc
-    // is setup, so we don't set chrome's proxy to an invalid server.
-    proxyConfig.startUsingProxy();
+    return this.promiseCommand(uProxy.Command.START_PROXYING, path).then(() => {
+      proxyConfig.startUsingProxy();
+    });
   }
 
   stop = () => {

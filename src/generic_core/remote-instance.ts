@@ -39,6 +39,12 @@ module Core {
     };
     private transport  :Transport;
 
+    // Functions to fulfill or reject the promise returned by start method.
+    // These will only be set while waiting for socks-to-rtc to setup
+    // peer-to-peer connection, otherwise they will be null.
+    private fulfillStartRequest_ = null;
+    private rejectStartRequest_ = null;
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -113,16 +119,18 @@ module Core {
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () : void => {
+    public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
         return;
-      }
-      if (this.access.asProxy) {
+      } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
         throw Error('Invalid proxy interaction!');
+      } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
+        console.warn('Already waiting for proxy to start ' + this.instanceId);
+        return;
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
@@ -146,8 +154,39 @@ module Core {
            // TODO: make network public or change api.
           'peerId': JSON.stringify(localPeerId)
       });
-      this.access.asProxy = true;
-      this.user.notifyUI();
+      return new Promise<void>((F, R) => {
+        // Save fulfill and reject functions, to be invoked after
+        // a signal is received back from socksToRtcClient.
+        this.fulfillStartRequest_ = F;
+        this.rejectStartRequest_ = R;
+      }).then(() => {
+        console.log('Proxy now ready through ' + this.user.userId);
+        this.fulfillStartRequest_ = null;
+        this.rejectStartRequest_ = null;
+        this.access.asProxy = true;
+        this.user.notifyUI();
+      }).catch(() => {
+        console.error('Could not start proxy through ' + this.user.userId);
+        this.fulfillStartRequest_ = null;
+        this.rejectStartRequest_ = null;
+        return Promise.reject();
+      });
+    }
+
+    public handleStartSuccess = () => {
+      if (!this.fulfillStartRequest_) {
+        console.error('No fulfillStartRequest_ for handleStartSuccess');
+        return;
+      }
+      this.fulfillStartRequest_();
+    }
+
+    public handleStartFailure = () => {
+      if (!this.rejectStartRequest_) {
+        console.error('No rejectStartRequest_ for handleStartSuccess');
+        return;
+      }
+      this.rejectStartRequest_();
     }
 
     /**

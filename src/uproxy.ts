@@ -102,7 +102,7 @@ module uProxy {
     modifyConsent(command :ConsentCommand) : void;
 
     // Using peer as a proxy.
-    start(instancePath :InstancePath) : void;
+    start(instancePath :InstancePath) : Promise<void>;
     // TODO: Maybe in the future there will be the capacity to actually proxy
     // thorugh more than one remote instance at the same time. If that occurs,
     // then stop will need to take an :InstancePath as an argument. Otherwise,
