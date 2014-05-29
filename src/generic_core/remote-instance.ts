@@ -59,7 +59,7 @@ module Core {
      * Since the parent User's userId may change, only store the userId.
      */
     public getStorePath = () => {
-      return this.user.getStorePath() + this.instanceId;
+      return this.user.getStorePath() + '/' + this.instanceId;
     }
 
     /**
@@ -172,6 +172,8 @@ module Core {
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
+      this.user.notifyUI();
+      this.saveToStorage();
     }
 
     /**

@@ -92,7 +92,7 @@ module Core {
      * the storage prefix.
      */
     public getStorePath = () => {
-      return this.network.getStorePath() + this.userId + '/';
+      return this.network.getStorePath() + this.userId;
     }
 
     /**
@@ -108,6 +108,7 @@ module Core {
       this.profile = profile;
       this.log('Updating...');
       this.notifyUI();
+      this.saveToStorage();
     }
 
     /**
@@ -282,10 +283,10 @@ module Core {
       }
 
       this.notifyUI();
-      // TODO: Fix ui.syncInstance.
+      // TODO: Make ui.syncInstance actually do the granular-level update to UI.
       ui.syncInstance(this.instances_[instanceId]);
       ui.syncMappings();
-      // TODO: save to storage.
+      this.saveToStorage();
     }
 
     /**
@@ -399,7 +400,8 @@ module Core {
       this.name = json.name;
       this.instances_ = {};
       // Load actual instance objects.
-      for (var instanceId in json.instanceIds) {
+      for (var i = 0 ; i < json.instanceIds.length ; ++i) {
+        var instanceId = json.instanceIds[i];
         storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
             .then((json) => {
           this.instances_[instanceId] = new Core.RemoteInstance(this, json);
@@ -409,6 +411,13 @@ module Core {
       }
       this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
       this.notifyUI();
+    }
+    private saveToStorage = () => {
+      var json = this.serialize();
+      storage.save<SerialUser>(this.getStorePath(), json)
+          .then((old) => {
+        this.log('saved to storage.');
+      });
     }
 
   }  // class User

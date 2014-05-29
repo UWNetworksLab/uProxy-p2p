@@ -9,7 +9,9 @@ describe('Core.User', () => {
   var network = jasmine.createSpyObj('network', [
       'api',
       'sendInstanceHandshake',
-      'getLocalInstanceId'
+      'getLocalInstanceId',
+      'getStorePath',
+      'notifyUI'
   ]);
   network['send'] = () => {};
   var user :Core.User;
