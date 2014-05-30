@@ -360,15 +360,19 @@ describe('Core.RemoteInstance', () => {
       spyOn(socksToRtcClient, 'emit');
     });
 
-    it('can start proxying', () => {
+    it('can start proxying', (done) => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
       spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
-      alice.start();
+      alice.start().then(() => {
+        expect(alice.access.asProxy).toEqual(true);
+        done();
+      });
       expect(socksToRtcClient.emit).toHaveBeenCalledWith('start', {
           'host': '127.0.0.1', 'port': 9999,
           'peerId': JSON.stringify(localPeerId)
       });
-      expect(alice.access.asProxy).toEqual(true);
+      expect(alice.access.asProxy).toEqual(false);
+      alice.handleStartSuccess();
     });
 
     it('can stop proxying', () => {

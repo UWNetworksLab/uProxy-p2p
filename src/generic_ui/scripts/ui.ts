@@ -242,9 +242,10 @@ module UI {
         userId: this.user.userId,
         instanceId: this.instance.instanceId
       };
-      this.core.start(path);
-      this.proxy = this.instance;
-      this._setProxying(true);
+      this.core.start(path).then(() => {
+        this.proxy = this.instance;
+        this._setProxying(true);
+      });
     }
 
     /**

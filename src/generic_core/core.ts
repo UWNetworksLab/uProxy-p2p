@@ -172,7 +172,7 @@ module Core {
    * Access various social networks using the Social API.
    * TODO: write a test for this.
    */
-  export var login = (networkName:string, explicit:boolean=false) : Promise<void> => {
+  export var login = (networkName:string) : Promise<void> => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not login to ' + networkName);
@@ -246,7 +246,7 @@ module Core {
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
    */
-  export var start = (path :InstancePath) => {
+  export var start = (path :InstancePath) : Promise<void> => {
     // Disable any previous proxying session.
     if (proxy) {
       console.log('Existing proxying session! Terminating...');
@@ -257,11 +257,13 @@ module Core {
     if (!remote) {
       console.error('Instance ' + path.instanceId +
                     ' does not exist for proxying.');
-      return;
+      return Promise.reject();
     }
-    remote.start();  // Will send an update to the UI.
-    // Remember this instance as our proxy.
-    proxy = remote;
+    // remote.start will send an update to the UI.
+    return remote.start().then(() => {
+      // Remember this instance as our proxy.
+      proxy = remote;
+    });
   }
 
   /**
@@ -338,6 +340,26 @@ socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
     type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
     data: sharedSignal
   });
+});
+
+socksToRtcClient.on('socksToRtcSuccess', (peerInfo :PeerInfo) => {
+  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
+  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  if (!instance) {
+    console.error('socksToRtcSuccess: RemoteInstance not found.', peerInfo);
+    return;
+  }
+  instance.handleStartSuccess();
+});
+
+socksToRtcClient.on('socksToRtcFailure', (peerInfo :PeerInfo) => {
+  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
+  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  if (!instance) {
+    console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
+    return;
+  }
+  instance.handleStartFailure();
 });
 
 // Make this take an actual peer object type.
@@ -457,15 +479,14 @@ function receiveUpdateDescription(msg) {
 Core.onCommand(uProxy.Command.READY, ui.sync);
 Core.onCommand(uProxy.Command.RESET, Core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-Core.onPromiseCommand(uProxy.Command.LOGIN,
-                      (network) => { return Core.login(network, true); });
+Core.onPromiseCommand(uProxy.Command.LOGIN, Core.login);
 Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
 // Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
 Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
 
-Core.onCommand(uProxy.Command.START_PROXYING, Core.start);
+Core.onPromiseCommand(uProxy.Command.START_PROXYING, Core.start);
 Core.onCommand(uProxy.Command.STOP_PROXYING, Core.stop);
 
 Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
