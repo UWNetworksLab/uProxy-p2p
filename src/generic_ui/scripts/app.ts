@@ -170,7 +170,7 @@ app.directive('uproxyConsentAction', () => {
       restrict: 'E',
       templateUrl: 'templates/consent-action.html',
       link: link,
-      scope: {}
+      scope: true
     }
   });
 
