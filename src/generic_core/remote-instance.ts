@@ -122,15 +122,15 @@ module Core {
     public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
-        return;
+        return Promise.reject();
       } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
-        throw Error('Invalid proxy interaction!');
+        return Promise.reject();
       } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
         console.warn('Already waiting for proxy to start ' + this.instanceId);
-        return;
+        return Promise.reject();
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
@@ -140,7 +140,6 @@ module Core {
       // The localhost host:port will be taken care of by WebRTC. The peerId is
       // utilized to set the local and remote descriptions on the
       // RTCPeerConnection.
-      // TODO: See if we can use promises here.
 
       // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
       // instanceId, userId, and network fields.
