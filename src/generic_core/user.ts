@@ -357,24 +357,32 @@ module Core {
         return;
       }
       // TODO: Fully support multiple instances, with the UI to go with it.
-      // For now, only send instances which currently have a client mapped to
-      // them.
-      var instances = Object.keys(this.instances_).map((instanceId) => {
-        return this.instances_[instanceId].serialize();
-      });
-      console.log(JSON.stringify(Object.keys(this.instances_)));
-      console.log(JSON.stringify(instances));
+      // For now, only send most recent instance which currently has a client
+      // mapped to it.
+      var mostRecentInstance = null;
+      for (var instanceId in this.instances_) {
+        var instance = this.instances_[instanceId];
+        if (!mostRecentInstance ||
+            instance.updateDate > mostRecentInstance.updateDate) {
+          mostRecentInstance = instance;
+        }
+      }
+      if (!mostRecentInstance) {
+        console.error('No instances found for user ' + this.userId);
+        return;
+      }
+
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
       ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
         user: this.profile,
         clients: valuesOf(this.clients),  // These are actually just Statuses.
-        instances: instances
+        instances: [mostRecentInstance.serialize()]
       })
       this.log('Sent myself to UI. \n' +
           JSON.stringify(this.clientToInstanceMap_) + ' with ' +
-          JSON.stringify(instances));
+          JSON.stringify(mostRecentInstance.serialize()));
     }
 
     /**

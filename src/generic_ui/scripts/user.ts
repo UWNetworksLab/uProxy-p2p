@@ -65,13 +65,6 @@ module UI {
                   '\n uproxy-enabled: ' + this.canUProxy);
     }
 
-    /**
-     * Set the instances on this user.
-     */
-    public setInstances = (instances:UI.Instance[]) => {
-      this.instances = instances;
-    }
-
   }  // class UI.User
 
 } // module UI
