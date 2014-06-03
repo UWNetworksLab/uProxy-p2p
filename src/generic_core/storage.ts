@@ -13,9 +13,10 @@
 
 module Core {
 
-  var fStorage :freedom.Storage = freedom['storage']();  // Platform-independent provider.
+  // Platform-independent storage provider.
+  var fStorage :freedom.Storage = freedom['storage']();
 
-  // Set false elsewhre to disable log messages (ie. from jasmine)
+  // Set false elsewhere to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;
 
   /**
@@ -75,6 +76,7 @@ module Core {
      * If the key does not exist, rejects the promise.
      *
      * TODO: Consider using a storage provider that works with JSON.
+     * TODO: Really reject the promise!
      */
     public load = <T>(key :string) : Promise<T> => {
       this.log('loading ' + key);
@@ -91,6 +93,7 @@ module Core {
      * Promise saving a key-value pair to storage, fulfilled with the previous
      * value of |key| if it existed (according to the freedom interface.)
      */
+    // TODO: should not return a value in the promise. Should be Promise<void>
     public save = <T>(key :string, val :T) : Promise<T> => {
       this.log('Saving ' + key + ': ' + val);
       return fStorage.set(key, JSON.stringify(val)).then((prev:string) => {
