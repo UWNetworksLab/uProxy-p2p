@@ -356,9 +356,10 @@ module Core {
         this.log('Not showing UI without profile.');
         return;
       }
-      // TODO: Fully support multiple instances, with the UI to go with it.
-      // For now, only send most recent instance which currently has a client
-      // mapped to it.
+      // TODO: Fully support multiple instances, with the UI to go with it,
+      // or alternatively send all instances to the UI and let the UI pick
+      // which to show.  For now, we only send most recent instance which
+      // currently has a client mapped to it.
       var mostRecentInstance = null;
       for (var instanceId in this.instances_) {
         var instance = this.instances_[instanceId];
@@ -367,10 +368,8 @@ module Core {
           mostRecentInstance = instance;
         }
       }
-      if (!mostRecentInstance) {
-        console.error('No instances found for user ' + this.userId);
-        return;
-      }
+      var instances =
+          mostRecentInstance ? [mostRecentInstance.serialize()] : [];
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
@@ -378,11 +377,11 @@ module Core {
         network: this.network.name,
         user: this.profile,
         clients: valuesOf(this.clients),  // These are actually just Statuses.
-        instances: [mostRecentInstance.serialize()]
+        instances: instances
       })
       this.log('Sent myself to UI. \n' +
           JSON.stringify(this.clientToInstanceMap_) + ' with ' +
-          JSON.stringify(mostRecentInstance.serialize()));
+          JSON.stringify(instances));
     }
 
     /**
