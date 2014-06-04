@@ -2,11 +2,11 @@
 
 [![Build Status](https://magnum.travis-ci.com/uProxy/uProxy.svg?token=HiP4RTme8LSvyrP9kNJq&branch=master)](https://magnum.travis-ci.com/uProxy/uProxy)
 
-[uProxy](uproxy.org) is a broswer extension that lets users share their internet connection.
+[uProxy](uproxy.org) is a browser extension that lets users share their internet connection.
 
 ## Tools
 
-UProxy is built using the following tools:
+uProxy is built using the following tools:
  - [Grunt](http://gruntjs.com/) for build tasks.
  - [TypeScript](http://www.typescriptlang.org/) as the primary language, which
    compiles to JavaScript. This does type checking and has some syntax
@@ -93,7 +93,7 @@ uProxy uses the Grunt build system for its build tasks. Here is a list
 of uProxy's Grunt commands:
 
  *  `setup` - Installs local dependencies and sets up environment
- *  `build` - Builds everything, making stuff in the `build` directory (and runns tests).
+ *  `build` - Builds everything, making stuff in the `build` directory (and runs tests).
    *  `build_chrome` - Build Chrome app and extension
    *  `build_chrome_app` - Build just Chrome app
    *  `build_chrome_extension` - Build just Chrome extension
@@ -145,25 +145,27 @@ Source code
  * `src/generic_core` generic uproxy core-functionality code
  * `src/chrome_app` code specific to the chrome app
  * `src/chrome_extension` code specific to the chrome extension
- * `src/firefox` code specific to filefox
+ * `src/firefox` code specific to firefox
  * `third_party` holds external libraries we depend on that are copied into this repository.
  * `node_modules` dynamically generated npm module dependencies.
  * `scraps` temporary holding for sharing scraps of code.
 
 Dynamically created directories (`grunt clean` should remove them)
  * `build` created by grunt tasks; holds the built code, but none of the code that was compiled.
- * `dist` created by grunt tasks; holds final distirbution versions.
+ * `dist` created by grunt tasks; holds final distribution versions.
  * `test_output` created by grunt tasks; holds test-output files.
  * `.grunt` holds grunt cache stuff
  * `.sass-cache` holds sass cache stuff
 
 ## Glossary of frameworks you need to know about
 
- * AngularJS - a UI framework for html/JS apps.
- * Jasmine - a testing framework for JavaScript.
- * Karma - a test runner or angularjs.
- * Grunt (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building.
- * NPM (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory.
- * Bower (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
- * Travis: a continnuous build system.
- * Coveralls: a continnuous coverage checking system.
+ * [AngularJS](http://angularjs.org) - a UI framework for html/JS apps.
+ * [Jasmine](http://pivotal.github.io/jasmine/) - a testing framework for JavaScript.
+ * Karma - a test runner for angularjs.
+ * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building.
+ * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory.
+ * [Bower](http://bower.io) (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
+ * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
+ * [sass](http://sass-lang.com/) to write css more beautifully.
+ * Travis: a continuous build system.
+ * Coveralls: a continuous coverage checking system.
