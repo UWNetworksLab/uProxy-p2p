@@ -37,6 +37,7 @@ module Core {
       asClient: false,
       asProxy:  false
     };
+    public updateDate = null;
     private transport  :Transport;
 
     // Functions to fulfill or reject the promise returned by start method.
@@ -212,6 +213,7 @@ module Core {
       this.description = data.description;
       this.user.notifyUI();
       this.saveToStorage();
+      this.updateDate = new Date();
     }
 
     /**

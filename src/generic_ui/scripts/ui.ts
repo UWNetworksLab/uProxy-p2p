@@ -421,8 +421,9 @@ module UI {
       }
       user.update(profile);
       user.refreshStatus(payload.clients);
-      user.setInstances(payload.instances);
+      user.instances = payload.instances;
       // Update the 'current instance' of UI if this is the correct user.
+      // TODO: change this for multi instance support
       if (this.user === user) {
         this.instance = user.instances[0];
       }
