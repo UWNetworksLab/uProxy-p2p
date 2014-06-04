@@ -62,33 +62,6 @@ describe('UI.User', () => {
 
   });
 
-  it('sets instances', () => {
-    user.setInstances([{
-      instanceId: 'fakeinstance',
-      description: 'im so fake',
-      consent: {
-        asClient: Consent.ClientState.NONE,
-        asProxy:  Consent.ProxyState.NONE
-      },
-      access: {
-        asClient: false,
-        asProxy: false
-      }
-    }]);
-    expect(user.instances).toEqual([{
-      instanceId: 'fakeinstance',
-      description: 'im so fake',
-      consent: {
-        asClient: Consent.ClientState.NONE,
-        asProxy:  Consent.ProxyState.NONE
-      },
-      access: {
-        asClient: false,
-        asProxy: false
-      }
-    }]);
-  });
-
   // TODO: more specs
 
 });  // UI.User

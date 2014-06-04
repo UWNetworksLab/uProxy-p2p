@@ -356,14 +356,21 @@ module Core {
         this.log('Not showing UI without profile.');
         return;
       }
-      // TODO: Fully support multiple instances, with the UI to go with it.
-      // For now, only send instances which currently have a client mapped to
-      // them.
-      var instances = Object.keys(this.instances_).map((instanceId) => {
-        return this.instances_[instanceId].serialize();
-      });
-      console.log(JSON.stringify(Object.keys(this.instances_)));
-      console.log(JSON.stringify(instances));
+      // TODO: Fully support multiple instances, with the UI to go with it,
+      // or alternatively send all instances to the UI and let the UI pick
+      // which to show.  For now, we only send most recent instance which
+      // currently has a client mapped to it.
+      var mostRecentInstance = null;
+      for (var instanceId in this.instances_) {
+        var instance = this.instances_[instanceId];
+        if (!mostRecentInstance ||
+            instance.updateDate > mostRecentInstance.updateDate) {
+          mostRecentInstance = instance;
+        }
+      }
+      var instances =
+          mostRecentInstance ? [mostRecentInstance.serialize()] : [];
+
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
       ui.syncUser(<UI.UserMessage>{
