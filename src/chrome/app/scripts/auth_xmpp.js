@@ -1,4 +1,4 @@
-var CREDENTIALS_KEY = "xmpp-credentials-mvav24n24ovp48"
+var CREDENTIALS_KEY = "xmpp-credentials-mvav24n24ovp48";
 
 function AuthXmpp(credCallback, errorCallback) {
   this.credentialsCallback = credCallback;

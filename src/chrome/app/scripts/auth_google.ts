@@ -1,7 +1,7 @@
 /// <reference path='../../../interfaces/authentication-manager.d.ts' />
 
 var GOOGLE_TOKENINFO_URL =
-  'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
+    'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
 
 // Client ID associated with our redirect URL from Google Developers Console.
 var CLIENT_ID =
@@ -23,11 +23,11 @@ class AuthGoogle implements AuthenticationManager {
     this.logout().then(() => {
       var googleOAuth2Url = 'https://accounts.google.com/o/oauth2/auth?' +
         'response_type=token' +
-        '&redirect_uri=' + chrome.identity.getRedirectURL() +
-        '&client_id=' + CLIENT_ID +
-        // scopes are "email" and "https://www.googleapis.com/auth/googletalk"
-        // separated by a space (%20).
-        '&scope=email%20https://www.googleapis.com/auth/googletalk';
+        '&redirect_uri=' + encodeURIComponent(chrome.identity.getRedirectURL()) +
+        '&client_id=' + encodeURIComponent(CLIENT_ID) +
+        // Scopes are space-separated.
+        '&scope=' + encodeURIComponent(
+            'email https://www.googleapis.com/auth/googletalk');
       console.log('googleOAuth2Url: ' + googleOAuth2Url);
       chrome.identity.launchWebAuthFlow(
           {url: googleOAuth2Url, interactive: true},
@@ -78,7 +78,7 @@ class AuthGoogle implements AuthenticationManager {
     xhr.addEventListener('error', (evt) => {
       this.errorCallback('Error occurred while validating Google oAuth token');
     }, false);
-    xhr.open('get', GOOGLE_TOKENINFO_URL + token, true);
+    xhr.open('get', GOOGLE_TOKENINFO_URL + encodeURIComponent(token), true);
     xhr.send();
   }
 
