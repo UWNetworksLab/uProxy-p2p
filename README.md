@@ -82,7 +82,7 @@ These are the steps to try uProxy in the Chrome browser.
 
 To test proxying without using multiple computers, you will need to launch 2 separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
 ```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta```
-where DIR_NAME is set to the name of a new directory'
+where DIR_NAME is set to the name of a new directory.  You may re-use your normal instance of Chrome if you wish to only run this command once.
 
 In each instance of Chrome, load the uProxy app and extension.  Then in each instance, sign into Google with gmail accounts that have already added each other as contacts.  After sign in both contacts should be visible on each others roster without changing the default filters.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's App and trace should appear indicating the flow of traffic.
 
