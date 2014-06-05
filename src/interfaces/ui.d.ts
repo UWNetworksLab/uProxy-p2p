@@ -6,6 +6,7 @@
  * contain attributes / functionality not relevant to the UI.)
  */
 /// <reference path='user.d.ts' />
+/// <reference path='../generic_ui/scripts/ui.ts' />
 /// <reference path='instance.d.ts' />
 /// <reference path='lib/angular.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
@@ -51,6 +52,14 @@ declare module UI {
     description   :string;
     consent       :ConsentState;
     access        :AccessState;
+  }
+
+  /**
+   * Data about a currently proxying server or client.
+   */
+  export interface CurrentProxy {
+    instance :Instance;
+    user :UI.User;
   }
 
 }  // module UI
