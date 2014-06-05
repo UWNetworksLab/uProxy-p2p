@@ -15,10 +15,10 @@ function AuthFacebook(credCallback, errorCallback) {
 
 AuthFacebook.prototype.login = function(interactive) {
   chrome.identity.launchWebAuthFlow({
-    url: 'https://www.facebook.com/dialog/oauth?' + 
-      'client_id=' + FACEBOOK_APP_ID +
-      '&redirect_uri=' + FACEBOOK_REDIRECT_URI + 
-      '&scope=' + FACEBOOK_OAUTH_SCOPES +
+    url: 'https://www.facebook.com/dialog/oauth?' +
+      'client_id=' + encodeURIComponent(FACEBOOK_APP_ID) +
+      '&redirect_uri=' + encodeURIComponent(FACEBOOK_REDIRECT_URI) +
+      '&scope=' + encodeURIComponent(FACEBOOK_OAUTH_SCOPES) +
       '&response_type=token',
     interactive: interactive
   }, (function(responseUrl) {
