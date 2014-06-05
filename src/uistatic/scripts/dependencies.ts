@@ -118,9 +118,11 @@ class MockCore implements uProxy.CoreAPI {
   // Fake starting and stopping proxying sessions.
   start = (path) : Promise<void> => {
     console.log('Starting to proxy through ', path);
-    this.currentProxy.instance = model.networks[path.network]
-        .roster[path.userId]
-        .instances[0];
+    var user :UI.User = model.networks[path.network].roster[path.userId];
+    this.currentProxy = {
+      instance: user.instances[0],
+      user: user
+    };
     console.log(this.currentProxy);
     this.currentProxy.instance.access.asProxy = true;
     return Promise.resolve();
