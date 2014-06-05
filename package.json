@@ -36,7 +36,8 @@
     "minimatch": "^0.2.12",
     "rimraf": "^2.2.6",
     "socks-rtc": "^0.1.4",
-    "typescript": "^0.9.7"
+    "typescript": "^0.9.7",
+    "uproxy-build-tools": "~0.0.5"
   },
   "scripts": {
     "test": "grunt test --verbose"
