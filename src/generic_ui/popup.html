@@ -211,9 +211,7 @@
         </div>
 
         <div id="access" ng-show="ui.isAccess()">
-          <div id="internets" class="bg-deco" ng-class="{
-              active: 'running'==ui.instance.status.client ||
-                      'running'==ui.instance.status.proxy}"
+          <div id="internets" class="bg-deco"
               ng-hide="ui.chatView"></div>
           <div class="bg-deco" id="path-left"
                ng-hide="ui.chatView"
@@ -262,32 +260,20 @@
     </div>
 
     <div id="status">
-      <span id="status-proxy" ng-show="ui.proxy" ng-cloak>
+      <span id="status-proxy" ng-show="ui.currentProxy" ng-cloak>
 
-        <div ng-hide="'off'==ui.proxy.status.proxy">
+        <div>
           <button id="stop-btn" class="icon-btn"
               ng-mouseenter="stopTooltip=true"
               ng-mouseleave="stopTooltip=false"
-              ng-click="stopAccess()">
+              ng-click="ui.stopProxying()">
           </button>
-          {{ui.proxy.rosterInfo.name}} - Proxying
-        </div>
-
-        <div ng-show="'off'==ui.proxy.status.proxy">
-          <button id="start-btn" class="icon-btn"
-              ng-mouseenter="startTooltip=true"
-              ng-mouseleave="startTooltip=false"
-              ng-click="startAccess(ui.proxy)">
-          </button>
-          {{ui.proxy.rosterInfo.name}} - Not Proxying
+          Proxying through {{ui.currentProxy.user.name}}
         </div>
 
         <div class="tool" id="status-tooltips">
           <div class="tip" ng-show="stopTooltip">
             Stop proxying
-          </div>
-          <div class="tip" ng-show="startTooltip">
-            Re-activate proxying.
           </div>
         </div>
       </span>

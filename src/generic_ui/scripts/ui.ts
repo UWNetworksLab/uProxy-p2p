@@ -95,7 +95,8 @@ module UI {
     public network :string = 'google';
     public user :User = null;
     public instance :UI.Instance = null;
-    public proxy :UI.Instance = null;  // If we are proxying, keep track of the instance.
+    // If we are proxying, keep track of the instance and user.
+    public currentProxy :UI.CurrentProxy = null;
 
     notifications = 0;
     advancedOptions = false;
@@ -105,7 +106,6 @@ module UI {
     myName = '';
     myPic = null;
 
-    isProxying = false;  // Whether we are proxying through someone.
     accessIds = 0;  // How many people are proxying through us.
 
     // When the description changes while the text field loses focus, it
@@ -243,7 +243,10 @@ module UI {
         instanceId: this.instance.instanceId
       };
       this.core.start(path).then(() => {
-        this.proxy = this.instance;
+        this.currentProxy = {
+          instance: this.instance,
+          user: this.user
+        };
         this._setProxying(true);
       });
     }
@@ -258,11 +261,11 @@ module UI {
         return;
       }
       this._setProxying(false);
+      this.currentProxy = null;
       this.core.stop();
     }
 
     _setProxying = (isProxying : boolean) => {
-      this.isProxying = isProxying;
       if (isProxying) {
         this.notify.setIcon('uproxy-19-p.png');
       } else {

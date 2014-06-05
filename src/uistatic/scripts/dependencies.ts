@@ -58,7 +58,7 @@ function generateFakeUserMessage() : UI.UserMessage {
 class MockCore implements uProxy.CoreAPI {
 
   public status :StatusObject;
-  private proxy :UI.Instance = null;
+  private currentProxy :UI.CurrentProxy = null;
 
   constructor() {
     this.status = { connected: true };
@@ -118,23 +118,22 @@ class MockCore implements uProxy.CoreAPI {
   // Fake starting and stopping proxying sessions.
   start = (path) : Promise<void> => {
     console.log('Starting to proxy through ', path);
-    // TODO: Do a better way of accessing instances.
-    this.proxy = model.networks[path.network]
+    this.currentProxy.instance = model.networks[path.network]
         .roster[path.userId]
         .instances[0];
-    console.log(this.proxy);
-    this.proxy.access.asProxy = true;
+    console.log(this.currentProxy);
+    this.currentProxy.instance.access.asProxy = true;
     return Promise.resolve();
   }
 
   stop = () => {
-    if (!this.proxy) {
+    if (!this.currentProxy) {
       console.warn('No proxy to stop for.');
       return;
     }
-    console.log('Stopping proxy through ', this.proxy);
-    this.proxy.access.asProxy = false;
-    this.proxy = null;
+    console.log('Stopping proxy through ', this.currentProxy);
+    this.currentProxy.instance.access.asProxy = false;
+    this.currentProxy = null;
   }
 
   updateDescription(description) {
