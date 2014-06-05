@@ -96,7 +96,7 @@ module UI {
     public user :User = null;
     public instance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
-    public currentProxy :UI.CurrentProxy = null;
+    public currentProxyServer :UI.CurrentProxy = null;
 
     notifications = 0;
     advancedOptions = false;
@@ -243,7 +243,7 @@ module UI {
         instanceId: this.instance.instanceId
       };
       this.core.start(path).then(() => {
-        this.currentProxy = {
+        this.currentProxyServer = {
           instance: this.instance,
           user: this.user
         };
@@ -261,7 +261,7 @@ module UI {
         return;
       }
       this._setProxying(false);
-      this.currentProxy = null;
+      this.currentProxyServer = null;
       this.core.stop();
     }
 

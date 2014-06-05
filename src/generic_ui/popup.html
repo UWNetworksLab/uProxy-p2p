@@ -260,7 +260,7 @@
     </div>
 
     <div id="status">
-      <span id="status-proxy" ng-show="ui.currentProxy" ng-cloak>
+      <span id="status-proxy" ng-show="ui.currentProxyServer" ng-cloak>
 
         <div>
           <button id="stop-btn" class="icon-btn"
@@ -268,7 +268,7 @@
               ng-mouseleave="stopTooltip=false"
               ng-click="ui.stopProxying()">
           </button>
-          Proxying through {{ui.currentProxy.user.name}}
+          Proxying through {{ui.currentProxyServer.user.name}}
         </div>
 
         <div class="tool" id="status-tooltips">

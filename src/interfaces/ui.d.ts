@@ -54,6 +54,9 @@ declare module UI {
     access        :AccessState;
   }
 
+  /**
+   * Data about a currently proxying server or client.
+   */
   export interface CurrentProxy {
     instance :Instance;
     user :UI.User;
