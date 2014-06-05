@@ -70,7 +70,7 @@ module Core {
      * full UserProfile.
      */
     constructor(public network :Social.Network,
-                public userId   :string) {
+                public userId  :string) {
       console.log('New user: ' + userId);
       this.name = 'pending';
       this.profile = {
@@ -369,7 +369,7 @@ module Core {
         }
       }
       var instances =
-          mostRecentInstance ? [mostRecentInstance.serialize()] : [];
+          mostRecentInstance ? [mostRecentInstance.serializeForUI()] : [];
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.

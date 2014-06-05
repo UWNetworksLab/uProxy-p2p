@@ -48,10 +48,11 @@ declare module UI {
    * TODO: Maybe turn this into an actual class. We'll see.
    */
   export interface Instance {
-    instanceId    :string;
-    description   :string;
-    consent       :ConsentState;
-    access        :AccessState;
+    instanceId           :string;
+    description          :string;
+    consent              :ConsentState;
+    access               :AccessState;
+    isCurrentProxyClient :boolean;
   }
 
   /**

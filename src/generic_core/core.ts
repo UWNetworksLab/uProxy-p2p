@@ -389,6 +389,28 @@ rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
   });
 });
 
+function updateClientProxyConnection(localPeerIdString :string,
+    isConnected :boolean) {
+  var localPeerId :LocalPeerId = JSON.parse(localPeerIdString);
+  var instance = Core.getInstance(localPeerId.clientInstancePath);
+  if (!instance) {
+    console.error('updateClientProxyConnection: RemoteInstance not found.',
+        localPeerIdString, isConnected);
+    return;
+  }
+  instance.updateClientProxyConnection(isConnected);
+};
+
+rtcToNetServer.on('rtcToNetConnectionEstablished',
+    (localPeerIdString :string) => {
+  updateClientProxyConnection(localPeerIdString, true);
+});
+
+rtcToNetServer.on('rtcToNetConnectionClosed',
+    (localPeerIdString :string) => {
+  updateClientProxyConnection(localPeerIdString, false);
+});
+
 // TODO: move this into User, or some sort of proxy service object.
 /*
 function handleNewlyActiveClient(msg) {

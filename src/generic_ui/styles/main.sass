@@ -47,20 +47,20 @@ ul
   list-style: none
   padding: 0
 
-// Prettier scrollbars.
-::-webkit-scrollbar
-  width: 6px
-  &:hover
-    width: 10px
-::-webkit-scrollbar-track
-  background-color: #f9f9f9
-  &:window-inactive
-    background-color: #888
-::-webkit-scrollbar-thumb
-  background-color: #aaa
-  height: 114.589px
-  &:hover
-    background-color: #bbb
+// Prettier scrollbars, removed for now because they are too light to see.
+//::-webkit-scrollbar
+//  width: 6px
+//  &:hover
+//    width: 10px
+//::-webkit-scrollbar-track
+//  background-color: #f9f9f9
+//  &:window-inactive
+//    background-color: #888
+//::-webkit-scrollbar-thumb
+//  background-color: #aaa
+//  height: 114.589px
+//  &:hover
+//    background-color: #bbb
 
 // Primary popup UI boundary.
 #uproxy-popup
@@ -401,6 +401,8 @@ input[type=text]
   background-image: url('../icons/uproxy-19.png')
 #stop-btn
   background-image: url('../icons/stop.png')
+  margin-bottom: 0
+  width: 21px
 
 // --------------------------- Primary view ------------------------------------
 #main-view
@@ -847,16 +849,16 @@ img.c-icon
   width: 100%
   font-size: $fontSize * 0.8
   color: #888
-  padding: 8px 20px
+  padding: 0px 20px
   cursor: default
   border-top: 1px solid #eee
   background-color: #fff
   text-align: center
+  height: 50px
+  overflow-y: scroll
+  overflow-x: hidden
 
-#status-proxy
-  padding-bottom: 12px
-  margin-bottom: 16px
-  border-bottom: 1px solid #eee
+#status-proxy-server
   color: #333
   text-align: left
   @include smooth-slow
@@ -864,6 +866,12 @@ img.c-icon
     @include un-ng-hide
     opacity: 0
     height: 0
+
+#status-proxy-clients
+  text-align: left
+  color: #333
+  ul
+    -webkit-margin-before: 0.5em
 
 #status-tooltips
   position: absolute

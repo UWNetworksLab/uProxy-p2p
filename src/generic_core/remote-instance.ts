@@ -46,6 +46,10 @@ module Core {
     private fulfillStartRequest_ = null;
     private rejectStartRequest_ = null;
 
+    // Set to true iff RemoteInstance is currently proxying through the
+    // local instance of uProxy.
+    private isCurrentProxyClient_ :boolean = false;
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -187,6 +191,11 @@ module Core {
         return;
       }
       this.rejectStartRequest_();
+    }
+
+    public updateClientProxyConnection = (isConnected :boolean) => {
+      this.isCurrentProxyClient_ = isConnected;
+      this.user.notifyUI();
     }
 
     /**
@@ -339,6 +348,21 @@ module Core {
       this.access = json.access
     }
 
+    /**
+     * Serialize RemoteInstance for the UI.  This includes fields like
+     * isCurrentProxyClient that we don't want to save to storage.
+     */
+    public serializeForUI = () : SerialRemoteInstanceForUI => {
+      return {
+        instanceId:           this.instanceId,
+        description:          this.description,
+        keyHash:              this.keyHash,
+        consent:              this.consent,
+        access:               this.access,
+        isCurrentProxyClient: this.isCurrentProxyClient_
+      }
+    }
+
     public getLocalPeerId = (isLocalServer :boolean)
         : LocalPeerId => {
       // Construct local and remote instance paths.
@@ -375,6 +399,13 @@ module Core {
     keyHash :string;
     consent :ConsentState;
     access  :AccessState;
+  }
+
+  export interface SerialRemoteInstanceForUI extends Instance {
+    keyHash              :string;
+    consent              :ConsentState;
+    access               :AccessState;
+    isCurrentProxyClient :boolean;
   }
 
   // TODO: Implement obfuscation.
