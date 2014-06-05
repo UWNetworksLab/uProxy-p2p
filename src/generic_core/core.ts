@@ -402,12 +402,12 @@ function updateClientProxyConnection(localPeerIdString :string,
 };
 
 rtcToNetServer.on('rtcToNetConnectionEstablished',
-  (localPeerIdString :string) => {
+    (localPeerIdString :string) => {
   updateClientProxyConnection(localPeerIdString, true);
 });
 
 rtcToNetServer.on('rtcToNetConnectionClosed',
-  (localPeerIdString :string) => {
+    (localPeerIdString :string) => {
   updateClientProxyConnection(localPeerIdString, false);
 });
 
