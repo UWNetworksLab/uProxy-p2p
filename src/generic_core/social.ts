@@ -26,7 +26,16 @@
 
 module Social {
 
+  // PREFIX is the string prefix indicating which social providers in the
+  // freedom manifest we want to treat as a social provider for uProxy.
   var PREFIX:string = 'SOCIAL-';
+
+  // Global mapping of social networks (without prefix) to the actual Network
+  // class to interact with that social network.
+  //
+  // TODO: rather than make this global, this should be a parameter of the core.
+  // This simplified Social to being a SocialNetwork and removes the need for
+  // this module. `initializeNetworks` becomes part of the core constructor.
   export var networks:{[name:string]:Network} = {}
 
   /**
@@ -80,9 +89,13 @@ module Social {
 
     // TODO: Review visibility of these attributes and the interface.
     public roster    :{[userId:string]:Core.User};
+    // TODO: give real typing to metdata.
     public metadata  :any;  // Network name, description, icon, etc.
 
+    // TODO: rename api to freedomApi.
     private api      :freedom.Social;
+    // TODO: give real typing to provider. Ask Freedom not to use overloaded
+    // types.
     private provider :any;  // Special freedom object which is both a function
                             // and object... cannot typescript.
 
@@ -237,7 +250,6 @@ module Social {
      */
     public prepareLocalInstance = () : Promise<void> => {
       if (this.myInstance) {
-        // return Promise.resolve(this.myInstance);
         return Promise.resolve();
       }
       var key = this.getStorePath() + this.SaveKeys.ME;
@@ -536,6 +548,7 @@ module Social {
 
   }  // class Social.Network
 
+  // TODO: rename `SerializedNetwork`.
   export interface SerialNetwork {
     name     :string;
     remember :boolean;

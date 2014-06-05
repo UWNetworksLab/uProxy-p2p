@@ -106,7 +106,7 @@ class UIConnector implements uProxy.UIAPI {
 
   public refreshDOM = () => {
     console.error('Cannot refresh DOM from the Core.');
-  };
+  }
 
 }
 var ui = new UIConnector();
@@ -114,8 +114,8 @@ var ui = new UIConnector();
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updaes to the UI, and handles commands from the UI.
- * TODO: Convert this into a class, actually implementing the CoreAPI.
  */
+// TODO: Convert this into a class, actually implementing the CoreAPI.
 module Core {
 
   /**

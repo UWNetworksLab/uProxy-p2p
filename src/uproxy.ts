@@ -1,10 +1,11 @@
 /**
  * uproxy.ts
  *
- * This file defines the base uProxy module. It contains Enums and other code
- * which must be accessible from all parts of uProxy at runtime, especially
- * between the Core and the UI.
+ * This file defines the base uProxy module. It contains Enums and interfaces
+ * which are relevant to all parts of uProxy, notably for communication between
+ * the Core and the UI.
  */
+
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
@@ -14,7 +15,7 @@ module uProxy {
   // --- Communications ---
 
   /**
-   * Commands are sent from the UI to the Core, always due to a user interaction.
+   * Commands are sent from the UI to the Core due to a user interaction.
    * This fully describes the set of commands which Core must respond to.
    */
   export enum Command {
@@ -27,7 +28,7 @@ module uProxy {
     INVITE,
     CHANGE_OPTION,
     UPDATE_DESCRIPTION,
-    DISMISS_NOTIFICATION,  // TODO: replace with some better notifications pipeline.
+    DISMISS_NOTIFICATION,  // TODO: replace a better notifications pipeline.
     START_PROXYING,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
@@ -54,6 +55,10 @@ module uProxy {
    * Messages are sent from Core to a remote Core - they are peer communications
    * between uProxy users. This enum describes the possible Message types.
    */
+  // TODO: move into generic_core.
+  // TODO: rename to PeerMessageType & PeerMessage.
+  // TODO: consider every message having every field, and that MessageType is
+  // no longer needed. This would use fewer larger messages.
   export enum MessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
     CONSENT,
@@ -65,16 +70,19 @@ module uProxy {
     SIGNAL_FROM_SERVER_PEER,
   }
 
-  // Message should be the boundary for JSON parse / stringify.
+  // Messages to the peer form the boundary for JSON parse / stringify.
   export interface Message {
     type :MessageType;
+    // TODO: Add a comment to explain the types that data can take and their
+    // relationship to MessageType.
     data :Object;
   }
 
   /**
    * ConsentCommands are sent from the UI to the Core, to modify the consent of
-   * a :RemoteInstance in the local client. (This is not sent on the wire).
-   * This should only be associated with the Command.MODIFY_CONSENT command.
+   * a :RemoteInstance in the local client. (This is not sent on the wire to
+   * the peer). This should only be passed along with a `Command.MODIFY_CONSENT`
+   * command.
    */
   export interface ConsentCommand {
     // TODO: Replace these 3 with InstancePath.
@@ -85,12 +93,13 @@ module uProxy {
   // --- Core <--> UI Interfaces ---
 
   /**
-   * The primary interface for the uProxy Core.
+   * The primary interface to the uProxy Core.
    *
    * This will be enforced for both the actual core implementation, as well as
    * abstraction layers such as the Chrome Extension, so that all components
    * which speak to the core benefit from this consistency.
    */
+  // TODO: Rename CoreApi.
   export interface CoreAPI {
 
     // Clears all state and storage.
@@ -103,13 +112,10 @@ module uProxy {
 
     // Using peer as a proxy.
     start(instancePath :InstancePath) : Promise<void>;
-    // TODO: Maybe in the future there will be the capacity to actually proxy
-    // thorugh more than one remote instance at the same time. If that occurs,
-    // then stop will need to take an :InstancePath as an argument. Otherwise,
-    // nothing is necessary, since the instance is implied.
     stop () : void;
 
     updateDescription(description :string) : void;
+    // TODO: rename toggle-option and/or replace with real configuration system.
     changeOption(option :string) : void;
 
     // TODO: improve the notifications feature
@@ -118,6 +124,8 @@ module uProxy {
     login(network :string) : Promise<void>;
     logout(network :string) : void;
 
+    // TODO: use Event instead of attaching manual handler. This allows event
+    // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
   }
 
@@ -125,14 +133,15 @@ module uProxy {
    * The primary interface for the uProxy User Interface.
    * Currently, the UI update message types are specified in ui.d.ts.
    */
+  // TODO: rename UiApi.
   export interface UIAPI {
 
     // Global sync of all state.
 
-    sync(state? : string) : void;
+    sync(state?:string) : void;
     update(type:Update, data?:any) : void;
 
-    syncUser(UserMessage :UI.UserMessage) : void;
+    syncUser(UserMessage:UI.UserMessage) : void;
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
@@ -143,7 +152,9 @@ module uProxy {
     // updateMappings() : void;
     // updateIdentity(identity) : void;
     // addNotification() : void;
-    refreshDOM :Function;
+
+    // TODO: explain why this is needed. Seems like a hack to refresh the dom.
+    refreshDOM() : void;
 
   }
 
@@ -153,14 +164,23 @@ module uProxy {
     setTurnServers(servers:string[]):void;
   }
 
+  // PromiseCommand is used when the UI makes requests to the Core which
+  // require a promise to be returned. Because many requests can be made, the
+  // UI needs to distinguish between them. The `promiseId` allows keeping track
+  // of which command was issued. e.g. consider the user clicking to login to
+  // multiple networks; we want the UI to know when each login completes.
+  //
+  // TODO: when freedom supports multiple runtime enviroments, this code should
+  // be able to be removed.
   export interface PromiseCommand {
     data ?:Object;  // Usually JSON.
-    promiseId :number;  // Values >= 1 means success/error should be returned.
+    promiseId :number;  // Values <= 1 means success/error should be returned.
   }
 
 }  // module uProxy
 
-
+// We use this to map Freedom's untyped social network structures into a real
+// type-script enum & interface.
 module UProxyClient {
   // Status of a client; used for both this client (in which case it will be
   // either ONLINE or OFFLINE)
@@ -186,6 +206,7 @@ module UProxyClient {
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running
 // freedom.
+// TODO: this is chrome-specific. Move to the right place.
 interface StatusObject {
   connected :boolean;
 }

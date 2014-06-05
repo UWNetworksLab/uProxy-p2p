@@ -52,6 +52,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
 
+  // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
@@ -199,7 +200,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * interaction.
    */
   public sendCommand = (command :uProxy.Command, data ?:any) => {
-    var payload :ChromeGlue.Payload= {
+    var payload :ChromeGlue.Payload = {
       cmd: 'emit',
       type: command,
       data: data,
