@@ -408,7 +408,6 @@ rtcToNetServer.on('rtcToNetConnectionEstablished',
 
 rtcToNetServer.on('rtcToNetConnectionClosed',
   (localPeerIdString :string) => {
-  console.log('got rtcToNetConnectionClosed event!!!');
   updateClientProxyConnection(localPeerIdString, false);
 });
 
