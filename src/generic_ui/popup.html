@@ -260,8 +260,7 @@
     </div>
 
     <div id="status">
-      <span id="status-proxy" ng-show="ui.currentProxyServer" ng-cloak>
-
+      <span id="status-proxy-server" ng-show="ui.currentProxyServer" ng-cloak>
         <div>
           <button id="stop-btn" class="icon-btn"
               ng-mouseenter="stopTooltip=true"
@@ -270,12 +269,20 @@
           </button>
           Proxying through {{ui.currentProxyServer.user.name}}
         </div>
-
         <div class="tool" id="status-tooltips">
           <div class="tip" ng-show="stopTooltip">
             Stop proxying
           </div>
         </div>
+      </span>
+
+      <span id="status-proxy-clients">
+        <ul>
+          <li ng-repeat="user in model.roster"
+              ng-show="ui.isCurrentProxyClient(user)">
+              {{user.name}} is proxying through you.
+          </li>
+        </ul>
       </span>
 
       <span id="status-network">

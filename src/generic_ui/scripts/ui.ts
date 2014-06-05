@@ -443,6 +443,15 @@ module UI {
         () => { console.warn('login failed for ' + network) });
     }
 
+    public isCurrentProxyClient = (user: User) : boolean => {
+      for (var i = 0; i < user.instances.length; ++i) {
+        if (user.instances[i].isCurrentProxyClient) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     /*
      * Make sure counters and UI-only state holders correctly reflect the model.
      * If |previousPatch| is provided, the search is optimized to only sync the
