@@ -1,4 +1,34 @@
 module ArrayBuffers {
+  // Equality by byte-value comparison.
+  export function byteEquality(b1 :ArrayBuffer, b2 :ArrayBuffer)
+      : boolean {
+    var a1 = new Uint8Array(b1);
+    var a2 = new Uint8Array(b2);
+    if(a1.byteLength !== a2.byteLength) return false;
+    for(var i:number = 0; i < a1.byteLength; ++i) {
+      if(a1[i] !== a2[i]) return false;
+    }
+    return true;
+  }
+
+  // Concat `ArrayBuffer`s into a single ArrayBuffer. If size is given, then the
+  // destination array buffer is of the given size. If size is not given or
+  // zero, the  size of all buffers is summed to make the new array buffer.
+  export function concat(buffers:ArrayBuffer[], size?:number)
+      : ArrayBuffer {
+    if(!size) {
+      size = 0;
+      buffers.forEach(a => { size += a.byteLength });
+    }
+    var accumulatorBuffer = new Uint8Array(size);
+    var location = 0;
+    buffers.forEach(a => {
+      accumulatorBuffer.set(new Uint8Array(a), location);
+      location += a.byteLength;
+    });
+    return accumulatorBuffer.buffer;
+  }
+
   /**
    * Converts an ArrayBuffer to a string.
    *

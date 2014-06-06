@@ -1,3 +1,4 @@
+/// <reference path='arraybuffers.ts' />
 /// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
 /// <reference path='arraybuffers.d.ts' />
 
@@ -22,37 +23,26 @@ module ArrayBuffers {
   var emptyString = '';
   var emptyHexString = '';
 
-  // Aux helper function for buffer equality by byte-value comparison.
-  function arrayBufferEquality(b1 :ArrayBuffer, b2 :ArrayBuffer) {
-    var a1 = new Uint8Array(b1);
-    var a2 = new Uint8Array(b2);
-    if(a1.byteLength !== a2.byteLength) return false;
-    for(var i:number = 0; i < a1.byteLength; ++i) {
-      if(a1[i] !== a2[i]) return false;
-    }
-    return true;
-  }
-
   describe("ArrayBuffers <-> Hex Strings", function() {
     it("arrayBufferEquality: emptyArray == emptyArray", function() {
-      expect(arrayBufferEquality(emptyArray, emptyArray)).toBe(true);
+      expect(ArrayBuffers.byteEquality(emptyArray, emptyArray)).toBe(true);
     });
     it("arrayBufferEquality: array1 == array1", function() {
-      expect(arrayBufferEquality(array1, array1)).toBe(true);
+      expect(ArrayBuffers.byteEquality(array1, array1)).toBe(true);
     });
     it("arrayBufferEquality: array1 != emptyArray", function() {
-      expect(arrayBufferEquality(array1, emptyArray)).toBe(false);
+      expect(ArrayBuffers.byteEquality(array1, emptyArray)).toBe(false);
     });
     it("arrayBufferEquality: array1 != array2", function() {
-      expect(arrayBufferEquality(array1, array2)).toBe(false);
+      expect(ArrayBuffers.byteEquality(array1, array2)).toBe(false);
     });
 
     it("Empty Buffer -> Empty Hex", function() {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyHexString);
     });
     it("Empty Hex -> Empty Buffer", function() {
-      expect(arrayBufferEquality(hexStringToArrayBuffer(emptyHexString),
-                                 emptyArray)).toBe(true);
+      expect(ArrayBuffers.byteEquality(hexStringToArrayBuffer(emptyHexString),
+                                       emptyArray)).toBe(true);
     });
 
     it("Buffer -> Hex", function() {
@@ -81,8 +71,8 @@ module ArrayBuffers {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyString);
     });
     it("Empty Hex -> Empty Buffer", function() {
-      expect(arrayBufferEquality(hexStringToArrayBuffer(emptyString),
-                                 emptyArray)).toBe(true);
+      expect(ArrayBuffers.byteEquality(hexStringToArrayBuffer(emptyString),
+                                       emptyArray)).toBe(true);
     });
 
     it("Buffer -> String", function() {
