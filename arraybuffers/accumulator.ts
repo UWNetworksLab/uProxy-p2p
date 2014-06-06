@@ -18,8 +18,8 @@ module ArrayBuffers {
 
     // Set the minimal size. Returns true if it causes the buffer handler to be
     // called because the current size is bigger than the new minimal size.
-    public setMinSize = (newMinSize :number) : number => {
-      this.minSize_ = newMinSize;
+    public setMinSize = (minSize :number) : number => {
+      this.minSize_ = minSize;
       return this.maybeBigEnoughNow();
     }
 
