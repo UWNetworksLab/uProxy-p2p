@@ -4,7 +4,7 @@ module Handler {
   // Queue up stuff while the handler is set to null. When set to not null
   // handle all the stuff that got queued.
   // (TODO: a kind of opposite to a promise, can probably be extended)
-  class Queue<T> {
+  export class Queue<T> {
     // the Queue of things to handle.
     private queue_ :T[] = [];
 
@@ -26,8 +26,8 @@ module Handler {
     private rejectFn_ : (e:Error) => void = null;
 
     // For measuring accumulation of things to handle.
-    private measure :number = 0;
-    private accumulate :NumberAccumulator<T>;
+    // private measure_ :number = 0;
+    // private accumulate_ :NumberAccumulator<T>;
 
     constructor() {}
 
@@ -37,19 +37,20 @@ module Handler {
     // If you have an unfulfilled promise, calling setHandler rejects the old
     // promise.
     public setHandler = (handler:(T) => void) : void => {
-      if (rejectFn_) {
+      if (this.rejectFn_) {
         // Question: How efficient is new Error? Maybe best to have rejection
         // with error.
-        rejectFn_(new Error('Cancelled by a call to setHandler'));
-        rejectFn_ = null;
+        this.rejectFn_(new Error('Cancelled by a call to setHandler'));
+        this.rejectFn_ = null;
       }
       this.handler_ = handler;
-      processQueue();
+      this.processQueue_();
     }
 
-    private processQueue = () : void => {
-      // Note: a handler may itself setHandler to being null, doing so should
-      // pause proccessing of the queue.
+    // Run the handler function on the queue until queue is empty or handler is
+    // null. Note: a handler may itself setHandler to being null, doing so
+    // should pause proccessing of the queue.
+    private processQueue_ = () : void => {
       while(this.handler_ && this.queue_.length > 0) {
         this.handler_(this.queue_.shift());
       }
@@ -71,6 +72,8 @@ module Handler {
       this.queue_.push(x);
     }
 
+    // Make promise gives a promise for the next data to be handled.
+    //
     // Note: this sets the Handler to fulfil this promise when there is
     // something to handle.
     public makePromise = () :Promise<T> => {
@@ -78,7 +81,7 @@ module Handler {
       var promiseForNextHandle = new Promise((F,R) => {
           fulfillFn = F;
           this.rejectFn_ = R;
-      };
+      });
       this.setHandler((x:T) => {
         // Note: we don't call setHandler here because it is responsible for
         // cancelling the last promise if one was made: you only get one promise

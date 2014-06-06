@@ -18,6 +18,8 @@ module ArrayBuffers {
 
     // Set the minimal size. Returns true if it causes the buffer handler to be
     // called because the current size is bigger than the new minimal size.
+    // TODO: debug why grunt-typescript gives an error if we name `newMinSize`
+    // as `minSize`, but normal tsc command doesn't seem able to reproduce it.
     public setMinSize = (newMinSize :number) : number => {
       this.minSize_ = newMinSize;
       return this.maybeBigEnoughNow();
