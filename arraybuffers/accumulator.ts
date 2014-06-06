@@ -12,14 +12,14 @@ module ArrayBuffers {
     private currentSize_ :number = 0;
 
     constructor(minSize :number,
-                public onBigEnoughBuffer :(ArrayBuffer)=>void) {
+                public onBigEnoughBuffer :(bigBuffer:ArrayBuffer)=>void) {
       this.minSize_ = minSize;
     }
 
     // Set the minimal size. Returns true if it causes the buffer handler to be
     // called because the current size is bigger than the new minimal size.
-    public setMinSize = (minSize :number) : number => {
-      this.minSize_ = minSize;
+    public setMinSize = (newMinSize :number) : number => {
+      this.minSize_ = newMinSize;
       return this.maybeBigEnoughNow();
     }
 

@@ -36,7 +36,7 @@ module ArrayBuffers {
    */
   export function arrayBufferToString(buffer:ArrayBuffer) : string {
     var bytes = new Uint8Array(buffer);
-    var a = [];
+    var a :string[] = [];
     for (var i = 0; i < bytes.length; ++i) {
       a.push(String.fromCharCode(bytes[i]));
     }
@@ -68,7 +68,7 @@ module ArrayBuffers {
    */
   export function arrayBufferToHexString(buffer:ArrayBuffer) : string {
     var bytes = new Uint8Array(buffer);
-    var a = [];
+    var a :string[] = [];
     for (var i = 0; i < buffer.byteLength; ++i) {
       a.push(bytes[i].toString(16));
     }

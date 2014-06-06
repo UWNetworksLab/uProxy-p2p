@@ -4,7 +4,7 @@
 module TaskManager {
 
   describe("TaskManager", function() {
-    var taskManager;
+    var taskManager :Manager;
 
     it("New task manager has no tasks", function() {
       taskManager = new Manager();
