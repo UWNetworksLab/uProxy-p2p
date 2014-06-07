@@ -82,6 +82,7 @@ module Core {
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+      this.saveToStorage();
     }
 
     /**
