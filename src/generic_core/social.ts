@@ -534,7 +534,9 @@ module Social {
       var json = this.serialize();
       storage.save<SerialNetwork>(this.getStorePath(), json)
           .then((old) => {
-        this.log('saved to storage.');
+        this.log('saved to storage. ' + JSON.stringify(json));
+      }).catch((e) => {
+        console.error('failed to save to storage', e);
       });
     }
 

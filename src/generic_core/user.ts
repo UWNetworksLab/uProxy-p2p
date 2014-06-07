@@ -410,22 +410,27 @@ module Core {
       this.instances_ = {};
       // Load actual instance objects.
       for (var i = 0 ; i < json.instanceIds.length ; ++i) {
-        var instanceId = json.instanceIds[i];
-        storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
-            .then((json) => {
-          this.instances_[instanceId] = new Core.RemoteInstance(this, json);
-        }).catch((e) => {
-          this.log('could not load instance ' + instanceId);
-        });
+        this.loadInstanceFromStorage_(json.instanceIds[i]);
       }
       this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
       this.notifyUI();
     }
+    private loadInstanceFromStorage_ = (instanceId :string) => {
+      storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
+          .then((json) => {
+        this.instances_[instanceId] = new Core.RemoteInstance(this, json);
+      }).catch((e) => {
+        this.log('could not load instance ' + instanceId);
+      });
+    }
     private saveToStorage = () => {
+      console.log('about to save user to storage ' + this.userId);
       var json = this.serialize();
       storage.save<SerialUser>(this.getStorePath(), json)
           .then((old) => {
-        this.log('saved to storage.');
+        this.log('saved to storage, ' + this.userId);
+      }).catch((e) => {
+        console.error('failed to save user to storage: ' + this.userId);
       });
     }
 
