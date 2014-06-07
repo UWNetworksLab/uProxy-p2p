@@ -1,10 +1,11 @@
 /// <reference path='../third_party/promise/promise.d.ts' />
 
+// Event Handler tools.
 module Handler {
 
-  // Queue up stuff while the handler is set to null. When set to not null
-  // handle all the stuff that got queued.
-  // (TODO: a kind of opposite to a promise, can probably be extended)
+  // Queue up event the handler is set to null. When set to not null handle all
+  // the stuff that was queued. (CONSIDER: this is a kind of co-promise, and can
+  // probably be extended/generalized)
   export class Queue<T> {
     // the Queue of things to handle.
     private queue_ :T[] = [];
@@ -57,7 +58,7 @@ module Handler {
       }
     }
 
-    public clearQueue = () : void => {
+    public clear = () : void => {
       this.queue_ = [];
     }
 
@@ -78,22 +79,18 @@ module Handler {
     // Note: this sets the Handler to fulfil this promise when there is
     // something to handle.
     public makePromise = () :Promise<T> => {
-      var fulfillFn :(x:T) => void;
-      var promiseForNextHandle = new Promise((F,R) => {
-          fulfillFn = F;
-          this.rejectFn_ = R;
+      return new Promise((F,R) => {
+        this.setHandler((x:T) => {
+          // Note: we don't call setHandler here because it is responsible for
+          // cancelling the last promise if one was made: you only get one promise
+          // to handle, so if we called it, we'd reject the promise we are
+          // supposed to be fulfilling!
+          this.handler_ = null;
+          this.rejectFn_ = null;
+          F(x);
+        });
+        this.rejectFn_ = R;
       });
-      this.setHandler((x:T) => {
-        // Note: we don't call setHandler here because it is responsible for
-        // cancelling the last promise if one was made: you only get one promise
-        // to handle, so if we called it, we'd reject the promise we are
-        // supposed to be fulfilling!
-        this.handler_ = null;
-        this.rejectFn_ = null;
-        fulfillFn(x);
-      });
-
-      return promiseForNextHandle;
     }
   }
 
