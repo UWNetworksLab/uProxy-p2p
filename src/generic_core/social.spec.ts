@@ -66,7 +66,7 @@ describe('Social.Network', () => {
   it('successfully initializes if api is social', () => {
     spyOn(storage, 'load').and.callFake(() => {
       loadedLocalInstance = true;
-      return Promise.resolve(undefined);
+      return Promise.resolve({});
     });
     Social.initializeNetworks();
     network = Social.getNetwork('mock');
@@ -342,5 +342,22 @@ describe('Social.Network', () => {
     network.send('fakeclient', outMsg)
     expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
   });
+
+  // TODO: get this unit test to pass.
+  /*
+  it('Can deserialize multiple users', (done) => {
+    var serialNetworkData :Social.SerialNetwork = {
+      name: 'mock',
+      remember: false,
+      userIds: ['userA', 'userB', 'userC']
+    }
+    network.deserialize(serialNetworkData).then(() => {
+      expect(network.getUser('userA')).toEqual('userA');
+      expect(network.getUser('userB')).toEqual('userB');
+      expect(network.getUser('userC')).toEqual('userC');
+      done();
+    });
+  });
+  */
 
 });

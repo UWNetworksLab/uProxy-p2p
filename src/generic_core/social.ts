@@ -517,15 +517,18 @@ module Social {
       this.remember = json.remember;
       // Load all users based on userIds.
       for (var i = 0 ; i < json.userIds.length ; ++i) {
-        var userId = json.userIds[i];
-        storage.load<Core.SerialUser>(this.getStorePath() + userId)
-            .then((json) => {
-          this.roster[userId] = new Core.User(this, userId);
-          this.roster[userId].deserialize(json);
-        }).catch((e) => {
-          this.error('could not load user ' + userId);
-        });
+        this.loadUserFromStorage_(json.userIds[i]);
       }
+    }
+    private loadUserFromStorage_ = (userId :string) => {
+      storage.load<Core.SerialUser>(this.getStorePath() + userId)
+          .then((json) => {
+        this.roster[userId] = new Core.User(this, userId);
+        this.roster[userId].deserialize(json);
+        this.log('successfully loaded user ' + userId);
+      }).catch((e) => {
+        this.error('could not load user ' + userId);
+      });
     }
     private saveToStorage = () => {
       var json = this.serialize();

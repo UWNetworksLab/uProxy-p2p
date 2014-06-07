@@ -169,14 +169,15 @@ module Core {
         return;
       }
       this.log('received client' + JSON.stringify(client));
-      var clientIsNew = !(client.clientId in this.clients);
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
         case UProxyClient.Status.ONLINE:
-          this.clients[client.clientId] = client.status;
-          if (clientIsNew) {
+          if (!(client.clientId in this.clients) ||
+              this.clients[client.clientId] != UProxyClient.Status.ONLINE) {
+            // Client is new, or has changed status from !ONLINE to ONLINE.
             this.network.sendInstanceHandshake(client.clientId);
           }
+          this.clients[client.clientId] = client.status;
           break;
         case UProxyClient.Status.OFFLINE:
           // Just delete OFFLINE clients, because they will never be ONLINE
@@ -255,11 +256,12 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, instance :InstanceHandshake) => {
+    private syncInstance_ = (clientId :string, instance :InstanceHandshake)
+        : void => {
       if (UProxyClient.Status.ONLINE !== this.clients[clientId]) {
-        console.warn('Received an Instance Handshake from a non-uProxy client! '
+        console.error('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
-        return false;
+        return;
       }
       this.log('received instance' + JSON.stringify(instance));
       var instanceId = instance.instanceId;
