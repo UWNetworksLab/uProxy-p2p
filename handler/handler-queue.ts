@@ -1,4 +1,4 @@
-/// <reference path='../freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../third_party/promise/promise.d.ts' />
 
 module Handler {
 
