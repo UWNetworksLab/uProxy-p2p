@@ -1,4 +1,5 @@
-//
+/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+
 module Handler {
 
   // Queue up stuff while the handler is set to null. When set to not null
