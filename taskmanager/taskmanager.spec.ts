@@ -1,5 +1,5 @@
 /// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
-/// <reference path='taskmanager.d.ts' />
+/// <reference path='taskmanager.ts' />
 
 module TaskManager {
 

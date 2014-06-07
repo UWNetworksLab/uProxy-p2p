@@ -1,7 +1,5 @@
+/// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
 /// <reference path='arraybuffers.ts' />
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
-/// <reference path='arraybuffers.d.ts' />
-
 module ArrayBuffers {
 
   var uint8Array1 = new Uint8Array([12,118,101,114,105,115]);
@@ -24,16 +22,16 @@ module ArrayBuffers {
   var emptyHexString = '';
 
   describe("ArrayBuffers <-> Hex Strings", function() {
-    it("arrayBufferEquality: emptyArray == emptyArray", function() {
+    it("byteEquality: emptyArray == emptyArray", function() {
       expect(ArrayBuffers.byteEquality(emptyArray, emptyArray)).toBe(true);
     });
-    it("arrayBufferEquality: array1 == array1", function() {
+    it("byteEquality: array1 == array1", function() {
       expect(ArrayBuffers.byteEquality(array1, array1)).toBe(true);
     });
-    it("arrayBufferEquality: array1 != emptyArray", function() {
+    it("byteEquality: array1 != emptyArray", function() {
       expect(ArrayBuffers.byteEquality(array1, emptyArray)).toBe(false);
     });
-    it("arrayBufferEquality: array1 != array2", function() {
+    it("byteEquality: array1 != array2", function() {
       expect(ArrayBuffers.byteEquality(array1, array2)).toBe(false);
     });
 
@@ -111,11 +109,11 @@ module ArrayBuffers {
     });
 
     it("String -> Buffer(UTF8)", function() {
-      expect(arrayBufferEquality(
+      expect(byteEquality(
           stringToUtf8EncodedArrayBuffer(emptyString), emptyArray)).toBe(true);
-      expect(arrayBufferEquality(
+      expect(byteEquality(
           stringToUtf8EncodedArrayBuffer(string1), array1)).toBe(true);
-      expect(arrayBufferEquality(
+      expect(byteEquality(
           stringToUtf8EncodedArrayBuffer(string3), array3)).toBe(true);
     });
 
