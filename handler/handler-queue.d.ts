@@ -1,4 +1,4 @@
-/// <reference path="../../node_modules/freedom-typescript-api/interfaces/promise.d.ts" />
+/// <reference path="../freedom-typescript-api/interfaces/promise.d.ts" />
 declare module Handler {
     class Queue<T> {
         constructor();

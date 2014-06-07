@@ -1,4 +1,4 @@
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../freedom-typescript-api/interfaces/promise.d.ts' />
 
 module Handler {
 
@@ -10,7 +10,7 @@ module Handler {
     private queue_ :T[] = [];
 
     // handler for things on the queue.
-    private handler_ :(T) => void = null;
+    private handler_ :(x:T) => void = null;
 
     // We store a handler's promise rejection function and cal it when
     // setHandler is called for an unfullfilled promise. We need to do this
@@ -37,7 +37,7 @@ module Handler {
     //
     // If you have an unfulfilled promise, calling setHandler rejects the old
     // promise.
-    public setHandler = (handler:(T) => void) : void => {
+    public setHandler = (handler:(x:T) => void) : void => {
       if (this.rejectFn_) {
         // Question: How efficient is new Error? Maybe best to have rejection
         // with error.
