@@ -170,6 +170,14 @@ module Core {
         return;
       }
       this.log('received client' + JSON.stringify(client));
+      if (client.clientId in this.clients &&
+          this.clients[client.clientId] == client.status) {
+        // Client is already in mapping and its status has not changed, skip.
+        // This is done to skip onClientState events we get for each message
+        // when only the timestamp has been updated.
+        return;
+      }
+
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
         case UProxyClient.Status.ONLINE:
@@ -230,8 +238,12 @@ module Core {
           }
           instance.handleSignal(msg.type, <PeerSignal>msg.data);
           break;
+        case uProxy.MessageType.INSTANCE_REQUEST:
+          console.log('got instance request from ' + clientId);
+          this.network.sendInstanceHandshake(clientId);
+          break;
         default:
-          console.error(this.userId + ' received invalid message.');
+          console.error(this.userId + ' received invalid message.', msg);
       }
     }
 
@@ -285,6 +297,9 @@ module Core {
         this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
       }
 
+      // TODO: this may send a duplicate notification to the UI, because
+      // instance.update and the instance constructor both notify the UI.
+      // This shouldn't be a problem but we may want to clean this up.
       this.notifyUI();
       // TODO: Make ui.syncInstance actually do the granular-level update to UI.
       ui.syncInstance(this.instances_[instanceId]);
@@ -432,6 +447,27 @@ module Core {
       }).catch((e) => {
         console.error('failed to save user to storage: ' + this.userId);
       });
+    }
+
+    public monitor = () : void => {
+      for (var clientId in this.clients) {
+        var isMissingInstance =
+            (this.clients[clientId] == UProxyClient.Status.ONLINE) &&
+            !(clientId in this.clientToInstanceMap_);
+        if (isMissingInstance) {
+          console.warn('monitor found no instance for clientId ' + clientId);
+          this.requestInstance_(clientId);
+        }
+      }
+    }
+
+    private requestInstance_ = (clientId) : void => {
+      this.log('requesting instance');
+      var instanceRequestMsg :uProxy.Message = {
+        type: uProxy.MessageType.INSTANCE_REQUEST,
+        data: {}
+      };
+      this.network.send(clientId, instanceRequestMsg);
     }
 
   }  // class User

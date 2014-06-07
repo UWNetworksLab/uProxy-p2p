@@ -108,6 +108,7 @@ module Social {
     private SaveKeys = {
       ME: 'me'
     }
+    private monitorIntervalId_ = null;
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -167,6 +168,7 @@ module Social {
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
             this.myInstance.userId = freedomClient.userId;
+            this.startMonitor_();
             this.log('logged into uProxy');
           });
       return this.onceLoggedIn_
@@ -188,6 +190,7 @@ module Social {
         return Promise.resolve();
       }
       this.onceLoggedIn_ = null;
+      this.stopMonitor_();
       return this.api.logout().then(() => {
         this.myInstance.userId = null;
         this.log('logged out.');
@@ -549,6 +552,32 @@ module Social {
 
     private error = (msg:string) : void => {
       console.error('!!! [' + this.name + '] ' + msg);
+    }
+
+    private startMonitor_ = () : void => {
+      if (this.monitorIntervalId_) {
+        // clear any existing monitor
+        console.warn('startMonitor_ called with monitor already running');
+        this.stopMonitor_();
+      }
+
+      var monitorCallback = () => {
+        this.log('Running monitor');
+        // TODO: if too many instances are missing, we may send more messages
+        // than our XMPP server will allow and be throttled.  We should change
+        // monitoring to limit the number of XMPP messages it sends on each
+        // interval.
+        for (var userId in this.roster) {
+          this.getUser(userId).monitor();
+        }
+      };
+      setInterval(monitorCallback, 5000);
+    }
+
+    private stopMonitor_ = () : void => {
+      if (this.monitorIntervalId_) {
+        clearInterval(this.monitorIntervalId_);
+      }
     }
 
   }  // class Social.Network
