@@ -424,7 +424,6 @@ module Core {
       });
     }
     private saveToStorage = () => {
-      console.log('about to save user to storage ' + this.userId);
       var json = this.serialize();
       storage.save<SerialUser>(this.getStorePath(), json)
           .then((old) => {
