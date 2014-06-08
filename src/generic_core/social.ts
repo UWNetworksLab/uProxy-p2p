@@ -108,7 +108,8 @@ module Social {
     private SaveKeys = {
       ME: 'me'
     }
-    private monitorIntervalId_ = null;
+    // ID returned by setInterval call for monitoring.
+    private monitorIntervalId_ :number = null;
 
     /**
      * Initialize the social provider for this Network, and attach event
@@ -554,6 +555,9 @@ module Social {
       console.error('!!! [' + this.name + '] ' + msg);
     }
 
+    // TODO: We should make a class for monitors or generally to encapsulate
+    // setInterval/clearInterval calls.  Then we could call monitor.start
+    // and monitor.stop.
     private startMonitor_ = () : void => {
       if (this.monitorIntervalId_) {
         // clear any existing monitor
