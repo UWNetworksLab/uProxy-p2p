@@ -29,6 +29,18 @@ module Handler {
       expect(queue.getLength()).toEqual(0);
     });
 
+
+    it("makePromise then handle 2 events: leaves second event queued",
+        function(done) {
+      queue.makePromise().then((s) => {
+        expect(s).toEqual('A');
+        expect(queue.getLength()).toEqual(1);
+        done();
+      });
+      queue.handle('A');
+      queue.handle('B');
+    });
+
     it("3 events then makePromise leaves 2 events and handles first",
         function(done) {
       queue.handle('A');
@@ -39,6 +51,29 @@ module Handler {
         expect(s).toEqual('A');
         done();
       });
+    });
+
+    it("3 events then makePromise to remove elements in order until empty",
+        function(done) {
+      queue.handle('A');
+      queue.handle('B');
+      queue.handle('C');
+      queue.makePromise()
+        .then((s) => {
+          expect(queue.getLength()).toEqual(2);
+          expect(s).toEqual('A');
+        })
+        .then(queue.makePromise)
+        .then((s) => {
+          expect(queue.getLength()).toEqual(1);
+          expect(s).toEqual('B');
+        })
+        .then(queue.makePromise)
+        .then((s) => {
+          expect(queue.getLength()).toEqual(0);
+          expect(s).toEqual('C');
+          done();
+        })
     });
 
 });  // describe("TaskManager", ... )
