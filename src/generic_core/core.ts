@@ -72,6 +72,14 @@ class UIConnector implements uProxy.UIAPI {
         console.log('update [COMMAND_REJECTED]', <number>data);
         break;
 
+      case uProxy.Update.ERROR:
+        console.log('update [ERROR]', <string>data);
+        break;
+
+      case uProxy.Update.STOP_PROXYING:
+        console.log('update [STOP_PROXYING]');
+        break;
+
       // TODO: re-enable once the CLIENT-specific messages work.
       // case uProxy.Update.CLIENT:
         // console.log('update [CLIENT]', <UI.ClientMessage>data);
@@ -106,6 +114,14 @@ class UIConnector implements uProxy.UIAPI {
 
   public refreshDOM = () => {
     console.error('Cannot refresh DOM from the Core.');
+  }
+
+  public sendError = (errorText :string) => {
+    this.update(uProxy.Update.ERROR, errorText);
+  }
+
+  public stopProxying = () => {
+    this.update(uProxy.Update.STOP_PROXYING, {});
   }
 
 }
@@ -250,7 +266,8 @@ module Core {
     // Disable any previous proxying session.
     if (proxy) {
       console.log('Existing proxying session! Terminating...');
-      stop();
+      // Stop proxy, don't notify UI since UI request a new proxy.
+      proxy.stop();
       proxy = null;
     }
     var remote = getInstance(path);
@@ -360,6 +377,20 @@ socksToRtcClient.on('socksToRtcFailure', (peerInfo :PeerInfo) => {
     return;
   }
   instance.handleStartFailure();
+});
+
+socksToRtcClient.on('socksToRtcTimeout', (peerInfo :PeerInfo) => {
+  console.warn('socksToRtcTimeout occurred for peer ' + peerInfo.peerId);
+  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
+  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  if (!instance) {
+    console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
+    return;
+  }
+  instance.stop();
+  ui.stopProxying();
+  ui.sendError('Darn, something went wrong with your proxying connection.' +
+    ' Please try to connect again.');
 });
 
 // Make this take an actual peer object type.

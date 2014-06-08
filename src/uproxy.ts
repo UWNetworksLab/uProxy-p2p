@@ -48,7 +48,9 @@ module uProxy {
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
     COMMAND_FULFILLED,
-    COMMAND_REJECTED
+    COMMAND_REJECTED,
+    ERROR,
+    STOP_PROXYING
   }
 
   /**
@@ -68,6 +70,8 @@ module uProxy {
     // from socks-rtc's RTCPeerConnection.
     SIGNAL_FROM_CLIENT_PEER,
     SIGNAL_FROM_SERVER_PEER,
+    // Request that an instance message be sent back from a peer.
+    INSTANCE_REQUEST
   }
 
   // Messages to the peer form the boundary for JSON parse / stringify.

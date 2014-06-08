@@ -181,7 +181,7 @@ app.directive('uproxyConsentAction', () => {
 app.directive('uproxyProxyGadget', () => {
     var link = ($s, element, attrs) => {
       $s.start = $s.ui.startProxying;
-      $s.stop = $s.ui.stopProxying
+      $s.stop = $s.ui.stopProxyingUserInitiated  // TODO(dborkan): test this
     };
     return {
       restrict: 'E',

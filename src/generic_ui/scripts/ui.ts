@@ -10,7 +10,9 @@
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
+
 declare var model         :UI.Model;
+declare var proxyConfig   :BrowserProxyConfig;
 
 module UI {
 
@@ -98,6 +100,8 @@ module UI {
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
 
+    public errors :string[] = [];
+
     notifications = 0;
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
@@ -161,6 +165,14 @@ module UI {
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
+      });
+      core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
+        console.warn('uProxy.Update.ERROR: ' + errorText);
+        this.errors.push(errorText);
+      });
+      core.onUpdate(uProxy.Update.STOP_PROXYING, (data :Object) => {
+        // Data is currently {}.
+        this.stopProxyingInUiAndConfig_();
       });
 
       console.log('Created the UserInterface');
@@ -255,14 +267,27 @@ module UI {
      * Stops proxying by updating UI-specific state, and passing the stop
      * COMMAND to the core.
      */
-    public stopProxying = () => {
+    public stopProxyingUserInitiated = () => {
+      if (!this.instance) {
+        console.warn('Stop Proxying called while not proxying.');
+        return;
+      }
+      this.stopProxyingInUiAndConfig_();
+      this.core.stop();
+    }
+
+    /**
+     * Removes proxy indicators from UI and undoes proxy configuration
+     * (e.g. chrome.proxy settings).
+     */
+    private stopProxyingInUiAndConfig_ = () => {
       if (!this.instance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
       this._setProxying(false);
       this.currentProxyServer = null;
-      this.core.stop();
+      proxyConfig.stopUsingProxy();
     }
 
     _setProxying = (isProxying : boolean) => {
@@ -417,6 +442,10 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
+      // TODO: we might want to check if this user has been our proxy server
+      // and if so stop the proxying if they are no longer proxying for us
+      // (e.g. they were disconnected).  Currently we are sending an explicit
+      // stop proxy message from the app to stop proxying.
       if (!user) {
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;

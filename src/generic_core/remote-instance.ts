@@ -203,7 +203,7 @@ module Core {
      */
     public stop = () : void => {
       if (!this.access.asProxy) {
-        console.error('Cannot stop proxying when not proxying.');
+        console.warn('Cannot stop proxying when not proxying.');
         return;
       }
       socksToRtcClient.emit('stop');

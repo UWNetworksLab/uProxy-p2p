@@ -265,7 +265,7 @@
           <button id="stop-btn" class="icon-btn"
               ng-mouseenter="stopTooltip=true"
               ng-mouseleave="stopTooltip=false"
-              ng-click="ui.stopProxying()">
+              ng-click="ui.stopProxyingUserInitiated()">
           </button>
           Proxying through {{ui.currentProxyServer.user.name}}
         </div>
@@ -295,6 +295,15 @@
         </span>
         <span ng-show="!ui.loggedIn()">Not Connected to a network</span>
       </span>
+    </div>
+
+    <div id="error-popup-mask" ng-show="ui.errors.length > 0">
+      <div id="error-popup">
+        <ul>
+          <li ng-repeat="error in ui.errors track by $index">{{error}}</li>
+        </ul>
+        <button class="btn" ng-click="ui.errors = []">OK</button>
+      </div>
     </div>
 
   </div></body>
