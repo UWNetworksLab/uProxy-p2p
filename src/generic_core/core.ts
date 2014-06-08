@@ -46,50 +46,8 @@ class UIConnector implements uProxy.UIAPI {
    * TODO: Turn this private and make outside accesses directly based on UIAPI.
    */
   public update = (type:uProxy.Update, data?:any) => {
-    switch(type) {
-      case uProxy.Update.ALL:
-        // console.log('update [ALL]', store.state);
-        var networkName :string;
-        for (networkName in Social.networks) {
-          Social.networks[networkName].notifyUI();
-        }
-        break;
-
-      case uProxy.Update.NETWORK:
-        console.log('update [NETWORK]', <UI.NetworkMessage>data);
-        break;
-
-      case uProxy.Update.USER_SELF:
-      case uProxy.Update.USER_FRIEND:
-        console.log('update [USER]', <UI.UserMessage>data);
-        break;
-
-      case uProxy.Update.COMMAND_FULFILLED:
-        console.log('update [COMMAND_FULFILLED]', <number>data);
-        break;
-
-      case uProxy.Update.COMMAND_REJECTED:
-        console.log('update [COMMAND_REJECTED]', <number>data);
-        break;
-
-      case uProxy.Update.ERROR:
-        console.log('update [ERROR]', <string>data);
-        break;
-
-      case uProxy.Update.STOP_PROXYING:
-        console.log('update [STOP_PROXYING]');
-        break;
-
-      // TODO: re-enable once the CLIENT-specific messages work.
-      // case uProxy.Update.CLIENT:
-        // console.log('update [CLIENT]', <UI.ClientMessage>data);
-        // break;
-
-      // TODO: Implement the finer-grained Update messages.
-      default:
-        console.warn('Not yet implemented.');
-        return;
-    }
+    var printableType :string = uProxy.Update[type];
+    console.log('update [' + printableType + ']', data);
     bgAppPageChannel.emit('' + type, data);
   }
 
@@ -104,7 +62,7 @@ class UIConnector implements uProxy.UIAPI {
   public sync = () => {
     // TODO: (the interface may change)
     console.log('sending ALL state to UI.');
-    ui.update(uProxy.Update.ALL);
+    ui.updateAll();
   }
 
   public syncUser = (payload:UI.UserMessage) => {
@@ -121,7 +79,15 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public stopProxying = () => {
-    this.update(uProxy.Update.STOP_PROXYING, {});
+    this.update(uProxy.Update.STOP_PROXYING);
+  }
+
+  public updateAll = () => {
+    var networkName :string;
+    for (networkName in Social.networks) {
+      Social.networks[networkName].notifyUI();
+    }
+    this.update(uProxy.Update.ALL); 
   }
 
 }

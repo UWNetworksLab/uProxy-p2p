@@ -1,4 +1,4 @@
-<div class='instance-actions' ng-show='ui.instance && ui.isAccess()'>
+<div class='instance-actions' ng-show='ui.proxyServerInstance && ui.isAccess()'>
 
   <div class='uproxy-box proxy'
       ng-switch='currentProxyState()'>
@@ -37,7 +37,7 @@
   </div>
 
   <div class='uproxy-box client'
-      ng-class="{active:ui.instance.access.asClient}"
+      ng-class="{active:ui.proxyServerInstance.access.asClient}"
       ng-switch='currentClientState()'>
     <div ng-switch-when='NONE'>
       <p class='uproxytip'>You have not granted them access.

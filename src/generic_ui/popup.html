@@ -186,7 +186,7 @@
           <div class="details" ng-show="theirInfoHovered">
             <div class="picCover"></div>
             <div class="description">
-              <p>{{ui.instance.description}}</p>
+              <p>{{ui.proxyServerInstance.description}}</p>
               <span ng-show="ui.user.onGoogle"> Google </span>
               <span ng-show="ui.user.onFB"> FB </span>
             </div>
@@ -226,10 +226,10 @@
                           active:ui.user.isActiveClient }">
           </div>
           <div class="uproxy-deco" id="their-uproxy"
-              ng-show="ui.instance"></div>
+              ng-show="ui.proxyServerInstance"></div>
           <div class="uproxy-deco" id="my-uproxy"></div>
 
-          <p class="access-note" ng-hide="ui.instance">
+          <p class="access-note" ng-hide="ui.proxyServerInstance">
           {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 

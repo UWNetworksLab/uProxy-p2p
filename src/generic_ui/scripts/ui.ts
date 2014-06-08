@@ -96,7 +96,9 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    public instance :UI.Instance = null;
+    // TODO: combine this with currentProxyServer so there is only 1 member
+    // variable to check current proxy server status.
+    public proxyServerInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
 
@@ -170,8 +172,7 @@ module UI {
         console.warn('uProxy.Update.ERROR: ' + errorText);
         this.errors.push(errorText);
       });
-      core.onUpdate(uProxy.Update.STOP_PROXYING, (data :Object) => {
-        // Data is currently {}.
+      core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
         this.stopProxyingInUiAndConfig_();
       });
 
@@ -243,8 +244,8 @@ module UI {
      * Assumes that there is a 'current instance' available.
      */
     public startProxying = () => {
-      if (!this.user || !this.instance) {
-        console.warn('Cannot stop proxying without a current instance.');
+      if (!this.user || !this.proxyServerInstance) {
+        console.warn('Cannot start proxying without a current instance.');
       }
       // Prepare the instance path.
       var path = <InstancePath>{
@@ -252,11 +253,11 @@ module UI {
         // model. Do this soon.
         network: 'google',
         userId: this.user.userId,
-        instanceId: this.instance.instanceId
+        instanceId: this.proxyServerInstance.instanceId
       };
       this.core.start(path).then(() => {
         this.currentProxyServer = {
-          instance: this.instance,
+          instance: this.proxyServerInstance,
           user: this.user
         };
         this._setProxying(true);
@@ -268,7 +269,7 @@ module UI {
      * COMMAND to the core.
      */
     public stopProxyingUserInitiated = () => {
-      if (!this.instance) {
+      if (!this.proxyServerInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
@@ -281,7 +282,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     private stopProxyingInUiAndConfig_ = () => {
-      if (!this.instance) {
+      if (!this.proxyServerInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
@@ -348,7 +349,7 @@ module UI {
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
       if (user.instances.length > 0) {
-        this.instance = user.instances[0];
+        this.proxyServerInstance = user.instances[0];
       }
     }
 
@@ -442,10 +443,10 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
-      // TODO: we might want to check if this user has been our proxy server
-      // and if so stop the proxying if they are no longer proxying for us
-      // (e.g. they were disconnected).  Currently we are sending an explicit
-      // stop proxy message from the app to stop proxying.
+      // CONSIDER: we might want to check if this user has been our proxy
+      // server and if so stop the proxying if they are no longer proxying
+      // for us (e.g. they were disconnected).  Currently we are sending an
+      // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
@@ -457,7 +458,7 @@ module UI {
       // Update the 'current instance' of UI if this is the correct user.
       // TODO: change this for multi instance support
       if (this.user === user) {
-        this.instance = user.instances[0];
+        this.proxyServerInstance = user.instances[0];
       }
       console.log('Synchronized user.', user);
       this.refreshDOM();

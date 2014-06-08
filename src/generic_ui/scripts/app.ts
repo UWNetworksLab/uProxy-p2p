@@ -104,23 +104,23 @@ app.directive('uproxyConsent', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.instance.instanceId
+            instanceId: $s.ui.proxyServerInstance.instanceId
           },
           action:     action
         });
       }
       // Current status indications need to return the enum strings.
       $s.currentProxyState = () => {
-        if (!$s.ui.instance) {
+        if (!$s.ui.proxyServerInstance) {
           return 'NONE';
         }
-        return '' + $s.ProxyState[$s.ui.instance.consent.asProxy];
+        return '' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy];
       }
       $s.currentClientState = () => {
-        if (!$s.ui.instance) {
+        if (!$s.ui.proxyServerInstance) {
           return 'NONE';
         }
-        return '' + $s.ClientState[$s.ui.instance.consent.asClient];
+        return '' + $s.ClientState[$s.ui.proxyServerInstance.consent.asClient];
       }
     };
     return {
@@ -156,7 +156,7 @@ app.directive('uproxyConsentAction', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.instance.instanceId
+            instanceId: $s.ui.proxyServerInstance.instanceId
           },
           action:     action
         });
