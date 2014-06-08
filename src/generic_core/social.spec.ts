@@ -33,9 +33,9 @@ describe('freedomClientToUproxyClient', () => {
   });
 });
 
-describe('Social.Network', () => {
+describe('Social.FreedomNetwork', () => {
 
-  var network :Social.Network;
+  var network :Social.FreedomNetwork;
   // Mock social providers.
   freedom['SOCIAL-badmock'] = () => { return new MockSocial(); };
   freedom['SOCIAL-mock'] = () => { return new MockSocial(); };
@@ -69,7 +69,7 @@ describe('Social.Network', () => {
       return Promise.resolve({});
     });
     Social.initializeNetworks();
-    network = Social.getNetwork('mock');
+    network = <Social.FreedomNetwork> Social.getNetwork('mock');
     expect(network.name).toEqual('mock');
   });
 
@@ -83,13 +83,13 @@ describe('Social.Network', () => {
 
   describe('login & logout', () => {
 
-    it('can login', (done) => {
+    it('can log in', (done) => {
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
-      spyOn(network['api'], 'login').and.returnValue(onceLoggedIn);
+      spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(network, 'notifyUI');
       expect(network.isLoginPending()).toEqual(false);
-      network.login().then(() => {
+      network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         expect(network.isOnline()).toEqual(true);
@@ -100,10 +100,10 @@ describe('Social.Network', () => {
       fulfillFunc(fakeFreedomClient);
     });
 
-    it('does nothing to login if already logged in', (done) => {
+    it('does nothing to log in if already logged in', (done) => {
       spyOn(network, 'notifyUI');
       expect(network.isLoginPending()).toEqual(false);
-      network.login().then(() => {
+      network.login(false).then(() => {
         expect(network.isLoginPending()).toEqual(false);
         expect(network.isOnline()).toEqual(true);
         expect(network.notifyUI).not.toHaveBeenCalled();
@@ -118,20 +118,20 @@ describe('Social.Network', () => {
       loginPromise = network['onceLoggedIn_'];
       network['onceLoggedIn_'] = null;
       // Pretend the social API's login failed.
-      spyOn(network['api'], 'login').and.returnValue(
+      spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
       spyOn(network, 'notifyUI');
       spyOn(network, 'error');
-      network.login().catch(() => {
+      network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
         expect(network.notifyUI).not.toHaveBeenCalled();
       }).then(done);
     });
 
-    it('can logout', (done) => {
+    it('can log out', (done) => {
       network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
-      spyOn(network['api'], 'logout').and.returnValue(Promise.resolve());
+      spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
@@ -164,14 +164,14 @@ describe('Social.Network', () => {
 
     it('delays handler until login', () => {
       expect(network.isOnline()).toEqual(false);
-      spyOn(network['api'], 'login').and.returnValue(
+      spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
           }));
       expect(network['onceLoggedIn_']).toBeDefined();
-      network.login();  // Will complete in the next spec.
+      network.login(false);  // Will complete in the next spec.
       // handlerPromise = delayed('hooray');
-      handlerPromise = network['delayForLogin'](foo.bar)('hooray');
+      handlerPromise = network['delayForLogin_'](foo.bar)('hooray');
       expect(foo.bar).not.toHaveBeenCalled();
     });
 
@@ -288,7 +288,7 @@ describe('Social.Network', () => {
   describe('outgoing communications', () => {
 
     it('calls the social provider sendMessage', () => {
-      network['api'].sendMessage = jasmine.createSpy('sendMessage');
+      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
       var msg = {
         type: uProxy.MessageType.CONSENT,
         data: {
@@ -296,7 +296,7 @@ describe('Social.Network', () => {
         }
       };
       network.send('someclient', msg);
-      expect(network['api'].sendMessage).toHaveBeenCalledWith(
+      expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
         'someclient', '{"type":3001,"data":{"doge":"wows"}}');
     });
 
