@@ -256,14 +256,14 @@ module.exports = function(grunt) {
     'typescript': {
       // uProxy UI without any platform dependencies
       generic_ui: {
-        src: ['src/generic_ui/**/*.ts'],
+        src: ['src/generic_ui/**/*.ts', 'src/interfaces/browser-proxy-config.d.ts'],
         dest: 'build/',
         options: { basePath: 'src/', ignoreError: false }
       },
 
       // Core uProxy without any platform dependencies
       generic_core: {
-        src: ['src/generic_core/**/*.ts'],
+        src: ['src/generic_core/**/*.ts', 'src/interfaces/browser-proxy-config.d.ts'],
         dest: 'build/',
         options: { basePath: 'src/', ignoreError: false }
       },
@@ -273,7 +273,8 @@ module.exports = function(grunt) {
         src: ['src/generic_ui/scripts/ui.d.ts',
               'src/generic_core/core.d.ts',
               'src/generic_ui/scripts/ui.ts',
-              'src/uistatic/scripts/dependencies.ts'],
+              'src/uistatic/scripts/dependencies.ts',
+              'src/interfaces/browser-proxy-config.d.ts'],
         dest: 'build/uistatic/',
       },
 

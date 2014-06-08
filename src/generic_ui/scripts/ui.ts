@@ -10,7 +10,9 @@
 /// <reference path='../../interfaces/notify.d.ts'/>
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
+
 declare var model         :UI.Model;
+declare var proxyConfig   :BrowserProxyConfig;
 
 module UI {
 
@@ -94,9 +96,13 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    public instance :UI.Instance = null;
+    // TODO: combine this with currentProxyServer so there is only 1 member
+    // variable to check current proxy server status.
+    public proxyServerInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
+
+    public errors :string[] = [];
 
     notifications = 0;
     advancedOptions = false;
@@ -161,6 +167,13 @@ module UI {
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
+      });
+      core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
+        console.warn('uProxy.Update.ERROR: ' + errorText);
+        this.errors.push(errorText);
+      });
+      core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
+        this.stopProxyingInUiAndConfig_();
       });
 
       console.log('Created the UserInterface');
@@ -231,8 +244,8 @@ module UI {
      * Assumes that there is a 'current instance' available.
      */
     public startProxying = () => {
-      if (!this.user || !this.instance) {
-        console.warn('Cannot stop proxying without a current instance.');
+      if (!this.user || !this.proxyServerInstance) {
+        console.warn('Cannot start proxying without a current instance.');
       }
       // Prepare the instance path.
       var path = <InstancePath>{
@@ -240,11 +253,11 @@ module UI {
         // model. Do this soon.
         network: 'google',
         userId: this.user.userId,
-        instanceId: this.instance.instanceId
+        instanceId: this.proxyServerInstance.instanceId
       };
       this.core.start(path).then(() => {
         this.currentProxyServer = {
-          instance: this.instance,
+          instance: this.proxyServerInstance,
           user: this.user
         };
         this._setProxying(true);
@@ -255,14 +268,27 @@ module UI {
      * Stops proxying by updating UI-specific state, and passing the stop
      * COMMAND to the core.
      */
-    public stopProxying = () => {
-      if (!this.instance) {
+    public stopProxyingUserInitiated = () => {
+      if (!this.proxyServerInstance) {
+        console.warn('Stop Proxying called while not proxying.');
+        return;
+      }
+      this.stopProxyingInUiAndConfig_();
+      this.core.stop();
+    }
+
+    /**
+     * Removes proxy indicators from UI and undoes proxy configuration
+     * (e.g. chrome.proxy settings).
+     */
+    private stopProxyingInUiAndConfig_ = () => {
+      if (!this.proxyServerInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
       this._setProxying(false);
       this.currentProxyServer = null;
-      this.core.stop();
+      proxyConfig.stopUsingProxy();
     }
 
     _setProxying = (isProxying : boolean) => {
@@ -323,7 +349,7 @@ module UI {
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
       if (user.instances.length > 0) {
-        this.instance = user.instances[0];
+        this.proxyServerInstance = user.instances[0];
       }
     }
 
@@ -417,6 +443,10 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
+      // CONSIDER: we might want to check if this user has been our proxy
+      // server and if so stop the proxying if they are no longer proxying
+      // for us (e.g. they were disconnected).  Currently we are sending an
+      // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
@@ -428,7 +458,7 @@ module UI {
       // Update the 'current instance' of UI if this is the correct user.
       // TODO: change this for multi instance support
       if (this.user === user) {
-        this.instance = user.instances[0];
+        this.proxyServerInstance = user.instances[0];
       }
       console.log('Synchronized user.', user);
       this.refreshDOM();

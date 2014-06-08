@@ -48,7 +48,9 @@ module uProxy {
     DESCRIPTION,
     ID_MAPS,  // ClientId <---> InstanceId mappings.
     COMMAND_FULFILLED,
-    COMMAND_REJECTED
+    COMMAND_REJECTED,
+    ERROR,
+    STOP_PROXYING
   }
 
   /**

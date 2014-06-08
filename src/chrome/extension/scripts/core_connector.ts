@@ -350,7 +350,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   stop = () => {
     console.log('Stopping proxy session.');
     this.sendCommand(uProxy.Command.STOP_PROXYING);
-    proxyConfig.stopUsingProxy();
   }
 
   updateDescription = (description :string) => {
