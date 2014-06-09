@@ -120,15 +120,23 @@ module ArrayBuffers {
       expect(arrayBufferDecodedAsUtf8String(array3)).toEqual(string3);
     });
 
-    /*
+    it("String -> Buffer(UTF8)", function() {
+      expect(arrayBufferEquality(
+          stringToUtf8EncodedArrayBuffer(emptyString), emptyArray)).toBe(true);
+      expect(arrayBufferEquality(
+          stringToUtf8EncodedArrayBuffer(string1), array1)).toBe(true);
+      expect(arrayBufferEquality(
+          stringToUtf8EncodedArrayBuffer(string3), array3)).toBe(true);
+    });
+
     it("String -> Buffer(UTF8) -> String = identity", function() {
-      expect(arrayBufferDecodedAsUtf8String(stringToArrayBuffer(emptyString)))
-          .toEqual(emptyString);
-      expect(arrayBufferDecodedAsUtf8String(stringToArrayBuffer(string1)))
-          .toEqual(string1);
-      expect(arrayBufferDecodedAsUtf8String(stringToArrayBuffer(string3)))
-          .toEqual(string3);
-    });*/
+      expect(arrayBufferDecodedAsUtf8String(
+          stringToUtf8EncodedArrayBuffer(emptyString))).toEqual(emptyString);
+      expect(arrayBufferDecodedAsUtf8String(
+          stringToUtf8EncodedArrayBuffer(string1))).toEqual(string1);
+      expect(arrayBufferDecodedAsUtf8String(
+          stringToUtf8EncodedArrayBuffer(string3))).toEqual(string3);
+    });
   });
 
 }  // module ArrayBuffers
