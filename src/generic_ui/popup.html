@@ -109,6 +109,7 @@
                     ng-mouseleave="showFilterTip=false"
                     ng-class="{on:ui.filters.uproxy}"
                     ng-click="ui.toggleFilter('uproxy')"></button>
+            <!-- TODO: re-enable when online filter works
             <button id="online-filter" class="filter"
                     ng-mouseenter="showFilter('online')"
                     ng-focus="showFilter('online')"
@@ -116,6 +117,7 @@
                     ng-mouseleave="showFilterTip=false"
                     ng-class="{on:ui.filters.online}"
                     ng-click="ui.toggleFilter('online')"></button>
+            -->
             <br>
           </div>
           <input type="text" id="search-contacts"
@@ -148,7 +150,7 @@
 
         <div id="roster-frame" ng-show="ui.isRoster()">
           <ul class="contacts">
-            <li ng-repeat="contact in model.roster"
+            <li ng-repeat="contact in model.roster | orderBy : ['-canUProxy', 'name']"
                 ng-click="ui.focusOnUser(contact)"
                 ng-hide="ui.contactIsFiltered(contact)"
                 ng-class="{offline:!contact.online}"

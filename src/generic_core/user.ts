@@ -389,6 +389,13 @@ module Core {
       var instances =
           mostRecentInstance ? [mostRecentInstance.serializeForUI()] : [];
 
+      // TODO: there is a bug where sometimes this.profile.name is not set,
+      // even though we have this.name set.  This should be tracked down, but for now
+      // we can just copy this.name to this.profile.name.
+      if (!this.profile.name) {
+        this.profile.name = this.name;
+      }
+
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
       ui.syncUser(<UI.UserMessage>{

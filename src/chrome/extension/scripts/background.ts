@@ -31,7 +31,7 @@ proxyConfig.clearConfig();
 var model :UI.Model = {
   networks: {},
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: {}
+  roster: []
 };
 
 // TODO(): remove this if there's no use for it.

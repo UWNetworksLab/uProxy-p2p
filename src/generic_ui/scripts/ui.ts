@@ -46,8 +46,12 @@ module UI {
     // TODO: Other top-level generic info...
 
     // This is a 'global' roster - a combination of all User Profiles.
-    // TODO: remove. The way the UI works will soon change drastically.
-    roster :{ [userId:string] :User }
+    // This must be an array because angular orderBy cannot sort objects
+    // in a JavaScript map.
+    // TODO: remove this if possible and just use network.roster
+    // TODO: or convert this back to an obect and figure out how to sort
+    // it in angular.
+    roster :User[];
   }
 
   // TODO: remove this once extension model is cleaned up.
@@ -120,7 +124,7 @@ module UI {
 
     // Initial filter state.
     public filters = {
-        'online': true,
+        'online': false,
         'myAccess': false,
         'friendsAccess': false,
         'uproxy': false
@@ -450,7 +454,7 @@ module UI {
       if (!user) {
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
-        model.roster[profile.userId] = user;
+        model.roster.push(user);
       }
       user.update(profile);
       user.refreshStatus(payload.clients);
@@ -460,6 +464,21 @@ module UI {
       if (this.user === user) {
         this.proxyServerInstance = user.instances[0];
       }
+
+      // Update givesMe and usesMe fields based on whether any instance
+      // has these permissions.
+      // TODO: we may want to include offered permissions here (even if the
+      // peer hasn't accepted the offer yet).
+      for (var i = 0; i < user.instances.length; ++i) {
+        var consent = user.instances[i].consent;
+        if (consent.asClient == Consent.ClientState.GRANTED) {
+          user.usesMe = true;
+        }
+        if (consent.asProxy == Consent.ProxyState.GRANTED) {
+          user.givesMe = true;
+        }
+      }
+
       console.log('Synchronized user.', user);
       this.refreshDOM();
     };

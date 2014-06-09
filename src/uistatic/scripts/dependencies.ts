@@ -77,7 +77,17 @@ class MockCore implements uProxy.CoreAPI {
       // Fake the core interaction, assume it sent bits on the wire, and receive
       // the update from core.
       var userUpdate = generateFakeUserMessage();
-      var user = model.roster[command.userId];
+      // Find user in model.roster.
+      var user ?:User = null;
+      for (var i = 0; i < model.roster.length; ++i) {
+        if (model.roster[i].userId == command.userId) {
+          user = model.roster[i];
+          break;
+        }
+      }
+      if (!user) {
+        console.error('Unable to find user ' + command.userId);
+      }
       var instance = user.instances[0];
       switch (command.action) {
         case Consent.UserAction.REQUEST:
