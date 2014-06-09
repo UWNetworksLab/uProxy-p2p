@@ -49,6 +49,8 @@ module UI {
     // This must be an array because angular orderBy cannot sort objects
     // in a JavaScript map.
     // TODO: remove this if possible and just use network.roster
+    // TODO: or convert this back to an obect and figure out how to sort
+    // it in angular.
     roster :User[];
   }
 
