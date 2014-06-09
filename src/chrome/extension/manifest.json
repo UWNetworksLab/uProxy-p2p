@@ -33,6 +33,7 @@
     "storage",
     "identity",
     "proxy",
+    "notifications",
     "https://apis.google.com/"
   ],
   "options_page": "options.html",

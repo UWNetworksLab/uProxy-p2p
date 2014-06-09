@@ -78,6 +78,10 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.ERROR, errorText);
   }
 
+  public sendNotification = (notificationText :string) => {
+    this.update(uProxy.Update.NOTIFICATION, notificationText);
+  }
+
   public stopProxying = () => {
     this.update(uProxy.Update.STOP_PROXYING);
   }
@@ -396,6 +400,12 @@ function updateClientProxyConnection(localPeerIdString :string,
     return;
   }
   instance.updateClientProxyConnection(isConnected);
+  if (isConnected) {
+    var user :Core.User = instance.user; 
+    var displayName :string = (user.name && user.name !== 'pending') ?
+      user.name : user.userId;
+    ui.sendNotification(displayName + ' is now proxying through you.');
+  }
 };
 
 rtcToNetServer.on('rtcToNetConnectionEstablished',

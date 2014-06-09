@@ -34,7 +34,6 @@ module UI {
   export interface Toggles {
     splash  :boolean;
     options :boolean;
-    search  :boolean;
   }
 
   /**
@@ -174,7 +173,14 @@ module UI {
       });
       core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
         console.warn('uProxy.Update.ERROR: ' + errorText);
-        this.errors.push(errorText);
+        this.showNotification(errorText);
+        // CONSIDER: we might want to display some errors in the extension popup
+        // as well (by pusing them onto this.errors).
+        // this.errors.push(errorText);
+      });
+      core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
+        console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
+        this.showNotification(notificationText);
       });
       core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
         this.stopProxyingInUiAndConfig_();
@@ -185,6 +191,19 @@ module UI {
 
     update = (type:uProxy.Update, data?:any) => {
       // TODO: Implement.
+    }
+
+    public showNotification = (notificationText :string) => {
+      chrome.notifications.create(
+        '',  // notification Id, not needed for now
+        {
+          type: "basic",
+          title: "uProxy",
+          message: notificationText,
+          iconUrl: 'icons/uproxy-128.png'
+        },
+        // Calback function to received assigned id, ignored for now.
+        () => {});
     }
 
     // ------------------------------- Views ----------------------------------

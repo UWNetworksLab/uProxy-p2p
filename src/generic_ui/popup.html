@@ -78,15 +78,13 @@
       <span ng-show="ui.isSplash() && ui.isAccess()">Show the contact again.</span>
       <span ng-show="ui.isSplash() && !ui.isAccess()">Show the contact list.</span>
       <span ng-show="ui.isRoster()">Show the setup page.</span>
+      <span ng-show="ui.isAccess() && !ui.isRoster()">Show the setup page.</span>
     </div>
 
     <div id="main-view" ng-hide="ui.isSplash()">
       <div id="header">
         <div id="roster-header" ng-show="ui.isRoster()">
           <div id="actions">
-            <button id="search-btn" type="search"
-                    ng-class="{on:ui.toggles.search}"
-                    ng-click="toggleSearch()"></button>
             <button id="my-access" class="filter"
                     ng-mouseenter="showFilter('myAccess')"
                     ng-mouseleave="showFilterTip=false"
@@ -122,7 +120,6 @@
           </div>
           <input type="text" id="search-contacts"
               placeholder="search contacts"
-              ng-show="ui.toggles.search"
               ng-model="ui.search"
               ng-blur="searchFocused=false"
               ng-focus="searchFocused=true">
