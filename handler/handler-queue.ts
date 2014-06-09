@@ -25,8 +25,10 @@ module Handler {
   }
 
   // Queue up event the handler is set to null. When set to not null handle all
-  // the stuff that was queued. (CONSIDER: this is a kind of co-promise, and can
-  // probably be extended/generalized)
+  // the stuff that was queued.
+  //
+  // CONSIDER: this is a kind of co-promise, and can probably be
+  // extended/generalized
   export class Queue<T,T2> {
     // the Queue of things to handle.
     private queue_ :PendingThing<T, T2>[] = [];
@@ -34,24 +36,27 @@ module Handler {
     // handler for things on the queue.
     private handler_ :(x:T) => Promise<T2> = null;
 
-    // We store a handler's promise rejection function and cal it when
-    // setHandler is called for an unfullfilled promise. We need to do this
-    // because the old handler that would fulfill the promise is no longer
-    // attached, sothe promise may never then be fulfilled.
+    // We store a handler's promise rejection function and call it when
+    // `setHandler` and we had a previously promised handler. We need to do this
+    // because the old handler would never fulfill the old promise as it is no
+    // longer attached, so the old promise would probably never then be
+    // fulfilled.
     //
-    // Note: we could try to generalise to event handling (many handlers),  but
-    // there is some tricky questions for how long to queue stuff: it would need
-    // explicitly start/stop queueing operations or some such. (having a handler
-    // might no longer double as a mechanism to know that we are ready to handle
-    // stuff: you'd have to deal with promiseHandling vs other).
-    //
-    // Invaiant: rejectFn_ == null iff handlePromise_ == null;
+    // CONSIDER: we could try to generalise to event handling (many handlers),
+    // but there is some tricky questions for how long to queue stuff: it would
+    // need explicitly start/stop queueing operations or some such. (having a
+    // handler might no longer double as a mechanism to know that we are ready
+    // to handle stuff: you'd have to deal with promiseHandling vs other).
     private rejectFn_ : (e:Error) => void = null;
 
-    // For measuring accumulation of things to handle.
+    // CONSIDER: in some situations, queued objects can be grouped together, or
+    // held until some summation condition is met. For measuring accumulation of
+    // things to handle.
+    //
     // private measure_ :number = 0;
     // private accumulate_ :NumberAccumulator<T>;
 
+    // CONSIDER: allow queue to be size-bounded? Reject on too much stuff.
     constructor() {}
 
     public getLength = () : number => {
