@@ -106,6 +106,27 @@ module Handler {
       });
     }
 
+    // Make promise for when the next call to handle is made.
+    //
+    // Note: this sets the Handler to fulfil this promise when there is
+    // something to handle.
+    public oncePromiseHandler = (handler:(x:T) => Promise<T2>)
+        : Promise<T2> => {
+      return new Promise((F,R) => {
+        this.setHandler((x:T) : T2 => {
+          // Note: we don't call setHandler here because it is responsible for
+          // cancelling the last promise if one was made: you only get one promise
+          // to handle, so if we called it, we'd reject the promise we are
+          // supposed to be fulfilling!
+          this.handler_ = null;
+          this.rejectFn_ = null;
+          handler(x).then(F);
+          return null;
+        });
+        this.rejectFn_ = R;
+      });
+    }
+
     // Calling setHandler with null pauses handling and queue all objects to be
     // handled.
     //

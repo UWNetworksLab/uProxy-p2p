@@ -5,7 +5,12 @@ module Handler {
 
   describe("Queue", function() {
     var queue :Queue<string, number>;
-    var lenHandler = (s:string) : number => { return s.length; };
+    function lenHandler(s:string) : number { return s.length; };
+    function promiseLenHandler(s:string) : Promise<number> {
+      return new Promise<number>((F,R) => {
+        setTimeout(F(s.length), 1);
+      });
+    }
 
     beforeEach(() => {
       queue = new Queue<string, number>();
@@ -30,10 +35,21 @@ module Handler {
       expect(queue.getLength()).toEqual(0);
     });
 
-
-    it("makePromise then handle 2 events: leaves second event queued",
+    it("onceHandler then handle 2 events: leaves second event queued",
         function(done) {
       queue.onceHandler(lenHandler).then((s) => {
+        expect(s).toEqual(1);
+        expect(queue.getLength()).toEqual(1);
+        done();
+      });
+      expect(queue.getLength()).toEqual(0);
+      queue.handle('A');
+      queue.handle('BB');
+    });
+
+    it("promiseLenHandler then handle 2 events: leaves second event queued",
+        function(done) {
+      queue.oncePromiseHandler(promiseLenHandler).then((s) => {
         expect(s).toEqual(1);
         expect(queue.getLength()).toEqual(1);
         done();
