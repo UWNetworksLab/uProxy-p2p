@@ -58,16 +58,18 @@ module Handler {
         function(done) {
       queue.handle('A');
       queue.handle('BBB');
-      queue.handle('CCCCC');
       queue.onceHandler(lenHandler)
         .then((n:number) => {
-          expect(queue.getLength()).toEqual(2);
+          expect(queue.getLength()).toEqual(1);
           expect(n).toEqual(1);  // length of 'A'
         })
         .then(() => { return queue.onceHandler(lenHandler); })
         .then((n:number) => {
-          expect(queue.getLength()).toEqual(1);
+          expect(queue.getLength()).toEqual(0);
           expect(n).toEqual(3);  // length of 'BBB'
+          // Notice that handle events canbe called mixed up with the handling.
+          queue.handle('CCCCC');
+          expect(queue.getLength()).toEqual(1);
         })
         .then(() => { return queue.onceHandler(lenHandler); })
         .then((n:number) => {
