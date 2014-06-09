@@ -12,7 +12,7 @@ declare var angular:ng.IAngularStatic;
 var model :UI.Model = {
   networks: {},
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: {}
+  roster: []
 };
 
 class MockNotifications implements INotifications {
@@ -78,7 +78,7 @@ class MockCore implements uProxy.CoreAPI {
       // the update from core.
       var userUpdate = generateFakeUserMessage();
       // Find user in model.roster.
-      var user ?:User = null;
+      var user :UI.User = null;
       for (var i = 0; i < model.roster.length; ++i) {
         if (model.roster[i].userId == command.userId) {
           user = model.roster[i];

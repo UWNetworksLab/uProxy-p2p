@@ -50,7 +50,8 @@ module uProxy {
     COMMAND_FULFILLED,
     COMMAND_REJECTED,
     ERROR,
-    STOP_PROXYING
+    STOP_PROXYING,
+    NOTIFICATION
   }
 
   /**

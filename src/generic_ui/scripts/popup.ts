@@ -36,10 +36,6 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.toggles.splash = !ui.toggles.splash;
     };
 
-    $scope.toggleSearch = () => {
-      ui.toggles.search = !ui.toggles.search;
-    };
-
     // Display the help tooltip for the filter.
     $scope.showFilter = (filter) => {
       $scope.filterTip = $scope.filterTips[filter];

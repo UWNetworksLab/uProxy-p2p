@@ -2432,3 +2432,34 @@ declare module chrome {
         dispatch(): void;
     }
 }
+
+declare module chrome.notifications {
+    interface NotificationButton {
+        title :string;
+        iconUrl ?:string;
+    }
+
+    interface NotificationItem {
+        title :string;
+        message :string;
+    }
+
+    interface NotificationOptions {
+        type ?:string;
+        iconUrl ?:string;
+        title ?:string;
+        message ?: string;
+        contextMessage ?:string;
+        priority ?:number;
+        eventTime ?:number;
+        buttons ?:NotificationButton[];
+        imageUrl ?:string;
+        items ?:NotificationItem[]; 
+        progress ?:number;
+        isClickable ?:boolean;
+    }
+
+
+    // TODO: add more API methods here as they are needed.
+    export function create(notificationId :string, options :NotificationOptions, callback :Function) : void;
+}
