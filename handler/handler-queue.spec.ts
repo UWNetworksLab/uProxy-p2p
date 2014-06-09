@@ -3,7 +3,7 @@
 
 module Handler {
 
-  describe("Queue", function() {
+  describe('Queue', function() {
     var queue :Queue<string, number>;
     function lenHandler(s:string) : number { return s.length; };
     function promiseLenHandler(s:string) : Promise<number> {
@@ -16,18 +16,18 @@ module Handler {
       queue = new Queue<string, number>();
     });
 
-    it("New queue has no events (length = 0)", function() {
+    it('New queue has no events (length = 0)', function() {
       expect(queue.getLength()).toEqual(0);
     });
 
-    it("3 events makes length = 3", function() {
+    it('3 events makes length = 3', function() {
       queue.handle('A');
       queue.handle('BB');
       queue.handle('CCC');
       expect(queue.getLength()).toEqual(3);
     });
 
-    it("3 events and then clearing makes length = 0", function() {
+    it('3 events and then clearing makes length = 0', function() {
       queue.handle('A');
       queue.handle('BB');
       queue.handle('CCC');
@@ -35,7 +35,7 @@ module Handler {
       expect(queue.getLength()).toEqual(0);
     });
 
-    it("onceHandler then handle 2 events: leaves second event queued",
+    it('onceHandler then handle 2 events: leaves second event queued',
         function(done) {
       queue.onceHandler(lenHandler).then((s) => {
         expect(s).toEqual(1);
@@ -47,7 +47,7 @@ module Handler {
       queue.handle('BB');
     });
 
-    it("promiseLenHandler then handle 2 events: leaves second event queued",
+    it('promiseLenHandler then handle 2 events: leaves second event queued',
         function(done) {
       queue.oncePromiseHandler(promiseLenHandler).then((s) => {
         expect(s).toEqual(1);
@@ -58,7 +58,7 @@ module Handler {
       queue.handle('BB');
     });
 
-    it("3 events then makePromise leaves 2 events and handles first",
+    it('3 events then makePromise leaves 2 events and handles first',
         function(done) {
       queue.handle('A');
       queue.handle('BB');
@@ -70,7 +70,7 @@ module Handler {
       });
     });
 
-    it("3 events then makePromise to remove elements in order until empty",
+    it('3 events then makePromise to remove elements in order until empty',
         function(done) {
       queue.handle('A');
       queue.handle('BBB');
@@ -95,6 +95,6 @@ module Handler {
         })
     });
 
-});  // describe("TaskManager", ... )
+});  // describe('TaskManager', ... )
 
 }  // module TaskManager

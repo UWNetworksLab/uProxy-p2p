@@ -21,35 +21,35 @@ module ArrayBuffers {
   var emptyString = '';
   var emptyHexString = '';
 
-  describe("ArrayBuffers <-> Hex Strings", function() {
-    it("byteEquality: emptyArray == emptyArray", function() {
+  describe('ArrayBuffers <-> Hex Strings', function() {
+    it('byteEquality: emptyArray == emptyArray', function() {
       expect(ArrayBuffers.byteEquality(emptyArray, emptyArray)).toBe(true);
     });
-    it("byteEquality: array1 == array1", function() {
+    it('byteEquality: array1 == array1', function() {
       expect(ArrayBuffers.byteEquality(array1, array1)).toBe(true);
     });
-    it("byteEquality: array1 != emptyArray", function() {
+    it('byteEquality: array1 != emptyArray', function() {
       expect(ArrayBuffers.byteEquality(array1, emptyArray)).toBe(false);
     });
-    it("byteEquality: array1 != array2", function() {
+    it('byteEquality: array1 != array2', function() {
       expect(ArrayBuffers.byteEquality(array1, array2)).toBe(false);
     });
 
-    it("Empty Buffer -> Empty Hex", function() {
+    it('Empty Buffer -> Empty Hex', function() {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyHexString);
     });
-    it("Empty Hex -> Empty Buffer", function() {
+    it('Empty Hex -> Empty Buffer', function() {
       expect(ArrayBuffers.byteEquality(hexStringToArrayBuffer(emptyHexString),
                                        emptyArray)).toBe(true);
     });
 
-    it("Buffer -> Hex", function() {
+    it('Buffer -> Hex', function() {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyString);
       expect(arrayBufferToHexString(array1)).toEqual(hexString1);
       expect(arrayBufferToHexString(array2)).toEqual(hexString2);
     });
 
-    it("Hex -> Buffer -> Hex = identity", function() {
+    it('Hex -> Buffer -> Hex = identity', function() {
       expect(arrayBufferToHexString(hexStringToArrayBuffer(emptyString)))
           .toEqual(emptyString);
       expect(arrayBufferToHexString(hexStringToArrayBuffer(emptyString)))
@@ -64,23 +64,23 @@ module ArrayBuffers {
   });
 
 
-  describe("ArrayBuffers <-> strings", function() {
-    it("Empty Buffer -> Empty Hex", function() {
+  describe('ArrayBuffers <-> strings', function() {
+    it('Empty Buffer -> Empty Hex', function() {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyString);
     });
-    it("Empty Hex -> Empty Buffer", function() {
+    it('Empty Hex -> Empty Buffer', function() {
       expect(ArrayBuffers.byteEquality(hexStringToArrayBuffer(emptyString),
                                        emptyArray)).toBe(true);
     });
 
-    it("Buffer -> String", function() {
+    it('Buffer -> String', function() {
       expect(arrayBufferToHexString(emptyArray)).toEqual(emptyString);
       expect(arrayBufferToHexString(array1)).toEqual(hexString1);
       expect(arrayBufferToHexString(array1)).not.toEqual(hexString2);
       expect(arrayBufferToHexString(array2)).toEqual(hexString2);
     });
 
-    it("String -> Buffer -> String = identity", function() {
+    it('String -> Buffer -> String = identity', function() {
       expect(arrayBufferToString(stringToArrayBuffer(emptyString)))
           .toEqual(emptyString);
       expect(arrayBufferToString(stringToArrayBuffer(emptyString)))
