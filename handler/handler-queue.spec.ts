@@ -32,7 +32,7 @@ module Handler {
 
     it("makePromise then handle 2 events: leaves second event queued",
         function(done) {
-      queue.makePromise().then((s) => {
+      queue.onceHandler().then((s) => {
         expect(s).toEqual('A');
         expect(queue.getLength()).toEqual(1);
         done();
@@ -46,7 +46,7 @@ module Handler {
       queue.handle('A');
       queue.handle('B');
       queue.handle('C');
-      queue.makePromise().then((s) => {
+      queue.onceHandler().then((s) => {
         expect(queue.getLength()).toEqual(2);
         expect(s).toEqual('A');
         done();
@@ -58,17 +58,17 @@ module Handler {
       queue.handle('A');
       queue.handle('B');
       queue.handle('C');
-      queue.makePromise()
+      queue.onceHandler()
         .then((s) => {
           expect(queue.getLength()).toEqual(2);
           expect(s).toEqual('A');
         })
-        .then(queue.makePromise)
+        .then(queue.onceHandler)
         .then((s) => {
           expect(queue.getLength()).toEqual(1);
           expect(s).toEqual('B');
         })
-        .then(queue.makePromise)
+        .then(queue.onceHandler)
         .then((s) => {
           expect(queue.getLength()).toEqual(0);
           expect(s).toEqual('C');
