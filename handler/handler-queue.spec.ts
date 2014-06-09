@@ -4,10 +4,11 @@
 module Handler {
 
   describe("Queue", function() {
-    var queue :Queue<string>;
+    var queue :Queue<string, number>;
+    var lenHandler = (s:string) : number => { return s.length; };
 
     beforeEach(() => {
-      queue = new Queue<string>();
+      queue = new Queue<string, number>();
     });
 
     it("New queue has no events (length = 0)", function() {
@@ -16,15 +17,15 @@ module Handler {
 
     it("3 events makes length = 3", function() {
       queue.handle('A');
-      queue.handle('B');
-      queue.handle('C');
+      queue.handle('BB');
+      queue.handle('CCC');
       expect(queue.getLength()).toEqual(3);
     });
 
     it("3 events and then clearing makes length = 0", function() {
       queue.handle('A');
-      queue.handle('B');
-      queue.handle('C');
+      queue.handle('BB');
+      queue.handle('CCC');
       queue.clear();
       expect(queue.getLength()).toEqual(0);
     });
@@ -32,23 +33,23 @@ module Handler {
 
     it("makePromise then handle 2 events: leaves second event queued",
         function(done) {
-      queue.onceHandler().then((s) => {
-        expect(s).toEqual('A');
+      queue.onceHandler(lenHandler).then((s) => {
+        expect(s).toEqual(1);
         expect(queue.getLength()).toEqual(1);
         done();
       });
       queue.handle('A');
-      queue.handle('B');
+      queue.handle('BB');
     });
 
     it("3 events then makePromise leaves 2 events and handles first",
         function(done) {
       queue.handle('A');
-      queue.handle('B');
-      queue.handle('C');
-      queue.onceHandler().then((s) => {
+      queue.handle('BB');
+      queue.handle('CCC');
+      queue.onceHandler(lenHandler).then((n:number) => {
         expect(queue.getLength()).toEqual(2);
-        expect(s).toEqual('A');
+        expect(n).toEqual(1);
         done();
       });
     });
@@ -56,22 +57,22 @@ module Handler {
     it("3 events then makePromise to remove elements in order until empty",
         function(done) {
       queue.handle('A');
-      queue.handle('B');
-      queue.handle('C');
-      queue.onceHandler()
-        .then((s) => {
+      queue.handle('BBB');
+      queue.handle('CCCCC');
+      queue.onceHandler(lenHandler)
+        .then((n:number) => {
           expect(queue.getLength()).toEqual(2);
-          expect(s).toEqual('A');
+          expect(n).toEqual(1);  // length of 'A'
         })
-        .then(queue.onceHandler)
-        .then((s) => {
+        .then(() => { return queue.onceHandler(lenHandler); })
+        .then((n:number) => {
           expect(queue.getLength()).toEqual(1);
-          expect(s).toEqual('B');
+          expect(n).toEqual(3);  // length of 'BBB'
         })
-        .then(queue.onceHandler)
-        .then((s) => {
+        .then(() => { return queue.onceHandler(lenHandler); })
+        .then((n:number) => {
           expect(queue.getLength()).toEqual(0);
-          expect(s).toEqual('C');
+          expect(n).toEqual(5); // length of 'CCCCC'
           done();
         })
     });
