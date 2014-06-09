@@ -23,7 +23,6 @@ declare module Handler {
     // by then that neither `onceHandler` or `setHandler` is called as they
     // will reject the current onceHandler promise and make a new promise).
     public onceHandler :(handler:(x:T) => T2) => Promise<T2>;
-
     // As above, but allows handler itself to be async.
     public oncePromiseFnHandler :(handler:(x:T) => Promise<T2>)
         => Promise<T2>;
@@ -33,5 +32,7 @@ declare module Handler {
     // is not empty & the handler itself is set (if `setHandler(null)` is
     // called while hanlding an entry, then further elements will be queued.
     public setHandler :(handler:(x:T) => T2) => void;
+    // As above, but allows handler to be async function.
+    public setPromiseHandler :(handler:(x:T) => Promise<T2>) => void;
   }
 }

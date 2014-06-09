@@ -32,7 +32,7 @@ module Handler {
     private queue_ :PendingThing<T, T2>[] = [];
 
     // handler for things on the queue.
-    private handler_ :(x:T) => T2 = null;
+    private handler_ :(x:T) => Promise<T2> = null;
 
     // We store a handler's promise rejection function and cal it when
     // setHandler is called for an unfullfilled promise. We need to do this
@@ -61,7 +61,7 @@ module Handler {
     // handle or queue the given thing.
     public handle = (x:T) : Promise<T2> => {
       if(this.handler_) {
-        return Promise.resolve(this.handler_(x));
+        return this.handler_(x);
       }
       var pendingThing = new PendingThing(x);
       this.queue_.push(pendingThing);
@@ -74,7 +74,7 @@ module Handler {
     private processQueue_ = () : void => {
       while(this.handler_ && this.queue_.length > 0) {
         var pendingThing = this.queue_.shift();
-        pendingThing.fulfill(this.handler_(pendingThing.thing));
+        this.handler_(pendingThing.thing).then(pendingThing.fulfill);
       }
     }
 
@@ -133,6 +133,22 @@ module Handler {
     // If you have an unfulfilled promise, calling setHandler rejects the old
     // promise.
     public setHandler = (handler:(x:T) => T2) : void => {
+      if (this.rejectFn_) {
+        // Question: How efficient is new Error? Maybe best to have rejection
+        // with error.
+        this.rejectFn_(new Error('Cancelled by a call to setHandler'));
+        this.rejectFn_ = null;
+      }
+      this.handler_ = (x:T) => { return Promise.resolve(handler(x)); };
+      this.processQueue_();
+    }
+
+    // Calling setHandler with null pauses handling and queue all objects to be
+    // handled.
+    //
+    // If you have an unfulfilled promise, calling setHandler rejects the old
+    // promise.
+    public setPromiseHandler = (handler:(x:T) => Promise<T2>) : void => {
       if (this.rejectFn_) {
         // Question: How efficient is new Error? Maybe best to have rejection
         // with error.
