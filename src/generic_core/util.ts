@@ -136,8 +136,52 @@ function isDefined(val) {
 }
 
 
+/**
+ * Given an array or object, returns a deep copy. Given a primitive type,
+ * returns the input unchanged (since such values are immutable).
+ *
+ * When cloning objects, copies only enumberable properties.
+ * Throws an exception if asked to clone a function.
+ * Does not attempt to handle cyclical object references correctly.
+ */
 function cloneDeep(val) {
-  return JSON.parse(JSON.stringify(val)); // quick and dirty
+  // Handle null separately, since typeof null === 'object'.
+  if (val === null) {
+    return null;
+  }
+
+  switch (typeof val) {
+    case 'boolean':
+      // fallthrough intended
+    case 'number':
+      // fallthrough intended
+    case 'string':
+      return val;
+
+    case 'undefined':
+      return undefined;
+
+    case 'object': {
+      if (Array.isArray(val)) {
+        var arrayClone = new Array(val.length);
+        for (var i = 0; i < val.length; i++) {
+          arrayClone[i] = cloneDeep(val[i]);
+        }
+        return arrayClone;
+      } else {
+        var objectClone = {};
+        for (var propertyName in val) {
+          objectClone[propertyName] = cloneDeep(val[propertyName]);
+        }
+        return objectClone;
+      }
+    }
+
+    case 'function':
+      throw new Error('Functions cannot be cloned');
+    default:
+      throw new Error('Unsupported input type [' + (typeof val) + ']');
+  }
 }
 
 // returns object[key] if it exists, or default if it doesn't.
