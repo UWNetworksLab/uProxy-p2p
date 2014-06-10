@@ -320,7 +320,7 @@ module Core {
     }
 
     private saveToStorage = () => {
-      var state = this.stateSnapshot();
+      var state = this.currentState();
       storage.save<RemoteInstanceState>(this.getStorePath(), state)
           .then((old) => {
         console.log('Saved instance ' + this.instanceId + ' to storage.');
@@ -331,7 +331,7 @@ module Core {
      * Get the raw attributes of the instance to be sent over to the UI or saved
      * to storage.
      */
-    public stateSnapshot = () : RemoteInstanceState => {
+    public currentState = () : RemoteInstanceState => {
       return {
         instanceId:  this.instanceId,
         description: this.description,
@@ -352,7 +352,7 @@ module Core {
      * Returns a snapshot of a RemoteInstance's state for the UI. This includes
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public stateSnapshotForUi = () : RemoteInstanceForUiState => {
+    public currentStateForUi = () : RemoteInstanceForUiState => {
       return {
         instanceId:           this.instanceId,
         description:          this.description,

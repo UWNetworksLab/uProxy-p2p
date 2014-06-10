@@ -397,7 +397,7 @@ describe('Core.User', () => {
   describe('save & load', () => {
 
     it('can snapthot its state', () => {
-      expect(user.stateSnapshot()).toEqual({
+      expect(user.currentState()).toEqual({
         userId: 'fakeuser',
         name: 'Alice',
         instanceIds: ['fakeinstance']
@@ -410,7 +410,7 @@ describe('Core.User', () => {
         name: 'Alice Still',
         instanceIds: []
       })
-      expect(user.stateSnapshot()).toEqual({
+      expect(user.currentState()).toEqual({
         userId: 'fakeuser',
         name: 'Alice Still',
         instanceIds: []

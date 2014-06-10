@@ -388,7 +388,7 @@ module Core {
         }
       }
       var instances =
-          mostRecentInstance ? [mostRecentInstance.stateSnapshotForUi()] : [];
+          mostRecentInstance ? [mostRecentInstance.currentStateForUi()] : [];
 
       // TODO: there is a bug where sometimes this.profile.name is not set,
       // even though we have this.name set.  This should be tracked down, but for now
@@ -421,7 +421,7 @@ module Core {
      * Get the raw attributes of the User to be sent over UI or saved to
      * storage.
      */
-    public stateSnapshot = () : UserState => {
+    public currentState = () : UserState => {
       return {
         userId: this.userId,
         name: this.name,
@@ -448,7 +448,7 @@ module Core {
       });
     }
     private saveToStorage = () => {
-      var state = this.stateSnapshot();
+      var state = this.currentState();
       storage.save<UserState>(this.getStorePath(), state)
           .then((old) => {
         this.log('saved to storage, ' + this.userId);

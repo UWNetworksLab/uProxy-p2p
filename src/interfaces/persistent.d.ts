@@ -31,8 +31,18 @@ declare module Core {
      * Returns an object that encapsulates the state of the 'this' object.
      * There are no requirements regarding the content of the returned object,
      * except that it must be one that restoreState() is able to consume.
+     *
+     * Implementations MUST return objects that they will never again mutate.
+     * All of the returned object's proeprty values must be of primitive types
+     * or be deep copies. The reason is that callers expect the returned value
+     * to be an unchanging representation of the state at the time
+     * 'currentState' was called. For example, if an implementation simply sets
+     * a property "foo" to the instance member 'foo_' of array type, then when
+     * 'foo_' is mutated in the future states previously returned from
+     * 'currentState' will also change, violating this interface's contract
+     * and likely causing subtle breakage.
      */
-    stateSnapshot :() => Object;
+    currentState :() => Object;
 
     /**
      * Updates the state of 'this' to match 'state'.

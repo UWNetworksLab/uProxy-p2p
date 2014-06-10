@@ -184,7 +184,7 @@ module Social {
         this.myInstance = new Core.LocalInstance(this);
         this.log('generated new local instance: ' +
                  this.myInstance.instanceId);
-        return storage.save<Instance>(key, this.myInstance.stateSnapshot()).then((prev) => {
+        return storage.save<Instance>(key, this.myInstance.currentState()).then((prev) => {
           this.log('saved new local instance to storage');
           return this.myInstance;
         });
@@ -309,7 +309,7 @@ module Social {
     }
 
     private saveToStorage_ = () => {
-      var state = this.stateSnapshot();
+      var state = this.currentState();
       storage.save<NetworkState>(this.getStorePath(), state)
           .then((old) => {
         this.log('saved to storage. ' + JSON.stringify(state));
@@ -343,7 +343,7 @@ module Social {
      * The returned state excludes the local instance information, which is
      * saved/loaded separately.
      */
-    public stateSnapshot = () : NetworkState => {
+    public currentState = () : NetworkState => {
       return {
         name: this.name,
         remember: false,

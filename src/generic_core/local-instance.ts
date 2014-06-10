@@ -114,7 +114,7 @@ module Core {
     /**
      * TODO: Come up with a better typing for this.
      */
-    public stateSnapshot = () : Instance => {
+    public currentState = () : Instance => {
       return {
         instanceId:  this.instanceId,
         description: this.description,
