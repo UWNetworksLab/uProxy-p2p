@@ -46,4 +46,8 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.login(network);
     };
 
+    $scope.logout = (network) => {
+      ui.logout(network);
+    };
+
   }]);
