@@ -197,8 +197,8 @@ module UI {
       chrome.notifications.create(
         '',  // notification Id, not needed for now
         {
-          type: "basic",
-          title: "uProxy",
+          type: 'basic',
+          title: 'uProxy',
           message: notificationText,
           iconUrl: 'icons/uproxy-128.png'
         },
