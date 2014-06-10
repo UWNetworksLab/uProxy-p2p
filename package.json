@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/UWNetworksLab/UProxy"
+    "url": "https://github.com/uProxy/UProxy"
   },
   "bugs": {
     "url": "http://github.com/uproxy/uproxy/issues",
@@ -39,6 +39,7 @@
     "typescript": "^0.9.7",
     "uproxy-build-tools": "~0.0.5"
   },
+  "private": true,
   "scripts": {
     "test": "grunt test --verbose"
   }
