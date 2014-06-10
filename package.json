@@ -39,6 +39,7 @@
     "typescript": "^0.9.7",
     "uproxy-build-tools": "~0.0.5"
   },
+  "private": true,
   "scripts": {
     "test": "grunt test --verbose"
   }
