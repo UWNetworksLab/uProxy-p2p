@@ -296,6 +296,8 @@ module Core {
      * accordingly.
      */
     public receiveConsent = (bits:Consent.State) => {
+      var oldProxyConsent = this.consent.asProxy;
+      var oldClientConsent = this.consent.asClient;
       this.consent.asProxy = Consent.updateProxyStateFromRemoteState(
           bits, this.consent.asProxy);
       this.consent.asClient = Consent.updateClientStateFromRemoteState(
@@ -304,6 +306,39 @@ module Core {
       // TODO: Make the UI update granular for just the consent, instead of the
       // entire parent User for this instance.
       this.user.notifyUI();
+      // Fire a notification on the UI, if a state is different.
+      if (oldProxyConsent != this.consent.asProxy) {
+        switch (this.consent.asProxy) {
+          case Consent.ProxyState.REMOTE_OFFERED:
+            ui.sendNotification(this.user.name + ' offered you access.');
+            break;
+          case Consent.ProxyState.GRANTED:
+            ui.sendNotification(this.user.name + ' granted you access.');
+            break;
+          case Consent.ProxyState.USER_REQUESTED:
+            // The only way to land in USER_REQUESTED upon reciving consent bits
+            // is if the remote has revoked access after previously being in
+            // GRANTED.
+            ui.sendNotification(this.user.name + ' revoked your access.');
+            break;
+          default:
+            // Don't display notification for ignoring, and any other states.
+            break;
+        }
+      }
+      if (oldClientConsent != this.consent.asClient) {
+        switch (this.consent.asClient) {
+          case Consent.ClientState.REMOTE_REQUESTED:
+            ui.sendNotification(this.user.name + ' is requesting access.');
+            break;
+          case Consent.ClientState.GRANTED:
+            ui.sendNotification(this.user.name + ' has agreed to your offer of access.');
+            break;
+          default:
+            // Don't display notification for ignoring, and any other states.
+            break;
+        }
+      }
     }
 
     /**
