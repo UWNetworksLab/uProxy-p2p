@@ -511,6 +511,14 @@ module UI {
         () => { console.warn('login failed for ' + network) });
     }
 
+    public logout = (network) => {
+      this.core.logout(network);
+      // Immediately set the network to be offline, because instant UI feedback
+      // to the user's action is more important than waiting for a roundtrip
+      // Core-UI update message in the logging out case.
+      model.networks[network].online = false;
+    }
+
     public isCurrentProxyClient = (user: User) : boolean => {
       for (var i = 0; i < user.instances.length; ++i) {
         if (user.instances[i].isCurrentProxyClient) {
