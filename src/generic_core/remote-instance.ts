@@ -6,6 +6,7 @@
  * consent, proxying status, and any other signalling information.
  */
 /// <reference path='../interfaces/instance.d.ts' />
+/// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='social.ts' />
 

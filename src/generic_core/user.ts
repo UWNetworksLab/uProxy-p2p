@@ -23,8 +23,9 @@
 /// <reference path='remote-instance.ts' />
 
 /// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/user.d.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
+/// <reference path='../interfaces/persistent.d.ts' />
+/// <reference path='../interfaces/user.d.ts' />
 
 module Core {
 

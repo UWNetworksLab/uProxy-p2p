@@ -19,6 +19,7 @@
  */
 /// <reference path='user.ts' />
 /// <reference path='../interfaces/network.d.ts' />
+/// <reference path='../interfaces/persistent.d.ts' />
 
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
