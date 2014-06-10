@@ -307,6 +307,8 @@ module Core {
       // entire parent User for this instance.
       this.user.notifyUI();
       // Fire a notification on the UI, if a state is different.
+      // TODO: Determine if we should attach the instance id / decription to the
+      // user name as part of the notification text.
       if (oldProxyConsent != this.consent.asProxy) {
         switch (this.consent.asProxy) {
           case Consent.ProxyState.REMOTE_OFFERED:
@@ -332,7 +334,7 @@ module Core {
             ui.sendNotification(this.user.name + ' is requesting access.');
             break;
           case Consent.ClientState.GRANTED:
-            ui.sendNotification(this.user.name + ' has agreed to your offer of access.');
+            ui.sendNotification(this.user.name + ' has accepted your offer of access.');
             break;
           default:
             // Don't display notification for ignoring, and any other states.
