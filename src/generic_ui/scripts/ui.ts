@@ -124,7 +124,7 @@ module UI {
         'online': false,
         'myAccess': false,
         'friendsAccess': false,
-        'uproxy': false
+        'uproxy': true
     };
 
     /**
@@ -334,27 +334,29 @@ module UI {
     }
 
     /**
-     * Returns |true| if contact |c| should *not* currently be visible in the
+     * Returns |false| if contact |c| should *not* currently be visible in the
      * roster.
      */
-    contactIsFiltered = (user:UI.User) => {
-      var searchText = this.search,
-          compareString = user.name.toLowerCase();
-      // First, compare filters.
-      if ((this.filters.online        && !user.online)    ||
-          (this.filters.uproxy        && !user.canUProxy) ||
-          (this.filters.myAccess      && !user.givesMe)   ||
-          (this.filters.friendsAccess && !user.usesMe)) {
-        return true;
-      }
-      // Otherwise, if there is no search text, this.user is visible.
-      if (!searchText) {
-        return false;
-      }
-      if (compareString.indexOf(searchText) >= 0) {
-        return false;
-      }
-      return true;  // Does not match the search text, should be hidden.
+    doesContactPassFilter = () => {
+      return (user :UI.User) : boolean => {
+        var searchText = this.search,
+            compareString = user.name.toLowerCase();
+        // First, compare filters.
+        if ((this.filters.online        && !user.online)    ||
+            (this.filters.uproxy        && !user.canUProxy) ||
+            (this.filters.myAccess      && !user.givesMe)   ||
+            (this.filters.friendsAccess && !user.usesMe)) {
+          return false;
+        }
+        // Otherwise, if there is no search text, this.user is visible.
+        if (!searchText) {
+          return true;
+        }
+        if (compareString.indexOf(searchText) >= 0) {
+          return true;
+        }
+        return false;  // Does not match the search text, should be hidden.
+      };
     }
 
     // --------------------------- Focus & Notifications ---------------------------
@@ -499,6 +501,18 @@ module UI {
       console.log('Synchronized user.', user);
       this.refreshDOM();
     };
+
+    // TODO: this might be more efficient if we just had a ui.hasUProxyBuddies
+    // boolean that we could keep up to date.
+    public hasOnlineUProxyBuddies = () => {
+      for (var i = 0; i < model.roster.length; ++i) {
+        var user :UI.User = model.roster[i]; 
+        if (user.instances.length > 0 && user.online) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     public login = (network) => {
       this.core.login(network).then(
