@@ -154,10 +154,10 @@ module Social {
      */
     private syncFromStorage_ = () : Promise<void> => {
       var preparedMyself = this.prepareLocalInstance_();
-      var preparedRoster = storage.load<SerializedNetwork>(this.getStorePath())
-          .then((json) => {
+      var preparedRoster = storage.load<NetworkState>(this.getStorePath())
+          .then((state) => {
         this.log('loading previous state.');
-        this.deserialize(json);
+        this.restoreState(state);
       }).catch((e) => {
         this.log('freshly initialized.');
       });
@@ -184,7 +184,7 @@ module Social {
         this.myInstance = new Core.LocalInstance(this);
         this.log('generated new local instance: ' +
                  this.myInstance.instanceId);
-        return storage.save<Instance>(key, this.myInstance.serialize()).then((prev) => {
+        return storage.save<Instance>(key, this.myInstance.stateSnapshot()).then((prev) => {
           this.log('saved new local instance to storage');
           return this.myInstance;
         });
@@ -309,20 +309,20 @@ module Social {
     }
 
     private saveToStorage_ = () => {
-      var json = this.serialize();
-      storage.save<SerializedNetwork>(this.getStorePath(), json)
+      var state = this.stateSnapshot();
+      storage.save<NetworkState>(this.getStorePath(), state)
           .then((old) => {
-        this.log('saved to storage. ' + JSON.stringify(json));
+        this.log('saved to storage. ' + JSON.stringify(state));
       }).catch((e) => {
         console.error('failed to save to storage', e);
       });
     }
 
     private loadUserFromStorage_ = (userId :string) => {
-      storage.load<Core.SerialUser>(this.getStorePath() + userId)
-          .then((json) => {
+      storage.load<Core.UserState>(this.getStorePath() + userId)
+          .then((state) => {
         this.roster[userId] = new Core.User(this, userId);
-        this.roster[userId].deserialize(json);
+        this.roster[userId].restoreState(state);
         this.log('successfully loaded user ' + userId);
       }).catch((e) => {
         this.error('could not load user ' + userId);
@@ -340,12 +340,10 @@ module Social {
     }
 
     /**
-     * Serialize information about this network to be saved to storage or sent
-     * to UI. This excludes the local instance information, which is
+     * The returned state excludes the local instance information, which is
      * saved/loaded separately.
      */
-    // TODO: This function does not actually serialize anything. Rename it.
-    public serialize = () : SerializedNetwork => {
+    public stateSnapshot = () : NetworkState => {
       return {
         name: this.name,
         remember: false,
@@ -355,16 +353,14 @@ module Social {
       }
     }
 
-    // TODO: This function does not actually deserialize anything. Rename it.
-    // TODO: The parameter is an actual JS object, not JSON text. Rename it.
-    public deserialize = (json :SerializedNetwork) => {
-      if (this.name !== json.name) {
-        throw Error('Loading unexpected network name!' + json.name);
+    public restoreState = (state :NetworkState) => {
+      if (this.name !== state.name) {
+        throw Error('Loading unexpected network name!' + state.name);
       }
-      this.remember = json.remember;
+      this.remember = state.remember;
       // Load all users based on userIds.
-      for (var i = 0 ; i < json.userIds.length ; ++i) {
-        this.loadUserFromStorage_(json.userIds[i]);
+      for (var i = 0 ; i < state.userIds.length ; ++i) {
+        this.loadUserFromStorage_(state.userIds[i]);
       }
     }
 

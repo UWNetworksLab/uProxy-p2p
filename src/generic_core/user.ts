@@ -388,7 +388,7 @@ module Core {
         }
       }
       var instances =
-          mostRecentInstance ? [mostRecentInstance.serializeForUI()] : [];
+          mostRecentInstance ? [mostRecentInstance.stateSnapshotForUi()] : [];
 
       // TODO: there is a bug where sometimes this.profile.name is not set,
       // even though we have this.name set.  This should be tracked down, but for now
@@ -421,35 +421,35 @@ module Core {
      * Get the raw attributes of the User to be sent over UI or saved to
      * storage.
      */
-    public serialize = () : SerialUser => {
+    public stateSnapshot = () : UserState => {
       return {
         userId: this.userId,
         name: this.name,
         instanceIds: Object.keys(this.instances_)
       }
     }
-    public deserialize = (json :SerialUser) => {
-      this.userId = json.userId;
-      this.name = json.name;
+    public restoreState = (state :UserState) => {
+      this.userId = state.userId;
+      this.name = state.name;
       this.instances_ = {};
       // Load actual instance objects.
-      for (var i = 0 ; i < json.instanceIds.length ; ++i) {
-        this.loadInstanceFromStorage_(json.instanceIds[i]);
+      for (var i = 0 ; i < state.instanceIds.length ; ++i) {
+        this.loadInstanceFromStorage_(state.instanceIds[i]);
       }
       this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
       this.notifyUI();
     }
     private loadInstanceFromStorage_ = (instanceId :string) => {
-      storage.load<Core.SerialRemoteInstance>(this.getStorePath() + instanceId)
-          .then((json) => {
-        this.instances_[instanceId] = new Core.RemoteInstance(this, json);
+      storage.load<Core.RemoteInstanceState>(this.getStorePath() + instanceId)
+          .then((state) => {
+        this.instances_[instanceId] = new Core.RemoteInstance(this, state);
       }).catch((e) => {
         this.log('could not load instance ' + instanceId);
       });
     }
     private saveToStorage = () => {
-      var json = this.serialize();
-      storage.save<SerialUser>(this.getStorePath(), json)
+      var state = this.stateSnapshot();
+      storage.save<UserState>(this.getStorePath(), state)
           .then((old) => {
         this.log('saved to storage, ' + this.userId);
       }).catch((e) => {
@@ -480,7 +480,7 @@ module Core {
 
   }  // class User
 
-  export interface SerialUser {
+  export interface UserState {
     userId      :string;
     name        :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will

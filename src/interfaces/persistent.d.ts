@@ -1,34 +1,43 @@
 declare module Core {
 
   /**
-   * Classes which make use of Storage should implement a consistent
-   * interface for accessing the Storage object.
+   * Represents an entity whose state can be captured and restored, such as
+   * with storage in a repository and subsequent retrieval.
+   *
+   * The interface represents state as an object, not as JSON text. JSON
+   * serialization, if appropriate, occurs outside of this interface.
    */
   export interface Persistent {
 
     /**
-     * Returns the prefix string for saving / loading the class from storage.
-     * Use slash-delimination.
+     * Returns the prefix string for saving / loading the object from storage.
+     * Paths are slash-delimited.
+     *
      * Expected: This function should return a string that ends with a /, for
      * further path appending.
+     *
+     * TODO: Why is the string a "prefix"? How is the prefix related to the
+     * location at which the entity will be stored? What "appending" might
+     * occur, and how is it related to implementations of this interface? Why
+     * are persistent entities concerned with where they are stored?
+     *
+     * TODO: Consider removing this method. The issue of storage paths applies
+     * only to saving & loading, but this interface is not involved in saving
+     * or loading.
      */
     getStorePath :() => string;
 
     /**
-     * Returns an object containing all the relevant attributes of this class.
-     * This returns an Object and not a string because JSON parse/stringify
-     * occurs only at the message-passing layer. If it occured at this
-     * interface, then there would be a lot of messy JSON code in every class
-     * which implemented Core.Persistent.
+     * Returns an object that encapsulates the state of the 'this' object.
+     * There are no requirements regarding the content of the returned object,
+     * except that it must be one that restoreState() is able to consume.
      */
-    serialize :() => Object;
+    stateSnapshot :() => Object;
 
     /**
-     * From the serialized attribute object, update with the new attributes.
-     * Serialize and deserialize must map back and forth perfectly on the
-     * attribues that were saved.
+     * Updates the state of 'this' to match 'state'.
      */
-    deserialize :(json :Object) => void;
+    restoreState :(state :Object) => void;
 
   }  // interface Core.Persistent
 

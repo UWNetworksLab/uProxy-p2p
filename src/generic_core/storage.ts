@@ -1,5 +1,5 @@
 /**
- * state-storage.ts
+ * storage.ts
  *
  * Provides a promise-based interface to the storage provider.
  */

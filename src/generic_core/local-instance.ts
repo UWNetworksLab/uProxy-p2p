@@ -27,7 +27,7 @@ module Core {
      */
     public constructor(public network :Social.Network, load ?:Instance) {
       if (load) {
-        this.deserialize(load);
+        this.restoreState(load);
         return;
       }
       this.instanceId = LocalInstance.generateInstanceID();
@@ -112,20 +112,19 @@ module Core {
     }
 
     /**
-     * Return JSON object of self, which can be serialized.
      * TODO: Come up with a better typing for this.
      */
-    public serialize = () : Instance => {
+    public stateSnapshot = () : Instance => {
       return {
         instanceId:  this.instanceId,
         description: this.description,
         keyHash:     this.keyHash,
       };
     }
-    public deserialize = (json) => {
-      this.instanceId = json.instanceId;
-      this.description = json.description;
-      this.keyHash = json.keyHash;
+    public restoreState = (state) => {
+      this.instanceId = state.instanceId;
+      this.description = state.description;
+      this.keyHash = state.keyHash;
     }
 
   }  // class Core.LocalInstance
