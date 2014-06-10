@@ -2,9 +2,7 @@
 
 declare module Social {
 
-  // TODO: Instances are actually JS objects, not in serialized form. Give this
-  // interface a more correct name.
-  interface SerializedNetwork {
+  interface NetworkState {
     name     :string;
     remember :boolean;    // TODO: Remember what?
     userIds  :string[];

@@ -345,13 +345,13 @@ describe('Social.FreedomNetwork', () => {
 
   // TODO: get this unit test to pass.
   /*
-  it('Can deserialize multiple users', (done) => {
-    var serialNetworkData :Social.SerialNetwork = {
+  it('Can restore a state that has multiple users', (done) => {
+    var networkState :Social.NetworkState = {
       name: 'mock',
       remember: false,
       userIds: ['userA', 'userB', 'userC']
     }
-    network.deserialize(serialNetworkData).then(() => {
+    network.restoreState(networkState).then(() => {
       expect(network.getUser('userA')).toEqual('userA');
       expect(network.getUser('userB')).toEqual('userB');
       expect(network.getUser('userC')).toEqual('userC');

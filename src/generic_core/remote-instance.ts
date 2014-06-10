@@ -320,8 +320,8 @@ module Core {
     }
 
     private saveToStorage = () => {
-      var json = this.serialize();
-      storage.save<SerialRemoteInstance>(this.getStorePath(), json)
+      var state = this.currentState();
+      storage.save<RemoteInstanceState>(this.getStorePath(), state)
           .then((old) => {
         console.log('Saved instance ' + this.instanceId + ' to storage.');
       });
@@ -330,9 +330,8 @@ module Core {
     /**
      * Get the raw attributes of the instance to be sent over to the UI or saved
      * to storage.
-     * TODO: Better typing for the serial object.
      */
-    public serialize = () : SerialRemoteInstance => {
+    public currentState = () : RemoteInstanceState => {
       return {
         instanceId:  this.instanceId,
         description: this.description,
@@ -341,19 +340,19 @@ module Core {
         access:      this.access
       }
     }
-    public deserialize = (json :SerialRemoteInstance) => {
-      this.instanceId = json.instanceId,
-      this.description = json.description,
-      this.keyHash = json.keyHash,
-      this.consent = json.consent,
-      this.access = json.access
+    public restoreState = (state :RemoteInstanceState) => {
+      this.instanceId = state.instanceId,
+      this.description = state.description,
+      this.keyHash = state.keyHash,
+      this.consent = state.consent,
+      this.access = state.access
     }
 
     /**
-     * Serialize RemoteInstance for the UI.  This includes fields like
-     * isCurrentProxyClient that we don't want to save to storage.
+     * Returns a snapshot of a RemoteInstance's state for the UI. This includes
+     * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public serializeForUI = () : SerialRemoteInstanceForUI => {
+    public currentStateForUi = () : RemoteInstanceForUiState => {
       return {
         instanceId:           this.instanceId,
         description:          this.description,
@@ -396,13 +395,13 @@ module Core {
 
   }  // class Core.RemoteInstance
 
-  export interface SerialRemoteInstance extends Instance {
+  export interface RemoteInstanceState extends Instance {
     keyHash :string;
     consent :ConsentState;
     access  :AccessState;
   }
 
-  export interface SerialRemoteInstanceForUI extends Instance {
+  export interface RemoteInstanceForUiState extends Instance {
     keyHash              :string;
     consent              :ConsentState;
     access               :AccessState;

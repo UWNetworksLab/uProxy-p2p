@@ -396,21 +396,21 @@ describe('Core.User', () => {
 
   describe('save & load', () => {
 
-    it('serializes', () => {
-      expect(user.serialize()).toEqual({
+    it('can snapthot its state', () => {
+      expect(user.currentState()).toEqual({
         userId: 'fakeuser',
         name: 'Alice',
         instanceIds: ['fakeinstance']
       });
     });
 
-    it('deserializes', () => {
-      user.deserialize({
+    it('can restore its state', () => {
+      user.restoreState({
         userId: 'fakeuser',
         name: 'Alice Still',
         instanceIds: []
       })
-      expect(user.serialize()).toEqual({
+      expect(user.currentState()).toEqual({
         userId: 'fakeuser',
         name: 'Alice Still',
         instanceIds: []
