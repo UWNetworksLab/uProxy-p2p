@@ -1,4 +1,4 @@
-/// <reference path='../generic_core/storage.ts' />
+/// <reference path='persistent.d.ts' />
 
 declare module Social {
 

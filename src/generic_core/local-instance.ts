@@ -6,6 +6,7 @@
  */
 /// <reference path='nouns-and-adjectives.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
+/// <reference path='../interfaces/persistent.d.ts' />
 
 module Core {
 
