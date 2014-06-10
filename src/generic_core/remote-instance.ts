@@ -9,6 +9,7 @@
 /// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='social.ts' />
+/// <reference path='util.ts' />
 
 module Core {
 
@@ -369,13 +370,13 @@ module Core {
      * to storage.
      */
     public currentState = () : RemoteInstanceState => {
-      return {
+      return cloneDeep({
         instanceId:  this.instanceId,
         description: this.description,
         keyHash:     this.keyHash,
         consent:     this.consent,
         access:      this.access
-      }
+      });
     }
     public restoreState = (state :RemoteInstanceState) => {
       this.instanceId = state.instanceId,
@@ -390,14 +391,14 @@ module Core {
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
     public currentStateForUi = () : RemoteInstanceForUiState => {
-      return {
+      return cloneDeep({
         instanceId:           this.instanceId,
         description:          this.description,
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
         isCurrentProxyClient: this.isCurrentProxyClient_
-      }
+      });
     }
 
     public getLocalPeerId = (isLocalServer :boolean)

@@ -21,6 +21,7 @@
  * client, but with the 'uProxy' non-human client.
  */
 /// <reference path='remote-instance.ts' />
+/// <reference path='util.ts' />
 
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
@@ -422,11 +423,11 @@ module Core {
      * storage.
      */
     public currentState = () : UserState => {
-      return {
+      return cloneDeep({
         userId: this.userId,
         name: this.name,
         instanceIds: Object.keys(this.instances_)
-      }
+      });
     }
     public restoreState = (state :UserState) => {
       this.userId = state.userId;

@@ -5,6 +5,7 @@
  * installation.
  */
 /// <reference path='nouns-and-adjectives.ts' />
+/// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
@@ -115,11 +116,11 @@ module Core {
      * TODO: Come up with a better typing for this.
      */
     public currentState = () : Instance => {
-      return {
+      return cloneDeep({
         instanceId:  this.instanceId,
         description: this.description,
         keyHash:     this.keyHash,
-      };
+      });
     }
     public restoreState = (state) => {
       this.instanceId = state.instanceId;
