@@ -401,7 +401,7 @@ function updateClientProxyConnection(localPeerIdString :string,
   }
   instance.updateClientProxyConnection(isConnected);
   if (isConnected) {
-    var user :Core.User = instance.user; 
+    var user :Core.User = instance.user;
     var displayName :string = (user.name && user.name !== 'pending') ?
       user.name : user.userId;
     ui.sendNotification(displayName + ' is now proxying through you.');

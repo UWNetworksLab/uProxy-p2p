@@ -16,6 +16,7 @@ describe('Core', () => {
   // Set up a fake network -> roster -> user -> instance chain.
   var network = <Social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
+  network['login'] = (remember:boolean) => { return Promise.resolve() };
   var user = <Core.User><any>jasmine.createSpy('user');
   user.getInstance = null;
   user.notifyUI = () => {};
@@ -24,6 +25,12 @@ describe('Core', () => {
     instanceId: 'instance-alice',
     keyHash:    'fake-hash-alice',
     description: 'alice peer',
+  });
+
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
   });
 
   it('passes modifyConsent to the correct instance', () => {
@@ -50,6 +57,21 @@ describe('Core', () => {
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
+  });
+
+  it('login fails for invalid network', (done) => {
+    Core.login('nothing').catch(() => {
+      expect(console.warn).toHaveBeenCalled();
+      done();
+    });
+  });
+
+  it('login continues to call login on correct network', (done) => {
+    spyOn(Social, 'getNetwork').and.callFake(() => {
+      return network;
+    });
+    spyOn(network, 'login').and.returnValue(Promise.resolve());
+    Core.login('network').then(done);
   });
 
   it('updateDescription updates the LocalInstance for all networks', () => {

@@ -28,10 +28,11 @@
 
 module Social {
 
+  var LOGIN_TIMEOUT :number = 5000;  // ms
+
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
   var PREFIX:string = 'SOCIAL-';
-
   // Global mapping of social network names (without prefix) to actual Network
   // instances that interact with that social network.
   //
@@ -92,6 +93,7 @@ module Social {
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
     private remember :boolean;
+    private loginTimeout_ :number = undefined;  // A js Timeout ID.
 
     private SaveKeys = {
       ME: 'me'
@@ -371,6 +373,20 @@ module Social {
         // Login is already pending, reject promise so the caller knows
         // this request to login failed (the pending request may still succeed).
         console.warn('Login already pending for ' + this.name);
+        // However, prepare a timeout to clear the login attempt in case
+        // freedom's login is actually never going to return, which would
+        // mean the user would never be able to actually retry. Timeout is only
+        // initiated after receiving at least one retry, because the first
+        // login-dialogue could take an arbitrary amount of time.
+        if (undefined === this.loginTimeout_) {
+          this.loginTimeout_ = setTimeout(() => {
+            this.onceLoggedIn_ = null;
+            this.loginTimeout_ = undefined;
+            this.error('Login timeout');
+            ui.sendError('There was a problem signing in to ' + this.name +
+                         '. Please try again.');
+          }, LOGIN_TIMEOUT);
+        }
         return Promise.reject();
       } else if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
@@ -392,9 +408,17 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(this.notifyUI)
+          // TODO: Only fire a popup notification the 1st few times.
+          // (what's a 'few'?)
+          .then(() => {
+            ui.sendNotification('You successfully signed on to ' + this.name +
+                                ' as ' + this.myInstance.userId);
+          })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
+            ui.sendError('There was a problem signing in to ' + this.name +
+                         '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
     }
