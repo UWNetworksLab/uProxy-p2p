@@ -93,7 +93,7 @@ module Social {
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
     private remember :boolean;
-    private loginTimeout_ :number = -1;  // A js Timeout ID.
+    private loginTimeout_ :number = undefined;  // A js Timeout ID.
 
     private SaveKeys = {
       ME: 'me'
@@ -378,10 +378,10 @@ module Social {
         // mean the user would never be able to actually retry. Timeout is only
         // initiated after receiving at least one retry, because the first
         // login-dialogue could take an arbitrary amount of time.
-        if (this.loginTimeout_ < 0) {
+        if (undefined === this.loginTimeout_) {
           this.loginTimeout_ = setTimeout(() => {
             this.onceLoggedIn_ = null;
-            this.loginTimeout_ = -1;
+            this.loginTimeout_ = undefined;
             this.error('Login timeout');
             ui.sendError('There was a problem signing in to ' + this.name +
                          '. Please try again.');
@@ -411,7 +411,7 @@ module Social {
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.sendNotification('You successfully signed-in to ' + this.name +
+            ui.sendNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
