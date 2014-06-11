@@ -392,9 +392,17 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(this.notifyUI)
+          // TODO: Only fire a popup notification the 1st few times.
+          // (what's a 'few'?)
+          .then(() => {
+            ui.sendNotification('You successfully signed-in to ' + this.name +
+                                ' as ' + this.myInstance.userId);
+          })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
+            ui.sendError('There was a problem signing in to ' + this.name +
+                         '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
     }

@@ -52,6 +52,9 @@ describe('Core', () => {
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
   });
 
+  it('sign-in succeeds', () => {
+  });
+
   it('updateDescription updates the LocalInstance for all networks', () => {
     var networkA = <Social.Network><any>jasmine.createSpy('networkA');
     networkA.getLocalInstance = null;
