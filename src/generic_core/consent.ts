@@ -1,6 +1,4 @@
 /// <reference path='util.ts' />
-// Meets specification:
-// * src/interfaces/consent.d.ts
 
 // Consent is REQUESTED by the receiver and OFFERED by the giver; when consent
 // is requested and offered, then it is GRANTED. Before either has happened,
