@@ -2,24 +2,28 @@
 // Meets specification:
 // * src/interfaces/consent.d.ts
 
-// Consent is REQUESTED by the receiver and OFFERD by the giver; when consent is
-// requested and offered, then it is GRANTED. Before either have happened, the
-// state is NONE. IGNORE_XXX actions can happen by the side that has not taken
-// any action. This puts the state into the IGNORED state.
+// Consent is REQUESTED by the receiver and OFFERED by the giver; when consent
+// is requested and offered, then it is GRANTED. Before either has happened,
+// the state is NONE. IGNORE_XXX actions can happen by the side that has not
+// taken any action. This puts the state into the IGNORED state.
 //
-// IGNORE states are particularly important when we want to work with an
-// external proxy that auto requests or offers access. e.g. Tor does both and
-// Psiphon always offers. The user wants to be able to be able to ignore these
-// services offer/request.
+// TODO: Correct the statement above. There is no "IGNORED" state.
+//
+// IGNORE_XXX states are particularly important when we want to work with an
+// external proxy that auto-requests or auto-offers access. E.g., Tor does both
+// and Psiphon always offers. The user wants to be able to be able to ignore
+// these services' offers/requests.
 module Consent {
-  // The different state's that uproxy consent can be in w.r.t. a peer. These
+
+  // The different states that uProxy consent can be in w.r.t. a peer. These
   // are the values that get receieved or sent on the wire.
   export interface State {
     isRequesting:boolean;
     isOffering:boolean;
   }
+
   // Action taken by the user. These values are not on the wire. They are passed
-  // as messaged from the UI to the core. They correspond to the different
+  // in messages from the UI to the core. They correspond to the different
   // buttons that the user may be clicking on.
   export enum UserAction {
     // Actions made by user w.r.t. remote as a proxy (changes ProxyState) or
@@ -27,12 +31,14 @@ module Consent {
     // Actions made by user w.r.t. remote as a client (changes ClientState)
     OFFER = 5100, CANCEL_OFFER, ALLOW_REQUEST, IGNORE_REQUEST
   }
+
   // User-level consent state for a remote instance to be a proxy client for the
   // user. This state is stored in local storage for each instance ID we know
   // of.
   export enum ClientState {
     NONE = 6000, USER_OFFERED, REMOTE_REQUESTED, USER_IGNORED_REQUEST, GRANTED
   }
+
   export module ClientState {
     // Get the user's request state to send to the remote from the clientState
     // value.
@@ -65,6 +71,7 @@ module Consent {
   export enum ProxyState {
     NONE = 6100, USER_REQUESTED, REMOTE_OFFERED, USER_IGNORED_OFFER, GRANTED
   }
+
   export module ProxyState {
     // Get the user's request state to send to the remote from the proxyState
     // value.
@@ -98,8 +105,7 @@ module Consent {
 //------------------------------------------------------------------------------
 // The State-Action Transitions
 //------------------------------------------------------------------------------
-// For conciseness, we use |t| for the state-action transition table.
-// (See util.ts for the Finite State Machine implementation)
+// See util.ts for the Finite State Machine implementation.
 
 //------------------------------------------------------------------------------
 // Actions by the user w.r.t. the remote instance as a proxy.
@@ -121,7 +127,7 @@ module Consent {
 }
 
 //------------------------------------------------------------------------------
-// Actions made by the user w.r.t. remote as a client.
+// Actions made by the user w.r.t. the remote instance as a client.
 module Consent {
   var fsm = new FSM<ClientState, UserAction>();
   var S = ClientState;
@@ -156,7 +162,7 @@ module Consent {
 
   // Note: to force a user to see a request they have ignored, the remote can
   // cancel their offer and offer again. At the end of the day, if someone
-  // is being too annoying, you can remove them from your contact lisfsm. Unclear
+  // is being too annoying, you can remove them from your contact list. Unclear
   // we can do better than this.
   fsm.set(ProxyState.USER_IGNORED_OFFER, 0,        ProxyState.NONE);
   fsm.set(ProxyState.USER_IGNORED_OFFER, 1,        ProxyState.USER_IGNORED_OFFER);
@@ -187,7 +193,7 @@ module Consent {
 
   // Note: to force a user to see a request they have ignored, the remote can
   // cancel their request and request again. At the end of the day, if someone
-  // is being too annoying, you can remove them from your contact lisfsm. Unclear
+  // is being too annoying, you can remove them from your contact list. Unclear
   // we can do better than this.
   fsm.set(ClientState.USER_IGNORED_REQUEST,0,   ClientState.NONE);
   fsm.set(ClientState.USER_IGNORED_REQUEST,1,   ClientState.USER_IGNORED_REQUEST);
