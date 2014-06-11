@@ -51,6 +51,9 @@ module Consent {
         case ClientState.USER_OFFERED:
         case ClientState.GRANTED:
           return true;
+        default:
+          throw new Error(
+              'Internal error: Unknown client state [' + clientState + ']');
       }
     }
     export function remoteIsRequesting(clientState:ClientState) : boolean {
@@ -62,6 +65,9 @@ module Consent {
         case ClientState.REMOTE_REQUESTED:
         case ClientState.GRANTED:
           return true;
+        default:
+          throw new Error(
+              'Internal error: Unknown client state [' + clientState + ']');
       }
     }
   }
@@ -84,6 +90,9 @@ module Consent {
         case ProxyState.USER_REQUESTED:
         case ProxyState.GRANTED:
           return true;
+        default:
+          throw new Error(
+              'Internal error: Unknown proxy state [' + proxyState + ']');
       }
     }
     export function remoteIsOffering(proxyState:ProxyState) : boolean {
@@ -95,6 +104,9 @@ module Consent {
         case ProxyState.REMOTE_OFFERED:
         case ProxyState.GRANTED:
           return true;
+        default:
+          throw new Error(
+              'Internal error: Unknown proxy state [' + proxyState + ']');
       }
     }
   }
