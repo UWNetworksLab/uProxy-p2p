@@ -152,6 +152,15 @@ describe('util', () => {
       expect(clone.e.abc).toBe(123);
     });
 
+    it('maps identical references to distinct references', () => {
+      var a = { x: 1 };
+      var foo = { a1: a, a2: a };
+      var clone = cloneDeep(foo);
+
+      expect(clone.a1).toEqual(clone.a2);   // equal...
+      expect(clone.a1).not.toBe(clone.a2);  // ... but not identical
+    });
+
   });
 
 });  // util

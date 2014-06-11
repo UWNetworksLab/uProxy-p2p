@@ -140,9 +140,15 @@ function isDefined(val) {
  * Given an array or object, returns a deep copy. Given a primitive type,
  * returns the input unchanged (since such values are immutable).
  *
- * When cloning objects, copies only enumberable properties.
+ * When cloning objects, copies only enumerable properties.
+ *
+ * Reference handling:
+ *   - Does not attempt to handle cyclical references correctly.
+ *   - Creates a new copy for each occurrence of a reference. Every reference
+ *     in the output will be unique, even if the input contains multiple
+ *     identical references.
+ *
  * Throws an exception if asked to clone a function.
- * Does not attempt to handle cyclical object references correctly.
  */
 function cloneDeep(val) {
   // Handle null separately, since typeof null === 'object'.
