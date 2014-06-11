@@ -384,6 +384,9 @@ module Social {
         interactive: true,
         rememberLogin: remember
       };
+      // TODO: There should be some sort of timeout, in case freedom's login
+      // never returns, causing the UI to behave as if login is always pending,
+      // and the user cannot retry. (This seems to be behind issue #217)
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
