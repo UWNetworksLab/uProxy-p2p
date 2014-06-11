@@ -18,8 +18,8 @@ module Consent {
   // The different states that uProxy consent can be in w.r.t. a peer. These
   // are the values that get receieved or sent on the wire.
   export interface State {
-    isRequesting:boolean;
-    isOffering:boolean;
+    isRequesting :boolean;
+    isOffering   :boolean;
   }
 
   // Action taken by the user. These values are not on the wire. They are passed
@@ -40,10 +40,10 @@ module Consent {
   }
 
   export module ClientState {
-    // Get the user's request state to send to the remote from the clientState
+    // Gets the user's request state to send to the remote from the clientState
     // value.
     export function userIsOffering(clientState:ClientState) : boolean {
-      switch(clientState){
+      switch (clientState) {
         case ClientState.NONE:
         case ClientState.REMOTE_REQUESTED:
         case ClientState.USER_IGNORED_REQUEST:
@@ -54,7 +54,7 @@ module Consent {
       }
     }
     export function remoteIsRequesting(clientState:ClientState) : boolean {
-      switch(clientState){
+      switch (clientState) {
         case ClientState.NONE:
         case ClientState.USER_OFFERED:
           return false;
@@ -73,10 +73,10 @@ module Consent {
   }
 
   export module ProxyState {
-    // Get the user's request state to send to the remote from the proxyState
+    // Gets the user's request state to send to the remote from the proxyState
     // value.
     export function userIsRequesting(proxyState:ProxyState) : boolean {
-      switch(proxyState){
+      switch (proxyState) {
         case ProxyState.NONE:
         case ProxyState.REMOTE_OFFERED:
         case ProxyState.USER_IGNORED_OFFER:
@@ -87,7 +87,7 @@ module Consent {
       }
     }
     export function remoteIsOffering(proxyState:ProxyState) : boolean {
-      switch(proxyState){
+      switch (proxyState) {
         case ProxyState.NONE:
         case ProxyState.USER_REQUESTED:
           return false;
@@ -98,7 +98,6 @@ module Consent {
       }
     }
   }
-
 
 }
 
