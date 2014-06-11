@@ -3,14 +3,17 @@
 // Consent is REQUESTED by the receiver and OFFERED by the giver; when consent
 // is requested and offered, then it is GRANTED. Before either has happened,
 // the state is NONE. IGNORE_XXX actions can happen by the side that has not
-// taken any action. This puts the state into the IGNORED state.
+// taken any action. Doing so sets the state to the corresponding
+// USER_IGNORED_XXX state.
 //
-// TODO: Correct the statement above. There is no "IGNORED" state.
+// USER_IGNORED_XXX states are particularly important when we want to work with
+// an external proxy that auto-requests or auto-offers access. E.g., Tor does
+// both and Psiphon always offers. The user wants to be able to be able to
+// ignore these services' offers/requests.
 //
-// IGNORE_XXX states are particularly important when we want to work with an
-// external proxy that auto-requests or auto-offers access. E.g., Tor does both
-// and Psiphon always offers. The user wants to be able to be able to ignore
-// these services' offers/requests.
+// TODO: Consider renaming these states (e.g., to IGNORING_XXX) to make clear
+// that future requests will continue to be ignored, not just that some prior
+// request was ignored.
 module Consent {
 
   // The different states that uProxy consent can be in w.r.t. a peer. These
