@@ -232,13 +232,12 @@ module UI {
         // Refresh timer is already set, DOM will be refreshed when the
         // timer callback runs.
         return;
-      } else {
-        // Set a timeout for the next refresh.
-        this.refreshTimer_ = setTimeout(() => {
-          this.refreshTimer_ = null;
-          this.refreshFunction_();
-        }, REFRESH_TIMEOUT);
       }
+      // Set a timeout for the next refresh.
+      this.refreshTimer_ = setTimeout(() => {
+        this.refreshTimer_ = null;
+        this.refreshFunction_();
+      }, REFRESH_TIMEOUT);
     }
     public setRefreshHandler = (f :Function) => {
       this.refreshFunction_ = f;
