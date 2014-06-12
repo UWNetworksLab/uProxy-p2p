@@ -99,8 +99,6 @@
                     ng-blur="showFilterTip=false"
                     ng-class="{on:ui.filters.friendsAccess}"
                     ng-click="ui.toggleFilter('friendsAccess')"></button>
-            <!-- TODO: re-enable when we can show 1000+ non-uProxy contacts
-                 without slowing down (https://github.com/uProxy/uProxy/issues/201)
             <button id="uproxy-filter" class="filter"
                     ng-mouseenter="showFilter('uproxy')"
                     ng-focus="showFilter('uproxy')"
@@ -109,7 +107,6 @@
                     ng-mouseleave="showFilterTip=false"
                     ng-class="{on:ui.filters.uproxy}"
                     ng-click="ui.toggleFilter('uproxy')"></button>
-            -->
             <!-- TODO: re-enable when online filter works
             <button id="online-filter" class="filter"
                     ng-mouseenter="showFilter('online')"
@@ -150,8 +147,19 @@
 
         <div id="roster-frame" ng-show="ui.isRoster()">
           <ul class="contacts">
-            <!-- TODO: re-add sort by canUProxy once we are able to show all contacts -->
-            <li ng-repeat="contact in model.roster | filter:ui.doesContactPassFilter() | orderBy : 'name' track by $index"
+            <!-- We need "track by $index" here due to
+                 https://github.com/angular/angular.js/issues/7813
+                 TODO: remove this when that bug is fixed.
+                 TODO: we are currently limiting before ordering, this means that
+                 only a random selection of users will be shown.  If we limit after
+                 sorting, the popup becomes unusably slow after ~3500 users.  We
+                 should move limitTo to be after orderBy once speed isssues
+                 are resolved.
+                 CONSIDER: we may want to do the buddylist outside of angular, so
+                 that we have complete control over sorting, filtering, and the
+                 timing of DOM updates.
+            -->
+            <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo: 100 | orderBy : ['-canUProxy', 'name'] track by $index"
                 ng-click="ui.focusOnUser(contact)"
                 ng-class="{offline:!contact.online}"
                 >
@@ -174,9 +182,11 @@
               <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
             </li>
           </ul>
+          <!--
           <div class="no-contacts-found" ng-hide="ui.hasOnlineUProxyBuddies()">
             No online contacts found with uProxy
           </div>
+          -->
         </div>
 
         <div class="contact-info" id="their-info"
