@@ -228,7 +228,8 @@ module UI {
         // refreshFunction_ is not set, this means the popup has not yet
         // been opened, not an error.
         return;
-      } else if (this.refreshTimer_) {
+      }
+      if (this.refreshTimer_) {
         // Refresh timer is already set, DOM will be refreshed when the
         // timer callback runs.
         return;
