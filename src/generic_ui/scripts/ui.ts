@@ -215,6 +215,7 @@ module UI {
 
     // Refreshing with angular from outside angular.
     private refreshTimer_ = null;
+    private refreshNeeded_ :boolean = false;
     private refreshFunction_ :Function = () => {
       console.warn('Angular has not hooked into UI refresh!');
     };
@@ -232,12 +233,23 @@ module UI {
       if (this.refreshTimer_) {
         // Refresh timer is already set, DOM will be refreshed when the
         // timer callback runs.
+        this.refreshNeeded_ = true;
         return;
       }
-      // Set a timeout for the next refresh.
+      // Refresh the DOM immediately.
+      this.refreshFunction_();
+      // Set a timeout.  Until the timeout callback is excuted, no calls to
+      // refreshFunction_ will be made.  Once the timeout callback runs, we
+      // check to see if there had been any calls to refreshDOM (by checking
+      // this.refreshNeeded_) and if so call refreshFunction_ action.  This
+      // prevents us from making more than 1 refreshFunction_ call within the
+      // REFRESH_TIMEOUT
       this.refreshTimer_ = setTimeout(() => {
+        if (this.refreshNeeded_) {
+          this.refreshFunction_();
+        }
+        this.refreshNeeded_ = false;
         this.refreshTimer_ = null;
-        this.refreshFunction_();
       }, REFRESH_TIMEOUT);
     }
     public setRefreshHandler = (f :Function) => {
