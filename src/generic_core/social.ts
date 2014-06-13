@@ -18,6 +18,7 @@
  *    ...
  */
 /// <reference path='user.ts' />
+/// <reference path='util.ts' />
 /// <reference path='../interfaces/network.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
@@ -346,13 +347,13 @@ module Social {
      * saved/loaded separately.
      */
     public currentState = () : NetworkState => {
-      return {
+      return cloneDeep({
         name: this.name,
         remember: false,
         // Only save and load the userIds in the roster.
         // The actual Users will be saved and loaded separately.
         userIds: Object.keys(this.roster)
-      }
+      });
     }
 
     public restoreState = (state :NetworkState) => {
