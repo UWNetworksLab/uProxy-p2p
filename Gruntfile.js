@@ -361,7 +361,6 @@ module.exports = function(grunt) {
               'build/generic_core/storage.js',
               'build/generic_core/social.js',
               'build/generic_core/core.js',
-              'build/generic_core/start-uproxy.js'
             ]),
         options: {
           // NOTE: Put any helper test-data files here:

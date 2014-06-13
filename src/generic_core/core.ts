@@ -21,7 +21,7 @@
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 /// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
-var storage = new Core.Storage();  // From start-uproxy.ts.
+var storage = new Core.Storage();
 
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
@@ -32,6 +32,8 @@ var bgAppPageChannel = freedom;
 // peers. See [https://github.com/uProxy/socks-rtc] for more information.
 var socksToRtcClient = freedom['SocksToRtc']();
 var rtcToNetServer = freedom['RtcToNet']();
+// Always begin the RTC-to-net server immediately.
+rtcToNetServer.emit('start');
 // The Core's responsibility is to pass messages across the signalling
 // channel using the User / Instance mechanisms.
 
@@ -160,7 +162,6 @@ module Core {
 
   /**
    * Access various social networks using the Social API.
-   * TODO: write a test for this.
    */
   export var login = (networkName:string) : Promise<void> => {
     var network = Social.getNetwork(networkName);
@@ -532,3 +533,8 @@ Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
 // TODO: make the invite mechanism an actual process.
 Core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 });
+
+
+// Now that this module has got itself setup, it sends a 'ready' message to the
+// freedom background page.
+bgAppPageChannel.emit('ready', null);

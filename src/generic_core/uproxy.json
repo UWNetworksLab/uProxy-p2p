@@ -14,8 +14,7 @@
       "user.js",
       "social-enum.js",
       "social.js",
-      "core.js",
-      "start-uproxy.js"
+      "core.js"
     ]
   },
   "dependencies": {
