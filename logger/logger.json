@@ -1,0 +1,80 @@
+{
+  "name": "logger",
+  "description": "Logger Freedom manifest",
+  "app": {
+    "script": [
+      "logger.js"
+    ]
+  },
+  "constraints": {
+    "isolation": "never"
+  },
+  "provides" : [
+    "Logger"
+  },
+  "api": {
+    "Logger": {
+      "getLogBlob": {
+        "type": "method",
+        "value": ["string", "string", "string", "string", "string", "string", 
+                  "string", "string", "string", "string", "string", "string"],
+        "ret": "ArrayBuffer"
+      },
+      "getLogs": {
+        "type": "method",
+        "value": ["string", "string", "string", "string", "string", "string", 
+                  "string", "string", "string", "string", "string", "string"],
+        "ret": "string"
+      },
+      "reset": {
+        "type": "method",
+        "value": [],
+        "ret": []
+      },
+      "enable": {
+        "type": "method",
+        "value": ["boolean"],
+        "ret": []
+      },
+      "setConsoleFilter": {
+        "type": "method",
+        "value": ["string", "string", "string", "string", "string", "string", 
+                  "string", "string", "string", "string", "string", "string"],
+        "ret": []
+      },
+      "debug": {
+        "type": "method",
+        "value": ["string", "string", "any", "any", "any", "any", 
+                  "any", "any", "any", "any", "any", "any"],
+        "ret": []
+      },
+      "info": {
+        "type": "method",
+        "value": ["string", "string", "any", "any", "any", "any", 
+                  "any", "any", "any", "any", "any", "any"],
+        "ret": []
+      },
+      "warn": {
+        "type": "method",
+        "value": ["string", "string", "any", "any", "any", "any", 
+                  "any", "any", "any", "any", "any", "any"],
+        "ret": []
+      },
+      "error": {
+        "type": "method",
+        "value": ["string", "string", "any", "any", "any", "any", 
+                  "any", "any", "any", "any", "any", "any"],
+        "ret": []
+      }
+    }
+  }
+    export function enable(newState: boolean) {
+    enabled = newState;
+  }
+
+  "dependencies": {
+  },
+  "permissions": [
+  ]
+}
+
