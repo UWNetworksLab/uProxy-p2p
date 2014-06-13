@@ -58,6 +58,10 @@ module Social {
         Social.networks[name] = network;
       }
     }
+
+    // TODO: Uncomment this.
+    //Social.networks[name] = new Social.ManualNetwork("manual");
+
     return Social.networks;
   }
 
@@ -73,89 +77,36 @@ module Social {
   }
 
   /**
-   * A Social.Network implementation that deals with a Freedom social provider.
-   *
-   * Handles events from the social provider. 'onUserProfile' events directly
-   * affect the roster of this network, while 'onClientState' and 'onMessage'
-   * events are passed on to the relevant user (provided the user exists).
+   * Implements those portions of the Network interface for which the logic is
+   * common to multiple Network implementations. Essentially an abstract base
+   * class for Network implementations, except that TypeScript does not allow
+   * abstract classes.
    */
-  export class FreedomNetwork implements Network {
+  export class AbstractNetwork implements Network {
+
     public roster     :{[userId:string]:Core.User};
+    // TODO: 'metadata' is both Freedom-specific and unused; remove it from
+    // the Network interface and implementations thereof.
     public metadata   :any;  // Network name, description, icon, etc.
     public myInstance :Core.LocalInstance;
-
-    private freedomApi_ :freedom.Social;
-    // TODO: give real typing to provider_. Ask Freedom not to use overloaded
-    // types.
-    private provider_ :any;  // Special freedom object which is both a function
-                             // and object... cannot typescript.
-
-    // Promise that delays all message handling until fully logged in.
-    private onceLoggedIn_   :Promise<void>;
-    private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
-    private remember :boolean;
-    private loginTimeout_ :number = undefined;  // A js Timeout ID.
 
     private SaveKeys = {
       ME: 'me'
     }
-    // ID returned by setInterval call for monitoring.
-    private monitorIntervalId_ :number = null;
 
-    /**
-     * Initializes the Freedom social provider for this FreedomNetwork and
-     * attaches event handlers.
-     */
     constructor(public name:string) {
-      this.provider_ = freedom[PREFIX + name];
-      this.metadata = this.provider_.manifest;
-      this.remember = false;
+      this.metadata = {};
       this.roster = {};
-      this.onceLoggedIn_ = null;
-      this.instanceMessageQueue_ = [];
-      this.freedomApi_ = this.provider_();
-
-      // TODO: Update these event name-strings when freedom updates to
-      // typescript and Enums.
-      this.freedomApi_.on('onUserProfile',
-                          this.delayForLogin_(this.handleUserProfile));
-      this.freedomApi_.on('onClientState',
-                          this.delayForLogin_(this.handleClientState));
-      this.freedomApi_.on('onMessage',
-                          this.delayForLogin_(this.handleMessage));
-
-      // Begin loading everything relevant to this Network from local storage.
-      this.syncFromStorage_().then(() => {
-        this.log('prepared Social.FreedomNetwork.');
-        this.notifyUI();
-      });
-    }
-
-    /**
-     * Functor that delays until the network is logged in.
-     * Resulting function will instantly fail if not already in the process of
-     * logging in.
-     * TODO: This should either be factored into a wrapper class to 'sanitize'
-     * social providers' async behavior, or directly into freedom.
-     */
-    private delayForLogin_ = (handler :Function) => {
-      return (arg :any) => {
-        if (!this.onceLoggedIn_) {
-          this.error('Not logged in.');
-          return;
-        }
-        return this.onceLoggedIn_.then(() => {
-          handler(arg);
-        });
-      }
     }
 
     /**
      * Check local storage for saved state about this FreedomNetwork. If there
      * exists actual state, load everything into memory. Otherwise, initialize
      * to sane defaults.
+     *
+     * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
-    private syncFromStorage_ = () : Promise<void> => {
+    public syncFromStorage = () : Promise<void> => {
       var preparedMyself = this.prepareLocalInstance_();
       var preparedRoster = storage.load<NetworkState>(this.getStorePath())
           .then((state) => {
@@ -192,6 +143,194 @@ module Social {
           return this.myInstance;
         });
       });
+    }
+
+    //==================== Core.Persistent implementation ====================//
+
+    public getStorePath = () => {
+      return this.name + '/';
+    }
+
+    //===================== Social.Network implementation ====================//
+
+    public getLocalInstance = () : Core.LocalInstance => {
+      return this.myInstance;
+    }
+
+    public getLocalInstanceId = () : string => {
+      return this.myInstance.instanceId;
+    }
+
+    public getUser = (userId :string) : Core.User => {
+      return this.roster[userId];
+    }
+
+    public notifyUI = () => {
+      var payload :UI.NetworkMessage = {
+        name: this.name,
+        online: this.isOnline()
+      };
+      ui.update(uProxy.Update.NETWORK, payload);
+    }
+
+    public sendInstanceHandshake = (clientId:string) : Promise<void> => {
+      return this.sendInstanceHandshakes([clientId]);
+    }
+
+    /**
+     * Sends our instance handshake to a list of clients, returning a promise
+     * that all handshake messages have been sent.
+     *
+     * Intended to be protected, but TypeScript has no 'protected' modifier.
+     */
+    public sendInstanceHandshakes = (clientIds:string[]) : Promise<void> => {
+      var handshakes :Promise<void>[] = [];
+      var handshake = this.getInstanceHandshake_();
+      var cnt = clientIds.length;
+      if (!handshake) {
+        throw Error('Not ready to send handshake');
+      }
+      clientIds.forEach((clientId:string) => {
+        handshakes.push(this.send(clientId, handshake));
+      })
+      return Promise.all(handshakes).then(() => {
+        this.log('sent ' + cnt + ' instance handshake(s): ' +
+                 clientIds.join(', '));
+      });
+    }
+
+    /**
+     * Generates my instance message, to send to other uProxy installations to
+     * inform them that we're also a uProxy installation to interact with.
+     */
+    private getInstanceHandshake_ = () : uProxy.Message => {
+      if (!this.myInstance) {
+        throw Error('No local instance available!');
+      }
+      // TODO: Should we memoize the instance handshake, or calculate it fresh
+      // each time?
+      return {
+        type: uProxy.MessageType.INSTANCE,
+        data: this.myInstance.getInstanceHandshake()
+      }
+    }
+
+    /**
+     * Intended to be protected, but TypeScript has no 'protected' modifier.
+     */
+    public log = (msg:string) : void => {
+      console.log('[' + this.name + '] ' + msg);
+    }
+
+    /**
+     * Intended to be protected, but TypeScript has no 'protected' modifier.
+     */
+    public error = (msg:string) : void => {
+      console.error('!!! [' + this.name + '] ' + msg);
+    }
+
+    //================ Subclasses must override these methods ================//
+
+    // From Core.Persistent
+    public currentState = () : NetworkState => {
+      throw new Error('Operation not implemented');
+    }
+    public restoreState = (state :NetworkState) => {
+      throw new Error('Operation not implemented');
+    }
+
+    // From Social.Network
+    public login = (remember:boolean) : Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+    public logout = () : Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+    public isOnline = () : boolean => {
+      throw new Error('Operation not implemented');
+    }
+    public isLoginPending = () : boolean => {
+      throw new Error('Operation not implemented');
+    }
+    public flushQueuedInstanceMessages = () => {
+      throw new Error('Operation not implemented');
+    }
+    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+  }  // class AbstractNetwork
+
+  /**
+   * A Social.Network implementation that deals with a Freedom social provider.
+   *
+   * Handles events from the social provider. 'onUserProfile' events directly
+   * affect the roster of this network, while 'onClientState' and 'onMessage'
+   * events are passed on to the relevant user (provided the user exists).
+   */
+  export class FreedomNetwork extends AbstractNetwork {
+
+    private freedomApi_ :freedom.Social;
+    // TODO: give real typing to provider_. Ask Freedom not to use overloaded
+    // types.
+    private provider_ :any;  // Special freedom object which is both a function
+                             // and object... cannot typescript.
+
+    // Promise that delays all message handling until fully logged in.
+    private onceLoggedIn_   :Promise<void>;
+    private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
+    private remember :boolean;
+    private loginTimeout_ :number = undefined;  // A js Timeout ID.
+
+    // ID returned by setInterval call for monitoring.
+    private monitorIntervalId_ :number = null;
+
+    /**
+     * Initializes the Freedom social provider for this FreedomNetwork and
+     * attaches event handlers.
+     */
+    constructor(public name:string) {
+      super(name);
+
+      this.provider_ = freedom[PREFIX + name];
+      this.remember = false;
+      this.onceLoggedIn_ = null;
+      this.instanceMessageQueue_ = [];
+      this.freedomApi_ = this.provider_();
+
+      // TODO: Update these event name-strings when freedom updates to
+      // typescript and Enums.
+      this.freedomApi_.on('onUserProfile',
+                          this.delayForLogin_(this.handleUserProfile));
+      this.freedomApi_.on('onClientState',
+                          this.delayForLogin_(this.handleClientState));
+      this.freedomApi_.on('onMessage',
+                          this.delayForLogin_(this.handleMessage));
+
+      // Begin loading everything relevant to this Network from local storage.
+      this.syncFromStorage().then(() => {
+        this.log('prepared Social.FreedomNetwork.');
+        this.notifyUI();
+      });
+    }
+
+    /**
+     * Functor that delays until the network is logged in.
+     * Resulting function will instantly fail if not already in the process of
+     * logging in.
+     * TODO: This should either be factored into a wrapper class to 'sanitize'
+     * social providers' async behavior, or directly into freedom.
+     */
+    private delayForLogin_ = (handler :Function) => {
+      return (arg :any) => {
+        if (!this.onceLoggedIn_) {
+          this.error('Not logged in.');
+          return;
+        }
+        return this.onceLoggedIn_.then(() => {
+          handler(arg);
+        });
+      }
     }
 
     /**
@@ -335,14 +474,6 @@ module Social {
     //==================== Core.Persistent implementation ====================//
 
     /**
-     * Obtains the prefix for all storage keys associated with this
-     * FreedomNetwork.
-     */
-    public getStorePath = () => {
-      return this.name + '/';
-    }
-
-    /**
      * The returned state excludes the local instance information, which is
      * saved/loaded separately.
      */
@@ -448,88 +579,20 @@ module Social {
       return Boolean(this.onceLoggedIn_) && !this.isOnline();
     }
 
-    public getLocalInstance = () : Core.LocalInstance => {
-      return this.myInstance;
-    }
-
-    public getLocalInstanceId = () : string => {
-      return this.myInstance.instanceId;
-    }
-
-    public getUser = (userId :string) : Core.User => {
-      return this.roster[userId];
-    }
-
-    public notifyUI = () => {
-      var payload :UI.NetworkMessage = {
-        name: this.name,
-        online: this.isOnline()
-      }
-      ui.update(uProxy.Update.NETWORK, payload);
-    }
-
-    public sendInstanceHandshake = (clientId:string) : Promise<void> => {
-      return this.sendInstanceHandshakes_([clientId]);
-    }
-
     public flushQueuedInstanceMessages = () => {
       if (0 === this.instanceMessageQueue_.length) {
         return Promise.resolve();  // Don't need to do anything.
       }
-      return this.sendInstanceHandshakes_(this.instanceMessageQueue_)
+      return this.sendInstanceHandshakes(this.instanceMessageQueue_)
           .then(() => {
             this.instanceMessageQueue_ = [];
           });
-    }
-
-    /**
-     * Sends our instance handshake to a list of clients, returning a promise
-     * that all handshake messages have been sent.
-     */
-    private sendInstanceHandshakes_ = (clientIds:string[]) : Promise<void> => {
-      var handshakes :Promise<void>[] = [];
-      var handshake = this.getInstanceHandshake_();
-      var cnt = clientIds.length;
-      if (!handshake) {
-        throw Error('Not ready to send handshake');
-      }
-      clientIds.forEach((clientId:string) => {
-        handshakes.push(this.send(clientId, handshake));
-      })
-      return Promise.all(handshakes).then(() => {
-        this.log('sent ' + cnt + ' instance handshake(s): ' +
-                 clientIds.join(', '));
-      });
-    }
-
-    /**
-     * Generates my instance message, to send to other uProxy installations to
-     * inform them that we're also a uProxy installation to interact with.
-     */
-    private getInstanceHandshake_ = () : uProxy.Message => {
-      if (!this.myInstance) {
-        throw Error('No local instance available!');
-      }
-      // TODO: Should we memoize the instance handshake, or calculate it fresh
-      // each time?
-      return {
-        type: uProxy.MessageType.INSTANCE,
-        data: this.myInstance.getInstanceHandshake()
-      }
     }
 
     public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);
       this.log('sending ------> ' + msgString);
       return this.freedomApi_.sendMessage(clientId, msgString);
-    }
-
-    private log = (msg:string) : void => {
-      console.log('[' + this.name + '] ' + msg);
-    }
-
-    private error = (msg:string) : void => {
-      console.error('!!! [' + this.name + '] ' + msg);
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -562,6 +625,73 @@ module Social {
     }
 
   }  // class Social.FreedomNetwork
+
+  /**
+   * A Social.Network implementation that relies on the user to transmit and
+   * receive messages (e.g., by copy/pasting).
+   *
+   * TODO: Implement sending & receiving.
+   */
+  export class ManualNetwork extends AbstractNetwork {
+
+    constructor(public name:string) {
+      super(name);
+
+      // Begin loading everything relevant to this Network from local storage.
+      this.syncFromStorage().then(() => {
+        this.log('prepared Social.FreedomNetwork.');
+        this.notifyUI();
+      });
+    }
+
+    //==================== Core.Persistent implementation ====================//
+
+    public currentState = () : NetworkState => {
+      return cloneDeep({
+        name: this.name,
+        remember: false,
+        userIds: []  // blank because ManualNetwork doesn't persist contacts.
+      });
+    }
+
+    public restoreState = (state :NetworkState) => {
+      if (this.name !== state.name) {
+        throw Error('Loading unexpected network name: ' + state.name);
+      }
+      // Discard state.remember. ManualNetwork doesn't use it.
+      // Discard state.userIds. ManualNetwork doesn't persist contacts.
+    }
+
+    //===================== Social.Network implementation ====================//
+
+    public login = (remember:boolean) : Promise<void> => {
+      return Promise.resolve();
+    }
+
+    public logout = () : Promise<void> => {
+      return Promise.resolve();
+    }
+
+    public isOnline = () : boolean => {
+      return true;
+    }
+
+    public isLoginPending = () : boolean => {
+      return false;
+    }
+
+    // Does not apply to ManualNetwork. Nothing to do.
+    public flushQueuedInstanceMessages = () => {
+    }
+
+    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+      var msgString = JSON.stringify(msg);
+      this.log('ManualNetwork.send: ' + msgString);
+      // TODO: Batch messages and display them in the UI.
+      return Promise.resolve();
+    }
+
+  }  // class ManualNetwork
 
 }  // module Social
 
