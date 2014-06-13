@@ -49,7 +49,6 @@ app.run([
       // receiving something over the wire).
       $s.ui['setRefreshHandler'](() => {
         $s.$apply(() => {
-          console.log($s.ui['instance']);
           console.log('Refreshed the DOM!');
         });
       });

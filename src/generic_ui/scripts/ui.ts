@@ -16,7 +16,7 @@ declare var proxyConfig   :BrowserProxyConfig;
 
 module UI {
 
-  var REFRESH_TIMEOUT :number = 500;  // ms.
+  var REFRESH_TIMEOUT :number = 1000;  // ms.
 
   /**
    * Enumeration of mutually-exclusive view states.
@@ -126,7 +126,7 @@ module UI {
         'online': false,
         'myAccess': false,
         'friendsAccess': false,
-        'uproxy': true
+        'uproxy': false
     };
 
     /**
@@ -214,8 +214,8 @@ module UI {
     public isAccess = () : boolean => { return View.ACCESS == this.view; }
 
     // Refreshing with angular from outside angular.
-    private refreshTimer = null;
-    private refreshNeeded :boolean = false;
+    private refreshTimer_ = null;
+    private refreshNeeded_ :boolean = false;
     private refreshFunction_ :Function = () => {
       console.warn('Angular has not hooked into UI refresh!');
     };
@@ -226,27 +226,34 @@ module UI {
      */
     public refreshDOM = () => {
       if (!this.refreshFunction_) {
+        // refreshFunction_ is not set, this means the popup has not yet
+        // been opened, not an error.
         return;
       }
-      if (this.refreshTimer) {
-        this.refreshNeeded = true;
-      } else {
-        this.refreshFunction_();
-        this.refreshNeeded = false;
-        // Set a timeout for the next possible refresh, if it exists.
-        this.refreshTimer = setTimeout(() => {
-          this.refreshTimer = null;
-          if (this.refreshNeeded) {
-            this.refreshDOM();
-          }
-          this.refreshNeeded = false;
-        }, REFRESH_TIMEOUT);
+      if (this.refreshTimer_) {
+        // Refresh timer is already set, DOM will be refreshed when the
+        // timer callback runs.
+        this.refreshNeeded_ = true;
+        return;
       }
+      // Refresh the DOM immediately.
+      this.refreshFunction_();
+      // Set a timeout.  Until the timeout callback is excuted, no calls to
+      // refreshFunction_ will be made.  Once the timeout callback runs, we
+      // check to see if there had been any calls to refreshDOM (by checking
+      // this.refreshNeeded_) and if so call refreshFunction_ action.  This
+      // prevents us from making more than 1 refreshFunction_ call within the
+      // REFRESH_TIMEOUT
+      this.refreshTimer_ = setTimeout(() => {
+        if (this.refreshNeeded_) {
+          this.refreshFunction_();
+        }
+        this.refreshNeeded_ = false;
+        this.refreshTimer_ = null;
+      }, REFRESH_TIMEOUT);
     }
     public setRefreshHandler = (f :Function) => {
-      this.refreshDOM = () => {
-        f();
-      };
+      this.refreshFunction_ = f;
     }
 
     setClients = (numClients) => {
@@ -473,6 +480,7 @@ module UI {
       // for us (e.g. they were disconnected).  Currently we are sending an
       // explicit stop proxy message from the app to stop proxying.
       if (!user) {
+        // New user.
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
         model.roster.push(user);
