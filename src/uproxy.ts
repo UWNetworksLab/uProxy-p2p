@@ -91,7 +91,6 @@ module uProxy {
    * command.
    */
   export interface ConsentCommand {
-    // TODO: Replace these 3 with InstancePath.
     path       :InstancePath;
     action     :Consent.UserAction;
   }
