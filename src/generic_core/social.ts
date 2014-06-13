@@ -85,9 +85,6 @@ module Social {
   export class AbstractNetwork implements Network {
 
     public roster     :{[userId:string]:Core.User};
-    // TODO: 'metadata' is both Freedom-specific and unused; remove it from
-    // the Network interface and implementations thereof.
-    public metadata   :any;  // Network name, description, icon, etc.
     public myInstance :Core.LocalInstance;
 
     private SaveKeys = {
@@ -95,7 +92,6 @@ module Social {
     }
 
     constructor(public name:string) {
-      this.metadata = {};
       this.roster = {};
     }
 
