@@ -309,7 +309,6 @@ class uProxyCore implements uProxy.CoreAPI {
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
 var core = new uProxyCore();
-console.log('lols', core);
 
 /*
 
