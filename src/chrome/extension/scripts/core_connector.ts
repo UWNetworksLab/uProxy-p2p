@@ -177,9 +177,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   }
 
   // --- Communication ---
-  // TODO: Replace this with an actual Core->UI update mechanism, which means
-  // we'll use Enums instead of strings.
-
   /**
    * Attach handlers for updates emitted from the uProxy Core.
    *
