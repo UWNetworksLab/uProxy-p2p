@@ -11,9 +11,7 @@ module Auth {
   export var localKey :string = '';  // Key extracted from peerconnection.
   export var ttl      :number = 0;  // Expiry of the key.
   export var pc       :RTCPeerConnection = null;
-
   declare var mozRTCPeerConnection;
-  var RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
 
   // This regular expression captures the fingerprint from an sdp header.
   var SDP_FINGERPRINT_REGEX = /(?:a=fingerprint:sha-256\s)(.*)\s/m;
@@ -26,16 +24,20 @@ module Auth {
     if ('' != localKey) {
       return Promise.resolve(localKey);
     }
+    var RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
     var pc = new RTCPC(null);
     return new Promise((F,R) => {
       pc.createOffer((description:RTCSessionDescription) => {
         var fingerprint = extractFingerprint(description);
-        F(description);
+        F(fingerprint);
       })
     });
   }
 
-  function extractFingerprint(desc:RTCSessionDescription) : string {
+  /**
+   * Use a regex to extract just the fingerprint string from an sdp header.
+   */
+  export function extractFingerprint(desc:RTCSessionDescription) : string {
     var sdp = desc.sdp;
     var captured = sdp.match(SDP_FINGERPRINT_REGEX);
     if (!captured || !captured[1]) {
