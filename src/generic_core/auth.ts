@@ -12,6 +12,7 @@ module Auth {
   export var ttl      :number = 0;  // Expiry of the key.
   export var pc       :RTCPeerConnection = null;
   declare var mozRTCPeerConnection;
+  declare var webkitRTCPeerConnection;
 
   // This regular expression captures the fingerprint from an sdp header.
   var SDP_FINGERPRINT_REGEX = /(?:a=fingerprint:sha-256\s)(.*)\s/m;
@@ -24,6 +25,9 @@ module Auth {
     if ('' != localKey) {
       return Promise.resolve(localKey);
     }
+    // TODO: Right now this doesn't work because there is no access to
+    // PeerConnection from within the webworker? Need to figure out the best
+    // approach to this.
     var RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
     var pc = new RTCPC(null);
     return new Promise((F,R) => {

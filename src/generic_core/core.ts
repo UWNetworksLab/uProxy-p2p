@@ -109,6 +109,16 @@ var ui = new UIConnector();
  */
 class uProxyCore implements uProxy.CoreAPI {
 
+  constructor() {
+    console.log('Preparing uProxy Core.');
+    // Send the local webrtc fingerprint to the UI.
+    // TODO: enable once we can use peerconnection from within the webworker.
+    // Auth.getLocalFingerprint().then((fingerprint) => {
+      // console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
+      // ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
+    // });
+  }
+
   /**
    * Logs out of all networks and resets data.
    */
