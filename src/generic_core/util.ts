@@ -70,47 +70,7 @@ function list_erase(list, obj_to_remove) {
   }
 }
 
-// TODO: Remove this once everything is already typed.
-// Creates an object |o| that has only the keys from |template|.
-// For each key 'k', o[k] has the corresponding value from |input| if the key
-// exists, otherwise the default value from |template|.
-// Does not mutate |template| or |input|.
-function restrictKeys(template, input) :any {
-  var output = {},
-      err;
-  for (var k in template) {
-    if (input && k in input) {
-      output[k] = cloneDeep(input[k]);
-    } else if (template[k] !== null) {
-      output[k] = cloneDeep(template[k]);
-    } else {
-      err = new Error('Missing required key ' + k + '.\nObject: ' +
-          JSON.stringify(input, null, '  ') + '\nRestriction: ' +
-          JSON.stringify(template, null, '  '));
-      console.error("Failed object-restrict on " + err.stack);
-      throw err;
-    }
-  }
-  var restricted_keys :Array<string> = Object.keys(template);
-  var object_keys = Object.keys(input);
-  var excess_keys = restricted_keys.reduce((prev :Array<any>, elem :any) => {
-    if (restricted_keys.indexOf(elem) < 0) {
-      prev.push(prev);
-      return prev;
-    } else {
-      return prev;
-    }
-  }, []);
-  if (excess_keys.length > 0) {
-      err = new Error('Excess members in object:' + excess_keys +
-          '\nObject: ' + JSON.stringify(input, null, '  ') +
-          '\nRestriction: ' + JSON.stringify(template, null, '  '));
-      console.error("Failed object-restrict on " + err.stack);
-      throw err;
-  }
-  return output;
-}
-
+// TODO: Actually implement the logging levels around the code.
 function makeLogger(level) {
   var logFunc = console[level];
   if (logFunc) {
@@ -126,15 +86,6 @@ function makeLogger(level) {
     console.log(s);
   };
 }
-
-function isUndefined(val) {
-  return typeof val == 'undefined';
-}
-
-function isDefined(val) {
-  return typeof val != 'undefined';
-}
-
 
 /**
  * Given an array or object, returns a deep copy. Given a primitive type,
@@ -187,15 +138,6 @@ function cloneDeep(val) {
       throw new Error('Functions cannot be cloned');
     default:
       throw new Error('Unsupported input type [' + (typeof val) + ']');
-  }
-}
-
-// returns object[key] if it exists, or default if it doesn't.
-function getKeyWithDefault(object, key, def) {
-  if (object[key] !== undefined) {
-    return object[key];
-  } else {
-    return def;
   }
 }
 
