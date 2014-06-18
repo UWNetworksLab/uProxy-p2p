@@ -19,6 +19,16 @@ var mockAppPort = () => {
   };
 };
 
+// Mock UI.
+var ui :uProxy.UIAPI = {
+  sync: (state ?:string) => {},
+  update: (type :uProxy.Update, data ?:any) => {},
+  syncUser: (UserMessage :UI.UserMessage) => {},
+  showNotification: (notificationText :string) => {},
+  isProxying: () => { return false; },
+  stopProxyingInUiAndConfig: () => {},
+  refreshDOM: () => {}
+};
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the connector object.
@@ -110,9 +120,12 @@ describe('core-connector', () => {
     // is called with the expected params.
     expect(disconnect).not.toBeNull();
     spyOn(connector, 'connect').and.callFake(() => { done(); })
+    spyOn(ui, 'isProxying').and.returnValue(true);
+    spyOn(ui, 'stopProxyingInUiAndConfig');
     disconnect();
     expect(connector.status.connected).toEqual(false);
     expect(connector['appPort_']).toBeNull();
+    expect(ui.stopProxyingInUiAndConfig).toHaveBeenCalled();
   });
 
   it('send_ queues message while disconnected.', () => {

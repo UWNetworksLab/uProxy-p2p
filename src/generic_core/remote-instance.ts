@@ -313,16 +313,16 @@ module Core {
       if (oldProxyConsent != this.consent.asProxy) {
         switch (this.consent.asProxy) {
           case Consent.ProxyState.REMOTE_OFFERED:
-            ui.sendNotification(this.user.name + ' offered you access.');
+            ui.showNotification(this.user.name + ' offered you access.');
             break;
           case Consent.ProxyState.GRANTED:
-            ui.sendNotification(this.user.name + ' granted you access.');
+            ui.showNotification(this.user.name + ' granted you access.');
             break;
           case Consent.ProxyState.USER_REQUESTED:
             // The only way to land in USER_REQUESTED upon reciving consent bits
             // is if the remote has revoked access after previously being in
             // GRANTED.
-            ui.sendNotification(this.user.name + ' revoked your access.');
+            ui.showNotification(this.user.name + ' revoked your access.');
             break;
           default:
             // Don't display notification for ignoring, and any other states.
@@ -332,10 +332,10 @@ module Core {
       if (oldClientConsent != this.consent.asClient) {
         switch (this.consent.asClient) {
           case Consent.ClientState.REMOTE_REQUESTED:
-            ui.sendNotification(this.user.name + ' is requesting access.');
+            ui.showNotification(this.user.name + ' is requesting access.');
             break;
           case Consent.ClientState.GRANTED:
-            ui.sendNotification(this.user.name + ' has accepted your offer of access.');
+            ui.showNotification(this.user.name + ' has accepted your offer of access.');
             break;
           default:
             // Don't display notification for ignoring, and any other states.

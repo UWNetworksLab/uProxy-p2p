@@ -26,13 +26,11 @@ class BrowserProxyConfig {
                      "computeengineondemand.appspot.com"]
       }
     };
+
+    chrome.proxy.settings.clear({scope: 'regular'});
   }
 
-  clearConfig = () => {
-    chrome.proxy.settings.clear({scope: 'regular'});
-  };
-
-  startUsingProxy = () => {
+  public startUsingProxy = () => {
     if (this.running_ == false) {
       console.log('Directing Chrome proxy settings to UProxy');
       this.running_ = true;
@@ -47,7 +45,7 @@ class BrowserProxyConfig {
     }
   };
 
-  stopUsingProxy = () => {
+  public stopUsingProxy = () => {
     if (this.running_ == true) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;

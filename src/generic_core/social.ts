@@ -411,7 +411,7 @@ module Social {
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.sendNotification('You successfully signed on to ' + this.name +
+            ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
