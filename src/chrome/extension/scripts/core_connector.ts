@@ -167,6 +167,11 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.status.connected = false;
     this.appPort_ = null;
 
+    if (ui.isProxying()) {
+      ui.showNotification('The uProxy app has exited, stopping proxy.')
+      ui.stopProxyingInUiAndConfig();
+    }
+
     console.warn('Retrying connection in ' + (SYNC_TIMEOUT/1000) + 's...');
     setTimeout(this.connect, SYNC_TIMEOUT);
   }

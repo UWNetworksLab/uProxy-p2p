@@ -183,7 +183,7 @@ module UI {
         this.showNotification(notificationText);
       });
       core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
-        this.stopProxyingInUiAndConfig_();
+        this.stopProxyingInUiAndConfig();
       });
 
       console.log('Created the UserInterface');
@@ -303,7 +303,7 @@ module UI {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
-      this.stopProxyingInUiAndConfig_();
+      this.stopProxyingInUiAndConfig();
       this.core.stop();
     }
 
@@ -311,7 +311,7 @@ module UI {
      * Removes proxy indicators from UI and undoes proxy configuration
      * (e.g. chrome.proxy settings).
      */
-    private stopProxyingInUiAndConfig_ = () => {
+    public stopProxyingInUiAndConfig = () => {
       if (!this.proxyServerInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
@@ -584,6 +584,10 @@ module UI {
         // this.syncMe();
       // }
       // return true;
+    }
+
+    public isProxying = () : boolean => {
+      return this.currentProxyServer != null;
     }
 
   }  // class UserInterface

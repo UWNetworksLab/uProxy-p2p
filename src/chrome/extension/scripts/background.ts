@@ -24,7 +24,6 @@ var core :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 // TODO: This should be *actually* typed.
 // Proxy Configuration.
 var proxyConfig = new BrowserProxyConfig();
-proxyConfig.clearConfig();
 
 
 // Singleton model for angularjs hooks on both popup and options.
@@ -43,16 +42,6 @@ chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
 });
-
-/**
- * Start proxying if one instance has their proxy status enabled.
- * Otherwise, stop all proxying.
- */
-function checkRunningProxy() {
-  // TODO: Make this work with the new UI model.
-  // proxyConfig.startUsingProxy();
-  proxyConfig.stopUsingProxy();
-}
 
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that

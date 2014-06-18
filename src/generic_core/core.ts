@@ -78,11 +78,11 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.ERROR, errorText);
   }
 
-  public sendNotification = (notificationText :string) => {
+  public showNotification = (notificationText :string) => {
     this.update(uProxy.Update.NOTIFICATION, notificationText);
   }
 
-  public stopProxying = () => {
+  public stopProxyingInUiAndConfig = () => {
     this.update(uProxy.Update.STOP_PROXYING);
   }
 
@@ -92,6 +92,10 @@ class UIConnector implements uProxy.UIAPI {
       Social.networks[networkName].notifyUI();
     }
     this.update(uProxy.Update.ALL); 
+  }
+
+  public isProxying = () : boolean => {
+    return proxy != null;
   }
 
 }
@@ -358,7 +362,7 @@ socksToRtcClient.on('socksToRtcTimeout', (peerInfo :PeerInfo) => {
     return;
   }
   instance.stop();
-  ui.stopProxying();
+  ui.stopProxyingInUiAndConfig();
   ui.sendError('Darn, something went wrong with your proxying connection.' +
     ' Please try to connect again.');
 });
@@ -404,7 +408,7 @@ function updateClientProxyConnection(localPeerIdString :string,
     var user :Core.User = instance.user;
     var displayName :string = (user.name && user.name !== 'pending') ?
       user.name : user.userId;
-    ui.sendNotification(displayName + ' is now proxying through you.');
+    ui.showNotification(displayName + ' is now proxying through you.');
   }
 };
 
