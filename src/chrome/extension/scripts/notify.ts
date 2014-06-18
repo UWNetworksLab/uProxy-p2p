@@ -9,17 +9,17 @@
 class ChromeNotifications implements INotifications {
   public ICON_DIR :string = 'icons/';
 
-  public setIcon = (iconFile : string) : void=> {
+  public setIcon = (iconFile :string) : void => {
     chrome.browserAction.setIcon({
       path: this.ICON_DIR + iconFile
     });
   }
 
-  public setLabel = (text : string) : void => {
+  public setLabel = (text :string) : void => {
     chrome.browserAction.setBadgeText({ text: '' + text });
   }
 
-  public setColor = (color) : void=> {
+  public setColor = (color :string) : void=> {
     chrome.browserAction.setBadgeBackgroundColor({color: color});
   }
 

@@ -20,18 +20,18 @@ module uProxy {
    */
   export enum Command {
     READY = 1000,
-    REFRESH = 1001,
-    RESET = 1002,
-    LOGIN = 1003,
-    LOGOUT = 1004,
-    SEND_INSTANCE = 1005,
-    INVITE = 1006,
-    CHANGE_OPTION = 1007,
-    UPDATE_DESCRIPTION = 1008,
+    REFRESH,
+    RESET,
+    LOGIN,
+    LOGOUT,
+    SEND_INSTANCE,
+    INVITE,
+    CHANGE_OPTION,
+    UPDATE_DESCRIPTION,
     // Skip now deprecated DISMISS_NOTIFICATION
     START_PROXYING = 1010,
-    STOP_PROXYING = 1011,
-    MODIFY_CONSENT = 1012,       // TODO: make this work with the consent piece.
+    STOP_PROXYING,
+    MODIFY_CONSENT,       // TODO: make this work with the consent piece.
   }
 
   /**
