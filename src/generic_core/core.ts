@@ -91,7 +91,7 @@ class UIConnector implements uProxy.UIAPI {
     for (networkName in Social.networks) {
       Social.networks[networkName].notifyUI();
     }
-    this.update(uProxy.Update.ALL); 
+    this.update(uProxy.Update.ALL);
   }
 
   public isProxying = () : boolean => {
@@ -528,25 +528,6 @@ Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
 });
 
 Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
-Core.onCommand(uProxy.Command.DISMISS_NOTIFICATION, (userId) => {
-  // TODO: Implement an actual notifications/userlog pipeline.
-  /*
-  var user = store.state.roster[userId];
-  if (!user) {
-    console.error('User ' + userId + ' does not exist!');
-    return false;
-  }
-  // user.hasNotification = false;
-  // Go through clients, remove notification flag from any uproxy instance.
-  for (var clientId in user.clients) {
-    var instanceId = store.state.clientToInstance[clientId];
-    if (instanceId) {
-      _removeNotification(instanceId);
-    }
-  }
-  */
-  // Don't need to re-sync with UI - expect UI to have done the change.
-});
 
 // TODO: make the invite mechanism an actual process.
 Core.onCommand(uProxy.Command.INVITE, (userId:string) => {

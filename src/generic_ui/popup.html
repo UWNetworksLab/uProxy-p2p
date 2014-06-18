@@ -159,10 +159,9 @@
                  that we have complete control over sorting, filtering, and the
                  timing of DOM updates.
             -->
-            <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo: 100 | orderBy : ['-canUProxy', 'name'] track by $index"
+            <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by $index"
                 ng-click="ui.focusOnUser(contact)"
-                ng-class="{offline:!contact.online}"
-                >
+                ng-class="{offline:!contact.online}">
               {{contact.name}}
               <img class="contact-image" ng-src='{{contact.imageData}}'>
               <span class="c-icons">
@@ -179,7 +178,6 @@
                 <span class="c-icon" ng-show='contact.onXMPP'> XM </span>
                 <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
               </span>
-              <span class="c-notification" ng-show='contact.hasNotification'> ! </span>
             </li>
           </ul>
           <!--

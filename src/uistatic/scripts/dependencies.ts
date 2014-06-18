@@ -25,6 +25,9 @@ class MockNotifications implements INotifications {
   setColor(color) {
     console.log('setting background color of the badge to: ' + color);
   }
+  showDesktopNotification(notificationText) {
+    console.log('showing desktop notification: ' + notificationText);
+  }
 }
 
 function generateFakeUserMessage() : UI.UserMessage {
@@ -170,9 +173,6 @@ class MockCore implements uProxy.CoreAPI {
       name: 'google',
       online: false
     });
-  }
-  dismissNotification(userId) {
-    console.log('Notification seen for ' + userId);
   }
   onUpdate(update, handler) {
     // In the 'real uProxy', this is where the UI installs update handlers for

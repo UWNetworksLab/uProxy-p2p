@@ -4,19 +4,36 @@
  * This is the Chrome-specific implementation of the Notifications API.
  */
 /// <reference path='../../../interfaces/notify.d.ts' />
+/// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 
 class ChromeNotifications implements INotifications {
-  ICON_DIR:string = 'icons/';
-  setIcon(iconFile : string) {
-    // TODO: make this not require chrome
+  public ICON_DIR :string = 'icons/';
+
+  public setIcon = (iconFile : string) : void=> {
     chrome.browserAction.setIcon({
       path: this.ICON_DIR + iconFile
     });
   }
-  setLabel(text : string) {
+
+  public setLabel = (text : string) : void => {
     chrome.browserAction.setBadgeText({ text: '' + text });
   }
-  setColor(color) {
+
+  public setColor = (color) : void=> {
     chrome.browserAction.setBadgeBackgroundColor({color: color});
   }
+
+  public showDesktopNotification = (notificationText :string) : void => {
+    chrome.notifications.create(
+      '',  // notification Id, not needed for now
+      {
+        type: 'basic',
+        title: 'uProxy',
+        message: notificationText,
+        iconUrl: 'icons/uproxy-128.png'
+      },
+      // Calback function to received assigned id, ignored for now.
+      () => {});
+  }
+
 }

@@ -8,7 +8,6 @@
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
-/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 
 declare var model         :UI.Model;
@@ -107,7 +106,6 @@ module UI {
 
     public errors :string[] = [];
 
-    notifications = 0;
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
     search = '';
@@ -194,16 +192,7 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      chrome.notifications.create(
-        '',  // notification Id, not needed for now
-        {
-          type: 'basic',
-          title: 'uProxy',
-          message: notificationText,
-          iconUrl: 'icons/uproxy-128.png'
-        },
-        // Calback function to received assigned id, ignored for now.
-        () => {});
+      this.notify.showDesktopNotification(notificationText);
     }
 
     // ------------------------------- Views ----------------------------------
@@ -377,7 +366,6 @@ module UI {
       this.view = View.ACCESS;
       console.log('focusing on user ' + user);
       this.user = user;
-      this.dismissNotification(user);
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
       if (user.instances.length > 0) {
@@ -392,33 +380,6 @@ module UI {
     public returnToRoster = () => {
       this.view = View.ROSTER;
       console.log('returning to roster! ' + this.user);
-      if (this.user && this.user.hasNotification) {
-        console.log('sending notification seen');
-        this.dismissNotification(this.user);  // Works if there *is* a contact.
-        this.user = null;
-      }
-    }
-
-    setNotifications = (n) => {
-      this.notify.setLabel(n > 0? n : '');
-      this.notifications = n < 0? 0 : n;
-    }
-
-    decNotifications = () => {
-      this.setNotifications(this.notifications - 1);
-    }
-
-    /**
-     * Notifications occur on the user level. The message sent to the app side
-     * will also remove the notification flag from the corresponding instance(s).
-     */
-    dismissNotification = (user) => {
-      if (!user.hasNotification) {
-        return;  // Ignore if user has no notification.
-      }
-      this.core.dismissNotification(user.userId);
-      user.hasNotification = false;
-      this.decNotifications();
     }
 
     syncInstance = (instance : any) => {}
@@ -516,7 +477,7 @@ module UI {
     // boolean that we could keep up to date.
     public hasOnlineUProxyBuddies = () => {
       for (var i = 0; i < model.roster.length; ++i) {
-        var user :UI.User = model.roster[i]; 
+        var user :UI.User = model.roster[i];
         if (user.instances.length > 0 && user.online) {
           return true;
         }

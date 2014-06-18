@@ -375,8 +375,4 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   logout = (network :string) => {
     this.sendCommand(uProxy.Command.LOGOUT, network);
   }
-
-  dismissNotification = (userId) => {
-    this.sendCommand(uProxy.Command.DISMISS_NOTIFICATION, userId);
-  }
 }  // class ChromeCoreConnector
