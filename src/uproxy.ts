@@ -28,8 +28,8 @@ module uProxy {
     INVITE,
     CHANGE_OPTION,
     UPDATE_DESCRIPTION,
-    DISMISS_NOTIFICATION,  // TODO: replace a better notifications pipeline.
-    START_PROXYING,
+    // Skip now deprecated DISMISS_NOTIFICATION
+    START_PROXYING = 1010,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
   }
@@ -122,9 +122,6 @@ module uProxy {
     updateDescription(description :string) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     changeOption(option :string) : void;
-
-    // TODO: improve the notifications feature
-    dismissNotification(userId :string) : void;
 
     login(network :string) : Promise<void>;
     logout(network :string) : void;

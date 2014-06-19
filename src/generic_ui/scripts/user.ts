@@ -22,7 +22,6 @@ module UI {
     public canUProxy       :boolean = false;
     public givesMe         :boolean = false;
     public usesMe          :boolean = false;
-    public hasNotification :boolean = false;
     public clients;
     public instances       :UI.Instance[];
 
