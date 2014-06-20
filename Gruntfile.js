@@ -354,6 +354,7 @@ module.exports = function(grunt) {
               'build/generic_core/nouns-and-adjectives.js',
               'build/generic_core/constants.js',
               'build/generic_core/consent.js',
+              'build/generic_core/auth.js',
               'build/generic_core/social-enum.js',
               'build/generic_core/local-instance.js',
               'build/generic_core/remote-instance.js',
@@ -361,7 +362,6 @@ module.exports = function(grunt) {
               'build/generic_core/storage.js',
               'build/generic_core/social.js',
               'build/generic_core/core.js',
-              'build/generic_core/start-uproxy.js'
             ]),
         options: {
           // NOTE: Put any helper test-data files here:

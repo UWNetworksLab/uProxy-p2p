@@ -11,6 +11,8 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 
+// declare var storage :Core.Storage;
+
 module Core {
 
   /**

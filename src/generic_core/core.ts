@@ -21,7 +21,7 @@
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 /// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
 
-var storage = new Core.Storage();  // From start-uproxy.ts.
+var storage = new Core.Storage();
 
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
@@ -32,6 +32,8 @@ var bgAppPageChannel = freedom;
 // peers. See [https://github.com/uProxy/socks-rtc] for more information.
 var socksToRtcClient = freedom['SocksToRtc']();
 var rtcToNetServer = freedom['RtcToNet']();
+// Always begin the RTC-to-net server immediately.
+rtcToNetServer.emit('start');
 // The Core's responsibility is to pass messages across the signalling
 // channel using the User / Instance mechanisms.
 
@@ -105,13 +107,22 @@ var ui = new UIConnector();
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updaes to the UI, and handles commands from the UI.
  */
-// TODO: Convert this into a class, actually implementing the CoreAPI.
-module Core {
+class uProxyCore implements uProxy.CoreAPI {
+
+  constructor() {
+    console.log('Preparing uProxy Core.');
+    // Send the local webrtc fingerprint to the UI.
+    // TODO: enable once we can use peerconnection from within the webworker.
+    // Auth.getLocalFingerprint().then((fingerprint) => {
+      // console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
+      // ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
+    // });
+  }
 
   /**
    * Logs out of all networks and resets data.
    */
-  export var reset = () => {
+  reset = () => {
     console.log('reset');
     for (var network in Social.networks) {
       Social.networks[network].logout();
@@ -119,10 +130,15 @@ module Core {
     storage.reset().then(ui.sync);
   }
 
+  sendInstance = (clientId :string) => {
+    // TODO: Possibly implement this, or get rid of the possibility for
+    // UI-initiated instance handshakes.
+  }
+
   /**
    * Install a handler for commands received from the UI.
    */
-  export var onCommand = (cmd :uProxy.Command, handler:any) => {
+  public onCommand = (cmd :uProxy.Command, handler:any) => {
     bgAppPageChannel.on('' + cmd,
       (args :uProxy.PromiseCommand) => {
         // Call handler with args.data and ignore other fields in args
@@ -135,7 +151,7 @@ module Core {
    * Install a handler for promise commands received from the UI.
    * Promise commands return an ack or error to the UI.
    */
-  export var onPromiseCommand = (cmd :uProxy.Command,
+  public onPromiseCommand = (cmd :uProxy.Command,
                                  handler :(data ?:any) => Promise<void>) => {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
@@ -158,11 +174,19 @@ module Core {
     bgAppPageChannel.on('' + cmd, promiseCommandHandler);
   }
 
+  changeOption = (option :string) => {
+    // TODO: implement options.
+  }
+
+  dismissNotification = (instancePath :InstancePath) => {
+    // TODO: implement options.
+  }
+
+
   /**
    * Access various social networks using the Social API.
-   * TODO: write a test for this.
    */
-  export var login = (networkName:string) : Promise<void> => {
+  public login = (networkName:string) : Promise<void> => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not login to ' + networkName);
@@ -182,7 +206,7 @@ module Core {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  export var logout = (networkName:string) : void => {
+  public logout = (networkName:string) : void => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
       console.warn('Could not logout of ' + networkName);
@@ -197,13 +221,16 @@ module Core {
     // store.saveMeToStorage();
   }
 
+  // onUpdate not needed in the real core.
+  onUpdate = (update, handler) => {}
+
   /**
    * Update user's description of their current device. This applies to all
    * local instances for every network the user is currently logged onto. Those
    * local instances will then propogate their description update to all
    * instances.
    */
-  export var updateDescription = (description:string) => {
+  public updateDescription = (description:string) => {
     for (var network in Social.networks) {
       var myself = Social.networks[network].getLocalInstance();
       if (!myself) {
@@ -219,9 +246,9 @@ module Core {
    * This is a distinct pathway from receiving consent bits over the wire, which
    * is handled directly inside the relevant Social.Network.
    */
-  export var modifyConsent = (command:uProxy.ConsentCommand) => {
+  public modifyConsent = (command:uProxy.ConsentCommand) => {
     // Determine which Network, User, and Instance...
-    var instance = getInstance(command.path);
+    var instance = this.getInstance(command.path);
     if (!instance) {  // Error msg emitted above.
       console.error('Cannot modify consent for non-existing instance!');
       return;
@@ -236,7 +263,7 @@ module Core {
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
    */
-  export var start = (path :InstancePath) : Promise<void> => {
+  public start = (path :InstancePath) : Promise<void> => {
     // Disable any previous proxying session.
     if (proxy) {
       console.log('Existing proxying session! Terminating...');
@@ -244,7 +271,7 @@ module Core {
       proxy.stop();
       proxy = null;
     }
-    var remote = getInstance(path);
+    var remote = this.getInstance(path);
     if (!remote) {
       console.error('Instance ' + path.instanceId +
                     ' does not exist for proxying.');
@@ -260,7 +287,7 @@ module Core {
   /**
    * Stop proxying with the current instance, if it exists.
    */
-  export var stop = () => {
+  public stop = () => {
     if (!proxy) {
       console.error('Cannot stop proxying when there is no proxy');
     }
@@ -272,7 +299,7 @@ module Core {
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
-  export var getInstance = (path :InstancePath) : Core.RemoteInstance => {
+  public getInstance = (path :InstancePath) : Core.RemoteInstance => {
     var network = Social.getNetwork(path.network);
     if (!network) {
       console.error('No network ' + path.network);
@@ -286,10 +313,12 @@ module Core {
     return user.getInstance(path.instanceId);
   }
 
-}  // module Core
+}  // class uProxyCore
+
 
 // Prepare all the social providers from the manifest.
 var networks = Social.initializeNetworks();
+var core = new uProxyCore();
 
 /*
 
@@ -311,7 +340,7 @@ socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
   console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
 
   var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
-  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  var instance = core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
     console.error('Cannot send client signal to non-existing RemoteInstance.');
     return;
@@ -335,7 +364,7 @@ socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
 
 socksToRtcClient.on('socksToRtcSuccess', (peerInfo :PeerInfo) => {
   var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  var instance = core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
     console.error('socksToRtcSuccess: RemoteInstance not found.', peerInfo);
     return;
@@ -345,7 +374,7 @@ socksToRtcClient.on('socksToRtcSuccess', (peerInfo :PeerInfo) => {
 
 socksToRtcClient.on('socksToRtcFailure', (peerInfo :PeerInfo) => {
   var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  var instance = core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
     console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
     return;
@@ -356,7 +385,7 @@ socksToRtcClient.on('socksToRtcFailure', (peerInfo :PeerInfo) => {
 socksToRtcClient.on('socksToRtcTimeout', (peerInfo :PeerInfo) => {
   console.warn('socksToRtcTimeout occurred for peer ' + peerInfo.peerId);
   var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = Core.getInstance(localPeerId.serverInstancePath);
+  var instance = core.getInstance(localPeerId.serverInstancePath);
   if (!instance) {
     console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
     return;
@@ -372,7 +401,7 @@ rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
   console.log('server(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
 
   var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
-  var instance = Core.getInstance(localPeerId.clientInstancePath);
+  var instance = core.getInstance(localPeerId.clientInstancePath);
   if (!instance) {
     console.error('Cannot send server signal to non-existing peer.');
     return;
@@ -397,7 +426,7 @@ rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
 function updateClientProxyConnection(localPeerIdString :string,
     isConnected :boolean) {
   var localPeerId :LocalPeerId = JSON.parse(localPeerIdString);
-  var instance = Core.getInstance(localPeerId.clientInstancePath);
+  var instance = core.getInstance(localPeerId.clientInstancePath);
   if (!instance) {
     console.error('updateClientProxyConnection: RemoteInstance not found.',
         localPeerIdString, isConnected);
@@ -509,26 +538,31 @@ function receiveUpdateDescription(msg) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-Core.onCommand(uProxy.Command.READY, ui.sync);
-Core.onCommand(uProxy.Command.RESET, Core.reset);
+core.onCommand(uProxy.Command.READY, ui.sync);
+core.onCommand(uProxy.Command.RESET, core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-Core.onPromiseCommand(uProxy.Command.LOGIN, Core.login);
-Core.onCommand(uProxy.Command.LOGOUT, Core.logout)
+core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
+core.onCommand(uProxy.Command.LOGOUT, core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
-// Core.onCommand(uProxy.Command.SEND_INSTANCE, Core.sendInstance);
-Core.onCommand(uProxy.Command.MODIFY_CONSENT, Core.modifyConsent);
+// core.onCommand(uProxy.Command.SEND_INSTANCE, core.sendInstance);
+core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
 
-Core.onPromiseCommand(uProxy.Command.START_PROXYING, Core.start);
-Core.onCommand(uProxy.Command.STOP_PROXYING, Core.stop);
+core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
+core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 
-Core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
+core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   console.warn('CHANGE_OPTION yet to be implemented!');
   // TODO: Handle changes that might affect proxying.
 });
 
-Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
+core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, core.updateDescription);
 
 // TODO: make the invite mechanism an actual process.
-Core.onCommand(uProxy.Command.INVITE, (userId:string) => {
+core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 });
+
+
+// Now that this module has got itself setup, it sends a 'ready' message to the
+// freedom background page.
+bgAppPageChannel.emit('ready', null);
