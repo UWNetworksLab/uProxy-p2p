@@ -556,7 +556,7 @@ core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
   // TODO: Handle changes that might affect proxying.
 });
 
-Core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, Core.updateDescription);
+core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, core.updateDescription);
 
 // TODO: make the invite mechanism an actual process.
 core.onCommand(uProxy.Command.INVITE, (userId:string) => {
