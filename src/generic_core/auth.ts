@@ -16,6 +16,7 @@ module Auth {
 
   // This regular expression captures the fingerprint from an sdp header.
   var SDP_FINGERPRINT_REGEX = /(?:a=fingerprint:sha-256\s)(.*)\s/m;
+  var RTCPC :any;
 
   /**
    * Create an un-used local WebRTC peer connection to obtain the local keyhash
@@ -28,13 +29,13 @@ module Auth {
     // TODO: Right now this doesn't work because there is no access to
     // PeerConnection from within the webworker? Need to figure out the best
     // approach to this.
-    var RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
+    RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
     var pc = new RTCPC(null);
     return new Promise((F,R) => {
       pc.createOffer((description:RTCSessionDescription) => {
         var fingerprint = extractFingerprint(description);
         F(fingerprint);
-      })
+      }, R);
     });
   }
 
