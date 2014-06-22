@@ -3,7 +3,7 @@
 
 module Handler {
 
-  describe('Queue', function() {
+  describe('Handler Queue', function() {
     var queue :Queue<string, number>;
     function lenHandler(s:string) : number { return s.length; };
     function promiseLenHandler(s:string) : Promise<number> {
