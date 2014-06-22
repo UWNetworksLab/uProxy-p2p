@@ -95,6 +95,21 @@ module Handler {
         })
     });
 
+  describe('Handler Queue with Events', function() {
+    var queue :Queue<string, number>;
+    function lenHandler(s:string) : number { return s.length; };
+    function promiseLenHandler(s:string) : Promise<number> {
+      return new Promise<number>((F,R) => {
+        setTimeout(F(s.length), 1);
+      });
+    }
+
+    beforeEach(() => {
+      queue = new Queue<string, number>();
+    });
+
+  }
+
 });  // describe('TaskManager', ... )
 
 }  // module TaskManager

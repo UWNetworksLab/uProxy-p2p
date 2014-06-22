@@ -4,7 +4,7 @@ declare module Handler {
   // call handle, and separately asyncronously for us to make promises to
   // handle the next using onceHandleNext.
   //
-  // TODO: Break into a inputNotifyQueue, and an exitNotifyQueue.
+  // CONSIDER: Break into a inputNotifyQueue, and an exitNotifyQueue.
   class Queue<T,T2> {
     constructor();
 
@@ -14,7 +14,7 @@ declare module Handler {
     // Number of things in the queue to be handled.
     public getLength :() => number;
 
-    // called by code that wants `x` to be handled. Returns a promise for
+    // Called by code that wants `x` to be handled. Returns a promise for
     // when `x` is handled.
     public handle :(x:T) => Promise<T2>;
 
