@@ -3,50 +3,55 @@
 // Event Handler tools.
 module Handler {
 
-  // Simple interface for optional values. Can be used as follows:
-  // Given |x :Maybe<string>| Then you can write stuff like:
-  // |if (some in x) then return x.some; else throw new Error("none!");|
-  interface Maybe<T> {
-    some ?:T;
+  // The |Aggregator| interface aggregates objects of type |T| to form a
+  // compound object of type |T2|. It may have internal data, including time
+  // which it uses as part of the aggregation. The |input| function adds a new
+  // input, and the |check| function returns an optional aggregated output. If
+  // the time/aggregate is not ready yet, |check| returns |null|. (Typically,
+  // calling |check| twice without an |input| in between will result in the null
+  // the second time; although this is not strickly enforced it is recommended).
+  export interface Aggregator<T,T2> {
+    input          :(x:T) => void;
+    check          :() => T2;  // Note: T2 object returned may be null;
   }
 
-  // The AggregateUntil interface allows internal storage of aggregation and any
-  // other state, including time. |considerNext| adds a new input element, And
-  // the |readyNow| function returns an optional aggregated output element if
-  // the time & aggregation is right.
-  interface AggregateUntil<T,T2> {
-    considerNext   :(x:T) => void;
-    readyNow       :() => Maybe<T2>;
-  }
+  // All handle calls get the same result for an aggregated collection of things
+  // in the queue.
+  export class AggregateUntil<T,T2> {
 
-  // All handle calls get the same result for an aggregated collection of things in the queue.
-  class AggregateUntilHandler<T,T2>() {
-      private nextPromise_  :Promise<T2>;
-      private fulfilNextFn_ :(x:T2) => void;
-    constructor(public aggregator :AggregateUntil<T,T2>) {
-      this.readyEvent_ = new UnitEventHandler<T2>();
-      nextPromise_
+    // The |nextAggregate| is the Promise for next aggregated value.
+    public nextAggregate  :Promise<T2>;
+
+    // fulfilNextFn_ is the internal function to fulfill the nextAggregate.
+    private fulfilNextFn_ :(x:T2) => void;
+
+    constructor(public aggregator :Aggregator<T,T2>) {
+      this.resetNextPromise_();
     }
 
-    private resetNextPromise_ = () => {
-      this.nextPromise_ = new Promise((F,R) => { this.fulfilNextFn_ = F; });
+    private resetNextPromise_ = () : void => {
+      this.nextAggregate = new Promise((F,R) => { this.fulfilNextFn_ = F; });
     }
 
-    // Returns true
-    public tryNow = () => {
-      var ready = aggregator.readyNow();
-      if (!ready.some) {
+    // Checks to see if the aggregator can now aggregate the inputs. Returns
+    // true if the old |nextAggregate| has been fulfilled and a new
+    // |nextAggregate| has been created.
+    public tryNext = () : boolean => {
+      var result = this.aggregator.check();
+      if (result === null) {
         return false;
       }
-      this.fulfilNextFn_(ready.some);
+      this.fulfilNextFn_(result);
       this.resetNextPromise_();
       return true;
     }
 
-    public handle = (x:T) => {
-      aggregator.considerNext(x);
-      var currentPromise = nextPromise_;
-      tryNow();
+    // The handle function for aggregating elements. Note that all handle calls
+    // of values will get the same aggregated reult promise.
+    public handle = (x:T) : Promise<T2> => {
+      this.aggregator.input(x);
+      var currentPromise = this.nextAggregate;
+      this.tryNext();
       return currentPromise;
     }
   }
