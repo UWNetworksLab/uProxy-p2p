@@ -60,10 +60,7 @@ var TESTDATA_EXAMPLE_STATE = {
         }
       },
       "online": true,
-      "canUProxy": true,
-      "onGoogle": true,
-      "onFB": false,
-      "onXMPP": false
+      "canUProxy": true
     }
   },
   "instances": {

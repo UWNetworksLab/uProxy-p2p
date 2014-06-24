@@ -159,12 +159,16 @@
                  that we have complete control over sorting, filtering, and the
                  timing of DOM updates.
             -->
-            <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by $index"
+            <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by contact.userId"
                 ng-click="ui.focusOnUser(contact)"
                 ng-class="{offline:!contact.online}">
-              {{contact.name}}
+
+              <span class="c-name">{{contact.name}}</span>
+
               <img class="contact-image" ng-src='{{contact.imageData}}'>
+
               <span class="c-icons">
+                <!-- TODO: do the givesMe or usesMe icons ever show? -->
                 <span class="c-icon givesMe"
                     ng-class="{grey:'yes'!=contact.trust.asProxy,
                                active:contact.isActiveProxy }"
@@ -173,11 +177,10 @@
                     ng-class="{grey:'yes'!=contact.trust.asClient,
                                active:contact.isActiveClient }"
                     ng-show='contact.usesMe'></span>
-                <span class="c-icon" ng-show='contact.onGoogle'>G+</span>
-                <span class="c-icon" ng-show='contact.onFB'>FB</span>
-                <span class="c-icon" ng-show='contact.onXMPP'> XM </span>
                 <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
+                <span class="c-icon contactRightArrow">&#62;</span>
               </span>
+
             </li>
           </ul>
           <!--
@@ -187,6 +190,8 @@
           -->
         </div>
 
+        <!-- TODO(dborkan): anything referencing ui.user or ui.proxyServerInstance
+        is now broken -->
         <div class="contact-info" id="their-info"
             ng-show="ui.isAccess()">
           <div class="contact-name-bar">
@@ -200,8 +205,6 @@
             <div class="picCover"></div>
             <div class="description">
               <p>{{ui.proxyServerInstance.description}}</p>
-              <span ng-show="ui.user.onGoogle"> Google </span>
-              <span ng-show="ui.user.onFB"> FB </span>
             </div>
 
             <div class="mode-panel">
