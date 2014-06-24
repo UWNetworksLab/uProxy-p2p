@@ -32,7 +32,7 @@ class AuthGoogle implements AuthenticationManager {
       chrome.identity.launchWebAuthFlow(
           {url: googleOAuth2Url, interactive: true},
           (responseUrl) => {
-            console.log('Got responseUrl: ' + responseUrl);
+            console.log('Got google authentication response');
             if (chrome.runtime.lastError) {
               this.errorCallback('Error logging into Google: ',
                                  chrome.runtime.lastError);
@@ -41,7 +41,6 @@ class AuthGoogle implements AuthenticationManager {
 
             // Parse Oauth2 token from responseUrl
             var token = responseUrl.match(/access_token=([^&]+)/)[1];
-            console.log('Got Oauth2 token:' + token);
             if (!token) {
               this.errorCallback('Error getting token for Google');
               return;
@@ -88,7 +87,6 @@ class AuthGoogle implements AuthenticationManager {
       // sign in with a different account.  This must be launched using
       // launchWebAuthFlow so that sandboxed environment is logged out (so
       // this can't be done using an xhr request).
-      console.log('About to log out of Google');
       chrome.identity.launchWebAuthFlow(
           {url: 'https://accounts.google.com/logout', interactive: false},
           (responseUrl) => {
