@@ -433,7 +433,7 @@ input[type=text]
 
 #roster-frame
   position: relative
-  min-height: 520px
+  min-height: 486px
   white-space: nowrap
   overflow-y: auto
   overflow-x: hidden
@@ -464,9 +464,9 @@ input[type=text]
 .contacts li
   position: relative
   z-index: 0
-  height: 30px
+  height: 65px
   cursor: default
-  padding: 6px 37px
+  padding: 6px 75px
   white-space: nowrap
   overflow: hidden
   border: 1px solid transparent
@@ -474,8 +474,21 @@ input[type=text]
   border-right: none
   color: #222
   font-weight: 300
-  text-shadow: 2px 2px 2px #ccc
   @include smooth
+
+  &.offline img
+    -webkit-filter: grayscale(100%)
+    opacity: 0.5
+
+  .c-name
+    color: #3333dd
+    font-size: 18px
+
+  &.offline .c-name
+    color: #999999
+
+  &.offline .contactRightArrow
+    color: #999999
 
   &:hover, &:focus
     background-color: #fff
@@ -486,34 +499,30 @@ input[type=text]
     box-shadow: 0 2px 6px 1px #ddd
     outline: none
 
-  &.offline
-    color: #999
-
 img.contact-image
   position: absolute
   left: 1px
   top: 1px
-  height: 100%
-  width: 25px
+  height: 65px
+  width: 65px
   background: transparent url('../icons/contact-default.png') no-repeat center
   background-size: cover
 
 .c-icons
   position: absolute
-  right: 12px
+  right: 0px
   color: #555
   font-size: $fontSize * 0.8
   font-weight: 900
+  top: 50%
+  margin-top: -9.5px  // half of .c-icon height
+
 .c-icon
   display: inline-block
-  padding: 1px
-  width: 18px
-  height: 16px
-  line-height: 16px
-  text-align: center
-  vertical-align: middle
-  background: transparent no-repeat center
-  background-size: 14px !important
+  height: 19px
+  width: 19px
+  background-size: 19px
+  margin-right: 5px
   @include smooth
   &.canUProxy
     background-image: url('../icons/uproxy-19.png')
@@ -531,6 +540,9 @@ img.contact-image
     opacity: 0.3
   &:hover
     opacity: 0.9
+  &.contactRightArrow
+    color: #999999
+    font-size: 22px
 
 img.c-icon
   vertical-align: middle
