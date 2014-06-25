@@ -233,41 +233,27 @@
         </div>
 
         <div id="access" ng-show="ui.isAccess()">
-          <div id="internets" class="bg-deco"
-              ng-hide="ui.chatView"></div>
+
+          <div id="internets" class="bg-deco"></div>
+
           <div class="bg-deco" id="path-left"
-               ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.user.trust.asProxy,
-                          darker:'yes'==ui.user.trust.asProxy,
-                          active:ui.user.isActiveProxy }">
+               ng-class="{faded: !ui.user.givesMe,
+                          darker: ui.user.givesMe,
+                          active: ui.currentProxyServer && ui.currentProxyServer.instance == ui.proxyServerInstance }">
           </div>
           <div class="bg-deco" id="path-right"
-               ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.user.trust.asClient,
-                          darker:'yes'==ui.user.trust.asClient,
-                          active:ui.user.isActiveClient }">
+               ng-class="{faded: !ui.user.usesMe,
+                          darker: ui.user.usesMe,
+                          active: ui.proxyServerInstance.isCurrentProxyClient }">
           </div>
-          <div class="uproxy-deco" id="their-uproxy"
-              ng-show="ui.proxyServerInstance"></div>
-          <div class="uproxy-deco" id="my-uproxy"></div>
 
           <p class="access-note" ng-hide="ui.proxyServerInstance">
-          {{ ui.user.name }} does not have <b>uProxy</b>.
+            {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
           <uproxy-consent></uproxy-consent>
 
-          <div id="chat-box" ng-show="ui.chatView">
-            <textarea id="chat-log" ng-init="chatLog='Chatting...'"
-                readonly>{{chatLog}}</textarea>
-            <input type="text" id="chat-input" ng-model="chatText">
-            </input>
-            <input type="submit" id="chat-send" class="btn"
-                ng-click="chatLog = chatLog + '\n' + chatText;chatText=''">
-              Send
-            </input>
-          </div>
-        </div>
+        </div>  <!-- end of #access -->
 
       </div>
 

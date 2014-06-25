@@ -113,6 +113,7 @@ app.directive('uproxyConsent', () => {
         if (!$s.ui.proxyServerInstance) {
           return 'NONE';
         }
+        console.log('currentProxyState returning ' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy])
         return '' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy];
       }
       $s.currentClientState = () => {
@@ -121,6 +122,7 @@ app.directive('uproxyConsent', () => {
         }
         return '' + $s.ClientState[$s.ui.proxyServerInstance.consent.asClient];
       }
+      $s.getOrGive = 'GET';  // Default to get, TODO: make enum
     };
     return {
       // 'E' is an angular directive attribute.

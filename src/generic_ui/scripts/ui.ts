@@ -289,6 +289,7 @@ module UI {
           user: this.user
         };
         this._setProxying(true);
+        this.refreshDOM();
       });
     }
 
@@ -379,6 +380,8 @@ module UI {
       // TODO: Support multiple instances in the UI.
       if (user.instances.length > 0) {
         this.proxyServerInstance = user.instances[0];
+      } else {
+        this.proxyServerInstance = null;
       }
     }
 
