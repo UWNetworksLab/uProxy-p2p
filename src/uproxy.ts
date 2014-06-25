@@ -51,7 +51,8 @@ module uProxy {
     COMMAND_REJECTED,
     ERROR,
     STOP_PROXYING,
-    NOTIFICATION
+    NOTIFICATION,
+    LOCAL_FINGERPRINT  // From the WebRTC peer connection.
   }
 
   /**

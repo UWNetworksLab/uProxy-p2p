@@ -6,6 +6,7 @@
       "uproxy.js",
       "view_oauth.js",
       "util.js",
+      "auth.js",
       "consent.js",
       "nouns-and-adjectives.js",
       "storage.js",
@@ -14,8 +15,7 @@
       "user.js",
       "social-enum.js",
       "social.js",
-      "core.js",
-      "start-uproxy.js"
+      "core.js"
     ]
   },
   "dependencies": {

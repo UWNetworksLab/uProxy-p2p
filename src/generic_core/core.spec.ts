@@ -52,7 +52,7 @@ describe('Core', () => {
       },
       action: Consent.UserAction.REQUEST
     }
-    Core.modifyConsent(command);
+    core.modifyConsent(command);
     expect(Social.getNetwork).toHaveBeenCalledWith('fake-network');
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
@@ -60,7 +60,7 @@ describe('Core', () => {
   });
 
   it('login fails for invalid network', (done) => {
-    Core.login('nothing').catch(() => {
+    core.login('nothing').catch(() => {
       expect(console.warn).toHaveBeenCalled();
       done();
     });
@@ -71,7 +71,7 @@ describe('Core', () => {
       return network;
     });
     spyOn(network, 'login').and.returnValue(Promise.resolve());
-    Core.login('network').then(done);
+    core.login('network').then(done);
   });
 
   it('updateDescription updates the LocalInstance for all networks', () => {
@@ -93,7 +93,7 @@ describe('Core', () => {
     spyOn(networkB, 'getLocalInstance').and.callFake(() => {
       return myselfB;
     });
-    Core.updateDescription('new description is really cool!');
+    core.updateDescription('new description is really cool!');
     expect(myselfA.description).toEqual('new description is really cool!');
     expect(myselfB.description).toEqual('new description is really cool!');
   });

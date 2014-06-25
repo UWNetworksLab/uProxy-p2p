@@ -6,13 +6,19 @@
   "bundle": "src/interfaces/lib/tsd.d.ts",
   "installed": {
     "chrome/chrome-app.d.ts": {
-      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
     },
     "chrome/chrome.d.ts": {
-      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "67aa15a029f4382a51a92413aac0e07d9c579e13"
+      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+    },
+    "webrtc/RTCPeerConnection.d.ts": {
+      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+    },
+    "webrtc/MediaStream.d.ts": {
+      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
     }
   }
 }

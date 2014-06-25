@@ -106,6 +106,10 @@ module UI {
 
     public errors :string[] = [];
 
+    // TODO: Put this into the 'auth' service, which will eventually include
+    // sas-rtc.
+    public localFingerprint :string = null;
+
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
     search = '';
@@ -182,6 +186,11 @@ module UI {
       });
       core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
         this.stopProxyingInUiAndConfig();
+      });
+
+      core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
+        this.localFingerprint = payload;
+        console.log('Received local fingerprint: ' + this.localFingerprint);
       });
 
       console.log('Created the UserInterface');
