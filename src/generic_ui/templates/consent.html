@@ -1,8 +1,12 @@
 <div class='instance-actions' ng-show='ui.proxyServerInstance && ui.isAccess()'>
 
   <div class='get-or-give buttons'>
-    <button class="btn" ng-click="getOrGive='GET'">Get Access</button>
-    <button class="btn" ng-click="getOrGive='GIVE'">Give Access</button>
+    <button class="btn" ng-click="getOrGive='GET'" ng-disabled="getOrGive=='GET'">
+      Get Access
+    </button>
+    <button class="btn" ng-click="getOrGive='GIVE'" ng-disabled="getOrGive=='GIVE'">
+      Give Access
+    </button>
   </div>
 
   <div ng-switch='getOrGive'>
@@ -21,7 +25,7 @@
           Requesting access from {{ui.user.name}}...
         </p>
         <uproxy-consent-action text='Cancel'
-            action='CANCEL_REQUEST'
+            action='CANCEL_REQUEST'>
         </uproxy-consent-action>
       </div>
       <div ng-switch-when='REMOTE_OFFERED'>
@@ -52,7 +56,7 @@
         <p class='uproxytip'>You have not granted them access.
         </p>
         <uproxy-consent-action text='Offer Access'
-            action='OFFER'
+            action='OFFER'>
         </uproxy-consent-action>
       </div>
       <div ng-switch-when='REMOTE_REQUESTED'>
@@ -60,17 +64,17 @@
         </p>
         <uproxy-consent-action text='Grant'
             action='ALLOW_REQUEST'
-            class='black'
+            class='black'>
         </uproxy-consent-action>
         <uproxy-consent-action text='Ignore'
-            action='IGNORE_REQUEST'
+            action='IGNORE_REQUEST'>
         </uproxy-consent-action>
       </div>
       <div ng-switch-default>
         <p class='uproxytip'>You've given them access.
         </p>
         <uproxy-consent-action text='Revoke Access'
-            action='CANCEL_OFFER'
+            action='CANCEL_OFFER'>
         </uproxy-consent-action>
       </div>
     </div>  <!-- end of currentClientState switch -->
