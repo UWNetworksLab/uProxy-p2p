@@ -651,7 +651,7 @@ module Social {
       return cloneDeep({
         name: this.name,
         remember: false,
-        userIds: []  // blank because ManualNetwork doesn't persist contacts.
+        userIds: []  // ManualNetwork currently doesn't persist contacts.
       });
     }
 
@@ -688,7 +688,8 @@ module Social {
     public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);
       this.log('ManualNetwork.send: ' + msgString);
-      // TODO: Batch messages and display them in the UI.
+      // TODO: Batch messages.
+      // TODO: Relay messages to the UI for display to the user.
       return Promise.resolve();
     }
 
