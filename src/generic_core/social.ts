@@ -30,6 +30,8 @@
 module Social {
 
   var LOGIN_TIMEOUT :number = 5000;  // ms
+  var MANUAL_NETWORK_ID = 'manual';
+
 
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
@@ -59,8 +61,11 @@ module Social {
       }
     }
 
-    // TODO: Uncomment this.
-    //Social.networks[name] = new Social.ManualNetwork("manual");
+    // TODO: Uncomment this once there is UI for the manual network.
+    /*
+    Social.networks[MANUAL_NETWORK_ID] =
+        new Social.ManualNetwork(MANUAL_NETWORK_ID);
+    */
 
     return Social.networks;
   }
@@ -188,7 +193,7 @@ module Social {
       }
       clientIds.forEach((clientId:string) => {
         handshakes.push(this.send(clientId, handshake));
-      })
+      });
       return Promise.all(handshakes).then(() => {
         this.log('sent ' + cnt + ' instance handshake(s): ' +
                  clientIds.join(', '));
@@ -208,7 +213,7 @@ module Social {
       return {
         type: uProxy.MessageType.INSTANCE,
         data: this.myInstance.getInstanceHandshake()
-      }
+      };
     }
 
     /**
@@ -227,7 +232,7 @@ module Social {
 
     //================ Subclasses must override these methods ================//
 
-    // From Core.Persistent
+    // From Core.Persistent:
     public currentState = () : NetworkState => {
       throw new Error('Operation not implemented');
     }
@@ -235,7 +240,7 @@ module Social {
       throw new Error('Operation not implemented');
     }
 
-    // From Social.Network
+    // From Social.Network:
     public login = (remember:boolean) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
