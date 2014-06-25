@@ -213,15 +213,31 @@ module.exports = function(grunt) {
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/firefox/',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
-         dest: 'build/firefox/'},
+         dest: 'build/firefox'},
         // ... the generic core stuff
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
-         dest: 'build/firefox/'},
+         dest: 'build/firefox/lib'},
         // ... the generic UI stuff
-        {expand: true, cwd: 'build/generic_ui',
+        {expand: true, cwd: 'build/uistatic',
          src: ['**'],
-         dest: 'build/firefox/'}
+         dest: 'build/firefox/data'},
+        // freedom for firefox
+        {expand: true, cwd: 'node_modules/freedom-for-firefox/',
+         src: ['freedom-for-firefox.jsm'],
+         dest: 'build/firefox/data'},
+        {expand: true, cwd: 'node_modules/socks-rtc/build/',
+         src: ['**'],
+         dest: 'build/firefox/lib/socks-rtc'},
+        {expand: true, cwd: 'node_modules/freedom/providers/social',
+         src: ['websocket-server/**'],
+         dest: 'build/firefox/lib'},
+        {expand: true, cwd: 'node_modules/freedom-social-xmpp/build/',
+         src: ['**'],
+         dest: 'build/firefox/lib/freedom-social-xmpp'},
+        {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
+         src: ['**'],
+         dest: 'build/firefox/lib/storage'},
       ]}
     },
 

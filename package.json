@@ -14,6 +14,7 @@
     "es6-promise": "^0.1.1",
     "freedom": "^0.4.6",
     "freedom-for-chrome": "0.1.5",
+    "freedom-for-firefox": "~0.3.0",
     "freedom-social-xmpp": "^0.0.11",
     "freedom-typescript-api": "^0.1.9",
     "glob": "^3.2.6",
