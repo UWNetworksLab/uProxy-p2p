@@ -53,26 +53,28 @@ module Handler {
       expect(queue.getLength()).toBe(0);
     });
 
-    it('onceHandler then handle 2 events: leaves second event queued',
+    it('setSyncNextHandler then handle 2 events: leaves second event queued',
         function(done) {
-      queue.onceHandler(lenHandler).then((n) => {
-        expect(n).toBe(1);
-        expect(queue.getLength()).toBe(1);
-        expect(++ncallbacks).toBe(1);
-      });
+      var p1 = queue.setSyncNextHandler(lenHandler).then((n) => {
+          expect(n).toBe(1);
+          expect(queue.getLength()).toBe(1);
+        });
       expect(queue.getLength()).toBe(0);
-      queue.handle('A').then((n) => {
+      var p2 = queue.handle('A').then((n) => {
           expect(n).toBe(1);  // length of 'A' is 2
-          expect(++ncallbacks).toBe(2);
-          done();
         });
       queue.handle('BB');
-      expect(queue.getLength()).toBe(1);
+
+      // Complete only when every promise has completed.
+      Promise.all<void>([p1,p2]).then((all) => {
+        expect(queue.getLength()).toBe(1);
+        done();
+      });
     });
 
-    it('promiseLenHandler then handle 2 events: leaves second event queued',
+    it('setAsyncNextHandler then handle 2 events: leaves second event queued',
         function(done) {
-      queue.oncePromiseHandler(promiseLenHandler).then((s) => {
+      queue.setAsyncNextHandler(promiseLenHandler).then((s) => {
         expect(s).toBe(1);
         expect(queue.getLength()).toBe(1);
         done();
@@ -81,23 +83,23 @@ module Handler {
       queue.handle('BB');
     });
 
-    it('3 events then makePromise leaves 2 events and handles first',
+    it('3 events then setSyncNextHandler leaves 2 events and handles first',
         function(done) {
       queue.handle('A');
       queue.handle('BB');
       queue.handle('CCC');
-      queue.onceHandler(lenHandler).then((n:number) => {
+      queue.setSyncNextHandler(lenHandler).then((n:number) => {
         expect(queue.getLength()).toBe(2);
         expect(n).toBe(1);
         done();
       });
     });
 
-    it('3 events then makePromise to remove elements in order until empty',
+    it('3 events then setSyncNextHandler to remove elements in order until empty',
         function(done) {
       queue.handle('A');
       queue.handle('BBB');
-      queue.onceHandler(lenHandler)
+      queue.setSyncNextHandler(lenHandler)
         .then((n:number) => {
             expect(++ncallbacks).toBe(1);
             expect(queue.getLength()).toBe(1);
@@ -105,7 +107,7 @@ module Handler {
           })
         .then(() => {
             expect(++ncallbacks).toBe(2);
-            return queue.onceHandler(lenHandler);
+            return queue.setSyncNextHandler(lenHandler);
           })
         .then((n:number) => {
             expect(++ncallbacks).toBe(3);
@@ -117,7 +119,7 @@ module Handler {
           })
         .then(() => {
             expect(++ncallbacks).toBe(4);
-            return queue.onceHandler(lenHandler);
+            return queue.setSyncNextHandler(lenHandler);
           })
         .then((n:number) => {
             expect(++ncallbacks).toBe(5);
@@ -162,7 +164,7 @@ module Handler {
 
       // We set the handler at this point so test that the two earlier values
       // are indeed queued.
-      queue.setPromiseHandler(aggregateTo10Handler.handle);
+      queue.setAsyncHandler(aggregateTo10Handler.handle);
       var p3 = queue.handle(20);
       p3.then((s) => {
           expect(s).toBe('SUM_AT_OUTPUT:26');

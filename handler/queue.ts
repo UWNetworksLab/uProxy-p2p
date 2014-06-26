@@ -54,8 +54,11 @@ module Handler {
     }
   }
 
-  // Queue up event the handler is set to null. When set to not null handle all
-  // the stuff that was queued.
+  // Queue up events to be handled. The handler is a function that takes objects
+  // of type |T| and promises objects of type |T2| (the handler may run async).
+  // When the handler is set to |null|, objects are queued up to be handled.
+  // When the handler is set to not a non-null function, everything in the queue
+  // is handled by that function. There are convenience functions
   //
   // CONSIDER: this is a kind of co-promise, and can probably be
   // extended/generalized.
@@ -108,35 +111,45 @@ module Handler {
       }
     }
 
-    // Make promise for when the next call to handle is made.
+    // Calling setHandler with null pauses handling and queues all objects to be
+    // handled.
     //
-    // Note: this sets the Handler to fulfil this promise when there is
-    // something to handle.
-    public onceHandler = (handler:(x:T) => T2) : Promise<T2> => {
-      return new Promise((F,R) => {
-        // We call setPromiseHandler to reject any previous promise handler; and
-        // to actually set the current handler.
-        this.setHandler((x:T) : T2 => {
-          // Note: we don't call stopHandling() within this handler because that
-          // would reject the promise we're about to fulfill.
-          this.handler_ = null;
-          this.rejectFn_ = null;
-          var result = handler(x);
-          F(result);
-          return result;
-        });
-        this.rejectFn_ = R;
-      });
+    // If you have an unfulfilled promise, calling setHandler rejects the old
+    // promise.
+    public setAsyncHandler = (handler:(x:T) => Promise<T2>) : void => {
+      if (this.rejectFn_) {
+        this.rejectFn_(new Error('Cancelled by a call to setHandler'));
+        this.rejectFn_ = null;
+      }
+      this.handler_ = handler;
+      this.processQueue_();
+    }
+    // Convenience function for handler to be an ordinary function without a
+    // promise result.
+    public setSyncHandler = (handler:(x:T) => T2) : void => {
+      this.setAsyncHandler((x:T) => { return Promise.resolve(handler(x)); });
     }
 
-    // Make promise for when the next call to handle is made.
+    // Reject the previous promise handler if it exists and stop handling stuff.
+    public stopHandling = () => {
+      if (this.rejectFn_) {
+        this.rejectFn_(new Error('Cancelled by a call to setHandler'));
+        this.rejectFn_ = null;
+      }
+      this.handler_ = null;
+    }
+
+    // A convenience function that takes a T => Promise<T2> function and sets
+    // the handler to a function that will return the promise for the next thing
+    // to handle and then unset the handler after that so that only the next
+    // thing in the queue is handled.
     //
-    // Note: this sets the Handler to fulfil this promise when there is
+    // Note: this sets the Handler to fulfill this promise when there is
     // something to handle.
-    public oncePromiseHandler = (handler:(x:T) => Promise<T2>)
+    public setAsyncNextHandler = (handler:(x:T) => Promise<T2>)
         : Promise<T2> => {
       return new Promise((F,R) => {
-        this.setPromiseHandler((x:T) : Promise<T2> => {
+        this.setAsyncHandler((x:T) : Promise<T2> => {
           // Note: we don't call stopHandling() within this handler because that
           // would reject the promise we're about to fulfill.
           this.handler_ = null;
@@ -149,25 +162,13 @@ module Handler {
       });
     }
 
-    // Calling setHandler with null pauses handling and queues all objects to be
-    // handled.
-    //
-    // If you have an unfulfilled promise, calling setHandler rejects the old
-    // promise.
-    public setPromiseHandler = (handler:(x:T) => Promise<T2>) : void => {
-      if (this.rejectFn_) {
-        this.rejectFn_(new Error('Cancelled by a call to setHandler'));
-        this.rejectFn_ = null;
-      }
-      this.handler_ = handler;
-      this.processQueue_();
+    // Convenience function for handling next element with an ordinary function.
+    public setSyncNextHandler = (handler:(x:T) => T2) : Promise<T2> => {
+      return this.setAsyncNextHandler((x:T) => {
+          return Promise.resolve(handler(x));
+        });
     }
-    public setHandler = (handler:(x:T) => T2) : void => {
-      this.setPromiseHandler((x:T) => { return Promise.resolve(handler(x)); });
-    }
-    public stopHandling = () => {
-      this.setPromiseHandler(null);
-    }
+
 
   }  // class Queue
 
