@@ -92,7 +92,7 @@ app.run([
  * The uProxy Consent directive handles all consent commands from the UI to
  * the Core, which handles passing consent bits over the wire.
  */
-app.directive('uproxyConsent', () => {
+app.directive('uproxyUserAccess', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
       $s.ProxyState = Consent.ProxyState;
@@ -122,13 +122,12 @@ app.directive('uproxyConsent', () => {
         }
         return '' + $s.ClientState[$s.ui.proxyServerInstance.consent.asClient];
       }
-      $s.getOrGive = 'GET';  // Default to get, TODO: make enum
     };
     return {
       // 'E' is an angular directive attribute.
       // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
-      templateUrl: 'templates/consent.html',
+      templateUrl: 'templates/user-access.html',
       link: link
     };
   });

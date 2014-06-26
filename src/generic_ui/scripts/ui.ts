@@ -110,6 +110,12 @@ module UI {
     // sas-rtc.
     public localFingerprint :string = null;
 
+    // Maps instanceId to 'GET' or 'GIVE' state, if the user has explicitly
+    // clicked to change the screen in the UI.  If an instance is missing from
+    // this map we should default to the correct get/give state based on the
+    // consent settings.
+    private mapInstanceIdToGetOrGive_ = {};
+
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
     search = '';
@@ -561,6 +567,28 @@ module UI {
 
     public isProxying = () : boolean => {
       return this.currentProxyServer != null;
+    }
+
+    public toggleGetOrGive = (newValue :string, instance :UI.Instance)
+        : void => {
+      this.mapInstanceIdToGetOrGive_[instance.instanceId] = newValue;
+    }
+
+    public showGetOrGive = (instance :UI.Instance) : string => {
+      if (!instance) {
+        // This occurs because angular still evaluates expressions using
+        // ui.proxyServerInstance even when those DOM elements are hidden
+        // and ui.proxyServerInstance is null.
+        return 'GET';
+      } else if (this.mapInstanceIdToGetOrGive_[instance.instanceId]) {
+        // User explicitly toggled get/give
+        return this.mapInstanceIdToGetOrGive_[instance.instanceId];
+      } else if (instance.consent.asClient != Consent.ClientState.NONE) {
+        // User has offered or been requested to act as proxy server.
+        return 'GIVE';
+      } else {
+        return 'GET';
+      }
     }
 
   }  // class UserInterface

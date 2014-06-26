@@ -196,62 +196,13 @@
           -->
         </div>
 
-        <!-- TODO(dborkan): anything referencing ui.user or ui.proxyServerInstance
-        is now broken -->
-        <div class="contact-info" id="their-info"
-            ng-show="ui.isAccess()">
-          <div class="contact-name-bar">
-            <p class="contact-name">{{ui.user.name}}</p>
-          </div>
-          <img ng-show="ui.user.imageData" class="contact-image"
-               ng-src='{{ui.user.imageData?ui.user.imageData:""}}'>
-          <img ng-hide="ui.user.imageData" class="contact-image">
-          <!--
-          <div class="details" ng-show="theirInfoHovered">
-            <div class="picCover"></div>
-            <div class="description">
-              <p>{{ui.proxyServerInstance.description}}</p>
-            </div>
-
-            <div class="mode-panel">
-              <button id="uproxy-btn" class="instance-btn">
-              </button>
-              <a class="chat-btn instance-btn"
-                 ng-click="ui.chatView=!ui.chatView"
-                 ng-show="ui.isAccess()"
-                 ng-mouseenter="chatButtonHovered=true"
-                 ng-mouseleave="chatButtonHovered=false">
-              </a>
-              <div class="tool">
-                <p class="tip" ng-show="chatButtonHovered">
-                  Chat with {{ ui.user.name }}.
-                </p>
-              </div>
-            </div>
-          </div>
-          -->
-        </div>
-
         <div id="access" ng-show="ui.isAccess()">
-
-          <div id="internets" class="bg-deco"></div>
-
-          <div class="bg-deco" id="path-left"
-               ng-class="{faded: !ui.user.givesMe,
-                          darker: ui.user.givesMe,
-                          active: ui.currentProxyServer && ui.currentProxyServer.instance == ui.proxyServerInstance }">
-          </div>
-          <div class="bg-deco" id="path-right"
-               ng-class="{faded: !ui.user.usesMe,
-                          darker: ui.user.usesMe,
-                          active: ui.proxyServerInstance.isCurrentProxyClient }">
-          </div>
 
           <p class="access-note" ng-hide="ui.proxyServerInstance">
             {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
-          <uproxy-consent></uproxy-consent>
+          <uproxy-user-access></uproxy-user-access>
 
         </div>  <!-- end of #access -->
 
@@ -259,13 +210,6 @@
 
     </div>
 
-    <div class="contact-info" id="my-info" ng-show="ui.isAccess()">
-      <div class="contact-name-bar">
-        <p class="contact-name">You</p>
-      </div>
-      <img class="contact-image"
-           ng-src='{{ui.myPic}}'>
-    </div>
 
     <div id="status">
       <span id="status-proxy-server" ng-show="ui.currentProxyServer" ng-cloak>
