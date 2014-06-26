@@ -9,7 +9,7 @@ module Handler {
   // input, and the |check| function returns an optional aggregated output. If
   // the time/aggregate is not ready yet, |check| returns |null|. (Typically,
   // calling |check| twice without an |input| in between will result in the null
-  // the second time; although this is not strickly enforced it is recommended).
+  // the second time; although this is not strictly enforced it is recommended).
   export interface Aggregator<T,T2> {
     input          :(x:T) => void;
     check          :() => T2;  // Note: T2 object returned may be null;
@@ -22,15 +22,15 @@ module Handler {
     // The |nextAggregate| is the Promise for next aggregated value.
     public nextAggregate  :Promise<T2>;
 
-    // fulfilNextFn_ is the internal function to fulfill the nextAggregate.
-    private fulfilNextFn_ :(x:T2) => void;
+    // fulfillNextFn_ is the internal function to fulfill the nextAggregate.
+    private fulfillNextFn_ :(x:T2) => void;
 
     constructor(public aggregator :Aggregator<T,T2>) {
       this.resetNextPromise_();
     }
 
     private resetNextPromise_ = () : void => {
-      this.nextAggregate = new Promise((F,R) => { this.fulfilNextFn_ = F; });
+      this.nextAggregate = new Promise((F,R) => { this.fulfillNextFn_ = F; });
     }
 
     // Checks to see if the aggregator can now aggregate the inputs. Returns
@@ -41,7 +41,7 @@ module Handler {
       if (result === null) {
         return false;
       }
-      this.fulfilNextFn_(result);
+      this.fulfillNextFn_(result);
       this.resetNextPromise_();
       return true;
     }

@@ -13,7 +13,7 @@ module Handler {
     }
     public check = () => {
       if (this.sum < this.min) { return null; }
-      var result = this.sum.toString();
+      var result = 'SUM_AT_OUTPUT:' + this.sum.toString();
       this.sum = 0;
       return result;
     }
@@ -137,34 +137,55 @@ module Handler {
       queue = new Queue<number, string>();
       // A simple aggregator of numbers up to the specified |min|, at which
       // point the string of the sum of the numbers is returned.
-
+      var MIN_AGGREGATION_VALUE = 10;
       aggregateTo10Handler = new AggregateUntil<number,string>(
-          new NumberSumAggregator(10));
-
+          new NumberSumAggregator(MIN_AGGREGATION_VALUE));
       ncallbacks = 0;
     });
 
     it('Basic aggregateTo10Handler & first two handle results',
         function(done) {
+      // Note that the return value for all the first three elements is the same
+      // because we are using the aggregated handler. The aggregation concludes
+      // only when we get over the specified min value (MIN_AGGREGATION_VALUE),
+      // and then fulfills the promise for each value handled that is part of
+      // that aggregation. We could write a different kind of aggregation
+      // handler that does something different.
       var p1 = queue.handle(4);
       p1.then((s) => {
-          expect(s).toBe('26');
+          expect(s).toBe('SUM_AT_OUTPUT:26');
         });
       var p2 = queue.handle(2);
       p2.then((s) => {
-          expect(s).toBe('26');
+          expect(s).toBe('SUM_AT_OUTPUT:26');
         });
+
+      // We set the handler at this point so test that the two earlier values
+      // are indeed queued.
       queue.setPromiseHandler(aggregateTo10Handler.handle);
       var p3 = queue.handle(20);
       p3.then((s) => {
-          expect(s).toBe('26');
+          expect(s).toBe('SUM_AT_OUTPUT:26');
         });
+
+      // The return value for the next one is 21 because that is already over
+      // the aggregate limit.
       var p4 = queue.handle(21);
       p4.then((s) => {
-          expect(s).toBe('21');
+          expect(s).toBe('SUM_AT_OUTPUT:21');
         });
+
+      // The promise return value for these two will not be called because they
+      // will be being processed until enough data is put on the queue to
+      // complete the next aggregation.
       var p5 = queue.handle(5);
+      p5.then((s) => {
+          expect('this should never happen').toBe(null);
+        });
       var p6 = queue.handle(3);
+      p6.then((s) => {
+          expect('this should never happen either').toBe(null);
+        });
 
       // Complete only when every promise has completed.
       Promise.all<string>([p1,p2,p3,p4]).then((all) => { done(); });
