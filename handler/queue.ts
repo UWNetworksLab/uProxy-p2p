@@ -124,6 +124,7 @@ module Handler {
       this.handler_ = handler;
       this.processQueue_();
     }
+
     // Convenience function for handler to be an ordinary function without a
     // promise result.
     public setSyncHandler = (handler:(x:T) => T2) : void => {

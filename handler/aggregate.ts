@@ -1,6 +1,5 @@
 /// <reference path='../third_party/promise/promise.d.ts' />
 
-// Event Handler tools.
 module Handler {
 
   // The |Aggregator| interface aggregates objects of type |T| to form a
