@@ -343,6 +343,25 @@ module.exports = function(grunt) {
                  'build/uistatic/src/uistatic/scripts/dependencies.js'],
            dest: 'build/uistatic/scripts/dependencies.js'}
         ]
+      },
+      uproxy: {
+        files: [{
+          src: [
+            "build/firefox/lib/uproxy.js",
+            "build/firefox/lib/view_oauth.js",
+            "build/firefox/lib/util.js",
+            "build/firefox/lib/auth.js",
+            "build/firefox/lib/consent.js",
+            "build/firefox/lib/nouns-and-adjectives.js",
+            "build/firefox/lib/storage.js",
+            "build/firefox/lib/local-instance.js",
+            "build/firefox/lib/remote-instance.js",
+            "build/firefox/lib/user.js",
+            "build/firefox/lib/social-enum.js",
+            "build/firefox/lib/social.js",
+            "build/firefox/lib/core.js"],
+          dest: 'build/firefox/lib/concat_core_script.js'
+        }]
       }
     },
 
@@ -476,6 +495,10 @@ module.exports = function(grunt) {
       files: makeSrcOfFiles('concat.uistatic.files'),
       tasks: ['concat:uistatic']
     },
+    concat_uproxy_json: {
+      files: makeSrcOfFiles('concat.uproxy.files'),
+      tasks: ['concat:uproxy']
+    },
     sass_generic_ui: {
       files: makeSrcOfFiles('sass.generic_ui.files'),
       tasks: ['sass:generic_ui']
@@ -563,7 +586,8 @@ module.exports = function(grunt) {
   taskManager.add('build_firefox', [
     'build_generic_ui',
     'build_generic_core',
-    'copy:firefox'
+    'copy:firefox',
+    'concat:uproxy'
   ]);
 
   taskManager.add('build_firefox_xpi', [

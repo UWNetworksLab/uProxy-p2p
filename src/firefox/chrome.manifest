@@ -1,6 +1,0 @@
-content  uproxy chrome/content/
-content  uproxy-common common/
-content  uproxy-freedom node_modules/freedom/
-
-overlay  chrome://browser/content/browser.xul   chrome://uproxy/content/browser-overlay.xul
-overlay  chrome://browser/content/browser.xul  chrome://uproxy/content/toolbar-button.xul
