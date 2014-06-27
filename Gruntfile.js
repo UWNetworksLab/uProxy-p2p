@@ -234,10 +234,7 @@ module.exports = function(grunt) {
          dest: 'build/firefox/lib'},
         {expand: true, cwd: 'node_modules/freedom-social-xmpp/build/',
          src: ['**'],
-         dest: 'build/firefox/lib/freedom-social-xmpp'},
-        {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
-         src: ['**'],
-         dest: 'build/firefox/lib/storage'},
+         dest: 'build/firefox/lib/freedom-social-xmpp'}
       ]}
     },
 
