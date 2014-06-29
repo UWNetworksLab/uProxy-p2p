@@ -22,7 +22,7 @@ module Handler {
     var ncallbacks :number;
     function lenHandler(s:string) : number { return s.length; };
     function promiseLenHandler(s:string) : Promise<number> {
-      return new Promise<number>((F,R) => {
+      return new Promise((F,R) => {
         setTimeout(F(s.length), 1);
       });
     }
