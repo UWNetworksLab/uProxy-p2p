@@ -23,7 +23,8 @@ declare module Handler {
 
     // The queue stops being handled. If there is an *NextHandler set, then its
     // return promise is rejected.
-    public stopHandling :() -=> void;
+    public stopHandling :() => void;
+    public isHandling :() => boolean;
 
     // A promise that handles the next element in the queue, or if the queue
     // is empty, the promise resolves the next time `handle` is called (assuming

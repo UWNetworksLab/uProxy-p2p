@@ -1,6 +1,4 @@
 /// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
-/// <reference path='aggregate.ts' />
-/// <reference path='queue.ts' />
 
 module Handler {
 

@@ -1,5 +1,5 @@
 /// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
-/// <reference path='arraybuffers.ts' />
+
 module ArrayBuffers {
 
   var uint8Array1 = new Uint8Array([12,118,101,114,105,115]);

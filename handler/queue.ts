@@ -84,6 +84,10 @@ module Handler {
       return this.queue_.length;
     }
 
+    public isHandling = () : boolean => {
+      return this.handler_ == null;
+    }
+
     // handle or queue the given thing.
     public handle = (x:T) : Promise<T2> => {
       if(this.handler_) {
