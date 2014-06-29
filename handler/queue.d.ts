@@ -21,9 +21,14 @@ declare module Handler {
     // when |x| is handled. Queues |x| until it can be handled.
     public handle :(x:T) => Promise<T2>;
 
-    // The queue stops being handled. If there is an *NextHandler set, then its
-    // return promise is rejected.
+    // The queue stops being handled and all future that |handle| is called on
+    // are queued. If |setSyncNextHandler| or |setAsyncNextHandler| has been
+    // called, then its return promise is rejected.
     public stopHandling :() => void;
+
+    // Returns true if on of the |set*| functions has been called but
+    // |stopHandling| has not. Returns false after |stopHandling| has been
+    // called.
     public isHandling :() => boolean;
 
     // A promise that handles the next element in the queue, or if the queue
