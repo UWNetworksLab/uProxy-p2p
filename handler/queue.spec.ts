@@ -130,7 +130,7 @@ module Handler {
 
   describe('Aggregated Handler Queue', function() {
     var queue :Queue<number, string>;
-    var aggregateTo10Handler :AggregateUntil<number,string>;
+    var aggregateTo10Handler :AggregateHandler<number,string>;
     var ncallbacks :number;
 
     beforeEach(() => {
@@ -138,7 +138,7 @@ module Handler {
       // A simple aggregator of numbers up to the specified |min|, at which
       // point the string of the sum of the numbers is returned.
       var MIN_AGGREGATION_VALUE = 10;
-      aggregateTo10Handler = new AggregateUntil<number,string>(
+      aggregateTo10Handler = new AggregateHandler<number,string>(
           new NumberSumAggregator(MIN_AGGREGATION_VALUE));
       ncallbacks = 0;
     });

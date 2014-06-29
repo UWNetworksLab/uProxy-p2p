@@ -13,7 +13,7 @@ declare module Handler {
   // Aggregate handler for things of type |T| until the given |aggregator|
   // results in a |T2| for each handle of a |T| that contribted to the resulting
   // |T2|.
-  class AggregateUntil<T, T2> {
+  class AggregateHandler<T, T2> {
     constructor(aggregator :Aggregator<T, T2>);
 
     // The aggregator being used.

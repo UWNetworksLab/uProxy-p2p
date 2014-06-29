@@ -16,7 +16,7 @@ module Handler {
 
   // All handle calls get the same result for an aggregated collection of things
   // in the queue.
-  export class AggregateUntil<T,T2> {
+  export class AggregateHandler<T,T2> {
 
     // The |nextAggregate| is the Promise for next aggregated value.
     public nextAggregate  :Promise<T2>;
