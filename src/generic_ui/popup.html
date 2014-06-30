@@ -81,10 +81,10 @@
         title="{{'options'|i18n}}">
     </button>
     <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-      <span ng-show="ui.isSplash() && ui.isAccess()">Show the contact again.</span>
-      <span ng-show="ui.isSplash() && !ui.isAccess()">Show the contact list.</span>
+      <span ng-show="ui.isSplash() && ui.isUserView()">Show the contact again.</span>
+      <span ng-show="ui.isSplash() && !ui.isUserView()">Show the contact list.</span>
       <span ng-show="ui.isRoster()">Show the setup page.</span>
-      <span ng-show="ui.isAccess() && !ui.isRoster()">Show the setup page.</span>
+      <span ng-show="ui.isUserView() && !ui.isRoster()">Show the setup page.</span>
     </div>
 
     <div id="main-view" ng-hide="ui.isSplash()">
@@ -132,7 +132,7 @@
           </input>
         </div>
 
-        <div id="contact-header" ng-show="ui.isAccess()">
+        <div id="contact-header" ng-show="ui.isUserView()">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
           <h1>{{ui.contact.name}}</h1>
         </div>
@@ -196,90 +196,20 @@
           -->
         </div>
 
-        <!-- TODO(dborkan): anything referencing ui.user or ui.proxyServerInstance
-        is now broken -->
-        <div class="contact-info" id="their-info"
-            ng-show="ui.isAccess()">
-          <div class="contact-name-bar">
-            <p class="contact-name">{{ui.user.name}}</p>
-          </div>
-          <img ng-show="ui.user.imageData" class="contact-image"
-               ng-src='{{ui.user.imageData?ui.user.imageData:""}}'>
-          <img ng-hide="ui.user.imageData" class="contact-image">
-          <!--
-          <div class="details" ng-show="theirInfoHovered">
-            <div class="picCover"></div>
-            <div class="description">
-              <p>{{ui.proxyServerInstance.description}}</p>
-            </div>
-
-            <div class="mode-panel">
-              <button id="uproxy-btn" class="instance-btn">
-              </button>
-              <a class="chat-btn instance-btn"
-                 ng-click="ui.chatView=!ui.chatView"
-                 ng-show="ui.isAccess()"
-                 ng-mouseenter="chatButtonHovered=true"
-                 ng-mouseleave="chatButtonHovered=false">
-              </a>
-              <div class="tool">
-                <p class="tip" ng-show="chatButtonHovered">
-                  Chat with {{ ui.user.name }}.
-                </p>
-              </div>
-            </div>
-          </div>
-          -->
-        </div>
-
-        <div id="access" ng-show="ui.isAccess()">
-          <div id="internets" class="bg-deco"
-              ng-hide="ui.chatView"></div>
-          <div class="bg-deco" id="path-left"
-               ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.user.trust.asProxy,
-                          darker:'yes'==ui.user.trust.asProxy,
-                          active:ui.user.isActiveProxy }">
-          </div>
-          <div class="bg-deco" id="path-right"
-               ng-hide="ui.chatView"
-               ng-class="{faded:'no'==ui.user.trust.asClient,
-                          darker:'yes'==ui.user.trust.asClient,
-                          active:ui.user.isActiveClient }">
-          </div>
-          <div class="uproxy-deco" id="their-uproxy"
-              ng-show="ui.proxyServerInstance"></div>
-          <div class="uproxy-deco" id="my-uproxy"></div>
+        <div id="access" ng-show="ui.isUserView()">
 
           <p class="access-note" ng-hide="ui.proxyServerInstance">
-          {{ ui.user.name }} does not have <b>uProxy</b>.
+            {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
-          <uproxy-consent></uproxy-consent>
+          <uproxy-user-access></uproxy-user-access>
 
-          <div id="chat-box" ng-show="ui.chatView">
-            <textarea id="chat-log" ng-init="chatLog='Chatting...'"
-                readonly>{{chatLog}}</textarea>
-            <input type="text" id="chat-input" ng-model="chatText">
-            </input>
-            <input type="submit" id="chat-send" class="btn"
-                ng-click="chatLog = chatLog + '\n' + chatText;chatText=''">
-              Send
-            </input>
-          </div>
-        </div>
+        </div>  <!-- end of #access -->
 
       </div>
 
     </div>
 
-    <div class="contact-info" id="my-info" ng-show="ui.isAccess()">
-      <div class="contact-name-bar">
-        <p class="contact-name">You</p>
-      </div>
-      <img class="contact-image"
-           ng-src='{{ui.myPic}}'>
-    </div>
 
     <div id="status">
       <span id="status-proxy-server" ng-show="ui.currentProxyServer" ng-cloak>
