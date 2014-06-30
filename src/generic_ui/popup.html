@@ -81,10 +81,10 @@
         title="{{'options'|i18n}}">
     </button>
     <div class="tip" id="options-btn-tip" ng-show="optionsTooltip">
-      <span ng-show="ui.isSplash() && ui.isAccess()">Show the contact again.</span>
-      <span ng-show="ui.isSplash() && !ui.isAccess()">Show the contact list.</span>
+      <span ng-show="ui.isSplash() && ui.isUserView()">Show the contact again.</span>
+      <span ng-show="ui.isSplash() && !ui.isUserView()">Show the contact list.</span>
       <span ng-show="ui.isRoster()">Show the setup page.</span>
-      <span ng-show="ui.isAccess() && !ui.isRoster()">Show the setup page.</span>
+      <span ng-show="ui.isUserView() && !ui.isRoster()">Show the setup page.</span>
     </div>
 
     <div id="main-view" ng-hide="ui.isSplash()">
@@ -132,7 +132,7 @@
           </input>
         </div>
 
-        <div id="contact-header" ng-show="ui.isAccess()">
+        <div id="contact-header" ng-show="ui.isUserView()">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
           <h1>{{ui.contact.name}}</h1>
         </div>
@@ -196,7 +196,7 @@
           -->
         </div>
 
-        <div id="access" ng-show="ui.isAccess()">
+        <div id="access" ng-show="ui.isUserView()">
 
           <p class="access-note" ng-hide="ui.proxyServerInstance">
             {{ ui.user.name }} does not have <b>uProxy</b>.

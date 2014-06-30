@@ -22,7 +22,7 @@ module UI {
    */
   export enum View {
     ROSTER,
-    ACCESS,
+    USER,
     OPTIONS,
     CHAT
   }
@@ -216,7 +216,7 @@ module UI {
       return this.toggles.splash || !this.loggedIn();
     }
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
-    public isAccess = () : boolean => { return View.ACCESS == this.view; }
+    public isUserView = () : boolean => { return View.USER == this.view; }
 
     // Refreshing with angular from outside angular.
     private refreshTimer_ = null;
@@ -381,7 +381,7 @@ module UI {
      * Sets the UI's 'current' User and Instance, if it exists.
      */
     public focusOnUser = (user:UI.User) => {
-      this.view = View.ACCESS;
+      this.view = View.USER;
       console.log('focusing on user ' + user);
       this.user = user;
       // For now, default to the first instance that the user has.
