@@ -114,6 +114,7 @@ module UI {
     // clicked to change the screen in the UI.  If an instance is missing from
     // this map we should default to the correct get/give state based on the
     // consent settings.
+    // TODO: put this in storage to remember the get/give state after restart.
     private mapInstanceIdToGetOrGive_ = {};
 
     advancedOptions = false;
@@ -279,7 +280,8 @@ module UI {
      */
     public startProxying = () => {
       if (!this.user || !this.proxyServerInstance) {
-        console.warn('Cannot start proxying without a current instance.');
+        console.error('Cannot start proxying without a current instance.');
+        return;
       }
       // Prepare the instance path.
       var path = <InstancePath>{
