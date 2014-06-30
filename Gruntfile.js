@@ -234,7 +234,10 @@ module.exports = function(grunt) {
          dest: 'build/firefox/lib'},
         {expand: true, cwd: 'node_modules/freedom-social-xmpp/build/',
          src: ['**'],
-         dest: 'build/firefox/lib/freedom-social-xmpp'}
+         dest: 'build/firefox/lib/freedom-social-xmpp'},
+        {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
+         src: ['**'],
+         dest: 'build/firefox/lib/storage'}
       ]}
     },
 
@@ -344,7 +347,8 @@ module.exports = function(grunt) {
       uproxy: {
         files: [{
           src: [
-            "build/firefox/lib/uproxy.js",
+            'build/mocks/freedom-mocks.js',
+            "build/uproxy.js",
             "build/firefox/lib/view_oauth.js",
             "build/firefox/lib/util.js",
             "build/firefox/lib/auth.js",

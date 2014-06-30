@@ -28,5 +28,5 @@ function start(state) {
             },
         portType: 'BackgroundFrame'
       });
-  freedom.emit('login');
+  freedom.emit('1003', {promiseId: 1, data: 'google'});
 }
