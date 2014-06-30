@@ -98,8 +98,8 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    // TODO: combine this with currentProxyServer so there is only 1 member
-    // variable to check current proxy server status.
+    // This is the instance we are focused on in the UI.
+    // TODO: come up with a better name to distinguish from currentProxyServer.
     public proxyServerInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
@@ -319,7 +319,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      if (!this.proxyServerInstance) {
+      if (!this.currentProxyServer) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
