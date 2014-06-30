@@ -573,6 +573,10 @@ module UI {
 
     public toggleGetOrGive = (newValue :string, instance :UI.Instance)
         : void => {
+      if (newValue !== 'GET' && newValue !== 'GIVE') {
+        console.error('toggleGetOrGive: unexpected value ' + newValue);
+        return;
+      }
       this.mapInstanceIdToGetOrGive_[instance.instanceId] = newValue;
     }
 
