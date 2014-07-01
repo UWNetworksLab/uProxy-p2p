@@ -29,8 +29,9 @@
 
 module Social {
 
+  export var MANUAL_NETWORK_ID = 'manual';
+
   var LOGIN_TIMEOUT :number = 5000;  // ms
-  var MANUAL_NETWORK_ID = 'manual';
 
 
   // PREFIX is the string prefix indicating which social providers in the
@@ -61,11 +62,8 @@ module Social {
       }
     }
 
-    // TODO: Uncomment this once there is UI for the manual network.
-    /*
     Social.networks[MANUAL_NETWORK_ID] =
         new Social.ManualNetwork(MANUAL_NETWORK_ID);
-    */
 
     return Social.networks;
   }
@@ -442,7 +440,7 @@ module Social {
     }
 
     /**
-     * Helper to determine if |userId| is a "new friend" to be adde to the
+     * Helper to determine if |userId| is a "new friend" to be added to the
      * roster, and also isn't just our own userId, since we can receive XMPP
      * messages for ourself too.
      */
@@ -667,7 +665,7 @@ module Social {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (remember:boolean) : Promise<void> => {
+    public login = (remember :boolean) : Promise<void> => {
       return Promise.resolve();
     }
 
@@ -687,7 +685,7 @@ module Social {
     public flushQueuedInstanceMessages = () => {
     }
 
-    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+    public send = (clientId :string, msg :uProxy.Message) : Promise<void> => {
       var msgString = JSON.stringify(msg);
       this.log('ManualNetwork.send: ' + msgString);
       // TODO: Batch messages.
@@ -696,6 +694,25 @@ module Social {
       ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, msgString);
 
       return Promise.resolve();
+    }
+
+    // TODO: Consider adding a mechanism for reporting back to the UI that a
+    // message is malformed or otherwise invalid.
+    public receive = (senderClientId :string,
+                      message :uProxy.Message) : void => {
+      this.log('Manual network received incoming message; senderClientId=[' +
+               senderClientId + '], message=' + JSON.stringify(message));
+
+      // The manual network has no concept of a single user having multiple
+      // clients; the client ID uniquely identifies the user in the manual
+      // network. Thus, the sender client ID doubles as the sender user ID.
+      var senderUserId = senderClientId;
+
+      if (!(senderUserId in this.roster)) {
+        this.roster[senderUserId] = new Core.User(this, senderUserId);
+      }
+
+      this.getUser(senderUserId).handleMessage(senderUserId, message);
     }
 
   }  // class ManualNetwork

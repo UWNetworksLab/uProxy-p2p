@@ -296,6 +296,19 @@ class uProxyCore implements uProxy.CoreAPI {
     // TODO: Handle revoked permissions notifications.
   }
 
+  public handleManualNetworkInboundMessage =
+      (command :uProxy.HandleManualNetworkInboundMessageCommand) => {
+    var network :Social.Network = Social.getNetwork(Social.MANUAL_NETWORK_ID);
+    if (!network) {
+      console.error('Manual network does not exist; discarding inbound ' +
+                    'message. Command=' + JSON.stringify(command));
+      return;
+    }
+
+    var manualNetwork :Social.ManualNetwork = <Social.ManualNetwork> network;
+    manualNetwork.receive(command.senderClientId, command.message);
+  }
+
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
@@ -561,6 +574,9 @@ core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, core.updateDescription);
 // TODO: make the invite mechanism an actual process.
 core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 });
+
+core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
+               core.handleManualNetworkInboundMessage);
 
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

@@ -391,4 +391,44 @@ describe('Social.ManualNetwork', () => {
         uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, JSON.stringify(message));
   });
 
+  it('adds the sender to the roster upon receving a message', () => {
+    var senderClientId = 'dummy_client_id';
+    var senderUserId = senderClientId;
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+
+    network.receive(senderClientId, message);
+    expect(network.getUser(senderUserId)).toBeDefined();
+  });
+
+  it('routes received messages appropriately', () => {
+    var senderClientId = 'dummy_client_id';
+    var senderUserId = senderClientId;
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+
+    // Send an initial message so ManualNetwork creates the user object that we
+    // will spy on.
+    network.receive(senderClientId, message);
+    var user = network.getUser(senderUserId);
+    expect(user).toBeDefined();
+    spyOn(user, 'handleMessage');
+
+    network.receive(senderClientId, message);
+
+    expect(user.handleMessage).toHaveBeenCalledWith(senderClientId, message);
+  });
+
 });
