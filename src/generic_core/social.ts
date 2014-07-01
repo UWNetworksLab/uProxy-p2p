@@ -71,7 +71,7 @@ module Social {
   /**
    * Retrieves reference to the network |networkName|.
    */
-  export function getNetwork(networkName:string) : Network {
+  export function getNetwork(networkName :string) : Network {
     if (!(networkName in networks)) {
       console.warn('Network does not exist: ' + networkName);
       return null;
@@ -94,7 +94,7 @@ module Social {
       ME: 'me'
     }
 
-    constructor(public name:string) {
+    constructor(public name :string) {
       this.roster = {};
     }
 
@@ -172,7 +172,7 @@ module Social {
       ui.update(uProxy.Update.NETWORK, payload);
     }
 
-    public sendInstanceHandshake = (clientId:string) : Promise<void> => {
+    public sendInstanceHandshake = (clientId :string) : Promise<void> => {
       return this.sendInstanceHandshakes([clientId]);
     }
 
@@ -182,7 +182,7 @@ module Social {
      *
      * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
-    public sendInstanceHandshakes = (clientIds:string[]) : Promise<void> => {
+    public sendInstanceHandshakes = (clientIds :string[]) : Promise<void> => {
       var handshakes :Promise<void>[] = [];
       var handshake = this.getInstanceHandshake_();
       var cnt = clientIds.length;
@@ -217,14 +217,14 @@ module Social {
     /**
      * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
-    public log = (msg:string) : void => {
+    public log = (msg :string) : void => {
       console.log('[' + this.name + '] ' + msg);
     }
 
     /**
      * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
-    public error = (msg:string) : void => {
+    public error = (msg :string) : void => {
       console.error('!!! [' + this.name + '] ' + msg);
     }
 
@@ -239,7 +239,7 @@ module Social {
     }
 
     // From Social.Network:
-    public login = (remember:boolean) : Promise<void> => {
+    public login = (remember :boolean) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
@@ -254,7 +254,8 @@ module Social {
     public flushQueuedInstanceMessages = () => {
       throw new Error('Operation not implemented');
     }
-    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
+    public send = (recipientClientId :string,
+                   message :uProxy.Message) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -288,7 +289,7 @@ module Social {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name:string) {
+    constructor(public name :string) {
       super(name);
 
       this.provider_ = freedom[PREFIX + name];
@@ -444,7 +445,7 @@ module Social {
      * roster, and also isn't just our own userId, since we can receive XMPP
      * messages for ourself too.
      */
-    private isNewFriend_ = (userId:string) : boolean => {
+    private isNewFriend_ = (userId :string) : boolean => {
       return !(userId == this.myInstance.userId) &&
              !(userId in this.roster);
     }
@@ -499,7 +500,7 @@ module Social {
 
     //===================== Social.Network implementation ====================//
 
-    public login = (remember:boolean) : Promise<void> => {
+    public login = (remember :boolean) : Promise<void> => {
       if (this.isLoginPending()) {
         // Login is already pending, reject promise so the caller knows
         // this request to login failed (the pending request may still succeed).
@@ -588,10 +589,11 @@ module Social {
           });
     }
 
-    public send = (clientId:string, msg:uProxy.Message) : Promise<void> => {
-      var msgString = JSON.stringify(msg);
-      this.log('sending ------> ' + msgString);
-      return this.freedomApi_.sendMessage(clientId, msgString);
+    public send = (recipientClientId :string,
+                   message :uProxy.Message) : Promise<void> => {
+      var messageString = JSON.stringify(message);
+      this.log('sending ------> ' + messageString);
+      return this.freedomApi_.sendMessage(recipientClientId, messageString);
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -685,13 +687,15 @@ module Social {
     public flushQueuedInstanceMessages = () => {
     }
 
-    public send = (clientId :string, msg :uProxy.Message) : Promise<void> => {
-      var msgString = JSON.stringify(msg);
-      this.log('ManualNetwork.send: ' + msgString);
+    public send = (recipientClientId :string,
+                   message :uProxy.Message) : Promise<void> => {
+      var messageString = JSON.stringify(message);
+      this.log('Manual network sending message; recipientClientId=[' +
+               recipientClientId + '], message=' + messageString);
       // TODO: Batch messages.
 
       // Relay the message to the UI for display to the user.
-      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, msgString);
+      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, messageString);
 
       return Promise.resolve();
     }
