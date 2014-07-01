@@ -79,15 +79,14 @@ module Social {
     return networks[networkName];
   }
 
-  /**
-   * Implements those portions of the Network interface for which the logic is
-   * common to multiple Network implementations. Essentially an abstract base
-   * class for Network implementations, except that TypeScript does not allow
-   * abstract classes.
-   */
+
+  // Implements those portions of the Network interface for which the logic is
+  // common to multiple Network implementations. Essentially an abstract base
+  // class for Network implementations, except that TypeScript does not allow
+  // abstract classes.
   export class AbstractNetwork implements Network {
 
-    public roster     :{[userId:string]:Core.User};
+    public roster     :{[userId: string] :Core.User};
     public myInstance :Core.LocalInstance;
 
     private SaveKeys = {
@@ -261,13 +260,12 @@ module Social {
 
   }  // class AbstractNetwork
 
-  /**
-   * A Social.Network implementation that deals with a Freedom social provider.
-   *
-   * Handles events from the social provider. 'onUserProfile' events directly
-   * affect the roster of this network, while 'onClientState' and 'onMessage'
-   * events are passed on to the relevant user (provided the user exists).
-   */
+
+  // A Social.Network implementation that deals with a Freedom social provider.
+  //
+  // Handles events from the social provider. 'onUserProfile' events directly
+  // affect the roster of this network, while 'onClientState' and 'onMessage'
+  // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
     private freedomApi_ :freedom.Social;
@@ -627,14 +625,11 @@ module Social {
 
   }  // class Social.FreedomNetwork
 
-  /**
-   * A Social.Network implementation that "sends" a message by relaying it to
-   * the uProxy core for display to the user and "receives" a message from the
-   * uProxy UI after the user has manually entered (copy/pasted) it into the
-   * UI.
-   *
-   * TODO: Implement receiving.
-   */
+
+  // A Social.Network implementation that "sends" a message by relaying it to
+  // the uProxy core for display to the user and "receives" a message from the
+  // uProxy UI after the user has manually entered (copy/pasted) it into the
+  // UI.
   export class ManualNetwork extends AbstractNetwork {
 
     constructor(public name :string) {

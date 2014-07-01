@@ -67,7 +67,7 @@ describe('Core', () => {
     spyOn(manualNetwork, 'receive');
 
     var senderClientId = 'dummy_sender';
-    var signallingMessage :uProxy.Message = {
+    var message :uProxy.Message = {
       type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
       data: {
         elephants: 'have trunks',
@@ -76,13 +76,12 @@ describe('Core', () => {
     };
     var command :uProxy.HandleManualNetworkInboundMessageCommand = {
       senderClientId: senderClientId,
-      message: signallingMessage
+      message: message
     };
     core.handleManualNetworkInboundMessage(command);
 
     expect(Social.getNetwork).toHaveBeenCalledWith(Social.MANUAL_NETWORK_ID);
-    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId,
-                                                       signallingMessage);
+    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
   });
 
   it('login fails for invalid network', (done) => {
