@@ -689,13 +689,12 @@ module Social {
 
     public send = (recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
-      var messageString = JSON.stringify(message);
       this.log('Manual network sending message; recipientClientId=[' +
-               recipientClientId + '], message=' + messageString);
+               recipientClientId + '], message=' + JSON.stringify(message));
       // TODO: Batch messages.
 
       // Relay the message to the UI for display to the user.
-      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, messageString);
+      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
 
       return Promise.resolve();
     }

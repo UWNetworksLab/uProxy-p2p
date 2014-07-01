@@ -201,8 +201,9 @@ module UI {
       });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-                    (payload :string) => {
-        console.log('Manual network outbound message: ' + payload);
+                    (message :uProxy.Message) => {
+        console.log('Manual network outbound message: ' +
+                    JSON.stringify(message));
         // TODO: Display the message in the 'manual network' UI.
       });
 

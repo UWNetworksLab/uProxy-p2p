@@ -388,7 +388,7 @@ describe('Social.ManualNetwork', () => {
     };
     network.send('dummyClientId', message);
     expect(ui.update).toHaveBeenCalledWith(
-        uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, JSON.stringify(message));
+        uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
   });
 
   it('adds the sender to the roster upon receving a message', () => {
