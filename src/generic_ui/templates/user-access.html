@@ -80,8 +80,13 @@
         <div ng-switch-when='NONE'>
           <p class='uproxytip'>You have not granted them access.
           </p>
-          <uproxy-consent-action text='Offer Access'
-              action='OFFER'>
+          <uproxy-consent-action text='Offer Access' action='OFFER'>
+          </uproxy-consent-action>
+        </div>
+        <div ng-switch-when='USER_IGNORED_REQUEST'>
+          <p class='uproxytip'>You have not granted them access.
+          </p>
+          <uproxy-consent-action text='Offer Access' action='OFFER'>
           </uproxy-consent-action>
         </div>
         <div ng-switch-when='REMOTE_REQUESTED'>

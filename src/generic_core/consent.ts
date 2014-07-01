@@ -150,6 +150,7 @@ module Consent {
   fsm.set(S.REMOTE_REQUESTED,     A.ALLOW_REQUEST,  S.GRANTED);
   fsm.set(S.REMOTE_REQUESTED,     A.IGNORE_REQUEST, S.USER_IGNORED_REQUEST);
   fsm.set(S.USER_IGNORED_REQUEST, A.ALLOW_REQUEST,  S.GRANTED);
+  fsm.set(S.USER_IGNORED_REQUEST, A.OFFER,          S.GRANTED);
   fsm.set(S.GRANTED,              A.CANCEL_OFFER,   S.REMOTE_REQUESTED);
   export function userActionOnClientState(
       action:UserAction, state:ClientState) : ClientState {
