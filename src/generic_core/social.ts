@@ -627,7 +627,7 @@ module Social {
 
 
   // A Social.Network implementation that "sends" a message by relaying it to
-  // the uProxy core for display to the user and "receives" a message from the
+  // the uProxy UI for display to the user and "receives" a message from the
   // uProxy UI after the user has manually entered (copy/pasted) it into the
   // UI.
   export class ManualNetwork extends AbstractNetwork {
