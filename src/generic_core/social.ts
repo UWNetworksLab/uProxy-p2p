@@ -628,14 +628,16 @@ module Social {
   }  // class Social.FreedomNetwork
 
   /**
-   * A Social.Network implementation that relies on the user to transmit and
-   * receive messages (e.g., by copy/pasting).
+   * A Social.Network implementation that "sends" a message by relaying it to
+   * the uProxy core for display to the user and "receives" a message from the
+   * uProxy UI after the user has manually entered (copy/pasted) it into the
+   * UI.
    *
-   * TODO: Implement sending & receiving.
+   * TODO: Implement receiving.
    */
   export class ManualNetwork extends AbstractNetwork {
 
-    constructor(public name:string) {
+    constructor(public name :string) {
       super(name);
 
       // Begin loading everything relevant to this Network from local storage.
@@ -689,7 +691,10 @@ module Social {
       var msgString = JSON.stringify(msg);
       this.log('ManualNetwork.send: ' + msgString);
       // TODO: Batch messages.
-      // TODO: Relay messages to the UI for display to the user.
+
+      // Relay the message to the UI for display to the user.
+      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, msgString);
+
       return Promise.resolve();
     }
 

@@ -52,7 +52,8 @@ module uProxy {
     ERROR,
     STOP_PROXYING,
     NOTIFICATION,
-    LOCAL_FINGERPRINT  // From the WebRTC peer connection.
+    LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
+    MANUAL_NETWORK_OUTBOUND_MESSAGE
   }
 
   /**

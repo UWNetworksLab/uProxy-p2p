@@ -361,3 +361,34 @@ describe('Social.FreedomNetwork', () => {
   */
 
 });
+
+
+describe('Social.ManualNetwork', () => {
+
+  var network :Social.ManualNetwork = new Social.ManualNetwork('manual');
+
+  var loginPromise :Promise<void>;
+
+  beforeEach(() => {
+    // Silence logging to keep test output clean.
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+  });
+
+  it('can send messages to the UI', () => {
+    spyOn(ui, 'update');
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+    network.send('dummyClientId', message);
+    expect(ui.update).toHaveBeenCalledWith(
+        uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, JSON.stringify(message));
+  });
+
+});
