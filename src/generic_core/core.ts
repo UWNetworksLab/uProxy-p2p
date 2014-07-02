@@ -298,14 +298,14 @@ class uProxyCore implements uProxy.CoreAPI {
 
   public handleManualNetworkInboundMessage =
       (command :uProxy.HandleManualNetworkInboundMessageCommand) => {
-    var network :Social.Network = Social.getNetwork(Social.MANUAL_NETWORK_ID);
-    if (!network) {
+    var manualNetwork :Social.ManualNetwork =
+        <Social.ManualNetwork> Social.getNetwork(Social.MANUAL_NETWORK_ID);
+    if (!manualNetwork) {
       console.error('Manual network does not exist; discarding inbound ' +
                     'message. Command=' + JSON.stringify(command));
       return;
     }
 
-    var manualNetwork :Social.ManualNetwork = <Social.ManualNetwork> network;
     manualNetwork.receive(command.senderClientId, command.message);
   }
 
