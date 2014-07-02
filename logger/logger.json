@@ -11,7 +11,7 @@
   },
   "provides" : [
     "Logger"
-  },
+  ],
   "api": {
     "Logger": {
       "getLogBlob": {
@@ -67,10 +67,7 @@
         "ret": []
       }
     }
-  }
-    export function enable(newState: boolean) {
-    enabled = newState;
-  }
+  },
 
   "dependencies": {
   },
