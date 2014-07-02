@@ -12,6 +12,10 @@
 
 module uProxy {
 
+  // --- Miscellaneous constants needed by both core & UI  ---
+
+  export var MANUAL_NETWORK_ID = 'manual';
+
   // --- Communications ---
 
   /**

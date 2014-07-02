@@ -19,6 +19,7 @@
  */
 /// <reference path='user.ts' />
 /// <reference path='util.ts' />
+/// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/network.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
@@ -28,8 +29,6 @@
 
 
 module Social {
-
-  export var MANUAL_NETWORK_ID = 'manual';
 
   var LOGIN_TIMEOUT :number = 5000;  // ms
 
@@ -62,8 +61,8 @@ module Social {
       }
     }
 
-    Social.networks[MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(MANUAL_NETWORK_ID);
+    Social.networks[uProxy.MANUAL_NETWORK_ID] =
+        new Social.ManualNetwork(uProxy.MANUAL_NETWORK_ID);
 
     return Social.networks;
   }
