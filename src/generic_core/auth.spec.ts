@@ -2,22 +2,28 @@
 /// <reference path='auth.ts' />
 
 /**
- * Create a mock peer connection class, just for these specs.
+ * Create a mock core.peerconnection class, pretending to be the freedom
+ * provider.
  */
-class MockRTCPC {
+class MockCorePeerConnection {
 
-  public createOffer = (callback:(desc)=>void) => {
+  public createOffer = () => {
     var mockDesc = {
       sdp: 'a=fingerprint:sha-256 foobar '
     };
-    callback(mockDesc);
+    return Promise.resolve(mockDesc);
   }
 
-}
-webkitRTCPeerConnection = <any>MockRTCPC;
-Auth['RTCPC'] = MockRTCPC;
+}  // class MockPeerConnection
+
 
 describe('Authentication', () => {
+
+  beforeEach(() => {
+    freedom['core.peerconnection'] = () => {
+      return new MockCorePeerConnection();
+    };
+  });
 
   it('returns a fingerprint', (done) => {
     Auth.getLocalFingerprint().then((fingerprint) => {

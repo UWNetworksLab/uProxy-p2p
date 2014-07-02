@@ -8,35 +8,32 @@
 
 module Auth {
 
-  export var localKey :string = '';  // Key extracted from peerconnection.
+  export var localKey :string = null;  // Key extracted from peerconnection.
   export var ttl      :number = 0;  // Expiry of the key.
-  export var pc       :RTCPeerConnection = null;
-  declare var mozRTCPeerConnection;
-  declare var webkitRTCPeerConnection;
 
   // This regular expression captures the fingerprint from an sdp header.
   var SDP_FINGERPRINT_REGEX = /(?:a=fingerprint:sha-256\s)(.*)\s/m;
-  var RTCPC :any;
 
   /**
    * Create an un-used local WebRTC peer connection to obtain the local keyhash
    * from. Returns a promise fulfilled with the keyhash string.
    */
   export function getLocalFingerprint() : Promise<string> {
-    if ('' != localKey) {
+    if (null !== localKey) {
       return Promise.resolve(localKey);
     }
-    // TODO: Right now this doesn't work because there is no access to
-    // PeerConnection from within the webworker? Need to figure out the best
-    // approach to this.
-    RTCPC = RTCPC || webkitRTCPeerConnection || mozRTCPeerConnection;
-    var pc = new RTCPC(null);
-    return new Promise((F,R) => {
-      pc.createOffer((description:RTCSessionDescription) => {
+    // TODO: This file will only work after commit
+    // 72f55be51c1dc5f339a959963be90aec87fa0ab9 in freedom.
+    var pc = freedom['core.peerconnection']();
+    return pc.createOffer()
+      .then((description:RTCSessionDescription) => {
         var fingerprint = extractFingerprint(description);
-        F(fingerprint);
-      }, R);
-    });
+        return fingerprint;
+      })
+      .catch((e) => {
+        console.error('Could not fetch local fingerprint.');
+        return Promise.reject(e);
+      });
   }
 
   /**
