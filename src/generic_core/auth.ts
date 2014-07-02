@@ -25,6 +25,11 @@ module Auth {
     // TODO: This file will only work after commit
     // 72f55be51c1dc5f339a959963be90aec87fa0ab9 in freedom.
     var pc = freedom['core.peerconnection']();
+    console.log('PC is', pc);
+    if (undefined === pc['createOffer']) {
+      return Promise.reject(new Error(
+          'freedom core.peerconnection missing createOffer!'));
+    }
     return pc.createOffer()
       .then((description:RTCSessionDescription) => {
         var fingerprint = extractFingerprint(description);
