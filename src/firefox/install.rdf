@@ -19,9 +19,9 @@
     </em:targetApplication>
    
     <!-- Front End MetaData -->
-    <em:name>UProxy</em:name>
+    <em:name>uProxy</em:name>
     <em:description>Social proxy</em:description>
     <em:creator>University of Washington Networks Lab</em:creator>
-    <em:homepageURL>UProxy.org</em:homepageURL>
+    <em:homepageURL>uProxy.org</em:homepageURL>
   </Description>      
 </RDF>

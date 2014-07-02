@@ -7,7 +7,7 @@
  *
  * In-memory state includes:
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
- *  - Instances, which is a list of active UProxy installs.
+ *  - Instances, which is a list of active uProxy installs.
  */
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />

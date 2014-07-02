@@ -427,7 +427,7 @@ module UI {
       }
     }
 
-    // Determine whether UProxy is connected to some network.
+    // Determine whether uProxy is connected to some network.
     // TODO: Make these functional and write specs.
     public loggedIn = () => {
       for (var networkId in model.networks) {
