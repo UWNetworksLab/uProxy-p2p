@@ -18,7 +18,7 @@ class AuthGoogle implements AuthenticationManager {
     // call logout first, the user might be logged into a different account
     // (possibly by another app/extension, as all apps/extensions share
     // the same sandboxed environment used by chrome.identity.launchWebAuthFlow)
-    // and would be unable to pick the right account for UProxy.
+    // and would be unable to pick the right account for uProxy.
     // Only invoke login popup after logout has been completed (asynchronously).
     this.logout().then(() => {
       var googleOAuth2Url = 'https://accounts.google.com/o/oauth2/auth?' +
