@@ -59,7 +59,9 @@ module Handler {
         });
       expect(queue.getLength()).toBe(0);
       var p2 = queue.handle('A').then((n) => {
-          expect(n).toBe(1);  // length of 'A' is 2
+          // This is the result of the handler. In this case, it is the length
+          // of the handled string (i.e. 'A') which is 1.
+          expect(n).toBe(1);
         });
       queue.handle('BB');
 

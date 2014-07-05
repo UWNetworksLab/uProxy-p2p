@@ -24,7 +24,7 @@ module Handler {
     // fulfillNextFn_ is the internal function to fulfill the nextAggregate.
     private fulfillNextFn_ :(x:T2) => void;
 
-    constructor(public aggregator :Aggregator<T,T2>) {
+    constructor(private aggregator_ :Aggregator<T,T2>) {
       this.resetNextPromise_();
     }
 
@@ -36,7 +36,7 @@ module Handler {
     // true if the old |nextAggregate| has been fulfilled and a new
     // |nextAggregate| has been created.
     public tryNext = () : boolean => {
-      var result = this.aggregator.check();
+      var result = this.aggregator_.check();
       if (result === null) {
         return false;
       }
@@ -48,7 +48,7 @@ module Handler {
     // The handle function for aggregating elements. Note that all handle calls
     // of values will get the same aggregated reult promise.
     public handle = (x:T) : Promise<T2> => {
-      this.aggregator.input(x);
+      this.aggregator_.input(x);
       var currentPromise = this.nextAggregate;
       this.tryNext();
       return currentPromise;

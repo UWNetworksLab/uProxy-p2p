@@ -8,7 +8,8 @@ declare module Handler {
   class Queue<T,T2> {
     constructor();
 
-    // Clears the queue, and rejects promises for each entry.
+    // Clears the queue, and rejects promises for handle that added the entry to
+    // the queue.
     public clear :() => void;
 
     // Number of things in the queue to be handled.
@@ -28,20 +29,21 @@ declare module Handler {
     // called.
     public isHandling :() => boolean;
 
-    // A promise that handles the next element in the queue, or if the queue
-    // is empty, the promise resolves the next time `handle` is called (assuming
-    // by then the queue isn't stopped or handler changed by then).
-    public setSyncNextHandler :(handler:(x:T) => T2) => Promise<T2>;
-    // As above, but allows handler itself to be async.
+    // Sets the next function to handle something in the handler queue. Returns
+    // a promise for the result of the next handled event in the queue. Note: if
+    // the queue is empty, the promise resolves the next time `handle` is called
+    // (assuming by then the queue isn't stopped or handler changed by then).
     public setNextHandler :(handler:(x:T) => Promise<T2>)
         => Promise<T2>;
+    // As above, but takes a sync handler.
+    public setSyncNextHandler :(handler:(x:T) => T2) => Promise<T2>;
 
-    // The provided function will be called on the next element while the queue
-    // is not empty & the handler itself is set (if `stopHandling()` is called
-    // while hanlding an entry, then further elements will be queued until a new
-    // handler is set.
-    public setSyncHandler :(handler:(x:T) => T2) => void;
-    // As above, but allows handler to be async function.
+    // The |setHandler|'s handler function will be called on the next element
+    // until the queue is empty or the handler itself is changed (e.g. if
+    // |stopHandling()| is called while handling an event then further events
+    // will be queued until a new handler is set).
     public setHandler :(handler:(x:T) => Promise<T2>) => void;
+    // As above, but takes a sync function handler.
+    public setSyncHandler :(handler:(x:T) => T2) => void;
   }
 }
