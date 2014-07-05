@@ -1,8 +1,13 @@
 /// <reference path='../third_party/promise/promise.d.ts' />
 
-// This file defines handler queues. These are like event queue, but events are
-// queued and must be handled by exactly one handler. This allows async
-// assignment of the handler along with adding events to the queue.
+// This file defines 'handler queues': a stream of function applications applied
+// to a stream of inputs. While this is a bit like traditional event handlers,
+// each thing in the hanlder queue and must be handled by exactly one handler
+// (although that handler may itself call several functions). This allows async
+// assignment of the handler along with adding events to the queue. In
+// particular, it allows a stream of data to have handler set for the next
+// element of data, and that by handling that element of data, a new handler may
+// be constructed for the following element of data.
 //
 // CONSIDER: How efficient is a new Error? Maybe best to have rejection
 // without an error since the error is not meaningful.
@@ -10,12 +15,20 @@
 // CONSIDER: there's quite a bit of book-keeping for the resulting promises from
 // a handle call. We may want a simpler version of this class that doesn't need
 // to remember result values (those of type T2).
+//
+// CONSIDER: May be possible to break this into a inputNotifyQueue, and an
+// exitNotifyQueue.
+//
+// CONSIDER: This is kind of similar to functional parsing. May be good to
+// formalize the relationship in comments here.
 module Handler {
 
-  // Internal helper class. Holds an object called |thing| of type |T| and a
-  // promise for a new result object of type |T2|. The idea is that |T2| is a
-  // result of some async function applied to |thing|. This supports the
-  // function that gerates the new object to be applied async (later) too.
+  // Internal helper class. Holds an object called |thing| of type |T| and
+  // provides a promise for a new result object of type |T2|. The idea is that
+  // |T2| is will be result of some async function applied to |thing|. This
+  // helper supports the function that gerates the new object to be known async
+  // (i.e. later), but still being able to promise a promise for the result
+  // immidiately.
   //
   // Assumes fulfill/reject are called exclusively and only once.
   class PendingPromiseHandler<T,T2> {
@@ -120,7 +133,7 @@ module Handler {
     //
     // If you have an unfulfilled promise, calling setHandler rejects the old
     // promise.
-    public setAsyncHandler = (handler:(x:T) => Promise<T2>) : void => {
+    public setHandler = (handler:(x:T) => Promise<T2>) : void => {
       if (this.rejectFn_) {
         this.rejectFn_(new Error('Cancelled by a call to setHandler'));
         this.rejectFn_ = null;
@@ -132,7 +145,7 @@ module Handler {
     // Convenience function for handler to be an ordinary function without a
     // promise result.
     public setSyncHandler = (handler:(x:T) => T2) : void => {
-      this.setAsyncHandler((x:T) => { return Promise.resolve(handler(x)); });
+      this.setHandler((x:T) => { return Promise.resolve(handler(x)); });
     }
 
     // Reject the previous promise handler if it exists and stop handling stuff.
@@ -151,10 +164,10 @@ module Handler {
     //
     // Note: this sets the Handler to fulfill this promise when there is
     // something to handle.
-    public setAsyncNextHandler = (handler:(x:T) => Promise<T2>)
+    public setNextHandler = (handler:(x:T) => Promise<T2>)
         : Promise<T2> => {
       return new Promise((F,R) => {
-        this.setAsyncHandler((x:T) : Promise<T2> => {
+        this.setHandler((x:T) : Promise<T2> => {
           // Note: we don't call stopHandling() within this handler because that
           // would reject the promise we're about to fulfill.
           this.handler_ = null;
@@ -169,7 +182,7 @@ module Handler {
 
     // Convenience function for handling next element with an ordinary function.
     public setSyncNextHandler = (handler:(x:T) => T2) : Promise<T2> => {
-      return this.setAsyncNextHandler((x:T) => {
+      return this.setNextHandler((x:T) => {
           return Promise.resolve(handler(x));
         });
     }

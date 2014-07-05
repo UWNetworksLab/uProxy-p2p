@@ -1,13 +1,10 @@
 /// <reference path='../third_party/promise/promise.d.ts' />
 declare module Handler {
 
-  // Queues events/data while a handler is not set. Allows events to
-  // asynchronously call |handle|, and separately, asynchronously, for us to
-  // make promises to handle the next elements. Also allows setting of a handler
-  // to handle all forthcoming events. You can stop handling when you like and
-  // things get queued again.
-  //
-  // CONSIDER: Break into a inputNotifyQueue, and an exitNotifyQueue.
+  // A stream of events happen async with a stream of functions to handle those
+  // events. A function handling an event may set the function to handle future
+  // events or event stop handling events and let the event stream queue up.
+  // Each event is guarenteed to be handled, and gets a promise for the result.
   class Queue<T,T2> {
     constructor();
 
@@ -36,7 +33,7 @@ declare module Handler {
     // by then the queue isn't stopped or handler changed by then).
     public setSyncNextHandler :(handler:(x:T) => T2) => Promise<T2>;
     // As above, but allows handler itself to be async.
-    public setAsyncNextHandler :(handler:(x:T) => Promise<T2>)
+    public setNextHandler :(handler:(x:T) => Promise<T2>)
         => Promise<T2>;
 
     // The provided function will be called on the next element while the queue
@@ -45,6 +42,6 @@ declare module Handler {
     // handler is set.
     public setSyncHandler :(handler:(x:T) => T2) => void;
     // As above, but allows handler to be async function.
-    public setAsyncHandler :(handler:(x:T) => Promise<T2>) => void;
+    public setHandler :(handler:(x:T) => Promise<T2>) => void;
   }
 }

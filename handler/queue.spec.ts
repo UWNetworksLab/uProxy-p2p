@@ -70,9 +70,9 @@ module Handler {
       });
     });
 
-    it('setAsyncNextHandler then handle 2 events: leaves second event queued',
+    it('setNextHandler then handle 2 events: leaves second event queued',
         function(done) {
-      queue.setAsyncNextHandler(promiseLenHandler).then((s) => {
+      queue.setNextHandler(promiseLenHandler).then((s) => {
         expect(s).toBe(1);
         expect(queue.getLength()).toBe(1);
         done();
@@ -162,7 +162,7 @@ module Handler {
 
       // We set the handler at this point so test that the two earlier values
       // are indeed queued.
-      queue.setAsyncHandler(aggregateTo10Handler.handle);
+      queue.setHandler(aggregateTo10Handler.handle);
       var p3 = queue.handle(20);
       p3.then((s) => {
           expect(s).toBe('SUM_AT_OUTPUT:26');
