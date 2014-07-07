@@ -6,6 +6,7 @@ const {Cu} = require("chrome");
 var {setTimeout} = require("sdk/timers");
 
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
+Cu.import("resource://gre/modules/Services.jsm");
 
 var button = buttons.ActionButton({
   id: "uProxy-button",
@@ -18,15 +19,33 @@ var button = buttons.ActionButton({
   onClick: start
 });
 
+var panel = panels.Panel({
+  width: 371,
+  height: 600,
+  contentURL: self.data.url("popup.html"),
+  contentScriptFile: [
+    self.data.url("scripts/user.js"),
+    self.data.url("scripts/ui.js"),
+    self.data.url("scripts/notify.js"),
+    self.data.url("scripts/proxy-config.js"),
+    self.data.url("scripts/core_connector.js"),
+    self.data.url("scripts/background.js")],
+  contentScriptWhen: 'start'
+})
+
+var manifest = self.data.url('../lib/uproxy.json');
+var freedom =
+    setupFreedom(manifest, {
+      freedomcfg: function(register) {
+            register('core.view', require('view_googleauth.js').View_googleAuth);
+          },
+      portType: 'BackgroundFrame'
+    });
+
+require('glue.js').setUpConnection(freedom, panel);
 
 function start(state) {
-  var manifest = self.data.url('../lib/uproxy.json');
-  var freedom =
-      setupFreedom(manifest, {
-        freedomcfg: function(register) {
-              register('core.view', require('view_googleauth.js').View_googleAuth);
-            },
-        portType: 'BackgroundFrame'
-      });
-  freedom.emit('1003', {promiseId: 1, data: 'google'});
+  panel.show({
+    position: button,
+  });
 }

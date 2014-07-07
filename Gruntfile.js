@@ -219,9 +219,12 @@ module.exports = function(grunt) {
          src: ['**'],
          dest: 'build/firefox/lib'},
         // ... the generic UI stuff
-        {expand: true, cwd: 'build/uistatic',
+        {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
          dest: 'build/firefox/data'},
+        {expand: true, cwd: 'build/', flatten: true,
+         src: FILES.uproxy_common,
+         dest: 'build/firefox/data/scripts'},
         // freedom for firefox
         {expand: true, cwd: 'node_modules/freedom-for-firefox/',
          src: ['freedom-for-firefox.jsm'],
