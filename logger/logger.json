@@ -14,7 +14,7 @@
   ],
   "api": {
     "Logger": {
-      "getLogBlob": {
+      "getEncrypedLogBubffer": {
         "type": "method",
         "value": ["string", "string", "string", "string", "string", "string", 
                   "string", "string", "string", "string", "string", "string"],

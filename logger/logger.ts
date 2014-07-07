@@ -1,17 +1,21 @@
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='logger.d.ts' />
 
 declare module freedom {
   // TODO: defined the return type of Logger function.
-  function Logger() : any
+  function Logger() : LogProvider
 }
 
-module Logger {
+module LoggerModule {
 
   var logBuffer: string[] = [];
   var enabled = true;   // TODO: we probably will change it to false as default.
   var consoleFilter: {[s: string]: string;} = {'*': 'D'};
 
+  // The filter API uses letter to select log level, D for debug, I for info,
+  // W for warn, and E for error. This string is used to convert from letter
+  // to level number.
   var LEVEL_CHARS = 'DIWE';
 
   export class Logger {
@@ -20,7 +24,8 @@ module Logger {
 
     // Gets log as a encrypted blob, which can be transported in insecure
     // channel.
-    public getLogBlob = (...tags: string[]) : Promise<ArrayBuffer> => {
+    public getEncrypedLogBuffer = (...tags: string[])
+        : Promise<ArrayBuffer> => {
       // TODO: to be implemented.
       return new Promise((F, R) => {
         F(new ArrayBuffer(0));
@@ -29,7 +34,11 @@ module Logger {
 
     // Gets log in plaintext, which should really be used in developing env
     // only.
+    // Usage: getLogs('network', 'xmpp')
+    // It will return log message with tag 'netowrk' and 'xmpp' only.
+    // getLogs() without specify any tag will return all messages.
     public getLogs = (...tags: string[]) : Promise<string> => {
+      // TODO: use input to select log message.
       return new Promise((F, R) => {
         F(logBuffer.join('\n'));
       });
@@ -75,7 +84,7 @@ module Logger {
     }
 
     private doRealLog = (
-        level: string, tag: string, msg: string, args: any[]) => {
+        level: string, tag: string, msg: string, args: any[]) : void => {
       if (!enabled) {
         return;
       }
@@ -91,7 +100,10 @@ module Logger {
 
     // Sets the log filter for console output. Caller can specify logs of
     // desired tags and levels for console output.
-    public setConsoleFilter = (...args: string[]) => {
+    // Usage example: setConsoleFilter("*:E", "network:D")
+    // It means: output message in Error level for with any tag
+    //           output message serious than debug level with "network" tag.
+    public setConsoleFilter = (...args: string[]) : Promise<void> => {
       consoleFilter = {};
       for (var i = 0; i < args.length; i++) {
         var parts = args[i].split(':');
@@ -101,25 +113,29 @@ module Logger {
     }
 
     // Logs message in debug level.
-    public debug = (tag: string, msg: string, ...args: any[]) => {
+    public debug = (tag: string, msg: string, ...args: string[])
+        : Promise<void> => {
       this.doRealLog('D', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in info level.
-    public info = (tag: string, msg: string, ...args: any[]) => {
+    public info = (tag: string, msg: string, ...args: string[])
+        : Promise<void> => {
       this.doRealLog('I', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in warn level.
-    public warn = (tag: string, msg: string, ...args: any[]) => {
+    public warn = (tag: string, msg: string, ...args: string[])
+        : Promise<void> => {
       this.doRealLog('W', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in error level.
-    public error = (tag: string, msg: string, ...args: any[]) => {
+    public error = (tag: string, msg: string, ...args: string[])
+        : Promise<void> => {
       this.doRealLog('E', tag, msg, args);
       return Promise.resolve();
     }

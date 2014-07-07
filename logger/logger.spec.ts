@@ -3,7 +3,7 @@
 /// <reference path='logger.ts' />
 
 describe("logger", function() {
-  var logger = new Logger.Logger('');
+  var logger = new LoggerModule.Logger('');
 
   beforeEach(function() {
     logger.reset();
@@ -16,7 +16,7 @@ describe("logger", function() {
         .toMatch(/.*\|test-module\|I\|second string/);
 
     expect(logger.format('W', 'test', '%1 pinged %2 with id=%3', [
-                         'Bob', 'Alice', 123456]))
+                         'Bob', 'Alice', '123456']))
         .toMatch(/.*\|test\|W\|Bob pinged Alice with id=123456/);
 
   });
@@ -31,7 +31,7 @@ describe("logger", function() {
   });
 
   it('format message like printf', function(){
-    logger.error('test', '%1 pinged %2 with id=%3', 'Bob', 'Alice', 123456);
+    logger.error('test', '%1 pinged %2 with id=%3', 'Bob', 'Alice', '123456');
     logger.getLogs().then((s) => {
         expect(s).toMatch(/.*\|test\|E\|Bob pinged Alice with id=123456/);
     });
