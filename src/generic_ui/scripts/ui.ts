@@ -425,6 +425,7 @@ module UI {
       } else {
         model.networks[network.name].online = network.online;
       }
+      this.refreshDOM();
     }
 
     // Determine whether uProxy is connected to some network.
