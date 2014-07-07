@@ -8,15 +8,7 @@ var model = {
     networks: {},
     roster: []
 };
-/*
-chrome.runtime.onInstalled.addListener(function (details) {
-    console.log('onInstalled: previousVersion', details.previousVersion);
-});
 
-chrome.runtime.onSuspend.addListener(function () {
-    console.log('onSuspend');
-});
-*/
 function initUI() {
     core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
     var notifications = new FirefoxNotifications();
@@ -24,7 +16,6 @@ function initUI() {
     return new UI.UserInterface(core, notifications);
 }
 
-console.log('Initializing chrome extension background page...');
 if (undefined === ui) {
     ui = initUI();
 }
@@ -32,3 +23,14 @@ if (undefined === ui) {
 unsafeWindow.ui = ui;
 unsafeWindow.model = model;
 unsafeWindow.core = core;
+
+
+/*
+unsafeWindow.ui = cloneInto(ui, unsafeWindow);
+ui = unsafeWIndow.ui;
+unsafeWindow.model = cloneInto(model, unsafeWindow);
+model = unsafeWIndow.model;
+unsafeWindow.core = cloneInto(core, unsafeWindow);
+core = unsafeWIndow.core;
+*/
+

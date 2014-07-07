@@ -1,13 +1,14 @@
 /**
- * @fileoverview Description of this file.
+ * Inject dependencies from content script
  */
-angular.module('dependencyInjector', []).filter('i18n', function () {
+angular.module('dependencyInjector', [])
+  .filter('i18n', function () {
     return function (key) {
         return key;
     };
-}).constant('ui', window.ui).constant('model', window.model)
+  })
+  .constant('ui', window.ui)
+  .constant('model', window.model)
   .constant('core', window.core);
-console.log("added dependencies ")
-console.log(window.model.networks);
 
 

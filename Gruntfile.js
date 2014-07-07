@@ -590,6 +590,7 @@ module.exports = function(grunt) {
   taskManager.add('build_firefox', [
     'build_generic_ui',
     'build_generic_core',
+    'typescript:firefox',
     'copy:firefox',
     'concat:uproxy'
   ]);
