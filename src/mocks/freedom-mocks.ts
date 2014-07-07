@@ -6,6 +6,35 @@
 
 /// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 
+class MockCore {
+
+  public createChannel = () => {
+    return Promise.resolve({ identifier: 'unused' });
+  }
+
+  public bindChannel = (id:string) => {
+    return Promise.resolve(null);
+  }
+
+  public getId = () => { return ['useless']; }
+
+}  // class MockCore
+
+class MockCorePeerConnection {
+
+  public createOffer = () => {
+    var mockDesc = {
+      sdp: 'a=fingerprint:sha-256 foobar '
+    };
+    return Promise.resolve(mockDesc);
+  }
+
+  public setup = () => {
+    console.log('[MockCorePeerConnection] setup');
+  }
+
+}  // class MockPeerConnection
+
 class MockStorage {
 
   private store_;
@@ -71,6 +100,8 @@ var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
+freedom['core'] = () => { return new MockCore(); };
+freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 freedom['SocksToRtc'] = () => { return new MockChannel(); };
 freedom['RtcToNet'] = () => { return new MockChannel(); };

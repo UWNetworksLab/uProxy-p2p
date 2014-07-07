@@ -7,7 +7,7 @@
  *
  * In-memory state includes:
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
- *  - Instances, which is a list of active UProxy installs.
+ *  - Instances, which is a list of active uProxy installs.
  */
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
@@ -113,10 +113,12 @@ class uProxyCore implements uProxy.CoreAPI {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
     // TODO: enable once we can use peerconnection from within the webworker.
-    // Auth.getLocalFingerprint().then((fingerprint) => {
-      // console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
-      // ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
-    // });
+    Auth.getLocalFingerprint().then((fingerprint) => {
+      console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
+      ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
+    }).catch((e) => {
+      console.error(e);
+    });
   }
 
   /**

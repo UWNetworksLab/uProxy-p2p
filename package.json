@@ -1,10 +1,10 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uProxy/UProxy"
+    "url": "https://github.com/uProxy/uProxy"
   },
   "bugs": {
     "url": "http://github.com/uproxy/uproxy/issues",

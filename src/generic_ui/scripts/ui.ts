@@ -22,7 +22,7 @@ module UI {
    */
   export enum View {
     ROSTER,
-    ACCESS,
+    USER,
     OPTIONS,
     CHAT
   }
@@ -98,8 +98,8 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    // TODO: combine this with currentProxyServer so there is only 1 member
-    // variable to check current proxy server status.
+    // This is the instance we are focused on in the UI.
+    // TODO: come up with a better name to distinguish from currentProxyServer.
     public proxyServerInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
@@ -109,6 +109,13 @@ module UI {
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
+
+    // Maps instanceId to 'GET' or 'GIVE' state, if the user has explicitly
+    // clicked to change the screen in the UI.  If an instance is missing from
+    // this map we should default to the correct get/give state based on the
+    // consent settings.
+    // TODO: put this in storage to remember the get/give state after restart.
+    private mapInstanceIdToGetOrGive_ = {};
 
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
@@ -209,7 +216,7 @@ module UI {
       return this.toggles.splash || !this.loggedIn();
     }
     public isRoster = () : boolean => { return View.ROSTER == this.view; }
-    public isAccess = () : boolean => { return View.ACCESS == this.view; }
+    public isUserView = () : boolean => { return View.USER == this.view; }
 
     // Refreshing with angular from outside angular.
     private refreshTimer_ = null;
@@ -273,7 +280,8 @@ module UI {
      */
     public startProxying = () => {
       if (!this.user || !this.proxyServerInstance) {
-        console.warn('Cannot start proxying without a current instance.');
+        console.error('Cannot start proxying without a current instance.');
+        return;
       }
       // Prepare the instance path.
       var path = <InstancePath>{
@@ -289,6 +297,7 @@ module UI {
           user: this.user
         };
         this._setProxying(true);
+        this.refreshDOM();
       });
     }
 
@@ -310,7 +319,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      if (!this.proxyServerInstance) {
+      if (!this.currentProxyServer) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
@@ -372,13 +381,15 @@ module UI {
      * Sets the UI's 'current' User and Instance, if it exists.
      */
     public focusOnUser = (user:UI.User) => {
-      this.view = View.ACCESS;
+      this.view = View.USER;
       console.log('focusing on user ' + user);
       this.user = user;
       // For now, default to the first instance that the user has.
       // TODO: Support multiple instances in the UI.
       if (user.instances.length > 0) {
         this.proxyServerInstance = user.instances[0];
+      } else {
+        this.proxyServerInstance = null;
       }
     }
 
@@ -414,9 +425,10 @@ module UI {
       } else {
         model.networks[network.name].online = network.online;
       }
+      this.refreshDOM();
     }
 
-    // Determine whether UProxy is connected to some network.
+    // Determine whether uProxy is connected to some network.
     // TODO: Make these functional and write specs.
     public loggedIn = () => {
       for (var networkId in model.networks) {
@@ -558,6 +570,32 @@ module UI {
 
     public isProxying = () : boolean => {
       return this.currentProxyServer != null;
+    }
+
+    public toggleGetOrGive = (newValue :string, instance :UI.Instance)
+        : void => {
+      if (newValue !== 'GET' && newValue !== 'GIVE') {
+        console.error('toggleGetOrGive: unexpected value ' + newValue);
+        return;
+      }
+      this.mapInstanceIdToGetOrGive_[instance.instanceId] = newValue;
+    }
+
+    public showGetOrGive = (instance :UI.Instance) : string => {
+      if (!instance) {
+        // This occurs because angular still evaluates expressions using
+        // ui.proxyServerInstance even when those DOM elements are hidden
+        // and ui.proxyServerInstance is null.
+        return 'GET';
+      } else if (this.mapInstanceIdToGetOrGive_[instance.instanceId]) {
+        // User explicitly toggled get/give
+        return this.mapInstanceIdToGetOrGive_[instance.instanceId];
+      } else if (instance.consent.asClient != Consent.ClientState.NONE) {
+        // User has offered or been requested to act as proxy server.
+        return 'GIVE';
+      } else {
+        return 'GET';
+      }
     }
 
   }  // class UserInterface

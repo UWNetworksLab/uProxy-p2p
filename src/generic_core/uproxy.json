@@ -1,6 +1,6 @@
 {
-  "name": "UProxy",
-  "description": "The UProxy backend provides a mesh web proxy, access the web through your social connections.",
+  "name": "uProxy",
+  "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
   "app": {
     "script": [
       "concat_core_script.js"

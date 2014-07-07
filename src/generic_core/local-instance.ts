@@ -33,11 +33,21 @@ module Core {
       }
       this.instanceId = LocalInstance.generateInstanceID();
       this.description = this.generateRandomDescription_();
-      this.keyHash = this.generateKeyHash();
-      console.log('Generated LocalInstance: ',
-          this.instanceId,
-          this.description,
-          this.keyHash);
+      this.keyHash = null;
+    }
+
+    /**
+     * Some preparation for the LocalInstance is asynchronous, so interaction
+     * should wait until this function completes.
+     */
+    public prepare = () : Promise<void> => {
+      return Auth.getLocalFingerprint().then((fingerprint) => {
+        this.keyHash = fingerprint;
+        console.log('Finished generating LocalInstance: ',
+            this.instanceId,
+            this.description,
+            this.keyHash);
+      })
     }
 
     /**
@@ -62,19 +72,6 @@ module Core {
 
       }
       return id;
-    }
-
-    // TODO: Get a real key hash.
-    public generateKeyHash = () : string => {
-      var keyHash = '';
-      var hex :String;
-      for (var i = 0; i < 20; i++) {
-        // 20 bytes for a fake key hash.
-        hex = Math.floor(Math.random() * 256).toString(16);
-        keyHash = ((i > 0)? (keyHash + ':') : '')  +
-            ('00'.substr(0, 2 - hex.length) + hex);
-      }
-      return keyHash;
     }
 
     /**
@@ -105,6 +102,9 @@ module Core {
      * peers, notifying them that we are a uProxy installation.
      */
     public getInstanceHandshake = () : InstanceHandshake => {
+      if (!this.keyHash) {
+        console.warn('Local keyhash not ready!');
+      }
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
