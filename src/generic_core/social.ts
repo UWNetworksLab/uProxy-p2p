@@ -134,12 +134,14 @@ module Social {
         return this.myInstance;
       }, (e) => {
         this.myInstance = new Core.LocalInstance(this);
-        this.log('generated new local instance: ' +
+        this.log('generating new local instance: ' +
                  this.myInstance.instanceId);
-        return storage.save<Instance>(key, this.myInstance.currentState()).then((prev) => {
-          this.log('saved new local instance to storage');
-          return this.myInstance;
-        });
+        return this.myInstance.prepare().then(() => {
+            return storage.save<Instance>(key, this.myInstance.currentState());
+          }).then((prev) => {
+            this.log('saved new local instance to storage');
+            return this.myInstance;
+          });
       });
     }
 
@@ -587,6 +589,9 @@ module Social {
           });
     }
 
+    /**
+     * Promise the sending of |msg| to a client with id |clientId|.
+     */
     public send = (recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);

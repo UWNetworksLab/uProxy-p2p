@@ -1,10 +1,10 @@
 {
   "appName": {
-    "message": "UProxy Extension",
+    "message": "uProxy Extension",
     "description": "The name of the extension"
   },
   "appDescription": {
-    "message": "UProxy",
+    "message": "uProxy",
     "description": "The description of the extension"
   },
   "giveAccess": {
@@ -24,7 +24,7 @@
     "description": "Button label"
   },
   "options": {
-    "message": "UProxy Options",
+    "message": "uProxy Options",
     "description": "Header for the options page"
   },
   "advanced": {
