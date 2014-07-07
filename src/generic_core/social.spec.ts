@@ -361,3 +361,74 @@ describe('Social.FreedomNetwork', () => {
   */
 
 });
+
+
+describe('Social.ManualNetwork', () => {
+
+  var network :Social.ManualNetwork = new Social.ManualNetwork('manual');
+
+  var loginPromise :Promise<void>;
+
+  beforeEach(() => {
+    // Silence logging to keep test output clean.
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+  });
+
+  it('can send messages to the UI', () => {
+    spyOn(ui, 'update');
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+    network.send('dummyClientId', message);
+    expect(ui.update).toHaveBeenCalledWith(
+        uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
+  });
+
+  it('adds the sender to the roster upon receving a message', () => {
+    var senderClientId = 'dummy_client_id';
+    var senderUserId = senderClientId;
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+
+    network.receive(senderClientId, message);
+    expect(network.getUser(senderUserId)).toBeDefined();
+  });
+
+  it('routes received messages appropriately', () => {
+    var senderClientId = 'dummy_client_id';
+    var senderUserId = senderClientId;
+
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+
+    // Send an initial message so ManualNetwork creates the user object that we
+    // will spy on.
+    network.receive(senderClientId, message);
+    var user = network.getUser(senderUserId);
+    expect(user).toBeDefined();
+    spyOn(user, 'handleMessage');
+
+    network.receive(senderClientId, message);
+
+    expect(user.handleMessage).toHaveBeenCalledWith(senderClientId, message);
+  });
+
+});
