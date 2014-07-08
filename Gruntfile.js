@@ -375,8 +375,8 @@ module.exports = function(grunt) {
         src: FILES.jasmine_helpers
             .concat(FILES.jasmine_chrome)
             .concat([
-              'build/chrome/extension/scripts/base_core_connector.js',
               'build/chrome/extension/scripts/core_connector.js',
+              'build/chrome/extension/scripts/chrome_connector.js',
               'build/chrome/extension/scripts/chrome_glue.js'
             ]),
         options: {
