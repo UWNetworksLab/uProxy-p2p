@@ -3,7 +3,7 @@
 /// <reference path='logger.ts' />
 
 describe("logger", function() {
-  var logger = new LoggerModule.Logger('');
+  var logger = new LoggerModule.LoggerImp('');
 
   beforeEach(function() {
     logger.reset();

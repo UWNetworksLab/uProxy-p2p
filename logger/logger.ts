@@ -2,11 +2,6 @@
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
 /// <reference path='logger.d.ts' />
 
-declare module freedom {
-  // TODO: defined the return type of Logger function.
-  function Logger() : LogProvider
-}
-
 module LoggerModule {
 
   var logBuffer: string[] = [];
@@ -18,7 +13,7 @@ module LoggerModule {
   // to level number.
   var LEVEL_CHARS = 'DIWE';
 
-  export class Logger {
+  export class LoggerImp {
     constructor(public dispatchEvent: any) {
     }
 
@@ -113,28 +108,28 @@ module LoggerModule {
     }
 
     // Logs message in debug level.
-    public debug = (tag: string, msg: string, ...args: string[])
+    public debug = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('D', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in info level.
-    public info = (tag: string, msg: string, ...args: string[])
+    public info = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('I', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in warn level.
-    public warn = (tag: string, msg: string, ...args: string[])
+    public warn = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('W', tag, msg, args);
       return Promise.resolve();
     }
 
     // Logs message in error level.
-    public error = (tag: string, msg: string, ...args: string[])
+    public error = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('E', tag, msg, args);
       return Promise.resolve();
@@ -143,7 +138,7 @@ module LoggerModule {
 
   /** REGISTER PROVIDER **/
   if (typeof freedom !== 'undefined') {
-    freedom.Logger().providePromises(Logger);
+    freedom.Logger().providePromises(LoggerImp);
   }
 }
 
