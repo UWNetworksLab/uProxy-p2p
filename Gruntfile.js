@@ -332,8 +332,8 @@ module.exports = function(grunt) {
       // uProxy firefox specific typescript
       firefox: {
         src: ['src/firefox/**/*.ts'],
-        dest: 'build/firefox/',
-        options: { basePath: 'src/firefox/', ignoreError: false }
+        dest: 'build/',
+        options: { basePath: 'src/', ignoreError: false }
       },
 
     },

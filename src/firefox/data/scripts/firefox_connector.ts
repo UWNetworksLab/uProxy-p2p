@@ -36,8 +36,6 @@ class FirefoxConnector implements uProxy.CoreBrowserConnector {
    */
   public send = (payload :uProxy.Payload,
                  skipQueue :Boolean = false) => {
-    console.assert(payload.cmd === 'emit');
-
     port.emit('' + payload.type, {data: payload.data, promiseId: payload.promiseId});
   }
 

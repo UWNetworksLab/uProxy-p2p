@@ -26,6 +26,7 @@ var panel = panels.Panel({
   height: 600,
   contentURL: self.data.url("popup.html"),
   contentScriptFile: [
+    self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
     self.data.url("scripts/ui.js"),
     self.data.url("scripts/notify.js"),
