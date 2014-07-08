@@ -1,5 +1,5 @@
-/// <reference path='core_connector.ts' />
-/// <reference path='../../../generic_ui/scripts/base_core_connector.ts' />
+/// <reference path='chrome_connector.ts' />
+/// <reference path='../../../generic_ui/scripts/core_connector.ts' />
 /// <reference path='../../../interfaces/lib/jasmine/jasmine.d.ts' />
 
 
