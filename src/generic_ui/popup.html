@@ -33,7 +33,7 @@
       <span class="description">Safe Passage for the Web.</span>
 
       <div class="app-missing-warning" ng-hide="core.connected()">
-        You need to install the UProxy app as well as the UProxy extension.
+        You need to install the uProxy app as well as the uProxy extension.
       </div>
 
       <div ng-show="core.connected()">
@@ -46,7 +46,7 @@
         </input>
         <p class="tip" ng-show="descriptionHelp">
           Please describe your device.
-          This description will be visible to friends with UProxy.
+          This description will be visible to friends with uProxy.
         </p>
         -->
 
@@ -55,12 +55,17 @@
 
           <div class="network-btn">
             <span ng-repeat="(network, detail) in model.networks">
-              <button class="btn" ng-show="!isOnline(network)"
-              ng-click="login(network)">Sign in to {{ prettyNetworkName(network) }}</button>
-              <button class="btn" ng-show="isOnline(network)"
-                ng-click="logout(network)">Sign out from {{ prettyNetworkName(network) }}</button>
+              <!-- TODO: Compare against Social.MANUAL_NETWORK_ID instead. -->
+              <span ng-if="network !== 'manual'">
+                <button class="btn" ng-show="!isOnline(network)"
+                    ng-click="login(network)">Sign in to {{ prettyNetworkName(network) }}</button>
+                <button class="btn" ng-show="isOnline(network)"
+                    ng-click="logout(network)">Sign out from {{ prettyNetworkName(network) }}</button>
+              </span>
             </span>
           </div>
+
+          <!-- TODO: Add a way to open UI for managing manual contacts. -->
         </div>
       </div>
       <div id="uproxy-warning">

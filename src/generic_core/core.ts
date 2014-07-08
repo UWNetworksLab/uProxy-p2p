@@ -7,7 +7,7 @@
  *
  * In-memory state includes:
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
- *  - Instances, which is a list of active UProxy installs.
+ *  - Instances, which is a list of active uProxy installs.
  */
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
@@ -113,10 +113,12 @@ class uProxyCore implements uProxy.CoreAPI {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
     // TODO: enable once we can use peerconnection from within the webworker.
-    // Auth.getLocalFingerprint().then((fingerprint) => {
-      // console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
-      // ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
-    // });
+    Auth.getLocalFingerprint().then((fingerprint) => {
+      console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
+      ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
+    }).catch((e) => {
+      console.error(e);
+    });
   }
 
   /**
@@ -294,6 +296,19 @@ class uProxyCore implements uProxy.CoreAPI {
     proxy.stop();
     proxy = null;
     // TODO: Handle revoked permissions notifications.
+  }
+
+  public handleManualNetworkInboundMessage =
+      (command :uProxy.HandleManualNetworkInboundMessageCommand) => {
+    var manualNetwork :Social.ManualNetwork =
+        <Social.ManualNetwork> Social.getNetwork(Social.MANUAL_NETWORK_ID);
+    if (!manualNetwork) {
+      console.error('Manual network does not exist; discarding inbound ' +
+                    'message. Command=' + JSON.stringify(command));
+      return;
+    }
+
+    manualNetwork.receive(command.senderClientId, command.message);
   }
 
   /**
@@ -561,6 +576,9 @@ core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, core.updateDescription);
 // TODO: make the invite mechanism an actual process.
 core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 });
+
+core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
+               core.handleManualNetworkInboundMessage);
 
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

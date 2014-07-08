@@ -32,7 +32,7 @@ class BrowserProxyConfig {
 
   public startUsingProxy = () => {
     if (this.running_ == false) {
-      console.log('Directing Chrome proxy settings to UProxy');
+      console.log('Directing Chrome proxy settings to uProxy');
       this.running_ = true;
       chrome.proxy.settings.get({incognito:false},
         (details) => {

@@ -24,8 +24,6 @@ declare module Social {
     name       :string;
     // TODO: Review visibility of these attributes and the interface.
     roster     :{[userId:string]:Core.User};
-    // TODO: Give real typing to metadata.
-    metadata   :any;  // Network name, description, icon, etc.
     // TODO: Make this private. Have other objects use getLocalInstance
     // instead.
     myInstance :Core.LocalInstance;

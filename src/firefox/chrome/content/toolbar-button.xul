@@ -10,8 +10,8 @@
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="uproxy-button"        
                    class="toolbarbutton-1 chromeclass-toolbar-additional uproxy-button"
-                   title = "UProxy"
-                   tooltiptext="UProxy menu"
+                   title = "uProxy"
+                   tooltiptext="uProxy menu"
                    oncommand="org.uproxy.uproxyButtonCommand(event)"
                    image="chrome://uproxy-common/content/ui/icons/uproxy-19.png"/>
 
