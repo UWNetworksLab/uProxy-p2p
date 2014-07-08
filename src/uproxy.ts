@@ -131,6 +131,28 @@ module uProxy {
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
   }
+  
+  /**
+   * Common type for the message payloads sent between uProxy backend and ui.
+   */
+  export interface Payload {
+    cmd :string;
+    type :number;   // Some flavor of Enum, converted to a number.
+    data ?:Object;  // Usually JSON.
+    promiseId ?:number;  // Values >= 1 means success/error should be returned.
+  }
+
+
+  /**
+   * Interface for browser specific backend - ui connector.
+   */
+  export interface CoreConnector {
+    send(payload :Payload, skipQueue ?:Boolean) : void;
+
+    onUpdate(update :Update, handler :Function) : void;
+
+    status :StatusObject;
+  }
 
   /**
    * The primary interface for the uProxy User Interface.

@@ -12,11 +12,6 @@
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
 
-interface FullfillAndReject {
-  fulfill :Function;
-  reject :Function;
-};
-
 /**
  * Chrome-Extension-specific uProxy Core API implementation.
  *
@@ -32,11 +27,11 @@ interface FullfillAndReject {
  * that the user (which is the Extension / UI) won't have to deal with
  * connectivity explicitly, but has the option to chain promises if desired.
  */
-class ChromeCoreConnector implements uProxy.CoreAPI {
+class ChromeConnector implements uProxy.CoreConnector {
 
   private appId_   :string;                // ID of target Chrome App.
   private appPort_ :chrome.runtime.Port;   // For speaking to App.
-  private queue_   :ChromeGlue.Payload[];  // Queue for outgoing appPort_ msgs.
+  private queue_   :uProxy.Payload[];  // Queue for outgoing appPort_ msgs.
 
   // Status object indicating whether we're connected to the app.
   // TODO: Since this is equivalent to whether or not appPort_ is null, we
@@ -52,10 +47,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
 
-  // Global unique promise ID.
-  private promiseId_ :number = 1;
-  private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
-      {};
 
   /**
    * As soon as one constructs the CoreConnector, it will attempt to connect.
@@ -66,11 +57,6 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
     this.appPort_ = null;
     this.queue_ = [];
     this.listeners_ = {};
-
-    this.onUpdate(uProxy.Update.COMMAND_FULFILLED,
-                  this.handleRequestFulfilled_);
-    this.onUpdate(uProxy.Update.COMMAND_REJECTED,
-                  this.handleRequestRejected_);
   }
 
 
@@ -101,10 +87,14 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
           type: parseInt(type, 10)
         };
         console.log('Connecting listener for', JSON.stringify(payload));
-        this.send_(payload);
+        this.send(payload);
       }
-
-      this.sendCommand(uProxy.Command.READY);
+      var ready :uProxy.Payload = {
+        cmd: 'emit',
+        type: uProxy.Command.READY,
+        promiseId: 0
+      }
+      this.send(ready);
     });
   }
 
@@ -194,81 +184,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       type: update
     };
     console.log('UI onUpdate for', JSON.stringify(payload));
-    this.send_(payload, true);
-  }
-
-  /**
-   * Send a Command from the UI to the Core, as a result of some user
-   * interaction.
-   */
-  public sendCommand = (command :uProxy.Command, data ?:any) => {
-    var payload :ChromeGlue.Payload = {
-      cmd: 'emit',
-      type: command,
-      data: data,
-      promiseId: 0
-    }
-    console.log('UI sending Command ' + //uProxy.Command[command],
-        JSON.stringify(payload));
-    this.send_(payload);
-  }
-
-  /**
-   * Send a Command from the UI to the Core, as a result of some user
-   * interaction.  Command returns a promise that fulfills/rejects upon
-   * an ack/reject from the app.
-   */
-  public promiseCommand = (command :uProxy.Command, data ?:any)
-      : Promise<void> => {
-    var promiseId :number = ++(this.promiseId_);
-    var payload :ChromeGlue.Payload = {
-      cmd: 'emit',
-      type: command,
-      data: data,
-      promiseId: promiseId
-    }
-    console.log('UI sending Promise Command ' + //uProxy.Command[command],
-        JSON.stringify(payload));
-
-    // Create a new promise and store its fulfill and reject functions.
-    var fulfillFunc :Function;
-    var rejectFunc :Function;
-    var promise :Promise<void> = new Promise<void>((F, R) => {
-      fulfillFunc = F;
-      rejectFunc = R;
-    });
-    // TODO: we may want to periodically remove garbage from this table
-    // e.g. if the app restarts, all promises should be removed or reject.
-    // Also we may want to reject promises after some timeout.
-    this.mapPromiseIdToFulfillAndReject_[promiseId] = {
-      fulfill: fulfillFunc,
-      reject: rejectFunc
-    };
-
-    // Send request to app.
-    this.send_(payload);
-
-    return promise;
-  }
-
-  private handleRequestFulfilled_ = (promiseId :number) => {
-    console.log('promise command fulfilled ' + promiseId);
-    if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
-      delete this.mapPromiseIdToFulfillAndReject_[promiseId];
-    } else {
-      console.warn('fulfill not found ' + promiseId);
-    }
-  }
-
-  private handleRequestRejected_ = (promiseId :number) => {
-    console.log('promise command rejected ' + promiseId);
-    if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
-      delete this.mapPromiseIdToFulfillAndReject_[promiseId];
-    } else {
-      console.warn('reject not found ' + promiseId);
-    }
+    this.send(payload, true);
   }
 
   /**
@@ -277,8 +193,8 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
    * the message for the next successful connection.
    * If skipQueue==true, payloads will not be enqueued when app is disconnected.
    */
-  private send_ = (payload :ChromeGlue.Payload,
-                   skipQueue :Boolean = false) => {
+  public send = (payload :uProxy.Payload,
+                 skipQueue :Boolean = false) => {
     if (!this.status.connected || null == this.appPort_) {
       if (!skipQueue) {
         this.queue_.push(payload);
@@ -289,7 +205,7 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
       this.appPort_.postMessage(payload);
     } catch (e) {
       console.warn(e);
-      console.warn('ChromeCoreConnector.send_ postMessage failure.');
+      console.warn('ChromeConnector.send postMessage failure.');
     }
   }
 
@@ -318,58 +234,9 @@ class ChromeCoreConnector implements uProxy.CoreAPI {
         break;
       }
       var payload = this.queue_.shift();
-      this.send_(payload);
+      this.send(payload);
     }
     return port;
   }
 
-
-  // --- CoreAPI interface requirements (sending COMMANDS) ---
-
-  reset = () => {
-    console.log('Resetting.');
-    this.sendCommand(uProxy.Command.RESET, null);
-  }
-
-  // TODO: Reconnect this hook, which while we're testing, sends a new instance
-  // message anytime we click on the user in the UI.
-  sendInstance = (clientId) => {
-    this.sendCommand(uProxy.Command.SEND_INSTANCE, clientId);
-  }
-
-  modifyConsent = (command:uProxy.ConsentCommand) => {
-    console.log('Modifying consent.', command);
-    this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
-  }
-
-  start = (path :InstancePath) : Promise<void> => {
-    console.log('Starting to proxy through ' + path);
-    return this.promiseCommand(uProxy.Command.START_PROXYING, path).then(() => {
-      proxyConfig.startUsingProxy();
-    });
-  }
-
-  stop = () => {
-    console.log('Stopping proxy session.');
-    this.sendCommand(uProxy.Command.STOP_PROXYING);
-  }
-
-  updateDescription = (description :string) => {
-    // TODO: determine if novelty check is necessary.
-    console.log('Updating description to ' + description);
-    this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
-  }
-
-  changeOption = (option) => {
-    console.log('Changing option ' + option);
-    // this.sendCommand(uProxy.Command.CHANGE_OPTION, option);
-  }
-
-  login = (network :string) : Promise<void> => {
-    return this.promiseCommand(uProxy.Command.LOGIN, network);
-  }
-
-  logout = (network :string) => {
-    this.sendCommand(uProxy.Command.LOGOUT, network);
-  }
-}  // class ChromeCoreConnector
+}  // class ChromeConnector
