@@ -146,7 +146,7 @@ module uProxy {
   /**
    * Interface for browser specific backend - ui connector.
    */
-  export interface CoreConnector {
+  export interface CoreBrowserConnector {
     send(payload :Payload, skipQueue ?:Boolean) : void;
 
     onUpdate(update :Update, handler :Function) : void;

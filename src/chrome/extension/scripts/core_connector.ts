@@ -27,7 +27,7 @@ var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
  * that the user (which is the Extension / UI) won't have to deal with
  * connectivity explicitly, but has the option to chain promises if desired.
  */
-class ChromeConnector implements uProxy.CoreConnector {
+class ChromeConnector implements uProxy.CoreBrowserConnector {
 
   private appId_   :string;                // ID of target Chrome App.
   private appPort_ :chrome.runtime.Port;   // For speaking to App.
@@ -49,7 +49,7 @@ class ChromeConnector implements uProxy.CoreConnector {
 
 
   /**
-   * As soon as one constructs the CoreConnector, it will attempt to connect.
+   * As soon as one constructs the CoreBrowserConnector, it will attempt to connect.
    */
   constructor(private options_ ?:chrome.runtime.ConnectInfo) {
     this.appId_ = UPROXY_CHROME_APP_ID;

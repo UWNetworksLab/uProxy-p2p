@@ -1,7 +1,7 @@
 /**
  * core_connector.ts
  *
- * Handles all connection and communication with the uProxy Chrome App.
+ * Handles all connection and communication with the uProxy core.
  */
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
@@ -26,19 +26,19 @@ class CoreConnector implements uProxy.CoreAPI {
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
-  constructor(private connector_ :uProxy.CoreConnector) {
-    this.connector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
-                             this.handleRequestFulfilled_);
-    this.connector_.onUpdate(uProxy.Update.COMMAND_REJECTED,
-                             this.handleRequestRejected_);
+  constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
+    this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
+                                    this.handleRequestFulfilled_);
+    this.browserConnector_.onUpdate(uProxy.Update.COMMAND_REJECTED,
+                                    this.handleRequestRejected_);
   }
 
   public connected = () => {
-    return this.connector_.status.connected;
+    return this.browserConnector_.status.connected;
   }
 
   public onUpdate = (update :uProxy.Update, handler :Function) => {
-    this.connector_.onUpdate(update, handler);
+    this.browserConnector_.onUpdate(update, handler);
   }
 
   /**
@@ -54,7 +54,7 @@ class CoreConnector implements uProxy.CoreAPI {
     }
     console.log('UI sending Command ' + //uProxy.Command[command],
         JSON.stringify(payload));
-    this.connector_.send(payload);
+    this.browserConnector_.send(payload);
   }
 
   /**
@@ -90,7 +90,7 @@ class CoreConnector implements uProxy.CoreAPI {
     };
 
     // Send request to backend.
-    this.connector_.send(payload);
+    this.browserConnector_.send(payload);
 
     return promise;
   }
