@@ -8,13 +8,13 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
-/// <reference path='core_connector.ts' />
+/// <reference path='chrome_connector.ts' />
 /// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
 /// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
-/// <reference path='../../../generic_ui/scripts/base_core_connector.ts' />
+/// <reference path='../../../generic_ui/scripts/core_connector.ts' />
 
 /// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
