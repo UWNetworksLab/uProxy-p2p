@@ -19,7 +19,7 @@
   <body ng-cloak ng-controller="OptionsCtrl" id="options">
     <h3>{{'options'|i18n}}</h3>
 
-    <div class="app-missing-warning" ng-hide="core.status.connected">
+    <div class="app-missing-warning" ng-hide="core.connected()">
       You need to install the uProxy app as well as the uProxy extension.
     </div>
 

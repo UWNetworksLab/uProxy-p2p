@@ -200,6 +200,13 @@ module UI {
         console.log('Received local fingerprint: ' + this.localFingerprint);
       });
 
+      core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
+                    (message :uProxy.Message) => {
+        console.log('Manual network outbound message: ' +
+                    JSON.stringify(message));
+        // TODO: Display the message in the 'manual network' UI.
+      });
+
       console.log('Created the UserInterface');
     }
 

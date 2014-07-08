@@ -32,6 +32,9 @@ module uProxy {
     START_PROXYING = 1010,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
+
+    // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
+    HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE
   }
 
   /**
@@ -52,7 +55,10 @@ module uProxy {
     ERROR,
     STOP_PROXYING,
     NOTIFICATION,
-    LOCAL_FINGERPRINT  // From the WebRTC peer connection.
+    LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
+
+    // Payload should be a uProxy.Message.
+    MANUAL_NETWORK_OUTBOUND_MESSAGE
   }
 
   /**
@@ -91,9 +97,17 @@ module uProxy {
    * command.
    */
   export interface ConsentCommand {
-    // TODO: Replace these 3 with InstancePath.
     path       :InstancePath;
     action     :Consent.UserAction;
+  }
+
+  // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
+  // client ID for the sender but no user ID because in the manual network
+  // there is no concept of a single user having multiple clients; in the
+  // manual network the client ID uniquely identifies the user.
+  export interface HandleManualNetworkInboundMessageCommand {
+    senderClientId  :string;
+    message         :uProxy.Message;
   }
 
   // --- Core <--> UI Interfaces ---
@@ -130,6 +144,28 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
+  }
+  
+  /**
+   * Common type for the message payloads sent between uProxy backend and ui.
+   */
+  export interface Payload {
+    cmd :string;
+    type :number;   // Some flavor of Enum, converted to a number.
+    data ?:Object;  // Usually JSON.
+    promiseId ?:number;  // Values >= 1 means success/error should be returned.
+  }
+
+
+  /**
+   * Interface for browser specific backend - ui connector.
+   */
+  export interface CoreBrowserConnector {
+    send(payload :Payload, skipQueue ?:Boolean) : void;
+
+    onUpdate(update :Update, handler :Function) : void;
+
+    status :StatusObject;
   }
 
   /**

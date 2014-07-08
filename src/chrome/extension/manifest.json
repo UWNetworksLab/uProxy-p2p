@@ -18,6 +18,7 @@
       "scripts/ui.js",
       "scripts/notify.js",
       "scripts/proxy-config.js",
+      "scripts/base_core_connector.js",
       "scripts/core_connector.js",
       "scripts/background.js"
     ]

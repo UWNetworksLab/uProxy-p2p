@@ -47,7 +47,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
 
-- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli
+- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
 - [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
 
