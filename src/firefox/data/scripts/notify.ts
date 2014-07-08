@@ -4,9 +4,11 @@
  * This is the Firefox-specific implementation of the Notifications API.
  */
 /// <reference path='../../../interfaces/notify.d.ts' />
+/// <reference path='../../../interfaces/firefox.d.ts' />
+
+var port :ContentScriptPort;
 
 class FirefoxNotifications implements INotifications {
-  public ICON_DIR :string = 'icons/';
 
   public setIcon = (iconFile :string) : void => {
   }
@@ -18,6 +20,6 @@ class FirefoxNotifications implements INotifications {
   }
 
   public showDesktopNotification = (notificationText :string) : void => {
+    port.emit('showNotification', notificationText);
   }
-
 }

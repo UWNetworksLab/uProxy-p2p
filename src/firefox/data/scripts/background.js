@@ -23,14 +23,3 @@ if (undefined === ui) {
 unsafeWindow.ui = ui;
 unsafeWindow.model = model;
 unsafeWindow.core = core;
-
-
-/*
-unsafeWindow.ui = cloneInto(ui, unsafeWindow);
-ui = unsafeWIndow.ui;
-unsafeWindow.model = cloneInto(model, unsafeWindow);
-model = unsafeWIndow.model;
-unsafeWindow.core = cloneInto(core, unsafeWindow);
-core = unsafeWIndow.core;
-*/
-

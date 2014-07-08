@@ -4,6 +4,7 @@ var self = require("sdk/self");
 var tabs = require("sdk/tabs");
 const {Cu} = require("chrome");
 var {setTimeout} = require("sdk/timers");
+var notifications = require("sdk/notifications");
 
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
 Cu.import("resource://gre/modules/Services.jsm");
@@ -24,6 +25,7 @@ var panel = panels.Panel({
   height: 600,
   contentURL: self.data.url("popup.html"),
   contentScriptFile: [
+    self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
     self.data.url("scripts/ui.js"),
     self.data.url("scripts/notify.js"),
@@ -49,3 +51,12 @@ function start(state) {
     position: button,
   });
 }
+
+panel.port.on('showNotification', function(notificationText) {
+  notifications.notify({
+    title: 'uProxy',
+    text: notificationText,
+    iconURL: self.data.url('icons/uproxy-128.png'),
+    //onClick: start,
+  });
+});
