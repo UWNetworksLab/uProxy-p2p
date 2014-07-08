@@ -5,6 +5,7 @@ var tabs = require("sdk/tabs");
 const {Cu} = require("chrome");
 var {setTimeout} = require("sdk/timers");
 var notifications = require("sdk/notifications");
+var prefsvc = require("sdk/preferences/service");
 
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
 Cu.import("resource://gre/modules/Services.jsm");
@@ -25,11 +26,11 @@ var panel = panels.Panel({
   height: 600,
   contentURL: self.data.url("popup.html"),
   contentScriptFile: [
-    self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
     self.data.url("scripts/ui.js"),
     self.data.url("scripts/notify.js"),
     self.data.url("scripts/proxy-config.js"),
+    self.data.url("scripts/firefox_connector.js"),
     self.data.url("scripts/core_connector.js"),
     self.data.url("scripts/background.js")],
   contentScriptWhen: 'start'
@@ -57,6 +58,12 @@ panel.port.on('showNotification', function(notificationText) {
     title: 'uProxy',
     text: notificationText,
     iconURL: self.data.url('icons/uproxy-128.png'),
-    //onClick: start,
+    onClick: start,
   });
 });
+
+panel.port.on('startUsingProxy', function() {
+  console.log("start using proxy");
+});
+
+

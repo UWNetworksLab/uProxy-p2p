@@ -116,6 +116,9 @@ function setUpConnection(freedom, panel) {
     freedom.emit('1013', data);
   });
 
+  panel.port.on('stopUsingProxy', function() {
+    console.log("stop using proxy");
+  });
 }
 
 exports.setUpConnection = setUpConnection

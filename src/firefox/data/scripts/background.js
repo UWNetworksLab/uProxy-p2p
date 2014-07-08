@@ -10,7 +10,8 @@ var model = {
 };
 
 function initUI() {
-    core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+    var firefoxConnector = new FirefoxConnector();
+    core = new CoreConnector(firefoxConnector);
     var notifications = new FirefoxNotifications();
 
     return new UI.UserInterface(core, notifications);
@@ -19,6 +20,8 @@ function initUI() {
 if (undefined === ui) {
     ui = initUI();
 }
+
+var port = self.port;
 
 unsafeWindow.ui = ui;
 unsafeWindow.model = model;
