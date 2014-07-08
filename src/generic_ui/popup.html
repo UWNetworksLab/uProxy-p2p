@@ -32,11 +32,11 @@
       </div>
       <span class="description">Safe Passage for the Web.</span>
 
-      <div class="app-missing-warning" ng-hide="core.status.connected">
+      <div class="app-missing-warning" ng-hide="core.connected()">
         You need to install the uProxy app as well as the uProxy extension.
       </div>
 
-      <div ng-show="core.status.connected">
+      <div ng-show="core.connected()">
         <!-- TODO: re-enable when we have descriptions ready for use.
         <input type="text" ng-model="model.me.description"
             id="my-description"
