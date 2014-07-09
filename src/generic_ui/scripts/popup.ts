@@ -13,7 +13,6 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
     // View states.
     var ui = $scope.ui;
     var core = $scope.core;
-    var uProxy = $scope.uProxy;
     // $scope.optionsTooltip = false;
 
     // TODO: Move filters into a directive.
@@ -51,4 +50,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.logout(network);
     };
 
+    $scope.MANUAL_NETWORK_ID = uProxy.MANUAL_NETWORK_ID;
   }]);

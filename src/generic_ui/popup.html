@@ -55,7 +55,7 @@
 
           <div class="network-btn">
             <span ng-repeat="(network, detail) in model.networks">
-              <span ng-if="network !== uProxy.MANUAL_NETWORK_ID">
+              <span ng-if="network !== MANUAL_NETWORK_ID">
                 <button class="btn" ng-show="!isOnline(network)"
                     ng-click="login(network)">Sign in to {{ prettyNetworkName(network) }}</button>
                 <button class="btn" ng-show="isOnline(network)"
