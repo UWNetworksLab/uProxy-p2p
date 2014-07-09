@@ -326,6 +326,11 @@ module Core {
             // is if the remote has revoked access after previously being in
             // GRANTED.
             ui.showNotification(this.user.name + ' revoked your access.');
+            if (this.access.asProxy) {
+              // If currently proxying through this instance, then stop proxying
+              // since there is no longer access.
+              core.stop();
+            }
             break;
           default:
             // Don't display notification for ignoring, and any other states.
