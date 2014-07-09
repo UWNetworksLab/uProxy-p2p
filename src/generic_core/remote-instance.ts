@@ -325,11 +325,17 @@ module Core {
             // The only way to land in USER_REQUESTED upon reciving consent bits
             // is if the remote has revoked access after previously being in
             // GRANTED.
-            ui.showNotification(this.user.name + ' revoked your access.');
             if (this.access.asProxy) {
               // If currently proxying through this instance, then stop proxying
-              // since there is no longer access.
+              // since there is no longer access. Other than a socksToRtc
+              // timeout, this is the only other situation where proxying is
+              // interrupted remotely.
+              ui.showNotification(this.user.name + ' revoked your access, ' +
+                  'which ends your current proxy session.');
               core.stop();
+              ui.stopProxyingInUiAndConfig();
+            } else {
+              ui.showNotification(this.user.name + ' revoked your access.');
             }
             break;
           default:
