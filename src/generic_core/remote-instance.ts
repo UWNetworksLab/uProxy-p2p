@@ -412,8 +412,6 @@ module Core {
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
-        // TODO: isCurrentProxyClient is the same as access.asClient. Combine.
-        isCurrentProxyClient: this.access.asClient
       });
     }
 
@@ -459,7 +457,6 @@ module Core {
     keyHash              :string;
     consent              :ConsentState;
     access               :AccessState;
-    isCurrentProxyClient :boolean;
   }
 
   // TODO: Implement obfuscation.

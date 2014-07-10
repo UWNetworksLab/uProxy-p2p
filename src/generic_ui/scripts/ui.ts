@@ -532,7 +532,7 @@ module UI {
 
     public isCurrentProxyClient = (user: User) : boolean => {
       for (var i = 0; i < user.instances.length; ++i) {
-        if (user.instances[i].isCurrentProxyClient) {
+        if (user.instances[i].access.asClient) {
           return true;
         }
       }
