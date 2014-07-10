@@ -50,4 +50,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.logout(network);
     };
 
+    $scope.MANUAL_NETWORK_ID = Social.MANUAL_NETWORK_ID;
   }]);
