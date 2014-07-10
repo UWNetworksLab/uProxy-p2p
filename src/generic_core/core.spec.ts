@@ -7,6 +7,7 @@
  * requirement and ensures consistency.
  */
 /// <reference path='social.ts' />
+/// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 // declare var storage :Core.Storage;
