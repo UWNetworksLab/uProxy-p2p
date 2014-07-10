@@ -12,10 +12,6 @@
 
 module uProxy {
 
-  // --- Miscellaneous constants needed by both core & UI  ---
-
-  export var MANUAL_NETWORK_ID = 'manual';
-
   // --- Communications ---
 
   /**
@@ -225,6 +221,10 @@ module uProxy {
   }
 
 }  // module uProxy
+
+module Social {
+  export var MANUAL_NETWORK_ID = 'manual';
+}
 
 // We use this to map Freedom's untyped social network structures into a real
 // type-script enum & interface.

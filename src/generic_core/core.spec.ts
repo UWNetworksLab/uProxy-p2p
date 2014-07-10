@@ -62,7 +62,7 @@ describe('Core', () => {
 
   it('relays incoming manual network messages to the manual network', () => {
     var manualNetwork :Social.ManualNetwork =
-        new Social.ManualNetwork(uProxy.MANUAL_NETWORK_ID);
+        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID);
 
     spyOn(Social, 'getNetwork').and.returnValue(manualNetwork);
     spyOn(manualNetwork, 'receive');
@@ -81,7 +81,7 @@ describe('Core', () => {
     };
     core.handleManualNetworkInboundMessage(command);
 
-    expect(Social.getNetwork).toHaveBeenCalledWith(uProxy.MANUAL_NETWORK_ID);
+    expect(Social.getNetwork).toHaveBeenCalledWith(Social.MANUAL_NETWORK_ID);
     expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
   });
 

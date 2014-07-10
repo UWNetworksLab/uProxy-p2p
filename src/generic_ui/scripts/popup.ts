@@ -50,5 +50,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.logout(network);
     };
 
-    $scope.MANUAL_NETWORK_ID = uProxy.MANUAL_NETWORK_ID;
+    $scope.MANUAL_NETWORK_ID = Social.MANUAL_NETWORK_ID;
   }]);

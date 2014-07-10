@@ -61,8 +61,8 @@ module Social {
       }
     }
 
-    Social.networks[uProxy.MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(uProxy.MANUAL_NETWORK_ID);
+    Social.networks[MANUAL_NETWORK_ID] =
+        new Social.ManualNetwork(MANUAL_NETWORK_ID);
 
     return Social.networks;
   }
