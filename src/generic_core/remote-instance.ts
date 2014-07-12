@@ -37,6 +37,8 @@ module Core {
       asClient: Consent.ClientState.NONE,
       asProxy:  Consent.ProxyState.NONE
     };
+    // Current proxy access activity of the remote instance with respect to the
+    // local instance of uProxy.
     public access      :AccessState = {
       asClient: false,
       asProxy:  false
@@ -49,10 +51,6 @@ module Core {
     // peer-to-peer connection, otherwise they will be null.
     private fulfillStartRequest_ = null;
     private rejectStartRequest_ = null;
-
-    // Set to true iff RemoteInstance is currently proxying through the
-    // local instance of uProxy.
-    private isCurrentProxyClient_ :boolean = false;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -198,7 +196,7 @@ module Core {
     }
 
     public updateClientProxyConnection = (isConnected :boolean) => {
-      this.isCurrentProxyClient_ = isConnected;
+      this.access.asClient = isConnected;
       this.user.notifyUI();
     }
 
@@ -271,6 +269,12 @@ module Core {
         default:
           console.warn('Invalid Consent.UserAction! ' + action);
           return;
+      }
+      // If remote is currently an active client, but user revokes access, also
+      // stop the proxy session.
+      if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
+        // TODO: emit a signal to rtcToNet to stop our peer, once that
+        // functionality is implemented in the socks-rtc repo.
       }
       // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();
@@ -410,7 +414,6 @@ module Core {
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
-        isCurrentProxyClient: this.isCurrentProxyClient_
       });
     }
 
@@ -456,7 +459,6 @@ module Core {
     keyHash              :string;
     consent              :ConsentState;
     access               :AccessState;
-    isCurrentProxyClient :boolean;
   }
 
   // TODO: Implement obfuscation.
