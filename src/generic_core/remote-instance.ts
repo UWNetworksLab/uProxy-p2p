@@ -273,6 +273,8 @@ module Core {
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
+        // TODO: emit a signal to rtcToNet to stop our peer, once that
+        // functionality is implemented in the socks-rtc repo.
       }
       // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();
