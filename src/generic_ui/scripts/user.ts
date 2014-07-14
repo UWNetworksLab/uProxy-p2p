@@ -44,7 +44,7 @@ module UI {
       }
       this.name = profile.name;
       this.url = profile.url;
-      this.imageData = profile.imageData;
+      this.imageData = /*profile.imageData ||*/ UI.DEFAULT_USER_IMG;
     }
 
     /**

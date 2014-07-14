@@ -15,7 +15,15 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
 
-var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
+var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'],
+  function($compileProvider) {
+    // TODO: comment
+    var oldImgWhitelist =
+        $compileProvider.imgSrcSanitizationWhitelist().toString();
+    var newImgWhitelist = oldImgWhitelist.slice(0,-1) + '|chrome-extension:' +
+        oldImgWhitelist.slice(-1);
+    $compileProvider.imgSrcSanitizationWhitelist(newImgWhitelist);
+  })
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
