@@ -98,7 +98,7 @@ module Handler {
     }
 
     public isHandling = () : boolean => {
-      return this.handler_ == null;
+      return this.handler_ !== null;
     }
 
     // handle or queue the given thing.

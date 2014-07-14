@@ -54,9 +54,11 @@ module Handler {
     it('setSyncNextHandler then handle 2 events: leaves second event queued',
         function(done) {
       var p1 = queue.setSyncNextHandler(lenHandler).then((n) => {
+          expect(queue.isHandling()).toBe(false);
           expect(n).toBe(1);
           expect(queue.getLength()).toBe(1);
         });
+      expect(queue.isHandling()).toBe(true);
       expect(queue.getLength()).toBe(0);
       var p2 = queue.handle('A').then((n) => {
           // This is the result of the handler. In this case, it is the length
@@ -75,10 +77,12 @@ module Handler {
     it('setNextHandler then handle 2 events: leaves second event queued',
         function(done) {
       queue.setNextHandler(promiseLenHandler).then((s) => {
+        expect(queue.isHandling()).toBe(false);
         expect(s).toBe(1);
         expect(queue.getLength()).toBe(1);
         done();
       });
+      expect(queue.isHandling()).toBe(true);
       queue.handle('A');
       queue.handle('BB');
     });
@@ -165,6 +169,7 @@ module Handler {
       // We set the handler at this point so test that the two earlier values
       // are indeed queued.
       queue.setHandler(aggregateTo10Handler.handle);
+      expect(queue.isHandling()).toBe(true);
       var p3 = queue.handle(20);
       p3.then((s) => {
           expect(s).toBe('SUM_AT_OUTPUT:26');
@@ -190,7 +195,10 @@ module Handler {
         });
 
       // Complete only when every promise has completed.
-      Promise.all<string>([p1,p2,p3,p4]).then((all) => { done(); });
+      Promise.all<string>([p1,p2,p3,p4]).then((all) => {
+        expect(queue.isHandling()).toBe(true);
+        done();
+      });
     });
 
   });  // describe('Handler Aggregated Queue', ... )
