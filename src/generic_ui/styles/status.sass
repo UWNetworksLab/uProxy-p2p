@@ -1,0 +1,46 @@
+// Styling for uProxy status elements.
+
+#status
+  position: absolute
+  z-index: 50
+  bottom: 0
+  width: 100%
+  font-size: $fontSize * 0.8
+  color: #888
+  padding: 0px 20px
+  cursor: default
+  border-top: 1px solid #eee
+  background-color: #fff
+  text-align: center
+  height: 50px
+  overflow-y: scroll
+  overflow-x: hidden
+
+#status-proxy-server
+  color: #333
+  text-align: left
+  @include smooth-slow
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+    height: 0
+
+#status-proxy-clients
+  text-align: left
+  color: #333
+  ul
+    -webkit-margin-before: 0.5em
+
+#status-tooltips
+  position: absolute
+  left: 20px
+  bottom: 67px
+  text-align: left !important
+#status-tooltips .tip
+  position: absolute
+
+#status-network
+  position: absolute
+  right: 0
+  bottom: 0
+  padding: 8px
