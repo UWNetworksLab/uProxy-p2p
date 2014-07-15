@@ -9,12 +9,14 @@ console.log('Setup repos script...\n '+
   ' * to test: `ssh -T git@github.com` \n ' +
   ' * to list your ssh agents: `ssh-add -l` \n ');
 
+// TODO: not currently used, but a placeholder for how to get args (not
+// including this command)
 var args = [];
 process.argv.slice(2).forEach(function (a) {
   args.push(a);
 });
 
-var repoNames = [
+var repositories = [
   {repo: 'git@github.com:uProxy/uProxy.git', dir: 'uproxy' },
   {repo: 'git@github.com:uProxy/socks-rtc.git', dir: 'uproxy-networking' },
   {repo: 'git@github.com:uProxy/sas-rtc.git', dir: 'uproxy-sas-rtc' },
@@ -43,7 +45,7 @@ function checkSshAgent() {
 function cloneAll(repos) {
   var promises = [];
   var cmd = '';
-  repoNames.forEach(function (r) {
+  repos.forEach(function (r) {
     if(!fs.existsSync(r.dir)) {
       cmd = 'git clone ' + r.repo + ' ' + r.dir;
       console.log('executing: ' + cmd);
@@ -68,4 +70,4 @@ function cloneAll(repos) {
   });
 }
 
-cloneAll();
+cloneAll(repositories);
