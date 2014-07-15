@@ -1,5 +1,5 @@
 /// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='logger.ts' />
 
 describe("logger", function() {

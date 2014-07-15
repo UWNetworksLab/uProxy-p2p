@@ -1,4 +1,4 @@
-/// <reference path='../third_party/promise/promise.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 module Handler {
 

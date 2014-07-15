@@ -1,4 +1,5 @@
-/// <reference path='../third_party/promise/promise.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
+
 declare module Handler {
 
   // A stream of events happen async with a stream of functions to handle those
