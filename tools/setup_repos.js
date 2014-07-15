@@ -15,15 +15,21 @@ process.argv.slice(2).forEach(function (a) {
 });
 
 var repoNames = [
-  'uProxy',
-  'socks-rtc',
-  'sas-rtc',
-  'uTransformers',
-  'uproxy-lib',
-  'libfte',
-  'uProbe',
-  'turn-relay',
-  'uproxy-website',
+  {repo: 'git@github.com:uProxy/uProxy.git', dir: 'uproxy' },
+  {repo: 'git@github.com:uProxy/socks-rtc.git', dir: 'uproxy-networking' },
+  {repo: 'git@github.com:uProxy/sas-rtc.git', dir: 'uproxy-sas-rtc' },
+  {repo: 'git@github.com:uProxy/uTransformers.git', dir: 'uproxy-uTransformers' },
+  {repo: 'git@github.com:uProxy/uproxy-lib.git', dir: 'uproxy-lib' },
+  {repo: 'git@github.com:uProxy/libfte.git', dir: 'libfte' },
+  {repo: 'git@github.com:uProxy/uProbe.git', dir: 'uproxy-logging' },
+  {repo: 'git@github.com:uProxy/turn-relay.git', dir: 'uproxy-churn' },
+  {repo: 'git@github.com:uProxy/uproxy-website.git', dir: 'uproxy-website' },
+  {repo: 'git@github.com:freedomjs/freedom.git', dir: 'freedom' },
+  {repo: 'git@github.com:freedomjs/freedom-typescript-api.git', dir: 'freedom-typescript-api' },
+  {repo: 'git@github.com:freedomjs/freedom-for-chrome.git', dir: 'freedom-for-chrome' },
+  {repo: 'git@github.com:freedomjs/freedom-for-firefox.git', dir: 'fredom-for-firefox' },
+  {repo: 'git@github.com:freedomjs/freedom-for-node.git', dir: 'freedom-for-node' },
+  {repo: 'git@github.com:freedomjs/freedom-social-xmpp.git', dir: 'freedom-social-xmpp' },
 ];
 
 var running = true;
@@ -34,18 +40,18 @@ function checkSshAgent() {
   return Promise.reject('Not yet implemented.')
 }
 
-function cloneAll() {
+function cloneAll(repos) {
   var promises = [];
   var cmd = '';
-  repoNames.forEach(function (n) {
-    if(!fs.existsSync(n)) {
-      cmd = 'git clone git@github.com:uProxy/' + n + '.git';
+  repoNames.forEach(function (r) {
+    if(!fs.existsSync(r.dir)) {
+      cmd = 'git clone ' + r.repo + ' ' + r.dir;
       console.log('executing: ' + cmd);
       promises.push(new Promise(function (F,R) {
         child_process.exec(cmd, {},
           function (error, stdout, stderr) {
-            console.log('stdout: ' + stdout);
-            console.log('stderr: ' + stderr);
+            if(stdout) { console.log('stdout: ' + stdout); }
+            if(stderr) { console.log('stderr: ' + stderr); }
             if (error !== null) {
               console.log('exec error: ' + error);
               R(error);
@@ -54,7 +60,7 @@ function cloneAll() {
             }
           });
       }));
-    }  // if
+    }  // if repo didn't exist
   });
   return Promise.all(promises).then(function () {
     running = false;
