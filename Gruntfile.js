@@ -230,7 +230,7 @@ module.exports = function(grunt) {
       generic_ui: {
         files: [
           { expand: true, cwd: 'src/generic_ui',
-            src: ['**/*.sass'],
+            src: ['**/main.sass'],
             dest: 'build/generic_ui/',
             ext: '.css'
           }]
