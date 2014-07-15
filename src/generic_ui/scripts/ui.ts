@@ -17,6 +17,8 @@ module UI {
 
   var REFRESH_TIMEOUT :number = 1000;  // ms.
 
+  export var DEFAULT_USER_IMG = 'icons/contact-default.png';
+
   /**
    * Enumeration of mutually-exclusive view states.
    */
@@ -173,7 +175,7 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :freedom.Social.UserProfile = payload.user;
-        this.myPic = profile.imageData;
+        this.myPic = profile.imageData || DEFAULT_USER_IMG;
         this.myName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {

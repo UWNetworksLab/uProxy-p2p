@@ -15,7 +15,18 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
 
-var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'])
+var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInjector'],
+  function($compileProvider) {
+    // Add "chrome-extension: and resource:" to the img src whitelist.
+    // If these are not added to the whitelist, angular will prefix src tags
+    // with "unsafe:" for local images using ng-src tags on firefox (resource:)
+    // and chrome (chrome-extension:).
+    var oldImgWhitelist =
+        $compileProvider.imgSrcSanitizationWhitelist().toString();
+    var newImgWhitelist = oldImgWhitelist.slice(0,-1) +
+       '|chrome-extension:|resource:' + oldImgWhitelist.slice(-1);
+    $compileProvider.imgSrcSanitizationWhitelist(newImgWhitelist);
+  })
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
   .config(function ($provide :ng.auto.IProvideService) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
