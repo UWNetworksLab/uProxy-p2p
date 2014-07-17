@@ -56,16 +56,13 @@ module WebRtc {
     return randomArray[0];
   }
 
-  // Super cheep simple hash function for comparison of SDP headers to choose
-  // initiator.
-  export var stringHash = (s:string, bytes:number) : string => {
-    // Note: array creation always rounds down to nearest int.
-    var array = new Uint16Array((bytes + 1) / 2);
-    var i :number;
-    for (i = 0; i < s.length; i++) {
-        array[i % bytes] ^= s.charCodeAt(i);
+  // Quick port of djb2 for comparison of SDP headers to choose initiator.
+  export var stringHash = (s:string) : number => {
+    var hash = 5381;
+    for (var i = 0; i < s.length; i++) {
+      hash = ((hash << 5) + hash) + s.charCodeAt(i); // hash * 33 + c
     }
-    return String.fromCharCode.apply(null, array);
+    return hash;
   }
 
   // A wrapper for peer-connection and it's associated data channels.
@@ -421,8 +418,8 @@ module WebRtc {
         //
         case SignalType.OFFER:
           if(this.pc_.signalingState === 'have-local-offer' &&
-              stringHash(JSON.stringify(signal.description.sdp), 4) <
-                  stringHash(JSON.stringify(this.pc_.localDescription.sdp), 4)) {
+              stringHash(JSON.stringify(signal.description.sdp)) <
+                  stringHash(JSON.stringify(this.pc_.localDescription.sdp))) {
             // TODO: implement reset and use their offer.
             this.closeWithError_('Simultainious offers not not yet implemented.');
             return;
