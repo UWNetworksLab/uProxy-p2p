@@ -65,7 +65,6 @@ module.exports = function(grunt) {
     'clean': ['build',
               'dist',
               '.sass-cache',
-              'node_modules',
               'test_output'],
 
     'connect': {
