@@ -136,7 +136,6 @@ module WebRtc {
       var byteLength :number;
       if (data.str) {
         // JS strings are utf-16.
-        // TODO: check this is really right.
         byteLength = data.str.length * 2;
       } else if (data.buffer) {
         byteLength = data.buffer.byteLength;
