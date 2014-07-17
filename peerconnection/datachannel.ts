@@ -15,10 +15,12 @@ module WebRtc {
   // http://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-07#section-6.6
   var CHUNK_SIZE = 1024 * 15;
   // The maximum amount of bytes we should allow to get queued up in
-  // peerconnection (10k), any more and we start queueing in JS. Note: WebRTC
-  // specified that if the buffer gets full a data channel is closed, so we
-  // really don't want that happen accidentally.
-  var PC_QUEUE_LIMIT = 1024 * 10;
+  // peerconnection. Any more and we start queueing in JS. Data channels are
+  // closed by WebRTC when the buffer fills, so we really don't want that happen
+  // accidentally. More info in this thread (note that 250Kb is well below both
+  // the 16MB for Chrome 37+ and "100 messages" of previous versions mentioned):
+  //   https://code.google.com/p/webrtc/issues/detail?id=2866
+  var PC_QUEUE_LIMIT = 1024 * 250;
   // Javascript has trouble representing integers larger than 2^53. So we simply
   // don't support trying to send array's bigger than that.
   var MAX_MESSAGE_SIZE = Math.pow(2, 53);
@@ -108,6 +110,7 @@ module WebRtc {
     // Handle data we get from the peer by putting it, appropriately wrapped, on
     // the queue of data from the peer.
     private onDataFromPeer_ = (messageEvent : RTCMessageEvent) : void => {
+      console.log('data!');
       if (typeof messageEvent.data === 'string') {
         this.fromPeerDataQueue.handle({str: messageEvent.data});
       } else if (typeof messageEvent.data === 'ArrayBuffer') {
@@ -126,6 +129,7 @@ module WebRtc {
     //
     // CONSIDER: We could support blob data by streaming into array-buffers.
     public send = (data:Data) : Promise<void> => {
+      console.log('sending... A');
       if (!(data.str || data.buffer)) {
         return Promise.reject(
             new Error('data must have at least string or buffer set'));
@@ -147,6 +151,7 @@ module WebRtc {
       }
 
       if(data.str) {
+        console.log('sending... B');
         return this.chunkStringOntoQueue_({str:data.str});
       } else if(data.buffer) {
         return this.chunkBufferOntoQueue_({buffer:data.buffer});
@@ -160,6 +165,7 @@ module WebRtc {
     }
 
     private chunkBufferOntoQueue_ = (data:BufferData) : Promise<void> => {
+      console.log('hello, what do i do?');
       var buffer = new Uint8Array(data.buffer);
       var startByte :number = 0;
       var endByte :number;
@@ -179,7 +185,9 @@ module WebRtc {
 
     // Assumes data is chunked.
     private handleSendDataToPeer_ = (data:Data) : Promise<void> => {
+      console.log('data pushed... A');
       if(data.str) {
+        console.log('data pushed... B');
         this.rtcDataChannel_.send(data.str);
       } else if(data.buffer) {
         this.rtcDataChannel_.send(data.buffer);
@@ -187,6 +195,7 @@ module WebRtc {
         return Promise.reject(new Error(
             'Bad data: ' + JSON.stringify(data)));
       }
+      console.log('CONGESTION');
       this.conjestionControlSendHandler();
       return Promise.resolve<void>();
     }
@@ -194,8 +203,10 @@ module WebRtc {
     // TODO: make this timeout adaptive so that we keep the buffer as full
     // as we can without wasting timeout callbacks.
     private conjestionControlSendHandler = () : void => {
+      console.log(' ** checking congestion...: ' + this.rtcDataChannel_.bufferedAmount);
       if(this.rtcDataChannel_.bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
         if(this.toPeerDataQueue_.isHandling()) {
+          console.log('stopping handling...');
           this.toPeerDataQueue_.stopHandling();
         }
         setTimeout(this.conjestionControlSendHandler, 20);
