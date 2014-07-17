@@ -161,11 +161,10 @@ module WebRtc {
     }
 
     private chunkBufferOntoQueue_ = (data:BufferData) : Promise<void> => {
-      var buffer = new Uint8Array(data.buffer);
       var startByte :number = 0;
       var endByte :number;
       var promises :Promise<void>[] = [];
-      while(startByte < buffer.byteLength) {
+      while(startByte < data.buffer.byteLength) {
         endByte = Math.min(startByte + CHUNK_SIZE, data.buffer.byteLength);
         promises.push(this.toPeerDataQueue_.handle(
             {buffer: data.buffer.subarray(startByte, endByte)}));
