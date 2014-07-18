@@ -64,12 +64,8 @@ module.exports = function(grunt) {
     //-------------------------------------------------------------------------
     'clean': ['build',
               'dist',
-              'tmp',
               '.sass-cache',
-              '.grunt',
-              'node_modules',
-              'test_output',
-              'third_party/lib'],
+              'test_output'],
 
     'connect': {
       uistatic: {
