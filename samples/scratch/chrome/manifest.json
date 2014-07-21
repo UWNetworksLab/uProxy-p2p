@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "scratch",
+  "description": "Quick freedom-for-uproxy test.",
+  "version": "0.1",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  }
+}
