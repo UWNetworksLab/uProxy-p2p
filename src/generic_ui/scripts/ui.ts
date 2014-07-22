@@ -8,6 +8,7 @@
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 
 declare var model         :UI.Model;
@@ -217,7 +218,8 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      this.browser_action.showDesktopNotification(notificationText);
+      new Notification('uProxy', { body: notificationText,
+                                   icon: 'icons/uproxy-128.png'});
     }
 
     // ------------------------------- Views ----------------------------------
