@@ -409,9 +409,7 @@ module UI {
     syncInstance = (instance : any) => {}
     updateMappings = () => {}
 
-    updateIdentity = (identity) => {}
     sendConsent = () => {}
-    addNotification = () => {}
 
     /**
      * Synchronize a new network to be visible on this UI.
@@ -555,42 +553,6 @@ module UI {
         }
       }
       return false;
-    }
-
-    /*
-     * Make sure counters and UI-only state holders correctly reflect the model.
-     * If |previousPatch| is provided, the search is optimized to only sync the
-     * relevant entries.
-     * TODO: Redo this for the new paradigm of network rosters.
-     */
-    sync = (previousPatch?:any) => {
-      // var n = 0;  // Count up notifications
-      // for (var userId in model.roster) {
-        // var user = model.roster[userId];
-        // this.syncUser(user);
-        // if (user.hasNotification) {
-          // n++;
-        // }
-      // }
-      // this.setNotifications(n);
-      // Run through instances, count up clients.
-      // var c = 0;
-      // for (var iId in model.instances) {
-        // var instance = model.instances[iId];
-        // if ('running' == instance.status.client) {
-          // c++;
-        // }
-        // if ('running' == instance.status.proxy) {
-          // this.isProxying = true;
-        // }
-      // }
-      // this.setClients(c);
-
-      // Generate list ordered by names.
-      // if (!this.myName) {
-        // this.syncMe();
-      // }
-      // return true;
     }
 
     public isProxying = () : boolean => {

@@ -39,7 +39,6 @@
 
       <div ng-show="core.connected()">
 
-        <!-- TODO(dborkan): default this to something like "Linux Computer (Chrome)" -->
         <!-- Description entry is disabled after login, as we don't yet support updating
              instances for signed in contacts -->
         <input type="text" ng-model="model.description"
@@ -172,7 +171,6 @@
                  that we have complete control over sorting, filtering, and the
                  timing of DOM updates.
             -->
-            <!-- TODO(dborkan): multi-instance support!  model.roster needs to be instances, not users -->
             <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by contact.userId"
                 ng-class="{offline:!contact.isOnline}">
 
@@ -190,7 +188,6 @@
                   </span>
                   
                   <div ng-repeat="instance in contact.instances | orderBy: '-isOnline'">
-                    <!-- TODO(dborkan) multiple instances! -->
                     <div ng-if="instance.isOnline"
                         ng-click="ui.focusOnUser(contact, instance)"
                         class="instance-description online">

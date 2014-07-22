@@ -175,9 +175,6 @@ module uProxy {
   // TODO: rename UiApi.
   export interface UIAPI {
 
-    // Global sync of all state.
-
-    sync(state?:string) : void;
     update(type:Update, data?:any) : void;
 
     syncUser(UserMessage:UI.UserMessage) : void;
@@ -190,7 +187,6 @@ module uProxy {
     // syncInstance(instance : any) : void;
     // updateMappings() : void;
     // updateIdentity(identity) : void;
-    // addNotification() : void;
 
     showNotification(notificationText :string) : void;
     isProxying() : boolean;
