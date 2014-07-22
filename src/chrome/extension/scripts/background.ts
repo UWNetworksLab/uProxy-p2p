@@ -51,9 +51,9 @@ function initUI() : UI.UserInterface {
 
   core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   core.connect();
-  var notifications = new ChromeNotifications();
+  var browserAction = new ChromeBrowserAction();
 
-  return new UI.UserInterface(core, notifications);
+  return new UI.UserInterface(core, browserAction);
 }
 
 console.log('Initializing chrome extension background page...');

@@ -144,7 +144,7 @@ module UI {
      */
     constructor(
         public core   :uProxy.CoreAPI,
-        public notify :INotifications) {
+        public browser_action :browserAction) {
 
       // TODO: Determine the best way to describe view transitions.
       this.view = View.ROSTER;
@@ -208,7 +208,7 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      this.notify.showDesktopNotification(notificationText);
+      this.browser_action.showDesktopNotification(notificationText);
     }
 
     // ------------------------------- Views ----------------------------------
@@ -264,10 +264,10 @@ module UI {
     setClients = (numClients) => {
       this.numClients = numClients;
       if (numClients > 0) {
-        this.notify.setColor('#008');
-        this.notify.setLabel('↓');
+        this.browser_action.setColor('#008');
+        this.browser_action.setLabel('↓');
       } else {
-        this.notify.setColor('#800');
+        this.browser_action.setColor('#800');
       }
     }
 
@@ -330,9 +330,9 @@ module UI {
 
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
-        this.notify.setIcon('uproxy-19-p.png');
+        this.browser_action.setIcon('uproxy-19-p.png');
       } else {
-        this.notify.setIcon('uproxy-19.png');
+        this.browser_action.setIcon('uproxy-19.png');
       }
     }
 
