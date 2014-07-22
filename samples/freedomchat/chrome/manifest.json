@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "scratch",
-  "description": "Quick freedom-for-uproxy test.",
+  "name": "freedomchat",
+  "description": "uproxypeerconnection chat demo.",
   "version": "0.1",
   "app": {
     "background": {
