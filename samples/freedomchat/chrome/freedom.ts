@@ -13,18 +13,18 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   }
 };
 
-var a :UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var a :freedom.UproxyPeerConnection = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
-var b :UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var b :freedom.UproxyPeerConnection = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessage', (signal:SignallingMessage) => {
+a.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) => {
   console.log('signalling channel A message: ' + signal.message);
   b.handleSignalMessage(signal);
 });
-b.on('signalMessage', (signal:SignallingMessage) => {
+b.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) => {
   console.log('signalling channel B message: ' + signal.message);
   a.handleSignalMessage(signal);
 });
@@ -41,7 +41,7 @@ b.on('signalMessage', (signal:SignallingMessage) => {
 
 // // Have a negotiate a peerconnection.
 // // Once negotiated, enable the UI and add send/receive handlers.
-a.negotiateConnection().then((endpoints:ConnectionAddresses) => {
+a.negotiateConnection().then((endpoints:freedom.UproxyPeerConnection.ConnectionAddresses) => {
   console.log('connected: ' +
       endpoints.localAddress + ':' + endpoints.localPort +
       ' <-> ' +

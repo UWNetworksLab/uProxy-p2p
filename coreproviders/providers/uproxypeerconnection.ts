@@ -21,13 +21,13 @@ class UproxyPeerConnectionImpl {
   }
 
   public handleSignalMessage(
-      signal:SignallingMessage,
+      signal:freedom.UproxyPeerConnection.SignallingMessage,
       continuation:() => any) : void {
     this.pc_.handleSignalMessage(JSON.parse(signal.message));
     continuation();
   }
 
-  public negotiateConnection = (continuation:(endpoints:ConnectionAddresses) => void) : void => {
+  public negotiateConnection = (continuation:(endpoints:freedom.UproxyPeerConnection.ConnectionAddresses) => any) : void => {
     // TODO: propagate errors
     this.pc_.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
       continuation({
