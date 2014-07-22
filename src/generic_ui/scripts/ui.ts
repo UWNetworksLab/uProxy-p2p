@@ -52,6 +52,8 @@ module UI {
     // TODO: or convert this back to an obect and figure out how to sort
     // it in angular.
     roster :User[];
+
+    description :string;
   }
 
   // TODO: remove this once extension model is cleaned up.
@@ -100,9 +102,7 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    // This is the instance we are focused on in the UI.
-    // TODO: come up with a better name to distinguish from currentProxyServer.
-    public proxyServerInstance :UI.Instance = null;
+    public focusedInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
 
@@ -117,7 +117,7 @@ module UI {
     // this map we should default to the correct get/give state based on the
     // consent settings.
     // TODO: put this in storage to remember the get/give state after restart.
-    private mapInstanceIdToGetOrGive_ = {};
+    private mapInstanceIdToGetOrGive_  :{ [instanceId :string] :string } = {};
 
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
@@ -161,6 +161,7 @@ module UI {
       // (We begin with the simplest, total state update, above.)
       core.onUpdate(uProxy.Update.ALL, (state :Object) => {
         console.log('Received uProxy.Update.ALL:', state);
+        model.description = state['description'];
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
         // from the core, so one-to-one mappinsg from the old json-patch code cannot
@@ -288,7 +289,7 @@ module UI {
      * Assumes that there is a 'current instance' available.
      */
     public startProxying = () => {
-      if (!this.user || !this.proxyServerInstance) {
+      if (!this.user || !this.focusedInstance) {
         console.error('Cannot start proxying without a current instance.');
         return;
       }
@@ -298,11 +299,11 @@ module UI {
         // model. Do this soon.
         network: 'google',
         userId: this.user.userId,
-        instanceId: this.proxyServerInstance.instanceId
+        instanceId: this.focusedInstance.instanceId
       };
       this.core.start(path).then(() => {
         this.currentProxyServer = {
-          instance: this.proxyServerInstance,
+          instance: this.focusedInstance,
           user: this.user
         };
         this._setProxying(true);
@@ -315,7 +316,7 @@ module UI {
      * COMMAND to the core.
      */
     public stopProxyingUserInitiated = () => {
-      if (!this.proxyServerInstance) {
+      if (!this.focusedInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
@@ -389,17 +390,11 @@ module UI {
      * Handler for when the user clicks on the entry in the roster for a User.
      * Sets the UI's 'current' User and Instance, if it exists.
      */
-    public focusOnUser = (user:UI.User) => {
+    public focusOnUser = (user :UI.User, instance :UI.Instance) => {
       this.view = View.USER;
       console.log('focusing on user ' + user);
       this.user = user;
-      // For now, default to the first instance that the user has.
-      // TODO: Support multiple instances in the UI.
-      if (user.instances.length > 0) {
-        this.proxyServerInstance = user.instances[0];
-      } else {
-        this.proxyServerInstance = null;
-      }
+      this.focusedInstance = instance;
     }
 
     /*
@@ -441,7 +436,9 @@ module UI {
     // TODO: Make these functional and write specs.
     public loggedIn = () => {
       for (var networkId in model.networks) {
-        if (model.networks[networkId].online) {
+        if (model.networks[networkId].online &&
+          // TODO(dborkan): figure out how to reference Social.MANUAL_NETWORK_ID here
+            networkId !== "manual") {
           return true;
         }
       }
@@ -477,13 +474,32 @@ module UI {
         model.roster.push(user);
       }
       user.update(profile);
-      user.refreshStatus(payload.clients);
+
+      // Update instances
+      // TODO: write tests for these.
       user.instances = payload.instances;
-      // Update the 'current instance' of UI if this is the correct user.
-      // TODO: change this for multi instance support
-      if (this.user === user) {
-        this.proxyServerInstance = user.instances[0];
+      if (user == this.user) {
+        // Update focusedInstance
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (user.instances[i].instanceId == this.focusedInstance.instanceId) {
+            this.focusedInstance = user.instances[i];
+            break;
+          }
+        }
       }
+      if (this.currentProxyServer && user == this.currentProxyServer.user) {
+        // Update currentProxyServer.instance.
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (user.instances[i].instanceId == this.currentProxyServer.instance.instanceId) {
+            this.currentProxyServer.instance = user.instances[i];
+            break;
+          }
+        }
+      }
+
+      user.refreshStatus(payload.clients);  // TODO: this may need changing
+
+
 
       // Update givesMe and usesMe fields based on whether any instance
       // has these permissions.
@@ -593,8 +609,8 @@ module UI {
     public showGetOrGive = (instance :UI.Instance) : string => {
       if (!instance) {
         // This occurs because angular still evaluates expressions using
-        // ui.proxyServerInstance even when those DOM elements are hidden
-        // and ui.proxyServerInstance is null.
+        // ui.focusedInstance even when those DOM elements are hidden
+        // and ui.focusedInstance is null.
         return 'GET';
       } else if (this.mapInstanceIdToGetOrGive_[instance.instanceId]) {
         // User explicitly toggled get/give

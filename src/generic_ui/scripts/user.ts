@@ -38,7 +38,7 @@ module UI {
     /**
      * Update user details.
      */
-    public update = (profile:freedom.Social.UserProfile) => {
+    public update = (profile :freedom.Social.UserProfile) => {
       if (this.userId !== profile.userId) {
         console.error('Unexpected userId: ' + profile.userId);
       }

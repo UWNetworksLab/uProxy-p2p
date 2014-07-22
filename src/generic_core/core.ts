@@ -40,6 +40,23 @@ rtcToNetServer.emit('start');
 // Keep track of the current remote proxy, if they exist.
 var proxy :Core.RemoteInstance = null;
 
+// TODO(dborkan): initialize?
+interface descriptionObj {
+  description :string;
+};
+var description :string = '';
+// TODO(dborkan): storage.load seems to work immediately after storage.save, but not after
+// app reload or restarting my computer.
+function loadDescriptionFromStorage() {
+  storage.load<descriptionObj>('description').then((loadedDescriptionObj :descriptionObj) => {
+    console.log('loaded description: (' + loadedDescriptionObj.description + ')');
+    description = loadedDescriptionObj.description;
+  }).catch((e) => {
+    console.log('no description loaded', e);
+  });
+}
+loadDescriptionFromStorage();
+
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
 
@@ -93,7 +110,7 @@ class UIConnector implements uProxy.UIAPI {
     for (networkName in Social.networks) {
       Social.networks[networkName].notifyUI();
     }
-    this.update(uProxy.Update.ALL);
+    this.update(uProxy.Update.ALL, {'description': description});
   }
 
   public isProxying = () : boolean => {
@@ -232,15 +249,15 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (description:string) => {
-    for (var network in Social.networks) {
-      var myself = Social.networks[network].getLocalInstance();
-      if (!myself) {
-        console.error('No LocalInstance to set description for!');
-        return;
-      }
-      myself.updateDescription(description);
-    }
+  public updateDescription = (newDescription:string) => {
+    // TODO: Send the new description to peers.  Right now we assume that users
+    // can't update the description after they are signed in.
+    var newDescriptionObj :descriptionObj = {
+      description: newDescription
+    };
+    storage.save<descriptionObj>('description', newDescriptionObj);
+    description = newDescription;
+    loadDescriptionFromStorage();
   }
 
   /**

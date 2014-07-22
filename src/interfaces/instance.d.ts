@@ -54,7 +54,7 @@ interface LocalPeerId {
 interface Instance {
   instanceId  :string;
   keyHash     :string;
-  description ?:string;
+  description ?:string;  // TODO(dborkan): can this be removed?  Only needed for RemoteInstance.
   consent     ?:ConsentState;
   status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications

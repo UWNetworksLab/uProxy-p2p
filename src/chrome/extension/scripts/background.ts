@@ -32,7 +32,8 @@ var proxyConfig = new BrowserProxyConfig();
 var model :UI.Model = {
   networks: {},
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: []
+  roster: [],
+  description: ''
 };
 
 // TODO(): remove this if there's no use for it.

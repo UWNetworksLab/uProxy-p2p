@@ -24,7 +24,7 @@ describe('UI.User', () => {
       url: 'fake.url',
       imageData: 'fakeimage.uri',
       timestamp: Date.now()
-    })
+    });
     expect(user.name).toEqual('fakename');
     expect(user.url).toEqual('fake.url');
     expect(user.imageData).toEqual('fakeimage.uri');

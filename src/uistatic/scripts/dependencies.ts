@@ -12,7 +12,8 @@ declare var angular:ng.IAngularStatic;
 var model :UI.Model = {
   networks: {},
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: []
+  roster: [],
+  description: 'My Computer'
 };
 
 class MockNotifications implements INotifications {
