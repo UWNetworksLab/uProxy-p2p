@@ -435,7 +435,7 @@ module UI {
     public loggedIn = () => {
       for (var networkId in model.networks) {
         if (model.networks[networkId].online &&
-          // TODO(dborkan): figure out how to reference Social.MANUAL_NETWORK_ID here
+            // TODO: figure out how to reference Social.MANUAL_NETWORK_ID here
             networkId !== "manual") {
           return true;
         }

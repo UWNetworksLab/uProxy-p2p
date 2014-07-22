@@ -458,13 +458,10 @@ module Core {
     }
 
     public monitor = () : void => {
-      console.log('in monitor');  // TODO: remove
       for (var clientId in this.clientIdToStatusMap) {
-        console.log('in monitor, clientId: ' + clientId);  // TODO: remove
         var isMissingInstance =
             (this.clientIdToStatusMap[clientId] == UProxyClient.Status.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
-        console.log('in monitor, isMissingInstance: ' + isMissingInstance);  // TODO: remove
         if (isMissingInstance) {
           console.warn('monitor found no instance for clientId ' + clientId);
           this.requestInstance_(clientId);

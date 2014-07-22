@@ -72,11 +72,7 @@ describe('Core.User', () => {
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
-    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
-      'fakeclient'
-    ]);
   });
 
   it('does not re-send instance messages to the same client', () => {
@@ -89,10 +85,6 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
-    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
-      'fakeclient'
-    ]);
     expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
@@ -105,10 +97,8 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
-    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
-      'fakeclient',
-    ]);
+    expect(user.clientIdToStatusMap['fakeclient-not-uproxy']).toEqual(
+        UProxyClient.Status.ONLINE_WITH_OTHER_APP);
     expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
@@ -120,7 +110,6 @@ describe('Core.User', () => {
       timestamp: 12346
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(0);
     expect(user.clientIdToStatusMap['fakeclient']).not.toBeDefined();
   });
 
@@ -133,11 +122,7 @@ describe('Core.User', () => {
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
-    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
-      'fakeclient'
-    ]);
   });
 
   it('logs an error when receiving a ClientState with wrong userId', () => {
@@ -309,7 +294,6 @@ describe('Core.User', () => {
         () => {
       user['removeClient_']('fakeclient');
       user['removeClient_']('fakeclient2');
-      expect(Object.keys(user.clientIdToStatusMap).length).toEqual(0);
       expect(user.clientIdToStatusMap['fakeclient']).not.toBeDefined();
       reconnectPromise = user.send('fakeinstance', msg).then((clientId) => {
         expect(clientId).toEqual('newclient');
