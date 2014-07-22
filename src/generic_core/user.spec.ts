@@ -34,7 +34,7 @@ describe('Core.User', () => {
   });
 
   it('created with an empty client and instance tables', () => {
-    expect(user.clients).toEqual({});
+    expect(user.clientIdToStatusMap).toEqual({});
     expect(user['instances_']).toEqual({});
     expect(user['clientToInstanceMap_']).toEqual({});
     expect(user['instanceToClientMap_']).toEqual({});
@@ -72,16 +72,16 @@ describe('Core.User', () => {
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(Object.keys(user.clients).length).toEqual(1);
-    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
-    expect(Object.keys(user.clients)).toEqual([
+    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
       'fakeclient'
     ]);
   });
 
   it('does not re-send instance messages to the same client', () => {
     network.sendInstanceHandshake.calls.reset();
-    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
     var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
@@ -89,8 +89,8 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clients).length).toEqual(1);
-    expect(Object.keys(user.clients)).toEqual([
+    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
+    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
       'fakeclient'
     ]);
     expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
@@ -105,8 +105,8 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clients).length).toEqual(1);
-    expect(Object.keys(user.clients)).toEqual([
+    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
+    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
       'fakeclient',
     ]);
     expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
@@ -120,8 +120,8 @@ describe('Core.User', () => {
       timestamp: 12346
     };
     user.handleClient(clientState);
-    expect(Object.keys(user.clients).length).toEqual(0);
-    expect(user.clients['fakeclient']).not.toBeDefined();
+    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(0);
+    expect(user.clientIdToStatusMap['fakeclient']).not.toBeDefined();
   });
 
   it('re-adds an re-sends instance message to new ONLINE clients', () => {
@@ -133,9 +133,9 @@ describe('Core.User', () => {
     };
     user.handleClient(clientState);
     expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(Object.keys(user.clients).length).toEqual(1);
-    expect(user.clients['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
-    expect(Object.keys(user.clients)).toEqual([
+    expect(Object.keys(user.clientIdToStatusMap).length).toEqual(1);
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    expect(Object.keys(user.clientIdToStatusMap)).toEqual([
       'fakeclient'
     ]);
   });
@@ -309,8 +309,8 @@ describe('Core.User', () => {
         () => {
       user['removeClient_']('fakeclient');
       user['removeClient_']('fakeclient2');
-      expect(Object.keys(user.clients).length).toEqual(0);
-      expect(user.clients['fakeclient']).not.toBeDefined();
+      expect(Object.keys(user.clientIdToStatusMap).length).toEqual(0);
+      expect(user.clientIdToStatusMap['fakeclient']).not.toBeDefined();
       reconnectPromise = user.send('fakeinstance', msg).then((clientId) => {
         expect(clientId).toEqual('newclient');
         reconnected = true;
@@ -358,7 +358,7 @@ describe('Core.User', () => {
         status: UProxyClient.Status.OFFLINE,
         timestamp: 12345
       });
-      expect(user.clients['newclient']).not.toBeDefined();
+      expect(user.clientIdToStatusMap['newclient']).not.toBeDefined();
       for (var i = 0 ; i < n ; ++i) {
         promises.push(user.send('fakeinstance', <uProxy.Message>{
           type: uProxy.MessageType.INSTANCE,

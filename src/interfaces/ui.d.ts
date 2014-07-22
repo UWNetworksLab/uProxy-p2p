@@ -9,7 +9,6 @@
 /// <reference path='../generic_ui/scripts/ui.ts' />
 /// <reference path='instance.d.ts' />
 /// <reference path='lib/angular.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 declare module UI {
 
@@ -19,17 +18,17 @@ declare module UI {
     online  :boolean;
   }
 
-  export interface UserMessage {
-    network   :string;
-    user      :freedom.Social.UserProfile;
-    clients   :UProxyClient.Status[];
-    instances :any[];
+  export interface UserProfileMessage {
+    userId       :string;
+    name         ?:string;
+    imageData    ?:string; // Image URI (e.g. data:image/png;base64,adkwe329...)
+    isOnline     :boolean;
   }
 
-  export interface ClientMessage {
-    userId   :string;
-    clientId :string;
-    status   :UProxyClient.Status;
+  export interface UserMessage {
+    network   :string;
+    user      :UserProfileMessage;
+    instances :any[];
   }
 
   /**
@@ -47,12 +46,14 @@ declare module UI {
    * UI-specific Instance.
    * TODO: Maybe turn this into an actual class. We'll see.
    */
+  // TODO: can this be combined with RemoteInstanceForUiState?
   export interface Instance {
     instanceId           :string;
     description          :string;
     consent              :ConsentState;
     access               :AccessState;
     isCurrentProxyClient :boolean;
+    isOnline             :boolean;
   }
 
   /**

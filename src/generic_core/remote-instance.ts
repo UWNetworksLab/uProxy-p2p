@@ -414,6 +414,7 @@ module Core {
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
+        isOnline:             this.user.isInstanceOnline(this.instanceId)
       });
     }
 
@@ -459,6 +460,7 @@ module Core {
     keyHash              :string;
     consent              :ConsentState;
     access               :AccessState;
+    isOnline             :boolean;
   }
 
   // TODO: Implement obfuscation.

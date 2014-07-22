@@ -37,15 +37,14 @@ function generateFakeUserMessage() : UI.UserMessage {
     user: {
       userId: 'alice',
       name: 'Alice uProxy',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      isOnline: true
     },
-    clients: [
-      UProxyClient.Status.ONLINE
-    ],
     instances: [
       {
         instanceId: 'alice-instance-01',
         description: 'fake instance for alice',
+        isOnline: true,
         consent: {
           asClient: Consent.ClientState.NONE,
           asProxy:  Consent.ProxyState.NONE

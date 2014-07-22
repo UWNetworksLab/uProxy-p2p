@@ -174,7 +174,7 @@
             -->
             <!-- TODO(dborkan): multi-instance support!  model.roster needs to be instances, not users -->
             <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by contact.userId"
-                ng-class="{offline:!contact.online}">
+                ng-class="{offline:!contact.isOnline}">
 
               <div ng-switch="contact.canUProxy">
                 <div ng-switch-when="true">
@@ -189,15 +189,21 @@
                     <span class="c-icon contactRightArrow">&#62;</span>
                   </span>
                   
-                  <div ng-repeat="instance in contact.instances"
-                       ng-click="ui.focusOnUser(contact, instance)">
+                  <div ng-repeat="instance in contact.instances | orderBy: '-isOnline'">
                     <!-- TODO(dborkan) multiple instances! -->
-                    <div>{{instance.description}}</div>
+                    <div ng-if="instance.isOnline"
+                        ng-click="ui.focusOnUser(contact, instance)"
+                        class="instance-description online">
+                      {{instance.description}}
+                    </div>
+                    <div ng-if="!instance.isOnline" class="instance-description offline">
+                      {{instance.description}} (offline)
+                    </div>
                   </div>
                 </div>
                 <div ng-switch-default>
                   <span class="c-name">{{contact.name}}</span>
-                  <div>Not running uProxy</div>
+                  <div class="instance-description offline">Not running uProxy</div>
                   <img class="contact-image" ng-src='{{contact.imageData}}'>
                 </div>
               </div>

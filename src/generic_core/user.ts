@@ -48,7 +48,7 @@ module Core {
   export class User implements BaseUser, Core.Persistent {
 
     public name :string;
-    public clients :{ [clientId :string] :UProxyClient.Status };
+    public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom.Social.UserProfile;
 
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
@@ -79,7 +79,7 @@ module Core {
         userId: this.userId,
         timestamp: Date.now()
       }
-      this.clients = {};
+      this.clientIdToStatusMap = {};
       this.instances_ = {};
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
@@ -172,32 +172,35 @@ module Core {
         return;
       }
       this.log('received client' + JSON.stringify(client));
-      if (client.clientId in this.clients &&
-          this.clients[client.clientId] == client.status) {
+      if (client.clientId in this.clientIdToStatusMap &&
+          this.clientIdToStatusMap[client.clientId] == client.status) {
         // Client is already in mapping and its status has not changed, skip.
         // This is done to skip onClientState events we get for each message
         // when only the timestamp has been updated.
+        console.log('Client already in memory and is unchanged');
         return;
       }
 
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
         case UProxyClient.Status.ONLINE:
-          if (!(client.clientId in this.clients) ||
-              this.clients[client.clientId] != UProxyClient.Status.ONLINE) {
+          if (!(client.clientId in this.clientIdToStatusMap) ||
+              this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.network.sendInstanceHandshake(client.clientId);
           }
-          this.clients[client.clientId] = client.status;
+          this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         case UProxyClient.Status.OFFLINE:
           // Just delete OFFLINE clients, because they will never be ONLINE
-          // again as the same clientID.
+          // again as the same clientID (removes clientId from clientIdToStatusMap
+          // and related data structures).
           this.removeClient_(client.clientId);
           break;
         case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
           // TODO: Figure out potential invite or chat-mechanism for non-uProxy
           // clients.
+          this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         default:
           console.warn('Received client ' + client.clientId +
@@ -214,7 +217,7 @@ module Core {
      * Emits an error for a message from a client which doesn't exist.
      */
     public handleMessage = (clientId :string, msg :uProxy.Message) => {
-      if (!(clientId in this.clients)) {
+      if (!(clientId in this.clientIdToStatusMap)) {
         console.error(this.userId +
             ' received message for non-existing client: ' + clientId);
         return;
@@ -273,7 +276,7 @@ module Core {
      */
     private syncInstance_ = (clientId :string, instance :InstanceHandshake)
         : void => {
-      if (UProxyClient.Status.ONLINE !== this.clients[clientId]) {
+      if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
         return;
@@ -359,7 +362,7 @@ module Core {
      * mapping if it exists.
      */
     private removeClient_ = (clientId:string) => {
-      delete this.clients[clientId];
+      delete this.clientIdToStatusMap[clientId];
       var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
         delete this.instanceToClientMap_[instanceId];
@@ -394,8 +397,12 @@ module Core {
       // sometimes.
       ui.syncUser(<UI.UserMessage>{
         network: this.network.name,
-        user: this.profile,
-        clients: valuesOf(this.clients),  // These are actually just Statuses.
+        user: {
+          userId: this.profile.userId,
+          name: this.profile.name,
+          imageData: this.profile.imageData,
+          isOnline: this.isOnline()
+        },
         instances: instanceStatesForUi
       })
       this.log('Sent myself to UI. \n' +
@@ -451,10 +458,13 @@ module Core {
     }
 
     public monitor = () : void => {
-      for (var clientId in this.clients) {
+      console.log('in monitor');  // TODO: remove
+      for (var clientId in this.clientIdToStatusMap) {
+        console.log('in monitor, clientId: ' + clientId);  // TODO: remove
         var isMissingInstance =
-            (this.clients[clientId] == UProxyClient.Status.ONLINE) &&
+            (this.clientIdToStatusMap[clientId] == UProxyClient.Status.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
+        console.log('in monitor, isMissingInstance: ' + isMissingInstance);  // TODO: remove
         if (isMissingInstance) {
           console.warn('monitor found no instance for clientId ' + clientId);
           this.requestInstance_(clientId);
@@ -469,6 +479,30 @@ module Core {
         data: {}
       };
       this.network.send(clientId, instanceRequestMsg);
+    }
+
+    public isOnline = () : boolean => {
+      for (var clientId in this.clientIdToStatusMap) {
+        var status = this.clientIdToStatusMap[clientId];
+        if (status == UProxyClient.Status.ONLINE ||
+            status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public isInstanceOnline = (instanceId :string) : boolean => {
+      var clientId = this.instanceToClientMap_[instanceId];
+      if (!clientId) {
+        return false;
+      }
+      var status = this.clientIdToStatusMap[clientId];
+      if (status == UProxyClient.Status.ONLINE ||
+          status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        return true;
+      }
+      return false;
     }
 
   }  // class User

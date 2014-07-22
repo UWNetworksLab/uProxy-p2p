@@ -40,11 +40,10 @@ rtcToNetServer.emit('start');
 // Keep track of the current remote proxy, if they exist.
 var proxy :Core.RemoteInstance = null;
 
-// TODO(dborkan): initialize?
 interface descriptionObj {
   description :string;
 };
-var description :string = '';
+var description :string = 'My computer';
 // TODO(dborkan): storage.load seems to work immediately after storage.save, but not after
 // app reload or restarting my computer.
 function loadDescriptionFromStorage() {

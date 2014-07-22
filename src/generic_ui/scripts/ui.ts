@@ -175,7 +175,7 @@ module UI {
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
-        var profile :freedom.Social.UserProfile = payload.user;
+        var profile :UI.UserProfileMessage = payload.user;
         this.myPic = profile.imageData || DEFAULT_USER_IMG;
         this.myName = profile.name;
       });
@@ -368,7 +368,7 @@ module UI {
         var searchText = this.search,
             compareString = user.name.toLowerCase();
         // First, compare filters.
-        if ((this.filters.online        && !user.online)    ||
+        if ((this.filters.online        && !user.isOnline)    ||
             (this.filters.uproxy        && !user.canUProxy) ||
             (this.filters.myAccess      && !user.givesMe)   ||
             (this.filters.friendsAccess && !user.usesMe)) {
@@ -497,9 +497,9 @@ module UI {
         }
       }
 
-      user.refreshStatus(payload.clients);  // TODO: this may need changing
-
-
+      user.canUProxy = user.instances.some((instance) => {
+        return instance.isOnline;
+      });
 
       // Update givesMe and usesMe fields based on whether any instance
       // has these permissions.
@@ -524,7 +524,7 @@ module UI {
     public hasOnlineUProxyBuddies = () => {
       for (var i = 0; i < model.roster.length; ++i) {
         var user :UI.User = model.roster[i];
-        if (user.instances.length > 0 && user.online) {
+        if (user.instances.length > 0 && user.isOnline) {
           return true;
         }
       }
