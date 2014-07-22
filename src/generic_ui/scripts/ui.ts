@@ -17,6 +17,8 @@ module UI {
 
   var REFRESH_TIMEOUT :number = 1000;  // ms.
 
+  export var DEFAULT_USER_IMG = 'icons/contact-default.png';
+
   /**
    * Enumeration of mutually-exclusive view states.
    */
@@ -173,7 +175,7 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :freedom.Social.UserProfile = payload.user;
-        this.myPic = profile.imageData;
+        this.myPic = profile.imageData || DEFAULT_USER_IMG;
         this.myName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
@@ -198,6 +200,13 @@ module UI {
       core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
         this.localFingerprint = payload;
         console.log('Received local fingerprint: ' + this.localFingerprint);
+      });
+
+      core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
+                    (message :uProxy.Message) => {
+        console.log('Manual network outbound message: ' +
+                    JSON.stringify(message));
+        // TODO: Display the message in the 'manual network' UI.
       });
 
       console.log('Created the UserInterface');
@@ -428,7 +437,7 @@ module UI {
       this.refreshDOM();
     }
 
-    // Determine whether UProxy is connected to some network.
+    // Determine whether uProxy is connected to some network.
     // TODO: Make these functional and write specs.
     public loggedIn = () => {
       for (var networkId in model.networks) {
@@ -525,7 +534,7 @@ module UI {
 
     public isCurrentProxyClient = (user: User) : boolean => {
       for (var i = 0; i < user.instances.length; ++i) {
-        if (user.instances[i].isCurrentProxyClient) {
+        if (user.instances[i].access.asClient) {
           return true;
         }
       }

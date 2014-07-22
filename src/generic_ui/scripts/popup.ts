@@ -17,7 +17,7 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
 
     // TODO: Move filters into a directive.
     $scope.filterTips = {
-      'uproxy': 'Only show contacts with UProxy installed.',
+      'uproxy': 'Only show contacts with uProxy installed.',
       'myAccess': 'Show contacts who provide me access.',
       'friendsAccess': 'Show contacts who use me for access.',
       'online': 'Only show online contacts.',
@@ -50,4 +50,5 @@ angular.module('UProxyExtension-popup', ['UProxyExtension'])
       ui.logout(network);
     };
 
+    $scope.MANUAL_NETWORK_ID = Social.MANUAL_NETWORK_ID;
   }]);

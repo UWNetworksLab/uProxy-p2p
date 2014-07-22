@@ -7,6 +7,7 @@
  * requirement and ensures consistency.
  */
 /// <reference path='social.ts' />
+/// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
 
 // declare var storage :Core.Storage;
@@ -51,12 +52,37 @@ describe('Core', () => {
         instanceId: 'instance-alice'
       },
       action: Consent.UserAction.REQUEST
-    }
+    };
     core.modifyConsent(command);
     expect(Social.getNetwork).toHaveBeenCalledWith('fake-network');
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
+  });
+
+  it('relays incoming manual network messages to the manual network', () => {
+    var manualNetwork :Social.ManualNetwork =
+        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID);
+
+    spyOn(Social, 'getNetwork').and.returnValue(manualNetwork);
+    spyOn(manualNetwork, 'receive');
+
+    var senderClientId = 'dummy_sender';
+    var message :uProxy.Message = {
+      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      data: {
+        elephants: 'have trunks',
+        birds: 'do not'
+      }
+    };
+    var command :uProxy.HandleManualNetworkInboundMessageCommand = {
+      senderClientId: senderClientId,
+      message: message
+    };
+    core.handleManualNetworkInboundMessage(command);
+
+    expect(Social.getNetwork).toHaveBeenCalledWith(Social.MANUAL_NETWORK_ID);
+    expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
   });
 
   it('login fails for invalid network', (done) => {

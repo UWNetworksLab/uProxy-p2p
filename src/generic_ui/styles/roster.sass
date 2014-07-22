@@ -1,0 +1,313 @@
+// Styling for the roster view.
+// Contains a filter/search/header on top, followed by a 'buddy list' sorted
+// according to the current relevant context, taking up most of the remaining
+// screen real-estate.
+// TODO: Subject to change with the redesign.
+
+// Goes at the top of the popup roster view.
+#roster-header
+  position: relative
+  z-index: 50
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+    z-index: -100
+
+// Contains a bunch of icons which modify the view / toggle filters.
+#actions
+  display: block
+  position: relative
+  z-index: 30
+  width: 100%
+  background-color: #fafafa
+  height: 30px
+  text-align: left
+  overflow: hidden
+  padding: 0
+  box-shadow: 0 1px 2px #aaa
+  @include smooth
+  &:hover
+    box-shadow: 0 1px 6px #aaa
+
+#search-contacts
+  display: block
+  position: relative
+  z-index: 20
+  width: 370px
+  height: 34px
+  margin: 0
+  // border: 1px solid #bbb
+  // outline: none
+  // color: #333
+  // @include smooth
+  &:hover
+    box-shadow: 0 1px 2px #ddd inset
+  &:focus
+    outline: none
+    box-shadow: 0 1px 2px #ccc
+  &.ng-hide
+    @include un-ng-hide
+    margin-top: -34px
+    z-index: -1
+    opacity: 0
+
+// The search button toggles the actual textfield.
+#search-btn
+  position: relative
+  z-index: 40
+  width: 50px
+  height: 16px
+  padding: 8px
+  border: none
+  background: transparent url('../icons/search.png') no-repeat center
+  background-size: 16px
+  cursor: pointer
+  opacity: 0.3
+  @include smooth
+  &:hover, &:focus
+    opacity: 0.1
+    outline: none
+  &.on
+    opacity: 1.0
+    &:active, &:focus
+      outline: none
+      opacity: 0.65
+    &:hover
+      opacity: 0.6
+
+.filter
+  margin: 0
+  padding: 8px
+  height: 16px
+  width: 40px
+  border: none
+  line-height: 0
+  background: transparent no-repeat center
+  background-size: 16px !important
+  font-size: $fontSize * 1.5
+  font-weight: 900
+  color: #222
+  opacity: 0.2
+  cursor: pointer
+  @include smooth
+  &:active, &:focus
+    outline: none
+    opacity: 0.15
+  &:hover
+    opacity: 0.1
+  // When the filter is on, the opacity changes are different.
+  &.on
+    opacity: 1.0
+    &:active, &:focus
+      outline: none
+      opacity: 0.65
+    &:hover
+      opacity: 0.6
+
+  &#my-access
+    background-image: url('../icons/arrow-up.png')
+
+  &#friends-access
+    background-image: url('../icons/arrow-down.png')
+
+  &#uproxy-filter
+    background-image: url('../icons/uproxy-19.png')
+
+  &#online-filter
+    background-image: url('../icons/online.png')
+
+// --------------------------- Roster & Contacts -------------------------------
+#roster
+  width: 100%
+  outline: none
+  @include smooth
+
+// Appears to tell the user about the state (like being offline)
+#roster-text
+  position: absolute
+  text-align: center
+  top: 100px
+  width: 100%
+  padding: 10%
+  z-index: 1
+  color: #444
+  text-shadow: 0 2px 2px #ccc
+  pointer-events: none
+
+#roster-frame
+  position: relative
+  min-height: 486px
+  white-space: nowrap
+  overflow-y: auto
+  overflow-x: hidden
+  border-top: 1px solid #eee
+  @include smooth
+  &.ng-hide
+    @include un-ng-hide
+    left: -400px
+
+.no-contacts-found
+  position: absolute
+  background-color: #fafafa
+  width: 100%
+  min-height: 100%
+  margin: 0
+  padding: 0.5em 0.5em
+  @include smooth
+
+.contacts
+  position: absolute
+  background-color: #fafafa
+  width: 100%
+  min-height: 100%
+  margin: 0
+  padding: 0
+  @include smooth
+
+.contacts li
+  position: relative
+  z-index: 0
+  height: 65px
+  cursor: default
+  padding: 6px 75px
+  white-space: nowrap
+  overflow: hidden
+  border: 1px solid transparent
+  border-left: none
+  border-right: none
+  color: #222
+  font-weight: 300
+  @include smooth
+
+  &.offline img
+    -webkit-filter: grayscale(100%)
+    opacity: 0.5
+
+  .c-name
+    color: #3333dd
+    font-size: 18px
+
+  &.offline .c-name
+    color: #999999
+
+  &.offline .contactRightArrow
+    color: #999999
+
+  &:hover, &:focus
+    background-color: #fff
+    border-color: #ddd
+    color: #000
+    z-index: 50
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
+    outline: none
+
+img.contact-image
+  position: absolute
+  left: 1px
+  top: 1px
+  height: 65px
+  width: 65px
+
+.c-icons
+  position: absolute
+  right: 0px
+  color: #555
+  font-size: $fontSize * 0.8
+  font-weight: 900
+  top: 50%
+  margin-top: -9.5px  // half of .c-icon height
+
+.c-icon
+  display: inline-block
+  height: 19px
+  width: 19px
+  background-size: 19px
+  margin-right: 5px
+  @include smooth
+  &.canUProxy
+    background-image: url('../icons/uproxy-19.png')
+  &.givesMe
+    background-image: url('../icons/arrow-up.png')
+  &.usesMe
+    background-image: url('../icons/arrow-down.png')
+    &.active
+      background-color: #fff
+      background-image: url('../icons/arrow-down-animate.gif')
+      border: 1px dotted #ddd
+      border-left: none
+      border-right: none
+  &.grey
+    opacity: 0.3
+  &:hover
+    opacity: 0.9
+  &.contactRightArrow
+    color: #999999
+    font-size: 22px
+
+img.c-icon
+  vertical-align: middle
+  margin-top: -4px
+  &:hover
+    opacity: 0.5
+
+// Container for a user's profile picture and such
+// TODO: rename to user- prefix
+.contact-info
+  position: absolute
+  text-align: center
+  text-shadow: 0px 1px 1px #ccc
+  width: 100%
+  z-index: 2
+  @include smooth
+  & img.contact-image
+    position: relative
+    border-color: #ddd
+    background-size: contain
+    box-shadow: 1px 2px 5px #ccc
+  &.their-info
+    img.contact-image
+      height: 110px
+      width: 110px
+    .contact-name
+      width: 110px
+  &.my-info
+    img.contact-image
+      height: 75px
+      width: 75px
+    .contact-name
+      width: 75px
+  & .details
+    position: absolute
+    top: 0
+    width: 100%
+    height: 100%
+    cursor: default
+    text-align: center
+    @include smooth-slow
+    & .picCover
+      display: inline-block
+      background-color: #fff
+      width: 116px
+      height: 120px
+      opacity: 0.95
+    & .description
+      position: absolute
+      top: 0
+      width: 100%
+  .contact-img-wrapper
+    position: relative
+  .contact-name-bar
+    position: absolute
+    left: 0
+    right: 0
+    bottom: 0
+    z-index: 2
+    font-size: 16px
+  .contact-name
+    background-color: rgba(0, 0, 0, 0.5)
+    color: white
+    text-shadow: black 0px 5px 5px
+    word-wrap: break-word
+    display: inline-block
+    margin-left: 2px  // To compensate for image border.

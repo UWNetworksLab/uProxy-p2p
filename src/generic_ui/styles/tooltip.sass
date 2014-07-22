@@ -1,0 +1,45 @@
+// A tip is a helpful bit of text which shows up when you have focus upon a
+// particular input element.
+.tip
+  display: inline-block
+  margin: 0
+  padding: 6px 8px
+  max-width: 270px
+  background-color: #fcfcfc
+  font-size: $fontSize * 0.9
+  color: #444
+  border: 1px solid #eee
+  text-align: left
+  cursor: default
+  opacity: 0.9
+  @include smooth
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+
+// For centering the tooltip.
+.tool
+  position: absolute
+  display: block
+  width: 100%
+  text-align: center
+
+.app-missing-warning
+  padding: 6px 8px
+  color: #900
+
+#filterTooltip
+  position: fixed
+  z-index: 50
+  top: 30px
+  opacity: 0.85
+  font-size: $fontSize * 0.9
+  pointer-events: none
+  @include smooth
+  &.ng-hide
+    @include un-ng-hide
+    opacity: 0
+
+#filterTooltip .tip
+  background-color: #000
+  color: #ccc

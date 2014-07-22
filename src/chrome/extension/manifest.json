@@ -19,6 +19,7 @@
       "scripts/notify.js",
       "scripts/proxy-config.js",
       "scripts/core_connector.js",
+      "scripts/chrome_connector.js",
       "scripts/background.js"
     ]
   },

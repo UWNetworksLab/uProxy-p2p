@@ -53,7 +53,7 @@ class ChromeUIConnector {
    * Receive a message from the extension.
    * This usually installs freedom handlers.
    */
-  private onExtMsg_ = (msg:ChromeGlue.Payload) => {
+  private onExtMsg_ = (msg:uProxy.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core. These are uProxy.Commands.

@@ -8,18 +8,20 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
-/// <reference path='core_connector.ts' />
+/// <reference path='chrome_connector.ts' />
 /// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
 /// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
+/// <reference path='../../../generic_ui/scripts/core_connector.ts' />
 
 /// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
 
 var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-var core :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
+var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
+var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 
 // TODO: This should be *actually* typed.
 // Proxy Configuration.
@@ -49,8 +51,10 @@ chrome.runtime.onSuspend.addListener(() => {
  */
 function initUI() : UI.UserInterface {
 
-  core = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  core.connect();
+  chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
+  chromeConnector.connect();
+
+  core = new CoreConnector(chromeConnector);
   var browserAction = new ChromeBrowserAction();
 
   return new UI.UserInterface(core, browserAction);

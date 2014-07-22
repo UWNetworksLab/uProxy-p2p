@@ -1,8 +1,11 @@
 # uProxy
 
-[![Build Status](https://magnum.travis-ci.com/uProxy/uProxy.svg?token=HiP4RTme8LSvyrP9kNJq&branch=master)](https://magnum.travis-ci.com/uProxy/uProxy)
-
 [uProxy](uproxy.org) is a browser extension that lets users share their internet connection.
+
+## Build Status
+
+Dev: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=dev)](https://magnum.travis-ci.com/uProxy/uproxy)
+Master: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=master)](https://magnum.travis-ci.com/uProxy/uproxy)
 
 ## Tools
 
@@ -47,7 +50,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
 
-- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli
+- [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
 - [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
 

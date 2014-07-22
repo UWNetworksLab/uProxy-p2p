@@ -1,0 +1,143 @@
+// Styles for the detail view, which contains symbols & leements related to
+// consent management.
+
+#contact-header
+  position: fixed
+  z-index: 300
+  width: 100%
+  top: 0
+  padding-bottom: 4px
+  box-shadow: 0 1px 3px #eee
+  background-color: #fff
+  & h1
+    position: fixed
+    width: 100%
+    padding: 0 50px
+    text-align: center
+    top: 10px
+    pointer-events: none
+    white-space: nowrap
+    font-size: $fontSize * 1.1
+    font-weight: 100
+    letter-spacing: 1px
+
+// ------------------------------ Access View ----------------------------------
+// This is the view which slides in from the right, when you click on a
+// roster entry.
+#access
+  display: inline-block
+  position: absolute
+  text-align: center
+  width: 100%
+  height: 100%
+  padding-top: 40px
+  top: 0
+  left: 0
+  @include smooth
+  &.ng-hide
+    display: inline-block !important
+    opacity: 0
+    left: 400px
+
+// Typically displayed when the contact does not have uproxy installed
+.access-note
+  position: absolute
+  top: 270px
+  width: 100%
+  text-align: center
+  cursor: default
+
+// Server should always be at the top, so get mode has You at the bottom
+// while give mode has You at the top.
+.movable-proxy-controls
+  &.get
+    .their-info
+      top: 200px
+    .consent-button-wrapper
+      top: 310px
+    .my-info
+      top: 405px
+  &.give
+    .my-info
+      top: 200px
+    .consent-button-wrapper
+      top: 275px
+    .their-info
+      top: 375px
+
+// Contains the actual trust & action buttons
+.uproxy-box
+  background: no-repeat center
+  height: 85px
+  & .uproxytip
+    text-align: center
+    opacity: 0.7
+    cursor: default
+    margin-top: 0.5em
+  &.proxy
+    background-image: url('../icons/arrow-up.png')
+  &.client
+    background-image: url('../icons/arrow-down.png')
+    background-position-y: bottom
+    &.active
+      // TODO: this isn't working yet, we should make this work
+      background-image: url('../icons/arrow-down-animate.gif')
+
+.instance-actions
+  text-align: center
+  font-size: $fontSize * 0.8
+  position: absolute
+  width: 100%
+  & .btn
+    padding: 6px 12px
+    margin-top: 10px
+    text-shadow: 0 1px 1px #888
+    border-radius: 3px
+    font-size: 11px
+    opacity: 0.9
+    &.black
+      background-color: #222
+      color: #ccc
+      border-color: #666
+      &:hover, &:focus
+        color: #fff
+        background-color: #444
+
+.instance-actions .internet-text
+  color: white
+  position: absolute
+  top: 100px
+  margin-left: auto
+  margin-right: auto
+  width: 100%
+  font-size: 20px
+
+.client-details
+  position: relative
+  display: block
+  padding: 8px
+  margin: 8px
+  border: 1px solid #eee
+  font-size: $fontSize * 0.75
+  font-family: monospace
+  @include smooth
+  &:hover
+    border-color: #ddd
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
+
+.instance-details
+  position: relative
+  display: block
+  padding: 8px
+  margin: 2px
+  height: 53px
+  width: 82%
+  border: 1px solid #eee
+  font-size: $fontSize * 0.5
+  font-family: monospace
+  @include smooth
+  &:hover
+    border-color: #ddd
+    top: -2px
+    box-shadow: 0 2px 6px 1px #ddd
