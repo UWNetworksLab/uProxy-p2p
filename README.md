@@ -1,8 +1,11 @@
 # uProxy
 
-[![Build Status](https://magnum.travis-ci.com/uProxy/uProxy.svg?token=HiP4RTme8LSvyrP9kNJq&branch=master)](https://magnum.travis-ci.com/uProxy/uProxy)
-
 [uProxy](uproxy.org) is a browser extension that lets users share their internet connection.
+
+## Build Status
+
+Dev: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=dev)](https://magnum.travis-ci.com/uProxy/uproxy)
+Master: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=master)](https://magnum.travis-ci.com/uProxy/uproxy)
 
 ## Tools
 

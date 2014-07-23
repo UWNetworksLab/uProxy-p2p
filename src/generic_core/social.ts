@@ -634,6 +634,16 @@ module Social {
   // the uProxy UI for display to the user and "receives" a message from the
   // uProxy UI after the user has manually entered (copy/pasted) it into the
   // UI.
+  //
+  // This network is unusual in that there is no distinction among user IDs,
+  // client IDs, and instance IDs; they are all the same thing. The reason is
+  // as follows:
+  //   - The manual network has no concept of a single user having multiple
+  //     clients; the client ID uniquely identifies the user in the manual
+  //     network. Thus, a user ID is also a client ID.
+  //   - Similarly, there is no concept of a single user having multiple
+  //     instances. Each instance is independent and not correlated with other
+  //     instances in any way. Thus, an instance ID is also a user ID.
   export class ManualNetwork extends AbstractNetwork {
 
     constructor(public name :string) {
@@ -641,7 +651,7 @@ module Social {
 
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {
-        this.log('prepared Social.FreedomNetwork.');
+        this.log('prepared Social.ManualNetwork.');
         this.notifyUI();
       });
     }
@@ -705,9 +715,8 @@ module Social {
       this.log('Manual network received incoming message; senderClientId=[' +
                senderClientId + '], message=' + JSON.stringify(message));
 
-      // The manual network has no concept of a single user having multiple
-      // clients; the client ID uniquely identifies the user in the manual
-      // network. Thus, the sender client ID doubles as the sender user ID.
+      // Client ID and user ID are the same thing in the manual network, so the
+      // sender client ID doubles as the sender user ID.
       var senderUserId = senderClientId;
 
       if (!(senderUserId in this.roster)) {

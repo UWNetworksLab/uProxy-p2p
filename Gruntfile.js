@@ -64,12 +64,8 @@ module.exports = function(grunt) {
     //-------------------------------------------------------------------------
     'clean': ['build',
               'dist',
-              'tmp',
               '.sass-cache',
-              '.grunt',
-              'node_modules',
-              'test_output',
-              'third_party/lib'],
+              'test_output'],
 
     'connect': {
       uistatic: {
@@ -249,7 +245,7 @@ module.exports = function(grunt) {
       generic_ui: {
         files: [
           { expand: true, cwd: 'src/generic_ui',
-            src: ['**/*.sass'],
+            src: ['**/main.sass'],
             dest: 'build/generic_ui/',
             ext: '.css'
           }]

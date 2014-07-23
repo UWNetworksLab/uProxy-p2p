@@ -1,0 +1,53 @@
+// Common styles.
+// This is a mega css reset. Fixes evil padding / width css shenanigans.
+*
+  box-sizing: border-box
+  -webkit-box-sizing: border-box
+  -moz-box-sizing: border-box
+  &:focus
+    outline: none
+
+$fontSize: 16px
+$defaultSmoothSpeed: 0.23s
+
+@font-face
+  font-family: 'Eurostile'
+  src: url('eurostile.ttf') format('truetype')
+
+@mixin smooth
+  -webkit-transition: all $defaultSmoothSpeed !important
+  -moz-transition: all $defaultSmoothSpeed !important
+  -o-transition: all $defaultSmoothSpeed !important
+  transition: all $defaultSmoothSpeed !important
+@mixin smooth-slow
+  -webkit-transition: all 0.5s !important
+  -moz-transition: all 0.5s !important
+  -o-transition: all 0.5s !important
+  transition: all 0.5s !important
+
+// Custom hidden behavior
+@mixin un-ng-hide
+  display: block !important
+  pointer-events: none
+
+body
+  font-family: Eurostile, sans-serif
+  height: 100%
+  margin: 0
+  padding: 0
+  overflow: hidden
+  font-size: $fontSize
+
+h1, h2, h3, h4, h5
+  margin: 0
+  padding: 0
+ul
+  list-style: none
+  padding: 0
+
+input[type=text]
+  border: 1px solid #bbb
+  outline: none
+  color: #333
+  padding: 8px 20px
+  @include smooth
