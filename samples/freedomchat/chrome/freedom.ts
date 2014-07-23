@@ -41,11 +41,11 @@ b.on('signalMessage', (signal:freedom_UproxyPeerConnection.SignallingMessage) =>
 
 // Negotiate a peerconnection.
 // Once negotiated, enable the UI and add send/receive handlers.
-a.negotiateConnection().then((endpoints:freedom_UproxyPeerConnection.ConnectionAddresses) => {
+a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
   console.log('connected: ' +
-      endpoints.localAddress + ':' + endpoints.localPort +
+      endpoints.local.address + ':' + endpoints.local.port +
       ' <-> ' +
-      endpoints.remoteAddress + ':' + endpoints.remotePort);
+      endpoints.remote.address + ':' + endpoints.remote.port);
 
   // Send messages over the datachannel, in response to events
   // arriving from the UI.

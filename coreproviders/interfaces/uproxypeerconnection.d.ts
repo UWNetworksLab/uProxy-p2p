@@ -2,15 +2,6 @@
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {
-  // TODO: This flattens WebRtc.ConnectionAddresses; can we do nested
-  //       structures in Freedom?
-  interface ConnectionAddresses {
-    localAddress: string;
-    localPort: number;
-    remoteAddress: string;
-    remotePort: number;
-  }
-
   // TODO: This reduces PeerConnection's relatively complex
   //       SignallingMessage with a string.
   interface SignallingMessage {
@@ -46,7 +37,7 @@ declare module freedom_UproxyPeerConnection {
   // PeerConnectionConfig instance.
   interface freedom_UproxyPeerConnection {
 
-    negotiateConnection() : Promise<freedom_UproxyPeerConnection.ConnectionAddresses>;
+    negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
 
     handleSignalMessage(signal:freedom_UproxyPeerConnection.SignallingMessage) : Promise<void>;
 

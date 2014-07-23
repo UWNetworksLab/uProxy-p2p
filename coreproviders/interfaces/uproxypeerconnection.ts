@@ -19,10 +19,14 @@ fdom.apis.set('core.uproxypeerconnection', {
     type: 'method',
     value: [],
     ret: {
-      'localAddress': 'string',
-      'localPort': 'number',
-      'remoteAddress': 'string',
-      'remotePort': 'number'
+      'local': {
+        'address': 'string',
+        'port': 'number'
+      },
+      'remote': {
+        'address': 'string',
+        'port': 'number'
+      }
     }
   },
 

@@ -39,15 +39,10 @@ class UproxyPeerConnectionImpl {
     continuation();
   }
 
-  public negotiateConnection = (continuation:(endpoints:freedom_UproxyPeerConnection.ConnectionAddresses) => any) : void => {
+  public negotiateConnection = (continuation:(endpoints:WebRtc.ConnectionAddresses) => any) : void => {
     // TODO: propagate errors
     this.pc_.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
-      continuation({
-        localAddress: endpoints.local.address,
-        localPort: endpoints.local.port,
-        remoteAddress: endpoints.remote.address,
-        remotePort: endpoints.remote.port
-      });
+      continuation(endpoints);
     });
   }
 
