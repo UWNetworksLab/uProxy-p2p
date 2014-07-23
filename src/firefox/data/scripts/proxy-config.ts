@@ -5,13 +5,15 @@
 
 var port :ContentScriptPort;
 
-class BrowserProxyConfig {
+class ProxyConfigForward {
   constructor() {
   }
 
   public startUsingProxy = () => {
+    port.emit('startUsingPorxy');
   };
 
   public stopUsingProxy = () => {
+    port.emit('startUsingPorxy');
   };
 };

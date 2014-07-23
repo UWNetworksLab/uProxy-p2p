@@ -1,14 +1,12 @@
 var buttons = require('sdk/ui/button/action');
 var panels = require("sdk/panel");
 var self = require("sdk/self");
-var tabs = require("sdk/tabs");
 const {Cu} = require("chrome");
-var {setTimeout} = require("sdk/timers");
+
 var notifications = require("sdk/notifications");
 var prefsvc = require("sdk/preferences/service");
 
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
-Cu.import("resource://gre/modules/Services.jsm");
 
 var button = buttons.ActionButton({
   id: "uProxy-button",
@@ -46,17 +44,10 @@ var freedom =
       portType: 'BackgroundFrame'
     });
 
-require('glue.js').setUpConnection(freedom, panel);
+require('glue.js').setUpConnection(freedom, panel, button);
 
 function start(state) {
   panel.show({
     position: button,
   });
 }
-
-panel.port.on('setIcon', function(iconFile) {
-  button.icon = {
-    '19': './icons/' + iconFile,
-  }
-});
-
