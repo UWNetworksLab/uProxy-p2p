@@ -55,9 +55,9 @@ function initUI() : UI.UserInterface {
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
-  var notifications = new ChromeNotifications();
+  var browserAction = new ChromeBrowserAction();
 
-  return new UI.UserInterface(core, notifications);
+  return new UI.UserInterface(core, browserAction);
 }
 
 console.log('Initializing chrome extension background page...');
