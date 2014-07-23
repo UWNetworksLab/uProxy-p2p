@@ -56,8 +56,10 @@ class UproxyPeerConnectionImpl {
     dataChannel.fromPeerDataQueue.setSyncHandler((data:WebRtc.Data) => {
       this.dispatchEvent_('fromPeerData', {
         channelLabel: dataChannel.getLabel(),
-        str: data.str,
-        buffer: data.buffer
+        message: {
+          str: data.str,
+          buffer: data.buffer
+        }
       });
     });
   }
@@ -74,17 +76,9 @@ class UproxyPeerConnectionImpl {
   }
 
   public send = (
-      channelLabel :string,
-      str ?:string,
-      buffer ?:ArrayBuffer,
+      channelLabel:string,
+      data:WebRtc.Data,
       continuation ?:() => any) : void => {
-    var data :WebRtc.Data = {};
-    if (str !== undefined) {
-      data.str = str;
-    }
-    if (buffer !== undefined) {
-      data.buffer = new Uint8Array(buffer);
-    }
     // TODO: propagate errors
     this.pc_.dataChannels[channelLabel].send(data).then(continuation);
   }

@@ -50,7 +50,7 @@ a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
   // Send messages over the datachannel, in response to events
   // arriving from the UI.
     var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
-    pc.send('text', message.message).catch((e) => {
+    pc.send('text', { str: message.message }).catch((e) => {
       console.error('error sending message: ' + e.message);
     });
   };
@@ -59,13 +59,13 @@ a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
 
   // Handle messages received on the datachannel(s).
   // The message is forwarded to the UI.
-  var receiveMessage = (name:string, d:freedom_UproxyPeerConnection.DataChannelMessage) => {
-    if (d.str === undefined) {
+  var receiveMessage = (name:string, d:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => {
+    if (d.message.str === undefined) {
       console.error('only text messages are supported');
       return;
     }
     freedom.emit('receive' + name, {
-      message: d.str
+      message: d.message.str
     });
   };
   a.on('fromPeerData', receiveMessage.bind(null, 'A'));

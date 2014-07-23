@@ -2,23 +2,19 @@
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {
-  // TODO: This reduces PeerConnection's relatively complex
-  //       SignallingMessage with a string.
+  // These types essentially just wrap a primitive (string in both instances)
+  // for various messages emitted by UproxyPeerConnection.
   interface SignallingMessage {
     message: string;
   }
-
-  // Rather than representing a data channel, as WebRtc.DataChannel does, this
-  // is simply used for data channel-related notifications.
   interface DataChannel {
     channelLabel: string;
   }
 
-  // TODO: This is an awkward mish-mash of WebRtc.Data and a channel label.
-  interface DataChannelMessage {
+  // Associates a channel label with a WebRtc.Data, for fromPeerData events.
+  interface LabelledDataChannelMessage {
     channelLabel: string;
-    str ?:string;
-    buffer ?:Uint8Array;
+    message: WebRtc.Data
   }
 }
 
@@ -46,8 +42,9 @@ declare module freedom_UproxyPeerConnection {
     // TODO: add options argument
     openDataChannel(channelLabel: string) : Promise<void>;
 
-    // TODO: Move str and buffer to their own object
-    send(channelLabel?:string, str?:string, buffer?:ArrayBuffer) : Promise<void>;
+    // As per PeerConnection, this fulfills once the supplied data
+    // has been sucessfully sent to the peer.
+    send(channelLabel:string, data:WebRtc.Data) : Promise<void>;
 
     // TODO: getState, for both peer connection and data channels
     // TODO: close
@@ -56,6 +53,6 @@ declare module freedom_UproxyPeerConnection {
     on(t:string, f:Function) : Promise<void>;
     on(t:'onSignalMessage', f:(signal:freedom_UproxyPeerConnection.SignallingMessage) => any) : Promise<void>;
     on(t:'peerCreatedChannel', f:(channel:freedom_UproxyPeerConnection.DataChannel) => any) : Promise<void>;
-    on(t:'fromPeerData', f:(channel:freedom_UproxyPeerConnection.DataChannelMessage) => any) : Promise<void>;
+    on(t:'fromPeerData', f:(channel:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => any) : Promise<void>;
   }
 // }

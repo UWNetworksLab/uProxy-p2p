@@ -66,8 +66,10 @@ fdom.apis.set('core.uproxypeerconnection', {
     type: 'event',
     value: {
       'channelLabel': 'string',
-      'str': 'string',
-      'buffer': 'buffer'
+      'message': {
+        'str': 'string',
+        'buffer': 'buffer'
+      }
     }
   },
 
@@ -75,8 +77,10 @@ fdom.apis.set('core.uproxypeerconnection', {
     type: 'method',
     value: [
       'string',
-      'string',
-      'buffer'
+      {
+        'str': 'string',
+        'buffer': 'buffer'
+      }
     ]
   }
 });
