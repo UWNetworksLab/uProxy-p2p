@@ -1,6 +1,5 @@
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
+/// <reference path='../freedom-interfaces/freedom.d.ts' />
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='logger.ts' />
 
 describe("logger", function() {
   var logger = new LoggerModule.LoggerImp('');
@@ -38,6 +37,3 @@ describe("logger", function() {
   });
 
 });
-
-
-

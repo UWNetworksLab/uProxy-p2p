@@ -1,6 +1,5 @@
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='logger.d.ts' />
+/// <reference path='../freedom-interfaces/freedom.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 module LoggerModule {
 
@@ -42,13 +41,13 @@ module LoggerModule {
     // Clears all the logs stored in buffer.
     public reset = (): Promise<void> => {
       logBuffer = [];
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Enables/Disables log facility.
     public enable = (newState: boolean) : Promise<void> => {
       enabled = newState;
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Generates current timestamp in form "m/d H:m:s.S"
@@ -104,41 +103,40 @@ module LoggerModule {
         var parts = args[i].split(':');
         consoleFilter[parts[0]] = parts[1];
       }
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Logs message in debug level.
     public debug = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('D', tag, msg, args);
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Logs message in info level.
     public info = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('I', tag, msg, args);
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Logs message in warn level.
     public warn = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('W', tag, msg, args);
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // Logs message in error level.
     public error = (tag: string, msg: string, ...args: any[])
         : Promise<void> => {
       this.doRealLog('E', tag, msg, args);
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
   }
 
   /** REGISTER PROVIDER **/
   if (typeof freedom !== 'undefined') {
-    freedom.Logger().providePromises(LoggerImp);
+    freedom['Logger']().providePromises(LoggerImp);
   }
 }
-
