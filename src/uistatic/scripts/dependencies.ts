@@ -15,7 +15,7 @@ var model :UI.Model = {
   roster: []
 };
 
-class MockNotifications implements INotifications {
+class MockNotifications implements BrowserAction {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
@@ -24,9 +24,6 @@ class MockNotifications implements INotifications {
   }
   setColor(color) {
     console.log('setting background color of the badge to: ' + color);
-  }
-  showDesktopNotification(notificationText) {
-    console.log('showing desktop notification: ' + notificationText);
   }
 }
 
