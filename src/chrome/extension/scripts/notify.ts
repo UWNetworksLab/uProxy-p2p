@@ -6,7 +6,7 @@
 /// <reference path='../../../interfaces/notify.d.ts' />
 /// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 
-class ChromeBrowserAction implements browserAction {
+class ChromeBrowserAction implements BrowserAction {
   public ICON_DIR :string = 'icons/';
 
   public setIcon = (iconFile :string) : void => {

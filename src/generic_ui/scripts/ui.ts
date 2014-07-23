@@ -147,7 +147,7 @@ module UI {
      */
     constructor(
         public core   :uProxy.CoreAPI,
-        public browser_action :browserAction) {
+        public browserAction :BrowserAction) {
 
       // TODO: Determine the best way to describe view transitions.
       this.view = View.ROSTER;
@@ -275,10 +275,10 @@ module UI {
     setClients = (numClients) => {
       this.numClients = numClients;
       if (numClients > 0) {
-        this.browser_action.setColor('#008');
-        this.browser_action.setLabel('↓');
+        this.browserAction.setColor('#008');
+        this.browserAction.setLabel('↓');
       } else {
-        this.browser_action.setColor('#800');
+        this.browserAction.setColor('#800');
       }
     }
 
@@ -341,9 +341,9 @@ module UI {
 
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
-        this.browser_action.setIcon('uproxy-19-p.png');
+        this.browserAction.setIcon('uproxy-19-p.png');
       } else {
-        this.browser_action.setIcon('uproxy-19.png');
+        this.browserAction.setIcon('uproxy-19.png');
       }
     }
 
