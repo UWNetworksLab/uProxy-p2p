@@ -426,9 +426,9 @@ module WebRtc {
           }
           this.pcState = State.CONNECTING;
           this.fulfillConnecting_();
-          var remoteDescrition :RTCSessionDescription =
+          var remoteDescription :RTCSessionDescription =
               new RTCSessionDescription(signal.description);
-          this.setRemoteDescription_(remoteDescrition)  // initial offer from peer
+          this.setRemoteDescription_(remoteDescription)  // initial offer from peer
               .then(this.createAnswer_)
               .then(this.setLocalDescription_)
               .then((d:RTCSessionDescription) => {
@@ -446,16 +446,16 @@ module WebRtc {
           break;
          // Answer to an offer we sent
         case SignalType.ANSWER:
-          var remoteDescrition :RTCSessionDescription =
+          var remoteDescription :RTCSessionDescription =
               new RTCSessionDescription(signal.description);
-          this.setRemoteDescription_(remoteDescrition)
+          this.setRemoteDescription_(remoteDescription)
               .then(() => {
                   this.fromPeerCandidateQueue.setHandler(this.addIceCandidate_);
                 })
               .catch((e) => {
                   this.closeWithError_('Failed to set remote description: ' +
-                      ': ' +  JSON.stringify(remoteDescrition) + ' (' +
-                      typeof(remoteDescrition) + '); Error: ' + e.toString());
+                      ': ' +  JSON.stringify(remoteDescription) + ' (' +
+                      typeof(remoteDescription) + '); Error: ' + e.toString());
                 });
           break;
         // Add remote ice candidate.
@@ -488,6 +488,8 @@ module WebRtc {
     public openDataChannel = (channelLabel:string,
                               options:RTCDataChannelInit={})
         : DataChannel => {
+      var rtcDataChannel = this.pc_.createDataChannel(channelLabel, options);
+
       // Firefox does not fire the |'negotiationneeded'| event, so we need to
       // negotate here if we are not connected. See
       // https://bugzilla.mozilla.org/show_bug.cgi?id=840728
@@ -497,7 +499,6 @@ module WebRtc {
         this.negotiateConnection();
       }
 
-      var rtcDataChannel = this.pc_.createDataChannel(channelLabel, options);
       var dataChannel = this.addRtcDataChannel_(rtcDataChannel);
       return dataChannel;
     }
