@@ -37,6 +37,7 @@ var freedom =
     setupFreedom(manifest, {
       freedomcfg: function(register) {
             register('core.view', require('view_googleauth.js').View_googleAuth);
+            register('core.storage', require('firefox_storage.js').Storage_firefox);
           },
       portType: 'BackgroundFrame'
     });
