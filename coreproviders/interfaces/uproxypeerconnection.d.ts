@@ -2,15 +2,6 @@
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {
-  // These types essentially just wrap a primitive (string in both instances)
-  // for various messages emitted by UproxyPeerConnection.
-  interface SignallingMessage {
-    message: string;
-  }
-  interface DataChannel {
-    channelLabel: string;
-  }
-
   // Associates a channel label with a WebRtc.Data, for fromPeerData events.
   interface LabelledDataChannelMessage {
     channelLabel: string;
@@ -23,6 +14,8 @@ declare module freedom_UproxyPeerConnection {
   // Thin wrapper over WebRtc.PeerConnection.
   // 
   // Some accomodations to Freedom message passing have had to be made:
+  //  - The relatively complex WebRtc.SignallingMessage interface has been
+  //    replaced with opaque strings (they can be decoded with JSON.parse).
   //  - As DataChannel objects cannot be returned by or passed as arguments,
   //    they must be accessed via this class, by label.
   //  - Some of the arguments to PeerConnection are too complex to
@@ -35,7 +28,7 @@ declare module freedom_UproxyPeerConnection {
 
     negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
 
-    handleSignalMessage(signal:freedom_UproxyPeerConnection.SignallingMessage) : Promise<void>;
+    handleSignalMessage(signal:string) : Promise<void>;
 
     // Fulfills once the data channel has been successfully opened,
     // i.e. this is equivalent to PeerConnection.openDataChannel().onceOpened().
@@ -51,8 +44,8 @@ declare module freedom_UproxyPeerConnection {
     // TODO: onceConnecting, onceConnected, and onceDisconnected
 
     on(t:string, f:Function) : Promise<void>;
-    on(t:'onSignalMessage', f:(signal:freedom_UproxyPeerConnection.SignallingMessage) => any) : Promise<void>;
-    on(t:'peerCreatedChannel', f:(channel:freedom_UproxyPeerConnection.DataChannel) => any) : Promise<void>;
+    on(t:'onSignalMessage', f:(signal:string) => any) : Promise<void>;
+    on(t:'peerCreatedChannel', f:(channelLabel:string) => any) : Promise<void>;
     on(t:'fromPeerData', f:(channel:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => any) : Promise<void>;
   }
 // }

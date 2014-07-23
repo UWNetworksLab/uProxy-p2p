@@ -32,16 +32,12 @@ fdom.apis.set('core.uproxypeerconnection', {
 
   'handleSignalMessage': {
     type: 'method',
-    value: [{
-      'message': 'string'
-    }]
+    value: 'string'
   },
 
   'signalMessage': {
     type: 'event',
-    value: {
-      'message': 'string'
-    }
+    value: 'string'
   },
 
   ////////
@@ -57,9 +53,7 @@ fdom.apis.set('core.uproxypeerconnection', {
 
   'peerCreatedChannel': {
     type: 'event',
-    value: {
-      'channelLabel': 'string'
-    }
+    value: 'string'
   },
 
   'fromPeerData': {

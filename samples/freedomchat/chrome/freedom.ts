@@ -20,13 +20,17 @@ var b :freedom_UproxyPeerConnection = freedom['core.uproxypeerconnection'](
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessage', (signal:freedom_UproxyPeerConnection.SignallingMessage) => {
-  console.log('signalling channel A message: ' + signal.message);
+a.on('signalMessage', (signal:string) => {
+  console.log('signalling channel A message: ' + signal);
   b.handleSignalMessage(signal);
 });
-b.on('signalMessage', (signal:freedom_UproxyPeerConnection.SignallingMessage) => {
-  console.log('signalling channel B message: ' + signal.message);
+b.on('signalMessage', (signal:string) => {
+  console.log('signalling channel B message: ' + signal);
   a.handleSignalMessage(signal);
+});
+
+b.on('peerCreatedChannel', (channelLabel:string) => {
+  console.log('i can see that a created a data channel called ' + channelLabel);
 });
 
 // // Log the chosen endpoints.
@@ -49,7 +53,7 @@ a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
 
   // Send messages over the datachannel, in response to events
   // arriving from the UI.
-    var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
+  var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
     pc.send('text', { str: message.message }).catch((e) => {
       console.error('error sending message: ' + e.message);
     });

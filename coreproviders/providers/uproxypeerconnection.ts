@@ -15,16 +15,12 @@ class UproxyPeerConnectionImpl {
 
     // Re-dispatch various messages as Freedom messages.
     this.pc_.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-      this.dispatchEvent_('signalMessage', {
-        message: JSON.stringify(signal)
-      });
+      this.dispatchEvent_('signalMessage', JSON.stringify(signal));
     });
     this.pc_.peerCreatedChannelQueue.setSyncHandler((dataChannel:WebRtc.DataChannel) => {
       // Re-dispatch events from this new data channel.
       this.dispatchDataChannelEvents_(dataChannel);
-      this.dispatchEvent_('peerCreatedChannel', {
-        channelLabel: dataChannel.getLabel()
-      });
+      this.dispatchEvent_('peerCreatedChannel', dataChannel.getLabel());
     });
   }
 
@@ -33,9 +29,9 @@ class UproxyPeerConnectionImpl {
   ////////
 
   public handleSignalMessage(
-      signal:freedom_UproxyPeerConnection.SignallingMessage,
+      signal:string,
       continuation:() => any) : void {
-    this.pc_.handleSignalMessage(JSON.parse(signal.message));
+    this.pc_.handleSignalMessage(JSON.parse(signal));
     continuation();
   }
 
