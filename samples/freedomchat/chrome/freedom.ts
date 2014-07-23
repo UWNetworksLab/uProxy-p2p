@@ -33,26 +33,20 @@ b.on('peerCreatedChannel', (channelLabel:string) => {
   console.log('i can see that a created a data channel called ' + channelLabel);
 });
 
-// // Log the chosen endpoints.
-// function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
-//   dbg(name + ' connected: ' +
-//       endpoints.local.address + ':' + endpoints.local.port +
-//       ' <-> ' +
-//       endpoints.remote.address + ':' + endpoints.remote.port);
-// }
-// a.onceConnected.then(logEndpoints.bind(null, 'a'));
-// b.onceConnected.then(logEndpoints.bind(null, 'b'));
+// Log the chosen endpoints.
+function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
+  console.log(name + ' connected: ' +
+      endpoints.local.address + ':' + endpoints.local.port +
+      ' <-> ' +
+      endpoints.remote.address + ':' + endpoints.remote.port);
+}
+a.onceConnected().then(logEndpoints.bind(null, 'a'));
+b.onceConnected().then(logEndpoints.bind(null, 'b'));
 
 // Negotiate a peerconnection.
 // Once negotiated, enable the UI and add send/receive handlers.
 a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
-  console.log('connected: ' +
-      endpoints.local.address + ':' + endpoints.local.port +
-      ' <-> ' +
-      endpoints.remote.address + ':' + endpoints.remote.port);
-
-  // Send messages over the datachannel, in response to events
-  // arriving from the UI.
+  // Send messages over the datachannel, in response to events from the UI.
   var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
     pc.send('text', { str: message.message }).catch((e) => {
       console.error('error sending message: ' + e.message);

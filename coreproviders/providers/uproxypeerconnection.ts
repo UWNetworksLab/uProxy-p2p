@@ -42,6 +42,13 @@ class UproxyPeerConnectionImpl {
     });
   }
 
+  public onceConnected = (continuation:(endpoints:WebRtc.ConnectionAddresses) => any) : void => {
+    this.pc_.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
+      // TODO: propagate errors
+      continuation(endpoints);
+    });
+  }
+
   ////////
   // Data channels.
   ////////

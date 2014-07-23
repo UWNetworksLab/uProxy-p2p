@@ -40,6 +40,21 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: 'string'
   },
 
+  'onceConnected': {
+    type: 'method',
+    value: [],
+    ret: {
+      'local': {
+        'address': 'string',
+        'port': 'number'
+      },
+      'remote': {
+        'address': 'string',
+        'port': 'number'
+      }
+    }
+  },
+
   ////////
   // Data channels.
   ////////

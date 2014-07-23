@@ -41,7 +41,9 @@ declare module freedom_UproxyPeerConnection {
 
     // TODO: getState, for both peer connection and data channels
     // TODO: close
-    // TODO: onceConnecting, onceConnected, and onceDisconnected
+
+    // TODO: onceConnecting and onceDisconnected
+    onceConnected() : Promise<WebRtc.ConnectionAddresses>;
 
     on(t:string, f:Function) : Promise<void>;
     on(t:'onSignalMessage', f:(signal:string) => any) : Promise<void>;
