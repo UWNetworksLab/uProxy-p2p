@@ -1,7 +1,8 @@
 // Typescript file for:
 // https://www.github.com/freedomjs/freedom/interface/social.js
 
-/// <reference path='../third_party/promise/promise.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
+
 // declare module freedom {
   declare module freedom_Social {
     // TODO(Freedom): would be nice for Freedom to have an enum of all 'valid'

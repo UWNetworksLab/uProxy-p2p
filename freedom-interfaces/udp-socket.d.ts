@@ -1,6 +1,8 @@
 // Typescript file for core.udpsocket in:
 // https://github.com/freedomjs/freedom/blob/master/interface/core.js
 
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
+
 //declare module freedom {
 
   declare module freedom_UdpSocket {

@@ -1,4 +1,4 @@
-/// <reference path='../third_party/promise/promise.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 // This is the interface that a module that has logger as a dependency gets to
 // use.

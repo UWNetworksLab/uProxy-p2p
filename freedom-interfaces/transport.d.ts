@@ -1,7 +1,7 @@
 // Typescript file for:
 // https://www.github.com/freedomjs/freedom/interface/transport.js
 
-/// <reference path='../third_party/promise/promise.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 //declare module freedom {
   declare module freedom_Transport {
