@@ -13,18 +13,18 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   }
 };
 
-var a :freedom.UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var a :freedom_UproxyPeerConnection = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
-var b :freedom.UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var b :freedom_UproxyPeerConnection = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) => {
+a.on('signalMessage', (signal:freedom_UproxyPeerConnection.SignallingMessage) => {
   console.log('signalling channel A message: ' + signal.message);
   b.handleSignalMessage(signal);
 });
-b.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) => {
+b.on('signalMessage', (signal:freedom_UproxyPeerConnection.SignallingMessage) => {
   console.log('signalling channel B message: ' + signal.message);
   a.handleSignalMessage(signal);
 });
@@ -41,7 +41,7 @@ b.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) =>
 
 // Negotiate a peerconnection.
 // Once negotiated, enable the UI and add send/receive handlers.
-a.negotiateConnection().then((endpoints:freedom.UproxyPeerConnection.ConnectionAddresses) => {
+a.negotiateConnection().then((endpoints:freedom_UproxyPeerConnection.ConnectionAddresses) => {
   console.log('connected: ' +
       endpoints.localAddress + ':' + endpoints.localPort +
       ' <-> ' +
@@ -49,7 +49,7 @@ a.negotiateConnection().then((endpoints:freedom.UproxyPeerConnection.ConnectionA
 
   // Send messages over the datachannel, in response to events
   // arriving from the UI.
-    var sendMessage = (pc:freedom.UproxyPeerConnection, message:Chat.Message) => {
+    var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
     pc.send('text', message.message).catch((e) => {
       console.error('error sending message: ' + e.message);
     });
@@ -59,7 +59,7 @@ a.negotiateConnection().then((endpoints:freedom.UproxyPeerConnection.ConnectionA
 
   // Handle messages received on the datachannel(s).
   // The message is forwarded to the UI.
-  var receiveMessage = (name:string, d:freedom.UproxyPeerConnection.DataChannelMessage) => {
+  var receiveMessage = (name:string, d:freedom_UproxyPeerConnection.DataChannelMessage) => {
     if (d.str === undefined) {
       console.error('only text messages are supported');
       return;

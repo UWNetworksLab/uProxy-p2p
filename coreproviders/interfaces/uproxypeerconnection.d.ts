@@ -1,6 +1,7 @@
 /// <reference path="../../third_party/typings/tsd.d.ts" />
 
-declare module freedom.UproxyPeerConnection {
+// TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
+declare module freedom_UproxyPeerConnection {
   // TODO: This flattens WebRtc.ConnectionAddresses; can we do nested
   //       structures in Freedom?
   interface ConnectionAddresses {
@@ -30,13 +31,24 @@ declare module freedom.UproxyPeerConnection {
   }
 }
 
-declare module freedom {
-  // TODO: Add remaining methods from peerconnection.d.ts.
-  interface UproxyPeerConnection {
+// TODO: uncomment once https://github.com/Microsoft/TypeScript/issues/52 is fixed
+// declare module freedom {
+  // Thin wrapper over WebRtc.PeerConnection.
+  // 
+  // Some accomodations to Freedom message passing have had to be made:
+  //  - As DataChannel objects cannot be returned by or passed as arguments,
+  //    they must be accessed via this class, by label.
+  //  - Some of the arguments to PeerConnection are too complex to
+  //    be expressed in Freedom-ese, e.g. PeerConnectionConfig.
+  //    
+  // Additionally, note that while TypeScript interfaces cannot specify
+  // arguments, the implementation of this class accepts a JSON-ified
+  // PeerConnectionConfig instance.
+  interface freedom_UproxyPeerConnection {
 
-    negotiateConnection() : Promise<freedom.UproxyPeerConnection.ConnectionAddresses>;
+    negotiateConnection() : Promise<freedom_UproxyPeerConnection.ConnectionAddresses>;
 
-    handleSignalMessage(signal:freedom.UproxyPeerConnection.SignallingMessage) : Promise<void>;
+    handleSignalMessage(signal:freedom_UproxyPeerConnection.SignallingMessage) : Promise<void>;
 
     // Fulfills once the data channel has been successfully opened,
     // i.e. this is equivalent to PeerConnection.openDataChannel().onceOpened().
@@ -51,8 +63,8 @@ declare module freedom {
     // TODO: onceConnecting, onceConnected, and onceDisconnected
 
     on(t:string, f:Function) : Promise<void>;
-    on(t:'onSignalMessage', f:(signal:freedom.UproxyPeerConnection.SignallingMessage) => any) : Promise<void>;
-    on(t:'peerCreatedChannel', f:(channel:freedom.UproxyPeerConnection.DataChannel) => any) : Promise<void>;
-    on(t:'fromPeerData', f:(channel:freedom.UproxyPeerConnection.DataChannelMessage) => any) : Promise<void>;
+    on(t:'onSignalMessage', f:(signal:freedom_UproxyPeerConnection.SignallingMessage) => any) : Promise<void>;
+    on(t:'peerCreatedChannel', f:(channel:freedom_UproxyPeerConnection.DataChannel) => any) : Promise<void>;
+    on(t:'fromPeerData', f:(channel:freedom_UproxyPeerConnection.DataChannelMessage) => any) : Promise<void>;
   }
-}
+// }
