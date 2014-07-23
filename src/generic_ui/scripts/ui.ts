@@ -7,7 +7,8 @@
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/browser_action.d.ts'/>
+/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 
 declare var model         :UI.Model;
@@ -146,7 +147,7 @@ module UI {
      */
     constructor(
         public core   :uProxy.CoreAPI,
-        public notify :INotifications) {
+        public browserAction :BrowserAction) {
 
       // TODO: Determine the best way to describe view transitions.
       this.view = View.ROSTER;
@@ -218,7 +219,8 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      this.notify.showDesktopNotification(notificationText);
+      new Notification('uProxy', { body: notificationText,
+                                   icon: 'icons/uproxy-128.png'});
     }
 
     // ------------------------------- Views ----------------------------------
@@ -274,10 +276,10 @@ module UI {
     setClients = (numClients) => {
       this.numClients = numClients;
       if (numClients > 0) {
-        this.notify.setColor('#008');
-        this.notify.setLabel('↓');
+        this.browserAction.setColor('#008');
+        this.browserAction.setLabel('↓');
       } else {
-        this.notify.setColor('#800');
+        this.browserAction.setColor('#800');
       }
     }
 
@@ -340,9 +342,9 @@ module UI {
 
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
-        this.notify.setIcon('uproxy-19-p.png');
+        this.browserAction.setIcon('uproxy-19-p.png');
       } else {
-        this.notify.setIcon('uproxy-19.png');
+        this.browserAction.setIcon('uproxy-19.png');
       }
     }
 
