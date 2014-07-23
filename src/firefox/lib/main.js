@@ -3,9 +3,6 @@ var panels = require("sdk/panel");
 var self = require("sdk/self");
 const {Cu} = require("chrome");
 
-var notifications = require("sdk/notifications");
-var prefsvc = require("sdk/preferences/service");
-
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
 
 var button = buttons.ActionButton({
@@ -27,7 +24,7 @@ var panel = panels.Panel({
     self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
     self.data.url("scripts/ui.js"),
-    self.data.url("scripts/notify.js"),
+    self.data.url("scripts/firefox_browser_action.js"),
     self.data.url("scripts/proxy-config.js"),
     self.data.url("scripts/firefox_connector.js"),
     self.data.url("scripts/core_connector.js"),

@@ -5,7 +5,7 @@
 
 var port :ContentScriptPort;
 
-class ProxyConfigForward {
+class BrowserProxyConfig {
   constructor() {
   }
 
