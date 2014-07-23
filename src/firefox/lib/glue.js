@@ -19,14 +19,14 @@ function setUpConnection(freedom, panel, button) {
     connect('' + i, panel.port, freedom);
   }
 
-  panel.port.on('startUsingProxy', function(iconFile) {
+  panel.port.on('startUsingProxy', function() {
     proxyConfig.startUsingProxy();
-    button.icon = {
-      '19': './icons/' + iconFile,
-    }
   }
-  panel.port.on('stopUsingProxy', function(iconFile) {
+  panel.port.on('stopUsingProxy', function() {
     proxyConfig.stopUsingProxy();
+  });
+
+  panel.port.on('setIcon', function(iconFile) {
     button.icon = {
       '19': './icons/' + iconFile,
     }

@@ -2,8 +2,6 @@ var tabs = require("sdk/tabs");
 var self = require("sdk/self");
 const {XMLHttpRequest} = require("sdk/net/xhr");
 
-var CREDENTIALS = "";
-
 var CLIENT_ID =
     "222861774905-tkvp9gq42v5l3orqvqk6850b160i8tfk.apps.googleusercontent.com";
 var CLIENT_SECRET = "hDJxfvLqKs6vj1IW_M77Jn5w";
@@ -20,12 +18,7 @@ View_googleAuth.prototype.open = function (name, what, continuation) {
 };
 
 View_googleAuth.prototype.show = function (continuation) {
-  if (CREDENTIALS == '') {
-    googleAuth(this.dispatchEvent, continuation);
-  } else {
-    this.dispatchEvent('message', {cmd: 'auth', message: CREDENTIALS});
-    continuation();
-  }
+  googleAuth(this.dispatchEvent, continuation);
 };
 
 View_googleAuth.prototype.postMessage = function (args, continuation) {
@@ -81,14 +74,14 @@ function getUserInfo(token, dispatchEvent, continuation) {
   xhr.setRequestHeader('Authorization', 'Bearer ' + token);
   xhr.onload = function() {
     var response = JSON.parse(xhr.response);
-    CREDENTIALS = {
+    credentials = {
       userId: response.email,
       jid: response.email,
       oauth2_token: token,
       oauth2_auth: 'http://www.google.com/talk/protocol/auth',
       host: 'talk.google.com'
     };
-    dispatchEvent('message', {cmd: 'auth', message: CREDENTIALS});
+    dispatchEvent('message', {cmd: 'auth', message: credentials});
     continuation();
   }
   xhr.send();
