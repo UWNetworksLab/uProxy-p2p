@@ -17,6 +17,7 @@ declare module freedom_PeerConnection {
   }
 }
 
+// TODO uncomment & rename once Typescript issue #52 is fixed
 //declare module  {
   // TODO: clarify semantics of close w.r.t. getBufferedAmount: does it close
   // after the buffered amount is set to zero? Or does it throw away what is

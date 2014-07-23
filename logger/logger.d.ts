@@ -1,6 +1,6 @@
 /// <reference path='../third_party/promise/promise.d.ts' />
 
-// This is the interface that a module that has logger as a dependency get's to
+// This is the interface that a module that has logger as a dependency gets to
 // use.
 interface LogProvider {
    getEncrypedLogBuffer(...tags: string[]) : Promise<ArrayBuffer>;
