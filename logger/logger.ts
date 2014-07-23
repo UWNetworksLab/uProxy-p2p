@@ -1,6 +1,5 @@
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='logger.d.ts' />
+/// <reference path='../freedom-interfaces/freedom.d.ts' />
+/// <reference path='../third_party/promise/promise.d.ts' />
 
 module LoggerModule {
 
@@ -138,7 +137,6 @@ module LoggerModule {
 
   /** REGISTER PROVIDER **/
   if (typeof freedom !== 'undefined') {
-    freedom.Logger().providePromises(LoggerImp);
+    freedom['Logger']().providePromises(LoggerImp);
   }
 }
-
