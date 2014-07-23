@@ -8,7 +8,6 @@
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
-/// <reference path='../../interfaces/browser-proxy-config.d.ts'/>
 /// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 
