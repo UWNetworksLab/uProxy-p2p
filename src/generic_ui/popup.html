@@ -174,7 +174,7 @@
             <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by contact.userId"
                 ng-class="{offline:!contact.isOnline}">
 
-              <div ng-switch="contact.canUProxy">
+              <div ng-switch="contact.instances.length > 0">
                 <div ng-switch-when="true">
                   <span class="c-name">{{contact.name}}</span>
                   <img class="contact-image" ng-src='{{contact.imageData}}'>

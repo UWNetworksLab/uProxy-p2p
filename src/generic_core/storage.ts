@@ -50,14 +50,9 @@ module Core {
     public load = <T>(key :string) : Promise<T> => {
       this.log('loading ' + key);
       return fStorage.get(key).then((result :string) => {
-        if (result === undefined) {
-          console.log('got undefined result for key ' + key);
-          return undefined;
-        }
         this.log('Loaded [' + key + '] : ' + result);
         return <T>JSON.parse(result);
       }, (e) => {
-        console.log('storage.load failed');
         this.log(e.message);
         return <T>{};
       });
@@ -69,7 +64,7 @@ module Core {
      */
     // TODO: should not return a value in the promise. Should be Promise<void>
     public save = <T>(key :string, val :T) : Promise<T> => {
-      console.log('Saving ' + key + ': ', val);
+      this.log('Saving ' + key + ': ' + val);
       return fStorage.set(key, JSON.stringify(val)).then((prev:string) => {
         this.log('Saved to storage[' + key + ']. old val=' + prev);
         if (!prev) {

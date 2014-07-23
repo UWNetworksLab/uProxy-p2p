@@ -474,7 +474,6 @@ module UI {
       user.update(profile);
 
       // Update instances
-      // TODO: write tests for these.
       user.instances = payload.instances;
       if (user == this.user) {
         // Update focusedInstance

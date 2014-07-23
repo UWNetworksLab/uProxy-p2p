@@ -26,39 +26,7 @@ describe('UI.User', () => {
     });
     expect(user.name).toEqual('fakename');
     expect(user.imageData).toEqual('fakeimage.uri');
-  });
-
-  describe('status flags', () => {
-    // TODO: write new tests
-/*
-    it('offline if there are only offline clients', () => {
-      user.refreshStatus([
-        UProxyClient.Status.OFFLINE,
-        UProxyClient.Status.OFFLINE
-      ])
-      expect(user.online).toEqual(false);
-      expect(user.canUProxy).toEqual(false);
-    });
-
-    it('online if there is at least one non-offline client', () => {
-      user.refreshStatus([
-        UProxyClient.Status.OFFLINE,
-        UProxyClient.Status.ONLINE_WITH_OTHER_APP
-      ])
-      expect(user.online).toEqual(true);
-      expect(user.canUProxy).toEqual(false);
-    });
-
-    it('can uProxy if there is at least one online client', () => {
-      user.refreshStatus([
-        UProxyClient.Status.OFFLINE,
-        UProxyClient.Status.ONLINE_WITH_OTHER_APP,
-        UProxyClient.Status.ONLINE
-      ])
-      expect(user.online).toEqual(true);
-      expect(user.canUProxy).toEqual(true);
-    });
-*/
+    expect(user.isOnline).toEqual(true);
   });
 
   // TODO: more specs

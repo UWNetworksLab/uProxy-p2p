@@ -407,7 +407,7 @@ module Core {
      * Returns a snapshot of a RemoteInstance's state for the UI. This includes
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public currentStateForUi = () : RemoteInstanceForUiState => {
+    public currentStateForUi = () : UI.Instance => {
       return cloneDeep({
         instanceId:           this.instanceId,
         description:          this.description,
@@ -451,16 +451,10 @@ module Core {
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState extends Instance {
-    keyHash :string;
-    consent :ConsentState;
-    access  :AccessState;
-  }
-
-  export interface RemoteInstanceForUiState extends Instance {
-    keyHash              :string;
-    consent              :ConsentState;
-    access               :AccessState;
-    isOnline             :boolean;
+    keyHash     :string;
+    consent     :ConsentState;
+    access      :AccessState;
+    description ?:string;
   }
 
   // TODO: Implement obfuscation.

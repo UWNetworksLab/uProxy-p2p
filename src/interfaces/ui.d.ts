@@ -28,8 +28,10 @@ declare module UI {
   export interface UserMessage {
     network   :string;
     user      :UserProfileMessage;
-    instances :any[];
+    instances :UI.Instance[];
   }
+
+
 
   /**
    * Proxy-state message is sent from the Core to the UI to indicate changes in
@@ -46,13 +48,11 @@ declare module UI {
    * UI-specific Instance.
    * TODO: Maybe turn this into an actual class. We'll see.
    */
-  // TODO: can this be combined with RemoteInstanceForUiState?
   export interface Instance {
     instanceId           :string;
     description          :string;
     consent              :ConsentState;
     access               :AccessState;
-    isCurrentProxyClient :boolean;
     isOnline             :boolean;
   }
 
