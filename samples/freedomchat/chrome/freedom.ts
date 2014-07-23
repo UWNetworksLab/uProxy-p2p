@@ -39,42 +39,45 @@ b.on('signalMessage', (signal:freedom.UproxyPeerConnection.SignallingMessage) =>
 // a.onceConnected.then(logEndpoints.bind(null, 'a'));
 // b.onceConnected.then(logEndpoints.bind(null, 'b'));
 
-// // Have a negotiate a peerconnection.
-// // Once negotiated, enable the UI and add send/receive handlers.
+// Negotiate a peerconnection.
+// Once negotiated, enable the UI and add send/receive handlers.
 a.negotiateConnection().then((endpoints:freedom.UproxyPeerConnection.ConnectionAddresses) => {
   console.log('connected: ' +
       endpoints.localAddress + ':' + endpoints.localPort +
       ' <-> ' +
       endpoints.remoteAddress + ':' + endpoints.remotePort);
 
-//   sendAreaA.disabled = false;
-//   sendAreaB.disabled = false;
+  // Send messages over the datachannel, in response to events
+  // arriving from the UI.
+    var sendMessage = (pc:freedom.UproxyPeerConnection, message:Chat.Message) => {
+    pc.send('text', message.message).catch((e) => {
+      console.error('error sending message: ' + e.message);
+    });
+  };
+  freedom.on('sendA', sendMessage.bind(null, a));
+  freedom.on('sendB', sendMessage.bind(null, b));
 
-//   // Send messages over the datachannel, in response to events
-//   // arriving from the UI.
-//   function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
-//     pc.dataChannels['text'].send({
-//       str: textArea.value || '(empty message)'
-//     }).catch((e) => {
-//       dbgErr('could not send: ' + e.message); }
-//     );
-//   }
-//   sendButtonA.onclick = send.bind(null, a, sendAreaA);
-//   sendButtonB.onclick = send.bind(null, b, sendAreaB);
+  // Handle messages received on the datachannel(s).
+  // The message is forwarded to the UI.
+  var receiveMessage = (name:string, d:freedom.UproxyPeerConnection.DataChannelMessage) => {
+    if (d.str === undefined) {
+      console.error('only text messages are supported');
+      return;
+    }
+    freedom.emit('receive' + name, {
+      message: d.str
+    });
+  };
+  a.on('fromPeerData', receiveMessage.bind(null, 'A'));
+  b.on('fromPeerData', receiveMessage.bind(null, 'B'));
 
-//   // Handle messages received on the datachannel(s).
-//   // The message is forwarded to the UI.
-//   // TODO: only the first message sent over the data channel is received
-//   function receive(textArea:HTMLInputElement, d:WebRtc.Data) {
-//     textArea.value = d.str;
-//   }
-//   var chanA = a.openDataChannel('text');
-//   chanA.onceOpened.then(() => {
-//     chanA.fromPeerDataQueue.setSyncHandler(receive.bind(null, receiveAreaA));
-//   });
-//   b.peerCreatedChannelQueue.setSyncHandler((chanB:WebRtc.DataChannel) => {
-//     chanB.fromPeerDataQueue.setSyncHandler(receive.bind(null, receiveAreaB));
-//   });
+  a.openDataChannel('text').then(() => {
+    console.log('datachannel open!');
+    freedom.emit('ready', {});
+  }, (e) => {
+    console.error('could not setup datachannel: ' + e.message);
+    freedom.emit('error', {});
+  });
 }, (e) => {
   dbgErr('could not negotiate peerconnection: ' + e.message);
 });

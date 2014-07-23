@@ -1,8 +1,8 @@
 /// <reference path="../interfaces/uproxypeerconnection.d.ts" />
 /// <reference path="../../peerconnection/peerconnection.d.ts" />
 
-// This can't implement UproxyPeerConnection interface due to the
-// continuation parameter.
+// Note that this can't implement UproxyPeerConnection interface due to the
+// continuation parameter, so we lose quite a bit of type safety.
 class UproxyPeerConnectionImpl {
   // Instance under wraps.
   private pc_ :WebRtc.PeerConnection;
@@ -12,13 +12,25 @@ class UproxyPeerConnectionImpl {
       private dispatchEvent_:any,
       pcConfigAsJson:any) {
     this.pc_ = new WebRtc.PeerConnection(JSON.parse(pcConfigAsJson));
-    // Re-dispatch signalling channel messages as Freedom messages.
+
+    // Re-dispatch various messages as Freedom messages.
     this.pc_.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
       this.dispatchEvent_('signalMessage', {
         message: JSON.stringify(signal)
       });
     });
+    this.pc_.peerCreatedChannelQueue.setSyncHandler((dataChannel:WebRtc.DataChannel) => {
+      // Re-dispatch events from this new data channel.
+      this.dispatchDataChannelEvents_(dataChannel);
+      this.dispatchEvent_('peerCreatedChannel', {
+        channelLabel: dataChannel.getLabel()
+      });
+    });
   }
+
+  ////////
+  // Signalling channel.
+  ////////
 
   public handleSignalMessage(
       signal:freedom.UproxyPeerConnection.SignallingMessage,
@@ -37,6 +49,49 @@ class UproxyPeerConnectionImpl {
         remotePort: endpoints.remote.port
       });
     });
+  }
+
+  ////////
+  // Data channels.
+  ////////
+
+  // Re-dispatches data channel events, such as receiving data, as
+  // Freedom messages.
+  private dispatchDataChannelEvents_ = (dataChannel:WebRtc.DataChannel) => {
+    dataChannel.fromPeerDataQueue.setSyncHandler((data:WebRtc.Data) => {
+      this.dispatchEvent_('fromPeerData', {
+        channelLabel: dataChannel.getLabel(),
+        str: data.str,
+        buffer: data.buffer
+      });
+    });
+  }
+
+  public openDataChannel = (
+      channelLabel: string,
+      continuation:() => any) : void => {
+    var dataChannel = this.pc_.openDataChannel(channelLabel);
+    dataChannel.onceOpened.then(() => {
+      this.dispatchDataChannelEvents_(dataChannel);
+      // TODO: propagate errors
+      continuation();
+    });
+  }
+
+  public send = (
+      channelLabel :string,
+      str ?:string,
+      buffer ?:ArrayBuffer,
+      continuation ?:() => any) : void => {
+    var data :WebRtc.Data = {};
+    if (str !== undefined) {
+      data.str = str;
+    }
+    if (buffer !== undefined) {
+      data.buffer = new Uint8Array(buffer);
+    }
+    // TODO: propagate errors
+    this.pc_.dataChannels[channelLabel].send(data).then(continuation);
   }
 }
 

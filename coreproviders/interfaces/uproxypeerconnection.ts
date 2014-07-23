@@ -11,6 +11,10 @@ fdom.apis.set('core.uproxypeerconnection', {
     ]
   },
 
+  ////////
+  // Signalling channel.
+  ////////
+
   'negotiateConnection': {
     type: 'method',
     value: [],
@@ -34,5 +38,41 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: {
       'message': 'string'
     }
+  },
+
+  ////////
+  // Data channels.
+  ////////
+
+  'openDataChannel': {
+    type: 'method',
+    value: [
+      'string'
+    ]
+  },
+
+  'peerCreatedChannel': {
+    type: 'event',
+    value: {
+      'channelLabel': 'string'
+    }
+  },
+
+  'fromPeerData': {
+    type: 'event',
+    value: {
+      'channelLabel': 'string',
+      'str': 'string',
+      'buffer': 'buffer'
+    }
+  },
+
+  'send': {
+    type: 'method',
+    value: [
+      'string',
+      'string',
+      'buffer'
+    ]
   }
 });
