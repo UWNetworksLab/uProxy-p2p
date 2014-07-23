@@ -54,17 +54,9 @@ function start(state) {
   });
 }
 
-panel.port.on('showNotification', function(notificationText) {
-  notifications.notify({
-    title: 'uProxy',
-    text: notificationText,
-    iconURL: self.data.url('icons/uproxy-128.png'),
-    onClick: start,
-  });
+panel.port.on('setIcon', function(iconFile) {
+  button.icon = {
+    '19': './icons/' + iconFile,
+  }
 });
-
-panel.port.on('startUsingProxy', function() {
-  console.log("start using proxy");
-});
-
 

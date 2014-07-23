@@ -12,9 +12,9 @@ var model = {
 function initUI() {
     var firefoxConnector = new FirefoxConnector();
     core = new CoreConnector(firefoxConnector);
-    var notifications = new FirefoxNotifications();
+    var browserAction = new FirefoxBrowserAction();
 
-    return new UI.UserInterface(core, notifications);
+    return new UI.UserInterface(core, browserAction);
 }
 
 if (undefined === ui) {

@@ -10,10 +10,8 @@ class BrowserProxyConfig {
   }
 
   public startUsingProxy = () => {
-    port.emit('startUsingProxy');
   };
 
   public stopUsingProxy = () => {
-    port.emit('stopUsingProxy');
   };
 };
