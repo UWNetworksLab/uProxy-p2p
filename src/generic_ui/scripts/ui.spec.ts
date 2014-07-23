@@ -1,7 +1,7 @@
 /// <reference path='../../interfaces/lib/jasmine/jasmine.d.ts' />
 /// <reference path='ui.ts' />
 
-// TODO: move model, mockCore, and mockNotifications to a file
+// TODO: move model, mockCore, and mockBrowserAction to a file
 // where they can be re-used.
 var model :UI.Model = {
   networks: {
@@ -22,8 +22,8 @@ describe('UI.UserInterface', () => {
   beforeEach(() => {
     // Create a fresh UI object before each test.
     var mockCore = jasmine.createSpyObj('core', ['reset', 'onUpdate']);
-    var mockNotifications = jasmine.createSpyObj('notifications', ['setIcon']);
-    ui = new UI.UserInterface(mockCore, mockNotifications);
+    var mockBrowserAction = jasmine.createSpyObj('browserAction', ['setIcon']);
+    ui = new UI.UserInterface(mockCore, mockBrowserAction);
   });
 
   describe('syncUser', () => {

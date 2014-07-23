@@ -16,7 +16,7 @@ var model :UI.Model = {
   description: 'My Computer'
 };
 
-class MockNotifications implements INotifications {
+class MockNotifications {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
