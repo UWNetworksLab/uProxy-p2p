@@ -61,10 +61,15 @@ class UIConnector implements uProxy.UIAPI {
     // TODO: (the interface may change)
   }
 
-  public sync = () => {
-    // TODO: (the interface may change)
+  public updateAll = () => {
     console.log('sending ALL state to UI.');
-    ui.updateAll();
+    for (var networkName in Social.networks) {
+      Social.networks[networkName].notifyUI();
+    }
+    // Only send ALL update to UI when description is loaded.
+    core.loadDescription.then(() => {
+      this.update(uProxy.Update.ALL, {'description': core.description});
+    });
   }
 
   public syncUser = (payload:UI.UserMessage) => {
@@ -88,14 +93,6 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.STOP_PROXYING);
   }
 
-  public updateAll = () => {
-    var networkName :string;
-    for (networkName in Social.networks) {
-      Social.networks[networkName].notifyUI();
-    }
-    this.update(uProxy.Update.ALL);
-  }
-
   public isProxying = () : boolean => {
     return proxy != null;
   }
@@ -108,6 +105,8 @@ var ui = new UIConnector();
  * sends updaes to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
+  public description :string = 'My computer';
+  public loadDescription :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -119,6 +118,16 @@ class uProxyCore implements uProxy.CoreAPI {
     }).catch((e) => {
       console.error(e);
     });
+
+    // TODO: description isn't loading properly after a restart in chrome,
+    // although save then load immediately after works.
+    this.loadDescription = storage.load<Core.StoredDescription>('description')
+        .then((loadedDescriptionObj :Core.StoredDescription) => {
+          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
+          this.description = loadedDescriptionObj.description;
+        }).catch((e) => {
+          console.log('No description loaded', e);
+        });
   }
 
   /**
@@ -129,7 +138,7 @@ class uProxyCore implements uProxy.CoreAPI {
     for (var network in Social.networks) {
       Social.networks[network].logout();
     }
-    storage.reset().then(ui.sync);
+    storage.reset().then(ui.updateAll);
   }
 
   sendInstance = (clientId :string) => {
@@ -195,7 +204,7 @@ class uProxyCore implements uProxy.CoreAPI {
       return Promise.reject();
     }
     var loginPromise = network.login(true);
-    loginPromise.then(ui.sync)
+    loginPromise.then(ui.updateAll)
         .then(() => {
           console.log('Successfully logged in to ' + networkName);
         });
@@ -232,15 +241,14 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (description:string) => {
-    for (var network in Social.networks) {
-      var myself = Social.networks[network].getLocalInstance();
-      if (!myself) {
-        console.error('No LocalInstance to set description for!');
-        return;
-      }
-      myself.updateDescription(description);
-    }
+  public updateDescription = (newDescription:string) => {
+    // TODO: Send the new description to peers.  Right now we assume that users
+    // can't update the description after they are signed in.
+    var newDescriptionObj :Core.StoredDescription = {
+      description: newDescription
+    };
+    storage.save<Core.StoredDescription>('description', newDescriptionObj);
+    core.description = newDescription;
   }
 
   /**
@@ -497,63 +505,10 @@ function _validateKeyHash(keyHash:string) {
   return true;
 }
 
-// TODO: Move notifications into its own service.
-// Set notification flag for Instance corresponding to |instanceId|, and also
-// set the notification flag for the userId.
-/*
-function _addNotification(instanceId:string) {
-  var instance = store.getInstance(instanceId);
-  if (!instance) {
-    console.error('Could not find instance ' + instanceId);
-    return false;
-  }
-  instance.notify = true;
-  store.saveInstance(instanceId);
-  ui.syncInstance(instance, 'notify');
-}
-
-// Remove notification flag for Instance corresponding to |instanceId|, if it
-// exists.
-function _removeNotification(instanceId:string) {
-  if (!instanceId) return;
-
-  var instance = store.getInstance(instanceId);
-  if (!instance) {
-    console.error('Instance does not exist for ' + instanceId);
-    return false;
-  }
-  instance.notify = false;
-  store.saveInstance(instanceId);
-  ui.syncInstance(instance, 'notify');
-  return true;
-}
-*/
-
-/**
- * Update the description for an instanceId.
- * Assumes that |instanceId| is valid.
- * TODO: Move this into LocalInstance.
- */
-/*
-function receiveUpdateDescription(msg) {
-  console.log('Updating description! ' + JSON.stringify(msg));
-  var description = msg.data.description,
-      instanceId = msg.data.instanceId,
-      instance = store.getInstance(instanceId);
-  if (!instance) {
-    console.error('Could not update description - no instance: ' + instanceId);
-    return false;
-  }
-  instance.description = description;
-  ui.syncInstance(instance, 'description');
-  return true;
-}
-*/
-
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-core.onCommand(uProxy.Command.READY, ui.sync);
+core.onCommand(uProxy.Command.READY, ui.updateAll);
 core.onCommand(uProxy.Command.RESET, core.reset);
 // When the login message is sent from the extension, assume it's explicit.
 core.onPromiseCommand(uProxy.Command.LOGIN, core.login);

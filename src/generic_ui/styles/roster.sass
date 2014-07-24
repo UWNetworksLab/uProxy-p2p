@@ -167,7 +167,7 @@
 .contacts li
   position: relative
   z-index: 0
-  height: 65px
+  min-height: 65px
   cursor: default
   padding: 6px 75px
   white-space: nowrap
@@ -311,3 +311,11 @@ img.c-icon
     word-wrap: break-word
     display: inline-block
     margin-left: 2px  // To compensate for image border.
+
+.instance-description
+  margin-top: 0.25em
+  &.online:hover
+    font-weight: bold
+    cursor: pointer
+  &.offline
+    color: #999999

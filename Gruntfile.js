@@ -371,7 +371,8 @@ module.exports = function(grunt) {
       generic_ui: {
         src: FILES.jasmine_helpers
             .concat([
-              'build/generic_ui/scripts/user.js'
+              'build/generic_ui/scripts/user.js',
+              'build/generic_ui/scripts/ui.js'
             ]),
         options: {
           keepRunner: true,

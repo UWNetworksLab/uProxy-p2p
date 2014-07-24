@@ -30,25 +30,28 @@
       <div class='uproxy-banner'>
       <img src='icons/uproxy-128.png'>proxy
       </div>
-      <span class="description">Safe Passage for the Web.</span>
+      <!-- TODO: add a tagline if we have one -->
+      <!-- <span class="description"></span> -->
 
       <div class="app-missing-warning" ng-hide="core.connected()">
         You need to install the uProxy app as well as the uProxy extension.
       </div>
 
       <div ng-show="core.connected()">
-        <!-- TODO: re-enable when we have descriptions ready for use.
-        <input type="text" ng-model="model.me.description"
+
+        <!-- Description entry is disabled after login, as we don't yet support updating
+             instances for signed in contacts -->
+        <input type="text" ng-model="model.description"
             id="my-description"
+            ng-disabled="ui.loggedIn()"
             placeholder="Device description"
-            ng-blur="core.updateDescription();descriptionHelp=false"
+            ng-blur="core.updateDescription(model.description);descriptionHelp=false"
             ng-focus="descriptionHelp=true">
         </input>
         <p class="tip" ng-show="descriptionHelp">
           Please describe your device.
           This description will be visible to friends with uProxy.
         </p>
-        -->
 
         <div id="networks-box" ng-show="ui.isSplash()">
           <h3>Networks</h3>
@@ -169,26 +172,38 @@
                  timing of DOM updates.
             -->
             <li ng-repeat="contact in model.roster | filter : ui.doesContactPassFilter() | limitTo : 100 | orderBy : ['-canUProxy', 'name'] track by contact.userId"
-                ng-click="ui.focusOnUser(contact)"
-                ng-class="{offline:!contact.online}">
+                ng-class="{offline:!contact.isOnline}">
 
-              <span class="c-name">{{contact.name}}</span>
+              <div ng-switch="contact.instances.length > 0">
+                <div ng-switch-when="true">
+                  <span class="c-name">{{contact.name}}</span>
+                  <img class="contact-image" ng-src='{{contact.imageData}}'>
 
-              <img class="contact-image" ng-src='{{contact.imageData}}'>
-
-              <span class="c-icons">
-                <!-- TODO: do the givesMe or usesMe icons ever show? -->
-                <span class="c-icon givesMe"
-                    ng-class="{grey:'yes'!=contact.trust.asProxy,
-                               active:contact.isActiveProxy }"
-                    ng-show='contact.givesMe'></span>
-                <span class="c-icon usesMe"
-                    ng-class="{grey:'yes'!=contact.trust.asClient,
-                               active:contact.isActiveClient }"
-                    ng-show='contact.usesMe'></span>
-                <span class="c-icon canUProxy" ng-show="contact.canUProxy"></span>
-                <span class="c-icon contactRightArrow">&#62;</span>
-              </span>
+                  <!-- TODO: should these icons these icons be instance specific ? -->
+                  <span class="c-icons">
+                    <span class="c-icon givesMe" ng-show='contact.givesMe'></span>
+                    <span class="c-icon usesMe" ng-show='contact.usesMe'></span>
+                    <span class="c-icon canUProxy"></span>
+                    <span class="c-icon contactRightArrow">&#62;</span>
+                  </span>
+                  
+                  <div ng-repeat="instance in contact.instances | orderBy: '-isOnline'">
+                    <div ng-if="instance.isOnline"
+                        ng-click="ui.focusOnUser(contact, instance)"
+                        class="instance-description online">
+                      {{instance.description}}
+                    </div>
+                    <div ng-if="!instance.isOnline" class="instance-description offline">
+                      {{instance.description}} (offline)
+                    </div>
+                  </div>
+                </div>
+                <div ng-switch-default>
+                  <span class="c-name">{{contact.name}}</span>
+                  <div class="instance-description offline">Not running uProxy</div>
+                  <img class="contact-image" ng-src='{{contact.imageData}}'>
+                </div>
+              </div>
 
             </li>
           </ul>
@@ -201,7 +216,7 @@
 
         <div id="access" ng-show="ui.isUserView()">
 
-          <p class="access-note" ng-hide="ui.proxyServerInstance">
+          <p class="access-note" ng-hide="ui.focusedInstance">
             {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
