@@ -81,7 +81,7 @@ module Core {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
-        description: description
+        description: core.description
       };
     }
 

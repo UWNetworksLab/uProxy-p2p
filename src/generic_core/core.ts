@@ -39,17 +39,6 @@ rtcToNetServer.emit('start');
 
 // Keep track of the current remote proxy, if they exist.
 var proxy :Core.RemoteInstance = null;
-// Load description or use default.
-// TODO: description isn't loading properly after a restart in chrome,
-// although save then load immediately after works.
-var description :string = 'My computer';
-var loadDescription = storage.load<Core.StoredDescription>('description')
-    .then((loadedDescriptionObj :Core.StoredDescription) => {
-      console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
-      description = loadedDescriptionObj.description;
-    }).catch((e) => {
-      console.log('No description loaded', e);
-    });
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -78,9 +67,9 @@ class UIConnector implements uProxy.UIAPI {
       Social.networks[networkName].notifyUI();
     }
     // Only send ALL update to UI when description is loaded.
-    loadDescription.then(() => {
-      this.update(uProxy.Update.ALL, {'description': description});
-      });
+    core.loadDescription.then(() => {
+      this.update(uProxy.Update.ALL, {'description': core.description});
+    });
   }
 
   public syncUser = (payload:UI.UserMessage) => {
@@ -116,6 +105,8 @@ var ui = new UIConnector();
  * sends updaes to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
+  public description :string = 'My computer';
+  public loadDescription :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -127,6 +118,16 @@ class uProxyCore implements uProxy.CoreAPI {
     }).catch((e) => {
       console.error(e);
     });
+
+    // TODO: description isn't loading properly after a restart in chrome,
+    // although save then load immediately after works.
+    this.loadDescription = storage.load<Core.StoredDescription>('description')
+        .then((loadedDescriptionObj :Core.StoredDescription) => {
+          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
+          this.description = loadedDescriptionObj.description;
+        }).catch((e) => {
+          console.log('No description loaded', e);
+        });
   }
 
   /**
@@ -247,7 +248,7 @@ class uProxyCore implements uProxy.CoreAPI {
       description: newDescription
     };
     storage.save<Core.StoredDescription>('description', newDescriptionObj);
-    description = newDescription;
+    core.description = newDescription;
   }
 
   /**
