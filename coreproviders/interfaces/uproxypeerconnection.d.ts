@@ -11,7 +11,9 @@ declare module freedom_UproxyPeerConnection {
 
 // TODO: uncomment once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 // declare module freedom {
-  // Thin wrapper over WebRtc.PeerConnection.
+  // This is the interface for the object returned by
+  // freedom['WebRtc.PeerConnection'], which is a thin wrapper over 
+  // WebRtc.PeerConnection.
   // 
   // Some accomodations to Freedom message passing have had to be made:
   //  - The relatively complex WebRtc.SignallingMessage interface has been
