@@ -212,11 +212,11 @@ module.exports = function(grunt) {
          dest: 'build/firefox'},
         {expand: true, cwd: 'build/',
          src: ['uproxy.js'],
-         dest: 'build/firefox/lib'},
+         dest: 'build/firefox/data/core/'},
         // ... the generic core stuff
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
-         dest: 'build/firefox/lib'},
+         dest: 'build/firefox/data/core/'},
         // ... the generic UI stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
@@ -230,16 +230,16 @@ module.exports = function(grunt) {
          dest: 'build/firefox/data'},
         {expand: true, cwd: 'node_modules/socks-rtc/build/',
          src: ['**'],
-         dest: 'build/firefox/lib/socks-rtc'},
+         dest: 'build/firefox/data/lib/socks-rtc'},
         {expand: true, cwd: 'node_modules/freedom/providers/social',
          src: ['websocket-server/**'],
-         dest: 'build/firefox/lib'},
+         dest: 'build/firefox/data/lib'},
         {expand: true, cwd: 'node_modules/freedom-social-xmpp/build/',
          src: ['**'],
-         dest: 'build/firefox/lib/freedom-social-xmpp'},
+         dest: 'build/firefox/data/lib/freedom-social-xmpp'},
         {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
          src: ['**'],
-         dest: 'build/firefox/lib/storage'}
+         dest: 'build/firefox/data/lib/storage'}
       ]}
     },
 
@@ -403,30 +403,6 @@ module.exports = function(grunt) {
       }
     },
 
-    //-------------------------------------------------------------------------
-    'mozilla-cfx': {
-      debug_run: {
-        options: {
-          extension_dir: 'dist/firefox',
-          command: 'run'
-        }
-      }
-    },
-
-    //-------------------------------------------------------------------------
-    'compress': {
-      main: {
-        options: {
-          mode: 'zip',
-          archive: 'dist/uproxy.xpi'
-        },
-        expand: true,
-        cwd: 'build/firefox',
-        src: ['**'],
-        dest: '.'
-      }
-    },
-
   });  // grunt.initConfig
 
 
@@ -573,11 +549,6 @@ module.exports = function(grunt) {
   taskManager.add('build_firefox_xpi', [
     'build_firefox',
     'compress:main'
-  ]);
-
-  taskManager.add('run_firefox', [
-    'build_firefox',
-    'mozilla-cfx:debug_run'
   ]);
 
   taskManager.add('test_core', [

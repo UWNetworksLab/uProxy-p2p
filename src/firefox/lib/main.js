@@ -32,7 +32,7 @@ var panel = panels.Panel({
   contentScriptWhen: 'start'
 })
 
-var manifest = self.data.url('../lib/uproxy.json');
+var manifest = self.data.url('core/uproxy.json');
 var freedom =
     setupFreedom(manifest, {
       freedomcfg: function(register) {

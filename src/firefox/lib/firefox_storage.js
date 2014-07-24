@@ -19,7 +19,6 @@ Storage_firefox.prototype.keys = function(continuation) {
 };
 
 Storage_firefox.prototype.get = function(key, continuation) {
-
   if (this.storage_[key]) {
     continuation(this.storage_[key]);
   } else {
