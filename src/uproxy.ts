@@ -145,7 +145,7 @@ module uProxy {
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
   }
-  
+
   /**
    * Common type for the message payloads sent between uProxy backend and ui.
    */
