@@ -1,20 +1,5 @@
 <div class='instance-actions' ng-show='ui.proxyServerInstance && ui.isUserView()'>
 
-  <div class='access-gestalt-toggle'>
-    <button class="btn"
-        ng-click="ui.toggleGetOrGive('GET', ui.proxyServerInstance)"
-        ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GET'">
-      Get Access
-    </button>
-    <img src='icons/bidirectional-arrow.png'>
-    <button class="btn"
-        ng-click="ui.toggleGetOrGive('GIVE', ui.proxyServerInstance)"
-        ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'">
-      Give Access
-    </button>
-  </div>
-
-
   <div class='movable-proxy-controls'
       ng-class="{get: ui.showGetOrGive(ui.proxyServerInstance)=='GET',
                  give: ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'}">

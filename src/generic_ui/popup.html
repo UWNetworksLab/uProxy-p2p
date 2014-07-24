@@ -137,6 +137,19 @@
 
         <div id="contact-header" ng-show="ui.isUserView()">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
+          <div class='access-gestalt-toggle'>
+            <button class="btn"
+                ng-click="ui.toggleGetOrGive('GET', ui.proxyServerInstance)"
+                ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GET'">
+              Get Access
+            </button>
+            <img src='icons/bidirectional-arrow.png'>
+            <button class="btn"
+                ng-click="ui.toggleGetOrGive('GIVE', ui.proxyServerInstance)"
+                ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'">
+              Give Access
+            </button>
+          </div>
           <h1>{{ui.contact.name}}</h1>
         </div>
       </div>
