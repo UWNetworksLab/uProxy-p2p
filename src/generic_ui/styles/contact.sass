@@ -21,12 +21,20 @@
     font-weight: 100
     letter-spacing: 1px
 
+// TODO: The switch between 'getting' and 'giving' will change drastically,
+// and not actually inherit from btn.
 .access-gestalt-toggle
   position: absolute
   text-align: center
   width: 100%
-  top: 20px
+  top: 4px
   z-index: 400
+  & .btn
+    padding: 3px !important
+    font-size: 10px !important
+    vertical-align: top
+  & img
+    height: 16px
 
 // ------------------------------ Access View ----------------------------------
 // This is the view which slides in from the right, when you click on a
