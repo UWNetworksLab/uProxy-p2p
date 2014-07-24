@@ -6,6 +6,7 @@
         ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GET'">
       Get Access
     </button>
+    <img src='icons/bidirectional-arrow.png'>
     <button class="btn"
         ng-click="ui.toggleGetOrGive('GIVE', ui.proxyServerInstance)"
         ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'">
@@ -13,7 +14,6 @@
     </button>
   </div>
 
-  <img src='icons/bidirectional-arrow.png'>
 
   <div class='movable-proxy-controls'
       ng-class="{get: ui.showGetOrGive(ui.proxyServerInstance)=='GET',
@@ -60,7 +60,9 @@
           </uproxy-consent-action>
         </div>
         <div ng-switch-default>
-          <p class='uproxytip'>No access yet.
+          <p class='uproxytip'>
+            You need to request access from your contact before making a
+            connection.
           </p>
           <uproxy-consent-action text='Request'
               action='REQUEST'>

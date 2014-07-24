@@ -22,10 +22,9 @@
     letter-spacing: 1px
 
 .access-gestalt-toggle
-  margin-bottom: 0.5em
-  margin-left: 0.5em
-  text-align: left
   position: absolute
+  text-align: center
+  width: 100%
   top: 20px
   z-index: 400
 
@@ -61,27 +60,35 @@
   &.get
     .their-info
       top: 100px
-    .consent-button-wrapper
-      top: 260px
     .my-info
       top: 405px
   &.give
     .my-info
       top: 100px
-    .consent-button-wrapper
-      top: 260px
     .their-info
       top: 375px
+  .consent-button-wrapper
+    top: 220px
+
+.consent-button-wrapper
+  position: absolute
+  width: 100%
 
 // Contains the actual trust & action buttons
 .uproxy-box
-  background: no-repeat center
-  height: 85px
+  background: repeat-y center 45px
+  height: 170px
+  // uproxytip contains a short amount of text to better clarify the current
+  // access situation between the contact and the user.
   & .uproxytip
+    position: absolute
+    width: 100%
     text-align: center
-    opacity: 0.7
+    line-height: 40px
+    color: #999
     cursor: default
-    margin-top: 0.5em
+    border-bottom: 1px solid #ddd
+    padding-bottom: 24px
   &.proxy
     background-image: url('../icons/arrow-up.png')
   &.client
@@ -90,6 +97,8 @@
     &.active
       // TODO: this isn't working yet, we should make this work
       background-image: url('../icons/arrow-down-animate.gif')
+  .btn
+    margin-top: 64px
 
 .instance-actions
   color: white
@@ -106,7 +115,6 @@
   height: 100%
   & .btn
     padding: 6px 12px
-    margin-top: 10px
     text-shadow: 0 1px 1px #888
     border-radius: 3px
     font-size: 11px
