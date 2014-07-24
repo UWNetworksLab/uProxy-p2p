@@ -1,0 +1,12 @@
+{
+  "name": "scratch",
+  "description": "top-level freedom manifest",
+  "app": {
+    "script": [
+      "freedom.js"
+    ]
+  },
+  "permissions": [
+    "core.uproxypeerconnection"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "freedomchat",
+  "description": "uproxypeerconnection chat demo.",
+  "version": "0.1",
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  }
+}
