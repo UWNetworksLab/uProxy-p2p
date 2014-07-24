@@ -1,5 +1,6 @@
 /*
- * Configuration and control of the browsers proxy settings.
+ * Sends message back to add-on environment, which handles proxy settings.
+ * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
 /// <reference path='../../../interfaces/firefox.d.ts' />
 

@@ -5,6 +5,7 @@ const {Cu} = require("chrome");
 
 Cu.import(self.data.url('freedom-for-firefox.jsm'));
 
+// Main uProxy button.
 var button = buttons.ActionButton({
   id: "uProxy-button",
   label: "uProxy-button",
@@ -16,6 +17,7 @@ var button = buttons.ActionButton({
   onClick: start
 });
 
+// Panel that gets displayed when user clicks the button.
 var panel = panels.Panel({
   width: 371,
   height: 600,
@@ -32,6 +34,7 @@ var panel = panels.Panel({
   contentScriptWhen: 'start'
 })
 
+// Load freedom.
 var manifest = self.data.url('core/uproxy.json');
 var freedom =
     setupFreedom(manifest, {
@@ -42,7 +45,9 @@ var freedom =
       portType: 'BackgroundFrame'
     });
 
+// Set up connection between freedom and content script.
 require('glue.js').setUpConnection(freedom, panel, button);
+
 
 function start(state) {
   panel.show({

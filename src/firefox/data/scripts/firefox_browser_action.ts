@@ -1,7 +1,7 @@
 /**
- * notify.ts
+ * firefox_browser_action.ts
  *
- * This is the Firefox-specific implementation of the Notifications API.
+ * This is the Firefox-specific implementation of the BrowserAction API.
  */
 /// <reference path='../../../interfaces/browser_action.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />

@@ -1,5 +1,5 @@
 /**
- * core_connector.ts
+ * firefox_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */

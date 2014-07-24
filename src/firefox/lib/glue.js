@@ -1,5 +1,5 @@
 /**
- * forwards data from content script to freedom;
+ * Forwards data from content script to freedom;
  * TODO(salomegeo): rewrite in typescript;
  * Figure out a way to avoid freeom -> add-on env -> content script -> add-on
  * for proxy setting and setiing a main icon.

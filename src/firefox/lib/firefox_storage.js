@@ -1,5 +1,5 @@
 /**
- * firefox local storage provider.
+ * Firefox local storage provider.
  * TODO(salomegeo): rewrite in typescript
  */
 

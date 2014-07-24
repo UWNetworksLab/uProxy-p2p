@@ -1,5 +1,5 @@
 /**
- * firefox proxy settings implementation
+ * Firefox proxy settings implementation
  * TODO(salomegeo): rewrite it in typescript
  */
 
