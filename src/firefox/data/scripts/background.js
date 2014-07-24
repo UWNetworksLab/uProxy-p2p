@@ -21,8 +21,6 @@ if (undefined === ui) {
     ui = initUI();
 }
 
-var port = self.port;
-
 unsafeWindow.ui = ui;
 unsafeWindow.model = model;
 unsafeWindow.core = core;
