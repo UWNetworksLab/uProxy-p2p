@@ -2,12 +2,12 @@
     ng-disabled='ui.proxyServerInstance.assess.asProxy'
     ng-hide='ui.proxyServerInstance.access.asProxy'
     ng-click='start()'>
-  Start
+  Connect
 </button>
 <!-- TODO: Include an indicator for when proxying is starting up.-->
 <button class='btn'
     ng-disabled='ui.proxyServerInstance.assess.asProxy'
     ng-show='ui.proxyServerInstance.access.asProxy'
     ng-click='stop()'>
-  Stop
+  Disconnect
 </button>
