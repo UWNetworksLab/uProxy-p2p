@@ -6,9 +6,9 @@
   z-index: 300
   width: 100%
   top: 0
-  padding-bottom: 4px
-  box-shadow: 0 1px 3px #eee
-  background-color: #fff
+  padding-bottom: 2px
+  box-shadow: 0 1px 3px #888
+  background-color: rgba(255, 255, 255, 0.5)
   & h1
     position: fixed
     width: 100%
@@ -20,6 +20,14 @@
     font-size: $fontSize * 1.1
     font-weight: 100
     letter-spacing: 1px
+
+.access-gestalt-toggle
+  margin-bottom: 0.5em
+  margin-left: 0.5em
+  text-align: left
+  position: absolute
+  top: 20px
+  z-index: 400
 
 // ------------------------------ Access View ----------------------------------
 // This is the view which slides in from the right, when you click on a
@@ -52,16 +60,16 @@
 .movable-proxy-controls
   &.get
     .their-info
-      top: 200px
+      top: 100px
     .consent-button-wrapper
-      top: 310px
+      top: 260px
     .my-info
       top: 405px
   &.give
     .my-info
-      top: 200px
+      top: 100px
     .consent-button-wrapper
-      top: 275px
+      top: 260px
     .their-info
       top: 375px
 
@@ -88,7 +96,8 @@
   position: absolute
   width: 100%
   font-size: 20px
-  background: #fff url('../icons/web.jpg') no-repeat center -80px
+  // This provides the connecting-to-internet graphical metaphor.
+  background: #fff url('../icons/web.jpg') no-repeat center -100px
   background-size: contain
   text-align: center
   font-size: $fontSize * 0.8
