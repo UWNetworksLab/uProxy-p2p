@@ -16,7 +16,7 @@ var model :UI.Model = {
   description: 'My Computer'
 };
 
-class MockNotifications {
+class MockNotifications implements BrowserAction {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
@@ -25,9 +25,6 @@ class MockNotifications {
   }
   setColor(color) {
     console.log('setting background color of the badge to: ' + color);
-  }
-  showDesktopNotification(notificationText) {
-    console.log('showing desktop notification: ' + notificationText);
   }
 }
 

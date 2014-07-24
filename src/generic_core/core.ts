@@ -39,18 +39,12 @@ rtcToNetServer.emit('start');
 
 // Keep track of the current remote proxy, if they exist.
 var proxy :Core.RemoteInstance = null;
-
-// Object containing description so it can be saved to storage.
-interface descriptionObj {
-  description :string;
-};
-
 // Load description or use default.
 // TODO: description isn't loading properly after a restart in chrome,
 // although save then load immediately after works.
 var description :string = 'My computer';
-var loadDescription = storage.load<descriptionObj>('description')
-    .then((loadedDescriptionObj :descriptionObj) => {
+var loadDescription = storage.load<Core.StoredDescription>('description')
+    .then((loadedDescriptionObj :Core.StoredDescription) => {
       console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
       description = loadedDescriptionObj.description;
     }).catch((e) => {
@@ -249,10 +243,10 @@ class uProxyCore implements uProxy.CoreAPI {
   public updateDescription = (newDescription:string) => {
     // TODO: Send the new description to peers.  Right now we assume that users
     // can't update the description after they are signed in.
-    var newDescriptionObj :descriptionObj = {
+    var newDescriptionObj :Core.StoredDescription = {
       description: newDescription
     };
-    storage.save<descriptionObj>('description', newDescriptionObj);
+    storage.save<Core.StoredDescription>('description', newDescriptionObj);
     description = newDescription;
   }
 
