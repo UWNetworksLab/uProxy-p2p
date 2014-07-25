@@ -97,20 +97,6 @@
       <div id="header">
         <div id="roster-header" ng-show="ui.isRoster()">
           <div id="actions">
-            <button id="my-access" class="filter"
-                    ng-mouseenter="showFilter('myAccess')"
-                    ng-mouseleave="showFilterTip=false"
-                    ng-focus="showFilter('myAccess')"
-                    ng-blur="showFilterTip=false"
-                    ng-class="{on:ui.filters.myAccess}"
-                    ng-click="ui.toggleFilter('myAccess')"></button>
-            <button id="friends-access" class="filter"
-                    ng-mouseenter="showFilter('friendsAccess')"
-                    ng-focus="showFilter('friendsAccess')"
-                    ng-mouseleave="showFilterTip=false"
-                    ng-blur="showFilterTip=false"
-                    ng-class="{on:ui.filters.friendsAccess}"
-                    ng-click="ui.toggleFilter('friendsAccess')"></button>
             <button id="uproxy-filter" class="filter"
                     ng-mouseenter="showFilter('uproxy')"
                     ng-focus="showFilter('uproxy')"
@@ -194,12 +180,10 @@
 
                   <!-- TODO: should these icons these icons be instance specific ? -->
                   <span class="c-icons">
-                    <span class="c-icon givesMe" ng-show='contact.givesMe'></span>
-                    <span class="c-icon usesMe" ng-show='contact.usesMe'></span>
                     <span class="c-icon canUProxy"></span>
                     <span class="c-icon contactRightArrow">&#62;</span>
                   </span>
-                  
+
                   <div ng-repeat="instance in contact.instances | orderBy: '-isOnline'">
                     <div ng-if="instance.isOnline"
                         ng-click="ui.focusOnUser(contact, instance)"
