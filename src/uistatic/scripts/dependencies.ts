@@ -1,7 +1,7 @@
 // Fake dependency which mocks all interactions such that the UI can work.
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/browser_action.d.ts'/>
 /// <reference path='../../interfaces/lib/angular.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 
@@ -12,10 +12,11 @@ declare var angular:ng.IAngularStatic;
 var model :UI.Model = {
   networks: {},
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: []
+  roster: [],
+  description: 'My Computer'
 };
 
-class MockNotifications implements INotifications {
+class MockNotifications implements BrowserAction {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
@@ -25,9 +26,6 @@ class MockNotifications implements INotifications {
   setColor(color) {
     console.log('setting background color of the badge to: ' + color);
   }
-  showDesktopNotification(notificationText) {
-    console.log('showing desktop notification: ' + notificationText);
-  }
 }
 
 function generateFakeUserMessage() : UI.UserMessage {
@@ -36,15 +34,14 @@ function generateFakeUserMessage() : UI.UserMessage {
     user: {
       userId: 'alice',
       name: 'Alice uProxy',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      isOnline: true
     },
-    clients: [
-      UProxyClient.Status.ONLINE
-    ],
     instances: [
       {
         instanceId: 'alice-instance-01',
         description: 'fake instance for alice',
+        isOnline: true,
         consent: {
           asClient: Consent.ClientState.NONE,
           asProxy:  Consent.ProxyState.NONE

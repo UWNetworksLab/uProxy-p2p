@@ -353,11 +353,19 @@ module Social {
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
         // Send our own InstanceMessage to any queued-up clients.
         this.flushQueuedInstanceMessages();
+
         // Update UI with own information.
+        var userProfileMessage :UI.UserProfileMessage = {
+          userId: profile.userId,
+          name: profile.name,
+          imageData: profile.imageData,
+          isOnline: true
+        };
         ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
           network: this.name,
-          user:    profile
+          user:    userProfileMessage
         });
+        
         return;
       }
       // Otherwise, this is a remote contact. Add them to the roster if
@@ -535,6 +543,7 @@ module Social {
           .then((freedomClient :freedom.Social.ClientState) => {
             // Upon successful login, save local client information.
             this.myInstance.userId = freedomClient.userId;
+            this.startMonitor_();
             this.log('logged into uProxy');
           });
       return this.onceLoggedIn_
@@ -560,6 +569,7 @@ module Social {
         return Promise.resolve();
       }
       this.onceLoggedIn_ = null;
+      this.stopMonitor_();
       return this.freedomApi_.logout().then(() => {
         this.myInstance.userId = null;
         this.log('logged out.');

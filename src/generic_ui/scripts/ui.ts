@@ -7,7 +7,8 @@
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/notify.d.ts'/>
+/// <reference path='../../interfaces/browser_action.d.ts'/>
+/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
 
 
 declare var model         :UI.Model;
@@ -52,6 +53,8 @@ module UI {
     // TODO: or convert this back to an obect and figure out how to sort
     // it in angular.
     roster :User[];
+
+    description :string;
   }
 
   // TODO: remove this once extension model is cleaned up.
@@ -100,9 +103,7 @@ module UI {
     // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
-    // This is the instance we are focused on in the UI.
-    // TODO: come up with a better name to distinguish from currentProxyServer.
-    public proxyServerInstance :UI.Instance = null;
+    public focusedInstance :UI.Instance = null;
     // If we are proxying, keep track of the instance and user.
     public currentProxyServer :UI.CurrentProxy = null;
 
@@ -117,7 +118,7 @@ module UI {
     // this map we should default to the correct get/give state based on the
     // consent settings.
     // TODO: put this in storage to remember the get/give state after restart.
-    private mapInstanceIdToGetOrGive_ = {};
+    private mapInstanceIdToGetOrGive_  :{ [instanceId :string] :string } = {};
 
     advancedOptions = false;
     // TODO: Pull search / filters into its own class.
@@ -146,7 +147,7 @@ module UI {
      */
     constructor(
         public core   :uProxy.CoreAPI,
-        public notify :INotifications) {
+        public browserAction :BrowserAction) {
 
       // TODO: Determine the best way to describe view transitions.
       this.view = View.ROSTER;
@@ -161,6 +162,7 @@ module UI {
       // (We begin with the simplest, total state update, above.)
       core.onUpdate(uProxy.Update.ALL, (state :Object) => {
         console.log('Received uProxy.Update.ALL:', state);
+        model.description = state['description'];
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
         // from the core, so one-to-one mappinsg from the old json-patch code cannot
@@ -174,7 +176,7 @@ module UI {
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
-        var profile :freedom.Social.UserProfile = payload.user;
+        var profile :UI.UserProfileMessage = payload.user;
         this.myPic = profile.imageData || DEFAULT_USER_IMG;
         this.myName = profile.name;
       });
@@ -217,7 +219,8 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      this.notify.showDesktopNotification(notificationText);
+      new Notification('uProxy', { body: notificationText,
+                                   icon: 'icons/uproxy-128.png'});
     }
 
     // ------------------------------- Views ----------------------------------
@@ -273,10 +276,10 @@ module UI {
     setClients = (numClients) => {
       this.numClients = numClients;
       if (numClients > 0) {
-        this.notify.setColor('#008');
-        this.notify.setLabel('↓');
+        this.browserAction.setColor('#008');
+        this.browserAction.setLabel('↓');
       } else {
-        this.notify.setColor('#800');
+        this.browserAction.setColor('#800');
       }
     }
 
@@ -288,7 +291,7 @@ module UI {
      * Assumes that there is a 'current instance' available.
      */
     public startProxying = () => {
-      if (!this.user || !this.proxyServerInstance) {
+      if (!this.user || !this.focusedInstance) {
         console.error('Cannot start proxying without a current instance.');
         return;
       }
@@ -298,11 +301,11 @@ module UI {
         // model. Do this soon.
         network: 'google',
         userId: this.user.userId,
-        instanceId: this.proxyServerInstance.instanceId
+        instanceId: this.focusedInstance.instanceId
       };
       this.core.start(path).then(() => {
         this.currentProxyServer = {
-          instance: this.proxyServerInstance,
+          instance: this.focusedInstance,
           user: this.user
         };
         this._setProxying(true);
@@ -315,7 +318,7 @@ module UI {
      * COMMAND to the core.
      */
     public stopProxyingUserInitiated = () => {
-      if (!this.proxyServerInstance) {
+      if (!this.focusedInstance) {
         console.warn('Stop Proxying called while not proxying.');
         return;
       }
@@ -339,9 +342,9 @@ module UI {
 
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
-        this.notify.setIcon('uproxy-19-p.png');
+        this.browserAction.setIcon('uproxy-19-p.png');
       } else {
-        this.notify.setIcon('uproxy-19.png');
+        this.browserAction.setIcon('uproxy-19.png');
       }
     }
 
@@ -367,7 +370,7 @@ module UI {
         var searchText = this.search,
             compareString = user.name.toLowerCase();
         // First, compare filters.
-        if ((this.filters.online        && !user.online)    ||
+        if ((this.filters.online        && !user.isOnline)    ||
             (this.filters.uproxy        && !user.canUProxy) ||
             (this.filters.myAccess      && !user.givesMe)   ||
             (this.filters.friendsAccess && !user.usesMe)) {
@@ -389,17 +392,11 @@ module UI {
      * Handler for when the user clicks on the entry in the roster for a User.
      * Sets the UI's 'current' User and Instance, if it exists.
      */
-    public focusOnUser = (user:UI.User) => {
+    public focusOnUser = (user :UI.User, instance :UI.Instance) => {
       this.view = View.USER;
       console.log('focusing on user ' + user);
       this.user = user;
-      // For now, default to the first instance that the user has.
-      // TODO: Support multiple instances in the UI.
-      if (user.instances.length > 0) {
-        this.proxyServerInstance = user.instances[0];
-      } else {
-        this.proxyServerInstance = null;
-      }
+      this.focusedInstance = instance;
     }
 
     /*
@@ -414,9 +411,7 @@ module UI {
     syncInstance = (instance : any) => {}
     updateMappings = () => {}
 
-    updateIdentity = (identity) => {}
     sendConsent = () => {}
-    addNotification = () => {}
 
     /**
      * Synchronize a new network to be visible on this UI.
@@ -441,7 +436,9 @@ module UI {
     // TODO: Make these functional and write specs.
     public loggedIn = () => {
       for (var networkId in model.networks) {
-        if (model.networks[networkId].online) {
+        if (model.networks[networkId].online &&
+            // TODO: figure out how to reference Social.MANUAL_NETWORK_ID here
+            networkId !== "manual") {
           return true;
         }
       }
@@ -477,13 +474,31 @@ module UI {
         model.roster.push(user);
       }
       user.update(profile);
-      user.refreshStatus(payload.clients);
+
+      // Update instances
       user.instances = payload.instances;
-      // Update the 'current instance' of UI if this is the correct user.
-      // TODO: change this for multi instance support
-      if (this.user === user) {
-        this.proxyServerInstance = user.instances[0];
+      if (user == this.user) {
+        // Update focusedInstance
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (user.instances[i].instanceId == this.focusedInstance.instanceId) {
+            this.focusedInstance = user.instances[i];
+            break;
+          }
+        }
       }
+      if (this.currentProxyServer && user == this.currentProxyServer.user) {
+        // Update currentProxyServer.instance.
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (user.instances[i].instanceId == this.currentProxyServer.instance.instanceId) {
+            this.currentProxyServer.instance = user.instances[i];
+            break;
+          }
+        }
+      }
+
+      user.canUProxy = user.instances.some((instance) => {
+        return instance.isOnline;
+      });
 
       // Update givesMe and usesMe fields based on whether any instance
       // has these permissions.
@@ -508,7 +523,7 @@ module UI {
     public hasOnlineUProxyBuddies = () => {
       for (var i = 0; i < model.roster.length; ++i) {
         var user :UI.User = model.roster[i];
-        if (user.instances.length > 0 && user.online) {
+        if (user.instances.length > 0 && user.isOnline) {
           return true;
         }
       }
@@ -541,42 +556,6 @@ module UI {
       return false;
     }
 
-    /*
-     * Make sure counters and UI-only state holders correctly reflect the model.
-     * If |previousPatch| is provided, the search is optimized to only sync the
-     * relevant entries.
-     * TODO: Redo this for the new paradigm of network rosters.
-     */
-    sync = (previousPatch?:any) => {
-      // var n = 0;  // Count up notifications
-      // for (var userId in model.roster) {
-        // var user = model.roster[userId];
-        // this.syncUser(user);
-        // if (user.hasNotification) {
-          // n++;
-        // }
-      // }
-      // this.setNotifications(n);
-      // Run through instances, count up clients.
-      // var c = 0;
-      // for (var iId in model.instances) {
-        // var instance = model.instances[iId];
-        // if ('running' == instance.status.client) {
-          // c++;
-        // }
-        // if ('running' == instance.status.proxy) {
-          // this.isProxying = true;
-        // }
-      // }
-      // this.setClients(c);
-
-      // Generate list ordered by names.
-      // if (!this.myName) {
-        // this.syncMe();
-      // }
-      // return true;
-    }
-
     public isProxying = () : boolean => {
       return this.currentProxyServer != null;
     }
@@ -593,8 +572,8 @@ module UI {
     public showGetOrGive = (instance :UI.Instance) : string => {
       if (!instance) {
         // This occurs because angular still evaluates expressions using
-        // ui.proxyServerInstance even when those DOM elements are hidden
-        // and ui.proxyServerInstance is null.
+        // ui.focusedInstance even when those DOM elements are hidden
+        // and ui.focusedInstance is null.
         return 'GET';
       } else if (this.mapInstanceIdToGetOrGive_[instance.instanceId]) {
         // User explicitly toggled get/give

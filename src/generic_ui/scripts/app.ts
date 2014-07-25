@@ -114,24 +114,24 @@ app.directive('uproxyContact', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.proxyServerInstance.instanceId
+            instanceId: $s.ui.focusedInstance.instanceId
           },
           action:     action
         });
       }
       // Current status indications need to return the enum strings.
       $s.currentProxyState = () => {
-        if (!$s.ui.proxyServerInstance) {
+        if (!$s.ui.focusedInstance) {
           return 'NONE';
         }
-        console.log('currentProxyState returning ' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy])
-        return '' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy];
+        console.log('currentProxyState returning ' + $s.ProxyState[$s.ui.focusedInstance.consent.asProxy])
+        return '' + $s.ProxyState[$s.ui.focusedInstance.consent.asProxy];
       }
       $s.currentClientState = () => {
-        if (!$s.ui.proxyServerInstance) {
+        if (!$s.ui.focusedInstance) {
           return 'NONE';
         }
-        return '' + $s.ClientState[$s.ui.proxyServerInstance.consent.asClient];
+        return '' + $s.ClientState[$s.ui.focusedInstance.consent.asClient];
       }
     };
     return {
@@ -167,7 +167,7 @@ app.directive('uproxyConsentAction', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.proxyServerInstance.instanceId
+            instanceId: $s.ui.focusedInstance.instanceId
           },
           action:     action
         });

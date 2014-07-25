@@ -16,7 +16,7 @@
       "scripts/chrome_glue.js",
       "scripts/user.js",
       "scripts/ui.js",
-      "scripts/notify.js",
+      "scripts/chrome_browser_action.js",
       "scripts/proxy-config.js",
       "scripts/core_connector.js",
       "scripts/chrome_connector.js",

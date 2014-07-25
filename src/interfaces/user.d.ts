@@ -8,7 +8,4 @@
 interface BaseUser {
   userId :string;
   name :string;
-  // Map from clientId to its current connection status.
-  clients :{[clientId:string] :UProxyClient.Status};
-  // clientToInstanceMap :{[clientId:string] :Instance};
 }
