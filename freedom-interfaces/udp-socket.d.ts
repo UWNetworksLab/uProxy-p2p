@@ -33,14 +33,13 @@
       destroy(continuation:() => void) : void;
       getInfo(continuation:(socketInfo:SocketInfo) => void) : void;
     }
-  }
 
-  interface freedom_UdpSocket {
-    bind:any;
-    sendTo:any;
-    destroy:any;
-    on:any;
-    getInfo:any;
+    interface Socket {
+      bind:any;
+      sendTo:any;
+      destroy:any;
+      on:any;
+      getInfo:any;
+    }
   }
-
 // }

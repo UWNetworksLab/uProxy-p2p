@@ -32,20 +32,19 @@
       host :string;
       port :number;
     }
+
+    // The TcpSocket class (freedom['core.TcpSocket'])
+    interface Socket {
+      listen(address:string, port:number) : Promise<void>;
+      connect(hostname:string, port:number) : Promise<void>;
+      write(data:ArrayBuffer) : Promise<WriteInfo>;
+      getInfo() : Promise<SocketInfo>;
+      close() : Promise<void>;
+      // TcpSockets have 3 types of events:
+      on(eventType:string, f:Function) : void;
+      on(type:'onConnection', f:(i:ConnectInfo) => void) : void;
+      on(type:'onData', f:(i:ReadInfo) => void) : void;
+      on(type:'onDisconnect', f:(i:DisconnectInfo) => void) : void;
+    }
   }  // module TcpSockets
-
-  // The TcpSocket class (freedom['core.TcpSocket'])
-  interface freedom_TcpSocket {
-    listen(address:string, port:number) : Promise<void>;
-    connect(hostname:string, port:number) : Promise<void>;
-    write(data:ArrayBuffer) : Promise<freedom_TcpSocket.WriteInfo>;
-    getInfo() : Promise<freedom_TcpSocket.SocketInfo>;
-    close() : Promise<void>;
-    // TcpSockets have 3 types of events:
-    on(eventType:string, f:Function) : void;
-    on(type:'onConnection', f:(i:freedom_TcpSocket.ConnectInfo) => void) : void;
-    on(type:'onData', f:(i:freedom_TcpSocket.ReadInfo) => void) : void;
-    on(type:'onDisconnect', f:(i:freedom_TcpSocket.DisconnectInfo) => void) : void;
-  }
-
 // }

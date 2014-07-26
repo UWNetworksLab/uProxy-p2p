@@ -125,7 +125,7 @@
         <button class='close-btn' ng-show='channel.state === "open"'>close</button>
       </div>
       <div class='messages'>
-        <div ng-repeat='message in messages'>{{message}}</div>
+        <div ng-repeat='message in messages track by $index'>{{message}}</div>
       </div>
       <div class='send'>
         <input type='text' id='message' size='60' ng-model='chatMessage'></input>
