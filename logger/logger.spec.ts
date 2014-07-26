@@ -1,4 +1,4 @@
-/// <reference path='../freedom-interfaces/freedom.d.ts' />
+/// <reference path='../freedom-declarations/freedom.d.ts' />
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 
 describe("logger", function() {

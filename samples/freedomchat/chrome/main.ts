@@ -1,5 +1,5 @@
 /// <reference path='messages.d.ts' />
-/// <reference path="../../../freedom-interfaces/freedom.d.ts" />
+/// <reference path="../../../freedom-declarations/freedom.d.ts" />
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
