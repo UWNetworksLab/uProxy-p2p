@@ -1,5 +1,5 @@
 /// <reference path="../../third_party/typings/tsd.d.ts" />
-/// <reference path="../../freedom-interfaces/freedom.d.ts" />
+/// <reference path="../../interfaces/freedom.d.ts" />
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {

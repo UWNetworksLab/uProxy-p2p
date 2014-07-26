@@ -1,6 +1,6 @@
 /// <reference path="uproxypeerconnection.d.ts" />
 /// <reference path="../../peerconnection/peerconnection.d.ts" />
-/// <reference path="../../freedom-interfaces/freedom.d.ts" />
+/// <reference path="../../interfaces/freedom.d.ts" />
 
 // Note that this can't implement UproxyPeerConnection interface due to the
 // continuation parameter, so we lose quite a bit of type safety.
