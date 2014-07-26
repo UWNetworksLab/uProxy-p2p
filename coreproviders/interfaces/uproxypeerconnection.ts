@@ -3,7 +3,10 @@
 // for it to be made available as a core provider.
 // For docs, see:
 //   ../providers/uproxypeerconnection.ts
-declare var fdom:any;
+
+/// <reference path="../../freedom-declarations/freedom.d.ts" />
+declare var fdom:freedom.CoreProviderEnv.Fdom;
+
 fdom.apis.set('core.uproxypeerconnection', {
   'constructor': {
     value: [
