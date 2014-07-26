@@ -1,6 +1,6 @@
 /// <reference path="../../../peerconnection/peerconnection.d.ts" />
 /// <reference path="../../../coreproviders/providers/uproxypeerconnection.d.ts" />
-/// <reference path="../../../freedom-interfaces/freedom.d.ts" />
+/// <reference path="../../../freedom-declarations/freedom.d.ts" />
 /// <reference path="../../../third_party/typings/tsd.d.ts" />
 
 var pcConfig :WebRtc.PeerConnectionConfig = {
