@@ -1,5 +1,6 @@
-/// <reference path="../interfaces/uproxypeerconnection.d.ts" />
+/// <reference path="uproxypeerconnection.d.ts" />
 /// <reference path="../../peerconnection/peerconnection.d.ts" />
+/// <reference path="../../freedom-interfaces/freedom.d.ts" />
 
 // Note that this can't implement UproxyPeerConnection interface due to the
 // continuation parameter, so we lose quite a bit of type safety.
@@ -8,16 +9,20 @@ class UproxyPeerConnectionImpl {
   private pc_ :WebRtc.PeerConnection;
 
   constructor(
+      // TODO: fix `any` type.
       private module_:any,
-      private dispatchEvent_:any,
-      pcConfigAsJson:any) {
+      // TODO: see comment in .d.ts: use real type not any.
+      private dispatchEvent_:(eventType:string, eventData:any) => void,
+      // TODO: don't take json string, take the real object and gice it a type.
+      pcConfigAsJson:string) {
     this.pc_ = new WebRtc.PeerConnection(JSON.parse(pcConfigAsJson));
 
     // Re-dispatch various messages as Freedom messages.
     this.pc_.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
       this.dispatchEvent_('signalMessage', JSON.stringify(signal));
     });
-    this.pc_.peerCreatedChannelQueue.setSyncHandler((dataChannel:WebRtc.DataChannel) => {
+      this.pc_.peerCreatedChannelQueue.setSyncHandler(
+          (dataChannel:WebRtc.DataChannel) => {
       // Re-dispatch events from this new data channel.
       this.dispatchDataChannelEvents_(dataChannel);
       this.dispatchEvent_('peerCreatedChannel', dataChannel.getLabel());
@@ -30,23 +35,19 @@ class UproxyPeerConnectionImpl {
 
   public handleSignalMessage(
       signal:string,
-      continuation:() => any) : void {
+      continuation:() => void) : void {
     this.pc_.handleSignalMessage(JSON.parse(signal));
     continuation();
   }
 
-  public negotiateConnection = (continuation:(endpoints:WebRtc.ConnectionAddresses) => any) : void => {
+  public negotiateConnection = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
     // TODO: propagate errors
-    this.pc_.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
-      continuation(endpoints);
-    });
+    this.pc_.negotiateConnection().then(continuation);
   }
 
-  public onceConnected = (continuation:(endpoints:WebRtc.ConnectionAddresses) => any) : void => {
-    this.pc_.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
-      // TODO: propagate errors
-      continuation(endpoints);
-    });
+  public onceConnected = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
+    // TODO: propagate errors
+    this.pc_.onceConnected.then(continuation);
   }
 
   ////////
@@ -68,8 +69,8 @@ class UproxyPeerConnectionImpl {
   }
 
   public openDataChannel = (
-      channelLabel: string,
-      continuation:() => any) : void => {
+      channelLabel :string,
+      continuation :() => void) : void => {
     var dataChannel = this.pc_.openDataChannel(channelLabel);
     dataChannel.onceOpened.then(() => {
       this.dispatchDataChannelEvents_(dataChannel);
@@ -79,13 +80,13 @@ class UproxyPeerConnectionImpl {
   }
 
   public send = (
-      channelLabel:string,
-      data:WebRtc.Data,
-      continuation ?:() => any) : void => {
+      channelLabel :string,
+      data :WebRtc.Data,
+      continuation :() => void) : void => {
     // TODO: propagate errors
     this.pc_.dataChannels[channelLabel].send(data).then(continuation);
   }
 }
 
-declare var fdom:any;
+declare var fdom:freedom.CoreProviderEnv.Fdom;
 fdom.apis.register('core.uproxypeerconnection', UproxyPeerConnectionImpl);

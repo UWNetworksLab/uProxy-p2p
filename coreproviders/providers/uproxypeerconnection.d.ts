@@ -1,20 +1,22 @@
 /// <reference path="../../third_party/typings/tsd.d.ts" />
+/// <reference path="../../freedom-interfaces/freedom.d.ts" />
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {
   // Associates a channel label with a WebRtc.Data, for fromPeerData events.
   interface LabelledDataChannelMessage {
     channelLabel: string;
-    message: WebRtc.Data
+    message: WebRtc.Data;
   }
+
 }
 
 // TODO: uncomment once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 // declare module freedom {
   // This is the interface for the object returned by
-  // freedom['WebRtc.PeerConnection'], which is a thin wrapper over 
+  // freedom['WebRtc.PeerConnection'], which is a thin wrapper over
   // WebRtc.PeerConnection.
-  // 
+  //
   // Some accomodations to Freedom message passing have had to be made:
   //  - The relatively complex WebRtc.SignallingMessage interface has been
   //    replaced with opaque strings (they can be decoded with JSON.parse).
@@ -22,7 +24,7 @@ declare module freedom_UproxyPeerConnection {
   //    they must be accessed via this class, by label.
   //  - Some of the arguments to PeerConnection are too complex to
   //    be expressed in Freedom-ese, e.g. PeerConnectionConfig.
-  //    
+  //
   // Additionally, note that while TypeScript interfaces cannot specify
   // arguments, the implementation of this class accepts a JSON-ified
   // PeerConnectionConfig instance.
@@ -47,9 +49,19 @@ declare module freedom_UproxyPeerConnection {
     // TODO: onceConnecting and onceDisconnected
     onceConnected() : Promise<WebRtc.ConnectionAddresses>;
 
-    on(t:string, f:Function) : Promise<void>;
-    on(t:'onSignalMessage', f:(signal:string) => any) : Promise<void>;
-    on(t:'peerCreatedChannel', f:(channelLabel:string) => any) : Promise<void>;
-    on(t:'fromPeerData', f:(channel:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => any) : Promise<void>;
+    // TODO: make a type for events from UproxyPeerConnection and use the same
+    // type in the implementation. That way you can get better typechecking.
+    // e.g.
+    // interface Message {
+    //  onSignalMessage: string;
+    //  peerCreatedChannel: string;
+    //  fromPeerData: freedom_UproxyPeerConnection.LabelledDataChannelMessage;
+    //}
+    on(t:string, f:(eventData:any) => void) : void;
+    on(t:'onSignalMessage', f:(signal:string) => void) : void;
+    on(t:'peerCreatedChannel', f:(channelLabel:string) => void) : void;
+    on(t:'fromPeerData',
+       f:(message:freedom_UproxyPeerConnection.LabelledDataChannelMessage)
+         => void) : void;
   }
 // }
