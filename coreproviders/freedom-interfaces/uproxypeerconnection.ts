@@ -4,7 +4,11 @@
 // For docs, see:
 //   ../providers/uproxypeerconnection.ts
 
+<<<<<<< HEAD:src/coreproviders/interfaces/uproxypeerconnection.ts
 /// <reference path="../../freedom-declarations/freedom.d.ts" />
+=======
+/// <reference path="../../freedom-interfaces/freedom.d.ts" />
+>>>>>>> improved types and uproxy-pc organization:src/coreproviders/freedom-interfaces/uproxypeerconnection.ts
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 
 fdom.apis.set('core.uproxypeerconnection', {

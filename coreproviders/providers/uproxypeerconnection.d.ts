@@ -58,12 +58,22 @@ declare module freedom_UproxyPeerConnection {
     // interface Message {
     //  onSignalMessage: string;
     //  peerCreatedChannel: string;
+<<<<<<< HEAD:src/coreproviders/providers/uproxypeerconnection.d.ts
     //  fromPeerData: LabelledDataChannelMessage;
+=======
+    //  fromPeerData: freedom_UproxyPeerConnection.LabelledDataChannelMessage;
+>>>>>>> improved types and uproxy-pc organization:src/coreproviders/providers/uproxypeerconnection.d.ts
     //}
     on(t:string, f:(eventData:any) => void) : void;
     on(t:'onSignalMessage', f:(signal:string) => void) : void;
     on(t:'peerCreatedChannel', f:(channelLabel:string) => void) : void;
+<<<<<<< HEAD:src/coreproviders/providers/uproxypeerconnection.d.ts
     on(t:'fromPeerData', f:(message:LabelledDataChannelMessage) => void)
         : void;
+=======
+    on(t:'fromPeerData',
+       f:(message:freedom_UproxyPeerConnection.LabelledDataChannelMessage)
+         => void) : void;
+>>>>>>> improved types and uproxy-pc organization:src/coreproviders/providers/uproxypeerconnection.d.ts
   }
 }
