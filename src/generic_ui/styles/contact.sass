@@ -2,13 +2,14 @@
 // consent management.
 
 #contact-header
-  position: fixed
+  position: absolute
   z-index: 300
   width: 100%
+  height: 28px
   top: 0
-  padding-bottom: 4px
-  box-shadow: 0 1px 3px #eee
-  background-color: #fff
+  padding-bottom: 2px
+  box-shadow: 0 1px 3px #888
+  background-color: rgba(255, 255, 255, 0.5)
   & h1
     position: fixed
     width: 100%
@@ -21,6 +22,21 @@
     font-weight: 100
     letter-spacing: 1px
 
+// TODO: The switch between 'getting' and 'giving' will change drastically,
+// and not actually inherit from btn.
+.access-gestalt-toggle
+  position: absolute
+  text-align: center
+  width: 100%
+  top: 4px
+  z-index: 400
+  & .btn
+    padding: 3px !important
+    font-size: 10px !important
+    vertical-align: top
+  & img
+    height: 16px
+
 // ------------------------------ Access View ----------------------------------
 // This is the view which slides in from the right, when you click on a
 // roster entry.
@@ -30,7 +46,7 @@
   text-align: center
   width: 100%
   height: 100%
-  padding-top: 40px
+  // padding-top: 40px
   top: 0
   left: 0
   @include smooth
@@ -52,28 +68,36 @@
 .movable-proxy-controls
   &.get
     .their-info
-      top: 200px
-    .consent-button-wrapper
-      top: 310px
+      top: 100px
     .my-info
       top: 405px
   &.give
     .my-info
-      top: 200px
-    .consent-button-wrapper
-      top: 275px
+      top: 100px
     .their-info
       top: 375px
+  .consent-button-wrapper
+    top: 220px
+
+.consent-button-wrapper
+  position: absolute
+  width: 100%
 
 // Contains the actual trust & action buttons
 .uproxy-box
-  background: no-repeat center
-  height: 85px
+  background: repeat-y center 45px
+  height: 170px
+  // uproxytip contains a short amount of text to better clarify the current
+  // access situation between the contact and the user.
   & .uproxytip
+    position: absolute
+    width: 100%
     text-align: center
-    opacity: 0.7
+    line-height: 40px
+    color: #999
     cursor: default
-    margin-top: 0.5em
+    border-bottom: 1px solid #ddd
+    padding-bottom: 24px
   &.proxy
     background-image: url('../icons/arrow-up.png')
   &.client
@@ -82,15 +106,24 @@
     &.active
       // TODO: this isn't working yet, we should make this work
       background-image: url('../icons/arrow-down-animate.gif')
+  .btn
+    margin-top: 64px
 
 .instance-actions
+  color: white
+  position: absolute
+  width: 100%
+  font-size: 20px
+  // This provides the connecting-to-internet graphical metaphor.
+  background: #fff url('../icons/clouds_background.png') no-repeat center top
+  background-size: contain
   text-align: center
   font-size: $fontSize * 0.8
   position: absolute
   width: 100%
+  height: 100%
   & .btn
     padding: 6px 12px
-    margin-top: 10px
     text-shadow: 0 1px 1px #888
     border-radius: 3px
     font-size: 11px
@@ -102,15 +135,6 @@
       &:hover, &:focus
         color: #fff
         background-color: #444
-
-.instance-actions .internet-text
-  color: white
-  position: absolute
-  top: 100px
-  margin-left: auto
-  margin-right: auto
-  width: 100%
-  font-size: 20px
 
 .client-details
   position: relative

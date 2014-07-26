@@ -97,20 +97,6 @@
       <div id="header">
         <div id="roster-header" ng-show="ui.isRoster()">
           <div id="actions">
-            <button id="my-access" class="filter"
-                    ng-mouseenter="showFilter('myAccess')"
-                    ng-mouseleave="showFilterTip=false"
-                    ng-focus="showFilter('myAccess')"
-                    ng-blur="showFilterTip=false"
-                    ng-class="{on:ui.filters.myAccess}"
-                    ng-click="ui.toggleFilter('myAccess')"></button>
-            <button id="friends-access" class="filter"
-                    ng-mouseenter="showFilter('friendsAccess')"
-                    ng-focus="showFilter('friendsAccess')"
-                    ng-mouseleave="showFilterTip=false"
-                    ng-blur="showFilterTip=false"
-                    ng-class="{on:ui.filters.friendsAccess}"
-                    ng-click="ui.toggleFilter('friendsAccess')"></button>
             <button id="uproxy-filter" class="filter"
                     ng-mouseenter="showFilter('uproxy')"
                     ng-focus="showFilter('uproxy')"
@@ -140,6 +126,19 @@
 
         <div id="contact-header" ng-show="ui.isUserView()">
           <button class="btn-back" ng-click="ui.returnToRoster()"></button>
+          <div class='access-gestalt-toggle'>
+            <button class="btn"
+                ng-click="ui.toggleGetOrGive('GET', ui.proxyServerInstance)"
+                ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GET'">
+              Get Access
+            </button>
+            <img src='icons/bidirectional-arrow.png'>
+            <button class="btn"
+                ng-click="ui.toggleGetOrGive('GIVE', ui.proxyServerInstance)"
+                ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'">
+              Give Access
+            </button>
+          </div>
           <h1>{{ui.contact.name}}</h1>
         </div>
       </div>
@@ -181,12 +180,10 @@
 
                   <!-- TODO: should these icons these icons be instance specific ? -->
                   <span class="c-icons">
-                    <span class="c-icon givesMe" ng-show='contact.givesMe'></span>
-                    <span class="c-icon usesMe" ng-show='contact.usesMe'></span>
                     <span class="c-icon canUProxy"></span>
                     <span class="c-icon contactRightArrow">&#62;</span>
                   </span>
-                  
+
                   <div ng-repeat="instance in contact.instances | orderBy: '-isOnline'">
                     <div ng-if="instance.isOnline"
                         ng-click="ui.focusOnUser(contact, instance)"
@@ -220,7 +217,7 @@
             {{ ui.user.name }} does not have <b>uProxy</b>.
           </p>
 
-          <uproxy-user-access></uproxy-user-access>
+          <uproxy-contact></uproxy-contact>
 
         </div>  <!-- end of #access -->
 

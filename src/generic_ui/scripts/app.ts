@@ -100,10 +100,10 @@ app.run([
 // TODO: Put these directives in their own dedicated files.
 
 /*
- * The uProxy Consent directive handles all consent commands from the UI to
+ * The uProxy Contact directive handles all consent commands from the UI to
  * the Core, which handles passing consent bits over the wire.
  */
-app.directive('uproxyUserAccess', () => {
+app.directive('uproxyContact', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
       $s.ProxyState = Consent.ProxyState;
@@ -138,7 +138,7 @@ app.directive('uproxyUserAccess', () => {
       // 'E' is an angular directive attribute.
       // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
-      templateUrl: 'templates/user-access.html',
+      templateUrl: 'templates/contact.html',
       link: link
     };
   });

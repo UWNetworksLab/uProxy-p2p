@@ -63,6 +63,9 @@ class MockCore implements uProxy.CoreAPI {
   constructor() {
     this.status = { connected: true };
   }
+  connected = () => {
+    return true;  // Static UI core is always 'connected'.
+  }
   reset() {
     console.log('Resetting.');
   }
