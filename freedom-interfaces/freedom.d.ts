@@ -16,6 +16,24 @@ interface OnAndEmit<T,T2> {
 }
 
 declare module freedom {
+
+  // This is the interface that exists in the environment of a core provider's
+  // definition.
+  module CoreProviderEnv {
+    // The interface for the global `fdom` object.
+    interface Fdom {
+      apis :Apis;
+    }
+    interface Apis {
+      // Register the core provider wheer |classDef| is the class object.
+      register(coreProviderName:string, classDef:Function) : void;
+
+      // This sets the object that defines the freedom interface for the given
+      // core provider name.
+      set(coreProviderName:string, freedomClassSpec:any) : void;
+    }
+  }
+
   //----------------------------------------------------------------------------
   // Generic top level freedom interfaces
   //----------------------------------------------------------------------------
