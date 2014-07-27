@@ -59,7 +59,10 @@ declare module freedom_UproxyPeerConnection {
     //  onSignalMessage: string;
     //  peerCreatedChannel: string;
     //  fromPeerData: LabelledDataChannelMessage;
+<<<<<<< HEAD
     //  fromPeerData: freedom_UproxyPeerConnection.LabelledDataChannelMessage;
+=======
+>>>>>>> fixed typo and abbreviated interface name
     //}
     on(t:string, f:(eventData:any) => void) : void;
     on(t:'onSignalMessage', f:(signal:string) => void) : void;
