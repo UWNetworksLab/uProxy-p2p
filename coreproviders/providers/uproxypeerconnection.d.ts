@@ -9,10 +9,6 @@ declare module freedom_UproxyPeerConnection {
     message: WebRtc.Data;
   }
 
-}
-
-// TODO: uncomment once https://github.com/Microsoft/TypeScript/issues/52 is fixed
-// declare module freedom {
   // This is the interface for the object returned by
   // freedom['WebRtc.PeerConnection'], which is a thin wrapper over
   // WebRtc.PeerConnection.
@@ -28,7 +24,7 @@ declare module freedom_UproxyPeerConnection {
   // Additionally, note that while TypeScript interfaces cannot specify
   // arguments, the implementation of this class accepts a JSON-ified
   // PeerConnectionConfig instance.
-  interface freedom_UproxyPeerConnection {
+  interface Pc {
 
     negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
 
@@ -55,13 +51,12 @@ declare module freedom_UproxyPeerConnection {
     // interface Message {
     //  onSignalMessage: string;
     //  peerCreatedChannel: string;
-    //  fromPeerData: freedom_UproxyPeerConnection.LabelledDataChannelMessage;
+    //  fromPeerData: LabelledDataChannelMessage;
     //}
     on(t:string, f:(eventData:any) => void) : void;
     on(t:'onSignalMessage', f:(signal:string) => void) : void;
     on(t:'peerCreatedChannel', f:(channelLabel:string) => void) : void;
-    on(t:'fromPeerData',
-       f:(message:freedom_UproxyPeerConnection.LabelledDataChannelMessage)
-         => void) : void;
+    on(t:'fromPeerData', f:(message:LabelledDataChannelMessage) => void)
+        : void;
   }
-// }
+}

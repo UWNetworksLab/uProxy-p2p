@@ -1,7 +1,10 @@
+/// <reference path='messages.d.ts' />
 /// <reference path="../../../peerconnection/peerconnection.d.ts" />
 /// <reference path="../../../coreproviders/providers/uproxypeerconnection.d.ts" />
 /// <reference path="../../../freedom-declarations/freedom.d.ts" />
 /// <reference path="../../../third_party/typings/tsd.d.ts" />
+
+import PcLib = freedom_UproxyPeerConnection;
 
 var pcConfig :WebRtc.PeerConnectionConfig = {
   webrtcPcConfig: {
@@ -13,9 +16,9 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   }
 };
 
-var a :freedom_UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var a :PcLib.Pc = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
-var b :freedom_UproxyPeerConnection = freedom['core.uproxypeerconnection'](
+var b :PcLib.Pc = freedom['core.uproxypeerconnection'](
     JSON.stringify(pcConfig));
 
 // Connect the two signalling channels.
@@ -47,7 +50,7 @@ b.onceConnected().then(logEndpoints.bind(null, 'b'));
 // Once negotiated, enable the UI and add send/receive handlers.
 a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
   // Send messages over the datachannel, in response to events from the UI.
-  var sendMessage = (pc:freedom_UproxyPeerConnection, message:Chat.Message) => {
+  var sendMessage = (pc:PcLib.Pc, message:Chat.Message) => {
     pc.send('text', { str: message.message }).catch((e) => {
       console.error('error sending message: ' + e.message);
     });
@@ -77,5 +80,5 @@ a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
     freedom.emit('error', {});
   });
 }, (e) => {
-  dbgErr('could not negotiate peerconnection: ' + e.message);
+  console.error('could not negotiate peerconnection: ' + e.message);
 });
