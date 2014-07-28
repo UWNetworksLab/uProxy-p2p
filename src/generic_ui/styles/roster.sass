@@ -167,7 +167,7 @@
 .contacts li
   position: relative
   z-index: 0
-  height: 65px
+  min-height: 65px
   cursor: default
   padding: 6px 75px
   white-space: nowrap
@@ -252,7 +252,6 @@ img.c-icon
     opacity: 0.5
 
 // Container for a user's profile picture and such
-// TODO: rename to user- prefix
 .contact-info
   position: absolute
   text-align: center
@@ -264,6 +263,7 @@ img.c-icon
     position: relative
     border-color: #ddd
     background-size: contain
+    background-color: #fff
     box-shadow: 1px 2px 5px #ccc
   &.their-info
     img.contact-image
@@ -311,3 +311,11 @@ img.c-icon
     word-wrap: break-word
     display: inline-block
     margin-left: 2px  // To compensate for image border.
+
+.instance-description
+  margin-top: 0.25em
+  &.online:hover
+    font-weight: bold
+    cursor: pointer
+  &.offline
+    color: #999999
