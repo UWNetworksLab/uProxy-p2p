@@ -1,5 +1,6 @@
-/// <reference path="../../third_party/typings/tsd.d.ts" />
 /// <reference path="../../freedom-declarations/freedom.d.ts" />
+/// <reference path="../../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
+/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {
@@ -7,6 +8,12 @@ declare module freedom_UproxyPeerConnection {
   interface LabelledDataChannelMessage {
     channelLabel: string;
     message: WebRtc.Data;
+  }
+
+  interface SignallingMessage {
+    // Should be exactly one of the below
+    candidate ?:RTCIceCandidate;
+    sdp       ?:RTCSessionDescription;
   }
 
   // This is the interface for the object returned by

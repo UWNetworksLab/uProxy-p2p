@@ -1,7 +1,7 @@
-/// <reference path='../../peerconnection/peerconnection.d.ts' />
-/// <reference path='../../peerconnection/datachannel.d.ts' />
-/// <reference path='../../third_party/typings/angularjs/angular.d.ts' />
-/// <reference path='../../arraybuffers/arraybuffers.d.ts' />
+/// <reference path='../../peerconnection.d.ts' />
+/// <reference path='../../datachannel.d.ts' />
+/// <reference path='../../../third_party/typings/angularjs/angular.d.ts' />
+/// <reference path='../../../arraybuffers/arraybuffers.d.ts' />
 
 
 //------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
 
   // Handle messages received on the datachannel(s).
   // The message is forwarded to the UI.
-  var receiveMessage = (name:string, d:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => {
+  var receiveMessage = (name:string, d:PcLib.LabelledDataChannelMessage) => {
     if (d.message.str === undefined) {
       console.error('only text messages are supported');
       return;
