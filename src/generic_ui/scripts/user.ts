@@ -18,11 +18,10 @@ module UI {
     public imageData       :string;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
-    public online          :boolean = false;
+    public isOnline          :boolean = false;
     public canUProxy       :boolean = false;
     public givesMe         :boolean = false;
     public usesMe          :boolean = false;
-    public clients;
     public instances       :UI.Instance[];
 
     /**
@@ -31,37 +30,19 @@ module UI {
     constructor(public userId:string) {
       console.log('new user: ' + this.userId);
       this.name = '';
-      this.clients = {};
       this.instances = [];
     }
 
     /**
      * Update user details.
      */
-    public update = (profile:freedom.Social.UserProfile) => {
+    public update = (profile :UI.UserProfileMessage) => {
       if (this.userId !== profile.userId) {
         console.error('Unexpected userId: ' + profile.userId);
       }
       this.name = profile.name;
-      this.url = profile.url;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
-    }
-
-    /**
-     * Update clients and instances.
-     */
-    public refreshStatus = (statuses:UProxyClient.Status[]) => {
-      // Is online if there is at least one client that is not 'OFFLINE'.
-      this.online = statuses.some((status) => {
-        return UProxyClient.Status.OFFLINE !== status;
-      });
-      // Has uProxy if there is at least one client that is 'ONLINE'.
-      this.canUProxy = statuses.some((status) => {
-        return UProxyClient.Status.ONLINE === status;
-      });
-      console.log('Updated ' + this.name + ' - known to be: ' +
-                  '\n online: ' + this.online +
-                  '\n uproxy-enabled: ' + this.canUProxy);
+      this.isOnline = profile.isOnline;
     }
 
   }  // class UI.User

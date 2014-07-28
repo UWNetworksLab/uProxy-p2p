@@ -4,7 +4,6 @@
  * This file defines the local uProxy Instance class. This represents the local
  * installation.
  */
-/// <reference path='nouns-and-adjectives.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
@@ -14,7 +13,6 @@ module Core {
   export class LocalInstance implements Instance, Core.Persistent {
 
     public instanceId  :string;
-    public description :string;
     public keyHash     :string;
     public userId      :string;
 
@@ -32,7 +30,6 @@ module Core {
         return;
       }
       this.instanceId = LocalInstance.generateInstanceID();
-      this.description = this.generateRandomDescription_();
       this.keyHash = null;
     }
 
@@ -45,7 +42,6 @@ module Core {
         this.keyHash = fingerprint;
         console.log('Finished generating LocalInstance: ',
             this.instanceId,
-            this.description,
             this.keyHash);
       })
     }
@@ -75,29 +71,6 @@ module Core {
     }
 
     /**
-     * Generate a random description based on an instance ID.
-     */
-    private generateRandomDescription_ = () : string => {
-      var words :string[] = [];
-      // TODO: separate this out and use full space of possible names by
-      // using the whole of the available strings.
-      for (var i = 0; i < 4; i++) {
-        var index= Math.floor(Math.random() * 256);
-        words.push((i & 1) ? nouns[index] : adjectives[index]);
-      }
-      return words.join(' ');
-    }
-
-    /**
-     * Update this local instance's description.
-     */
-    public updateDescription = (description:string) => {
-      this.description = description;
-      // TODO: save personal description to storage.
-      // TODO: Send the new description to ALL currently online friend instances.
-    }
-
-    /**
      * This method prepares the local instance's handshake, to be sent to all
      * peers, notifying them that we are a uProxy installation.
      */
@@ -108,7 +81,7 @@ module Core {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
-        description: this.description
+        description: core.description
       };
     }
 
@@ -118,13 +91,11 @@ module Core {
     public currentState = () : Instance => {
       return cloneDeep({
         instanceId:  this.instanceId,
-        description: this.description,
         keyHash:     this.keyHash,
       });
     }
     public restoreState = (state) => {
       this.instanceId = state.instanceId;
-      this.description = state.description;
       this.keyHash = state.keyHash;
     }
 

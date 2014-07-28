@@ -1,28 +1,8 @@
-<div class='instance-actions' ng-show='ui.proxyServerInstance && ui.isUserView()'>
-
-  <div class='get-or-give-buttons'>
-    I would like to
-    <button class="btn"
-        ng-click="ui.toggleGetOrGive('GET', ui.proxyServerInstance)"
-        ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GET'">
-      Get Access
-    </button>
-    <button class="btn"
-        ng-click="ui.toggleGetOrGive('GIVE', ui.proxyServerInstance)"
-        ng-disabled="ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'">
-      Give Access
-    </button>
-  </div>
-
-  <img src='icons/cloud.png'>
-
-  <div class='internet-text'>Internet</div>
-
-  <img src='icons/bidirectional-arrow.png'>
+<div class='instance-actions' ng-show='ui.focusedInstance && ui.isUserView()'>
 
   <div class='movable-proxy-controls'
-      ng-class="{get: ui.showGetOrGive(ui.proxyServerInstance)=='GET',
-                 give: ui.showGetOrGive(ui.proxyServerInstance)=='GIVE'}">
+      ng-class="{get: ui.showGetOrGive(ui.focusedInstance)=='GET',
+                 give: ui.showGetOrGive(ui.focusedInstance)=='GIVE'}">
 
     <div class="my-info contact-info">
       <div class='contact-img-wrapper'>
@@ -34,7 +14,7 @@
     </div>
 
     <div class="consent-button-wrapper"
-        ng-switch='ui.showGetOrGive(ui.proxyServerInstance)'>
+        ng-switch='ui.showGetOrGive(ui.focusedInstance)'>
 
       <div class='uproxy-box proxy'
           ng-switch-when='GET'
@@ -65,7 +45,8 @@
           </uproxy-consent-action>
         </div>
         <div ng-switch-default>
-          <p class='uproxytip'>No access yet.
+          <p class='uproxytip'>
+            Request access from contact before connection.
           </p>
           <uproxy-consent-action text='Request'
               action='REQUEST'>
@@ -74,7 +55,7 @@
       </div>  <!-- end of currentProxyState switch -->
 
       <div class='uproxy-box client'
-          ng-class="{active:ui.proxyServerInstance.access.asClient}"
+          ng-class="{active:ui.focusedInstance.access.asClient}"
           ng-switch-when='GIVE'
           ng-switch='currentClientState()'>
         <div ng-switch-when='NONE'>
@@ -109,13 +90,13 @@
         </div>
       </div>  <!-- end of currentClientState switch -->
 
-    </div>  <!-- end of ui.showGetOrGive(ui.proxyServerInstance) switch -->
+    </div>  <!-- end of ui.showGetOrGive(ui.focusedInstance) switch -->
 
 
     <div class="their-info contact-info">
       <div class='contact-img-wrapper'>
         <div class="contact-name-bar">
-          <p class="contact-name">{{ui.user.name}}</p>
+          <p class="contact-name">{{ui.user.name}}:<br>{{ui.focusedInstance.description}}</p>
         </div>
         <img class="contact-image" ng-src='{{ui.user.imageData}}'>
       </div>

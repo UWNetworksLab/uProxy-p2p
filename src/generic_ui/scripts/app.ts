@@ -100,10 +100,10 @@ app.run([
 // TODO: Put these directives in their own dedicated files.
 
 /*
- * The uProxy Consent directive handles all consent commands from the UI to
+ * The uProxy Contact directive handles all consent commands from the UI to
  * the Core, which handles passing consent bits over the wire.
  */
-app.directive('uproxyUserAccess', () => {
+app.directive('uproxyContact', () => {
     // TODO: Specify the scoping of the 'current user' in a better way.
     var link = ($s, element, attrs) => {
       $s.ProxyState = Consent.ProxyState;
@@ -114,31 +114,31 @@ app.directive('uproxyUserAccess', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.proxyServerInstance.instanceId
+            instanceId: $s.ui.focusedInstance.instanceId
           },
           action:     action
         });
       }
       // Current status indications need to return the enum strings.
       $s.currentProxyState = () => {
-        if (!$s.ui.proxyServerInstance) {
+        if (!$s.ui.focusedInstance) {
           return 'NONE';
         }
-        console.log('currentProxyState returning ' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy])
-        return '' + $s.ProxyState[$s.ui.proxyServerInstance.consent.asProxy];
+        console.log('currentProxyState returning ' + $s.ProxyState[$s.ui.focusedInstance.consent.asProxy])
+        return '' + $s.ProxyState[$s.ui.focusedInstance.consent.asProxy];
       }
       $s.currentClientState = () => {
-        if (!$s.ui.proxyServerInstance) {
+        if (!$s.ui.focusedInstance) {
           return 'NONE';
         }
-        return '' + $s.ClientState[$s.ui.proxyServerInstance.consent.asClient];
+        return '' + $s.ClientState[$s.ui.focusedInstance.consent.asClient];
       }
     };
     return {
       // 'E' is an angular directive attribute.
       // See: https://docs.angularjs.org/guide/directive
       restrict: 'E',
-      templateUrl: 'templates/user-access.html',
+      templateUrl: 'templates/contact.html',
       link: link
     };
   });
@@ -167,7 +167,7 @@ app.directive('uproxyConsentAction', () => {
           path: {
             network:    $s.ui['network'],
             userId:     $s.ui.user.userId,
-            instanceId: $s.ui.proxyServerInstance.instanceId
+            instanceId: $s.ui.focusedInstance.instanceId
           },
           action:     action
         });
