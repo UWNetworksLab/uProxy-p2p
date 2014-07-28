@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "es6-promise": "^0.1.1",
-    "freedom-for-chrome": "0.2.2",
+    "freedom-for-chrome": "~0.2.2",
     "freedom-for-firefox": "~0.4.1",
     "freedom-social-xmpp": "~0.1.0",
     "freedom-typescript-api": "^0.1.9",
