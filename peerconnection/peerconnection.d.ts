@@ -46,6 +46,9 @@ declare module WebRtc {
     public pcState :State;
 
     // All open data channels.
+    // NOTE: There exists a bug in Chrome prior to version 37 which causes
+    //       entries in this object to continue to exist even after
+    //       the remote peer has closed a data channel.
     public dataChannels     :{[channelLabel:string] : DataChannel};
 
     // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
