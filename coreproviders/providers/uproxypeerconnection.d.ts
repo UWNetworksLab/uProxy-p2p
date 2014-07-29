@@ -49,8 +49,9 @@ declare module freedom_UproxyPeerConnection {
     // TODO: getState, for both peer connection and data channels
     // TODO: close
 
-    // TODO: onceConnecting and onceDisconnected
     onceConnected() : Promise<WebRtc.ConnectionAddresses>;
+    onceConnecting() : Promise<void>;
+    onceDisconnected() : Promise<void>;
 
     // TODO: make a type for events from UproxyPeerConnection and use the same
     // type in the implementation. That way you can get better typechecking.

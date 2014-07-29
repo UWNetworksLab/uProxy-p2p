@@ -50,6 +50,16 @@ class UproxyPeerConnectionImpl {
     this.pc_.onceConnected.then(continuation);
   }
 
+  public onceConnecting = (continuation:() => void) : void => {
+    // TODO: propagate errors
+    this.pc_.onceConnecting.then(continuation);
+  }
+
+  public onceDisconnected = (continuation:() => void) : void => {
+    // TODO: propagate errors
+    this.pc_.onceDisconnected.then(continuation);
+  }
+
   ////////
   // Data channels.
   ////////

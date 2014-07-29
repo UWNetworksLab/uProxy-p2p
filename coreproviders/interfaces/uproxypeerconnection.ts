@@ -59,6 +59,16 @@ fdom.apis.set('core.uproxypeerconnection', {
     }
   },
 
+  'onceConnecting': {
+    type: 'method',
+    value: []
+  },
+
+  'onceDisconnected': {
+    type: 'method',
+    value: []
+  },
+
   ////////
   // Data channels.
   ////////

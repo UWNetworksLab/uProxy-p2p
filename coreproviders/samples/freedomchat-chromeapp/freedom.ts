@@ -36,6 +36,9 @@ b.on('peerCreatedChannel', (channelLabel:string) => {
   console.log('i can see that a created a data channel called ' + channelLabel);
 });
 
+a.onceConnecting().then(() => { console.log('a is connecting...'); });
+b.onceConnecting().then(() => { console.log('b is connecting...'); });
+
 // Log the chosen endpoints.
 function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
   console.log(name + ' connected: ' +
