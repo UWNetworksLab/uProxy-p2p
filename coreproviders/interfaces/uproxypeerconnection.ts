@@ -5,6 +5,7 @@
 //   ../providers/uproxypeerconnection.ts
 
 /// <reference path="../../freedom-declarations/freedom.d.ts" />
+
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 
 fdom.apis.set('core.uproxypeerconnection', {

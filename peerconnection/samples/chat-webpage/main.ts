@@ -1,5 +1,5 @@
-/// <reference path='../../peerconnection/peerconnection.d.ts' />
-/// <reference path='../../peerconnection/datachannel.d.ts' />
+/// <reference path='../../peerconnection.d.ts' />
+/// <reference path='../../datachannel.d.ts' />
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");

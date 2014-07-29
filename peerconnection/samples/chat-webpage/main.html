@@ -20,12 +20,10 @@
     <button id="sendButtonB">Send</button>
   </div>
 
-  <script src='webrtc-adapter/adapter.js'></script>
-  <script src='lib/freedom-for-chrome-for-uproxy.js' data-manifest='freedom.json'>
-    {
-      "debug": false
-    }
-  </script>
+  <script src='lib/third_party/webrtc-adapter/adapter.js'></script>
+  <script src='lib/handler/queue.js'></script>
+  <script src='lib/peerconnection/datachannel.js'></script>
+  <script src='lib/peerconnection/peerconnection.js'></script>
   <script src='main.js'></script>
 </body>
 </html>
