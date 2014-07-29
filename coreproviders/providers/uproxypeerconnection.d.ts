@@ -10,12 +10,6 @@ declare module freedom_UproxyPeerConnection {
     message: WebRtc.Data;
   }
 
-  interface SignallingMessage {
-    // Should be exactly one of the below
-    candidate ?:RTCIceCandidate;
-    sdp       ?:RTCSessionDescription;
-  }
-
   // This is the interface for the object returned by
   // freedom['WebRtc.PeerConnection'], which is a thin wrapper over
   // WebRtc.PeerConnection.
@@ -29,13 +23,13 @@ declare module freedom_UproxyPeerConnection {
   //    be expressed in Freedom-ese, e.g. PeerConnectionConfig.
   //
   // Additionally, note that while TypeScript interfaces cannot specify
-  // arguments, the implementation of this class accepts a JSON-ified
+  // arguments, the implementation of this class accepts a
   // PeerConnectionConfig instance.
   interface Pc {
 
     negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
 
-    handleSignalMessage(signal:string) : Promise<void>;
+    handleSignalMessage(signal:WebRtc.SignallingMessage) : Promise<void>;
 
     // Fulfills once the data channel has been successfully opened,
     // i.e. this is equivalent to PeerConnection.openDataChannel().onceOpened().
@@ -62,7 +56,7 @@ declare module freedom_UproxyPeerConnection {
     //  fromPeerData: LabelledDataChannelMessage;
     //}
     on(t:string, f:(eventData:any) => void) : void;
-    on(t:'onSignalMessage', f:(signal:string) => void) : void;
+    on(t:'onSignalMessage', f:(signal:WebRtc.SignallingMessage) => void) : void;
     on(t:'peerCreatedChannel', f:(channelLabel:string) => void) : void;
     on(t:'fromPeerData', f:(message:LabelledDataChannelMessage) => void)
         : void;

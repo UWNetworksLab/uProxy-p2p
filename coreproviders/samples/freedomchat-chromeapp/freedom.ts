@@ -16,19 +16,17 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   }
 };
 
-var a :PcLib.Pc = freedom['core.uproxypeerconnection'](
-    JSON.stringify(pcConfig));
-var b :PcLib.Pc = freedom['core.uproxypeerconnection'](
-    JSON.stringify(pcConfig));
+var a :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
+var b :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessage', (signal:string) => {
-  console.log('signalling channel A message: ' + signal);
+a.on('signalMessage', (signal:WebRtc.SignallingMessage) => {
+  console.log('signalling channel A message: ' + JSON.stringify(signal));
   b.handleSignalMessage(signal);
 });
-b.on('signalMessage', (signal:string) => {
-  console.log('signalling channel B message: ' + signal);
+b.on('signalMessage', (signal:WebRtc.SignallingMessage) => {
+  console.log('signalling channel B message: ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
 

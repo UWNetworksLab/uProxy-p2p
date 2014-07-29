@@ -13,13 +13,12 @@ class UproxyPeerConnectionImpl {
       private module_:any,
       // TODO: see comment in .d.ts: use real type not any.
       private dispatchEvent_:(eventType:string, eventData:any) => void,
-      // TODO: don't take json string, take the real object and gice it a type.
-      pcConfigAsJson:string) {
-    this.pc_ = new WebRtc.PeerConnection(JSON.parse(pcConfigAsJson));
+      config:WebRtc.PeerConnectionConfig) {
+    this.pc_ = new WebRtc.PeerConnection(config);
 
     // Re-dispatch various messages as Freedom messages.
     this.pc_.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-      this.dispatchEvent_('signalMessage', JSON.stringify(signal));
+      this.dispatchEvent_('signalMessage', signal);
     });
       this.pc_.peerCreatedChannelQueue.setSyncHandler(
           (dataChannel:WebRtc.DataChannel) => {
@@ -34,9 +33,9 @@ class UproxyPeerConnectionImpl {
   ////////
 
   public handleSignalMessage(
-      signal:string,
+      signal:WebRtc.SignallingMessage,
       continuation:() => void) : void {
-    this.pc_.handleSignalMessage(JSON.parse(signal));
+    this.pc_.handleSignalMessage(signal);
     continuation();
   }
 

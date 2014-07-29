@@ -11,7 +11,7 @@ declare var fdom:freedom.CoreProviderEnv.Fdom;
 fdom.apis.set('core.uproxypeerconnection', {
   'constructor': {
     value: [
-      'string'
+      'object'
     ]
   },
 
@@ -36,12 +36,12 @@ fdom.apis.set('core.uproxypeerconnection', {
 
   'handleSignalMessage': {
     type: 'method',
-    value: 'string'
+    value: 'object'
   },
 
   'signalMessage': {
     type: 'event',
-    value: 'string'
+    value: 'object'
   },
 
   'onceConnected': {
