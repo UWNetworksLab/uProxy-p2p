@@ -206,5 +206,8 @@ module WebRtc {
       }
     }
 
+    public close = () : void => {
+      this.rtcDataChannel_.close();
+    }
   }  // class DataChannel
 }  // module

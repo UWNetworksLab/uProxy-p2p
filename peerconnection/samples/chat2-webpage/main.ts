@@ -31,6 +31,7 @@ interface WebrtcPcControllerScope extends ng.IScope {
 
   createDataChannel :(channelLabel:string) => void;
   send :(channelLabel:string, message:string) => void;
+  closeDataChannel :(channelLabel:string) => void;
 
   addDataChannel :(d:WebRtc.DataChannel) => void;
   addMessage :(d:WebRtc.Data, who:string) => void;
@@ -139,6 +140,11 @@ webrtcPcApp.controller('webrtcPcController',
     console.log('creating data channel');
     var dataChannel = pc.openDataChannel(channelLabel);
     $scope.addDataChannel(dataChannel)
+  }
+
+  $scope.closeDataChannel = (channelLabel:string) : void => {
+    console.log('closing data channel');
+    pc.dataChannels[channelLabel].close();
   }
 
   $scope.addMessage = (d:WebRtc.Data, who:string) : void => {

@@ -122,7 +122,7 @@
     <div class='chat' id='channel-hello' ng-repeat='(channelLabel, channel) in channels'>
       <div class='channel-header'>Channel Label: <span class='channel-label'>{{channel.label}}</span> ({{channel.state}})
         <button class='close-btn' ng-show='channel.state === "closed"'>remove</button>
-        <button class='close-btn' ng-show='channel.state === "open"'>close</button>
+        <button class='close-btn' ng-show='channel.state === "open"' ng-click='closeDataChannel(channelLabel)'>close</button>
       </div>
       <div class='messages'>
         <div ng-repeat='message in messages track by $index'>{{message}}</div>
