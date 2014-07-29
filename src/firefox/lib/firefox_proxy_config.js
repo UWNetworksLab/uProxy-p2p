@@ -22,7 +22,7 @@ proxyConfig.startUsingProxy = function() {
   }
 };
 
-proxyConfig.startUsingProxy = function() {
+proxyConfig.stopUsingProxy = function() {
   if (this.running_) {
     this.running_ = false;
     prefsvc.set("network.proxy.socks", this.socks_server_);

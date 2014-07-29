@@ -39,6 +39,7 @@ Storage_firefox.prototype.remove = function(key, continuation) {
 Storage_firefox.prototype.clear = function(continuation) {
   ss.storage.uproxy = {};
   this.storage_ = ss.storage.uproxy;
+  continuation();
 }
 
 exports.Storage_firefox = Storage_firefox;

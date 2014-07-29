@@ -14,6 +14,8 @@ function setUpConnection(freedom, panel, button) {
     })
   }
 
+	
+  // Set up listeners between core and ui.
   for (i = 2000; i < 2014; i++) {
     connect('' + i, freedom, panel.port);
   }

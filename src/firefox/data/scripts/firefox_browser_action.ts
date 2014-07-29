@@ -13,14 +13,4 @@ class FirefoxBrowserAction implements BrowserAction {
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon', iconFile);
   }
-
-  public setLabel = (text :string) : void => {
-    // This is not used and not clear what it should be doing.
-    // TODO: figure out wether we need it or not.
-  }
-
-  public setColor = (color :string) : void=> {
-    // This is not used and not clear what it should be doing.
-  }
-
 }

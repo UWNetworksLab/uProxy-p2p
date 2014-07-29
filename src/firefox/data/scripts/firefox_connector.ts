@@ -1,7 +1,7 @@
 /**
  * firefox_connector.ts
  *
- * Handles all connection and communication with the uProxy Chrome App.
+ * Handles all connection and communication with the uProxy core and ui..
  */
 /// <reference path='../../../uproxy.ts'/>
 /// <reference path='../../../interfaces/firefox.d.ts' />

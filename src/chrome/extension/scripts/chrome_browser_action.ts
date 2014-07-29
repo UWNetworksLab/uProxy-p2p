@@ -14,12 +14,4 @@ class ChromeBrowserAction implements BrowserAction {
       path: this.ICON_DIR + iconFile
     });
   }
-
-  public setLabel = (text :string) : void => {
-    chrome.browserAction.setBadgeText({ text: '' + text });
-  }
-
-  public setColor = (color :string) : void=> {
-    chrome.browserAction.setBadgeBackgroundColor({color: color});
-  }
 }

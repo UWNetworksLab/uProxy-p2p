@@ -8,7 +8,6 @@
       "util.js",
       "auth.js",
       "consent.js",
-      "nouns-and-adjectives.js",
       "storage.js",
       "local-instance.js",
       "remote-instance.js",
