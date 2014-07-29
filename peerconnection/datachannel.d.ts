@@ -24,7 +24,7 @@ declare module WebRtc {
     // Promise for when the data channel has been closed (only fulfilled after
     // the data channel has been openned).
     // NOTE: There exists a bug in Chrome prior to version 37 which prevents
-    //       this promise from fulfilling on the remote peer.
+    //       this from fulfilling on the remote peer.
     public onceClosed :Promise<void>;
 
     // Data from the peer. No data will be added to the queue after |onceClosed|
