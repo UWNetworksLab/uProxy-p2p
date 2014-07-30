@@ -26,8 +26,8 @@ declare module freedom_UproxyPeerConnection {
   // arguments, the implementation of this class accepts a
   // PeerConnectionConfig instance.
   interface Pc {
-
-    negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
+    negotiateConnection(config:WebRtc.PeerConnectionConfig)
+        : Promise<WebRtc.ConnectionAddresses>;
 
     handleSignalMessage(signal:WebRtc.SignallingMessage) : Promise<void>;
 
@@ -35,6 +35,7 @@ declare module freedom_UproxyPeerConnection {
     // i.e. this is equivalent to PeerConnection.openDataChannel().onceOpened().
     // TODO: add options argument
     openDataChannel(channelLabel: string) : Promise<void>;
+    closeDataChannel(channelLabel: string) : Promise<void>;
 
     // As per PeerConnection, this fulfills once the supplied data
     // has been sucessfully sent to the peer.
@@ -43,22 +44,26 @@ declare module freedom_UproxyPeerConnection {
     // TODO: getState, for both peer connection and data channels
     // TODO: close
 
+    // TODO: onceConnecting and onceDisconnected
     onceConnected() : Promise<WebRtc.ConnectionAddresses>;
     onceConnecting() : Promise<void>;
     onceDisconnected() : Promise<void>;
+    close() : Promise<void>;
 
     // TODO: make a type for events from UproxyPeerConnection and use the same
     // type in the implementation. That way you can get better typechecking.
     // e.g.
     // interface Message {
-    //  onSignalMessage: string;
+    //  signalMessage: string;
     //  peerCreatedChannel: string;
     //  fromPeerData: LabelledDataChannelMessage;
     //}
     on(t:string, f:(eventData:any) => void) : void;
-    on(t:'onSignalMessage', f:(signal:WebRtc.SignallingMessage) => void) : void;
-    on(t:'peerCreatedChannel', f:(channelLabel:string) => void) : void;
-    on(t:'fromPeerData', f:(message:LabelledDataChannelMessage) => void)
-        : void;
+    on(t:'signalMessageToPeer',
+       f:(signal:WebRtc.SignallingMessage) => void) : void;
+    on(t:'peerOpenedChannel', f:(channelLabel:string) => void) : void;
+    on(t:'peerClosedChannel', f:(channelLabel:string) => void) : void;
+    on(t:'dataFromPeer',
+       f:(message:LabelledDataChannelMessage) => void) : void;
   }
 }

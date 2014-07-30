@@ -39,7 +39,7 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: 'object'
   },
 
-  'signalMessage': {
+  'signalMessageToPeer': {
     type: 'event',
     value: 'object'
   },
@@ -85,7 +85,7 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: 'string'
   },
 
-  'fromPeerData': {
+  'dataFromPeer': {
     type: 'event',
     value: {
       'channelLabel': 'string',
