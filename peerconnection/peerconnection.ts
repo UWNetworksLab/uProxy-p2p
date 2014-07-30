@@ -123,7 +123,7 @@ module WebRtc {
     public onceDisconnected :Promise<void>;
 
     // Queue of channels opened up by the remote peer.
-    public peerCreatedChannelQueue :Handler.Queue<DataChannel,void>;
+    public peerOpenedChannelQueue :Handler.Queue<DataChannel,void>;
 
     // Signals to be send to the remote peer by this peer.
     public signalForPeerQueue :Handler.Queue<SignallingMessage,void>;
@@ -152,7 +152,7 @@ module WebRtc {
         });
 
       // New data channels from the peer.
-      this.peerCreatedChannelQueue = new Handler.Queue<DataChannel,void>();
+      this.peerOpenedChannelQueue = new Handler.Queue<DataChannel,void>();
 
       // Messages to send to the peer.
       this.signalForPeerQueue = new Handler.Queue<SignallingMessage,void>();
@@ -504,11 +504,11 @@ module WebRtc {
 
     // When a peer creates a data channel, this function is called with the
     // |RTCDataChannelEvent|. We then create the data channel wrapper and add
-    // the new |DataChannel| to the |this.peerCreatedChannelQueue| to be
+    // the new |DataChannel| to the |this.peerOpenedChannelQueue| to be
     // handled.
     private onPeerStartedDataChannel_ =
         (rtcDataChannelEvent:RTCDataChannelEvent) : void => {
-      this.peerCreatedChannelQueue.handle(
+      this.peerOpenedChannelQueue.handle(
           this.addRtcDataChannel_(rtcDataChannelEvent.channel));
     }
 

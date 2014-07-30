@@ -74,7 +74,7 @@ a.negotiateConnection().then(() => {
   chanA.onceOpened.then(() => {
     chanA.dataFromPeerQueue.setSyncHandler(receive.bind(null, receiveAreaA));
   });
-  b.peerCreatedChannelQueue.setSyncHandler((chanB:WebRtc.DataChannel) => {
+  b.peerOpenedChannelQueue.setSyncHandler((chanB:WebRtc.DataChannel) => {
     chanB.dataFromPeerQueue.setSyncHandler(receive.bind(null, receiveAreaB));
   });
 }, (e) => {

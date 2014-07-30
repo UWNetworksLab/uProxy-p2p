@@ -21,21 +21,19 @@ class UproxyPeerConnectionImpl {
         (signal:WebRtc.SignallingMessage) => {
       this.dispatchEvent_('signalForPeer', signal);
     });
-      this.pc_.peerCreatedChannelQueue.setSyncHandler(
-          (dataChannel:WebRtc.DataChannel) => {
+    this.pc_.peerOpenedChannelQueue.setSyncHandler(
+        (dataChannel:WebRtc.DataChannel) => {
       // Re-dispatch events from this new data channel.
       this.dispatchDataChannelEvents_(dataChannel);
-      this.dispatchEvent_('peerCreatedChannel', dataChannel.getLabel());
+      this.dispatchEvent_('peerOpenedChannel', dataChannel.getLabel());
     });
   }
-
-  ////////
-  // Signalling channel.
-  ////////
 
   public handleSignalMessage(
       signal:WebRtc.SignallingMessage,
       continuation:() => void) : void {
+    // TODO: make continuation only get called after signal message has been
+    // handled.
     this.pc_.handleSignalMessage(signal);
     continuation();
   }
@@ -43,6 +41,12 @@ class UproxyPeerConnectionImpl {
   public negotiateConnection = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
     // TODO: propagate errors
     this.pc_.negotiateConnection().then(continuation);
+  }
+
+  public close = (continuation:() => void) : void => {
+    // TODO: propagate errors
+    this.pc_.close();
+    this.pc_.onceDisconnected.then(continuation);
   }
 
   public onceConnected = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
@@ -60,21 +64,19 @@ class UproxyPeerConnectionImpl {
     this.pc_.onceDisconnected.then(continuation);
   }
 
-  ////////
+  //---------------------------------------------------------------------------
   // Data channels.
-  ////////
 
   // Re-dispatches data channel events, such as receiving data, as
   // Freedom messages.
   private dispatchDataChannelEvents_ = (dataChannel:WebRtc.DataChannel) => {
     dataChannel.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
-      this.dispatchEvent_('dataFromPeer', {
-        channelLabel: dataChannel.getLabel(),
-        message: {
-          str: data.str,
-          buffer: data.buffer
-        }
-      });
+      this.dispatchEvent_('dataFromPeer',
+        { channelLabel: dataChannel.getLabel(),
+          message: data });
+    });
+    dataChannel.onceClosed.then(() => {
+      this.dispatchEvent_('closeDataChannel', dataChannel.getLabel());
     });
   }
 

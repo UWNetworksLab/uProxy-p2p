@@ -51,14 +51,6 @@ declare module freedom_UproxyPeerConnection {
     onceDisconnected() : Promise<void>;
     close() : Promise<void>;
 
-    // TODO: make a type for events from UproxyPeerConnection and use the same
-    // type in the implementation. That way you can get better typechecking.
-    // e.g.
-    // interface Message {
-    //  signalMessage: string;
-    //  peerCreatedChannel: string;
-    //  fromPeerData: LabelledDataChannelMessage;
-    //}
     on(t:string, f:(eventData:any) => void) : void;
     on(t:'signalForPeer',
        f:(signal:WebRtc.SignallingMessage) => void) : void;

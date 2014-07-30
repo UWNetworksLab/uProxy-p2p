@@ -34,6 +34,11 @@ fdom.apis.set('core.uproxypeerconnection', {
     }
   },
 
+  'close': {
+    type: 'method',
+    value: []
+  },
+
   'handleSignalMessage': {
     type: 'method',
     value: 'object'
@@ -80,7 +85,19 @@ fdom.apis.set('core.uproxypeerconnection', {
     ]
   },
 
-  'peerCreatedChannel': {
+  'closeDataChannel': {
+    type: 'method',
+    value: [
+      'string'
+    ]
+  },
+
+  'peerOpenedChannel': {
+    type: 'event',
+    value: 'string'
+  },
+
+  'peerClosedChannel': {
     type: 'event',
     value: 'string'
   },

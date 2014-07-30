@@ -30,8 +30,8 @@ b.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
   a.handleSignalMessage(signal);
 });
 
-b.on('peerCreatedChannel', (channelLabel:string) => {
-  console.log('i can see that a created a data channel called ' + channelLabel);
+b.on('peerOpenedChannel', (channelLabel:string) => {
+  console.log('I can see that `a` created a data channel called ' + channelLabel);
 });
 
 a.onceConnecting().then(() => { console.log('a is connecting...'); });

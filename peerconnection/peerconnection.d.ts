@@ -71,7 +71,7 @@ declare module WebRtc {
     public openDataChannel :(channelLabel: string,
                              options?: RTCDataChannelInit) => DataChannel;
     // Or handle data channels opened by the peer (these events will )
-    public peerCreatedChannelQueue :Handler.Queue<DataChannel, void>;
+    public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
 
     // The |handleSignalMessage| function should be called with signalling
     // messages from the remote peer.

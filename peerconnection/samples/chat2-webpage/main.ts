@@ -93,7 +93,7 @@ webrtcPcApp.controller('webrtcPcController',
       $scope.$apply(() => { $scope.state = 'DISCONNECTED.'; });
     });
 
-  pc.peerCreatedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
+  pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
       $scope.$apply(() => { $scope.addDataChannel(d); });
     });
 
