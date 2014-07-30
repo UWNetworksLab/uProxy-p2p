@@ -26,8 +26,12 @@ declare module freedom_UproxyPeerConnection {
   // arguments, the implementation of this class accepts a
   // PeerConnectionConfig instance.
   interface Pc {
-    negotiateConnection(config:WebRtc.PeerConnectionConfig)
-        : Promise<WebRtc.ConnectionAddresses>;
+    // Note: the constructor is done in the
+    // style of freedom['provider-name'](args)
+    //
+    // constructor(config:WebRtc.PeerConnectionConfig);
+
+    negotiateConnection() : Promise<WebRtc.ConnectionAddresses>;
 
     handleSignalMessage(signal:WebRtc.SignallingMessage) : Promise<void>;
 
@@ -42,9 +46,6 @@ declare module freedom_UproxyPeerConnection {
     send(channelLabel:string, data:WebRtc.Data) : Promise<void>;
 
     // TODO: getState, for both peer connection and data channels
-    // TODO: close
-
-    // TODO: onceConnecting and onceDisconnected
     onceConnected() : Promise<WebRtc.ConnectionAddresses>;
     onceConnecting() : Promise<void>;
     onceDisconnected() : Promise<void>;
@@ -59,7 +60,7 @@ declare module freedom_UproxyPeerConnection {
     //  fromPeerData: LabelledDataChannelMessage;
     //}
     on(t:string, f:(eventData:any) => void) : void;
-    on(t:'signalMessageToPeer',
+    on(t:'signalMessageForPeer',
        f:(signal:WebRtc.SignallingMessage) => void) : void;
     on(t:'peerOpenedChannel', f:(channelLabel:string) => void) : void;
     on(t:'peerClosedChannel', f:(channelLabel:string) => void) : void;

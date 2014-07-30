@@ -21,11 +21,11 @@ var b :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessageToPeer', (signal:WebRtc.SignallingMessage) => {
+a.on('signalMessageForPeer', (signal:WebRtc.SignallingMessage) => {
   console.log('signalling channel A message: ' + JSON.stringify(signal));
   b.handleSignalMessage(signal);
 });
-b.on('signalMessageToPeer', (signal:WebRtc.SignallingMessage) => {
+b.on('signalMessageForPeer', (signal:WebRtc.SignallingMessage) => {
   console.log('signalling channel B message: ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
@@ -47,22 +47,9 @@ function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
 a.onceConnected().then(logEndpoints.bind(null, 'a'));
 b.onceConnected().then(logEndpoints.bind(null, 'b'));
 
-var pcConfig :WebRtc.PeerConnectionConfig = {
-    webrtcPcConfig: {
-      iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                   {url: 'stun:stun1.l.google.com:19302'},
-                   {url: 'stun:stun2.l.google.com:19302'},
-                   {url: 'stun:stun3.l.google.com:19302'},
-                   {url: 'stun:stun4.l.google.com:19302'}]
-    },
-    webrtcMediaConstraints: {
-      optional: [{DtlsSrtpKeyAgreement: true}]
-    }
-  };
-
 // Negotiate a peerconnection.
 // Once negotiated, enable the UI and add send/receive handlers.
-a.negotiateConnection(pcConfig)
+a.negotiateConnection()
   .then((endpoints:WebRtc.ConnectionAddresses) => {
     // Send messages over the datachannel, in response to events from the UI.
     var sendMessage = (pc:PcLib.Pc, message:Chat.Message) => {

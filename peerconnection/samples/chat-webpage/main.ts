@@ -26,11 +26,11 @@ var b = new WebRtc.PeerConnection(pcConfig);
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
+a.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
   dbg('signalling channel A message: ' + JSON.stringify(signal));
   b.handleSignalMessage(signal);
 });
-b.toPeerSignalQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
+b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
   dbg('signalling channel B message: ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
@@ -72,10 +72,10 @@ a.negotiateConnection().then(() => {
   }
   var chanA = a.openDataChannel('text');
   chanA.onceOpened.then(() => {
-    chanA.fromPeerDataQueue.setSyncHandler(receive.bind(null, receiveAreaA));
+    chanA.dataFromPeerQueue.setSyncHandler(receive.bind(null, receiveAreaA));
   });
   b.peerCreatedChannelQueue.setSyncHandler((chanB:WebRtc.DataChannel) => {
-    chanB.fromPeerDataQueue.setSyncHandler(receive.bind(null, receiveAreaB));
+    chanB.dataFromPeerQueue.setSyncHandler(receive.bind(null, receiveAreaB));
   });
 }, (e) => {
   dbgErr('could not negotiate peerconnection: ' + e.message);

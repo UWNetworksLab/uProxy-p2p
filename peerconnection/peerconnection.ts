@@ -73,7 +73,7 @@ module WebRtc {
   //   1. [external] negotiateConnection
   //      1.1. createOffer_ -> pc_.createOffer
   //      1.2. setLocalDescription_ -> pc_.setLocalDescription
-  //      1.3. toPeerSignalQueue.handle -> [external]
+  //      1.3. signalForPeerQueue.handle -> [external]
   //   2. [external] -> handleSignalMessage
   //      2.1. setRemoteDescription_ -> pc_.setRemoteDescription
   //   3. *[external] -> handleSignalMessage -> pc_.addIceCandidate
@@ -86,7 +86,7 @@ module WebRtc {
   //      1.1. setRemoteDescription_ -> pc_.setRemoteDescription
   //      1.3. createAnswer_
   //      1.4. setLocalDescription_
-  //      1.5. toPeerSignalQueue.handle -> [external]
+  //      1.5. signalForPeerQueue.handle -> [external]
   //   2. *[external] -> handleSignalMessage -> pc_.addIceCandidate
   //   3. (callback) -> pc_.onsignalingstatechange -> onSignallingStateChange_
   //      3.1. completeConnection_ -> pc_.getStats
@@ -126,7 +126,7 @@ module WebRtc {
     public peerCreatedChannelQueue :Handler.Queue<DataChannel,void>;
 
     // Signals to be send to the remote peer by this peer.
-    public toPeerSignalQueue :Handler.Queue<SignallingMessage,void>;
+    public signalForPeerQueue :Handler.Queue<SignallingMessage,void>;
     public fromPeerCandidateQueue :Handler.Queue<RTCIceCandidate,void>;
 
     // if |createOffer| is true, the consturctor will immidiately initiate
@@ -155,7 +155,7 @@ module WebRtc {
       this.peerCreatedChannelQueue = new Handler.Queue<DataChannel,void>();
 
       // Messages to send to the peer.
-      this.toPeerSignalQueue = new Handler.Queue<SignallingMessage,void>();
+      this.signalForPeerQueue = new Handler.Queue<SignallingMessage,void>();
 
       // candidates form the peer; need to be queued until after remote
       // descrption has been set.
@@ -172,14 +172,14 @@ module WebRtc {
       // Add basic event handlers.
       this.pc_.onicecandidate = ((event:RTCIceCandidateEvent) => {
           if(event.candidate) {
-            this.toPeerSignalQueue.handle({
+            this.signalForPeerQueue.handle({
                 type: SignalType.CANDIDATE,
                 candidate: { candidate: event.candidate.candidate,
                              sdpMid: event.candidate.sdpMid,
                              sdpMLineIndex: event.candidate.sdpMLineIndex }
               });
             } else {
-              this.toPeerSignalQueue.handle(
+              this.signalForPeerQueue.handle(
                   { type: SignalType.NO_MORE_CANDIDATES });
             }
         });
@@ -392,7 +392,7 @@ module WebRtc {
         this.fulfillConnecting_();
         this.createOffer_()
           .then(this.setLocalDescription_)
-          .then((d:RTCSessionDescription) => { this.toPeerSignalQueue.handle(
+          .then((d:RTCSessionDescription) => { this.signalForPeerQueue.handle(
               {type: SignalType.OFFER,
                description: {type: d.type, sdp: d.sdp} });
             })
@@ -431,7 +431,7 @@ module WebRtc {
               .then(this.createAnswer_)
               .then(this.setLocalDescription_)
               .then((d:RTCSessionDescription) => {
-                  this.toPeerSignalQueue.handle(
+                  this.signalForPeerQueue.handle(
                       {type: SignalType.ANSWER,
                        description: {type: d.type, sdp: d.sdp} });
                 })

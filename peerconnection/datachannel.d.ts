@@ -29,7 +29,7 @@ declare module WebRtc {
 
     // Data from the peer. No data will be added to the queue after |onceClosed|
     // is fulfilled.
-    public fromPeerDataQueue :Handler.Queue<Data, void>;
+    public dataFromPeerQueue :Handler.Queue<Data, void>;
 
     // Send data; promise returns when all the data has been passed on to the
     // undertlying network layer for ending.

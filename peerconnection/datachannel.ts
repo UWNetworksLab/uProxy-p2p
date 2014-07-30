@@ -50,7 +50,7 @@ module WebRtc {
   //
   export class DataChannel {
 
-    public fromPeerDataQueue      :Handler.Queue<Data,void>;
+    public dataFromPeerQueue      :Handler.Queue<Data,void>;
 
     // The |toPeerDataQueue_| is chunked by the send call and conjection
     // controlled by the handler this class sets.
@@ -74,7 +74,7 @@ module WebRtc {
     // Wrapper for
     constructor(private rtcDataChannel_:RTCDataChannel) {
       this.label_ = this.rtcDataChannel_.label;
-      this.fromPeerDataQueue = new Handler.Queue<Data,void>();
+      this.dataFromPeerQueue = new Handler.Queue<Data,void>();
       this.toPeerDataQueue_ = new Handler.Queue<Data,void>();
       this.onceOpened = new Promise<void>((F,R) => {
           this.rejectOpened_ = R;
@@ -97,8 +97,8 @@ module WebRtc {
 
       // Make sure to reject the onceOpened promise if state went from
       // |connecting| to |close|.
-      this.onceOpened.then(() => { 
-        this.wasOpenned_ = true; 
+      this.onceOpened.then(() => {
+        this.wasOpenned_ = true;
         this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
       });
       this.onceClosed.then(() => {
@@ -111,9 +111,9 @@ module WebRtc {
     // the queue of data from the peer.
     private onDataFromPeer_ = (messageEvent : RTCMessageEvent) : void => {
       if (typeof messageEvent.data === 'string') {
-        this.fromPeerDataQueue.handle({str: messageEvent.data});
+        this.dataFromPeerQueue.handle({str: messageEvent.data});
       } else if (typeof messageEvent.data === 'ArrayBuffer') {
-        this.fromPeerDataQueue.handle({buffer: messageEvent.data});
+        this.dataFromPeerQueue.handle({buffer: messageEvent.data});
       } else {
         console.error('Unexpected data from peer that has type: ' +
             JSON.stringify(messageEvent));

@@ -40,7 +40,7 @@ interface WebrtcPcControllerScope extends ng.IScope {
   onLocalSignallingMessage :(signal:WebRtc.SignallingMessage) => void;
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Create a new peer connection.
 var pcConfig :WebRtc.PeerConnectionConfig = {
     webrtcPcConfig: {
@@ -56,11 +56,11 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   };
 var pc :WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 var webrtcPcApp = angular.module('webrtcPcApp', []);
 webrtcPcApp.controller('webrtcPcController',
     ($scope :WebrtcPcControllerScope) => {
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   $scope.state = 'WAITING.';
   $scope.errors = [];
   $scope.connectInfo = '';
@@ -74,7 +74,7 @@ webrtcPcApp.controller('webrtcPcController',
 
   $scope.clearErrors = () => { $scope.errors = []; }
 
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   // Promise completion callbacks
   pc.onceConnecting.then(() => {
       $scope.$apply(() => { $scope.state = 'CONNECTING...'; });
@@ -112,7 +112,7 @@ webrtcPcApp.controller('webrtcPcController',
         JSON.stringify(signal);
     });
   };
-  pc.toPeerSignalQueue.setSyncHandler($scope.onLocalSignallingMessage);
+  pc.signalForPeerQueue.setSyncHandler($scope.onLocalSignallingMessage);
 
   // Handles each line in the received 'paste' box which are messages from the
   // remote peer via the signalling channel.
@@ -164,7 +164,7 @@ webrtcPcApp.controller('webrtcPcController',
       messages: []
     };
 
-    dataChannel.fromPeerDataQueue.setSyncHandler((d:WebRtc.Data) => {
+    dataChannel.dataFromPeerQueue.setSyncHandler((d:WebRtc.Data) => {
         $scope.$apply(() => { $scope.addMessage(d, 'other'); });
       });
 
