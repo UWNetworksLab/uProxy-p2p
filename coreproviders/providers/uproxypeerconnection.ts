@@ -67,6 +67,11 @@ class UproxyPeerConnectionImpl {
   //---------------------------------------------------------------------------
   // Data channels.
 
+  public onceDataChannelClosed =
+      (channelLabel:string, continuation:() => void) : void => {
+    this.pc_.dataChannels[channelLabel].onceClosed.then(continuation);
+  }
+
   // Re-dispatches data channel events, such as receiving data, as
   // Freedom messages.
   private dispatchDataChannelEvents_ = (dataChannel:WebRtc.DataChannel) => {
@@ -74,9 +79,6 @@ class UproxyPeerConnectionImpl {
       this.dispatchEvent_('dataFromPeer',
         { channelLabel: dataChannel.getLabel(),
           message: data });
-    });
-    dataChannel.onceClosed.then(() => {
-      this.dispatchEvent_('closeDataChannel', dataChannel.getLabel());
     });
   }
 

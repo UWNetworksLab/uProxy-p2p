@@ -92,12 +92,14 @@ fdom.apis.set('core.uproxypeerconnection', {
     ]
   },
 
-  'peerOpenedChannel': {
-    type: 'event',
-    value: 'string'
+  'onceDataChannelClosed': {
+    type: 'method',
+    value: [
+      'string'
+    ]
   },
 
-  'peerClosedChannel': {
+  'peerOpenedChannel': {
     type: 'event',
     value: 'string'
   },
