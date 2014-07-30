@@ -1,6 +1,7 @@
 /**
  * Firefox local storage provider.
  * TODO(salomegeo): rewrite in typescript
+ * TODO(salomegeo): needs testing
  */
 
 var ss = require("sdk/simple-storage");

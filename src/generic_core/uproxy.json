@@ -4,7 +4,6 @@
   "app": {
     "script": [
       "uproxy.js",
-      "view_oauth.js",
       "util.js",
       "auth.js",
       "consent.js",
