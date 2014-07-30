@@ -36,8 +36,8 @@ declare module freedom_UproxyPeerConnection {
     handleSignalMessage(signal:WebRtc.SignallingMessage) : Promise<void>;
 
     // Fulfills once the data channel has been successfully opened,
-    // i.e. this is equivalent to PeerConnection.openDataChannel().onceOpened().
-    // TODO: add options argument
+    // i.e. this is equivalent to
+    //   PeerConnection.openDataChannel().onceOpened()
     openDataChannel(channelLabel: string) : Promise<void>;
     closeDataChannel(channelLabel: string) : Promise<void>;
 
@@ -60,7 +60,7 @@ declare module freedom_UproxyPeerConnection {
     //  fromPeerData: LabelledDataChannelMessage;
     //}
     on(t:string, f:(eventData:any) => void) : void;
-    on(t:'signalMessageForPeer',
+    on(t:'signalForPeer',
        f:(signal:WebRtc.SignallingMessage) => void) : void;
     on(t:'peerOpenedChannel', f:(channelLabel:string) => void) : void;
     on(t:'peerClosedChannel', f:(channelLabel:string) => void) : void;

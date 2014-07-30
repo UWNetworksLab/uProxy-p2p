@@ -39,7 +39,7 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: 'object'
   },
 
-  'signalMessageForPeer': {
+  'signalForPeer': {
     type: 'event',
     value: 'object'
   },

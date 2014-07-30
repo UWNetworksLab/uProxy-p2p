@@ -19,7 +19,7 @@ class UproxyPeerConnectionImpl {
     // Re-dispatch various messages as Freedom messages.
     this.pc_.signalForPeerQueue.setSyncHandler(
         (signal:WebRtc.SignallingMessage) => {
-      this.dispatchEvent_('signalMessageForPeer', signal);
+      this.dispatchEvent_('signalForPeer', signal);
     });
       this.pc_.peerCreatedChannelQueue.setSyncHandler(
           (dataChannel:WebRtc.DataChannel) => {
@@ -78,9 +78,8 @@ class UproxyPeerConnectionImpl {
     });
   }
 
-  public openDataChannel = (
-      channelLabel :string,
-      continuation :() => void) : void => {
+  public openDataChannel = (channelLabel :string,
+                            continuation :() => void) : void => {
     var dataChannel = this.pc_.openDataChannel(channelLabel);
     dataChannel.onceOpened.then(() => {
       this.dispatchDataChannelEvents_(dataChannel);
@@ -89,10 +88,16 @@ class UproxyPeerConnectionImpl {
     });
   }
 
-  public send = (
-      channelLabel :string,
-      data :WebRtc.Data,
-      continuation :() => void) : void => {
+  public closeDataChannel =
+      (channelLabel :string, continuation :() => void) : void => {
+    var dataChannel = this.pc_.dataChannels[channelLabel];
+    dataChannel.close();
+    continuation();
+  }
+
+  public send = (channelLabel :string,
+                 data :WebRtc.Data,
+                 continuation :() => void) : void => {
     // TODO: propagate errors
     this.pc_.dataChannels[channelLabel].send(data).then(continuation);
   }
