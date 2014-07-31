@@ -345,6 +345,13 @@ module.exports = function(grunt) {
                  'build/uistatic/src/uistatic/scripts/dependencies.js'],
            dest: 'build/uistatic/scripts/dependencies.js'}
         ]
+      },
+      firefox_uproxy: {
+        files: [
+          {src: ['build/firefox/data/core/uproxy.js',
+                 'build/firefox/lib/exports.js'],
+           dest: 'build/firefox/lib/uproxy.js'}
+        ]
       }
     },
 

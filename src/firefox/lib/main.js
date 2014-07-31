@@ -42,7 +42,7 @@ var freedom =
             register('core.view', require('view_googleauth.js').View_googleAuth);
             register('core.storage', require('firefox_storage.js').Storage_firefox);
           },
-      portType: 'BackgroundFrame'
+      //portType: 'BackgroundFrame'
     });
 
 // Set up connection between freedom and content script.

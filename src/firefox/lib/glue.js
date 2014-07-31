@@ -6,6 +6,7 @@
  */
 
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
+var uProxy = require('uproxy.js').uProxy;
 
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
@@ -16,12 +17,16 @@ function setUpConnection(freedom, panel, button) {
 
 	
   // Set up listeners between core and ui.
-  for (i = 2000; i < 2014; i++) {
-    connect('' + i, freedom, panel.port);
+  for (var command in uProxy.Command) {
+    if (typeof uProxy.Command[command] === 'number') {
+      connect('' + uProxy.Command[command], panel.port, freedom);
+    }
   }
 
-  for (i = 1000; i < 1014; i++) {
-    connect('' + i, panel.port, freedom);
+  for (var update in uProxy.Update) {
+    if (typeof uProxy.Update[update] === 'number') {
+      connect('' + uProxy.Update[update], freedom, panel.port);
+    }
   }
 
   panel.port.on('startUsingProxy', function() {
