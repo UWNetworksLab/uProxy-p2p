@@ -20,12 +20,6 @@ class MockNotifications implements BrowserAction {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
-  setLabel(text) {
-    console.log('setting label to: ' + text);
-  }
-  setColor(color) {
-    console.log('setting background color of the badge to: ' + color);
-  }
 }
 
 function generateFakeUserMessage() : UI.UserMessage {

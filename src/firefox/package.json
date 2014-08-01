@@ -1,0 +1,13 @@
+{
+  "name": "uproxy",
+  "title": "uProxy",
+  "id": "jid1-DhGl7eIwcjxVEQ",
+  "description": "Ubiquitous Proxy [Alpha]",
+  "author": "",
+  "license": "MPL 2.0",
+  "version": "0.1",
+  "permissions": {
+    "private-browsing": true,
+    "unsafe-content-script": true
+  }
+}

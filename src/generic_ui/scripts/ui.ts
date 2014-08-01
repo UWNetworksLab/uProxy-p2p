@@ -273,16 +273,6 @@ module UI {
       this.refreshFunction_ = f;
     }
 
-    setClients = (numClients) => {
-      this.numClients = numClients;
-      if (numClients > 0) {
-        this.browserAction.setColor('#008');
-        this.browserAction.setLabel('↓');
-      } else {
-        this.browserAction.setColor('#800');
-      }
-    }
-
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
     /**

@@ -209,15 +209,37 @@ module.exports = function(grunt) {
         // The platform specific stuff, and...
         {expand: true, cwd: 'src/firefox/',
          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts', '!**/*.sass'],
-         dest: 'build/firefox/'},
+         dest: 'build/firefox'},
+        {expand: true, cwd: 'build/',
+         src: ['uproxy.js'],
+         dest: 'build/firefox/data/core/'},
         // ... the generic core stuff
         {expand: true, cwd: 'build/generic_core',
          src: ['**'],
-         dest: 'build/firefox/'},
+         dest: 'build/firefox/data/core/'},
         // ... the generic UI stuff
         {expand: true, cwd: 'build/generic_ui',
          src: ['**'],
-         dest: 'build/firefox/'}
+         dest: 'build/firefox/data'},
+        {expand: true, cwd: 'build/', flatten: true,
+         src: FILES.uproxy_common,
+         dest: 'build/firefox/data/scripts'},
+        // freedom for firefox
+        {expand: true, cwd: 'node_modules/freedom-for-firefox/build',
+         src: ['freedom-for-firefox.jsm'],
+         dest: 'build/firefox/data'},
+        {expand: true, cwd: 'node_modules/socks-rtc/build/',
+         src: ['**'],
+         dest: 'build/firefox/data/lib/socks-rtc'},
+        {expand: true, cwd: 'node_modules/freedom/providers/social',
+         src: ['websocket-server/**'],
+         dest: 'build/firefox/data/lib'},
+        {expand: true, cwd: 'node_modules/freedom-social-xmpp/build/',
+         src: ['**'],
+         dest: 'build/firefox/data/lib/freedom-social-xmpp'},
+        {expand: true, cwd: 'node_modules/freedom/providers/storage/isolated',
+         src: ['**'],
+         dest: 'build/firefox/data/lib/storage'}
       ]}
     },
 
@@ -309,8 +331,8 @@ module.exports = function(grunt) {
       // uProxy firefox specific typescript
       firefox: {
         src: ['src/firefox/**/*.ts'],
-        dest: 'build/firefox/',
-        options: { basePath: 'src/firefox/', ignoreError: false }
+        dest: 'build/',
+        options: { basePath: 'src/', ignoreError: false }
       },
 
     },
@@ -322,6 +344,13 @@ module.exports = function(grunt) {
           {src: ['build/uistatic/src/generic_ui/scripts/ui.js',
                  'build/uistatic/src/uistatic/scripts/dependencies.js'],
            dest: 'build/uistatic/scripts/dependencies.js'}
+        ]
+      },
+      firefox_uproxy: {
+        files: [
+          {src: ['build/firefox/data/core/uproxy.js',
+                 'build/firefox/lib/exports.js'],
+           dest: 'build/firefox/lib/uproxy.js'}
         ]
       }
     },
@@ -379,30 +408,6 @@ module.exports = function(grunt) {
           outfile: 'test_output/_UiSpecRunner.html',
           specs: 'build/generic_ui/scripts/**/*.spec.js'
         }
-      }
-    },
-
-    //-------------------------------------------------------------------------
-    'mozilla-cfx': {
-      debug_run: {
-        options: {
-          extension_dir: 'dist/firefox',
-          command: 'run'
-        }
-      }
-    },
-
-    //-------------------------------------------------------------------------
-    'compress': {
-      main: {
-        options: {
-          mode: 'zip',
-          archive: 'dist/uproxy.xpi'
-        },
-        expand: true,
-        cwd: 'build/firefox',
-        src: ['**'],
-        dest: '.'
       }
     },
 
@@ -545,17 +550,13 @@ module.exports = function(grunt) {
   taskManager.add('build_firefox', [
     'build_generic_ui',
     'build_generic_core',
-    'copy:firefox'
+    'typescript:firefox',
+    'copy:firefox',
   ]);
 
   taskManager.add('build_firefox_xpi', [
     'build_firefox',
     'compress:main'
-  ]);
-
-  taskManager.add('run_firefox', [
-    'build_firefox',
-    'mozilla-cfx:debug_run'
   ]);
 
   taskManager.add('test_core', [

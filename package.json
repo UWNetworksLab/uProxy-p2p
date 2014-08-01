@@ -12,8 +12,8 @@
   },
   "devDependencies": {
     "es6-promise": "^0.1.1",
-    "freedom-for-chrome": "~0.2.0",
-    "freedom-for-firefox": "~0.4.0",
+    "freedom-for-chrome": "~0.2.2",
+    "freedom-for-firefox": "~0.4.1",
     "freedom-social-xmpp": "~0.1.0",
     "freedom-typescript-api": "^0.1.9",
     "glob": "^3.2.6",
@@ -35,7 +35,7 @@
     "grunt-typescript": "^0.3.6",
     "minimatch": "^0.2.12",
     "rimraf": "^2.2.6",
-    "socks-rtc": "^0.1.4",
+    "socks-rtc": "^0.1.14",
     "typescript": "^0.9.7",
     "uproxy-build-tools": "~0.0.5"
   },
