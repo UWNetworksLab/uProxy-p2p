@@ -132,6 +132,10 @@ module WebRtc {
     // if |createOffer| is true, the consturctor will immidiately initiate
     // negotiation.
     constructor(private config_ :PeerConnectionConfig) {
+      if (config_.webrtcPcConfig === undefined ||
+        config_.webrtcMediaConstraints === undefined) {
+        throw new Error('must specify peerconnection config and constraints');
+      }
 
       this.peerName = this.config_.peerName ||
           'unnamed-pc-' + randomUint32();
