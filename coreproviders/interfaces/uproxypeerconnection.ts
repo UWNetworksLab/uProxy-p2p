@@ -10,9 +10,7 @@ declare var fdom:freedom.CoreProviderEnv.Fdom;
 
 fdom.apis.set('core.uproxypeerconnection', {
   'constructor': {
-    value: [
-      'object'
-    ]
+    value: 'object'
   },
 
   ////////
