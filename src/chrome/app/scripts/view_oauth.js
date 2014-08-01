@@ -20,7 +20,8 @@ View_oauth.prototype.open = function(args, what, continuation) {
   // ('XMPPLogin', {file: 'login.html'}) as set by freedom-social-xmpp's
   // socialprovider.js
   if (this.socialNetworkName == "google") {
-    this.authMan = new AuthGoogle(this.dispatchAuth.bind(this), this.dispatchError.bind(this));
+    connector.sendToUI(uProxy.Update.GET_CREDENTIALS, 'google');
+    connector.setOnCredentials(this.dispatchResult.bind(this));
   }
   /* TODO: these social network's haven't yet been fully implemented 
   else if (this.socialNetworkName == "xmpp") {
@@ -41,18 +42,8 @@ View_oauth.prototype.open = function(args, what, continuation) {
   continuation();
 };
 
-View_oauth.prototype.dispatchAuth = function(msg) {
-  this.dispatchEvent('message', {
-    cmd: 'auth',
-    message: msg
-  });
-};
-
-View_oauth.prototype.dispatchError = function(msg) {
-  this.dispatchEvent('message', {
-    cmd: 'error',
-    message: msg
-  });
+View_oauth.prototype.dispatchResult = function(results) {
+  this.dispatchEvent('message', results);
 };
 
 View_oauth.prototype.show = function(continuation) {
@@ -60,12 +51,8 @@ View_oauth.prototype.show = function(continuation) {
 };
 
 View_oauth.prototype.postMessage = function(args, continuation) {
-  if (args == 'logout' && this.authMan) {
-    this.authMan.logout().then(continuation);
-  } else {
-    console.error("Unrecognized message to core.view: " + JSON.stringify(args));
-    continuation();
-  }
+	console.error("Unrecognized message to core.view: " + JSON.stringify(args));
+	continuation();
 };
 
 View_oauth.prototype.close = function(continuation) {

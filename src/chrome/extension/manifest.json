@@ -20,6 +20,8 @@
       "scripts/proxy-config.js",
       "scripts/core_connector.js",
       "scripts/chrome_connector.js",
+      "scripts/oauth.js",
+      "scripts/google_auth.js",
       "scripts/background.js"
     ]
   },
@@ -32,10 +34,12 @@
   },
   "permissions": [
     "storage",
+    "tabs",
     "identity",
     "proxy",
     "notifications",
-    "https://apis.google.com/"
+    "https://apis.google.com/",
+    "https://accounts.google.com/o/oauth2/token"
   ],
   "options_page": "options.html",
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOOsgNK52HYy9483rhgsofyHTp/NbmXkpHNLoarN027kqKVPS3U36/L2XyPJOAtvy+DDR+kCro1JmdFWBwPAk5AqvSKvfLzuXkO+98T/3ZhqfAl4KIqc0C+PsWIYsANTAbKkXlP4bATEK6O5Mq0aItAHGLSmKoNrAAVrtxmETXaumcrq78amOpAZz7XrPdJVhrHd6uQbR90WeFEe8LBOqdnA4iKeuMI9IQdDLKGSizhYFZP78HKSk0ZY2uYeJFpya0iXAvbcuHRGY9/c7pP5UDo+FExdyrgJnIt7H1W5LWfy/mAMnR77dvCSfGX1vCD7faWntYvzZO4FlISh+h21+QIDAQAB",

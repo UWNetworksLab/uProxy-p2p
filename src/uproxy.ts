@@ -34,7 +34,8 @@ module uProxy {
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
-    HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE
+    HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
+    SEND_CREDENTIALS
   }
 
   /**
@@ -58,7 +59,8 @@ module uProxy {
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
 
     // Payload should be a uProxy.Message.
-    MANUAL_NETWORK_OUTBOUND_MESSAGE
+    MANUAL_NETWORK_OUTBOUND_MESSAGE,
+    GET_CREDENTIALS
   }
 
   /**
