@@ -1,10 +1,10 @@
 class OAuth {
-	constructor() {
+  constructor() {
   }
 
   public getCredentials(network :string) {
-		if (network === 'google') {
-			var googleAuth = new GoogleAuth();		
+    if (network === 'google') {
+      var googleAuth = new GoogleAuth();		
       googleAuth.login();
     }
   }

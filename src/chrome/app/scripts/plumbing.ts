@@ -60,9 +60,7 @@ class ChromeUIConnector {
     // Pass 'emit's from the UI to Core. These are uProxy.Commands.
     if ('emit' == msg.cmd) {
       if (msg.type == uProxy.Command.SEND_CREDENTIALS) {
-        console.log('received results');
-        console.log(msg.data); 
-      	this.onCredentials_(msg.data);
+        this.onCredentials_(msg.data);
       }
       uProxyAppChannel.emit(msgType,
                             <uProxy.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
@@ -82,17 +80,16 @@ class ChromeUIConnector {
   }
 
   public sendToUI = (type :uProxy.Update, data ?: any) => {
-		this.extPort_.postMessage({
-			cmd: 'fired',
-			type: type,
-			data: data
-		});
+    this.extPort_.postMessage({
+        cmd: 'fired',
+        type: type,
+        data: data
+    });
   }
   
   public setOnCredentials = (onCredentials : Function) => {
-		this.onCredentials_ = onCredentials;
-	}
-
+    this.onCredentials_ = onCredentials;
+  }
 }
 var connector = new ChromeUIConnector();
 console.log('Starting uProxy app...');
