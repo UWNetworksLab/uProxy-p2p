@@ -8,7 +8,6 @@ var CLIENT_SECRET = "Bmlc90_i2GFcaP26Fneq9UnO";
 var REDIRECT_URI = "https://www.uproxy.org/";
 
 class GoogleAuth {
-  private code_;
   constructor() {
   }
 
@@ -17,15 +16,16 @@ class GoogleAuth {
   }
 
   private getAccessCode_() {
-    chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-      if (tab.url.indexOf(REDIRECT_URI) === 0 && !this.code_) {
-        // FIXME
-        this.code_ = tab.url.match(/code=([^&]+)/)[1];
+    var extractCode = function(tabId, changeInfo, tab) {
+			console.log('tab url is ' + tab.url);
+      if (tab.url.indexOf(REDIRECT_URI) === 0) {
+        var code = tab.url.match(/code=([^&]+)/)[1];
+				chrome.tabs.onUpdated.removeListener(extractCode);
         chrome.tabs.remove(tabId);
-        this.getToken_(this.code_);
+        this.getToken_(code);
       }
-    }.bind(this));
-
+    }.bind(this);
+    chrome.tabs.onUpdated.addListener(extractCode);
     var googleOAuth2Url = "https://accounts.google.com/o/oauth2/auth?" +
         "scope=email%20https://www.googleapis.com/auth/googletalk" +
         "&redirect_uri=" + REDIRECT_URI +
