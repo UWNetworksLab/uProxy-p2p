@@ -20,10 +20,14 @@ declare module WebRtc {
     initiateConnection     ?:boolean;
   }
 
+  enum SignalType {
+    OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
+  }
+
   interface SignallingMessage {
-    // Should be exactly one of the below
-    candidate ?:RTCIceCandidate;
-    sdp       ?:RTCSessionDescription;
+    type          :SignalType
+    candidate     ?:RTCIceCandidateInit;
+    description   ?:RTCSessionDescriptionInit;
   }
 
   // Once you are connected to the peer, you know the local/remote addresses.
