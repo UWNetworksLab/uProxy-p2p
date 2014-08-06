@@ -1,0 +1,36 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name="uproxy-button" attributes="img, click">
+  <template>
+    <style>
+    :host {
+      display: inline-block;
+      height: 50px;
+      width: 50px;
+      margin: 0 10px;
+      text-align: center;
+      line-height: 50px;
+    }
+    img {
+      height: 28px;
+      width: 28px;
+      vertical-align: middle;
+    }
+    img:hover {
+      opacity: 0.7;
+      cursor: pointer;
+    }
+    </style>
+    <img on-tap='{{click}}' src='{{img}}' />
+    <content>
+    </content>
+  </template>
+  <script>
+    Polymer({
+      img: 'lol',
+      click: function(event, detail, sender) {
+        this.fire('clicked');
+      }
+    });
+  </script>
+</polymer-element>
