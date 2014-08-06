@@ -20,16 +20,7 @@ fdom.apis.set('core.uproxypeerconnection', {
   'negotiateConnection': {
     type: 'method',
     value: [],
-    ret: {
-      'local': {
-        'address': 'string',
-        'port': 'number'
-      },
-      'remote': {
-        'address': 'string',
-        'port': 'number'
-      }
-    }
+    ret: 'object'
   },
 
   'close': {
@@ -50,16 +41,7 @@ fdom.apis.set('core.uproxypeerconnection', {
   'onceConnected': {
     type: 'method',
     value: [],
-    ret: {
-      'local': {
-        'address': 'string',
-        'port': 'number'
-      },
-      'remote': {
-        'address': 'string',
-        'port': 'number'
-      }
-    }
+    ret: 'object'
   },
 
   'onceConnecting': {
