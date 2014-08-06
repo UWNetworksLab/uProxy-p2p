@@ -92,6 +92,8 @@ module.exports = function(grunt) {
         // Libraries
         {expand: true, cwd: 'third_party/lib/',
          src: ['lodash/dist/lodash.js',
+               'platform/**',
+               'polymer/**',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
                'angular-lodash/angular-lodash.js'],
@@ -304,7 +306,7 @@ module.exports = function(grunt) {
 
       // typescript required for polymer
       uipolymer: {
-        src: ['src/generic?ui/
+        src: ['src/generic_ui/polymer/**/*.ts']
       },
 
       // mocks to help jasmine along. These typescript files must be compiled
