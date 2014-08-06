@@ -317,8 +317,22 @@ module WebRtc {
           var results = report.result();
           for (var i = 0; i < results.length; i++) {
             var result = results[i];
-            // look for the googActiveConnection report...
-            if (result.stat('googActiveConnection') === 'true') {
+            // Search for the endpoints in use.
+            // There's a bug in Chrome whereby RTCPeerConnection.getStats(),
+            // when that RTCPeerConnection is configured to use a TURN server,
+            // reports multiple channels, *some of which have the non-relay
+            // candidates and are reported as active*. Fortunately, the report
+            // quickly fixes itself and a workaround seems to be to wait until
+            // some bytes are sent over the channel -- fortunately, again,
+            // this happens automatically as part of keeping the channel alive.
+            //
+            // Tracking here:
+            //   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            //
+            // Note that the inactive/failed channel remains visible at
+            // chrome://webrtc-internals/.
+            if (result.stat('googActiveConnection') === 'true' &&
+                parseInt(result.stat('bytesSent')) > 0) {
               this.pcState = State.CONNECTED;
               var localFields = result.stat('googLocalAddress').split(':');
               var remoteFields = result.stat('googRemoteAddress').split(':');
