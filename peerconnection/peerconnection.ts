@@ -327,7 +327,7 @@ module WebRtc {
             // this happens automatically as part of keeping the channel alive.
             //
             // Tracking here:
-            //   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            //   https://code.google.com/p/webrtc/issues/detail?id=3665
             //
             // Note that the inactive/failed channel remains visible at
             // chrome://webrtc-internals/.
