@@ -18,9 +18,21 @@ module WebRtc {
     initiateConnection     ?:boolean;  // defaults to false
   }
 
+  export enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
   export interface Endpoint {
     address:string;  // TODO: rename to IpAddress
     port:number;
+    candidateType: CandidateType;
+  }
+
+  var candidateTypeMapping_ :{[name:string]:CandidateType} = {
+    'local': CandidateType.LOCAL,
+    'stun': CandidateType.STUN,
+    'prflx': CandidateType.PRFLX,
+    'relay': CandidateType.RELAY
   }
 
   export interface ConnectionAddresses {
@@ -337,10 +349,18 @@ module WebRtc {
               var localFields = result.stat('googLocalAddress').split(':');
               var remoteFields = result.stat('googRemoteAddress').split(':');
               this.fulfillConnected_({
-                  local:  {address: localFields[0],
-                           port: parseInt(localFields[1])},
-                  remote: {address: remoteFields[0],
-                           port: parseInt(remoteFields[1])}
+                  local: {
+                    address: localFields[0],
+                    port: parseInt(localFields[1]),
+                    candidateType: (candidateTypeMapping_[result.stat(
+                        'googLocalCandidateType')] || CandidateType.UNKNOWN)
+                  },
+                  remote: {
+                    address: remoteFields[0],
+                    port: parseInt(remoteFields[1]),
+                    candidateType: (candidateTypeMapping_[result.stat(
+                        'googRemoteCandidateType')] || CandidateType.UNKNOWN)
+                  }
                 });
               return;
             }

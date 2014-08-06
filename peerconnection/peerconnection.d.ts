@@ -8,9 +8,18 @@
 
 declare module WebRtc {
 
+  // Possible candidate types, e.g. RELAY if a host is only accessible
+  // via a TURN server. The values are taken from this file; as the comment
+  // suggests, not all values may be found in practice:
+  //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
+  enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
   interface Endpoint {
     address:string;  // TODO: rename to IpAddress
     port:number;
+    candidateType:CandidateType;
   }
 
   interface PeerConnectionConfig {
