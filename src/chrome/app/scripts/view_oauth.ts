@@ -21,7 +21,9 @@ View_oauth.prototype.open = function(args, what, continuation) {
   // socialprovider.js
   if (this.socialNetworkName == "google") {
     connector.sendToUI(uProxy.Update.GET_CREDENTIALS, 'google');
-    connector.setOnCredentials(this.dispatchResult.bind(this));
+    connector.setOnCredentials((results) => {
+      this.dispatchEvent('message', results);
+    });
   }
   /* TODO: these social network's haven't yet been fully implemented 
   else if (this.socialNetworkName == "xmpp") {
@@ -40,10 +42,6 @@ View_oauth.prototype.open = function(args, what, continuation) {
                  this.socialNetworkName);
   }
   continuation();
-};
-
-View_oauth.prototype.dispatchResult = function(results) {
-  this.dispatchEvent('message', results);
 };
 
 View_oauth.prototype.show = function(continuation) {

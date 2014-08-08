@@ -22,7 +22,6 @@ var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
 var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
-var oAuth;
 
 // TODO: This should be *actually* typed.
 // Proxy Configuration.

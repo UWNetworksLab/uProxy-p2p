@@ -19,8 +19,8 @@ var uProxyAppChannel = freedom;  // Guaranteed to exist.
  */
 class ChromeUIConnector {
 
-  private extPort_ :chrome.runtime.Port;    // The port that the extension connects to.
-  private onCredentials_ :Function;
+  private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
+  private onCredentials_ :(Object) => void;
 
   constructor() {
     this.extPort_ = null;
@@ -30,7 +30,7 @@ class ChromeUIConnector {
   /**
    * Handler for when the uProxy Chrome Extension connects to this uProxy App.
    */
-  private onConnect_ = (port:chrome.runtime.Port) => {
+  private onConnect_ = (port :chrome.runtime.Port) => {
     // Security: only allow the official uproxy extension to control the backend.
     // We don't want another extension secretly making you proxy others, or
     // trying to do something even worse.
@@ -54,7 +54,7 @@ class ChromeUIConnector {
    * Receive a message from the extension.
    * This usually installs freedom handlers.
    */
-  private onExtMsg_ = (msg:uProxy.Payload) => {
+  private onExtMsg_ = (msg :uProxy.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core. These are uProxy.Commands.
@@ -73,13 +73,13 @@ class ChromeUIConnector {
       }
       installedFreedomHooks.push(msg.type);
       // When it fires, send data back over Chrome App -> Extension port.
-      uProxyAppChannel.on(msgType, (ret) => {
+      uProxyAppChannel.on(msgType, (ret :string) => {
         this.sendToUI(msg.type, ret);
       });
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?: any) => {
+  public sendToUI = (type :uProxy.Update, data ?:string) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
@@ -87,7 +87,7 @@ class ChromeUIConnector {
     });
   }
   
-  public setOnCredentials = (onCredentials : Function) => {
+  public setOnCredentials = (onCredentials :(Object) => void) => {
     this.onCredentials_ = onCredentials;
   }
 }

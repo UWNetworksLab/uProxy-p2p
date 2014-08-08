@@ -11,12 +11,12 @@ class GoogleAuth {
   constructor() {
   }
 
-  public login() {
+  public login = () : void => {
     this.getAccessCode_();
   }
 
-  private getAccessCode_() {
-    var extractCode = function(tabId, changeInfo, tab) {
+  private getAccessCode_ = () : void => {
+    var extractCode = (tabId, changeInfo, tab) => {
 			console.log('tab url is ' + tab.url);
       if (tab.url.indexOf(REDIRECT_URI) === 0) {
         var code = tab.url.match(/code=([^&]+)/)[1];
@@ -24,17 +24,20 @@ class GoogleAuth {
         chrome.tabs.remove(tabId);
         this.getToken_(code);
       }
-    }.bind(this);
+    };
     chrome.tabs.onUpdated.addListener(extractCode);
     var googleOAuth2Url = "https://accounts.google.com/o/oauth2/auth?" +
         "scope=email%20https://www.googleapis.com/auth/googletalk" +
         "&redirect_uri=" + REDIRECT_URI +
         "&response_type=code" +
         "&client_id=" + CLIENT_ID;
-    chrome.tabs.create({url: googleOAuth2Url});
+    var accountChooserUrl =
+        'https://accounts.google.com/accountchooser?continue=' +
+        encodeURIComponent(googleOAuth2Url);
+    chrome.tabs.create({url: accountChooserUrl});
   }
 
-  private getToken_(code) {
+  private getToken_ = (code :string) : void => {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "https://accounts.google.com/o/oauth2/token", false);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -43,14 +46,14 @@ class GoogleAuth {
         "&client_secret=" + CLIENT_SECRET +
         "&redirect_uri=" + REDIRECT_URI +
         "&grant_type=authorization_code";
-    xhr.addEventListener('load', function(event) {
+    xhr.addEventListener('load', (event) => {
       if (xhr.status != 200) {
-        this.onError_();
+        this.onError_('Error getting credentials ' + xhr.status);
         return;
       }
       var resp = JSON.parse(xhr.response);
       this.getCredentials_(resp.access_token);
-    }.bind(this), false);
+    }, false);
 
     xhr.addEventListener('error', function(evt) {
       this.onError_('Error occurred while trying to get Google oAuth token');
@@ -59,7 +62,7 @@ class GoogleAuth {
     xhr.send(params);
   }
 
-  private getCredentials_(token :string) {
+  private getCredentials_ = (token :string) : void => {
     // Make googleapis request to get user's email address, then pass
     // credentials back to social provider.
     var xhr = new XMLHttpRequest();
@@ -86,15 +89,13 @@ class GoogleAuth {
     xhr.send();
   }
 
-  private onError_(errorText :string) {
+  private onError_ = (errorText :string) : void => {
     core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'error',
-                     message: errorText});
+                     {cmd: 'error', message: errorText});
   }
 
-  private sendCredentials_(credentials :GoogleTalkCredentials) {
+  private sendCredentials_ = (credentials :GoogleTalkCredentials) : void => {
     core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'auth',
-                     message: credentials});
+                     {cmd: 'auth', message: credentials});
   }
 }

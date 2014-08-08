@@ -19,9 +19,9 @@
       "scripts/chrome_browser_action.js",
       "scripts/proxy-config.js",
       "scripts/core_connector.js",
-      "scripts/chrome_connector.js",
       "scripts/oauth.js",
       "scripts/google_auth.js",
+      "scripts/chrome_connector.js",
       "scripts/background.js"
     ]
   },
