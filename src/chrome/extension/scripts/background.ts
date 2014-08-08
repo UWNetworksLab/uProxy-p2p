@@ -57,6 +57,8 @@ function initUI() : UI.UserInterface {
 
   core = new CoreConnector(chromeConnector);
   var browserAction = new ChromeBrowserAction();
+  var oAuth = new OAuth();
+  chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS, oAuth.getCredentials);
 
   return new UI.UserInterface(core, browserAction);
 }

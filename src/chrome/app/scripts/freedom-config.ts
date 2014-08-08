@@ -6,7 +6,7 @@
 // Defined in src/chrome-providers/*.ts
 declare module TcpSocket { class Chrome {} }
 declare module UdpSocket { class Chrome {} }
-var View_oauth:any;
+var View_oauth :(app: any, dispatchEvent: any) => void;
 
 // Configure variable used by Freedom to register custom providers
 window.freedomcfg = function(register) {
