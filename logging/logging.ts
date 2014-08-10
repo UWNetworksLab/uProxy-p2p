@@ -1,5 +1,4 @@
-
-module UproxyLogging {
+module Logging {
 
   // The data structure for a logged message.
   export interface Message {
@@ -10,7 +9,9 @@ module UproxyLogging {
   }
 
   var logBuffer: Message[] = [];
-  var enabled = true;   // TODO: we probably will change it to false as default.
+
+  // TODO: we probably will change it to false as default.
+  var enabled = true;
 
   // The console filter defines what gets logged, depending on the tags. There
   // is a special '*' tag that applies to all messages.
@@ -122,37 +123,6 @@ module UproxyLogging {
     }
   }
 
-  // Class for managing logging and exporting logs.
-  export class FreedomLogManager {
-    // Dummy consturctor because freedom needs one.
-    constructor(
-      private module_:any,  // TODO: fix `any` type.
-      // dispatchEvent_ is never used, hense void eventData.
-      private dispatchEvent_:(eventType:string, eventData:void) => void) {}
-    //
-    public getEncrypedLogBuffer = (tags:string[],
-        continuation:(encryptedLogs:ArrayBuffer) => void) : void => {
-      continuation(getEncrypedLogBuffer(tags));
-    }
-    public getLogs = (tags:string[], continuation:(logs:Message[])=>void)
-        : void => {
-      continuation(getLogs(tags));
-    }
-    public clearLogs = (continuation:()=>void) : void => {
-      clearLogs(); continuation();
-    }
-    public enable = (continuation:()=>void) : void => {
-      enable(); continuation();
-    }
-    public disable = (continuation:()=>void) : void => {
-      disable(); continuation();;
-    }
-    public setConsoleFilter = (args: string[], continuation:()=>void)
-        : void => {
-      setConsoleFilter(args); continuation();
-    }
-  }
-
   export class Log {
     constructor(private tag_:string) {}
     // Logs message in debug level.
@@ -172,35 +142,4 @@ module UproxyLogging {
       doRealLog('E', this.tag_, msg, args);
     }
   }
-
-  // Class for writing to log.
-  export class FreedomLogger {
-    private logger_ :Log;
-    constructor(
-        // module_ is never used.
-        private module_:any,  // TODO: fix `any` type.
-        // dispatchEvent_ is never used, hense void eventData.
-        private dispatchEvent_:(eventType:string, eventData:void) => void,
-        // The |defaultTag_| is
-        private tag_:string) {
-      this.logger_ = new Log(tag_);
-    }
-    public debug = (msg:string, args:any[], continuation:()=>void)
-        : void => {
-      this.logger_.debug(msg, args); continuation();
-    }
-    public info = (msg:string, args:any[], continuation:()=>void)
-        : void => {
-      this.logger_.debug(msg, args); continuation();
-    }
-    public warn = (msg:string, args:any[], continuation:()=>void)
-        : void => {
-      this.logger_.debug(msg, args); continuation();
-    }
-    public error = (msg:string, args:any[], continuation:()=>void)
-        : void => {
-      this.logger_.debug(msg, args); continuation();
-    }
-  }
-
 }

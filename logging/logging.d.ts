@@ -1,5 +1,3 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
-
 // These live in UproxyLogging module, and are provided as a freedom core
 // providers. Note: because the definition of these modules is interpreted and
 // remotely provided by Freedom, the interfaces in ../logger.ts looks quite
@@ -11,7 +9,7 @@
 // CONSIDER: better to have date done by the caller? Then you get real timings
 // without the message-passing delay which could be really confusing on race-
 // condition debugging.
-declare module UproxyLogging {
+declare module Logging {
 
   // The data structure for a logged message.
   interface Message {
@@ -34,22 +32,6 @@ declare module UproxyLogging {
   function enable() : void;
   function disable() : void;
   function setConsoleFilter(args:string[]) : void;
-
-  // This is the Freedom LogManager core provider that lets freedom modules
-  // access the logger's core functions.
-  //
-  // Example of use:
-  // var logManager :UproxyLogging.FreedomLogManager =
-  //    freedom['core.logmanager']();
-  interface FreedomLogManager {
-    getEncrypedLogBuffer(tags?:string[]) : Promise<ArrayBuffer>;
-    getLogs(tags?:string[]) : Promise<Message[]>;
-    getLogStrings(tags?:string[]) : Promise<string[]>;
-    clearLogs() : void;
-    enable() : void;
-    disable() : void;
-    setConsoleFilter(args:string[]) : void;
-  }
 
   // Example use for a provider that depends on this core provider:
   // var logger :UproxyLogging.Logger = freedom['core.logger']('my_tag');

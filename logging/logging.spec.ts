@@ -1,5 +1,4 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
-import Logging = UproxyLogging;
 
 describe("logger from core environment", () => {
   var log1 = new Logging.Log('tag1');
