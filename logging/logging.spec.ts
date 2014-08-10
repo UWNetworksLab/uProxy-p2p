@@ -18,27 +18,27 @@ describe("logger from core environment", () => {
 
   it('format string', () => {
     expect(Logging.formatMessage(message1))
-        .toMatch(/\*D\[tag\]\(.*\): simple string/);
+        .toMatch(/\*\[tag\]\(.*\) D: simple string/);
     expect(Logging.formatMessage(message2))
-        .toMatch(/\*D\[tag\]\(.*\): simple string/);
+        .toMatch(/\*\[tag\]\(.*\) D: simple string/);
     expect(Logging.formatMessage(message3))
-        .toMatch(/\*I\[test-module\]\(.*\): second string/);
+        .toMatch(/\*\[test-module\]\(.*\) I: second string/);
     expect(Logging.formatMessage(message4))
-        .toMatch(/\*W\[test\]\(.*\): Bob pinged Alice with id=123456/);
+        .toMatch(/\*\[test\]\(.*\) W: Bob pinged Alice with id=123456/);
     expect(Logging.formatMessage(message5))
-        .toMatch(/\*E\[test\]\(.*\): Bob pinged Alice with id=123456/);
+        .toMatch(/\*\[test\]\(.*\) E: Bob pinged Alice with id=123456/);
   });
 
   it('grab logs', () => {
     log1.debug('simple string');
     log2.info('second string');
     expect(Logging.getLogStrings().join('\n')).toMatch(
-      /\*D\[tag1\]\(.*\): simple string\n\*I\[tag2\]\(.*\): second string/);
+      /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string/);
   });
 
   it('format message like printf', () => {
     log1.error('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
     expect(Logging.getLogStrings().join('\n')).toMatch(
-      /\*E\[tag1\]\(.*\): Bob pinged Alice with id=123456/);
+      /\*\[tag1\]\(.*\) E: Bob pinged Alice with id=123456/);
   });
 });

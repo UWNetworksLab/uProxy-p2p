@@ -8,20 +8,6 @@
 
 declare module WebRtc {
 
-  // Possible candidate types, e.g. RELAY if a host is only accessible
-  // via a TURN server. The values are taken from this file; as the comment
-  // suggests, not all values may be found in practice:
-  //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
-  enum CandidateType {
-    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
-  }
-
-  interface Endpoint {
-    address:string;  // TODO: rename to IpAddress
-    port:number;
-    candidateType:CandidateType;
-  }
-
   interface PeerConnectionConfig {
     webrtcPcConfig         :RTCPeerConnectionConfig;
     webrtcMediaConstraints :RTCMediaConstraints;
@@ -39,10 +25,25 @@ declare module WebRtc {
     description   ?:RTCSessionDescriptionInit;
   }
 
+  // Possible candidate types, e.g. RELAY if a host is only accessible
+  // via a TURN server. The values are taken from this file; as the comment
+  // suggests, not all values may be found in practice:
+  //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
+  enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
+  interface Endpoint {
+    address:string;
+    port:number;
+  }
+
   // Once you are connected to the peer, you know the local/remote addresses.
   interface ConnectionAddresses {
     local  :Endpoint;  // the local transport address/port
+    localType: CandidateType;
     remote :Endpoint;  // the remote peer's transport address/port
+    remoteType: CandidateType;
   }
 
   enum State {

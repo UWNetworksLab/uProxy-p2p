@@ -39,9 +39,9 @@ b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
 function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
   dbg(name + ' connected: ' +
       endpoints.local.address + ':' + endpoints.local.port +
-      ' (' + WebRtc.CandidateType[endpoints.local.candidateType] + ') <-> ' +
+      ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
       endpoints.remote.address + ':' + endpoints.remote.port +
-      ' (' + WebRtc.CandidateType[endpoints.remote.candidateType] + ')');
+      ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
 }
 a.onceConnected.then(logEndpoints.bind(null, 'a'));
 b.onceConnected.then(logEndpoints.bind(null, 'b'));

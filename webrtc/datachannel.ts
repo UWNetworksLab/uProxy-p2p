@@ -20,6 +20,7 @@ module WebRtc {
   // accidentally. More info in this thread (note that 250Kb is well below both
   // the 16MB for Chrome 37+ and "100 messages" of previous versions mentioned):
   //   https://code.google.com/p/webrtc/issues/detail?id=2866
+  // CONSIDER: make it 0. There is no size in the spec.
   var PC_QUEUE_LIMIT = 1024 * 250;
   // Javascript has trouble representing integers larger than 2^53. So we simply
   // don't support trying to send array's bigger than that.

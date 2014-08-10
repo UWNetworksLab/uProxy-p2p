@@ -19,28 +19,6 @@ module WebRtc {
     initiateConnection     ?:boolean;  // defaults to false
   }
 
-  export enum CandidateType {
-    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
-  }
-
-  export interface Endpoint {
-    address:string;  // TODO: rename to IpAddress
-    port:number;
-    candidateType: CandidateType;
-  }
-
-  var candidateTypeMapping_ :{[name:string]:CandidateType} = {
-    'local': CandidateType.LOCAL,
-    'stun': CandidateType.STUN,
-    'prflx': CandidateType.PRFLX,
-    'relay': CandidateType.RELAY
-  }
-
-  export interface ConnectionAddresses {
-    local  :Endpoint;  // the local transport address/port
-    remote :Endpoint;  // the remote peer's transport address/port
-  }
-
   export enum SignalType {
     OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
   }
@@ -53,6 +31,36 @@ module WebRtc {
     // The |description| parameter is set iff type === OFFER or
     // type === ANSWER
     description   ?:RTCSessionDescriptionInit;
+  }
+
+  // Possible candidate types, e.g. RELAY if a host is only accessible
+  // via a TURN server. The values are taken from this file; as the comment
+  // suggests, not all values may be found in practice:
+  //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
+  export enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
+  var candidateTypeMapping_ :{[name:string]:CandidateType} = {
+    'local': CandidateType.LOCAL,
+    'stun': CandidateType.STUN,
+    'prflx': CandidateType.PRFLX,
+    'relay': CandidateType.RELAY
+  }
+
+  // This should match the uproxy-networking/network-typings/communications.d.ts
+  // type with the same name (Net.Endpoint).
+  export interface Endpoint {
+    address:string; // IPv4, IPv6, or domain name.
+    port:number;
+  }
+
+  // Once you are connected to the peer, you know the local/remote addresses.
+  export interface ConnectionAddresses {
+    local  :Endpoint;  // the local transport address/port
+    localType: CandidateType;
+    remote :Endpoint;  // the remote peer's transport address/port
+    remoteType: CandidateType;
   }
 
   export enum State {
@@ -355,16 +363,16 @@ module WebRtc {
               this.fulfillConnected_({
                   local: {
                     address: localFields[0],
-                    port: parseInt(localFields[1]),
-                    candidateType: (candidateTypeMapping_[result.stat(
-                        'googLocalCandidateType')] || CandidateType.UNKNOWN)
+                    port: parseInt(localFields[1])
                   },
+                  localType: (candidateTypeMapping_[result.stat(
+                      'googLocalCandidateType')] || CandidateType.UNKNOWN),
                   remote: {
                     address: remoteFields[0],
-                    port: parseInt(remoteFields[1]),
-                    candidateType: (candidateTypeMapping_[result.stat(
-                        'googRemoteCandidateType')] || CandidateType.UNKNOWN)
-                  }
+                    port: parseInt(remoteFields[1])
+                  },
+                  remoteType: (candidateTypeMapping_[result.stat(
+                      'googRemoteCandidateType')] || CandidateType.UNKNOWN)
                 });
               return;
             }
