@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 
 describe("logger from core environment", () => {
   var log1 = new Logging.Log('tag1');
@@ -29,7 +29,7 @@ describe("logger from core environment", () => {
     log1.debug('simple string');
     log2.info('second string');
     expect(Logging.getLogStrings().join('\n')).toMatch(
-      /.*\|tag1\|D\|simple string\n.*\|test-module\|I\|second string/);
+      /.*\|tag1\|D\|simple string\n.*\|tag2\|I\|second string/);
   });
 
   it('format message like printf', () => {

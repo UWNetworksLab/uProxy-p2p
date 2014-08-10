@@ -2,7 +2,7 @@
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
-/// <reference path='../coreproviders/providers/logger.d.ts' />
+/// <reference path='../logging/logging.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -66,7 +66,7 @@ module WebRtc {
   }
 
   // Logger for this module.
-  var log :UproxyLogging.Log = new UproxyLogging.Log('PeerConnection');
+  var log :Logging.Log = new Logging.Log('PeerConnection');
 
   // A wrapper for peer-connection and it's associated data channels.
   // The most important diagram is this one:

@@ -1,5 +1,5 @@
 /// <reference path='messages.d.ts' />
-/// <reference path="../../../../freedom/typings/freedom.d.ts" />
+/// <reference path="../../typings/freedom.d.ts" />
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -10,13 +10,13 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom.on('ready', function() {
-  dbg('peer connection established!');
+  console.info('peer connection established!');
   sendAreaA.disabled = false;
   sendAreaB.disabled = false;
 });
 
 freedom.on('error', function() {
-  dbgErr('something went wrong with the peer connection');
+  console.error('something went wrong with the peer connection');
   sendAreaA.disabled = true;
   sendAreaB.disabled = true;
 });
@@ -34,7 +34,3 @@ function receive(textArea:HTMLInputElement, msg:Chat.Message) {
 }
 freedom.on('receiveA', receive.bind(null, receiveAreaA));
 freedom.on('receiveB', receive.bind(null, receiveAreaB));
-
-function dbg(msg:string) { console.log(msg); }
-function dbgWarn(msg:string) { console.warn(msg); }
-function dbgErr(msg:string) { console.error(msg); }

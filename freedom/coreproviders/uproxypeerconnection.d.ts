@@ -1,6 +1,6 @@
-/// <reference path="../../../freedom/typings/freedom.d.ts" />
-/// <reference path="../../../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../typings/freedom.d.ts" />
+/// <reference path="../../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
+/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 // TODO: rename once https://github.com/Microsoft/TypeScript/issues/52 is fixed
 declare module freedom_UproxyPeerConnection {

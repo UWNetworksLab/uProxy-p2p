@@ -66,9 +66,9 @@ module Logging {
     var Message :Message = makeMessage(level, tag, msg, args);
 
     if ('*' in consoleFilter &&
-        this.isLevelAllowed_(level, consoleFilter['*']) ||
+        isLevelAllowed_(level, consoleFilter['*']) ||
         tag in consoleFilter &&
-        this.isLevelAllowed_(level, consoleFilter[tag])) {
+        isLevelAllowed_(level, consoleFilter[tag])) {
       console.log(formatMessage(Message));
     }
     logBuffer.push(Message);

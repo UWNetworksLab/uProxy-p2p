@@ -1,4 +1,4 @@
-/// <reference path="../../../logging/logging.d.ts" />
+/// <reference path="../../logging/logging.d.ts" />
 
 module Freedom_UproxyLogging {
 
@@ -14,7 +14,8 @@ module Freedom_UproxyLogging {
         continuation:(encryptedLogs:ArrayBuffer) => void) : void => {
       continuation(Logging.getEncrypedLogBuffer(tags));
     }
-    public getLogs = (tags:string[], continuation:(logs:Message[])=>void)
+    public getLogs =
+        (tags:string[], continuation:(logs:Logging.Message[])=>void)
         : void => {
       continuation(Logging.getLogs(tags));
     }

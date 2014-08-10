@@ -1,10 +1,13 @@
 /// <reference path='messages.d.ts' />
 /// <reference path="../../../webrtc/peerconnection.d.ts" />
-/// <reference path="../../../coreproviders/providers/uproxypeerconnection.d.ts" />
+/// <reference path="../../../freedom/coreproviders/uproxypeerconnection.d.ts" />
+/// <reference path="../../../freedom/coreproviders/uproxylogging.d.ts" />
 /// <reference path="../../../freedom/typings/freedom.d.ts" />
 /// <reference path="../../../third_party/typings/tsd.d.ts" />
 
-import PcLib = freedom_UproxyPeerConnection;
+import WebrtcLib = freedom_UproxyPeerConnection;
+
+var log :Freedom_UproxyLogging.Log = freedom['core.log']('freedomchat');
 
 var pcConfig :WebRtc.PeerConnectionConfig = {
   webrtcPcConfig: {
@@ -16,30 +19,30 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   }
 };
 
-var a :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
-var b :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
+var a :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
+var b :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
 a.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
-  console.log('signalling channel A message: ' + JSON.stringify(signal));
+  log.info('signalling channel A message: ' + JSON.stringify(signal));
   b.handleSignalMessage(signal);
 });
 b.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
-  console.log('signalling channel B message: ' + JSON.stringify(signal));
+  log.info('signalling channel B message: ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
 
 b.on('peerOpenedChannel', (channelLabel:string) => {
-  console.log('I can see that `a` created a data channel called ' + channelLabel);
+  log.info('I can see that `a` created a data channel called ' + channelLabel);
 });
 
-a.onceConnecting().then(() => { console.log('a is connecting...'); });
-b.onceConnecting().then(() => { console.log('b is connecting...'); });
+a.onceConnecting().then(() => { log.info('a is connecting...'); });
+b.onceConnecting().then(() => { log.info('b is connecting...'); });
 
 // Log the chosen endpoints.
 function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
-  console.log(name + ' connected: ' +
+  log.info(name + ' connected: ' +
       endpoints.local.address + ':' + endpoints.local.port +
       ' <-> ' +
       endpoints.remote.address + ':' + endpoints.remote.port);
@@ -52,9 +55,9 @@ b.onceConnected().then(logEndpoints.bind(null, 'b'));
 a.negotiateConnection()
   .then((endpoints:WebRtc.ConnectionAddresses) => {
     // Send messages over the datachannel, in response to events from the UI.
-    var sendMessage = (pc:PcLib.Pc, message:Chat.Message) => {
+    var sendMessage = (pc:WebrtcLib.Pc, message:Chat.Message) => {
       pc.send('text', { str: message.message }).catch((e) => {
-        console.error('error sending message: ' + e.message);
+        log.error('error sending message: ' + e.message);
       });
     };
     freedom.on('sendA', sendMessage.bind(null, a));
@@ -62,9 +65,9 @@ a.negotiateConnection()
 
     // Handle messages received on the datachannel(s).
     // The message is forwarded to the UI.
-    var receiveMessage = (name:string, d:PcLib.LabelledDataChannelMessage) => {
+    var receiveMessage = (name:string, d:WebrtcLib.LabelledDataChannelMessage) => {
       if (d.message.str === undefined) {
-        console.error('only text messages are supported');
+        log.error('only text messages are supported');
         return;
       }
       freedom.emit('receive' + name, {
@@ -75,12 +78,12 @@ a.negotiateConnection()
     b.on('dataFromPeer', receiveMessage.bind(null, 'B'));
 
     a.openDataChannel('text').then(() => {
-      console.log('datachannel open!');
+      log.info('datachannel open!');
       freedom.emit('ready', {});
     }, (e) => {
-      console.error('could not setup datachannel: ' + e.message);
+      log.error('could not setup datachannel: ' + e.message);
       freedom.emit('error', {});
     });
   }, (e:Error) => {
-    console.error('could not negotiate peerconnection: ' + e.message);
+    log.error('could not negotiate peerconnection: ' + e.message);
   });
