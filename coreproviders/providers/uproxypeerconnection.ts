@@ -114,6 +114,3 @@ class UproxyPeerConnectionImpl {
     this.pc_.dataChannels[channelLabel].send(data).then(continuation);
   }
 }
-
-declare var fdom:freedom.CoreProviderEnv.Fdom;
-fdom.apis.register('core.uproxypeerconnection', UproxyPeerConnectionImpl);

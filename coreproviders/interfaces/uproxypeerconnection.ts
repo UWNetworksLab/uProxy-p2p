@@ -124,3 +124,5 @@ fdom.apis.set('core.uproxypeerconnection', {
     ]
   }
 });
+
+fdom.apis.register('core.uproxypeerconnection', UproxyPeerConnectionImpl);

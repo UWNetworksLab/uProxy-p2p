@@ -72,7 +72,6 @@ module LoggerModule {
       return ret;
     }
 
-
     private isLevelAllowed = (request: string, permitted: string) : boolean => {
       return LEVEL_CHARS.indexOf(request) >= LEVEL_CHARS.indexOf(permitted);
     }

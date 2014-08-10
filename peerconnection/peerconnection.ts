@@ -2,6 +2,7 @@
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
+/// <reference path='../coreproviders/providers/logger.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -63,6 +64,9 @@ module WebRtc {
     }
     return hash;
   }
+
+  // Logger for this module.
+  var log :UproxyLogging.Log = new UproxyLogging.Log('PeerConnection');
 
   // A wrapper for peer-connection and it's associated data channels.
   // The most important diagram is this one:
@@ -229,7 +233,7 @@ module WebRtc {
 
     // Close the peer connection. This function is idempotent.
     public close = () : void => {
-      //console.log(this.peerName + ': ' + 'close');
+      log.info(this.peerName + ': ' + 'close');
 
       // This may happen because calling close will invoke pc_.close, which
       // may call |onSignallingStateChange_| with |this.pc_.signalingState ===
@@ -250,7 +254,7 @@ module WebRtc {
     }
 
     private closeWithError_ = (s:string) : void => {
-      console.error(s);
+      log.error(this.peerName + ': ' + s);
       if (this.pcState === State.CONNECTING) {
         this.rejectConnected_(new Error(s));
       }
@@ -346,7 +350,7 @@ module WebRtc {
     // our connection, or called when some WebRTC internal event requires
     // renegotiation of SDP headers.
     public negotiateConnection = () : Promise<ConnectionAddresses> => {
-      //console.log(this.peerName + ': ' + 'negotiateConnection', this._pc, e);
+      log.debug(this.peerName + ': ' + 'negotiateConnection');
       if (this.pcState === State.DISCONNECTED) {
         return Promise.reject(new Error(this.peerName + ': ' +
             'negotiateConnection called on ' +
@@ -369,21 +373,21 @@ module WebRtc {
       //   https://code.google.com/p/webrtc/issues/detail?id=2431
       /*if (this.pc_.localDescription && this.pc_.remoteDescription) {
         // TODO: remove when we are using a good version of chrome.
-        console.warn('Dodging strange negotiateConnection.')
+        log.warn('Dodging strange negotiateConnection.')
         if (this.pc_.localDescription.type === "offer") {
           this.pc_.setLocalDescription(this.pc_.localDescription,
-              () => { console.log('reset offer local description'); },
-              console.error);
+              () => { log.info('reset offer local description'); },
+              log.error);
           this.pc_.setRemoteDescription(this.pc_.remoteDescription,
-              () => { console.log('reset answer remote description'); },
-              console.error);
+              () => { log.info('reset answer remote description'); },
+              log.error);
         } else { // was 'answer'
           this.pc_.setRemoteDescription(this.pc_.remoteDescription,
-              () => { console.log('reset offer remote description'); },
-              console.error);
+              () => { log.info('reset offer remote description'); },
+              log.error);
           this.pc_.setLocalDescription(this.pc_.localDescription,
-              () => { console.log('reset answer local description'); },
-              console.error);
+              () => { log.info('reset answer local description'); },
+              log.error);
         }
         return this.onceConnected;
       }*/
@@ -410,7 +414,7 @@ module WebRtc {
 
     // Handle a signalling message from the remote peer.
     public handleSignalMessage = (signal :SignallingMessage) : void => {
-      console.log(this.peerName + ': ' + 'handleSignalMessage: \n' +
+      log.debug(this.peerName + ': ' + 'handleSignalMessage: \n' +
           JSON.stringify(signal));
       // If we are offering and they are also offerring at the same time, pick
       // the one who has the lower hash value for their description: this is
@@ -424,7 +428,7 @@ module WebRtc {
               stringHash(JSON.stringify(signal.description.sdp)) <
                   stringHash(JSON.stringify(this.pc_.localDescription.sdp))) {
             // TODO: implement reset and use their offer.
-            this.closeWithError_('Simultainious offers not not yet implemented.');
+            this.closeWithError_('Simultainious offers not yet implemented.');
             return;
           }
           this.pcState = State.CONNECTING;
@@ -465,22 +469,21 @@ module WebRtc {
         case SignalType.CANDIDATE:
           // CONSIDER: Should we be passing/getting the SDP line index?
           // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
-          //console.log(this.peerName + ': Adding ice candidate: ' + JSON.stringify(signal.candidate));
           try {
             this.fromPeerCandidateQueue.handle(
                 new RTCIceCandidate(signal.candidate));
           } catch(e) {
-            console.error(this.peerName + ': ' + 'addIceCandidate: ' +
+            log.error(this.peerName + ': ' + 'addIceCandidate: ' +
                 JSON.stringify(signal.candidate) + ' (' +
                 typeof(signal.candidate) + '); Error: ' + e.toString());
           }
           break;
         case SignalType.NO_MORE_CANDIDATES:
-          console.info(this.peerName + ': handleSignalMessage: noMoreCandidates');
+          log.debug(this.peerName + ': handleSignalMessage: noMoreCandidates');
           break;
 
         default:
-          console.error(this.peerName + ': ' +
+          log.error(this.peerName + ': ' +
               'handleSignalMessage got unexpected message: ' +
               JSON.stringify(signal) + ' (' + typeof(signal) + ')');
           break;
