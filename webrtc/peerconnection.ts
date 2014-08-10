@@ -1,3 +1,4 @@
+/// <reference path='RTCPeerConnection.d.ts' />
 /// <reference path='../handler/queue.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
@@ -18,9 +19,21 @@ module WebRtc {
     initiateConnection     ?:boolean;  // defaults to false
   }
 
+  export enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
   export interface Endpoint {
     address:string;  // TODO: rename to IpAddress
     port:number;
+    candidateType: CandidateType;
+  }
+
+  var candidateTypeMapping_ :{[name:string]:CandidateType} = {
+    'local': CandidateType.LOCAL,
+    'stun': CandidateType.STUN,
+    'prflx': CandidateType.PRFLX,
+    'relay': CandidateType.RELAY
   }
 
   export interface ConnectionAddresses {
@@ -320,16 +333,38 @@ module WebRtc {
           var results = report.result();
           for (var i = 0; i < results.length; i++) {
             var result = results[i];
-            // look for the googActiveConnection report...
-            if (result.stat('googActiveConnection') === 'true') {
+            // Search for the endpoints in use.
+            // There's a bug in Chrome whereby RTCPeerConnection.getStats(),
+            // when that RTCPeerConnection is configured to use a TURN server,
+            // reports multiple channels, *some of which have the non-relay
+            // candidates and are reported as active*. Fortunately, the report
+            // quickly fixes itself and a workaround seems to be to wait until
+            // some bytes are sent over the channel -- fortunately, again,
+            // this happens automatically as part of keeping the channel alive.
+            //
+            // Tracking here:
+            //   https://code.google.com/p/webrtc/issues/detail?id=3665
+            //
+            // Note that the inactive/failed channel remains visible at
+            // chrome://webrtc-internals/.
+            if (result.stat('googActiveConnection') === 'true' &&
+                parseInt(result.stat('bytesSent')) > 0) {
               this.pcState = State.CONNECTED;
               var localFields = result.stat('googLocalAddress').split(':');
               var remoteFields = result.stat('googRemoteAddress').split(':');
               this.fulfillConnected_({
-                  local:  {address: localFields[0],
-                           port: parseInt(localFields[1])},
-                  remote: {address: remoteFields[0],
-                           port: parseInt(remoteFields[1])}
+                  local: {
+                    address: localFields[0],
+                    port: parseInt(localFields[1]),
+                    candidateType: (candidateTypeMapping_[result.stat(
+                        'googLocalCandidateType')] || CandidateType.UNKNOWN)
+                  },
+                  remote: {
+                    address: remoteFields[0],
+                    port: parseInt(remoteFields[1]),
+                    candidateType: (candidateTypeMapping_[result.stat(
+                        'googRemoteCandidateType')] || CandidateType.UNKNOWN)
+                  }
                 });
               return;
             }
