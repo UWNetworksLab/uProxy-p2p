@@ -8,9 +8,18 @@
 
 declare module WebRtc {
 
+  // Possible candidate types, e.g. RELAY if a host is only accessible
+  // via a TURN server. The values are taken from this file; as the comment
+  // suggests, not all values may be found in practice:
+  //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
+  enum CandidateType {
+    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
+  }
+
   interface Endpoint {
     address:string;  // TODO: rename to IpAddress
     port:number;
+    candidateType:CandidateType;
   }
 
   interface PeerConnectionConfig {
@@ -20,10 +29,14 @@ declare module WebRtc {
     initiateConnection     ?:boolean;
   }
 
+  enum SignalType {
+    OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
+  }
+
   interface SignallingMessage {
-    // Should be exactly one of the below
-    candidate ?:RTCIceCandidate;
-    sdp       ?:RTCSessionDescription;
+    type          :SignalType
+    candidate     ?:RTCIceCandidateInit;
+    description   ?:RTCSessionDescriptionInit;
   }
 
   // Once you are connected to the peer, you know the local/remote addresses.

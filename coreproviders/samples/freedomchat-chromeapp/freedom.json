@@ -3,7 +3,8 @@
   "description": "top-level freedom manifest",
   "app": {
     "script": [
-      "freedom.js"
+      "freedom.js",
+      "lib/peerconnection/peerconnection.js"
     ]
   },
   "permissions": [

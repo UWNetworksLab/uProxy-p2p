@@ -41,8 +41,9 @@ b.onceConnecting().then(() => { console.log('b is connecting...'); });
 function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
   console.log(name + ' connected: ' +
       endpoints.local.address + ':' + endpoints.local.port +
-      ' <-> ' +
-      endpoints.remote.address + ':' + endpoints.remote.port);
+      ' (' + WebRtc.CandidateType[endpoints.local.candidateType] + ') <-> ' +
+      endpoints.remote.address + ':' + endpoints.remote.port +
+      ' (' + WebRtc.CandidateType[endpoints.remote.candidateType] + ')');
 }
 a.onceConnected().then(logEndpoints.bind(null, 'a'));
 b.onceConnected().then(logEndpoints.bind(null, 'b'));

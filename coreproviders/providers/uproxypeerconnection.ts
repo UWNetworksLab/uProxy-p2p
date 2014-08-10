@@ -14,6 +14,14 @@ class UproxyPeerConnectionImpl {
       // TODO: see comment in .d.ts: use real type not any.
       private dispatchEvent_:(eventType:string, eventData:any) => void,
       config:WebRtc.PeerConnectionConfig) {
+
+    // TODO: Remove when objects-for-constructors is fixed in Freedom:
+    //         https://github.com/freedomjs/freedom/issues/87
+    if (Array.isArray(config)) {
+      // Extract the first element of this single element array.
+      config = (<WebRtc.PeerConnectionConfig[]><any> config)[0];
+    }
+
     this.pc_ = new WebRtc.PeerConnection(config);
 
     // Re-dispatch various messages as Freedom messages.
