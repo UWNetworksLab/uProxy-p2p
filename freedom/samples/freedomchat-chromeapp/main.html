@@ -20,18 +20,23 @@
     <button id="sendButtonB">Send</button>
   </div>
 
-  <script src='lib/freedom/freedom-for-webpages-for-uproxy.js'
-          data-manifest='freedom-module.json'>
+  <!-- Note the object in the script tag is JSON-parsed, and must have double-quotes on keys (due to odd freedom parsing of it), and has this format:
     {
       // This is useful for debugging.
       //
-      // "debug": true
+      "debug": true
 
       // This makes modules run in iFrames instead of WebWorkers. You get
       // syntax error warnings from iFrames where WebWorker's silently die.
       //
-      // "portType": "Frame"
+      "portType": "Frame"
     }
+  -->
+  <script src='lib/freedom/freedom-for-webpages-for-uproxy.js'
+          data-manifest='freedom-module.json'>
+  {
+    "debug": false
+  }
   </script>
   <script src='main.js'></script>
 </body>

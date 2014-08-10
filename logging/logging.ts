@@ -70,7 +70,13 @@ module Logging {
         isLevelAllowed_(level, consoleFilter['*']) ||
         tag in consoleFilter &&
         isLevelAllowed_(level, consoleFilter[tag])) {
-      console.log(formatMessage(Message));
+      if(level === 'D' || level === 'I') {
+        console.log(formatMessage(Message));
+      } else if(level === 'W') {
+        console.warn(formatMessage(Message));
+      } else {
+        console.error(formatMessage(Message));
+      }
     }
     logBuffer.push(Message);
   }
