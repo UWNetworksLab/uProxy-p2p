@@ -52,15 +52,15 @@ module Freedom_UproxyLogging {
     }
     public info = (msg:string, args:any[], continuation:()=>void)
         : void => {
-      this.logger_.debug(msg, args); continuation();
+      this.logger_.info(msg, args); continuation();
     }
     public warn = (msg:string, args:any[], continuation:()=>void)
         : void => {
-      this.logger_.debug(msg, args); continuation();
+      this.logger_.warn(msg, args); continuation();
     }
     public error = (msg:string, args:any[], continuation:()=>void)
         : void => {
-      this.logger_.debug(msg, args); continuation();
+      this.logger_.error(msg, args); continuation();
     }
   }
 

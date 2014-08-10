@@ -8,6 +8,10 @@
 import WebrtcLib = freedom_UproxyPeerConnection;
 
 var log :Freedom_UproxyLogging.Log = freedom['core.log']('freedomchat');
+log.debug('debug message');
+log.info('info message');
+log.warn('warn message');
+log.error('error message');
 
 var pcConfig :WebRtc.PeerConnectionConfig = {
   webrtcPcConfig: {
