@@ -5,6 +5,7 @@
 //   ../providers/uproxypeerconnection.ts
 
 /// <reference path="../../freedom/typings/freedom.d.ts" />
+/// <reference path="../coreproviders/uproxypeerconnection.ts" />
 
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 

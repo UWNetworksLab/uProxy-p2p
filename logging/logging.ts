@@ -49,7 +49,8 @@ module Logging {
     return formatted_msg;
   }
   export function formatMessage(l:Message) : string {
-    return [dateToString_(l.timestamp), l.tag, l.level, l.message].join('|');
+    return '*' + l.level + '[' + l.tag + ']'  + '(' +
+      dateToString_(l.timestamp) + '): ' + l.message;
   }
 
   export function makeMessage(level:string, tag:string, msg:string, args?:any[]) : Message {

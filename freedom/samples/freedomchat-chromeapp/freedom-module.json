@@ -7,6 +7,7 @@
     ]
   },
   "permissions": [
-    "core.uproxypeerconnection"
+    "core.uproxypeerconnection",
+    "core.log"
   ]
 }

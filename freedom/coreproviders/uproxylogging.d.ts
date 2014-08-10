@@ -10,7 +10,9 @@ declare module Freedom_UproxyLogging {
   //
   // var logManager :Freedom_UproxyLogging.LogManager =
   //     freedom['core.logmanager']();
-  interface LogManager {
+  class LogManager {
+    // The freedom module constructor takes no arguments. i.e.
+    // constructor();
     getEncrypedLogBuffer(tags?:string[]) : Promise<ArrayBuffer>;
     getLogs(tags?:string[]) : Promise<Logging.Message[]>;
     getLogStrings(tags?:string[]) : Promise<string[]>;
@@ -25,6 +27,7 @@ declare module Freedom_UproxyLogging {
   // var logger :Freedom_UproxyLogging.Logger =
   //     freedom['core.logger']('my_tag');
   class Log {
+    // The freedom module constructor takes one module_tag:string argument.
     // constructor(tag_:string);
     debug(msg:string, args?:any[]) : void;
     info(msg:string, args?:any[]) : void;

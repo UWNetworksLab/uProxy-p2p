@@ -3,7 +3,7 @@
 //   ../providers/logger.ts
 
 /// <reference path="../../freedom/typings/freedom.d.ts" />
-/// <reference path="../providers/logger.ts" />
+/// <reference path="../coreproviders/uproxylogging.d.ts" />
 
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 
@@ -38,7 +38,7 @@ fdom.apis.set('core.logging', {
     value: [['array', 'string']]
   }
 });
-fdom.apis.register('core.logging', UproxyLogging.FreedomLogManager);
+fdom.apis.register('core.logging', Freedom_UproxyLogging.LogManager);
 
 fdom.apis.set('core.log', {
   'constructor': {
@@ -61,4 +61,4 @@ fdom.apis.set('core.log', {
     value: ['object', ['array', 'object']]
   }
 });
-fdom.apis.register('core.log', UproxyLogging.FreedomLogger);
+fdom.apis.register('core.log', Freedom_UproxyLogging.Log);
