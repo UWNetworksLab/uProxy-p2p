@@ -1,7 +1,7 @@
 /// <reference path='messages.d.ts' />
-/// <reference path="../../../peerconnection/peerconnection.d.ts" />
+/// <reference path="../../../webrtc/peerconnection.d.ts" />
 /// <reference path="../../../coreproviders/providers/uproxypeerconnection.d.ts" />
-/// <reference path="../../../freedom-declarations/freedom.d.ts" />
+/// <reference path="../../../freedom/typings/freedom.d.ts" />
 /// <reference path="../../../third_party/typings/tsd.d.ts" />
 
 import PcLib = freedom_UproxyPeerConnection;

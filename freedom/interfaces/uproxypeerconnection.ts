@@ -4,7 +4,7 @@
 // For docs, see:
 //   ../providers/uproxypeerconnection.ts
 
-/// <reference path="../../freedom-declarations/freedom.d.ts" />
+/// <reference path="../../freedom/typings/freedom.d.ts" />
 
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 

@@ -2,7 +2,7 @@
 // For docs, see:
 //   ../providers/logger.ts
 
-/// <reference path="../../freedom-declarations/freedom.d.ts" />
+/// <reference path="../../freedom/typings/freedom.d.ts" />
 /// <reference path="../providers/logger.ts" />
 
 declare var fdom:freedom.CoreProviderEnv.Fdom;

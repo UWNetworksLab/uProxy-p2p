@@ -1,13 +1,13 @@
 // This is a dummy file to make sure that we typescheck the freedom-stypescript-
 // api files.
 
-/// <reference path='../freedom-declarations/freedom.d.ts' />
-/// <reference path='../freedom-declarations/peer-connection.d.ts' />
-/// <reference path='../freedom-declarations/social.d.ts' />
-/// <reference path='../freedom-declarations/storage.d.ts' />
-/// <reference path='../freedom-declarations/tcp-socket.d.ts' />
-/// <reference path='../freedom-declarations/udp-socket.d.ts' />
-/// <reference path='../freedom-declarations/transport.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/peer-connection.d.ts' />
+/// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../freedom/typings/storage.d.ts' />
+/// <reference path='../freedom/typings/tcp-socket.d.ts' />
+/// <reference path='../freedom/typings/udp-socket.d.ts' />
+/// <reference path='../freedom/typings/transport.d.ts' />
 
 var fdomCore :freedom.Core = freedom.core();
 freedom.emit('foo');
