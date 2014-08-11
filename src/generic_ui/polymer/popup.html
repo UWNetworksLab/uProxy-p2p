@@ -7,6 +7,7 @@
   <script src="../lib/platform/platform.js"></script>
   <link rel="import" href="uproxy-toolbar.html">
   <link rel="import" href="uproxy-button.html">
+  <link rel="import" href="roster.html">
   <style>
     body {
       padding: 0;
@@ -23,13 +24,16 @@
 <body id="popup" unresolved touch-action="auto">
 
   <uproxy-toolbar>
-    <uproxy-button id='give' img='../icons/share_grey.svg'>
+    <uproxy-button id='give' img='../icons/share_white.svg'>
     </uproxy-button>
-    <uproxy-button id='get' img='../icons/receive_grey.svg'>
+    <uproxy-button id='get' img='../icons/receive_white.svg'>
     </uproxy-button>
-    <uproxy-button id='settings' img='../icons/more_vert_grey.svg'>
+    <uproxy-button id='settings' img='../icons/more_vert_white.svg'>
     </uproxy-button>
   </uproxy-toolbar>
+
+  <uproxy-roster>
+  </uproxy-roster>
 
   <script>
     var give = document.querySelector('#give');

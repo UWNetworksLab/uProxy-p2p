@@ -1,0 +1,66 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-contact' attributes='contact'>
+
+  <template>
+    <style>
+    :host {
+      display: inline-block;
+      box-sizing: border-box;
+      height: 64px;
+      width: 100%;
+      border: 1px solid #ccc; border-left: none; border-right: none;
+      background-color: #fff;
+      padding: 16px;
+      cursor: default;
+      overflow: hidden;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    :host(:hover) {
+      box-shadow: 0px 2px 5px #ccc;
+      margin-top: -2px;
+      z-index: 100;
+    }
+    #avatar {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background-color: #eee;
+      vertical-align: middle;
+    }
+    h1 {
+      display: inline;
+      font-size: 16px;
+      font-weight: 100;
+      padding: 0 16px;
+    }
+    </style>
+
+    <img id='avatar' src='{{ contact.pic }}' />
+    <h1>{{ contact.name }}</h1>
+    <span{{ contact.description }}></span>
+  </template>
+
+  <script>
+    Polymer({
+      contact: {
+        // Must adhere to the typescript interface.
+        name: 'unknown',
+        pic: undefined,
+        description: 'description here'
+      },
+      ready: function() {
+        if (!this.contact.pic) {
+          this.contact.pic = '../icons/contact-default.png';
+        }
+        if (!this.contact.description) {
+          this.contact.description = 'no description.';
+        }
+      }
+    });
+  </script>
+
+</polymer-element>

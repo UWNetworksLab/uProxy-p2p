@@ -1,0 +1,50 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='contact.html'>
+
+<polymer-element name='uproxy-roster' attributes='contacts'>
+
+  <template>
+    <style>
+    :host {
+      display: inline-block;
+      box-sizing: border-box;
+      height: 100%;
+      width: 100%;
+    }
+    #search {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      line-height: 20px;
+      color: #888;
+      outline: none;
+      border: none;
+      border-bottom: 1px solid #ddd;
+    }
+    </style>
+
+    <input type='text' id='search' placeholder='Search'></input>
+
+    <template repeat='{{ c in contacts }}'>
+      <uproxy-contact contact='{{ c }}'></uproxy-contact>
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      contacts: [],
+      ready: function() {
+        console.log('initializing roster');
+        this.contacts.push({ name: 'alice' });
+        this.contacts.push({ name: 'bob' });
+        this.contacts.push({ name: 'charlie' });
+        this.contacts.push({ name: 'dave' });
+        this.contacts.push({ name: 'eve' });
+      }
+    });
+  </script>
+
+</polymer-element>
