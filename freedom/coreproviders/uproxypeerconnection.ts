@@ -24,6 +24,8 @@ module freedom_UproxyPeerConnection {
 
       this.log_ = new Logging.Log('uproxy-peerconnection-freedom-wrapper');
 
+      this.log_.debug('making new pc from config: ' + JSON.stringify(config));
+
       // TODO: Remove when objects-for-constructors is fixed in Freedom:
       //         https://github.com/freedomjs/freedom/issues/87
       if (Array.isArray(config)) {
@@ -46,16 +48,17 @@ module freedom_UproxyPeerConnection {
       });
     }
 
-    public handleSignalMessage(
-        signal:WebRtc.SignallingMessage,
-        continuation:() => void) : void {
+    public handleSignalMessage =
+        (signal:WebRtc.SignallingMessage, continuation:() => void) : void => {
       // TODO: make continuation only get called after signal message has been
       // handled.
       this.pc_.handleSignalMessage(signal);
       continuation();
     }
 
-    public negotiateConnection = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
+    public negotiateConnection =
+        (continuation:(endpoints:WebRtc.ConnectionAddresses) => void)
+        : void => {
       // TODO: propagate errors
       this.pc_.negotiateConnection()
         .then(continuation)
@@ -75,7 +78,9 @@ module freedom_UproxyPeerConnection {
         });
     }
 
-    public onceConnected = (continuation:(endpoints:WebRtc.ConnectionAddresses) => void) : void => {
+    public onceConnected =
+        (continuation:(endpoints:WebRtc.ConnectionAddresses) => void)
+        : void => {
       this.pc_.onceConnected
         .then(continuation)
         .catch((e:Error) => {

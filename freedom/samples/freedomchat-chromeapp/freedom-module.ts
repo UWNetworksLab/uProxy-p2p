@@ -31,7 +31,7 @@ var a_pcConfig :WebRtc.PeerConnectionConfig = {
   webrtcMediaConstraints: {
     optional: [{DtlsSrtpKeyAgreement: true}]
   },
-  peerName: 'b'
+  peerName: 'a'
 };
 var a :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](a_pcConfig);
 
@@ -89,6 +89,8 @@ b.on('peerOpenedChannel', (channelLabel:string) => {
 // Once negotiated, enable the UI and add send/receive handlers.
 a.negotiateConnection()
   .then((endpoints:WebRtc.ConnectionAddresses) => {
+    log.info('a: negotiated connection to: ' + JSON.stringify(endpoints));
+
     // Send messages over the datachannel, in response to events from the UI.
     var sendMessage = (pc:WebrtcLib.Pc, message:Chat.Message) => {
       pc.send('text', { str: message.message }).catch((e) => {
