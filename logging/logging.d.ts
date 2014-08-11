@@ -1,8 +1,5 @@
-// These live in UproxyLogging module, and are provided as a freedom core
-// providers. Note: because the definition of these modules is interpreted and
-// remotely provided by Freedom, the interfaces in ../logger.ts looks quite
-// different. In particular, continuation functions get interpretted as Promise
-// results.
+// Core log management functionality. For writing log output from code, see
+// log.d.ts.
 //
 // All timestamps are in the core environments runtime.
 //
@@ -10,13 +7,14 @@
 // without the message-passing delay which could be really confusing on race-
 // condition debugging.
 declare module Logging {
-
-  // The data structure for a logged message.
-  interface Message {
-    timestamp :Date; // the timestamp the log was called (in core runtime).
-    level :string; // one of D=Debug, I=Info, W=Warning, E=Error
-    tag :string; // any string, used for viewing specific module logs.
-    message :string; // the actual log message.
+  // Example use for a core-provider or core runtime code that uses it:
+  // var logger :Logging.Logger = new Logging.Log('my_tag');
+  class Log {
+    constructor(tag_:string);
+    debug(msg:string, args?:any[]) : void;
+    info(msg:string, args?:any[]) : void;
+    warn(msg:string, args?:any[]) : void;
+    error(msg:string, args?:any[]) : void;
   }
 
   // This is the real internal interface available to other core modules/the
@@ -33,17 +31,11 @@ declare module Logging {
   function disable() : void;
   function setConsoleFilter(args:string[]) : void;
 
-  // Example use for a provider that depends on this core provider:
-  // var logger :UproxyLogging.Logger = freedom['core.logger']('my_tag');
-  //
-  // Example use for a core-provider or core runtime code that uses it:
-  // var logger :UproxyLogging.Logger =
-  //   new UproxyLogging.Log('my_tag');
-  class Log {
-    constructor(tag_:string);
-    debug(msg:string, args?:any[]) : void;
-    info(msg:string, args?:any[]) : void;
-    warn(msg:string, args?:any[]) : void;
-    error(msg:string, args?:any[]) : void;
+  // The data structure for a logged message.
+  interface Message {
+    timestamp :Date; // the timestamp the log was called (in core runtime).
+    level :string; // one of D=Debug, I=Info, W=Warning, E=Error
+    tag :string; // any string, used for viewing specific module logs.
+    message :string; // the actual log message.
   }
 }

@@ -108,4 +108,5 @@ fdom.apis.set('core.uproxypeerconnection', {
   }
 });
 
-fdom.apis.register('core.uproxypeerconnection', UproxyPeerConnectionImpl);
+fdom.apis.register('core.uproxypeerconnection',
+    freedom_UproxyPeerConnection.FreedomPcImpl);
