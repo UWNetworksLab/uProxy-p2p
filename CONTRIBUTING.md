@@ -1,1 +1,1 @@
-For contributing to uProxy, see the [uProxy Coding Guide](https://docs.google.com/a/google.com/document/d/1rnaSOBbAHYvb9yXr8lyM-nkUe2FefzUWpeYZ27UKr7o/edit#). 
+For contributing to uProxy, see the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit#). 
