@@ -46,19 +46,19 @@ fdom.apis.set('core.log', {
   },
   'debug': {
     type: 'method',
-    value: ['object', ['array', 'object']]
+    value: ['string', ['array', 'object']]
   },
   'info': {
     type: 'method',
-    value: ['object', ['array', 'object']]
+    value: ['string', ['array', 'object']]
   },
   'warn': {
     type: 'method',
-    value: ['object', ['array', 'object']]
+    value: ['string', ['array', 'object']]
   },
   'error': {
     type: 'method',
-    value: ['object', ['array', 'object']]
+    value: ['string', ['array', 'object']]
   }
 });
 fdom.apis.register('core.log', Freedom_UproxyLogging.Log);
