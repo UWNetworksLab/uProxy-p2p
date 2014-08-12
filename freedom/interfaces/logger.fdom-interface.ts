@@ -7,7 +7,7 @@
 
 declare var fdom:freedom.CoreProviderEnv.Fdom;
 
-fdom.apis.set('core.logging', {
+fdom.apis.set('core.logmanager', {
   'constructor': {
     value: []
   },
@@ -38,7 +38,7 @@ fdom.apis.set('core.logging', {
     value: [['array', 'string']]
   }
 });
-fdom.apis.register('core.logging', Freedom_UproxyLogging.LogManager);
+fdom.apis.register('core.logmanager', Freedom_UproxyLogging.LogManager);
 
 fdom.apis.set('core.log', {
   'constructor': {

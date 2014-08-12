@@ -86,25 +86,23 @@ module Logging {
     // TODO: to be implemented.
     return new ArrayBuffer(0);
   }
-  export function getLogs(tags?:string[]) : Message[] {
-    // TODO: use input to select log message.
-    if(!tags || tags.length === 0) {
-      return logBuffer
-    } else {
-      return logBuffer.filter((m:Message) => {
-        return tags.indexOf(m.tag) >= 0;
-      });
-    }
-  }
+
   // Gets log in plaintext, which should really be used in development env
   // only.
   // Usage: getLogs(['network', 'xmpp']);
   // It will return log message with tag 'netowrk' and 'xmpp' only.
   // getLogs() without specify any tag will return all messages.
-  export function getLogStrings(tags?:string[]) : string[] {
+  export function getLogs(tags?:string[]) : string[] {
     // TODO: use input to select log message.
-    return getLogs(tags).map(formatMessage);
+    if(!tags || tags.length === 0) {
+      return logBuffer.map(formatMessage);
+    } else {
+      return logBuffer.filter((m:Message) => {
+        return tags.indexOf(m.tag) >= 0;
+      }).map(formatMessage);
+    }
   }
+
   // Clears all the logs stored in buffer.
   export function clearLogs() : void {
     logBuffer = [];
@@ -150,3 +148,5 @@ module Logging {
     }
   }
 }
+
+
