@@ -22,12 +22,18 @@
       outline: none;
       border: none;
       border-bottom: 1px solid #ddd;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #search:hover {
+      border-color: #aaa;
     }
     </style>
 
     <input type='text' id='search' placeholder='Search'></input>
 
-    <template repeat='{{ c in contacts }}'>
+    <template repeat='{{ c in contacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'></uproxy-contact>
     </template>
 
@@ -38,7 +44,10 @@
       contacts: [],
       ready: function() {
         console.log('initializing roster');
-        this.contacts.push({ name: 'alice' });
+        this.contacts.push({
+          name: 'alice',
+          description: 'just some laptop'
+        });
         this.contacts.push({ name: 'bob' });
         this.contacts.push({ name: 'charlie' });
         this.contacts.push({ name: 'dave' });

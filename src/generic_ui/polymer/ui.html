@@ -1,0 +1,65 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href='toolbar.html'>
+<link rel="import" href='button.html'>
+<link rel="import" href='roster.html'>
+<link rel="import" href='settings.html'>
+
+<polymer-element name='uproxy-ui'>
+
+  <template>
+    <style>
+      :host {
+        width: 371px;
+        height: 600px;
+        border: 1px solid #888;
+        display: inline-block;
+        margin: auto;
+        text-align: left;
+      }
+    </style>
+
+    <uproxy-toolbar>
+      <uproxy-button id='btnGive' img='../icons/share_white.svg'>
+      </uproxy-button>
+      <uproxy-button id='btnGet' img='../icons/receive_white.svg'>
+      </uproxy-button>
+      <uproxy-button id='btnSettings' img='../icons/more_vert_white.svg'>
+      </uproxy-button>
+    </uproxy-toolbar>
+
+    <uproxy-roster id='roster' hidden?='{{ROSTER != view}}'>
+    </uproxy-roster>
+
+    <uproxy-settings id='settings' hidden?='{{SETTINGS != view}}'>
+    </uproxy-settings>
+
+  </template>
+
+  <script>
+    Polymer({
+      ready: function() {
+        // TODO: Use typescript and enums and everything here.
+        this.ROSTER = 1;
+        this.SETTINGS = 2;
+        this.view = this.ROSTER;
+        var ui = this;
+        var roster = this.$.roster;
+        var settings = this.$.settings;
+        console.log(roster);
+        console.log(settings);
+        this.$.btnGive.addEventListener('clicked', function() {
+          console.log('GIVE mode.');
+        });
+        this.$.btnGet.addEventListener('clicked', function() {
+          console.log('GET mode.');
+        });
+        this.$.btnSettings.addEventListener('clicked', function() {
+          console.log('SETTINGS');
+          // TODO: this is a hack for now. use actually good view state changes.
+          ui.view = (ui.SETTINGS == ui.view) ? ui.ROSTER : ui.SETTINGS;
+        });
+      }
+    });
+  </script>
+
+</polymer-element>

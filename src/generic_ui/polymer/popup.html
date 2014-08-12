@@ -3,52 +3,19 @@
 
 <head>
   <title>uProxy polymer UI</title>
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../lib/platform/platform.js"></script>
-  <link rel="import" href="toolbar.html">
-  <link rel="import" href="button.html">
-  <link rel="import" href="roster.html">
+  <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
+  <script src='../lib/platform/platform.js'></script>
+  <link rel='import' href='ui.html'>
   <style>
-    body {
-      padding: 0;
-      margin: auto;
-    }
-    #popup {
-      width: 371px;
-      height: 600px;
-      border: 1px solid #888;
-    }
+  body {
+    text-align: center;
+  }
   </style>
 </head>
 
-<body id="popup" unresolved touch-action="auto">
-
-  <uproxy-toolbar>
-    <uproxy-button id='give' img='../icons/share_white.svg'>
-    </uproxy-button>
-    <uproxy-button id='get' img='../icons/receive_white.svg'>
-    </uproxy-button>
-    <uproxy-button id='settings' img='../icons/more_vert_white.svg'>
-    </uproxy-button>
-  </uproxy-toolbar>
-
-  <uproxy-roster>
-  </uproxy-roster>
-
-  <script>
-    var give = document.querySelector('#give');
-    var get = document.querySelector('#get');
-    var settings = document.querySelector('#settings');
-    give.addEventListener('clicked', function() {
-      console.log('GIVE mode.');
-    });
-    get.addEventListener('clicked', function() {
-      console.log('GET mode.');
-    });
-    settings.addEventListener('clicked', function() {
-      console.log('SETTINGS');
-    });
-  </script>
+<body unresolved touch-action='auto'>
+  <uproxy-ui>
+  </uproxy-ui>
 </body>
 
 </html>
