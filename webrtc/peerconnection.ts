@@ -535,8 +535,10 @@ module WebRtc {
 
     // Open a new data channel with the peer.
     public openDataChannel = (channelLabel:string,
-                              options:RTCDataChannelInit={})
+                              options?:RTCDataChannelInit)
         : DataChannel => {
+      log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
+          '; options=' + JSON.stringify(options));
       var rtcDataChannel = this.pc_.createDataChannel(channelLabel, options);
 
       // Firefox does not fire the |'negotiationneeded'| event, so we need to
@@ -558,6 +560,8 @@ module WebRtc {
     // handled.
     private onPeerStartedDataChannel_ =
         (rtcDataChannelEvent:RTCDataChannelEvent) : void => {
+      log.debug(this.peerName + ': ' + 'onPeerStartedDataChannel: ' +
+          rtcDataChannelEvent.channel);
       this.peerOpenedChannelQueue.handle(
           this.addRtcDataChannel_(rtcDataChannelEvent.channel));
     }
