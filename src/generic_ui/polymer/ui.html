@@ -10,12 +10,13 @@
   <template>
     <style>
       :host {
-        width: 371px;
-        height: 600px;
-        border: 1px solid #888;
+        position: relative;
+        width: 371px; height: 600px;
         display: inline-block;
+        border: 1px solid #888;
         margin: auto;
         text-align: left;
+        overflow: hidden;
       }
     </style>
 
@@ -30,14 +31,17 @@
       </uproxy-button>
     </uproxy-toolbar>
 
-    <uproxy-networks id='networks' hidden?='{{NETWORKS != view}}'>
+    <uproxy-networks id='networks'
+      class='{{ {active:(NETWORKS==view)} | tokenList }}'>
     </uproxy-networks>
 
-    <uproxy-roster id='roster' hidden?='{{ROSTER != view}}'>
-    </uproxy-roster>
-
-    <uproxy-settings id='settings' hidden?='{{SETTINGS != view}}'>
+    <uproxy-settings id='settings'
+      class='{{ {active:(SETTINGS==view)} | tokenList }}'>
     </uproxy-settings>
+
+    <uproxy-roster id='roster'
+      class='{{ {active:(ROSTER==view)} | tokenList }}'>
+    </uproxy-roster>
 
   </template>
 

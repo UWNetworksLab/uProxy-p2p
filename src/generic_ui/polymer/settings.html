@@ -5,10 +5,20 @@
   <template>
     <style>
     :host {
+      position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%;
-      width: 100%;
+      height: 100%; width: 300px;
+      padding-top: 50px;
+      background-color: #fff;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      top: -100%;
+    }
+    :host(.active) {
+      top: 0;
+      overflow: hidden;
     }
     #device-name {
       box-sizing: border-box;

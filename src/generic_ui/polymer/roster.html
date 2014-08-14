@@ -6,10 +6,22 @@
   <template>
     <style>
     :host {
+      position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%;
-      width: 100%;
+      height: 100%; width: 100%;
+      border-left: 1px solid #ddd;
+      background-color: #f8f8f8;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      right: -300px;
+      z-index: 10;
+    }
+    :host(.active) {
+      right: -20px;
+      overflow: hidden;
+      z-index: 100;
     }
     #search {
       display: block;
