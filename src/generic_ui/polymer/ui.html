@@ -3,6 +3,7 @@
 <link rel="import" href='button.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
+<link rel="import" href='networks.html'>
 
 <polymer-element name='uproxy-ui' attributes='model'>
 
@@ -23,9 +24,14 @@
       </uproxy-button>
       <uproxy-button id='btnGet' img='../icons/receive_white.svg'>
       </uproxy-button>
+      <uproxy-button id='btnNetworks' img='../icons/networks.png'>
+      </uproxy-button>
       <uproxy-button id='btnSettings' img='../icons/more_vert_white.svg'>
       </uproxy-button>
     </uproxy-toolbar>
+
+    <uproxy-networks id='networks' hidden?='{{NETWORKS != view}}'>
+    </uproxy-networks>
 
     <uproxy-roster id='roster' hidden?='{{ROSTER != view}}'>
     </uproxy-roster>

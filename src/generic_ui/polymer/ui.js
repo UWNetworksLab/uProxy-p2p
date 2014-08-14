@@ -4,6 +4,7 @@ Polymer({
     // TODO: Use typescript and enums and everything here.
     this.ROSTER = 1;
     this.SETTINGS = 2;
+    this.NETWORKS = 3;
     this.view = this.ROSTER;
     var ui = this;
     var roster = this.$.roster;
@@ -15,6 +16,10 @@ Polymer({
     });
     this.$.btnGet.addEventListener('clicked', function() {
       console.log('GET mode.');
+    });
+    this.$.btnNetworks.addEventListener('click', function() {
+      console.log('NETWORKS');
+      ui.view = ui.NETWORKS;
     });
     this.$.btnSettings.addEventListener('clicked', function() {
       console.log('SETTINGS');
