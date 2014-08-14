@@ -1,5 +1,6 @@
 /// <reference path='../../peerconnection.d.ts' />
 /// <reference path='../../datachannel.d.ts' />
+/// <reference path='../../../logging/logging.d.ts' />
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -9,47 +10,73 @@ var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
-var pcConfig :WebRtc.PeerConnectionConfig = {
-  webrtcPcConfig: {
-    iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                 {url: 'stun:stun1.l.google.com:19302'},
-                 {url: 'stun:stun2.l.google.com:19302'},
-                 {url: 'stun:stun3.l.google.com:19302'},
-                 {url: 'stun:stun4.l.google.com:19302'}]
-  },
-  webrtcMediaConstraints: {
-    optional: [{DtlsSrtpKeyAgreement: true}]
-  }
-};
-var a = new WebRtc.PeerConnection(pcConfig);
-var b = new WebRtc.PeerConnection(pcConfig);
+var log :Logging.Log = new Logging.Log('main.ts');
 
-// Connect the two signalling channels.
-// Normally, these messages would be sent over the internet.
+// Create a peer connection with logging for all its actions.
+function setupLoggingPeerConnection(name:string) : WebRtc.PeerConnection {
+  var pcConfig :WebRtc.PeerConnectionConfig = {
+    webrtcPcConfig: {
+      iceServers: [{url: 'stun:stun.l.google.com:19302'},
+                   {url: 'stun:stun1.l.google.com:19302'},
+                   {url: 'stun:stun2.l.google.com:19302'},
+                   {url: 'stun:stun3.l.google.com:19302'},
+                   {url: 'stun:stun4.l.google.com:19302'}]
+    },
+    webrtcMediaConstraints: {
+      optional: [{DtlsSrtpKeyAgreement: true}]
+    },
+    peerName: name
+  };
+  var pc = new WebRtc.PeerConnection(pcConfig);
+  pc.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
+    log.info(name + ': connected: ' +
+        endpoints.local.address + ':' + endpoints.local.port +
+        ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+        endpoints.remote.address + ':' + endpoints.remote.port +
+        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+  });
+  pc.onceConnecting.then(() => {
+    log.info(name + ': onceConnecting: ' + pc.toString());
+  });
+  pc.onceDisconnected.then(() => {
+    log.info(name + ': onceDisconnected: ' + pc.toString());
+  });
+  pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
+    d.onceOpened.then(() => {
+      log.info(name + ': ' + d.getLabel() + ': onceOpened: ' +
+          d.toString());
+    });
+    d.onceClosed.then(() => {
+      log.info(name + ': ' + d.getLabel() + ': onceClosed: ' +
+          d.toString());
+    });
+    d.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
+      log.info(name + ': ' + d.getLabel() + ': dataFromPeer: ' +
+          JSON.stringify(data));
+    });
+  });
+  return pc;
+}
+
+//------------------------------------------------------------------------------
+var a :WebRtc.PeerConnection = setupLoggingPeerConnection('a');
+var b :WebRtc.PeerConnection = setupLoggingPeerConnection('b');
+
+// Connect the two signalling channels. Normally, these messages would be sent
+// over the internet.
 a.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-  dbg('signalling channel A message: ' + JSON.stringify(signal));
-  b.handleSignalMessage(signal);
-});
+    log.info('a: sent signal (to b): ' + JSON.stringify(signal));
+    b.handleSignalMessage(signal);
+  });
 b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-  dbg('signalling channel B message: ' + JSON.stringify(signal));
+  log.info('b: sent signal (to a): ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
 
-// Log the chosen endpoints.
-function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
-  dbg(name + ' connected: ' +
-      endpoints.local.address + ':' + endpoints.local.port +
-      ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
-      endpoints.remote.address + ':' + endpoints.remote.port +
-      ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
-}
-a.onceConnected.then(logEndpoints.bind(null, 'a'));
-b.onceConnected.then(logEndpoints.bind(null, 'b'));
-
-// Have a negotiate a peerconnection.
-// Once negotiated, enable the UI and add send/receive handlers.
+// Have a negotiate a peerconnection. Once negotiated, enable the UI and add
+// send/receive handlers.
 a.negotiateConnection().then(() => {
-  dbg('peerconnection negotiated!');
+  log.info('peerconnection negotiated!');
   sendAreaA.disabled = false;
   sendAreaB.disabled = false;
 
@@ -59,7 +86,7 @@ a.negotiateConnection().then(() => {
     pc.dataChannels['text'].send({
       str: textArea.value || '(empty message)'
     }).catch((e) => {
-      dbgErr('could not send: ' + e.message); }
+      log.error('could not send: ' + e.message); }
     );
   }
   sendButtonA.onclick = send.bind(null, a, sendAreaA);
@@ -79,9 +106,5 @@ a.negotiateConnection().then(() => {
     chanB.dataFromPeerQueue.setSyncHandler(receive.bind(null, receiveAreaB));
   });
 }, (e) => {
-  dbgErr('could not negotiate peerconnection: ' + e.message);
+  log.error('could not negotiate peerconnection: ' + e.message);
 });
-
-function dbg(msg:string) { console.log(msg); }
-function dbgWarn(msg:string) { console.warn(msg); }
-function dbgErr(msg:string) { console.error(msg); }
