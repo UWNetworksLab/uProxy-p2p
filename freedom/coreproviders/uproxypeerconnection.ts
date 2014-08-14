@@ -115,6 +115,11 @@ module freedom_UproxyPeerConnection {
       this.pc_.dataChannels[channelLabel].onceClosed.then(continuation);
     }
 
+    public onceDataChannelOpened =
+        (channelLabel:string, continuation:() => void) : void => {
+      this.pc_.dataChannels[channelLabel].onceOpened.then(continuation);
+    }
+
     // Re-dispatches data channel events, such as receiving data, as
     // Freedom messages.
     private dispatchDataChannelEvents_ = (dataChannel:WebRtc.DataChannel) => {

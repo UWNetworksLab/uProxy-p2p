@@ -13,80 +13,58 @@ var log :Freedom_UproxyLogging.Log = freedom['core.log']('freedomchat');
 //log.warn('test warn message');
 //log.error('test error message');
 
-// Log the chosen endpoints.
-function logEndpoints(name:string, endpoints:WebRtc.ConnectionAddresses) {
-  log.info(name + ' connected: ' +
-      endpoints.local.address + ':' + endpoints.local.port +
-      ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
-      endpoints.remote.address + ':' + endpoints.remote.port +
-      ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+// Make a peer connection which logs stuff that happens.
+function makePeerConnection(name:string) {
+  var pcConfig :WebRtc.PeerConnectionConfig = {
+    webrtcPcConfig: {
+      iceServers: [{url: 'stun:stun.l.google.com:19302'},
+                   {url: 'stun:stun1.l.google.com:19302'}]
+    },
+    webrtcMediaConstraints: {
+      optional: [{DtlsSrtpKeyAgreement: true}]
+    },
+    peerName: name
+  };
+  var pc :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
+  pc.onceConnecting().then(() => { log.info(name + ': connecting...'); });
+  pc.onceConnected().then((endpoints:WebRtc.ConnectionAddresses) => {
+    log.info(name + ' connected: ' +
+        endpoints.local.address + ':' + endpoints.local.port +
+        ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+        endpoints.remote.address + ':' + endpoints.remote.port +
+        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+  });
+  pc.onceDisconnected().then(() => {
+    log.info(name + ': onceDisonnected');
+  });
+  pc.on('peerOpenedChannel', (channelLabel:string) => {
+    log.info(name + ': peerOpenedChannel(' + channelLabel + ')');
+    pc.onceDataChannelOpened(channelLabel).then(() => {
+      log.info(name + ': onceDataChannelOpened(' + channelLabel + ')');
+    });
+    pc.onceDataChannelClosed(channelLabel).then(() => {
+      log.info(name + ': onceDataChannelClosed(' + channelLabel + ')');
+    });
+  });
+  return pc;
 }
 
-// Setup PC for a
-var a_pcConfig :WebRtc.PeerConnectionConfig = {
-  webrtcPcConfig: {
-    iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                 {url: 'stun:stun1.l.google.com:19302'}]
-  },
-  webrtcMediaConstraints: {
-    optional: [{DtlsSrtpKeyAgreement: true}]
-  },
-  peerName: 'a'
-};
-var a :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](a_pcConfig);
+var a :WebrtcLib.Pc = makePeerConnection('a');
+var b :WebrtcLib.Pc = makePeerConnection('b')
 
-// Setup PC for b
-var b_pcConfig :WebRtc.PeerConnectionConfig = {
-  webrtcPcConfig: {
-    iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                 {url: 'stun:stun1.l.google.com:19302'}]
-  },
-  webrtcMediaConstraints: {
-    optional: [{DtlsSrtpKeyAgreement: true}]
-  },
-  peerName: 'b'
-};
-var b :WebrtcLib.Pc = freedom['core.uproxypeerconnection'](b_pcConfig);
-
-// Setup A
-a.onceConnecting().then(() => { log.info('a is connecting...'); });
-a.onceConnected().then(logEndpoints.bind(null, 'a'));
-// Connect the two signalling channels.
-// Normally, these messages would be sent over the internet.
+// Connect the two signalling channels. Normally, these messages would be sent
+// over the internet.
 a.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
   log.info('a: sending signal to b.');
   b.handleSignalMessage(signal);
 });
-a.onceDisconnected().then(() => {
-  log.info('a: onceDisonnected');
-});
-a.on('peerOpenedChannel', (channelLabel:string) => {
-  log.info('a: peerOpenedChannel(' + channelLabel + ')');
-  a.onceDataChannelClosed(channelLabel).then(() => {
-    log.info('a: onceDataChannelClosed(' + channelLabel + ')');
-  });
-});
-
-// Setup B
-b.onceConnecting().then(() => { log.info('b is connecting...'); });
-b.onceConnected().then(logEndpoints.bind(null, 'b'));
 b.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
   log.info('b: sending signal to a.');
   a.handleSignalMessage(signal);
 });
-b.onceDisconnected().then(() => {
-  log.info('b: onceDisonnected');
-});
-b.on('peerOpenedChannel', (channelLabel:string) => {
-  log.info('b: peerOpenedChannel(' + channelLabel + ')');
-  b.onceDataChannelClosed(channelLabel).then(() => {
-    log.info('b: onceDataChannelClosed(' + channelLabel + ')');
-  });
-});
 
-
-// Negotiate a peerconnection.
-// Once negotiated, enable the UI and add send/receive handlers.
+// Negotiate a peerconnection. Once negotiated, enable the UI and add
+// send/receive handlers.
 a.negotiateConnection()
   .then((endpoints:WebRtc.ConnectionAddresses) => {
     log.info('a: negotiated connection to: ' + JSON.stringify(endpoints));

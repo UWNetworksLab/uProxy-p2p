@@ -42,6 +42,7 @@ declare module freedom_UproxyPeerConnection {
     //   PeerConnection.openDataChannel().onceOpened()
     openDataChannel(channelLabel: string) : Promise<void>;
     closeDataChannel(channelLabel: string) : Promise<void>;
+    onceDataChannelOpened(channelLabel:string) : Promise<void>;
     onceDataChannelClosed(channelLabel:string) : Promise<void>;
 
     // As per PeerConnection, this fulfills once the supplied data

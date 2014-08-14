@@ -69,6 +69,11 @@ fdom.apis.set('core.uproxypeerconnection', {
     value: ['string']
   },
 
+  'onceDataChannelOpened': {
+    type: 'method',
+    value: ['string']
+  },
+
   'onceDataChannelClosed': {
     type: 'method',
     value: ['string']
