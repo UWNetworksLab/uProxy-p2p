@@ -8,7 +8,7 @@ declare module WebRtc {
     // Only one of these should be specified.
     // TODO: use union type once it is supported in TypeScript.
     str    ?:string;
-    buffer ?:Uint8Array;
+    buffer ?:ArrayBuffer;
   }
 
   class DataChannel {
