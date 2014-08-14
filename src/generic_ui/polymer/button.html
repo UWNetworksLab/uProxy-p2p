@@ -10,22 +10,31 @@
       margin: 0 10px;
       text-align: center;
       line-height: 50px;
+      opacity: 0.6;
+      cursor: pointer;
+    }
+    :host(:hover) {
+      opacity: 1.0;
+    }
+    .btn {
+      width: 100%;
+      height: 100%;
     }
     img {
       height: 28px;
       width: 28px;
       vertical-align: middle;
-      opacity: 0.6;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
     img:hover {
       opacity: 1.0;
-      cursor: pointer;
     }
     </style>
-    <img on-tap='{{click}}' src='{{img}}' />
+    <div class='btn' on-tap='{{click}}'>
+      <img src='{{img}}' />
+    </div>
     <content>
     </content>
   </template>

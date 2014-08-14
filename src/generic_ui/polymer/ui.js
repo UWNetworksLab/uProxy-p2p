@@ -11,11 +11,14 @@ Polymer({
     var settings = this.$.settings;
     console.log(roster);
     console.log(settings);
+    // TODO: actually distinguish between give and get sort order.
     this.$.btnGive.addEventListener('clicked', function() {
       console.log('GIVE mode.');
+      ui.view = ui.ROSTER;
     });
     this.$.btnGet.addEventListener('clicked', function() {
       console.log('GET mode.');
+      ui.view = ui.ROSTER;
     });
     this.$.btnNetworks.addEventListener('click', function() {
       console.log('NETWORKS');
