@@ -33,7 +33,8 @@ function setupLoggingPeerConnection(name:string) : WebRtc.PeerConnection {
         endpoints.local.address + ':' + endpoints.local.port +
         ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
         endpoints.remote.address + ':' + endpoints.remote.port +
-        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')\n' +
+        pc.toString());
   });
   pc.onceConnecting.then(() => {
     log.info(name + ': onceConnecting: ' + pc.toString());
@@ -65,13 +66,12 @@ var b :WebRtc.PeerConnection = setupLoggingPeerConnection('b');
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
 a.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-    log.info('a: sent signal (to b): ' + JSON.stringify(signal));
     b.handleSignalMessage(signal);
   });
 b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
-  log.info('b: sent signal (to a): ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
+
 
 // Have a negotiate a peerconnection. Once negotiated, enable the UI and add
 // send/receive handlers.

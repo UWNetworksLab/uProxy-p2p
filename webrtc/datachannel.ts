@@ -45,6 +45,8 @@ module WebRtc {
     buffer :Uint8Array;
   }
 
+  var log :Logging.Log = new Logging.Log('DataChannel');
+
   // Wrapper for a WebRtc Data Channels:
   // http://dev.w3.org/2011/webrtc/editor/webrtc.html#rtcdatachannel
   //
@@ -58,10 +60,11 @@ module WebRtc {
     private toPeerDataQueue_        :Handler.Queue<Data,void>;
 
     public onceOpened      :Promise<void>;
-    public onceClosed       :Promise<void>;
+    public onceClosed      :Promise<void>;
 
-    private label_ :string;
-    private wasOpenned_     :boolean;
+    private label_         :string;
+
+    private opennedSuccessfully_ :boolean;
     private rejectOpened_  :(e:Error) => void;
 
     public getLabel = () : string => {
@@ -94,17 +97,21 @@ module WebRtc {
           this.rtcDataChannel_.onclose = (e:Event) => { F(); };
         });
       this.rtcDataChannel_.onmessage = this.onDataFromPeer_;
-      this.rtcDataChannel_.onerror = console.error;
-
-      // Make sure to reject the onceOpened promise if state went from
-      // |connecting| to |close|.
+      this.rtcDataChannel_.onerror = (e:Event) => {
+        log.error('rtcDataChannel_.onerror: ' + this.label_ + ': ' + e.toString);
+      };
       this.onceOpened.then(() => {
-        this.wasOpenned_ = true;
+        this.opennedSuccessfully_ = true;
         this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
       });
       this.onceClosed.then(() => {
-          if(!this.wasOpenned_) { this.rejectOpened_(new Error(
-              'Failed to open; closed while trying to open.')); }
+          if(!this.opennedSuccessfully_) {
+            // Make sure to reject the onceOpened promise if state went from
+            // |connecting| to |close|.
+            this.rejectOpened_(new Error(
+                'Failed to open; closed while trying to open.'));
+          }
+          this.opennedSuccessfully_ = false;
         });
     }
 
@@ -116,7 +123,7 @@ module WebRtc {
       } else if (typeof messageEvent.data === 'ArrayBuffer') {
         this.dataFromPeerQueue.handle({buffer: messageEvent.data});
       } else {
-        console.error('Unexpected data from peer that has type: ' +
+        log.error('Unexpected data from peer that has type: ' +
             JSON.stringify(messageEvent));
       }
     }
@@ -192,8 +199,9 @@ module WebRtc {
       return Promise.resolve<void>();
     }
 
-    // TODO: make this timeout adaptive so that we keep the buffer as full
-    // as we can without wasting timeout callbacks.
+    // TODO: make this timeout adaptive so that we keep the buffer as full as we
+    // can without wasting timeout callbacks. When DataChannels correctly has a
+    // callback for buffering, we don't need to do this anymore.
     private conjestionControlSendHandler = () : void => {
       if(this.rtcDataChannel_.bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
         if(this.toPeerDataQueue_.isHandling()) {
@@ -209,6 +217,12 @@ module WebRtc {
 
     public close = () : void => {
       this.rtcDataChannel_.close();
+    }
+
+    public toString = () : string => {
+      var s = this.getLabel() + ': opennedSuccessfully_=' +
+        this.opennedSuccessfully_ + '; state=' + this.getState();
+      return s;
     }
   }  // class DataChannel
 }  // module

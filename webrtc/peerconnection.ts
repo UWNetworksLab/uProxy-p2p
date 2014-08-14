@@ -94,8 +94,14 @@ module WebRtc {
   // http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCSignalingState
   //
   // Expected call-path to establish a connection...
-  // When we start the connection negotiation:
-  //   1. [external] negotiateConnection
+  // We start by negotiate connection openning a data channel to make sure that
+  // the SDP headers have data channels in them.
+  //   0. negotiateConnection (public version)
+  //      0.1. openDataChannel -> pc_.createDataChannel
+  //      0.2. [callback] -> pc_.onnegotiation
+  //
+  // Then we start the real connection negotiation...
+  //   1. [external] negotiateConnection_ (private version)
   //      1.1. createOffer_ -> pc_.createOffer
   //      1.2. setLocalDescription_ -> pc_.setLocalDescription
   //      1.3. signalForPeerQueue.handle -> [external]
@@ -212,11 +218,21 @@ module WebRtc {
                   { type: SignalType.NO_MORE_CANDIDATES });
             }
         });
-      this.pc_.onnegotiationneeded = (this.negotiateConnection);
-      this.pc_.ondatachannel = (this.onPeerStartedDataChannel_);
-      this.pc_.onsignalingstatechange = (this.onSignallingStateChange_);
+      this.pc_.onnegotiationneeded = () => {
+        this.negotiateConnection_().catch((e:Error) => {
+          log.error(this.peerName + ': negotiateConnection: ' + e.toString() +
+              '; this.toString()= ' + this.toString());
+        });
+      }
+      this.pc_.ondatachannel = this.onPeerStartedDataChannel_;
+      this.pc_.onsignalingstatechange = this.onSignallingStateChange_;
 
-      if(this.config_.initiateConnection) { this.negotiateConnection(); }
+      if(this.config_.initiateConnection) {
+        this.negotiateConnection().catch((e:Error) => {
+          log.error(this.peerName + ': negotiateConnection: ' + e.toString() +
+            '; this.toString()= ' + this.toString());
+        });
+      }
     }
 
     // Promise wrappers for async WebRtc calls that return the session
@@ -233,7 +249,9 @@ module WebRtc {
     private setLocalDescription_ = (d:RTCSessionDescription)
         : Promise<RTCSessionDescription> => {
       return new Promise((F,R) => {
-            this.pc_.setLocalDescription(d, F.bind(this, d), R);
+            this.pc_.setLocalDescription(d,
+              () => { F(d); log.debug(this.peerName + ': ' + 'setLocalDescription'); },
+              R);
           });
     }
     // The |setRemoteDescription_| returns a void promise because we don't need
@@ -241,7 +259,9 @@ module WebRtc {
     private setRemoteDescription_ = (d:RTCSessionDescription)
         : Promise<void> => {
       return new Promise<void>((F,R) => {
-          this.pc_.setRemoteDescription(d, F, R);
+          this.pc_.setRemoteDescription(d,
+            () => { F(); log.debug(this.peerName + ': ' + 'setRemoteDescription'); },
+            R);
         });
     }
     // add an ice candidate, promise is for when it is added.
@@ -389,51 +409,48 @@ module WebRtc {
       );
     }
 
+    public negotiateConnection =  () : Promise<ConnectionAddresses> => {
+      // In order for the initial SDP header to include the provision for having
+      // data channels (without it, we would have to re-negotiate SDP after the
+      // PC is established), we start negotaition by openning a data channel to
+      // the peer, this triggers the negotiation needed event.
+      var d = this.openDataChannel('');
+      return d.onceOpened.then(() => { return this.onceConnected; });
+    }
+
     // Called when openDataChannel is called to and we have not yet negotiated
     // our connection, or called when some WebRTC internal event requires
     // renegotiation of SDP headers.
-    public negotiateConnection = () : Promise<ConnectionAddresses> => {
-      log.debug(this.peerName + ': ' + 'negotiateConnection');
+    private negotiateConnection_ = () : Promise<ConnectionAddresses> => {
+      log.debug(this.peerName + ': ' + 'negotiateConnection_');
       if (this.pcState === State.DISCONNECTED) {
         return Promise.reject(new Error(this.peerName + ': ' +
-            'negotiateConnection called on ' +
+            'negotiateConnection_ called on ' +
             'DISCONNECTED state.'));
       }
 
       if (this.pcState === State.CONNECTING) {
         return Promise.reject(new Error('Unexpected call to ' +
-            'negotiateConnection: ' + this.toString()));
+            'negotiateConnection_: ' + this.toString()));
       }
 
-      // TODO: negotiation need to happen as in initial round, where a round
-      // of information exchange is needed. Remove following code?
-      // TODO: fix/remove this when Chrome issue is fixed. This code is a hack
-      // to simply reset the same local and remote description which will
-      // trigger the appropriate data channel open event. This can happen in
-      // State.CONNECTING to State.CONNECTED.
+      // TODO: fix/remove this when Chrome issue is fixed. This code is a bit
+      // of a hack to simply reset the same local and remote description which
+      // will trigger the appropriate data channel open event. This can happen
+      // in State.CONNECTING to State.CONNECTED.
+      //
+      // This workaround will cause legitimate renegotation to fail (e.g. for
+      // when your local IP/port changes). However that's rather rare.
       //
       // Negotiation messages are falsely requested for new data channels.
       //   https://code.google.com/p/webrtc/issues/detail?id=2431
-      /*if (this.pc_.localDescription && this.pc_.remoteDescription) {
+      if (this.pc_.localDescription && this.pc_.remoteDescription) {
+        var localDescription = this.pc_.localDescription;
+        var remoteDescription = this.pc_.localDescription;
         // TODO: remove when we are using a good version of chrome.
-        log.warn('Dodging strange negotiateConnection.')
-        if (this.pc_.localDescription.type === "offer") {
-          this.pc_.setLocalDescription(this.pc_.localDescription,
-              () => { log.info('reset offer local description'); },
-              log.error);
-          this.pc_.setRemoteDescription(this.pc_.remoteDescription,
-              () => { log.info('reset answer remote description'); },
-              log.error);
-        } else { // was 'answer'
-          this.pc_.setRemoteDescription(this.pc_.remoteDescription,
-              () => { log.info('reset offer remote description'); },
-              log.error);
-          this.pc_.setLocalDescription(this.pc_.localDescription,
-              () => { log.info('reset answer local description'); },
-              log.error);
-        }
+        log.debug(this.peerName + ': ' + 'negotiateConnection_: dodging.');
         return this.onceConnected;
-      }*/
+      }
 
       // CONSIDER: might we ever need to re-create an onAnswer? Exactly how/when
       // do onnegotiation events get raised? Do they get raised on both sides?
@@ -547,7 +564,7 @@ module WebRtc {
       // TODO: Remove when Firefox supports it.
       if (typeof mozRTCPeerConnection !== 'undefined' &&
           this.pcState === State.WAITING) {
-        this.negotiateConnection();
+        this.negotiateConnection_();
       }
 
       var dataChannel = this.addRtcDataChannel_(rtcDataChannel);
@@ -561,7 +578,7 @@ module WebRtc {
     private onPeerStartedDataChannel_ =
         (rtcDataChannelEvent:RTCDataChannelEvent) : void => {
       log.debug(this.peerName + ': ' + 'onPeerStartedDataChannel: ' +
-          rtcDataChannelEvent.channel);
+          rtcDataChannelEvent.channel.label);
       this.peerOpenedChannelQueue.handle(
           this.addRtcDataChannel_(rtcDataChannelEvent.channel));
     }

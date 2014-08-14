@@ -38,5 +38,7 @@ declare module WebRtc {
     // Closes this data channel.
     // A channel cannot be re-opened once this has been called.
     public close :() => void;
+
+    public toString :() => string;
   }
 }
