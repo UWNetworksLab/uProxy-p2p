@@ -24,8 +24,7 @@ declare module Logging {
   function formatMessage(l:Message) : string;
   function doRealLog(level:string, tag:string, msg:string, args?:any[]) : void;
   function getEncrypedLogBuffer(tags?:string[]) : ArrayBuffer;
-  function getLogs(tags?:string[]) : Message[];
-  function getLogStrings(tags?:string[]) : string[];
+  function getLogs(tags?:string[]) : string[];
   function clearLogs() : void;
   function enable() : void;
   function disable() : void;

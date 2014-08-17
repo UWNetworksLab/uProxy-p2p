@@ -14,8 +14,7 @@ declare module Freedom_UproxyLogging {
     // The freedom module constructor takes no arguments. i.e.
     // constructor();
     getEncrypedLogBuffer(tags?:string[]) : Promise<ArrayBuffer>;
-    getLogs(tags?:string[]) : Promise<Logging.Message[]>;
-    getLogStrings(tags?:string[]) : Promise<string[]>;
+    getLogs(tags?:string[]) : Promise<string[]>;
     clearLogs() : void;
     enable() : void;
     disable() : void;

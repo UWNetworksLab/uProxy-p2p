@@ -15,7 +15,7 @@ module Freedom_UproxyLogging {
       continuation(Logging.getEncrypedLogBuffer(tags));
     }
     public getLogs =
-        (tags:string[], continuation:(logs:Logging.Message[])=>void)
+        (tags:string[], continuation:(logs:string[])=>void)
         : void => {
       continuation(Logging.getLogs(tags));
     }

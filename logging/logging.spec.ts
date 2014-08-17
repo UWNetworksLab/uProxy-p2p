@@ -32,13 +32,13 @@ describe("logger from core environment", () => {
   it('grab logs', () => {
     log1.debug('simple string');
     log2.info('second string');
-    expect(Logging.getLogStrings().join('\n')).toMatch(
+    expect(Logging.getLogs().join('\n')).toMatch(
       /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string/);
   });
 
   it('format message like printf', () => {
     log1.error('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
-    expect(Logging.getLogStrings().join('\n')).toMatch(
+    expect(Logging.getLogs().join('\n')).toMatch(
       /\*\[tag1\]\(.*\) E: Bob pinged Alice with id=123456/);
   });
 });
