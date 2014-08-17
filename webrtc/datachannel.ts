@@ -8,6 +8,12 @@
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
 
+// TODO: once typescript with https://github.com/Microsoft/TypeScript/issues/310
+// is released, this can be removed.
+interface ArrayBuffer {
+  slice :(start?:number, end?:number) => ArrayBuffer;
+}
+
 module WebRtc {
 
   // Messages are limited to a 16KB length by SCTP; we use 15k for safety.
@@ -30,7 +36,7 @@ module WebRtc {
   // connection.
   export interface Data {
     str ?:string;
-    buffer ?:Uint8Array;
+    buffer ?:ArrayBuffer;
     // TODO: add when supported by WebRtc in Chrome and FF.
     // https://code.google.com/p/webrtc/issues/detail?id=2276
     //
@@ -42,7 +48,7 @@ module WebRtc {
     str :string;
   }
   interface BufferData {
-    buffer :Uint8Array;
+    buffer :ArrayBuffer;
   }
 
   var log :Logging.Log = new Logging.Log('DataChannel');
@@ -175,14 +181,13 @@ module WebRtc {
       while(startByte < data.buffer.byteLength) {
         endByte = Math.min(startByte + CHUNK_SIZE, data.buffer.byteLength);
         promises.push(this.toPeerDataQueue_.handle(
-            {buffer: data.buffer.subarray(startByte, endByte)}));
+            {buffer: data.buffer.slice(startByte, endByte)}));
         startByte += CHUNK_SIZE;
       }
 
       // CONSIDER: can we change the interface to support not having the dummy
       // extra return at the end?
-      return Promise.all(promises)
-          .then<void>((_) => { return; });
+      return Promise.all(promises).then(() => { return; });
     }
 
     // Assumes data is chunked.
