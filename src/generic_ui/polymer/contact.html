@@ -15,6 +15,9 @@
       cursor: pointer;
       overflow: hidden;
       z-index: 10;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
     }
     :host(:hover) {
       box-shadow: 0px 2px 5px #ccc;
@@ -54,6 +57,12 @@
       display: block;
       font-size: 10px;
     }
+    #instances {
+      padding: 8px;
+    }
+    #actions {
+      padding: 8px;
+    }
     </style>
 
     <div tabindex='-1'  id='frame'
@@ -64,6 +73,17 @@
       <div id='words'>
         <h1>{{ contact.name }}</h1>
         <span id='description'>{{ contact.description }}</span>
+        <div id='instances' hidden?='{{!expanded}}'>
+          INSTANCES:
+          <div hidden?='{{ getting() }}'>
+            whoa
+            <uproxy-button>Request Access</uproxy-button>
+          </div>
+          <div hidden?='{{ !getting() }}'>
+            omg
+            <uproxy-button>Offer Access</uproxy-button>
+          </div>
+        </div>
       </div>
     </div>
   </template>
@@ -84,6 +104,15 @@
       collapse: function() {
         this.expanded = false;
         console.log('collapse', this);
+      },
+      getting: function() {
+        var roster = this.parentNode.host;
+        console.log(roster);
+        if (!roster) {
+          return false;
+        }
+        var ui = roster.parentNode.host;
+        return ui.GETTING == ui.gestalt;
       },
       ready: function() {
         if (!this.contact.pic) {

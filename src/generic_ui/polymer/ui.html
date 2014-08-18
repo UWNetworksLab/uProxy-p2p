@@ -22,9 +22,13 @@
     </style>
 
     <uproxy-toolbar>
-      <uproxy-button id='btnGive' img='../icons/share_white.svg'>
+      <uproxy-button id='btnGive'
+          hidden?='{{GIVING == gestalt}}'
+          img='../icons/share_white.svg'>
       </uproxy-button>
-      <uproxy-button id='btnGet' img='../icons/receive_white.svg'>
+      <uproxy-button id='btnGet'
+          hidden?='{{GETTING == gestalt}}'
+          img='../icons/receive_white.svg'>
       </uproxy-button>
       <uproxy-button id='btnNetworks' img='../icons/networks.png'>
       </uproxy-button>

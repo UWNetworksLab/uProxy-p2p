@@ -6,6 +6,10 @@ Polymer({
     this.ROSTER = 1;
     this.SETTINGS = 2;
     this.NETWORKS = 3;
+
+    this.GIVING = 101;
+    this.GETTING = 102;
+
     this.view = 0;  // this.ROSTER;
     var ui = this;
     var roster = this.$.roster;
@@ -13,14 +17,18 @@ Polymer({
     console.log(roster);
     console.log(settings);
 
+    ui.gestalt = this.GIVING;
+
     // TODO: actually distinguish between give and get sort order.
     this.$.btnGive.addEventListener('clicked', function() {
       console.log('GIVE mode.');
       ui.view = ui.ROSTER;
+      ui.gestalt = ui.GIVING;
     });
     this.$.btnGet.addEventListener('clicked', function() {
       console.log('GET mode.');
       ui.view = ui.ROSTER;
+      ui.gestalt = ui.GETTING;
     });
     this.$.btnNetworks.addEventListener('click', function() {
       console.log('NETWORKS');
