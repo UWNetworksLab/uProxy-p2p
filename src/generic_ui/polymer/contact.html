@@ -1,6 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 
-<polymer-element name='uproxy-contact' attributes='contact'>
+<polymer-element name='uproxy-contact' attributes='contact, expanded'>
 
   <template>
     <style>
@@ -8,22 +8,28 @@
       position: relative;
       display: inline-block;
       box-sizing: border-box;
-      height: 72px;
       width: 100%;
       border: 1px solid #ddd; border-left: none; border-right: none;
       background-color: #fff;
-      padding: 16px;
       margin: 0;
-      cursor: default;
+      cursor: pointer;
       overflow: hidden;
-      -webkit-transition: all 0.46s !important;
-      -moz-transition: all 0.46s !important;
-      transition: all 0.46s !important;
       z-index: 10;
     }
     :host(:hover) {
       box-shadow: 0px 2px 5px #ccc;
       z-index: 100;
+    }
+    #frame {
+      box-sizing: border-box;
+      padding: 16px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      height: 72px;
+    }
+    #frame.expanded {
+      height: 150px;
     }
     #avatar {
       width: 36px;
@@ -50,20 +56,34 @@
     }
     </style>
 
-    <img id='avatar' src='{{ contact.pic }}' />
-    <div id='words'>
-      <h1>{{ contact.name }}</h1>
-      <span id='description'>{{ contact.description }}</span>
+    <div tabindex='-1'  id='frame'
+      class='{{ expanded? "expanded" : "" }}'
+      on-mousedown='{{toggle}}'
+      on-blur='{{collapse}}'>
+      <img id='avatar' src='{{ contact.pic }}' />
+      <div id='words'>
+        <h1>{{ contact.name }}</h1>
+        <span id='description'>{{ contact.description }}</span>
+      </div>
     </div>
   </template>
 
   <script>
     Polymer({
+      expanded: false,
       contact: {
         // Must adhere to the typescript interface.
         name: 'unknown',
         pic: undefined,
         description: 'description here'
+      },
+      toggle: function() {
+        this.expanded = !this.expanded;
+        console.log('toggle', this);
+      },
+      collapse: function() {
+        this.expanded = false;
+        console.log('collapse', this);
       },
       ready: function() {
         if (!this.contact.pic) {
