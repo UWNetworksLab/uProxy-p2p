@@ -37,6 +37,7 @@
     interface Socket {
       listen(address:string, port:number) : Promise<void>;
       connect(hostname:string, port:number) : Promise<void>;
+      secure() : Promise<void>;
       write(data:ArrayBuffer) : Promise<WriteInfo>;
       getInfo() : Promise<SocketInfo>;
       close() : Promise<void>;
