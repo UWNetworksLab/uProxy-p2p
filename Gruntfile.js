@@ -92,6 +92,8 @@ module.exports = function(grunt) {
         // Libraries
         {expand: true, cwd: 'third_party/lib/',
          src: ['lodash/dist/lodash.js',
+               'platform/**',
+               'polymer/**',
                'angular/angular.js',
                'angular-animate/angular-animate.js',
                'angular-lodash/angular-lodash.js'],
@@ -129,6 +131,12 @@ module.exports = function(grunt) {
         {expand: true, cwd: 'build/', flatten: true,
          src: FILES.uproxy_common,
          dest: 'build/uistatic/scripts'}
+      ]},
+
+      uipolymer: {files: [
+        {expand: true, cwd: 'src/generic_ui/polymer',
+         src: ['**'],
+         dest: 'build/uistatic/'},
       ]},
 
       // Chrome extension. Assumes the top-level task generic_ui completed.
@@ -294,6 +302,11 @@ module.exports = function(grunt) {
               'src/uistatic/scripts/dependencies.ts',
               'src/interfaces/browser-proxy-config.d.ts'],
         dest: 'build/uistatic/',
+      },
+
+      // typescript required for polymer
+      uipolymer: {
+        src: ['src/generic_ui/polymer/**/*.ts']
       },
 
       // mocks to help jasmine along. These typescript files must be compiled
@@ -533,6 +546,12 @@ module.exports = function(grunt) {
     'typescript:uistatic',
     'concat:uistatic',
     'copy:uistatic'
+  ]);
+
+  taskManager.add('build_uipolymer', [
+    'build_generic_ui',
+    'typescript:uipolymer',
+    'copy:uipolymer'
   ]);
 
   // The Chrome App and the Chrome Extension cannot be built separately. They

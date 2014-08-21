@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>uProxy polymer UI</title>
+  <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
+  <script src='../lib/platform/platform.js'></script>
+  <link rel='import' href='ui.html'>
+  <style>
+  body {
+    text-align: center;
+  }
+  </style>
+  <script>
+    // TODO: bind this to the underlying uproxy ui model.
+    var model = {};
+  </script>
+</head>
+
+<body unresolved touch-action='auto'>
+  <uproxy-ui>
+  </uproxy-ui>
+  <script>
+    var ui = document.querySelector('uproxy-ui');
+    console.log('global model is: ', model);
+    ui.model = model;
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href='toolbar.html'>
+<link rel="import" href='button.html'>
+<link rel="import" href='roster.html'>
+<link rel="import" href='settings.html'>
+<link rel="import" href='networks.html'>
+
+<polymer-element name='uproxy-ui' attributes='model'>
+
+  <template>
+    <style>
+      :host {
+        position: relative;
+        width: 371px; height: 600px;
+        display: inline-block;
+        border: 1px solid #888;
+        margin: auto;
+        text-align: left;
+        overflow: hidden;
+        background: url('../icons/internet.png') center top no-repeat;
+      }
+    </style>
+
+    <uproxy-toolbar>
+      <uproxy-button id='btnGive'
+          hidden?='{{GIVING == gestalt}}'
+          img='../icons/share_white.svg'>
+      </uproxy-button>
+      <uproxy-button id='btnGet'
+          hidden?='{{GETTING == gestalt}}'
+          img='../icons/receive_white.svg'>
+      </uproxy-button>
+      <uproxy-button id='btnNetworks' img='../icons/networks.png'>
+      </uproxy-button>
+      <uproxy-button id='btnSettings' img='../icons/more_vert_white.svg'>
+      </uproxy-button>
+    </uproxy-toolbar>
+
+    <uproxy-networks id='networks'
+      class='{{ {active:(NETWORKS==view)} | tokenList }}'>
+    </uproxy-networks>
+
+    <uproxy-settings id='settings'
+      class='{{ {active:(SETTINGS==view)} | tokenList }}'>
+    </uproxy-settings>
+
+    <uproxy-roster id='roster'
+      class='{{ {active:(ROSTER==view)} | tokenList }}'>
+    </uproxy-roster>
+
+  </template>
+
+  <script src='ui.js'></script>
+
+</polymer-element>

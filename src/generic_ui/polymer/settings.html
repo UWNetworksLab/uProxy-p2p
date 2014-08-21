@@ -1,0 +1,89 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-settings' attributes=''>
+
+  <template>
+    <style>
+    :host {
+      position: absolute;
+      display: inline-block;
+      box-sizing: border-box;
+      height: 100%; width: 300px;
+      padding-top: 50px;
+      background-color: #fff;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      top: -100%;
+    }
+    :host(.active) {
+      top: 0;
+      overflow: hidden;
+    }
+    #device-name {
+      box-sizing: border-box;
+      padding: 12px 16px;
+      font-size: 16px;
+      line-height: 20px;
+      color: #888;
+      outline: none;
+      border: none;
+      border-bottom: 1px solid #ddd;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #device-name:hover {
+      border-color: #aaa;
+    }
+    .setting {
+      padding: 16px;
+      border-bottom: 1px solid #ccc;
+      color: #888;
+    }
+    h1 {
+      font-size: 16px;
+      font-weight: 100;
+      color: #333;
+    }
+    #sas {
+      padding-left: 36px;
+      color: #5a7;
+      font-size: 14px;
+    }
+    </style>
+
+    <div class='setting'>
+      <h1>Device</h1>
+      <input type='text' id='device-name' placeholder='Description'></input>
+      <p>
+      Giving this device a name will let your contacts know how they are
+      connecting with you. It also means you can have more than one device with
+      uProxy installed and proxy from one to the other.
+      </p>
+    </div>
+
+    <div class='setting'>
+      <h1>Your security phrase<h1>
+      <span id='sas'>melon toast horse rocket</span>
+    </div>
+
+    <div class='setting'>
+      <h1>Public Mode</h1>
+    </div>
+
+    <div class='setting'>
+      <h1>STUN Servers</h1>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      ready: function() {
+        console.log('initializing settings');
+      }
+    });
+  </script>
+
+</polymer-element>

@@ -1,0 +1,128 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-contact' attributes='contact, expanded'>
+
+  <template>
+    <style>
+    :host {
+      position: relative;
+      display: inline-block;
+      box-sizing: border-box;
+      width: 100%;
+      border: 1px solid #ddd; border-left: none; border-right: none;
+      background-color: #fff;
+      margin: 0;
+      cursor: pointer;
+      overflow: hidden;
+      z-index: 10;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+    :host(:hover) {
+      box-shadow: 0px 2px 5px #ccc;
+      z-index: 100;
+    }
+    #frame {
+      box-sizing: border-box;
+      padding: 16px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      height: 72px;
+    }
+    #frame.expanded {
+      height: 150px;
+    }
+    #avatar {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background-color: #eee;
+      vertical-align: top;
+    }
+    #words {
+      display: inline-block;
+      padding: 0 16px;
+      height: 100%;
+    }
+    h1 {
+      display: inline;
+      font-size: 16px;
+      font-weight: 100;
+    }
+    #description {
+      color: #aaa;
+      display: block;
+      font-size: 10px;
+    }
+    #instances {
+      padding: 8px;
+    }
+    #actions {
+      padding: 8px;
+    }
+    </style>
+
+    <div tabindex='-1'  id='frame'
+      class='{{ expanded? "expanded" : "" }}'
+      on-mousedown='{{toggle}}'
+      on-blur='{{collapse}}'>
+      <img id='avatar' src='{{ contact.pic }}' />
+      <div id='words'>
+        <h1>{{ contact.name }}</h1>
+        <span id='description'>{{ contact.description }}</span>
+        <div id='instances' hidden?='{{!expanded}}'>
+          INSTANCES:
+          <div hidden?='{{ getting() }}'>
+            whoa
+            <uproxy-button>Request Access</uproxy-button>
+          </div>
+          <div hidden?='{{ !getting() }}'>
+            omg
+            <uproxy-button>Offer Access</uproxy-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      expanded: false,
+      contact: {
+        // Must adhere to the typescript interface.
+        name: 'unknown',
+        pic: undefined,
+        description: 'description here'
+      },
+      toggle: function() {
+        this.expanded = !this.expanded;
+        console.log('toggle', this);
+      },
+      collapse: function() {
+        this.expanded = false;
+        console.log('collapse', this);
+      },
+      getting: function() {
+        var roster = this.parentNode.host;
+        console.log(roster);
+        if (!roster) {
+          return false;
+        }
+        var ui = roster.parentNode.host;
+        return ui.GETTING == ui.gestalt;
+      },
+      ready: function() {
+        if (!this.contact.pic) {
+          this.contact.pic = '../icons/contact-default.png';
+        }
+        if (!this.contact.description) {
+          this.contact.description = 'no description.';
+        }
+      }
+    });
+  </script>
+
+</polymer-element>
