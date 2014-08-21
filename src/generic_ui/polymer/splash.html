@@ -30,18 +30,49 @@
     #proxy-pic {
       opacity: 0.3;
     }
+    .view {
+    }
+    #device-name {
+      box-sizing: border-box;
+      padding: 12px 16px;
+      font-size: 16px;
+      line-height: 20px;
+      color: #888;
+      outline: none;
+      border: none;
+      border-bottom: 1px solid #ddd;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #device-name:hover {
+      border-color: #aaa;
+    }
     </style>
 
-    <img id='proxy-pic' src='../icons/splash.png'>
+    <div class='view' id='intro' hidden?='{{0!==currentView}}'>
+      <img id='proxy-pic' src='../icons/splash.png'>
+      <h1>Share your pathway to the Internet</h1>
+      <p>
+      uProxy helps users protect each other from third parties who may try to
+      watch, block, or redirect users' Internet connections.
+      </p>
+    </div>
 
-    <h1>Share your pathway to the Internet</h1>
+    <div class='view' id='description' hidden?='{{1!==currentView}}'>
+      <h1>What name should others see when this device is online?</h1>
+      <input type='text' id='device-name' placeholder='Description'></input>
+      <p>
+      Giving this device a name will let others know how they are connecting
+      with you. It also means you can have more than one device with uProxy
+      installed and proxy from one to the other.
+      </p>
+    </div>
 
-    <p>
-    uProxy helps users protect each other from third parties who may try to
-    watch, block, or redirect users' Internet connections.
-    </p>
-
-    <uproxy-button on-click='next' id='next' img='../icons/play.png'>Next</uproxy-button>
+    <uproxy-button on-tap='{{next}}' id='next'
+        img='../icons/play.png'>
+      Next
+    </uproxy-button>
 
   </template>
   <script src='splash.js'></script>
