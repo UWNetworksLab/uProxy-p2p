@@ -3,6 +3,7 @@ Polymer({
   ready: function() {
 
     // TODO: Use typescript and enums and everything here.
+    this.SPLASH = 0;
     this.ROSTER = 1;
     this.SETTINGS = 2;
     this.NETWORKS = 3;
@@ -10,7 +11,7 @@ Polymer({
     this.GIVING = 101;
     this.GETTING = 102;
 
-    this.view = 0;  // this.ROSTER;
+    this.view = this.SPLASH;
     var ui = this;
     var roster = this.$.roster;
     var settings = this.$.settings;

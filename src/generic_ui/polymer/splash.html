@@ -1,0 +1,48 @@
+<link rel='import' href='../lib/polymer/polymer.html'>
+<link rel="import" href='button.html'>
+
+<polymer-element name='uproxy-splash' attributes=''>
+  <template>
+    <style>
+    :host {
+      position: relative;
+      display: block;
+      box-sizing: border-box;
+      height: 100%; width: 100%;
+      text-align: center;
+      padding: 32px;
+      padding-top: 230px;
+      font-size: 12px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+      top: -100%;
+      color: #999;
+    }
+    :host(.active) {
+      top: 0px;
+      z-index: 100;
+    }
+    h1 {
+      font-size: 16px;
+      color: #666;
+    }
+    #proxy-pic {
+      opacity: 0.3;
+    }
+    </style>
+
+    <img id='proxy-pic' src='../icons/splash.png'>
+
+    <h1>Share your pathway to the Internet</h1>
+
+    <p>
+    uProxy helps users protect each other from third parties who may try to
+    watch, block, or redirect users' Internet connections.
+    </p>
+
+    <uproxy-button on-click='next' id='next' img='../icons/play.png'>Next</uproxy-button>
+
+  </template>
+  <script src='splash.js'></script>
+</polymer-element>

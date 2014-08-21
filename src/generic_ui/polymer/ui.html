@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href='splash.html'>
 <link rel="import" href='toolbar.html'>
 <link rel="import" href='button.html'>
 <link rel="import" href='roster.html'>
@@ -36,6 +37,10 @@
       </uproxy-button>
     </uproxy-toolbar>
 
+    <uproxy-splash id='splash'
+      class='{{ {active:(SPLASH==view)} | tokenList }}'>
+    </uproxy-splash>
+
     <uproxy-networks id='networks'
       class='{{ {active:(NETWORKS==view)} | tokenList }}'>
     </uproxy-networks>
@@ -45,6 +50,7 @@
     </uproxy-settings>
 
     <uproxy-roster id='roster'
+      hidden?='{{SPLASH==view}}'
       class='{{ {active:(ROSTER==view)} | tokenList }}'>
     </uproxy-roster>
 
