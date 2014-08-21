@@ -9,22 +9,16 @@
   <style>
   body {
     text-align: center;
+    margin: 0;
+    font-family: sans-serif;
   }
   </style>
-  <script>
-    // TODO: bind this to the underlying uproxy ui model.
-    var model = {};
-  </script>
 </head>
 
 <body unresolved touch-action='auto'>
   <uproxy-ui>
   </uproxy-ui>
-  <script>
-    var ui = document.querySelector('uproxy-ui');
-    console.log('global model is: ', model);
-    ui.model = model;
-  </script>
+  <script src='popup.js'></script>
 </body>
 
 </html>
