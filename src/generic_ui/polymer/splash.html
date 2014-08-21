@@ -1,5 +1,6 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel="import" href='button.html'>
+<link rel="import" href='description.html'>
 
 <polymer-element name='uproxy-splash' attributes=''>
   <template>
@@ -32,22 +33,6 @@
     }
     .view {
     }
-    #device-name {
-      box-sizing: border-box;
-      padding: 12px 16px;
-      font-size: 16px;
-      line-height: 20px;
-      color: #888;
-      outline: none;
-      border: none;
-      border-bottom: 1px solid #ddd;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    #device-name:hover {
-      border-color: #aaa;
-    }
     </style>
 
     <div class='view' id='intro' hidden?='{{0!==currentView}}'>
@@ -61,7 +46,7 @@
 
     <div class='view' id='description' hidden?='{{1!==currentView}}'>
       <h1>What name should others see when this device is online?</h1>
-      <input type='text' id='device-name' placeholder='Description'></input>
+      <uproxy-description></uproxy-description>
       <p>
       Giving this device a name will let others know how they are connecting
       with you. It also means you can have more than one device with uProxy
