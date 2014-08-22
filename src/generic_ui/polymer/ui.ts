@@ -5,6 +5,7 @@ declare var ui :uProxy.UIAPI;
 var $ui;
 Polymer({
   model: {},
+  // TODO: actually disting$uish between give and get sort order.
   giveMode: () => {
     console.log('GIVE mode.');
     $ui.view = $ui.ROSTER;
@@ -14,6 +15,15 @@ Polymer({
     console.log('GET mode.');
     $ui.view = $ui.ROSTER;
     $ui.gestalt = $ui.GETTING;
+  },
+  networksView: () => {
+    console.log('NETWORKS');
+    $ui.view = $ui.NETWORKS;
+  },
+  settingsView: () => {
+    console.log('SETTINGS');
+    // TODO: this is a hack for now. use actually good view state changes.
+    $ui.view = ($ui.SETTINGS == $ui.view) ? $ui.ROSTER : $ui.SETTINGS;
   },
   ready: function() {
 
@@ -34,27 +44,11 @@ Polymer({
     console.log(settings);
 
     $ui.gestalt = this.GIVING;
-
-    $ui.loggedIn = ui.loggedIn;
-
-    // TODO: actually disting$uish between give and get sort order.
-    this.$.btnGive.addEventListener('click', function() {
-    });
-    this.$.btnGet.addEventListener('click', function() {
-    });
-    this.$.btnNetworks.addEventListener('click', function() {
-      console.log('NETWORKS');
-      $ui.view = $ui.NETWORKS;
-    });
-    this.$.btnSettings.addEventListener('clicked', function() {
-      console.log('SETTINGS');
-      // TODO: this is a hack for now. use actually good view state changes.
-      $ui.view = ($ui.SETTINGS == $ui.view) ? $ui.ROSTER : $ui.SETTINGS;
-    });
+    $ui.loggedIn = ui['loggedIn'];
 
     // Determine which view to start in.
     this.view = this.SPLASH;
-    if (ui.introSplashed) {
+    if (ui['introSplashed']) {
       // This must be asynchronous to avoid a CSS bug.
       // TODO: There seems to be a race condition with polymer element load
       // order which sometimes still causes a CSS bug. This needs to be fixed.

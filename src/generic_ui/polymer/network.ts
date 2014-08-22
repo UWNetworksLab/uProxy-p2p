@@ -6,7 +6,7 @@ Polymer({
   LOGGED_OUT: 0,
   LOGGING_IN: 1,
   LOGGED_IN: 2,
-  connect: () => {
+  connect: function() {
     if (!this.network) {
       console.error('uproxy-network with no network specified!');
       return;
@@ -31,7 +31,7 @@ Polymer({
     }, null, 5000);
   },
 
-  disconnect: () => {
+  disconnect: function() {
     if (!this.network) {
       console.error('uproxy-network with no network specified!');
       return;

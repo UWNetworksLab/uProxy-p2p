@@ -28,18 +28,22 @@
 
     <uproxy-toolbar hidden?='{{SPLASH==view || !loggedIn}}'>
       <uproxy-button id='btnGive'
-          on-tap='{{giveMode}}'
-          hidden?='{{GIVING == gestalt}}'
+          on-tap='{{ giveMode }}'
+          hidden?='{{ GIVING == gestalt }}'
           img='../icons/share_white.svg'>
       </uproxy-button>
       <uproxy-button id='btnGet'
-          on-tap='{{getMode}}'
-          hidden?='{{GETTING == gestalt}}'
+          on-tap='{{ getMode }}'
+          hidden?='{{ GETTING == gestalt }}'
           img='../icons/receive_white.svg'>
       </uproxy-button>
-      <uproxy-button id='btnNetworks' img='../icons/networks.png'>
+      <uproxy-button id='btnNetworks'
+          on-tap='{{ networksView }}'
+          img='../icons/networks.png'>
       </uproxy-button>
-      <uproxy-button id='btnSettings' img='../icons/more_vert_white.svg'>
+      <uproxy-button id='btnSettings'
+          on-tap='{{ settingsView }}'
+          img='../icons/more_vert_white.svg'>
       </uproxy-button>
     </uproxy-toolbar>
 
