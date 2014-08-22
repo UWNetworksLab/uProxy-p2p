@@ -5,9 +5,9 @@
     <style>
     :host {
       display: inline-block;
-      height: 50px;
-      width: 50px;
-      margin: 0 10px;
+      box-sizing: border-box;
+      height: 50px; width: 50px;
+      padding: 0 10px;
       text-align: center;
       line-height: 50px;
       opacity: 0.6;
@@ -15,6 +15,9 @@
       -webkit-user-select: none;
       -moz-user-select: none;
       user-select: none;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
     }
     :host(:hover) {
       opacity: 1.0;

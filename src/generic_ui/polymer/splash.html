@@ -11,17 +11,16 @@
       box-sizing: border-box;
       height: 100%; width: 100%;
       text-align: center;
-      padding: 32px;
-      padding-top: 230px;
+      padding-top: 200px;
       font-size: 12px;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      top: -100%;
+      right: -100%;
       color: #999;
     }
     :host(.active) {
-      top: 0px;
+      right: 0px;
       z-index: 100;
     }
     h1 {
@@ -32,6 +31,23 @@
       opacity: 0.3;
     }
     .view {
+      position: absolute;
+      padding: 32px;
+      opacity: 1;
+      -webkit-transition: all 0.46s !important;
+      -moz-transition: all 0.46s !important;
+      transition: all 0.46s !important;
+      z-index: 100;
+    }
+    .view[hidden] {
+      display: block !important;
+      opacity: 0;
+      z-index: -1;
+    }
+    #next {
+      position: absolute;
+      bottom: 80px; left: 0;
+      width: 100%;
     }
     </style>
 

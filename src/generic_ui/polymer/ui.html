@@ -18,7 +18,10 @@
         margin: auto;
         text-align: left;
         overflow: hidden;
-        background: url('../icons/internet.png') center top no-repeat;
+        background: url('../icons/internet.png') center top no-repeat #fff;
+      }
+      #btnSettings {
+        position: absolute; right: 0; top: 0;
       }
     </style>
 
@@ -50,8 +53,7 @@
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      hidden?='{{SPLASH==view || !loggedIn}}'
-      class='{{ {active:(ROSTER==view)} | tokenList }}'>
+      class='{{ { active: (ROSTER==view), hidden: (SPLASH==view || !loggedIn) } | tokenList }}'>
     </uproxy-roster>
 
   </template>
