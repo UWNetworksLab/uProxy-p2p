@@ -1,7 +1,7 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 
 Polymer({
-  contacts: [],
+  contacts: model.roster,
   ready: function() {
     console.log('initializing roster');
     // this.contacts.push({
