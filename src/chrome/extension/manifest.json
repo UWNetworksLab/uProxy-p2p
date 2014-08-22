@@ -30,7 +30,7 @@
       "19": "icons/uproxy-19.png"
     },
     "default_title": "__MSG_appName__",
-    "default_popup": "popup.html"
+    "default_popup": "polymer/popup.html"
   },
   "permissions": [
     "storage",

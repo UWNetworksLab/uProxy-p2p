@@ -180,13 +180,16 @@ var ui :uProxy.UIAPI = new UI.UserInterface(
     mockCore,
     new MockNotifications());
 
-var dependencyInjector = angular.module('dependencyInjector', [])
-  .filter('i18n', function () {
-    return function (key) { return key; };
-  })
-  .constant('ui', ui)
-  .constant('model', model)
-  .constant('core', mockCore)
+if (!angular) {
+  var dependencyInjector = angular.module('dependencyInjector', [])
+    .filter('i18n', function () {
+      return function (key) { return key; };
+    })
+    .constant('ui', ui)
+    .constant('model', model)
+    .constant('core', mockCore)
+}
+var core = mockCore;
 
 // Fake a bunch of interactions from core.
 // Starts off being 'offline' to a network.

@@ -20,7 +20,8 @@
       border-color: #aaa;
     }
     </style>
-    <input type='text' id='device-name' placeholder='Description'></input>
+    <input type='text' id='device-name' placeholder='Description'
+        on-blur='{{update}}' value='{{description}}'></input>
   </template>
   <script src='description.js'></script>
 </polymer-element>
