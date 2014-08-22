@@ -20,6 +20,8 @@ Polymer({
 
     ui.gestalt = this.GIVING;
 
+    ui.loggedIn = false;
+
     // TODO: actually distinguish between give and get sort order.
     this.$.btnGive.addEventListener('clicked', function() {
       console.log('GIVE mode.');

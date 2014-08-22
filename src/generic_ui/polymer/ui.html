@@ -22,7 +22,7 @@
       }
     </style>
 
-    <uproxy-toolbar>
+    <uproxy-toolbar hidden?='{{!loggedIn}}'>
       <uproxy-button id='btnGive'
           hidden?='{{GIVING == gestalt}}'
           img='../icons/share_white.svg'>
@@ -50,7 +50,7 @@
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      hidden?='{{SPLASH==view}}'
+      hidden?='{{SPLASH==view || !loggedIn}}'
       class='{{ {active:(ROSTER==view)} | tokenList }}'>
     </uproxy-roster>
 

@@ -1,8 +1,12 @@
 Polymer({
   currentView: 0,
   next: function() {
-    console.log('whoaa');
     this.currentView++;
+    var ui = this.parentNode.host;
+    console.log(ui);
+    if (this.currentView >= 2) {
+      ui.view = ui.NETWORKS;
+    }
   },
   ready: function() {
     console.log('splash is ready');

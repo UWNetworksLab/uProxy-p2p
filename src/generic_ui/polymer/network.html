@@ -1,0 +1,52 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-network' attributes='network'>
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 16px;
+        border-bottom: 1px solid #ccc;
+      }
+      button, input[type='checkbox'] {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 8px;
+        outline: none;
+      }
+      button:hover {
+        box-shadow: 1px 2px 4px #aaa;
+      }
+      button:active {
+        box-shadow: 1px 2px 4px #aaa inset;
+      }
+      h1 {
+        font-weight: 100;
+        font-size: 16px;
+        display: inline-block;
+        width: 30%;
+      }
+    </style>
+
+    <div class='network'>
+      <h1>{{network}}</h1>
+      <span hidden?='{{LOGGED_OUT!=state}}'>
+        <button on-tap='{{connect}}'>Connect</button>
+      </span>
+      <span hidden?='{{LOGGED_IN!=state}}'>
+        <button on-tap='{{disconnect}}'>Disconnect</button>
+      </span>
+      <span hidden?='{{LOGGING_IN!=state}}'>
+        Waiting for sign in...
+      </span>
+      <!--
+      <input type='checkbox'>
+        Remember?
+      </input>
+      -->
+    </div>
+  </template>
+  <script src='network.js'></script>
+</polymer-element>

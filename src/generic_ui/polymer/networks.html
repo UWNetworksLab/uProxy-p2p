@@ -1,5 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href='button.html'>
+<link rel="import" href='network.html'>
 
 <polymer-element name='uproxy-networks' attributes='networks'>
 
@@ -21,40 +22,10 @@
       left: 0;
       overflow: hidden;
     }
-    .network {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      border-bottom: 1px solid #ccc;
-    }
-    h1 {
-      font-weight: 100;
-      font-size: 16px;
-      display: inline-block;
-      width: 30%;
-    }
-    button, input[type='checkbox'] {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      padding: 8px;
-      outline: none;
-    }
-    button:hover {
-      box-shadow: 1px 2px 4px #aaa;
-    }
-    button:active {
-      box-shadow: 1px 2px 4px #aaa inset;
-    }
     </style>
 
     <template repeat='{{ n in networks }}' vertical layout>
-      <div class='network'>
-        <h1>{{ n }}</h1>
-        <button>Connect</button>
-        <input type='checkbox'>
-          Remember
-        </input>
-      </div>
+      <uproxy-network network='{{n}}'></uproxy-network>
     </template>
 
   </template>
