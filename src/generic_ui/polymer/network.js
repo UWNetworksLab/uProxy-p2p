@@ -16,10 +16,16 @@ Polymer({
       console.log('connected to ' + this.network.name);
       this.state = this.LOGGED_IN;
     }.bind(this))
-    // .catch(function() {
-      // console.log('failed to connect to ' + this.network.name);
-      // this.state = this.LOGGED_OUT;
-    // }.bind(this));
+
+    // Restore the button after a timeout.
+    this.async(function() {
+      if (this.LOGGED_IN != this.state) {
+        this.state = this.LOGGED_OUT;
+      }
+    // TODO: Make the timeout the same as LOGIN_TIMEOUT as in core / social.ts,
+    // or better yet, figure out a better way to deal with promise rejects in
+    // the various cases between failed login or duplicate login attempts.
+    }.bind(this), null, 5000);
   },
   disconnect: function() {
     if (!this.network) {
