@@ -17,6 +17,11 @@ module ArrayBuffers {
   var array3 = uint8Array3.buffer;
   var string3 = '大纪元';
 
+  var uint8Array12 = new Uint8Array(
+      [12,118,101,114,105,115,0,2,129,128,0,1,0,5,0]);
+  var array12 = uint8Array12.buffer;
+  var string12 = string1 + string2;
+
   var emptyArray = (new Uint8Array([])).buffer;
   var emptyString = '';
   var emptyHexString = '';
@@ -63,6 +68,50 @@ module ArrayBuffers {
     });
   });
 
+  describe('ArrayBuffers concat & chunk', function() {
+    it('chunk(array12, 6).length == 3', function() {
+      expect(ArrayBuffers.chunk(array12,6).length).toBe(3);
+    });
+    it('chunk(array12, 1).length == 15', function() {
+      expect(ArrayBuffers.chunk(array12,1).length).toBe(15);
+    });
+    it('concat(array1,array2) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat([array1, array2]),
+          array12))
+        .toBe(true);
+    });
+    it('concat(chunk(array12, 1)) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat(ArrayBuffers.chunk(array12,1)),
+          array12))
+        .toBe(true);
+    });
+    it('concat(chunk(array12, 4)) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat(ArrayBuffers.chunk(array12,4)),
+          array12))
+        .toBe(true);
+    });
+    it('concat(chunk(array12, 5)) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat(ArrayBuffers.chunk(array12,5)),
+          array12))
+        .toBe(true);
+    });
+    it('concat(chunk(array12, array12.byteLength)) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat(ArrayBuffers.chunk(array12,array12.byteLength)),
+          array12))
+        .toBe(true);
+    });
+    it('concat(chunk(array12, 20)) == array12', function() {
+      expect(ArrayBuffers.byteEquality(
+          ArrayBuffers.concat(ArrayBuffers.chunk(array12,20)),
+          array12))
+        .toBe(true);
+    });
+  });
 
   describe('ArrayBuffers <-> strings', function() {
     it('Empty Buffer -> Empty Hex', function() {

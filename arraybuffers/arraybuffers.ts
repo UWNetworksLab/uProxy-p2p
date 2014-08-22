@@ -1,3 +1,9 @@
+// TODO: once typescript with https://github.com/Microsoft/TypeScript/issues/310
+// is released, this can be removed.
+interface ArrayBuffer {
+  slice :(start?:number, end?:number) => ArrayBuffer;
+}
+
 module ArrayBuffers {
   // Equality by byte-value comparison.
   export function byteEquality(b1 :ArrayBuffer, b2 :ArrayBuffer)
@@ -11,8 +17,8 @@ module ArrayBuffers {
     return true;
   }
 
-  // Concat `ArrayBuffer`s into a single ArrayBuffer. If size is given, then the
-  // destination array buffer is of the given size. If size is not given or
+  // Concat |ArrayBuffer|s into a single ArrayBuffer. If size is given, then
+  // the destination array buffer is of the given size. If size is not given or
   // zero, the  size of all buffers is summed to make the new array buffer.
   export function concat(buffers:ArrayBuffer[], size?:number)
       : ArrayBuffer {
@@ -29,11 +35,26 @@ module ArrayBuffers {
     return accumulatorBuffer.buffer;
   }
 
-  /**
-   * Converts an ArrayBuffer to a string.
-   *
-   * @param {ArrayBuffer} buffer The buffer to convert.
-   */
+  // Break an array buffer into multiple array buffers that are at most |size|
+  // types long. Returns 'chunked' array buffers. The array buffers are in
+  // order such that |byteEquality(concat(chunk(a, n)),a)===true|
+  export function chunk(buffer:ArrayBuffer, size:number) : ArrayBuffer[] {
+    var startByte :number = 0;
+    var endByte :number;
+    var chunks :ArrayBuffer[] = [];
+    while(startByte < buffer.byteLength) {
+      endByte = Math.min(startByte + size, buffer.byteLength);
+      if(startByte === 0 && endByte === buffer.byteLength) {
+        chunks.push(buffer);
+      } else {
+        chunks.push(buffer.slice(startByte, endByte));
+      }
+      startByte += size;
+    }
+    return chunks;
+  }
+
+  // Converts an ArrayBuffer to a string.
   export function arrayBufferToString(buffer:ArrayBuffer) : string {
     var bytes = new Uint8Array(buffer);
     var a :string[] = [];
@@ -43,11 +64,7 @@ module ArrayBuffers {
     return a.join('');
   }
 
-  /**
-   * Converts a string to an ArrayBuffer.
-   *
-   * @param {string} s The string to convert.
-   */
+  // Converts a string to an ArrayBuffer.
   export function stringToArrayBuffer(s:string) : ArrayBuffer {
     var buffer = new ArrayBuffer(s.length);
     var bytes = new Uint8Array(buffer);
@@ -60,12 +77,8 @@ module ArrayBuffers {
   declare function escape(s:string): string;
   declare function unescape(s:string): string;
 
-  /**
-   * Converts an ArrayBuffer to a string of hex codes and interpretations as
-   * a char code.
-   *
-   * @param {ArrayBuffer} buffer The buffer to convert.
-   */
+  // Converts an ArrayBuffer to a string of hex codes and interpretations as
+  // a char code.
   export function arrayBufferToHexString(buffer:ArrayBuffer) : string {
     var bytes = new Uint8Array(buffer);
     var a :string[] = [];
@@ -75,12 +88,8 @@ module ArrayBuffers {
     return a.join('.');
   }
 
-  /**
-   * Converts a HexString of the regexp form /(hh\.)*hh/ where `h` is a
-   * hex-character to an ArrayBuffer.
-   *
-   * @param {string} hexString The hexString to convert.
-   */
+  // Converts a HexString of the regexp form /(hh\.)*hh/ where `h` is a
+  // hex-character to an ArrayBuffer.
   export function hexStringToArrayBuffer(hexString:string) : ArrayBuffer {
     if(hexString === '') { return new ArrayBuffer(0); }
     var hexChars = hexString.split('.');
@@ -92,14 +101,10 @@ module ArrayBuffers {
     return buffer;
   }
 
-  /**
-   * Converts arrayBuffer which has a string encoded in UTF8 to a
-   * Javascript string.
-   *
-   * Note: the array buffer should have a valid string with no zero inside.
-   *
-   * @param {string} array buffer to convert.
-   */
+  // Converts arrayBuffer which has a string encoded in UTF8 to a
+  // Javascript string.
+  //
+  // Note: the array buffer should have a valid string with no zero inside.
   export function arrayBufferDecodedAsUtf8String(buffer:ArrayBuffer) : string {
     var bytes = new Uint8Array(buffer);
     var a :string[] = [];
@@ -109,11 +114,7 @@ module ArrayBuffers {
     return decodeURIComponent(escape(a.join('')));
   }
 
-  /**
-   * Converts javascript string to array buffer using UTF8 encoding.
-   *
-   * @param {string} string to convert.
-   */
+  // Converts javascript string to array buffer using UTF8 encoding.
   export function stringToUtf8EncodedArrayBuffer(str:string) : ArrayBuffer {
     var strUtf8 = unescape(encodeURIComponent(str));
     var ab = new Uint8Array(strUtf8.length);
