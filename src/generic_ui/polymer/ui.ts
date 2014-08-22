@@ -31,6 +31,9 @@ Polymer({
     $ui.view = ($ui.SETTINGS == $ui.view) ? $ui.ROSTER : $ui.SETTINGS;
   },
   ready: function() {
+    // Expose global ui object and UI module in this context.
+    this.ui = ui;
+    this.UI = UI;
 
     // TODO: Use typescript and enums and everything here.
     this.SPLASH = 0;
