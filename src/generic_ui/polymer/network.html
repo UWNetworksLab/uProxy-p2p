@@ -32,7 +32,7 @@
     </style>
 
     <div class='network'>
-      <h1>{{network}}</h1>
+      <h1>{{ network.name }}</h1>
       <span hidden?='{{LOGGED_OUT!=state}}'>
         <button on-tap='{{connect}}'>Connect</button>
       </span>

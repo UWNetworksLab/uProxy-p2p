@@ -9,25 +9,30 @@ Polymer({
       return;
     }
     console.log('connect fired!');
-    var ui = this.parentNode.host.parentNode.host;
-    console.log(ui);
+    // var ui = this.parentNode.host.parentNode.host;
+    // console.log(ui);
     this.state = this.LOGGING_IN;
-    this.async(function() {
-       // TODO: Call upon actual login here.
-      console.log('connected to ' + this.network);
+    core.login(this.network.name).then(function() {
+      console.log('connected to ' + this.network.name);
       this.state = this.LOGGED_IN;
-      ui.loggedIn = true;
-    }, null, 1000);
+    }.bind(this))
+    // .catch(function() {
+      // console.log('failed to connect to ' + this.network.name);
+      // this.state = this.LOGGED_OUT;
+    // }.bind(this));
   },
   disconnect: function() {
     if (!this.network) {
       console.error('uproxy-network with no network specified!');
       return;
     }
-    console.log('disconnect fired!');
+    core.logout(this.network.name);
+    console.log('disconnected from ' + this.network.name);
     this.state = this.LOGGED_OUT;
   },
   ready: function() {
-    this.state = this.LOGGED_OUT;
+    // TODO: Probably turn this into a more reasonable enum to prevent doubling
+    // state.
+    this.state = this.network.online? this.LOGGED_IN : this.LOGGED_OUT;
   },
 });
