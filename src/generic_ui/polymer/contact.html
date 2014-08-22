@@ -1,4 +1,5 @@
-<link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/polymer/polymer.html'>
+<link rel='import' href='instance.html'>
 
 <polymer-element name='uproxy-contact' attributes='contact, expanded'>
 
@@ -45,7 +46,7 @@
     #words {
       display: inline-block;
       padding: 0 16px;
-      height: 100%;
+      words: 200px; height: 100%;
     }
     h1 {
       display: inline;
@@ -74,15 +75,9 @@
         <h1>{{ contact.name }}</h1>
         <span id='description'>{{ contact.description }}</span>
         <div id='instances' hidden?='{{!expanded}}'>
-          INSTANCES:
-          <div hidden?='{{ getting() }}'>
-            whoa
-            <uproxy-button>Request Access</uproxy-button>
-          </div>
-          <div hidden?='{{ !getting() }}'>
-            omg
-            <uproxy-button>Offer Access</uproxy-button>
-          </div>
+          <template repeat='{{ i in contact.instances }}' vertical layout>
+            <uproxy-instance instance='{{ i }}'></uproxy-instance>
+          </template>
         </div>
       </div>
     </div>

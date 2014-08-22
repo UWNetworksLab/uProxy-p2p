@@ -1,0 +1,20 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-instance' attributes='instance'>
+  <template>
+    <style>
+    :host {
+    }
+    </style>
+    Instance ID: {{instance.instanceId}}
+    <div hidden?='{{ getting() }}'>
+      whoa
+      <uproxy-button>Request Access</uproxy-button>
+    </div>
+    <div hidden?='{{ !getting() }}'>
+      omg
+      <uproxy-button>Offer Access</uproxy-button>
+    </div>
+  </template>
+  <script src='instance.js'></script>
+</polymer-element>

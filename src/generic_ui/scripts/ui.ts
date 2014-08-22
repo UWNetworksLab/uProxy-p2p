@@ -30,6 +30,11 @@ module UI {
     CHAT
   }
 
+  export enum Gestalt {
+    GIVING = 101,
+    GETTING
+  }
+
   /**
    * Boolean toggles which influence other appearances.
    */

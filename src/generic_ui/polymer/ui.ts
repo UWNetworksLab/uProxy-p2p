@@ -1,20 +1,25 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='../scripts/ui.ts' />
 
 declare var ui :uProxy.UIAPI;
 
 var $ui;
+window['$ui'] = $ui;
+
 Polymer({
   model: {},
   // TODO: actually disting$uish between give and get sort order.
   giveMode: () => {
     console.log('GIVE mode.');
     $ui.view = $ui.ROSTER;
-    $ui.gestalt = $ui.GIVING;
+    // TODO(keroserene): Update the original UI file and this new polymer UI
+    // file, merge them, clean out the old, apply the new.
+    ui['gestalt'] = UI.Gestalt.GIVING;
   },
   getMode: () => {
     console.log('GET mode.');
     $ui.view = $ui.ROSTER;
-    $ui.gestalt = $ui.GETTING;
+    ui['gestalt'] = UI.Gestalt.GETTING;
   },
   networksView: () => {
     console.log('NETWORKS');
@@ -33,17 +38,10 @@ Polymer({
     this.SETTINGS = 2;
     this.NETWORKS = 3;
 
-    this.GIVING = 101;
-    this.GETTING = 102;
-
     console.log('UI view is doing a thing!', this.view);
     $ui = this;
-    var roster = this.$.roster;
-    var settings = this.$.settings;
-    console.log(roster);
-    console.log(settings);
 
-    $ui.gestalt = this.GIVING;
+    ui['gestalt'] = UI.Gestalt.GIVING;
     $ui.loggedIn = ui['loggedIn'];
 
     // Determine which view to start in.

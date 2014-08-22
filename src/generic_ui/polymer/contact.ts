@@ -14,15 +14,6 @@ Polymer({
     this.expanded = false;
     console.log('collapse', this);
   },
-  getting: function() {
-    var roster = this.parentNode.host;
-    console.log(roster);
-    if (!roster) {
-      return false;
-    }
-    var ui = roster.parentNode.host;
-    return ui.GETTING == ui.gestalt;
-  },
   ready: function() {
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
