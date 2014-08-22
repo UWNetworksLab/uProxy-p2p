@@ -1,3 +1,4 @@
+var $ui;
 Polymer({
   model: {},
   ready: function() {
@@ -11,8 +12,8 @@ Polymer({
     this.GIVING = 101;
     this.GETTING = 102;
 
-    this.view = this.SPLASH;
-    var $ui = this;
+    console.log('UI view is doing a thing!', this.view);
+    $ui = this;
     var roster = this.$.roster;
     var settings = this.$.settings;
     console.log(roster);
@@ -42,6 +43,15 @@ Polymer({
       // TODO: this is a hack for now. use actually good view state changes.
       $ui.view = ($ui.SETTINGS == $ui.view) ? $ui.ROSTER : $ui.SETTINGS;
     });
+
+    // Determine which view to start in.
+    this.view = this.SPLASH;
+    if (ui.introSplashed) {
+      // This must be asynchronous to avoid a CSS bug.
+      this.async(function() {
+        this.view = this.NETWORKS;
+      }, 500);
+    }
 
   }
 });

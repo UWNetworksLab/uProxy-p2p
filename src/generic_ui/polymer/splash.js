@@ -1,18 +1,27 @@
+/**
+ * Script for the introductory splash screen.
+ */
 Polymer({
-  currentView: 0,
+  state: 0,
   next: function() {
-    this.currentView++;
-    var ui = this.parentNode.host;
-    console.log(ui);
-    if (1 == this.currentView) {
+    this.state++;
+    if (1 == this.state) {
       var desc = this.$.description.children[1];
       desc.$['device-name'].focus();
-    }
-    if (this.currentView >= 2) {
-      ui.view = ui.NETWORKS;
+    } else if (this.state >= 2) {
+      this.end();
     }
   },
+  end: function() {
+    console.log('closing the splash intro.');
+    ui.introSplashed = true;
+    var $ui = this.parentNode.host;
+    console.log($ui);
+    $ui.view = $ui.NETWORKS;
+  },
   ready: function() {
-    console.log('splash is ready');
+    // if (ui.introSplashed) {
+      // this.end();
+    // }
   }
 });

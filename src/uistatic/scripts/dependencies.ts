@@ -180,6 +180,7 @@ var ui :uProxy.UIAPI = new UI.UserInterface(
     mockCore,
     new MockNotifications());
 
+/*
 if (!angular) {
   var dependencyInjector = angular.module('dependencyInjector', [])
     .filter('i18n', function () {
@@ -189,6 +190,7 @@ if (!angular) {
     .constant('model', model)
     .constant('core', mockCore)
 }
+*/
 var core = mockCore;
 
 // Fake a bunch of interactions from core.

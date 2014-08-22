@@ -99,6 +99,9 @@ module UI {
     public view :View;
     public toggles :Toggles;
 
+    // Just the initial introductory splash screen.
+    public introSplashed :Boolean = false;
+
     // Keep track of currently viewed contact and instance.
     // public focus :InstancePath;
     public network :string = 'google';
