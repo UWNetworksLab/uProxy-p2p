@@ -6,19 +6,22 @@
   "bundle": "src/interfaces/lib/tsd.d.ts",
   "installed": {
     "chrome/chrome-app.d.ts": {
-      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "chrome/chrome.d.ts": {
-      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "webrtc/RTCPeerConnection.d.ts": {
-      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "webrtc/MediaStream.d.ts": {
-      "commit": "14bea81d0ea20b2d787b38ad3d8f42578fa92ec8"
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     }
   }
 }

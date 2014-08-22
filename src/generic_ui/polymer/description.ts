@@ -4,7 +4,7 @@
 declare var core :uProxy.CoreAPI;
 
 Polymer({
-  description: 'My computer',
+  description: 'a computer',
   update: () => {
     console.log('updating description to ' + this.description);
     // TODO(keroserene): Actually check that the description update propogates
