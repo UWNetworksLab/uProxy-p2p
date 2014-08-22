@@ -4,7 +4,7 @@
 /// <reference path="../third_party/typings/webcrypto/WebCrypto.d.ts" />
 /// <reference path="../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
 
-/// <reference path="../handler/queue.ts" />
+/// <reference path="../handler/queue.d.ts" />
 
 declare module WebRtc {
 

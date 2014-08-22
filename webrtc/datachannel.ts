@@ -1,4 +1,5 @@
-/// <reference path='../handler/queue.ts' />
+/// <reference path='../handler/queue.d.ts' />
+/// <reference path='../arraybuffers/arraybuffers.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
 
@@ -7,12 +8,6 @@
 // This class assumes WebRTC is available; this is provided by the cross-
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
-
-// TODO: once typescript with https://github.com/Microsoft/TypeScript/issues/310
-// is released, this can be removed.
-interface ArrayBuffer {
-  slice :(start?:number, end?:number) => ArrayBuffer;
-}
 
 module WebRtc {
 
@@ -126,10 +121,11 @@ module WebRtc {
     private onDataFromPeer_ = (messageEvent : RTCMessageEvent) : void => {
       if (typeof messageEvent.data === 'string') {
         this.dataFromPeerQueue.handle({str: messageEvent.data});
-      } else if (typeof messageEvent.data === 'ArrayBuffer') {
+      } else if (messageEvent.data instanceof ArrayBuffer) {
         this.dataFromPeerQueue.handle({buffer: messageEvent.data});
       } else {
         log.error('Unexpected data from peer that has type: ' +
+            typeof messageEvent.data + '; event: ' +
             JSON.stringify(messageEvent));
       }
     }
@@ -175,16 +171,11 @@ module WebRtc {
     }
 
     private chunkBufferOntoQueue_ = (data:BufferData) : Promise<void> => {
-      var startByte :number = 0;
-      var endByte :number;
+      var chunks = ArrayBuffers.chunk(data.buffer, CHUNK_SIZE);
       var promises :Promise<void>[] = [];
-      while(startByte < data.buffer.byteLength) {
-        endByte = Math.min(startByte + CHUNK_SIZE, data.buffer.byteLength);
-        promises.push(this.toPeerDataQueue_.handle(
-            {buffer: data.buffer.slice(startByte, endByte)}));
-        startByte += CHUNK_SIZE;
-      }
-
+      chunks.forEach((chunk) => {
+        promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
+      });
       // CONSIDER: can we change the interface to support not having the dummy
       // extra return at the end?
       return Promise.all(promises).then(() => { return; });

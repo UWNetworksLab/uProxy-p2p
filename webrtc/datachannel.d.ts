@@ -1,4 +1,4 @@
-/// <reference path="../handler/queue.ts" />
+/// <reference path="../handler/queue.d.ts" />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
 
