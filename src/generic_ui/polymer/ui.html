@@ -28,10 +28,12 @@
 
     <uproxy-toolbar hidden?='{{SPLASH==view || !loggedIn}}'>
       <uproxy-button id='btnGive'
+          on-tap='{{giveMode}}'
           hidden?='{{GIVING == gestalt}}'
           img='../icons/share_white.svg'>
       </uproxy-button>
       <uproxy-button id='btnGet'
+          on-tap='{{getMode}}'
           hidden?='{{GETTING == gestalt}}'
           img='../icons/receive_white.svg'>
       </uproxy-button>

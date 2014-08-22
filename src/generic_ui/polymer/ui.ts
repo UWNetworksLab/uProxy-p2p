@@ -1,6 +1,20 @@
+/// <reference path='../../interfaces/ui-polymer.d.ts' />
+
+declare var ui :uProxy.UIAPI;
+
 var $ui;
 Polymer({
   model: {},
+  giveMode: () => {
+    console.log('GIVE mode.');
+    $ui.view = $ui.ROSTER;
+    $ui.gestalt = $ui.GIVING;
+  },
+  getMode: () => {
+    console.log('GET mode.');
+    $ui.view = $ui.ROSTER;
+    $ui.gestalt = $ui.GETTING;
+  },
   ready: function() {
 
     // TODO: Use typescript and enums and everything here.
@@ -24,15 +38,9 @@ Polymer({
     $ui.loggedIn = ui.loggedIn;
 
     // TODO: actually disting$uish between give and get sort order.
-    this.$.btnGive.addEventListener('clicked', function() {
-      console.log('GIVE mode.');
-      $ui.view = $ui.ROSTER;
-      $ui.gestalt = $ui.GIVING;
+    this.$.btnGive.addEventListener('click', function() {
     });
-    this.$.btnGet.addEventListener('clicked', function() {
-      console.log('GET mode.');
-      $ui.view = $ui.ROSTER;
-      $ui.gestalt = $ui.GETTING;
+    this.$.btnGet.addEventListener('click', function() {
     });
     this.$.btnNetworks.addEventListener('click', function() {
       console.log('NETWORKS');
@@ -48,9 +56,11 @@ Polymer({
     this.view = this.SPLASH;
     if (ui.introSplashed) {
       // This must be asynchronous to avoid a CSS bug.
+      // TODO: There seems to be a race condition with polymer element load
+      // order which sometimes still causes a CSS bug. This needs to be fixed.
       this.async(function() {
         this.view = this.NETWORKS;
-      }, 500);
+      }, 1000);
     }
 
   }
