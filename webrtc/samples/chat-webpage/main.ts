@@ -83,6 +83,7 @@ b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
 // Send messages over the datachannel, in response to events
 // arriving from the UI.
 function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
+  log.info('sending: ' + textArea.value);
   pc.dataChannels['text'].send({
     str: textArea.value || '(empty message)'
   }).catch((e) => {
@@ -97,7 +98,11 @@ sendButtonB.onclick = send.bind(null, b, sendAreaB);
 // that works, enable the UI.
 a.negotiateConnection()
   .then(() => {
-    a.openDataChannel('text');
+    var aTextDataChannel = a.openDataChannel('text');
+    aTextDataChannel.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
+      log.info('a: dataFromPeer: ' + JSON.stringify(data));
+      receiveAreaA.value = JSON.stringify(data);
+    });
   })
   .then(() => {
     log.info('peerconnection negotiated!');
