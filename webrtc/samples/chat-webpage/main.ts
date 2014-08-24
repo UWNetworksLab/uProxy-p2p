@@ -55,9 +55,10 @@ function setupLoggingPeerConnection(name:string, receiveArea:HTMLInputElement) :
     });
     d.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
       log.info(name + ': dataFromPeer: ' + JSON.stringify(data));
-      // Handle messages received on the datachannel(s).
-      // The message is forwarded to the UI.
-      // TODO: only the first message sent over the data channel is received
+      // Handle messages received on the datachannel(s). The message is
+      // forwarded to the UI. TODO: only the first message sent over the data
+      // channel is received. The if-statement allows us to create new peer-
+      // connections in the console that are not tied to the UI.
       if(receiveArea) {
         receiveArea.value = JSON.stringify(data);
       }
@@ -79,26 +80,31 @@ b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
   a.handleSignalMessage(signal);
 });
 
-// Have a negotiate a peerconnection. Once negotiated, enable the UI and add
-// send/receive handlers.
-a.negotiateConnection().then(() => {
-  log.info('peerconnection negotiated!');
-  sendAreaA.disabled = false;
-  sendAreaB.disabled = false;
+// Send messages over the datachannel, in response to events
+// arriving from the UI.
+function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
+  pc.dataChannels['text'].send({
+    str: textArea.value || '(empty message)'
+  }).catch((e) => {
+    log.error('could not send: ' + e.message); }
+  );
+}
 
-  // Send messages over the datachannel, in response to events
-  // arriving from the UI.
-  function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
-    pc.dataChannels['text'].send({
-      str: textArea.value || '(empty message)'
-    }).catch((e) => {
-      log.error('could not send: ' + e.message); }
-    );
-  }
-  sendButtonA.onclick = send.bind(null, a, sendAreaA);
-  sendButtonB.onclick = send.bind(null, b, sendAreaB);
+sendButtonA.onclick = send.bind(null, a, sendAreaA);
+sendButtonB.onclick = send.bind(null, b, sendAreaB);
 
-  var chanA = a.openDataChannel('text');
+// Have a negotiate a peerconnection. Once negotiated, open data channel. Once
+// that works, enable the UI.
+a.negotiateConnection()
+  .then(() => {
+    a.openDataChannel('text');
+  })
+  .then(() => {
+    log.info('peerconnection negotiated!');
+    sendAreaA.disabled = false;
+    sendAreaB.disabled = false;
+    sendButtonA.disabled = false;
+    sendButtonB.disabled = false;
 }, (e) => {
   log.error('could not negotiate peerconnection: ' + e.message);
 });
