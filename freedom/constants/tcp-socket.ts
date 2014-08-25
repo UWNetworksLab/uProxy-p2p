@@ -1,8 +1,11 @@
-// tcp-socket.ts
-// from freedom/interface/core.js
+// This file provides some constants to help document and provide type-checking
+// for the freedoms tcp sockets (the freedom interface defined in:
+// freedom/interface/core.js).
+
+// Note: Freedom only uses the string values. Don't use the number value from
+// these enums.
 
 // TODO: persuade freedom to use real enums.
-// Note: Freedom only uses the string values. Don't use the int value.
 // TODO: double-check and merge with Firefox usage.
 module freedom_TcpSocket_Constants {
   enum onDisconnect {
@@ -10,11 +13,14 @@ module freedom_TcpSocket_Constants {
     SUCCESS,
     // Remote end of the TCP connection closed.
     CONNECTION_CLOSED,
-    // Some other unkown reason.
-    UNKOWN
+    // Some other unknown reason.
+    UNKNOWN
   }
 
+  // Error codes for calls to tcp socket methods. The enum is named after the
+  // tcp socket method being called.
   module ErrorCode {
+
     enum Connect {
       // The socket is already connected.
       ALREADY_CONNECTED,
