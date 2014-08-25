@@ -89,6 +89,10 @@ module WebRtc {
   // Logger for this module.
   var log :Logging.Log = new Logging.Log('PeerConnection');
 
+  // Global listing of active peer connections. Helpful for debugging when you
+  // are in Freedom.
+  export var peerConnections :{ [name:string] : PeerConnection } = {};
+
   // A wrapper for peer-connection and it's associated data channels.
   // The most important diagram is this one:
   // http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCSignalingState
@@ -185,6 +189,15 @@ module WebRtc {
       this.onceDisconnected = new Promise<void>((F,R) => {
           this.fulfillDisconnected_ = F;
         });
+
+      // Once connected, add to global listing. Helpful for debugging.
+      this.onceConnected.then(() => {
+        peerConnections[this.peerName] = this;
+      });
+      // Once disconnected, remove from global listing.
+      this.onceDisconnected.then(() => {
+        delete peerConnections[this.peerName];
+      });
 
       // New data channels from the peer.
       this.peerOpenedChannelQueue = new Handler.Queue<DataChannel,void>();

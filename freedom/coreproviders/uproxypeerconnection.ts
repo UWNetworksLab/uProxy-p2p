@@ -155,10 +155,16 @@ module freedom_UproxyPeerConnection {
                    data :WebRtc.Data,
                    continuation :() => void) : void => {
       // TODO: propagate errors
+      if(!(channelLabel in this.pc_.dataChannels)) {
+        this.log_.warn('No such channel label (maybe internal error?): ' + channelLabel);
+        continuation();
+        return
+      }
+
       this.pc_.dataChannels[channelLabel].send(data)
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
+          this.log_.warn(e.toString());
           // TODO: propagate errors
         });
     }
