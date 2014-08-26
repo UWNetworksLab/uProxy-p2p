@@ -189,6 +189,8 @@ module WebRtc {
         } else if(data.buffer) {
           this.rtcDataChannel_.send(data.buffer);
         } else {
+          // Data is good when it meets the type expected of the Data. If type-
+          // saftey is ensured at compile time, this should never happen.
           return Promise.reject(new Error(
               'Bad data: ' + JSON.stringify(data)));
         }

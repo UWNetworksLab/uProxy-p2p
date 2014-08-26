@@ -16,9 +16,8 @@ module freedom_UproxyPeerConnection {
     private log_ :Logging.Log;
 
     constructor(
-        // TODO: fix `any` type.
+        // TODO: fix `any` type: https://github.com/uProxy/uproxy/issues/353
         private module_:any,
-        // TODO: see comment in .d.ts: use real type not any.
         private dispatchEvent_:(eventType:string, eventData:any) => void,
         config:WebRtc.PeerConnectionConfig) {
 
@@ -59,12 +58,11 @@ module freedom_UproxyPeerConnection {
     public negotiateConnection =
         (continuation:(endpoints:WebRtc.ConnectionAddresses) => void)
         : void => {
-      // TODO: propagate errors
       this.pc_.negotiateConnection()
         .then(continuation)
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -74,7 +72,7 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -85,7 +83,7 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -94,7 +92,7 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -103,7 +101,7 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -140,7 +138,7 @@ module freedom_UproxyPeerConnection {
         })
         .catch((e:Error) => {
           this.log_.error(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
 
@@ -154,9 +152,9 @@ module freedom_UproxyPeerConnection {
     public send = (channelLabel :string,
                    data :WebRtc.Data,
                    continuation :() => void) : void => {
-      // TODO: propagate errors
       if(!(channelLabel in this.pc_.dataChannels)) {
         this.log_.warn('No such channel label (maybe internal error?): ' + channelLabel);
+        // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         continuation();
         return
       }
@@ -165,7 +163,7 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           this.log_.warn(e.toString());
-          // TODO: propagate errors
+          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
         });
     }
   }  // class FreedomImpl

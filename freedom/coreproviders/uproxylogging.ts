@@ -6,7 +6,8 @@ module Freedom_UproxyLogging {
   export class LogManager {
     // Dummy consturctor because freedom needs one.
     constructor(
-      private module_:any,  // TODO: fix `any` type.
+      // TODO: fix `any` type: https://github.com/uProxy/uproxy/issues/353
+      private module_:any,
       // dispatchEvent_ is never used, hense void eventData.
       private dispatchEvent_:(eventType:string, eventData:void) => void) {}
     //
