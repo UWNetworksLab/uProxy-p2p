@@ -36,7 +36,7 @@ module freedom_TcpSocket_Constants {
     }
 
     enum Write {
-      // the socket trying to be secured is not yet connected.
+      // The socket trying to be written to is not yet connected.
       NOT_CONNECTED,
       // CONNECTION_RESET is inferred from: bytes sent !== data length.
       CONNECTION_RESET,
