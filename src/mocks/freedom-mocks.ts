@@ -24,7 +24,8 @@ class MockCorePeerConnection {
 
   public createOffer = () => {
     var mockDesc = {
-      sdp: 'a=fingerprint:sha-256 foobar '
+      sdp: 'a=fingerprint:sha-256 00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:' +
+          'EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF '
     };
     return Promise.resolve(mockDesc);
   }
