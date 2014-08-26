@@ -198,7 +198,7 @@ module WebRtc {
       } catch (e) {
         log.debug('Error in send' + e.toString());
         return Promise.reject(new Error(
-              'Error in send: ' + JSON.stringify(e)));
+            'Error in send: ' + JSON.stringify(e)));
       }
       this.conjestionControlSendHandler();
       return Promise.resolve<void>();
