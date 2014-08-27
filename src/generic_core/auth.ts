@@ -16,7 +16,9 @@ module Auth {
   var pc_ = freedom['core.peerconnection']();
 
   // This regular expression captures the fingerprint from an sdp header.
-  var SDP_FINGERPRINT_REGEX = /(?:a=fingerprint:sha-256\s)(.*)\s/m;
+  // TODO: Allow hashes other than sha-256.
+  var SDP_FINGERPRINT_REGEX =
+      /^(?:a=fingerprint:sha-256\s)((?:[0-9a-f]{2}:){31}[0-9a-f]{2})\s*$/mi;
 
   /**
    * Create an un-used local WebRTC peer connection to obtain the local keyhash
@@ -43,10 +45,7 @@ module Auth {
       });
     }
     return sigChannelPromise_.then(pc_.createOffer)
-        .then((description:RTCSessionDescription) => {
-          var fingerprint = extractFingerprint(description);
-          return fingerprint;
-        })
+        .then(extractFingerprint)
         .catch((e) => {
           console.error('Could not fetch local fingerprint.');
           return Promise.reject(e);
