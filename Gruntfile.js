@@ -44,10 +44,6 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'shell': {
-      bower_install: {
-        command: 'bower install',
-        options: {stdout: true, stderr: true, failOnError: true}
-      },
       // TODO: Get rid of this step once socks-rtc has this automatically done.
       socks_rtc_setup: {
         command: 'npm install;grunt',
@@ -525,10 +521,6 @@ module.exports = function(grunt) {
   // TODO: Make TaskManager understand timestamps so it avoids re-compliation
   // things that have not been modified between compilations.
   var taskManager = new TaskManager.Manager();
-
-  taskManager.add('setup', [
-    'shell:bower_install',
-  ]);
 
   taskManager.add('build_generic_core', [
     'typescript:generic_core',

@@ -6,6 +6,8 @@ START_DIR="$(pwd)"
 ROOT_DIR="$(cd "$(dirname $0)"; pwd)"
 PRG="$(basename "$0")"
 
+echo "This script helps you make sure you have 'npm', 'grunt', 'sass', and 'bower' commands in your installed and in your path. It then runs the 'npm install command' to make sure you have all the needed dependencies for uProxy, and finally it runs 'grunt build' to build uProxy."
+
 if ! which npm >/dev/null; then
   echo "npm is required.  http://nodejs.org"
   exit 1
@@ -18,7 +20,7 @@ fi
 
 if ! gem query -i -n sass >/dev/null; then
   echo "The 'sass' ruby gem needs installation. Try:"
-  echo "sudo gem install sass"
+  echo "gem install sass"
   exit 1
 fi
 
@@ -28,13 +30,13 @@ echo "PRG=$PRG"
 
 if ! which grunt >/dev/null; then
   echo "The global 'grunt' command needs installation.  Try:"
-  echo "sudo npm install -g grunt"
+  echo "npm install -g grunt-cli"
   exit 1
 fi
 
 if ! which bower >/dev/null; then
   echo "The global 'bower' command needs installation.  Try:"
-  echo "sudo npm install -g bower"
+  echo "npm install -g bower"
   exit 1
 fi
 
@@ -48,5 +50,5 @@ echo
 echo "### Install local dependencies"
 runcmd "cd $ROOT_DIR"
 runcmd "npm install"
-runcmd "grunt setup"
+echo "### Building uProxy"
 runcmd "grunt build"

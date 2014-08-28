@@ -5,6 +5,7 @@ node_js:
 before_install:
   - npm install grunt -g grunt-cli
   - gem install sass
+  - bower install
 install: npm install
 
 notifications:

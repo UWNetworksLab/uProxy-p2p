@@ -1,10 +1,10 @@
-src/chrome/
-==========
+# src/chrome/
+
 This is the source directory for all Chrome-specific uProxy code.
 
 
-The App & Extension split
--------------------
+## The App & Extension split
+
 At the moment, uProxy for Chrome is split into two components -
 the **App** and the **Extension**. This is required because Chrome offers
 different sets of browser permissions for 'Apps' and 'Extensions', and uProxy
@@ -20,8 +20,8 @@ Hopefully in the future this split can be remedied so
 that users will have a much simpler time for just a single installation.
 
 
-Directories
------------
+## Directories
+
 `app/` contains the Chrome App component of uProxy Chrome. The primary uProxy
 Core is contained within the App. (See `src/generic_core`)
 

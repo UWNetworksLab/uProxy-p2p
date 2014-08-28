@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "UProxyApp",
   "description": "Ubiquitous Proxy [Alpha]",
-  "minimum_chrome_version": "34",
+  "minimum_chrome_version": "38",
   "version": "0.3.0",
   "icons": {
       "128": "icons/uproxy-128.png",
@@ -15,18 +15,17 @@
     }
   },
   "permissions": [
-    {"socket": ["tcp-connect", "udp-send-to", "tcp-listen", "udp-bind"]},
     "storage",
     "webview",
-    "identity",
     "videoCapture",
     "audioCapture",
-    "https://apis.google.com/",
-    "https://*.appspot.com/",
-    "https://www.facebook.com/",
-    "https://graph.facebook.com/",
-    "https://www.googleapis.com/*",
-    "https://accounts.google.com/*"
+    "https://graph.facebook.com/oauth/access_token",
+    "https://accounts.google.com/o/oauth2/token"
   ],
+  "sockets": {
+    "tcp": { "connect" : "" },
+    "tcpServer": { "listen": "" },
+    "udp": { "send": "", "bind": "" }
+  },
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB"
 }
