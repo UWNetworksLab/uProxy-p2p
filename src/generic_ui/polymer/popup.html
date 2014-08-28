@@ -5,26 +5,33 @@
   <title>uProxy polymer UI</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
   <script src='../lib/platform/platform.js'></script>
+  <script src='../lib/lodash/dist/lodash.compat.js'></script>
+
+  <script src='../scripts/ui.js'></script>
+  <script src='../scripts/uproxy.js'></script>
+  <script src='../scripts/util.js'></script>
+  <script src='../scripts/consent.js'></script>
+  <script src='../scripts/user.js'></script>
+  <script src='../scripts/dependencies.js'></script>
+
   <link rel='import' href='ui.html'>
   <style>
   body {
+    position: relative;
+    width: 371px; height: 600px;
+    display: block;
     text-align: center;
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 13px;
+    background-color: #eee;
   }
   </style>
-  <script>
-    // TODO: bind this to the underlying uproxy ui model.
-    var model = {};
-  </script>
 </head>
 
 <body unresolved touch-action='auto'>
-  <uproxy-ui>
-  </uproxy-ui>
-  <script>
-    var ui = document.querySelector('uproxy-ui');
-    console.log('global model is: ', model);
-    ui.model = model;
-  </script>
+  <uproxy-ui></uproxy-ui>
+  <script src='popup.js'></script>
 </body>
 
 </html>

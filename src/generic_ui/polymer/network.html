@@ -1,0 +1,81 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-network' attributes='network'>
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+        width: 100%; height: 110px;
+        padding: 16px;
+        border-bottom: 1px solid #ccc;
+      }
+      button, input[type='checkbox'] {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 8px;
+        outline: none;
+      }
+      button:hover {
+        box-shadow: 1px 2px 4px #aaa;
+      }
+      button:active {
+        box-shadow: 1px 2px 4px #aaa inset;
+      }
+      h1 {
+        font-weight: 100;
+        font-size: 16px;
+        display: block;
+        width: 80px;
+        font-variant: small-caps;
+      }
+      #waiting {
+        color: #bbb;
+        position: relative;
+        cursor: default;
+      }
+      #hourglass {
+        position: absolute;
+        height: 28px; width: 28px;
+        left: 40px; top: 20px;
+        background-image: url('../icons/waiting_grey.svg');
+        -webkit-animation-name: rotate;
+        -webkit-animation-duration: 1s;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-timing-function: linear;
+        -moz-animation-name: rotate;
+        -moz-animation-duration: 1s;
+        -moz-animation-iteration-count: infinite;
+        -moz-animation-timing-function: linear;
+      }
+      @-webkit-keyframes rotate {
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(360deg);}
+      }
+      @-moz-keyframes rotate {
+        from {-moz-transform: rotate(0deg);}
+        to {-moz-transform: rotate(360deg);}
+      }
+    </style>
+
+    <div class='network'>
+      <h1>{{ network.name }}</h1>
+      <span hidden?='{{LOGGED_OUT!=state}}'>
+        <button on-tap='{{connect}}'>Connect</button>
+      </span>
+      <span hidden?='{{LOGGED_IN!=state}}'>
+        <button on-tap='{{disconnect}}'>Disconnect</button>
+      </span>
+      <span id='waiting' hidden?='{{LOGGING_IN!=state}}'>
+        Waiting for sign in...
+        <div id='hourglass'></div>
+      </span>
+      <!--
+      <input type='checkbox'>
+        Remember?
+      </input>
+      -->
+    </div>
+  </template>
+  <script src='network.js'></script>
+</polymer-element>

@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href='splash.html'>
 <link rel="import" href='toolbar.html'>
 <link rel="import" href='button.html'>
 <link rel="import" href='roster.html'>
@@ -10,31 +11,45 @@
   <template>
     <style>
       :host {
-        position: relative;
+        position: fixed;
         width: 371px; height: 600px;
-        display: inline-block;
-        border: 1px solid #888;
-        margin: auto;
+        left: 0;
+        top: 0;
+        display: block;
+        border: none; margin: auto;
         text-align: left;
         overflow: hidden;
-        background: url('../icons/internet.png') center top no-repeat;
+        background: url('../icons/internet.png') center top no-repeat #fff;
+      }
+      #btnSettings {
+        position: absolute; right: 0; top: 0;
       }
     </style>
 
-    <uproxy-toolbar>
+    <uproxy-toolbar hidden?='{{SPLASH==view || !loggedIn}}'>
       <uproxy-button id='btnGive'
-          hidden?='{{GIVING == gestalt}}'
+          on-tap='{{ giveMode }}'
+          hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'
           img='../icons/share_white.svg'>
       </uproxy-button>
       <uproxy-button id='btnGet'
-          hidden?='{{GETTING == gestalt}}'
+          on-tap='{{ getMode }}'
+          hidden?='{{ UI.Gestalt.GETTING == ui.gestalt }}'
           img='../icons/receive_white.svg'>
       </uproxy-button>
-      <uproxy-button id='btnNetworks' img='../icons/networks.png'>
+      <uproxy-button id='btnNetworks'
+          on-tap='{{ networksView }}'
+          img='../icons/networks.png'>
       </uproxy-button>
-      <uproxy-button id='btnSettings' img='../icons/more_vert_white.svg'>
+      <uproxy-button id='btnSettings'
+          on-tap='{{ settingsView }}'
+          img='../icons/more_vert_white.svg'>
       </uproxy-button>
     </uproxy-toolbar>
+
+    <uproxy-splash id='splash'
+      class='{{ {active:(SPLASH==view)} | tokenList }}'>
+    </uproxy-splash>
 
     <uproxy-networks id='networks'
       class='{{ {active:(NETWORKS==view)} | tokenList }}'>
@@ -45,7 +60,7 @@
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      class='{{ {active:(ROSTER==view)} | tokenList }}'>
+      class='{{ { active: (ROSTER==view), hidden: (SPLASH==view || !loggedIn) } | tokenList }}'>
     </uproxy-roster>
 
   </template>
