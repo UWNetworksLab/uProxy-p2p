@@ -36,7 +36,7 @@
     "minimatch": "~0.2.12",
     "rimraf": "^2.2.6",
     "socks-rtc": "~0.1.14",
-    "typescript": "~0.9.7",
+    "typescript": "^1.0.1",
     "uproxy-build-tools": "~0.0.5"
   },
   "private": true,

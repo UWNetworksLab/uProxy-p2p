@@ -109,9 +109,12 @@ class MockCore implements uProxy.CoreAPI {
       ui.syncUser(userUpdate);
       console.log('Modified consent: ', command,
                   'new state: ', instance.consent);
-      // Randomly generate a positive response from alice.
-      // TODO: Make two UIs side-by-side for an actual 'peer-to-peer' mock.
-      if (Math.random() > 0.5) {
+      // Make a choice that depends on the time the call was made; a 1 second
+      // gap is easy for user to interactively to hit to toggle state. CONSIDER:
+      // base it on a hash of the user id? Better to have deterministic
+      // behaviour. TODO: Make two UIs side-by-side for an actual 'peer-to-peer'
+      // mock.
+      if ((new Date()).getSeconds() > 0.5) {
         console.log('Alice will respond...');
         setTimeout(() => {
           userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
