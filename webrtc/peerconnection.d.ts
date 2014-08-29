@@ -106,6 +106,5 @@ declare module WebRtc {
   }
 
   // Generic helper functions useful for debugging.
-  var randomUint32 :() => number;
   var stringHash :(s: string, bytes: number) => string;
 }
