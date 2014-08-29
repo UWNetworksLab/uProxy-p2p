@@ -16,9 +16,6 @@
   },
   "permissions": [
     "storage",
-    "webview",
-    "videoCapture",
-    "audioCapture",
     "https://graph.facebook.com/oauth/access_token",
     "https://accounts.google.com/o/oauth2/token"
   ],
