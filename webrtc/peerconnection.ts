@@ -1,10 +1,11 @@
 /// <reference path='RTCPeerConnection.d.ts' />
+/// <reference path="../crypto/random.d.ts"/>
 /// <reference path='../handler/queue.d.ts' />
-/// <reference path='../random/random.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
 /// <reference path='../logging/logging.d.ts' />
-/// <reference path='../crypto/random.d.ts' />
+
+/// <reference path='datachannel.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -167,7 +168,7 @@ module WebRtc {
       }
 
       this.peerName = this.config_.peerName ||
-          'unnamed-pc-' + randomUint32();
+          'unnamed-pc-' + Crypto.randomUint32();
 
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;
