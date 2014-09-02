@@ -64,11 +64,16 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 1. Clone uProxy and its submodules (and its submodules' submodules...):
 `git clone https://github.com/uProxy/uProxy.git`
+or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github setup (useful if you use 2-step auth for github, which you should do).
 
-2. Run `./setup.sh`. This will install all local dependencies,
+2. Run `sudo gem install sass` to install sass.
+
+2. Run `bower install` to install any bower dependencies.
+
+3. Run `npm install`. This will install all local dependencies,
 as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
-Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `./setup.sh` again to update these dependencies.
+Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update the dependencies.
 
 
 ### Building and installing and running for Chrome
@@ -95,7 +100,6 @@ In each instance of Chrome, load the uProxy app and extension.  Then in each ins
 uProxy uses the Grunt build system for its build tasks. Here is a list
 of uProxy's Grunt commands:
 
- *  `setup` - Installs local dependencies and sets up environment
  *  `build` - Builds everything, making stuff in the `build` directory (and runs tests).
    *  `build_chrome` - Build Chrome app and extension
    *  `build_chrome_app` - Build just Chrome app
@@ -107,7 +111,7 @@ of uProxy's Grunt commands:
  *  `test` - Run unit tests
  *  `xpi` - Generates an .xpi for installation to Firefox.
  *  `run_uistatic` - Run the standalone UI on a local webserver.
- *  `everything` - 'setup', 'test', then 'build'
+ *  `everything` - 'test', then 'build'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
 your distribution, then run `grunt watch`, which will rebuild as you make changes. (TODO: grunt watch is broken; fix it!)
@@ -133,7 +137,6 @@ The following hints may help you if it goes wrong and you need to debug and fix 
 ## Layout of files
 
 Configuration and setup files
- * `setup.sh` a shell script, assumes you have `npm` installed, to setup uproxy (install and setup dependent libraries).
  * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uproxy.
  * `bower.json` specified dependent libraries from Bower.
  * `package.json` specified dependent libraries from NPM.
