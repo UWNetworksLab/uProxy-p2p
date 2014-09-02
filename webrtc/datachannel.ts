@@ -138,13 +138,23 @@ module WebRtc {
     //
     // CONSIDER: We could support blob data by streaming into array-buffers.
     public send = (data:Data) : Promise<void> => {
-      if (!(data.str || data.buffer)) {
+      // Note: you cannot just write |if(data.str) ...| because str may be empty
+      // which is treated as false. You have to do something more verbose, like
+      // |if (typeof data.str === 'string') ...|.
+      if (!(typeof data.str === 'string' ||
+           (typeof data.buffer === 'object') &&
+             (data.buffer instanceof ArrayBuffer)) ) {
         return Promise.reject(
-            new Error('data must have at least string or buffer set'));
+            new Error('data to send must have at least `str:string` or ' +
+                '`buffer:ArrayBuffer` defined (typeof data.str === ' +
+                typeof data.str + '; typeof data.buffer === ' +
+                typeof data.buffer +
+                '; data.buffer instanceof ArrayBuffer === ' +
+                (data.buffer instanceof ArrayBuffer) + ')'));
       }
 
       var byteLength :number;
-      if (data.str) {
+      if (typeof data.str === 'string') {
         // JS strings are utf-16.
         byteLength = data.str.length * 2;
       } else if (data.buffer) {
@@ -157,7 +167,7 @@ module WebRtc {
             'Need to wait for real Blob support.'));
       }
 
-      if(data.str) {
+      if(typeof data.str === 'string') {
         return this.chunkStringOntoQueue_({str:data.str});
       } else if(data.buffer) {
         return this.chunkBufferOntoQueue_({buffer:data.buffer});
@@ -184,7 +194,7 @@ module WebRtc {
     // Assumes data is chunked.
     private handleSendDataToPeer_ = (data:Data) : Promise<void> => {
       try {
-        if(data.str) {
+        if(typeof data.str === 'string') {
           this.rtcDataChannel_.send(data.str);
         } else if(data.buffer) {
           this.rtcDataChannel_.send(data.buffer);

@@ -9,6 +9,7 @@ interface Channel {
   label :string;
   state :string; // 'open', 'connecting', 'closed'
   messages :string[];
+  messageToSend :string
 }
 
 interface WebrtcPcControllerScope extends ng.IScope {
@@ -22,7 +23,6 @@ interface WebrtcPcControllerScope extends ng.IScope {
   newChannelLabel :string;
 
   channels : {[channelLabel:string] : Channel};
-  messages : string[];
 
   // User actions
   initiateConnection :() => void;
@@ -34,7 +34,7 @@ interface WebrtcPcControllerScope extends ng.IScope {
   closeDataChannel :(channelLabel:string) => void;
 
   addDataChannel :(d:WebRtc.DataChannel) => void;
-  addMessage :(d:WebRtc.Data, who:string) => void;
+  addMessage :(channelLabel:string, d:WebRtc.Data, who:string) => void;
 
   // Callback from pc
   onLocalSignallingMessage :(signal:WebRtc.SignallingMessage) => void;
@@ -65,7 +65,6 @@ webrtcPcApp.controller('webrtcPcController',
   $scope.errors = [];
   $scope.connectInfo = '';
   $scope.channels = {};
-  $scope.messages = [];
 
   $scope.localInfo = '';
   $scope.remoteInfo = '';
@@ -77,25 +76,29 @@ webrtcPcApp.controller('webrtcPcController',
   //---------------------------------------------------------------------------
   // Promise completion callbacks
   pc.onceConnecting.then(() => {
-      $scope.$apply(() => { $scope.state = 'CONNECTING...'; });
-    });
+    $scope.$apply(() => { $scope.state = 'CONNECTING...'; });
+  });
   pc.onceConnected.then((addresses) => {
-      $scope.$apply(() => {
-        $scope.state = 'CONNECTED!';
-        $scope.localInfo = '';
-        $scope.remoteInfo = '';
-        $scope.connectInfo = JSON.stringify(addresses);
-      });
-    }).catch((e) => {
-      $scope.$apply(() => { $scope.errors.push(e.toString()); });
+    $scope.$apply(() => {
+      $scope.state = 'CONNECTED!';
+      $scope.localInfo = '';
+      $scope.remoteInfo = '';
+      $scope.connectInfo = JSON.stringify(addresses);
     });
+  }).catch((e) => {
+    $scope.$apply(() => { $scope.errors.push(e.toString()); });
+  });
   pc.onceDisconnected.then(() => {
-      $scope.$apply(() => { $scope.state = 'DISCONNECTED.'; });
-    });
+    $scope.$apply(() => { $scope.state = 'DISCONNECTED.'; });
+  });
 
   pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
+    if(d.getLabel() !== '') {
       $scope.$apply(() => { $scope.addDataChannel(d); });
-    });
+    } else {
+      console.log('ignoring dummy channel.');
+    }
+  });
 
   // called when the start button is clicked. Only called on the initiating
   // side.
@@ -121,9 +124,9 @@ webrtcPcApp.controller('webrtcPcController',
     var signal:WebRtc.SignallingMessage;
     var s:string
     var i:number;
-    var messages = $scope.remoteInfo.split('\n');
-    for (var i = 0; i < messages.length; i++) {
-      s = messages[i].trim();
+    var signals = $scope.remoteInfo.split('\n');
+    for (var i = 0; i < signals.length; i++) {
+      s = signals[i].trim();
       if(s.length > 0) {
         try {
           signal = JSON.parse(s);
@@ -147,46 +150,48 @@ webrtcPcApp.controller('webrtcPcController',
     pc.dataChannels[channelLabel].close();
   }
 
-  $scope.addMessage = (d:WebRtc.Data, who:string) : void => {
+  $scope.addMessage = (channelLabel:string, d:WebRtc.Data, who:string)
+      : void => {
     if (d.str) {
-      $scope.messages.push(who + ':' + d.str);
+      $scope.channels[channelLabel].messages.push(who + ':' + d.str);
     } else if (d.buffer) {
-      $scope.messages.push(
+      $scope.channels[channelLabel].messages.push(
           who + ':' + ArrayBuffers.arrayBufferToHexString(d.buffer));
     }
   }
 
   $scope.addDataChannel = (dataChannel:WebRtc.DataChannel) :void => {
     var channelLabel = dataChannel.getLabel();
+
     $scope.channels[channelLabel] = {
       label: channelLabel,
       state: dataChannel.getState(),
-      messages: []
+      messages: [],
+      messageToSend: ''
     };
 
     dataChannel.dataFromPeerQueue.setSyncHandler((d:WebRtc.Data) => {
-        $scope.$apply(() => { $scope.addMessage(d, 'other'); });
-      });
-
+      $scope.$apply(() => { $scope.addMessage(channelLabel, d, 'other'); });
+    });
     dataChannel.onceOpened.then(() => {
-        $scope.$apply(() => {
-            $scope.channels[channelLabel].state = dataChannel.getState();
-          });
+      $scope.$apply(() => {
+        $scope.channels[channelLabel].state = dataChannel.getState();
       });
+    });
     dataChannel.onceClosed.then(() => {
-        $scope.$apply(() => {
-            $scope.channels[channelLabel].state = dataChannel.getState();
-          });
+      $scope.$apply(() => {
+        $scope.channels[channelLabel].state = dataChannel.getState();
       });
+    });
   }
 
   $scope.send = (channelLabel:string, channelMessage:string) => {
-    console.log('send: ' + channelLabel + ' : ' + channelMessage);
+    console.log('send: ' + channelLabel + ' : ' + JSON.stringify(channelMessage));
     pc.dataChannels[channelLabel].send({str: channelMessage})
       .catch((e) => {
         console.error('error in sending:'  + e);
       });
-    $scope.addMessage({str: channelMessage}, 'self');
+    $scope.addMessage(channelLabel, {str: channelMessage}, 'self');
   }
 });
 

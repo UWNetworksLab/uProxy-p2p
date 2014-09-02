@@ -122,11 +122,13 @@
         <button class='close-btn' ng-show='channel.state === "open"' ng-click='closeDataChannel(channelLabel)'>close</button>
       </div>
       <div class='messages'>
-        <div ng-repeat='message in messages track by $index'>{{message}}</div>
+        <div ng-repeat='message in channel.messages track by $index'>
+          {{message}}
+        </div>
       </div>
       <div class='send'>
-        <input type='text' id='message' size='60' ng-model='chatMessage'></input>
-        <button class='send-message-btn' ng-click='send(channel.label, chatMessage)'>Send</button>
+        <input type='text' id='message' size='60' ng-model='channel.messageToSend'></input>
+        <button class='send-message-btn' ng-click='send(channelLabel, channel.messageToSend)'>Send</button>
       </div>
     </div>
   </div>
