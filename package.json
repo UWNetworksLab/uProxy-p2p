@@ -1,21 +1,22 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uProxy/uProxy"
+    "url": "https://github.com/uproxy/uproxy"
   },
   "bugs": {
     "url": "http://github.com/uproxy/uproxy/issues",
     "email": "info@uproxy.org"
   },
+  "licenses": [ {
+    "type": "Apache-2.0",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+  } ],
   "devDependencies": {
     "es6-promise": "~0.1.1",
-    "freedom-for-chrome": "~0.2.2",
-    "freedom-for-firefox": "~0.4.1",
-    "freedom-social-xmpp": "~0.1.0",
-    "freedom-typescript-api": "~0.1.9",
+    "freedom-social-xmpp": "~1.0.1",
     "glob": "^3.2.6",
     "globule": "~0.2.0",
     "grunt": "~0.4.2",
@@ -35,12 +36,12 @@
     "grunt-typescript": "~0.3.6",
     "minimatch": "~0.2.12",
     "rimraf": "^2.2.6",
-    "socks-rtc": "~0.1.14",
     "typescript": "^1.0.1",
-    "uproxy-build-tools": "~0.0.5"
+    "uproxy-networking": "^1.0.1"
   },
   "private": true,
   "scripts": {
-    "test": "grunt test --verbose"
+    "test": "grunt test --verbose",
+    "prepublish": "grunt test"
   }
 }

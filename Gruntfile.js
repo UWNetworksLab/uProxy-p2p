@@ -3,7 +3,6 @@
  * Support commands:
  * grunt
  *  build - Builds Chrome and Firefox extensions
- *  setup - Installs local dependencies and sets up environment
  *  xpi - Generates an .xpi for installation to Firefox.
  *  test - Run unit tests
  *  watch - Watch for changes in 'common' and copy as necessary
@@ -12,7 +11,7 @@
  *  build_chrome_extension - build Chrome extension files
  *  build_chrome_app - build Chrome app files
  *  build_firefox - build Firefox
- *  everything - 'setup', 'test', then 'build'
+ *  everything - 'test', then 'build'
  **/
 
 var TaskManager = require('./node_modules/uproxy-build-tools/build/taskmanager/taskmanager');
@@ -44,10 +43,6 @@ module.exports = function(grunt) {
 
     //-------------------------------------------------------------------------
     'shell': {
-      bower_install: {
-        command: 'bower install',
-        options: {stdout: true, stderr: true, failOnError: true}
-      },
       // TODO: Get rid of this step once socks-rtc has this automatically done.
       socks_rtc_setup: {
         command: 'npm install;grunt',
@@ -526,10 +521,6 @@ module.exports = function(grunt) {
   // things that have not been modified between compilations.
   var taskManager = new TaskManager.Manager();
 
-  taskManager.add('setup', [
-    'shell:bower_install',
-  ]);
-
   taskManager.add('build_generic_core', [
     'typescript:generic_core',
     'copy:generic_core'
@@ -612,7 +603,7 @@ module.exports = function(grunt) {
     'connect:uistatic'
   ]);
 
-  taskManager.add('everything', ['setup', 'tsd:refresh', 'build', 'test']);
+  taskManager.add('everything', ['tsd:refresh', 'build', 'test']);
 
   // Default task(s).
   taskManager.add('default', ['build']);
@@ -623,7 +614,7 @@ module.exports = function(grunt) {
   });
 
   //-------------------------------------------------------------------------
-  //Setup tasks
+  // Setup tasks
   taskManager.list().forEach(function(taskName) {
     grunt.registerTask(taskName, taskManager.get(taskName));
   });

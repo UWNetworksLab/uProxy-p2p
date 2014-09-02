@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
-  "minimum_chrome_version": "34",
+  "minimum_chrome_version": "38",
   "icons": {
     "16": "icons/uproxy-16.png",
     "19": "icons/uproxy-19.png",
@@ -34,22 +34,10 @@
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
-    "storage",
     "tabs",
-    "identity",
     "proxy",
-    "notifications",
-    "https://apis.google.com/",
-    "https://accounts.google.com/o/oauth2/token"
+    "notifications"
   ],
   "options_page": "options.html",
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOOsgNK52HYy9483rhgsofyHTp/NbmXkpHNLoarN027kqKVPS3U36/L2XyPJOAtvy+DDR+kCro1JmdFWBwPAk5AqvSKvfLzuXkO+98T/3ZhqfAl4KIqc0C+PsWIYsANTAbKkXlP4bATEK6O5Mq0aItAHGLSmKoNrAAVrtxmETXaumcrq78amOpAZz7XrPdJVhrHd6uQbR90WeFEe8LBOqdnA4iKeuMI9IQdDLKGSizhYFZP78HKSk0ZY2uYeJFpya0iXAvbcuHRGY9/c7pP5UDo+FExdyrgJnIt7H1W5LWfy/mAMnR77dvCSfGX1vCD7faWntYvzZO4FlISh+h21+QIDAQAB",
-  "oauth2": {
-    "client_id": "746567772449-r5jou7779ca0hlm9di7t2pu36kf4nqn0.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/plus.login",
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/googletalk"
-    ]
-  }
 }
