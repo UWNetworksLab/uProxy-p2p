@@ -8,11 +8,17 @@
 
 // Common on/emit for message passing interfaces.
 interface EventDispatchFn<T> { (eventType:string, value?:T) : void; }
-interface EventHandlerFn<T> { (eventType:string, handler:(eventData:T) => void) : void; }
+interface EventHandlerFn<T> {
+  (eventType:string, handler:(eventData:T) => void) : void;
+}
 
 interface OnAndEmit<T,T2> {
   on   :EventHandlerFn<T>;
   emit :EventDispatchFn<T2>;
+}
+
+interface CoreProviderCallback<T> {
+  (fulfill?:T, reject?:{errcode:string; message:string;}) : void;
 }
 
 declare module freedom {

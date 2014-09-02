@@ -47,8 +47,9 @@ module freedom_UproxyPeerConnection {
       });
     }
 
-    public handleSignalMessage =
-        (signal:WebRtc.SignallingMessage, continuation:() => void) : void => {
+    public handleSignalMessage = (
+        signal:WebRtc.SignallingMessage,
+        continuation:CoreProviderCallback<void>) : void => {
       // TODO: make continuation only get called after signal message has been
       // handled.
       this.pc_.handleSignalMessage(signal);
@@ -56,66 +57,97 @@ module freedom_UproxyPeerConnection {
     }
 
     public negotiateConnection =
-        (continuation:(endpoints:WebRtc.ConnectionAddresses) => void)
+        (continuation:CoreProviderCallback<WebRtc.ConnectionAddresses>)
         : void => {
       this.pc_.negotiateConnection()
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName +
+              ': negotiateConnection: error: ' + e.toString()
+          });
         });
     }
 
-    public close = (continuation:() => void) : void => {
+    public close = (continuation:CoreProviderCallback<void>) : void => {
       this.pc_.close();
       this.pc_.onceDisconnected
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName +
+              ': close: error: ' + e.toString()
+          });
         });
     }
 
     public onceConnected =
-        (continuation:(endpoints:WebRtc.ConnectionAddresses) => void)
+        (continuation:CoreProviderCallback<WebRtc.ConnectionAddresses>)
         : void => {
       this.pc_.onceConnected
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName +
+              ': onceConnected: error: ' + e.toString()
+          });
         });
     }
 
-    public onceConnecting = (continuation:() => void) : void => {
+    public onceConnecting = (continuation:CoreProviderCallback<void>)
+        : void => {
       this.pc_.onceConnecting
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName +
+              ': onceConnecting: error: ' + e.toString()
+          });
         });
     }
 
-    public onceDisconnected = (continuation:() => void) : void => {
+    public onceDisconnected =
+        (continuation:CoreProviderCallback<void>) : void => {
       this.pc_.onceDisconnected
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName +
+              ': onceDisconnected: error: ' + e.toString()
+          });
         });
     }
 
     //---------------------------------------------------------------------------
     // Data channels.
 
-    public onceDataChannelClosed =
-        (channelLabel:string, continuation:() => void) : void => {
-      this.pc_.dataChannels[channelLabel].onceClosed.then(continuation);
+    public onceDataChannelClosed = (channelLabel:string,
+        continuation:CoreProviderCallback<void>) : void => {
+      if (channelLabel in this.pc_.dataChannels) {
+        this.pc_.dataChannels[channelLabel].onceClosed.then(continuation);
+      } else {
+        // If channelLabel is not in pc_ list of data channels, pc_ must have
+        // already closed it. So call continuation directly.
+        continuation();
+      }
     }
 
-    public onceDataChannelOpened =
-        (channelLabel:string, continuation:() => void) : void => {
-      this.pc_.dataChannels[channelLabel].onceOpened.then(continuation);
+    public onceDataChannelOpened = (channelLabel:string,
+        continuation:CoreProviderCallback<void>) : void => {
+      if (channelLabel in this.pc_.dataChannels) {
+        this.pc_.dataChannels[channelLabel].onceOpened.then(continuation);
+      } else {
+        continuation(null, {
+          'errcode': 'NO_SUCH_DATA_CHANNEL',
+          'message': this.pc_.peerName +
+            ': onceDataChannelOpened: non-existant label: ' + channelLabel
+        });
+      }
     }
 
     // Re-dispatches data channel events, such as receiving data, as
@@ -129,7 +161,7 @@ module freedom_UproxyPeerConnection {
     }
 
     public openDataChannel = (channelLabel :string,
-                              continuation :() => void) : void => {
+        continuation:CoreProviderCallback<void>) : void => {
       var dataChannel = this.pc_.openDataChannel(channelLabel);
       dataChannel.onceOpened
         .then(() => {
@@ -137,33 +169,43 @@ module freedom_UproxyPeerConnection {
           continuation();
         })
         .catch((e:Error) => {
-          this.log_.error(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName + ': openDataChannel: ' + e.toString()
+          });
         });
     }
 
-    public closeDataChannel =
-        (channelLabel :string, continuation :() => void) : void => {
-      var dataChannel = this.pc_.dataChannels[channelLabel];
-      dataChannel.close();
+    public closeDataChannel = (channelLabel :string,
+        continuation:CoreProviderCallback<void>) : void => {
+      // When a data channel is closed by the remote peer the underlying
+      // peerconnection will have removed it, so we need to check it exists
+      // first.
+      if (channelLabel in this.pc_.dataChannels) {
+        this.pc_.dataChannels[channelLabel].close();
+      }
       continuation();
     }
 
     public send = (channelLabel :string,
                    data :WebRtc.Data,
-                   continuation :() => void) : void => {
+                   continuation:CoreProviderCallback<void>) : void => {
       if(!(channelLabel in this.pc_.dataChannels)) {
-        this.log_.warn('No such channel label (maybe internal error?): ' + channelLabel);
-        // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
-        continuation();
+        continuation(null, {
+            'errcode': 'NO_SUCH_DATA_CHANNEL',
+            'message': this.pc_.peerName +
+                ': send: non-existant label: ' + channelLabel
+          });
         return
       }
 
       this.pc_.dataChannels[channelLabel].send(data)
         .then(continuation)
         .catch((e:Error) => {
-          this.log_.warn(e.toString());
-          // TODO: propagate error. https://github.com/uProxy/uproxy/issues/354
+          continuation(null, {
+            'errcode': 'ERROR',
+            'message': this.pc_.peerName + ': send: ' + e.toString()
+          });
         });
     }
   }  // class FreedomImpl
