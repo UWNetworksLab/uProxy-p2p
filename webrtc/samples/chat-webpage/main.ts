@@ -83,9 +83,9 @@ b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
 // Send messages over the datachannel, in response to events
 // arriving from the UI.
 function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
-  log.info('sending: ' + textArea.value);
+  log.info('sending: ' + JSON.stringify(textArea.value));
   pc.dataChannels['text'].send({
-    str: textArea.value || '(empty message)'
+    str: textArea.value
   }).catch((e) => {
     log.error('could not send: ' + e.message); }
   );
