@@ -17,8 +17,11 @@ interface OnAndEmit<T,T2> {
   emit :EventDispatchFn<T2>;
 }
 
+// The type for a core provider's 'continuation' function argument. It's
+// basically a promise-like thing.
+// CONSIDER: generalise the error value to a type-parameter.
 interface CoreProviderCallback<T> {
-  (fulfill?:T, reject?:{errcode:string; message:string;}) : void;
+  (fulfill?:T, reject?:{message: string}) : void;
 }
 
 declare module freedom {

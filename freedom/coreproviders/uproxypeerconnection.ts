@@ -63,7 +63,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName +
               ': negotiateConnection: error: ' + e.toString()
           });
@@ -76,7 +75,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName +
               ': close: error: ' + e.toString()
           });
@@ -90,7 +88,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName +
               ': onceConnected: error: ' + e.toString()
           });
@@ -103,7 +100,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName +
               ': onceConnecting: error: ' + e.toString()
           });
@@ -116,7 +112,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName +
               ': onceDisconnected: error: ' + e.toString()
           });
@@ -143,7 +138,6 @@ module freedom_UproxyPeerConnection {
         this.pc_.dataChannels[channelLabel].onceOpened.then(continuation);
       } else {
         continuation(null, {
-          'errcode': 'NO_SUCH_DATA_CHANNEL',
           'message': this.pc_.peerName +
             ': onceDataChannelOpened: non-existant label: ' + channelLabel
         });
@@ -170,7 +164,6 @@ module freedom_UproxyPeerConnection {
         })
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName + ': openDataChannel: ' + e.toString()
           });
         });
@@ -192,7 +185,6 @@ module freedom_UproxyPeerConnection {
                    continuation:CoreProviderCallback<void>) : void => {
       if(!(channelLabel in this.pc_.dataChannels)) {
         continuation(null, {
-            'errcode': 'NO_SUCH_DATA_CHANNEL',
             'message': this.pc_.peerName +
                 ': send: non-existant label: ' + channelLabel
           });
@@ -203,7 +195,6 @@ module freedom_UproxyPeerConnection {
         .then(continuation)
         .catch((e:Error) => {
           continuation(null, {
-            'errcode': 'ERROR',
             'message': this.pc_.peerName + ': send: ' + e.toString()
           });
         });

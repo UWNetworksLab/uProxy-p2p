@@ -21,12 +21,14 @@ fdom.apis.set('core.uproxypeerconnection', {
   'negotiateConnection': {
     type: 'method',
     value: [],
-    ret: 'object'
+    ret: 'object',
+    err: { 'message': 'string' }
   },
 
   'close': {
     type: 'method',
-    value: []
+    value: [],
+    err: { 'message': 'string' }
   },
 
   'handleSignalMessage': {
@@ -42,17 +44,20 @@ fdom.apis.set('core.uproxypeerconnection', {
   'onceConnected': {
     type: 'method',
     value: [],
-    ret: 'object'
+    ret: 'object',
+    err: { 'message': 'string' }
   },
 
   'onceConnecting': {
     type: 'method',
-    value: []
+    value: [],
+    err: { 'message': 'string' }
   },
 
   'onceDisconnected': {
     type: 'method',
-    value: []
+    value: [],
+    err: { 'message': 'string' }
   },
 
   ////////
@@ -61,7 +66,8 @@ fdom.apis.set('core.uproxypeerconnection', {
 
   'openDataChannel': {
     type: 'method',
-    value: ['string']
+    value: ['string'],
+    err: { 'message': 'string' }
   },
 
   'closeDataChannel': {
@@ -71,7 +77,8 @@ fdom.apis.set('core.uproxypeerconnection', {
 
   'onceDataChannelOpened': {
     type: 'method',
-    value: ['string']
+    value: ['string'],
+    err: { 'message': 'string' }
   },
 
   'onceDataChannelClosed': {
@@ -99,11 +106,10 @@ fdom.apis.set('core.uproxypeerconnection', {
     type: 'method',
     value: [
       'string',
-      {
-        'str': 'string',
-        'buffer': 'buffer'
-      }
-    ]
+      { 'str': 'string',
+        'buffer': 'buffer' }
+    ],
+    err: { 'message': 'string' }
   }
 });
 
