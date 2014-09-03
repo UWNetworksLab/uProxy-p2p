@@ -152,11 +152,14 @@ webrtcPcApp.controller('webrtcPcController',
 
   $scope.addMessage = (channelLabel:string, d:WebRtc.Data, who:string)
       : void => {
-    if (d.str) {
+    if (typeof d.str === 'string') {
       $scope.channels[channelLabel].messages.push(who + ':' + d.str);
-    } else if (d.buffer) {
+    } else if (typeof d.buffer === 'object' && d.buffer instanceof ArrayBuffer) {
       $scope.channels[channelLabel].messages.push(
           who + ':' + ArrayBuffers.arrayBufferToHexString(d.buffer));
+    } else {
+      console.error('addMessage: only supports str and buffer, got: ' +
+          JSON.stringify(d));
     }
   }
 
