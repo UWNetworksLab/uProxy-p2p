@@ -159,17 +159,8 @@ module WebRtc {
     public signalForPeerQueue :Handler.Queue<SignallingMessage,void>;
     public fromPeerCandidateQueue :Handler.Queue<RTCIceCandidate,void>;
 
-    // The next two variables help work around this issue:
-    //   https://code.google.com/p/webrtc/issues/detail?id=3778
-    // For a full description of our workaround for this issue,
-    // see #openDataChannel.
-
-    // True iff this.pc_.createDataChannel has been called at least once.
-    private haveOpenedChannel_ = false;
-
-    // True iff a data channel has been closed by either peer since the
-    // last call to this.pc_.createDataChannel.
-    private channelClosedSinceLastOpen_ = false;
+    // https://code.google.com/p/webrtc/issues/detail?id=3778
+    private closeWorkaroundIndex_ = 0;
 
     // if |createOffer| is true, the consturctor will immidiately initiate
     // negotiation.
@@ -577,25 +568,15 @@ module WebRtc {
       log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
           '; options=' + JSON.stringify(options));
 
-      // If a RTCPeerConnection has ever opened a data channel and a data
-      // channel has been closed by either peer then the *next* call to
-      // createDataChannel will silently fail. Our workaround is to make
-      // an additional call to createDataChannel.
-      //
-      // Tracking here:
       // https://code.google.com/p/webrtc/issues/detail?id=3778
-      if (typeof webkitRTCPeerConnection !== 'undefined' &&
-          this.haveOpenedChannel_ &&
-          this.channelClosedSinceLastOpen_) {
-        log.info('working around data channel closure issue...');
-        // From testing with the SOCKS server, it seems that attempting to
-        // close this "phantom" channel causes issues.
-        this.pc_.createDataChannel('3378-workaround');
-        this.channelClosedSinceLastOpen_ = false;
+      if (options !== undefined) {
+        if (!('id' in options)) {
+          options.id = this.closeWorkaroundIndex_++;
+        }
+      } else {
+        options = { id: this.closeWorkaroundIndex_++ };
       }
-
       var rtcDataChannel = this.pc_.createDataChannel(channelLabel, options);
-      this.haveOpenedChannel_ = true;
 
       // Firefox does not fire the |'negotiationneeded'| event, so we need to
       // negotate here if we are not connected. See
@@ -628,10 +609,8 @@ module WebRtc {
       var dataChannel :DataChannel = new DataChannel(rtcDataChannel);
       this.dataChannels[dataChannel.getLabel()] = dataChannel;
       dataChannel.onceClosed.then(() => {
-        delete this.dataChannels[dataChannel.getLabel()];
-        // See #openDataChannel
-        this.channelClosedSinceLastOpen_ = true;
-      });
+          delete this.dataChannels[dataChannel.getLabel()];
+        });
       return dataChannel;
     }
 
