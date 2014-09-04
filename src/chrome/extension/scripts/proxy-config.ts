@@ -19,11 +19,7 @@ class BrowserProxyConfig {
           scheme: "socks5",
           host: "127.0.0.1",
           port: 9999
-        },
-        // List of domains to bypass the proxy
-        // Bypass Google/Facebook RESTful API endpoint (used by XMPP for auth)
-        bypassList: ["<local>", "www.googleapis.com", "graph.facebook.com",
-                     "computeengineondemand.appspot.com"]
+        }
       }
     };
 
