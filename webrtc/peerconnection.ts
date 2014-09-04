@@ -579,11 +579,8 @@ module WebRtc {
 
       // If a RTCPeerConnection has ever opened a data channel and a data
       // channel has been closed by either peer then the *next* call to
-      // createDataChannel will silently fail. Our workaround is to make an
-      // additional call to createDataChannel, the result of which we will
-      // essentially ignore (from testing with the SOCKS server, it seems
-      // that attempting to close that channel causes issues, so we don't
-      // even bother closing it on subsequent calls).
+      // createDataChannel will silently fail. Our workaround is to make
+      // an additional call to createDataChannel.
       //
       // Tracking here:
       // https://code.google.com/p/webrtc/issues/detail?id=3778
@@ -591,6 +588,8 @@ module WebRtc {
           this.haveOpenedChannel_ &&
           this.channelClosedSinceLastOpen_) {
         log.info('working around data channel closure issue...');
+        // From testing with the SOCKS server, it seems that attempting to
+        // close this "phantom" channel causes issues.
         this.pc_.createDataChannel('3378-workaround');
         this.channelClosedSinceLastOpen_ = false;
       }
