@@ -29,7 +29,7 @@ var repositories = [
   {repo: 'git@github.com:freedomjs/freedom.git', dir: 'freedom' },
   {repo: 'git@github.com:freedomjs/freedom-typescript-api.git', dir: 'freedom-typescript-api' },
   {repo: 'git@github.com:freedomjs/freedom-for-chrome.git', dir: 'freedom-for-chrome' },
-  {repo: 'git@github.com:freedomjs/freedom-for-firefox.git', dir: 'fredom-for-firefox' },
+  {repo: 'git@github.com:freedomjs/freedom-for-firefox.git', dir: 'freedom-for-firefox' },
   {repo: 'git@github.com:freedomjs/freedom-for-node.git', dir: 'freedom-for-node' },
   {repo: 'git@github.com:freedomjs/freedom-social-xmpp.git', dir: 'freedom-social-xmpp' },
 ];

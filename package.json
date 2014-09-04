@@ -37,7 +37,7 @@
     "minimatch": "~0.2.12",
     "rimraf": "^2.2.6",
     "typescript": "^1.0.1",
-    "uproxy-networking": "^1.0.1"
+    "uproxy-networking": "git://github.com/uproxy/uproxy-networking.git#dev"
   },
   "private": true,
   "scripts": {
