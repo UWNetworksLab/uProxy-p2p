@@ -14,7 +14,7 @@
  *  everything - 'test', then 'build'
  **/
 
-var TaskManager = require('./node_modules/uproxy-build-tools/build/taskmanager/taskmanager');
+var TaskManager = require('uproxy-lib/tools/taskmanager');
 
 // TODO: Move more file lists here.
 var FILES = {
