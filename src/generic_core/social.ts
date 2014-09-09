@@ -23,9 +23,9 @@
 /// <reference path='../interfaces/network.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/promise.d.ts' />
+/// <reference path='../freedom/typings/social.d.ts' />
 
 
 module Social {

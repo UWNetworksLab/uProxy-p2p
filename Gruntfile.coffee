@@ -5,7 +5,19 @@ Path = require 'path'
 fs = require 'fs'
 path = require 'path'
 
+uproxyLibPath = Path.dirname(require.resolve('uproxy-lib/package.json'))
 uproxyNetworkingPath = Path.dirname(require.resolve('uproxy-networking/package.json'))
+# freedomTypescriptApiPath = Path.dirname(require.resolve('freedom-typescript-api/package.json'))
+
+# TODO: Move this into common-grunt-rules in uproxy-lib.
+Rule.symlink = (dir) =>
+  { files: [ {
+    expand: true,
+    overwrite: true,
+    cwd: dir,
+    src: ['*'],
+    dest: 'build/typescript-src/' } ] }
+
 
 module.exports = (grunt) ->
   grunt.initConfig {
@@ -40,6 +52,19 @@ module.exports = (grunt) ->
         cwd: Path.join(uproxyNetworkingPath, 'src'),
         src: ['*'],
         dest: 'build/typescript-src/' } ] }
+      uproxyLibThirdPartyTypescriptSrc: { files: [ {
+        expand: true,
+        overwrite: true,
+        cwd: uproxyLibPath,
+        src: ['third_party'],
+        dest: 'build/typescript-src/' } ] }
+      uproxyLibTypescriptSrc: { files: [ {
+        expand: true,
+        overwrite: true,
+        cwd: Path.join(uproxyLibPath, 'src'),
+        src: ['*'],
+        dest: 'build/typescript-src/' } ] }
+      # freedomTypescriptApi: Rule.symlink(freedomTypescriptApiPath)
 
     shell: {
 
@@ -139,7 +164,6 @@ module.exports = (grunt) ->
 
       # Core uProxy without any platform dependencies
       generic_core: Rule.typescriptSrc 'generic_core'
-
         # src: ['src/generic_core/**/*.ts', 'src/interfaces/browser-proxy-config.d.ts'],
         # dest: 'build/',
         # options: { basePath: 'src/', ignoreError: false }
@@ -224,8 +248,11 @@ module.exports = (grunt) ->
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'base', [
-    'symlink:uproxyNetworkingTypescriptSrc'
+    # 'symlink:freedom-typescript-api'
     'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
+    'symlink:uproxyNetworkingTypescriptSrc'
+    'symlink:uproxyLibThirdPartyTypescriptSrc'
+    'symlink:uproxyLibTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
   ]
@@ -238,9 +265,10 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'build_generic_ui', [
+    'base'
     'typescript:generic_ui'
     # 'sass:generic_ui'
-    'copy:generic_ui'
+    # 'copy:generic_ui'
   ]
 
   taskManager.add('build_uistatic', [

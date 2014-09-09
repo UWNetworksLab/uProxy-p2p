@@ -7,9 +7,9 @@
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/storage.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/storage.d.ts' />
+/// <reference path='../freedom/typings/promise.d.ts' />
 
 
 module Core {
