@@ -27,6 +27,7 @@
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='../interfaces/user.d.ts' />
+/// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
 

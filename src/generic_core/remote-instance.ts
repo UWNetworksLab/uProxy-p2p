@@ -148,10 +148,11 @@ module Core {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
-        return Promise.reject();
+        return Promise.reject('Already proxying through ' + this.instanceId);
       } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
         console.warn('Already waiting for proxy to start ' + this.instanceId);
-        return Promise.reject();
+        return Promise.reject('Already waiting for proxy to start ' +
+            this.instanceId);
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
@@ -189,7 +190,7 @@ module Core {
         console.error('Could not start proxy through ' + this.user.userId);
         this.fulfillStartRequest_ = null;
         this.rejectStartRequest_ = null;
-        return Promise.reject();
+        return Promise.reject('Could not start proxy');
       });
     }
 

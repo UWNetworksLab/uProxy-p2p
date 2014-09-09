@@ -116,7 +116,7 @@ module.exports = (grunt) ->
     typescript: {
 
       # uProxy UI without any platform dependencies
-      generic_ui: Rule.typescriptSrc 'generic_ui'
+      generic_ui: Rule.typescriptSrcLenient 'generic_ui'
 
       # Core uProxy without any platform dependencies
       generic_core: Rule.typescriptSrcLenient 'generic_core'
