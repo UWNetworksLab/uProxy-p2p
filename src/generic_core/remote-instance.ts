@@ -11,7 +11,21 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 
-// declare var storage :Core.Storage;
+
+// TODO: These interfaces were deleted from socksRTC from its 101th pull request
+// which breaks this file. Keeping them in for now, until the next refactor
+// which changes all of networking.
+interface PeerInfo {
+  host   :string;
+  port   :number;
+  peerId :string;
+}
+
+interface PeerSignal {
+  peerId :string;
+  data   :string;
+}
+
 
 module Core {
 
@@ -129,7 +143,7 @@ module Core {
     public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
-        return Promise.reject();
+        return Promise.reject('Lacking permission to proxy!');
       } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
