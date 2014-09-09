@@ -17,9 +17,10 @@
 /// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
-/// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../networking-typings/communications.d.ts' />
+
 
 var storage = new Core.Storage();
 
