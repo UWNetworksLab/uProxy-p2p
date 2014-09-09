@@ -24,8 +24,8 @@
 /// <reference path='../interfaces/persistent.d.ts' />
 
 /// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/promise.d.ts' />
 /// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 
 module Social {

@@ -10,61 +10,31 @@ uproxyNetworkingPath = Path.dirname(require.resolve('uproxy-networking/package.j
 # freedomTypescriptApiPath = Path.dirname(require.resolve('freedom-typescript-api/package.json'))
 
 # TODO: Move this into common-grunt-rules in uproxy-lib.
-Rule.symlink = (dir) =>
+Rule.symlink = (dir, dest='') =>
   { files: [ {
     expand: true,
     overwrite: true,
     cwd: dir,
     src: ['*'],
-    dest: 'build/typescript-src/' } ] }
+    dest: 'build/typescript-src/' + dest} ] }
+Rule.symlinkSrc = (dir) => Rule.symlink Path.join(dir, 'src')
+Rule.symlinkThirdParty = (dir) =>
+  Rule.symlink(Path.join(dir, 'third_party'), 'third_party')
 
 
 module.exports = (grunt) ->
   grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
 
-    # TODO: Refactor this common symlink boilerplate for all uproxy repos.
     symlink:
-      # Symlink all module directories in `src` into typescript-src
-      typescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: 'src',
-        src: ['*'],
-        dest: 'build/typescript-src/' } ] }
-      # Symlink third_party into typescript-src
-      thirdPartyTypescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: '.',
-        src: ['third_party'],
-        dest: 'build/typescript-src/' } ] }
-      # Symlink third_party into typescript-src
-      uproxyNetworkingThirdPartyTypescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: uproxyNetworkingPath,
-        src: ['third_party'],
-        dest: 'build/typescript-src/' } ] }
-      uproxyNetworkingTypescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: Path.join(uproxyNetworkingPath, 'src'),
-        src: ['*'],
-        dest: 'build/typescript-src/' } ] }
-      uproxyLibThirdPartyTypescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: uproxyLibPath,
-        src: ['third_party'],
-        dest: 'build/typescript-src/' } ] }
-      uproxyLibTypescriptSrc: { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: Path.join(uproxyLibPath, 'src'),
-        src: ['*'],
-        dest: 'build/typescript-src/' } ] }
-      # freedomTypescriptApi: Rule.symlink(freedomTypescriptApiPath)
+      # Symlink all module directories in `src` into typescript-src, and
+      # merge `third_party` from different places as well.
+      typescriptSrc: Rule.symlinkSrc '.'
+      thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
+      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyNetworkingPath
+      uproxyNetworkingTypescriptSrc: Rule.symlinkSrc uproxyNetworkingPath
+      uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyLibPath
+      uproxyLibTypescriptSrc: Rule.symlinkSrc uproxyLibPath
 
     shell: {
 
