@@ -2,12 +2,12 @@
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
-/// <reference path='../../interfaces/lib/angular.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
-declare var angular:ng.IAngularStatic;
+// declare var angular:ng.IAngularStatic;
+declare var angular :any;
 
 var model :UI.Model = {
   networks: {},

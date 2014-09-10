@@ -67,7 +67,7 @@ FILES =
 
 
 module.exports = (grunt) ->
-  grunt.initConfig {
+  grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
     # Decrease log output for noisy things like symlink.
@@ -182,36 +182,45 @@ module.exports = (grunt) ->
     }  # typescript
 
     #-------------------------------------------------------------------------
-    jasmine: {
+    jasmine:
       generic_core:
         src: FILES.jasmine_helpers
             .concat [
-              'build/mocks/freedom-mocks.js',
-              'build/uproxy.js',
-              'build/generic_core/util.js',
-              'build/generic_core/nouns-and-adjectives.js',
-              'build/generic_core/constants.js',
-              'build/generic_core/consent.js',
-              'build/generic_core/auth.js',
-              'build/generic_core/social-enum.js',
-              'build/generic_core/local-instance.js',
-              'build/generic_core/remote-instance.js',
-              'build/generic_core/user.js',
-              'build/generic_core/storage.js',
-              'build/generic_core/social.js',
-              'build/generic_core/core.js',
+              'build/mocks/freedom-mocks.js'
+              'build/uproxy.js'
+              'build/generic_core/util.js'
+              'build/generic_core/nouns-and-adjectives.js'
+              'build/generic_core/constants.js'
+              'build/generic_core/consent.js'
+              'build/generic_core/auth.js'
+              'build/generic_core/social-enum.js'
+              'build/generic_core/local-instance.js'
+              'build/generic_core/remote-instance.js'
+              'build/generic_core/user.js'
+              'build/generic_core/storage.js'
+              'build/generic_core/social.js'
+              'build/generic_core/core.js'
             ]
         options:
           specs: 'build/generic_core/**/*.spec.js'
-          outfile: 'test_output/_CoreSpecRunner.html',
+          outfile: 'test_output/_CoreSpecRunner.html'
           # NOTE: Put any helper test-data files here:
-          helpers: [],
+          helpers: []
           keepRunner: true,
-    }
+      generic_ui:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/generic_ui/scripts/user.js'
+              'build/generic_ui/scripts/ui.js'
+            ]
+        options:
+          specs: 'build/generic_ui/scripts/**/*.spec.js'
+          outfile: 'test_output/_UiSpecRunner.html'
+          keepRunner: true
 
     clean: ['build/**']
 
-  }  # grunt.initConfig
+ # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'

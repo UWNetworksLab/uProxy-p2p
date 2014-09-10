@@ -54,7 +54,8 @@ module Core {
         return <T>JSON.parse(result);
       }, (e) => {
         this.log(e.message);
-        return <T>{};
+        return Promise.reject('non-existing key');
+        // return <T>{};
       });
     }
 
