@@ -17,7 +17,7 @@ describe('Core', () => {
   // Set up a fake network -> roster -> user -> instance chain.
   var network = <Social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
-  network['login'] = (remember:boolean) => { return Promise.resolve() };
+  network['login'] = (remember:boolean) => { return Promise.resolve<void>() };
   var user = <Core.User><any>jasmine.createSpy('user');
   user.getInstance = null;
   user.notifyUI = () => {};

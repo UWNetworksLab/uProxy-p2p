@@ -15,7 +15,7 @@
 module Core {
 
   // Platform-independent storage provider.
-  var fStorage :freedom.Storage = freedom['storage']();
+  var fStorage :freedom_Storage = freedom['storage']();
 
   // Set false elsewhere to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;

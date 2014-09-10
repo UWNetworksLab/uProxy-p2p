@@ -14,7 +14,7 @@ class MockSocial {
 }
 
 describe('freedomClientToUproxyClient', () => {
-  var freedomClient :freedom.Social.ClientState = {
+  var freedomClient :freedom_Social.ClientState = {
     userId: 'mockmyself',
     clientId: 'fakemyself',
     status: 'ONLINE',
@@ -42,7 +42,7 @@ describe('Social.FreedomNetwork', () => {
   freedom['SOCIAL-mock']['api'] = 'social';
 
   var loginPromise :Promise<void>;
-  var fakeFreedomClient :freedom.Social.ClientState = {
+  var fakeFreedomClient :freedom_Social.ClientState = {
     userId: 'mockmyself',
     clientId: 'fakemyself',
     status: 'ONLINE',
@@ -216,7 +216,7 @@ describe('Social.FreedomNetwork', () => {
     it('passes |onClientState| to correct client', () => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleClient');
-      var freedomClientState :freedom.Social.ClientState = {
+      var freedomClientState :freedom_Social.ClientState = {
         userId: 'mockuser',
         clientId: 'fakeclient',
         status: 'ONLINE',
@@ -235,7 +235,7 @@ describe('Social.FreedomNetwork', () => {
         spyOn(user, 'handleClient');
         return user;
       });
-      var freedomClientState :freedom.Social.ClientState = {
+      var freedomClientState :freedom_Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
         status: 'ONLINE',

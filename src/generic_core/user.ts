@@ -50,7 +50,7 @@ module Core {
 
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
-    public profile :freedom.Social.UserProfile;
+    public profile :freedom_Social.UserProfile;
 
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
@@ -103,7 +103,7 @@ module Core {
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom.Social.UserProfile) => {
+    public update = (profile :freedom_Social.UserProfile) => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);
