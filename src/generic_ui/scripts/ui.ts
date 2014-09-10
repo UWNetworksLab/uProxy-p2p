@@ -13,6 +13,13 @@
 
 declare var model         :UI.Model;
 declare var proxyConfig   :IBrowserProxyConfig;
+// TODO: This file will be destructed once polymer is is-use, so we don't care
+// about this any.
+declare var ng :any;
+// interface ng {
+  // export interface IRootScopeService;
+// }
+
 
 module UI {
 
@@ -68,7 +75,7 @@ module UI {
     instances :{[instanceId :string] :UI.Instance};
   }
 
-  export interface RootScope extends ng.IRootScopeService {
+  export interface RootScope { //extends ng.IRootScopeService {
     ui :uProxy.UIAPI;
     core :uProxy.CoreAPI;
     model :modelForAngular;
