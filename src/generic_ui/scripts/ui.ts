@@ -12,7 +12,7 @@
 
 
 declare var model         :UI.Model;
-declare var proxyConfig   :BrowserProxyConfig;
+declare var proxyConfig   :IBrowserProxyConfig;
 
 module UI {
 

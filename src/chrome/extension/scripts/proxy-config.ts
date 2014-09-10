@@ -3,6 +3,7 @@
  */
 
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../interfaces/browser-proxy-config.d.ts'/>
 
 
 class BrowserProxyConfig implements IBrowserProxyConfig {
@@ -23,14 +24,16 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
       }
     };
 
-    chrome.proxy.settings.clear({scope: 'regular'});
+    // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
+    // is why we employ a hacky thing here.
+    chrome.proxy.settings['clear']({scope: 'regular'});
   }
 
   public startUsingProxy = () => {
     if (this.running_ == false) {
       console.log('Directing Chrome proxy settings to uProxy');
       this.running_ = true;
-      chrome.proxy.settings.get({incognito:false},
+      chrome.proxy['settings']['get']({incognito:false},
         (details) => {
           this.preUproxyConfig_ = details.value;
           chrome.proxy.settings.set({
@@ -52,4 +55,4 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
     }
   };
 
-};  // end of this.socialNetworkName BrowserProxyConfig
+}  // BrowserProxyConfig

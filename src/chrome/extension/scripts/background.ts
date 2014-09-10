@@ -26,7 +26,7 @@ var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 
 // TODO: This should be *actually* typed.
 // Proxy Configuration.
-var proxyConfig = new BrowserProxyConfig();
+var proxyConfig = <IBrowserProxyConfig>new BrowserProxyConfig();
 
 
 // Singleton model for angularjs hooks on both popup and options.
