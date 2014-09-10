@@ -46,6 +46,26 @@ Rule.typescriptSrcLenient = (name) =>
   rule
 
 
+# TODO: Move more file lists here.
+FILES =
+  jasmine_helpers: [
+    # Help Jasmine's PhantomJS understand promises.
+    'node_modules/es6-promise/dist/promise-*.js'
+    '!node_modules/es6-promise/dist/promise-*amd.js'
+    '!node_modules/es6-promise/dist/promise-*.min.js'
+  ]
+  # Mocks for chrome app/extension APIs.
+  jasmine_chrome: [
+    'build/chrome/test/chrome_mocks.js'
+  ]
+  # Files which are required at run-time everywhere.
+  uproxy_common: [
+    'uproxy.js'
+    'generic_core/consent.js'
+    'generic_core/util.js'
+  ]
+
+
 module.exports = (grunt) ->
   grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
@@ -140,7 +160,7 @@ module.exports = (grunt) ->
       # Mocks to help jasmine along. These typescript files must be compiled
       # independently from the rest of the code, because otherwise there will
       # be many 'duplicate identifiers' and similar typescript conflicts.
-      mocks: Rule.typescriptSrc 'mocks'
+      mocks: Rule.typescriptSrcLenient 'mocks'
 
       # Compile typescript for all chrome components. This will do both the app
       # and extension in one go, along with their specs, because they all share
@@ -163,12 +183,30 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine: {
-      socks:
-        src: ['build/socks/socks-headers.js']
+      generic_core:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/mocks/freedom-mocks.js',
+              'build/uproxy.js',
+              'build/generic_core/util.js',
+              'build/generic_core/nouns-and-adjectives.js',
+              'build/generic_core/constants.js',
+              'build/generic_core/consent.js',
+              'build/generic_core/auth.js',
+              'build/generic_core/social-enum.js',
+              'build/generic_core/local-instance.js',
+              'build/generic_core/remote-instance.js',
+              'build/generic_core/user.js',
+              'build/generic_core/storage.js',
+              'build/generic_core/social.js',
+              'build/generic_core/core.js',
+            ]
         options:
-          specs: 'build/socks/socks-headers.spec.js'
-          outfile: 'build/socks/_SpecRunner.html'
-          keepRunner: true
+          specs: 'build/generic_core/**/*.spec.js'
+          outfile: 'test_output/_CoreSpecRunner.html',
+          # NOTE: Put any helper test-data files here:
+          helpers: [],
+          keepRunner: true,
     }
 
     clean: ['build/**']
