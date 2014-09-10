@@ -49,6 +49,12 @@ module.exports = (grunt) ->
   grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
 
+    # Decrease log output for noisy things like symlink.
+    verbosity:
+      diminished:
+        options: { mode: 'dot' }
+        tasks: ['symlink']
+
     symlink:
       # Symlink all module directories in `src` into typescript-src, and
       # merge `third_party` from different places as well.
@@ -175,12 +181,14 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-typescript'
   grunt.loadNpmTasks 'grunt-tsd'
+  grunt.loadNpmTasks 'grunt-verbosity'
 
   #-------------------------------------------------------------------------
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'base', [
+    'verbosity:diminished'
     'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
@@ -203,14 +211,14 @@ module.exports = (grunt) ->
   taskManager.add('build_uistatic', [
     'build_generic_ui',
     'typescript:uistatic',
-    'concat:uistatic',
-    'copy:uistatic'
+    # 'concat:uistatic',
+    # 'copy:uistatic'
   ]);
 
   taskManager.add 'build_uipolymer', [
     'build_generic_ui'
     'typescript:uipolymer'
-    'copy:uipolymer'
+    # 'copy:uipolymer'
   ]
 
   # The Chrome App and the Chrome Extension cannot be built separately. They
@@ -219,9 +227,9 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:chrome'
-    'copy:chrome_app'
-    'copy:chrome_extension'
-    'shell:extract_chrome_tests'
+    # 'copy:chrome_app'
+    # 'copy:chrome_extension'
+    # 'shell:extract_chrome_tests'
   ]
 
   # Firefox build tasks.
@@ -229,7 +237,7 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:firefox'
-    'copy:firefox'
+    # 'copy:firefox'
   ]
 
   taskManager.add 'build_firefox_xpi', [
