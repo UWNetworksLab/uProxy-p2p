@@ -8,7 +8,7 @@
  */
 /// <reference path='social.ts' />
 /// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 
 // declare var storage :Core.Storage;
 

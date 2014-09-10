@@ -7,7 +7,7 @@
  * The majority of the consent-to-consent testing between peers happens at the
  * Instance level. (See remote-instance.spec.ts)
  */
-/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='consent.ts' />
 
 describe('Consent', () => {

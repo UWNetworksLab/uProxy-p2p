@@ -6,7 +6,7 @@
  * they've been disconnected. This must ensure that we resolve the
  * correct consent values between remote instances.
  */
-/// <reference path='../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='remote-instance.ts' />
 
 describe('Core.RemoteInstance', () => {

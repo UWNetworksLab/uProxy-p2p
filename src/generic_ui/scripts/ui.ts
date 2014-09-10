@@ -16,9 +16,6 @@ declare var proxyConfig   :IBrowserProxyConfig;
 // TODO: This file will be destructed once polymer is is-use, so we don't care
 // about this any.
 declare var ng :any;
-// interface ng {
-  // export interface IRootScopeService;
-// }
 
 
 module UI {
