@@ -42,7 +42,11 @@ describe('core-connector', () => {
 
   var connectPromise :Promise<void>;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+  });
 
   it('attempts chrome.runtime.connect().', () => {
     spyOn(chromeConnector, 'connect').and.callThrough()

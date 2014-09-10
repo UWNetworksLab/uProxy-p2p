@@ -56,7 +56,7 @@ FILES =
   ]
   # Mocks for chrome app/extension APIs.
   jasmine_chrome: [
-    'build/chrome/test/chrome_mocks.js'
+    'build/mocks/chrome_mocks.js'
   ]
   # Files which are required at run-time everywhere.
   uproxy_common: [
@@ -171,11 +171,6 @@ module.exports = (grunt) ->
       # actual distribution directory.
       chrome: Rule.typescriptSrcLenient 'chrome'
 
-      # Compile the Chrome mocks separately from above. Otherwise, there will
-      # be problematic mixing of Ambient / Non-Ambient contexts for things like
-      # the chrome.runtime declarations.
-      chrome_mocks: Rule.typescriptSrc 'chrome/mocks'
-
       # uProxy firefox specific typescript
       firefox: Rule.typescriptSrcLenient 'firefox'
 
@@ -183,6 +178,18 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
+      chrome_extension:
+        src: FILES.jasmine_helpers
+            .concat FILES.jasmine_chrome
+            .concat [
+              'build/generic_ui/scripts/core_connector.js'
+              'build/chrome/extension/scripts/chrome_connector.js'
+              'build/chrome/util/chrome_glue.js'
+            ]
+        options:
+          specs: 'build/chrome/**/*.spec.js'
+          outfile: 'test_output/_ChromeExtensionSpecRunner.html'
+          keepRunner: true
       generic_core:
         src: FILES.jasmine_helpers
             .concat [
@@ -315,7 +322,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'test_chrome_extension', [
     'build_chrome'
-    'typescript:chrome_mocks'
+    'typescript:mocks'
     'jasmine:chrome_extension'
   ]
 
