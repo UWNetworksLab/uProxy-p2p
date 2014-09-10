@@ -38,7 +38,8 @@ Rule.symlinkThirdParty = (module) =>
 
 # Temporary wrapper which allows implicit any.
 # TODO: Remove once implicit anys are fixed. (This is actually happening in some
-# of the DefinitelyTyped definitions - i.e. MediaStream.d.ts
+# of the DefinitelyTyped definitions - i.e. MediaStream.d.ts, and many other
+# places)
 Rule.typescriptSrcLenient = (name) =>
   rule = Rule.typescriptSrc name
   rule.options.noImplicitAny = false
@@ -154,7 +155,7 @@ module.exports = (grunt) ->
       chrome_mocks: Rule.typescriptSrc 'chrome/mocks'
 
       # uProxy firefox specific typescript
-      firefox: Rule.typescriptSrc 'firefox'
+      firefox: Rule.typescriptSrcLenient 'firefox'
 
     }  # typescript
 
