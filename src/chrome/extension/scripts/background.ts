@@ -12,11 +12,12 @@
 /// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
-/// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../generic_ui/scripts/core_connector.ts' />
 
-/// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
+/// <reference path='../../../freedom/typings/social.d.ts' />
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
+
 
 var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------

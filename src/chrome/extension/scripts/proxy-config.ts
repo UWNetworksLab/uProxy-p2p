@@ -2,10 +2,10 @@
  * Configuration and control of the browsers proxy settings.
  */
 
-/// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 
 
-class BrowserProxyConfig {
+class BrowserProxyConfig implements IBrowserProxyConfig {
   private preUproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private uproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private running_ :boolean = false;

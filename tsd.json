@@ -6,7 +6,7 @@
   "bundle": "src/interfaces/lib/tsd.d.ts",
   "installed": {
     "chrome/chrome-app.d.ts": {
-      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
+      "commit": "50dd84eb5d5593787b7686decf1476d094f5e13a"
     },
     "chrome/chrome.d.ts": {
       "commit": "807ba77ee6af4e587618535b0d820f03e3353823"

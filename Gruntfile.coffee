@@ -27,7 +27,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['*'],
+    src: ['**/*.ts'],
     dest: 'build/typescript-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -43,6 +43,7 @@ Rule.typescriptSrcLenient = (name) =>
   rule = Rule.typescriptSrc name
   rule.options.noImplicitAny = false
   rule
+
 
 module.exports = (grunt) ->
   grunt.initConfig {
@@ -139,7 +140,7 @@ module.exports = (grunt) ->
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
-      chrome: Rule.typescriptSrc 'chrome'
+      chrome: Rule.typescriptSrcLenient 'chrome'
 
       # Compile the Chrome mocks separately from above. Otherwise, there will
       # be problematic mixing of Ambient / Non-Ambient contexts for things like
