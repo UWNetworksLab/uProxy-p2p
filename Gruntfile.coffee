@@ -16,8 +16,10 @@ Path = require 'path'
 fs = require 'fs'
 path = require 'path'
 
-uproxyLibPath = Path.dirname(require.resolve('uproxy-lib/package.json'))
-uproxyNetworkingPath = Path.dirname(require.resolve('uproxy-networking/package.json'))
+getNodePath = (module) =>
+  Path.dirname(require.resolve(module + '/package.json'))
+uproxyLibPath = getNodePath 'uproxy-lib'
+uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 Rule.symlink = (dir, dest='') =>
@@ -27,9 +29,12 @@ Rule.symlink = (dir, dest='') =>
     cwd: dir,
     src: ['*'],
     dest: 'build/typescript-src/' + dest} ] }
-Rule.symlinkSrc = (dir) => Rule.symlink Path.join(dir, 'src')
-Rule.symlinkThirdParty = (dir) =>
-  Rule.symlink(Path.join(dir, 'third_party'), 'third_party')
+
+# Use symlinkSrc with the name of the module, and it will automatically symlink
+# the path to its src/ directory.
+Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
+Rule.symlinkThirdParty = (module) =>
+  Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
 
 # Temporary wrapper which allows implicit any.
 # TODO: Remove once implicit anys are fixed. (This is actually happening in some
@@ -48,21 +53,19 @@ module.exports = (grunt) ->
       # merge `third_party` from different places as well.
       typescriptSrc: Rule.symlinkSrc '.'
       thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
+
       uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyNetworkingPath
-      uproxyNetworkingTypescriptSrc: Rule.symlinkSrc uproxyNetworkingPath
-      uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyLibPath
-      uproxyLibTypescriptSrc: Rule.symlinkSrc uproxyLibPath
+      uproxyNetworkingTypescriptSrc: Rule.symlinkSrc 'uproxy-networking'
+
+      uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
+      uproxyLibTypescriptSrc: Rule.symlinkSrc 'uproxy-lib'
 
     shell: {
 
-      # TODO: Get rid of this step once socks-rtc has this automatically done.
-      socks_rtc_setup: {
-        command: 'npm install;grunt',
-        options: {stdout: true, stderr: true, failOnError: true, execOptions: {cwd: 'node_modules/socks-rtc'}}
-      }
-
       # Once compiled, take all .spec files out of the chrome extension and app
       # directories and into the chrome/test directory, to keep a clean distro.
+      # TODO: Change to have a separate task that creates a distribution, and
+      # remove this hacky test extraction.
       extract_chrome_tests: {
         command: 'mkdir -p test; mv extension/scripts/*.spec.js test/',
         options: { failOnError: true, execOptions: {cwd: 'build/chrome/' }}
