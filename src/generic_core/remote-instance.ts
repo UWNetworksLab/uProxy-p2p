@@ -11,7 +11,21 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 
-// declare var storage :Core.Storage;
+
+// TODO: These interfaces were deleted from socksRTC from its 101th pull request
+// which breaks this file. Keeping them in for now, until the next refactor
+// which changes all of networking.
+interface PeerInfo {
+  host   :string;
+  port   :number;
+  peerId :string;
+}
+
+interface PeerSignal {
+  peerId :string;
+  data   :string;
+}
+
 
 module Core {
 
@@ -129,15 +143,16 @@ module Core {
     public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
-        return Promise.reject();
+        return Promise.reject('Lacking permission to proxy!');
       } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
-        return Promise.reject();
+        return Promise.reject('Already proxying through ' + this.instanceId);
       } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
         console.warn('Already waiting for proxy to start ' + this.instanceId);
-        return Promise.reject();
+        return Promise.reject('Already waiting for proxy to start ' +
+            this.instanceId);
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
@@ -175,7 +190,7 @@ module Core {
         console.error('Could not start proxy through ' + this.user.userId);
         this.fulfillStartRequest_ = null;
         this.rejectStartRequest_ = null;
-        return Promise.reject();
+        return Promise.reject('Could not start proxy');
       });
     }
 

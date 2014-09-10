@@ -4,7 +4,7 @@
  * Handles all connection and communication with the uProxy core.
  */
 /// <reference path='../../uproxy.ts'/>
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 interface FullfillAndReject {
   fulfill :Function;

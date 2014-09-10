@@ -3,7 +3,7 @@
  *
  * This is the UI-specific representation of a User.
  */
-/// <reference path='../../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
+/// <reference path='../../freedom/typings/social.d.ts' />
 /// <reference path='../../interfaces/user.d.ts' />
 
 module UI {
