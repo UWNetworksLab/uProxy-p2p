@@ -53,7 +53,7 @@ module.exports = (grunt) ->
     # Decrease log output for noisy things like symlink.
     verbosity:
       diminished:
-        options: { mode: 'dot' }
+        options: { mode: 'oneline' }
         tasks: ['symlink']
 
     symlink:
@@ -132,7 +132,9 @@ module.exports = (grunt) ->
       # Core uProxy without any platform dependencies
       generic_core: Rule.typescriptSrcLenient 'generic_core'
 
-      uistatic: Rule.typescriptSrc 'uistatic'
+      # TODO: Remove uistatic / make it the same as uipolymer once polymer is
+      # fully integrated.
+      uistatic: Rule.typescriptSrcLenient 'uistatic'
       uipolymer: Rule.typescriptSrc 'generic_ui/polymer'
 
       # Mocks to help jasmine along. These typescript files must be compiled

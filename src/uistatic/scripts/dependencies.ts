@@ -135,7 +135,7 @@ class MockCore implements uProxy.CoreAPI {
     };
     console.log(this.currentProxyServer);
     this.currentProxyServer.instance.access.asProxy = true;
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
 
   stop = () => {
@@ -162,7 +162,7 @@ class MockCore implements uProxy.CoreAPI {
     });
     // Pretend we receive a bunch of user messages.
     ui.syncUser(generateFakeUserMessage());
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
   logout(network) {
     console.log('Logging out of', network);
