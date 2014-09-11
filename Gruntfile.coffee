@@ -173,10 +173,6 @@ module.exports = (grunt) ->
             ]
           dest: chromeExtDevPath + 'scripts/'
         }, {
-          # expand: true, cwd: 'node_modules/freedom-for-chrome/'
-          # src: ['freedom.js']
-          # dest: 'build/chrome/extension/lib'},
-          # Libraries
           expand: true, cwd: 'third_party/lib'
           src: ['**']
           dest: chromeExtDevPath + 'lib'
@@ -207,7 +203,7 @@ module.exports = (grunt) ->
             'freedom-for-chrome-for-uproxy.js'
           ]
           dest: chromeAppDevPath + 'lib/'
-        }, {  # Libraries
+        }, {  # Additional hack - TODO: remove this once social enum is gone.
           expand: true, cwd: 'third_party', flatten: true
           src: [
             'freedom-ts-hacks/social-enum.js'
@@ -215,7 +211,7 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # uProxy Icons.
           expand: true, cwd: 'src/'
-          src: ['icons/*']
+          src: ['icons/uproxy-*.png']
           dest: chromeAppDevPath
         } ]
 
