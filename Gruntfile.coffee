@@ -188,7 +188,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/chrome/**/*.spec.js'
-          outfile: 'test_output/_ChromeExtensionSpecRunner.html'
+          outfile: 'build/chrome/_SpecRunner.html'
           keepRunner: true
       generic_core:
         src: FILES.jasmine_helpers
@@ -210,7 +210,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/generic_core/**/*.spec.js'
-          outfile: 'test_output/_CoreSpecRunner.html'
+          outfile: 'build/generic_core/_SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
           keepRunner: true,
@@ -222,7 +222,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/generic_ui/scripts/**/*.spec.js'
-          outfile: 'test_output/_UiSpecRunner.html'
+          outfile: 'build/generic_ui/_SpecRunner.html'
           keepRunner: true
 
     clean: ['build/**']
