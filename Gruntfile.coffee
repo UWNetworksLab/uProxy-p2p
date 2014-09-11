@@ -66,10 +66,6 @@ FILES =
     '!node_modules/es6-promise/dist/promise-*amd.js'
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ]
-  # Mocks for chrome app/extension APIs.
-  jasmine_chrome: [
-    'build/mocks/chrome_mocks.js'
-  ]
   # Files which are required at run-time everywhere.
   uproxy_common: [
     'uproxy.js'
@@ -253,51 +249,54 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
+
       chrome_extension:
         src: FILES.jasmine_helpers
-            .concat FILES.jasmine_chrome
             .concat [
-              'build/generic_ui/scripts/core_connector.js'
-              'build/chrome/extension/scripts/chrome_connector.js'
-              'build/chrome/util/chrome_glue.js'
+              'build/dev/mocks/chrome_mocks.js'
+              'build/dev/generic_ui/scripts/core_connector.js'
+              'build/dev/chrome/extension/scripts/chrome_connector.js'
+              'build/dev/chrome/util/chrome_glue.js'
             ]
         options:
-          specs: 'build/chrome/**/*.spec.js'
-          outfile: 'build/chrome/_SpecRunner.html'
+          specs: 'build/dev/chrome/**/*.spec.js'
+          outfile: 'build/dev/chrome/_SpecRunner.html'
           keepRunner: true
+
       generic_core:
         src: FILES.jasmine_helpers
             .concat [
-              'build/mocks/freedom-mocks.js'
-              'build/uproxy.js'
-              'build/generic_core/util.js'
-              'build/generic_core/nouns-and-adjectives.js'
-              'build/generic_core/constants.js'
-              'build/generic_core/consent.js'
-              'build/generic_core/auth.js'
-              'build/generic_core/social-enum.js'
-              'build/generic_core/local-instance.js'
-              'build/generic_core/remote-instance.js'
-              'build/generic_core/user.js'
-              'build/generic_core/storage.js'
-              'build/generic_core/social.js'
-              'build/generic_core/core.js'
+              'build/dev/mocks/freedom-mocks.js'
+              'build/dev/uproxy.js'
+              'build/dev/generic_core/util.js'
+              'build/dev/generic_core/nouns-and-adjectives.js'
+              'build/dev/generic_core/constants.js'
+              'build/dev/generic_core/consent.js'
+              'build/dev/generic_core/auth.js'
+              'build/dev/generic_core/social-enum.js'
+              'build/dev/generic_core/local-instance.js'
+              'build/dev/generic_core/remote-instance.js'
+              'build/dev/generic_core/user.js'
+              'build/dev/generic_core/storage.js'
+              'build/dev/generic_core/social.js'
+              'build/dev/generic_core/core.js'
             ]
         options:
-          specs: 'build/generic_core/**/*.spec.js'
-          outfile: 'build/generic_core/_SpecRunner.html'
+          specs: 'build/dev/generic_core/**/*.spec.js'
+          outfile: 'build/dev/generic_core/_SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
           keepRunner: true,
+
       generic_ui:
         src: FILES.jasmine_helpers
             .concat [
-              'build/generic_ui/scripts/user.js'
-              'build/generic_ui/scripts/ui.js'
+              'build/dev/generic_ui/scripts/user.js'
+              'build/dev/generic_ui/scripts/ui.js'
             ]
         options:
-          specs: 'build/generic_ui/scripts/**/*.spec.js'
-          outfile: 'build/generic_ui/_SpecRunner.html'
+          specs: 'build/dev/generic_ui/scripts/**/*.spec.js'
+          outfile: 'build/dev/generic_ui/_SpecRunner.html'
           keepRunner: true
 
     clean: ['build/**']
