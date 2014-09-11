@@ -172,15 +172,15 @@ module.exports = (grunt) ->
               'chrome/util/chrome_glue.js'
             ]
           dest: chromeExtDevPath + 'scripts/'
-        }
-        # Libraries
+        }, {
           # expand: true, cwd: 'node_modules/freedom-for-chrome/'
           # src: ['freedom.js']
           # dest: 'build/chrome/extension/lib'},
-        # {expand: true, cwd: 'third_party/lib',
-         # src: ['**/*.js'],
-         # dest: 'build/chrome/extension/lib'},
-        ]
+          # Libraries
+          expand: true, cwd: 'third_party/lib'
+          src: ['**']
+          dest: chromeExtDevPath + 'lib'
+        } ]
 
       chrome_app:
         nonull: true
