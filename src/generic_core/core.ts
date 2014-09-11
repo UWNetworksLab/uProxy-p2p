@@ -28,15 +28,6 @@ var storage = new Core.Storage();
 // this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
-// The socks-rtc client and server allows us to proxy through / for other uProxy
-// peers. See [https://github.com/uProxy/socks-rtc] for more information.
-var socksToRtcClient = freedom['SocksToRtc']();
-var rtcToNetServer = freedom['RtcToNet']();
-// Always begin the RTC-to-net server immediately.
-rtcToNetServer.emit('start');
-// The Core's responsibility is to pass messages across the signalling
-// channel using the User / Instance mechanisms.
-
 // Keep track of the current remote proxy, if they exist.
 var proxy :Core.RemoteInstance = null;
 
@@ -359,6 +350,8 @@ allow the remote to verify the provinance of the signal.
 Expect peerId to be a #-connected InstancePath.
 
 */
+SocksToRtc.signalsForPeer.
+
 socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
   console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
 

@@ -4,8 +4,8 @@
  * Interactions for network-specific social providers.
  *
  * To add new social providers, list them as dependencies in the primary
- * uProxy freedom manifest (./uproxy.json) with the 'SOCIAL-' prefix in the
- * name.
+ * uProxy freedom manifest (freedom-module.json) with the 'SOCIAL-' prefix
+ * in the name.
  *
  * e.g.
  *
@@ -365,7 +365,7 @@ module Social {
           network: this.name,
           user:    userProfileMessage
         });
-        
+
         return;
       }
       // Otherwise, this is a remote contact. Add them to the roster if
