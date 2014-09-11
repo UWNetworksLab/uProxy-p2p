@@ -163,7 +163,7 @@ module.exports = (grunt) ->
         }, {
           # Icons
           expand: true, cwd: 'src/'
-          src: ['generic_ui/*', 'icons/*', '!**/*.ts']
+          src: ['icons/*']
           dest: chromeExtDevPath
         }, {
           expand: true, cwd: 'build/dev/', flatten: true
@@ -184,13 +184,40 @@ module.exports = (grunt) ->
 
       chrome_app:
         nonull: true
-        files: [
-          {
-            expand: true, cwd: 'src/chrome/app'
-            src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts', '!**/*.sass']
-            dest: chromeAppDevPath
-          }
-        ]
+        files: [ {
+          expand: true, cwd: 'src/chrome/app'
+          src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts', '!**/*.sass']
+          dest: chromeAppDevPath
+        }, {  # Freedom manifest for uproxy
+          expand: true, cwd: 'src/generic_core/'
+          src: ['uproxy.json']
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # Sourcecode (no specs):
+          expand: true, cwd: 'build/dev/', flatten: true,
+          src: [
+            'uproxy.js'
+            'generic_core/**/*.js'
+            'chrome/util/chrome_glue.js'
+            '!**/*.spec.js'
+          ]
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # Libraries
+          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom/'
+          src: [
+            'freedom-for-chrome-for-uproxy.js'
+          ]
+          dest: chromeAppDevPath + 'lib/'
+        }, {  # Libraries
+          expand: true, cwd: 'third_party', flatten: true
+          src: [
+            'freedom-ts-hacks/social-enum.js'
+          ]
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # uProxy Icons.
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
+          dest: chromeAppDevPath
+        } ]
 
     }  # copy
 
