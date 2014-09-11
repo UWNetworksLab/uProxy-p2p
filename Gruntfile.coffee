@@ -21,6 +21,10 @@ getNodePath = (module) =>
 uproxyLibPath = getNodePath 'uproxy-lib'
 uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
+chromeExtDevPath = 'build/dev/chrome/extension/'
+chromeAppDevPath = 'build/dev/chrome/app/'
+firefoxDevPath = 'build/dev/firefox/'
+
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 Rule.symlink = (dir, dest='') =>
   { files: [ {
@@ -36,12 +40,21 @@ Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
 Rule.symlinkThirdParty = (module) =>
   Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
 
+
+# TODO: When we make the 'distribution' build which uglifies all js and removes
+# the specs, make a corresponding rule which makes everything go into
+# 'build/dist'.
+Rule.typescriptSrcDev = (name) =>
+  rule = Rule.typescriptSrc name
+  rule.dest = 'build/dev/'
+  rule
+
 # Temporary wrapper which allows implicit any.
 # TODO: Remove once implicit anys are fixed. (This is actually happening in some
 # of the DefinitelyTyped definitions - i.e. MediaStream.d.ts, and many other
 # places)
 Rule.typescriptSrcLenient = (name) =>
-  rule = Rule.typescriptSrc name
+  rule = Rule.typescriptSrcDev name
   rule.options.noImplicitAny = false
   rule
 
@@ -53,10 +66,6 @@ FILES =
     'node_modules/es6-promise/dist/promise-*.js'
     '!node_modules/es6-promise/dist/promise-*amd.js'
     '!node_modules/es6-promise/dist/promise-*.min.js'
-  ]
-  # Mocks for chrome app/extension APIs.
-  jasmine_chrome: [
-    'build/mocks/chrome_mocks.js'
   ]
   # Files which are required at run-time everywhere.
   uproxy_common: [
@@ -112,9 +121,9 @@ module.exports = (grunt) ->
 
       firefox_uproxy: {
         files: [ {
-          src: ['build/firefox/data/core/uproxy.js'
-                'build/firefox/lib/exports.js']
-          dest: 'build/firefox/lib/uproxy.js'
+          src: [firefoxDevPath + 'data/core/uproxy.js'
+                firefoxDevPath + 'lib/exports.js']
+          dest: firefoxDevPath + 'lib/uproxy.js'
         } ]
       }
 
@@ -122,16 +131,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
-      # TODO: provide a warning if local project overrides directory?
-      #
-      # Copy all the built stuff from uproxy-lib
-      uproxyNetworkingBuild: { files: [ {
-          expand: true, cwd: Path.join(uproxyNetworkingPath, 'build')
-          src: ['**', '!**/typescript-src/**']
-          dest: 'build'
-          onlyIf: 'modified'
-        } ] }
-
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
@@ -139,6 +138,129 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
+
+      chrome_extension:
+        nonull: true
+        files: [ {
+          # The platform specific non-compiled stuff, and...
+          expand: true, cwd: 'src/chrome/extension'
+          src: ['**', '!**/*.md', '!**/*.ts']
+          dest: chromeExtDevPath
+        }, {
+          # generic_ui HTML and non-typescript assets.
+          expand: true, cwd: 'src/generic_ui',
+          src: ['**', '!**/*.ts']
+          dest: chromeExtDevPath
+        }, {
+          # generic_ui compiled source.
+          # (Assumes the typescript task has executed)
+          expand: true, cwd: 'build/dev/generic_ui'
+          src: ['**', '!**/*.spec.js']
+          dest: chromeExtDevPath
+        }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
+          dest: chromeExtDevPath
+        }, {
+          expand: true, cwd: 'build/dev/', flatten: true
+          src: FILES.uproxy_common
+            .concat [
+              'chrome/util/chrome_glue.js'
+            ]
+          dest: chromeExtDevPath + 'scripts/'
+        }, {
+          expand: true, cwd: 'third_party/lib'
+          src: ['**']
+          dest: chromeExtDevPath + 'lib'
+        } ]
+
+      chrome_app:
+        nonull: true
+        files: [ {
+          expand: true, cwd: 'src/chrome/app'
+          src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts']
+          dest: chromeAppDevPath
+        }, {  # Freedom manifest for uproxy
+          expand: true, cwd: 'src/generic_core/'
+          src: ['uproxy.json']
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # Sourcecode (no specs):
+          expand: true, cwd: 'build/dev/', flatten: true,
+          src: [
+            'uproxy.js'
+            'generic_core/**/*.js'
+            'chrome/util/chrome_glue.js'
+            '!**/*.spec.js'
+          ]
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # Libraries
+          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom/'
+          src: [
+            'freedom-for-chrome-for-uproxy.js'
+          ]
+          dest: chromeAppDevPath + 'lib/'
+        }, {  # Additional hack - TODO: remove this once social enum is gone.
+          expand: true, cwd: 'third_party', flatten: true
+          src: [
+            'freedom-ts-hacks/social-enum.js'
+          ]
+          dest: chromeAppDevPath + 'scripts/'
+        }, {  # uProxy Icons.
+          expand: true, cwd: 'src/'
+          src: ['icons/uproxy-*.png']
+          dest: chromeAppDevPath
+        } ]
+
+      # Firefox. Assumes the top-level tasks generic_core and generic_ui
+      # completed.
+      firefox:
+        files: [ {
+          # The platform specific stuff, and...
+          expand: true, cwd: 'src/firefox/'
+          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: firefoxDevPath
+        # }, {
+          # expand: true, cwd: 'build/dev'
+          # src: ['uproxy.js']
+          # dest: firefoxDevPath + 'data/core/'
+        # ... the generic core stuff
+        }, {
+          expand: true, cwd: 'build/dev/generic_core'
+          src: ['**'],
+          dest: firefoxDevPath + 'data/core/'
+        # ... the generic UI stuff
+        }, {
+          expand: true, cwd: 'build/dev/generic_ui'
+          src: ['**'],
+          dest: firefoxDevPath + 'data'
+        }, {
+          expand: true, cwd: 'build/dev', flatten: true
+          src: FILES.uproxy_common,
+          dest: firefoxDevPath + 'data/scripts'
+        # freedom for firefox
+        }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom'
+          src: ['freedom-for-firefox-for-uproxy.jsm']
+          dest: firefoxDevPath + 'data'
+        }, {
+        # TODO: Fix socks-rtc / uproxy-networking include?
+          expand: true, cwd: 'node_modules/socks-rtc/build/'
+          src: ['**'],
+          dest: firefoxDevPath + 'data/lib/socks-rtc'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/social'
+          src: ['websocket-server/**']
+          dest: firefoxDevPath + 'data/lib'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/storage'
+        } ]
 
     }  # copy
 
@@ -178,52 +300,65 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
+
       chrome_extension:
         src: FILES.jasmine_helpers
-            .concat FILES.jasmine_chrome
             .concat [
-              'build/generic_ui/scripts/core_connector.js'
-              'build/chrome/extension/scripts/chrome_connector.js'
-              'build/chrome/util/chrome_glue.js'
+              'build/dev/mocks/chrome_mocks.js'
+              'build/dev/generic_ui/scripts/core_connector.js'
+              'build/dev/chrome/extension/scripts/chrome_connector.js'
+              'build/dev/chrome/util/chrome_glue.js'
             ]
         options:
-          specs: 'build/chrome/**/*.spec.js'
-          outfile: 'build/chrome/_SpecRunner.html'
+          specs: 'build/dev/chrome/**/*.spec.js'
+          outfile: 'build/dev/chrome/_SpecRunner.html'
           keepRunner: true
+
       generic_core:
         src: FILES.jasmine_helpers
             .concat [
-              'build/mocks/freedom-mocks.js'
-              'build/uproxy.js'
-              'build/generic_core/util.js'
-              'build/generic_core/nouns-and-adjectives.js'
-              'build/generic_core/constants.js'
-              'build/generic_core/consent.js'
-              'build/generic_core/auth.js'
-              'build/generic_core/social-enum.js'
-              'build/generic_core/local-instance.js'
-              'build/generic_core/remote-instance.js'
-              'build/generic_core/user.js'
-              'build/generic_core/storage.js'
-              'build/generic_core/social.js'
-              'build/generic_core/core.js'
+              'build/dev/mocks/freedom-mocks.js'
+              'build/dev/uproxy.js'
+              'build/dev/generic_core/util.js'
+              'build/dev/generic_core/nouns-and-adjectives.js'
+              'build/dev/generic_core/constants.js'
+              'build/dev/generic_core/consent.js'
+              'build/dev/generic_core/auth.js'
+              'build/dev/generic_core/social-enum.js'
+              'build/dev/generic_core/local-instance.js'
+              'build/dev/generic_core/remote-instance.js'
+              'build/dev/generic_core/user.js'
+              'build/dev/generic_core/storage.js'
+              'build/dev/generic_core/social.js'
+              'build/dev/generic_core/core.js'
             ]
         options:
-          specs: 'build/generic_core/**/*.spec.js'
-          outfile: 'build/generic_core/_SpecRunner.html'
+          specs: 'build/dev/generic_core/**/*.spec.js'
+          outfile: 'build/dev/generic_core/_SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
           keepRunner: true,
+
       generic_ui:
         src: FILES.jasmine_helpers
             .concat [
-              'build/generic_ui/scripts/user.js'
-              'build/generic_ui/scripts/ui.js'
+              'build/dev/generic_ui/scripts/user.js'
+              'build/dev/generic_ui/scripts/ui.js'
             ]
         options:
-          specs: 'build/generic_ui/scripts/**/*.spec.js'
-          outfile: 'build/generic_ui/_SpecRunner.html'
+          specs: 'build/dev/generic_ui/scripts/**/*.spec.js'
+          outfile: 'build/dev/generic_ui/_SpecRunner.html'
           keepRunner: true
+
+    compress:
+      main:
+        options:
+          mode: 'zip'
+          archive: 'dist/uproxy.xpi'
+        expand: true
+        cwd: 'build/dev/firefox'
+        src: ['**']
+        dest: '.'
 
     clean: ['build/**']
 
@@ -231,6 +366,7 @@ module.exports = (grunt) ->
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-contrib-compress'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
@@ -284,8 +420,8 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:chrome'
-    # 'copy:chrome_app'
-    # 'copy:chrome_extension'
+    'copy:chrome_app'
+    'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
   ]
 
@@ -294,7 +430,7 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:firefox'
-    # 'copy:firefox'
+    'copy:firefox'
   ]
 
   taskManager.add 'build_firefox_xpi', [
