@@ -17,6 +17,7 @@
     }
   ],
   "devDependencies": {
+    "es6-promise": "^0.1.1",
     "freedom-social-xmpp": "~1.0.1",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
