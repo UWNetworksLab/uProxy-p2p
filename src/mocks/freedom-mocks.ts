@@ -4,7 +4,8 @@
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+
 
 class MockCore {
 
@@ -54,7 +55,7 @@ class MockStorage {
     if (v) {
       return Promise.resolve(v);
     }
-    return Promise.reject();  // new Error('non-existing key'));
+    return Promise.reject('non-existing key');
   }
 
   public set = (key, value) => {

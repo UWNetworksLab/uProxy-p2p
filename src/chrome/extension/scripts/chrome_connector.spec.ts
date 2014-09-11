@@ -1,6 +1,6 @@
 /// <reference path='chrome_connector.ts' />
 /// <reference path='../../../generic_ui/scripts/core_connector.ts' />
-/// <reference path='../../../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 
 // Mock for the Chrome App's port as if the App actually exists.
@@ -42,7 +42,11 @@ describe('core-connector', () => {
 
   var connectPromise :Promise<void>;
 
-  beforeEach(() => {});
+  beforeEach(() => {
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
+    spyOn(console, 'error');
+  });
 
   it('attempts chrome.runtime.connect().', () => {
     spyOn(chromeConnector, 'connect').and.callThrough()

@@ -4,7 +4,8 @@
  * This is the Chrome-specific implementation of the Notifications API.
  */
 /// <reference path='../../../interfaces/browser_action.d.ts' />
-/// <reference path='../../../interfaces/lib/chrome/chrome.d.ts'/>
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
+
 
 class ChromeBrowserAction implements BrowserAction {
   public ICON_DIR :string = 'icons/';

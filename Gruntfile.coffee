@@ -27,7 +27,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['*'],
+    src: ['**/*.ts'],
     dest: 'build/typescript-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -38,15 +38,43 @@ Rule.symlinkThirdParty = (module) =>
 
 # Temporary wrapper which allows implicit any.
 # TODO: Remove once implicit anys are fixed. (This is actually happening in some
-# of the DefinitelyTyped definitions - i.e. MediaStream.d.ts
+# of the DefinitelyTyped definitions - i.e. MediaStream.d.ts, and many other
+# places)
 Rule.typescriptSrcLenient = (name) =>
   rule = Rule.typescriptSrc name
   rule.options.noImplicitAny = false
   rule
 
+
+# TODO: Move more file lists here.
+FILES =
+  jasmine_helpers: [
+    # Help Jasmine's PhantomJS understand promises.
+    'node_modules/es6-promise/dist/promise-*.js'
+    '!node_modules/es6-promise/dist/promise-*amd.js'
+    '!node_modules/es6-promise/dist/promise-*.min.js'
+  ]
+  # Mocks for chrome app/extension APIs.
+  jasmine_chrome: [
+    'build/mocks/chrome_mocks.js'
+  ]
+  # Files which are required at run-time everywhere.
+  uproxy_common: [
+    'uproxy.js'
+    'generic_core/consent.js'
+    'generic_core/util.js'
+  ]
+
+
 module.exports = (grunt) ->
-  grunt.initConfig {
+  grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
+
+    # Decrease log output for noisy things like symlink.
+    verbosity:
+      diminished:
+        options: { mode: 'oneline' }
+        tasks: ['symlink']
 
     symlink:
       # Symlink all module directories in `src` into typescript-src, and
@@ -124,13 +152,15 @@ module.exports = (grunt) ->
       # Core uProxy without any platform dependencies
       generic_core: Rule.typescriptSrcLenient 'generic_core'
 
-      uistatic: Rule.typescriptSrc 'uistatic'
+      # TODO: Remove uistatic / make it the same as uipolymer once polymer is
+      # fully integrated.
+      uistatic: Rule.typescriptSrcLenient 'uistatic'
       uipolymer: Rule.typescriptSrc 'generic_ui/polymer'
 
       # Mocks to help jasmine along. These typescript files must be compiled
       # independently from the rest of the code, because otherwise there will
       # be many 'duplicate identifiers' and similar typescript conflicts.
-      mocks: Rule.typescriptSrc 'mocks'
+      mocks: Rule.typescriptSrcLenient 'mocks'
 
       # Compile typescript for all chrome components. This will do both the app
       # and extension in one go, along with their specs, because they all share
@@ -139,31 +169,65 @@ module.exports = (grunt) ->
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
-      chrome: Rule.typescriptSrc 'chrome'
-
-      # Compile the Chrome mocks separately from above. Otherwise, there will
-      # be problematic mixing of Ambient / Non-Ambient contexts for things like
-      # the chrome.runtime declarations.
-      chrome_mocks: Rule.typescriptSrc 'chrome/mocks'
+      chrome: Rule.typescriptSrcLenient 'chrome'
 
       # uProxy firefox specific typescript
-      firefox: Rule.typescriptSrc 'firefox'
+      firefox: Rule.typescriptSrcLenient 'firefox'
 
     }  # typescript
 
     #-------------------------------------------------------------------------
-    jasmine: {
-      socks:
-        src: ['build/socks/socks-headers.js']
+    jasmine:
+      chrome_extension:
+        src: FILES.jasmine_helpers
+            .concat FILES.jasmine_chrome
+            .concat [
+              'build/generic_ui/scripts/core_connector.js'
+              'build/chrome/extension/scripts/chrome_connector.js'
+              'build/chrome/util/chrome_glue.js'
+            ]
         options:
-          specs: 'build/socks/socks-headers.spec.js'
-          outfile: 'build/socks/_SpecRunner.html'
+          specs: 'build/chrome/**/*.spec.js'
+          outfile: 'build/chrome/_SpecRunner.html'
           keepRunner: true
-    }
+      generic_core:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/mocks/freedom-mocks.js'
+              'build/uproxy.js'
+              'build/generic_core/util.js'
+              'build/generic_core/nouns-and-adjectives.js'
+              'build/generic_core/constants.js'
+              'build/generic_core/consent.js'
+              'build/generic_core/auth.js'
+              'build/generic_core/social-enum.js'
+              'build/generic_core/local-instance.js'
+              'build/generic_core/remote-instance.js'
+              'build/generic_core/user.js'
+              'build/generic_core/storage.js'
+              'build/generic_core/social.js'
+              'build/generic_core/core.js'
+            ]
+        options:
+          specs: 'build/generic_core/**/*.spec.js'
+          outfile: 'build/generic_core/_SpecRunner.html'
+          # NOTE: Put any helper test-data files here:
+          helpers: []
+          keepRunner: true,
+      generic_ui:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/generic_ui/scripts/user.js'
+              'build/generic_ui/scripts/ui.js'
+            ]
+        options:
+          specs: 'build/generic_ui/scripts/**/*.spec.js'
+          outfile: 'build/generic_ui/_SpecRunner.html'
+          keepRunner: true
 
     clean: ['build/**']
 
-  }  # grunt.initConfig
+ # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -174,12 +238,14 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-typescript'
   grunt.loadNpmTasks 'grunt-tsd'
+  grunt.loadNpmTasks 'grunt-verbosity'
 
   #-------------------------------------------------------------------------
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'base', [
+    'verbosity:diminished'
     'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
@@ -202,14 +268,14 @@ module.exports = (grunt) ->
   taskManager.add('build_uistatic', [
     'build_generic_ui',
     'typescript:uistatic',
-    'concat:uistatic',
-    'copy:uistatic'
+    # 'concat:uistatic',
+    # 'copy:uistatic'
   ]);
 
   taskManager.add 'build_uipolymer', [
     'build_generic_ui'
     'typescript:uipolymer'
-    'copy:uipolymer'
+    # 'copy:uipolymer'
   ]
 
   # The Chrome App and the Chrome Extension cannot be built separately. They
@@ -218,9 +284,9 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:chrome'
-    'copy:chrome_app'
-    'copy:chrome_extension'
-    'shell:extract_chrome_tests'
+    # 'copy:chrome_app'
+    # 'copy:chrome_extension'
+    # 'shell:extract_chrome_tests'
   ]
 
   # Firefox build tasks.
@@ -228,7 +294,7 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:firefox'
-    'copy:firefox'
+    # 'copy:firefox'
   ]
 
   taskManager.add 'build_firefox_xpi', [
@@ -256,7 +322,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'test_chrome_extension', [
     'build_chrome'
-    'typescript:chrome_mocks'
+    'typescript:mocks'
     'jasmine:chrome_extension'
   ]
 

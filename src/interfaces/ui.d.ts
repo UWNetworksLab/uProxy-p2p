@@ -8,7 +8,6 @@
 /// <reference path='user.d.ts' />
 /// <reference path='../generic_ui/scripts/ui.ts' />
 /// <reference path='instance.d.ts' />
-/// <reference path='lib/angular.d.ts' />
 
 declare module UI {
 
