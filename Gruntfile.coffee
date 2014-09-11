@@ -21,6 +21,9 @@ getNodePath = (module) =>
 uproxyLibPath = getNodePath 'uproxy-lib'
 uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
+chromeExtDevPath = 'build/dev/chrome/extension/'
+chromeAppDevPath = 'build/dev/chrome/app/'
+
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 Rule.symlink = (dir, dest='') =>
   { files: [ {
@@ -36,12 +39,21 @@ Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
 Rule.symlinkThirdParty = (module) =>
   Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
 
+
+# TODO: When we make the 'distribution' build which uglifies all js and removes
+# the specs, make a corresponding rule which makes everything go into
+# 'build/dist'.
+Rule.typescriptSrcDev = (name) =>
+  rule = Rule.typescriptSrc name
+  rule.dest = 'build/dev/'
+  rule
+
 # Temporary wrapper which allows implicit any.
 # TODO: Remove once implicit anys are fixed. (This is actually happening in some
 # of the DefinitelyTyped definitions - i.e. MediaStream.d.ts, and many other
 # places)
 Rule.typescriptSrcLenient = (name) =>
-  rule = Rule.typescriptSrc name
+  rule = Rule.typescriptSrcDev name
   rule.options.noImplicitAny = false
   rule
 
@@ -122,16 +134,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
-      # TODO: provide a warning if local project overrides directory?
-      #
-      # Copy all the built stuff from uproxy-lib
-      uproxyNetworkingBuild: { files: [ {
-          expand: true, cwd: Path.join(uproxyNetworkingPath, 'build')
-          src: ['**', '!**/typescript-src/**']
-          dest: 'build'
-          onlyIf: 'modified'
-        } ] }
-
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
@@ -139,6 +141,56 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
+
+      chrome_extension:
+        nonull: true
+        files: [ {
+          # The platform specific non-compiled stuff, and...
+          expand: true, cwd: 'src/chrome/extension'
+          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass']
+          dest: chromeExtDevPath
+        }, {
+          # generic_ui HTML and non-typescript assets.
+          expand: true, cwd: 'src/generic_ui',
+          src: ['**', '!**/*.ts']
+          dest: chromeExtDevPath
+        }, {
+          # generic_ui compiled source.
+          # (Assumes the typescript task has executed)
+          expand: true, cwd: 'build/dev/generic_ui'
+          src: ['**', '!**/*.spec.js']
+          dest: chromeExtDevPath
+        }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['generic_ui/*', 'icons/*', '!**/*.ts']
+          dest: chromeExtDevPath
+        }, {
+          expand: true, cwd: 'build/dev/', flatten: true
+          src: FILES.uproxy_common
+            .concat [
+              'chrome/util/chrome_glue.js'
+            ]
+          dest: chromeExtDevPath + 'scripts/'
+        }
+        # Libraries
+          # expand: true, cwd: 'node_modules/freedom-for-chrome/'
+          # src: ['freedom.js']
+          # dest: 'build/chrome/extension/lib'},
+        # {expand: true, cwd: 'third_party/lib',
+         # src: ['**/*.js'],
+         # dest: 'build/chrome/extension/lib'},
+        ]
+
+      chrome_app:
+        nonull: true
+        files: [
+          {
+            expand: true, cwd: 'src/chrome/app'
+            src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts', '!**/*.sass']
+            dest: chromeAppDevPath
+          }
+        ]
 
     }  # copy
 
@@ -284,8 +336,8 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:chrome'
-    # 'copy:chrome_app'
-    # 'copy:chrome_extension'
+    'copy:chrome_app'
+    'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
   ]
 
