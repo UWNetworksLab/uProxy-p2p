@@ -4,7 +4,7 @@
  * This file contains functions related to uProxy authentication.
  * TODO: Hook the video-auth SAS-RTC component into here.
  */
-/// <reference path='../interfaces/lib/webrtc/RTCPeerConnection.d.ts' />
+/// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
 
 module Auth {
 

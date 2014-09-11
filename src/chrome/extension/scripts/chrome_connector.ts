@@ -7,7 +7,7 @@
 /// <reference path='../../../uproxy.ts'/>
 /// <reference path='../../util/chrome_glue.ts' />
 
-/// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
@@ -72,7 +72,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     console.log('trying to connect to app');
     if (this.status.connected) {
       console.warn('Already connected.');
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     return this.connect_().then(this.flushQueue).then(() => {

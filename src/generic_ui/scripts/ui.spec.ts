@@ -1,4 +1,4 @@
-/// <reference path='../../interfaces/lib/jasmine/jasmine.d.ts' />
+/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='ui.ts' />
 
 // TODO: move model, mockCore, and mockBrowserAction to a file

@@ -2,12 +2,12 @@
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
-/// <reference path='../../interfaces/lib/angular.d.ts' />
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
-declare var angular:ng.IAngularStatic;
+// declare var angular:ng.IAngularStatic;
+declare var angular :any;
 
 var model :UI.Model = {
   networks: {},
@@ -135,7 +135,7 @@ class MockCore implements uProxy.CoreAPI {
     };
     console.log(this.currentProxyServer);
     this.currentProxyServer.instance.access.asProxy = true;
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
 
   stop = () => {
@@ -162,7 +162,7 @@ class MockCore implements uProxy.CoreAPI {
     });
     // Pretend we receive a bunch of user messages.
     ui.syncUser(generateFakeUserMessage());
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
   logout(network) {
     console.log('Logging out of', network);

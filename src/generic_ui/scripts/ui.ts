@@ -8,11 +8,15 @@
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
-/// <reference path='../../interfaces/lib/chrome/chrome.d.ts'/>
+/// <reference path='../../interfaces/browser-proxy-config.d.ts'/>
 
 
 declare var model         :UI.Model;
-declare var proxyConfig   :BrowserProxyConfig;
+declare var proxyConfig   :IBrowserProxyConfig;
+// TODO: This file will be destructed once polymer is is-use, so we don't care
+// about this any.
+declare var ng :any;
+
 
 module UI {
 
@@ -68,7 +72,7 @@ module UI {
     instances :{[instanceId :string] :UI.Instance};
   }
 
-  export interface RootScope extends ng.IRootScopeService {
+  export interface RootScope { //extends ng.IRootScopeService {
     ui :uProxy.UIAPI;
     core :uProxy.CoreAPI;
     model :modelForAngular;

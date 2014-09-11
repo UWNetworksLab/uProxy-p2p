@@ -57,7 +57,7 @@ class FSM<S, T> {
 
 }  // class FSM
 
-function linear_congruence_gen(prior) {
+function linear_congruence_gen(prior) : number {
   return (1 + prior * 16807) % 2147483647;
 }
 

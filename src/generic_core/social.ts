@@ -24,8 +24,8 @@
 /// <reference path='../interfaces/persistent.d.ts' />
 
 /// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/promise.d.ts' />
 /// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 
 module Social {
@@ -104,7 +104,8 @@ module Social {
      * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
     public syncFromStorage = () : Promise<void> => {
-      var preparedMyself = this.prepareLocalInstance_();
+      // TODO: Fix tsd es6-promise typing to be more lenient.
+      var preparedMyself = this.prepareLocalInstance_().then(() => {});
       var preparedRoster = storage.load<NetworkState>(this.getStorePath())
           .then((state) => {
         this.log('loading previous state.');
@@ -112,7 +113,8 @@ module Social {
       }).catch((e) => {
         this.log('freshly initialized.');
       });
-      return Promise.all([preparedMyself, preparedRoster]);
+      return Promise.all([preparedMyself, preparedRoster])
+          .then(() => {});
     }
 
     /**
@@ -120,9 +122,9 @@ module Social {
      * from storage, or create a new one if this is the first time this uProxy
      * installation has interacted with this network.
      */
-    private prepareLocalInstance_ = () : Promise<void> => {
+    private prepareLocalInstance_ = () : Promise<Core.LocalInstance> => {
       if (this.myInstance) {
-        return Promise.resolve();
+        return Promise.resolve(this.myInstance);
       }
       var key = this.getStorePath() + this.SaveKeys.ME;
       return storage.load<Instance>(key).then((result :Instance) => {
@@ -269,7 +271,7 @@ module Social {
   // events are passed on to the relevant user (provided the user exists).
   export class FreedomNetwork extends AbstractNetwork {
 
-    private freedomApi_ :freedom.Social;
+    private freedomApi_ :freedom_Social;
     // TODO: give real typing to provider_. Ask Freedom not to use overloaded
     // types.
     private provider_ :any;  // Special freedom object which is both a function
@@ -344,7 +346,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom.Social.UserProfile) => {
+    public handleUserProfile = (profile :freedom_Social.UserProfile) => {
       var userId = profile.userId;
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
@@ -389,7 +391,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom.Social.ClientState)
+    public handleClientState = (freedomClient :freedom_Social.ClientState)
         : void => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
@@ -416,7 +418,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom.Social.IncomingMessage)
+    public handleMessage = (incoming :freedom_Social.IncomingMessage)
         : void => {
       var userId = incoming.from.userId;
       if (this.isNewFriend_(userId)) {
@@ -526,13 +528,13 @@ module Social {
                          '. Please try again.');
           }, LOGIN_TIMEOUT);
         }
-        return Promise.reject();
+        return Promise.reject('Login already pending...');
       } else if (this.isOnline()) {
         console.warn('Already logged in to ' + this.name);
-        return Promise.resolve();
+        return Promise.resolve<void>();
       }
 
-      var request :freedom.Social.LoginRequest = {
+      var request :freedom_Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
         url: 'https://github.com/uProxy/uProxy',
@@ -540,7 +542,7 @@ module Social {
         rememberLogin: remember
       };
       this.onceLoggedIn_ = this.freedomApi_.login(request)
-          .then((freedomClient :freedom.Social.ClientState) => {
+          .then((freedomClient :freedom_Social.ClientState) => {
             // Upon successful login, save local client information.
             this.myInstance.userId = freedomClient.userId;
             this.startMonitor_();
@@ -566,7 +568,7 @@ module Social {
     public logout = () : Promise<void> => {
       if (!this.isOnline()) {
         console.warn('Already logged out of ' + this.name);
-        return Promise.resolve();
+        return Promise.resolve<void>();
       }
       this.onceLoggedIn_ = null;
       this.stopMonitor_();
@@ -588,9 +590,10 @@ module Social {
       return Boolean(this.onceLoggedIn_) && !this.isOnline();
     }
 
-    public flushQueuedInstanceMessages = () => {
+    // TODO: Use the queue from uproxy-lib!
+    public flushQueuedInstanceMessages = () : Promise<void> => {
       if (0 === this.instanceMessageQueue_.length) {
-        return Promise.resolve();  // Don't need to do anything.
+        return Promise.resolve<void>();  // Don't need to do anything.
       }
       return this.sendInstanceHandshakes(this.instanceMessageQueue_)
           .then(() => {
@@ -687,11 +690,11 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     public logout = () : Promise<void> => {
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     public isOnline = () : boolean => {
@@ -715,7 +718,7 @@ module Social {
       // Relay the message to the UI for display to the user.
       ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
 
-      return Promise.resolve();
+      return Promise.resolve<void>();
     }
 
     // TODO: Consider adding a mechanism for reporting back to the UI that a
@@ -741,7 +744,7 @@ module Social {
 }  // module Social
 
 function freedomClientToUproxyClient(
-  freedomClientState :freedom.Social.ClientState) : UProxyClient.State {
+  freedomClientState :freedom_Social.ClientState) : UProxyClient.State {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.

@@ -9,13 +9,13 @@
 
 /// <reference path='../freedom/typings/freedom.d.ts' />
 /// <reference path='../freedom/typings/storage.d.ts' />
-/// <reference path='../freedom/typings/promise.d.ts' />
+/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 
 module Core {
 
   // Platform-independent storage provider.
-  var fStorage :freedom.Storage = freedom['storage']();
+  var fStorage :freedom_Storage = freedom['storage']();
 
   // Set false elsewhere to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;
@@ -54,7 +54,8 @@ module Core {
         return <T>JSON.parse(result);
       }, (e) => {
         this.log(e.message);
-        return <T>{};
+        return Promise.reject('non-existing key');
+        // return <T>{};
       });
     }
 

@@ -11,7 +11,7 @@
 // Mock out chrome.
 module chrome.runtime {
 
-  export function connect() {
-    // console.log('Mock chrome.runtime.connect.');
+  export function connect(connect) {
+    console.log('Mock chrome.runtime.connect.');
   }
 }

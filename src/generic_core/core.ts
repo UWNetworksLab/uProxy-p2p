@@ -17,9 +17,10 @@
 /// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/freedom.d.ts' />
-/// <reference path='../../node_modules/freedom-typescript-api/interfaces/social.d.ts' />
-/// <reference path='../../node_modules/socks-rtc/src/interfaces/communications.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../networking-typings/communications.d.ts' />
+
 
 var storage = new Core.Storage();
 
@@ -158,9 +159,10 @@ class uProxyCore implements uProxy.CoreAPI {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
-        console.error('onPromiseCommand called for cmd ' + cmd +
-                      'with promiseId undefined');
-        return Promise.reject();
+        var err = 'onPromiseCommand called for cmd ' + cmd +
+                  'with promiseId undefined';
+        console.error(err)
+        return Promise.reject(err);
       }
 
       // Call handler function, then return success or failure to UI.
@@ -191,8 +193,9 @@ class uProxyCore implements uProxy.CoreAPI {
   public login = (networkName:string) : Promise<void> => {
     var network = Social.getNetwork(networkName);
     if (null === network) {
-      console.warn('Could not login to ' + networkName);
-      return Promise.reject();
+      var warn = 'Could not login to ' + networkName;
+      console.warn(warn)
+      return Promise.reject(warn);
     }
     var loginPromise = network.login(true);
     loginPromise.then(ui.updateAll)
@@ -274,9 +277,9 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     var remote = this.getInstance(path);
     if (!remote) {
-      console.error('Instance ' + path.instanceId +
-                    ' does not exist for proxying.');
-      return Promise.reject();
+      var err = 'Instance ' + path.instanceId + ' does not exist for proxying.';
+      console.error(err);
+      return Promise.reject(err);
     }
     // remote.start will send an update to the UI.
     return remote.start().then(() => {

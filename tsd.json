@@ -2,17 +2,17 @@
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
-  "path": "src/interfaces/lib",
-  "bundle": "src/interfaces/lib/tsd.d.ts",
+  "path": "third_party/typings/",
+  "bundle": "third_party/typings/tsd.d.ts",
   "installed": {
     "chrome/chrome-app.d.ts": {
-      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
+      "commit": "50dd84eb5d5593787b7686decf1476d094f5e13a"
     },
     "chrome/chrome.d.ts": {
       "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
+      "commit": "50dd84eb5d5593787b7686decf1476d094f5e13a"
     },
     "webrtc/RTCPeerConnection.d.ts": {
       "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
@@ -21,7 +21,7 @@
       "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
     },
     "lodash/lodash.d.ts": {
-      "commit": "807ba77ee6af4e587618535b0d820f03e3353823"
+      "commit": "50dd84eb5d5593787b7686decf1476d094f5e13a"
     }
   }
 }

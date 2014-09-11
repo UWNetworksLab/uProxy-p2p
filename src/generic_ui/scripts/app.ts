@@ -10,7 +10,9 @@
  * straightforward to let the background page connect to the App.
  */
 
-/// <reference path='../../interfaces/lib/angular.d.ts'/>
+declare var angular :any;
+declare var ng :any;
+
 /// <reference path='../../interfaces/instance.d.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../uproxy.ts'/>
@@ -28,7 +30,7 @@ var app = angular.module('UProxyExtension', ['angular-lodash', 'dependencyInject
     $compileProvider.imgSrcSanitizationWhitelist(newImgWhitelist);
   })
   // can remove once https://github.com/angular/angular.js/issues/2963 is fixed:
-  .config(function ($provide :ng.auto.IProvideService) {
+  .config(function ($provide) {
     $provide.decorator('$sniffer', ['$delegate', function ($sniffer) {
       $sniffer.csp = true;
       return $sniffer;
@@ -59,7 +61,7 @@ app.run([
       // necesasry anytime there is a non-user-initiated callback, like
       // receiving something over the wire).
       $s.ui['setRefreshHandler'](() => {
-        $s.$apply(() => {
+        $s['$apply'](() => {
           console.log('Refreshed the DOM!');
         });
       });

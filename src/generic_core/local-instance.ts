@@ -7,7 +7,7 @@
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
-/// <reference path='../../third_party/typings/webcrypto/WebCrypto.d.ts' />
+/// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 
 module Core {
 

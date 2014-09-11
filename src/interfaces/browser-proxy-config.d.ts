@@ -1,4 +1,4 @@
-interface BrowserProxyConfig {
+interface IBrowserProxyConfig {
   startUsingProxy() : void;
   stopUsingProxy() : void;
 }

@@ -7,7 +7,7 @@
 /// <reference path='../../../interfaces/firefox.d.ts' />
 
 
-/// <reference path='../../../../node_modules/freedom-typescript-api/interfaces/promise.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 
 var port :ContentScriptPort;
