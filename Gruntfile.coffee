@@ -143,7 +143,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.sass']
+          src: ['**', '!**/*.md', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # generic_ui HTML and non-typescript assets.
@@ -178,7 +178,7 @@ module.exports = (grunt) ->
         nonull: true
         files: [ {
           expand: true, cwd: 'src/chrome/app'
-          src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts', '!**/*.sass']
+          src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts']
           dest: chromeAppDevPath
         }, {  # Freedom manifest for uproxy
           expand: true, cwd: 'src/generic_core/'
