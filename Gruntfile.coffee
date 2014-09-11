@@ -23,6 +23,7 @@ uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
 chromeExtDevPath = 'build/dev/chrome/extension/'
 chromeAppDevPath = 'build/dev/chrome/app/'
+firefoxDevPath = 'build/dev/firefox/'
 
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 Rule.symlink = (dir, dest='') =>
@@ -120,9 +121,9 @@ module.exports = (grunt) ->
 
       firefox_uproxy: {
         files: [ {
-          src: ['build/firefox/data/core/uproxy.js'
-                'build/firefox/lib/exports.js']
-          dest: 'build/firefox/lib/uproxy.js'
+          src: [firefoxDevPath + 'data/core/uproxy.js'
+                firefoxDevPath + 'lib/exports.js']
+          dest: firefoxDevPath + 'lib/uproxy.js'
         } ]
       }
 
@@ -209,6 +210,56 @@ module.exports = (grunt) ->
           expand: true, cwd: 'src/'
           src: ['icons/uproxy-*.png']
           dest: chromeAppDevPath
+        } ]
+
+      # Firefox. Assumes the top-level tasks generic_core and generic_ui
+      # completed.
+      firefox:
+        files: [ {
+          # The platform specific stuff, and...
+          expand: true, cwd: 'src/firefox/'
+          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: firefoxDevPath
+        # }, {
+          # expand: true, cwd: 'build/dev'
+          # src: ['uproxy.js']
+          # dest: firefoxDevPath + 'data/core/'
+        # ... the generic core stuff
+        }, {
+          expand: true, cwd: 'build/dev/generic_core'
+          src: ['**'],
+          dest: firefoxDevPath + 'data/core/'
+        # ... the generic UI stuff
+        }, {
+          expand: true, cwd: 'build/dev/generic_ui'
+          src: ['**'],
+          dest: firefoxDevPath + 'data'
+        }, {
+          expand: true, cwd: 'build/dev', flatten: true
+          src: FILES.uproxy_common,
+          dest: firefoxDevPath + 'data/scripts'
+        # freedom for firefox
+        }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom'
+          src: ['freedom-for-firefox-for-uproxy.jsm']
+          dest: firefoxDevPath + 'data'
+        }, {
+        # TODO: Fix socks-rtc / uproxy-networking include?
+          expand: true, cwd: 'node_modules/socks-rtc/build/'
+          src: ['**'],
+          dest: firefoxDevPath + 'data/lib/socks-rtc'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/social'
+          src: ['websocket-server/**']
+          dest: firefoxDevPath + 'data/lib'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/storage'
         } ]
 
     }  # copy
@@ -299,12 +350,23 @@ module.exports = (grunt) ->
           outfile: 'build/dev/generic_ui/_SpecRunner.html'
           keepRunner: true
 
+    compress:
+      main:
+        options:
+          mode: 'zip'
+          archive: 'dist/uproxy.xpi'
+        expand: true
+        cwd: 'build/dev/firefox'
+        src: ['**']
+        dest: '.'
+
     clean: ['build/**']
 
  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-contrib-compress'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
@@ -368,7 +430,7 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'typescript:firefox'
-    # 'copy:firefox'
+    'copy:firefox'
   ]
 
   taskManager.add 'build_firefox_xpi', [
