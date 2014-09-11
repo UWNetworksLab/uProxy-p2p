@@ -1,0 +1,34 @@
+{
+  "name": "uProxy",
+  "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
+  "app": {
+    "script": [
+      "uproxy.js",
+      "util.js",
+      "auth.js",
+      "consent.js",
+      "storage.js",
+      "local-instance.js",
+      "remote-instance.js",
+      "user.js",
+      "social-enum.js",
+      "social.js",
+      "core.js"
+    ]
+  },
+  "dependencies": {
+    "SOCIAL-google": {
+      "url": "../lib/freedom-social-xmpp/social.google.json",
+      "api": "social"
+    },
+    "storage": {
+      "url": "../lib/storage/storage.isolated.json",
+      "api": "storage"
+    }
+  },
+  "permissions": [
+    "core.uproxypeerconnection",
+    "core.tcpsocket",
+    "core.udpsocket"
+  ]
+}
