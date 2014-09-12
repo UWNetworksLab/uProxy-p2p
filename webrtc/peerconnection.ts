@@ -364,60 +364,27 @@ module WebRtc {
     // connection addresses are so the onceConnected and negotiate connection
     // promises can be fulfilled with the addresses.
     private completeConnection_ = () : void => {
-      this.pc_.getStats(
-        // Success.
-        // TODO: add need stat-getting for Firefox.
-        // TODO: when Chrome meets the spec, update to match.
-        (report :RTCStatsReport) => {
-          var results = report.result();
-          for (var i = 0; i < results.length; i++) {
-            var result = results[i];
-            // Search for the endpoints in use.
-            // There's a bug in Chrome whereby RTCPeerConnection.getStats(),
-            // when that RTCPeerConnection is configured to use a TURN server,
-            // reports multiple channels, *some of which have the non-relay
-            // candidates and are reported as active*. Fortunately, the report
-            // quickly fixes itself and a workaround seems to be to wait until
-            // some bytes are sent over the channel -- fortunately, again,
-            // this happens automatically as part of keeping the channel alive.
-            //
-            // Tracking here:
-            //   https://code.google.com/p/webrtc/issues/detail?id=3665
-            //
-            // Note that the inactive/failed channel remains visible at
-            // chrome://webrtc-internals/.
-            if (result.stat('googActiveConnection') === 'true' &&
-                parseInt(result.stat('bytesSent')) > 0) {
-              this.pcState = State.CONNECTED;
-              var localFields = result.stat('googLocalAddress').split(':');
-              var remoteFields = result.stat('googRemoteAddress').split(':');
-              this.fulfillConnected_({
-                  local: {
-                    address: localFields[0],
-                    port: parseInt(localFields[1])
-                  },
-                  localType: (candidateTypeMapping_[result.stat(
-                      'googLocalCandidateType')] || CandidateType.UNKNOWN),
-                  remote: {
-                    address: remoteFields[0],
-                    port: parseInt(remoteFields[1])
-                  },
-                  remoteType: (candidateTypeMapping_[result.stat(
-                      'googRemoteCandidateType')] || CandidateType.UNKNOWN)
-                });
-              return;
-            }
-          }
-          // Get stats doesn't reliably work, so we have to pull it
-          // TODO: bug request?
-          window.setTimeout(this.completeConnection_, 200);
-        },
+      getPeerConnectionStats(this.pc_)
+      .then((stats: {local: Endpoint;
+                     remote: Endpoint;
+                     localType:string;
+                     remoteType:string;}) => {
+        var addresses : ConnectionAddresses = {
+          local: stats.local,
+          remote: stats.remote,
+          localType: (candidateTypeMapping_[stats.localType]
+                               || CandidateType.UNKNOWN),
+          remoteType: (candidateTypeMapping_[stats.remoteType]
+                               || CandidateType.UNKNOWN)
+        };
+        this.pcState = State.CONNECTED;
+        this.fulfillConnected_(addresses);
+      })
+      .catch((e) => {
         // Error (unclear from the spec if this can actually happen)
-        (e) => {
-          this.closeWithError_(this.peerName + ': ' +
-            'onSignallingStateChange getStats error: ' + e.toString());
-        }
-      );
+        this.closeWithError_(this.peerName + ': ' +
+          'onSignallingStateChange getStats error: ' + e.toString());
+      });
     }
 
     public negotiateConnection =  () : Promise<ConnectionAddresses> => {

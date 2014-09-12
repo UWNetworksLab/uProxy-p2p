@@ -5,6 +5,8 @@ var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
 var createIceServer = null;
+var getPeerConnectionStats = null;
+
 
 if (navigator.mozGetUserMedia) {
   console.log("This appears to be Firefox");
@@ -81,6 +83,33 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
+  getPeerConnectionStats = function(pc) {
+    return new Promise(function(F, R) {
+      pc.getStats(null,
+        function(report) {
+          var result = {};
+          report.forEach(function(res) {
+            if (res.type === 'localcandidate') {
+              result.local = {
+                address: res.ipAddress,
+                port: res.portNumber
+              };
+              result.localType = res.candidateType;
+            } else if (res.type === 'remotecandidate') {
+              result.remote = {
+                address: res.ipAddress,
+                port: res.portNumber
+              };
+              result.remoteType = res.candidateType;
+            }
+            if (typeof result.local !== 'undefined' &&
+                typeof result.remote !== 'undefined') {
+              F(result);
+            }
+          });
+        }, R);
+    });
+  }
 } else if (navigator.webkitGetUserMedia) {
   console.log("This appears to be Chrome");
 
@@ -127,6 +156,60 @@ if (navigator.mozGetUserMedia) {
   reattachMediaStream = function(to, from) {
     to.src = from.src;
   };
+
+  getPeerConnectionStats = function(pc) {
+    return new Promise(function(F, R) {
+      function tryGetStats() {
+        pc.getStats(
+          // Success.
+          // TODO: when Chrome meets the spec, update to match.
+          function(report) {
+            var results = report.result();
+            for (var i = 0; i < results.length; i++) {
+              var result = results[i];
+              // Search for the endpoints in use.
+              // There's a bug in Chrome whereby RTCPeerConnection.getStats(),
+              // when that RTCPeerConnection is configured to use a TURN server,
+              // reports multiple channels, *some of which have the non-relay
+              // candidates and are reported as active*. Fortunately, the report
+              // quickly fixes itself and a workaround seems to be to wait until
+              // some bytes are sent over the channel -- fortunately, again,
+              // this happens automatically as part of keeping the channel alive.
+              //
+              // Tracking here:
+              //   https://code.google.com/p/webrtc/issues/detail?id=3665
+              //
+              // Note that the inactive/failed channel remains visible at
+              // chrome://webrtc-internals/.
+              console.log(result);
+              if (result.stat('googActiveConnection') === 'true' &&
+                  parseInt(result.stat('bytesSent')) > 0) {
+                var localFields = result.stat('googLocalAddress').split(':');
+                var remoteFields = result.stat('googRemoteAddress').split(':');
+                console.log('fulfill');
+                F({
+                    local: {
+                      address: localFields[0],
+                      port: parseInt(localFields[1])
+                    },
+                    remote: {
+                      address: remoteFields[0],
+                      port: parseInt(remoteFields[1])
+                    },
+                    localType: result.stat('googLocalCandidateType'),
+                    remoteType: result.stat('googRemoteCandidateType')
+                  });
+                return;
+              }
+            }
+            // Get stats doesn't reliably work, so we have to pull it
+            // TODO: bug request?
+            window.setTimeout(tryGetStats, 200);
+          }, R);
+      }
+      tryGetStats();
+    });
+  }
 } else {
   console.log("Browser does not appear to be WebRTC-capable");
 }
