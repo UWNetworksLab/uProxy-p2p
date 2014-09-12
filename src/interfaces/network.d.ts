@@ -49,10 +49,6 @@ declare module Social {
 
     getLocalInstance :() => Core.LocalInstance;
 
-    // TODO: Remove this redundant method? Callers can do
-    // getLocalInstance().id instead.
-    getLocalInstanceId :() => string;
-
     /**
      * Returns the User corresponding to |userId|.
      */

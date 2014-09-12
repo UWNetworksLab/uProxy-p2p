@@ -158,10 +158,6 @@ module Social {
       return this.myInstance;
     }
 
-    public getLocalInstanceId = () : string => {
-      return this.myInstance.instanceId;
-    }
-
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
