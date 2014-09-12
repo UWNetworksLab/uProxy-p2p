@@ -29,8 +29,9 @@ var storage = new Core.Storage();
 // this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
-// Keep track of the current remote proxy, if they exist.
-var proxy :Core.RemoteInstance = null;
+// Keep track of the current remote instance who is acting as a proxy server
+// for us.
+var remoteProxyServerInstance : Core.RemoteInstance = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -86,7 +87,7 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public isProxying = () : boolean => {
-    return proxy != null;
+    return remoteProxyServerInstance != null;
   }
 
 }
@@ -94,7 +95,7 @@ var ui = new UIConnector();
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
- * sends updaes to the UI, and handles commands from the UI.
+ * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
@@ -155,7 +156,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Promise commands return an ack or error to the UI.
    */
   public onPromiseCommand = (cmd :uProxy.Command,
-                                 handler :(data ?:any) => Promise<void>) => {
+                             handler :(data ?:any) => Promise<void>) => {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
@@ -269,11 +270,11 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<void> => {
     // Disable any previous proxying session.
-    if (proxy) {
+    if (remoteProxyServerInstance) {
       console.log('Existing proxying session! Terminating...');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      proxy.stop();
-      proxy = null;
+      remoteProxyServerInstance.stop();
+      remoteProxyServerInstance = null;
     }
     var remote = this.getInstance(path);
     if (!remote) {
@@ -284,7 +285,7 @@ class uProxyCore implements uProxy.CoreAPI {
     // remote.start will send an update to the UI.
     return remote.start().then(() => {
       // Remember this instance as our proxy.
-      proxy = remote;
+      remoteProxyServerInstance = remote;
     });
   }
 
@@ -295,8 +296,8 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!proxy) {
       console.error('Cannot stop proxying when there is no proxy');
     }
-    proxy.stop();
-    proxy = null;
+    remoteProxyServerInstance.stop();
+    remoteProxyServerInstance = null;
     // TODO: Handle revoked permissions notifications.
   }
 
@@ -353,7 +354,6 @@ allow the remote to verify the provinance of the signal.
 Expect peerId to be a #-connected InstancePath.
 
 */
-SocksToRtc.signalsForPeer.
 
 socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
   console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
