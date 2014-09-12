@@ -71,7 +71,7 @@ class CoreConnector implements uProxy.CoreAPI {
       data: data,
       promiseId: promiseId
     }
-    console.log('UI sending Promise Command ' + //uProxy.Command[command],
+    console.log('UI sending Promise Command ' + uProxy.Command[command],
         JSON.stringify(payload));
 
     // Create a new promise and store its fulfill and reject functions.
