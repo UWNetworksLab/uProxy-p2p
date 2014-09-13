@@ -258,13 +258,13 @@ module Core {
     }
 
     /**
-     * Helper which returns the local user's instance ID.
-     * TODO: this API is confusing because it doesn't return the instance
+     * Helper that returns the local user's instance ID.
+     * TODO: This API is confusing because it doesn't return the instance
      * for this (remote) user object, but instead returns information about the
-     * user running uproxy.  We should clean this up somehow.
+     * user running uProxy.  We should clean this up somehow.
      */
     public getLocalInstanceId = () : string => {
-      return this.network.getLocalInstanceId();
+      return this.network.getLocalInstance().instanceId;
     }
 
     /**
