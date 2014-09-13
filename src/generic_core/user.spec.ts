@@ -9,11 +9,14 @@ describe('Core.User', () => {
   var network = jasmine.createSpyObj('network', [
       'api',
       'sendInstanceHandshake',
-      'getLocalInstanceId',
       'getStorePath',
       'notifyUI'
   ]);
+  network['getLocalInstance'] = function() {
+    return { instanceId: 'dummyInstanceId' };
+  };
   network['send'] = () => {};
+
   var user :Core.User;
   var instance :Core.RemoteInstance;
 
