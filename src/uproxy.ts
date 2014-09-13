@@ -25,8 +25,8 @@ module uProxy {
     REFRESH_UI = 1000,
     // Skip unused REFRESH. (Refresh what, anyway?)
     RESET = 1002,  // logs out of all networks
-    LOG_IN,
-    LOG_OUT,
+    LOGIN,
+    LOGOUT,
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.

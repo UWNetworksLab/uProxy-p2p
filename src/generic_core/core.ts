@@ -514,8 +514,8 @@ function _validateKeyHash(keyHash:string) {
 core.onCommand(uProxy.Command.REFRESH_UI, ui.updateAll);
 core.onCommand(uProxy.Command.RESET, core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-core.onPromiseCommand(uProxy.Command.LOG_IN, core.login);
-core.onCommand(uProxy.Command.LOG_OUT, core.logout)
+core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
+core.onCommand(uProxy.Command.LOGOUT, core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
 // core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
