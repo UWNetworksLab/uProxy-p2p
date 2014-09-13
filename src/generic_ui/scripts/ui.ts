@@ -207,7 +207,7 @@ module UI {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
         this.showNotification(notificationText);
       });
-      core.onUpdate(uProxy.Update.STOP_PROXYING, () => {
+      core.onUpdate(uProxy.Update.PROXYING_STOPPED, () => {
         this.stopProxyingInUiAndConfig();
       });
 

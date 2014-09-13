@@ -91,7 +91,7 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public stopProxyingInUiAndConfig = () => {
-    this.update(uProxy.Update.STOP_PROXYING);
+    this.update(uProxy.Update.PROXYING_STOPPED);
   }
 
   public isProxying = () : boolean => {
@@ -132,7 +132,7 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   /**
-   * Logs out of all networks and resets data.
+   * Logs out of all networks.
    */
   reset = () => {
     console.log('reset');
@@ -142,10 +142,10 @@ class uProxyCore implements uProxy.CoreAPI {
     storage.reset().then(ui.updateAll);
   }
 
-  sendInstance = (clientId :string) => {
-    // TODO: Possibly implement this, or get rid of the possibility for
-    // UI-initiated instance handshakes.
-  }
+  // sendInstanceHandshakeMessage = (clientId :string) => {
+  //   // TODO: Possibly implement this, or get rid of the possibility for
+  //   // UI-initiated instance handshakes.
+  // }
 
   /**
    * Install a handler for commands received from the UI.
@@ -239,7 +239,7 @@ class uProxyCore implements uProxy.CoreAPI {
   onUpdate = (update, handler) => {}
 
   /**
-   * Update user's description of their current device. This applies to all
+   * Updates user's description of their current device. This applies to all
    * local instances for every network the user is currently logged onto. Those
    * local instances will then propogate their description update to all
    * instances.
@@ -511,29 +511,32 @@ function _validateKeyHash(keyHash:string) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-core.onCommand(uProxy.Command.READY, ui.updateAll);
+core.onCommand(uProxy.Command.REFRESH_UI, ui.updateAll);
 core.onCommand(uProxy.Command.RESET, core.reset);
 // When the login message is sent from the extension, assume it's explicit.
-core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
-core.onCommand(uProxy.Command.LOGOUT, core.logout)
+core.onPromiseCommand(uProxy.Command.LOG_IN, core.login);
+core.onCommand(uProxy.Command.LOG_OUT, core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
-// core.onCommand(uProxy.Command.SEND_INSTANCE, core.sendInstance);
+// core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
+//                core.sendInstanceHandshakeMessage);
 core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
 
 core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
 core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 
-core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
-  console.warn('CHANGE_OPTION yet to be implemented!');
-  // TODO: Handle changes that might affect proxying.
-});
+// TODO: Implement this or remove it.
+// core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
+//   console.warn('CHANGE_OPTION yet to be implemented!');
+//   // TODO: Handle changes that might affect proxying.
+// });
 
-core.onCommand(uProxy.Command.UPDATE_DESCRIPTION, core.updateDescription);
+core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
+               core.updateDescription);
 
 // TODO: make the invite mechanism an actual process.
-core.onCommand(uProxy.Command.INVITE, (userId:string) => {
-});
+// core.onCommand(uProxy.Command.INVITE, (userId:string) => {
+// });
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);

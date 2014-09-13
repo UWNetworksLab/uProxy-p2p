@@ -91,7 +91,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
       }
       var ready :uProxy.Payload = {
         cmd: 'emit',
-        type: uProxy.Command.READY,
+        type: uProxy.Command.REFRESH_UI,
         promiseId: 0
       }
       this.send(ready);

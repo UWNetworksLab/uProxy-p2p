@@ -125,7 +125,7 @@ class CoreConnector implements uProxy.CoreAPI {
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
   sendInstance = (clientId) => {
-    this.sendCommand(uProxy.Command.SEND_INSTANCE, clientId);
+    this.sendCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE, clientId);
   }
 
   modifyConsent = (command:uProxy.ConsentCommand) => {
@@ -148,19 +148,21 @@ class CoreConnector implements uProxy.CoreAPI {
   updateDescription = (description :string) => {
     // TODO: determine if novelty check is necessary.
     console.log('Updating description to ' + description);
-    this.sendCommand(uProxy.Command.UPDATE_DESCRIPTION, description);
+    this.sendCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
+                     description);
   }
 
-  changeOption = (option) => {
-    console.log('Changing option ' + option);
-    // this.sendCommand(uProxy.Command.CHANGE_OPTION, option);
-  }
+  // TODO: Implement this or remove it.
+  // changeOption = (option) => {
+  //   console.log('Changing option ' + option);
+  //   this.sendCommand(uProxy.Command.CHANGE_OPTION, option);
+  // }
 
   login = (network :string) : Promise<void> => {
-    return this.promiseCommand(uProxy.Command.LOGIN, network);
+    return this.promiseCommand(uProxy.Command.LOG_IN, network);
   }
 
   logout = (network :string) => {
-    this.sendCommand(uProxy.Command.LOGOUT, network);
+    this.sendCommand(uProxy.Command.LOG_OUT, network);
   }
 }  // class CoreConnector
