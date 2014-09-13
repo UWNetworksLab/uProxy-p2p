@@ -14,21 +14,24 @@ module uProxy {
 
   // --- Communications ---
 
-  /**
-   * Commands are sent from the UI to the Core due to a user interaction.
-   * This fully describes the set of commands which Core must respond to.
-   */
+  // Commands are sent from the UI to the Core due to a user interaction.
+  // This fully describes the set of commands that Core must respond to.
+  //
+  // Enum value names should be verb phrases that clearly describe the action
+  // being requested.
+  //
+  // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
-    READY = 1000,
-    REFRESH,
-    RESET,
+    REFRESH_UI = 1000,
+    // Skip unused REFRESH. (Refresh what, anyway?)
+    RESET = 1002,  // logs out of all networks
     LOGIN,
     LOGOUT,
-    SEND_INSTANCE,
-    INVITE,
-    CHANGE_OPTION,
-    UPDATE_DESCRIPTION,
-    // Skip now deprecated DISMISS_NOTIFICATION
+    SEND_INSTANCE_HANDSHAKE_MESSAGE,
+    // Skip unused INVITE. (Invite who to do what, anyway?)
+    // Skip unused CHANGE_OPTION = 1007.
+    UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
@@ -38,28 +41,32 @@ module uProxy {
     SEND_CREDENTIALS
   }
 
-  /**
-   * Updates are sent from the Core to the UI, to update state which the UI must
-   * expose to the user.
-   */
+  // Updates are sent from the Core to the UI, to update state that the UI must
+  // expose to the user.
+  //
+  // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Update {
     ALL = 2000,
     NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
-    CLIENT,       // Single client for a User.
-    INSTANCE,
-    DESCRIPTION,
-    ID_MAPS,  // ClientId <---> InstanceId mappings.
-    COMMAND_FULFILLED,
+    // Skip unused CLIENT.       // Single client for a User.
+    INSTANCE = 2005,
+    // Skip unused DESCRIPTION.
+    // Skip unused ID_MAPS = 2007.  // ClientId <---> InstanceId mappings.
+    COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
     ERROR,
-    STOP_PROXYING,
+    // TODO: Why do we have PROXYING_STOPPED but not PROXYING_STARTED? The
+    // asymmetry suggests that simplification would be possible here.
+    PROXYING_STOPPED,
     NOTIFICATION,
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
 
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
+    // TODO: "Get credentials" is a command, not an "update". Consider
+    // renaming the "Update" enum.
     GET_CREDENTIALS
   }
 
@@ -128,7 +135,8 @@ module uProxy {
     reset() : void;
 
     // Send your own instanceId to target clientId.
-    sendInstance(clientId :string) : void;
+    // TODO: Implement this or remove it.
+    // sendInstanceHandshakeMessage(clientId :string) : void;
 
     modifyConsent(command :ConsentCommand) : void;
 
@@ -138,7 +146,8 @@ module uProxy {
 
     updateDescription(description :string) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
-    changeOption(option :string) : void;
+    // TODO: Implement this or remove it.
+    // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
     logout(network :string) : void;
