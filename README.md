@@ -4,20 +4,17 @@
 
 ## Build Status
 
-Dev: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=dev)](https://magnum.travis-ci.com/uProxy/uproxy)
-Master: [![Build Status](https://magnum.travis-ci.com/uProxy/uproxy.svg?token=13k81uoQyqSsK2BM6X8J&branch=master)](https://magnum.travis-ci.com/uProxy/uproxy)
+Dev: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
+Master: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=master)](https://travis-ci.org/uProxy/uproxy)
 
 ## Tools
 
 uProxy is built using the following tools:
- - [Grunt](http://gruntjs.com/) for build tasks.
- - [TypeScript](http://www.typescriptlang.org/) as the primary language, which
-   compiles to JavaScript. This does type checking and has some syntax
-   improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
- - [Jasmine](http://pivotal.github.io/jasmine/) for testing.
- - [AngularJS](http://angularjs.org) for UI coding.
- - [sass](http://sass-lang.com/) to write css more beautifully.
-
+ - [Grunt](http://gruntjs.com/) to write the tasks that build uProxy
+ - [TypeScript](http://www.typescriptlang.org/) as the primary language we code in; this compiles to JavaScript. It gives us type-checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
+ - [Jasmine](http://pivotal.github.io/jasmine/) for testing
+ - [Polymer](http://www.polymer-project.org/) for UI
+ 
 To manage dependencies we use:
  - [npm](https://www.npmjs.org/) for installing node modules that we use for our build process.  (Specified in `package.json`)
  - [Bower](http://bower.io) to install libraries that we use in the UI
@@ -53,9 +50,6 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
 - [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
-
-- [sass](http://sass-lang.com/):
-  `sudo gem install sass` (requires ruby, often comes installed, may need to be installed as super-user)
 
     - This is assuming you have `ruby` and `rubygems` installed.
 
@@ -149,32 +143,28 @@ Configuration and setup files
 * `tools` directory contains some typescript and javascript to help Grunt.
 
 Source code
- * `src` holds all source code; no compiled files.
+ * `src` holds all source code; no compiled files
  * `src/generic_ui` generic user interface code
  * `src/generic_core` generic uproxy core-functionality code
  * `src/chrome_app` code specific to the chrome app
  * `src/chrome_extension` code specific to the chrome extension
  * `src/firefox` code specific to firefox
- * `third_party` holds external libraries we depend on that are copied into this repository.
- * `node_modules` dynamically generated npm module dependencies.
- * `scraps` temporary holding for sharing scraps of code.
+ * `third_party` holds external libraries we depend on that are copied into this repository
+ * `node_modules` dynamically generated npm module dependencies
+ * `scraps` temporary holding for sharing scraps of code
 
 Dynamically created directories (`grunt clean` should remove them)
  * `build` created by grunt tasks; holds the built code, but none of the code that was compiled.
- * `dist` created by grunt tasks; holds final distribution versions.
- * `test_output` created by grunt tasks; holds test-output files.
+ * `dist` created by grunt tasks; holds final distribution versions
+ * `test_output` created by grunt tasks; holds test-output files
  * `.grunt` holds grunt cache stuff
- * `.sass-cache` holds sass cache stuff
-
 ## Glossary of frameworks you need to know about
 
- * [AngularJS](http://angularjs.org) - a UI framework for html/JS apps.
  * [Jasmine](http://pivotal.github.io/jasmine/) - a testing framework for JavaScript.
- * Karma - a test runner for angularjs.
- * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building.
- * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory.
+ * Karma - a test runner
+ * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building
+ * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory
  * [Bower](http://bower.io) (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
- * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks.
- * [sass](http://sass-lang.com/) to write css more beautifully.
- * Travis: a continuous build system.
- * Coveralls: a continuous coverage checking system.
+ * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks
+ * [Travis](https://travis-ci.org/): a continuous build system
+ * [Coveralls](https://coveralls.io/): a continuous coverage checking system
