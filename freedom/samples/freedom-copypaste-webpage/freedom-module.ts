@@ -29,9 +29,14 @@ function makePeerConnection() : freedom_UproxyPeerConnection.Pc {
     freedom.emit('signalForPeer', signal);
   });
 
-  // TODO: fix onceConnected not firing issue
+  pc.onceConnected().then((endpoints:WebRtc.ConnectionAddresses) => {
+    log.info('connected: ' +
+         endpoints.local.address + ':' + endpoints.local.port +
+         ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+         endpoints.remote.address + ':' + endpoints.remote.port +
+         ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+  });
 
-  // TODO: fix onceDataChannelOpened issue
   pc.on('peerOpenedChannel', (channelLabel:string) => {
     if (channelLabel === 'text') {
       freedom.emit('ready');
@@ -40,7 +45,6 @@ function makePeerConnection() : freedom_UproxyPeerConnection.Pc {
 
   // Forward chat messages to the UI.
   pc.on('dataFromPeer', (message:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => {
-    log.info('IN: ' + JSON.stringify(message));
     freedom.emit('messageForPeer', message.message.str);
   });
 
@@ -50,15 +54,9 @@ function makePeerConnection() : freedom_UproxyPeerConnection.Pc {
 freedom.on('start', () => {
   pc = makePeerConnection();
   pc.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
-    log.info('connected: ' +
-         endpoints.local.address + ':' + endpoints.local.port +
-         ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
-         endpoints.remote.address + ':' + endpoints.remote.port +
-         ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
-
-    pc.openDataChannel('text').then(() => {
-      freedom.emit('ready');
-    });
+    pc.openDataChannel('text');
+  }).then(() => {
+    freedom.emit('ready');
   });
 });
 
@@ -74,7 +72,6 @@ freedom.on('handleSignalMessage', (signal:WebRtc.SignallingMessage) => {
 
 // Receive outbound chat messages from the UI.
 freedom.on('handleChatMessage', (message:string) => {
-  log.info('OUT: ' + message)
   pc.send('text', { str: message }).catch((e) => {
     log.error('error sending chat message: ' + e.message);
   });
