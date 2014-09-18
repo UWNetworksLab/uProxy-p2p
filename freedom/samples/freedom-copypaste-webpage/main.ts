@@ -144,7 +144,7 @@ function consumeInboundMessage(inboundMessageField:HTMLInputElement) : void {
 
   // Disable the form field, since it no longer makes sense to accept further
   // input in it.
-  inboundMessageField.disabled = true;
+  inboundMessageField.readonly = true;
 
   // TODO: Report success/failure to the user.
 };
