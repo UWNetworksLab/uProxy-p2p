@@ -271,6 +271,9 @@ module Core {
         return;
       }
       this.socksToRtc_.stop();
+      // TODO: Remove the access.asProxy/asClient, maybe replace with getters
+      // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
+      this.access.asProxy = false;
     }
 
     /**
@@ -335,6 +338,7 @@ module Core {
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
         this.rtcToNet_.close();
         this.rtcToNet_ = null;
+        this.access.asClient = false;
       }
       // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();
