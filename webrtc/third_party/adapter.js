@@ -7,7 +7,6 @@ var webrtcDetectedVersion = null;
 var createIceServer = null;
 var getPeerConnectionStats = null;
 
-
 if (navigator.mozGetUserMedia) {
   console.log("This appears to be Firefox");
 
@@ -85,29 +84,33 @@ if (navigator.mozGetUserMedia) {
   }
   getPeerConnectionStats = function(pc) {
     return new Promise(function(F, R) {
-      pc.getStats(null,
-        function(report) {
-          var result = {};
-          report.forEach(function(res) {
-            if (res.type === 'localcandidate') {
-              result.local = {
-                address: res.ipAddress,
-                port: res.portNumber
-              };
-              result.localType = res.candidateType;
-            } else if (res.type === 'remotecandidate') {
-              result.remote = {
-                address: res.ipAddress,
-                port: res.portNumber
-              };
-              result.remoteType = res.candidateType;
+      function tryGetStats() {
+        pc.getStats(null,
+          function(report) {
+            var result = {};
+            for(key in report) {
+              res = report[key];
+              if (res.type === 'candidatepair' && res.selected) {
+                var localCandidate = report[res.localCandidateId];
+                result.local = {
+                  address: localCandidate.ipAddress,
+                  port: localCandidate.portNumber
+                };
+                result.localType = localCandidate.candidateType;
+                var remoteCandidate = report[res.remoteCandidateId];
+                result.remote = {
+                  address: remoteCandidate.ipAddress,
+                  port: remoteCandidate.portNumber
+                };
+                result.remoteType = remoteCandidate.candidateType;
+                F(result);
+                return;
+              }
             }
-            if (typeof result.local !== 'undefined' &&
-                typeof result.remote !== 'undefined') {
-              F(result);
-            }
-          });
-        }, R);
+            window.setTimeout(tryGetStats, 200);
+          }, R);
+      }
+      tryGetStats();
     });
   }
 } else if (navigator.webkitGetUserMedia) {
@@ -181,12 +184,10 @@ if (navigator.mozGetUserMedia) {
               //
               // Note that the inactive/failed channel remains visible at
               // chrome://webrtc-internals/.
-              console.log(result);
               if (result.stat('googActiveConnection') === 'true' &&
                   parseInt(result.stat('bytesSent')) > 0) {
                 var localFields = result.stat('googLocalAddress').split(':');
                 var remoteFields = result.stat('googRemoteAddress').split(':');
-                console.log('fulfill');
                 F({
                     local: {
                       address: localFields[0],
