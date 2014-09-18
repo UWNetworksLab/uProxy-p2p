@@ -331,6 +331,8 @@ module.exports = (grunt) ->
               'build/dev/generic_core/storage.js'
               'build/dev/generic_core/social.js'
               'build/dev/generic_core/core.js'
+              'build/dev/socks-to-rtc/socks-to-rtc.js'
+              'build/dev/rtc-to-net/rtc-to-net.js'
             ]
         options:
           specs: 'build/dev/generic_core/**/*.spec.js'

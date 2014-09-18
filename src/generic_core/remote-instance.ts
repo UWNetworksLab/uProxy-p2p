@@ -178,6 +178,11 @@ module Core {
               <WebRtc.SignallingMessage>signalFromRemote);
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          if (!this.socksToRtc_) {
+            console.error('Race condition! Received signal from server but ' +
+                'local SocksToRtc does not exist.');
+            return;
+          }
           // If the remote peer sent signal as the server, we act as client.
           this.socksToRtc_.handleSignalFromPeer(
               <WebRtc.SignallingMessage>signalFromRemote);
