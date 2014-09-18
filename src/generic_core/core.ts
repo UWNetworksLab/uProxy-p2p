@@ -31,7 +31,7 @@ var bgAppPageChannel = freedom;
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-var remoteProxyServerInstance : Core.RemoteInstance = null;
+var remoteProxyInstance : Core.RemoteInstance = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -87,7 +87,7 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public isProxying = () : boolean => {
-    return remoteProxyServerInstance != null;
+    return remoteProxyInstance != null;
   }
 
 }
@@ -270,11 +270,11 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<void> => {
     // Disable any previous proxying session.
-    if (remoteProxyServerInstance) {
+    if (remoteProxyInstance) {
       console.log('Existing proxying session! Terminating...');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      remoteProxyServerInstance.stop();
-      remoteProxyServerInstance = null;
+      remoteProxyInstance.stop();
+      remoteProxyInstance = null;
     }
     var remote = this.getInstance(path);
     if (!remote) {
@@ -285,7 +285,7 @@ class uProxyCore implements uProxy.CoreAPI {
     // remote.start will send an update to the UI.
     return remote.start().then(() => {
       // Remember this instance as our proxy.
-      remoteProxyServerInstance = remote;
+      remoteProxyInstance = remote;
     });
   }
 
@@ -296,8 +296,8 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!proxy) {
       console.error('Cannot stop proxying when there is no proxy');
     }
-    remoteProxyServerInstance.stop();
-    remoteProxyServerInstance = null;
+    remoteProxyInstance.stop();
+    remoteProxyInstance = null;
     // TODO: Handle revoked permissions notifications.
   }
 

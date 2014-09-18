@@ -88,8 +88,9 @@ module Core {
         },
         peerName: 'rtcNet'
       };
-    public rtcNetProxyConfig :RtcToNet.ProxyConfig =
-      { allowNonUnicast: false };
+    public rtcNetProxyConfig :RtcToNet.ProxyConfig = {
+      allowNonUnicast: false
+    };
 
     // If set, this is the localhost socks server that is receiving
     // connections and sending them to the peer.
@@ -213,9 +214,12 @@ module Core {
       var localPeerId :LocalPeerId = this.getLocalPeerId(false);
       console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
 
-      this.socksToRtc_ = new SocksToRtc.SocksToRtc(
-          { 'address': '127.0.0.1', 'port': 9999 },
-          this.socksRtcPcConfig);
+      if (null != this.socksToRtc_) {
+        console.warn('socksToRtc_ already exists for remoteIntsance');
+      }
+      this.socksToRtc_ = new SocksToRtc.SocksToRtc({
+          'address': '127.0.0.1', 'port': 9999
+      }, this.socksRtcPcConfig);
 
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
@@ -225,6 +229,7 @@ module Core {
               this.access.asProxy = false;
               // CONSIDER: notification to the user?
               this.user.notifyUI();
+              this.socksToRtc_ = null;
             });
         })
         // TODO: remove catch & error print: that should happen at the level
