@@ -242,7 +242,7 @@ module Core {
             console.error('failed to get instance for clientId ' + clientId);
             return;
           }
-          instance.handleSignal(msg.type, <PeerSignal>msg.data);
+          instance.handleSignal(msg.type, msg.data);
           break;
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);

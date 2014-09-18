@@ -7,6 +7,9 @@
  */
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
+/// <reference path='../webrtc/peerconnection.d.ts' />
+/// <reference path='../rtc-to-net/rtc-to-net.ts' />
+/// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
@@ -151,7 +154,7 @@ module Core {
      * TODO: assuming that signal is valid, should we remove signal?
      */
     public handleSignal = (type:uProxy.MessageType,
-                           signalFromRemote:string) => {
+                           signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
@@ -168,11 +171,16 @@ module Core {
                 ui.showNotification(this.user.name + ' stopped proxying through you');
               });
           }
-          this.rtcToNet_.handleSignalFromPeer(signalFromRemote);
+          // TODO: signalFromRemote needs to get converted into a
+          // WebRtc.SignallingMessage. This probably doesn't actually work right
+          // now.
+          this.rtcToNet_.handleSignalFromPeer(
+              <WebRtc.SignallingMessage>signalFromRemote);
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           // If the remote peer sent signal as the server, we act as client.
-          this.socksToRtc_.handleSignalFromPeer(signalFromRemote);
+          this.socksToRtc_.handleSignalFromPeer(
+              <WebRtc.SignallingMessage>signalFromRemote);
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
@@ -225,7 +233,8 @@ module Core {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
-          this.socksToRtc_.onceStopped.then(() => {
+          // TODO: Call directly once uproxy-networking is updated.
+          this.socksToRtc_['onceStopped'].then(() => {
               this.access.asProxy = false;
               // CONSIDER: notification to the user?
               this.user.notifyUI();
@@ -270,7 +279,9 @@ module Core {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
-      this.socksToRtc_.stop();
+      // TODO: stop is only public in the latest uproxy-networking. Update when
+      // possible.
+      this.socksToRtc_['stop']();
       // TODO: Remove the access.asProxy/asClient, maybe replace with getters
       // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
       this.access.asProxy = false;
@@ -336,7 +347,8 @@ module Core {
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
-        this.rtcToNet_.close();
+        // TODO: close is accessible in latest uproxy-networking.
+        this.rtcToNet_['close']();
         this.rtcToNet_ = null;
         this.access.asClient = false;
       }
