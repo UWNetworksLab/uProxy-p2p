@@ -97,6 +97,8 @@ module.exports = (grunt) ->
       uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
       uproxyLibTypescriptSrc: Rule.symlinkSrc 'uproxy-lib'
 
+      uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
+
     shell: {
 
       # Once compiled, take all .spec files out of the chrome extension and app
@@ -388,6 +390,7 @@ module.exports = (grunt) ->
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
     'symlink:uproxyLibTypescriptSrc'
+    'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
   ]

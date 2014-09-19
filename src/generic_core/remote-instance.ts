@@ -238,8 +238,7 @@ module Core {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
-          // TODO: Call directly once uproxy-networking is updated.
-          this.socksToRtc_['onceStopped'].then(() => {
+          this.socksToRtc_.onceStopped().then(() => {
               this.access.asProxy = false;
               // CONSIDER: notification to the user?
               this.user.notifyUI();
@@ -284,9 +283,7 @@ module Core {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
-      // TODO: stop is only public in the latest uproxy-networking. Update when
-      // possible.
-      this.socksToRtc_['stop']();
+      this.socksToRtc_.stop();
       // TODO: Remove the access.asProxy/asClient, maybe replace with getters
       // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
       this.access.asProxy = false;
