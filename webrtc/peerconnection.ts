@@ -44,10 +44,16 @@ module WebRtc {
   }
 
   var candidateTypeMapping_ :{[name:string]:CandidateType} = {
+    // Chrome
     'local': CandidateType.LOCAL,
     'stun': CandidateType.STUN,
     'prflx': CandidateType.PRFLX,
-    'relay': CandidateType.RELAY
+    'relay': CandidateType.RELAY,
+    // Firefox
+    'host': CandidateType.LOCAL,
+    'serverreflexive': CandidateType.STUN,
+    'peerreflexive': CandidateType.PRFLX,
+    'relayed': CandidateType.RELAY
   }
 
   // This should match the uproxy-networking/network-typings/communications.d.ts
