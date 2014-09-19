@@ -141,6 +141,13 @@ module.exports = (grunt) ->
           onlyIf: 'modified'
         } ] }
 
+      # Compiled javascript from say, uproxy-lib and uproxy-networking.
+      # core_libs: { files: [ {
+          # expand: true, cwd: uproxyLibPath + '/build'
+          # src: ['**/*.js']
+          # dest: 'build/dev/'
+        # } ]}
+
       chrome_extension:
         nonull: true
         files: [ {
@@ -320,6 +327,8 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/dev/mocks/freedom-mocks.js'
+              'build/dev/socks-to-rtc/socks-to-rtc.js'
+              'build/dev/rtc-to-net/rtc-to-net.js'
               'build/dev/uproxy.js'
               'build/dev/generic_core/util.js'
               'build/dev/generic_core/nouns-and-adjectives.js'
@@ -333,8 +342,6 @@ module.exports = (grunt) ->
               'build/dev/generic_core/storage.js'
               'build/dev/generic_core/social.js'
               'build/dev/generic_core/core.js'
-              'build/dev/socks-to-rtc/socks-to-rtc.js'
-              'build/dev/rtc-to-net/rtc-to-net.js'
             ]
         options:
           specs: 'build/dev/generic_core/**/*.spec.js'
@@ -399,6 +406,7 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_core', [
     'base'
     'typescript:generic_core'
+    # 'copy:core_libs'
   ]
 
   taskManager.add 'build_generic_ui', [

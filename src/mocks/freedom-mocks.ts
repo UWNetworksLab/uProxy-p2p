@@ -96,6 +96,9 @@ class MockSocial {
   public emit = () => {}
 }
 
+class MockLog {
+}
+
 var freedom = new MockChannel();
 freedom['storage'] = () => { return new MockStorage({}); };
 var mockSocial = () => { return new MockSocial(); };
@@ -103,6 +106,7 @@ mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['core'] = () => { return new MockCore(); };
+freedom['core.log'] = () => { return new MockLog(); };
 freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 freedom['SocksToRtc'] = () => { return new MockChannel(); };

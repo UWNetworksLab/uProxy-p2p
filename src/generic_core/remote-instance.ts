@@ -349,8 +349,7 @@ module Core {
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
-        // TODO: close is accessible in latest uproxy-networking.
-        this.rtcToNet_['close']();
+        this.rtcToNet_.close();
         this.rtcToNet_ = null;
         this.access.asClient = false;
       }

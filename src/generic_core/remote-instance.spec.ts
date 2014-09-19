@@ -28,7 +28,7 @@ describe('Core.RemoteInstance', () => {
   };
 
   beforeEach(() => {
-    spyOn(console, 'log');
+    // spyOn(console, 'log');
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
@@ -376,6 +376,7 @@ describe('Core.RemoteInstance', () => {
     it('can start proxying', (done) => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
       spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
+      console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
         expect(alice.access.asProxy).toEqual(true);
         done();
