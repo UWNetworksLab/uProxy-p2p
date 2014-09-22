@@ -109,8 +109,6 @@ freedom['core'] = () => { return new MockCore(); };
 freedom['core.log'] = () => { return new MockLog(); };
 freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
-// freedom['SocksToRtc'] = () => { return new MockChannel(); };
-// freedom['RtcToNet'] = () => { return new MockChannel(); };
 
 var DEBUG = true;
 

@@ -31,7 +31,7 @@ describe('Core.RemoteInstance', () => {
   };
 
   beforeEach(() => {
-    // spyOn(console, 'log');
+    spyOn(console, 'log');
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
@@ -372,15 +372,18 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-
-    beforeEach(() => {
-    });
+    // Bare-minimum functions to fake the current version methods of SocksToRtc.
+    var fakeSocksToRtc = {
+      'onceReady': Promise.resolve(),
+      'onceStopped': () => { return new Promise((F,R) => {}); },
+      'stop': () => {}
+    };
 
     it('can start proxying', (done) => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
       spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
       // The module & constructor of SocksToRtc may change in the near future.
-      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(socksToRtc);
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
         expect(alice.access.asProxy).toEqual(true);
@@ -392,7 +395,6 @@ describe('Core.RemoteInstance', () => {
 
     it('can stop proxying', () => {
       alice.stop();
-      // expect(socksToRtcClient.emit).toHaveBeenCalledWith('stop');
       expect(alice.access.asProxy).toEqual(false);
     });
 
@@ -400,13 +402,11 @@ describe('Core.RemoteInstance', () => {
       alice.consent.asProxy = Consent.ProxyState.NONE;
       alice.access.asProxy = false;
       alice.start();
-      // expect(socksToRtcClient.emit).not.toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
     });
 
     it('does not stop proxying when already stopped', () => {
       alice.stop();
-      // expect(socksToRtcClient.emit).not.toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
     });
 
@@ -414,12 +414,16 @@ describe('Core.RemoteInstance', () => {
 
   describe('signaling', () => {
 
+    // Build a mock Alice with fake signals and networking hooks.
     var alice = new Core.RemoteInstance(user, {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-
+    var fakeSocksToRtc = { 'handleSignalFromPeer': () => {} };
+    var fakeRtcToNet = { 'handleSignalFromPeer': () => {} };
+    alice['socksToRtc_'] = <SocksToRtc.SocksToRtc><any>fakeSocksToRtc;
+    alice['rtcToNet_'] = <RtcToNet.RtcToNet><any>fakeRtcToNet;
     var fakeSignal :PeerSignal = {
       peerId: JSON.stringify(localPeerId),
       data: 'really fake signal'
@@ -427,28 +431,26 @@ describe('Core.RemoteInstance', () => {
 
     beforeEach(() => {
       spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
-      // spyOn(socksToRtcClient, 'emit');
-      // spyOn(rtcToNetServer, 'emit');
+      spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
+      spyOn(fakeRtcToNet, 'handleSignalFromPeer');
     });
 
     it('handles signal from client peer as server', () => {
       alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
-      // expect(socksToRtcClient.emit).not.toHaveBeenCalled();
-      // expect(rtcToNetServer.emit).toHaveBeenCalledWith(
-          // 'handleSignalFromPeer', fakeSignal);
+      expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+      expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
     });
 
     it('handles signal from server peer as client', () => {
       alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
-      // expect(socksToRtcClient.emit).toHaveBeenCalledWith(
-          // 'handleSignalFromPeer', fakeSignal);
-      // expect(rtcToNetServer.emit).not.toHaveBeenCalled();
+      expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
+      expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
     });
 
     it('rejects invalid signals', () => {
       alice.handleSignal(uProxy.MessageType.CONSENT, fakeSignal)
-      // expect(socksToRtcClient.emit).not.toHaveBeenCalled();
-      // expect(rtcToNetServer.emit).not.toHaveBeenCalled();
+      expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+      expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
     });
 

@@ -223,13 +223,18 @@ module Core {
       console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
 
       if (null != this.socksToRtc_) {
-        console.warn('socksToRtc_ already exists for remoteIntsance');
+        console.warn('socksToRtc_ already exists for remoteInstance');
       }
-      this.socksToRtc_ = new SocksToRtc.SocksToRtc({
-          'address': '127.0.0.1', 'port': 9999
-      }, this.socksRtcPcConfig);
+      // Tell SocksToRtc to use a localhost SOCKS server.
+      var endpoint :Net.Endpoint = {
+          address: '127.0.0.1',
+          port: 9999
+      }
+      this.socksToRtc_ = new SocksToRtc.SocksToRtc(
+          endpoint,
+          this.socksRtcPcConfig);
 
-      // TODO: Update to onceReady() once uproxy-networking changes that.
+      // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
