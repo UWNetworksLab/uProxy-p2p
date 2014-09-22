@@ -240,7 +240,7 @@ module Core {
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
               this.access.asProxy = false;
-              // CONSIDER: notification to the user?
+              // TODO: notification to the user on remote-close?
               this.user.notifyUI();
               this.socksToRtc_ = null;
             });
@@ -254,6 +254,7 @@ module Core {
         });
     }
 
+    // Where did these come from!?! This doesn't seem right. ~s
     public handleStartSuccess = () => {
       if (!this.fulfillStartRequest_) {
         console.error('No fulfillStartRequest_ for handleStartSuccess');
@@ -495,6 +496,7 @@ module Core {
       });
     }
 
+    // TODO: Remove this if unnecessary with uproxy-networking.
     public getLocalPeerId = (isLocalServer :boolean)
         : LocalPeerId => {
       // Construct local and remote instance paths.

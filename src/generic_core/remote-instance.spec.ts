@@ -18,6 +18,9 @@ describe('Core.RemoteInstance', () => {
       'notifyUI',
       'getStorePath'
   ]);
+  var socksToRtc = <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
+      'onceReady'
+  ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
   var tmpClientConsent :Consent.ClientState;
@@ -376,15 +379,14 @@ describe('Core.RemoteInstance', () => {
     it('can start proxying', (done) => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
       spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
+      // The module & constructor of SocksToRtc may change in the near future.
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(socksToRtc);
       console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
         expect(alice.access.asProxy).toEqual(true);
         done();
       });
-      // expect(socksToRtcClient.emit).toHaveBeenCalledWith('start', {
-          // 'host': '127.0.0.1', 'port': 9999,
-          // 'peerId': JSON.stringify(localPeerId)
-      // });
+      expect(SocksToRtc.SocksToRtc).toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
       alice.handleStartSuccess();
     });
