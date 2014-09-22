@@ -381,7 +381,6 @@ describe('Core.RemoteInstance', () => {
 
     it('can start proxying', (done) => {
       alice.consent.asProxy = Consent.ProxyState.GRANTED;
-      spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
       // The module & constructor of SocksToRtc may change in the near future.
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       console.log(JSON.stringify(SocksToRtc));
@@ -424,13 +423,12 @@ describe('Core.RemoteInstance', () => {
     var fakeRtcToNet = { 'handleSignalFromPeer': () => {} };
     alice['socksToRtc_'] = <SocksToRtc.SocksToRtc><any>fakeSocksToRtc;
     alice['rtcToNet_'] = <RtcToNet.RtcToNet><any>fakeRtcToNet;
-    var fakeSignal :PeerSignal = {
-      peerId: JSON.stringify(localPeerId),
+    // TODO: Turn into a WebRtc.SignallingMessage?
+    var fakeSignal :Object = {
       data: 'really fake signal'
     };
 
     beforeEach(() => {
-      spyOn(alice, 'getLocalPeerId').and.returnValue(localPeerId);
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
     });

@@ -15,21 +15,6 @@
 /// <reference path='util.ts' />
 
 
-// TODO: These interfaces were deleted from socksRTC from its 101th pull request
-// which breaks this file. Keeping them in for now, until the next refactor
-// which changes all of networking.
-interface PeerInfo {
-  host   :string;
-  port   :number;
-  peerId :string;
-}
-
-interface PeerSignal {
-  peerId :string;
-  data   :string;
-}
-
-
 module Core {
 
   /**
@@ -214,14 +199,6 @@ module Core {
       // The localhost host:port will be taken care of by WebRTC. The peerId is
       // utilized to set the local and remote descriptions on the
       // RTCPeerConnection.
-
-      // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
-      // instanceId, userId, and network fields.
-      // The "false" parameter to getLocalPeerId means the local instance is
-      // the client, not server.
-      var localPeerId :LocalPeerId = this.getLocalPeerId(false);
-      console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
-
       if (null != this.socksToRtc_) {
         console.warn('socksToRtc_ already exists for remoteInstance');
       }
@@ -478,37 +455,6 @@ module Core {
         access:               this.access,
         isOnline:             this.user.isInstanceOnline(this.instanceId)
       });
-    }
-
-    // TODO: Remove this if unnecessary with uproxy-networking.
-    public getLocalPeerId = (isLocalServer :boolean)
-        : LocalPeerId => {
-      // Construct local and remote instance paths.
-      var network :Social.Network = this.user.network;
-      var localInstancePath :InstancePath = {
-        network: network.name,
-        userId: network.myInstance.userId,
-        instanceId: network.myInstance.instanceId
-      }
-      var remoteInstancePath :InstancePath = {
-        network: network.name,
-        userId: this.user.userId,
-        instanceId: this.instanceId
-      }
-
-      if (isLocalServer) {
-        // Local instance is the server, remote instance is the client.
-        return {
-          clientInstancePath: remoteInstancePath,
-          serverInstancePath: localInstancePath
-        };
-      } else {
-        // Local instance is the client, remote instance is the server.
-        return {
-          clientInstancePath: localInstancePath,
-          serverInstancePath: remoteInstancePath
-        };
-      }
     }
 
   }  // class Core.RemoteInstance
