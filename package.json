@@ -37,7 +37,7 @@
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
     "uproxy-lib": "^11.0.2",
-    "uproxy-networking": "^1.2.0"
+    "uproxy-networking": "^1.3.0"
   },
   "private": true,
   "scripts": {

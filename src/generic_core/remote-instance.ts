@@ -206,14 +206,9 @@ module Core {
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
         return Promise.reject('Already proxying through ' + this.instanceId);
-      } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
-        console.warn('Already waiting for proxy to start ' + this.instanceId);
-        return Promise.reject('Already waiting for proxy to start ' +
-            this.instanceId);
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
-      // TODO: Convert socks-rtc's message types to Enums.
 
       // Speak with socks-rtc to start the connection.
       // The localhost host:port will be taken care of by WebRTC. The peerId is
@@ -234,6 +229,7 @@ module Core {
           'address': '127.0.0.1', 'port': 9999
       }, this.socksRtcPcConfig);
 
+      // TODO: Update to onceReady() once uproxy-networking changes that.
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
@@ -252,23 +248,6 @@ module Core {
               '; ' + e.toString());
           return Promise.reject('Could not start proxy');
         });
-    }
-
-    // Where did these come from!?! This doesn't seem right. ~s
-    public handleStartSuccess = () => {
-      if (!this.fulfillStartRequest_) {
-        console.error('No fulfillStartRequest_ for handleStartSuccess');
-        return;
-      }
-      this.fulfillStartRequest_();
-    }
-
-    public handleStartFailure = () => {
-      if (!this.rejectStartRequest_) {
-        console.error('No rejectStartRequest_ for handleStartSuccess');
-        return;
-      }
-      this.rejectStartRequest_();
     }
 
     public updateClientProxyConnection = (isConnected :boolean) => {

@@ -388,7 +388,6 @@ describe('Core.RemoteInstance', () => {
       });
       expect(SocksToRtc.SocksToRtc).toHaveBeenCalled();
       expect(alice.access.asProxy).toEqual(false);
-      alice.handleStartSuccess();
     });
 
     it('can stop proxying', () => {
