@@ -39,22 +39,6 @@ module WebRtc {
   // via a TURN server. The values are taken from this file; as the comment
   // suggests, not all values may be found in practice:
   //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
-  export enum CandidateType {
-    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
-  }
-
-  var candidateTypeMapping_ :{[name:string]:CandidateType} = {
-    // Chrome
-    'local': CandidateType.LOCAL,
-    'stun': CandidateType.STUN,
-    'prflx': CandidateType.PRFLX,
-    'relay': CandidateType.RELAY,
-    // Firefox
-    'host': CandidateType.LOCAL,
-    'serverreflexive': CandidateType.STUN,
-    'peerreflexive': CandidateType.PRFLX,
-    'relayed': CandidateType.RELAY
-  }
 
   // This should match the uproxy-networking/network-typings/communications.d.ts
   // type with the same name (Net.Endpoint).
@@ -66,9 +50,9 @@ module WebRtc {
   // Once you are connected to the peer, you know the local/remote addresses.
   export interface ConnectionAddresses {
     local  :Endpoint;  // the local transport address/port
-    localType: CandidateType;
+    localType: string;
     remote :Endpoint;  // the remote peer's transport address/port
-    remoteType: CandidateType;
+    remoteType: string;
   }
 
   export enum State {
@@ -370,19 +354,8 @@ module WebRtc {
     // connection addresses are so the onceConnected and negotiate connection
     // promises can be fulfilled with the addresses.
     private completeConnection_ = () : void => {
-      getPeerConnectionStats(this.pc_)
-      .then((stats: {local: Endpoint;
-                     remote: Endpoint;
-                     localType:string;
-                     remoteType:string;}) => {
-        var addresses : ConnectionAddresses = {
-          local: stats.local,
-          remote: stats.remote,
-          localType: (candidateTypeMapping_[stats.localType]
-                               || CandidateType.UNKNOWN),
-          remoteType: (candidateTypeMapping_[stats.remoteType]
-                               || CandidateType.UNKNOWN)
-        };
+      getPeerConnectionEndpoints(this.pc_)
+      .then((addresses: ConnectionAddresses) => {
         this.pcState = State.CONNECTED;
         this.fulfillConnected_(addresses);
       })

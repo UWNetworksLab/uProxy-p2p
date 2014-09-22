@@ -28,8 +28,5 @@ interface RTCPeerConnection {
                   failureCallback?: RTCPeerConnectionErrorCallback) : void;
 }
 
-declare function getPeerConnectionStats(pc: RTCPeerConnection)
-  :Promise<{local: WebRtc.Endpoint;
-            remote: WebRtc.Endpoint;
-            localType:string;
-            remoteType:string;}>;
+declare function getPeerConnectionEndpoints(pc: RTCPeerConnection)
+  :Promise<WebRtc.ConnectionAddresses>;

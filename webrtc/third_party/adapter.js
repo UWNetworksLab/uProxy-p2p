@@ -5,7 +5,14 @@ var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
 var createIceServer = null;
-var getPeerConnectionStats = null;
+var getPeerConnectionEndpoints = null;
+
+var candidateTypeMapping = {
+    'host': 'local',
+    'serverreflexive': 'stun',
+    'peerreflexive': 'prflx',
+    'relayed': 'relay'
+}
 
 if (navigator.mozGetUserMedia) {
   console.log("This appears to be Firefox");
@@ -82,7 +89,7 @@ if (navigator.mozGetUserMedia) {
       return [];
     };
   }
-  getPeerConnectionStats = function(pc) {
+  getPeerConnectionEndpoints = function(pc) {
     return new Promise(function(F, R) {
       function tryGetStats() {
         pc.getStats(null,
@@ -96,13 +103,15 @@ if (navigator.mozGetUserMedia) {
                   address: localCandidate.ipAddress,
                   port: localCandidate.portNumber
                 };
-                result.localType = localCandidate.candidateType;
+                result.localType =
+                    candidateTypeMapping[localCandidate.candidateType];
                 var remoteCandidate = report[res.remoteCandidateId];
                 result.remote = {
                   address: remoteCandidate.ipAddress,
                   port: remoteCandidate.portNumber
                 };
-                result.remoteType = remoteCandidate.candidateType;
+                result.remoteType =
+                    candidateTypeMapping[remoteCandidate.candidateType];
                 F(result);
                 return;
               }
@@ -160,7 +169,7 @@ if (navigator.mozGetUserMedia) {
     to.src = from.src;
   };
 
-  getPeerConnectionStats = function(pc) {
+  getPeerConnectionEndpoints = function(pc) {
     return new Promise(function(F, R) {
       function tryGetStats() {
         pc.getStats(
