@@ -19,16 +19,16 @@ var offerPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('
 var offerPanel_step2ContainerNode = <HTMLElement>document.getElementById('offerPanel_step2Container');
 
 var startPanelNode = <HTMLElement>document.getElementById('startPanel');
-var startPanel_getAccessLinkNode = <HTMLElement>document.getElementById('startPanel_getAccessLink');
-var startPanel_giveAccessLinkNode = <HTMLElement>document.getElementById('startPanel_giveAccessLink');
+var startPanel_offerLinkNode = <HTMLElement>document.getElementById('startPanel_offerLink');
+var startPanel_answerLinkNode = <HTMLElement>document.getElementById('startPanel_answerLink');
 
 var chatPanelNode = <HTMLElement>document.getElementById('chatPanel');
 var chatPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_outboundMessage');
 var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chatPanel_sendMessageButton');
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
-// DOM nodes that we will choose from either the 'give access' panel or the
-// 'get access' panel once the user chooses whether to give/get.
+// DOM nodes that we will choose from either the offer panel or the
+// answer panel once the user chooses whether to offer/answer.
 var step2ContainerNode :HTMLElement;
 var outboundMessageNode :HTMLInputElement;
 var inboundMessageNode :HTMLInputElement;
@@ -37,7 +37,7 @@ var inboundMessageNode :HTMLInputElement;
 // button for consuming the messages.
 var parsedInboundMessages :WebRtc.SignallingMessage[];
 
-startPanel_giveAccessLinkNode.onclick =
+startPanel_answerLinkNode.onclick =
     function(event:MouseEvent) : any {
       step2ContainerNode = offerPanel_step2ContainerNode;
       outboundMessageNode = offerPanel_outboundMessageNode;
@@ -47,7 +47,7 @@ startPanel_giveAccessLinkNode.onclick =
       offerPanelNode.style.display = 'block';
     };
 
-startPanel_getAccessLinkNode.onclick =
+startPanel_offerLinkNode.onclick =
     function(event:MouseEvent) : any {
       step2ContainerNode = answerPanel_step2ContainerNode;
       outboundMessageNode = answerPanel_outboundMessageNode;
