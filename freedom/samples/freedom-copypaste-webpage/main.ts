@@ -90,7 +90,7 @@ answerPanel_consumeInboundMessageButtonNode.onclick =
 chatPanel_sendMessageButtonNode.onclick =
     function(event:MouseEvent) : any {
       // TODO: cannot send empty messages
-      freedom.emit('handleChatMessage',
+      freedom.emit('messageFromPeer',
           chatPanel_outboundMessageNode.value || '(empty message)');
     };
 
@@ -139,7 +139,7 @@ function parseInboundMessages(inboundMessageField:HTMLInputElement,
 function consumeInboundMessage(inboundMessageField:HTMLInputElement) : void {
   // Forward the signalling messages to the Freedom app.
   for (var i = 0; i < parsedInboundMessages.length; i++) {
-    freedom.emit('handleSignalMessage', parsedInboundMessages[i]);
+    freedom.emit('signalFromPeer', parsedInboundMessages[i]);
   }
 
   // Disable the form field, since it no longer makes sense to accept further

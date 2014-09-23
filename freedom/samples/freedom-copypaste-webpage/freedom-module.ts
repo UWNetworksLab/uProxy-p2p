@@ -63,7 +63,7 @@ freedom.on('start', () => {
 // Receive signalling channel messages from the UI.
 // If pc doesn't exist yet then we are responding to the remote
 // peer's initiation.
-freedom.on('handleSignalMessage', (signal:WebRtc.SignallingMessage) => {
+freedom.on('signalFromPeer', (signal:WebRtc.SignallingMessage) => {
   if (pc === undefined) {
     pc = makePeerConnection();
   }
@@ -71,7 +71,7 @@ freedom.on('handleSignalMessage', (signal:WebRtc.SignallingMessage) => {
 });
 
 // Receive outbound chat messages from the UI.
-freedom.on('handleChatMessage', (message:string) => {
+freedom.on('messageFromPeer', (message:string) => {
   pc.send('text', { str: message }).catch((e) => {
     log.error('error sending chat message: ' + e.message);
   });
