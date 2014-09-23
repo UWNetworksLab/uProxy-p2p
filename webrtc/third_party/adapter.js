@@ -104,14 +104,14 @@ if (navigator.mozGetUserMedia) {
                   port: localCandidate.portNumber
                 };
                 result.localType =
-                    candidateTypeMapping[localCandidate.candidateType];
+                    candidateTypeMapping[localCandidate.candidateType] || 'unknown';
                 var remoteCandidate = report[res.remoteCandidateId];
                 result.remote = {
                   address: remoteCandidate.ipAddress,
                   port: remoteCandidate.portNumber
                 };
                 result.remoteType =
-                    candidateTypeMapping[remoteCandidate.candidateType];
+                    candidateTypeMapping[remoteCandidate.candidateType] || 'unknown';
                 F(result);
                 return;
               }
