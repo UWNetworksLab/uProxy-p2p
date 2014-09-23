@@ -97,6 +97,8 @@ module.exports = (grunt) ->
       uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
       uproxyLibTypescriptSrc: Rule.symlinkSrc 'uproxy-lib'
 
+      uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
+
     shell: {
 
       # Once compiled, take all .spec files out of the chrome extension and app
@@ -138,6 +140,13 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
+
+      # Compiled javascript from say, uproxy-lib and uproxy-networking.
+      # core_libs: { files: [ {
+          # expand: true, cwd: uproxyLibPath + '/build'
+          # src: ['**/*.js']
+          # dest: 'build/dev/'
+        # } ]}
 
       chrome_extension:
         nonull: true
@@ -318,6 +327,8 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/dev/mocks/freedom-mocks.js'
+              'build/dev/socks-to-rtc/socks-to-rtc.js'
+              'build/dev/rtc-to-net/rtc-to-net.js'
               'build/dev/uproxy.js'
               'build/dev/generic_core/util.js'
               'build/dev/generic_core/nouns-and-adjectives.js'
@@ -386,6 +397,7 @@ module.exports = (grunt) ->
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
     'symlink:uproxyLibTypescriptSrc'
+    'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
   ]
@@ -394,6 +406,7 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_core', [
     'base'
     'typescript:generic_core'
+    # 'copy:core_libs'
   ]
 
   taskManager.add 'build_generic_ui', [

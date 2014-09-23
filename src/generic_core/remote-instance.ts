@@ -7,24 +7,12 @@
  */
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
+/// <reference path='../webrtc/peerconnection.d.ts' />
+/// <reference path='../rtc-to-net/rtc-to-net.ts' />
+/// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
-
-
-// TODO: These interfaces were deleted from socksRTC from its 101th pull request
-// which breaks this file. Keeping them in for now, until the next refactor
-// which changes all of networking.
-interface PeerInfo {
-  host   :string;
-  port   :number;
-  peerId :string;
-}
-
-interface PeerSignal {
-  peerId :string;
-  data   :string;
-}
 
 
 module Core {
@@ -59,6 +47,46 @@ module Core {
     };
     public updateDate = null;
     private transport  :Transport;
+
+    // The configuration used to setup peer-connections. This should be
+    // available under advanced options.
+    public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
+        webrtcPcConfig: {
+          iceServers: [{url: 'stun:stun.l.google.com:19302'},
+                       {url: 'stun:stun1.l.google.com:19302'},
+                       {url: 'stun:stun2.l.google.com:19302'},
+                       {url: 'stun:stun3.l.google.com:19302'},
+                       {url: 'stun:stun4.l.google.com:19302'}]
+        },
+        webrtcMediaConstraints: {
+          optional: [{DtlsSrtpKeyAgreement: true}]
+        },
+        peerName: 'socksRtc'
+      };
+    public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
+        webrtcPcConfig: {
+          iceServers: [{url: 'stun:stun.l.google.com:19302'},
+                       {url: 'stun:stun1.l.google.com:19302'},
+                       {url: 'stun:stun2.l.google.com:19302'},
+                       {url: 'stun:stun3.l.google.com:19302'},
+                       {url: 'stun:stun4.l.google.com:19302'}]
+        },
+        webrtcMediaConstraints: {
+          optional: [{DtlsSrtpKeyAgreement: true}]
+        },
+        peerName: 'rtcNet'
+      };
+    public rtcNetProxyConfig :RtcToNet.ProxyConfig = {
+      allowNonUnicast: false
+    };
+
+    // If set, this is the localhost socks server that is receiving
+    // connections and sending them to the peer.
+    private socksToRtc_ :SocksToRtc.SocksToRtc = null;
+
+    // If set, this is the WebRtc peer-connection that is receiving requests
+    // from the peer and handling them by proxying them to the internet.
+    private rtcToNet_ :RtcToNet.RtcToNet = null;
 
     // Functions to fulfill or reject the promise returned by start method.
     // These will only be set while waiting for socks-to-rtc to setup
@@ -110,25 +138,39 @@ module Core {
      * TODO: spec
      * TODO: assuming that signal is valid, should we remove signal?
      */
-    public handleSignal = (type:uProxy.MessageType, signalFromWire:PeerSignal) => {
-      // We are ignoring the peerId from signalFromWire for now.
-      // We need to construct a LocalPeerId object (containing both the client and server
-      // instanceIds, userIds, and networks) for communication with socks-rtc
-      var isLocalServer :boolean = (type == uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER);
-      var localPeerId :LocalPeerId = this.getLocalPeerId(isLocalServer);
-      var signalForSocksRtc :PeerSignal = {
-        peerId: JSON.stringify(localPeerId),
-        data: signalFromWire.data
-      };
-
+    public handleSignal = (type:uProxy.MessageType,
+                           signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           // If the remote peer sent signal as the client, we act as server.
-          rtcToNetServer.emit('handleSignalFromPeer', signalForSocksRtc);
+          if(!this.rtcToNet_) {
+            // TODO: make this into a separate function
+            this.rtcToNet_ = new RtcToNet.RtcToNet(
+                this.rtcNetPcConfig, this.rtcNetProxyConfig);
+            this.rtcToNet_.onceClosed.then(() => {
+                this.access.asClient = false;
+                this.rtcToNet_ = null;
+                this.user.notifyUI();
+                // TODO: give each notification a real data structure and id,
+                // and allow the user select what notifications they get.
+                ui.showNotification(this.user.name + ' stopped proxying through you');
+              });
+          }
+          // TODO: signalFromRemote needs to get converted into a
+          // WebRtc.SignallingMessage. This probably doesn't actually work right
+          // now.
+          this.rtcToNet_.handleSignalFromPeer(
+              <WebRtc.SignallingMessage>signalFromRemote);
           break;
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          if (!this.socksToRtc_) {
+            console.error('Race condition! Received signal from server but ' +
+                'local SocksToRtc does not exist.');
+            return;
+          }
           // If the remote peer sent signal as the server, we act as client.
-          socksToRtcClient.emit('handleSignalFromPeer', signalForSocksRtc);
+          this.socksToRtc_.handleSignalFromPeer(
+              <WebRtc.SignallingMessage>signalFromRemote);
           break;
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
@@ -149,65 +191,45 @@ module Core {
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
         return Promise.reject('Already proxying through ' + this.instanceId);
-      } else if (this.fulfillStartRequest_ || this.rejectStartRequest_) {
-        console.warn('Already waiting for proxy to start ' + this.instanceId);
-        return Promise.reject('Already waiting for proxy to start ' +
-            this.instanceId);
       }
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
-      // TODO: Convert socks-rtc's message types to Enums.
 
       // Speak with socks-rtc to start the connection.
       // The localhost host:port will be taken care of by WebRTC. The peerId is
       // utilized to set the local and remote descriptions on the
       // RTCPeerConnection.
-
-      // PeerId sent to socks-rtc libraries should be LocalPeerId that includes
-      // instanceId, userId, and network fields.
-      // The "false" parameter to getLocalPeerId means the local instance is
-      // the client, not server.
-      var localPeerId :LocalPeerId = this.getLocalPeerId(false);
-      console.log('starting client with localPeerId: ' + JSON.stringify(localPeerId));
-      socksToRtcClient.emit('start', {
-          'host': '127.0.0.1', 'port': 9999,
-           // Peer's peerId is the same as our InstancePath
-           // TODO: make network public or change api.
-          'peerId': JSON.stringify(localPeerId)
-      });
-      return new Promise<void>((F, R) => {
-        // Save fulfill and reject functions, to be invoked after
-        // a signal is received back from socksToRtcClient.
-        this.fulfillStartRequest_ = F;
-        this.rejectStartRequest_ = R;
-      }).then(() => {
-        console.log('Proxy now ready through ' + this.user.userId);
-        this.fulfillStartRequest_ = null;
-        this.rejectStartRequest_ = null;
-        this.access.asProxy = true;
-        this.user.notifyUI();
-      }).catch(() => {
-        console.error('Could not start proxy through ' + this.user.userId);
-        this.fulfillStartRequest_ = null;
-        this.rejectStartRequest_ = null;
-        return Promise.reject('Could not start proxy');
-      });
-    }
-
-    public handleStartSuccess = () => {
-      if (!this.fulfillStartRequest_) {
-        console.error('No fulfillStartRequest_ for handleStartSuccess');
-        return;
+      if (null != this.socksToRtc_) {
+        console.warn('socksToRtc_ already exists for remoteInstance');
       }
-      this.fulfillStartRequest_();
-    }
-
-    public handleStartFailure = () => {
-      if (!this.rejectStartRequest_) {
-        console.error('No rejectStartRequest_ for handleStartSuccess');
-        return;
+      // Tell SocksToRtc to use a localhost SOCKS server.
+      var endpoint :Net.Endpoint = {
+          address: '127.0.0.1',
+          port: 9999
       }
-      this.rejectStartRequest_();
+      this.socksToRtc_ = new SocksToRtc.SocksToRtc(
+          endpoint,
+          this.socksRtcPcConfig);
+
+      // TODO: Update to onceReady() once uproxy-networking fixes it.
+      return this.socksToRtc_.onceReady.then(() => {
+          console.log('Proxy now ready through ' + this.user.userId);
+          this.access.asProxy = true;
+          this.user.notifyUI();
+          this.socksToRtc_.onceStopped().then(() => {
+              this.access.asProxy = false;
+              // TODO: notification to the user on remote-close?
+              this.user.notifyUI();
+              this.socksToRtc_ = null;
+            });
+        })
+        // TODO: remove catch & error print: that should happen at the level
+        // above.
+        .catch((e:Error) => {
+          console.error('Could not start proxy through ' + this.user.userId +
+              '; ' + e.toString());
+          return Promise.reject('Could not start proxy');
+        });
     }
 
     public updateClientProxyConnection = (isConnected :boolean) => {
@@ -223,9 +245,10 @@ module Core {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
-      socksToRtcClient.emit('stop');
+      this.socksToRtc_.stop();
+      // TODO: Remove the access.asProxy/asClient, maybe replace with getters
+      // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
       this.access.asProxy = false;
-      this.user.notifyUI();
     }
 
     /**
@@ -288,8 +311,9 @@ module Core {
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
-        // TODO: emit a signal to rtcToNet to stop our peer, once that
-        // functionality is implemented in the socks-rtc repo.
+        this.rtcToNet_.close();
+        this.rtcToNet_ = null;
+        this.access.asClient = false;
       }
       // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();
@@ -431,36 +455,6 @@ module Core {
         access:               this.access,
         isOnline:             this.user.isInstanceOnline(this.instanceId)
       });
-    }
-
-    public getLocalPeerId = (isLocalServer :boolean)
-        : LocalPeerId => {
-      // Construct local and remote instance paths.
-      var network :Social.Network = this.user.network;
-      var localInstancePath :InstancePath = {
-        network: network.name,
-        userId: network.myInstance.userId,
-        instanceId: network.myInstance.instanceId
-      }
-      var remoteInstancePath :InstancePath = {
-        network: network.name,
-        userId: this.user.userId,
-        instanceId: this.instanceId
-      }
-
-      if (isLocalServer) {
-        // Local instance is the server, remote instance is the client.
-        return {
-          clientInstancePath: remoteInstancePath,
-          serverInstancePath: localInstancePath
-        };
-      } else {
-        // Local instance is the client, remote instance is the server.
-        return {
-          clientInstancePath: localInstancePath,
-          serverInstancePath: remoteInstancePath
-        };
-      }
     }
 
   }  // class Core.RemoteInstance

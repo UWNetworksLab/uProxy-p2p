@@ -17,12 +17,6 @@
     ]
   },
   "dependencies": {
-    "SocksToRtc": {
-      "url": "../lib/socks-rtc/socks-to-rtc/socks-to-rtc.json"
-    },
-    "RtcToNet": {
-      "url": "../lib/socks-rtc/rtc-to-net/rtc-to-net.json"
-    },
     "SOCIAL-google": {
       "url": "../lib/freedom-social-xmpp/social.google.json",
       "api": "social"
@@ -33,7 +27,7 @@
     }
   },
   "permissions": [
-    "core.peerconnection",
+    "core.uproxypeerconnection",
     "core.tcpsocket",
     "core.udpsocket"
   ]

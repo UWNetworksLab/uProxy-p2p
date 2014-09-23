@@ -35,7 +35,7 @@ var panel = panels.Panel({
 })
 
 // Load freedom.
-var manifest = self.data.url('core/uproxy.json');
+var manifest = self.data.url('core/freedom-module.json');
 var freedom =
     setupFreedom(manifest, {
       freedomcfg: function(register) {

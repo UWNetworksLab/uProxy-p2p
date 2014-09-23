@@ -29,17 +29,9 @@ var storage = new Core.Storage();
 // this to be freedom, and communicate using 'emit's and 'on's.
 var bgAppPageChannel = freedom;
 
-// The socks-rtc client and server allows us to proxy through / for other uProxy
-// peers. See [https://github.com/uProxy/socks-rtc] for more information.
-var socksToRtcClient = freedom['SocksToRtc']();
-var rtcToNetServer = freedom['RtcToNet']();
-// Always begin the RTC-to-net server immediately.
-rtcToNetServer.emit('start');
-// The Core's responsibility is to pass messages across the signalling
-// channel using the User / Instance mechanisms.
-
-// Keep track of the current remote proxy, if they exist.
-var proxy :Core.RemoteInstance = null;
+// Keep track of the current remote instance who is acting as a proxy server
+// for us.
+var remoteProxyInstance : Core.RemoteInstance = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -95,7 +87,7 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public isProxying = () : boolean => {
-    return proxy != null;
+    return remoteProxyInstance != null;
   }
 
 }
@@ -103,7 +95,7 @@ var ui = new UIConnector();
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
- * sends updaes to the UI, and handles commands from the UI.
+ * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
@@ -164,7 +156,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Promise commands return an ack or error to the UI.
    */
   public onPromiseCommand = (cmd :uProxy.Command,
-                                 handler :(data ?:any) => Promise<void>) => {
+                             handler :(data ?:any) => Promise<void>) => {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
@@ -278,11 +270,11 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<void> => {
     // Disable any previous proxying session.
-    if (proxy) {
+    if (remoteProxyInstance) {
       console.log('Existing proxying session! Terminating...');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      proxy.stop();
-      proxy = null;
+      remoteProxyInstance.stop();
+      remoteProxyInstance = null;
     }
     var remote = this.getInstance(path);
     if (!remote) {
@@ -293,7 +285,7 @@ class uProxyCore implements uProxy.CoreAPI {
     // remote.start will send an update to the UI.
     return remote.start().then(() => {
       // Remember this instance as our proxy.
-      proxy = remote;
+      remoteProxyInstance = remote;
     });
   }
 
@@ -301,11 +293,11 @@ class uProxyCore implements uProxy.CoreAPI {
    * Stop proxying with the current instance, if it exists.
    */
   public stop = () => {
-    if (!proxy) {
+    if (!remoteProxyInstance) {
       console.error('Cannot stop proxying when there is no proxy');
     }
-    proxy.stop();
-    proxy = null;
+    remoteProxyInstance.stop();
+    remoteProxyInstance = null;
     // TODO: Handle revoked permissions notifications.
   }
 
@@ -346,162 +338,6 @@ class uProxyCore implements uProxy.CoreAPI {
 var networks = Social.initializeNetworks();
 var core = new uProxyCore();
 
-/*
-
-Install signalling channel hooks. When we receive 'sendSignalToPeer' events
-emitted from the socks-rtc, it is uProxy's job to pass those signals through to
-XMPP / the target social provider, eventually reaching the appropriate remote
-instance. To accomplish this, it must identify the peer using a fully qualified
-InstancePath.
-
-The data sent over the signalling channel will be the full signal, and not just
-the data portion. This includes the |peerId| as part of the payload, which will
-allow the remote to verify the provinance of the signal.
-
-:PeerSignal is defined in SocksRTC.
-Expect peerId to be a #-connected InstancePath.
-
-*/
-socksToRtcClient.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
-  console.log('client(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
-
-  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
-  var instance = core.getInstance(localPeerId.serverInstancePath);
-  if (!instance) {
-    console.error('Cannot send client signal to non-existing RemoteInstance.');
-    return;
-  }
-
-  // When passing the PeerSignal over the social network, the signal's peerId
-  // should only contain instance ids, not potentially revealing user or
-  // social network info.
-  var localInstanceId = instance.user.getLocalInstanceId();
-  var sharedSignal :PeerSignal = {
-    peerId: localInstanceId,
-    data: signalFromSocksRtc.data
-  };
-  console.log('client(sendSignalToPeer): sending sharedSignal ' +
-              JSON.stringify(sharedSignal));
-  instance.send({
-    type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
-    data: sharedSignal
-  });
-});
-
-socksToRtcClient.on('socksToRtcSuccess', (peerInfo :PeerInfo) => {
-  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = core.getInstance(localPeerId.serverInstancePath);
-  if (!instance) {
-    console.error('socksToRtcSuccess: RemoteInstance not found.', peerInfo);
-    return;
-  }
-  instance.handleStartSuccess();
-});
-
-socksToRtcClient.on('socksToRtcFailure', (peerInfo :PeerInfo) => {
-  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = core.getInstance(localPeerId.serverInstancePath);
-  if (!instance) {
-    console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
-    return;
-  }
-  instance.handleStartFailure();
-});
-
-socksToRtcClient.on('socksToRtcTimeout', (peerInfo :PeerInfo) => {
-  console.warn('socksToRtcTimeout occurred for peer ' + peerInfo.peerId);
-  var localPeerId :LocalPeerId = JSON.parse(peerInfo.peerId);
-  var instance = core.getInstance(localPeerId.serverInstancePath);
-  if (!instance) {
-    console.error('socksToRtcFailure: RemoteInstance not found.', peerInfo);
-    return;
-  }
-  instance.stop();
-  ui.stopProxyingInUiAndConfig();
-  ui.sendError('Darn, something went wrong with your proxying connection.' +
-    ' Please try to connect again.');
-});
-
-// Make this take an actual peer object type.
-rtcToNetServer.on('sendSignalToPeer', (signalFromSocksRtc :PeerSignal) => {
-  console.log('server(sendSignalToPeer):' + JSON.stringify(signalFromSocksRtc));
-
-  var localPeerId :LocalPeerId = JSON.parse(signalFromSocksRtc.peerId);
-  var instance = core.getInstance(localPeerId.clientInstancePath);
-  if (!instance) {
-    console.error('Cannot send server signal to non-existing peer.');
-    return;
-  }
-
-  // When passing the PeerSignal over the social network, the signal's peerId
-  // should only contain instance ids, not potentially revealing user or
-  // social network info.
-  var localInstanceId = instance.user.getLocalInstanceId();
-  var sharedSignal :PeerSignal = {
-    peerId: localInstanceId,
-    data: signalFromSocksRtc.data
-  };
-  console.log('server(sendSignalToPeer): sending sharedSignal ' +
-              JSON.stringify(sharedSignal));
-  instance.send({
-    type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-    data: sharedSignal
-  });
-});
-
-function updateClientProxyConnection(localPeerIdString :string,
-    isConnected :boolean) {
-  var localPeerId :LocalPeerId = JSON.parse(localPeerIdString);
-  var instance = core.getInstance(localPeerId.clientInstancePath);
-  if (!instance) {
-    console.error('updateClientProxyConnection: RemoteInstance not found.',
-        localPeerIdString, isConnected);
-    return;
-  }
-  instance.updateClientProxyConnection(isConnected);
-  if (isConnected) {
-    var user :Core.User = instance.user;
-    var displayName :string = (user.name && user.name !== 'pending') ?
-      user.name : user.userId;
-    ui.showNotification(displayName + ' is now proxying through you.');
-  }
-};
-
-rtcToNetServer.on('rtcToNetConnectionEstablished',
-    (localPeerIdString :string) => {
-  updateClientProxyConnection(localPeerIdString, true);
-});
-
-rtcToNetServer.on('rtcToNetConnectionClosed',
-    (localPeerIdString :string) => {
-  updateClientProxyConnection(localPeerIdString, false);
-});
-
-// TODO: move this into User, or some sort of proxy service object.
-/*
-function handleNewlyActiveClient(msg) {
-  var instanceId = msg.data.instanceId;
-  var instance = store.state.instances[instanceId];
-  if (!instance) {
-    console.error('Cannot be proxy for nonexistent instance.');
-    return;
-  }
-  console.log('PROXYING FOR CLIENT INSTANCE: ' + instanceId);
-  instance.status.client = C.ProxyState.RUNNING;
-  ui.syncInstance(instance, 'status');
-}
-
-function handleInactiveClient(msg) {
-  var instanceId = msg.data.instanceId;
-  var instance = store.state.instances[instanceId];
-  if (!instance) {
-    console.error('Cannot be proxy for nonexistent instance.');
-    return;
-  }
-  instance.status.client = C.ProxyState.OFF;
-  ui.syncInstance(instance, 'status');
-}
-*/
 
 function _validateKeyHash(keyHash:string) {
   console.log('Warning: keyHash Validation not yet implemented...');
