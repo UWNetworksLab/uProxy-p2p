@@ -45,7 +45,7 @@ function makePeerConnection() : freedom_UproxyPeerConnection.Pc {
 
   // Forward chat messages to the UI.
   pc.on('dataFromPeer', (message:freedom_UproxyPeerConnection.LabelledDataChannelMessage) => {
-    freedom.emit('messageForPeer', message.message.str);
+    freedom.emit('messageFromPeer', message.message.str);
   });
 
   return pc;

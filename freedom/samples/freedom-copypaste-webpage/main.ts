@@ -163,7 +163,7 @@ freedom.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
 });
 
 // Display this inbound chat message to the user.
-freedom.on('messageForPeer', (message:string) => {
+freedom.on('messageFromPeer', (message:string) => {
   chatPanel_inboundMessageNode.value = message;
 });
 
