@@ -1,6 +1,6 @@
-/// <reference path='../../peerconnection.d.ts' />
-/// <reference path='../../datachannel.d.ts' />
-/// <reference path='../../../logging/logging.d.ts' />
+/// <reference path='../../logging/logging.d.ts' />
+/// <reference path='../../webrtc/peerconnection.d.ts' />
+/// <reference path='../../webrtc/datachannel.d.ts' />
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");

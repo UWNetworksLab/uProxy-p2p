@@ -1,9 +1,9 @@
 /// <reference path='messages.d.ts' />
-/// <reference path="../../../webrtc/peerconnection.d.ts" />
-/// <reference path="../../../freedom/coreproviders/uproxypeerconnection.d.ts" />
-/// <reference path="../../../freedom/coreproviders/uproxylogging.d.ts" />
-/// <reference path="../../../freedom/typings/freedom.d.ts" />
-/// <reference path="../../../third_party/typings/tsd.d.ts" />
+/// <reference path="../../webrtc/peerconnection.d.ts" />
+/// <reference path="../../freedom/coreproviders/uproxypeerconnection.d.ts" />
+/// <reference path="../../freedom/coreproviders/uproxylogging.d.ts" />
+/// <reference path="../../freedom/typings/freedom.d.ts" />
+/// <reference path="../../third_party/typings/tsd.d.ts" />
 
 import WebrtcLib = freedom_UproxyPeerConnection;
 
