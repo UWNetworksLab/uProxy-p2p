@@ -60,8 +60,6 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 `git clone https://github.com/uProxy/uProxy.git`
 or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github setup (useful if you use 2-step auth for github, which you should do).
 
-2. Run `sudo gem install sass` to install sass.
-
 2. Run `bower install` to install any bower dependencies.
 
 3. Run `npm install`. This will install all local dependencies,
