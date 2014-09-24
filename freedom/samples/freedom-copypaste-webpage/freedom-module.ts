@@ -32,9 +32,9 @@ function makePeerConnection() : freedom_UproxyPeerConnection.Pc {
   pc.onceConnected().then((endpoints:WebRtc.ConnectionAddresses) => {
     log.info('connected: ' +
          endpoints.local.address + ':' + endpoints.local.port +
-         ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+         ' (' + endpoints.localType + ') <-> ' +
          endpoints.remote.address + ':' + endpoints.remote.port +
-         ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+         ' (' + endpoints.remoteType + ')');
   });
 
   pc.on('peerOpenedChannel', (channelLabel:string) => {
