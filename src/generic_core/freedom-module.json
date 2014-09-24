@@ -3,6 +3,13 @@
   "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
   "app": {
     "script": [
+      "uproxy-networking/arraybuffers/arraybuffers.js",
+      "uproxy-networking/handler/queue.js",
+      "uproxy-networking/ipaddr/ipaddr.min.js",
+      "uproxy-networking/tcp/tcp.js",
+      "uproxy-networking/socks-common/socks-headers.js",
+      "uproxy-networking/socks-to-rtc/socks-to-rtc.js",
+      "uproxy-networking/rtc-to-net/rtc-to-net.js",
       "uproxy.js",
       "util.js",
       "auth.js",
@@ -27,6 +34,8 @@
     }
   },
   "permissions": [
+    "core.log",
+    "core.peerconnection",
     "core.uproxypeerconnection",
     "core.tcpsocket",
     "core.udpsocket"
