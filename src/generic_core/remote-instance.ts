@@ -155,10 +155,10 @@ module Core {
                 // and allow the user select what notifications they get.
                 ui.showNotification(this.user.name + ' stopped proxying through you');
               });
-            this.rtcToNet_.signalsForPeer.setSyncHandler((signalFromSocksRtc) => {
+            this.rtcToNet_.signalsForPeer.setSyncHandler((signal) => {
               this.send({
                 type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-                data: signalFromSocksRtc
+                data: signal
               });
             });
           }
@@ -218,10 +218,10 @@ module Core {
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
           this.socksRtcPcConfig);
-      this.socksToRtc_.signalsForPeer.setSyncHandler((signalFromSocksRtc) => {
+      this.socksToRtc_.signalsForPeer.setSyncHandler((signal) => {
         this.send({
           type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
-          data: signalFromSocksRtc
+          data: signal
         });
       });
 
