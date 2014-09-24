@@ -376,7 +376,8 @@ describe('Core.RemoteInstance', () => {
     var fakeSocksToRtc = {
       'onceReady': Promise.resolve(),
       'onceStopped': () => { return new Promise((F,R) => {}); },
-      'stop': () => {}
+      'stop': () => {},
+      'signalsForPeer': { 'setSyncHandler': () => {} }
     };
 
     it('can start proxying', (done) => {
