@@ -15,9 +15,7 @@
     }
   },
   "permissions": [
-    "storage",
-    "https://graph.facebook.com/oauth/access_token",
-    "https://accounts.google.com/o/oauth2/token"
+    "storage"
   ],
   "sockets": {
     "tcp": { "connect" : "" },

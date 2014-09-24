@@ -155,6 +155,12 @@ module Core {
                 // and allow the user select what notifications they get.
                 ui.showNotification(this.user.name + ' stopped proxying through you');
               });
+            this.rtcToNet_.signalsForPeer.setSyncHandler((signalFromSocksRtc) => {
+              this.send({
+                type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+                data: signalFromSocksRtc
+              });
+            });
           }
           // TODO: signalFromRemote needs to get converted into a
           // WebRtc.SignallingMessage. This probably doesn't actually work right
@@ -162,6 +168,7 @@ module Core {
           this.rtcToNet_.handleSignalFromPeer(
               <WebRtc.SignallingMessage>signalFromRemote);
           break;
+
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           if (!this.socksToRtc_) {
             console.error('Race condition! Received signal from server but ' +
@@ -172,6 +179,7 @@ module Core {
           this.socksToRtc_.handleSignalFromPeer(
               <WebRtc.SignallingMessage>signalFromRemote);
           break;
+
         default:
           console.warn('Invalid signal! ' + uProxy.MessageType[type]);
           return
@@ -210,6 +218,12 @@ module Core {
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
           this.socksRtcPcConfig);
+      this.socksToRtc_.signalsForPeer.setSyncHandler((signalFromSocksRtc) => {
+        this.send({
+          type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+          data: signalFromSocksRtc
+        });
+      });
 
       // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
