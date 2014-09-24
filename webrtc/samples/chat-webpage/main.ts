@@ -31,9 +31,9 @@ function setupLoggingPeerConnection(name:string, receiveArea:HTMLInputElement) :
   pc.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
     log.info(name + ': connected: ' +
         endpoints.local.address + ':' + endpoints.local.port +
-        ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+        ' (' + endpoints.localType + ') <-> ' +
         endpoints.remote.address + ':' + endpoints.remote.port +
-        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')\n' +
+        ' (' + endpoints.remoteType + ')\n' +
         pc.toString());
   });
   pc.onceConnecting.then(() => {

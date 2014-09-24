@@ -30,9 +30,9 @@ function makePeerConnection(name:string) {
   pc.onceConnected().then((endpoints:WebRtc.ConnectionAddresses) => {
     log.info(name + ' connected: ' +
         endpoints.local.address + ':' + endpoints.local.port +
-        ' (' + WebRtc.CandidateType[endpoints.localType] + ') <-> ' +
+        ' (' + endpoints.localType + ') <-> ' +
         endpoints.remote.address + ':' + endpoints.remote.port +
-        ' (' + WebRtc.CandidateType[endpoints.remoteType] + ')');
+        ' (' + endpoints.remoteType + ')');
   });
   pc.onceDisconnected().then(() => {
     log.info(name + ': onceDisonnected');

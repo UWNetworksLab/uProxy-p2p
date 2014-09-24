@@ -29,9 +29,6 @@ declare module WebRtc {
   // via a TURN server. The values are taken from this file; as the comment
   // suggests, not all values may be found in practice:
   //   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
-  enum CandidateType {
-    UNKNOWN, LOCAL, STUN, PRFLX, RELAY
-  }
 
   interface Endpoint {
     address:string;
@@ -41,9 +38,9 @@ declare module WebRtc {
   // Once you are connected to the peer, you know the local/remote addresses.
   interface ConnectionAddresses {
     local  :Endpoint;  // the local transport address/port
-    localType: CandidateType;
+    localType: string;
     remote :Endpoint;  // the remote peer's transport address/port
-    remoteType: CandidateType;
+    remoteType: string;
   }
 
   enum State {
