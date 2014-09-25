@@ -1,5 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
-<link rel='import' href='button.html'>
+<link rel='import' href='consent-action.html'>
 
 <polymer-element name='uproxy-instance' attributes='userId, instance'>
   <template>
@@ -19,18 +19,38 @@
     Instance ID: {{instance.instanceId}}
     <div hidden?='{{ !getting() }}'>
       <div hidden?='{{ !getting() }}'>
-      <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
-        Start
+
+      <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
+        <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
+          Start
+        </button>
+        <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
+          Stop
+        </button>
+      </div>
+
+      <button on-tap='{{ request }}'
+        hidden?='{{ "NONE" !== getProxyConsentState() }}'>
+        Request
       </button>
-      <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
-        Stop
+      <button on-tap='{{ cancel }}'
+        hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
+        Cancel
       </button>
-      <!--
-        <button on-tap='{{ request }}'>Request Access</button>
-      -->
+      <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
+        <button on-tap='{{ accept }}'>
+          Accept
+        </button>
+        <button on-tap='{{ ignore }}'>
+          Decline
+        </button>
+      </div>
     </div>
+
     <div hidden?='{{ getting() }}'>
-      <button on-tap='{{ offer }}'>Offer Access</button>
+      <button on-tap='{{ offer }}'>Offer</button>
+      <button on-tap='{{ grant }}'>Grant</button>
+      <button on-tap='{{ ignore }}'>Ignore</button>
     </div>
 
     <!--
