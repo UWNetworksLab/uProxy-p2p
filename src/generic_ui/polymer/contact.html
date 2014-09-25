@@ -26,39 +26,35 @@
     }
     #frame {
       box-sizing: border-box;
-      padding: 16px;
+      padding: 0;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      height: 72px;
-    }
-    #frame.expanded {
-      height: 150px;
-    }
+      height: 54px;
+    } #frame.expanded { height: 200px; }
     #avatar {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 50%;
+      width: 36px; height: 36px;
+      margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: top;
     }
     #words {
       display: inline-block;
-      width: 250px; height: 100%;
+      width: 283px; height: 100%;
     }
     h1 {
       display: block;
       font-size: 16px; font-weight: 100;
-      margin: 0; padding: 8px;
-    }
-    #words:hover h1 { color: #aaa; }
+      margin: 0; padding: 16px 8px 0;
+    } #words:hover h1 { color: #aaa; }
     #description {
       color: #aaa; display: block;
       font-size: 10px; margin-left: 8px;
     }
     #instances {
       padding: 8px;
+      overflow-y: scroll;
+      height: 100px;
     }
     #actions {
       padding: 8px;

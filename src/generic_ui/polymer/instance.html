@@ -6,7 +6,7 @@
     :host {
       display: block; padding: 8px;
       border-top: 1px solid #ddd;
-      font-size: 11px;
+      font-size: 10px;
     }
     button {
       background-color: #fff;
@@ -16,9 +16,14 @@
     }
     button:hover { box-shadow: 1px 2px 4px #aaa; }
     button:active { box-shadow: 1px 2px 4px #aaa inset; }
+    p, span {
+      margin: 0;
+      color: #888;
+    }
     </style>
 
-    <!-- Instance ID: {{instance.instanceId}} -->
+    Instance ID: {{ instance.instanceId }}
+
     <div hidden?='{{ !getting() }}'>
 
       <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
@@ -38,10 +43,10 @@
       </div>
 
       <div hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
-        <p>Requesting access... </p>
         <button on-tap='{{ cancel }}'>
           Cancel Request
         </button>
+        <span>Requesting access... </span>
       </div>
 
       <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
