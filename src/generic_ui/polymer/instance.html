@@ -1,20 +1,42 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='button.html'>
 
-<polymer-element name='uproxy-instance' attributes='instance'>
+<polymer-element name='uproxy-instance' attributes='userId, instance'>
   <template>
     <style>
     :host {
+      border: 1px solid #888;
     }
+    button {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 8px;
+      outline: none;
+    }
+    button:hover { box-shadow: 1px 2px 4px #aaa; }
+    button:active { box-shadow: 1px 2px 4px #aaa inset; }
     </style>
     Instance ID: {{instance.instanceId}}
-    <div hidden?='{{ getting() }}'>
-      whoa
-      <uproxy-button>Request Access</uproxy-button>
-    </div>
     <div hidden?='{{ !getting() }}'>
-      omg
-      <uproxy-button>Offer Access</uproxy-button>
+      <div hidden?='{{ !getting() }}'>
+      <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
+        Start
+      </button>
+      <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
+        Stop
+      </button>
+      <!--
+        <button on-tap='{{ request }}'>Request Access</button>
+      -->
     </div>
+    <div hidden?='{{ getting() }}'>
+      <button on-tap='{{ offer }}'>Offer Access</button>
+    </div>
+
+    <!--
+      TODO: Insert bandwidth information here.
+    -->
+
   </template>
   <script src='instance.js'></script>
 </polymer-element>

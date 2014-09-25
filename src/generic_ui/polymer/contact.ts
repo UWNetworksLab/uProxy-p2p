@@ -1,7 +1,7 @@
 Polymer({
   expanded: false,
   contact: {
-    // Must adhere to the typescript interface.
+    // Must adhere to the typescript interface UI.User.
     name: 'unknown',
     pic: undefined,
     description: 'description here'

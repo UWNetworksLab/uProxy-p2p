@@ -328,6 +328,11 @@ module.exports = (grunt) ->
           src: ['**']
           dest: 'build/dev/uistatic/polymer'
         }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
+          dest: 'build/dev/uistatic/'
+        }, {
           # generic_ui sources.
           expand: true, cwd: 'build/dev/generic_ui/scripts', flatten: true
           src: ['**']
