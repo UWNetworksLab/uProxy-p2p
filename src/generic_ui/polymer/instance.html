@@ -20,11 +20,15 @@
       margin: 0;
       color: #888;
     }
+    #instanceId {
+      font-size: 8px;
+      color: #bbb;
+    }
     </style>
 
-    Instance ID: {{ instance.instanceId }}
+    <span id='instanceId'>{{ instance.instanceId }}</span>
 
-    <div hidden?='{{ !getting() }}'>
+    <div hidden?='{{ giving() }}'>
 
       <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
         <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
@@ -43,7 +47,7 @@
       </div>
 
       <div hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
-        <button on-tap='{{ cancel }}'>
+        <button on-tap='{{ cancelRequest }}'>
           Cancel Request
         </button>
         <span>Requesting access... </span>
@@ -60,16 +64,12 @@
     <div hidden?='{{ getting() }}'>
 
       <div hidden?='{{ "NONE" !== getClientConsentState() }}'>
-        <button on-tap='{{ offer }}'>
-          Offer Access
-        </button>
+        <button on-tap='{{ offer }}'>Offer Access</button>
         <p>You have not granted them access.</p>
       </div>
 
       <div hidden?='{{ "USER_OFFERED" !== getClientConsentState() }}'>
-        <button on-tap='{{ cancelOffer }}'>
-          Cancel Offer
-        </button>
+        <button on-tap='{{ cancelOffer }}'>Cancel Offer</button>
       </div>
 
       <div
@@ -77,6 +77,11 @@
         <p>They requested access through you.</p>
         <button on-tap='{{ grant }}'>Grant</button>
         <button on-tap='{{ ignoreRequest }}'>Ignore</button>
+      </div>
+
+      <div hidden?='{{ "GRANTED" !== getClientConsentState() }}'>
+        <p>You've given them access.</p>
+        <button on-tap='{{ cancelOffer }}'>Revoke Access</button>
       </div>
 
     </div>

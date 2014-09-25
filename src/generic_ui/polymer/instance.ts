@@ -8,16 +8,16 @@ Polymer({
     };
   },
 
+  // Used as a filter on ui.gestalt.
   getting: function() {
+    return UI.Gestalt.GETTING == ui['gestalt'];
     // return UI.Gestalt.GETTING == window['$ui'].gestalt;
-    return true;
-    // var roster = this.parentNode.host;
-    // console.log(roster);
-    // if (!roster) {
-      // return false;
-    // }
-    // var ui = roster.parentNode.host;
-    // return ui.GETTING == ui.gestalt;
+    // return ui['gestalt'] == UI.Gestalt.GETTING;
+  },
+
+  giving: function() {
+    // console.log('GIVING FILTER! ' + val);
+    return UI.Gestalt.GIVING == ui['gestalt'];
   },
 
   start: function() {
