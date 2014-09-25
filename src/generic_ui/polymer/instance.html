@@ -1,11 +1,12 @@
 <link rel="import" href="../lib/polymer/polymer.html">
-<link rel='import' href='consent-action.html'>
 
 <polymer-element name='uproxy-instance' attributes='userId, instance'>
   <template>
     <style>
     :host {
-      border: 1px solid #888;
+      display: block; padding: 8px;
+      border-top: 1px solid #ddd;
+      font-size: 11px;
     }
     button {
       background-color: #fff;
@@ -16,9 +17,9 @@
     button:hover { box-shadow: 1px 2px 4px #aaa; }
     button:active { box-shadow: 1px 2px 4px #aaa inset; }
     </style>
-    Instance ID: {{instance.instanceId}}
+
+    <!-- Instance ID: {{instance.instanceId}} -->
     <div hidden?='{{ !getting() }}'>
-      <div hidden?='{{ !getting() }}'>
 
       <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
         <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
@@ -29,28 +30,50 @@
         </button>
       </div>
 
-      <button on-tap='{{ request }}'
-        hidden?='{{ "NONE" !== getProxyConsentState() }}'>
-        Request
-      </button>
-      <button on-tap='{{ cancel }}'
-        hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
-        Cancel
-      </button>
-      <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
-        <button on-tap='{{ accept }}'>
-          Accept
-        </button>
-        <button on-tap='{{ ignore }}'>
-          Decline
+      <div hidden?='{{ "NONE" !== getProxyConsentState() }}'>
+        <p>Request access from contact before connection.</p>
+        <button on-tap='{{ request }}'>
+          Request
         </button>
       </div>
+
+      <div hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
+        <p>Requesting access... </p>
+        <button on-tap='{{ cancel }}'>
+          Cancel Request
+        </button>
+      </div>
+
+      <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
+        <p>They've offered you access.</p>
+        <button on-tap='{{ accept }}'>Accept Offer</button>
+        <button on-tap='{{ ignoreOffer }}'>Decline</button>
+      </div>
+
     </div>
 
     <div hidden?='{{ getting() }}'>
-      <button on-tap='{{ offer }}'>Offer</button>
-      <button on-tap='{{ grant }}'>Grant</button>
-      <button on-tap='{{ ignore }}'>Ignore</button>
+
+      <div hidden?='{{ "NONE" !== getClientConsentState() }}'>
+        <button on-tap='{{ offer }}'>
+          Offer Access
+        </button>
+        <p>You have not granted them access.</p>
+      </div>
+
+      <div hidden?='{{ "USER_OFFERED" !== getClientConsentState() }}'>
+        <button on-tap='{{ cancelOffer }}'>
+          Cancel Offer
+        </button>
+      </div>
+
+      <div
+        hidden?='{{ "REMOTE_REQUESTED" !== getClientConsentState() }}'>
+        <p>They requested access through you.</p>
+        <button on-tap='{{ grant }}'>Grant</button>
+        <button on-tap='{{ ignoreRequest }}'>Ignore</button>
+      </div>
+
     </div>
 
     <!--

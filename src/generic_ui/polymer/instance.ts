@@ -22,7 +22,6 @@ Polymer({
 
   start: function() {
     console.log('[polymer] calling core.start(', this.path, ')');
-    // this.access.asProxy = true;
     core.start(this.path).then(() => {
       console.log('[polymer] received core.start promise fulfillment.');
       // TODO: Use BrowserAction to set the extension icon to 'proxy mode'.
@@ -30,7 +29,6 @@ Polymer({
   },
   stop: function() {
     console.log('[polymer] calling core.stop()');
-    // this.access.asProxy = false;
     core.stop();
   },
 
@@ -48,12 +46,19 @@ Polymer({
 
   // Proxy UserActions.
   request: function() { this.modifyConsent(Consent.UserAction.REQUEST) },
-  cancel: function() { this.modifyConsent(Consent.UserAction.CANCEL_REQUEST) },
+  cancelRequest: function() {
+    this.modifyConsent(Consent.UserAction.CANCEL_REQUEST)
+  },
   accept: function() { this.modifyConsent(Consent.UserAction.ACCEPT_OFFER) },
-  ignore: function() { this.modifyConsent(Consent.UserAction.IGNORE_OFFER) },
+  ignoreOffer: function() { this.modifyConsent(Consent.UserAction.IGNORE_OFFER) },
 
   // Client UserActions
   offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
+  cancelOffer: function() { this.modifyConsent(Consent.UserAction.CANCEL_OFFER) },
+  grant: function() { this.modifyConsent(Consent.UserAction.ALLOW_REQUEST) },
+  ignoreRequest: function() {
+    this.modifyConsent(Consent.UserAction.IGNORE_REQUEST)
+  },
 
   getProxyConsentState: function() : string {
     return Consent.ProxyState[this.instance.consent.asProxy];
