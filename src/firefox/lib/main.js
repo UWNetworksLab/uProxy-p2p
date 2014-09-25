@@ -3,7 +3,7 @@ var panels = require("sdk/panel");
 var self = require("sdk/self");
 const {Cu} = require("chrome");
 
-Cu.import(self.data.url('freedom-for-firefox.jsm'));
+Cu.import(self.data.url('freedom-for-firefox-for-uproxy.jsm'));
 
 // Main uProxy button.
 var button = buttons.ActionButton({
@@ -21,7 +21,7 @@ var button = buttons.ActionButton({
 var panel = panels.Panel({
   width: 371,
   height: 600,
-  contentURL: self.data.url("popup.html"),
+  contentURL: self.data.url("polymer/popup.html"),
   contentScriptFile: [
     self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),

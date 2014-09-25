@@ -74,6 +74,16 @@ FILES =
     'generic_core/util.js'
   ]
 
+  uproxy_networking_common: [
+    'arraybuffers/arraybuffers.js'
+    'handler/queue.js'
+    'ipaddr/ipaddr.min.js'
+    'tcp/tcp.js'
+    'socks-common/socks-headers.js'
+    'socks-to-rtc/socks-to-rtc.js'
+    'rtc-to-net/rtc-to-net.js'
+  ]
+
 
 module.exports = (grunt) ->
   grunt.initConfig
@@ -227,34 +237,10 @@ module.exports = (grunt) ->
           expand: true, cwd: 'src/'
           src: ['icons/uproxy-*.png']
           dest: chromeAppDevPath
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/arraybuffers/',
-          src: ['arraybuffers.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/arraybuffers/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/handler/',
-          src: ['queue.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/handler/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/ipaddr/',
-          src: ['ipaddr.min.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/ipaddr/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/tcp/',
-          src: ['tcp.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/tcp/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/socks-common/',
-          src: ['socks-headers.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/socks-common/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/socks-to-rtc/',
-          src: ['socks-to-rtc.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/socks-to-rtc/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/rtc-to-net/',
-          src: ['rtc-to-net.js']
-          dest: chromeAppDevPath + 'scripts/uproxy-networking/rtc-to-net/'
+        }, { # Copy uproxy-networking files.
+          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          src: FILES.uproxy_networking_common,
+          dest: chromeAppDevPath + 'scripts/uproxy-networking/'
         }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
           expand: true, cwd: 'node_modules/uproxy-networking/build/freedom/',
           src: ['uproxy-core-env.js']
@@ -269,19 +255,39 @@ module.exports = (grunt) ->
           expand: true, cwd: 'src/firefox/'
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
           dest: firefoxDevPath
-        # }, {
-          # expand: true, cwd: 'build/dev'
-          # src: ['uproxy.js']
-          # dest: firefoxDevPath + 'data/core/'
+        }, {  # Freedom manifest for uproxy
+          expand: true, cwd: 'src/generic_core/'
+          src: ['freedom-module.json']
+          dest: firefoxDevPath + 'data/core/'
+        }, {  # Additional hack - TODO: remove this once social enum is gone.
+          expand: true, cwd: 'third_party', flatten: true
+          src: [
+            'freedom-ts-hacks/social-enum.js'
+          ]
+          dest: firefoxDevPath + 'data/core/'
+         }, {
+           expand: true, cwd: 'build/dev'
+           src: ['uproxy.js']
+           dest: firefoxDevPath + 'data/core/'
         # ... the generic core stuff
         }, {
           expand: true, cwd: 'build/dev/generic_core'
           src: ['**'],
           dest: firefoxDevPath + 'data/core/'
-        # ... the generic UI stuff
         }, {
+          # generic_ui HTML and non-typescript assets.
+          expand: true, cwd: 'src/generic_ui',
+          src: ['**', '!**/*.ts']
+          dest: firefoxDevPath + 'data/'
+        }, {
+        # ... the generic UI stuff
           expand: true, cwd: 'build/dev/generic_ui'
           src: ['**'],
+          dest: firefoxDevPath + 'data'
+        }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
           dest: firefoxDevPath + 'data'
         }, {
           expand: true, cwd: 'build/dev', flatten: true
@@ -292,11 +298,10 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/uproxy-lib/build/freedom'
           src: ['freedom-for-firefox-for-uproxy.jsm']
           dest: firefoxDevPath + 'data'
-        }, {
-        # TODO: Fix socks-rtc / uproxy-networking include?
-          expand: true, cwd: 'node_modules/socks-rtc/build/'
-          src: ['**'],
-          dest: firefoxDevPath + 'data/lib/socks-rtc'
+        }, { # Copy uproxy-networking files.
+          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          src: FILES.uproxy_networking_common,
+          dest: firefoxDevPath + 'data/core/uproxy-networking'
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/social'
           src: ['websocket-server/**']
@@ -309,6 +314,10 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
+        }, {
+          expand: true, cwd: 'third_party/lib'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib'
         } ]
 
     }  # copy
@@ -484,6 +493,7 @@ module.exports = (grunt) ->
     'build_generic_core'
     'typescript:firefox'
     'copy:firefox'
+    'concat:firefox_uproxy'
   ]
 
   taskManager.add 'build_firefox_xpi', [
