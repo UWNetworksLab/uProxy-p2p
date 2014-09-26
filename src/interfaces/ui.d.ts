@@ -53,6 +53,8 @@ declare module UI {
     consent              :ConsentState;
     access               :AccessState;
     isOnline             :boolean;
+    bytesSent            :number;
+    bytesReceived        :number;
   }
 
   /**

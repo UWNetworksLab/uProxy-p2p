@@ -6,7 +6,9 @@
     :host {
     }
     </style>
-    Instance ID: {{instance.instanceId}}
+    Instance ID: {{instance.instanceId}}<br>
+    Bytes Sent: {{instance.bytesSent}}<br>
+    Bytes Received: {{instance.bytesReceived}}<br>
     <div hidden?='{{ getting() }}'>
       whoa
       <uproxy-button>Request Access</uproxy-button>

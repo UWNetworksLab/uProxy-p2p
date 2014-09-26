@@ -34,6 +34,8 @@ module Core {
     public instanceId  :string;
     public keyHash     :string
     public description :string;
+    public bytesSent   :number;
+    public bytesReceived    :number;
 
     public consent     :ConsentState = {
       asClient: Consent.ClientState.NONE,
@@ -47,6 +49,8 @@ module Core {
     };
     public updateDate = null;
     private transport  :Transport;
+    //
+    private timerActive = false;
 
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
@@ -107,6 +111,8 @@ module Core {
       if (data.consent) {
         this.consent = data.consent;
       }
+      this.bytesSent = 0;
+      this.bytesReceived = 0;
     }
 
     /**
@@ -161,6 +167,28 @@ module Core {
                 data: signal
               });
             });
+            this.rtcToNet_.bytesReceivedFromPeer
+                .setSyncHandler((numBytes:number) => {
+              this.bytesReceived += numBytes;
+              if (!this.timerActive) {
+                setTimeout(() => {
+                  this.user.notifyUI();
+                  this.timerActive = false;
+                }, 1000);
+                this.timerActive = true;  
+              }
+            });
+            this.rtcToNet_.bytesSentToPeer
+                .setSyncHandler((numBytes:number) => {
+              this.bytesSent += numBytes;
+              if (!this.timerActive) {
+                setTimeout(() => {
+                  this.user.notifyUI();
+                  this.timerActive = false;
+                }, 1000);
+                this.timerActive = true;  
+              }              
+            });
           }
           // TODO: signalFromRemote needs to get converted into a
           // WebRtc.SignallingMessage. This probably doesn't actually work right
@@ -193,7 +221,7 @@ module Core {
     public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
-        return Promise.reject('Lacking permission to proxy!');
+        //return Promise.reject('Lacking permission to proxy!');
       } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
@@ -224,7 +252,28 @@ module Core {
           data: signal
         });
       });
-
+      this.socksToRtc_.bytesReceivedFromPeer
+          .setSyncHandler((numBytes:number) => {
+        this.bytesReceived += numBytes;
+        if (!this.timerActive) {
+          setTimeout(() => {
+            this.user.notifyUI();
+            this.timerActive = false;
+          }, 1000);
+          this.timerActive = true;  
+        }
+      });
+      this.socksToRtc_.bytesSentToPeer
+          .setSyncHandler((numBytes:number) => {
+        this.bytesSent += numBytes;
+        if (!this.timerActive) {
+          setTimeout(() => {
+            this.user.notifyUI();
+            this.timerActive = false;
+          }, 1000);
+          this.timerActive = true;  
+        }
+      });      
       // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
@@ -467,7 +516,9 @@ module Core {
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
-        isOnline:             this.user.isInstanceOnline(this.instanceId)
+        isOnline:             this.user.isInstanceOnline(this.instanceId),
+        bytesSent:            this.bytesSent,
+        bytesReceived:        this.bytesReceived
       });
     }
 
