@@ -49,8 +49,11 @@ module Core {
     };
     public updateDate = null;
     private transport  :Transport;
-    //
-    private timerActive = false;
+    // Whether or not there is a UI update (triggered by this.user.notifyUI())
+    // scheduled to run in the next second.
+    // Used by SocksToRtc & RtcToNet Handlers to make sure bytes sent and
+    // received are only forwarded to the UI once every second. 
+    private isUIUpdatePending = false;
 
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
@@ -167,26 +170,30 @@ module Core {
                 data: signal
               });
             });
+            // When bytes are sent to or received from the client, notify the 
+            // UI about the increase in data exchanged. Increment the bytes 
+            // sent/received variables in real time, but use a timer to control 
+            // when notifyUI() is called.
             this.rtcToNet_.bytesReceivedFromPeer
                 .setSyncHandler((numBytes:number) => {
               this.bytesReceived += numBytes;
-              if (!this.timerActive) {
+              if (!this.isUIUpdatePending) {
                 setTimeout(() => {
                   this.user.notifyUI();
-                  this.timerActive = false;
+                  this.isUIUpdatePending = false;
                 }, 1000);
-                this.timerActive = true;  
+                this.isUIUpdatePending = true;  
               }
             });
             this.rtcToNet_.bytesSentToPeer
                 .setSyncHandler((numBytes:number) => {
               this.bytesSent += numBytes;
-              if (!this.timerActive) {
+              if (!this.isUIUpdatePending) {
                 setTimeout(() => {
                   this.user.notifyUI();
-                  this.timerActive = false;
+                  this.isUIUpdatePending = false;
                 }, 1000);
-                this.timerActive = true;  
+                this.isUIUpdatePending = true;  
               }              
             });
           }
@@ -252,26 +259,30 @@ module Core {
           data: signal
         });
       });
+      // When bytes are sent to or received through the proxy, notify the 
+      // UI about the increase in data exchanged. Increment the bytes 
+      // sent/received variables in real time, but use a timer to control 
+      // when notifyUI() is called.      
       this.socksToRtc_.bytesReceivedFromPeer
           .setSyncHandler((numBytes:number) => {
         this.bytesReceived += numBytes;
-        if (!this.timerActive) {
+        if (!this.isUIUpdatePending) {
           setTimeout(() => {
             this.user.notifyUI();
-            this.timerActive = false;
+            this.isUIUpdatePending = false;
           }, 1000);
-          this.timerActive = true;  
+          this.isUIUpdatePending = true;  
         }
       });
       this.socksToRtc_.bytesSentToPeer
           .setSyncHandler((numBytes:number) => {
         this.bytesSent += numBytes;
-        if (!this.timerActive) {
+        if (!this.isUIUpdatePending) {
           setTimeout(() => {
             this.user.notifyUI();
-            this.timerActive = false;
+            this.isUIUpdatePending = false;
           }, 1000);
-          this.timerActive = true;  
+          this.isUIUpdatePending = true;  
         }
       });      
       // TODO: Update to onceReady() once uproxy-networking fixes it.
