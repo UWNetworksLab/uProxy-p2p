@@ -6,7 +6,7 @@
 <link rel="import" href='settings.html'>
 <link rel="import" href='networks.html'>
 
-<polymer-element name='uproxy-ui' attributes='model'>
+<polymer-element name='uproxy-root' attributes='model'>
 
   <template>
     <style>
@@ -26,7 +26,7 @@
       }
     </style>
 
-    <uproxy-toolbar hidden?='{{SPLASH==view || !loggedIn}}'>
+    <uproxy-toolbar hidden?='{{ UI.View.SPLASH==ui.view || !loggedIn }}'>
       <uproxy-button id='btnGive'
           on-tap='{{ getMode }}'
           hidden?='{{ UI.Gestalt.GETTING == ui.gestalt }}'
@@ -48,23 +48,23 @@
     </uproxy-toolbar>
 
     <uproxy-splash id='splash'
-      class='{{ {active:(SPLASH==view)} | tokenList }}'>
+      class='{{ { active:(UI.View.SPLASH==ui.view) } | tokenList }}'>
     </uproxy-splash>
 
     <uproxy-networks id='networks'
-      class='{{ {active:(NETWORKS==view)} | tokenList }}'>
+      class='{{ { active:(UI.View.NETWORKS==ui.view) } | tokenList }}'>
     </uproxy-networks>
 
     <uproxy-settings id='settings'
-      class='{{ {active:(SETTINGS==view)} | tokenList }}'>
+      class='{{ { active:(UI.View.SETTINGS==ui.view) } | tokenList }}'>
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      class='{{ { active: (ROSTER==view), hidden: (SPLASH==view || !loggedIn) } | tokenList }}'>
+      class='{{ { active: (UI.View.ROSTER==ui.view), hidden: (UI.View.SPLASH==ui.view || !loggedIn) } | tokenList }}'>
     </uproxy-roster>
 
   </template>
 
-  <script src='ui.js'></script>
+  <script src='root.js'></script>
 
 </polymer-element>

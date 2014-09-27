@@ -30,13 +30,14 @@
 
     <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
 
-      <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
+      <div hidden?='{{ "GRANTED" !== getProxyConsentState() }}'>
         <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
           Start
         </button>
         <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
           Stop
         </button>
+        <p>You have access.</p>
       </div>
 
       <div hidden?='{{ "NONE" !== getProxyConsentState() }}'>
