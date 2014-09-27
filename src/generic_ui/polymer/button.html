@@ -37,12 +37,18 @@
     img:hover {
       opacity: 1.0;
     }
+    button {
+      background: none;
+      border: none;
+      outline: none;
+      margin: 0; padding: 0;
+    }
     </style>
-    <div class='btn'>
-      <img src='{{img}}' />
+    <button class='btn'>
+      <img src='{{ img }}' />
       <content>
       </content>
-    </div>
+    </button>
   </template>
   <script src='button.js'></script>
 </polymer-element>

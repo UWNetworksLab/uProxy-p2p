@@ -8,7 +8,7 @@ window['$ui'] = $ui;
 
 Polymer({
   model: {},
-  // TODO: actually disting$uish between give and get sort order.
+  // TODO: actually distinguish between give and get sort order.
   giveMode: () => {
     console.log('GIVE mode.');
     $ui.view = $ui.ROSTER;

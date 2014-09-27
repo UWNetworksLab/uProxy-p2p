@@ -12,8 +12,6 @@ Polymer({
       return;
     }
     console.log('connect fired!');
-    // var ui = this.parentNode.host.parentNode.host;
-    // console.log(ui);
     this.state = this.LOGGING_IN;
     core.login(this.network.name).then(() => {
       console.log('connected to ' + this.network.name);
