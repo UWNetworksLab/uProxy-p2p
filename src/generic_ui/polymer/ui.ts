@@ -15,16 +15,11 @@ Polymer({
     // TODO(keroserene): Update the original UI file and this new polymer UI
     // file, merge them, clean out the old, apply the new.
     ui['gestalt'] = UI.Gestalt.GIVING;
-    // TODO(keroserene): Figure out how platform flush works so that data
-    // bindings external to polymer elements (like the give/get toggle)
-    // propogate correctly.
-    // Platform.flush();
   },
   getMode: () => {
     console.log('GET mode.');
     $ui.view = $ui.ROSTER;
     ui['gestalt'] = UI.Gestalt.GETTING;
-    // Platform.flush();
   },
   networksView: () => {
     console.log('NETWORKS');

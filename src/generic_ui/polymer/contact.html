@@ -40,7 +40,7 @@
     }
     #words {
       display: inline-block;
-      width: 283px; height: 100%;
+      width: 282px; height: 100%;
     }
     h1 {
       display: block;
@@ -66,7 +66,7 @@
      <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' />
       <div id='words'>
-        <h1 on-mousedown='{{toggle}}'>{{ contact.name }}</h1>
+        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
         <span id='description'>{{ contact.description }}</span>
         <div id='instances' hidden?='{{!expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>

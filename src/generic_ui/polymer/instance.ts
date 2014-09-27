@@ -6,18 +6,10 @@ Polymer({
       userId: this.userId,
       instanceId: this.instance.instanceId
     };
-  },
-
-  // Used as a filter on ui.gestalt.
-  getting: function() {
-    return UI.Gestalt.GETTING == ui['gestalt'];
-    // return UI.Gestalt.GETTING == window['$ui'].gestalt;
-    // return ui['gestalt'] == UI.Gestalt.GETTING;
-  },
-
-  giving: function() {
-    // console.log('GIVING FILTER! ' + val);
-    return UI.Gestalt.GIVING == ui['gestalt'];
+    // Expose global ui object and UI module in this context. This allows the
+    // hidden? watch for the get/give toggle to actually update.
+    this.ui = ui;
+    this.UI = UI;
   },
 
   start: function() {
@@ -34,8 +26,6 @@ Polymer({
 
   // |action| is the string end for a Consent.UserAction
   modifyConsent: function(action :Consent.UserAction) {
-    // var actionEnumStr = action;
-    // var action :Consent.UserAction = Consent.UserAction[action];
     var command = <uProxy.ConsentCommand>{
       path: this.path,
       action: action

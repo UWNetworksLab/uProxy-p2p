@@ -28,7 +28,7 @@
 
     <span id='instanceId'>{{ instance.instanceId }}</span>
 
-    <div hidden?='{{ giving() }}'>
+    <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
 
       <div hidden?='{{ "GRANTED" !== instance.consent.asProxy }}'>
         <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
@@ -40,10 +40,10 @@
       </div>
 
       <div hidden?='{{ "NONE" !== getProxyConsentState() }}'>
-        <p>Request access from contact before connection.</p>
         <button on-tap='{{ request }}'>
           Request
         </button>
+        <p>Request access from contact before connection.</p>
       </div>
 
       <div hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
@@ -54,14 +54,14 @@
       </div>
 
       <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
-        <p>They've offered you access.</p>
         <button on-tap='{{ accept }}'>Accept Offer</button>
         <button on-tap='{{ ignoreOffer }}'>Decline</button>
+        <p>They've offered you access.</p>
       </div>
 
     </div>
 
-    <div hidden?='{{ getting() }}'>
+    <div hidden?='{{ UI.Gestalt.GIVING !== ui.gestalt }}'>
 
       <div hidden?='{{ "NONE" !== getClientConsentState() }}'>
         <button on-tap='{{ offer }}'>Offer Access</button>
@@ -74,14 +74,14 @@
 
       <div
         hidden?='{{ "REMOTE_REQUESTED" !== getClientConsentState() }}'>
-        <p>They requested access through you.</p>
         <button on-tap='{{ grant }}'>Grant</button>
         <button on-tap='{{ ignoreRequest }}'>Ignore</button>
+        <p>They requested access through you.</p>
       </div>
 
       <div hidden?='{{ "GRANTED" !== getClientConsentState() }}'>
-        <p>You've given them access.</p>
         <button on-tap='{{ cancelOffer }}'>Revoke Access</button>
+        <p>You've given them access.</p>
       </div>
 
     </div>
