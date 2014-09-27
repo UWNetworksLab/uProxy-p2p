@@ -25,10 +25,11 @@ module UI {
    * Enumeration of mutually-exclusive view states.
    */
   export enum View {
+    SPLASH = 0,
     ROSTER,
     USER,
-    OPTIONS,
-    CHAT
+    NETWORKS,
+    SETTINGS,
   }
 
   export enum Gestalt {
@@ -71,6 +72,7 @@ module UI {
   /**
    * The User Interface class.
    *
+   * Keeps persistent state between the popup opening and closing.
    * Manipulates the payloads received from UPDATES from the Core in preparation
    * for UI interaction.
    * Any COMMANDs from the UI should be directly called from the 'core' object.
@@ -137,7 +139,8 @@ module UI {
         public browserAction :BrowserAction) {
 
       // TODO: Determine the best way to describe view transitions.
-      this.view = View.ROSTER;
+      this.view = View.SPLASH;  // Begin at the splash intro.
+      // TODO: Remove toggles.
       this.toggles = {
         splash:  true,
         options: false,
