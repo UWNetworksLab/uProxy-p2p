@@ -38,14 +38,6 @@ module UI {
   }
 
   /**
-   * Boolean toggles which influence other appearances.
-   */
-  export interface Toggles {
-    splash  :boolean;
-    options :boolean;
-  }
-
-  /**
    * Structure of the uProxy UI model object:
    * TODO: Probably put the model in its own file.
    */
@@ -78,18 +70,11 @@ module UI {
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
   export class UserInterface implements uProxy.UIAPI {
-
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    // Appearance.
-    public view :View;
-    public toggles :Toggles;
-
-    // Just the initial introductory splash screen.
-    public introSplashed :Boolean = false;
+    public view :View;  // Appearance.
 
     // Keep track of currently viewed contact and instance.
-    // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
     public focusedInstance :UI.Instance = null;
@@ -140,12 +125,6 @@ module UI {
 
       // TODO: Determine the best way to describe view transitions.
       this.view = View.SPLASH;  // Begin at the splash intro.
-      // TODO: Remove toggles.
-      this.toggles = {
-        splash:  true,
-        options: false,
-        search:  true
-      };
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -212,13 +191,6 @@ module UI {
       new Notification('uProxy', { body: notificationText,
                                    icon: 'icons/uproxy-128.png'});
     }
-
-    // ------------------------------- Views ----------------------------------
-    public isSplash = () : boolean => {
-      return this.toggles.splash || !this.loggedIn();
-    }
-    public isRoster = () : boolean => { return View.ROSTER == this.view; }
-    public isUserView = () : boolean => { return View.USER == this.view; }
 
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
@@ -287,6 +259,8 @@ module UI {
     // -------------------------------- Filters ----------------------------------
     /**
      * Toggling |filter| changes the visibility and ordering of roster entries.
+     * TODO: Filters not currently used. Either re-implement or remove during
+     * the next UX update.
      */
     toggleFilter = (filter) => {
       if (undefined === this.filters[filter]) {
@@ -468,7 +442,6 @@ module UI {
       this.core.login(network).then(
         () => {
           this.view = UI.View.ROSTER;
-          this.toggles.splash = false;
         },
         () => { console.warn('login failed for ' + network) });
     }

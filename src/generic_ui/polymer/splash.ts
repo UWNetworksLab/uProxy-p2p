@@ -14,11 +14,7 @@ Polymer({
   },
   end: function() {
     console.log('closing the splash intro.');
-    ui['introSplashed'] = true;
-    // var $ui = this.parentNode.host;
-    // console.log($ui);
     ui['view'] = UI.View.NETWORKS;
   },
-  ready: function() {
-  }
+  ready: function() {}
 });

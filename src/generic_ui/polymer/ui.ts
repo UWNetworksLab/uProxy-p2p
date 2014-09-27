@@ -36,14 +36,5 @@ Polymer({
 
     ui['gestalt'] = UI.Gestalt.GIVING;
     this.loggedIn = ui['loggedIn'];
-
-    // if (ui['introSplashed']) {
-      // This must be asynchronous to avoid a CSS bug.
-      // TODO: There seems to be a race condition with polymer element load
-      // order which sometimes still causes a CSS bug. This needs to be fixed.
-      // this.async(function() {
-        // ui['view'] = UI.View.NETWORKS;
-      // }, 1000);
-    // }
   }
 });
