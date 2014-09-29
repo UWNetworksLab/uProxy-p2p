@@ -202,10 +202,6 @@ module uProxy {
     showNotification(notificationText :string) : void;
     isProxying() : boolean;
     stopProxyingInUiAndConfig() : void;
-
-    // TODO: explain why this is needed. Seems like a hack to refresh the dom.
-    refreshDOM() : void;
-
   }
 
   interface ICoreOptions {

@@ -36,7 +36,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
   // Status object indicating whether we're connected to the app.
   // TODO: Since this is equivalent to whether or not appPort_ is null, we
   // should probably consider turning it into a function, while at the same time
-  // preserving potential angular bindings.
+  // preserving potential data bindings.
   public status :StatusObject;
 
   // A freedom-type indexed object where each key provides a list of listener

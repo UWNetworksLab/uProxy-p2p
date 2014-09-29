@@ -14,6 +14,7 @@
     "persistent": true,
     "scripts": [
       "scripts/chrome_glue.js",
+      "scripts/uproxy.js",
       "scripts/user.js",
       "scripts/ui.js",
       "scripts/chrome_browser_action.js",
@@ -40,6 +41,6 @@
     "https://graph.facebook.com/oauth/access_token",
     "https://accounts.google.com/o/oauth2/token"
   ],
-  "options_page": "options.html",
+  "options_page": "polymer/popup.html",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOOsgNK52HYy9483rhgsofyHTp/NbmXkpHNLoarN027kqKVPS3U36/L2XyPJOAtvy+DDR+kCro1JmdFWBwPAk5AqvSKvfLzuXkO+98T/3ZhqfAl4KIqc0C+PsWIYsANTAbKkXlP4bATEK6O5Mq0aItAHGLSmKoNrAAVrtxmETXaumcrq78amOpAZz7XrPdJVhrHd6uQbR90WeFEe8LBOqdnA4iKeuMI9IQdDLKGSizhYFZP78HKSk0ZY2uYeJFpya0iXAvbcuHRGY9/c7pP5UDo+FExdyrgJnIt7H1W5LWfy/mAMnR77dvCSfGX1vCD7faWntYvzZO4FlISh+h21+QIDAQAB"
 }

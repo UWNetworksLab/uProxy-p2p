@@ -13,9 +13,6 @@
 
 declare var model         :UI.Model;
 declare var proxyConfig   :IBrowserProxyConfig;
-// TODO: This file will be destructed once polymer is is-use, so we don't care
-// about this any.
-declare var ng :any;
 
 
 module UI {
@@ -28,23 +25,16 @@ module UI {
    * Enumeration of mutually-exclusive view states.
    */
   export enum View {
+    SPLASH = 0,
     ROSTER,
     USER,
-    OPTIONS,
-    CHAT
+    NETWORKS,
+    SETTINGS,
   }
 
   export enum Gestalt {
     GIVING = 101,
     GETTING
-  }
-
-  /**
-   * Boolean toggles which influence other appearances.
-   */
-  export interface Toggles {
-    splash  :boolean;
-    options :boolean;
   }
 
   /**
@@ -56,31 +46,10 @@ module UI {
     // TODO: Other top-level generic info...
 
     // This is a 'global' roster - a combination of all User Profiles.
-    // This must be an array because angular orderBy cannot sort objects
-    // in a JavaScript map.
     // TODO: remove this if possible and just use network.roster
-    // TODO: or convert this back to an obect and figure out how to sort
-    // it in angular.
     roster :User[];
 
     description :string;
-  }
-
-  // TODO: remove this once extension model is cleaned up.
-  export interface modelForAngular extends UI.Model {
-    clientToInstance :{[clientId :string] :string };
-    instances :{[instanceId :string] :UI.Instance};
-  }
-
-  export interface RootScope { //extends ng.IRootScopeService {
-    ui :uProxy.UIAPI;
-    core :uProxy.CoreAPI;
-    model :modelForAngular;
-    isOnline(network :string) : boolean;
-    isOffline(network :string) : boolean;
-    loggedIn() : boolean;
-    resetState() : void;
-    prettyNetworkName(networkId :string) : string;
   }
 
   /**
@@ -95,24 +64,17 @@ module UI {
   /**
    * The User Interface class.
    *
-   * Contains UI-related state and functions, which angular will access.
+   * Keeps persistent state between the popup opening and closing.
    * Manipulates the payloads received from UPDATES from the Core in preparation
    * for UI interaction.
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
   export class UserInterface implements uProxy.UIAPI {
-
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    // Appearance.
-    public view :View;
-    public toggles :Toggles;
-
-    // Just the initial introductory splash screen.
-    public introSplashed :Boolean = false;
+    public view :View;  // Appearance.
 
     // Keep track of currently viewed contact and instance.
-    // public focus :InstancePath;
     public network :string = 'google';
     public user :User = null;
     public focusedInstance :UI.Instance = null;
@@ -162,12 +124,7 @@ module UI {
         public browserAction :BrowserAction) {
 
       // TODO: Determine the best way to describe view transitions.
-      this.view = View.ROSTER;
-      this.toggles = {
-        splash:  true,
-        options: false,
-        search:  true
-      };
+      this.view = View.SPLASH;  // Begin at the splash intro.
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -235,56 +192,6 @@ module UI {
                                    icon: 'icons/uproxy-128.png'});
     }
 
-    // ------------------------------- Views ----------------------------------
-    public isSplash = () : boolean => {
-      return this.toggles.splash || !this.loggedIn();
-    }
-    public isRoster = () : boolean => { return View.ROSTER == this.view; }
-    public isUserView = () : boolean => { return View.USER == this.view; }
-
-    // Refreshing with angular from outside angular.
-    private refreshTimer_ = null;
-    private refreshNeeded_ :boolean = false;
-    private refreshFunction_ :Function = () => {
-      console.warn('Angular has not hooked into UI refresh!');
-    };
-
-    /**
-     * Rate-limited DOM refreshing.
-     * TODO: Put into a 'refreshing' service.
-     */
-    public refreshDOM = () => {
-      if (!this.refreshFunction_) {
-        // refreshFunction_ is not set, this means the popup has not yet
-        // been opened, not an error.
-        return;
-      }
-      if (this.refreshTimer_) {
-        // Refresh timer is already set, DOM will be refreshed when the
-        // timer callback runs.
-        this.refreshNeeded_ = true;
-        return;
-      }
-      // Refresh the DOM immediately.
-      this.refreshFunction_();
-      // Set a timeout.  Until the timeout callback is excuted, no calls to
-      // refreshFunction_ will be made.  Once the timeout callback runs, we
-      // check to see if there had been any calls to refreshDOM (by checking
-      // this.refreshNeeded_) and if so call refreshFunction_ action.  This
-      // prevents us from making more than 1 refreshFunction_ call within the
-      // REFRESH_TIMEOUT
-      this.refreshTimer_ = setTimeout(() => {
-        if (this.refreshNeeded_) {
-          this.refreshFunction_();
-        }
-        this.refreshNeeded_ = false;
-        this.refreshTimer_ = null;
-      }, REFRESH_TIMEOUT);
-    }
-    public setRefreshHandler = (f :Function) => {
-      this.refreshFunction_ = f;
-    }
-
     // ------------------------------- Proxying ----------------------------------
     // TODO Replace this with a 'Proxy Service'.
     /**
@@ -311,7 +218,6 @@ module UI {
           user: this.user
         };
         this._setProxying(true);
-        this.refreshDOM();
       });
     }
 
@@ -353,6 +259,8 @@ module UI {
     // -------------------------------- Filters ----------------------------------
     /**
      * Toggling |filter| changes the visibility and ordering of roster entries.
+     * TODO: Filters not currently used. Either re-implement or remove during
+     * the next UX update.
      */
     toggleFilter = (filter) => {
       if (undefined === this.filters[filter]) {
@@ -431,7 +339,6 @@ module UI {
       } else {
         model.networks[network.name].online = network.online;
       }
-      this.refreshDOM();
     }
 
     // Determine whether uProxy is connected to some network.
@@ -517,7 +424,6 @@ module UI {
       }
 
       console.log('Synchronized user.', user);
-      this.refreshDOM();
     };
 
     // TODO: this might be more efficient if we just had a ui.hasUProxyBuddies
@@ -536,7 +442,6 @@ module UI {
       this.core.login(network).then(
         () => {
           this.view = UI.View.ROSTER;
-          this.toggles.splash = false;
         },
         () => { console.warn('login failed for ' + network) });
     }
