@@ -1,20 +1,96 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 
-<polymer-element name='uproxy-instance' attributes='instance'>
+<polymer-element name='uproxy-instance' attributes='userId, instance'>
   <template>
     <style>
     :host {
+      display: block; padding: 8px;
+      border-top: 1px solid #ddd;
+      font-size: 10px;
+    }
+    button {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 8px;
+      outline: none;
+    }
+    button:hover { box-shadow: 1px 2px 4px #aaa; }
+    button:active { box-shadow: 1px 2px 4px #aaa inset; }
+    p, span {
+      margin: 0;
+      color: #888;
+    }
+    #instanceId {
+      font-size: 8px;
+      color: #bbb;
     }
     </style>
-    Instance ID: {{instance.instanceId}}
-    <div hidden?='{{ getting() }}'>
-      whoa
-      <uproxy-button>Request Access</uproxy-button>
+
+    <span id='instanceId'>{{ instance.instanceId }}</span>
+
+    <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
+
+      <div hidden?='{{ "GRANTED" !== getProxyConsentState() }}'>
+        <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
+          Start
+        </button>
+        <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
+          Stop
+        </button>
+        <p>You have access.</p>
+      </div>
+
+      <div hidden?='{{ "NONE" !== getProxyConsentState() }}'>
+        <button on-tap='{{ request }}'>
+          Request
+        </button>
+        <p>Request access from contact before connection.</p>
+      </div>
+
+      <div hidden?='{{ "USER_REQUESTED" !== getProxyConsentState() }}'>
+        <button on-tap='{{ cancelRequest }}'>
+          Cancel Request
+        </button>
+        <span>Requesting access... </span>
+      </div>
+
+      <div hidden?='{{ "REMOTE_OFFERED" !== getProxyConsentState() }}'>
+        <button on-tap='{{ accept }}'>Accept Offer</button>
+        <button on-tap='{{ ignoreOffer }}'>Decline</button>
+        <p>They've offered you access.</p>
+      </div>
+
     </div>
-    <div hidden?='{{ !getting() }}'>
-      omg
-      <uproxy-button>Offer Access</uproxy-button>
+
+    <div hidden?='{{ UI.Gestalt.GIVING !== ui.gestalt }}'>
+
+      <div hidden?='{{ "NONE" !== getClientConsentState() }}'>
+        <button on-tap='{{ offer }}'>Offer Access</button>
+        <p>You have not granted them access.</p>
+      </div>
+
+      <div hidden?='{{ "USER_OFFERED" !== getClientConsentState() }}'>
+        <button on-tap='{{ cancelOffer }}'>Cancel Offer</button>
+      </div>
+
+      <div
+        hidden?='{{ "REMOTE_REQUESTED" !== getClientConsentState() }}'>
+        <button on-tap='{{ grant }}'>Grant</button>
+        <button on-tap='{{ ignoreRequest }}'>Ignore</button>
+        <p>They requested access through you.</p>
+      </div>
+
+      <div hidden?='{{ "GRANTED" !== getClientConsentState() }}'>
+        <button on-tap='{{ cancelOffer }}'>Revoke Access</button>
+        <p>You've given them access.</p>
+      </div>
+
     </div>
+
+    <!--
+      TODO: Insert bandwidth information here.
+    -->
+
   </template>
   <script src='instance.js'></script>
 </polymer-element>

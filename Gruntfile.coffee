@@ -205,7 +205,7 @@ module.exports = (grunt) ->
           src: ['freedom-module.json']
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Sourcecode (no specs):
-          expand: true, cwd: 'build/dev/', flatten: true,
+          expand: true, cwd: 'build/dev/', flatten: true
           src: [
             'uproxy.js'
             'generic_core/**/*.js'
@@ -217,16 +217,21 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/uproxy-lib/build/freedom/'
           src: [
             'freedom-for-chrome-for-uproxy.js'
+            'uproxy-core-env.js'
           ]
           dest: chromeAppDevPath + 'lib/'
-        }, {  # Social modules
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
-          src: ['**']
-          dest: chromeAppDevPath + 'lib/freedom-social-xmpp/'
-        }, {  # Storage
-          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated/'
-          src: ['**']
-          dest: chromeAppDevPath + 'lib/storage/'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-xmpp', flatten: true
+          src: [
+            'build/**'
+          ]
+          dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
+          src: [
+            'isolated/**'
+          ]
+          dest: chromeAppDevPath + 'lib/storage'
         }, {  # Additional hack - TODO: remove this once social enum is gone.
           expand: true, cwd: 'third_party', flatten: true
           src: [
@@ -320,6 +325,38 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib'
         } ]
 
+      uipolymer:
+        files: [ {
+          # Copy all non-ts assets (html, css).
+          expand: true, cwd: 'src/generic_ui/polymer', flatten: true
+          src: ['**', '!**/*.ts']
+          dest: 'build/dev/uistatic/polymer'
+        }, {
+          # Copy all compiled polymer js.
+          expand: true, cwd: 'build/dev/generic_ui/polymer', flatten: true
+          src: ['**']
+          dest: 'build/dev/uistatic/polymer'
+        }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
+          dest: 'build/dev/uistatic/'
+        }, {
+          # generic_ui sources.
+          expand: true, cwd: 'build/dev/generic_ui/scripts', flatten: true
+          src: ['**']
+          dest: 'build/dev/uistatic/scripts'
+        }, {
+          # Common uProxy requirements
+          expand: true, cwd: 'build/dev', flatten: true
+          src: FILES.uproxy_common,
+          dest: 'build/dev/uistatic/scripts'
+        }, {
+          expand: true, cwd: 'third_party/lib'
+          src: ['**']
+          dest: 'build/dev/uistatic/lib'
+        } ]
+
     }  # copy
 
     #-------------------------------------------------------------------------
@@ -335,7 +372,7 @@ module.exports = (grunt) ->
       # TODO: Remove uistatic / make it the same as uipolymer once polymer is
       # fully integrated.
       uistatic: Rule.typescriptSrcLenient 'uistatic'
-      uipolymer: Rule.typescriptSrc 'generic_ui/polymer'
+      uipolymer: Rule.typescriptSrcLenient 'generic_ui/polymer'
 
       # Mocks to help jasmine along. These typescript files must be compiled
       # independently from the rest of the code, because otherwise there will
@@ -473,7 +510,7 @@ module.exports = (grunt) ->
   taskManager.add 'build_uipolymer', [
     'build_generic_ui'
     'typescript:uipolymer'
-    # 'copy:uipolymer'
+    'copy:uipolymer'
   ]
 
   # The Chrome App and the Chrome Extension cannot be built separately. They

@@ -26,40 +26,35 @@
     }
     #frame {
       box-sizing: border-box;
-      padding: 16px;
+      padding: 0;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      height: 72px;
-    }
-    #frame.expanded {
-      height: 150px;
-    }
+      height: 54px;
+    } #frame.expanded { height: 200px; }
     #avatar {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 50%;
+      width: 36px; height: 36px;
+      margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: top;
     }
     #words {
       display: inline-block;
-      padding: 0 16px;
-      width: 200px; height: 100%;
+      width: 282px; height: 100%;
     }
     h1 {
-      display: inline;
-      font-size: 16px;
-      font-weight: 100;
-    }
-    #description {
-      color: #aaa;
       display: block;
-      font-size: 10px;
+      font-size: 16px; font-weight: 100;
+      margin: 0; padding: 16px 8px 0;
+    } #words:hover h1 { color: #aaa; }
+    #description {
+      color: #aaa; display: block;
+      font-size: 10px; margin-left: 8px;
     }
     #instances {
       padding: 8px;
+      overflow-y: scroll;
+      height: 100px;
     }
     #actions {
       padding: 8px;
@@ -67,16 +62,18 @@
     </style>
 
     <div tabindex='-1'  id='frame'
-      class='{{ expanded? "expanded" : "" }}'
-      on-mousedown='{{toggle}}'
-      on-blur='{{collapse}}'>
+      class='{{ expanded? "expanded" : "" }}'>
+     <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' />
       <div id='words'>
-        <h1>{{ contact.name }}</h1>
+        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
         <span id='description'>{{ contact.description }}</span>
         <div id='instances' hidden?='{{!expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
-            <uproxy-instance instance='{{ i }}'></uproxy-instance>
+            <uproxy-instance
+                userId='{{ contact.userId }}'
+                instance='{{ i }}'>
+            </uproxy-instance>
           </template>
         </div>
       </div>
