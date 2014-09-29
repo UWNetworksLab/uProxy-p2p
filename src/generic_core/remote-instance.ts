@@ -177,24 +177,12 @@ module Core {
             this.rtcToNet_.bytesReceivedFromPeer
                 .setSyncHandler((numBytes:number) => {
               this.bytesReceived += numBytes;
-              if (!this.isUIUpdatePending) {
-                setTimeout(() => {
-                  this.user.notifyUI();
-                  this.isUIUpdatePending = false;
-                }, 1000);
-                this.isUIUpdatePending = true;  
-              }
+              this.updateBytesInUI();
             });
             this.rtcToNet_.bytesSentToPeer
                 .setSyncHandler((numBytes:number) => {
               this.bytesSent += numBytes;
-              if (!this.isUIUpdatePending) {
-                setTimeout(() => {
-                  this.user.notifyUI();
-                  this.isUIUpdatePending = false;
-                }, 1000);
-                this.isUIUpdatePending = true;  
-              }              
+              this.updateBytesInUI();               
             });
           }
           // TODO: signalFromRemote needs to get converted into a
@@ -228,7 +216,7 @@ module Core {
     public start = () : Promise<void> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
-        //return Promise.reject('Lacking permission to proxy!');
+        return Promise.reject('Lacking permission to proxy!');
       } else if (this.access.asProxy) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
@@ -266,24 +254,12 @@ module Core {
       this.socksToRtc_.bytesReceivedFromPeer
           .setSyncHandler((numBytes:number) => {
         this.bytesReceived += numBytes;
-        if (!this.isUIUpdatePending) {
-          setTimeout(() => {
-            this.user.notifyUI();
-            this.isUIUpdatePending = false;
-          }, 1000);
-          this.isUIUpdatePending = true;  
-        }
+        this.updateBytesInUI();
       });
       this.socksToRtc_.bytesSentToPeer
           .setSyncHandler((numBytes:number) => {
         this.bytesSent += numBytes;
-        if (!this.isUIUpdatePending) {
-          setTimeout(() => {
-            this.user.notifyUI();
-            this.isUIUpdatePending = false;
-          }, 1000);
-          this.isUIUpdatePending = true;  
-        }
+        this.updateBytesInUI();
       });      
       // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
@@ -323,6 +299,8 @@ module Core {
       // TODO: Remove the access.asProxy/asClient, maybe replace with getters
       // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
       this.access.asProxy = false;
+      this.bytesSent = 0;
+      this.bytesReceived = 0;
     }
 
     /**
@@ -531,6 +509,16 @@ module Core {
         bytesSent:            this.bytesSent,
         bytesReceived:        this.bytesReceived
       });
+    }
+
+    private updateBytesInUI = () : void => {
+      if (!this.isUIUpdatePending) {
+        setTimeout(() => {
+          this.user.notifyUI();
+          this.isUIUpdatePending = false;
+        }, 1000);
+        this.isUIUpdatePending = true;  
+      }
     }
 
   }  // class Core.RemoteInstance
