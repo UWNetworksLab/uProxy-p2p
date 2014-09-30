@@ -20,13 +20,9 @@
       margin: 0;
       color: #888;
     }
-    #instanceId {
-      font-size: 8px;
-      color: #bbb;
-    }
     </style>
 
-    <span id='instanceId'>{{ instance.instanceId }}</span>
+    <span>{{ instance.description }}</span>
 
     <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
 
