@@ -41,16 +41,13 @@
     #words {
       display: inline-block;
       width: 282px; height: 100%;
+      position: absolute;
     }
     h1 {
       display: block;
       font-size: 16px; font-weight: 100;
       margin: 0; padding: 16px 8px 0;
     } #words:hover h1 { color: #aaa; }
-    #description {
-      color: #aaa; display: block;
-      font-size: 10px; margin-left: 8px;
-    }
     #instances {
       padding: 8px;
       overflow-y: scroll;
@@ -67,7 +64,6 @@
       <img id='avatar' src='{{ contact.imageData }}' />
       <div id='words'>
         <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
-        <span id='description'>{{ contact.description }}</span>
         <div id='instances' hidden?='{{!expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
