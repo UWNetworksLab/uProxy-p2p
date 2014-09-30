@@ -159,6 +159,8 @@ module Core {
             this.rtcToNet_.onceClosed.then(() => {
                 this.access.asClient = false;
                 this.rtcToNet_ = null;
+                this.bytesSent = 0;
+                this.bytesReceived = 0;                
                 this.user.notifyUI();
                 // TODO: give each notification a real data structure and id,
                 // and allow the user select what notifications they get.
@@ -268,6 +270,8 @@ module Core {
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
               this.access.asProxy = false;
+              this.bytesSent = 0;
+              this.bytesReceived = 0;
               // TODO: notification to the user on remote-close?
               this.user.notifyUI();
               this.socksToRtc_ = null;
@@ -299,8 +303,6 @@ module Core {
       // TODO: Remove the access.asProxy/asClient, maybe replace with getters
       // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
       this.access.asProxy = false;
-      this.bytesSent = 0;
-      this.bytesReceived = 0;
     }
 
     /**
