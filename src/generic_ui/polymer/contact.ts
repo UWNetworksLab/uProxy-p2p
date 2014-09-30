@@ -3,8 +3,7 @@ Polymer({
   contact: {
     // Must adhere to the typescript interface UI.User.
     name: 'unknown',
-    pic: undefined,
-    description: 'description here'
+    pic: undefined
   },
   toggle: function() {
     this.expanded = !this.expanded;
@@ -17,9 +16,6 @@ Polymer({
   ready: function() {
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
-    }
-    if (!this.contact.description) {
-      this.contact.description = 'no description.';
     }
   }
 });
