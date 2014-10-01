@@ -1,0 +1,15 @@
+{
+  "name": "copy-paste-chat",
+  "description": "Sample socks over rtc to net Freedom manifest",
+  "app": {
+    "script": [
+      "lib/logging/logging.js",
+      "lib/webrtc/peerconnection.js",
+      "freedom-module.js"
+    ]
+  },
+  "permissions": [
+    "core.log",
+    "core.uproxypeerconnection"
+  ]
+}
