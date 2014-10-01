@@ -186,8 +186,6 @@ module uProxy {
   // TODO: rename UiApi.
   export interface UIAPI {
 
-    update(type:Update, data?:any) : void;
-
     syncUser(UserMessage:UI.UserMessage) : void;
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
@@ -200,7 +198,6 @@ module uProxy {
     // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
-    isProxying() : boolean;
     stopProxyingInUiAndConfig() : void;
   }
 

@@ -157,10 +157,10 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     this.status.connected = false;
     this.appPort_ = null;
 
-    if (ui.isProxying()) {
-      ui.showNotification('The uProxy app has exited, stopping proxy.')
-      ui.stopProxyingInUiAndConfig();
-    }
+    // Ensure that proxying has stopped.
+    // TODO: display a notification to the user when we have a good way to
+    // check if they are currently getting or giving access.
+    ui.stopProxyingInUiAndConfig();
 
     console.warn('Retrying connection in ' + (SYNC_TIMEOUT/1000) + 's...');
     setTimeout(this.connect, SYNC_TIMEOUT);
