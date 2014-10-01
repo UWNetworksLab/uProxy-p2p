@@ -156,13 +156,14 @@ Dynamically created directories (`grunt clean` should remove them)
  * `dist` created by grunt tasks; holds final distribution versions
  * `test_output` created by grunt tasks; holds test-output files
  * `.grunt` holds grunt cache stuff
+
 ## Glossary of frameworks you need to know about
 
- * [Jasmine](http://pivotal.github.io/jasmine/) - a testing framework for JavaScript.
- * Karma - a test runner
- * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building
- * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory
  * [Bower](http://bower.io) (and the `bower.json` file) - a package manager for the web. Used for javascript and web-libraries that the extension uses (e.g. angular). Note: this uses the file .bowerrc to specify where bower components get installed (in third_party/bower_components)
- * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks
- * [Travis](https://travis-ci.org/): a continuous build system
  * [Coveralls](https://coveralls.io/): a continuous coverage checking system
+ * [Grunt](http://gruntjs.com/) (and the `Gruntfile.js` file) - a JavaScript task runner, used for compilation/building
+ * [Jasmine](http://pivotal.github.io/jasmine/) - a testing framework for JavaScript.
+ * [Karma](http://karma-runner.github.io/) - a test runner
+ * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory
+ * [Travis](https://travis-ci.org/): a continuous build system
+ * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks
