@@ -74,7 +74,9 @@ describe('UI.UserInterface', () => {
           asProxy: Consent.ProxyState.NONE
         },
         access: {asClient: false, asProxy: false},
-        isOnline: true
+        isOnline: true,
+        bytesSent: 0,
+        bytesReceived: 0
       };
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
@@ -84,7 +86,9 @@ describe('UI.UserInterface', () => {
           asProxy: Consent.ProxyState.GRANTED
         },
         access: {asClient: false, asProxy: false},
-        isOnline: true
+        isOnline: true,
+        bytesSent: 0,
+        bytesReceived: 0
       };
       var payload :UI.UserMessage = {
         network: 'testNetwork',

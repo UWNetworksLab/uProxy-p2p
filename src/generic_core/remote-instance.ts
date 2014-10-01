@@ -34,6 +34,8 @@ module Core {
     public instanceId  :string;
     public keyHash     :string
     public description :string;
+    public bytesSent   :number;
+    public bytesReceived    :number;
 
     public consent     :ConsentState = {
       asClient: Consent.ClientState.NONE,
@@ -47,6 +49,11 @@ module Core {
     };
     public updateDate = null;
     private transport  :Transport;
+    // Whether or not there is a UI update (triggered by this.user.notifyUI())
+    // scheduled to run in the next second.
+    // Used by SocksToRtc & RtcToNet Handlers to make sure bytes sent and
+    // received are only forwarded to the UI once every second. 
+    private isUIUpdatePending = false;
 
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
@@ -107,6 +114,8 @@ module Core {
       if (data.consent) {
         this.consent = data.consent;
       }
+      this.bytesSent = 0;
+      this.bytesReceived = 0;
     }
 
     /**
@@ -150,6 +159,8 @@ module Core {
             this.rtcToNet_.onceClosed.then(() => {
                 this.access.asClient = false;
                 this.rtcToNet_ = null;
+                this.bytesSent = 0;
+                this.bytesReceived = 0;                
                 this.user.notifyUI();
                 // TODO: give each notification a real data structure and id,
                 // and allow the user select what notifications they get.
@@ -160,6 +171,20 @@ module Core {
                 type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
                 data: signal
               });
+            });
+            // When bytes are sent to or received from the client, notify the 
+            // UI about the increase in data exchanged. Increment the bytes 
+            // sent/received variables in real time, but use a timer to control 
+            // when notifyUI() is called.
+            this.rtcToNet_.bytesReceivedFromPeer
+                .setSyncHandler((numBytes:number) => {
+              this.bytesReceived += numBytes;
+              this.updateBytesInUI();
+            });
+            this.rtcToNet_.bytesSentToPeer
+                .setSyncHandler((numBytes:number) => {
+              this.bytesSent += numBytes;
+              this.updateBytesInUI();               
             });
           }
           // TODO: signalFromRemote needs to get converted into a
@@ -224,7 +249,20 @@ module Core {
           data: signal
         });
       });
-
+      // When bytes are sent to or received through the proxy, notify the 
+      // UI about the increase in data exchanged. Increment the bytes 
+      // sent/received variables in real time, but use a timer to control 
+      // when notifyUI() is called.      
+      this.socksToRtc_.bytesReceivedFromPeer
+          .setSyncHandler((numBytes:number) => {
+        this.bytesReceived += numBytes;
+        this.updateBytesInUI();
+      });
+      this.socksToRtc_.bytesSentToPeer
+          .setSyncHandler((numBytes:number) => {
+        this.bytesSent += numBytes;
+        this.updateBytesInUI();
+      });      
       // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
@@ -232,6 +270,8 @@ module Core {
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
               this.access.asProxy = false;
+              this.bytesSent = 0;
+              this.bytesReceived = 0;
               // TODO: notification to the user on remote-close?
               this.user.notifyUI();
               this.socksToRtc_ = null;
@@ -467,8 +507,20 @@ module Core {
         keyHash:              this.keyHash,
         consent:              this.consent,
         access:               this.access,
-        isOnline:             this.user.isInstanceOnline(this.instanceId)
+        isOnline:             this.user.isInstanceOnline(this.instanceId),
+        bytesSent:            this.bytesSent,
+        bytesReceived:        this.bytesReceived
       });
+    }
+
+    private updateBytesInUI = () : void => {
+      if (!this.isUIUpdatePending) {
+        setTimeout(() => {
+          this.user.notifyUI();
+          this.isUIUpdatePending = false;
+        }, 1000);
+        this.isUIUpdatePending = true;  
+      }
     }
 
   }  // class Core.RemoteInstance

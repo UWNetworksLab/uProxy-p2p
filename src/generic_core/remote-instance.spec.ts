@@ -371,13 +371,17 @@ describe('Core.RemoteInstance', () => {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
+      bytesSent: 0,
+      bytesReceived: 0
     });
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
     var fakeSocksToRtc = {
       'onceReady': Promise.resolve(),
       'onceStopped': () => { return new Promise((F,R) => {}); },
       'stop': () => {},
-      'signalsForPeer': { 'setSyncHandler': () => {} }
+      'signalsForPeer': { 'setSyncHandler': () => {} },
+      'bytesReceivedFromPeer' : { 'setSyncHandler': () => {} },
+      'bytesSentToPeer' : { 'setSyncHandler': () => {} },
     };
 
     it('can start proxying', (done) => {
@@ -399,6 +403,7 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('refuses to start proxy without permission', () => {
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.consent.asProxy = Consent.ProxyState.NONE;
       alice.access.asProxy = false;
       alice.start();

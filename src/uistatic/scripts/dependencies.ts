@@ -43,7 +43,9 @@ function generateFakeUserMessage() : UI.UserMessage {
         access: {
           asClient: false,
           asProxy: false
-        }
+        },
+        bytesSent: 0,
+        bytesReceived: 0
       }
     ]
   }
