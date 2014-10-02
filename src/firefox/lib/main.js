@@ -25,6 +25,7 @@ var panel = panels.Panel({
   contentScriptFile: [
     self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
+    self.data.url("scripts/uproxy.js"),
     self.data.url("scripts/ui.js"),
     self.data.url("scripts/firefox_browser_action.js"),
     self.data.url("scripts/proxy-config.js"),
@@ -42,7 +43,7 @@ var freedom =
             register('core.view', require('view_googleauth.js').View_googleAuth);
             register('core.storage', require('firefox_storage.js').Storage_firefox);
           },
-      //portType: 'BackgroundFrame'
+      portType: 'BackgroundFrame'
     });
 
 // Set up connection between freedom and content script.

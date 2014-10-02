@@ -4,5 +4,3 @@
 var ui = window.ui;
 var model = window.model;
 var core = window.core;
-
-
