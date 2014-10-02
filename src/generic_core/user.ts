@@ -443,7 +443,8 @@ module Core {
     private loadInstanceFromStorage_ = (instanceId :string) => {
       storage.load<Core.RemoteInstanceState>(this.getStorePath() + instanceId)
           .then((state) => {
-        this.instances_[instanceId] = new Core.RemoteInstance(this, state);
+        this.instances_[instanceId] =
+            new Core.RemoteInstance(this, state, state.consent);
       }).catch((e) => {
         this.log('could not load instance ' + instanceId);
       });
