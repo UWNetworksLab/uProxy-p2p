@@ -75,7 +75,7 @@ These are the steps to try uProxy in the Chrome browser.
 - Run `grunt build_chrome` from the root directory of the repository to compile
   all the typescript and prepare the assets.
 
-- In Chrome, go to `chrome://extensions` and click 'Load unpacked extension...' for both `/build/chrome/app` and `build/chrome/extension`. You need both the uProxy Chrome App and the Extension.
+- In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled, and click 'Load unpacked extension...' for both `build/dev/chrome/app` and `build/dev/chrome/extension`. You need both the uProxy Chrome App and the Extension.
 
 Please don’t submit uProxy to the Chrome Web Store or Firefox Marketplace. uProxy is under active development and the team takes its responsibility to provide security very seriously; we don’t want at-risk groups that may not be technically sophisticated — journalists, human-rights workers, et al — to rely on uProxy until we feel it’s ready. Prematurely making uProxy available could have very serious real world ramifications.
 
