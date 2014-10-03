@@ -11,12 +11,16 @@
 // i.e. given: A = [B,C,Z], B = [X1,X2], C = [X1,Y], then A = [X1,X2,Y,Z],
 // i.e. only constraint is that index(X1) < index(Y), and that steps after
 // X1 in B do not disrupt steps C.
+//
+// Note: circular dependencies will result in a runtime error being thrown.
 
 module TaskManager {
 
   export interface Index { [s:string]: string[] };
 
-  // The state of flattening a tree.
+  // The state of flattening a tree containing only leaf nodes. The output
+  // keeps left-to-right order, and only contains the first occurence in the
+  // list of the node entry in the tree.
   class FlatteningState {
     // Flattened tree seen so far.
     flattened_: string[] = [];
@@ -65,17 +69,57 @@ module TaskManager {
   }
 
 
+  // Manager managed tasks so that you add entries with sub-entries, and you
+  // can get a flattened and de-duped list of leaf-tasks as output.
   export class Manager {
-    // Index from task name to flattened and de-duped list of subtasks.
+    // The index of branch nodes in the tree with names of their children.
     private taskIndex_ : Index;
 
     constructor() {
       this.taskIndex_ = {};
     }
 
-    // Assumes all tasks are defined before being added.
+    // Depth first search keep track of path and checking for loops for each
+    // new node. Returns null if no cycle is found, returns a cycle if one
+    // cycle exists.
+    public getCycle(name : string) : string[] {
+      // The |agenda| holds set of paths explored so far. The format for each
+      // agenda entry is: [child, patent, grandparent, etc]
+      // An invariant of the the agenda is that each member is a non-empty
+      // string-list.
+      var agenda : string[][]= [[name]];
+      var cyclicPath : string[] = null;
+      while (agenda !== []) {
+        // Get the next path to explore further.
+        var nextPath = agenda.shift();
+        // For each child of
+        var children = this.taskIndex_[nextPath[0]];
+        children.forEach((child) => {
+          // Extends the old path with a new one with child added to the front.
+          // We use slice(0) to make a copy of the path.
+          var newExtendedPath = nextPath.slice(0);
+          newExtendedPath.unshift(child);
+          if(nextPath.indexOf(child) !== -1) {
+            cyclicPath = newExtendedPath;
+          } else {
+            agenda.push(newExtendedPath);
+          }
+        });
+        if(cyclicPath) { return cyclicPath; }
+      }
+      return cyclicPath;
+    }
+
+    // The |add| method will throw an exception if a circular dependency is
+    // added.
     public add(name : string, subtasks : string[]) {
       this.taskIndex_[name] = subtasks;
+
+      // Check for resulting circular dependency.
+      var cycle = this.getCycle(name);
+      if(cycle) {
+        throw new Error('Cyclic dependency: ' + cycle.toString());
+      }
     }
 
     public getUnflattened(name : string) {
