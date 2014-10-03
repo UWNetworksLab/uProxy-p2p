@@ -7,3 +7,4 @@ var core = chrome.extension.getBackgroundPage().core;
 var model = chrome.extension.getBackgroundPage().model;
 var roster = chrome.extension.getBackgroundPage().roster;
 console.log('Loaded dependencies for Chrome Extension.');
+console.log(roster);
