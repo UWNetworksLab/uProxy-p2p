@@ -17,8 +17,6 @@ declare var proxyConfig   :IBrowserProxyConfig;
 
 module UI {
 
-  var REFRESH_TIMEOUT :number = 1000;  // ms.
-
   export var DEFAULT_USER_IMG = 'icons/contact-default.png';
 
   /**
@@ -76,27 +74,10 @@ module UI {
 
     // Keep track of currently viewed contact and instance.
     public network :string = 'google';
-    public user :User = null;
-    public focusedInstance :UI.Instance = null;
-    // If we are proxying, keep track of the instance and user.
-    public currentProxyServer :UI.CurrentProxy = null;
-
-    public errors :string[] = [];
 
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
-
-    // Maps instanceId to 'GET' or 'GIVE' state, if the user has explicitly
-    // clicked to change the screen in the UI.  If an instance is missing from
-    // this map we should default to the correct get/give state based on the
-    // consent settings.
-    // TODO: put this in storage to remember the get/give state after restart.
-    private mapInstanceIdToGetOrGive_  :{ [instanceId :string] :string } = {};
-
-    advancedOptions = false;
-    // TODO: Pull search / filters into its own class.
-    search = '';
     numClients = 0;
     myName = '';
     myPic = null;
@@ -106,14 +87,6 @@ module UI {
     // When the description changes while the text field loses focus, it
     // automatically updates.
     oldDescription :string = '';
-
-    // Initial filter state.
-    public filters = {
-        'online': false,
-        'myAccess': false,
-        'friendsAccess': false,
-        'uproxy': false
-    };
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -156,9 +129,6 @@ module UI {
       core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
         console.warn('uProxy.Update.ERROR: ' + errorText);
         this.showNotification(errorText);
-        // CONSIDER: we might want to display some errors in the extension popup
-        // as well (by pusing them onto this.errors).
-        // this.errors.push(errorText);
       });
       core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
@@ -183,55 +153,9 @@ module UI {
       console.log('Created the UserInterface');
     }
 
-    update = (type:uProxy.Update, data?:any) => {
-      // TODO: Implement.
-    }
-
     public showNotification = (notificationText :string) => {
       new Notification('uProxy', { body: notificationText,
                                    icon: 'icons/uproxy-128.png'});
-    }
-
-    // ------------------------------- Proxying ----------------------------------
-    // TODO Replace this with a 'Proxy Service'.
-    /**
-     * Starts proxying by updating UI-specific state, then passing the start
-     * COMMAND to the core.
-     * Assumes that there is a 'current instance' available.
-     */
-    public startProxying = () => {
-      if (!this.user || !this.focusedInstance) {
-        console.error('Cannot start proxying without a current instance.');
-        return;
-      }
-      // Prepare the instance path.
-      var path = <InstancePath>{
-        // TODO: Don't hardcode the network. This involves some changes to the
-        // model. Do this soon.
-        network: 'google',
-        userId: this.user.userId,
-        instanceId: this.focusedInstance.instanceId
-      };
-      this.core.start(path).then(() => {
-        this.currentProxyServer = {
-          instance: this.focusedInstance,
-          user: this.user
-        };
-        this._setProxying(true);
-      });
-    }
-
-    /**
-     * Stops proxying by updating UI-specific state, and passing the stop
-     * COMMAND to the core.
-     */
-    public stopProxyingUserInitiated = () => {
-      if (!this.focusedInstance) {
-        console.warn('Stop Proxying called while not proxying.');
-        return;
-      }
-      this.stopProxyingInUiAndConfig();
-      this.core.stop();
     }
 
     /**
@@ -239,12 +163,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      if (!this.currentProxyServer) {
-        console.warn('Stop Proxying called while not proxying.');
-        return;
-      }
       this._setProxying(false);
-      this.currentProxyServer = null;
       proxyConfig.stopUsingProxy();
     }
 
@@ -254,68 +173,6 @@ module UI {
       } else {
         this.browserAction.setIcon('uproxy-19.png');
       }
-    }
-
-    // -------------------------------- Filters ----------------------------------
-    /**
-     * Toggling |filter| changes the visibility and ordering of roster entries.
-     * TODO: Filters not currently used. Either re-implement or remove during
-     * the next UX update.
-     */
-    toggleFilter = (filter) => {
-      if (undefined === this.filters[filter]) {
-        console.error('Filter "' + filter + '" is not a valid filter.');
-        return false;
-      }
-      console.log('Toggling ' + filter + ' : ' + this.filters[filter]);
-      this.filters[filter] = !this.filters[filter];
-    }
-
-    /**
-     * Returns |false| if contact |c| should *not* currently be visible in the
-     * roster.
-     */
-    doesContactPassFilter = () => {
-      return (user :UI.User) : boolean => {
-        var searchText = this.search,
-            compareString = user.name.toLowerCase();
-        // First, compare filters.
-        if ((this.filters.online        && !user.isOnline)    ||
-            (this.filters.uproxy        && !user.canUProxy) ||
-            (this.filters.myAccess      && !user.givesMe)   ||
-            (this.filters.friendsAccess && !user.usesMe)) {
-          return false;
-        }
-        // Otherwise, if there is no search text, this.user is visible.
-        if (!searchText) {
-          return true;
-        }
-        if (compareString.indexOf(searchText) >= 0) {
-          return true;
-        }
-        return false;  // Does not match the search text, should be hidden.
-      };
-    }
-
-    // --------------------------- Focus & Notifications ---------------------------
-    /**
-     * Handler for when the user clicks on the entry in the roster for a User.
-     * Sets the UI's 'current' User and Instance, if it exists.
-     */
-    public focusOnUser = (user :UI.User, instance :UI.Instance) => {
-      this.view = View.USER;
-      console.log('focusing on user ' + user);
-      this.user = user;
-      this.focusedInstance = instance;
-    }
-
-    /*
-     * Change from the detailed access view back to the roster view.
-     * Clears the 'current user'.
-     */
-    public returnToRoster = () => {
-      this.view = View.ROSTER;
-      console.log('returning to roster! ' + this.user);
     }
 
     syncInstance = (instance : any) => {}
@@ -392,27 +249,7 @@ module UI {
         model.roster.push(user);
       }
       user.update(profile);
-
-      // Update instances
       user.instances = payload.instances;
-      if (user == this.user) {
-        // Update focusedInstance
-        for (var i = 0; i < user.instances.length; ++i) {
-          if (user.instances[i].instanceId == this.focusedInstance.instanceId) {
-            this.focusedInstance = user.instances[i];
-            break;
-          }
-        }
-      }
-      if (this.currentProxyServer && user == this.currentProxyServer.user) {
-        // Update currentProxyServer.instance.
-        for (var i = 0; i < user.instances.length; ++i) {
-          if (user.instances[i].instanceId == this.currentProxyServer.instance.instanceId) {
-            this.currentProxyServer.instance = user.instances[i];
-            break;
-          }
-        }
-      }
 
       user.canUProxy = user.instances.some((instance) => {
         return instance.isOnline;
@@ -434,74 +271,6 @@ module UI {
 
       console.log('Synchronized user.', user);
     };
-
-    // TODO: this might be more efficient if we just had a ui.hasUProxyBuddies
-    // boolean that we could keep up to date.
-    public hasOnlineUProxyBuddies = () => {
-      for (var i = 0; i < model.roster.length; ++i) {
-        var user :UI.User = model.roster[i];
-        if (user.instances.length > 0 && user.isOnline) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    public login = (network) => {
-      this.core.login(network).then(
-        () => {
-          this.view = UI.View.ROSTER;
-        },
-        () => { console.warn('login failed for ' + network) });
-    }
-
-    public logout = (network) => {
-      this.core.logout(network);
-      // Immediately set the network to be offline, because instant UI feedback
-      // to the user's action is more important than waiting for a roundtrip
-      // Core-UI update message in the logging out case.
-      this.getNetwork(model.networks, network).online = false;
-    }
-
-    public isCurrentProxyClient = (user: User) : boolean => {
-      for (var i = 0; i < user.instances.length; ++i) {
-        if (user.instances[i].access.asClient) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    public isProxying = () : boolean => {
-      return this.currentProxyServer != null;
-    }
-
-    public toggleGetOrGive = (newValue :string, instance :UI.Instance)
-        : void => {
-      if (newValue !== 'GET' && newValue !== 'GIVE') {
-        console.error('toggleGetOrGive: unexpected value ' + newValue);
-        return;
-      }
-      this.mapInstanceIdToGetOrGive_[instance.instanceId] = newValue;
-    }
-
-    public showGetOrGive = (instance :UI.Instance) : string => {
-      if (!instance) {
-        // This occurs because angular still evaluates expressions using
-        // ui.focusedInstance even when those DOM elements are hidden
-        // and ui.focusedInstance is null.
-        return 'GET';
-      } else if (this.mapInstanceIdToGetOrGive_[instance.instanceId]) {
-        // User explicitly toggled get/give
-        return this.mapInstanceIdToGetOrGive_[instance.instanceId];
-      } else if (instance.consent.asClient != Consent.ClientState.NONE) {
-        // User has offered or been requested to act as proxy server.
-        return 'GIVE';
-      } else {
-        return 'GET';
-      }
-    }
-
   }  // class UserInterface
 
 }  // module UI

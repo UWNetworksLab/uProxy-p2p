@@ -74,7 +74,9 @@ describe('UI.UserInterface', () => {
           asProxy: Consent.ProxyState.NONE
         },
         access: {asClient: false, asProxy: false},
-        isOnline: true
+        isOnline: true,
+        bytesSent: 0,
+        bytesReceived: 0
       };
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
@@ -84,7 +86,9 @@ describe('UI.UserInterface', () => {
           asProxy: Consent.ProxyState.GRANTED
         },
         access: {asClient: false, asProxy: false},
-        isOnline: true
+        isOnline: true,
+        bytesSent: 0,
+        bytesReceived: 0
       };
       var payload :UI.UserMessage = {
         network: 'testNetwork',
@@ -106,77 +110,6 @@ describe('UI.UserInterface', () => {
       // usesMe should || all consent.asProxy values
       expect(user.givesMe).toEqual(true);
     });
-
-    it('Updates focusedInstance and currentProxyServer', () => {
-      var initialInstance :UI.Instance = {
-        instanceId: 'focusedInstance',
-        description: 'description1',
-        consent: {
-          asClient: Consent.ClientState.NONE,
-          asProxy: Consent.ProxyState.NONE
-        },
-        access: {asClient: false, asProxy: false},
-        isOnline: true
-      };
-      var payload :UI.UserMessage = {
-        network: 'testNetwork',
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData',
-          isOnline: true
-        },
-        instances: [initialInstance]
-      };
-
-      // Initially sync the user and instance
-      ui.syncUser(payload);
-
-      // Focus on user and instance
-      var user :UI.User = model.networks[0].roster['testUserId'];
-      ui.focusOnUser(user, initialInstance);
-      expect(ui.focusedInstance).toEqual(initialInstance);
-      expect(ui.focusedInstance.consent.asClient).toEqual(
-          Consent.ClientState.NONE);
-
-      // Set currentProxyServer
-      ui.currentProxyServer = {user: user, instance: initialInstance};
-
-      // Update the instance (permissions) and sync again
-      var updatedInstance :UI.Instance = {
-        instanceId: 'focusedInstance',
-        description: 'description1',
-        consent: {
-          asClient: Consent.ClientState.GRANTED,
-          asProxy: Consent.ProxyState.NONE
-        },
-        access: {
-          asClient: false,
-          asProxy: false
-        },
-        isOnline: true
-      };
-      var payload :UI.UserMessage = {
-        network: 'testNetwork',
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData',
-          isOnline: true
-        },
-        instances: [updatedInstance]
-      };
-      ui.syncUser(payload);
-
-      // Verify that the focusedInstance and currentProxyServer have updated.
-      expect(ui.focusedInstance).toEqual(updatedInstance);
-      expect(ui.focusedInstance.consent.asClient).toEqual(
-          Consent.ClientState.GRANTED);
-      expect(ui.currentProxyServer.instance).toEqual(updatedInstance);
-      expect(ui.currentProxyServer.instance.consent.asClient).toEqual(
-          Consent.ClientState.GRANTED);
-    });
-
   }); // syncUser
 
   // TODO: more specs

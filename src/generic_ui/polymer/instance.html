@@ -20,13 +20,11 @@
       margin: 0;
       color: #888;
     }
-    #instanceId {
-      font-size: 8px;
-      color: #bbb;
-    }
     </style>
 
-    <span id='instanceId'>{{ instance.instanceId }}</span>
+    <span>{{ instance.description }}</span>
+    <div id='bytesSent' hidden?='{{ instance.bytesSent == 0 }}'>Bytes Sent: {{ instance.bytesSent }}</div>
+    <div id='bytesReceived' hidden?='{{ instance.bytesReceived == 0 }}'>Bytes Received: {{ instance.bytesReceived }}</div>
 
     <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
 
