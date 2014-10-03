@@ -40,7 +40,7 @@ module UI {
    * TODO: Probably put the model in its own file.
    */
   export interface Model {
-    networks :{ [name:string] :UI.Network };
+    networks : UI.Network[];
     // TODO: Other top-level generic info...
 
     // This is a 'global' roster - a combination of all User Profiles.
@@ -180,21 +180,30 @@ module UI {
 
     sendConsent = () => {}
 
+    private getNetwork = (networks : UI.Network[], networkName :string) => {
+      for (var networkId in networks) {
+        if (networks[networkId].name === networkName) {
+          return networks[networkId];
+        }
+      }
+      return null;
+    }
+
     /**
      * Synchronize a new network to be visible on this UI.
      */
     private syncNetwork_ = (network :UI.NetworkMessage) => {
       console.log('uProxy.Update.NETWORK', network, model.networks);
       console.log(model);
-      if (!(network.name in model.networks)) {
-        // TODO: Turn this into a class.
-        model.networks[network.name] = {
+      var existingNetwork = this.getNetwork(model.networks, network.name);
+      if (existingNetwork) {
+        existingNetwork.online = network.online;
+      } else {
+        model.networks.push({
           name:   network.name,
           online: network.online,
           roster: {}
-        };
-      } else {
-        model.networks[network.name].online = network.online;
+        });
       }
     }
 
@@ -204,7 +213,7 @@ module UI {
       for (var networkId in model.networks) {
         if (model.networks[networkId].online &&
             // TODO: figure out how to reference Social.MANUAL_NETWORK_ID here
-            networkId !== "manual") {
+            model.networks[networkId].name !== "manual") {
           return true;
         }
       }
@@ -218,7 +227,7 @@ module UI {
      * Synchronize data about some friend.
      */
     public syncUser = (payload :UI.UserMessage) => {
-      var network = model.networks[payload.network];
+      var network = this.getNetwork(model.networks, payload.network);
       if (!network) {
         console.warn('Received USER for non-existing network.');
         return;

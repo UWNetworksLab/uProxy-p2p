@@ -6,7 +6,7 @@ var core;
 var proxyConfig = new BrowserProxyConfig();
 
 var model = {
-    networks: {},
+    networks: [],
     roster: []
 };
 

@@ -4,13 +4,13 @@
 // TODO: move model, mockCore, and mockBrowserAction to a file
 // where they can be re-used.
 var model :UI.Model = {
-  networks: {
-    'testNetwork': {
+  networks: [
+    {
       name: 'testNetwork',
       online: true,
       roster: {}
     }
-  },
+  ],
   roster: [],
   description: ''
 };
@@ -42,7 +42,7 @@ describe('UI.UserInterface', () => {
       ui.syncUser(payload);
       var user :UI.User = model.roster[0];
       expect(user).toBeDefined();
-      expect(model.networks['testNetwork'].roster['testUserId']).toEqual(user);
+      expect(model.networks[0].roster['testUserId']).toEqual(user);
     });
 
     it('Sets correct flags for non-uProxy users', () => {
@@ -57,7 +57,7 @@ describe('UI.UserInterface', () => {
         instances: []
       };
       ui.syncUser(payload);
-      var user :UI.User = model.networks['testNetwork'].roster['testUserId'];
+      var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
       expect(user.isOnline).toEqual(true);
       expect(user.canUProxy).toEqual(false);
@@ -101,7 +101,7 @@ describe('UI.UserInterface', () => {
         instances: [clientInstance, serverInstance]
       };
       ui.syncUser(payload);
-      var user :UI.User = model.networks['testNetwork'].roster['testUserId'];
+      var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
       expect(user.isOnline).toEqual(true);
       expect(user.canUProxy).toEqual(true);
@@ -110,7 +110,6 @@ describe('UI.UserInterface', () => {
       // usesMe should || all consent.asProxy values
       expect(user.givesMe).toEqual(true);
     });
-
   }); // syncUser
 
   // TODO: more specs
