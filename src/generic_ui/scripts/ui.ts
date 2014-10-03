@@ -180,10 +180,10 @@ module UI {
 
     sendConsent = () => {}
 
-    private getNetwork = (networks : UI.Network[], networkName :string) => {
-      for (var networkId in networks) {
-        if (networks[networkId].name === networkName) {
-          return networks[networkId];
+    private getNetwork = (networkName :string) => {
+      for (var networkId in model.networks) {
+        if (model.networks[networkId].name === networkName) {
+          return model.networks[networkId];
         }
       }
       return null;
@@ -195,7 +195,7 @@ module UI {
     private syncNetwork_ = (network :UI.NetworkMessage) => {
       console.log('uProxy.Update.NETWORK', network, model.networks);
       console.log(model);
-      var existingNetwork = this.getNetwork(model.networks, network.name);
+      var existingNetwork = this.getNetwork(network.name);
       if (existingNetwork) {
         existingNetwork.online = network.online;
       } else {
@@ -227,7 +227,7 @@ module UI {
      * Synchronize data about some friend.
      */
     public syncUser = (payload :UI.UserMessage) => {
-      var network = this.getNetwork(model.networks, payload.network);
+      var network = this.getNetwork(payload.network);
       if (!network) {
         console.warn('Received USER for non-existing network.');
         return;
