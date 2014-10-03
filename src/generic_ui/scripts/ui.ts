@@ -153,7 +153,18 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
+      this._setProxying(false);
       proxyConfig.stopUsingProxy();
+    }
+
+    // TODO(dborkan): call this when proxying starts, test on Firefox and
+    // Chrome.
+    _setProxying = (isProxying : boolean) => {
+      if (isProxying) {
+        this.browserAction.setIcon('uproxy-19-p.png');
+      } else {
+        this.browserAction.setIcon('uproxy-19.png');
+      }
     }
 
     syncInstance = (instance : any) => {}
