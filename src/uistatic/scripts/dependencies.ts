@@ -10,7 +10,7 @@ console.log('This is not a real uProxy frontend.');
 declare var angular :any;
 
 var model :UI.Model = {
-  networks: {},
+  networks: [],
   // 'global' roster, which is just the concatenation of all network rosters.
   roster: [],
   description: 'My Computer'
