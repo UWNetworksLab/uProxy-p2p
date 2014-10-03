@@ -72,21 +72,11 @@ module UI {
 
     public view :View;  // Appearance.
 
-    // Keep track of currently viewed contact and instance.
-    public network :string = 'google';
-
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
-    numClients = 0;
     myName = '';
     myPic = null;
-
-    accessIds = 0;  // How many people are proxying through us.
-
-    // When the description changes while the text field loses focus, it
-    // automatically updates.
-    oldDescription :string = '';
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -163,16 +153,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      this._setProxying(false);
       proxyConfig.stopUsingProxy();
-    }
-
-    _setProxying = (isProxying : boolean) => {
-      if (isProxying) {
-        this.browserAction.setIcon('uproxy-19-p.png');
-      } else {
-        this.browserAction.setIcon('uproxy-19.png');
-      }
     }
 
     syncInstance = (instance : any) => {}
