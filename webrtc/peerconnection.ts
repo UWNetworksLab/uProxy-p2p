@@ -161,7 +161,7 @@ module WebRtc {
       }
 
       this.peerName = this.config_.peerName ||
-          'unnamed-pc-' + Crypto.randomUint32();
+          'unnamed-pc-' + crypto.randomUint32();
 
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;
