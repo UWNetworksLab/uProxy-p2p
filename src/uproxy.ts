@@ -59,7 +59,6 @@ module uProxy {
     ERROR,
     NOTIFICATION,
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
-
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
@@ -196,7 +195,6 @@ module uProxy {
 
     showNotification(notificationText :string) : void;
     stopProxyingInUiAndConfig() : void;
-    startProxyingInUiAndConfig() : void;
   }
 
   interface ICoreOptions {

@@ -84,8 +84,6 @@ class UIConnector implements uProxy.UIAPI {
 
   public stopProxyingInUiAndConfig = () => {}
 
-  public startProxyingInUiAndConfig = () => {}
-
   public isProxying = () : boolean => {
     return remoteProxyInstance != null;
   }
