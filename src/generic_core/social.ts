@@ -613,7 +613,7 @@ module Social {
     private startMonitor_ = () : void => {
       if (this.monitorIntervalId_) {
         // clear any existing monitor
-        console.warn('startMonitor_ called with monitor already running');
+        console.error('startMonitor_ called with monitor already running');
         this.stopMonitor_();
       }
 
@@ -627,13 +627,14 @@ module Social {
           this.getUser(userId).monitor();
         }
       };
-      setInterval(monitorCallback, 5000);
+      this.monitorIntervalId_ = setInterval(monitorCallback, 5000);
     }
 
     private stopMonitor_ = () : void => {
       if (this.monitorIntervalId_) {
         clearInterval(this.monitorIntervalId_);
       }
+      this.monitorIntervalId_ = null;
     }
 
   }  // class Social.FreedomNetwork
