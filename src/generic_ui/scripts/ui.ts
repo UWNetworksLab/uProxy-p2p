@@ -243,24 +243,6 @@ module UI {
       user.update(profile);
       user.instances = payload.instances;
 
-      user.canUProxy = user.instances.some((instance) => {
-        return instance.isOnline;
-      });
-
-      // Update givesMe and usesMe fields based on whether any instance
-      // has these permissions.
-      // TODO: we may want to include offered permissions here (even if the
-      // peer hasn't accepted the offer yet).
-      for (var i = 0; i < user.instances.length; ++i) {
-        var consent = user.instances[i].consent;
-        if (consent.asClient == Consent.ClientState.GRANTED) {
-          user.usesMe = true;
-        }
-        if (consent.asProxy == Consent.ProxyState.GRANTED) {
-          user.givesMe = true;
-        }
-      }
-
       console.log('Synchronized user.', user);
     };
   }  // class UserInterface
