@@ -50,10 +50,11 @@
     }
     </style>
 
-    <input type='text' id='search' placeholder='Search'></input>
+    <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
     <template repeat='{{ c in contacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'></uproxy-contact>
+      <uproxy-contact contact='{{ c }}' hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery)}}'></uproxy-contact>
+
     </template>
 
   </template>

@@ -12,5 +12,12 @@ Polymer({
     // this.contacts.push({ name: 'charlie' });
     // this.contacts.push({ name: 'dave' });
     // this.contacts.push({ name: 'eve' });
+  }, 
+  searchQuery: '',   
+  isSearching: function(query) {
+    return query.length > 0;
+  },
+  matchesQuery: function(name, query) {
+    return name.toLowerCase().indexOf(query.toLowerCase()) > -1;
   }
 });

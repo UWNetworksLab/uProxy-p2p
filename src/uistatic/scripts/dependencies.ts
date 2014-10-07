@@ -6,9 +6,6 @@
 
 console.log('This is not a real uProxy frontend.');
 
-// declare var angular:ng.IAngularStatic;
-declare var angular :any;
-
 var model :UI.Model = {
   networks: [],
   // 'global' roster, which is just the concatenation of all network rosters.
@@ -170,17 +167,6 @@ var ui :uProxy.UIAPI = new UI.UserInterface(
     mockCore,
     new MockNotifications());
 
-/*
-if (!angular) {
-  var dependencyInjector = angular.module('dependencyInjector', [])
-    .filter('i18n', function () {
-      return function (key) { return key; };
-    })
-    .constant('ui', ui)
-    .constant('model', model)
-    .constant('core', mockCore)
-}
-*/
 var core = mockCore;
 
 // Fake a bunch of interactions from core.
@@ -189,5 +175,3 @@ ui['syncNetwork_'](<UI.NetworkMessage>{
   name: 'google',
   online: false
 });
-
-ui['DEBUG'] = true;

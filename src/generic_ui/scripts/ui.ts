@@ -72,16 +72,13 @@ module UI {
 
     public view :View;  // Appearance.
 
-    // Keep track of currently viewed contact and instance.
-    public network :string = 'google';
-
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
-    numClients = 0;
     myName = '';
     myPic = null;
 
+<<<<<<< HEAD
     accessIds = 0;  // How many people are proxying through us.
 
     // When the description changes while the text field loses focus, it
@@ -91,6 +88,8 @@ module UI {
     private isProxying = false;
     private isProvidingProxy = false;
 
+=======
+>>>>>>> origin/dev
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -187,6 +186,8 @@ module UI {
       this.browserAction.setIcon('uproxy-19.png');
     }
 
+    // TODO(dborkan): call this when proxying starts, test on Firefox and
+    // Chrome.
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
         this.browserAction.setIcon('uproxy-19-c.png');
