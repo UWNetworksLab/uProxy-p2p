@@ -277,7 +277,7 @@ module UI {
       // has these permissions.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
-      var shouldNowProvideProxy = false;
+      var updatedAccessIds = 0;
       var shouldNowProxy = false;
       for (var i = 0; i < user.instances.length; ++i) {
         var consent = user.instances[i].consent;
@@ -287,22 +287,26 @@ module UI {
         if (consent.asProxy == Consent.ProxyState.GRANTED) {
           user.givesMe = true;
         }
-        shouldNowProvideProxy = (shouldNowProvideProxy || user.instances[i].access.asClient);
+        if (user.instances[i].access.asClient) {
+          updatedAccessIds++;
+        }
         shouldNowProxy = (shouldNowProxy || user.instances[i].access.asProxy);
       }
 
-      if (this.isProvidingProxy && !shouldNowProvideProxy) {
+      if (this.accessIds > 0 && updatedAccessIds == 0) {
         this.stopProvidingProxyInUi();
-        this.isProvidingProxy = false;
-      } else if (!this.isProvidingProxy && shouldNowProvideProxy) {
+      } else if (this.accessIds == 0 && updatedAccessIds > 0) {
         this.startProvidingProxyInUi();
-        this.isProvidingProxy = true;
       }
+      this.accessIds = updatedAccessIds;
+
       if (this.isProxying && !shouldNowProxy) {
         this.stopProxyingInUiAndConfig();
         this.isProxying = false;
       } else if (!this.isProxying && shouldNowProxy) {
-        this.startProvidingProxyInUi();
+        // This might be redundant because startProxyingInUiAndConfig should
+        // always be called by instance.ts
+        this.startProxyingInUiAndConfig();
         this.isProxying = true;
       }
 
