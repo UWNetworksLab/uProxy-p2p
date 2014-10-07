@@ -18,10 +18,6 @@ module UI {
     public imageData       :string;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
-    public isOnline          :boolean = false;
-    public canUProxy       :boolean = false;
-    public givesMe         :boolean = false;
-    public usesMe          :boolean = false;
     public instances       :UI.Instance[];
 
     /**
@@ -42,7 +38,6 @@ module UI {
       }
       this.name = profile.name;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
-      this.isOnline = profile.isOnline;
     }
 
   }  // class UI.User
