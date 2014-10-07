@@ -80,34 +80,36 @@ module TaskManager {
     }
 
     // Depth first search keep track of path and checking for loops for each
-    // new node. Returns null if no cycle is found, returns a cycle if one
-    // cycle exists.
-    public getCycle(name : string) : string[] {
+    // new node. Returns list of all cycles found.
+    public getCycles(name : string) : string[][] {
       // The |agenda| holds set of paths explored so far. The format for each
       // agenda entry is: [child, patent, grandparent, etc]
       // An invariant of the the agenda is that each member is a non-empty
       // string-list.
       var agenda : string[][]= [[name]];
-      var cyclicPath : string[] = null;
-      while (agenda !== []) {
+      var cyclicPaths : string[][] = [];
+      while (agenda.length > 0) {
         // Get the next path to explore further.
         var nextPath = agenda.shift();
-        // For each child of
-        var children = this.taskIndex_[nextPath[0]];
-        children.forEach((child) => {
-          // Extends the old path with a new one with child added to the front.
-          // We use slice(0) to make a copy of the path.
-          var newExtendedPath = nextPath.slice(0);
-          newExtendedPath.unshift(child);
-          if(nextPath.indexOf(child) !== -1) {
-            cyclicPath = newExtendedPath;
-          } else {
-            agenda.push(newExtendedPath);
-          }
-        });
-        if(cyclicPath) { return cyclicPath; }
+        // If this is a non-leaf node, search all child nodes/paths
+        var nodeToUnfold = nextPath[0];
+        if(nodeToUnfold in this.taskIndex_) {
+          // For each child of
+          var children = this.taskIndex_[nodeToUnfold];
+          children.forEach((child) => {
+            // Extends the old path with a new one with child added to the
+            // front. We use slice(0) to make a copy of the path.
+            var newExtendedPath = nextPath.slice(0);
+            newExtendedPath.unshift(child);
+            if(nextPath.indexOf(child) !== -1) {
+              cyclicPaths.push(newExtendedPath);
+            } else {
+              agenda.push(newExtendedPath);
+            }
+          });
+        }
       }
-      return cyclicPath;
+      return cyclicPaths;
     }
 
     // The |add| method will throw an exception if a circular dependency is
@@ -116,9 +118,9 @@ module TaskManager {
       this.taskIndex_[name] = subtasks;
 
       // Check for resulting circular dependency.
-      var cycle = this.getCycle(name);
-      if(cycle) {
-        throw new Error('Cyclic dependency: ' + cycle.toString());
+      var cycles = this.getCycles(name);
+      if(cycles.length > 0) {
+        throw new Error('Cyclic dependencies: ' + cycles.toString());
       }
     }
 
