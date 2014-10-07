@@ -8,7 +8,10 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+/// <reference path='chrome_browser_action.ts' />
 /// <reference path='chrome_connector.ts' />
+/// <reference path='google_auth.ts' />
+/// <reference path='oauth.ts' />
 /// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />

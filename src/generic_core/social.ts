@@ -17,6 +17,7 @@
  *    },
  *    ...
  */
+/// <reference path='local-instance.ts' />
 /// <reference path='user.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../uproxy.ts' />
