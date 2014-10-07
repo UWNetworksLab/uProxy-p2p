@@ -82,13 +82,17 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.NOTIFICATION, notificationText);
   }
 
-  public stopProxyingInUiAndConfig = () => {
-    this.update(uProxy.Update.PROXYING_STOPPED);
+  public stopProxyingInUiAndConfig = () => {}
+
+  public startProxyingInUiAndConfig = () => {}
+
+  public startProvidingProxyInUi = () => {
+    this.update(uProxy.Update.START_PROVIDING_PROXY);
   }
 
-  public startProxyingInUiAndConfig = () => {
-    this.update(uProxy.Update.PROXYING_STARTED);
-  };
+  public stopProvidingProxyInUi = () => {
+    this.update(uProxy.Update.STOP_PROVIDING_PROXY);
+  }  
 
   public isProxying = () : boolean => {
     return remoteProxyInstance != null;

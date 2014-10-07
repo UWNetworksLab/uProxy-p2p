@@ -57,10 +57,8 @@ module uProxy {
     COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
     ERROR,
-    // TODO: Why do we have PROXYING_STOPPED but not PROXYING_STARTED? The
-    // asymmetry suggests that simplification would be possible here.
-    PROXYING_STOPPED,
-    PROXYING_STARTED,
+    START_PROVIDING_PROXY,
+    STOP_PROVIDING_PROXY,
     NOTIFICATION,
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
 
@@ -201,6 +199,8 @@ module uProxy {
     showNotification(notificationText :string) : void;
     stopProxyingInUiAndConfig() : void;
     startProxyingInUiAndConfig() : void;
+    startProvidingProxyInUi() : void;
+    stopProvidingProxyInUi() : void;
   }
 
   interface ICoreOptions {

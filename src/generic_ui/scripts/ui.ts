@@ -88,6 +88,9 @@ module UI {
     // automatically updates.
     oldDescription :string = '';
 
+    private isProxying = false;
+    private isProvidingProxy = false;
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -134,13 +137,13 @@ module UI {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
         this.showNotification(notificationText);
       });
-      core.onUpdate(uProxy.Update.PROXYING_STOPPED, () => {
-        this.stopProxyingInUiAndConfig();
+      core.onUpdate(uProxy.Update.START_PROVIDING_PROXY, () => {
+        this.startProvidingProxyInUi();
       });
-      core.onUpdate(uProxy.Update.PROXYING_STARTED, () => {
-        this.startProxyingInUiAndConfig();
+      core.onUpdate(uProxy.Update.STOP_PROVIDING_PROXY, () => {
+        this.stopProvidingProxyInUi();
       });
-      
+
 
       core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
         this.localFingerprint = payload;
@@ -174,6 +177,14 @@ module UI {
     public startProxyingInUiAndConfig = () => {
       this._setProxying(true);
       proxyConfig.startUsingProxy();
+    }
+
+    public startProvidingProxyInUi = () => {
+      this.browserAction.setIcon('uproxy-19-p.png');
+    }
+
+    public stopProvidingProxyInUi = () => {
+      this.browserAction.setIcon('uproxy-19.png');
     }
 
     _setProxying = (isProxying : boolean) => {
@@ -268,6 +279,8 @@ module UI {
       // has these permissions.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
+      var shouldNowProvideProxy = false;
+      var shouldNowProxy = false;
       for (var i = 0; i < user.instances.length; ++i) {
         var consent = user.instances[i].consent;
         if (consent.asClient == Consent.ClientState.GRANTED) {
@@ -276,6 +289,23 @@ module UI {
         if (consent.asProxy == Consent.ProxyState.GRANTED) {
           user.givesMe = true;
         }
+        shouldNowProvideProxy = (shouldNowProvideProxy || user.instances[i].access.asClient);
+        shouldNowProxy = (shouldNowProxy || user.instances[i].access.asProxy);
+      }
+
+      if (this.isProvidingProxy && !shouldNowProvideProxy) {
+        this.stopProvidingProxyInUi();
+        this.isProvidingProxy = false;
+      } else if (!this.isProvidingProxy && shouldNowProvideProxy) {
+        this.startProvidingProxyInUi();
+        this.isProvidingProxy = true;
+      }
+      if (this.isProxying && !shouldNowProxy) {
+        this.stopProxyingInUiAndConfig();
+        this.isProxying = false;
+      } else if (!this.isProxying && shouldNowProxy) {
+        this.startProvidingProxyInUi();
+        this.isProxying = true;
       }
 
       console.log('Synchronized user.', user);
