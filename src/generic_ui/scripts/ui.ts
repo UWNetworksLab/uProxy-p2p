@@ -80,12 +80,8 @@ module UI {
 
     accessIds = 0;  // How many people are proxying through us.
 
-    // When the description changes while the text field loses focus, it
-    // automatically updates.
-    oldDescription :string = '';
-
+    // If the extension icon should show the proxying icon.
     private isProxying = false;
-    private isProvidingProxy = false;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -163,15 +159,24 @@ module UI {
       proxyConfig.stopUsingProxy();
     }
 
+    /**
+      * Returns extension icon to default and undoes proxy configuration.
+      */
     public startProxyingInUiAndConfig = () => {
       this._setProxying(true);
       proxyConfig.startUsingProxy();
     }
 
+    /**
+      * Set extension icon to the providing proxy icon.
+      */
     public startProvidingProxyInUi = () => {
       this.browserAction.setIcon('uproxy-19-p.png');
     }
 
+    /**
+      * Set extension icon to the default icon.
+      */
     public stopProvidingProxyInUi = () => {
       this.browserAction.setIcon('uproxy-19.png');
     }
@@ -266,12 +271,15 @@ module UI {
         return instance.isOnline;
       });
 
-      // Update givesMe and usesMe fields based on whether any instance
-      // has these permissions.
-      // TODO: we may want to include offered permissions here (even if the
-      // peer hasn't accepted the offer yet).
       var updatedAccessIds = 0;
       var shouldNowProxy = false;
+
+      // Update givesMe and usesMe fields based on whether any instance
+      // has these permissions.
+      // Also while iterating through instances, check if this user
+      // is proxying through or is a proxy for any of those instances.
+      // TODO: we may want to include offered permissions here (even if the
+      // peer hasn't accepted the offer yet).
       for (var i = 0; i < user.instances.length; ++i) {
         var consent = user.instances[i].consent;
         if (consent.asClient == Consent.ClientState.GRANTED) {
@@ -286,14 +294,19 @@ module UI {
         shouldNowProxy = (shouldNowProxy || user.instances[i].access.asProxy);
       }
 
+      // Update UI if user's state as a proxy or proxyer has changed.
       if (this.accessIds > 0 && updatedAccessIds == 0) {
+      // If user is no longer a proxy (i.e. if number of people proxying
+      // through us has reduced to 0.)  
         this.stopProvidingProxyInUi();
       } else if (this.accessIds == 0 && updatedAccessIds > 0) {
+      // If user is now proxying to > 0 people.
         this.startProvidingProxyInUi();
       }
       this.accessIds = updatedAccessIds;
 
       if (this.isProxying && !shouldNowProxy) {
+      // If no instances are proxying through us anymore.  
         this.stopProxyingInUiAndConfig();
         this.isProxying = false;
       } else if (!this.isProxying && shouldNowProxy) {

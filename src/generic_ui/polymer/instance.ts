@@ -16,7 +16,6 @@ Polymer({
     console.log('[polymer] calling core.start(', this.path, ')');
     core.start(this.path).then(() => {
       console.log('[polymer] received core.start promise fulfillment.');
-      // TODO: Use BrowserAction to set the extension icon to 'proxy mode'.
       this.ui.startProxyingInUiAndConfig();
     });
   },

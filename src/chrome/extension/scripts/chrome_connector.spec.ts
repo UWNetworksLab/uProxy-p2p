@@ -28,7 +28,6 @@ var ui :uProxy.UIAPI = {
   showNotification: (notificationText :string) => {},
   isProxying: () => { return false; },
   stopProxyingInUiAndConfig: () => {},
-  startProxyingInUiAndConfig: () => {},
   refreshDOM: () => {}
 };
 
