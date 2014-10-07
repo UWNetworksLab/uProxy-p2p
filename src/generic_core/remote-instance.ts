@@ -328,6 +328,9 @@ module Core {
      * Assumes that |data| actually belongs to this instance.
      */
     public update = (data :InstanceHandshake) => {
+      // WARNING: |data| is UNTRUSTED, because it is often provided directly by
+      // the remote peer.  Therefore, we MUST NOT make use of any consent
+      // information that might be present.
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
