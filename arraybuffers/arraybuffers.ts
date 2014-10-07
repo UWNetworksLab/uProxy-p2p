@@ -1,9 +1,3 @@
-// TODO: once typescript with https://github.com/Microsoft/TypeScript/issues/310
-// is released, this can be removed.
-interface ArrayBuffer {
-  slice :(start?:number, end?:number) => ArrayBuffer;
-}
-
 module ArrayBuffers {
   // Equality by byte-value comparison.
   export function byteEquality(b1 :ArrayBuffer, b2 :ArrayBuffer)

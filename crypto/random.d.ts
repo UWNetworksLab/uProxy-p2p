@@ -1,3 +1,3 @@
-declare module Crypto {
+declare module crypto {
   function randomUint32() : number;
 }
