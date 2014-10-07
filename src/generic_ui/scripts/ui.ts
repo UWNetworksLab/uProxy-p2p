@@ -160,7 +160,7 @@ module UI {
     }
 
     /**
-      * Returns extension icon to default and undoes proxy configuration.
+      * Set extension icon to default and undoes proxy configuration.
       */
     public startProxyingInUiAndConfig = () => {
       this._setProxying(true);
@@ -297,7 +297,7 @@ module UI {
       // Update UI if user's state as a proxy or proxyer has changed.
       if (this.accessIds > 0 && updatedAccessIds == 0) {
       // If user is no longer a proxy (i.e. if number of people proxying
-      // through us has reduced to 0.)  
+      // through us has reduced to 0).
         this.stopProvidingProxyInUi();
       } else if (this.accessIds == 0 && updatedAccessIds > 0) {
       // If user is now proxying to > 0 people.
@@ -306,12 +306,12 @@ module UI {
       this.accessIds = updatedAccessIds;
 
       if (this.isProxying && !shouldNowProxy) {
-      // If no instances are proxying through us anymore.  
+      // If no instances are proxying through us anymore.
         this.stopProxyingInUiAndConfig();
         this.isProxying = false;
       } else if (!this.isProxying && shouldNowProxy) {
         // This might be redundant because startProxyingInUiAndConfig should
-        // always be called by instance.ts
+        // always be called by instance.ts.
         this.startProxyingInUiAndConfig();
         this.isProxying = true;
       }
