@@ -133,13 +133,6 @@ module UI {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
         this.showNotification(notificationText);
       });
-      core.onUpdate(uProxy.Update.START_PROVIDING_PROXY, () => {
-        this.startProvidingProxyInUi();
-      });
-      core.onUpdate(uProxy.Update.STOP_PROVIDING_PROXY, () => {
-        this.stopProvidingProxyInUi();
-      });
-
 
       core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
         this.localFingerprint = payload;
