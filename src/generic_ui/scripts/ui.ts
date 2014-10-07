@@ -78,7 +78,6 @@ module UI {
     myName = '';
     myPic = null;
 
-<<<<<<< HEAD
     accessIds = 0;  // How many people are proxying through us.
 
     // When the description changes while the text field loses focus, it
@@ -88,8 +87,6 @@ module UI {
     private isProxying = false;
     private isProvidingProxy = false;
 
-=======
->>>>>>> origin/dev
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
