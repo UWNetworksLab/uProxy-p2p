@@ -137,6 +137,10 @@ module UI {
       core.onUpdate(uProxy.Update.PROXYING_STOPPED, () => {
         this.stopProxyingInUiAndConfig();
       });
+      core.onUpdate(uProxy.Update.PROXYING_STARTED, () => {
+        this.startProxyingInUiAndConfig();
+      });
+      
 
       core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
         this.localFingerprint = payload;
@@ -167,9 +171,14 @@ module UI {
       proxyConfig.stopUsingProxy();
     }
 
+    public startProxyingInUiAndConfig = () => {
+      this._setProxying(true);
+      proxyConfig.startUsingProxy();
+    }
+
     _setProxying = (isProxying : boolean) => {
       if (isProxying) {
-        this.browserAction.setIcon('uproxy-19-p.png');
+        this.browserAction.setIcon('uproxy-19-c.png');
       } else {
         this.browserAction.setIcon('uproxy-19.png');
       }
