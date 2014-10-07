@@ -155,7 +155,7 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      this._setProxying(false);
+      this.browserAction.setIcon('uproxy-19.png');
       proxyConfig.stopUsingProxy();
     }
 
@@ -163,7 +163,7 @@ module UI {
       * Set extension icon to default and undoes proxy configuration.
       */
     public startProxyingInUiAndConfig = () => {
-      this._setProxying(true);
+      this.browserAction.setIcon('uproxy-19-c.png');
       proxyConfig.startUsingProxy();
     }
 
@@ -179,16 +179,6 @@ module UI {
       */
     public stopProvidingProxyInUi = () => {
       this.browserAction.setIcon('uproxy-19.png');
-    }
-
-    // TODO(dborkan): call this when proxying starts, test on Firefox and
-    // Chrome.
-    _setProxying = (isProxying : boolean) => {
-      if (isProxying) {
-        this.browserAction.setIcon('uproxy-19-c.png');
-      } else {
-        this.browserAction.setIcon('uproxy-19.png');
-      }
     }
 
     syncInstance = (instance : any) => {}

@@ -194,7 +194,6 @@ module uProxy {
     // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
-    stopProxyingInUiAndConfig() : void;
   }
 
   interface ICoreOptions {
