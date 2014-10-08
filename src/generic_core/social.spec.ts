@@ -84,10 +84,12 @@ describe('Social.FreedomNetwork', () => {
   describe('login & logout', () => {
 
     it('can log in', (done) => {
+      jasmine.clock().install();
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(network, 'notifyUI');
+      spyOn(network, 'log');
       expect(network.isLoginPending()).toEqual(false);
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
@@ -95,6 +97,9 @@ describe('Social.FreedomNetwork', () => {
         expect(network.isOnline()).toEqual(true);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
+        jasmine.clock().tick(5000)
+        expect(network['log']).toHaveBeenCalledWith('Running monitor');
+        jasmine.clock().uninstall();
       }).then(done);
       expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
@@ -129,6 +134,7 @@ describe('Social.FreedomNetwork', () => {
     });
 
     it('can log out', (done) => {
+      jasmine.clock().install();
       network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
@@ -137,6 +143,10 @@ describe('Social.FreedomNetwork', () => {
         expect(network.isOnline()).toEqual(false);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
+        spyOn(network, 'log');
+        jasmine.clock().tick(5000)
+        expect(network['log']).not.toHaveBeenCalledWith('Running monitor');
+        jasmine.clock().uninstall();
       }).then(done);
     });
 
