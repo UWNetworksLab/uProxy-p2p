@@ -1,5 +1,6 @@
 /// <reference path='chrome_connector.ts' />
 /// <reference path='../../../generic_ui/scripts/core_connector.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 
@@ -21,19 +22,19 @@ var mockAppPort = () => {
 };
 
 // Mock UI.
-var ui :uProxy.UIAPI = {
-  sync: (state ?:string) => {},
-  update: (type :uProxy.Update, data ?:any) => {},
-  syncUser: (UserMessage :UI.UserMessage) => {},
-  showNotification: (notificationText :string) => {},
-  isProxying: () => { return false; },
-  stopProxyingInUiAndConfig: () => {},
-  refreshDOM: () => {}
-};
+var ui :UI.UserInterface;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the chromeConnector object.
 describe('core-connector', () => {
+
+  ui = jasmine.createSpyObj('UI.UserInterface', 
+    ['stopProxyingInUiAndConfig', 
+    'isProxying', 
+    'sync',
+    'update',
+    'syncUser',
+    'showNotification']);
 
   var chromeConnector :ChromeConnector;
   chromeConnector = new ChromeConnector();
@@ -128,8 +129,6 @@ describe('core-connector', () => {
     // is called with the expected params.
     expect(disconnect).not.toBeNull();
     spyOn(chromeConnector, 'connect').and.callFake(() => { done(); })
-    spyOn(ui, 'isProxying').and.returnValue(true);
-    spyOn(ui, 'stopProxyingInUiAndConfig');
     disconnect();
     expect(chromeConnector.status.connected).toEqual(false);
     expect(chromeConnector['appPort_']).toBeNull();
