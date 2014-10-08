@@ -189,6 +189,10 @@ module Core {
               this.bytesSent += numBytes;
               this.updateBytesInUI();               
             });
+            this.rtcToNet_.onceReady.then(() => {
+              this.access.asClient = true;
+              this.user.notifyUI();
+            });
           }
           // TODO: signalFromRemote needs to get converted into a
           // WebRtc.SignallingMessage. This probably doesn't actually work right
@@ -265,7 +269,7 @@ module Core {
           .setSyncHandler((numBytes:number) => {
         this.bytesSent += numBytes;
         this.updateBytesInUI();
-      });      
+      });
       // TODO: Update to onceReady() once uproxy-networking fixes it.
       return this.socksToRtc_.onceReady.then(() => {
           console.log('Proxy now ready through ' + this.user.userId);
@@ -433,7 +437,6 @@ module Core {
               ui.showNotification(this.user.name + ' revoked your access, ' +
                   'which ends your current proxy session.');
               core.stop();
-              ui.stopProxyingInUiAndConfig();
             } else {
               ui.showNotification(this.user.name + ' revoked your access.');
             }

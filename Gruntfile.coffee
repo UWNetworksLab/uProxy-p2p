@@ -380,6 +380,7 @@ module.exports = (grunt) ->
             .concat [
               'build/typescript-src/mocks/chrome_mocks.js'
               'build/typescript-src/generic_ui/scripts/core_connector.js'
+              'build/typescript-src/generic_ui/scripts/ui.js'
               'build/typescript-src/chrome/extension/scripts/chrome_connector.js'
               'build/typescript-src/chrome/util/chrome_glue.js'
             ]

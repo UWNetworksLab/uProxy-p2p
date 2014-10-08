@@ -57,12 +57,8 @@ module uProxy {
     COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
     ERROR,
-    // TODO: Why do we have PROXYING_STOPPED but not PROXYING_STARTED? The
-    // asymmetry suggests that simplification would be possible here.
-    PROXYING_STOPPED,
     NOTIFICATION,
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
-
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
@@ -198,7 +194,6 @@ module uProxy {
     // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
-    stopProxyingInUiAndConfig() : void;
   }
 
   interface ICoreOptions {
