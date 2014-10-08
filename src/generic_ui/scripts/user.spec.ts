@@ -27,7 +27,6 @@ describe('UI.User', () => {
     });
     expect(user.name).toEqual('fakename');
     expect(user.imageData).toEqual('fakeimage.uri');
-    expect(user.isOnline).toEqual(true);
   });
 
   // TODO: more specs

@@ -35,7 +35,6 @@ describe('UI.UserInterface', () => {
           userId: 'testUserId',
           name: 'Alice',
           imageData: 'testImageData',
-          isOnline: true
         },
         instances: []
       };
@@ -52,17 +51,12 @@ describe('UI.UserInterface', () => {
           userId: 'testUserId',
           name: 'Alice',
           imageData: 'testImageData',
-          isOnline: true
         },
         instances: []
       };
       ui.syncUser(payload);
       var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
-      expect(user.isOnline).toEqual(true);
-      expect(user.canUProxy).toEqual(false);
-      expect(user.usesMe).toEqual(false);
-      expect(user.givesMe).toEqual(false);
     });
 
     it('Sets correct flags for uProxy users', () => {
@@ -96,19 +90,12 @@ describe('UI.UserInterface', () => {
           userId: 'testUserId',
           name: 'Alice',
           imageData: 'testImageData',
-          isOnline: true
         },
         instances: [clientInstance, serverInstance]
       };
       ui.syncUser(payload);
       var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
-      expect(user.isOnline).toEqual(true);
-      expect(user.canUProxy).toEqual(true);
-      // usesMe should || all consent.asClient values
-      expect(user.usesMe).toEqual(true);
-      // usesMe should || all consent.asProxy values
-      expect(user.givesMe).toEqual(true);
     });
   }); // syncUser
 

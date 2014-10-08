@@ -257,10 +257,6 @@ module UI {
       user.update(profile);
       user.instances = payload.instances;
 
-      user.canUProxy = user.instances.some((instance) => {
-        return instance.isOnline;
-      });
-
       // Increase this count for each remote instance that is listed 
       // as a client.
       var updatedNumGivingAccessTo = 0;
@@ -268,20 +264,11 @@ module UI {
       // this local user), this will be set to true.
       var updatedIsGettingAccess = false;
 
-      // Update givesMe and usesMe fields based on whether any instance
-      // has these permissions.
       // Also while iterating through instances, check if this user
       // is giving access to or getting access from any of those instances.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
       for (var i = 0; i < user.instances.length; ++i) {
-        var consent = user.instances[i].consent;
-        if (consent.asClient == Consent.ClientState.GRANTED) {
-          user.usesMe = true;
-        }
-        if (consent.asProxy == Consent.ProxyState.GRANTED) {
-          user.givesMe = true;
-        }
         if (user.instances[i].access.asClient) {
           updatedNumGivingAccessTo++;
         }
