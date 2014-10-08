@@ -78,10 +78,13 @@ module UI {
     myName = '';
     myPic = null;
 
-    numGivingAccessTo = 0;  // How many people you are giving access to.
-
+    // How many people you are giving access to.
+    // The number is calculated by counting the remote instances for which
+    // access.isClient = true.
+    numGivingAccessTo = 0;  
     // If you are getting access.
-    private isGettingAccess = false;
+    // True only if there is a remote instance for which access.isProxy = true.
+    private isGettingAccess_ = false;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -179,6 +182,14 @@ module UI {
       */
     public stopProvidingProxyInUi = () => {
       this.browserAction.setIcon('uproxy-19.png');
+    }
+
+    public isGettingAccess = () => {
+      return this.isGettingAccess_;
+    }
+
+    public isGivingAccess = () => {
+      return this.numGivingAccessTo > 0;
     }
 
     syncInstance = (instance : any) => {}
@@ -288,15 +299,15 @@ module UI {
       this.numGivingAccessTo = updatedNumGivingAccessTo;
 
       // Update UI if user's state of getting access has changed.
-      if (this.isGettingAccess && !updatedIsGettingAccess) {
+      if (this.isGettingAccess_ && !updatedIsGettingAccess) {
       // If we are no longer getting access.
         this.stopProxyingInUiAndConfig();
-        this.isGettingAccess = false;
-      } else if (!this.isGettingAccess && updatedIsGettingAccess) {
+        this.isGettingAccess_ = false;
+      } else if (!this.isGettingAccess_ && updatedIsGettingAccess) {
         // This might be redundant because startProxyingInUiAndConfig should
         // always be called by instance.ts.
         this.startProxyingInUiAndConfig();
-        this.isGettingAccess = true;
+        this.isGettingAccess_ = true;
       }
 
       console.log('Synchronized user.', user);

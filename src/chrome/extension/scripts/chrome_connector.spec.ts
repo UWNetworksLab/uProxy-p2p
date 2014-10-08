@@ -29,8 +29,7 @@ var ui :UI.UserInterface;
 describe('core-connector', () => {
 
   ui = jasmine.createSpyObj('UI.UserInterface', 
-    ['stopProxyingInUiAndConfig', 
-    'isProxying', 
+    ['stopProxyingInUiAndConfig',
     'sync',
     'update',
     'syncUser',
