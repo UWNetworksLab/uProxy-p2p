@@ -78,10 +78,10 @@ module UI {
     myName = '';
     myPic = null;
 
-    accessIds = 0;  // How many people are proxying through us.
+    numGivingAccessTo = 0;  // How many people you are giving access to.
 
-    // If the extension icon should show the proxying icon.
-    private isProxying = false;
+    // If you are getting access.
+    private isGettingAccess = false;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -261,13 +261,17 @@ module UI {
         return instance.isOnline;
       });
 
-      var updatedAccessIds = 0;
-      var shouldNowProxy = false;
+      // Increase this count for each remote instance that is listed 
+      // as a client.
+      var updatedNumGivingAccessTo = 0;
+      // If any of the remote instances is a proxy (i.e. giving access to
+      // this local user), this will be set to true.
+      var updatedIsGettingAccess = false;
 
       // Update givesMe and usesMe fields based on whether any instance
       // has these permissions.
       // Also while iterating through instances, check if this user
-      // is proxying through or is a proxy for any of those instances.
+      // is giving access to or getting access from any of those instances.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
       for (var i = 0; i < user.instances.length; ++i) {
@@ -279,31 +283,33 @@ module UI {
           user.givesMe = true;
         }
         if (user.instances[i].access.asClient) {
-          updatedAccessIds++;
+          updatedNumGivingAccessTo++;
         }
-        shouldNowProxy = (shouldNowProxy || user.instances[i].access.asProxy);
+        updatedIsGettingAccess = 
+            (updatedIsGettingAccess || user.instances[i].access.asProxy);
       }
 
-      // Update UI if user's state as a proxy or proxyer has changed.
-      if (this.accessIds > 0 && updatedAccessIds == 0) {
-      // If user is no longer a proxy (i.e. if number of people proxying
+      // Update UI if user's state of giving access has changed.
+      if (this.numGivingAccessTo > 0 && updatedNumGivingAccessTo == 0) {
+      // If user is no longer giving access (i.e. if number of people proxying
       // through us has reduced to 0).
         this.stopProvidingProxyInUi();
-      } else if (this.accessIds == 0 && updatedAccessIds > 0) {
-      // If user is now proxying to > 0 people.
+      } else if (this.numGivingAccessTo == 0 && updatedNumGivingAccessTo > 0) {
+      // If user is now giving access to at least one person.
         this.startProvidingProxyInUi();
       }
-      this.accessIds = updatedAccessIds;
+      this.numGivingAccessTo = updatedNumGivingAccessTo;
 
-      if (this.isProxying && !shouldNowProxy) {
-      // If no instances are proxying through us anymore.
+      // Update UI if user's state of getting access has changed.
+      if (this.isGettingAccess && !updatedIsGettingAccess) {
+      // If we are no longer getting access.
         this.stopProxyingInUiAndConfig();
-        this.isProxying = false;
-      } else if (!this.isProxying && shouldNowProxy) {
+        this.isGettingAccess = false;
+      } else if (!this.isGettingAccess && updatedIsGettingAccess) {
         // This might be redundant because startProxyingInUiAndConfig should
         // always be called by instance.ts.
         this.startProxyingInUiAndConfig();
-        this.isProxying = true;
+        this.isGettingAccess = true;
       }
 
       console.log('Synchronized user.', user);
