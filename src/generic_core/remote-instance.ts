@@ -245,7 +245,7 @@ module Core {
       // Tell SocksToRtc to use a localhost SOCKS server.
       var endpoint :Net.Endpoint = {
           address: '127.0.0.1',
-          port: 9999
+          port: 0
       }
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,

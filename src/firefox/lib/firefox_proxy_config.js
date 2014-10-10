@@ -9,15 +9,15 @@ var proxyConfig = function() {
   this.running_ = false;
 };
 
-proxyConfig.startUsingProxy = function() {
+proxyConfig.startUsingProxy = function(endpoint:Net.Endpoint) {
   if (!this.running_) {
     this.running_ = true;
     this.socks_server_ = prefsvc.get("network.proxy.socks");
     this.socks_port_ = prefsvc.get("network.proxy.socks_port");
     this.proxy_type_ = prefsvc.get("network.proxy.type");
 
-    prefsvc.set("network.proxy.socks", '127.0.0.1');
-    prefsvc.set("network.proxy.http_port", 9999);
+    prefsvc.set("network.proxy.socks", endpoint.address);
+    prefsvc.set("network.proxy.http_port", endpoint.port);
     prefsvc.set("network.proxy.type", 1);
   }
 };

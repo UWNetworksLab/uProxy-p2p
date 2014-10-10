@@ -25,10 +25,12 @@ class CoreConnector implements uProxy.CoreAPI {
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
+  private mapPromiseIdToArgsForCallback_ :{[id :number] : any} =
+      {};      
   private endpoint :Net.Endpoint = {
           address: '127.0.0.1',
           port: 9999
-      };
+      }; // how do i get rid of this
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
@@ -107,10 +109,9 @@ class CoreConnector implements uProxy.CoreAPI {
     console.log('promise command fulfilled ' + promiseId + ' got data: ' + JSON.stringify(data));
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       if (data.data != undefined) {
-        this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill(data.data);
-      } else {
-        this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
+        this.mapPromiseIdToArgsForCallback_[promiseId] = data.data;
       }
+      this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('fulfill not found ' + promiseId);
@@ -146,10 +147,11 @@ class CoreConnector implements uProxy.CoreAPI {
   }
 
   start = (path :InstancePath) : Promise<Net.Endpoint> => {
+    var startPromiseId = this.promiseId_ + 1;
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uProxy.Command.START_PROXYING, path)
         .then(() => {
-          return Promise.resolve(this.endpoint);
+          return Promise.resolve(this.mapPromiseIdToArgsForCallback_[startPromiseId]);
         });
   }
 

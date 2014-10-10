@@ -4,7 +4,7 @@
 
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../interfaces/browser-proxy-config.d.ts'/>
-
+/// <reference path='../../../networking-typings/communications.d.ts' />
 
 class BrowserProxyConfig implements IBrowserProxyConfig {
   private preUproxyConfig_ :chrome.proxy.ProxyConfig = null;
@@ -18,7 +18,7 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
       rules: {
         singleProxy: {
           scheme: "socks5",
-          host: "127.0.0.1",
+          host: "127.0.0.1", // should I change these defaults
           port: 9999
         }
       }
@@ -29,8 +29,10 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
     chrome.proxy.settings['clear']({scope: 'regular'});
   }
 
-  public startUsingProxy = () => {
+  public startUsingProxy = (endpoint:Net.Endpoint) => {
     if (this.running_ == false) {
+      this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
+      this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
       console.log('Directing Chrome proxy settings to uProxy');
       this.running_ = true;
       chrome.proxy['settings']['get']({incognito:false},
