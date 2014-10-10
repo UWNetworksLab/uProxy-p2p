@@ -3,6 +3,7 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
 /// <reference path='../../generic_ui/scripts/ui.ts' />
+/// <reference path='../../networking-typings/communications.d.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
@@ -124,9 +125,12 @@ class MockCore implements uProxy.CoreAPI {
   }
 
   // Fake starting and stopping proxying sessions.
-  start = (path) : Promise<void> => {
+  start = (path) : Promise<Net.Endpoint> => {
     console.log('Starting to proxy through ', path);
-    return Promise.resolve<void>();
+    return Promise.resolve<Net.Endpoint>({
+          address: '127.0.0.1',
+          port: 9999
+      });
   }
 
   stop = () => {

@@ -166,7 +166,6 @@ class uProxyCore implements uProxy.CoreAPI {
       handler(args.data).then(
         (data2 ?:any) => {
           console.warn(JSON.stringify(data2));
-
           ui.update(uProxy.Update.COMMAND_FULFILLED, 
             { promiseId: args.promiseId,
               data: data2 });

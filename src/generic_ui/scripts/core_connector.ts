@@ -106,7 +106,11 @@ class CoreConnector implements uProxy.CoreAPI {
 
     console.log('promise command fulfilled ' + promiseId + ' got data: ' + JSON.stringify(data));
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
+      if (data.data != undefined) {
+        this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill(data.data);
+      } else {
+        this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
+      }
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('fulfill not found ' + promiseId);
