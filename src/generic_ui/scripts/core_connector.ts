@@ -144,12 +144,8 @@ class CoreConnector implements uProxy.CoreAPI {
   }
 
   start = (path :InstancePath) : Promise<Net.Endpoint> => {
-    var startPromiseId = this.promiseId_ + 1;
     console.log('Starting to proxy through ' + path);
-    return this.promiseCommand(uProxy.Command.START_PROXYING, path)
-        .then((endpoint:Net.Endpoint) => {
-          return Promise.resolve(endpoint);
-        });
+    return this.promiseCommand(uProxy.Command.START_PROXYING, path);
   }
 
   stop = () => {
