@@ -16,6 +16,7 @@ Polymer({
     console.log('[polymer] calling core.start(', this.path, ')');
     core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
+      console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startProxyingInUiAndConfig(endpoint);
     });
   },
