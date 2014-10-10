@@ -24,9 +24,7 @@ class CoreConnector implements uProxy.CoreAPI {
   // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
-      {};
-  private mapPromiseIdToArgsForCallback_ :{[id :number] : any} =
-      {};      
+      {};   
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
@@ -65,7 +63,7 @@ class CoreConnector implements uProxy.CoreAPI {
    * an ack/reject from the backend.
    */
   public promiseCommand = (command :uProxy.Command, data ?:any)
-      : Promise<void> => {
+      : Promise<any> => {
     var promiseId :number = ++(this.promiseId_);
     var payload :uProxy.Payload = {
       cmd: 'emit',
@@ -79,7 +77,7 @@ class CoreConnector implements uProxy.CoreAPI {
     // Create a new promise and store its fulfill and reject functions.
     var fulfillFunc :Function;
     var rejectFunc :Function;
-    var promise :Promise<void> = new Promise<void>((F, R) => {
+    var promise :Promise<any> = new Promise<any>((F, R) => {
       fulfillFunc = F;
       rejectFunc = R;
     });
@@ -102,7 +100,8 @@ class CoreConnector implements uProxy.CoreAPI {
     console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       if (data.argsForCallback != undefined) {
-        this.mapPromiseIdToArgsForCallback_[promiseId] = data.argsForCallback;
+        this.mapPromiseIdToFulfillAndReject_[promiseId]
+            .fulfill(data.argsForCallback);
       }
       this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
@@ -115,6 +114,10 @@ class CoreConnector implements uProxy.CoreAPI {
     var promiseId = data.promiseId;
     console.log('promise command rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
+      if (data.errorForCallback != undefined) {
+        this.mapPromiseIdToFulfillAndReject_[promiseId]
+            .reject(data.errorForCallback);
+      }
       this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
@@ -144,9 +147,8 @@ class CoreConnector implements uProxy.CoreAPI {
     var startPromiseId = this.promiseId_ + 1;
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uProxy.Command.START_PROXYING, path)
-        .then(() => {
-          return Promise.resolve(
-              this.mapPromiseIdToArgsForCallback_[startPromiseId]);
+        .then((endpoint:Net.Endpoint) => {
+          return Promise.resolve(endpoint);
         });
   }
 
