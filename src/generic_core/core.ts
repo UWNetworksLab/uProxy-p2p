@@ -166,11 +166,13 @@ class uProxyCore implements uProxy.CoreAPI {
       handler(args.data).then(
         (argsForCallback ?:any) => {
           ui.update(uProxy.Update.COMMAND_FULFILLED, 
-            { promiseId: args.promiseId,
-              argsForCallback: argsForCallback });
+              { promiseId: args.promiseId,
+                argsForCallback: argsForCallback });
         },
-        () => {
-          ui.update(uProxy.Update.COMMAND_REJECTED, args.promiseId);
+        (errorForCallback :Error) => {
+          ui.update(uProxy.Update.COMMAND_REJECTED,
+              { promiseId: args.promiseId,
+                errorForCallback: errorForCallback });
         }
       );
     };

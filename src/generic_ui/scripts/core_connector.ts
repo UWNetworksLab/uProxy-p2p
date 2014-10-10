@@ -111,7 +111,8 @@ class CoreConnector implements uProxy.CoreAPI {
     }
   }
 
-  private handleRequestRejected_ = (promiseId :number) => {
+  private handleRequestRejected_ = (data :any) => {
+    var promiseId = data.promiseId;
     console.log('promise command rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
