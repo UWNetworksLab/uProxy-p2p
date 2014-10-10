@@ -27,10 +27,6 @@ class CoreConnector implements uProxy.CoreAPI {
       {};
   private mapPromiseIdToArgsForCallback_ :{[id :number] : any} =
       {};      
-  private endpoint :Net.Endpoint = {
-          address: '127.0.0.1',
-          port: 9999
-      }; // how do i get rid of this
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
@@ -103,10 +99,7 @@ class CoreConnector implements uProxy.CoreAPI {
 
   private handleRequestFulfilled_ = (data :any) => {
     var promiseId = data.promiseId;
-
-
-
-    console.log('promise command fulfilled ' + promiseId + ' got data: ' + JSON.stringify(data));
+    console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       if (data.data != undefined) {
         this.mapPromiseIdToArgsForCallback_[promiseId] = data.data;

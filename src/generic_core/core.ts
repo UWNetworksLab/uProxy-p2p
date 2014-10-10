@@ -165,7 +165,6 @@ class uProxyCore implements uProxy.CoreAPI {
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
         (data2 ?:any) => {
-          console.warn(JSON.stringify(data2));
           ui.update(uProxy.Update.COMMAND_FULFILLED, 
             { promiseId: args.promiseId,
               data: data2 });
@@ -286,8 +285,6 @@ class uProxyCore implements uProxy.CoreAPI {
       // Remember this instance as our proxy.
       remoteProxyInstance = remote;
       return endpoint;
-      //console.warn(JSON.stringify(endpoint) + ' YOUR ENDPOINT');
-      //return Promise.resolve('data');  // TODO: verify that you can fulfill with data
     });
   }
 
