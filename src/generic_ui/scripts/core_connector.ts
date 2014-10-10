@@ -99,11 +99,8 @@ class CoreConnector implements uProxy.CoreAPI {
     var promiseId = data.promiseId;
     console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      if (data.argsForCallback != undefined) {
-        this.mapPromiseIdToFulfillAndReject_[promiseId]
-            .fulfill(data.argsForCallback);
-      }
-      this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
+      this.mapPromiseIdToFulfillAndReject_[promiseId]
+          .fulfill(data.argsForCallback);
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('fulfill not found ' + promiseId);
@@ -114,11 +111,8 @@ class CoreConnector implements uProxy.CoreAPI {
     var promiseId = data.promiseId;
     console.log('promise command rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      if (data.errorForCallback != undefined) {
-        this.mapPromiseIdToFulfillAndReject_[promiseId]
-            .reject(data.errorForCallback);
-      }
-      this.mapPromiseIdToFulfillAndReject_[promiseId].reject();
+      this.mapPromiseIdToFulfillAndReject_[promiseId]
+          .reject(data.errorForCallback);
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
       console.warn('reject not found ' + promiseId);
