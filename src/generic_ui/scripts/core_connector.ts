@@ -25,6 +25,10 @@ class CoreConnector implements uProxy.CoreAPI {
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
+  private endpoint :Net.Endpoint = {
+          address: '127.0.0.1',
+          port: 9999
+      };
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
@@ -95,8 +99,12 @@ class CoreConnector implements uProxy.CoreAPI {
     return promise;
   }
 
-  private handleRequestFulfilled_ = (promiseId :number) => {
-    console.log('promise command fulfilled ' + promiseId);
+  private handleRequestFulfilled_ = (data :any) => {
+    var promiseId = data.promiseId;
+
+
+
+    console.log('promise command fulfilled ' + promiseId + ' got data: ' + JSON.stringify(data));
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
@@ -133,9 +141,12 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.MODIFY_CONSENT, command);
   }
 
-  start = (path :InstancePath) : Promise<void> => {
+  start = (path :InstancePath) : Promise<Net.Endpoint> => {
     console.log('Starting to proxy through ' + path);
-    return this.promiseCommand(uProxy.Command.START_PROXYING, path);
+    return this.promiseCommand(uProxy.Command.START_PROXYING, path)
+        .then(() => {
+          return Promise.resolve(this.endpoint);
+        });
   }
 
   stop = () => {

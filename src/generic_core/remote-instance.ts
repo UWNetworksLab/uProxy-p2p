@@ -222,7 +222,7 @@ module Core {
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () : Promise<void> => {
+    public start = () : Promise<Net.Endpoint> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
         return Promise.reject('Lacking permission to proxy!');
@@ -271,7 +271,7 @@ module Core {
         this.updateBytesInUI();
       });
       // TODO: Update to onceReady() once uproxy-networking fixes it.
-      return this.socksToRtc_.onceReady.then(() => {
+      return this.socksToRtc_.onceReady.then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
@@ -283,6 +283,7 @@ module Core {
               this.user.notifyUI();
               this.socksToRtc_ = null;
             });
+          return endpoint;
         })
         // TODO: remove catch & error print: that should happen at the level
         // above.
