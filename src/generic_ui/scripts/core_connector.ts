@@ -101,8 +101,8 @@ class CoreConnector implements uProxy.CoreAPI {
     var promiseId = data.promiseId;
     console.log('promise command fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
-      if (data.data != undefined) {
-        this.mapPromiseIdToArgsForCallback_[promiseId] = data.data;
+      if (data.argsForCallback != undefined) {
+        this.mapPromiseIdToArgsForCallback_[promiseId] = data.argsForCallback;
       }
       this.mapPromiseIdToFulfillAndReject_[promiseId].fulfill();
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
@@ -144,7 +144,8 @@ class CoreConnector implements uProxy.CoreAPI {
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uProxy.Command.START_PROXYING, path)
         .then(() => {
-          return Promise.resolve(this.mapPromiseIdToArgsForCallback_[startPromiseId]);
+          return Promise.resolve(
+              this.mapPromiseIdToArgsForCallback_[startPromiseId]);
         });
   }
 

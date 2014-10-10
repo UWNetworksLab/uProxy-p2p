@@ -164,10 +164,10 @@ class uProxyCore implements uProxy.CoreAPI {
 
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
-        (data2 ?:any) => {
+        (argsForCallback ?:any) => {
           ui.update(uProxy.Update.COMMAND_FULFILLED, 
             { promiseId: args.promiseId,
-              data: data2 });
+              argsForCallback: argsForCallback });
         },
         () => {
           ui.update(uProxy.Update.COMMAND_REJECTED, args.promiseId);
