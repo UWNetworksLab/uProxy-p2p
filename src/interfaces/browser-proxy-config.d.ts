@@ -1,4 +1,4 @@
 interface IBrowserProxyConfig {
-  startUsingProxy() : void;
+  startUsingProxy(endpoint:Net.Endpoint) : void;
   stopUsingProxy() : void;
 }

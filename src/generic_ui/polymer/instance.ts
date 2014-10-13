@@ -14,9 +14,10 @@ Polymer({
 
   start: function() {
     console.log('[polymer] calling core.start(', this.path, ')');
-    core.start(this.path).then(() => {
+    core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
-      this.ui.startProxyingInUiAndConfig();
+      console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
+      this.ui.startProxyingInUiAndConfig(endpoint);
     });
   },
   stop: function() {

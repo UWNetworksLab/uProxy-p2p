@@ -9,7 +9,7 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
 /// <reference path='../../interfaces/browser-proxy-config.d.ts'/>
-
+/// <reference path='../../networking-typings/communications.d.ts' />
 
 declare var model         :UI.Model;
 declare var proxyConfig   :IBrowserProxyConfig;
@@ -165,9 +165,9 @@ module UI {
     /**
       * Set extension icon to default and undoes proxy configuration.
       */
-    public startProxyingInUiAndConfig = () => {
+    public startProxyingInUiAndConfig = (endpoint:Net.Endpoint) => {
       this.browserAction.setIcon('uproxy-19-c.png');
-      proxyConfig.startUsingProxy();
+      proxyConfig.startUsingProxy(endpoint);
     }
 
     /**
@@ -306,7 +306,7 @@ module UI {
       } else if (!this.isGettingAccess_ && updatedIsGettingAccess) {
         // This might be redundant because startProxyingInUiAndConfig should
         // always be called by instance.ts.
-        this.startProxyingInUiAndConfig();
+        this.browserAction.setIcon('uproxy-19-c.png');
         this.isGettingAccess_ = true;
       }
 

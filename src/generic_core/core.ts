@@ -152,7 +152,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Promise commands return an ack or error to the UI.
    */
   public onPromiseCommand = (cmd :uProxy.Command,
-                             handler :(data ?:any) => Promise<void>) => {
+                             handler :(data ?:any) => Promise<any>) => {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
@@ -164,11 +164,15 @@ class uProxyCore implements uProxy.CoreAPI {
 
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
-        () => {
-          ui.update(uProxy.Update.COMMAND_FULFILLED, args.promiseId);
+        (argsForCallback ?:any) => {
+          ui.update(uProxy.Update.COMMAND_FULFILLED, 
+              { promiseId: args.promiseId,
+                argsForCallback: argsForCallback });
         },
-        () => {
-          ui.update(uProxy.Update.COMMAND_REJECTED, args.promiseId);
+        (errorForCallback :Error) => {
+          ui.update(uProxy.Update.COMMAND_REJECTED,
+              { promiseId: args.promiseId,
+                errorForCallback: errorForCallback });
         }
       );
     };
@@ -264,7 +268,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
    */
-  public start = (path :InstancePath) : Promise<void> => {
+  public start = (path :InstancePath) : Promise<Net.Endpoint> => {
     // Disable any previous proxying session.
     if (remoteProxyInstance) {
       console.log('Existing proxying session! Terminating...');
@@ -279,9 +283,10 @@ class uProxyCore implements uProxy.CoreAPI {
       return Promise.reject(err);
     }
     // remote.start will send an update to the UI.
-    return remote.start().then(() => {
+    return remote.start().then((endpoint:Net.Endpoint) => {
       // Remember this instance as our proxy.
       remoteProxyInstance = remote;
+      return endpoint;
     });
   }
 
