@@ -127,9 +127,11 @@ class MockCore implements uProxy.CoreAPI {
   // Fake starting and stopping proxying sessions.
   start = (path) : Promise<Net.Endpoint> => {
     console.log('Starting to proxy through ', path);
+    // start() will typically dynamically select a port for communication
+    // but for the purpose of this mock, we can choose arbitrary values.
     return Promise.resolve<Net.Endpoint>({
           address: '127.0.0.1',
-          port: 9999
+          port: 24680
       });
   }
 
