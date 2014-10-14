@@ -9,6 +9,7 @@
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
+/// <reference path='networking-typings/communications.d.ts' />
 
 module uProxy {
 
@@ -57,12 +58,8 @@ module uProxy {
     COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
     ERROR,
-    // TODO: Why do we have PROXYING_STOPPED but not PROXYING_STARTED? The
-    // asymmetry suggests that simplification would be possible here.
-    PROXYING_STOPPED,
     NOTIFICATION,
     LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
-
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
@@ -141,7 +138,7 @@ module uProxy {
     modifyConsent(command :ConsentCommand) : void;
 
     // Using peer as a proxy.
-    start(instancePath :InstancePath) : Promise<void>;
+    start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
     updateDescription(description :string) : void;
@@ -198,7 +195,6 @@ module uProxy {
     // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
-    stopProxyingInUiAndConfig() : void;
   }
 
   interface ICoreOptions {

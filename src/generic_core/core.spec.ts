@@ -6,6 +6,7 @@
  * and can also be received in different orders. This file lays out these
  * requirement and ensures consistency.
  */
+/// <reference path='core.ts' />
 /// <reference path='social.ts' />
 /// <reference path='../uproxy.ts' />
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />

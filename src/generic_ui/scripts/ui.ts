@@ -9,7 +9,7 @@
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/browser_action.d.ts'/>
 /// <reference path='../../interfaces/browser-proxy-config.d.ts'/>
-
+/// <reference path='../../networking-typings/communications.d.ts' />
 
 declare var model         :UI.Model;
 declare var proxyConfig   :IBrowserProxyConfig;
@@ -78,6 +78,14 @@ module UI {
     myName = '';
     myPic = null;
 
+    // How many people you are giving access to.
+    // The number is calculated by counting the remote instances for which
+    // access.isClient = true.
+    numGivingAccessTo = 0;  
+    // If you are getting access.
+    // True only if there is a remote instance for which access.isProxy = true.
+    private isGettingAccess_ = false;
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -124,9 +132,6 @@ module UI {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
         this.showNotification(notificationText);
       });
-      core.onUpdate(uProxy.Update.PROXYING_STOPPED, () => {
-        this.stopProxyingInUiAndConfig();
-      });
 
       core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
         this.localFingerprint = payload;
@@ -153,18 +158,38 @@ module UI {
      * (e.g. chrome.proxy settings).
      */
     public stopProxyingInUiAndConfig = () => {
-      this._setProxying(false);
+      this.browserAction.setIcon('uproxy-19.png');
       proxyConfig.stopUsingProxy();
     }
 
-    // TODO(dborkan): call this when proxying starts, test on Firefox and
-    // Chrome.
-    _setProxying = (isProxying : boolean) => {
-      if (isProxying) {
-        this.browserAction.setIcon('uproxy-19-p.png');
-      } else {
-        this.browserAction.setIcon('uproxy-19.png');
-      }
+    /**
+      * Set extension icon to default and undoes proxy configuration.
+      */
+    public startProxyingInUiAndConfig = (endpoint:Net.Endpoint) => {
+      this.browserAction.setIcon('uproxy-19-c.png');
+      proxyConfig.startUsingProxy(endpoint);
+    }
+
+    /**
+      * Set extension icon to the providing proxy icon.
+      */
+    public startProvidingProxyInUi = () => {
+      this.browserAction.setIcon('uproxy-19-p.png');
+    }
+
+    /**
+      * Set extension icon to the default icon.
+      */
+    public stopProvidingProxyInUi = () => {
+      this.browserAction.setIcon('uproxy-19.png');
+    }
+
+    public isGettingAccess = () => {
+      return this.isGettingAccess_;
+    }
+
+    public isGivingAccess = () => {
+      return this.numGivingAccessTo > 0;
     }
 
     syncInstance = (instance : any) => {}
@@ -243,22 +268,46 @@ module UI {
       user.update(profile);
       user.instances = payload.instances;
 
-      user.canUProxy = user.instances.some((instance) => {
-        return instance.isOnline;
-      });
+      // Increase this count for each remote instance that is listed 
+      // as a client.
+      var updatedNumGivingAccessTo = 0;
+      // If any of the remote instances is a proxy (i.e. giving access to
+      // this local user), this will be set to true.
+      var updatedIsGettingAccess = false;
 
-      // Update givesMe and usesMe fields based on whether any instance
-      // has these permissions.
+      // Also while iterating through instances, check if this user
+      // is giving access to or getting access from any of those instances.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
       for (var i = 0; i < user.instances.length; ++i) {
-        var consent = user.instances[i].consent;
-        if (consent.asClient == Consent.ClientState.GRANTED) {
-          user.usesMe = true;
+        if (user.instances[i].access.asClient) {
+          updatedNumGivingAccessTo++;
         }
-        if (consent.asProxy == Consent.ProxyState.GRANTED) {
-          user.givesMe = true;
-        }
+        updatedIsGettingAccess = 
+            (updatedIsGettingAccess || user.instances[i].access.asProxy);
+      }
+
+      // Update UI if user's state of giving access has changed.
+      if (this.numGivingAccessTo > 0 && updatedNumGivingAccessTo == 0) {
+      // If user is no longer giving access (i.e. if number of people proxying
+      // through us has reduced to 0).
+        this.stopProvidingProxyInUi();
+      } else if (this.numGivingAccessTo == 0 && updatedNumGivingAccessTo > 0) {
+      // If user is now giving access to at least one person.
+        this.startProvidingProxyInUi();
+      }
+      this.numGivingAccessTo = updatedNumGivingAccessTo;
+
+      // Update UI if user's state of getting access has changed.
+      if (this.isGettingAccess_ && !updatedIsGettingAccess) {
+      // If we are no longer getting access.
+        this.stopProxyingInUiAndConfig();
+        this.isGettingAccess_ = false;
+      } else if (!this.isGettingAccess_ && updatedIsGettingAccess) {
+        // This might be redundant because startProxyingInUiAndConfig should
+        // always be called by instance.ts.
+        this.browserAction.setIcon('uproxy-19-c.png');
+        this.isGettingAccess_ = true;
       }
 
       console.log('Synchronized user.', user);

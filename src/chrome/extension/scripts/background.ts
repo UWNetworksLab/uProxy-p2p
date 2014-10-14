@@ -8,7 +8,10 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
+/// <reference path='chrome_browser_action.ts' />
 /// <reference path='chrome_connector.ts' />
+/// <reference path='google_auth.ts' />
+/// <reference path='oauth.ts' />
 /// <reference path='proxy-config.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
@@ -19,7 +22,7 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 
 
-var ui   :uProxy.UIAPI;  // singleton referenced in both options and popup.
+var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
 var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI

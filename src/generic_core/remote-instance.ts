@@ -10,7 +10,10 @@
 /// <reference path='../webrtc/peerconnection.d.ts' />
 /// <reference path='../rtc-to-net/rtc-to-net.ts' />
 /// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
+/// <reference path='auth.ts' />
 /// <reference path='consent.ts' />
+/// <reference path='core.ts' />
+/// <reference path='remote-transport.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 
@@ -186,6 +189,10 @@ module Core {
               this.bytesSent += numBytes;
               this.updateBytesInUI();               
             });
+            this.rtcToNet_.onceReady.then(() => {
+              this.access.asClient = true;
+              this.user.notifyUI();
+            });
           }
           // TODO: signalFromRemote needs to get converted into a
           // WebRtc.SignallingMessage. This probably doesn't actually work right
@@ -215,7 +222,7 @@ module Core {
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () : Promise<void> => {
+    public start = () : Promise<Net.Endpoint> => {
       if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
         console.warn('Lacking permission to proxy!');
         return Promise.reject('Lacking permission to proxy!');
@@ -238,7 +245,7 @@ module Core {
       // Tell SocksToRtc to use a localhost SOCKS server.
       var endpoint :Net.Endpoint = {
           address: '127.0.0.1',
-          port: 9999
+          port: 0
       }
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
@@ -262,9 +269,9 @@ module Core {
           .setSyncHandler((numBytes:number) => {
         this.bytesSent += numBytes;
         this.updateBytesInUI();
-      });      
+      });
       // TODO: Update to onceReady() once uproxy-networking fixes it.
-      return this.socksToRtc_.onceReady.then(() => {
+      return this.socksToRtc_.onceReady.then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
@@ -276,6 +283,7 @@ module Core {
               this.user.notifyUI();
               this.socksToRtc_ = null;
             });
+          return endpoint;
         })
         // TODO: remove catch & error print: that should happen at the level
         // above.
@@ -430,7 +438,6 @@ module Core {
               ui.showNotification(this.user.name + ' revoked your access, ' +
                   'which ends your current proxy session.');
               core.stop();
-              ui.stopProxyingInUiAndConfig();
             } else {
               ui.showNotification(this.user.name + ' revoked your access.');
             }
