@@ -571,6 +571,7 @@ module Social {
       this.stopMonitor_();
       return this.freedomApi_.logout().then(() => {
         this.myInstance.userId = null;
+        this.roster = {};
         this.log('logged out.');
       }).then(this.notifyUI);
     }

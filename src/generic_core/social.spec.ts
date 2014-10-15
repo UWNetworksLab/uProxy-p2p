@@ -89,7 +89,7 @@ describe('Social.FreedomNetwork', () => {
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(network, 'notifyUI');
-      spyOn(network, 'log');
+      spyOn(network, 'sendInstanceHandshake');
       expect(network.isLoginPending()).toEqual(false);
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
@@ -97,9 +97,21 @@ describe('Social.FreedomNetwork', () => {
         expect(network.isOnline()).toEqual(true);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
-        jasmine.clock().tick(5000)
-        expect(network['log']).toHaveBeenCalledWith('Running monitor');
-        jasmine.clock().uninstall();
+        var freedomClient :freedom_Social.ClientState = {
+          userId: 'fakeuser',
+          clientId: 'fakeclient',
+          status: 'ONLINE',
+          timestamp: 12345
+        };
+        // Add user to the roster;
+        network.handleClientState(freedomClient);
+        expect(Object.keys(network.roster).length).toEqual(1);
+        var friend = network.getUser('fakeuser');
+        spyOn(friend, 'monitor');
+        expect(friend.isOnline()).toEqual(true);
+        // Wait for 5 seconds and make sure monitoring was called.
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
       expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
@@ -134,18 +146,24 @@ describe('Social.FreedomNetwork', () => {
     });
 
     it('can log out', (done) => {
-      jasmine.clock().install();
       network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
+
+      var friend = network.getUser('fakeuser');
+      spyOn(friend, 'monitor');
+      // Monitoring is still running.
+      jasmine.clock().tick(5000);
+      expect(friend.monitor).toHaveBeenCalled();
+
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
-        spyOn(network, 'log');
-        jasmine.clock().tick(5000)
-        expect(network['log']).not.toHaveBeenCalledWith('Running monitor');
+        (<any>friend.monitor).calls.reset();
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
       }).then(done);
     });
