@@ -1,4 +1,6 @@
+/// <reference path='../../../generic_ui/scripts/core_connector.ts'/>
 /// <reference path='../../../interfaces/authentication-manager.d.ts' />
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
 var CLIENT_ID =
@@ -6,6 +8,8 @@ var CLIENT_ID =
 var CLIENT_SECRET = "Bmlc90_i2GFcaP26Fneq9UnO";
 
 var REDIRECT_URI = "https://www.uproxy.org/";
+
+declare var core :CoreConnector;
 
 class GoogleAuth {
   constructor() {
@@ -17,10 +21,10 @@ class GoogleAuth {
 
   private getAccessCode_ = () : void => {
     var extractCode = (tabId, changeInfo, tab) => {
-			console.log('tab url is ' + tab.url);
+      console.log('tab url is ' + tab.url);
       if (tab.url.indexOf(REDIRECT_URI) === 0) {
         var code = tab.url.match(/code=([^&]+)/)[1];
-				chrome.tabs.onUpdated.removeListener(extractCode);
+        chrome.tabs.onUpdated.removeListener(extractCode);
         chrome.tabs.remove(tabId);
         this.getToken_(code);
       }
