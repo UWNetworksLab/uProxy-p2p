@@ -537,6 +537,10 @@ module WebRtc {
       return dataChannel;
     }
 
+    public closeDataChannel = (channelLabel:string) : void => {
+      this.dataChannels[channelLabel].close();
+    }
+
     // When a peer creates a data channel, this function is called with the
     // |RTCDataChannelEvent|. We then create the data channel wrapper and add
     // the new |DataChannel| to the |this.peerOpenedChannelQueue| to be
@@ -556,6 +560,9 @@ module WebRtc {
       this.dataChannels[dataChannel.getLabel()] = dataChannel;
       dataChannel.onceClosed.then(() => {
           delete this.dataChannels[dataChannel.getLabel()];
+          if (dataChannel.getLabel() == '_control_') {
+            this.close();
+          }
         });
       return dataChannel;
     }
