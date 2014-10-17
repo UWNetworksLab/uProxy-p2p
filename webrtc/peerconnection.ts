@@ -152,6 +152,8 @@ module WebRtc {
     // https://code.google.com/p/webrtc/issues/detail?id=3778
     private closeWorkaroundIndex_ = 0;
 
+    private CONTROL_CHANNEL_LABEL = '';
+
     // if |createOffer| is true, the consturctor will immidiately initiate
     // negotiation.
     constructor(private config_ :PeerConnectionConfig) {
@@ -371,7 +373,7 @@ module WebRtc {
       // data channels (without it, we would have to re-negotiate SDP after the
       // PC is established), we start negotaition by openning a data channel to
       // the peer, this triggers the negotiation needed event.
-      var d = this.openDataChannel('');
+      var d = this.openDataChannel(this.CONTROL_CHANNEL_LABEL);
       return d.onceOpened.then(() => { return this.onceConnected; });
     }
 
@@ -537,10 +539,6 @@ module WebRtc {
       return dataChannel;
     }
 
-    public closeDataChannel = (channelLabel:string) : void => {
-      this.dataChannels[channelLabel].close();
-    }
-
     // When a peer creates a data channel, this function is called with the
     // |RTCDataChannelEvent|. We then create the data channel wrapper and add
     // the new |DataChannel| to the |this.peerOpenedChannelQueue| to be
@@ -560,7 +558,7 @@ module WebRtc {
       this.dataChannels[dataChannel.getLabel()] = dataChannel;
       dataChannel.onceClosed.then(() => {
           delete this.dataChannels[dataChannel.getLabel()];
-          if (dataChannel.getLabel() == '_control_') {
+          if (dataChannel.getLabel() == this.CONTROL_CHANNEL_LABEL) {
             this.close();
           }
         });

@@ -175,7 +175,7 @@ module freedom_UproxyPeerConnection {
       // peerconnection will have removed it, so we need to check it exists
       // first.
       if (channelLabel in this.pc_.dataChannels) {
-        this.pc_.closeDataChannel(channelLabel);
+        this.pc_.dataChannels[channelLabel].close();
       }
       continuation();
     }
