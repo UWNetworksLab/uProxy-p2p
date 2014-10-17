@@ -97,7 +97,7 @@ module WebRtc {
   //   2. [external] -> handleSignalMessage
   //      2.1. setRemoteDescription_ -> pc_.setRemoteDescription
   //   3. *[external] -> handleSignalMessage -> pc_.addIceCandidate
-  //   4. (callback) -> pc_.onsignalingstatechange -> onSignallingStateChange_
+  //   4. (callback) -> controlDataChannel.onceOpened
   //      4.1. completeConnection_ -> pc_.getStats
   //      4.3. [Fulfill onceConnected]
   //
@@ -108,7 +108,7 @@ module WebRtc {
   //      1.4. setLocalDescription_
   //      1.5. signalForPeerQueue.handle -> [external]
   //   2. *[external] -> handleSignalMessage -> pc_.addIceCandidate
-  //   3. (callback) -> pc_.onsignalingstatechange -> onSignallingStateChange_
+  //   3. (callback) -> controlDataChannel.onceOpened
   //      3.1. completeConnection_ -> pc_.getStats
   //      3.3. [Fulfill onceConnected]
   export class PeerConnection {
@@ -152,6 +152,15 @@ module WebRtc {
     // https://code.google.com/p/webrtc/issues/detail?id=3778
     private closeWorkaroundIndex_ = 0;
 
+    // Data channel that acts as a control for if the peer connection should be
+    // open or closed. Created during connection start up.
+    // i.e. this connection's onceConnected is true once this data channel is 
+    // ready and the connection is closed if this data channel is closed.
+    private controlDataChannel :DataChannel;
+    // Label for the control data channel. Because channel labels must be 
+    // unique, the empty string was chosen to create a simple naming 
+    // restriction for new data channels--all other data channels must have 
+    // non-empty channel labels.
     private CONTROL_CHANNEL_LABEL = '';
 
     // if |createOffer| is true, the consturctor will immidiately initiate
@@ -343,12 +352,6 @@ module WebRtc {
               ' with pc_.signallingState: ' + this.pc_.signalingState);
         return;
       }
-
-      // The only change we care about is getting to stable, which means we are
-      // connected. Assumes: |this.pcState === State.CONNECTING| (from above)
-      if (this.pc_.signalingState === 'stable') {
-        this.completeConnection_();
-      }
     }
 
     // Once we have connected, we need to fulfill the connection promise and set
@@ -373,8 +376,14 @@ module WebRtc {
       // data channels (without it, we would have to re-negotiate SDP after the
       // PC is established), we start negotaition by openning a data channel to
       // the peer, this triggers the negotiation needed event.
-      var d = this.openDataChannel(this.CONTROL_CHANNEL_LABEL);
-      return d.onceOpened.then(() => { return this.onceConnected; });
+      this.controlDataChannel = this.openDataChannel(this.CONTROL_CHANNEL_LABEL);
+      this.controlDataChannel.onceClosed.then(() => {
+          this.close();
+        });
+      return this.controlDataChannel.onceOpened.then(() => { 
+        this.completeConnection_();
+        return this.onceConnected; 
+      });
     }
 
     // Called when openDataChannel is called to and we have not yet negotiated
@@ -515,6 +524,11 @@ module WebRtc {
         : DataChannel => {
       log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
           '; options=' + JSON.stringify(options));
+      
+      // Only the control data channel can have an empty channel label. 
+      if (this.controlDataChannel != null && channelLabel === '') {
+        throw new Error('Channel label can not be an empty string.');
+      }
 
       // https://code.google.com/p/webrtc/issues/detail?id=3778
       if (options !== undefined) {
@@ -547,8 +561,23 @@ module WebRtc {
         (rtcDataChannelEvent:RTCDataChannelEvent) : void => {
       log.debug(this.peerName + ': ' + 'onPeerStartedDataChannel: ' +
           rtcDataChannelEvent.channel.label);
-      this.peerOpenedChannelQueue.handle(
-          this.addRtcDataChannel_(rtcDataChannelEvent.channel));
+      if (rtcDataChannelEvent.channel.label === this.CONTROL_CHANNEL_LABEL) {
+        // Peer has started the control data channel.
+        // Add the data channel to this peer connection as well.
+        this.controlDataChannel = 
+            this.addRtcDataChannel_(rtcDataChannelEvent.channel);
+        this.controlDataChannel.onceOpened.then(() => { 
+          this.completeConnection_(); 
+        });        
+        this.controlDataChannel.onceClosed.then(() => {
+          this.close();
+        });
+      } else {
+        // Aside from the control channel, all other channels should be
+        // added to the queue of peer opened channels.
+        this.peerOpenedChannelQueue
+            .handle(this.addRtcDataChannel_(rtcDataChannelEvent.channel));
+      }
     }
 
     // Add a rtc data channel and return the it wrapped as a DataChannel
@@ -558,9 +587,6 @@ module WebRtc {
       this.dataChannels[dataChannel.getLabel()] = dataChannel;
       dataChannel.onceClosed.then(() => {
           delete this.dataChannels[dataChannel.getLabel()];
-          if (dataChannel.getLabel() == this.CONTROL_CHANNEL_LABEL) {
-            this.close();
-          }
         });
       return dataChannel;
     }
