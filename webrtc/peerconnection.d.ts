@@ -81,7 +81,6 @@ declare module WebRtc {
     // change from |WAITING| state to |CONNECTING|)
     public openDataChannel :(channelLabel: string,
                              options?: RTCDataChannelInit) => DataChannel;
-
     // Or handle data channels opened by the peer (these events will )
     public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
 
