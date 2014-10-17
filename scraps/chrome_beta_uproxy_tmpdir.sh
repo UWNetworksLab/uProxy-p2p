@@ -42,7 +42,7 @@ function usage()
 # run the quanto-core
 function run_chrome_mac_chrome_beta ()
 {
-    CMD="/Applications/Google\ Chrome-beta.app/Contents/MacOS/Google\ Chrome --user-data-dir=${ROOT_DIR}/tmp/user_${USERNAME} --load-and-launch-app=${ROOT_DIR}/build/chrome_app --load-extension=${ROOT_DIR}/build/chrome_extension $@"
+    CMD="/Applications/Google\ Chrome-beta.app/Contents/MacOS/Google\ Chrome --user-data-dir=${ROOT_DIR}/tmp/user_${USERNAME} --load-and-launch-app=${ROOT_DIR}/build/dev/chrome/app --load-extension=${ROOT_DIR}/build/dev/chrome/extension $@"
     echo "Running: $CMD"
     echo
     bash -c "$CMD"
