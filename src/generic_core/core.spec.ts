@@ -94,6 +94,7 @@ describe('Core', () => {
   });
 
   it('login continues to call login on correct network', (done) => {
+    Social.networkNames.push('network');
     spyOn(Social, 'getNetwork').and.callFake(() => {
       return network;
     });

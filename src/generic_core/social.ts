@@ -44,6 +44,7 @@ module Social {
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
   export var networks:{[name:string]:Network} = {};
+  export var networkNames :string[] = [];
 
   /**
    * Goes through network names and gets a reference to each social provider.
@@ -57,15 +58,14 @@ module Social {
         }
 
         var name = dependency.substr(PREFIX.length);
-        var network = new Social.FreedomNetwork(name);
-        Social.networks[name] = network;
+        networkNames.push(name);
       }
     }
 
     Social.networks[MANUAL_NETWORK_ID] =
         new Social.ManualNetwork(MANUAL_NETWORK_ID);
 
-    return Social.networks;
+		networkNames.push(MANUAL_NETWORK_ID);
   }
 
   /**
@@ -79,6 +79,14 @@ module Social {
     return networks[networkName];
   }
 
+	export function notifyUI(networkName :string) {
+    console.log('notify ui social');
+		var payload :UI.NetworkMessage = {
+			name: networkName,
+			online: networkName in networks && networks[networkName].isOnline()
+		};
+		ui.update(uProxy.Update.NETWORK, payload);
+	}
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
@@ -161,14 +169,6 @@ module Social {
 
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
-    }
-
-    public notifyUI = () => {
-      var payload :UI.NetworkMessage = {
-        name: this.name,
-        online: this.isOnline()
-      };
-      ui.update(uProxy.Update.NETWORK, payload);
     }
 
     public sendInstanceHandshake = (clientId :string) : Promise<void> => {
@@ -308,7 +308,7 @@ module Social {
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {
         this.log('prepared Social.FreedomNetwork.');
-        this.notifyUI();
+        //this.notifyUI();
       });
     }
 
@@ -546,12 +546,12 @@ module Social {
             this.log('logged into uProxy');
           });
       return this.onceLoggedIn_
-          .then(this.notifyUI)
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.showNotification('You successfully signed on to ' + this.name +
-                                ' as ' + this.myInstance.userId);
+            console.log('logged in show notifications');
+            //ui.showNotification('You successfully signed on to ' + this.name +
+             //                   ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;
@@ -572,7 +572,7 @@ module Social {
       return this.freedomApi_.logout().then(() => {
         this.myInstance.userId = null;
         this.log('logged out.');
-      }).then(this.notifyUI);
+      });
     }
 
     public isOnline = () : boolean => {
@@ -662,7 +662,6 @@ module Social {
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {
         this.log('prepared Social.ManualNetwork.');
-        this.notifyUI();
       });
     }
 

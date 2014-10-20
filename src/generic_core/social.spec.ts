@@ -51,7 +51,7 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    spyOn(console, 'log');
+    //spyOn(console, 'log');
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
@@ -69,11 +69,11 @@ describe('Social.FreedomNetwork', () => {
       return Promise.resolve({});
     });
     Social.initializeNetworks();
-    network = <Social.FreedomNetwork> Social.getNetwork('mock');
-    expect(network.name).toEqual('mock');
+    expect(Social.networkNames.indexOf('mock')).not.toBe(-1);
   });
 
   it('begins with empty roster', () => {
+    network = new Social.FreedomNetwork('mock');
     expect(network.roster).toEqual({});
   });
 
@@ -87,26 +87,24 @@ describe('Social.FreedomNetwork', () => {
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
-      spyOn(network, 'notifyUI');
       expect(network.isLoginPending()).toEqual(false);
+      spyOn(ui, 'showNotification');
       network.login(false).then(() => {
+        console.log('done');
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         expect(network.isOnline()).toEqual(true);
         expect(network.isLoginPending()).toEqual(false);
-        expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
       expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
     });
 
     it('does nothing to log in if already logged in', (done) => {
-      spyOn(network, 'notifyUI');
       expect(network.isLoginPending()).toEqual(false);
       network.login(false).then(() => {
         expect(network.isLoginPending()).toEqual(false);
         expect(network.isOnline()).toEqual(true);
-        expect(network.notifyUI).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith('Already logged in to mock');
       }).then(done);
       // isPendingLogin should be false right away, without waiting for async
@@ -120,11 +118,9 @@ describe('Social.FreedomNetwork', () => {
       // Pretend the social API's login failed.
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
-      spyOn(network, 'notifyUI');
       spyOn(network, 'error');
       network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
-        expect(network.notifyUI).not.toHaveBeenCalled();
       }).then(done);
     });
 
@@ -132,20 +128,16 @@ describe('Social.FreedomNetwork', () => {
       network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
-      spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
         expect(network.isLoginPending()).toEqual(false);
-        expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
     });
 
     it('does nothing to logout if already logged out', (done) => {
       network['onceLoggedIn_'] = null;
-      spyOn(network, 'notifyUI');
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
-        expect(network.notifyUI).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledWith('Already logged out of mock');
       }).then(done);
     });

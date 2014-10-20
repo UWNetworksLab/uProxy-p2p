@@ -56,8 +56,8 @@ class UIConnector implements uProxy.UIAPI {
 
   public updateAll = () => {
     console.log('sending ALL state to UI.');
-    for (var networkName in Social.networks) {
-      Social.networks[networkName].notifyUI();
+    for (var network in Social.networkNames) {
+      Social.notifyUI(Social.networkNames[network]);
     }
     // Only send ALL update to UI when description is loaded.
     core.loadDescription.then(() => {
@@ -192,12 +192,16 @@ class uProxyCore implements uProxy.CoreAPI {
    * Access various social networks using the Social API.
    */
   public login = (networkName:string) : Promise<void> => {
-    var network = Social.getNetwork(networkName);
-    if (null === network) {
-      var warn = 'Could not login to ' + networkName;
+    if (Social.networkNames.indexOf(networkName) < 0) {
+      var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
       return Promise.reject(warn);
     }
+    var network = Social.getNetwork(networkName);
+    if (null === network) {
+      network = new Social.FreedomNetwork(networkName);
+			Social.networks[networkName] = network;
+		}
     var loginPromise = network.login(true);
     loginPromise.then(ui.updateAll)
         .then(() => {
@@ -336,7 +340,7 @@ class uProxyCore implements uProxy.CoreAPI {
 
 
 // Prepare all the social providers from the manifest.
-var networks = Social.initializeNetworks();
+Social.initializeNetworks();
 var core = new uProxyCore();
 
 

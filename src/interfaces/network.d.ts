@@ -66,7 +66,7 @@ declare module Social {
      * general-purpose event-listener mechanism, through which any component
      * (not only the UI) can subscribe to change notifications.
      */
-    notifyUI :() => void;
+    //notifyUI :() => void;
 
     /**
      * Notifies a remote uProxy installation that we are also a uProxy
