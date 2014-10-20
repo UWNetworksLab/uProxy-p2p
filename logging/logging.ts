@@ -8,17 +8,27 @@ module Logging {
     message :string; // the actual log message.
   }
 
+  // The maximum number of buffered log before we trim them. Assuming average
+  // log length is 80, the whole buffer size is about 80k. That should be
+  // easy to send through email,  not much memory usage, and still enough
+  // to capture most issues.
+  var MAX_BUFFERED_LOG = 1000;
+
   var logBuffer: Message[] = [];
 
   // TODO: we probably will change it to false as default.
   var enabled = true;
 
-  // The console filter defines what gets logged, depending on the tags. There
-  // is a special '*' tag that applies to all messages.
+  // The console filter controls what is displayed in console.
   // Entries in the console filter map are of the form:
   //   'tag': LEVEL
-  // And they signify which tag gets printed at what level of debug printing.
+  // It specifies the minimum level of log that will be printed to console for
+  // module 'tag'. '*' is a wildcard tag that applies to all messages.
   var consoleFilter: {[s: string]: string;} = {'*': 'D'};
+
+  // Similar to console filter, this filter controls what log is saved to
+  // internal log buffer, which can be retrieved for diagnosis purpose.
+  var bufferedLogFilter: {[s: string]: string;} = {'*': 'E'};
 
   // The filter API uses letter to select log level, D for debug, I for info,
   // W for warn, and E for error. This string is used to convert from letter
@@ -78,8 +88,18 @@ module Logging {
         console.error(formatMessage(Message));
       }
     }
-    logBuffer.push(Message);
+    if ('*' in bufferedLogFilter &&
+        isLevelAllowed_(level, bufferedLogFilter['*']) ||
+        tag in bufferedLogFilter &&
+        isLevelAllowed_(level, bufferedLogFilter[tag])) {
+      if (logBuffer.length > MAX_BUFFERED_LOG) {
+        // trim from the head 10 percent each time.
+        logBuffer.splice(0, MAX_BUFFERED_LOG / 10);
+      }
+      logBuffer.push(Message);
+    }
   }
+
   // Gets log as a encrypted blob, which can be transported in insecure
   // channel.
   export function getEncrypedLogBuffer(tags:string[]) : ArrayBuffer {
@@ -115,16 +135,29 @@ module Logging {
   export function disable() : void {
     enabled = false;
   }
+
   // Sets the log filter for console output. Caller can specify logs of
   // desired tags and levels for console output.
   // Usage example: setConsoleFilter("*:E", "network:D")
-  // It means: output message in Error level for with any tag
-  //           output message serious than debug level with "network" tag.
+  // It means: output message in Error level for any module
+  //           output message in debug level and above for "network" module.
   export function setConsoleFilter(args: string[]) : void {
     consoleFilter = {};
     for (var i = 0; i < args.length; i++) {
       var parts = args[i].split(':');
       consoleFilter[parts[0]] = parts[1];
+    }
+  }
+
+  // Sets the log filter for buffered log.
+  // Usage example: setBufferedLogFilter("*:E", "network:D")
+  // It means: buffer message in Error level for any module
+  //           buffer message in debug level and above for "network" module.
+  export function setBufferedLogFilter(args: string[]) : void {
+    bufferedLogFilter = {};
+    for (var i = 0; i < args.length; i++) {
+      var parts = args[i].split(':');
+      bufferedLogFilter[parts[0]] = parts[1];
     }
   }
 

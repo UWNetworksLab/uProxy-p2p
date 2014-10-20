@@ -29,6 +29,7 @@ declare module Logging {
   function enable() : void;
   function disable() : void;
   function setConsoleFilter(args:string[]) : void;
+  function setBufferedLogFilter(args:string[]) : void;
 
   // The data structure for a logged message.
   interface Message {
