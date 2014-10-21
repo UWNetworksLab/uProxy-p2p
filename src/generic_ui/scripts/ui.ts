@@ -35,7 +35,7 @@ module UI {
     GETTING
   }
 
-  interface Contacts {
+  export interface Contacts {
     onlineTrustedUproxy :UI.User[];
     offlineTrustedUproxy :UI.User[];
     onlineUntrustedUproxy :UI.User[];
