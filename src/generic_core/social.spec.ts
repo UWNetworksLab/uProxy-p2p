@@ -84,14 +84,35 @@ describe('Social.FreedomNetwork', () => {
   describe('login & logout', () => {
 
     it('can log in', (done) => {
+      jasmine.clock().install();
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
+      spyOn(network, 'sendInstanceHandshake');
       network.login(false).then(() => {
         console.log('done');
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
+        var freedomClient :freedom_Social.ClientState = {
+          userId: 'fakeuser',
+          clientId: 'fakeclient',
+          status: 'ONLINE',
+          timestamp: 12345
+        };
+        // Add user to the roster;
+        console.log('add user to the roster');
+        network.handleClientState(freedomClient);
+        console.log('handle client');
+        expect(Object.keys(network.roster).length).toEqual(1);
+        var friend = network.getUser('fakeuser');
+        console.log('spy on monitor');
+        spyOn(friend, 'monitor');
+        expect(friend.isOnline()).toEqual(true);
+        // Wait for 5 seconds and make sure monitoring was called.
+        jasmine.clock().tick(5000);
+        console.log('tick 5000');
+        expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
       fulfillFunc(fakeFreedomClient);
     });
@@ -105,6 +126,25 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network, 'error');
       network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
+      }).then(done);
+    });
+
+    it('can log out', (done) => {
+      network['onceLoggedIn_'] = loginPromise;
+      // Pretend the social API's logout succeeded.
+      spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
+
+      var friend = network.getUser('fakeuser');
+      spyOn(friend, 'monitor');
+      // Monitoring is still running.
+      jasmine.clock().tick(5000);
+      expect(friend.monitor).toHaveBeenCalled();
+
+      network.logout().then(() => {
+        (<any>friend.monitor).calls.reset();
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).not.toHaveBeenCalled();
+        jasmine.clock().uninstall();
       }).then(done);
     });
 
