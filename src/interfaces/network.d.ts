@@ -45,8 +45,6 @@ declare module Social {
     /**
      * Returns true iff a login is pending (e.g. waiting on user's password).
      */
-    isLoginPending :() => boolean;
-
     getLocalInstance :() => Core.LocalInstance;
 
     /**

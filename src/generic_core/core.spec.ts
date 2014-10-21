@@ -95,9 +95,7 @@ describe('Core', () => {
 
   it('login continues to call login on correct network', (done) => {
     Social.networkNames.push('network');
-    spyOn(Social, 'getNetwork').and.callFake(() => {
-      return network;
-    });
+    Social.pendingNetworks['network'] = network;
     spyOn(network, 'login').and.returnValue(Promise.resolve());
     core.login('network').then(done);
   });

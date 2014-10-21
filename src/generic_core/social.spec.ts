@@ -87,29 +87,13 @@ describe('Social.FreedomNetwork', () => {
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
-      expect(network.isLoginPending()).toEqual(false);
       spyOn(ui, 'showNotification');
       network.login(false).then(() => {
         console.log('done');
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
-        expect(network.isOnline()).toEqual(true);
-        expect(network.isLoginPending()).toEqual(false);
       }).then(done);
-      expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
-    });
-
-    it('does nothing to log in if already logged in', (done) => {
-      expect(network.isLoginPending()).toEqual(false);
-      network.login(false).then(() => {
-        expect(network.isLoginPending()).toEqual(false);
-        expect(network.isOnline()).toEqual(true);
-        expect(console.warn).toHaveBeenCalledWith('Already logged in to mock');
-      }).then(done);
-      // isPendingLogin should be false right away, without waiting for async
-      // login to complete.
-      expect(network.isLoginPending()).toEqual(false);
     });
 
     it('errors if network login fails', (done) => {
@@ -121,24 +105,6 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network, 'error');
       network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
-      }).then(done);
-    });
-
-    it('can log out', (done) => {
-      network['onceLoggedIn_'] = loginPromise;
-      // Pretend the social API's logout succeeded.
-      spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
-      network.logout().then(() => {
-        expect(network.isOnline()).toEqual(false);
-        expect(network.isLoginPending()).toEqual(false);
-      }).then(done);
-    });
-
-    it('does nothing to logout if already logged out', (done) => {
-      network['onceLoggedIn_'] = null;
-      network.logout().then(() => {
-        expect(network.isOnline()).toEqual(false);
-        expect(console.warn).toHaveBeenCalledWith('Already logged out of mock');
       }).then(done);
     });
 
@@ -155,7 +121,6 @@ describe('Social.FreedomNetwork', () => {
     // var delayed :Function;
 
     it('delays handler until login', () => {
-      expect(network.isOnline()).toEqual(false);
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;

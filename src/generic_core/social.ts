@@ -43,7 +43,9 @@ module Social {
   // TODO: rather than make this global, this should be a parameter of the core.
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
+  // TODO(salomegeo): Change structure of network to b
   export var networks:{[name:string]:Network} = {};
+  export var pendingNetworks:{[name:string]:Network} = {};
   export var networkNames :string[] = [];
 
   /**
@@ -64,8 +66,7 @@ module Social {
 
     Social.networks[MANUAL_NETWORK_ID] =
         new Social.ManualNetwork(MANUAL_NETWORK_ID);
-
-		networkNames.push(MANUAL_NETWORK_ID);
+    networkNames.push(MANUAL_NETWORK_ID);
   }
 
   /**
@@ -79,14 +80,14 @@ module Social {
     return networks[networkName];
   }
 
-	export function notifyUI(networkName :string) {
+  export function notifyUI(networkName :string) {
     console.log('notify ui social');
-		var payload :UI.NetworkMessage = {
-			name: networkName,
-			online: networkName in networks && networks[networkName].isOnline()
-		};
-		ui.update(uProxy.Update.NETWORK, payload);
-	}
+    var payload :UI.NetworkMessage = {
+      name: networkName,
+      online: networkName in networks
+    };
+    ui.update(uProxy.Update.NETWORK, payload);
+  }
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
@@ -103,6 +104,7 @@ module Social {
 
     constructor(public name :string) {
       this.roster = {};
+      this.myInstance = new Core.LocalInstance(this, null);
     }
 
     /**
@@ -247,9 +249,6 @@ module Social {
     public isOnline = () : boolean => {
       throw new Error('Operation not implemented');
     }
-    public isLoginPending = () : boolean => {
-      throw new Error('Operation not implemented');
-    }
     public flushQueuedInstanceMessages = () => {
       throw new Error('Operation not implemented');
     }
@@ -278,7 +277,6 @@ module Social {
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
     private remember :boolean;
-    private loginTimeout_ :number = undefined;  // A js Timeout ID.
 
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
@@ -304,12 +302,6 @@ module Social {
                           this.delayForLogin_(this.handleClientState));
       this.freedomApi_.on('onMessage',
                           this.delayForLogin_(this.handleMessage));
-
-      // Begin loading everything relevant to this Network from local storage.
-      this.syncFromStorage().then(() => {
-        this.log('prepared Social.FreedomNetwork.');
-        //this.notifyUI();
-      });
     }
 
     /**
@@ -507,30 +499,6 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
-      if (this.isLoginPending()) {
-        // Login is already pending, reject promise so the caller knows
-        // this request to login failed (the pending request may still succeed).
-        console.warn('Login already pending for ' + this.name);
-        // However, prepare a timeout to clear the login attempt in case
-        // freedom's login is actually never going to return, which would
-        // mean the user would never be able to actually retry. Timeout is only
-        // initiated after receiving at least one retry, because the first
-        // login-dialogue could take an arbitrary amount of time.
-        if (undefined === this.loginTimeout_) {
-          this.loginTimeout_ = setTimeout(() => {
-            this.onceLoggedIn_ = null;
-            this.loginTimeout_ = undefined;
-            this.error('Login timeout');
-            ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again.');
-          }, LOGIN_TIMEOUT);
-        }
-        return Promise.reject('Login already pending...');
-      } else if (this.isOnline()) {
-        console.warn('Already logged in to ' + this.name);
-        return Promise.resolve<void>();
-      }
-
       var request :freedom_Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -563,14 +531,8 @@ module Social {
     }
 
     public logout = () : Promise<void> => {
-      if (!this.isOnline()) {
-        console.warn('Already logged out of ' + this.name);
-        return Promise.resolve<void>();
-      }
-      this.onceLoggedIn_ = null;
       this.stopMonitor_();
       return this.freedomApi_.logout().then(() => {
-        this.myInstance.userId = null;
         this.log('logged out.');
       });
     }
@@ -581,11 +543,6 @@ module Social {
       return Boolean(this.myInstance && this.myInstance.userId);
     }
 
-    public isLoginPending = () : boolean => {
-      // We are in a pending login state if the onceLoggedIn_ promise is
-      // defined, but we don't yet have the myInstance.userId set.
-      return Boolean(this.onceLoggedIn_) && !this.isOnline();
-    }
 
     // TODO: Use the queue from uproxy-lib!
     public flushQueuedInstanceMessages = () : Promise<void> => {
@@ -697,9 +654,6 @@ module Social {
       return true;
     }
 
-    public isLoginPending = () : boolean => {
-      return false;
-    }
 
     // Does not apply to ManualNetwork. Nothing to do.
     public flushQueuedInstanceMessages = () => {

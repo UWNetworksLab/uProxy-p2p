@@ -197,14 +197,17 @@ class uProxyCore implements uProxy.CoreAPI {
       console.warn(warn)
       return Promise.reject(warn);
     }
-    var network = Social.getNetwork(networkName);
+    var network = Social.pendingNetworks[networkName];
     if (null === network) {
       network = new Social.FreedomNetwork(networkName);
-			Social.networks[networkName] = network;
-		}
+      Social.pendingNetworks[networkName] = network;
+
+    }
     var loginPromise = network.login(true);
     loginPromise.then(ui.updateAll)
         .then(() => {
+          Social.networks[networkName] = network;
+          delete Social.pendingNetworks[networkName];
           console.log('Successfully logged in to ' + networkName);
         });
 
