@@ -78,13 +78,14 @@ module UI {
     myName = '';
     myPic = null;
 
-    // How many people you are giving access to.
-    // The number is calculated by counting the remote instances for which
-    // access.isClient = true.
-    numGivingAccessTo = 0;  
-    // If you are getting access.
-    // True only if there is a remote instance for which access.isProxy = true.
-    private isGettingAccess_ = false;
+    // Instance you are getting access from.
+    // Set to the remote instance for which access.isProxy = true.
+    // Null if you are not getting access.
+    private instanceGettingAccessFrom_ = null;
+    // The instances you are giving access to.
+    // Remote instances are added to this set if their access.isClient value
+    // is true.   
+    private instancesGivingAccessTo_ = {};
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -185,11 +186,11 @@ module UI {
     }
 
     public isGettingAccess = () => {
-      return this.isGettingAccess_;
+      return this.instanceGettingAccessFrom_ != null;
     }
 
     public isGivingAccess = () => {
-      return this.numGivingAccessTo > 0;
+      return Object.keys(this.instancesGivingAccessTo_).length > 0;
     }
 
     syncInstance = (instance : any) => {}
@@ -270,44 +271,56 @@ module UI {
 
       // Increase this count for each remote instance that is listed 
       // as a client.
-      var updatedNumGivingAccessTo = 0;
+      var numGivingAccessTo = 
+          Object.keys(this.instancesGivingAccessTo_).length;
       // If any of the remote instances is a proxy (i.e. giving access to
       // this local user), this will be set to true.
-      var updatedIsGettingAccess = false;
+      var isGettingAccess = (this.instanceGettingAccessFrom_ != null);
 
       // Also while iterating through instances, check if this user
       // is giving access to or getting access from any of those instances.
       // TODO: we may want to include offered permissions here (even if the
       // peer hasn't accepted the offer yet).
       for (var i = 0; i < user.instances.length; ++i) {
-        if (user.instances[i].access.asClient) {
-          updatedNumGivingAccessTo++;
+        var instance = user.instances[i];
+        if (instance.access.asClient && 
+            !this.instancesGivingAccessTo_[instance.instanceId]) {
+          this.instancesGivingAccessTo_[instance.instanceId] = true;
+        } else if (!instance.access.asClient && 
+            this.instancesGivingAccessTo_[instance.instanceId]) {
+          delete this.instancesGivingAccessTo_[instance.instanceId];
         }
-        updatedIsGettingAccess = 
-            (updatedIsGettingAccess || user.instances[i].access.asProxy);
+        
+        if (instance.access.asProxy && 
+            this.instanceGettingAccessFrom_ != instance.instanceId) {
+          this.instanceGettingAccessFrom_ = instance.instanceId;
+        } else if (!instance.access.asProxy && 
+            this.instanceGettingAccessFrom_ == instance.instanceId) {
+          this.instanceGettingAccessFrom_ = null;
+        }
       }
 
+      var updatedNumGivingAccessTo = 
+          Object.keys(this.instancesGivingAccessTo_).length;
+      var updatedIsGettingAccess = (this.instanceGettingAccessFrom_ != null);
+
       // Update UI if user's state of giving access has changed.
-      if (this.numGivingAccessTo > 0 && updatedNumGivingAccessTo == 0) {
+      if (numGivingAccessTo > 0 && updatedNumGivingAccessTo == 0) {
       // If user is no longer giving access (i.e. if number of people proxying
       // through us has reduced to 0).
         this.stopProvidingProxyInUi();
-      } else if (this.numGivingAccessTo == 0 && updatedNumGivingAccessTo > 0) {
+      } else if (numGivingAccessTo == 0 && updatedNumGivingAccessTo > 0) {
       // If user is now giving access to at least one person.
         this.startProvidingProxyInUi();
       }
-      this.numGivingAccessTo = updatedNumGivingAccessTo;
 
       // Update UI if user's state of getting access has changed.
-      if (this.isGettingAccess_ && !updatedIsGettingAccess) {
+      if (isGettingAccess && !updatedIsGettingAccess) {
       // If we are no longer getting access.
         this.stopProxyingInUiAndConfig();
-        this.isGettingAccess_ = false;
-      } else if (!this.isGettingAccess_ && updatedIsGettingAccess) {
-        // This might be redundant because startProxyingInUiAndConfig should
-        // always be called by instance.ts.
+      } else if (!isGettingAccess && updatedIsGettingAccess) {
+      // If we are now getting access.
         this.browserAction.setIcon('uproxy-19-c.png');
-        this.isGettingAccess_ = true;
       }
 
       console.log('Synchronized user.', user);
