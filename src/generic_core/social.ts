@@ -43,7 +43,7 @@ module Social {
   // TODO: rather than make this global, this should be a parameter of the core.
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
-  // TODO(salomegeo): Change structure of network to b
+  // TODO(salomegeo): Change structure of network
   export var networks:{[name:string]:Network} = {};
   export var pendingNetworks:{[name:string]:Network} = {};
   export var networkNames :string[] = [];
@@ -518,8 +518,8 @@ module Social {
           // (what's a 'few'?)
           .then(() => {
             console.log('logged in show notifications');
-            //ui.showNotification('You successfully signed on to ' + this.name +
-             //                   ' as ' + this.myInstance.userId);
+            ui.showNotification('You successfully signed on to ' + this.name +
+                                ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;

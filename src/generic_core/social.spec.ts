@@ -91,7 +91,6 @@ describe('Social.FreedomNetwork', () => {
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
       network.login(false).then(() => {
-        console.log('done');
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         var freedomClient :freedom_Social.ClientState = {
@@ -101,17 +100,13 @@ describe('Social.FreedomNetwork', () => {
           timestamp: 12345
         };
         // Add user to the roster;
-        console.log('add user to the roster');
         network.handleClientState(freedomClient);
-        console.log('handle client');
         expect(Object.keys(network.roster).length).toEqual(1);
         var friend = network.getUser('fakeuser');
-        console.log('spy on monitor');
         spyOn(friend, 'monitor');
         expect(friend.isOnline()).toEqual(true);
         // Wait for 5 seconds and make sure monitoring was called.
         jasmine.clock().tick(5000);
-        console.log('tick 5000');
         expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
       fulfillFunc(fakeFreedomClient);
@@ -184,6 +179,7 @@ describe('Social.FreedomNetwork', () => {
   describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', () => {
+      network = new Social.FreedomNetwork('mock');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',
