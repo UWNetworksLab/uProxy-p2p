@@ -1,5 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
-<link rel='import' href='contact.html'>
+<link rel='import' href='roster-group.html'>
 
 <polymer-element name='uproxy-roster' attributes='contacts'>
 
@@ -25,11 +25,6 @@
     }
     :host(.hidden) {
       right: -100%;
-    }
-    .header {
-      font-size: 14px;
-      color: #888;
-      margin: 0.5em;
     }
     #search {
       display: block;
@@ -58,52 +53,33 @@
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
     <!-- trusted uProxy contacts -->
-    <div class='header' hidden?='{{ onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0 }}'>Trusted uProxy Friends</div>
-    <template repeat='{{ c in onlineTrustedUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
-    <template repeat='{{ c in offlineTrustedUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
+    <uproxy-roster-group
+        title='Trusted uProxy Friends'
+        onlineContacts='{{ onlineTrustedUproxyContacts }}'
+        offlineContacts='{{ offlineTrustedUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
     <!-- Hide HR between Trusted and Untrusted if either group is completely empty -->
     <hr color="#eee"
         hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || (onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) }}'></hr>
 
     <!-- untrusted uProxy contacts -->
-    <div class='header' hidden?='{{ onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0 }}'>uProxy Contacts</div>
-    <template repeat='{{ c in onlineUntrustedUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
-    <template repeat='{{ c in offlineUntrustedUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
+    <uproxy-roster-group
+        title='All uProxy Contacts'
+        onlineContacts='{{ onlineUntrustedUproxyContacts }}'
+        offlineContacts='{{ offlineUntrustedUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
     <!-- hide hr if there are no non-uproxy contacts, or if there are only non-uProxy contacts -->
     <hr color="#eee"
         hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0)) }}'></hr>
 
-    <!-- non-uProxy contacts -->
-    <div class='header' hidden?='{{ onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0 }}'>Non-uProxy Contacts</div>
-    <template repeat='{{ c in onlineNonUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
-    <template repeat='{{ c in offlineNonUproxyContacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
-      </uproxy-contact>
-    </template>
-    </template>
+    <!-- non uProxy contacts -->
+    <uproxy-roster-group
+        title='Non uProxy Contacts'
+        onlineContacts='{{ onlineNonUproxyContacts }}'
+        offlineContacts='{{ offlineNonUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
   </template>
 
