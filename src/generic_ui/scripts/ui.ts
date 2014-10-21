@@ -35,18 +35,31 @@ module UI {
     GETTING
   }
 
+  export enum ContactGroup {
+    onlineTrustedUproxy = 0,
+    offlineTrustedUproxy,
+    onlineUntrustedUproxy,
+    offlineUntrustedUproxy,
+    onlineNonUproxy,
+    offlineNonUproxy
+  }
+
+  interface Contacts {
+    onlineTrustedUproxy :UI.User[];
+    offlineTrustedUproxy :UI.User[];
+    onlineUntrustedUproxy :UI.User[];
+    offlineUntrustedUproxy :UI.User[];
+    onlineNonUproxy :UI.User[];
+    offlineNonUproxy :UI.User[];
+  }
+
   /**
    * Structure of the uProxy UI model object:
    * TODO: Probably put the model in its own file.
    */
   export interface Model {
     networks : UI.Network[];
-    // TODO: Other top-level generic info...
-
-    // This is a 'global' roster - a combination of all User Profiles.
-    // TODO: remove this if possible and just use network.roster
-    roster :User[];
-
+    contacts : Contacts;
     description :string;
   }
 
@@ -255,6 +268,8 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
+      var oldCategory = null;
+
       // CONSIDER: we might want to check if this user has been our proxy
       // server and if so stop the proxying if they are no longer proxying
       // for us (e.g. they were disconnected).  Currently we are sending an
@@ -263,8 +278,11 @@ module UI {
         // New user.
         user = new UI.User(profile.userId);
         network.roster[profile.userId] = user;
-        model.roster.push(user);
+      } else {
+        // Existing user, get the category before modifying any properties.
+        oldCategory = user.getCategory();
       }
+
       user.update(profile);
       user.instances = payload.instances;
 
@@ -310,8 +328,29 @@ module UI {
         this.isGettingAccess_ = true;
       }
 
+      var newCategory = user.getCategory();
+      this.categorizeUser_(user, oldCategory, newCategory);
+
       console.log('Synchronized user.', user);
     };
+
+    private categorizeUser_ = (user, oldCategory, newCategory) => {
+      if (oldCategory == null) {
+        // User hasn't yet been categorized.
+        model.contacts[newCategory].push(user);
+      } else if (oldCategory != newCategory) {
+        // Remove user from old category.
+        var oldCategoryArray = model.contacts[oldCategory];
+        for (var i = 0; i < oldCategoryArray.length; ++i) {
+          if (oldCategoryArray[i] == user) {
+            oldCategoryArray.splice(i, 1);
+            break;
+          }
+        }
+        // Add users to new category.
+        model.contacts[newCategory].push(user);
+      }
+    }
   }  // class UserInterface
 
 }  // module UI

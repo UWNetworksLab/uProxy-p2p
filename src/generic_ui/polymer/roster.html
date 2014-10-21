@@ -11,7 +11,7 @@
       box-sizing: border-box;
       height: 100%; width: 340px;
       border-left: 1px solid #ddd;
-      background-color: #f8f8f8;
+      background-color: white;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
@@ -25,6 +25,11 @@
     }
     :host(.hidden) {
       right: -100%;
+    }
+    .header {
+      font-size: 14px;
+      color: #888;
+      margin: 0.5em;
     }
     #search {
       display: block;
@@ -52,9 +57,52 @@
 
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
-    <template repeat='{{ c in contacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}' hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery)}}'></uproxy-contact>
+    <!-- trusted uProxy contacts -->
+    <div class='header' hidden?='{{ onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0 }}'>Trusted uProxy Friends</div>
+    <template repeat='{{ c in onlineTrustedUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
+    <template repeat='{{ c in offlineTrustedUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
 
+    <!-- Hide HR between Trusted and Untrusted if either group is completely empty -->
+    <hr color="#eee"
+        hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || (onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) }}'></hr>
+
+    <!-- untrusted uProxy contacts -->
+    <div class='header' hidden?='{{ onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0 }}'>uProxy Contacts</div>
+    <template repeat='{{ c in onlineUntrustedUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
+    <template repeat='{{ c in offlineUntrustedUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
+
+    <!-- hide hr if there are no non-uproxy contacts, or if there are only non-uProxy contacts -->
+    <hr color="#eee"
+        hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0)) }}'></hr>
+
+    <!-- non-uProxy contacts -->
+    <div class='header' hidden?='{{ onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0 }}'>Non-uProxy Contacts</div>
+    <template repeat='{{ c in onlineNonUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
+    <template repeat='{{ c in offlineNonUproxyContacts }}' vertical layout>
+      <uproxy-contact contact='{{ c }}'
+          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+      </uproxy-contact>
+    </template>
     </template>
 
   </template>

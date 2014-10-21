@@ -1,7 +1,12 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 
 Polymer({
-  contacts: model.roster,
+  onlineTrustedUproxyContacts: model.contacts.onlineTrustedUproxy,
+  offlineTrustedUproxyContacts: model.contacts.offlineTrustedUproxy,
+  onlineUntrustedUproxyContacts: model.contacts.onlineUntrustedUproxy,
+  offlineUntrustedUproxyContacts: model.contacts.offlineUntrustedUproxy,
+  onlineNonUproxyContacts: model.contacts.onlineNonUproxy,
+  offlineNonUproxyContacts: model.contacts.offlineNonUproxy,
   ready: function() {
     console.log('initializing roster');
     // this.contacts.push({

@@ -36,7 +36,14 @@ var proxyConfig = <IBrowserProxyConfig>new BrowserProxyConfig();
 var model :UI.Model = {
   networks: [],
   // 'global' roster, which is just the concatenation of all network rosters.
-  roster: [],
+  contacts: {
+    'onlineTrustedUproxy': [],
+    'offlineTrustedUproxy': [],
+    'onlineUntrustedUproxy': [],
+    'offlineUntrustedUproxy': [],
+    'onlineNonUproxy': [],
+    'offlineNonUproxy': []
+  },
   description: ''
 };
 
