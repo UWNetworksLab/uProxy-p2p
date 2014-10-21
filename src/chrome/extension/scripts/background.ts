@@ -35,7 +35,6 @@ var proxyConfig = <IBrowserProxyConfig>new BrowserProxyConfig();
 // Singleton model for data bindings.
 var model :UI.Model = {
   networks: [],
-  // 'global' roster, which is just the concatenation of all network rosters.
   contacts: {
     'onlineTrustedUproxy': [],
     'offlineTrustedUproxy': [],
