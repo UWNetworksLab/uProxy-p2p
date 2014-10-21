@@ -161,7 +161,7 @@ module WebRtc {
     // unique, the empty string was chosen to create a simple naming 
     // restriction for new data channels--all other data channels must have 
     // non-empty channel labels.
-    private CONTROL_CHANNEL_LABEL = '';
+    private static CONTROL_CHANNEL_LABEL = '';
 
     // if |createOffer| is true, the consturctor will immidiately initiate
     // negotiation.
@@ -376,14 +376,11 @@ module WebRtc {
       // data channels (without it, we would have to re-negotiate SDP after the
       // PC is established), we start negotaition by openning a data channel to
       // the peer, this triggers the negotiation needed event.
-      this.controlDataChannel = this.openDataChannel(this.CONTROL_CHANNEL_LABEL);
-      this.controlDataChannel.onceClosed.then(() => {
-          this.close();
-        });
-      return this.controlDataChannel.onceOpened.then(() => { 
-        this.completeConnection_();
-        return this.onceConnected; 
-      });
+      return this.registerControlChannel_(
+          this.openDataChannel(PeerConnection.CONTROL_CHANNEL_LABEL))
+          .then(() => { 
+            return this.onceConnected; 
+          });
     }
 
     // Called when openDataChannel is called to and we have not yet negotiated
@@ -561,17 +558,12 @@ module WebRtc {
         (rtcDataChannelEvent:RTCDataChannelEvent) : void => {
       log.debug(this.peerName + ': ' + 'onPeerStartedDataChannel: ' +
           rtcDataChannelEvent.channel.label);
-      if (rtcDataChannelEvent.channel.label === this.CONTROL_CHANNEL_LABEL) {
-        // Peer has started the control data channel.
-        // Add the data channel to this peer connection as well.
-        this.controlDataChannel = 
-            this.addRtcDataChannel_(rtcDataChannelEvent.channel);
-        this.controlDataChannel.onceOpened.then(() => { 
-          this.completeConnection_(); 
-        });        
-        this.controlDataChannel.onceClosed.then(() => {
-          this.close();
-        });
+      if (rtcDataChannelEvent.channel.label === 
+          PeerConnection.CONTROL_CHANNEL_LABEL) {
+        // If the peer has started the control channel, register it
+        // as this user's control channel as well.
+        this.registerControlChannel_(
+            this.addRtcDataChannel_(rtcDataChannelEvent.channel));
       } else {
         // Aside from the control channel, all other channels should be
         // added to the queue of peer opened channels.
@@ -589,6 +581,16 @@ module WebRtc {
           delete this.dataChannels[dataChannel.getLabel()];
         });
       return dataChannel;
+    }
+
+    // Saves the given data channel as the control channel for this peer
+    // connection. The appropriate callbacks for opening/closing
+    // this channel are registered here.
+    private registerControlChannel_ = (controlChannel:DataChannel) 
+        : Promise<void> => {
+      this.controlDataChannel = controlChannel;
+      this.controlDataChannel.onceClosed.then(this.close);
+      return this.controlDataChannel.onceOpened.then(this.completeConnection_);      
     }
 
     // For debugging: prints the state of the peer connection including all
