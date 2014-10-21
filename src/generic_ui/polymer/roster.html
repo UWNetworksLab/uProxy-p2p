@@ -61,12 +61,12 @@
     <div class='header' hidden?='{{ onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0 }}'>Trusted uProxy Friends</div>
     <template repeat='{{ c in onlineTrustedUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
     <template repeat='{{ c in offlineTrustedUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
 
@@ -78,12 +78,12 @@
     <div class='header' hidden?='{{ onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0 }}'>uProxy Contacts</div>
     <template repeat='{{ c in onlineUntrustedUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
     <template repeat='{{ c in offlineUntrustedUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
 
@@ -95,12 +95,12 @@
     <div class='header' hidden?='{{ onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0 }}'>Non-uProxy Contacts</div>
     <template repeat='{{ c in onlineNonUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
     <template repeat='{{ c in offlineNonUproxyContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
       </uproxy-contact>
     </template>
     </template>

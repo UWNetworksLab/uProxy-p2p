@@ -35,15 +35,6 @@ module UI {
     GETTING
   }
 
-  export enum ContactGroup {
-    onlineTrustedUproxy = 0,
-    offlineTrustedUproxy,
-    onlineUntrustedUproxy,
-    offlineUntrustedUproxy,
-    onlineNonUproxy,
-    offlineNonUproxy
-  }
-
   interface Contacts {
     onlineTrustedUproxy :UI.User[];
     offlineTrustedUproxy :UI.User[];

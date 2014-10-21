@@ -18,11 +18,11 @@ Polymer({
     // this.contacts.push({ name: 'dave' });
     // this.contacts.push({ name: 'eve' });
   }, 
-  searchQuery: '',   
-  isSearching: function(query) {
-    return query.length > 0;
-  },
-  matchesQuery: function(name, query) {
-    return name.toLowerCase().indexOf(query.toLowerCase()) > -1;
+  searchQuery: '',
+  hideForSearch: function(name, query) {
+    if (query.length === 0) {
+      return false;
+    }
+    return name.toLowerCase().indexOf(query.toLowerCase()) === -1;
   }
 });
