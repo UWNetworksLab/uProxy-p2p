@@ -195,9 +195,11 @@ describe('UI.UserInterface', () => {
 
     it('Extension icon changes when you stop getting access', () => {
       ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
+      ui.instanceGettingAccessFrom = 'testGiverId';
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19-c.png');
-      updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND].call(ui);
+      updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
+          .call(ui, 'testGiverId');
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19.png');
     });
