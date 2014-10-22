@@ -393,7 +393,8 @@ describe('Social.FreedomNetwork', () => {
 
 describe('Social.ManualNetwork', () => {
 
-  var network :Social.ManualNetwork = new Social.ManualNetwork('manual');
+  var network :Social.ManualNetwork =
+      new Social.ManualNetwork('manual', 'Manual');
 
   var loginPromise :Promise<void>;
 
