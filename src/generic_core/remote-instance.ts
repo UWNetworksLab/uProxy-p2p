@@ -163,6 +163,10 @@ module Core {
                            signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          if (Consent.ClientState.GRANTED !== this.consent.asClient) {
+            console.warn('Remote side attempted access without permission');
+            return;
+          }
           // If the remote peer sent signal as the client, we act as server.
           if(!this.rtcToNet_) {
             // TODO: make this into a separate function
