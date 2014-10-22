@@ -36,6 +36,10 @@ fdom.apis.set('core.logmanager', {
   'setConsoleFilter': {
     type: 'method',
     value: [['array', 'string']]
+  },
+  'setBufferedLogFilter': {
+    type: 'method',
+    value: [['array', 'string']]
   }
 });
 fdom.apis.register('core.logmanager', Freedom_UproxyLogging.LogManager);

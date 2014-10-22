@@ -19,6 +19,7 @@ declare module Freedom_UproxyLogging {
     enable() : void;
     disable() : void;
     setConsoleFilter(args:string[]) : void;
+    setBufferedLogFilter(args:string[]) : void;
   }
 
   // Example use for a provider that depends on this core provider:
