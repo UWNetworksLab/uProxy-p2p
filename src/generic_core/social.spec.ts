@@ -51,9 +51,9 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    //spyOn(console, 'log');
-    //spyOn(console, 'warn');
-    //spyOn(console, 'error');
+    // spyOn(console, 'log');
+    // spyOn(console, 'warn');
+    // spyOn(console, 'error');
   });
 
   it('fails to initialize if api is not social', () => {
@@ -84,26 +84,37 @@ describe('Social.FreedomNetwork', () => {
   describe('login & logout', () => {
 
     it('can log in', (done) => {
+      jasmine.clock().install();
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(network, 'notifyUI');
+      spyOn(network, 'sendInstanceHandshake');
       expect(network.isLoginPending()).toEqual(false);
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         var isOnline = network.isOnline();
-        console.log('can log in: network.myInstance: ' + network.myInstance);
-        console.log('can log in: network.myInstance.userId: ' + network.myInstance.userId);
-        console.log('can log in: network.isOnline: ' + isOnline);
+        console.log('can log in: isOnline: ' + isOnline);
         expect(isOnline).toEqual(true);
-        console.log('can log in: inside callback: network.isLoginPending(): '
-            + network.isLoginPending());
         expect(network.isLoginPending()).toEqual(false);
-        //expect(network.notifyUI).toHaveBeenCalled();
+        expect(network.notifyUI).toHaveBeenCalled();
+        var freedomClient :freedom_Social.ClientState = {
+          userId: 'fakeuser',
+          clientId: 'fakeclient',
+          status: 'ONLINE',
+          timestamp: 12345
+        };
+        // Add user to the roster;
+        network.handleClientState(freedomClient);
+        expect(Object.keys(network.roster).length).toEqual(1);
+        var friend = network.getUser('fakeuser');
+        spyOn(friend, 'monitor');
+        expect(friend.isOnline()).toEqual(true);
+        // Wait for 5 seconds and make sure monitoring was called.
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
-      console.log('can log in:  network.isLoginPending(): '
-          + network.isLoginPending());
       expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
     });
@@ -141,10 +152,21 @@ describe('Social.FreedomNetwork', () => {
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
       spyOn(network, 'notifyUI');
+
+      var friend = network.getUser('fakeuser');
+      spyOn(friend, 'monitor');
+      // Monitoring is still running.
+      jasmine.clock().tick(5000);
+      expect(friend.monitor).toHaveBeenCalled();
+
       network.logout().then(() => {
         expect(network.isOnline()).toEqual(false);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
+        (<any>friend.monitor).calls.reset();
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).not.toHaveBeenCalled();
+        jasmine.clock().uninstall();
       }).then(done);
     });
 
