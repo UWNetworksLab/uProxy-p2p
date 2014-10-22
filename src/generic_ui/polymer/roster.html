@@ -1,5 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
-<link rel='import' href='contact.html'>
+<link rel='import' href='roster-group.html'>
 
 <polymer-element name='uproxy-roster' attributes='contacts'>
 
@@ -11,7 +11,7 @@
       box-sizing: border-box;
       height: 100%; width: 340px;
       border-left: 1px solid #ddd;
-      background-color: #f8f8f8;
+      background-color: white;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
@@ -52,10 +52,34 @@
 
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
-    <template repeat='{{ c in contacts }}' vertical layout>
-      <uproxy-contact contact='{{ c }}' hidden?='{{ isSearching(searchQuery) && !matchesQuery(c.name, searchQuery)}}'></uproxy-contact>
+    <!-- trusted uProxy contacts -->
+    <uproxy-roster-group
+        title='Trusted uProxy Friends'
+        onlineContacts='{{ onlineTrustedUproxyContacts }}'
+        offlineContacts='{{ offlineTrustedUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
-    </template>
+    <!-- Hide HR between Trusted and Untrusted if either group is completely empty -->
+    <hr color="#eee"
+        hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || (onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) }}'></hr>
+
+    <!-- untrusted uProxy contacts -->
+    <uproxy-roster-group
+        title='All uProxy Contacts'
+        onlineContacts='{{ onlineUntrustedUproxyContacts }}'
+        offlineContacts='{{ offlineUntrustedUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
+
+    <!-- hide hr if there are no non-uproxy contacts, or if there are only non-uProxy contacts -->
+    <hr color="#eee"
+        hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0)) }}'></hr>
+
+    <!-- non uProxy contacts -->
+    <uproxy-roster-group
+        title='Non uProxy Contacts'
+        onlineContacts='{{ onlineNonUproxyContacts }}'
+        offlineContacts='{{ offlineNonUproxyContacts }}'
+        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
   </template>
 
