@@ -57,13 +57,14 @@ module Social {
         }
 
         var name = dependency.substr(PREFIX.length);
-        var network = new Social.FreedomNetwork(name);
+        var displayName = name.substr(0, 1).toUpperCase() + name.substr(1);
+        var network = new Social.FreedomNetwork(name, displayName);
         Social.networks[name] = network;
       }
     }
 
     Social.networks[MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(MANUAL_NETWORK_ID);
+        new Social.ManualNetwork(MANUAL_NETWORK_ID, 'Manual');
 
     return Social.networks;
   }
@@ -93,7 +94,7 @@ module Social {
       ME: 'me'
     }
 
-    constructor(public name :string) {
+    constructor(public name :string, public displayName :string) {
       this.roster = {};
     }
 
@@ -287,8 +288,8 @@ module Social {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, public displayName :string) {
+      super(name, displayName);
 
       this.provider_ = freedom[PREFIX + name];
       this.remember = false;
@@ -521,7 +522,7 @@ module Social {
             this.onceLoggedIn_ = null;
             this.loginTimeout_ = undefined;
             this.error('Login timeout');
-            ui.sendError('There was a problem signing in to ' + this.name +
+            ui.sendError('There was a problem signing in to ' + this.displayName +
                          '. Please try again.');
           }, LOGIN_TIMEOUT);
         }
@@ -550,13 +551,13 @@ module Social {
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.showNotification('You successfully signed on to ' + this.name +
+            ui.showNotification('You successfully signed on to ' + this.displayName +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
-            ui.sendError('There was a problem signing in to ' + this.name +
+            ui.sendError('There was a problem signing in to ' + this.displayName +
                          '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
@@ -658,8 +659,8 @@ module Social {
   //     instances in any way. Thus, an instance ID is also a user ID.
   export class ManualNetwork extends AbstractNetwork {
 
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, public displayName :string) {
+      super(name, displayName);
 
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {

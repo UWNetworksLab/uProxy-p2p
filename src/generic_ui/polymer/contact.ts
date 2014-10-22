@@ -6,7 +6,11 @@ Polymer({
     pic: undefined
   },
   toggle: function() {
-    this.expanded = !this.expanded;
+    if (this.contact.instances.length == 0) {
+      this.expanded = false;
+    } else {
+      this.expanded = !this.expanded;
+    }
     console.log('toggle', this);
   },
   collapse: function() {

@@ -63,7 +63,7 @@ describe('Core', () => {
 
   it('relays incoming manual network messages to the manual network', () => {
     var manualNetwork :Social.ManualNetwork =
-        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID);
+        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID, 'Manual');
 
     spyOn(Social, 'getNetwork').and.returnValue(manualNetwork);
     spyOn(manualNetwork, 'receive');
