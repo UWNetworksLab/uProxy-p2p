@@ -1,7 +1,7 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 /// <reference path='../scripts/ui.ts' />
 
-declare var ui :uProxy.UIAPI;
+declare var ui :UI.UserInterface;
 
 Polymer({
   model: {},

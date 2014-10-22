@@ -16,6 +16,7 @@ Polymer({
     core.login(this.network.name).then(() => {
       console.log('connected to ' + this.network.name);
       this.state = this.LOGGED_IN;
+      ui.view = UI.View.ROSTER;
     });
 
     // Restore the button after a timeout.
