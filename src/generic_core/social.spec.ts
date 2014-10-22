@@ -97,14 +97,14 @@ describe('Social.FreedomNetwork', () => {
         expect(network.isOnline()).toEqual(true);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
-        var freedomClient :freedom_Social.ClientState = {
+        var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
-          status: 'ONLINE',
+          status: 'ONLINE_WITH_OTHER_APP',
           timestamp: 12345
         };
         // Add user to the roster;
-        network.handleClientState(freedomClient);
+        network.handleClientState(freedomClientState);
         expect(Object.keys(network.roster).length).toEqual(1);
         var friend = network.getUser('fakeuser');
         spyOn(friend, 'monitor');
