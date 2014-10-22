@@ -41,6 +41,10 @@
     .offline {
       opacity: 0.5;
     }
+    #userId {
+      color: #888;
+      margin-top: 0.5em;
+    }
     #words {
       display: inline-block;
       width: 282px; height: 100%;
@@ -73,6 +77,7 @@
       <img id='avatar' src='{{ contact.imageData }}' />
       <div id='words'>
         <h1>{{ contact.name }}</h1>
+        <div id='userId' hidden?='{{!expanded}}'>{{ contact.userId }}</div>
         <div id='instances' hidden?='{{!expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
