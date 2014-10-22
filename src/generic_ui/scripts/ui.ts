@@ -146,19 +146,27 @@ module UI {
         // TODO: Display the message in the 'manual network' UI.
       });
 
-      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND, (instanceId :string) => {
-        this.instanceGettingAccessFrom = null;
-        this.stopGettingInUiAndConfig();
+      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND, 
+          (instanceId :string) => {
+        if (instanceId === this.instanceGettingAccessFrom) {
+          this.instanceGettingAccessFrom = null;
+          this.stopGettingInUiAndConfig();
+        } else {
+          console.warn('Can\'t stop getting access from friend you were not ' +
+              'already getting access from.');
+        }
       });      
 
-      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND, (instanceId :string) => {
+      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND, 
+          (instanceId :string) => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
       });
 
-      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND, (instanceId :string) => {
+      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND, 
+          (instanceId :string) => {
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();

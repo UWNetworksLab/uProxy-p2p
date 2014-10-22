@@ -32,14 +32,14 @@ describe('UI.UserInterface', () => {
     // instead of being triggered by events emitted from the core.
     var argumentsForOnUpdate = mockCore.onUpdate.calls.allArgs();
     for (var i = 0; i < argumentsForOnUpdate.length; i++) {
-      updateToHandlerMap[argumentsForOnUpdate[i][0]] = argumentsForOnUpdate[i][1];
+      updateToHandlerMap[argumentsForOnUpdate[i][0]] = 
+          argumentsForOnUpdate[i][1];
     }
   });
 
   describe('syncUser', () => {
 
     it('Adds users to roster', () => {
-
       var payload :UI.UserMessage = {
         network: 'testNetwork',
         user: {
@@ -119,9 +119,11 @@ describe('UI.UserInterface', () => {
 
     it('isGivingAccess updates when you start and stop giving', () => {
       expect(ui.isGivingAccess()).toEqual(false);   
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(true);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(false);   
     });      
 
@@ -136,38 +138,46 @@ describe('UI.UserInterface', () => {
     }); 
 
     it('Extension icon changes when you start giving access', () => {
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19-p.png');
     });   
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +
         'getters', () => {
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19-p.png');
       expect(mockBrowserAction.setIcon.calls.count()).toEqual(1);    
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId2');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
       expect(mockBrowserAction.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(mockBrowserAction.setIcon)
           .not.toHaveBeenCalledWith('uproxy-19.png');
     }); 
 
     it('Extension icon changes if you stop giving to all getters', 
         () => {
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19-p.png');
       expect(mockBrowserAction.setIcon.calls.count()).toEqual(1);    
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND].call(ui, 'testGetterId2');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
       expect(mockBrowserAction.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND].call(ui, 'testGetterId');
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND].call(ui, 'testGetterId2');        
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testGetterId2');        
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19.png');
     }); 
