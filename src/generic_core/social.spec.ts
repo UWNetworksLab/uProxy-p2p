@@ -102,7 +102,7 @@ describe('Social.FreedomNetwork', () => {
         expect(network.isLoginPending()).toEqual(false);
         //expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
-      console.log('can log in: network.isLoginPending(): '
+      console.log('can log in:  network.isLoginPending(): '
           + network.isLoginPending());
       expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
