@@ -10,19 +10,16 @@
       display: inline-block;
       box-sizing: border-box;
       width: 100%;
-      border: 1px solid #ddd; border-left: none; border-right: none;
       background-color: #fff;
       margin: 0;
-      cursor: pointer;
       overflow: hidden;
       z-index: 10;
       -webkit-user-select: none;
       -moz-user-select: none;
       user-select: none;
     }
-    :host(:hover) {
-      box-shadow: 0px 2px 5px #ccc;
-      z-index: 100;
+    div:focus {
+      outline: 0; /* disable blue focus outline around contact */
     }
     #frame {
       box-sizing: border-box;
@@ -31,12 +28,19 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
       height: 54px;
-    } #frame.expanded { height: 200px; }
+    }
+    #frame.expanded {
+      height: 200px;
+    }
     #avatar {
       width: 36px; height: 36px;
       margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: top;
+    }
+    .offline {
+      -webkit-filter: grayscale(100%);
+      filter: grayscale(100%);  /* TODO: test this with firefox */
     }
     #words {
       display: inline-block;
@@ -47,7 +51,10 @@
       display: block;
       font-size: 16px; font-weight: 100;
       margin: 0; padding: 16px 8px 0;
-    } #words:hover h1 { color: #aaa; }
+    }
+    .hasInstances #words:hover h1 {
+      color: #aaa;
+    }
     #instances {
       padding: 8px;
       overflow-y: scroll;
@@ -56,14 +63,17 @@
     #actions {
       padding: 8px;
     }
+    .hasInstances {
+      cursor: pointer;
+    }
     </style>
 
-    <div tabindex='-1'  id='frame'
-      class='{{ expanded? "expanded" : "" }}'>
+    <div on-mousedown='{{ toggle }}' tabindex='-1'  id='frame'
+        class='{{ expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
      <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' />
       <div id='words'>
-        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
+        <h1>{{ contact.name }}</h1>
         <div id='instances' hidden?='{{!expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
