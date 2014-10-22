@@ -7,7 +7,14 @@ var proxyConfig = new BrowserProxyConfig();
 
 var model = {
     networks: [],
-    roster: []
+    contacts: {
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
 };
 
 function initUI() {

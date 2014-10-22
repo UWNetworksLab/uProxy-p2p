@@ -51,9 +51,9 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    spyOn(console, 'log');
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
+    // spyOn(console, 'log');
+    // spyOn(console, 'warn');
+    // spyOn(console, 'error');
   });
 
   it('fails to initialize if api is not social', () => {
@@ -94,7 +94,9 @@ describe('Social.FreedomNetwork', () => {
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
-        expect(network.isOnline()).toEqual(true);
+        var isOnline = network.isOnline();
+        console.log('can log in: isOnline: ' + isOnline);
+        expect(isOnline).toEqual(true);
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
         var freedomClient :freedom_Social.ClientState = {
