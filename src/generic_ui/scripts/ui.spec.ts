@@ -24,17 +24,16 @@ describe('UI.UserInterface', () => {
   beforeEach(() => {
     // Create a fresh UI object before each test.
     var mockCore = jasmine.createSpyObj('core', ['reset', 'onUpdate']);
-    mockBrowserAction = jasmine.createSpyObj('browserAction', ['setIcon']);
-    ui = new UI.UserInterface(mockCore, mockBrowserAction);
 
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
     // instead of being triggered by events emitted from the core.
-    var argumentsForOnUpdate = mockCore.onUpdate.calls.allArgs();
-    for (var i = 0; i < argumentsForOnUpdate.length; i++) {
-      updateToHandlerMap[argumentsForOnUpdate[i][0]] = 
-          argumentsForOnUpdate[i][1];
-    }
+    mockCore.onUpdate.and.callFake((key :any, handler : any) => {
+      updateToHandlerMap[key] = handler;
+    });
+
+    mockBrowserAction = jasmine.createSpyObj('browserAction', ['setIcon']);
+    ui = new UI.UserInterface(mockCore, mockBrowserAction);
   });
 
   describe('syncUser', () => {
