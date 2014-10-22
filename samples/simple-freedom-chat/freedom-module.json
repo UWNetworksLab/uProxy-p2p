@@ -1,13 +1,9 @@
 {
-  "name": "scratch",
+  "name": "simple freedom chat",
   "description": "top-level freedom manifest",
   "app": {
     "script": [
       "freedom-module.js"
     ]
-  },
-  "permissions": [
-    "core.uproxypeerconnection",
-    "core.log"
-  ]
+  }
 }
