@@ -96,6 +96,8 @@ describe('Social.FreedomNetwork', () => {
         console.log('can log in: network.myInstance: ' + network.myInstance);
         console.log('can log in: network.myInstance.userId: ' + network.myInstance.userId);
         expect(network.isOnline()).toEqual(true);
+        console.log('can log in: inside callback: network.isLoginPending(): '
+            + network.isLoginPending());
         expect(network.isLoginPending()).toEqual(false);
         expect(network.notifyUI).toHaveBeenCalled();
       }).then(done);
