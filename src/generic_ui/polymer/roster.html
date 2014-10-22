@@ -9,7 +9,8 @@
       position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%; width: 340px;
+      height: 550px;
+      width: 340px;
       border-left: 1px solid #ddd;
       background-color: white;
       -webkit-transition: all 0.23s !important;
@@ -17,10 +18,11 @@
       transition: all 0.23s !important;
       right: -288px; top: 50px;
       z-index: 10;
+      overflow-y: hidden;
+      overflow-y: scroll;
     }
     :host(.active) {
       right: 0px;
-      overflow: scroll;
       z-index: 100;
     }
     :host(.hidden) {
