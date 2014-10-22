@@ -85,7 +85,7 @@ module UI {
     // The instances you are giving access to.
     // Remote instances are added to this set if their access.isClient value
     // is true.   
-    private instancesGivingAccessTo_ = {};
+    public instancesGivingAccessTo = {};
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -155,11 +155,11 @@ module UI {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
-        this.instancesGivingAccessTo_[instanceId] = true;
+        this.instancesGivingAccessTo[instanceId] = true;
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND, (instanceId :string) => {
-        delete this.instancesGivingAccessTo_[instanceId];
+        delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }        
@@ -209,7 +209,7 @@ module UI {
     }
 
     public isGivingAccess = () => {
-      return Object.keys(this.instancesGivingAccessTo_).length > 0;
+      return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
     syncInstance = (instance : any) => {}

@@ -57,8 +57,8 @@ module uProxy {
     // Skip unused ID_MAPS = 2007.  // ClientId <---> InstanceId mappings.
     COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
+    START_GETTING_FROM_FRIEND,    
     STOP_GETTING_FROM_FRIEND,
-    START_GETTING_FROM_FRIEND,
     START_GIVING_TO_FRIEND,
     STOP_GIVING_TO_FRIEND,
     ERROR,
