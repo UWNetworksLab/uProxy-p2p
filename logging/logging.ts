@@ -8,10 +8,11 @@ module Logging {
     message :string; // the actual log message.
   }
 
-  // The maximum number of buffered log before we trim them. Assuming average
-  // log length is 80, the whole buffer size is about 80k. That should be
-  // easy to send through email,  not much memory usage, and still enough
-  // to capture most issues.
+  // Besides output to console, log can also be buffered for later retrieval
+  // through "getLogs". This is the maximum number of buffered log before it is
+  // trimmed. Assuming average log length is 80, the whole buffer size is about
+  // 80k. That should be easy to send through email, not much memory usage, and 
+  // still enough to capture most issues.
   var MAX_BUFFERED_LOG = 1000;
 
   var logBuffer: Message[] = [];
@@ -70,16 +71,21 @@ module Logging {
         message: formatStringMessageWithArgs_(msg, args)
       };
   }
+
+
+  function checkFilter_(level:string, tag:string, filter:{[s: string]: string;})
+      : boolean {
+    return '*' in filter && isLevelAllowed_(level, filter['*']) ||
+           tag in filter && isLevelAllowed_(level, filter[tag]);
+  }
+
   // Function that actally adds things to the log and does the console output.
   export function doRealLog(level:string, tag:string, msg:string, args?:any[])
       : void {
     if (!enabled) { return; }
     var Message :Message = makeMessage(level, tag, msg, args);
 
-    if ('*' in consoleFilter &&
-        isLevelAllowed_(level, consoleFilter['*']) ||
-        tag in consoleFilter &&
-        isLevelAllowed_(level, consoleFilter[tag])) {
+    if (checkFilter_(level, tag, consoleFilter)) {
       if(level === 'D' || level === 'I') {
         console.log(formatMessage(Message));
       } else if(level === 'W') {
@@ -88,10 +94,8 @@ module Logging {
         console.error(formatMessage(Message));
       }
     }
-    if ('*' in bufferedLogFilter &&
-        isLevelAllowed_(level, bufferedLogFilter['*']) ||
-        tag in bufferedLogFilter &&
-        isLevelAllowed_(level, bufferedLogFilter[tag])) {
+
+    if (checkFilter_(level, tag, bufferedLogFilter)) {
       if (logBuffer.length > MAX_BUFFERED_LOG) {
         // trim from the head 10 percent each time.
         logBuffer.splice(0, MAX_BUFFERED_LOG / 10);

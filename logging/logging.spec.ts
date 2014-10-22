@@ -47,7 +47,7 @@ describe("logger from core environment", () => {
     expect(Logging.getLogs().join('\n')).toMatch(
       /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string\n\*\[tag2\]\(.*\) E: third string/);
 
-     // set to log all messages.
+     // set to log messages with level >= info.
     Logging.clearLogs();
     Logging.setBufferedLogFilter(['*:I']);
     log1.debug('simple string');
