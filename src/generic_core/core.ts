@@ -198,7 +198,7 @@ class uProxyCore implements uProxy.CoreAPI {
       return Promise.reject(warn);
     }
     var network = Social.pendingNetworks[networkName];
-    if (null === network) {
+    if (typeof network === 'undefined') {
       network = new Social.FreedomNetwork(networkName);
       Social.pendingNetworks[networkName] = network;
 
