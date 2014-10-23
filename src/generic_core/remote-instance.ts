@@ -110,15 +110,24 @@ module Core {
      * with the lowest consent values.
      */
     constructor(
-        public user :Core.User,  // The User which this instance belongs to.
-        data        :Instance) {
-      this.update(<InstanceHandshake>data);
-      // Load consent state if it exists. Don't load access state.
-      if (data.consent) {
-        this.consent = data.consent;
+        // The User which this instance belongs to.
+        public user :Core.User,
+        // The last instance handshake from the peer.  This data may be fresh
+        // (over the wire) or recovered from disk (and stored in a
+        // RemoteInstanceState, which subclasses InstanceHandshake).
+        data        :InstanceHandshake,
+        // Any access consent that has already been granted, or null if consent
+        // acquisition has not yet started.
+        consent    ?:ConsentState) {
+      // Load consent state if it exists.  The consent state does not exist when
+      // processing an initial instance handshake, only when restoring one from
+      // storage.
+      if (consent) {
+        this.consent = consent;
       }
       this.bytesSent = 0;
       this.bytesReceived = 0;
+      this.update(data);
     }
 
     /**
@@ -154,6 +163,10 @@ module Core {
                            signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          if (Consent.ClientState.GRANTED !== this.consent.asClient) {
+            console.warn('Remote side attempted access without permission');
+            return;
+          }
           // If the remote peer sent signal as the client, we act as server.
           if(!this.rtcToNet_) {
             // TODO: make this into a separate function
@@ -319,6 +332,9 @@ module Core {
      * Assumes that |data| actually belongs to this instance.
      */
     public update = (data :InstanceHandshake) => {
+      // WARNING: |data| is UNTRUSTED, because it is often provided directly by
+      // the remote peer.  Therefore, we MUST NOT make use of any consent
+      // information that might be present.
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
