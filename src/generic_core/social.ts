@@ -84,7 +84,7 @@ module Social {
     console.log('notify ui social');
     var payload :UI.NetworkMessage = {
       name: networkName,
-      online: networkName in networks
+      online: networkName in networks && networks[networkName].isOnline()
     };
     ui.update(uProxy.Update.NETWORK, payload);
   }
@@ -613,6 +613,7 @@ module Social {
   //     instances. Each instance is independent and not correlated with other
   //     instances in any way. Thus, an instance ID is also a user ID.
   export class ManualNetwork extends AbstractNetwork {
+    private isOnline_ :boolean;
 
     constructor(public name :string) {
       super(name);
@@ -644,15 +645,17 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
+      this.isOnline_ = true;
       return Promise.resolve<void>();
     }
 
     public logout = () : Promise<void> => {
+      this.isOnline_ = false;
       return Promise.resolve<void>();
     }
 
     public isOnline = () : boolean => {
-      return true;
+      return this.isOnline_;
     }
 
 

@@ -126,6 +126,9 @@ class uProxyCore implements uProxy.CoreAPI {
     console.log('reset');
     for (var network in Social.networks) {
       Social.networks[network].logout();
+      if (network !== Social.MANUAL_NETWORK_ID) {
+        delete Social.networks[network];
+      }
     }
     storage.reset().then(ui.updateAll);
   }
@@ -192,6 +195,16 @@ class uProxyCore implements uProxy.CoreAPI {
    * Access various social networks using the Social API.
    */
   public login = (networkName:string) : Promise<void> => {
+    if (networkName === Social.MANUAL_NETWORK_ID) {
+      var network = Social.getNetwork(networkName);
+      var loginPromise = network.login(true);
+      loginPromise.then(() => {
+        ui.updateAll();
+        console.log('Logged in to manual network');
+      });
+      return loginPromise;
+    }
+
     if (Social.networkNames.indexOf(networkName) < 0) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
@@ -201,14 +214,15 @@ class uProxyCore implements uProxy.CoreAPI {
     if (typeof network === 'undefined') {
       network = new Social.FreedomNetwork(networkName);
       Social.pendingNetworks[networkName] = network;
-
     }
     var loginPromise = network.login(true);
-    loginPromise.then(ui.updateAll)
-        .then(() => {
+    loginPromise.then(() => {
           Social.networks[networkName] = network;
           delete Social.pendingNetworks[networkName];
+          ui.updateAll();
           console.log('Successfully logged in to ' + networkName);
+        }).catch(() => {
+          delete Social.pendingNetworks[networkName];
         });
 
     // TODO: save the auto-login default.
@@ -226,6 +240,10 @@ class uProxyCore implements uProxy.CoreAPI {
       return;
     }
     network.logout().then(() => {
+      if (networkName !== Social.MANUAL_NETWORK_ID) {
+        delete Social.networks[networkName];
+      }
+      ui.updateAll();
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: only remove clients from the network we are logging out of.

@@ -12,24 +12,35 @@ var REDIRECT_URI = "https://www.uproxy.org/";
 declare var core :CoreConnector;
 
 class GoogleAuth {
+  private tabId_ :number;
+
   constructor() {
+    this.tabId_ = -1;
   }
 
   public login = () : void => {
-    this.getAccessCode_();
+    if (this.tabId_ === -1) {
+      this.getAccessCode_();
+    } else {
+      chrome.tabs.update(this.tabId_, {active:true});
+    }
   }
 
   private getAccessCode_ = () : void => {
-    var extractCode = (tabId, changeInfo, tab) => {
-      console.log('tab url is ' + tab.url);
+    var extractCode = function(tabId, changeInfo, tab) {
       if (tab.url.indexOf(REDIRECT_URI) === 0) {
-        var code = tab.url.match(/code=([^&]+)/)[1];
         chrome.tabs.onUpdated.removeListener(extractCode);
+        chrome.tabs.onRemoved.removeListener(onTabClose);
+        this.tabId_ = -1;
         chrome.tabs.remove(tabId);
+        if (tab.url.indexOf('error=access_denied') > 0) {
+          this.onError_('');
+          return;
+        }
+        var code = tab.url.match(/code=([^&]+)/)[1];
         this.getToken_(code);
       }
-    };
-    chrome.tabs.onUpdated.addListener(extractCode);
+    }.bind(this);
     var googleOAuth2Url = "https://accounts.google.com/o/oauth2/auth?" +
         "scope=email%20https://www.googleapis.com/auth/googletalk" +
         "&redirect_uri=" + REDIRECT_URI +
@@ -38,7 +49,20 @@ class GoogleAuth {
     var accountChooserUrl =
         'https://accounts.google.com/accountchooser?continue=' +
         encodeURIComponent(googleOAuth2Url);
-    chrome.tabs.create({url: accountChooserUrl});
+    var onTabClose = function(tabId, removeInfo) {
+        if (tabId == this.tabId_) {
+          chrome.tabs.onUpdated.removeListener(extractCode);
+          chrome.tabs.onRemoved.removeListener(onTabClose);
+          this.tabId_ = -1;
+          this.onError_('');
+        }
+    }.bind(this);
+    chrome.tabs.create({url: accountChooserUrl},
+                       function(tab: chrome.tabs.Tab) {
+      this.tabId_ = tab.id;
+      chrome.tabs.onRemoved.addListener(onTabClose);
+      chrome.tabs.onUpdated.addListener(extractCode);
+    }.bind(this));
   }
 
   private getToken_ = (code :string) : void => {
