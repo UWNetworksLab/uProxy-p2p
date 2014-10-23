@@ -1,4 +1,8 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='../scripts/core_connector.ts' />
+/// <reference path='../scripts/ui.ts' />
+
+declare var ui :UI.UserInterface;
 
 Polymer({
   // TODO: turn into typescript enums
@@ -16,6 +20,7 @@ Polymer({
     core.login(this.network.name).then(() => {
       console.log('connected to ' + this.network.name);
       this.state = this.LOGGED_IN;
+      ui.view = UI.View.ROSTER;
     });
 
     // Restore the button after a timeout.

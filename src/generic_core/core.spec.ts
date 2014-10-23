@@ -63,7 +63,7 @@ describe('Core', () => {
 
   it('relays incoming manual network messages to the manual network', () => {
     var manualNetwork :Social.ManualNetwork =
-        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID);
+        new Social.ManualNetwork(Social.MANUAL_NETWORK_ID, 'Manual');
 
     spyOn(Social, 'getNetwork').and.returnValue(manualNetwork);
     spyOn(manualNetwork, 'receive');
@@ -94,7 +94,7 @@ describe('Core', () => {
   });
 
   it('login continues to call login on correct network', (done) => {
-    Social.networkNames.push('network');
+    Social.networkNames['network'] = 'network';
     Social.pendingNetworks['network'] = network;
     spyOn(network, 'login').and.returnValue(Promise.resolve());
     core.login('network').then(done);

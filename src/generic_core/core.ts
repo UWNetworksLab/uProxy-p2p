@@ -57,7 +57,7 @@ class UIConnector implements uProxy.UIAPI {
   public updateAll = () => {
     console.log('sending ALL state to UI.');
     for (var network in Social.networkNames) {
-      Social.notifyUI(Social.networkNames[network]);
+      Social.notifyUI(network);
     }
     // Only send ALL update to UI when description is loaded.
     core.loadDescription.then(() => {
@@ -205,14 +205,14 @@ class uProxyCore implements uProxy.CoreAPI {
       return loginPromise;
     }
 
-    if (Social.networkNames.indexOf(networkName) < 0) {
+    if (!(networkName in Social.networkNames)) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
       return Promise.reject(warn);
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
-      network = new Social.FreedomNetwork(networkName);
+      network = new Social.FreedomNetwork(networkName, Social.networkNames[networkName]);
       Social.pendingNetworks[networkName] = network;
     }
     var loginPromise = network.login(true);

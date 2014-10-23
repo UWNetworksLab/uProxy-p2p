@@ -69,11 +69,11 @@ describe('Social.FreedomNetwork', () => {
       return Promise.resolve({});
     });
     Social.initializeNetworks();
-    expect(Social.networkNames.indexOf('mock')).not.toBe(-1);
+    expect('mock' in Social.networkNames).toBe(true);
   });
 
   it('begins with empty roster', () => {
-    network = new Social.FreedomNetwork('mock');
+    network = new Social.FreedomNetwork('mock', 'mock');
     expect(network.roster).toEqual({});
   });
 
@@ -93,14 +93,14 @@ describe('Social.FreedomNetwork', () => {
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
-        var freedomClient :freedom_Social.ClientState = {
+        var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
-          status: 'ONLINE',
+          status: 'ONLINE_WITH_OTHER_APP',
           timestamp: 12345
         };
         // Add user to the roster;
-        network.handleClientState(freedomClient);
+        network.handleClientState(freedomClientState);
         expect(Object.keys(network.roster).length).toEqual(1);
         var friend = network.getUser('fakeuser');
         spyOn(friend, 'monitor');
@@ -179,7 +179,7 @@ describe('Social.FreedomNetwork', () => {
   describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', () => {
-      network = new Social.FreedomNetwork('mock');
+      network = new Social.FreedomNetwork('mock', 'mock');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',
@@ -358,7 +358,8 @@ describe('Social.FreedomNetwork', () => {
 
 describe('Social.ManualNetwork', () => {
 
-  var network :Social.ManualNetwork = new Social.ManualNetwork('manual');
+  var network :Social.ManualNetwork =
+      new Social.ManualNetwork('manual', 'Manual');
 
   var loginPromise :Promise<void>;
 

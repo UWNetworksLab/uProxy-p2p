@@ -9,8 +9,14 @@ console.log('This is not a real uProxy frontend.');
 
 var model :UI.Model = {
   networks: [],
-  // 'global' roster, which is just the concatenation of all network rosters.
-  roster: [],
+  contacts: {
+    'onlineTrustedUproxy': [],
+    'offlineTrustedUproxy': [],
+    'onlineUntrustedUproxy': [],
+    'offlineUntrustedUproxy': [],
+    'onlineNonUproxy': [],
+    'offlineNonUproxy': []
+  },
   description: 'My Computer'
 };
 
@@ -73,12 +79,14 @@ class MockCore implements uProxy.CoreAPI {
       // Fake the core interaction, assume it sent bits on the wire, and receive
       // the update from core.
       var userUpdate = generateFakeUserMessage();
-      // Find user in model.roster.
       var user :UI.User = null;
-      for (var i = 0; i < model.roster.length; ++i) {
-        if (model.roster[i].userId == command.userId) {
-          user = model.roster[i];
-          break;
+      // Find user in model.contacts.
+      for (var category in model.contacts) {
+        for (var i = 0; i < model.contacts[category].length; ++i) {
+          if (model.contacts[category][i].userId == command.userId) {
+            user = model.contacts[category][i];
+            break;
+          }
         }
       }
       if (!user) {

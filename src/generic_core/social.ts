@@ -46,7 +46,7 @@ module Social {
   // TODO(salomegeo): Change structure of network
   export var networks:{[name:string]:Network} = {};
   export var pendingNetworks:{[name:string]:Network} = {};
-  export var networkNames :string[] = [];
+  export var networkNames :{[name:string]:string} = {};
 
   /**
    * Goes through network names and gets a reference to each social provider.
@@ -60,13 +60,16 @@ module Social {
         }
 
         var name = dependency.substr(PREFIX.length);
-        networkNames.push(name);
+        var displayName = name.substr(0, 1).toUpperCase() + name.substr(1);
+        networkNames[name] = displayName;
       }
     }
 
     Social.networks[MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(MANUAL_NETWORK_ID);
-    networkNames.push(MANUAL_NETWORK_ID);
+        new Social.ManualNetwork(MANUAL_NETWORK_ID, 'Manual');
+    networkNames[MANUAL_NETWORK_ID] = 'Manual';
+
+    return Social.networks;
   }
 
   /**
@@ -102,7 +105,7 @@ module Social {
       ME: 'me'
     }
 
-    constructor(public name :string) {
+    constructor(public name :string, public displayName :string) {
       this.roster = {};
       this.myInstance = new Core.LocalInstance(this, null);
     }
@@ -285,8 +288,8 @@ module Social {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, public displayName :string) {
+      super(name, displayName);
 
       this.provider_ = freedom[PREFIX + name];
       this.remember = false;
@@ -517,14 +520,13 @@ module Social {
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            console.log('logged in show notifications');
-            ui.showNotification('You successfully signed on to ' + this.name +
+            ui.showNotification('You successfully signed on to ' + this.displayName +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
-            ui.sendError('There was a problem signing in to ' + this.name +
+            ui.sendError('There was a problem signing in to ' + this.displayName +
                          '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
@@ -615,8 +617,8 @@ module Social {
   export class ManualNetwork extends AbstractNetwork {
     private isOnline_ :boolean;
 
-    constructor(public name :string) {
-      super(name);
+    constructor(public name :string, public displayName :string) {
+      super(name, displayName);
 
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {

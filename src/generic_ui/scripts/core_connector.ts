@@ -24,7 +24,7 @@ class CoreConnector implements uProxy.CoreAPI {
   // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
-      {};   
+      {};
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
