@@ -84,7 +84,6 @@ module Social {
   }
 
   export function notifyUI(networkName :string) {
-    console.log('notify ui social');
     var payload :UI.NetworkMessage = {
       name: networkName,
       online: networkName in networks && networks[networkName].isOnline()

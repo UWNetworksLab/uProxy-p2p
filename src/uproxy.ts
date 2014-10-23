@@ -147,7 +147,7 @@ module uProxy {
     // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
-    logout(network :string) : void;
+    logout(networkInfo :any) : void;
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.

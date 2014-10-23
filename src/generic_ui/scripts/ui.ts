@@ -59,6 +59,8 @@ module UI {
    */
   export interface Network {
     name   :string;
+    // TODO(salomegeo): Add more information about the user.
+    userId :string;
     online :boolean;
     roster :{ [userId:string] :User }
   }
@@ -79,9 +81,6 @@ module UI {
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
-    myName = '';
-    myPic = null;
-
     // How many people you are giving access to.
     // The number is calculated by counting the remote instances for which
     // access.isClient = true.
@@ -121,8 +120,7 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :UI.UserProfileMessage = payload.user;
-        this.myPic = profile.imageData || DEFAULT_USER_IMG;
-        this.myName = profile.name;
+        this.getNetwork(payload.network).userId = profile.userId;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
@@ -222,6 +220,7 @@ module UI {
       } else {
         model.networks.push({
           name:   network.name,
+          userId: '',
           online: network.online,
           roster: {}
         });

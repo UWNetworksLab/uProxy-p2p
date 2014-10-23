@@ -39,7 +39,8 @@ Polymer({
       console.error('uproxy-network with no network specified!');
       return;
     }
-    core.logout(this.network.name);
+    core.logout({networkName:this.network.name,
+                 userId: this.network.userId});
     console.log('disconnected from ' + this.network.name);
     this.state = this.LOGGED_OUT;
   },

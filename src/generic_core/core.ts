@@ -124,10 +124,10 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   reset = () => {
     console.log('reset');
-    for (var network in Social.networks) {
-      Social.networks[network].logout();
-      if (network !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[network];
+    for (var networkKey in Social.networks) {
+      Social.networks[networkKey].logout();
+      if (networkKey !== Social.MANUAL_NETWORK_ID) {
+        delete Social.networks[networkKey];
       }
     }
     storage.reset().then(ui.updateAll);
@@ -212,12 +212,17 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
-      network = new Social.FreedomNetwork(networkName, Social.networkNames[networkName]);
+      network = new Social.FreedomNetwork(networkName,
+                                          Social.networkNames[networkName]);
       Social.pendingNetworks[networkName] = network;
     }
     var loginPromise = network.login(true);
     loginPromise.then(() => {
-          Social.networks[networkName] = network;
+          var networkKey = networkName;// + network.myInstance.userId;
+          if (networkKey in Social.networks) {
+            Social.networks[networkKey].logout();
+          }
+          Social.networks[networkKey] = network;
           delete Social.pendingNetworks[networkName];
           ui.updateAll();
           console.log('Successfully logged in to ' + networkName);
@@ -233,18 +238,19 @@ class uProxyCore implements uProxy.CoreAPI {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkName:string) : void => {
-    var network = Social.getNetwork(networkName);
+  public logout = (networkInfo:any) : void => {
+    var networkKey = networkInfo.networkName;// + network.userId;
+    var network = Social.getNetwork(networkKey);
     if (null === network) {
-      console.warn('Could not logout of ' + networkName);
+      console.warn('Could not logout of ', networkKey);
       return;
     }
     network.logout().then(() => {
-      if (networkName !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[networkName];
+      if (networkKey !== Social.MANUAL_NETWORK_ID) {
+        delete Social.networks[networkKey];
       }
       ui.updateAll();
-      console.log('Successfully logged out of ' + networkName);
+      console.log('Successfully logged out of ' + networkKey);
     });
     // TODO: only remove clients from the network we are logging out of.
     ui.syncMappings();

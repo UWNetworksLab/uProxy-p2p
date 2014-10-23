@@ -164,7 +164,7 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGIN, network);
   }
 
-  logout = (network :string) => {
-    this.sendCommand(uProxy.Command.LOGOUT, network);
+  logout = (networkInfo :any) => {
+    this.sendCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 }  // class CoreConnector

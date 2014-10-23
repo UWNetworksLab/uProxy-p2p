@@ -95,11 +95,27 @@ describe('Core', () => {
 
   it('login continues to call login on correct network', (done) => {
     Social.networkNames['network'] = 'network';
-    Social.pendingNetworks['network'] = network;
-    spyOn(network, 'login').and.returnValue(Promise.resolve());
-    core.login('network').then(done);
-  });
+    Social.networks = {};
+    spyOn(Social, 'FreedomNetwork').and.returnValue(network);
+    expect(Object.keys(Social.pendingNetworks).length).toEqual(0);
+    expect(Object.keys(Social.networks).length).toEqual(0);
 
+    // Login promise is not resolved so network object stays in pending logins
+    var loginSpy = spyOn(network, 'login').and.returnValue(
+        new Promise((F, R) => {}));
+    core.login('network');
+    expect(Object.keys(Social.pendingNetworks).length).toEqual(1);
+    expect(Object.keys(Social.networks).length).toEqual(0);
+
+    // Core login will envoke login method on the same network object
+    // This time it succeeds, so network object is moved from pending logins
+    // to Social.networks.
+    (<any>loginSpy).and.returnValue(Promise.resolve());
+    core.login('network').then(() => {
+      expect(Object.keys(Social.pendingNetworks).length).toEqual(0);
+      expect(Object.keys(Social.networks).length).toEqual(1);
+    }).then(done);
+  });
 });
 
 // Validate that |inst| is present and proper inside
