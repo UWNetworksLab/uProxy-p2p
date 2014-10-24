@@ -5,20 +5,6 @@ declare var ui :UI.UserInterface;
 
 Polymer({
   model: {},
-  // TODO: actually distinguish between give and get sort order.
-  giveMode: function() {
-    console.log('GIVE mode.');
-    ui['view'] = UI.View.ROSTER;
-    // TODO(keroserene): Update the original UI file and this new polymer UI
-    // file, merge them, clean out the old, apply the new.
-    ui['gestalt'] = UI.Gestalt.GIVING;
-  },
-  // TODO: These might actually belong in the generic ui.ts
-  getMode: function() {
-    console.log('GET mode.');
-    ui['view'] = UI.View.ROSTER;
-    ui['gestalt'] = UI.Gestalt.GETTING;
-  },
   networksView: function() {
     console.log('NETWORKS');
     ui['view'] = UI.View.NETWORKS;
@@ -34,7 +20,6 @@ Polymer({
     this.ui = ui;
     this.UI = UI;
 
-    ui['gestalt'] = UI.Gestalt.GIVING;
     this.loggedIn = ui['loggedIn'];
   }
 });

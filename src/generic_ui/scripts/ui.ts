@@ -30,11 +30,6 @@ module UI {
     SETTINGS,
   }
 
-  export enum Gestalt {
-    GIVING = 101,
-    GETTING
-  }
-
   export interface Contacts {
     onlineTrustedUproxy :UI.User[];
     offlineTrustedUproxy :UI.User[];

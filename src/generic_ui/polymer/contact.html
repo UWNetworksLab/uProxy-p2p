@@ -1,7 +1,7 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='instance.html'>
 
-<polymer-element name='uproxy-contact' attributes='contact, expanded'>
+<polymer-element name='uproxy-contact' attributes='contact'>
 
   <template>
     <style>
@@ -27,10 +27,6 @@
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      height: 54px;
-    }
-    #frame.expanded {
-      height: 200px;
     }
     #avatar {
       width: 36px; height: 36px;
@@ -47,8 +43,7 @@
     }
     #words {
       display: inline-block;
-      width: 282px; height: 100%;
-      position: absolute;
+      width: 268px;
     }
     h1 {
       display: block;
@@ -60,8 +55,6 @@
     }
     #instances {
       padding: 8px;
-      overflow-y: scroll;
-      height: 100px;
     }
     #actions {
       padding: 8px;
@@ -71,14 +64,14 @@
     }
     </style>
 
-    <div on-mousedown='{{ toggle }}' tabindex='-1'  id='frame'
-        class='{{ expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
+    <div tabindex='-1'  id='frame'
+        class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
      <!-- on-blur='{{ collapse }}'> -->
-      <img id='avatar' src='{{ contact.imageData }}' />
+      <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
       <div id='words'>
-        <h1>{{ contact.name }}</h1>
-        <div id='userId' hidden?='{{!expanded}}'>{{ contact.userId }}</div>
-        <div id='instances' hidden?='{{!expanded}}'>
+        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
+        <div id='userId' hidden?='{{!contact.expanded}}'>{{ contact.userId }}</div>
+        <div id='instances' hidden?='{{!contact.expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
                 userId='{{ contact.userId }}'
