@@ -13,14 +13,9 @@
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
-interface ConsentState {
-  asClient :Consent.ClientState;
-  asProxy  :Consent.ProxyState;
-}
-
 interface ConsentMessage {
   instanceId :string;
-  consent    :Consent.State;
+  consent    :Consent.WireState;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -37,7 +32,7 @@ interface NetworkInfo {
  * InstancePath is required to retrieve Instance objects.
  */
 interface InstancePath {
-  network : NetworkInfo
+  network :NetworkInfo
   userId :string;
   instanceId :string;
 }
@@ -57,7 +52,7 @@ interface LocalPeerId {
 interface Instance {
   instanceId  :string;
   keyHash     :string;
-  consent     ?:ConsentState;
+  consent     ?:Consent.State;
   status      ?:string;
   notify      ?:boolean;   // TODO: replace with better notications
 }

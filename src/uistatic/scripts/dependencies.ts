@@ -26,7 +26,7 @@ class MockNotifications implements BrowserAction {
   }
 }
 
-function generateFakeUserMessage() : UI.UserMessage {
+function generateFakeUserMessage() :UI.UserMessage {
   return {
     network: 'google',
     user: {
@@ -40,10 +40,7 @@ function generateFakeUserMessage() : UI.UserMessage {
         instanceId: 'alice-instance-01',
         description: 'fake instance for alice',
         isOnline: true,
-        consent: {
-          asClient: Consent.ClientState.NONE,
-          asProxy:  Consent.ProxyState.NONE
-        },
+        consent: new Consent.State(),
         access: {
           asClient: false,
           asProxy: false
@@ -93,25 +90,7 @@ class MockCore implements uProxy.CoreAPI {
         console.error('Unable to find user ' + command.userId);
       }
       var instance = user.instances[0];
-      switch (command.action) {
-        case Consent.UserAction.REQUEST:
-        case Consent.UserAction.CANCEL_REQUEST:
-        case Consent.UserAction.ACCEPT_OFFER:
-        case Consent.UserAction.IGNORE_OFFER:
-          instance.consent.asProxy = Consent.userActionOnProxyState(
-              command.action, instance.consent.asProxy);
-          break;
-        case Consent.UserAction.OFFER:
-        case Consent.UserAction.CANCEL_OFFER:
-        case Consent.UserAction.ALLOW_REQUEST:
-        case Consent.UserAction.IGNORE_REQUEST:
-          instance.consent.asClient = Consent.userActionOnClientState(
-              command.action, instance.consent.asClient);
-          break;
-        default:
-          console.warn('Invalid Consent.UserAction! ' + command.action);
-          return;
-      }
+      Consent.handleUserAction(instance.consent, command.action);
       userUpdate.instances[0].consent = instance.consent;
       ui.syncUser(userUpdate);
       console.log('Modified consent: ', command,
@@ -124,8 +103,8 @@ class MockCore implements uProxy.CoreAPI {
       if ((new Date()).getSeconds() > 0.5) {
         console.log('Alice will respond...');
         setTimeout(() => {
-          userUpdate.instances[0].consent.asProxy = Consent.ProxyState.GRANTED;
-          userUpdate.instances[0].consent.asClient = Consent.ClientState.GRANTED;
+          userUpdate.instances[0].consent.remoteGrantsAccessToLocal = true;
+          userUpdate.instances[0].consent.localGrantsAccessToRemote = true;
           ui.syncUser(userUpdate);
         }, 500);
       }
@@ -133,7 +112,7 @@ class MockCore implements uProxy.CoreAPI {
   }
 
   // Fake starting and stopping proxying sessions.
-  start = (path) : Promise<Net.Endpoint> => {
+  start = (path) :Promise<Net.Endpoint> => {
     console.log('Starting to proxy through ', path);
     // start() will typically dynamically select a port for communication
     // but for the purpose of this mock, we can choose arbitrary values.
@@ -152,7 +131,7 @@ class MockCore implements uProxy.CoreAPI {
   changeOption(option) {
     console.log('Changing option ' + option);
   }
-  login = (network) : Promise<void> => {
+  login = (network) :Promise<void> => {
     console.log('Logging in to', network);
     ui['syncNetwork_']({
       name: 'google',

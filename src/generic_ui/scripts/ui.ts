@@ -96,7 +96,6 @@ module UI {
     constructor(
         public core   :uProxy.CoreAPI,
         public browserAction :BrowserAction) {
-
       // TODO: Determine the best way to describe view transitions.
       this.view = View.SPLASH;  // Begin at the splash intro.
 

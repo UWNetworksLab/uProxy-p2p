@@ -78,9 +78,17 @@ describe('UI.UserInterface', () => {
       var clientInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
+        // Unfortunately, local/_local* fields are duplicated because
+        // Consent.State uses setters for them.
         consent: {
-          asClient: Consent.ClientState.GRANTED,
-          asProxy: Consent.ProxyState.NONE
+          _localGrantsAccessToRemote: false,
+          localGrantsAccessToRemote: false,
+          _localRequestsAccessFromRemote: true,
+          localRequestsAccessFromRemote: true,
+          remoteGrantsAccessToLocal: true,
+          remoteRequestsAccessFromLocal: false,
+          ignoringRemoteUserRequest: false,
+          ignoringRemoteUserOffer: false,
         },
         access: {asClient: false, asProxy: false},
         isOnline: true,
@@ -90,9 +98,17 @@ describe('UI.UserInterface', () => {
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
+        // Unfortunately, local/_local* fields are duplicated because
+        // Consent.State uses setters for them.
         consent: {
-          asClient: Consent.ClientState.NONE,
-          asProxy: Consent.ProxyState.GRANTED
+          _localGrantsAccessToRemote: true,
+          localGrantsAccessToRemote: true,
+          _localRequestsAccessFromRemote: false,
+          localRequestsAccessFromRemote: false,
+          remoteGrantsAccessToLocal: false,
+          remoteRequestsAccessFromLocal: true,
+          ignoringRemoteUserRequest: false,
+          ignoringRemoteUserOffer: false,
         },
         access: {asClient: false, asProxy: false},
         isOnline: true,
