@@ -242,8 +242,8 @@ class uProxyCore implements uProxy.CoreAPI {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkInfo:any) : void => {
-    var networkName = networkInfo.networkName;
+  public logout = (networkInfo:NetworkInfo) : void => {
+    var networkName = networkInfo.name;
     var userId = networkInfo.userId;
     var network = Social.getNetwork(networkName, userId);
     if (null === network) {
@@ -355,9 +355,9 @@ class uProxyCore implements uProxy.CoreAPI {
    * Obtain the RemoteInstance corresponding to an instance path.
    */
   public getInstance = (path :InstancePath) : Core.RemoteInstance => {
-    var network = Social.getNetwork(path.network, '');
+    var network = Social.getNetwork(path.network.name, path.network.userId);
     if (!network) {
-      console.error('No network ' + path.network);
+      console.error('No network ' + path.network.name);
       return;
     }
     var user = network.getUser(path.userId);

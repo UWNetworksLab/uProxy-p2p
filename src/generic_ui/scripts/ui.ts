@@ -266,7 +266,7 @@ module UI {
       // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId);
+        user = new UI.User(profile.userId, network);
         network.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.

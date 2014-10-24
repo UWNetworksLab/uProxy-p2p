@@ -48,14 +48,17 @@ describe('Core', () => {
     spyOn(alice, 'modifyConsent');
     var command :uProxy.ConsentCommand = {
       path: {
-        network: 'fake-network',
+        network: {
+          name: 'fake-network',
+          userId: 'fake-login'
+        },
         userId: 'user-alice',
         instanceId: 'instance-alice'
       },
       action: Consent.UserAction.REQUEST
     };
     core.modifyConsent(command);
-    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network', '');
+    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network', 'fake-login');
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);

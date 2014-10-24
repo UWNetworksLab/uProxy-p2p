@@ -29,12 +29,15 @@ interface AccessState {
   asClient :boolean;
   asProxy  :boolean;
 }
-
+interface NetworkInfo {
+  name :string;
+  userId :string;
+}
 /**
  * InstancePath is required to retrieve Instance objects.
  */
 interface InstancePath {
-  network :string;
+  network : NetworkInfo
   userId :string;
   instanceId :string;
 }

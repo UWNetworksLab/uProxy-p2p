@@ -25,7 +25,7 @@ module UI {
     /**
      * Initialize the user to an 'empty' default.
      */
-    constructor(public userId:string) {
+    constructor(public userId:string, public network :UI.Network) {
       console.log('new user: ' + this.userId);
       this.name = '';
       this.instances = [];
