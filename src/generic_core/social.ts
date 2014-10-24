@@ -84,9 +84,18 @@ module Social {
   }
 
   export function notifyUI(networkName :string) {
+    var userId = '';
+    var online = false;
+    if (Object.keys(networks[networkName]).length > 0) {
+      online = true;
+      // Hack. Once we have a support for multiple networks in ui
+      // we'll change this.
+      userId = (Object.keys(networks[networkName]))[0];
+    };
     var payload :UI.NetworkMessage = {
       name: networkName,
-      online: Object.keys(networks[networkName]).length > 0
+      online: online,
+      userId: userId
     };
     ui.update(uProxy.Update.NETWORK, payload);
   }

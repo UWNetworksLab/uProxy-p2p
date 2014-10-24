@@ -187,5 +187,6 @@ var core = mockCore;
 // Starts off being 'offline' to a network.
 ui['syncNetwork_'](<UI.NetworkMessage>{
   name: 'google',
-  online: false
+  online: false,
+  userId: ''
 });
