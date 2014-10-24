@@ -56,7 +56,7 @@ class UIConnector implements uProxy.UIAPI {
 
   public updateAll = () => {
     console.log('sending ALL state to UI.');
-    for (var network in Social.networkNames) {
+    for (var network in Social.networks) {
       Social.notifyUI(network);
     }
     // Only send ALL update to UI when description is loaded.
@@ -124,10 +124,12 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   reset = () => {
     console.log('reset');
-    for (var networkKey in Social.networks) {
-      Social.networks[networkKey].logout();
-      if (networkKey !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[networkKey];
+    for (var networkName in Social.networks) {
+      for (var userId in Social.networks) {
+        Social.networks[networkName][userId].logout();
+      }
+      if (networkName !== Social.MANUAL_NETWORK_ID) {
+        Social.networks[networkName] = {};
       }
     }
     storage.reset().then(ui.updateAll);
@@ -168,7 +170,7 @@ class uProxyCore implements uProxy.CoreAPI {
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
         (argsForCallback ?:any) => {
-          ui.update(uProxy.Update.COMMAND_FULFILLED, 
+          ui.update(uProxy.Update.COMMAND_FULFILLED,
               { promiseId: args.promiseId,
                 argsForCallback: argsForCallback });
         },
@@ -196,7 +198,7 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public login = (networkName:string) : Promise<void> => {
     if (networkName === Social.MANUAL_NETWORK_ID) {
-      var network = Social.getNetwork(networkName);
+      var network = Social.getNetwork(networkName, '');
       var loginPromise = network.login(true);
       loginPromise.then(() => {
         ui.updateAll();
@@ -205,27 +207,29 @@ class uProxyCore implements uProxy.CoreAPI {
       return loginPromise;
     }
 
-    if (!(networkName in Social.networkNames)) {
+    if (!(networkName in Social.networks)) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
       return Promise.reject(warn);
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
-      network = new Social.FreedomNetwork(networkName,
-                                          Social.networkNames[networkName]);
+      network = new Social.FreedomNetwork(networkName);
       Social.pendingNetworks[networkName] = network;
     }
     var loginPromise = network.login(true);
     loginPromise.then(() => {
-          var networkKey = networkName;// + network.myInstance.userId;
-          if (networkKey in Social.networks) {
-            Social.networks[networkKey].logout();
+          var userId = network.myInstance.userId;
+          if (userId in Social.networks[networkName]) {
+            // If user is already logged in with the same (network, userId)
+            // log out from existing network before replacing it.
+            Social.networks[networkName][userId].logout();
           }
-          Social.networks[networkKey] = network;
+          Social.networks[networkName][userId] = network;
           delete Social.pendingNetworks[networkName];
           ui.updateAll();
-          console.log('Successfully logged in to ' + networkName);
+          console.log('Successfully logged in to ' + networkName +
+                      ' with user id ' + userId);
         }).catch(() => {
           delete Social.pendingNetworks[networkName];
         });
@@ -239,18 +243,19 @@ class uProxyCore implements uProxy.CoreAPI {
    * TODO: write a test for this.
    */
   public logout = (networkInfo:any) : void => {
-    var networkKey = networkInfo.networkName;// + network.userId;
-    var network = Social.getNetwork(networkKey);
+    var networkName = networkInfo.networkName;
+    var userId = networkInfo.userId;
+    var network = Social.getNetwork(networkName, userId);
     if (null === network) {
-      console.warn('Could not logout of ', networkKey);
+      console.warn('Could not logout of network ', networkName);
       return;
     }
     network.logout().then(() => {
-      if (networkKey !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[networkKey];
+      if (networkName !== Social.MANUAL_NETWORK_ID) {
+        delete Social.networks[networkName][userId];
       }
       ui.updateAll();
-      console.log('Successfully logged out of ' + networkKey);
+      console.log('Successfully logged out of ' + networkName);
     });
     // TODO: only remove clients from the network we are logging out of.
     ui.syncMappings();
@@ -336,7 +341,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public handleManualNetworkInboundMessage =
       (command :uProxy.HandleManualNetworkInboundMessageCommand) => {
     var manualNetwork :Social.ManualNetwork =
-        <Social.ManualNetwork> Social.getNetwork(Social.MANUAL_NETWORK_ID);
+        <Social.ManualNetwork> Social.getNetwork(Social.MANUAL_NETWORK_ID, '');
     if (!manualNetwork) {
       console.error('Manual network does not exist; discarding inbound ' +
                     'message. Command=' + JSON.stringify(command));
@@ -350,7 +355,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Obtain the RemoteInstance corresponding to an instance path.
    */
   public getInstance = (path :InstancePath) : Core.RemoteInstance => {
-    var network = Social.getNetwork(path.network);
+    var network = Social.getNetwork(path.network, '');
     if (!network) {
       console.error('No network ' + path.network);
       return;

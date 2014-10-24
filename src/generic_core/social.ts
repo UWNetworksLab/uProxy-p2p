@@ -44,9 +44,8 @@ module Social {
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
   // TODO(salomegeo): Change structure of network
-  export var networks:{[name:string]:Network} = {};
-  export var pendingNetworks:{[name:string]:Network} = {};
-  export var networkNames :{[name:string]:string} = {};
+  export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
+  export var pendingNetworks:{[networkName:string]:Network} = {};
 
   /**
    * Goes through network names and gets a reference to each social provider.
@@ -60,33 +59,34 @@ module Social {
         }
 
         var name = dependency.substr(PREFIX.length);
-        var displayName = name.substr(0, 1).toUpperCase() + name.substr(1);
-        networkNames[name] = displayName;
+        networks[name] = {};
       }
     }
 
-    Social.networks[MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(MANUAL_NETWORK_ID, 'Manual');
-    networkNames[MANUAL_NETWORK_ID] = 'Manual';
-
-    return Social.networks;
+    Social.networks[MANUAL_NETWORK_ID] = {
+        '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
   }
 
   /**
    * Retrieves reference to the network |networkName|.
    */
-  export function getNetwork(networkName :string) : Network {
+  export function getNetwork(networkName :string, userId :string) : Network {
     if (!(networkName in networks)) {
       console.warn('Network does not exist: ' + networkName);
       return null;
     }
-    return networks[networkName];
+
+    if (!(userId in networks[networkName])) {
+      console.log('Not logged in with userId ' + userId + ' in network ' + networkName);
+      return null
+    }
+    return networks[networkName][userId];
   }
 
   export function notifyUI(networkName :string) {
     var payload :UI.NetworkMessage = {
       name: networkName,
-      online: networkName in networks && networks[networkName].isOnline()
+      online: Object.keys(networks[networkName]).length > 0
     };
     ui.update(uProxy.Update.NETWORK, payload);
   }
@@ -104,9 +104,9 @@ module Social {
       ME: 'me'
     }
 
-    constructor(public name :string, public displayName :string) {
+    constructor(public name :string) {
       this.roster = {};
-      this.myInstance = new Core.LocalInstance(this, null);
+      this.myInstance = new Core.LocalInstance(this);
     }
 
     /**
@@ -287,8 +287,8 @@ module Social {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string, public displayName :string) {
-      super(name, displayName);
+    constructor(public name :string) {
+      super(name);
 
       this.provider_ = freedom[PREFIX + name];
       this.remember = false;
@@ -519,19 +519,20 @@ module Social {
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.showNotification('You successfully signed on to ' + this.displayName +
+            ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
-            ui.sendError('There was a problem signing in to ' + this.displayName +
+            ui.sendError('There was a problem signing in to ' + this.name +
                          '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
     }
 
     public logout = () : Promise<void> => {
+      this.myInstance = null;
       this.stopMonitor_();
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
@@ -616,8 +617,8 @@ module Social {
   export class ManualNetwork extends AbstractNetwork {
     private isOnline_ :boolean;
 
-    constructor(public name :string, public displayName :string) {
-      super(name, displayName);
+    constructor(public name :string) {
+      super(name);
 
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {

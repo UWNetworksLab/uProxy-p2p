@@ -56,29 +56,21 @@ describe('Social.FreedomNetwork', () => {
     spyOn(console, 'error');
   });
 
-  it('fails to initialize if api is not social', () => {
+  it('initialize networks', () => {
     Social.initializeNetworks();
     expect(Social.networks['badmock']).not.toBeDefined();
+    expect(Social.networks['mock']).toBeDefined();
+    expect(Social.networks['mock']).toEqual({});
   });
 
-  var loadedLocalInstance = false;
-
-  it('successfully initializes if api is social', () => {
-    spyOn(storage, 'load').and.callFake(() => {
-      loadedLocalInstance = true;
-      return Promise.resolve({});
-    });
-    Social.initializeNetworks();
-    expect('mock' in Social.networkNames).toBe(true);
-  });
 
   it('begins with empty roster', () => {
-    network = new Social.FreedomNetwork('mock', 'mock');
+    network = new Social.FreedomNetwork('mock');
     expect(network.roster).toEqual({});
   });
 
   it('initializes with a LocalInstance', () => {
-    expect(loadedLocalInstance).toEqual(true);
+    expect(network.myInstance).toBeDefined();
   });
 
   describe('login & logout', () => {
@@ -140,6 +132,7 @@ describe('Social.FreedomNetwork', () => {
         jasmine.clock().tick(5000);
         expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
+        expect(network.myInstance).toEqual(null);
       }).then(done);
     });
 
@@ -156,6 +149,7 @@ describe('Social.FreedomNetwork', () => {
     // var delayed :Function;
 
     it('delays handler until login', () => {
+      network = new Social.FreedomNetwork('mock');
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
@@ -179,7 +173,7 @@ describe('Social.FreedomNetwork', () => {
   describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', () => {
-      network = new Social.FreedomNetwork('mock', 'mock');
+      network = new Social.FreedomNetwork('mock');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',
@@ -359,7 +353,7 @@ describe('Social.FreedomNetwork', () => {
 describe('Social.ManualNetwork', () => {
 
   var network :Social.ManualNetwork =
-      new Social.ManualNetwork('manual', 'Manual');
+      new Social.ManualNetwork('Manual');
 
   var loginPromise :Promise<void>;
 

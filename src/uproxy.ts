@@ -219,7 +219,7 @@ module uProxy {
 }  // module uProxy
 
 module Social {
-  export var MANUAL_NETWORK_ID = 'manual';
+  export var MANUAL_NETWORK_ID = 'Manual';
 }
 
 // We use this to map Freedom's untyped social network structures into a real

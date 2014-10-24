@@ -8,7 +8,7 @@ class OAuth {
   }
 
   public getCredentials(network :string) {
-    if (network === 'google') {
+    if (network === 'Google') {
       this.googleAuth_.login();
     }
   }

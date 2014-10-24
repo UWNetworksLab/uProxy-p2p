@@ -12,10 +12,9 @@ var REDIRECT_URI = "https://www.uproxy.org/";
 declare var core :CoreConnector;
 
 class GoogleAuth {
-  private tabId_ :number;
+  private tabId_ :number = -1;
 
   constructor() {
-    this.tabId_ = -1;
   }
 
   public login = () : void => {
@@ -28,13 +27,13 @@ class GoogleAuth {
 
   private getAccessCode_ = () : void => {
     var extractCode = function(tabId, changeInfo, tab) {
-      if (tab.url.indexOf(REDIRECT_URI) === 0) {
+      if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URI) === 0) {
         chrome.tabs.onUpdated.removeListener(extractCode);
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
         chrome.tabs.remove(tabId);
         if (tab.url.indexOf('error=access_denied') > 0) {
-          this.onError_('');
+          this.onError_('User denied access.');
           return;
         }
         var code = tab.url.match(/code=([^&]+)/)[1];
@@ -54,7 +53,7 @@ class GoogleAuth {
           chrome.tabs.onUpdated.removeListener(extractCode);
           chrome.tabs.onRemoved.removeListener(onTabClose);
           this.tabId_ = -1;
-          this.onError_('');
+          this.onError_('Login abandoned.');
         }
     }.bind(this);
     chrome.tabs.create({url: accountChooserUrl},
