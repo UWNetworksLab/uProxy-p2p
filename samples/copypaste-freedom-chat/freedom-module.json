@@ -4,12 +4,7 @@
   "app": {
     "script": [
       "lib/logging/logging.js",
-      "lib/webrtc/peerconnection.js",
       "freedom-module.js"
     ]
-  },
-  "permissions": [
-    "core.log",
-    "core.uproxypeerconnection"
-  ]
+  }
 }

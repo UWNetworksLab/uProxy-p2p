@@ -1,4 +1,10 @@
 /// <reference path='messages.d.ts' />
+/// <reference path='../../logging/logging.d.ts' />
+
+// TODO: update src/freedom/typings/freedom.d.ts
+declare var freedom:any;
+
+var log :Logging.Log = new Logging.Log('main');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -7,9 +13,6 @@ var sendAreaA = <HTMLInputElement>document.getElementById("sendAreaA");
 var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
-
-// TODO: update src/freedom/typings/freedom.d.ts
-declare var freedom:any;
 
 freedom(
     'freedom-module.json',
@@ -21,13 +24,13 @@ freedom(
     var chat :any = interface();
 
     chat.on('ready', function() {
-      console.info('peer connection established!');
+      log.info('peer connection established!');
       sendAreaA.disabled = false;
       sendAreaB.disabled = false;
     });
 
     chat.on('error', function() {
-      console.error('something went wrong with the peer connection');
+      log.error('something went wrong with the peer connection');
       sendAreaA.disabled = true;
       sendAreaB.disabled = true;
     });
@@ -46,5 +49,5 @@ freedom(
     chat.on('receiveA', receive.bind(null, receiveAreaA));
     chat.on('receiveB', receive.bind(null, receiveAreaB));
   }, (e:Error) => {
-    console.error('could not load freedom: ' + e.message);
+    log.error('could not load freedom: ' + e.message);
   });

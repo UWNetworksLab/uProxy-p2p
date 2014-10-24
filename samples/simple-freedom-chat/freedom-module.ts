@@ -1,16 +1,18 @@
 /// <reference path='messages.d.ts' />
+/// <reference path='../../logging/logging.d.ts' />
 /// <reference path="../../webrtc/peerconnection.d.ts" />
 /// <reference path="../../third_party/typings/tsd.d.ts" />
 
 // TODO: update src/freedom/typings/freedom.d.ts.
 declare var freedom:any;
-freedom().emit('error');
 
-// var log :Freedom_UproxyLogging.Log = freedom['core.log']('freedomchat');
-//log.debug('test debug message');
-//log.info('test info message');
-//log.warn('test warn message');
-//log.error('test error message');
+var log :Logging.Log = new Logging.Log('freedomchat');
+log.debug('test debug message');
+log.info('test info message');
+log.warn('test warn message');
+log.error('test error message');
+
+freedom().emit('error');
 
 // // Make a peer connection which logs stuff that happens.
 // function makePeerConnection(name:string) {
