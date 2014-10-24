@@ -7,6 +7,7 @@ var model :UI.Model = {
   networks: [
     {
       name: 'testNetwork',
+      userId: 'fakeUser',
       online: true,
       roster: {}
     }

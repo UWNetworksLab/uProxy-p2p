@@ -2,7 +2,10 @@ Polymer({
 
   ready: function() {
     this.path = <InstancePath>{
-      network: 'google',  // TODO: Make network reflect actual social network.
+      network : {
+       name: this.network.name,
+       userId: this.network.userId
+      },
       userId: this.userId,
       instanceId: this.instance.instanceId
     };

@@ -1,4 +1,9 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='../scripts/core_connector.ts' />
+/// <reference path='../scripts/ui.ts' />
+
+declare var ui :UI.UserInterface;
+declare var core :uProxy.CoreAPI;
 
 Polymer({
   // TODO: turn into typescript enums
@@ -35,7 +40,8 @@ Polymer({
       console.error('uproxy-network with no network specified!');
       return;
     }
-    core.logout(this.network.name);
+    core.logout({name:this.network.name,
+                 userId: this.network.userId});
     console.log('disconnected from ' + this.network.name);
     this.state = this.LOGGED_OUT;
   },

@@ -24,7 +24,7 @@ class CoreConnector implements uProxy.CoreAPI {
   // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
-      {};   
+      {};
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
@@ -164,7 +164,7 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGIN, network);
   }
 
-  logout = (network :string) => {
-    this.sendCommand(uProxy.Command.LOGOUT, network);
+  logout = (networkInfo :NetworkInfo) => {
+    this.sendCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 }  // class CoreConnector

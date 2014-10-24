@@ -43,7 +43,9 @@ module Social {
   // TODO: rather than make this global, this should be a parameter of the core.
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
-  export var networks:{[name:string]:Network} = {};
+  // TODO(salomegeo): Change structure of network
+  export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
+  export var pendingNetworks:{[networkName:string]:Network} = {};
 
   /**
    * Goes through network names and gets a reference to each social provider.
@@ -57,29 +59,37 @@ module Social {
         }
 
         var name = dependency.substr(PREFIX.length);
-        var displayName = name.substr(0, 1).toUpperCase() + name.substr(1);
-        var network = new Social.FreedomNetwork(name, displayName);
-        Social.networks[name] = network;
+        networks[name] = {};
       }
     }
 
-    Social.networks[MANUAL_NETWORK_ID] =
-        new Social.ManualNetwork(MANUAL_NETWORK_ID, 'Manual');
-
-    return Social.networks;
+    Social.networks[MANUAL_NETWORK_ID] = {
+        '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
   }
 
   /**
    * Retrieves reference to the network |networkName|.
    */
-  export function getNetwork(networkName :string) : Network {
+  export function getNetwork(networkName :string, userId :string) : Network {
     if (!(networkName in networks)) {
       console.warn('Network does not exist: ' + networkName);
       return null;
     }
-    return networks[networkName];
+
+    if (!(userId in networks[networkName])) {
+      console.log('Not logged in with userId ' + userId + ' in network ' + networkName);
+      return null
+    }
+    return networks[networkName][userId];
   }
 
+  export function notifyUI(networkName :string) {
+    var payload :UI.NetworkMessage = {
+      name: networkName,
+      online: Object.keys(networks[networkName]).length > 0
+    };
+    ui.update(uProxy.Update.NETWORK, payload);
+  }
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
@@ -94,8 +104,9 @@ module Social {
       ME: 'me'
     }
 
-    constructor(public name :string, public displayName :string) {
+    constructor(public name :string) {
       this.roster = {};
+      this.myInstance = new Core.LocalInstance(this);
     }
 
     /**
@@ -162,14 +173,6 @@ module Social {
 
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
-    }
-
-    public notifyUI = () => {
-      var payload :UI.NetworkMessage = {
-        name: this.name,
-        online: this.isOnline()
-      };
-      ui.update(uProxy.Update.NETWORK, payload);
     }
 
     public sendInstanceHandshake = (clientId :string) : Promise<void> => {
@@ -248,9 +251,6 @@ module Social {
     public isOnline = () : boolean => {
       throw new Error('Operation not implemented');
     }
-    public isLoginPending = () : boolean => {
-      throw new Error('Operation not implemented');
-    }
     public flushQueuedInstanceMessages = () => {
       throw new Error('Operation not implemented');
     }
@@ -279,7 +279,6 @@ module Social {
     private onceLoggedIn_   :Promise<void>;
     private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
     private remember :boolean;
-    private loginTimeout_ :number = undefined;  // A js Timeout ID.
 
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
@@ -288,8 +287,8 @@ module Social {
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
      */
-    constructor(public name :string, public displayName :string) {
-      super(name, displayName);
+    constructor(public name :string) {
+      super(name);
 
       this.provider_ = freedom[PREFIX + name];
       this.remember = false;
@@ -305,12 +304,6 @@ module Social {
                           this.delayForLogin_(this.handleClientState));
       this.freedomApi_.on('onMessage',
                           this.delayForLogin_(this.handleMessage));
-
-      // Begin loading everything relevant to this Network from local storage.
-      this.syncFromStorage().then(() => {
-        this.log('prepared Social.FreedomNetwork.');
-        this.notifyUI();
-      });
     }
 
     /**
@@ -508,30 +501,6 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
-      if (this.isLoginPending()) {
-        // Login is already pending, reject promise so the caller knows
-        // this request to login failed (the pending request may still succeed).
-        console.warn('Login already pending for ' + this.name);
-        // However, prepare a timeout to clear the login attempt in case
-        // freedom's login is actually never going to return, which would
-        // mean the user would never be able to actually retry. Timeout is only
-        // initiated after receiving at least one retry, because the first
-        // login-dialogue could take an arbitrary amount of time.
-        if (undefined === this.loginTimeout_) {
-          this.loginTimeout_ = setTimeout(() => {
-            this.onceLoggedIn_ = null;
-            this.loginTimeout_ = undefined;
-            this.error('Login timeout');
-            ui.sendError('There was a problem signing in to ' + this.displayName +
-                         '. Please try again.');
-          }, LOGIN_TIMEOUT);
-        }
-        return Promise.reject('Login already pending...');
-      } else if (this.isOnline()) {
-        console.warn('Already logged in to ' + this.name);
-        return Promise.resolve<void>();
-      }
-
       var request :freedom_Social.LoginRequest = {
         agent: 'uproxy',
         version: '0.1',
@@ -547,34 +516,27 @@ module Social {
             this.log('logged into uProxy');
           });
       return this.onceLoggedIn_
-          .then(this.notifyUI)
           // TODO: Only fire a popup notification the 1st few times.
           // (what's a 'few'?)
           .then(() => {
-            ui.showNotification('You successfully signed on to ' + this.displayName +
+            ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
           .catch(() => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
-            ui.sendError('There was a problem signing in to ' + this.displayName +
+            ui.sendError('There was a problem signing in to ' + this.name +
                          '. Please try again.');
             return Promise.reject(new Error('Could not login.'));
           });
     }
 
     public logout = () : Promise<void> => {
-      if (!this.isOnline()) {
-        console.warn('Already logged out of ' + this.name);
-        return Promise.resolve<void>();
-      }
-      this.onceLoggedIn_ = null;
+      this.myInstance = null;
       this.stopMonitor_();
       return this.freedomApi_.logout().then(() => {
-        this.myInstance.userId = null;
-        this.roster = {};
         this.log('logged out.');
-      }).then(this.notifyUI);
+      });
     }
 
     public isOnline = () : boolean => {
@@ -583,11 +545,6 @@ module Social {
       return Boolean(this.myInstance && this.myInstance.userId);
     }
 
-    public isLoginPending = () : boolean => {
-      // We are in a pending login state if the onceLoggedIn_ promise is
-      // defined, but we don't yet have the myInstance.userId set.
-      return Boolean(this.onceLoggedIn_) && !this.isOnline();
-    }
 
     // TODO: Use the queue from uproxy-lib!
     public flushQueuedInstanceMessages = () : Promise<void> => {
@@ -658,14 +615,14 @@ module Social {
   //     instances. Each instance is independent and not correlated with other
   //     instances in any way. Thus, an instance ID is also a user ID.
   export class ManualNetwork extends AbstractNetwork {
+    private isOnline_ :boolean;
 
-    constructor(public name :string, public displayName :string) {
-      super(name, displayName);
+    constructor(public name :string) {
+      super(name);
 
       // Begin loading everything relevant to this Network from local storage.
       this.syncFromStorage().then(() => {
         this.log('prepared Social.ManualNetwork.');
-        this.notifyUI();
       });
     }
 
@@ -690,20 +647,19 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
+      this.isOnline_ = true;
       return Promise.resolve<void>();
     }
 
     public logout = () : Promise<void> => {
+      this.isOnline_ = false;
       return Promise.resolve<void>();
     }
 
     public isOnline = () : boolean => {
-      return true;
+      return this.isOnline_;
     }
 
-    public isLoginPending = () : boolean => {
-      return false;
-    }
 
     // Does not apply to ManualNetwork. Nothing to do.
     public flushQueuedInstanceMessages = () => {

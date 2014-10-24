@@ -147,7 +147,7 @@ module uProxy {
     // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
-    logout(network :string) : void;
+    logout(networkInfo :NetworkInfo) : void;
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
@@ -219,7 +219,7 @@ module uProxy {
 }  // module uProxy
 
 module Social {
-  export var MANUAL_NETWORK_ID = 'manual';
+  export var MANUAL_NETWORK_ID = 'Manual';
 }
 
 // We use this to map Freedom's untyped social network structures into a real
