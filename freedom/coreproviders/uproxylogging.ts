@@ -33,6 +33,10 @@ module Freedom_UproxyLogging {
         : void => {
       Logging.setConsoleFilter(args); continuation();
     }
+    public setBufferedLogFilter = (args: string[], continuation:()=>void)
+        : void => {
+      Logging.setBufferedLogFilter(args); continuation();
+    }
   }
 
   // Class for writing to log.

@@ -35,6 +35,17 @@ module TaskManager {
         .toEqual(['t1','t5','t3','t6','t4']);
     });
 
+    it("Task A and B have a cycle", function() {
+      taskManager = new Manager();
+      taskManager.add('A', ['a1','a2','B','a4']);
+      expect(() => { taskManager.add('B', ['b1','b2','A','b4']); }).toThrow();
+    });
+
+    it("Task A is self-cyclic", function() {
+      taskManager = new Manager();
+      expect(() => { taskManager.add('A', ['a1','a2','A','a4']); }).toThrow();
+    });
+
 });  // describe("TaskManager", ... )
 
 }  // module TaskManager

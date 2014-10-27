@@ -1,4 +1,5 @@
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path="logging.d.ts" />
 
 describe("logger from core environment", () => {
   var log1 = new Logging.Log('tag1');
@@ -30,10 +31,33 @@ describe("logger from core environment", () => {
   });
 
   it('grab logs', () => {
+    // testing default behavior, only log error messages.
     log1.debug('simple string');
     log2.info('second string');
+    log2.error('third string');
     expect(Logging.getLogs().join('\n')).toMatch(
-      /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string/);
+      /\*\[tag2\]\(.*\) E: third string/);
+
+    // set to log all messages.
+    Logging.clearLogs();
+    Logging.setBufferedLogFilter(['*:D']);
+    log1.debug('simple string');
+    log2.info('second string');
+    log2.error('third string');
+    expect(Logging.getLogs().join('\n')).toMatch(
+      /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string\n\*\[tag2\]\(.*\) E: third string/);
+
+     // set to log messages with level >= info.
+    Logging.clearLogs();
+    Logging.setBufferedLogFilter(['*:I']);
+    log1.debug('simple string');
+    log2.info('second string');
+    log2.error('third string');
+    expect(Logging.getLogs().join('\n')).toMatch(
+      /\*\[tag2\]\(.*\) I: second string\n\*\[tag2\]\(.*\) E: third string/);
+
+    // restore back to default.
+    Logging.setBufferedLogFilter(['*:E']);
   });
 
   it('format message like printf', () => {

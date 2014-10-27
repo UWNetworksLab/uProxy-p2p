@@ -11,12 +11,16 @@
 // i.e. given: A = [B,C,Z], B = [X1,X2], C = [X1,Y], then A = [X1,X2,Y,Z],
 // i.e. only constraint is that index(X1) < index(Y), and that steps after
 // X1 in B do not disrupt steps C.
+//
+// Note: circular dependencies will result in a runtime error being thrown.
 
 module TaskManager {
 
   export interface Index { [s:string]: string[] };
 
-  // The state of flattening a tree.
+  // The state of flattening a tree containing only leaf nodes. The output
+  // keeps left-to-right order, and only contains the first occurence in the
+  // list of the node entry in the tree.
   class FlatteningState {
     // Flattened tree seen so far.
     flattened_: string[] = [];
@@ -65,17 +69,59 @@ module TaskManager {
   }
 
 
+  // Manager managed tasks so that you add entries with sub-entries, and you
+  // can get a flattened and de-duped list of leaf-tasks as output.
   export class Manager {
-    // Index from task name to flattened and de-duped list of subtasks.
+    // The index of branch nodes in the tree with names of their children.
     private taskIndex_ : Index;
 
     constructor() {
       this.taskIndex_ = {};
     }
 
-    // Assumes all tasks are defined before being added.
+    // Depth first search keep track of path and checking for loops for each
+    // new node. Returns list of all cycles found.
+    public getCycles(name : string) : string[][] {
+      // The |agenda| holds set of paths explored so far. The format for each
+      // agenda entry is: [child, patent, grandparent, etc]
+      // An invariant of the the agenda is that each member is a non-empty
+      // string-list.
+      var agenda : string[][]= [[name]];
+      var cyclicPaths : string[][] = [];
+      while (agenda.length > 0) {
+        // Get the next path to explore further.
+        var nextPath = agenda.shift();
+        // If this is a non-leaf node, search all child nodes/paths
+        var nodeToUnfold = nextPath[0];
+        if(nodeToUnfold in this.taskIndex_) {
+          // For each child of
+          var children = this.taskIndex_[nodeToUnfold];
+          children.forEach((child) => {
+            // Extends the old path with a new one with child added to the
+            // front. We use slice(0) to make a copy of the path.
+            var newExtendedPath = nextPath.slice(0);
+            newExtendedPath.unshift(child);
+            if(nextPath.indexOf(child) !== -1) {
+              cyclicPaths.push(newExtendedPath);
+            } else {
+              agenda.push(newExtendedPath);
+            }
+          });
+        }
+      }
+      return cyclicPaths;
+    }
+
+    // The |add| method will throw an exception if a circular dependency is
+    // added.
     public add(name : string, subtasks : string[]) {
       this.taskIndex_[name] = subtasks;
+
+      // Check for resulting circular dependency.
+      var cycles = this.getCycles(name);
+      if(cycles.length > 0) {
+        throw new Error('Cyclic dependencies: ' + cycles.toString());
+      }
     }
 
     public getUnflattened(name : string) {
