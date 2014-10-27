@@ -76,13 +76,18 @@ module UI {
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
-    // How many people you are giving access to.
-    // The number is calculated by counting the remote instances for which
-    // access.isClient = true.
-    numGivingAccessTo = 0;  
-    // If you are getting access.
-    // True only if there is a remote instance for which access.isProxy = true.
-    private isGettingAccess_ = false;
+
+    myName = '';
+    myPic = null;
+
+    // Instance you are getting access from.
+    // Set to the remote instance for which access.isProxy = true.
+    // Null if you are not getting access.
+    public instanceGettingAccessFrom = null;
+    // The instances you are giving access to.
+    // Remote instances are added to this set if their access.isClient value
+    // is true.   
+    public instancesGivingAccessTo = {};
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -142,6 +147,33 @@ module UI {
         // TODO: Display the message in the 'manual network' UI.
       });
 
+      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND, 
+          (instanceId :string) => {
+        if (instanceId === this.instanceGettingAccessFrom) {
+          this.instanceGettingAccessFrom = null;
+          this.stopGettingInUiAndConfig();
+        } else {
+          console.warn('Can\'t stop getting access from friend you were not ' +
+              'already getting access from.');
+        }
+      });      
+
+      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND, 
+          (instanceId :string) => {
+        if (!this.isGivingAccess()) {
+          this.startGivingInUi();
+        }
+        this.instancesGivingAccessTo[instanceId] = true;
+      });
+
+      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND, 
+          (instanceId :string) => {
+        delete this.instancesGivingAccessTo[instanceId];
+        if (!this.isGivingAccess()) {
+          this.stopGivingInUi();
+        }        
+      });
+
       console.log('Created the UserInterface');
     }
 
@@ -154,39 +186,39 @@ module UI {
      * Removes proxy indicators from UI and undoes proxy configuration
      * (e.g. chrome.proxy settings).
      */
-    public stopProxyingInUiAndConfig = () => {
+    public stopGettingInUiAndConfig = () => {
       this.browserAction.setIcon('uproxy-19.png');
       proxyConfig.stopUsingProxy();
     }
 
     /**
-      * Set extension icon to default and undoes proxy configuration.
+      * Sets extension icon to default and undoes proxy configuration.
       */
-    public startProxyingInUiAndConfig = (endpoint:Net.Endpoint) => {
+    public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
       this.browserAction.setIcon('uproxy-19-c.png');
       proxyConfig.startUsingProxy(endpoint);
     }
 
     /**
-      * Set extension icon to the providing proxy icon.
+      * Set extension icon to the 'giving' icon.
       */
-    public startProvidingProxyInUi = () => {
+    public startGivingInUi = () => {
       this.browserAction.setIcon('uproxy-19-p.png');
     }
 
     /**
       * Set extension icon to the default icon.
       */
-    public stopProvidingProxyInUi = () => {
+    public stopGivingInUi = () => {
       this.browserAction.setIcon('uproxy-19.png');
     }
 
     public isGettingAccess = () => {
-      return this.isGettingAccess_;
+      return this.instanceGettingAccessFrom != null;
     }
 
     public isGivingAccess = () => {
-      return this.numGivingAccessTo > 0;
+      return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
     syncInstance = (instance : any) => {}
@@ -270,48 +302,6 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
-
-      // Increase this count for each remote instance that is listed 
-      // as a client.
-      var updatedNumGivingAccessTo = 0;
-      // If any of the remote instances is a proxy (i.e. giving access to
-      // this local user), this will be set to true.
-      var updatedIsGettingAccess = false;
-
-      // Also while iterating through instances, check if this user
-      // is giving access to or getting access from any of those instances.
-      // TODO: we may want to include offered permissions here (even if the
-      // peer hasn't accepted the offer yet).
-      for (var i = 0; i < user.instances.length; ++i) {
-        if (user.instances[i].access.asClient) {
-          updatedNumGivingAccessTo++;
-        }
-        updatedIsGettingAccess = 
-            (updatedIsGettingAccess || user.instances[i].access.asProxy);
-      }
-
-      // Update UI if user's state of giving access has changed.
-      if (this.numGivingAccessTo > 0 && updatedNumGivingAccessTo == 0) {
-      // If user is no longer giving access (i.e. if number of people proxying
-      // through us has reduced to 0).
-        this.stopProvidingProxyInUi();
-      } else if (this.numGivingAccessTo == 0 && updatedNumGivingAccessTo > 0) {
-      // If user is now giving access to at least one person.
-        this.startProvidingProxyInUi();
-      }
-      this.numGivingAccessTo = updatedNumGivingAccessTo;
-
-      // Update UI if user's state of getting access has changed.
-      if (this.isGettingAccess_ && !updatedIsGettingAccess) {
-      // If we are no longer getting access.
-        this.stopProxyingInUiAndConfig();
-        this.isGettingAccess_ = false;
-      } else if (!this.isGettingAccess_ && updatedIsGettingAccess) {
-        // This might be redundant because startProxyingInUiAndConfig should
-        // always be called by instance.ts.
-        this.browserAction.setIcon('uproxy-19-c.png');
-        this.isGettingAccess_ = true;
-      }
 
       var newCategory = user.getCategory();
       this.categorizeUser_(user, oldCategory, newCategory);

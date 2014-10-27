@@ -29,7 +29,7 @@ var ui :UI.UserInterface;
 describe('core-connector', () => {
 
   ui = jasmine.createSpyObj('UI.UserInterface', 
-    ['stopProxyingInUiAndConfig',
+    ['stopGettingInUiAndConfig',
     'sync',
     'update',
     'syncUser',
@@ -131,7 +131,7 @@ describe('core-connector', () => {
     disconnect();
     expect(chromeConnector.status.connected).toEqual(false);
     expect(chromeConnector['appPort_']).toBeNull();
-    expect(ui.stopProxyingInUiAndConfig).toHaveBeenCalled();
+    expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
   });
 
   it('send queues message while disconnected.', () => {

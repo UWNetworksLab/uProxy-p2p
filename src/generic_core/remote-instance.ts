@@ -174,6 +174,7 @@ module Core {
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
                 this.access.asClient = false;
+                ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
                 this.rtcToNet_ = null;
                 this.bytesSent = 0;
                 this.bytesReceived = 0;                
@@ -204,6 +205,7 @@ module Core {
             });
             this.rtcToNet_.onceReady.then(() => {
               this.access.asClient = true;
+              ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
               this.user.notifyUI();
             });
           }
@@ -289,6 +291,7 @@ module Core {
           this.access.asProxy = true;
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
+              ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, this.instanceId);
               this.access.asProxy = false;
               this.bytesSent = 0;
               this.bytesReceived = 0;
@@ -390,8 +393,6 @@ module Core {
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
         this.rtcToNet_.close();
-        this.rtcToNet_ = null;
-        this.access.asClient = false;
       }
       // Send new consent bits to the remote client, and save to storage.
       this.sendConsent();

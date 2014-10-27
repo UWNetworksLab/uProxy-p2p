@@ -20,12 +20,15 @@ Polymer({
     core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
-      this.ui.startProxyingInUiAndConfig(endpoint);
+      this.ui.startGettingInUiAndConfig(endpoint);
+      this.ui.instanceGettingAccessFrom = this.instance.instanceId;
     });
   },
   stop: function() {
     console.log('[polymer] calling core.stop()');
     core.stop();
+    this.ui.stopGettingInUiAndConfig();
+    this.ui.instanceGettingAccessFrom = null;
   },
 
   // |action| is the string end for a Consent.UserAction
@@ -48,7 +51,10 @@ Polymer({
 
   // Client UserActions
   offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
-  cancelOffer: function() { this.modifyConsent(Consent.UserAction.CANCEL_OFFER) },
+  cancelOffer: function() { 
+    this.ui.stopGivingInUi();
+    this.modifyConsent(Consent.UserAction.CANCEL_OFFER) 
+  },
   grant: function() { this.modifyConsent(Consent.UserAction.ALLOW_REQUEST) },
   ignoreRequest: function() {
     this.modifyConsent(Consent.UserAction.IGNORE_REQUEST)
