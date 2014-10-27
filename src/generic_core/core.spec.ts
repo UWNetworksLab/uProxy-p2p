@@ -48,14 +48,17 @@ describe('Core', () => {
     spyOn(alice, 'modifyConsent');
     var command :uProxy.ConsentCommand = {
       path: {
-        network: 'fake-network',
+        network: {
+          name: 'fake-network',
+          userId: 'fake-login'
+        },
         userId: 'user-alice',
         instanceId: 'instance-alice'
       },
       action: Consent.UserAction.REQUEST
     };
     core.modifyConsent(command);
-    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network');
+    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network', 'fake-login');
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
     expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
@@ -82,7 +85,7 @@ describe('Core', () => {
     };
     core.handleManualNetworkInboundMessage(command);
 
-    expect(Social.getNetwork).toHaveBeenCalledWith(Social.MANUAL_NETWORK_ID);
+    expect(Social.getNetwork).toHaveBeenCalledWith(Social.MANUAL_NETWORK_ID, '');
     expect(manualNetwork.receive).toHaveBeenCalledWith(senderClientId, message);
   });
 
@@ -94,13 +97,33 @@ describe('Core', () => {
   });
 
   it('login continues to call login on correct network', (done) => {
-    spyOn(Social, 'getNetwork').and.callFake(() => {
+    Social.networks['mockNetwork'] = {};
+    spyOn(Social, 'FreedomNetwork').and.callFake(() => {
+      network.myInstance = new Core.LocalInstance(network);
       return network;
     });
-    spyOn(network, 'login').and.returnValue(Promise.resolve());
-    core.login('network').then(done);
-  });
+    expect(Object.keys(Social.pendingNetworks).length).toEqual(0);
+    expect(Object.keys(Social.networks['mockNetwork']).length).toEqual(0);
 
+    // Login promise is not resolved so network object stays in pending logins
+    var loginSpy = spyOn(network, 'login').and.returnValue(
+        new Promise((F, R) => {}));
+    core.login('mockNetwork');
+    expect(Object.keys(Social.pendingNetworks).length).toEqual(1);
+    expect(Object.keys(Social.networks['mockNetwork']).length).toEqual(0);
+
+    // Core login will envoke login method on the same network object
+    // This time it succeeds, so network object is moved from pending logins
+    // to Social.networks.
+    (<any>loginSpy).and.callFake(() => {
+      network.myInstance = new Core.LocalInstance(network);
+      return Promise.resolve();
+    });
+    core.login('mockNetwork').then(() => {
+      expect(Object.keys(Social.pendingNetworks).length).toEqual(0);
+      expect(Object.keys(Social.networks['mockNetwork']).length).toEqual(1);
+    }).then(done);
+  });
 });
 
 // Validate that |inst| is present and proper inside

@@ -437,6 +437,7 @@ describe('Core.RemoteInstance', () => {
     beforeEach(() => {
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
+      alice.consent.asClient = Consent.ClientState.GRANTED;
     });
 
     it('handles signal from client peer as server', () => {
@@ -456,6 +457,22 @@ describe('Core.RemoteInstance', () => {
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
+    });
+
+    it('rejects message from client if consent is not GRANTED', () => {
+      var disallowedStates :Consent.ClientState[] = [
+        Consent.ClientState.NONE,
+        Consent.ClientState.USER_OFFERED,
+        Consent.ClientState.REMOTE_REQUESTED,
+        Consent.ClientState.USER_IGNORED_REQUEST,
+      ];
+      disallowedStates.forEach(state => {
+        alice.consent.asClient = state;
+        alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+        expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+        expect(console.warn).toHaveBeenCalled();
+      });
     });
 
   });  // describe signalling

@@ -30,9 +30,13 @@ module UI {
     SETTINGS,
   }
 
-  export enum Gestalt {
-    GIVING = 101,
-    GETTING
+  export interface Contacts {
+    onlineTrustedUproxy :UI.User[];
+    offlineTrustedUproxy :UI.User[];
+    onlineUntrustedUproxy :UI.User[];
+    offlineUntrustedUproxy :UI.User[];
+    onlineNonUproxy :UI.User[];
+    offlineNonUproxy :UI.User[];
   }
 
   /**
@@ -41,12 +45,7 @@ module UI {
    */
   export interface Model {
     networks : UI.Network[];
-    // TODO: Other top-level generic info...
-
-    // This is a 'global' roster - a combination of all User Profiles.
-    // TODO: remove this if possible and just use network.roster
-    roster :User[];
-
+    contacts : Contacts;
     description :string;
   }
 
@@ -55,6 +54,8 @@ module UI {
    */
   export interface Network {
     name   :string;
+    // TODO(salomegeo): Add more information about the user.
+    userId :string;
     online :boolean;
     roster :{ [userId:string] :User }
   }
@@ -75,6 +76,7 @@ module UI {
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
+
     myName = '';
     myPic = null;
 
@@ -118,8 +120,7 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :UI.UserProfileMessage = payload.user;
-        this.myPic = profile.imageData || DEFAULT_USER_IMG;
-        this.myName = profile.name;
+        this.getNetwork(payload.network).userId = profile.userId;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
@@ -246,6 +247,7 @@ module UI {
       } else {
         model.networks.push({
           name:   network.name,
+          userId: '',
           online: network.online,
           roster: {}
         });
@@ -283,21 +285,47 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
+      var oldCategory = null;
+
       // CONSIDER: we might want to check if this user has been our proxy
       // server and if so stop the proxying if they are no longer proxying
       // for us (e.g. they were disconnected).  Currently we are sending an
       // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId);
+        user = new UI.User(profile.userId, network);
         network.roster[profile.userId] = user;
-        model.roster.push(user);
+      } else {
+        // Existing user, get the category before modifying any properties.
+        oldCategory = user.getCategory();
       }
+
       user.update(profile);
       user.instances = payload.instances;
 
+      var newCategory = user.getCategory();
+      this.categorizeUser_(user, oldCategory, newCategory);
+
       console.log('Synchronized user.', user);
     };
+
+    private categorizeUser_ = (user, oldCategory, newCategory) => {
+      if (oldCategory == null) {
+        // User hasn't yet been categorized.
+        model.contacts[newCategory].push(user);
+      } else if (oldCategory != newCategory) {
+        // Remove user from old category.
+        var oldCategoryArray = model.contacts[oldCategory];
+        for (var i = 0; i < oldCategoryArray.length; ++i) {
+          if (oldCategoryArray[i] == user) {
+            oldCategoryArray.splice(i, 1);
+            break;
+          }
+        }
+        // Add users to new category.
+        model.contacts[newCategory].push(user);
+      }
+    }
   }  // class UserInterface
 
 }  // module UI

@@ -1,6 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 
-<polymer-element name='uproxy-instance' attributes='userId, instance'>
+<polymer-element name='uproxy-instance' attributes='userId, instance, network'>
   <template>
     <style>
     :host {
@@ -20,13 +20,23 @@
       margin: 0;
       color: #888;
     }
+    #description {
+      color: #333;
+      margin-left: -1em;
+    }
+    #getControls {
+      margin-top: 1em;
+    }
+    #giveControls {
+      margin-top: 1em;
+    }
     </style>
 
-    <span>{{ instance.description }}</span>
+    <div id='description'>{{ instance.description }}</div>
     <div id='bytesSent' hidden?='{{ instance.bytesSent == 0 }}'>Bytes Sent: {{ instance.bytesSent }}</div>
     <div id='bytesReceived' hidden?='{{ instance.bytesReceived == 0 }}'>Bytes Received: {{ instance.bytesReceived }}</div>
 
-    <div hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'>
+    <div id='getControls'>
 
       <div hidden?='{{ "GRANTED" !== getProxyConsentState() }}'>
         <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
@@ -60,7 +70,7 @@
 
     </div>
 
-    <div hidden?='{{ UI.Gestalt.GIVING !== ui.gestalt }}'>
+    <div id='giveControls'>
 
       <div hidden?='{{ "NONE" !== getClientConsentState() }}'>
         <button on-tap='{{ offer }}'>Offer Access</button>

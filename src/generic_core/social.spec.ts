@@ -51,34 +51,26 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    spyOn(console, 'log');
+    //spyOn(console, 'log');
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
 
-  it('fails to initialize if api is not social', () => {
+  it('initialize networks', () => {
     Social.initializeNetworks();
     expect(Social.networks['badmock']).not.toBeDefined();
+    expect(Social.networks['mock']).toBeDefined();
+    expect(Social.networks['mock']).toEqual({});
   });
 
-  var loadedLocalInstance = false;
-
-  it('successfully initializes if api is social', () => {
-    spyOn(storage, 'load').and.callFake(() => {
-      loadedLocalInstance = true;
-      return Promise.resolve({});
-    });
-    Social.initializeNetworks();
-    network = <Social.FreedomNetwork> Social.getNetwork('mock');
-    expect(network.name).toEqual('mock');
-  });
 
   it('begins with empty roster', () => {
+    network = new Social.FreedomNetwork('mock');
     expect(network.roster).toEqual({});
   });
 
   it('initializes with a LocalInstance', () => {
-    expect(loadedLocalInstance).toEqual(true);
+    expect(network.myInstance).toBeDefined();
   });
 
   describe('login & logout', () => {
@@ -88,23 +80,19 @@ describe('Social.FreedomNetwork', () => {
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
-      spyOn(network, 'notifyUI');
+      spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
-      expect(network.isLoginPending()).toEqual(false);
       network.login(false).then(() => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
-        expect(network.isOnline()).toEqual(true);
-        expect(network.isLoginPending()).toEqual(false);
-        expect(network.notifyUI).toHaveBeenCalled();
-        var freedomClient :freedom_Social.ClientState = {
+        var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
-          status: 'ONLINE',
+          status: 'ONLINE_WITH_OTHER_APP',
           timestamp: 12345
         };
         // Add user to the roster;
-        network.handleClientState(freedomClient);
+        network.handleClientState(freedomClientState);
         expect(Object.keys(network.roster).length).toEqual(1);
         var friend = network.getUser('fakeuser');
         spyOn(friend, 'monitor');
@@ -113,22 +101,7 @@ describe('Social.FreedomNetwork', () => {
         jasmine.clock().tick(5000);
         expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
-      expect(network.isLoginPending()).toEqual(true);
       fulfillFunc(fakeFreedomClient);
-    });
-
-    it('does nothing to log in if already logged in', (done) => {
-      spyOn(network, 'notifyUI');
-      expect(network.isLoginPending()).toEqual(false);
-      network.login(false).then(() => {
-        expect(network.isLoginPending()).toEqual(false);
-        expect(network.isOnline()).toEqual(true);
-        expect(network.notifyUI).not.toHaveBeenCalled();
-        expect(console.warn).toHaveBeenCalledWith('Already logged in to mock');
-      }).then(done);
-      // isPendingLogin should be false right away, without waiting for async
-      // login to complete.
-      expect(network.isLoginPending()).toEqual(false);
     });
 
     it('errors if network login fails', (done) => {
@@ -137,11 +110,9 @@ describe('Social.FreedomNetwork', () => {
       // Pretend the social API's login failed.
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
-      spyOn(network, 'notifyUI');
       spyOn(network, 'error');
       network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
-        expect(network.notifyUI).not.toHaveBeenCalled();
       }).then(done);
     });
 
@@ -149,7 +120,6 @@ describe('Social.FreedomNetwork', () => {
       network['onceLoggedIn_'] = loginPromise;
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
-      spyOn(network, 'notifyUI');
 
       var friend = network.getUser('fakeuser');
       spyOn(friend, 'monitor');
@@ -158,23 +128,11 @@ describe('Social.FreedomNetwork', () => {
       expect(friend.monitor).toHaveBeenCalled();
 
       network.logout().then(() => {
-        expect(network.isOnline()).toEqual(false);
-        expect(network.isLoginPending()).toEqual(false);
-        expect(network.notifyUI).toHaveBeenCalled();
         (<any>friend.monitor).calls.reset();
         jasmine.clock().tick(5000);
         expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
-      }).then(done);
-    });
-
-    it('does nothing to logout if already logged out', (done) => {
-      network['onceLoggedIn_'] = null;
-      spyOn(network, 'notifyUI');
-      network.logout().then(() => {
-        expect(network.isOnline()).toEqual(false);
-        expect(network.notifyUI).not.toHaveBeenCalled();
-        expect(console.warn).toHaveBeenCalledWith('Already logged out of mock');
+        expect(network.myInstance).toEqual(null);
       }).then(done);
     });
 
@@ -191,7 +149,7 @@ describe('Social.FreedomNetwork', () => {
     // var delayed :Function;
 
     it('delays handler until login', () => {
-      expect(network.isOnline()).toEqual(false);
+      network = new Social.FreedomNetwork('mock');
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
@@ -215,6 +173,7 @@ describe('Social.FreedomNetwork', () => {
   describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', () => {
+      network = new Social.FreedomNetwork('mock');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',
@@ -393,7 +352,8 @@ describe('Social.FreedomNetwork', () => {
 
 describe('Social.ManualNetwork', () => {
 
-  var network :Social.ManualNetwork = new Social.ManualNetwork('manual');
+  var network :Social.ManualNetwork =
+      new Social.ManualNetwork('Manual');
 
   var loginPromise :Promise<void>;
 

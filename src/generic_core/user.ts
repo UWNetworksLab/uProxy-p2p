@@ -443,7 +443,8 @@ module Core {
     private loadInstanceFromStorage_ = (instanceId :string) => {
       storage.load<Core.RemoteInstanceState>(this.getStorePath() + instanceId)
           .then((state) => {
-        this.instances_[instanceId] = new Core.RemoteInstance(this, state);
+        this.instances_[instanceId] =
+            new Core.RemoteInstance(this, state, state.consent);
       }).catch((e) => {
         this.log('could not load instance ' + instanceId);
       });
@@ -480,13 +481,32 @@ module Core {
     }
 
     public isOnline = () : boolean => {
+      // For each instance we know about, check if it's online.
+      var hasInstances = false;
+      var hasOnlineInstances = false;
+      for (var instanceId in this.instances_) {
+        hasInstances = true;
+        if (this.isInstanceOnline(instanceId)) {
+          hasOnlineInstances = true;
+          break;
+        }
+      }
+
+      // If the user has instances, return true iff any of them are online.
+      if (hasInstances) {
+        return hasOnlineInstances;
+      }
+
+      // If the user does not have instances, check if they are online with
+      // another app.
       for (var clientId in this.clientIdToStatusMap) {
         var status = this.clientIdToStatusMap[clientId];
-        if (status == UProxyClient.Status.ONLINE ||
-            status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        if (status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
           return true;
         }
       }
+
+      // User is not online.
       return false;
     }
 
@@ -496,8 +516,7 @@ module Core {
         return false;
       }
       var status = this.clientIdToStatusMap[clientId];
-      if (status == UProxyClient.Status.ONLINE ||
-          status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      if (status == UProxyClient.Status.ONLINE) {
         return true;
       }
       return false;

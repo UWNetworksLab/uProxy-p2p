@@ -7,11 +7,19 @@ var model :UI.Model = {
   networks: [
     {
       name: 'testNetwork',
+      userId: 'fakeUser',
       online: true,
       roster: {}
     }
   ],
-  roster: [],
+  contacts: {
+    'onlineTrustedUproxy': [],
+    'offlineTrustedUproxy': [],
+    'onlineUntrustedUproxy': [],
+    'offlineUntrustedUproxy': [],
+    'onlineNonUproxy': [],
+    'offlineNonUproxy': []
+  },
   description: ''
 };
 
@@ -38,35 +46,27 @@ describe('UI.UserInterface', () => {
 
   describe('syncUser', () => {
 
-    it('Adds users to roster', () => {
+    it('Adds users to roster and contacts list', () => {
       var payload :UI.UserMessage = {
         network: 'testNetwork',
         user: {
           userId: 'testUserId',
           name: 'Alice',
           imageData: 'testImageData',
-        },
-        instances: []
-      };
-      ui.syncUser(payload);
-      var user :UI.User = model.roster[0];
-      expect(user).toBeDefined();
-      expect(model.networks[0].roster['testUserId']).toEqual(user);
-    });
-
-    it('Sets correct flags for non-uProxy users', () => {
-      var payload :UI.UserMessage = {
-        network: 'testNetwork',
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData',
+          isOnline: true
         },
         instances: []
       };
       ui.syncUser(payload);
       var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
+      expect(model.contacts.onlineNonUproxy.length).toEqual(1);
+      expect(model.contacts.onlineNonUproxy[0]).toEqual(user);
+      expect(model.contacts.offlineNonUproxy.length).toEqual(0);
+      expect(model.contacts.onlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.offlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.onlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.offlineUntrustedUproxy.length).toEqual(0);
     });
 
     it('Sets correct flags for uProxy users', () => {
@@ -100,6 +100,7 @@ describe('UI.UserInterface', () => {
           userId: 'testUserId',
           name: 'Alice',
           imageData: 'testImageData',
+          isOnline: true
         },
         instances: [clientInstance, serverInstance]
       };

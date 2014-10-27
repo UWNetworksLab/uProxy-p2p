@@ -12,7 +12,7 @@ describe('UI.User', () => {
   });
 
   it('creates with the correct userId', () => {
-    user = new UI.User('fakeuser');
+    user = new UI.User('fakeuser', null);
     expect(user.userId).toEqual('fakeuser');
     expect(user.instances).toBeDefined();
   });

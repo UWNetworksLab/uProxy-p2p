@@ -1,17 +1,21 @@
 Polymer({
-  expanded: false,
   contact: {
     // Must adhere to the typescript interface UI.User.
     name: 'unknown',
-    pic: undefined
+    pic: undefined,
+    expanded: false
   },
   toggle: function() {
-    this.expanded = !this.expanded;
-    console.log('toggle', this);
+    if (this.contact.instances.length == 0) {
+      this.contact.expanded = false;
+    } else {
+      this.contact.expanded = !this.contact.expanded;
+    }
+    console.log('toggle', this.contact.expanded);
   },
   collapse: function() {
-    this.expanded = false;
-    console.log('collapse', this);
+    this.contact.expanded = false;
+    console.log('collapse', this.contact.expanded);
   },
   ready: function() {
     if (!this.contact.pic) {

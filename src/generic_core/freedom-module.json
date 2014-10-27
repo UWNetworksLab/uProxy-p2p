@@ -24,7 +24,7 @@
     ]
   },
   "dependencies": {
-    "SOCIAL-google": {
+    "SOCIAL-Google": {
       "url": "../lib/freedom-social-xmpp/social.google.json",
       "api": "social"
     },

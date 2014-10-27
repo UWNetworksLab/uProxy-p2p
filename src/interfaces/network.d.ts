@@ -45,28 +45,12 @@ declare module Social {
     /**
      * Returns true iff a login is pending (e.g. waiting on user's password).
      */
-    isLoginPending :() => boolean;
-
     getLocalInstance :() => Core.LocalInstance;
 
     /**
      * Returns the User corresponding to |userId|.
      */
     getUser :(userId :string) => Core.User;
-
-    /**
-     * Notifies the UI about the existence & status of this network. Should be
-     * called only upon logging in/out. Does not tell the UI about the roster.
-     *
-     * TODO: If this method should be called only upon logging in/out, why is
-     * it a public method at all (vs. having login & logout call it
-     * internally)? And why does code in other files call it directly?
-     *
-     * TODO: Consider removing this method and replacing it with a
-     * general-purpose event-listener mechanism, through which any component
-     * (not only the UI) can subscribe to change notifications.
-     */
-    notifyUI :() => void;
 
     /**
      * Notifies a remote uProxy installation that we are also a uProxy

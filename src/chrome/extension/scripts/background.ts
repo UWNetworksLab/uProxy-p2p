@@ -35,8 +35,14 @@ var proxyConfig = <IBrowserProxyConfig>new BrowserProxyConfig();
 // Singleton model for data bindings.
 var model :UI.Model = {
   networks: [],
-  // 'global' roster, which is just the concatenation of all network rosters.
-  roster: [],
+  contacts: {
+    'onlineTrustedUproxy': [],
+    'offlineTrustedUproxy': [],
+    'onlineUntrustedUproxy': [],
+    'offlineUntrustedUproxy': [],
+    'onlineNonUproxy': [],
+    'offlineNonUproxy': []
+  },
   description: ''
 };
 
@@ -62,7 +68,8 @@ function initUI() : UI.UserInterface {
   core = new CoreConnector(chromeConnector);
   var browserAction = new ChromeBrowserAction();
   var oAuth = new OAuth();
-  chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS, oAuth.getCredentials);
+  chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
+                           oAuth.getCredentials.bind(oAuth));
 
   return new UI.UserInterface(core, browserAction);
 }

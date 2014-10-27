@@ -27,16 +27,6 @@
     </style>
 
     <uproxy-toolbar hidden?='{{ UI.View.SPLASH==ui.view || !loggedIn }}'>
-      <uproxy-button id='btnGive'
-          on-tap='{{ getMode }}'
-          hidden?='{{ UI.Gestalt.GETTING == ui.gestalt }}'
-          img='../icons/share_white.svg'>
-      </uproxy-button>
-      <uproxy-button id='btnGet'
-          on-tap='{{ giveMode }}'
-          hidden?='{{ UI.Gestalt.GIVING == ui.gestalt }}'
-          img='../icons/receive_white.svg'>
-      </uproxy-button>
       <uproxy-button id='btnNetworks'
           on-tap='{{ networksView }}'
           img='../icons/networks.png'>

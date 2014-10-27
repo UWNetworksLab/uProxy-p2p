@@ -5,6 +5,7 @@
  * loaded.
  */
 /// <reference path='../../../uproxy.ts' />
+/// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
 
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
