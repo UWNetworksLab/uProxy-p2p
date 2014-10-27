@@ -244,10 +244,11 @@ module UI {
       var existingNetwork = this.getNetwork(network.name);
       if (existingNetwork) {
         existingNetwork.online = network.online;
+        existingNetwork.userId = network.userId;
       } else {
         model.networks.push({
           name:   network.name,
-          userId: '',
+          userId: network.userId,
           online: network.online,
           roster: {}
         });

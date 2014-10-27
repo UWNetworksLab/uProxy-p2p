@@ -15,6 +15,7 @@ declare module UI {
   export interface NetworkMessage {
     name    :string;
     online  :boolean;
+    userId :string;
   }
 
   export interface UserProfileMessage {
