@@ -86,7 +86,7 @@ module UI {
     public instanceGettingAccessFrom = null;
     // The instances you are giving access to.
     // Remote instances are added to this set if their access.isClient value
-    // is true.   
+    // is true.
     public instancesGivingAccessTo = {};
 
     /**
@@ -245,6 +245,13 @@ module UI {
       if (existingNetwork) {
         existingNetwork.online = network.online;
         existingNetwork.userId = network.userId;
+        if (!network.online) {
+          for (var userId in existingNetwork.roster) {
+            var user = existingNetwork.roster[userId];
+            this.categorizeUser_(user, user.getCategory(), null);
+          }
+          existingNetwork.roster = {};
+        }
       } else {
         model.networks.push({
           name:   network.name,
@@ -324,7 +331,9 @@ module UI {
           }
         }
         // Add users to new category.
-        model.contacts[newCategory].push(user);
+        if (newCategory) {
+          model.contacts[newCategory].push(user);
+        }
       }
     }
   }  // class UserInterface
