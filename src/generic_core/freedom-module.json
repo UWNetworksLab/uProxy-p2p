@@ -29,7 +29,7 @@
       "api": "social"
     },
     "storage": {
-      "url": "../lib/storage/storage.isolated.json",
+      "url": "../lib/storage/storage.shared.json",
       "api": "storage"
     }
   },

@@ -236,7 +236,7 @@ module.exports = (grunt) ->
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
           src: [
-            'isolated/**'
+            'shared/**'
           ]
           dest: chromeAppDevPath + 'lib/storage'
         }, {  # Additional hack - TODO: remove this once social enum is gone.
