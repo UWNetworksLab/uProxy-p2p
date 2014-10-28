@@ -253,11 +253,7 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/uproxy-networking/build/',
           src: FILES.uproxy_networking_common,
           dest: chromeAppDevPath + 'scripts/uproxy-networking/'
-        }, { # Copy uproxy-networking files.  TODO: merge these 8 into 1 grunt rule
-          expand: true, cwd: 'node_modules/uproxy-networking/build/freedom/',
-          src: ['uproxy-core-env.js']
-          dest: chromeAppDevPath + 'lib/'
-        } ]
+        }]
 
       # Firefox. Assumes the top-level tasks generic_core and generic_ui
       # completed.
