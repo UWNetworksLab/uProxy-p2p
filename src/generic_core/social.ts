@@ -115,28 +115,6 @@ module Social {
 
     constructor(public name :string) {
       this.roster = {};
-      this.myInstance = new Core.LocalInstance(this);
-    }
-
-    /**
-     * Check local storage for saved state about this FreedomNetwork. If there
-     * exists actual state, load everything into memory. Otherwise, initialize
-     * to sane defaults.
-     *
-     * Intended to be protected, but TypeScript has no 'protected' modifier.
-     */
-    public syncFromStorage = () : Promise<void> => {
-      // TODO: Fix tsd es6-promise typing to be more lenient.
-      var preparedMyself = this.prepareLocalInstance_().then(() => {});
-      var preparedRoster = storage.load<NetworkState>(this.getStorePath())
-          .then((state) => {
-        this.log('loading previous state.');
-        this.restoreState(state);
-      }).catch((e) => {
-        this.log('freshly initialized.');
-      });
-      return Promise.all([preparedMyself, preparedRoster])
-          .then(() => {});
     }
 
     /**
@@ -144,26 +122,21 @@ module Social {
      * from storage, or create a new one if this is the first time this uProxy
      * installation has interacted with this network.
      */
-    private prepareLocalInstance_ = () : Promise<Core.LocalInstance> => {
-      if (this.myInstance) {
-        return Promise.resolve(this.myInstance);
-      }
-      var key = this.getStorePath() + this.SaveKeys.ME;
+    public prepareLocalInstance = (userId :string) : Promise<void> => {
+      var key = this.name + userId;
       return storage.load<Instance>(key).then((result :Instance) => {
         console.log(JSON.stringify(result));
-        this.myInstance = new Core.LocalInstance(this, result);
+        this.myInstance = new Core.LocalInstance(this, userId, result);
         this.log('loaded local instance from storage: ' +
                  this.myInstance.instanceId);
-        return this.myInstance;
       }, (e) => {
-        this.myInstance = new Core.LocalInstance(this);
+        this.myInstance = new Core.LocalInstance(this, userId);
         this.log('generating new local instance: ' +
                  this.myInstance.instanceId);
         return this.myInstance.prepare().then(() => {
             return storage.save<Instance>(key, this.myInstance.currentState());
           }).then((prev) => {
             this.log('saved new local instance to storage');
-            return this.myInstance;
           });
       });
     }
@@ -242,22 +215,11 @@ module Social {
 
     //================ Subclasses must override these methods ================//
 
-    // From Core.Persistent:
-    public currentState = () : NetworkState => {
-      throw new Error('Operation not implemented');
-    }
-    public restoreState = (state :NetworkState) => {
-      throw new Error('Operation not implemented');
-    }
-
     // From Social.Network:
     public login = (remember :boolean) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
-      throw new Error('Operation not implemented');
-    }
-    public isOnline = () : boolean => {
       throw new Error('Operation not implemented');
     }
     public flushQueuedInstanceMessages = () => {
@@ -446,7 +408,6 @@ module Social {
       this.log('added "' + userId + '" to roster.');
       this.roster[userId] = new Core.User(this, userId);
       // Remember the new user.
-      this.saveToStorage_();
     }
 
     /**
@@ -457,54 +418,6 @@ module Social {
     private isNewFriend_ = (userId :string) : boolean => {
       return !(userId == this.myInstance.userId) &&
              !(userId in this.roster);
-    }
-
-    private saveToStorage_ = () => {
-      var state = this.currentState();
-      storage.save<NetworkState>(this.getStorePath(), state)
-          .then((old) => {
-        this.log('saved to storage. ' + JSON.stringify(state));
-      }).catch((e) => {
-        console.error('failed to save to storage', e);
-      });
-    }
-
-    private loadUserFromStorage_ = (userId :string) => {
-      storage.load<Core.UserState>(this.getStorePath() + userId)
-          .then((state) => {
-        this.roster[userId] = new Core.User(this, userId);
-        this.roster[userId].restoreState(state);
-        this.log('successfully loaded user ' + userId);
-      }).catch((e) => {
-        this.error('could not load user ' + userId);
-      });
-    }
-
-    //==================== Core.Persistent implementation ====================//
-
-    /**
-     * The returned state excludes the local instance information, which is
-     * saved/loaded separately.
-     */
-    public currentState = () : NetworkState => {
-      return cloneDeep({
-        name: this.name,
-        remember: false,
-        // Only save and load the userIds in the roster.
-        // The actual Users will be saved and loaded separately.
-        userIds: Object.keys(this.roster)
-      });
-    }
-
-    public restoreState = (state :NetworkState) => {
-      if (this.name !== state.name) {
-        throw Error('Loading unexpected network name!' + state.name);
-      }
-      this.remember = state.remember;
-      // Load all users based on userIds.
-      for (var i = 0 ; i < state.userIds.length ; ++i) {
-        this.loadUserFromStorage_(state.userIds[i]);
-      }
     }
 
     //===================== Social.Network implementation ====================//
@@ -520,13 +433,11 @@ module Social {
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom_Social.ClientState) => {
             // Upon successful login, save local client information.
-            this.myInstance.userId = freedomClient.userId;
             this.startMonitor_();
             this.log('logged into uProxy');
+            return this.prepareLocalInstance(freedomClient.userId);
           });
       return this.onceLoggedIn_
-          // TODO: Only fire a popup notification the 1st few times.
-          // (what's a 'few'?)
           .then(() => {
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
@@ -547,13 +458,6 @@ module Social {
         this.log('logged out.');
       });
     }
-
-    public isOnline = () : boolean => {
-      // this.myInstance.userId is only set when the social API's login
-      // promise fulfills.
-      return Boolean(this.myInstance && this.myInstance.userId);
-    }
-
 
     // TODO: Use the queue from uproxy-lib!
     public flushQueuedInstanceMessages = () : Promise<void> => {
@@ -624,51 +528,19 @@ module Social {
   //     instances. Each instance is independent and not correlated with other
   //     instances in any way. Thus, an instance ID is also a user ID.
   export class ManualNetwork extends AbstractNetwork {
-    private isOnline_ :boolean;
-
     constructor(public name :string) {
       super(name);
-
-      // Begin loading everything relevant to this Network from local storage.
-      this.syncFromStorage().then(() => {
-        this.log('prepared Social.ManualNetwork.');
-      });
-    }
-
-    //==================== Core.Persistent implementation ====================//
-
-    public currentState = () : NetworkState => {
-      return cloneDeep({
-        name: this.name,
-        remember: false,
-        userIds: []  // ManualNetwork currently doesn't persist contacts.
-      });
-    }
-
-    public restoreState = (state :NetworkState) => {
-      if (this.name !== state.name) {
-        throw Error('Loading unexpected network name: ' + state.name);
-      }
-      // Discard state.remember. ManualNetwork doesn't use it.
-      // Discard state.userIds. ManualNetwork doesn't persist contacts.
     }
 
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
-      this.isOnline_ = true;
       return Promise.resolve<void>();
     }
 
     public logout = () : Promise<void> => {
-      this.isOnline_ = false;
       return Promise.resolve<void>();
     }
-
-    public isOnline = () : boolean => {
-      return this.isOnline_;
-    }
-
 
     // Does not apply to ManualNetwork. Nothing to do.
     public flushQueuedInstanceMessages = () => {

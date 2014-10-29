@@ -1,4 +1,3 @@
-/// <reference path='persistent.d.ts' />
 
 declare module Social {
 
@@ -20,7 +19,7 @@ declare module Social {
    * with the clientIds. This is because instanceIds occur at the User level, as
    * the User manages the instance <--> client mappings (see 'user.ts').
    */
-  interface Network extends Core.Persistent {
+  interface Network {
     name       :string;
     // TODO: Review visibility of these attributes and the interface.
     roster     :{[userId:string]:Core.User};
@@ -39,8 +38,6 @@ declare module Social {
      * Does nothing if already logged out.
      */
     logout :() => Promise<void>;
-
-    isOnline :() => boolean;
 
     /**
      * Returns true iff a login is pending (e.g. waiting on user's password).

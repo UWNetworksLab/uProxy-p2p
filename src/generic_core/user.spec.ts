@@ -380,30 +380,4 @@ describe('Core.User', () => {
     });
 
   });  // describe instance sending promises
-
-  describe('save & load', () => {
-
-    it('can snapthot its state', () => {
-      expect(user.currentState()).toEqual({
-        userId: 'fakeuser',
-        name: 'Alice',
-        instanceIds: ['fakeinstance']
-      });
-    });
-
-    it('can restore its state', () => {
-      user.restoreState({
-        userId: 'fakeuser',
-        name: 'Alice Still',
-        instanceIds: []
-      })
-      expect(user.currentState()).toEqual({
-        userId: 'fakeuser',
-        name: 'Alice Still',
-        instanceIds: []
-      });
-    })
-
-  });  // describe save & load
-
 });  // uProxy.User

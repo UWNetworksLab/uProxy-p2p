@@ -22,7 +22,7 @@ describe('Core', () => {
   var user = <Core.User><any>jasmine.createSpy('user');
   user.getInstance = null;
   user.notifyUI = () => {};
-  user.getStorePath = () => { return 'fake/userpath'; };
+  user.getLocalInstanceId = () => { return 'fake/userpath'; };
   var alice = new Core.RemoteInstance(user, {
     instanceId: 'instance-alice',
     keyHash:    'fake-hash-alice',
@@ -99,7 +99,7 @@ describe('Core', () => {
   it('login continues to call login on correct network', (done) => {
     Social.networks['mockNetwork'] = {};
     spyOn(Social, 'FreedomNetwork').and.callFake(() => {
-      network.myInstance = new Core.LocalInstance(network);
+      network.myInstance = new Core.LocalInstance(network, 'fakeUser');
       return network;
     });
     expect(Object.keys(Social.pendingNetworks).length).toEqual(0);
@@ -116,7 +116,6 @@ describe('Core', () => {
     // This time it succeeds, so network object is moved from pending logins
     // to Social.networks.
     (<any>loginSpy).and.callFake(() => {
-      network.myInstance = new Core.LocalInstance(network);
       return Promise.resolve();
     });
     core.login('mockNetwork').then(() => {

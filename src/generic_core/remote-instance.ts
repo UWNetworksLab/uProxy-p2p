@@ -55,7 +55,7 @@ module Core {
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
     // scheduled to run in the next second.
     // Used by SocksToRtc & RtcToNet Handlers to make sure bytes sent and
-    // received are only forwarded to the UI once every second. 
+    // received are only forwarded to the UI once every second.
     private isUIUpdatePending = false;
 
     // The configuration used to setup peer-connections. This should be
@@ -115,19 +115,20 @@ module Core {
         // The last instance handshake from the peer.  This data may be fresh
         // (over the wire) or recovered from disk (and stored in a
         // RemoteInstanceState, which subclasses InstanceHandshake).
-        data        :InstanceHandshake,
-        // Any access consent that has already been granted, or null if consent
-        // acquisition has not yet started.
-        consent    ?:ConsentState) {
+        data        :InstanceHandshake) {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
       // storage.
-      if (consent) {
-        this.consent = consent;
-      }
+      this.update(data);
+      storage.load<RemoteInstanceState>(this.getStorePath())
+          .then((state) => {
+            this.restoreState(state);
+          }).catch((e) => {
+            console.log('Did not have consent state for this instanceId');
+          });
+
       this.bytesSent = 0;
       this.bytesReceived = 0;
-      this.update(data);
     }
 
     /**
@@ -135,7 +136,7 @@ module Core {
      * Since the parent User's userId may change, only store the userId.
      */
     public getStorePath = () => {
-      return this.user.getStorePath() + '/' + this.instanceId;
+      return this.user.getLocalInstanceId() + '/' + this.instanceId;
     }
 
     /**
@@ -177,7 +178,7 @@ module Core {
                 ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
                 this.rtcToNet_ = null;
                 this.bytesSent = 0;
-                this.bytesReceived = 0;                
+                this.bytesReceived = 0;
                 this.user.notifyUI();
                 // TODO: give each notification a real data structure and id,
                 // and allow the user select what notifications they get.
@@ -189,9 +190,9 @@ module Core {
                 data: signal
               });
             });
-            // When bytes are sent to or received from the client, notify the 
-            // UI about the increase in data exchanged. Increment the bytes 
-            // sent/received variables in real time, but use a timer to control 
+            // When bytes are sent to or received from the client, notify the
+            // UI about the increase in data exchanged. Increment the bytes
+            // sent/received variables in real time, but use a timer to control
             // when notifyUI() is called.
             this.rtcToNet_.bytesReceivedFromPeer
                 .setSyncHandler((numBytes:number) => {
@@ -201,7 +202,7 @@ module Core {
             this.rtcToNet_.bytesSentToPeer
                 .setSyncHandler((numBytes:number) => {
               this.bytesSent += numBytes;
-              this.updateBytesInUI();               
+              this.updateBytesInUI();
             });
             this.rtcToNet_.onceReady.then(() => {
               this.access.asClient = true;
@@ -271,10 +272,10 @@ module Core {
           data: signal
         });
       });
-      // When bytes are sent to or received through the proxy, notify the 
-      // UI about the increase in data exchanged. Increment the bytes 
-      // sent/received variables in real time, but use a timer to control 
-      // when notifyUI() is called.      
+      // When bytes are sent to or received through the proxy, notify the
+      // UI about the increase in data exchanged. Increment the bytes
+      // sent/received variables in real time, but use a timer to control
+      // when notifyUI() is called.
       this.socksToRtc_.bytesReceivedFromPeer
           .setSyncHandler((numBytes:number) => {
         this.bytesReceived += numBytes;
@@ -342,7 +343,6 @@ module Core {
       this.keyHash = data.keyHash;
       this.description = data.description;
       this.user.notifyUI();
-      this.saveToStorage();
       this.updateDate = new Date();
     }
 
@@ -543,7 +543,7 @@ module Core {
           this.user.notifyUI();
           this.isUIUpdatePending = false;
         }, 1000);
-        this.isUIUpdatePending = true;  
+        this.isUIUpdatePending = true;
       }
     }
 

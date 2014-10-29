@@ -12,7 +12,7 @@ describe('Core.LocalInstance', () => {
   });
 
   it('initializes with valid id and keyhash', () => {
-    instance = new Core.LocalInstance(network);
+    instance = new Core.LocalInstance(network, 'fakeId');
     expect(instance.instanceId).toBeDefined();
     expect(instance.keyHash).toBeDefined();
   });
