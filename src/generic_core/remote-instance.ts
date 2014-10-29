@@ -507,12 +507,10 @@ module Core {
     public currentState = () : RemoteInstanceState => {
       return cloneDeep({
         consent:     this.consent,
-        access:      this.access
       });
     }
     public restoreState = (state :RemoteInstanceState) => {
-      this.consent = state.consent,
-      this.access = state.access
+      this.consent = state.consent;
     }
 
     /**
@@ -546,7 +544,6 @@ module Core {
 
   export interface RemoteInstanceState {
     consent     :ConsentState;
-    access      :AccessState;
   }
 
   // TODO: Implement obfuscation.
