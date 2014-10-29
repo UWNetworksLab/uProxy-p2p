@@ -40,11 +40,11 @@ class ChromeTabAuth {
   private launchAuthTab_ = () : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
       if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
-        chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
         chrome.tabs.remove(tabId);
+        chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
         this.extractCode(tab.url).then((credentials :any) => {
           this.sendCredentials_(credentials);
         }).catch((e) => {
