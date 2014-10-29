@@ -3,7 +3,7 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
-var REDIRECT_URL = "https://www.uproxy.org/";
+var REDIRECT_URL = "https://www.uproxy.org/oauth-redirect-uri";
 
 declare var core :CoreConnector;
 
@@ -40,6 +40,7 @@ class ChromeTabAuth {
   private launchAuthTab_ = () : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
       if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
+        chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
@@ -58,16 +59,26 @@ class ChromeTabAuth {
         if (tabId == this.tabId_) {
           chrome.tabs.onUpdated.removeListener(onTabChange);
           chrome.tabs.onRemoved.removeListener(onTabClose);
+          chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
           this.tabId_ = -1;
           this.onError_('Login abandoned.');
         }
     }.bind(this);
+
+    var urlBlocker = function() {
+      return {cancel: true};
+    };
 
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
                        function(tab: chrome.tabs.Tab) {
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);
+      chrome.webRequest.onBeforeRequest.addListener(
+        urlBlocker,
+        {urls: [REDIRECT_URL + "*"]},
+        ['blocking']
+      );
     }.bind(this));
   }
 
