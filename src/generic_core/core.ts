@@ -125,7 +125,7 @@ class uProxyCore implements uProxy.CoreAPI {
   reset = () => {
     console.log('reset');
     for (var networkName in Social.networks) {
-      for (var userId in Social.networks) {
+      for (var userId in Social.networks[networkName]) {
         Social.networks[networkName][userId].logout();
       }
       if (networkName !== Social.MANUAL_NETWORK_ID) {

@@ -119,7 +119,7 @@ module Core {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
       // storage.
-      this.update(data);
+      this.instanceId = data.instanceId;
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
             this.restoreState(state);
@@ -129,6 +129,7 @@ module Core {
 
       this.bytesSent = 0;
       this.bytesReceived = 0;
+      this.update(data);
     }
 
     /**
@@ -342,6 +343,7 @@ module Core {
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
+      this.saveToStorage();
       this.user.notifyUI();
       this.updateDate = new Date();
     }
