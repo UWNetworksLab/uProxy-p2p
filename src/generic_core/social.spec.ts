@@ -73,7 +73,7 @@ describe('Social.FreedomNetwork', () => {
   describe('login & logout', () => {
 
     it('can log in', (done) => {
-      //jasmine.clock().install();
+      jasmine.clock().install();
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
@@ -100,10 +100,12 @@ describe('Social.FreedomNetwork', () => {
         spyOn(friend, 'monitor');
         expect(friend.isOnline()).toEqual(true);
         // Wait for 5 seconds and make sure monitoring was called.
-        //jasmine.clock().tick(5000);
-        //expect(friend.monitor).toHaveBeenCalled();
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
       fulfillFunc(fakeFreedomClient);
+      // We need to tick a clock in order promises to be resolved.
+      jasmine.clock().tick(1);
     });
 
     it('errors if network login fails', (done) => {
@@ -126,14 +128,14 @@ describe('Social.FreedomNetwork', () => {
       var friend = network.getUser('fakeuser');
       spyOn(friend, 'monitor');
       // Monitoring is still running.
-      //jasmine.clock().tick(5000);
-      //expect(friend.monitor).toHaveBeenCalled();
+      jasmine.clock().tick(5000);
+      expect(friend.monitor).toHaveBeenCalled();
 
       network.logout().then(() => {
         (<any>friend.monitor).calls.reset();
-        //jasmine.clock().tick(5000);
-        //expect(friend.monitor).not.toHaveBeenCalled();
-        //jasmine.clock().uninstall();
+        jasmine.clock().tick(5000);
+        expect(friend.monitor).not.toHaveBeenCalled();
+        jasmine.clock().uninstall();
         expect(network.myInstance).toEqual(null);
       }).then(done);
     });
