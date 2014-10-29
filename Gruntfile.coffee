@@ -392,7 +392,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/typescript-src/chrome/**/*.spec.js'
-          outfile: 'build/typescript-src/chrome/_SpecRunner.html'
+          outfile: 'build/typescript-src/chrome/SpecRunner.html'
           keepRunner: true
 
       generic_core:
@@ -417,7 +417,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/typescript-src/generic_core/**/*.spec.js'
-          outfile: 'build/typescript-src/generic_core/_SpecRunner.html'
+          outfile: 'build/typescript-src/generic_core/SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
           keepRunner: true,
@@ -430,7 +430,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/typescript-src/generic_ui/scripts/**/*.spec.js'
-          outfile: 'build/typescript-src/generic_ui/_SpecRunner.html'
+          outfile: 'build/typescript-src/generic_ui/SpecRunner.html'
           keepRunner: true
 
     compress:

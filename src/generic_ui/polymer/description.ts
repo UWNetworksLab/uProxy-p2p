@@ -4,7 +4,7 @@
 declare var core :uProxy.CoreAPI;
 
 Polymer({
-  description: 'My Computer',
+  description: model.description,
   update: function() {
     core.updateDescription(this.description);
   }

@@ -69,9 +69,6 @@ describe('Social.FreedomNetwork', () => {
     expect(network.roster).toEqual({});
   });
 
-  it('initializes with a LocalInstance', () => {
-    expect(network.myInstance).toBeDefined();
-  });
 
   describe('login & logout', () => {
 
@@ -82,7 +79,12 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
+      spyOn(network, 'prepareLocalInstance').and.callFake((userId) => {
+        network.myInstance = new Core.LocalInstance(network, userId);
+        return Promise.resolve();
+      });
       network.login(false).then(() => {
+        expect(network.myInstance).toBeDefined();
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         var freedomClientState :freedom_Social.ClientState = {
@@ -102,6 +104,8 @@ describe('Social.FreedomNetwork', () => {
         expect(friend.monitor).toHaveBeenCalled();
       }).then(done);
       fulfillFunc(fakeFreedomClient);
+      // We need to tick a clock in order promises to be resolved.
+      jasmine.clock().tick(1);
     });
 
     it('errors if network login fails', (done) => {
@@ -174,6 +178,7 @@ describe('Social.FreedomNetwork', () => {
 
     it('adds a new user for |onUserProfile|', () => {
       network = new Social.FreedomNetwork('mock');
+      network.myInstance = new Core.LocalInstance(network, 'fakeId');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',

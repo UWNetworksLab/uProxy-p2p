@@ -25,7 +25,6 @@ module Core {
 
     public instanceId  :string;
     public keyHash     :string;
-    public userId      :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -35,7 +34,9 @@ module Core {
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor(public network :Social.Network, load ?:Instance) {
+    public constructor(public network :Social.Network,
+                       public userId :string,
+                       load ?:Instance) {
       if (load) {
         this.restoreState(load);
         return;
@@ -61,7 +62,7 @@ module Core {
      * Obtain storage prefix for the LocalInstance.
      */
     public getStorePath = () => {
-      return this.network.getStorePath() + 'me/';
+      return this.network.name + this.userId;
     }
 
     /**

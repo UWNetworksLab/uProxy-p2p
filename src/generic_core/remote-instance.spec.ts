@@ -16,11 +16,11 @@ describe('Core.RemoteInstance', () => {
       'getLocalInstanceId',
       'send',
       'notifyUI',
-      'getStorePath'
   ]);
-  var socksToRtc = <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
-      'onceReady'
-  ]);
+  var socksToRtc =
+      <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
+          'onceReady'
+      ]);
   var instance :Core.RemoteInstance;
   // For remembering consent values.
   var tmpClientConsent :Consent.ClientState;

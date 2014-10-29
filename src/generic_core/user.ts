@@ -25,7 +25,6 @@
 
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='../interfaces/user.d.ts' />
 /// <reference path='../freedom/typings/social.d.ts' />
 
@@ -46,7 +45,7 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser, Core.Persistent {
+  export class User implements BaseUser {
 
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
@@ -85,18 +84,6 @@ module Core {
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
-      this.saveToStorage();
-    }
-
-    /**
-     * Obtain the storage prefix of this User.
-     * Assumption: Although Alice's userId may appear differently to Bob and
-     * Charlie, the potentially-different userIds will remain the same,
-     * individually to Bob and Charlie. Therefore we can use userId as part of
-     * the storage prefix.
-     */
-    public getStorePath = () => {
-      return this.network.getStorePath() + this.userId;
     }
 
     /**
@@ -112,7 +99,6 @@ module Core {
       this.profile = profile;
       this.log('Updating...');
       this.notifyUI();
-      this.saveToStorage();
     }
 
     /**
@@ -310,7 +296,6 @@ module Core {
       // TODO: Make ui.syncInstance actually do the granular-level update to UI.
       ui.syncInstance(this.instances_[instanceId]);
       ui.syncMappings();
-      this.saveToStorage();
     }
 
     /**
@@ -416,47 +401,6 @@ module Core {
      */
     private log = (msg:string) : void => {
       console.log('[User ' + this.name + '] ' + msg);
-    }
-
-    /**
-     * Get the raw attributes of the User to be sent over UI or saved to
-     * storage.
-     */
-    public currentState = () : UserState => {
-      return cloneDeep({
-        userId: this.userId,
-        name: this.name,
-        instanceIds: Object.keys(this.instances_)
-      });
-    }
-    public restoreState = (state :UserState) => {
-      this.userId = state.userId;
-      this.name = state.name;
-      this.instances_ = {};
-      // Load actual instance objects.
-      for (var i = 0 ; i < state.instanceIds.length ; ++i) {
-        this.loadInstanceFromStorage_(state.instanceIds[i]);
-      }
-      this.log('Loaded ' + Object.keys(this.instances_).length + ' instances');
-      this.notifyUI();
-    }
-    private loadInstanceFromStorage_ = (instanceId :string) => {
-      storage.load<Core.RemoteInstanceState>(this.getStorePath() + instanceId)
-          .then((state) => {
-        this.instances_[instanceId] =
-            new Core.RemoteInstance(this, state, state.consent);
-      }).catch((e) => {
-        this.log('could not load instance ' + instanceId);
-      });
-    }
-    private saveToStorage = () => {
-      var state = this.currentState();
-      storage.save<UserState>(this.getStorePath(), state)
-          .then((old) => {
-        this.log('saved to storage, ' + this.userId);
-      }).catch((e) => {
-        console.error('failed to save user to storage: ' + this.userId);
-      });
     }
 
     public monitor = () : void => {
