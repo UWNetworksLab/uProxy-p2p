@@ -21,6 +21,8 @@
       "scripts/proxy-config.js",
       "scripts/core_connector.js",
       "scripts/oauth.js",
+      "scripts/chrome_tab_auth.js",
+      "scripts/facebook_auth.js",
       "scripts/google_auth.js",
       "scripts/chrome_connector.js",
       "scripts/background.js"

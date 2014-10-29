@@ -18,6 +18,7 @@
   ],
   "devDependencies": {
     "es6-promise": "^0.1.1",
+    "freedom-social-facebook": "~0.0.5",
     "freedom-social-xmpp": "~0.2.1",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
