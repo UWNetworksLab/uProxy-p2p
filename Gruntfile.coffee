@@ -234,6 +234,12 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
         }, {
+          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
+          src: [
+            '**'
+          ]
+          dest: chromeAppDevPath + 'lib/freedom-social-facebook'
+        }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
           src: [
             'shared/**'
@@ -319,6 +325,10 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/freedom-social-facebook'
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
           src: ['**']

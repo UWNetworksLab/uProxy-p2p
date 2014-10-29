@@ -584,6 +584,10 @@ module Social {
         // clear any existing monitor
         console.error('startMonitor_ called with monitor already running');
         this.stopMonitor_();
+      } else if (this.name == 'Facebook') {
+        // Don't monitor (send INSTANCE_REQUEST messages) for Facebook,
+        // to minimize spam.
+        return;
       }
 
       var monitorCallback = () => {
