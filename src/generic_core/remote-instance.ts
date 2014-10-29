@@ -119,17 +119,17 @@ module Core {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
       // storage.
-      this.instanceId = data.instanceId;
+      this.update(data);
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
             this.restoreState(state);
+            this.user.notifyUI();
           }).catch((e) => {
             console.log('Did not have consent state for this instanceId');
           });
 
       this.bytesSent = 0;
       this.bytesReceived = 0;
-      this.update(data);
     }
 
     /**
@@ -343,7 +343,6 @@ module Core {
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
-      this.saveToStorage();
       this.user.notifyUI();
       this.updateDate = new Date();
     }
@@ -507,17 +506,11 @@ module Core {
      */
     public currentState = () : RemoteInstanceState => {
       return cloneDeep({
-        instanceId:  this.instanceId,
-        description: this.description,
-        keyHash:     this.keyHash,
         consent:     this.consent,
         access:      this.access
       });
     }
     public restoreState = (state :RemoteInstanceState) => {
-      this.instanceId = state.instanceId,
-      this.description = state.description,
-      this.keyHash = state.keyHash,
       this.consent = state.consent,
       this.access = state.access
     }
@@ -551,11 +544,9 @@ module Core {
 
   }  // class Core.RemoteInstance
 
-  export interface RemoteInstanceState extends Instance {
-    keyHash     :string;
+  export interface RemoteInstanceState {
     consent     :ConsentState;
     access      :AccessState;
-    description ?:string;
   }
 
   // TODO: Implement obfuscation.
