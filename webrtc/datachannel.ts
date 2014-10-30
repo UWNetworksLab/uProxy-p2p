@@ -1,7 +1,7 @@
 /// <reference path='../handler/queue.d.ts' />
 /// <reference path='../arraybuffers/arraybuffers.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
+/// <reference path='../freedom/typings/core-rtcdatachannel.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -63,44 +63,47 @@ module WebRtc {
     public onceOpened      :Promise<void>;
     public onceClosed      :Promise<void>;
 
-    private label_         :string;
-
     private opennedSuccessfully_ :boolean;
     private rejectOpened_  :(e:Error) => void;
 
+    private label_ :string;
     public getLabel = () : string => {
       return this.label_;
     }
 
-    public getState = () : string => {
-      return this.rtcDataChannel_.readyState;
-    }
+    private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel;
 
-    // Wrapper for
-    constructor(private rtcDataChannel_:RTCDataChannel) {
-      this.label_ = this.rtcDataChannel_.label;
+    // PRIVATE CONSTRUCTOR.  Typescript does not support marking a
+    // constructor as private, but this constructor should only be
+    // used by the |makeChannel| static factory method, because the
+    // |label_| field has not yet been populated.
+    constructor(ref:string) {
+      this.rtcDataChannel_ = freedom['core.rtcdatachannel'](ref);
       this.dataFromPeerQueue = new Handler.Queue<Data,void>();
       this.toPeerDataQueue_ = new Handler.Queue<Data,void>();
       this.onceOpened = new Promise<void>((F,R) => {
           this.rejectOpened_ = R;
+          this.rtcDataChannel_.getReadyState().then((state:string) => {
           // RTCDataChannels created by a RTCDataChannelEvent have an initial
           // state of open, so the onopen event for the channel will not
           // fire. We need to fire the onOpenDataChannel event here
           // http://www.w3.org/TR/webrtc/#idl-def-RTCDataChannelState
-          if (rtcDataChannel_.readyState === 'open') { F(); }
+          if (state === 'open') {
+            F();
+          } else if (state === 'connecting') {
           // Firefox channels do not have an initial state of 'open'
           // See https://bugzilla.mozilla.org/show_bug.cgi?id=1000478
-          if (rtcDataChannel_.readyState === 'connecting') {
-            rtcDataChannel_.onopen = (e:Event) => { F(); };
+            this.rtcDataChannel_.on('onopen', F);
           }
         });
+      });
       this.onceClosed = new Promise<void>((F,R) => {
-          this.rtcDataChannel_.onclose = (e:Event) => { F(); };
+          this.rtcDataChannel_.on('onclose', F);
         });
-      this.rtcDataChannel_.onmessage = this.onDataFromPeer_;
-      this.rtcDataChannel_.onerror = (e:Event) => {
-        log.error('rtcDataChannel_.onerror: ' + this.label_ + ': ' + e.toString);
-      };
+      this.rtcDataChannel_.on('onmessage', this.onDataFromPeer_);
+      this.rtcDataChannel_.on('onerror', (e:Event) => {
+        log.error('rtcDataChannel_.onerror: ' + e.toString);
+      });
       this.onceOpened.then(() => {
         this.opennedSuccessfully_ = true;
         this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
@@ -116,17 +119,26 @@ module WebRtc {
         });
     }
 
+    // Factory method.  This method should be used instead of the constructor.
+    // After this method returns, the channel's label property is available
+    // synchronously.
+    public static makeChannel = (ref:string) : Promise<DataChannel> => {
+      var channel :DataChannel = new DataChannel(ref);
+      return channel.rtcDataChannel_.getLabel().then((label:string) => {
+        channel.label_ = label;
+        return channel;
+      });
+    }
+
     // Handle data we get from the peer by putting it, appropriately wrapped, on
     // the queue of data from the peer.
-    private onDataFromPeer_ = (messageEvent : RTCMessageEvent) : void => {
-      if (typeof messageEvent.data === 'string') {
-        this.dataFromPeerQueue.handle({str: messageEvent.data});
-      } else if (messageEvent.data instanceof ArrayBuffer) {
-        this.dataFromPeerQueue.handle({buffer: messageEvent.data});
+    private onDataFromPeer_ = (message:freedom_RTCDataChannel.Message) : void => {
+      if (typeof message.text === 'string') {
+        this.dataFromPeerQueue.handle({str: message.text});
+      } else if (message.buffer instanceof ArrayBuffer) {
+        this.dataFromPeerQueue.handle({buffer: message.buffer});
       } else {
-        log.error('Unexpected data from peer that has type: ' +
-            typeof messageEvent.data + '; event: ' +
-            JSON.stringify(messageEvent));
+        log.error('Unexpected data from peer: ' + JSON.stringify(message));
       }
     }
 
@@ -197,7 +209,7 @@ module WebRtc {
         if(typeof data.str === 'string') {
           this.rtcDataChannel_.send(data.str);
         } else if(data.buffer) {
-          this.rtcDataChannel_.send(data.buffer);
+          this.rtcDataChannel_.sendBuffer(data.buffer);
         } else {
           // Data is good when it meets the type expected of the Data. If type-
           // saftey is ensured at compile time, this should never happen.
@@ -218,16 +230,18 @@ module WebRtc {
     // can without wasting timeout callbacks. When DataChannels correctly has a
     // callback for buffering, we don't need to do this anymore.
     private conjestionControlSendHandler = () : void => {
-      if(this.rtcDataChannel_.bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
-        if(this.toPeerDataQueue_.isHandling()) {
-          this.toPeerDataQueue_.stopHandling();
+      this.rtcDataChannel_.getBufferedAmount().then((bufferedAmount:number) => {
+        if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
+          if(this.toPeerDataQueue_.isHandling()) {
+            this.toPeerDataQueue_.stopHandling();
+          }
+          setTimeout(this.conjestionControlSendHandler, 20);
+        } else {
+          if(!this.toPeerDataQueue_.isHandling()) {
+            this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
+          }
         }
-        setTimeout(this.conjestionControlSendHandler, 20);
-      } else {
-        if(!this.toPeerDataQueue_.isHandling()) {
-          this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
-        }
-      }
+      });
     }
 
     public close = () : void => {
@@ -236,7 +250,7 @@ module WebRtc {
 
     public toString = () : string => {
       var s = this.getLabel() + ': opennedSuccessfully_=' +
-        this.opennedSuccessfully_ + '; state=' + this.getState();
+        this.opennedSuccessfully_;
       return s;
     }
   }  // class DataChannel

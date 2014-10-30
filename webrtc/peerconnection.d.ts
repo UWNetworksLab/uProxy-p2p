@@ -1,16 +1,15 @@
 /// <reference path="datachannel.d.ts" />
 
+/// <reference path='../freedom/typings/core-rtcpeerconnection.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="../third_party/typings/webcrypto/WebCrypto.d.ts" />
-/// <reference path="../third_party/typings/webrtc/RTCPeerConnection.d.ts" />
 
 /// <reference path="../handler/queue.d.ts" />
 
 declare module WebRtc {
 
   interface PeerConnectionConfig {
-    webrtcPcConfig         :RTCPeerConnectionConfig;
-    webrtcMediaConstraints :RTCMediaConstraints;
+    webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
     peerName               ?:string;
     initiateConnection     ?:boolean;
   }
@@ -21,8 +20,8 @@ declare module WebRtc {
 
   interface SignallingMessage {
     type          :SignalType
-    candidate     ?:RTCIceCandidateInit;
-    description   ?:RTCSessionDescriptionInit;
+    candidate     ?:freedom_RTCPeerConnection.RTCIceCandidate;
+    description   ?:freedom_RTCPeerConnection.RTCSessionDescription;
   }
 
   // Possible candidate types, e.g. RELAY if a host is only accessible
@@ -80,7 +79,8 @@ declare module WebRtc {
     // A peer connection can either open a data channel to the peer (will
     // change from |WAITING| state to |CONNECTING|)
     public openDataChannel :(channelLabel: string,
-                             options?: RTCDataChannelInit) => DataChannel;
+        options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
+        Promise<DataChannel>;
     // Or handle data channels opened by the peer (these events will )
     public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
 

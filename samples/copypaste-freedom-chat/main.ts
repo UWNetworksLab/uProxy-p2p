@@ -1,9 +1,6 @@
 /// <reference path='../../logging/logging.d.ts' />
 /// <reference path='../../webrtc/peerconnection.d.ts' />
 
-// TODO: update src/freedom/typings/freedom.d.ts
-declare var freedom:any;
-
 var log :Logging.Log = new Logging.Log('main');
 
 // Freedom apps don't have direct access to the page so this

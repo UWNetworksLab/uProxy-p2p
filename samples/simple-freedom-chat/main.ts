@@ -1,9 +1,6 @@
 /// <reference path='messages.d.ts' />
 /// <reference path='../../logging/logging.d.ts' />
 
-// TODO: update src/freedom/typings/freedom.d.ts
-declare var freedom:any;
-
 var log :Logging.Log = new Logging.Log('main');
 
 var sendButtonA = document.getElementById("sendButtonA");
