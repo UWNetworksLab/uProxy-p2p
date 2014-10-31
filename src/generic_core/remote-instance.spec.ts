@@ -22,8 +22,6 @@ describe('Core.RemoteInstance', () => {
           'onceReady'
       ]);
   var instance :Core.RemoteInstance;
-  // For remembering consent values.
-  var tmpConsent :Consent.State;
   var localPeerId = {
     clientInstancePath: 'clientInstancePath',
     serverInstancePath: 'serverInstancePath'
@@ -48,7 +46,6 @@ describe('Core.RemoteInstance', () => {
   it('begins with lowest consent bits', () => {
     var emptyConsent = new Consent.State();
     expect(instance.consent).toEqual(emptyConsent);
-    tmpConsent = instance.consent;
   });
 
   it('modifying consent locally also sends consent bits to remote', () => {
