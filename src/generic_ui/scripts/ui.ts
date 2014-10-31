@@ -147,18 +147,18 @@ module UI {
         // TODO: Display the message in the 'manual network' UI.
       });
 
-      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND, 
-          (instanceId :string) => {
-        if (instanceId === this.instanceGettingAccessFrom) {
+      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+          (data :any) => {
+        if (data.instanceId === this.instanceGettingAccessFrom) {
           this.instanceGettingAccessFrom = null;
-          this.stopGettingInUiAndConfig();
+          this.stopGettingInUiAndConfig(data.error);
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
         }
-      });      
+      });
 
-      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND, 
+      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
           (instanceId :string) => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
@@ -166,12 +166,12 @@ module UI {
         this.instancesGivingAccessTo[instanceId] = true;
       });
 
-      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND, 
+      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
           (instanceId :string) => {
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
-        }        
+        }
       });
 
       console.log('Created the UserInterface');
@@ -186,9 +186,9 @@ module UI {
      * Removes proxy indicators from UI and undoes proxy configuration
      * (e.g. chrome.proxy settings).
      */
-    public stopGettingInUiAndConfig = () => {
+    public stopGettingInUiAndConfig = (askUser :boolean) => {
       this.browserAction.setIcon('uproxy-19.png');
-      proxyConfig.stopUsingProxy();
+      proxyConfig.stopUsingProxy(askUser);
     }
 
     /**

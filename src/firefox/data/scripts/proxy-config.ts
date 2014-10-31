@@ -6,15 +6,15 @@
 
 var port :ContentScriptPort;
 
-class BrowserProxyConfig {
+class BrowserProxyConfig implements IBrowserProxyConfig{
   constructor() {
   }
 
-  public startUsingProxy = () => {
-    port.emit('startUsingPorxy');
+  public startUsingProxy = (endpoint:Net.Endpoint) => {
+    port.emit('startUsingPorxy', endpoint);
   };
 
-  public stopUsingProxy = () => {
-    port.emit('startUsingPorxy');
+  public stopUsingProxy = (askUser :boolean) => {
+    port.emit('startUsingPorxy', askUser);
   };
 };

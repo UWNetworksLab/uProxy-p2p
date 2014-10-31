@@ -293,7 +293,9 @@ module Core {
           this.access.asProxy = true;
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
-              ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, this.instanceId);
+              ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+                        {instanceId: this.instanceId,
+                         error: this.access.asProxy});
               this.access.asProxy = false;
               this.bytesSent = 0;
               this.bytesReceived = 0;
@@ -325,10 +327,11 @@ module Core {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
+      this.access.asProxy = false;
+
       this.socksToRtc_.stop();
       // TODO: Remove the access.asProxy/asClient, maybe replace with getters
       // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
-      this.access.asProxy = false;
     }
 
     /**
