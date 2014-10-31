@@ -71,6 +71,14 @@ function initUI() : UI.UserInterface {
   chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.getCredentials.bind(oAuth));
 
+  chrome.webRequest.onBeforeRequest.addListener(
+    function() {
+      return {cancel: true};
+    },
+    {urls: [REDIRECT_URL + "*"]},
+    ['blocking']
+  );
+
   return new UI.UserInterface(core, browserAction);
 }
 

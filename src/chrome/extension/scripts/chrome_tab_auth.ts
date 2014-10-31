@@ -44,7 +44,6 @@ class ChromeTabAuth {
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
         chrome.tabs.remove(tabId);
-        chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
         this.extractCode(tab.url).then((credentials :any) => {
           this.sendCredentials_(credentials);
         }).catch((e) => {
@@ -59,26 +58,17 @@ class ChromeTabAuth {
         if (tabId == this.tabId_) {
           chrome.tabs.onUpdated.removeListener(onTabChange);
           chrome.tabs.onRemoved.removeListener(onTabClose);
-          chrome.webRequest.onBeforeRequest.removeListener(urlBlocker);
           this.tabId_ = -1;
           this.onError_('Login abandoned.');
         }
     }.bind(this);
 
-    var urlBlocker = function() {
-      return {cancel: true};
-    };
 
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
                        function(tab: chrome.tabs.Tab) {
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);
-      chrome.webRequest.onBeforeRequest.addListener(
-        urlBlocker,
-        {urls: [REDIRECT_URL + "*"]},
-        ['blocking']
-      );
     }.bind(this));
   }
 
