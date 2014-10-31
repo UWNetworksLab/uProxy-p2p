@@ -1,8 +1,8 @@
 /// <reference path="../crypto/random.d.ts"/>
 /// <reference path='../handler/queue.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path='../freedom/typings/core-rtcdatachannel.d.ts' />
-/// <reference path='../freedom/typings/core-rtcpeerconnection.d.ts' />
+/// <reference path='../freedom/typings/rtcdatachannel.d.ts' />
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 /// <reference path='../freedom/typings/freedom.d.ts' />
 /// <reference path='../logging/logging.d.ts' />
 

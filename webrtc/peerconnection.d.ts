@@ -1,6 +1,6 @@
 /// <reference path="datachannel.d.ts" />
 
-/// <reference path='../freedom/typings/core-rtcpeerconnection.d.ts' />
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="../third_party/typings/webcrypto/WebCrypto.d.ts" />
 
