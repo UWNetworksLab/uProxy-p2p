@@ -75,15 +75,16 @@ module WebRtc {
 
     // PRIVATE CONSTRUCTOR.  Typescript does not support marking a
     // constructor as private, but this constructor should only be
-    // used by the |makeChannel| static factory method, because the
+    // used by the |fromId| static factory method, because the
     // |label_| field has not yet been populated.
-    constructor(ref:string) {
-      this.rtcDataChannel_ = freedom['core.rtcdatachannel'](ref);
+    // |id| is the Freedom GUID for the underlying browser object.
+    constructor(id:string) {
+      this.rtcDataChannel_ = freedom['core.rtcdatachannel'](id);
       this.dataFromPeerQueue = new Handler.Queue<Data,void>();
       this.toPeerDataQueue_ = new Handler.Queue<Data,void>();
       this.onceOpened = new Promise<void>((F,R) => {
-          this.rejectOpened_ = R;
-          this.rtcDataChannel_.getReadyState().then((state:string) => {
+        this.rejectOpened_ = R;
+        this.rtcDataChannel_.getReadyState().then((state:string) => {
           // RTCDataChannels created by a RTCDataChannelEvent have an initial
           // state of open, so the onopen event for the channel will not
           // fire. We need to fire the onOpenDataChannel event here
@@ -91,8 +92,8 @@ module WebRtc {
           if (state === 'open') {
             F();
           } else if (state === 'connecting') {
-          // Firefox channels do not have an initial state of 'open'
-          // See https://bugzilla.mozilla.org/show_bug.cgi?id=1000478
+            // Firefox channels do not have an initial state of 'open'
+            // See https://bugzilla.mozilla.org/show_bug.cgi?id=1000478
             this.rtcDataChannel_.on('onopen', F);
           }
         });
@@ -122,8 +123,9 @@ module WebRtc {
     // Factory method.  This method should be used instead of the constructor.
     // After this method returns, the channel's label property is available
     // synchronously.
-    public static makeChannel = (ref:string) : Promise<DataChannel> => {
-      var channel :DataChannel = new DataChannel(ref);
+    // |id| is the Freedom GUID for the underlying browser object.
+    public static fromId = (id:string) : Promise<DataChannel> => {
+      var channel :DataChannel = new DataChannel(id);
       return channel.rtcDataChannel_.getLabel().then((label:string) => {
         channel.label_ = label;
         return channel;

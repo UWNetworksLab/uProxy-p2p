@@ -2,6 +2,7 @@
 /// <reference path='../../logging/logging.d.ts' />
 /// <reference path="../../webrtc/peerconnection.d.ts" />
 /// <reference path="../../third_party/typings/tsd.d.ts" />
+/// <reference path="../../freedom/typings/freedom.d.ts" />
 
 var log :Logging.Log = new Logging.Log('freedomchat');
 

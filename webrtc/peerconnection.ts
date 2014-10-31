@@ -3,6 +3,7 @@
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../freedom/typings/core-rtcdatachannel.d.ts' />
 /// <reference path='../freedom/typings/core-rtcpeerconnection.d.ts' />
+/// <reference path='../freedom/typings/freedom.d.ts' />
 /// <reference path='../logging/logging.d.ts' />
 
 /// <reference path='datachannel.ts' />
@@ -616,9 +617,9 @@ module WebRtc {
       }
 
     // Add a rtc data channel and return the it wrapped as a DataChannel
-    private addRtcDataChannel_ = (dataChannelRef:string)
+    private addRtcDataChannel_ = (id:string)
         : Promise<DataChannel> => {
-      return WebRtc.DataChannel.makeChannel(dataChannelRef).then((dataChannel:DataChannel) => {
+      return WebRtc.DataChannel.fromId(id).then((dataChannel:DataChannel) => {
         var label = dataChannel.getLabel();
         this.dataChannels[label] = dataChannel;
         dataChannel.onceClosed.then(() => {
