@@ -34,7 +34,6 @@ module Core {
    */
   export class RemoteInstance implements Instance, Core.Persistent {
 
-    public instanceId  :string;
     public keyHash     :string
     public description :string;
     public bytesSent   :number;
@@ -115,11 +114,15 @@ module Core {
         // The last instance handshake from the peer.  This data may be fresh
         // (over the wire) or recovered from disk (and stored in a
         // RemoteInstanceState, which subclasses InstanceHandshake).
+        public instanceId :string,
         data        :InstanceHandshake) {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
       // storage.
-      this.update(data);
+      if (data) {
+        this.update(data);
+      }
+
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
             this.restoreState(state);
@@ -340,7 +343,6 @@ module Core {
       // WARNING: |data| is UNTRUSTED, because it is often provided directly by
       // the remote peer.  Therefore, we MUST NOT make use of any consent
       // information that might be present.
-      this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
       this.user.notifyUI();
@@ -507,10 +509,12 @@ module Core {
     public currentState = () : RemoteInstanceState => {
       return cloneDeep({
         consent:     this.consent,
+        //description: this.description
       });
     }
     public restoreState = (state :RemoteInstanceState) => {
       this.consent = state.consent;
+      //this.description = state.consent.description;
     }
 
     /**

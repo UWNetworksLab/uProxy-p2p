@@ -42,7 +42,7 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    instance = new Core.RemoteInstance(user, handshake);
+    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
   });
 
@@ -334,12 +334,12 @@ describe('Core.RemoteInstance', () => {
   });
 
   it('two remote instances establish mutual consent', () => {
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(user, {
+    var bob = new Core.RemoteInstance(user, 'instance-bob', {
       instanceId: 'instance-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
@@ -367,7 +367,7 @@ describe('Core.RemoteInstance', () => {
 
   describe('proxying', () => {
 
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
@@ -420,7 +420,7 @@ describe('Core.RemoteInstance', () => {
   describe('signaling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',

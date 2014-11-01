@@ -45,7 +45,7 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser {
+  export class User implements BaseUser, Core.Persistent {
 
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
@@ -84,6 +84,11 @@ module Core {
       this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+      storage.load<string[]>(this.getStorePath()).then((state) => {
+        this.restoreState(state);
+      }).catch((e) => {
+        console.log('could not load instance for user ' + this.userId);
+      });
     }
 
     /**
@@ -286,7 +291,9 @@ module Core {
         // Send consent, if we have had past relationships with this instance.
         existingInstance.sendConsent();
       } else {
-        this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
+        this.instances_[instanceId] =
+          new Core.RemoteInstance(this, instance.instanceId, instance);
+        this.saveToStorage();
       }
 
       // TODO: this may send a duplicate notification to the UI, because
@@ -464,6 +471,26 @@ module Core {
         return true;
       }
       return false;
+    }
+
+    public getStorePath() {
+      return this.getLocalInstanceId() + '/' + this.userId;
+    }
+
+    public saveToStorage = () => {
+      var state = this.currentState();
+      storage.save<string[]>(this.getStorePath(), state).then((old) => {});
+    }
+
+    public restoreState = (instances :string[]) => {
+      for (var i in instances) {
+        var instanceId = instances[i];
+        this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
+      }
+    }
+
+    public currentState = () :string[] => {
+      return cloneDeep(Object.keys(this.instances_));
     }
 
   }  // class User
