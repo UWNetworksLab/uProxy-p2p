@@ -18,8 +18,6 @@ path = require 'path'
 
 getNodePath = (module) =>
   Path.dirname(require.resolve(module + '/package.json'))
-uproxyLibPath = getNodePath 'uproxy-lib'
-uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
 chromeExtDevPath = 'build/dev/chrome/extension/'
 chromeAppDevPath = 'build/dev/chrome/app/'
@@ -78,10 +76,13 @@ FILES =
     'generic_core/util.js'
   ]
 
-  uproxy_networking_common: [
+  uproxy_lib_common: [
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
-    'ipaddr/ipaddr.min.js'
+  ]
+
+  uproxy_networking_common: [
+    'ipaddrjs/ipaddr.min.js'
     'tcp/tcp.js'
     'socks-common/socks-headers.js'
     'socks-to-rtc/socks-to-rtc.js'
@@ -105,7 +106,7 @@ module.exports = (grunt) ->
       typescriptSrc: Rule.symlinkSrc '.'
       thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
 
-      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyNetworkingPath
+      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-networking'
       uproxyNetworkingTypescriptSrc: Rule.symlinkSrc 'uproxy-networking'
 
       uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
@@ -156,7 +157,7 @@ module.exports = (grunt) ->
         } ] }
 
       # Compiled javascript from say, uproxy-lib and uproxy-networking.
-      # core_libs: { files: [ {
+      # uproxy_core_libs: { files: [ {
           # expand: true, cwd: uproxyLibPath + '/build'
           # src: ['**/*.js']
           # dest: 'build/dev/'
@@ -201,7 +202,7 @@ module.exports = (grunt) ->
 
       chrome_app:
         nonull: true
-        
+
         files: [ {  # Copy .js, .json, etc from src to build/dev/chrome/app
           expand: true, cwd: 'src/chrome/app'
           src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts']
@@ -221,7 +222,7 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
-          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom/'
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom/'
           src: [
             'freedom-for-chrome-for-uproxy.js'
             'uproxy-core-env.js'
@@ -255,8 +256,12 @@ module.exports = (grunt) ->
           expand: true, cwd: 'src/'
           src: ['icons/uproxy-*.png']
           dest: chromeAppDevPath
+        }, { # Copy uproxy-lib files.
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: chromeAppDevPath + 'scripts/uproxy-lib/'
         }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: chromeAppDevPath + 'scripts/uproxy-networking/'
         }]
@@ -310,11 +315,11 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
-          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom'
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom'
           src: ['freedom-for-firefox-for-uproxy.jsm']
           dest: firefoxDevPath + 'data'
         }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: firefoxDevPath + 'data/core/uproxy-networking'
         }, {

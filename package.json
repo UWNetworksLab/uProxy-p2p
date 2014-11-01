@@ -37,8 +37,8 @@
     "grunt-verbosity": "^0.2.2",
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
-    "uproxy-lib": "^13.1.1",
-    "uproxy-networking": "^1.3.0"
+    "uproxy-lib": "^14.0.0",
+    "uproxy-networking": "^2.1.2"
   },
   "private": true,
   "scripts": {
