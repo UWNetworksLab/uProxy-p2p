@@ -1,10 +1,16 @@
 {
   "folders": [
     {
-      "path": "../../",
-      "name": "uproxy-root-folder",
+      "path": "../..",
+      "name": "uproxy",
       "follow_symlinks": true
     },
+    {
+      "path": "../../build/",
+      "name": "build",
+      "follow_symlinks": true,
+      "file_exclude_patterns": ["*.js", "*.js.map"]
+    }
   ],
   "settings": {
     "tab_size": 2,
@@ -13,9 +19,7 @@
     "wrap_width": 80,
 
     "typescript": {
-      "roots":[
-        "root.ts",
-      ],
+      "roots":[ "root.ts" ],
       "settings": {
         "auto_complete":true,
         "node_path":"none",
