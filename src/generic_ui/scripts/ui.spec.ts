@@ -1,4 +1,5 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../generic_core/consent.ts' />
 /// <reference path='ui.ts' />
 
 // TODO: move model, mockCore, and mockBrowserAction to a file
@@ -78,43 +79,25 @@ describe('UI.UserInterface', () => {
       var clientInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        // TODO(jetpack): local*_ fields should be marked private.
-        // This test should probably import and instantiate real
-        // Consent.State objects, right? Same for
-        // serverInstance.consent below.
-        consent: {
-          localGrantsAccessToRemote_: false,
-          localGrantsAccessToRemote: false,
-          localRequestsAccessFromRemote_: true,
-          localRequestsAccessFromRemote: true,
-          remoteGrantsAccessToLocal: true,
-          remoteRequestsAccessFromLocal: false,
-          ignoringRemoteUserRequest: false,
-          ignoringRemoteUserOffer: false,
-        },
+        consent: new Consent.State(),
         access: {asClient: false, asProxy: false},
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
       };
+      clientInstance.consent.localRequestsAccessFromRemote = true;
+      clientInstance.consent.remoteGrantsAccessToLocal = true;
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        consent: {
-          localGrantsAccessToRemote_: true,
-          localGrantsAccessToRemote: true,
-          localRequestsAccessFromRemote_: false,
-          localRequestsAccessFromRemote: false,
-          remoteGrantsAccessToLocal: false,
-          remoteRequestsAccessFromLocal: true,
-          ignoringRemoteUserRequest: false,
-          ignoringRemoteUserOffer: false,
-        },
+        consent: new Consent.State(),
         access: {asClient: false, asProxy: false},
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
       };
+      serverInstance.consent.localGrantsAccessToRemote = true;
+      serverInstance.consent.remoteRequestsAccessFromLocal = true;
       var payload :UI.UserMessage = {
         network: 'testNetwork',
         user: {

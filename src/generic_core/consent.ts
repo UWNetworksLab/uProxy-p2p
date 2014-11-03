@@ -21,13 +21,11 @@ module Consent {
   // User-level consent state w.r.t. a remote instance. This state is stored
   // in local storage for each instance ID we know of.
   export class State {
-    // TODO(jetpack): make these two private (currently fails due to
-    // ui.spec.ts needing to instantiate State objects)
     // Local user's relationship with remote instance. These are
     // managed by getters and setters to maintain the invariant
     // relationship with the corresponding ignoring* fields below.
-    localGrantsAccessToRemote_ :boolean;
-    localRequestsAccessFromRemote_ :boolean;
+    private localGrantsAccessToRemote_ :boolean;
+    private localRequestsAccessFromRemote_ :boolean;
 
     // Cached values from remote user's instance sent over signalling channel.
     remoteGrantsAccessToLocal :boolean;
