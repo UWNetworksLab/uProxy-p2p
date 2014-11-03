@@ -394,47 +394,43 @@ module Core {
       // TODO: Make the UI update granular for just the consent, instead of the
       // entire parent User for this instance.
       this.user.notifyUI();
+
       // Fire a notification on the UI, if a state is different.
       // TODO: Determine if we should attach the instance id / decription to the
       // user name as part of the notification text.
+      var note = null;
       if (this.consent.remoteGrantsAccessToLocal !== remoteWasGrantingAccess) {
-	if (this.consent.remoteGrantsAccessToLocal
-            && !this.consent.ignoringRemoteUserOffer) {  // newly granted access
-	  if (this.consent.localRequestsAccessFromRemote) {
-	    ui.showNotification(this.user.name + ' granted you access.');
-	  } else {
-	    ui.showNotification(this.user.name + ' offered you access.');
-	  }
-	} else {  // newly revoked access
-          if (this.access.asProxy) {
-            // If currently proxying through this instance, then stop proxying
-            // since there is no longer access. Other than a socksToRtc
-            // timeout, this is the only other situation where proxying is
-            // interrupted remotely.
-            //
-            // We could hide notifications for this if
-            // ignoringRemoteUserOffer, but users probably want to see
-            // this even when ignoring.
-            ui.showNotification(this.user.name + ' revoked your access, ' +
-                'which ends your current proxy session.');
-            core.stop();
-          } else if (!this.consent.ignoringRemoteUserOffer) {
-            ui.showNotification(this.user.name + ' revoked your access.');
+        if (this.consent.remoteGrantsAccessToLocal
+            && !this.consent.ignoringRemoteUserOffer) {
+          // newly granted access
+          if (this.consent.localRequestsAccessFromRemote) {
+            note = this.user.name + ' granted you access.';
+          } else {
+            note = this.user.name + ' offered you access.';
           }
-	}
+        } else {
+          // newly revoked access
+          if (!this.consent.ignoringRemoteUserOffer) {
+            note = this.user.name + ' revoked your access.';
+          }
+        }
       }
 
-      if (this.consent.remoteRequestsAccessFromLocal
-          !== remoteWasRequestingAccess) {
-	if (this.consent.remoteRequestsAccessFromLocal
-            && !this.consent.ignoringRemoteUserRequest) {  // newly requesting/accepting
+      if (this.consent.remoteRequestsAccessFromLocal !== remoteWasRequestingAccess) {
+        if (this.consent.remoteRequestsAccessFromLocal
+            && !this.consent.ignoringRemoteUserRequest) {
+          // newly requested/accepted access
           if (this.consent.localGrantsAccessToRemote) {
-            ui.showNotification(this.user.name + ' has accepted your offer of access.');
-	  } else {
-            ui.showNotification(this.user.name + ' is requesting access.');
-	  }
-	}
+            note = this.user.name + ' has accepted your offer of access.';
+          } else {
+            note = this.user.name + ' is requesting access.';
+          }
+        }
         // No notification for cancelled requests.
+      }
+
+      if (note) {
+        ui.showNotification(note);
       }
     }
 
