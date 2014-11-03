@@ -241,22 +241,6 @@ describe('Core.RemoteInstance', () => {
       expect(user.notifyUI).toHaveBeenCalled();
     });
 
-    it('remote revoking consent stops proxy', () => {
-      instance.consent = new Consent.State();
-      // Pretend we are currently proxying through instance.
-      instance.consent.localRequestsAccessFromRemote = true;
-      instance.consent.remoteGrantsAccessToLocal = true;
-      instance.access.asProxy = true;
-      spyOn(core, 'stop');
-      instance.receiveConsent({
-        isRequesting: false,
-        isOffering:   false
-      });
-      expect(instance.consent.localRequestsAccessFromRemote).toEqual(true);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
-      expect(core.stop).toHaveBeenCalled();
-    });
-
   });
 
   describe('preparing consent bits to send over the wire', () => {
