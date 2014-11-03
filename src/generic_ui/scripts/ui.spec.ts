@@ -78,12 +78,14 @@ describe('UI.UserInterface', () => {
       var clientInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        // Unfortunately, local/_local* fields are duplicated because
-        // Consent.State uses setters for them.
+        // TODO(jetpack): local*_ fields should be marked private.
+        // This test should probably import and instantiate real
+        // Consent.State objects, right? Same for
+        // serverInstance.consent below.
         consent: {
-          _localGrantsAccessToRemote: false,
+          localGrantsAccessToRemote_: false,
           localGrantsAccessToRemote: false,
-          _localRequestsAccessFromRemote: true,
+          localRequestsAccessFromRemote_: true,
           localRequestsAccessFromRemote: true,
           remoteGrantsAccessToLocal: true,
           remoteRequestsAccessFromLocal: false,
@@ -98,12 +100,10 @@ describe('UI.UserInterface', () => {
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        // Unfortunately, local/_local* fields are duplicated because
-        // Consent.State uses setters for them.
         consent: {
-          _localGrantsAccessToRemote: true,
+          localGrantsAccessToRemote_: true,
           localGrantsAccessToRemote: true,
-          _localRequestsAccessFromRemote: false,
+          localRequestsAccessFromRemote_: false,
           localRequestsAccessFromRemote: false,
           remoteGrantsAccessToLocal: false,
           remoteRequestsAccessFromLocal: true,

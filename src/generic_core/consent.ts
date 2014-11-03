@@ -21,10 +21,13 @@ module Consent {
   // User-level consent state w.r.t. a remote instance. This state is stored
   // in local storage for each instance ID we know of.
   export class State {
-    // Local user's relationship with remote instance.
-    // key security property: controls local user giving access to peer
-    _localGrantsAccessToRemote :boolean;
-    _localRequestsAccessFromRemote :boolean;
+    // TODO(jetpack): make these two private (currently fails due to
+    // ui.spec.ts needing to instantiate State objects)
+    // Local user's relationship with remote instance. These are
+    // managed by getters and setters to maintain the invariant
+    // relationship with the corresponding ignoring* fields below.
+    localGrantsAccessToRemote_ :boolean;
+    localRequestsAccessFromRemote_ :boolean;
 
     // Cached values from remote user's instance sent over signalling channel.
     remoteGrantsAccessToLocal :boolean;
@@ -39,8 +42,8 @@ module Consent {
     ignoringRemoteUserOffer :boolean;
 
     constructor() {
-      this._localGrantsAccessToRemote = false;
-      this._localRequestsAccessFromRemote = false;
+      this.localGrantsAccessToRemote_ = false;
+      this.localRequestsAccessFromRemote_ = false;
       this.remoteGrantsAccessToLocal = false;
       this.remoteRequestsAccessFromLocal = false;
       this.ignoringRemoteUserRequest = false;
@@ -48,27 +51,29 @@ module Consent {
     }
 
     // TODO(jetpack): what about setting ignoring* vals to true when
-    // corresponding _local* vals are already true? we could:
-    // - set the _local* val to false
+    // corresponding local* vals are already true? we could:
+    // - set the local* val to false
     // - ignore attempt to set ignoring* val
-    // - allow ignoring* to be true when _local* is true
+    // - allow ignoring* to be true when local* is true
 
     // setters to guarantee invariants
     public get localGrantsAccessToRemote() :boolean {
-      return this._localGrantsAccessToRemote;
+      return this.localGrantsAccessToRemote_;
     }
     public set localGrantsAccessToRemote(granted :boolean) {
-      this._localGrantsAccessToRemote = granted;
-      if (granted)
+      this.localGrantsAccessToRemote_ = granted;
+      if (granted) {
         this.ignoringRemoteUserRequest = false;
+      }
     }
     public get localRequestsAccessFromRemote() :boolean {
-      return this._localRequestsAccessFromRemote;
+      return this.localRequestsAccessFromRemote_;
     }
     public set localRequestsAccessFromRemote(requested :boolean) {
-      this._localRequestsAccessFromRemote = requested;
-      if (requested)
+      this.localRequestsAccessFromRemote_ = requested;
+      if (requested) {
         this.ignoringRemoteUserOffer = false;
+      }
     }
   }
 
