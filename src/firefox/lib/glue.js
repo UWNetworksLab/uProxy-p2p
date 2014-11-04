@@ -5,8 +5,10 @@
  * for proxy setting and setiing a main icon.
  */
 
+var self = require("sdk/self");
+
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
-var uProxy = require('uproxy.js').uProxy;
+var uProxy = require(self.data.url('scripts/uproxy.js')).uProxy;
 
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {

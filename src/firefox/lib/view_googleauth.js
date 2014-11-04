@@ -3,8 +3,8 @@ var self = require("sdk/self");
 const {XMLHttpRequest} = require("sdk/net/xhr");
 
 var CLIENT_ID =
-    "222861774905-tkvp9gq42v5l3orqvqk6850b160i8tfk.apps.googleusercontent.com";
-var CLIENT_SECRET = "hDJxfvLqKs6vj1IW_M77Jn5w";
+    "746567772449-bp2g60f0mq4g8u02pqcepm2mjttogrrt.apps.googleusercontent.com";
+var CLIENT_SECRET = "Bmlc90_i2GFcaP26Fneq9UnO";
 
 var REDIRECT_URI = "https://www.uproxy.org/";
 
@@ -33,23 +33,26 @@ View_googleAuth.prototype.onMessage = function (m) {
 };
 
 function googleAuth(dispatchEvent, continuation) {
-    tabs.open({
-      url: "https://accounts.google.com/o/oauth2/auth?" +
-           "scope=email%20https://www.googleapis.com/auth/googletalk" +
-           "&redirect_uri=" + REDIRECT_URI +
-           "&response_type=code" +
-           "&client_id=" + CLIENT_ID,
-      isPrivate: true,
-
-      onLoad: function onLoad(tab) {
-        var url = tab.url;
-        if (url.startsWith(REDIRECT_URI)) {
-          var code = url.match(/code=([^&]+)/)[1];
-          getToken(code, dispatchEvent, continuation);
-          tab.close();
-        }
+  var googleOAuth2Url = "https://accounts.google.com/o/oauth2/auth?" +
+      "scope=email%20https://www.googleapis.com/auth/googletalk" +
+      "&redirect_uri=" + REDIRECT_URI +
+      "&response_type=code" +
+      "&client_id=" + CLIENT_ID;
+  var accountChooserUrl =
+      'https://accounts.google.com/accountchooser?continue=' +
+      encodeURIComponent(googleOAuth2Url);
+  tabs.open({
+    url: accountChooserUrl,
+    isPrivate: true,
+    onLoad: function onLoad(tab) {
+      var url = tab.url;
+      if (url.startsWith(REDIRECT_URI)) {
+        var code = url.match(/code=([^&]+)/)[1];
+        getToken(code, dispatchEvent, continuation);
+        tab.close();
       }
-   })
+    }
+ })
 }
 
 function getToken(authorization_code, dispatchEvent, continuation) {
