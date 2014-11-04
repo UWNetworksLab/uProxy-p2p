@@ -40,6 +40,9 @@
     "tabs",
     "proxy",
     "notifications",
+    "https://www.uproxy.org/oauth-redirect-uri*",
+    "webRequest",
+    "webRequestBlocking",
     "https://graph.facebook.com/oauth/access_token",
     "https://accounts.google.com/o/oauth2/token"
   ],
