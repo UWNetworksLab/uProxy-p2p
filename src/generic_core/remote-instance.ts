@@ -39,10 +39,7 @@ module Core {
     public bytesSent   :number;
     public bytesReceived    :number;
 
-    public consent     :ConsentState = {
-      asClient: Consent.ClientState.NONE,
-      asProxy:  Consent.ProxyState.NONE
-    };
+    public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
     public access      :AccessState = {
@@ -168,7 +165,7 @@ module Core {
                            signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
-          if (Consent.ClientState.GRANTED !== this.consent.asClient) {
+          if (!this.consent.localGrantsAccessToRemote) {
             console.warn('Remote side attempted access without permission');
             return;
           }
@@ -242,8 +239,8 @@ module Core {
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () : Promise<Net.Endpoint> => {
-      if (Consent.ProxyState.GRANTED !== this.consent.asProxy) {
+    public start = () :Promise<Net.Endpoint> => {
+      if (!this.consent.remoteGrantsAccessToLocal) {
         console.warn('Lacking permission to proxy!');
         return Promise.reject('Lacking permission to proxy!');
       } else if (this.access.asProxy) {
@@ -323,7 +320,7 @@ module Core {
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : void => {
+    public stop = () :void => {
       if (!this.access.asProxy) {
         console.warn('Cannot stop proxying when not proxying.');
         return;
@@ -353,48 +350,15 @@ module Core {
      * Modify the consent for this instance, *locally*. (User clicked on one of
      * the consent buttons in the UI.) Sends updated consent bits to the
      * remote instance afterwards.
-     *
-     * Gives a warning for UserActions which are invalid for the current state.
      */
     public modifyConsent = (action :Consent.UserAction) => {
-      switch(action) {
-        // Actions affecting our consent towards the remote as our proxy.
-        case Consent.UserAction.REQUEST:
-        case Consent.UserAction.CANCEL_REQUEST:
-        case Consent.UserAction.ACCEPT_OFFER:
-        case Consent.UserAction.IGNORE_OFFER:
-          var newProxyConsent = Consent.userActionOnProxyState(
-              action, this.consent.asProxy);
-          if (newProxyConsent) {
-            this.consent.asProxy = newProxyConsent;
-          } else {
-            console.warn('Invalid proxy consent transition!',
-                this.consent.asProxy, action);
-            return;
-          }
-          break;
-        // Actions affecting our consent towards the remote as our client.
-        case Consent.UserAction.OFFER:
-        case Consent.UserAction.CANCEL_OFFER:
-        case Consent.UserAction.ALLOW_REQUEST:
-        case Consent.UserAction.IGNORE_REQUEST:
-          var newClientConsent = Consent.userActionOnClientState(
-              action, this.consent.asClient);
-          if (newClientConsent) {
-            this.consent.asClient = newClientConsent;
-          } else {
-            console.warn('Invalid client consent transition!',
-                this.consent.asClient, action);
-            return;
-          }
-          break;
-        default:
-          console.warn('Invalid Consent.UserAction! ' + action);
-          return;
+      if (!Consent.handleUserAction(this.consent, action)) {
+        console.warn('Invalid user action on consent!', this.consent, action);
+        return;
       }
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
-      if (Consent.UserAction.CANCEL_OFFER == action && this.access.asClient) {
+      if (Consent.UserAction.CANCEL_OFFER === action && this.access.asClient) {
         this.rtcToNet_.close();
       }
       // Send new consent bits to the remote client, and save to storage.
@@ -424,73 +388,63 @@ module Core {
      * Receive consent bits from the remote, and update consent values
      * accordingly.
      */
-    public receiveConsent = (bits:Consent.State) => {
-      var oldProxyConsent = this.consent.asProxy;
-      var oldClientConsent = this.consent.asClient;
-      this.consent.asProxy = Consent.updateProxyStateFromRemoteState(
-          bits, this.consent.asProxy);
-      this.consent.asClient = Consent.updateClientStateFromRemoteState(
-          bits, this.consent.asClient);
+    public receiveConsent = (bits:Consent.WireState) => {
+      var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
+      var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
+      Consent.updateStateFromRemoteState(this.consent, bits);
       this.saveToStorage();
       // TODO: Make the UI update granular for just the consent, instead of the
       // entire parent User for this instance.
       this.user.notifyUI();
+
       // Fire a notification on the UI, if a state is different.
       // TODO: Determine if we should attach the instance id / decription to the
       // user name as part of the notification text.
-      if (oldProxyConsent != this.consent.asProxy) {
-        switch (this.consent.asProxy) {
-          case Consent.ProxyState.REMOTE_OFFERED:
-            ui.showNotification(this.user.name + ' offered you access.');
-            break;
-          case Consent.ProxyState.GRANTED:
-            ui.showNotification(this.user.name + ' granted you access.');
-            break;
-          case Consent.ProxyState.USER_REQUESTED:
-            // The only way to land in USER_REQUESTED upon reciving consent bits
-            // is if the remote has revoked access after previously being in
-            // GRANTED.
-            if (this.access.asProxy) {
-              // If currently proxying through this instance, then stop proxying
-              // since there is no longer access. Other than a socksToRtc
-              // timeout, this is the only other situation where proxying is
-              // interrupted remotely.
-              ui.showNotification(this.user.name + ' revoked your access, ' +
-                  'which ends your current proxy session.');
-              core.stop();
-            } else {
-              ui.showNotification(this.user.name + ' revoked your access.');
-            }
-            break;
-          default:
-            // Don't display notification for ignoring, and any other states.
-            break;
+      var note = null;
+      if (this.consent.remoteGrantsAccessToLocal !== remoteWasGrantingAccess) {
+        if (this.consent.remoteGrantsAccessToLocal
+            && !this.consent.ignoringRemoteUserOffer) {
+          // newly granted access
+          if (this.consent.localRequestsAccessFromRemote) {
+            note = this.user.name + ' granted you access.';
+          } else {
+            note = this.user.name + ' offered you access.';
+          }
+        } else {
+          // newly revoked access
+          if (!this.consent.ignoringRemoteUserOffer) {
+            note = this.user.name + ' revoked your access.';
+          }
         }
       }
-      if (oldClientConsent != this.consent.asClient) {
-        switch (this.consent.asClient) {
-          case Consent.ClientState.REMOTE_REQUESTED:
-            ui.showNotification(this.user.name + ' is requesting access.');
-            break;
-          case Consent.ClientState.GRANTED:
-            ui.showNotification(this.user.name + ' has accepted your offer of access.');
-            break;
-          default:
-            // Don't display notification for ignoring, and any other states.
-            break;
+
+      if (this.consent.remoteRequestsAccessFromLocal !== remoteWasRequestingAccess) {
+        if (this.consent.remoteRequestsAccessFromLocal
+            && !this.consent.ignoringRemoteUserRequest) {
+          // newly requested/accepted access
+          if (this.consent.localGrantsAccessToRemote) {
+            note = this.user.name + ' has accepted your offer of access.';
+          } else {
+            note = this.user.name + ' is requesting access.';
+          }
         }
+        // No notification for cancelled requests.
+      }
+
+      if (note) {
+        ui.showNotification(note);
       }
     }
 
     /**
      * Return the pair of boolean consent bits indicating client and proxy
      * consent status, from the user's point of view. These bits will be sent on
-     * thewire.
+     * the wire.
      */
-    public getConsentBits = () : Consent.State => {
+    public getConsentBits = () :Consent.WireState => {
       return {
-        isRequesting: Consent.ProxyState.userIsRequesting(this.consent.asProxy),
-        isOffering: Consent.ClientState.userIsOffering(this.consent.asClient)
+        isRequesting: this.consent.localRequestsAccessFromRemote,
+        isOffering: this.consent.localGrantsAccessToRemote
       };
     }
 
@@ -506,7 +460,7 @@ module Core {
      * Get the raw attributes of the instance to be sent over to the UI or saved
      * to storage.
      */
-    public currentState = () : RemoteInstanceState => {
+    public currentState = () :RemoteInstanceState => {
       return cloneDeep({
         consent:     this.consent,
         //description: this.description
@@ -521,7 +475,7 @@ module Core {
      * Returns a snapshot of a RemoteInstance's state for the UI. This includes
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public currentStateForUi = () : UI.Instance => {
+    public currentStateForUi = () :UI.Instance => {
       return cloneDeep({
         instanceId:           this.instanceId,
         description:          this.description,
@@ -534,7 +488,7 @@ module Core {
       });
     }
 
-    private updateBytesInUI = () : void => {
+    private updateBytesInUI = () :void => {
       if (!this.isUIUpdatePending) {
         setTimeout(() => {
           this.user.notifyUI();
@@ -547,7 +501,7 @@ module Core {
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState {
-    consent     :ConsentState;
+    consent     :Consent.State;
   }
 
   // TODO: Implement obfuscation.

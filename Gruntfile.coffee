@@ -425,6 +425,7 @@ module.exports = (grunt) ->
       generic_ui:
         src: FILES.jasmine_helpers
             .concat [
+              'build/typescript-src/generic_core/consent.js'
               'build/typescript-src/generic_ui/scripts/user.js'
               'build/typescript-src/generic_ui/scripts/ui.js'
             ]

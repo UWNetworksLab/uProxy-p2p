@@ -54,10 +54,8 @@ module UI {
       // Check if any instances have non-none consent state.
       for (var i = 0; i < this.instances.length; ++i) {
         // TODO: check these values / change after consent rewrite.
-        if (this.instances[i].consent.asClient == Consent.ClientState.GRANTED ||
-            this.instances[i].consent.asClient == Consent.ClientState.USER_OFFERED ||
-            this.instances[i].consent.asProxy == Consent.ProxyState.GRANTED ||
-            this.instances[i].consent.asProxy == Consent.ProxyState.REMOTE_OFFERED) {
+        if (this.instances[i].consent.localGrantsAccessToRemote ||
+            this.instances[i].consent.remoteGrantsAccessToLocal) {
           return onlineOrOffline + 'TrustedUproxy';
         }
       }
