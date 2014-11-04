@@ -191,12 +191,6 @@ module uProxy {
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
-    // updateNetwork(network:Social.Network) : void;
-    // updateSelf(user:Core.User) : void;
-    // Update an instance.
-    // syncInstance(instance : any) : void;
-    // updateMappings() : void;
-    // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
   }

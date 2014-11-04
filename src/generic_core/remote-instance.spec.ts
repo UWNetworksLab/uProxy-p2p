@@ -233,7 +233,6 @@ describe('Core.RemoteInstance', () => {
 
     it('receiving consent bits sends update to UI', () => {
       instance.consent = new Consent.State();
-      spyOn(ui, 'syncInstance');
       instance.receiveConsent({
         isRequesting: false,
         isOffering:   false

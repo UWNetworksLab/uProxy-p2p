@@ -55,12 +55,6 @@ module Core {
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
-    // Sometimes, sending messages to an instance fails because the client
-    // corresponding to the instance has gone offline. In that case, we save a
-    // promise for the next connection of that instance, for the future delivery
-    // of that message.
-    private reconnections_ :{ [instanceId :string] :InstanceReconnection };
-
     /**
      * Users are constructed purely on the basis of receiving a userId.
      * They may or may not have a :UserProfile (because the Network may have
@@ -81,7 +75,6 @@ module Core {
       }
       this.clientIdToStatusMap = {};
       this.instances_ = {};
-      this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
     }
@@ -120,28 +113,8 @@ module Core {
             'Cannot send to invalid instance ' + instanceId));
       }
       var clientId = this.instanceToClientMap_[instanceId];
-      var promise = Promise.resolve(clientId);
-      if (!clientId) {
-        // If this instance is currently offline...
-        if (!this.reconnections_[instanceId]) {
-          // Prepares a reconnection promise if necessary,
-          promise = new Promise<string>((F, R) => {
-            this.reconnections_[instanceId] = {
-              promise: promise,
-              fulfill: F
-            }
-          });
-        } else {
-          // or access the existing one, to attach the pending message to.
-          promise = this.reconnections_[instanceId].promise;
-        }
-      }
-      return <Promise<string>>promise.then((clientId) => {
-        // clientId may have changed by the time this promise fulfills.
-        clientId = this.instanceToClientMap_[instanceId];
-        return this.network.send(clientId, payload).then(() => {
-          return clientId;
-        });
+      return this.network.send(clientId, payload).then(() => {
+        return clientId;
       });
     }
 
@@ -281,7 +254,6 @@ module Core {
       // Create or update the Instance object.
       var existingInstance = this.instances_[instanceId];
       if (existingInstance) {
-        this.fulfillReconnection_(instanceId);
         existingInstance.update(instance);
         // Send consent, if we have had past relationships with this instance.
         existingInstance.sendConsent();
@@ -293,9 +265,6 @@ module Core {
       // instance.update and the instance constructor both notify the UI.
       // This shouldn't be a problem but we may want to clean this up.
       this.notifyUI();
-      // TODO: Make ui.syncInstance actually do the granular-level update to UI.
-      ui.syncInstance(this.instances_[instanceId]);
-      ui.syncMappings();
     }
 
     /**
@@ -311,25 +280,6 @@ module Core {
         return;
       }
       instance.receiveConsent(consentMessage.consent);
-    }
-
-    /**
-     * Fulfill the reconnection (delivers pending messages) if it's there.
-     */
-    private fulfillReconnection_ = (instanceId:string) => {
-      var newClientId = this.instanceToClientMap_[instanceId];
-      if (!newClientId) {
-        console.warn('Expected valid new clientId for ' + instanceId);
-        // Try again next time (keep the reconnection so messages can still be
-        // sent in the future).
-        return;
-      }
-      var reconnect:InstanceReconnection = this.reconnections_[instanceId];
-      if (reconnect) {
-        reconnect.fulfill(newClientId);
-      }
-      // TODO: Make sure this doesn't affect multiple .thens().
-      delete this.reconnections_[instanceId];
     }
 
     /**

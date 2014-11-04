@@ -220,11 +220,6 @@ module UI {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
-    syncInstance = (instance : any) => {}
-    updateMappings = () => {}
-
-    sendConsent = () => {}
-
     private getNetwork = (networkName :string) => {
       for (var networkId in model.networks) {
         if (model.networks[networkId].name === networkName) {
