@@ -1,8 +1,5 @@
 /// <reference path='messages.d.ts' />
-/// <reference path='../../logging/logging.d.ts' />
 /// <reference path="../../freedom/typings/freedom.d.ts" />
-
-var log :Logging.Log = new Logging.Log('main');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -17,13 +14,11 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   var chat :any = interface();
 
   chat.on('ready', function() {
-    log.info('peer connection established!');
     sendAreaA.disabled = false;
     sendAreaB.disabled = false;
   });
 
   chat.on('error', function() {
-    log.error('something went wrong with the peer connection');
     sendAreaA.disabled = true;
     sendAreaB.disabled = true;
   });
@@ -42,5 +37,5 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   chat.on('receiveA', receive.bind(null, receiveAreaA));
   chat.on('receiveB', receive.bind(null, receiveAreaB));
 }, (e:Error) => {
-  log.error('could not load freedom: ' + e.message);
+  console.error('could not load freedom: ' + e.message);
 });

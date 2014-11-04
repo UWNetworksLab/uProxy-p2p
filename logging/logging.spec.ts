@@ -19,15 +19,15 @@ describe("logger from core environment", () => {
 
   it('format string', () => {
     expect(Logging.formatMessage(message1))
-        .toMatch(/\*\[tag\]\(.*\) D: simple string/);
+        .toMatch(/D \[.*\] simple string/);
     expect(Logging.formatMessage(message2))
-        .toMatch(/\*\[tag\]\(.*\) D: simple string/);
+        .toMatch(/D \[.*\] simple string/);
     expect(Logging.formatMessage(message3))
-        .toMatch(/\*\[test-module\]\(.*\) I: second string/);
+        .toMatch(/I \[.*\] second string/);
     expect(Logging.formatMessage(message4))
-        .toMatch(/\*\[test\]\(.*\) W: Bob pinged Alice with id=123456/);
+        .toMatch(/W \[.*\] Bob pinged Alice with id=123456/);
     expect(Logging.formatMessage(message5))
-        .toMatch(/\*\[test\]\(.*\) E: Bob pinged Alice with id=123456/);
+        .toMatch(/E \[.*\] Bob pinged Alice with id=123456/);
   });
 
   it('grab logs', () => {
@@ -36,7 +36,7 @@ describe("logger from core environment", () => {
     log2.info('second string');
     log2.error('third string');
     expect(Logging.getLogs().join('\n')).toMatch(
-      /\*\[tag2\]\(.*\) E: third string/);
+      /E \[.*\] third string/);
 
     // set to log all messages.
     Logging.clearLogs();
@@ -45,7 +45,7 @@ describe("logger from core environment", () => {
     log2.info('second string');
     log2.error('third string');
     expect(Logging.getLogs().join('\n')).toMatch(
-      /\*\[tag1\]\(.*\) D: simple string\n\*\[tag2\]\(.*\) I: second string\n\*\[tag2\]\(.*\) E: third string/);
+      /D \[.*\] simple string\nI \[.*\] second string\nE \[.*\] third string/);
 
      // set to log messages with level >= info.
     Logging.clearLogs();
@@ -54,7 +54,7 @@ describe("logger from core environment", () => {
     log2.info('second string');
     log2.error('third string');
     expect(Logging.getLogs().join('\n')).toMatch(
-      /\*\[tag2\]\(.*\) I: second string\n\*\[tag2\]\(.*\) E: third string/);
+      /I \[.*\] second string\nE \[.*\] third string/);
 
     // restore back to default.
     Logging.setBufferedLogFilter(['*:E']);
@@ -63,6 +63,6 @@ describe("logger from core environment", () => {
   it('format message like printf', () => {
     log1.error('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
     expect(Logging.getLogs().join('\n')).toMatch(
-      /\*\[tag1\]\(.*\) E: Bob pinged Alice with id=123456/);
+      /E \[.*\] Bob pinged Alice with id=123456/);
   });
 });
