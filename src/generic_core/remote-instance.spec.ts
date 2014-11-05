@@ -111,21 +111,19 @@ describe('Core.RemoteInstance', () => {
       expect(instance.sendConsent).toHaveBeenCalled();
     });
 
+    it('invalid proxy transitions do not modify consent', () => {
+      var emptyConsent = new Consent.State();
+
+      instance.consent = new Consent.State();
+      instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+      expect(instance.consent).toEqual(emptyConsent);
+      instance.modifyConsent(Consent.UserAction.UNIGNORE_OFFER);
+      expect(instance.consent).toEqual(emptyConsent);
+      // proxy consent modifications did not touch client consent
+      expect(instance.consent.localRequestsAccessFromRemote).toEqual(false);
+    });
   });
 
-  it('invalid proxy transitions do not modify consent', () => {
-    var emptyConsent = new Consent.State();
-
-    instance.consent = new Consent.State();
-    instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
-    expect(instance.consent).toEqual(emptyConsent);
-    instance.modifyConsent(Consent.UserAction.UNIGNORE_OFFER);
-    expect(instance.consent).toEqual(emptyConsent);
-  });
-
-  it('proxy consent modifications did not touch client consent', () => {
-    expect(instance.consent.localRequestsAccessFromRemote).toEqual(false);
-  });
 
   describe('local consent towards remote client', () => {
 
@@ -178,20 +176,18 @@ describe('Core.RemoteInstance', () => {
       expect(instance.sendConsent).toHaveBeenCalled();
     });
 
-  });
+    it('invalid client transitions do not modify consent', () => {
+      var emptyConsent = new Consent.State();
 
-  it('invalid client transitions do not modify consent', () => {
-    var emptyConsent = new Consent.State();
+      instance.consent = new Consent.State();
+      instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+      expect(instance.consent).toEqual(emptyConsent);
+      instance.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST);
+      expect(instance.consent).toEqual(emptyConsent);
 
-    instance.consent = new Consent.State();
-    instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
-    expect(instance.consent).toEqual(emptyConsent);
-    instance.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST);
-    expect(instance.consent).toEqual(emptyConsent);
-  });
-
-  it('client consent modifications did not touch proxy consent', () => {
-    expect(instance.consent.localGrantsAccessToRemote).toEqual(false);
+      // Client consent modifications did not touch proxy consent
+      expect(instance.consent.localGrantsAccessToRemote).toEqual(false);
+    });
   });
 
   describe('receiving consent bits', () => {
@@ -202,7 +198,7 @@ describe('Core.RemoteInstance', () => {
 
     it('remote maintains no consent', () => {
       instance.consent = new Consent.State();
-      instance.receiveConsent({
+      instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
@@ -212,7 +208,7 @@ describe('Core.RemoteInstance', () => {
     it('remote cancels their consent', () => {
       instance.consent.remoteRequestsAccessFromLocal = true;
       instance.consent.remoteGrantsAccessToLocal = true;
-      instance.receiveConsent({
+      instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
@@ -223,7 +219,7 @@ describe('Core.RemoteInstance', () => {
     it('remote gives consent', () => {
       instance.consent.remoteRequestsAccessFromLocal = false;
       instance.consent.remoteGrantsAccessToLocal = false;
-      instance.receiveConsent({
+      instance.updateConsent({
         isRequesting: true,
         isOffering:   true
       });
@@ -233,7 +229,7 @@ describe('Core.RemoteInstance', () => {
 
     it('receiving consent bits sends update to UI', () => {
       instance.consent = new Consent.State();
-      instance.receiveConsent({
+      instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
@@ -281,25 +277,7 @@ describe('Core.RemoteInstance', () => {
     });
 
   });
-
-  it('sends and receives consent bits in the same format', () => {
-    var consentBits :uProxy.Message;
-    spyOn(instance, 'send').and.callFake((payload) => {
-      consentBits = payload;
-    });
-    instance.consent = new Consent.State();
-    instance.sendConsent();
-    expect(consentBits.type).toEqual(uProxy.MessageType.CONSENT);
-    var data :ConsentMessage = <ConsentMessage>consentBits.data;
-    // The instanceID sent on the wire should not be of the remote's, but of the
-    // local uProxy client's.
-    expect(data.instanceId).not.toEqual('fakeInstance');
-    expect(data.consent).toEqual({
-      isRequesting: false,
-      isOffering: false
-    });
-  });
-
+/*
   it('two remote instances establish mutual consent', () => {
     var alice = new Core.RemoteInstance(user, {
       instanceId: 'instance-alice',
@@ -316,11 +294,11 @@ describe('Core.RemoteInstance', () => {
     // and a RemoteInstance, and there would be other messages.
     spyOn(alice, 'send').and.callFake((payload) => {
       expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
-      bob.receiveConsent(payload.data.consent);
+      bob.updateConsent(payload.data.consent);
     });
     spyOn(bob, 'send').and.callFake((payload) => {
       expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
-      alice.receiveConsent(payload.data.consent);
+      alice.updateConsent(payload.data.consent);
     });
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
@@ -333,6 +311,7 @@ describe('Core.RemoteInstance', () => {
     expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
     expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
   });
+  */
 
   describe('proxying', () => {
 
@@ -423,7 +402,7 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('rejects invalid signals', () => {
-      alice.handleSignal(uProxy.MessageType.CONSENT, fakeSignal)
+      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeSignal)
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();

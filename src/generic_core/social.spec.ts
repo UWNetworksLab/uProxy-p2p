@@ -282,25 +282,28 @@ describe('Social.FreedomNetwork', () => {
     it('calls the social provider sendMessage', () => {
       network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
       var msg = {
-        type: uProxy.MessageType.CONSENT,
+        type: uProxy.MessageType.INSTANCE,
         data: {
           'doge': 'wows'
         }
       };
       network.send('someclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'someclient', '{"type":3001,"data":{"doge":"wows"}}');
+        'someclient', '{"type":3000,"data":{"doge":"wows"}}');
     });
 
     it('sends instance handshake', (done) => {
       spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
         'fake-instance-handshake');
       spyOn(network, 'send').and.returnValue(Promise.resolve());
-      network.sendInstanceHandshake('fakeclient').then(() => {
+      network.sendInstanceHandshake('fakeclient', null).then(() => {
         expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
         expect(network.send).toHaveBeenCalledWith('fakeclient', {
             type: uProxy.MessageType.INSTANCE,
-            data: 'fake-instance-handshake'
+            data: {
+              handshake: 'fake-instance-handshake',
+              consent: null
+            }
         });
       }).then(done);
     });
@@ -325,7 +328,7 @@ describe('Social.FreedomNetwork', () => {
     network.handleMessage(inMsg);
     expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
     var outMsg = {
-      type: uProxy.MessageType.CONSENT,
+      type: uProxy.MessageType.INSTANCE,
       data: {
         'tigers': 'are also cats'
       }

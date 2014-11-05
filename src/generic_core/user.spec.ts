@@ -73,7 +73,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -123,7 +123,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -150,17 +150,6 @@ describe('Core.User', () => {
         }
       });
       expect(user['syncInstance_']).toHaveBeenCalled();
-    });
-
-    it('handles a CONSENT message', () => {
-      spyOn(user, 'handleConsent_');
-      user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.CONSENT,
-        data: {
-          'bar': 2
-        }
-      });
-      expect(user['handleConsent_']).toHaveBeenCalled();
     });
 
     it('handles a SIGNAL* messages', () => {
@@ -190,7 +179,7 @@ describe('Core.User', () => {
     it('errors when receiving a message with non-existing client', () => {
       spyOn(console, 'error');
       user.handleMessage('REALLYfakeclient', {
-        type: uProxy.MessageType.CONSENT,
+        type: uProxy.MessageType.INSTANCE,
         data: 'meow'
       });
       expect(console.error).toHaveBeenCalled();
@@ -205,12 +194,16 @@ describe('Core.User', () => {
     description: 'fake instance',
   };
 
+  var instanceHandshake = {
+    handshake :instanceData,
+    consent :null
+  }
+
   describe('client <---> instance', () => {
 
     beforeEach(() => {
       if (instance) {
         spyOn(instance, 'update');
-        spyOn(instance, 'send');
       }
       // Don't test reconnection promises in this sub-suite.
     });
@@ -218,7 +211,7 @@ describe('Core.User', () => {
     it('syncs clientId <--> instanceId mapping', () => {
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user['syncInstance_']('fakeclient', instanceData);
+      user['syncInstance_']('fakeclient', instanceHandshake);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
       expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
       instance = user.getInstance('fakeinstance');
@@ -236,7 +229,7 @@ describe('Core.User', () => {
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
-      user['syncInstance_']('fakeclient2', instanceData);
+      user['syncInstance_']('fakeclient2', instanceHandshake);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
@@ -245,12 +238,12 @@ describe('Core.User', () => {
     it('sends consent message if Instance already exists', () => {
       expect(instance).toBeDefined();
       spyOn(instance, 'sendConsent');
-      user['syncInstance_']('fakeclient', instanceData);
+      user['syncInstance_']('fakeclient', instanceHandshake);
       expect(instance.sendConsent).toHaveBeenCalled();
     });
 
     it('syncs UI after updating instance', () => {
-      user['syncInstance_']('fakeclient', instanceData);
+      user['syncInstance_']('fakeclient', instanceHandshake);
     });
 
   });  // describe client <---> instance

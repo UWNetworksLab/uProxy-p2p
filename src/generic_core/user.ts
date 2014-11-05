@@ -147,7 +147,8 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(client.clientId);
+            this.network.sendInstanceHandshake(
+                client.clientId, this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
@@ -187,9 +188,6 @@ module Core {
         case uProxy.MessageType.INSTANCE:
           this.syncInstance_(clientId, <InstanceHandshake>msg.data);
           break;
-        case uProxy.MessageType.CONSENT:
-          this.handleConsent_(<ConsentMessage>msg.data);
-          break;
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
@@ -205,11 +203,21 @@ module Core {
           break;
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
-          this.network.sendInstanceHandshake(clientId);
+          this.network.sendInstanceHandshake(
+              clientId, this.getConsentForClient_(clientId));
           break;
         default:
           console.error(this.userId + ' received invalid message.', msg);
       }
+    }
+
+    private getConsentForClient_ = (clientId :string) : Consent.WireState => {
+      var instanceId = this.clientToInstanceMap_[clientId];
+      if (typeof instanceId === 'undefined') {
+        console.log('returning null');
+        return null;
+      }
+      return (this.instances_[instanceId]).getConsentBits();;
     }
 
     public getInstance = (instanceId:string) => {
@@ -234,14 +242,15 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, instance :InstanceHandshake)
+    private syncInstance_ = (clientId :string, data :any)
         : void => {
+      var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
         return;
       }
-      this.log('received instance' + JSON.stringify(instance));
+      this.log('received instance' + JSON.stringify(data));
       var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
@@ -255,31 +264,22 @@ module Core {
       var existingInstance = this.instances_[instanceId];
       if (existingInstance) {
         existingInstance.update(instance);
-        // Send consent, if we have had past relationships with this instance.
-        existingInstance.sendConsent();
+        if (!data.consent) {
+          existingInstance.sendConsent();
+        }
       } else {
-        this.instances_[instanceId] = new Core.RemoteInstance(this, instance);
+        existingInstance = new Core.RemoteInstance(this, instance);
+        this.instances_[instanceId] = existingInstance;
+      }
+
+      if (data.consent) {
+        existingInstance.updateConsent(data.consent);
       }
 
       // TODO: this may send a duplicate notification to the UI, because
       // instance.update and the instance constructor both notify the UI.
       // This shouldn't be a problem but we may want to clean this up.
       this.notifyUI();
-    }
-
-    /**
-     * Receive a consent message. Update the consent between the piece.
-     * Assumes the instance associated with the consent message is valid and
-     * belongs to this user.
-     */
-    private handleConsent_ = (consentMessage :ConsentMessage) => {
-      var instanceId = consentMessage.instanceId;
-      var instance = this.instances_[instanceId];
-      if (!instance) {
-        console.warn('Cannot update consent for non-existing instance!');
-        return;
-      }
-      instance.receiveConsent(consentMessage.consent);
     }
 
     /**

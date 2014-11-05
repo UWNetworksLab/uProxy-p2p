@@ -65,7 +65,7 @@ declare module Social {
      * agreement of two parties, but here "handshake" is something that can be
      * unilaterally sent.
      */
-    sendInstanceHandshake :(clientId:string) => Promise<void>;
+    sendInstanceHandshake :(clientId:string, consent :Consent.WireState) => Promise<void>;
 
     /**
      * Oftentimes, network will receive client IDs belonging to remote
