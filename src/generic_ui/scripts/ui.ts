@@ -185,6 +185,8 @@ module UI {
     /**
      * Removes proxy indicators from UI and undoes proxy configuration
      * (e.g. chrome.proxy settings).
+     * If user didn't end proxying, so if proxy session ended because of some
+     * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
       this.browserAction.setIcon('uproxy-19.png');
