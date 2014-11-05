@@ -11,8 +11,8 @@
     ]
   },
   "permissions": [
+    "core.console",
     "core.rtcdatachannel",
-    "core.rtcpeerconnection",
-    "core.console"
+    "core.rtcpeerconnection"
   ]
 }
