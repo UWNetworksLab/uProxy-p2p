@@ -186,7 +186,7 @@ module Core {
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceHandshake>msg.data);
+          this.syncInstance_(clientId, <InstanceMessage>msg.data);
           break;
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
@@ -241,7 +241,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :any)
+    private syncInstance_ = (clientId :string, data :InstanceMessage)
         : void => {
       var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {

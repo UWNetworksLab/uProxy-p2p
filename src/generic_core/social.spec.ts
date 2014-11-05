@@ -289,7 +289,7 @@ describe('Social.FreedomNetwork', () => {
       };
       network.send('someclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'someclient', '{"type":3000,"data":{"doge":"wows"}}');
+        'someclient', '{"type":' + uProxy.MessageType.INSTANCE + ',"data":{"doge":"wows"}}');
     });
 
     it('sends instance handshake', (done) => {

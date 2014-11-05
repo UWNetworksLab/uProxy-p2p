@@ -16,6 +16,7 @@ describe('Core.RemoteInstance', () => {
       'getLocalInstanceId',
       'send',
       'notifyUI',
+      'instanceToClient'
   ]);
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
@@ -277,8 +278,15 @@ describe('Core.RemoteInstance', () => {
     });
 
   });
-/*
+
   it('two remote instances establish mutual consent', () => {
+    (<any>user.instanceToClient).and.callFake((instanceId) => {
+      return instanceId;
+    });
+
+    user.network = <Social.Network><any>jasmine.createSpyObj(
+        'network', ['sendInstanceHandshake']);
+
     var alice = new Core.RemoteInstance(user, {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
@@ -289,17 +297,15 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
     });
-    // Fake a working signalling channel, and assume only consent messages pass
-    // over it. In reality, the interaction would be between a LocalInstance
-    // and a RemoteInstance, and there would be other messages.
-    spyOn(alice, 'send').and.callFake((payload) => {
-      expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
-      bob.updateConsent(payload.data.consent);
+
+    (<any>user.network.sendInstanceHandshake).and.callFake((clientId, consent) => {
+      if (clientId === 'instance-alice') {
+        bob.updateConsent(consent);
+      } else if (clientId === 'instance-bob') {
+        alice.updateConsent(consent);
+      }
     });
-    spyOn(bob, 'send').and.callFake((payload) => {
-      expect(payload.type).toEqual(uProxy.MessageType.CONSENT);
-      alice.updateConsent(payload.data.consent);
-    });
+
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
     expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
@@ -311,7 +317,6 @@ describe('Core.RemoteInstance', () => {
     expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
     expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
   });
-  */
 
   describe('proxying', () => {
 
