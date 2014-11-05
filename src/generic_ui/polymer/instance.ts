@@ -22,7 +22,6 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(endpoint);
       this.ui.instanceGettingAccessFrom = this.instance.instanceId;
-      console.log(this.ui.instanceGettingAccessFrom);
     });
   },
   stop: function() {
