@@ -214,7 +214,6 @@ module Core {
     private getConsentForClient_ = (clientId :string) : Consent.WireState => {
       var instanceId = this.clientToInstanceMap_[clientId];
       if (typeof instanceId === 'undefined') {
-        console.log('returning null');
         return null;
       }
       return (this.instances_[instanceId]).getConsentBits();;
