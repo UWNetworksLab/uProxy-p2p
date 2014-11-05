@@ -293,6 +293,7 @@ module Core {
           this.access.asProxy = true;
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
+              console.log(this.instanceId);
               ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
                         {instanceId: this.instanceId,
                          error: this.access.asProxy});

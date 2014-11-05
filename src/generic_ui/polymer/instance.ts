@@ -22,12 +22,13 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(endpoint);
       this.ui.instanceGettingAccessFrom = this.instance.instanceId;
+      console.log(this.ui.instanceGettingAccessFrom);
     });
   },
   stop: function() {
     console.log('[polymer] calling core.stop()');
     core.stop();
-    this.ui.stopGettingInUiAndConfig();
+    this.ui.stopGettingInUiAndConfig(false);
     this.ui.instanceGettingAccessFrom = null;
   },
 
@@ -51,9 +52,9 @@ Polymer({
 
   // Client UserActions
   offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
-  cancelOffer: function() { 
+  cancelOffer: function() {
     this.ui.stopGivingInUi();
-    this.modifyConsent(Consent.UserAction.CANCEL_OFFER) 
+    this.modifyConsent(Consent.UserAction.CANCEL_OFFER)
   },
   grant: function() { this.modifyConsent(Consent.UserAction.ALLOW_REQUEST) },
   ignoreRequest: function() {

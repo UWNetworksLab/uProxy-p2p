@@ -47,6 +47,28 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
   };
 
   public stopUsingProxy = (askUser :boolean) => {
+    if (askUser && this.running_ == true) {
+      // Listen for the user's decision about resetting their proxy config.
+      chrome.runtime.onMessage.addListener(
+          function(message, sender, sendResponse) {
+            if (message.confirmedStopProxying) {
+              this.revertProxySettings_();
+              var tabId = sender.tab.id;
+              chrome.tabs.sendMessage(tabId, {proxyReverted: true});
+            }
+            return true;
+          }.bind(this));
+      // Create a tab which prompts the user to decide if they want
+      // to reset their proxy config.
+      chrome.tabs.create({url: "../disconnected.html"},
+          function(tab: chrome.tabs.Tab) {
+          });
+    } else {
+      this.revertProxySettings_();
+    }
+  };
+
+  private revertProxySettings_ = () => {
     if (this.running_ == true) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;
@@ -56,5 +78,4 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
       });
     }
   };
-
 }  // BrowserProxyConfig

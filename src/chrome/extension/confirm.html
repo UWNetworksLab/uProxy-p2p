@@ -1,0 +1,41 @@
+<link rel="import" href="lib/polymer/polymer.html">
+
+<polymer-element name='uproxy-confirm'>
+	<template>
+		<style>
+			#errorBox {
+				max-width: 540px;
+				min-width: 200px;
+				max-height:  250px;
+				min-height:  150px;
+				margin: 15px;
+				margin-left: auto;
+		    margin-right: auto;
+		    padding: 30px;
+		    background-color: #FFFFFF;
+		    text-align: center;
+		    font-family: 'Lucida Grande', sans-serif;
+		    font-size: 12px;
+			}
+			.detail {
+				font-family: 'Lucida Grande', sans-serif;
+				color: #dd1144;
+		    font-size: 10px;
+			}
+		</style>
+
+		<div id='errorBox'>
+			<img src="../icons/uproxy-19.png"><img><br><br>
+			Your uProxy connection was disrupted and you are no longer accessing the internet through your friend. You can browse the internet with your local connection, but you should proceed with caution if you are worried about your connection's security. Would you like to reset Chrome's proxy settings and use your local connection?
+			<br><br>
+
+			<button id='undoProxyButton' on-click='{{ undoProxyConfig }}'>Yes</button> <button id='keepProxyButton' on-click='{{ doNotUndoProxyConfig }}'>No</button>
+			<br><br>
+
+			<div id='proxyReverted' class='detail' hidden>Proxy settings reverted. You are now using your local internet connection.</div>
+			<div id='proxyNotReverted' class='detail' hidden>Chrome proxy settings are still enabled. Try re-establishing a connection through the uProxy extension.</div>
+
+		</div>
+	</template>
+	<script src='confirm.js'></script>
+</polymer-element>
