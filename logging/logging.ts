@@ -66,7 +66,6 @@ module Logging {
   }
 
   export function formatMessage(l:Message) : string {
-    // return '[' + dateToString_(l.timestamp) + '] ' + l.level + ': ' + l.message;
     return l.level + ' [' + dateToString_(l.timestamp) + '] ' + l.message;
   }
 
