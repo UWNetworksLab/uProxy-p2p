@@ -3,7 +3,7 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
-var REDIRECT_URL = "https://www.uproxy.org/";
+var REDIRECT_URL = "https://www.uproxy.org/oauth-redirect-uri";
 
 declare var core :CoreConnector;
 
@@ -62,6 +62,7 @@ class ChromeTabAuth {
           this.onError_('Login abandoned.');
         }
     }.bind(this);
+
 
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
                        function(tab: chrome.tabs.Tab) {

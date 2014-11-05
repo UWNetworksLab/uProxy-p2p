@@ -51,7 +51,7 @@ declare module UI {
   export interface Instance {
     instanceId           :string;
     description          :string;
-    consent              :ConsentState;
+    consent              :Consent.State;
     access               :AccessState;
     isOnline             :boolean;
     bytesSent            :number;

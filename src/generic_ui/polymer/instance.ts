@@ -47,24 +47,19 @@ Polymer({
   cancelRequest: function() {
     this.modifyConsent(Consent.UserAction.CANCEL_REQUEST)
   },
-  accept: function() { this.modifyConsent(Consent.UserAction.ACCEPT_OFFER) },
   ignoreOffer: function() { this.modifyConsent(Consent.UserAction.IGNORE_OFFER) },
+  unignoreOffer: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_OFFER) },
 
   // Client UserActions
   offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
   cancelOffer: function() {
     this.ui.stopGivingInUi();
-    this.modifyConsent(Consent.UserAction.CANCEL_OFFER)
+    this.modifyConsent(Consent.UserAction.CANCEL_OFFER);
   },
-  grant: function() { this.modifyConsent(Consent.UserAction.ALLOW_REQUEST) },
-  ignoreRequest: function() {
-    this.modifyConsent(Consent.UserAction.IGNORE_REQUEST)
-  },
+  ignoreRequest: function() { this.modifyConsent(Consent.UserAction.IGNORE_REQUEST) },
+  unignoreRequest: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST) },
 
-  getProxyConsentState: function() : string {
-    return Consent.ProxyState[this.instance.consent.asProxy];
+  getConsentState: function() : string {
+    return this.instance.consent;
   },
-  getClientConsentState: function() : string {
-    return Consent.ClientState[this.instance.consent.asClient];
-  }
 });

@@ -1,4 +1,5 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../generic_core/consent.ts' />
 /// <reference path='ui.ts' />
 
 // TODO: move model, mockCore, and mockBrowserAction to a file
@@ -78,27 +79,25 @@ describe('UI.UserInterface', () => {
       var clientInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        consent: {
-          asClient: Consent.ClientState.GRANTED,
-          asProxy: Consent.ProxyState.NONE
-        },
+        consent: new Consent.State(),
         access: {asClient: false, asProxy: false},
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
       };
+      clientInstance.consent.localRequestsAccessFromRemote = true;
+      clientInstance.consent.remoteGrantsAccessToLocal = true;
       var serverInstance :UI.Instance = {
         instanceId: 'instance1',
         description: 'description1',
-        consent: {
-          asClient: Consent.ClientState.NONE,
-          asProxy: Consent.ProxyState.GRANTED
-        },
+        consent: new Consent.State(),
         access: {asClient: false, asProxy: false},
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
       };
+      serverInstance.consent.localGrantsAccessToRemote = true;
+      serverInstance.consent.remoteRequestsAccessFromLocal = true;
       var payload :UI.UserMessage = {
         network: 'testNetwork',
         user: {

@@ -24,32 +24,6 @@ describe('util', () => {
     });
   });
 
-  describe('FSM (finite-state-machine)', () => {
-
-    var fsm = new FSM<number, number>();
-
-    it('can set a state transition', () => {
-      fsm.set(5, 1, 5);
-      fsm.set(5, 2, 7);
-      expect(fsm.get(5, 1)).toEqual(5);
-      expect(fsm.get(5, 2)).toEqual(7);
-    });
-
-    it('can override a state transition', () => {
-      fsm.set(5, 1, 10);
-      expect(fsm.get(5, 1)).toEqual(10);
-    });
-
-    it('getting from invalid states return null', () => {
-      expect(fsm.get(100, 1)).toEqual(null);
-    });
-
-    it('getting from invalid transitions return null', () => {
-      expect(fsm.get(5, 3)).toEqual(null);
-    });
-
-  });  // describe FSM
-
   describe('cloneDeep', () => {
 
     it('handles all supported primitive types', () => {
