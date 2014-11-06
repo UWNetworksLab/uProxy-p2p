@@ -87,6 +87,4 @@ class ChromeBrowserApi implements BrowserAPI {
   public openFaq = (pageAnchor :string) => {
     chrome.tabs.create({url: "../polymer/faq.html#" + pageAnchor});
   }
-
 }
-
