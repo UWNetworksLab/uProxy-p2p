@@ -46,7 +46,7 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
     }
   };
 
-  public stopUsingProxy = () => {
+  public stopUsingProxy = (askUser :boolean) => {
     if (this.running_ == true) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;

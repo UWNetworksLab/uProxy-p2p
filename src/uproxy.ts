@@ -57,7 +57,7 @@ module uProxy {
     // Skip unused ID_MAPS = 2007.  // ClientId <---> InstanceId mappings.
     COMMAND_FULFILLED = 2008,
     COMMAND_REJECTED,
-    START_GETTING_FROM_FRIEND,    
+    START_GETTING_FROM_FRIEND,
     STOP_GETTING_FROM_FRIEND,
     START_GIVING_TO_FRIEND,
     STOP_GIVING_TO_FRIEND,
@@ -81,8 +81,6 @@ module uProxy {
   // no longer needed. This would use fewer larger messages.
   export enum MessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
-    CONSENT,
-    DESCRIPTION,
     // These are for the signalling-channel. The payloads are arbitrary, and
     // could be specified from uProxy, or could also be SDP headers forwarded
     // from socks-rtc's RTCPeerConnection.
@@ -191,12 +189,6 @@ module uProxy {
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
-    // updateNetwork(network:Social.Network) : void;
-    // updateSelf(user:Core.User) : void;
-    // Update an instance.
-    // syncInstance(instance : any) : void;
-    // updateMappings() : void;
-    // updateIdentity(identity) : void;
 
     showNotification(notificationText :string) : void;
   }

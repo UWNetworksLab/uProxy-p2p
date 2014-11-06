@@ -203,7 +203,7 @@ describe('UI.UserInterface', () => {
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19-c.png');
       updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
-          .call(ui, 'testGiverId');
+          .call(ui, {instanceId: 'testGiverId', error: false});
       expect(mockBrowserAction.setIcon)
           .toHaveBeenCalledWith('uproxy-19.png');
     });

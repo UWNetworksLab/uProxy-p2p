@@ -9,7 +9,7 @@ var proxyConfig = function() {
   this.running_ = false;
 };
 
-proxyConfig.startUsingProxy = function() {
+proxyConfig.startUsingProxy = function(endpoint) {
   if (!this.running_) {
     this.running_ = true;
     this.socks_server_ = prefsvc.get("network.proxy.socks");
@@ -22,7 +22,7 @@ proxyConfig.startUsingProxy = function() {
   }
 };
 
-proxyConfig.stopUsingProxy = function() {
+proxyConfig.stopUsingProxy = function(askUser) {
   if (this.running_) {
     this.running_ = false;
     prefsvc.set("network.proxy.socks", this.socks_server_);

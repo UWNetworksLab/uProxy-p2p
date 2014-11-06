@@ -46,14 +46,6 @@ class UIConnector implements uProxy.UIAPI {
     bgAppPageChannel.emit('' + type, data);
   }
 
-  public syncInstance = (instance, field?:any) => {
-    // TODO: (the interface may change)
-  }
-
-  public syncMappings = () => {
-    // TODO: (the interface may change)
-  }
-
   public updateAll = () => {
     console.log('sending ALL state to UI.');
     for (var network in Social.networks) {
@@ -68,10 +60,6 @@ class UIConnector implements uProxy.UIAPI {
   public syncUser = (payload:UI.UserMessage) => {
     console.log('Core: UI.syncUser ' + JSON.stringify(payload));
     this.update(uProxy.Update.USER_FRIEND, payload);
-  }
-
-  public refreshDOM = () => {
-    console.error('Cannot refresh DOM from the Core.');
   }
 
   public sendError = (errorText :string) => {
@@ -257,8 +245,6 @@ class uProxyCore implements uProxy.CoreAPI {
       ui.updateAll();
       console.log('Successfully logged out of ' + networkName);
     });
-    // TODO: only remove clients from the network we are logging out of.
-    ui.syncMappings();
     // TODO: disable auto-login
     // store.saveMeToStorage();
   }

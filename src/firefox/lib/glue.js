@@ -15,7 +15,6 @@ function setUpConnection(freedom, panel, button) {
     })
   }
 
-	
   // Set up listeners between core and ui.
   for (var command in uProxy.Command) {
     if (typeof uProxy.Command[command] === 'number') {
@@ -29,12 +28,12 @@ function setUpConnection(freedom, panel, button) {
     }
   }
 
-  panel.port.on('startUsingProxy', function() {
-    proxyConfig.startUsingProxy();
+  panel.port.on('startUsingProxy', function(endpoint) {
+    proxyConfig.startUsingProxy(endpoint);
   });
 
-  panel.port.on('stopUsingProxy', function() {
-    proxyConfig.stopUsingProxy();
+  panel.port.on('stopUsingProxy', function(askUser) {
+    proxyConfig.stopUsingProxy(askUser);
   });
 
   panel.port.on('setIcon', function(iconFile) {

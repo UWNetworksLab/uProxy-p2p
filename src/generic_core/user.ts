@@ -55,12 +55,6 @@ module Core {
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
-    // Sometimes, sending messages to an instance fails because the client
-    // corresponding to the instance has gone offline. In that case, we save a
-    // promise for the next connection of that instance, for the future delivery
-    // of that message.
-    private reconnections_ :{ [instanceId :string] :InstanceReconnection };
-
     /**
      * Users are constructed purely on the basis of receiving a userId.
      * They may or may not have a :UserProfile (because the Network may have
@@ -81,7 +75,6 @@ module Core {
       }
       this.clientIdToStatusMap = {};
       this.instances_ = {};
-      this.reconnections_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
       storage.load<string[]>(this.getStorePath()).then((state) => {
@@ -125,28 +118,8 @@ module Core {
             'Cannot send to invalid instance ' + instanceId));
       }
       var clientId = this.instanceToClientMap_[instanceId];
-      var promise = Promise.resolve(clientId);
-      if (!clientId) {
-        // If this instance is currently offline...
-        if (!this.reconnections_[instanceId]) {
-          // Prepares a reconnection promise if necessary,
-          promise = new Promise<string>((F, R) => {
-            this.reconnections_[instanceId] = {
-              promise: promise,
-              fulfill: F
-            }
-          });
-        } else {
-          // or access the existing one, to attach the pending message to.
-          promise = this.reconnections_[instanceId].promise;
-        }
-      }
-      return <Promise<string>>promise.then((clientId) => {
-        // clientId may have changed by the time this promise fulfills.
-        clientId = this.instanceToClientMap_[instanceId];
-        return this.network.send(clientId, payload).then(() => {
-          return clientId;
-        });
+      return this.network.send(clientId, payload).then(() => {
+        return clientId;
       });
     }
 
@@ -179,7 +152,8 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(client.clientId);
+            this.network.sendInstanceHandshake(
+                client.clientId, this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
@@ -217,10 +191,7 @@ module Core {
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceHandshake>msg.data);
-          break;
-        case uProxy.MessageType.CONSENT:
-          this.handleConsent_(<ConsentMessage>msg.data);
+          this.syncInstance_(clientId, <InstanceMessage>msg.data);
           break;
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
@@ -237,11 +208,20 @@ module Core {
           break;
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
-          this.network.sendInstanceHandshake(clientId);
+          this.network.sendInstanceHandshake(
+              clientId, this.getConsentForClient_(clientId));
           break;
         default:
           console.error(this.userId + ' received invalid message.', msg);
       }
+    }
+
+    private getConsentForClient_ = (clientId :string) : Consent.WireState => {
+      var instanceId = this.clientToInstanceMap_[clientId];
+      if (typeof instanceId === 'undefined') {
+        return null;
+      }
+      return (this.instances_[instanceId]).getConsentBits();;
     }
 
     public getInstance = (instanceId:string) => {
@@ -266,14 +246,15 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, instance :InstanceHandshake)
+    private syncInstance_ = (clientId :string, data :InstanceMessage)
         : void => {
+      var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '
                      + clientId);
         return;
       }
-      this.log('received instance' + JSON.stringify(instance));
+      this.log('received instance' + JSON.stringify(data));
       var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
@@ -286,57 +267,25 @@ module Core {
       // Create or update the Instance object.
       var existingInstance = this.instances_[instanceId];
       if (existingInstance) {
-        this.fulfillReconnection_(instanceId);
         existingInstance.update(instance);
-        // Send consent, if we have had past relationships with this instance.
-        existingInstance.sendConsent();
+        if (!data.consent) {
+          existingInstance.sendConsent();
+        }
       } else {
-        this.instances_[instanceId] =
-          new Core.RemoteInstance(this, instance.instanceId, instance);
+        existingInstance =
+            new Core.RemoteInstance(this, instance.instanceId, instance);
+        this.instances_[instanceId] = existingInstance;
         this.saveToStorage();
+      }
+
+      if (data.consent) {
+        existingInstance.updateConsent(data.consent);
       }
 
       // TODO: this may send a duplicate notification to the UI, because
       // instance.update and the instance constructor both notify the UI.
       // This shouldn't be a problem but we may want to clean this up.
       this.notifyUI();
-      // TODO: Make ui.syncInstance actually do the granular-level update to UI.
-      ui.syncInstance(this.instances_[instanceId]);
-      ui.syncMappings();
-    }
-
-    /**
-     * Receive a consent message. Update the consent between the piece.
-     * Assumes the instance associated with the consent message is valid and
-     * belongs to this user.
-     */
-    private handleConsent_ = (consentMessage :ConsentMessage) => {
-      var instanceId = consentMessage.instanceId;
-      var instance = this.instances_[instanceId];
-      if (!instance) {
-        console.warn('Cannot update consent for non-existing instance!');
-        return;
-      }
-      instance.receiveConsent(consentMessage.consent);
-    }
-
-    /**
-     * Fulfill the reconnection (delivers pending messages) if it's there.
-     */
-    private fulfillReconnection_ = (instanceId:string) => {
-      var newClientId = this.instanceToClientMap_[instanceId];
-      if (!newClientId) {
-        console.warn('Expected valid new clientId for ' + instanceId);
-        // Try again next time (keep the reconnection so messages can still be
-        // sent in the future).
-        return;
-      }
-      var reconnect:InstanceReconnection = this.reconnections_[instanceId];
-      if (reconnect) {
-        reconnect.fulfill(newClientId);
-      }
-      // TODO: Make sure this doesn't affect multiple .thens().
-      delete this.reconnections_[instanceId];
     }
 
     /**
