@@ -11,8 +11,6 @@
 /// <reference path='../../networking-typings/communications.d.ts' />
 
 declare var model         :UI.Model;
-//declare var browserApi   :IBrowserbrowserApi;
-
 
 module UI {
 
