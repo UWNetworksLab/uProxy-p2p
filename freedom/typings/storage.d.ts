@@ -19,7 +19,7 @@
 // The Freedom Storage class
   interface freedom_Storage {
     // Fetch array of all keys.
-    keys() : string[];
+    keys() : Promise<string[]>;
     // Fetch a value for a key.
     get(key :string) : Promise<string>;
     // Sets a value to a key. Fulfills promise with the previous value, if it
