@@ -23,7 +23,6 @@ describe('Core.User', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(ui, 'syncInstance');
   });
 
   it('creates with the correct userId', () => {
@@ -74,7 +73,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -124,7 +123,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
+    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -151,17 +150,6 @@ describe('Core.User', () => {
         }
       });
       expect(user['syncInstance_']).toHaveBeenCalled();
-    });
-
-    it('handles a CONSENT message', () => {
-      spyOn(user, 'handleConsent_');
-      user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.CONSENT,
-        data: {
-          'bar': 2
-        }
-      });
-      expect(user['handleConsent_']).toHaveBeenCalled();
     });
 
     it('handles a SIGNAL* messages', () => {
@@ -191,7 +179,7 @@ describe('Core.User', () => {
     it('errors when receiving a message with non-existing client', () => {
       spyOn(console, 'error');
       user.handleMessage('REALLYfakeclient', {
-        type: uProxy.MessageType.CONSENT,
+        type: uProxy.MessageType.INSTANCE,
         data: 'meow'
       });
       expect(console.error).toHaveBeenCalled();
@@ -206,21 +194,24 @@ describe('Core.User', () => {
     description: 'fake instance',
   };
 
+  var instanceHandshake = {
+    handshake :instanceData,
+    consent :null
+  }
+
   describe('client <---> instance', () => {
 
     beforeEach(() => {
       if (instance) {
         spyOn(instance, 'update');
-        spyOn(instance, 'send');
       }
       // Don't test reconnection promises in this sub-suite.
-      spyOn(user, 'fulfillReconnection_');
     });
 
     it('syncs clientId <--> instanceId mapping', () => {
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user['syncInstance_']('fakeclient', instanceData);
+      user['syncInstance_']('fakeclient', instanceHandshake);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
       expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
       instance = user.getInstance('fakeinstance');
@@ -238,7 +229,7 @@ describe('Core.User', () => {
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
-      user['syncInstance_']('fakeclient2', instanceData);
+      user['syncInstance_']('fakeclient2', instanceHandshake);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
@@ -247,13 +238,12 @@ describe('Core.User', () => {
     it('sends consent message if Instance already exists', () => {
       expect(instance).toBeDefined();
       spyOn(instance, 'sendConsent');
-      user['syncInstance_']('fakeclient', instanceData);
+      user['syncInstance_']('fakeclient', instanceHandshake);
       expect(instance.sendConsent).toHaveBeenCalled();
     });
 
     it('syncs UI after updating instance', () => {
-      user['syncInstance_']('fakeclient', instanceData);
-      expect(ui.syncInstance).toHaveBeenCalled();
+      user['syncInstance_']('fakeclient', instanceHandshake);
     });
 
   });  // describe client <---> instance
@@ -288,94 +278,6 @@ describe('Core.User', () => {
       instance = user.getInstance('fakeinstance');
       user.send('nobody', msg).catch((e) => {
         expect(e.message).toEqual('Cannot send to invalid instance nobody');
-      }).then(done);
-    });
-
-    var reconnectPromise;
-
-    it('sending message to offline instanceId prepares reconnection promise',
-        () => {
-      user['removeClient_']('fakeclient');
-      user['removeClient_']('fakeclient2');
-      expect(user.clientIdToStatusMap['fakeclient']).not.toBeDefined();
-      reconnectPromise = user.send('fakeinstance', msg).then((clientId) => {
-        expect(clientId).toEqual('newclient');
-        reconnected = true;
-      });
-      reconnect = user['reconnections_']['fakeinstance'];
-      expect(reconnect.promise).toBeDefined();
-      expect(reconnect.fulfill).toBeDefined();
-    });
-
-    it('delivers pending messages & fulfills with new client ID on reconnect',
-        (done) => {
-      spyOn(user, 'fulfillReconnection_').and.callThrough();
-      spyOn(user, 'syncInstance_').and.callThrough();
-      // Simulate a full reconnection to a new client.
-      var clientState = {
-        userId: 'fakeuser',
-        clientId: 'newclient',
-        status: UProxyClient.Status.ONLINE,
-        timestamp: 12345
-      };
-      user.handleClient(clientState);
-      user.handleMessage('newclient', {
-        type: uProxy.MessageType.INSTANCE,
-        data: instanceData
-      });
-      expect(user['fulfillReconnection_']).toHaveBeenCalled();
-      expect(reconnectPromise).toBeDefined();
-      reconnectPromise.then(() => {
-        expect(reconnected).toEqual(true);
-        expect(network.send).toHaveBeenCalledWith('newclient', {
-          type: uProxy.MessageType.INSTANCE,
-          data: 'foo'
-        });
-      }).then(done);
-    });
-
-    it('round-trip future delivery of multiple pending messages', (done) => {
-      var n = 10;
-      var messages = [];
-      var promises = [];
-      // Disconnect the client.
-      user.handleClient({
-        userId: 'fakeuser',
-        clientId: 'newclient',
-        status: UProxyClient.Status.OFFLINE,
-        timestamp: 12345
-      });
-      expect(user.clientIdToStatusMap['newclient']).not.toBeDefined();
-      for (var i = 0 ; i < n ; ++i) {
-        promises.push(user.send('fakeinstance', <uProxy.Message>{
-          type: uProxy.MessageType.INSTANCE,
-          data: i
-        }));
-      }
-      expect(Object.keys(user['reconnections_']).length).toEqual(1);
-      var newClientState = {
-        userId: 'fakeuser',
-        clientId: 'even-newer-client',
-        status: UProxyClient.Status.ONLINE,
-        timestamp: 12345
-      };
-      user.handleClient(newClientState);
-      user.handleMessage('even-newer-client', {
-        type: uProxy.MessageType.INSTANCE,
-        data: instanceData
-      });
-      // Expect all reconnections and messages to fire and become empty.
-      Promise.all(promises).then((vals) => {
-        expect(network.send.calls.count()).toEqual(n);
-        var sum = 0;
-        for (var i = 0 ; i < n ; ++i) {
-          // Ensure each message sent correctly.
-          var args = network.send.calls.argsFor(i);
-          expect(args[0]).toEqual('even-newer-client');
-          sum += parseInt(args[1].data);
-        }
-        expect(sum).toEqual(n * (n - 1) / 2);
-        expect(user['reconnections_']).toEqual({});
       }).then(done);
     });
 

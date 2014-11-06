@@ -156,47 +156,27 @@ module Social {
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
-
-    public sendInstanceHandshake = (clientId :string) : Promise<void> => {
-      return this.sendInstanceHandshakes([clientId]);
-    }
-
     /**
      * Sends our instance handshake to a list of clients, returning a promise
      * that all handshake messages have been sent.
      *
      * Intended to be protected, but TypeScript has no 'protected' modifier.
      */
-    public sendInstanceHandshakes = (clientIds :string[]) : Promise<void> => {
-      var handshakes :Promise<void>[] = [];
-      var handshake = this.getInstanceHandshake_();
-      var cnt = clientIds.length;
-      if (!handshake) {
+    public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
+      if (!this.myInstance) {
         throw Error('Not ready to send handshake');
       }
-      clientIds.forEach((clientId:string) => {
-        handshakes.push(this.send(clientId, handshake));
-      });
-      return Promise.all(handshakes).then(() => {
-        this.log('sent ' + cnt + ' instance handshake(s): ' +
-                 clientIds.join(', '));
-      });
-    }
-
-    /**
-     * Generates my instance message, to send to other uProxy installations to
-     * inform them that we're also a uProxy installation to interact with.
-     */
-    private getInstanceHandshake_ = () : uProxy.Message => {
-      if (!this.myInstance) {
-        throw Error('No local instance available!');
-      }
-      // TODO: Should we memoize the instance handshake, or calculate it fresh
-      // each time?
-      return {
+      var handshake = {
         type: uProxy.MessageType.INSTANCE,
-        data: this.myInstance.getInstanceHandshake()
+        data: {
+         handshake: this.myInstance.getInstanceHandshake(),
+         consent: consent
+        }
       };
+
+      return this.send(clientId, handshake).then(() => {
+        this.log('Sent instance handshake to ' + clientId);
+      });
     }
 
     /**
@@ -248,7 +228,6 @@ module Social {
 
     // Promise that delays all message handling until fully logged in.
     private onceLoggedIn_   :Promise<void>;
-    private instanceMessageQueue_ :string[];  // List of recipient clientIDs.
     private remember :boolean;
 
     // ID returned by setInterval call for monitoring.
@@ -264,7 +243,6 @@ module Social {
       this.provider_ = freedom[PREFIX + name];
       this.remember = false;
       this.onceLoggedIn_ = null;
-      this.instanceMessageQueue_ = [];
       this.freedomApi_ = this.provider_();
 
       // TODO: Update these event name-strings when freedom updates to
@@ -457,17 +435,6 @@ module Social {
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
       });
-    }
-
-    // TODO: Use the queue from uproxy-lib!
-    public flushQueuedInstanceMessages = () : Promise<void> => {
-      if (0 === this.instanceMessageQueue_.length) {
-        return Promise.resolve<void>();  // Don't need to do anything.
-      }
-      return this.sendInstanceHandshakes(this.instanceMessageQueue_)
-          .then(() => {
-            this.instanceMessageQueue_ = [];
-          });
     }
 
     /**

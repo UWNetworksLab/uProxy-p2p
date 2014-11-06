@@ -375,21 +375,16 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      var consentPayload :uProxy.Message = {
-        type: uProxy.MessageType.CONSENT,
-        data: <ConsentMessage>{
-          instanceId: this.user.getLocalInstanceId(),
-          consent: this.getConsentBits()
-        }
-      };
-      this.send(consentPayload);
+      this.user.network.sendInstanceHandshake(
+          this.user.instanceToClient(this.instanceId), this.getConsentBits());
     }
 
     /**
      * Receive consent bits from the remote, and update consent values
      * accordingly.
      */
-    public receiveConsent = (bits:Consent.WireState) => {
+    public updateConsent = (bits:Consent.WireState) => {
+
       var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
       var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
       Consent.updateStateFromRemoteState(this.consent, bits);
@@ -463,11 +458,13 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     this.consent,
+        consent:     this.getConsentBits()
       });
     }
     public restoreState = (state :RemoteInstanceState) => {
-      this.consent = state.consent;
+      this.consent.localRequestsAccessFromRemote = state.consent.isRequesting;
+      this.consent.localGrantsAccessToRemote = state.consent.isOffering;
+      this.sendConsent();
     }
 
     /**
@@ -500,7 +497,7 @@ module Core {
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState {
-    consent     :Consent.State;
+    consent     :Consent.WireState;
   }
 
   // TODO: Implement obfuscation.

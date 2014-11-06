@@ -67,3 +67,8 @@ interface InstanceHandshake {
   keyHash     :string;
   description ?:string;  // TODO: Determine if description is actually optional.
 }
+
+interface InstanceMessage {
+  handshake :InstanceHandshake;
+  consent :Consent.WireState
+}
