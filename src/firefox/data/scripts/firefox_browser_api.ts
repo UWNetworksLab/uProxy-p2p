@@ -1,9 +1,8 @@
 /**
  * firefox_browser_api.ts
  *
- * Includes:
- * Firefox-specific implementation of the Notifications API.
- * Sends message back to add-on environment, which handles proxy settings.
+ * Firefox-specific implementation of the Browser API.
+ * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
@@ -19,6 +18,11 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('setIcon', iconFile);
   }
 
+  public openFaq = (pageAnchor :string) => {}
+
+  // Proxy configuration methods.
+  // Sends message back to add-on environment, which handles proxy settings.
+
   public startUsingProxy = (endpoint:Net.Endpoint) => {
     port.emit('startUsingPorxy', endpoint);
   }
@@ -26,6 +30,4 @@ class FirefoxBrowserApi implements BrowserAPI {
   public stopUsingProxy = (askUser :boolean) => {
     port.emit('startUsingPorxy', askUser);
   }
-
-  public openFaq = (pageAnchor :string) => {}
 }
