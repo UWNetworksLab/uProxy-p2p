@@ -27,8 +27,6 @@ Polymer({
   stop: function() {
     console.log('[polymer] calling core.stop()');
     core.stop();
-    this.ui.stopGettingInUiAndConfig();
-    this.ui.instanceGettingAccessFrom = null;
   },
 
   // |action| is the string end for a Consent.UserAction

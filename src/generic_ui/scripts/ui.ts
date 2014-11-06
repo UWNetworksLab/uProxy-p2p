@@ -188,6 +188,9 @@ module UI {
      * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
+      // TODO (lucyhe): if askUser is true we might want a different
+      // icon that means "configured to proxy, but not proxying"
+      // instead of immediately going back to the "not proxying" icon.
       this.browserAction.setIcon('uproxy-19.png');
       proxyConfig.stopUsingProxy(askUser);
     }
