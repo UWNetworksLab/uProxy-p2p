@@ -1,9 +1,7 @@
 /**
  * chrome_browser_api.ts
  *
- * Includes:
- * Chrome-specific implementation of the Notifications API.
- * Configuration and control of the browsers proxy settings.
+ * Chrome-specific implementation of the Browser API.
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -12,7 +10,7 @@
 
 class ChromeBrowserApi implements BrowserAPI {
 
-  // For browser actions.
+  // For browser action.
 
   public ICON_DIR :string = 'icons/';
 

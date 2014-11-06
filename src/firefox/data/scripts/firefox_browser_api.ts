@@ -14,13 +14,17 @@ class FirefoxBrowserApi implements BrowserAPI {
   constructor() {
   }
 
+  // For browser icon.
+
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon', iconFile);
   }
 
+  // For FAQ.
+
   public openFaq = (pageAnchor :string) => {}
 
-  // Proxy configuration methods.
+  // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
 
   public startUsingProxy = (endpoint:Net.Endpoint) => {

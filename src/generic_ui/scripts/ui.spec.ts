@@ -117,11 +117,6 @@ describe('UI.UserInterface', () => {
 
   describe('Update giving and getting state in UI', () => {
 
-    beforeEach(() => {
-      //proxyConfig = jasmine.createSpyObj('IBrowserProxyConfig',
-      //    ['startUsingProxy', 'stopUsingProxy']);
-    });
-
     it('isGivingAccess updates when you start and stop giving', () => {
       expect(ui.isGivingAccess()).toEqual(false);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
