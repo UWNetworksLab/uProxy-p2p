@@ -151,11 +151,10 @@ module UI {
         if (data.instanceId === this.instanceGettingAccessFrom) {
           this.instanceGettingAccessFrom = null;
           this.stopGettingInUiAndConfig(data.error);
+        } else {
+          console.warn('Can\'t stop getting access from friend you were not ' +
+              'already getting access from');
         }
-        // If the two instanceIds did not match then either the stop
-        // was initiated from the UI (i.e. user clicked stop) or the
-        // user somehow tried to stop proxying from someone they were not
-        // already proxying through.
       });
 
       core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
