@@ -1,7 +1,7 @@
 // Fake dependency which mocks all interactions such that the UI can work.
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/browser_action.d.ts'/>
+/// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../networking-typings/communications.d.ts' />
 
@@ -20,10 +20,13 @@ var model :UI.Model = {
   description: 'My Computer'
 };
 
-class MockNotifications implements BrowserAction {
+class MockBrowserApi implements BrowserApi {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
+  startUsingProxy() {}
+  stopUsingProxy(askUser) {}
+  openFaq(pageAnchor) {}
 }
 
 function generateFakeUserMessage() :UI.UserMessage {
@@ -158,7 +161,7 @@ class MockCore implements uProxy.CoreAPI {
 var mockCore = new MockCore();
 var ui :uProxy.UIAPI = new UI.UserInterface(
     mockCore,
-    new MockNotifications());
+    new MockBrowserApi());
 
 var core = mockCore;
 
