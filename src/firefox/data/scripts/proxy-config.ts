@@ -3,6 +3,7 @@
  * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
 /// <reference path='../../../interfaces/firefox.d.ts' />
+/// <reference path='../../../interfaces/browser-proxy-config.d.ts'/>
 
 var port :ContentScriptPort;
 

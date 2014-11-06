@@ -8,24 +8,24 @@
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
 
+var port :ContentScriptPort;
+
 class FirefoxBrowserApi implements BrowserAPI {
 
-  var port :ContentScriptPort;
+  constructor() {
+  }
 
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon', iconFile);
   }
 
-  constructor() {
-  }
-
   public startUsingProxy = (endpoint:Net.Endpoint) => {
     port.emit('startUsingPorxy', endpoint);
-  };
+  }
 
   public stopUsingProxy = (askUser :boolean) => {
     port.emit('startUsingPorxy', askUser);
-  };
+  }
 
   public openFaq = (pageAnchor :string) => {}
 }

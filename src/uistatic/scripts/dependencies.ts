@@ -20,7 +20,7 @@ var model :UI.Model = {
   description: 'My Computer'
 };
 
-class MockBrowserApi implements BrowserApi {
+class MockBrowserApi implements BrowserAPI {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
