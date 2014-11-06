@@ -153,7 +153,7 @@ module UI {
           this.stopGettingInUiAndConfig(data.error);
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
-              'already getting access from');
+              'already getting access from.');
         }
       });
 
