@@ -278,11 +278,6 @@ module Core {
       if (data.consent) {
         existingInstance.updateConsent(data.consent);
       }
-
-      // TODO: this may send a duplicate notification to the UI, because
-      // instance.update and the instance constructor both notify the UI.
-      // This shouldn't be a problem but we may want to clean this up.
-      this.notifyUI();
     }
 
     /**

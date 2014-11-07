@@ -125,6 +125,7 @@ module Core {
             this.restoreState(state);
             this.user.notifyUI();
           }).catch((e) => {
+            this.user.notifyUI();
             console.log('Did not have consent state for this instanceId');
           });
 
