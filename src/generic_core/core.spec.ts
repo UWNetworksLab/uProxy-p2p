@@ -23,7 +23,7 @@ describe('Core', () => {
   user.getInstance = null;
   user.notifyUI = () => {};
   user.getLocalInstanceId = () => { return 'fake/userpath'; };
-  var alice = new Core.RemoteInstance(user, {
+  var alice = new Core.RemoteInstance(user, 'instance-alice', {
     instanceId: 'instance-alice',
     keyHash:    'fake-hash-alice',
     description: 'alice peer',

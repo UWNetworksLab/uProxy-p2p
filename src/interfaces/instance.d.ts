@@ -10,6 +10,8 @@
  * about their current status and consent level.
  */
 
+/// <reference path='../generic_core/consent.ts' />
+
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
