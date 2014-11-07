@@ -51,7 +51,7 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    //spyOn(console, 'log');
+    spyOn(console, 'log');
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
@@ -74,20 +74,30 @@ describe('Social.FreedomNetwork', () => {
 
     it('can log in', (done) => {
       jasmine.clock().install();
-      spyOn(network, 'restoreFromStorage');
+      var storage = new Core.Storage;
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
-      spyOn(network, 'prepareLocalInstance').and.callFake((userId) => {
-        network.myInstance = new Core.LocalInstance(network, userId);
-        return Promise.resolve();
-      });
-      network.login(false).then(() => {
+      var promises :Promise<void>[] = [];
+      promises.push(<any>storage.save<Instance>('mockmockmyself', {
+          instanceId: 'dummy-instance-id',
+          keyHash: ''
+      }));
+      promises.push(<any>storage.save<string>(
+          'dummy-instance-id/roster/somefriend', ''));
+
+      Promise.all(promises).then(() => {
+        return network.login(false);
+      }).then(() => {
         expect(network.myInstance).toBeDefined();
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
+        expect(network['myInstance'].instanceId).toEqual(
+            'dummy-instance-id');
+        expect(Object.keys(network.roster).length).toEqual(1);
+        expect(network.getUser('somefriend')).toBeDefined();
         var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
@@ -96,7 +106,7 @@ describe('Social.FreedomNetwork', () => {
         };
         // Add user to the roster;
         network.handleClientState(freedomClientState);
-        expect(Object.keys(network.roster).length).toEqual(1);
+        expect(Object.keys(network.roster).length).toEqual(2);
         var friend = network.getUser('fakeuser');
         spyOn(friend, 'monitor');
         expect(friend.isOnline()).toEqual(true);
