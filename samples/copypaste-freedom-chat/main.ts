@@ -1,7 +1,4 @@
-/// <reference path='../../logging/logging.d.ts' />
 /// <reference path='../../webrtc/peerconnection.d.ts' />
-
-var log :Logging.Log = new Logging.Log('main');
 
 // Freedom apps don't have direct access to the page so this
 // file mediates between the page's controls and the Freedom app.
@@ -30,6 +27,9 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) {
+  // TODO: typings for the freedom module
+  var copypaste :any = interface();
+
   // DOM nodes that we will choose from either the offer panel or the
   // answer panel once the user chooses whether to offer/answer.
   var step2ContainerNode :HTMLElement;
@@ -66,7 +66,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
       function(event:MouseEvent) : any {
         this.disabled = true;
 
-        freedom.emit('start', {});
+        copypaste.emit('start', {});
       };
 
   offerPanel_inboundMessageNode.onkeyup =
@@ -93,7 +93,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   chatPanel_sendMessageButtonNode.onclick =
       function(event:MouseEvent) : any {
         // TODO: cannot send empty messages
-        freedom.emit('messageFromPeer',
+        copypaste.emit('messageFromPeer',
             chatPanel_outboundMessageNode.value || '(empty message)');
       };
 
@@ -142,7 +142,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   function consumeInboundMessage(inboundMessageField:HTMLInputElement) : void {
     // Forward the signalling messages to the Freedom app.
     for (var i = 0; i < parsedInboundMessages.length; i++) {
-      freedom.emit('signalFromPeer', parsedInboundMessages[i]);
+      copypaste.emit('signalFromPeer', parsedInboundMessages[i]);
     }
 
     // Disable the form field, since it no longer makes sense to accept further
@@ -157,7 +157,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   //
   // TODO: Accumulate signalling messages until we have all of them, and only
   // then update the textarea.
-  freedom.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
+  copypaste.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
     step2ContainerNode.style.display = 'block';
 
     outboundMessageNode.value =
@@ -165,16 +165,16 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   });
 
   // Display this inbound chat message to the user.
-  freedom.on('messageFromPeer', (message:string) => {
+  copypaste.on('messageFromPeer', (message:string) => {
     chatPanel_inboundMessageNode.value = message;
   });
 
   // Called when a peer-to-peer connection has been established.
-  freedom.on('ready', () => {
+  copypaste.on('ready', () => {
     offerPanelNode.style.display = 'none';
     answerPanelNode.style.display = 'none';
     chatPanelNode.style.display = 'block';
   });
 }, (e:Error) => {
-  log.error('could not load freedom: ' + e.message);
+  console.error('could not load freedom: ' + e.message);
 });
