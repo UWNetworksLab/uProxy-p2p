@@ -89,4 +89,3 @@ a.negotiateConnection()
     log.error('error while opening datachannel: ' + e.message);
     freedom().emit('error', {})
   });
-
