@@ -108,10 +108,10 @@ module Core {
     constructor(
         // The User which this instance belongs to.
         public user :Core.User,
+        public instanceId :string,
         // The last instance handshake from the peer.  This data may be fresh
         // (over the wire) or recovered from disk (and stored in a
         // RemoteInstanceState, which subclasses InstanceHandshake).
-        public instanceId :string,
         data        :InstanceHandshake) {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
@@ -460,16 +460,24 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     this.getConsentBits()
-        //description: this.description
+        consent:     this.consent,
+        description: this.description,
+        keyHash:     this.keyHash
       });
     }
 
     public restoreState = (state :RemoteInstanceState) => {
-      //this.description = state.consent.description;
-      this.consent.localRequestsAccessFromRemote = state.consent.isRequesting;
-      this.consent.localGrantsAccessToRemote = state.consent.isOffering;
-      this.sendConsent();
+      if (typeof this.description === 'undefined') {
+        this.description = state.description;
+        this.keyHash = state.keyHash;
+        this.consent = state.consent;
+      } else {
+        this.consent.localRequestsAccessFromRemote =
+            state.consent.localRequestsAccessFromRemote;
+        this.consent.localGrantsAccessToRemote =
+            state.consent.localGrantsAccessToRemote;
+        this.sendConsent();
+      }
     }
 
     /**
@@ -502,7 +510,9 @@ module Core {
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState {
-    consent     :Consent.WireState;
+    consent     :Consent.State;
+    description :string;
+    keyHash     :string;
   }
 
   // TODO: Implement obfuscation.

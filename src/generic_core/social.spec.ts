@@ -74,6 +74,7 @@ describe('Social.FreedomNetwork', () => {
 
     it('can log in', (done) => {
       jasmine.clock().install();
+      spyOn(network, 'restoreFromStorage');
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
@@ -390,6 +391,7 @@ describe('Social.ManualNetwork', () => {
   it('adds the sender to the roster upon receving a message', () => {
     var senderClientId = 'dummy_client_id';
     var senderUserId = senderClientId;
+    spyOn(network, 'getStorePath').and.returnValue('');
 
     var message :uProxy.Message = {
       type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,

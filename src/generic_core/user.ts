@@ -77,10 +77,8 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
-      storage.load<string[]>(this.getStorePath()).then((state) => {
+      storage.load<UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
-      }).catch((e) => {
-        console.log('could not load instance for user ' + this.userId);
       });
     }
 
@@ -272,8 +270,7 @@ module Core {
           existingInstance.sendConsent();
         }
       } else {
-        existingInstance =
-            new Core.RemoteInstance(this, instance.instanceId, instance);
+        existingInstance = new Core.RemoteInstance(this, instanceId, instance);
         this.instances_[instanceId] = existingInstance;
         this.saveToStorage();
       }
@@ -423,34 +420,49 @@ module Core {
     }
 
     public getStorePath() {
-      return this.getLocalInstanceId() + '/' + this.userId;
+      return this.network.getStorePath() + this.userId;
     }
 
     public saveToStorage = () => {
       var state = this.currentState();
-      storage.save<string[]>(this.getStorePath(), state).then((old) => {});
+      storage.save<UserState>(this.getStorePath(), state).then((old) => {});
     }
 
-    public restoreState = (instances :string[]) => {
-      for (var i in instances) {
-        var instanceId = instances[i];
-        this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
+    public restoreState = (state :UserState) => {
+      if (this.name === 'pending') {
+        this.name = state.name;
       }
+
+      if (typeof this.profile.imageData === 'undefined') {
+        this.profile.imageData = state.imageData;
+      }
+      for (var i in state.instanceIds) {
+        var instanceId = state.instanceIds[i];
+        console.log('new instance Id ' + instanceId);
+        if (!(instanceId in this.instances_)) {
+          this.instances_[instanceId] =
+              new Core.RemoteInstance(this, instanceId, null);
+        }
+      }
+      this.notifyUI();
     }
 
-    public currentState = () :string[] => {
-      return cloneDeep(Object.keys(this.instances_));
+    public currentState = () :UserState => {
+      return cloneDeep({
+        name : this.name,
+        imageData: this.profile.imageData,
+        instanceIds: Object.keys(this.instances_)
+      });
     }
 
   }  // class User
 
   export interface UserState {
-    userId      :string;
     name        :string;
+    imageData     :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
-    // Don't save the clients, because those are completely ephemeral.
   }
 
 }  // module uProxy
