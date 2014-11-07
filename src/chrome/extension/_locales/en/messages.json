@@ -1,11 +1,11 @@
 {
   "appName": {
     "message": "uProxy Extension",
-    "description": "The name of the extension"
+    "description": "(Alpha version: do not use for real!) The title that appears in the Chrome Extensions listing"
   },
   "appDescription": {
-    "message": "uProxy",
-    "description": "The description of the extension"
+    "message": "Provides the user-interface for the uProxy Chrome App",
+    "description": "The description that appears in the Chrome Extensions listing"
   },
   "giveAccess": {
     "message": "Give Access",

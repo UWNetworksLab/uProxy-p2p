@@ -76,11 +76,6 @@ FILES =
     'generic_core/util.js'
   ]
 
-  uproxy_lib_common: [
-    'arraybuffers/arraybuffers.js'
-    'handler/queue.js'
-  ]
-
   uproxy_networking_common: [
     'ipaddrjs/ipaddr.min.js'
     'tcp/tcp.js'
@@ -155,13 +150,6 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
-
-      # Compiled javascript from say, uproxy-lib and uproxy-networking.
-      # uproxy_core_libs: { files: [ {
-          # expand: true, cwd: uproxyLibPath + '/build'
-          # src: ['**/*.js']
-          # dest: 'build/dev/'
-        # } ]}
 
       chrome_extension:
         nonull: true
@@ -258,7 +246,10 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
-          src: FILES.uproxy_lib_common,
+          src: [
+            'arraybuffers/arraybuffers.js'
+            'handler/queue.js'
+          ],
           dest: chromeAppDevPath + 'scripts/uproxy-lib/'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
