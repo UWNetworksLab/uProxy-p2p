@@ -323,8 +323,10 @@ module Core {
 
       var instanceStatesForUi = [];
       for (var instanceId in this.instances_) {
-        instanceStatesForUi.push(
-          this.instances_[instanceId].currentStateForUi());
+        if (this.instances_[instanceId].readFromStorage) {
+          instanceStatesForUi.push(
+              this.instances_[instanceId].currentStateForUi());
+        }
       }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
