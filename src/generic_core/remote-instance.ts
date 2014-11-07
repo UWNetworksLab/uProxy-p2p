@@ -38,7 +38,7 @@ module Core {
     public description :string;
     public bytesSent   :number;
     public bytesReceived    :number;
-    public readFromStorage :boolean;
+    public readFromStorage :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -465,6 +465,11 @@ module Core {
       });
     }
 
+    /**
+     * Restore state from storage
+     * if remote instance state was set, only overwrite fields
+     * that correspond to local user action.
+     */
     public restoreState = (state :RemoteInstanceState) => {
       if (typeof this.description === 'undefined') {
         this.description = state.description;

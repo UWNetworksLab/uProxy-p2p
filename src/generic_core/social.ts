@@ -162,6 +162,10 @@ module Social {
      */
     public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
       if (!this.myInstance) {
+        // TODO: consider waiting until myInstance is constructing
+        // instead of dropping this message.
+        // Currently we will keep receiving INSTANCE_REQUEST until instance
+        // handshake is sent to the peer.
         throw Error('Not ready to send handshake');
       }
       var handshake = {

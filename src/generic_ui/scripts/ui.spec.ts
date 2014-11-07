@@ -38,6 +38,7 @@ describe('UI.UserInterface', () => {
     mockBrowserAction = jasmine.createSpyObj('browserAction', ['setIcon']);
     ui = new UI.UserInterface(mockCore, mockBrowserAction);
     model.networks = [];
+    spyOn(console, 'log');
   });
 
   describe('syncUser', () => {
