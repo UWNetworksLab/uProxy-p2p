@@ -1,12 +1,27 @@
-/*
- * Configuration and control of the browsers proxy settings.
+/**
+ * chrome_browser_api.ts
+ *
+ * Chrome-specific implementation of the Browser API.
  */
-
+/// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../interfaces/browser-proxy-config.d.ts'/>
 /// <reference path='../../../networking-typings/communications.d.ts' />
 
-class BrowserProxyConfig implements IBrowserProxyConfig {
+
+class ChromeBrowserApi implements BrowserAPI {
+
+  // For browser action.
+
+  public ICON_DIR :string = 'icons/';
+
+  public setIcon = (iconFile :string) : void => {
+    chrome.browserAction.setIcon({
+      path: this.ICON_DIR + iconFile
+    });
+  }
+
+  // For proxy configuration.
+
   private preUproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private uproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private running_ :boolean = false;
@@ -66,4 +81,10 @@ class BrowserProxyConfig implements IBrowserProxyConfig {
       });
     }
   };
-}  // BrowserProxyConfig
+
+  // For FAQ.
+
+  public openFaq = (pageAnchor :string) => {
+    chrome.tabs.create({url: "../polymer/faq.html#" + pageAnchor});
+  }
+}
