@@ -97,6 +97,9 @@ declare module freedom {
 }  // declare module freedom
 
 interface Freedom {
+  // Represents the call to freedom().
+  (manifestPath?:string, options?:any): any;
+
   // We use this specification so that you can reference any value in freedom by
   // a array-lookup of it's name. One day we'll have a nicer way to do this.
   // This also allows stricter typescript checking (noImplicitAny=true)

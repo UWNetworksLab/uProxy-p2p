@@ -1,4 +1,3 @@
-/// <reference path='../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../webrtc/peerconnection.d.ts' />
 
 // Freedom apps don't have direct access to the page so this
@@ -27,149 +26,155 @@ var chatPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('c
 var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chatPanel_sendMessageButton');
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
-// DOM nodes that we will choose from either the offer panel or the
-// answer panel once the user chooses whether to offer/answer.
-var step2ContainerNode :HTMLElement;
-var outboundMessageNode :HTMLInputElement;
-var inboundMessageNode :HTMLInputElement;
+freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) {
+  // TODO: typings for the freedom module
+  var copypaste :any = interface();
 
-// Stores the parsed messages for use later, if & when the user clicks the
-// button for consuming the messages.
-var parsedInboundMessages :WebRtc.SignallingMessage[];
+  // DOM nodes that we will choose from either the offer panel or the
+  // answer panel once the user chooses whether to offer/answer.
+  var step2ContainerNode :HTMLElement;
+  var outboundMessageNode :HTMLInputElement;
+  var inboundMessageNode :HTMLInputElement;
 
-startPanel_answerLinkNode.onclick =
-    function(event:MouseEvent) : any {
-      step2ContainerNode = offerPanel_step2ContainerNode;
-      outboundMessageNode = offerPanel_outboundMessageNode;
-      inboundMessageNode = offerPanel_inboundMessageNode;
+  // Stores the parsed messages for use later, if & when the user clicks the
+  // button for consuming the messages.
+  var parsedInboundMessages :WebRtc.SignallingMessage[];
 
-      startPanelNode.style.display = 'none';
-      offerPanelNode.style.display = 'block';
-    };
+  startPanel_answerLinkNode.onclick =
+      function(event:MouseEvent) : any {
+        step2ContainerNode = offerPanel_step2ContainerNode;
+        outboundMessageNode = offerPanel_outboundMessageNode;
+        inboundMessageNode = offerPanel_inboundMessageNode;
 
-startPanel_offerLinkNode.onclick =
-    function(event:MouseEvent) : any {
-      step2ContainerNode = answerPanel_step2ContainerNode;
-      outboundMessageNode = answerPanel_outboundMessageNode;
-      inboundMessageNode = answerPanel_inboundMessageNode;
+        startPanelNode.style.display = 'none';
+        offerPanelNode.style.display = 'block';
+      };
 
-      startPanelNode.style.display = 'none';
-      answerPanelNode.style.display = 'block';
-    };
+  startPanel_offerLinkNode.onclick =
+      function(event:MouseEvent) : any {
+        step2ContainerNode = answerPanel_step2ContainerNode;
+        outboundMessageNode = answerPanel_outboundMessageNode;
+        inboundMessageNode = answerPanel_inboundMessageNode;
 
-// Tells the Freedom app to create an instance of the socks-to-rtc
-// Freedom module and initiate a connection.
-answerPanel_generateIceCandidatesButton.onclick =
-    function(event:MouseEvent) : any {
-      this.disabled = true;
+        startPanelNode.style.display = 'none';
+        answerPanelNode.style.display = 'block';
+      };
 
-      freedom.emit('start', {});
-    };
+  // Tells the Freedom app to create an instance of the socks-to-rtc
+  // Freedom module and initiate a connection.
+  answerPanel_generateIceCandidatesButton.onclick =
+      function(event:MouseEvent) : any {
+        this.disabled = true;
 
-offerPanel_inboundMessageNode.onkeyup =
-    function(event:Event) : any {
-      parsedInboundMessages = parseInboundMessages(this, offerPanel_consumeInboundMessageButtonNode);
-    };
+        copypaste.emit('start', {});
+      };
 
-answerPanel_inboundMessageNode.onkeyup =
-    function(event:Event) : any {
-      parsedInboundMessages = parseInboundMessages(this, answerPanel_consumeInboundMessageButtonNode);
-    };
+  offerPanel_inboundMessageNode.onkeyup =
+      function(event:Event) : any {
+        parsedInboundMessages = parseInboundMessages(this, offerPanel_consumeInboundMessageButtonNode);
+      };
 
-offerPanel_consumeInboundMessageButtonNode.onclick =
-    function(event:MouseEvent) : any {
-      consumeInboundMessage(offerPanel_inboundMessageNode);
-    };
+  answerPanel_inboundMessageNode.onkeyup =
+      function(event:Event) : any {
+        parsedInboundMessages = parseInboundMessages(this, answerPanel_consumeInboundMessageButtonNode);
+      };
 
-answerPanel_consumeInboundMessageButtonNode.onclick =
-    function(event:MouseEvent) : any {
-      consumeInboundMessage(answerPanel_inboundMessageNode);
-      answerPanel_consumeInboundMessageButtonNode.disabled = true;
-    };
+  offerPanel_consumeInboundMessageButtonNode.onclick =
+      function(event:MouseEvent) : any {
+        consumeInboundMessage(offerPanel_inboundMessageNode);
+      };
 
-chatPanel_sendMessageButtonNode.onclick =
-    function(event:MouseEvent) : any {
-      // TODO: cannot send empty messages
-      freedom.emit('messageFromPeer',
-          chatPanel_outboundMessageNode.value || '(empty message)');
-    };
+  answerPanel_consumeInboundMessageButtonNode.onclick =
+      function(event:MouseEvent) : any {
+        consumeInboundMessage(answerPanel_inboundMessageNode);
+        answerPanel_consumeInboundMessageButtonNode.disabled = true;
+      };
 
-// Parses the contents of the form field 'inboundMessageField' as a sequence of
-// signalling messages. Enables/disables the corresponding form button, as
-// appropriate. Returns null if the field contents are malformed.
-function parseInboundMessages(inboundMessageField:HTMLInputElement,
-                              consumeMessageButton:HTMLElement)
-    : WebRtc.SignallingMessage[] {
-  var signals :string[] = inboundMessageField.value.trim().split('\n');
+  chatPanel_sendMessageButtonNode.onclick =
+      function(event:MouseEvent) : any {
+        // TODO: cannot send empty messages
+        copypaste.emit('messageFromPeer',
+            chatPanel_outboundMessageNode.value || '(empty message)');
+      };
 
-  // Each line should be a JSON representation of a WebRtc.SignallingMessage.
-  // Parse the lines here.
-  var parsedSignals :WebRtc.SignallingMessage[] = [];
-  for (var i = 0; i < signals.length; i++) {
-    var s :string = signals[i].trim();
+  // Parses the contents of the form field 'inboundMessageField' as a sequence of
+  // signalling messages. Enables/disables the corresponding form button, as
+  // appropriate. Returns null if the field contents are malformed.
+  function parseInboundMessages(inboundMessageField:HTMLInputElement,
+                                consumeMessageButton:HTMLElement)
+      : WebRtc.SignallingMessage[] {
+    var signals :string[] = inboundMessageField.value.trim().split('\n');
 
-    // TODO: Consider detecting the error if the text is well-formed JSON but
-    // does not represent a WebRtc.SignallingMessage.
-    var signal :WebRtc.SignallingMessage;
-    try {
-      signal = JSON.parse(s);
-    } catch (e) {
-      parsedSignals = null;
-      break;
+    // Each line should be a JSON representation of a WebRtc.SignallingMessage.
+    // Parse the lines here.
+    var parsedSignals :WebRtc.SignallingMessage[] = [];
+    for (var i = 0; i < signals.length; i++) {
+      var s :string = signals[i].trim();
+
+      // TODO: Consider detecting the error if the text is well-formed JSON but
+      // does not represent a WebRtc.SignallingMessage.
+      var signal :WebRtc.SignallingMessage;
+      try {
+        signal = JSON.parse(s);
+      } catch (e) {
+        parsedSignals = null;
+        break;
+      }
+      parsedSignals.push(signal);
     }
-    parsedSignals.push(signal);
+
+    // Enable/disable, as appropriate, the button for consuming the messages.
+    var inputIsWellFormed :boolean = false;
+    if (null !== parsedSignals && parsedSignals.length > 0) {
+      inputIsWellFormed = true;
+    } else {
+      // TODO: Notify the user that the pasted text is malformed.
+    }
+    consumeMessageButton.disabled = !inputIsWellFormed;
+
+    return parsedSignals;
   }
 
-  // Enable/disable, as appropriate, the button for consuming the messages.
-  var inputIsWellFormed :boolean = false;
-  if (null !== parsedSignals && parsedSignals.length > 0) {
-    inputIsWellFormed = true;
-  } else {
-    // TODO: Notify the user that the pasted text is malformed.
-  }
-  consumeMessageButton.disabled = !inputIsWellFormed;
+  // Forwards each line from the paste box to the Freedom app, which
+  // interprets each as a signalling channel message. The Freedom app
+  // knows whether this message should be sent to the socks-to-rtc
+  // or rtc-to-net module. Disables the form field.
+  function consumeInboundMessage(inboundMessageField:HTMLInputElement) : void {
+    // Forward the signalling messages to the Freedom app.
+    for (var i = 0; i < parsedInboundMessages.length; i++) {
+      copypaste.emit('signalFromPeer', parsedInboundMessages[i]);
+    }
 
-  return parsedSignals;
-}
+    // Disable the form field, since it no longer makes sense to accept further
+    // input in it.
+    inboundMessageField.readOnly = true;
 
-// Forwards each line from the paste box to the Freedom app, which
-// interprets each as a signalling channel message. The Freedom app
-// knows whether this message should be sent to the socks-to-rtc
-// or rtc-to-net module. Disables the form field.
-function consumeInboundMessage(inboundMessageField:HTMLInputElement) : void {
-  // Forward the signalling messages to the Freedom app.
-  for (var i = 0; i < parsedInboundMessages.length; i++) {
-    freedom.emit('signalFromPeer', parsedInboundMessages[i]);
-  }
+    // TODO: Report success/failure to the user.
+  };
 
-  // Disable the form field, since it no longer makes sense to accept further
-  // input in it.
-  inboundMessageField.readOnly = true;
+  // Add signalling-channel messages to the box from which the user should
+  // copy/paste the outgoing message.
+  //
+  // TODO: Accumulate signalling messages until we have all of them, and only
+  // then update the textarea.
+  copypaste.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
+    step2ContainerNode.style.display = 'block';
 
-  // TODO: Report success/failure to the user.
-};
+    outboundMessageNode.value =
+        outboundMessageNode.value.trim() + '\n' + JSON.stringify(signal);
+  });
 
+  // Display this inbound chat message to the user.
+  copypaste.on('messageFromPeer', (message:string) => {
+    chatPanel_inboundMessageNode.value = message;
+  });
 
-// Add signalling-channel messages to the box from which the user should
-// copy/paste the outgoing message.
-//
-// TODO: Accumulate signalling messages until we have all of them, and only
-// then update the textarea.
-freedom.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
-  step2ContainerNode.style.display = 'block';
-
-  outboundMessageNode.value =
-      outboundMessageNode.value.trim() + '\n' + JSON.stringify(signal);
-});
-
-// Display this inbound chat message to the user.
-freedom.on('messageFromPeer', (message:string) => {
-  chatPanel_inboundMessageNode.value = message;
-});
-
-// Called when a peer-to-peer connection has been established.
-freedom.on('ready', () => {
-  offerPanelNode.style.display = 'none';
-  answerPanelNode.style.display = 'none';
-  chatPanelNode.style.display = 'block';
+  // Called when a peer-to-peer connection has been established.
+  copypaste.on('ready', () => {
+    offerPanelNode.style.display = 'none';
+    answerPanelNode.style.display = 'none';
+    chatPanelNode.style.display = 'block';
+  });
+}, (e:Error) => {
+  console.error('could not load freedom: ' + e.message);
 });

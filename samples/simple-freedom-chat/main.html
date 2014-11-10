@@ -1,8 +1,7 @@
 <html>
 <head>
   <title>PeerConnection chat client</title>
-  <!-- Dependencies for freedom-for-*-for-uproxy -->
-  <script src='lib/freedom/uproxy-core-env.js'></script>
+  <script src='lib/freedom/freedom.js'></script>
 </head>
 
 <body>
@@ -22,24 +21,6 @@
     <button id="sendButtonB">Send</button>
   </div>
 
-  <!-- Note the object in the script tag is JSON-parsed, and must have double-quotes on keys (due to odd freedom parsing of it), and has this format:
-    {
-      // This is useful for debugging.
-      //
-      "debug": "debug"
-
-      // This makes modules run in iFrames instead of WebWorkers. You get
-      // syntax error warnings from iFrames where WebWorker's silently die.
-      //
-      "portType": "Frame"
-    }
-  -->
-  <script src='lib/freedom/freedom-for-webpages-for-uproxy.js'
-          data-manifest='freedom-module.json'>
-  {
-    "debug": "log"
-  }
-  </script>
   <script src='main.js'></script>
 </body>
 </html>

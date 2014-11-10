@@ -1,13 +1,18 @@
 {
-  "name": "scratch",
+  "name": "simple freedom chat",
   "description": "top-level freedom manifest",
   "app": {
     "script": [
+      "lib/handler/queue.js",
+      "lib/logging/logging.js",
+      "lib/webrtc/datachannel.js",
+      "lib/webrtc/peerconnection.js",
       "freedom-module.js"
     ]
   },
   "permissions": [
-    "core.uproxypeerconnection",
-    "core.log"
+    "core.console",
+    "core.rtcdatachannel",
+    "core.rtcpeerconnection"
   ]
 }

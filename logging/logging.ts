@@ -1,3 +1,6 @@
+/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/console.d.ts' />
+
 module Logging {
 
   // The data structure for a logged message.
@@ -11,9 +14,11 @@ module Logging {
   // Besides output to console, log can also be buffered for later retrieval
   // through "getLogs". This is the maximum number of buffered log before it is
   // trimmed. Assuming average log length is 80, the whole buffer size is about
-  // 80k. That should be easy to send through email, not much memory usage, and 
+  // 80k. That should be easy to send through email, not much memory usage, and
   // still enough to capture most issues.
   var MAX_BUFFERED_LOG = 1000;
+
+  var consoleLogger :freedom_Console.Console = freedom['core.console']();
 
   var logBuffer: Message[] = [];
 
@@ -59,19 +64,19 @@ module Logging {
     }
     return formatted_msg;
   }
+
   export function formatMessage(l:Message) : string {
-    return '*[' + l.tag + ']'  + '(' +
-      dateToString_(l.timestamp) + ') ' + l.level + ': ' + l.message;
+    return l.level + ' [' + dateToString_(l.timestamp) + '] ' + l.message;
   }
 
   export function makeMessage(level:string, tag:string, msg:string, args?:any[]) : Message {
-    return { timestamp: new Date(),
-        level: level,
-        tag: tag,
-        message: formatStringMessageWithArgs_(msg, args)
-      };
+    return {
+      timestamp: new Date(),
+      level: level,
+      tag: tag,
+      message: formatStringMessageWithArgs_(msg, args)
+    };
   }
-
 
   function checkFilter_(level:string, tag:string, filter:{[s: string]: string;})
       : boolean {
@@ -87,11 +92,11 @@ module Logging {
 
     if (checkFilter_(level, tag, consoleFilter)) {
       if(level === 'D' || level === 'I') {
-        console.log(formatMessage(Message));
+        consoleLogger.log(tag, formatMessage(Message));
       } else if(level === 'W') {
-        console.warn(formatMessage(Message));
+        consoleLogger.warn(tag, formatMessage(Message));
       } else {
-        console.error(formatMessage(Message));
+        consoleLogger.error(tag, formatMessage(Message));
       }
     }
 
