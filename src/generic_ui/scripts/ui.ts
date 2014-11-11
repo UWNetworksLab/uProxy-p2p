@@ -356,7 +356,7 @@ module UI {
       }
     }
 
-    public openFaq = (pageAnchor :string) => {
+    public openFaq = (pageAnchor ?:string) => {
       this.browserApi.openFaq(pageAnchor);
     }
   }  // class UserInterface

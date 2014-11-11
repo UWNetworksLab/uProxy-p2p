@@ -1,5 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href='description.html'>
+<link rel="import" href='faq-link.html'>
 
 <polymer-element name='uproxy-settings' attributes=''>
 
@@ -27,8 +28,9 @@
       width: 100%;
       color: white;
       padding: 1em;
+      margin-bottom: 1em;
     }
-    .logOut {
+    .actionLink {
       cursor: pointer;
       padding: 1em;
     }
@@ -57,7 +59,8 @@
           {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
         </div>
       </div>
-      <div class='logOut' on-tap='{{logOut}}'>Log-out of uProxy</div>
+      <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
+      <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
     </div>
 
   </template>
