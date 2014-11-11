@@ -18,7 +18,6 @@ Polymer({
     }
     console.log('connect fired!');
     this.state = this.LOGGING_IN;
-    window.close();
     core.login(this.network.name).then(() => {
       console.log('connected to ' + this.network.name);
       this.state = this.LOGGED_IN;
