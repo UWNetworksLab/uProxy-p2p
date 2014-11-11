@@ -10,45 +10,45 @@
       display: inline-block;
       box-sizing: border-box;
       height: 100%; width: 300px;
-      padding-top: 50px;
       background-color: #fff;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
       top: -100%;
+      z-index: 2000;  /* appear on top of toolbar */
+      font-size: 14px;
     }
     :host(.active) {
       top: 0;
       overflow: hidden;
     }
-    .setting {
-      padding: 16px;
-      border-bottom: 1px solid #ccc;
-      color: #888;
+    .userInfo {
+      background-color: #009688;
+      width: 100%;
+      color: white;
+      padding: 1em;
     }
-    h1 {
-      font-size: 16px;
-      font-weight: 100;
-      color: #333;
+    .logOut {
+      cursor: pointer;
+      padding: 1em;
     }
-    #sas {
-      padding-left: 36px;
-      color: #5a7;
-      font-size: 14px;
+    .userId {
+      font-size: 18px;
+    }
+    .networkName {
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      opacity: 0.7;
     }
     </style>
 
-    <div class='setting'>
-      <h1>Your security phrase<h1>
-      <span id='sas'>melon toast horse rocket</span>
-    </div>
-
-    <div class='setting'>
-      <h1>Public Mode</h1>
-    </div>
-
-    <div class='setting'>
-      <h1>STUN Servers</h1>
+    <div hidden?='{{ui.onlineNetwork==null}}'>
+      <div class='userInfo'>
+        <img hidden?='{{ui.onlineNetwork.imageData==null}}' src='{{ui.onlineNetwork.imageData}}'>
+        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
+        <div class='userId'>{{ui.onlineNetwork.userId}}</div>
+      </div>
+      <div class='logOut' on-tap='{{logOut}}'>Log-out of uProxy</div>
     </div>
 
   </template>

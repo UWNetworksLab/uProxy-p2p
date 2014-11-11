@@ -62,9 +62,6 @@ class MockCore implements uProxy.CoreAPI {
   connected = () => {
     return true;  // Static UI core is always 'connected'.
   }
-  reset() {
-    console.log('Resetting.');
-  }
   sendInstance(clientId) {
     console.log('Sending instance ID to ' + clientId);
   }

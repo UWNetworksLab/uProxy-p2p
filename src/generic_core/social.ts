@@ -432,6 +432,9 @@ module Social {
     public logout = () : Promise<void> => {
       this.myInstance = null;
       this.stopMonitor_();
+      for (var userId in this.roster) {
+        this.roster[userId].handleLogout();
+      }
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
       });

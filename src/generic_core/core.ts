@@ -107,22 +107,6 @@ class uProxyCore implements uProxy.CoreAPI {
         });
   }
 
-  /**
-   * Logs out of all networks.
-   */
-  reset = () => {
-    console.log('reset');
-    for (var networkName in Social.networks) {
-      for (var userId in Social.networks[networkName]) {
-        Social.networks[networkName][userId].logout();
-      }
-      if (networkName !== Social.MANUAL_NETWORK_ID) {
-        Social.networks[networkName] = {};
-      }
-    }
-    storage.reset().then(ui.updateAll);
-  }
-
   // sendInstanceHandshakeMessage = (clientId :string) => {
   //   // TODO: Possibly implement this, or get rid of the possibility for
   //   // UI-initiated instance handshakes.
@@ -230,7 +214,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkInfo:NetworkInfo) : void => {
+  public logout = (networkInfo:NetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     var userId = networkInfo.userId;
     var network = Social.getNetwork(networkName, userId);
@@ -238,7 +222,7 @@ class uProxyCore implements uProxy.CoreAPI {
       console.warn('Could not logout of network ', networkName);
       return;
     }
-    network.logout().then(() => {
+    return network.logout().then(() => {
       if (networkName !== Social.MANUAL_NETWORK_ID) {
         delete Social.networks[networkName][userId];
       }
@@ -371,10 +355,9 @@ function _validateKeyHash(keyHash:string) {
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
 core.onCommand(uProxy.Command.REFRESH_UI, ui.updateAll);
-core.onCommand(uProxy.Command.RESET, core.reset);
 // When the login message is sent from the extension, assume it's explicit.
 core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
-core.onCommand(uProxy.Command.LOGOUT, core.logout)
+core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
 // core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,

@@ -26,11 +26,7 @@
       }
     </style>
 
-    <uproxy-toolbar hidden?='{{ UI.View.SPLASH==ui.view || !loggedIn }}'>
-      <uproxy-button id='btnNetworks'
-          on-tap='{{ networksView }}'
-          img='../icons/networks.png'>
-      </uproxy-button>
+    <uproxy-toolbar hidden?='{{ UI.View.SPLASH==ui.view || !ui.onlineNetwork }}'>
       <uproxy-button id='btnSettings'
           on-tap='{{ settingsView }}'
           img='../icons/more_vert_white.svg'>
@@ -50,7 +46,7 @@
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      class='{{ { active: (UI.View.ROSTER==ui.view), hidden: (UI.View.SPLASH==ui.view || !loggedIn) } | tokenList }}'>
+      class='{{ { active: (UI.View.ROSTER==ui.view), hidden: (UI.View.SPLASH==ui.view || !ui.onlineNetwork) } | tokenList }}'>
     </uproxy-roster>
 
   </template>

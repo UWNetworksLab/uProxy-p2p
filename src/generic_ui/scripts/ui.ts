@@ -77,9 +77,6 @@ module UI {
     // sas-rtc.
     public localFingerprint :string = null;
 
-    myName = '';
-    myPic = null;
-
     // Instance you are getting access from.
     // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
@@ -88,6 +85,8 @@ module UI {
     // Remote instances are added to this set if their access.isClient value
     // is true.
     public instancesGivingAccessTo = {};
+
+    public onlineNetwork :Network = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -259,19 +258,16 @@ module UI {
           roster: {}
         });
       }
-    }
-
-    // Determine whether uProxy is connected to some network.
-    // TODO: Make these functional and write specs.
-    public loggedIn = () => {
-      for (var networkId in model.networks) {
-        if (model.networks[networkId].online &&
-            // TODO: figure out how to reference Social.MANUAL_NETWORK_ID here
-            model.networks[networkId].name !== "manual") {
-          return true;
+  
+      // Figure out which network we are signed into (currently user can only
+      // be signed into 1 network at a time in the UI, not counting manual). 
+      this.onlineNetwork = null;     
+      for (var i = 0; i < model.networks.length; ++i) {
+        if (model.networks[i].online && model.networks[i].name != 'Manual') {
+          this.onlineNetwork = model.networks[i];
+          break;
         }
       }
-      return false;
     }
 
     // Synchronize the data about the current user.
@@ -285,7 +281,18 @@ module UI {
       if (!network) {
         console.warn('Received USER for non-existing network.');
         return;
+      } else if (!network.online) {
+        // Ignore all user updates when the network is offline.
+        // These user updates may come in asynchrously after logging out of a
+        // network, e.g. if the UI logs out of Google while we are getting
+        // access, we will first completely logout and then asynchronously
+        // get an update for the user when the peerconnection has closed - in
+        // this case the user should already have been removed from the roster
+        // in the UI and stay removed.
+        return;
       }
+
+
       // Construct a UI-specific user object.
       var profile = payload.user;
       // Update / create if necessary a user, both in the network-specific

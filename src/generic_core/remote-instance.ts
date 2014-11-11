@@ -172,16 +172,17 @@ module Core {
             this.rtcToNet_ = new RtcToNet.RtcToNet(
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
-                this.access.asClient = false;
-                ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
-                this.rtcToNet_ = null;
-                this.bytesSent = 0;
-                this.bytesReceived = 0;
-                this.user.notifyUI();
-                // TODO: give each notification a real data structure and id,
-                // and allow the user select what notifications they get.
-                ui.showNotification(this.user.name + ' stopped proxying through you');
-              });
+              console.log('rtcToNet_.onceClosed called');
+              this.access.asClient = false;
+              ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
+              this.rtcToNet_ = null;
+              this.bytesSent = 0;
+              this.bytesReceived = 0;
+              this.user.notifyUI();
+              // TODO: give each notification a real data structure and id,
+              // and allow the user select what notifications they get.
+              ui.showNotification(this.user.name + ' stopped proxying through you');
+            });
             this.rtcToNet_.signalsForPeer.setSyncHandler((signal) => {
               this.send({
                 type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
@@ -290,16 +291,17 @@ module Core {
           this.access.asProxy = true;
           this.user.notifyUI();
           this.socksToRtc_.onceStopped().then(() => {
-              ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
-                        {instanceId: this.instanceId,
-                         error: this.access.asProxy});
-              this.access.asProxy = false;
-              this.bytesSent = 0;
-              this.bytesReceived = 0;
-              // TODO: notification to the user on remote-close?
-              this.user.notifyUI();
-              this.socksToRtc_ = null;
-            });
+            console.log('socksToRtc_.onceStopped called');
+            ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+                      {instanceId: this.instanceId,
+                       error: this.access.asProxy});
+            this.access.asProxy = false;
+            this.bytesSent = 0;
+            this.bytesReceived = 0;
+            // TODO: notification to the user on remote-close?
+            this.user.notifyUI();
+            this.socksToRtc_ = null;
+          });
           return endpoint;
         })
         // TODO: remove catch & error print: that should happen at the level
@@ -491,6 +493,17 @@ module Core {
           this.isUIUpdatePending = false;
         }, 1000);
         this.isUIUpdatePending = true;
+      }
+    }
+
+    public handleLogout = () => {
+      if (this.rtcToNet_) {
+        console.log('Closing rtcToNet_ for logout');
+        this.rtcToNet_.close();
+      }
+      if (this.socksToRtc_) {
+        console.log('Stopping socksToRtc_ for logout');
+        this.socksToRtc_.stop();
       }
     }
 
