@@ -22,7 +22,12 @@ class ChromeTabAuth {
   }
 
   public login = () : void => {
-    this.launchAuthTab_();
+    if (this.tabId_ === -1) {
+      this.launchAuthTab_();
+    } else {
+      chrome.tabs.update(this.tabId_, {active:true,
+          url: this.getOauthUrl(REDIRECT_URL)});
+    }
   }
 
   public getOauthUrl = (redirctUrl) : string => {
