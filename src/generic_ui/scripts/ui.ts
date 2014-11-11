@@ -7,13 +7,10 @@
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/browser_action.d.ts'/>
-/// <reference path='../../interfaces/browser-proxy-config.d.ts'/>
+/// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
 declare var model         :UI.Model;
-declare var proxyConfig   :IBrowserProxyConfig;
-
 
 module UI {
 
@@ -99,7 +96,7 @@ module UI {
      */
     constructor(
         public core   :uProxy.CoreAPI,
-        public browserAction :BrowserAction) {
+        public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
       this.view = View.SPLASH;  // Begin at the splash intro.
 
@@ -203,30 +200,30 @@ module UI {
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
-      this.browserAction.setIcon('uproxy-19.png');
-      proxyConfig.stopUsingProxy(askUser);
+      this.browserApi.setIcon('uproxy-19.png');
+      this.browserApi.stopUsingProxy(askUser);
     }
 
     /**
       * Sets extension icon to default and undoes proxy configuration.
       */
     public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
-      this.browserAction.setIcon('uproxy-19-c.png');
-      proxyConfig.startUsingProxy(endpoint);
+      this.browserApi.setIcon('uproxy-19-c.png');
+      this.browserApi.startUsingProxy(endpoint);
     }
 
     /**
       * Set extension icon to the 'giving' icon.
       */
     public startGivingInUi = () => {
-      this.browserAction.setIcon('uproxy-19-p.png');
+      this.browserApi.setIcon('uproxy-19-p.png');
     }
 
     /**
       * Set extension icon to the default icon.
       */
     public stopGivingInUi = () => {
-      this.browserAction.setIcon('uproxy-19.png');
+      this.browserApi.setIcon('uproxy-19.png');
     }
 
     public isGettingAccess = () => {
@@ -357,6 +354,10 @@ module UI {
           model.contacts[newCategory].push(user);
         }
       }
+    }
+
+    public openFaq = (pageAnchor :string) => {
+      this.browserApi.openFaq(pageAnchor);
     }
   }  // class UserInterface
 

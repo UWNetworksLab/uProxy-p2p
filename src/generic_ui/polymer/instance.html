@@ -54,7 +54,7 @@
         <button on-tap='{{ cancelRequest }}'>
           Cancel Request
         </button>
-        <span>Requesting access... </span>
+        <span>Waiting for permission... </span>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal && !getConsentState().ignoringRemoteUserOffer ) }}'>
