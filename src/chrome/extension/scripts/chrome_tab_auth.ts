@@ -25,7 +25,8 @@ class ChromeTabAuth {
     if (this.tabId_ === -1) {
       this.launchAuthTab_();
     } else {
-      chrome.tabs.update(this.tabId_, {active:true});
+      chrome.tabs.update(this.tabId_, {active:true,
+          url: this.getOauthUrl(REDIRECT_URL)});
     }
   }
 
@@ -39,9 +40,11 @@ class ChromeTabAuth {
 
   private launchAuthTab_ = () : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
+      console.log(tabId + " tab updated " + JSON.stringify(changeInfo));
       if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
+        chrome.tabs.onReplaced.removeListener(onTabReplace);
         this.tabId_ = -1;
         chrome.tabs.remove(tabId);
         this.extractCode(tab.url).then((credentials :any) => {
@@ -58,17 +61,24 @@ class ChromeTabAuth {
         if (tabId == this.tabId_) {
           chrome.tabs.onUpdated.removeListener(onTabChange);
           chrome.tabs.onRemoved.removeListener(onTabClose);
+          chrome.tabs.onReplaced.removeListener(onTabReplace);
           this.tabId_ = -1;
           this.onError_('Login abandoned.');
         }
     }.bind(this);
 
+    var onTabReplace = function(addedTabId, removedTabId) {
+      if (removedTabId == this.tabId_) {
+        this.tabId_ = addedTabId;
+      }
+    }.bind(this);
 
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
                        function(tab: chrome.tabs.Tab) {
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);
+      chrome.tabs.onReplaced.addListener(onTabReplace);
     }.bind(this));
   }
 
