@@ -6,10 +6,11 @@ declare var ui :UI.UserInterface;
 Polymer({
   model: {},
   settingsView: function() {
-    console.log('SETTINGS');
-    // TODO: this is a hack for now. use actually good view state changes.
-    ui['view'] = (UI.View.SETTINGS == ui['view']) ?
-        UI.View.ROSTER : UI.View.SETTINGS;
+    ui['view'] = UI.View.SETTINGS;
+  },
+  rosterView: function() {
+    console.log('rosterView called');
+    ui['view'] = UI.View.ROSTER;
   },
   ready: function() {
     // Expose global ui object and UI module in this context.

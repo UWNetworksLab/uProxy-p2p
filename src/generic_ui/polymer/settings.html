@@ -10,13 +10,17 @@
       position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%; width: 300px;
-      background-color: #fff;
+      height: 100%; width: 100%;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
       left: -100%;
       z-index: 2000;  /* appear on top of toolbar */
+      position: absolute;
+      width: 300px;
+      height: 100%;
+      background-color: #ffffff;
+      z-index: 2001;
       font-size: 14px;
     }
     :host(.active) {
@@ -27,7 +31,6 @@
       background-color: #009688;
       width: 100%;
       color: white;
-      padding: 1em;
       margin-bottom: 1em;
     }
     .actionLink {
@@ -52,11 +55,13 @@
 
     <div hidden?='{{ui.onlineNetwork==null}}'>
       <div class='userInfo'>
-        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
-            src='{{ui.onlineNetwork.imageData}}'>
-        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
-        <div class='userNameOrId'>
-          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+        <div style="padding:1em">
+          <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
+              src='{{ui.onlineNetwork.imageData}}'>
+          <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
+          <div class='userNameOrId'>
+            {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+          </div>
         </div>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>

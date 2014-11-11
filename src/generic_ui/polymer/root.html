@@ -22,11 +22,20 @@
         background: url('../icons/internet.png') center top no-repeat #fff;
       }
       #btnSettings {
-        position: absolute; right: 0; top: 0;
+        position: absolute; left: 0; top: 0;
+      }
+      #darkMask {
+        background-color: rgba(0, 0, 0, 0.5);
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        z-index: 1001;
       }
     </style>
 
-    <uproxy-toolbar hidden?='{{ UI.View.SPLASH==ui.view || !ui.onlineNetwork }}'>
+    <uproxy-toolbar hidden?='{{ !ui.onlineNetwork }}'>
       <uproxy-button id='btnSettings'
           on-tap='{{ settingsView }}'
           img='../icons/more_vert_white.svg'>
@@ -48,6 +57,10 @@
     <uproxy-roster id='roster'
       class='{{ { active: (UI.View.ROSTER==ui.view), hidden: (UI.View.SPLASH==ui.view || !ui.onlineNetwork) } | tokenList }}'>
     </uproxy-roster>
+
+    <!-- Dark mask displayed on top of roster when settings is visible -->
+    <div id='darkMask' hidden?='{{UI.View.SETTINGS!=ui.view}}'
+        on-tap='{{ rosterView }}'></div>
 
   </template>
 
