@@ -56,6 +56,8 @@ module UI {
     name   :string;
     // TODO(salomegeo): Add more information about the user.
     userId :string;
+    imageData ?:string;
+    userName ?:string;
     online :boolean;
     roster :{ [userId:string] :User }
   }
@@ -118,7 +120,15 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :UI.UserProfileMessage = payload.user;
-        this.getNetwork(payload.network).userId = profile.userId;
+        var network :UI.Network = this.getNetwork(payload.network);
+        if (!network) {
+          console.error('Network not found for uProxy.Update.USER_SELF',
+              payload);
+          return;
+        }
+        network.userId = profile.userId;
+        network.imageData = profile.imageData;
+        network.userName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);

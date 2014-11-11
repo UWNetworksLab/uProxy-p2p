@@ -14,12 +14,12 @@
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      top: -100%;
+      left: -100%;
       z-index: 2000;  /* appear on top of toolbar */
       font-size: 14px;
     }
     :host(.active) {
-      top: 0;
+      left: 0;
       overflow: hidden;
     }
     .userInfo {
@@ -32,7 +32,7 @@
       cursor: pointer;
       padding: 1em;
     }
-    .userId {
+    .userNameOrId {
       font-size: 18px;
     }
     .networkName {
@@ -40,13 +40,22 @@
       padding-bottom: 0.5em;
       opacity: 0.7;
     }
+    .userImage {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+
     </style>
 
     <div hidden?='{{ui.onlineNetwork==null}}'>
       <div class='userInfo'>
-        <img hidden?='{{ui.onlineNetwork.imageData==null}}' src='{{ui.onlineNetwork.imageData}}'>
+        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
+            src='{{ui.onlineNetwork.imageData}}'>
         <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
-        <div class='userId'>{{ui.onlineNetwork.userId}}</div>
+        <div class='userNameOrId'>
+          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+        </div>
       </div>
       <div class='logOut' on-tap='{{logOut}}'>Log-out of uProxy</div>
     </div>

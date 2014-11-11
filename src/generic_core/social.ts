@@ -164,6 +164,7 @@ module Social {
      */
     public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
       if (!this.myInstance) {
+        console.error('Not ready to send handshake');
         throw Error('Not ready to send handshake');
       }
       var handshake = {
@@ -293,8 +294,6 @@ module Social {
         // TODO: we may want to verify that our status is ONLINE before
         // sending out any instance messages.
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
-        // Send our own InstanceMessage to any queued-up clients.
-        this.flushQueuedInstanceMessages();
 
         // Update UI with own information.
         var userProfileMessage :UI.UserProfileMessage = {
@@ -514,10 +513,6 @@ module Social {
 
     public logout = () : Promise<void> => {
       return Promise.resolve<void>();
-    }
-
-    // Does not apply to ManualNetwork. Nothing to do.
-    public flushQueuedInstanceMessages = () => {
     }
 
     public send = (recipientClientId :string,
