@@ -22,12 +22,7 @@ class ChromeTabAuth {
   }
 
   public login = () : void => {
-    if (this.tabId_ === -1) {
-      this.launchAuthTab_();
-    } else {
-      chrome.tabs.update(this.tabId_, {active:true,
-          url: this.getOauthUrl(REDIRECT_URL)});
-    }
+    this.launchAuthTab_();
   }
 
   public getOauthUrl = (redirctUrl) : string => {
@@ -40,7 +35,6 @@ class ChromeTabAuth {
 
   private launchAuthTab_ = () : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
-      console.log(tabId + " tab updated " + JSON.stringify(changeInfo));
       if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
