@@ -83,11 +83,14 @@ module UI {
     // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
     public instanceGettingAccessFrom = null;
+
     // The instances you are giving access to.
     // Remote instances are added to this set if their access.isClient value
     // is true.
     public instancesGivingAccessTo = {};
 
+    // The network currently logged into (UI only supports 1 logged in network
+    // at a time, not including Manual), or null if not logged in.
     public onlineNetwork :Network = null;
 
     /**
@@ -254,11 +257,14 @@ module UI {
         existingNetwork.online = network.online;
         existingNetwork.userId = network.userId;
         if (!network.online) {
+          // Clear roster and option user info from offline network.
           for (var userId in existingNetwork.roster) {
             var user = existingNetwork.roster[userId];
             this.categorizeUser_(user, user.getCategory(), null);
           }
           existingNetwork.roster = {};
+          existingNetwork.userName = null;
+          existingNetwork.imageData = null;
         }
       } else {
         model.networks.push({
