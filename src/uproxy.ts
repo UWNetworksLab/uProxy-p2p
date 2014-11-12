@@ -24,9 +24,8 @@ module uProxy {
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
     REFRESH_UI = 1000,
-    // Skip unused REFRESH. (Refresh what, anyway?)
-    RESET = 1002,  // logs out of all networks
-    LOGIN,
+    // Skip REFRESH and RESET commands that have been removed
+    LOGIN = 1003,
     LOGOUT,
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
@@ -130,9 +129,6 @@ module uProxy {
   // TODO: Rename CoreApi.
   export interface CoreAPI {
 
-    // Clears all state and storage.
-    reset() : void;
-
     // Send your own instanceId to target clientId.
     // TODO: Implement this or remove it.
     // sendInstanceHandshakeMessage(clientId :string) : void;
@@ -149,7 +145,7 @@ module uProxy {
     // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
-    logout(networkInfo :NetworkInfo) : void;
+    logout(networkInfo :NetworkInfo) : Promise<void>;
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
