@@ -62,27 +62,30 @@ class ChromeBrowserApi implements BrowserAPI {
   };
 
   public stopUsingProxy = (askUser :boolean) => {
-    // Get the active tab. If it's not the disconnected error page, we
-    // might need to bring up that page.
-    chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-      var thisUrl = tabs[0].url;
-      var disconnectUrl = chrome.extension.getURL("polymer/disconnected.html");
+      if (askUser && this.running_ == true) {
+        // If we want to confirm with the user if they want to revert their
+        // proxy settings.
 
-      if (askUser && this.running_ == true && (thisUrl != disconnectUrl)) {
-        // If the browser is currently proxying, if the open tab is not the
-        // disconnect error page, and if we want to let the user confirm if
-        // they want to revert their proxy settings, then
-        // create a tab which prompts the user to decide if they want
-        // to reset their proxy config.
-        chrome.tabs.create({url: "../polymer/disconnected.html"},
-                         function(tab: chrome.tabs.Tab) {
-            this.tabId_ = tab.id;
-          }.bind(this));
+        chrome.tabs.query({currentWindow: true}, function(tabs){
+          // See if the disconnect page is open in this window.
+          var isDisconnectTabOpen = false;
+          for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i].url ===
+                chrome.extension.getURL("polymer/disconnected.html")) {
+              isDisconnectTabOpen = true;
+              break;
+            }
+          }
+
+          if (!isDisconnectTabOpen) {
+            // Create a tab which prompts the user to decide if they want
+            // to reset their proxy config.
+            chrome.tabs.create({url: "../polymer/disconnected.html"});
+          }
+        });
       } else if (!askUser && this.running_ == true) {
         this.revertProxySettings_();
       }
-    }.bind(this));
-
   };
 
   private revertProxySettings_ = () => {
