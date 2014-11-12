@@ -31,37 +31,40 @@
       background-color: #009688;
       width: 100%;
       color: white;
-      margin-bottom: 1em;
+      margin-bottom: 32px;
+      padding: 32px;
+      line-height: 24px;
     }
     .actionLink {
       cursor: pointer;
-      padding: 1em;
+      padding-left: 32px;
+      line-height: 32px;
+      color: rgb(112, 112, 112);
     }
     .userNameOrId {
-      font-size: 18px;
+      font-size: 16px;
     }
     .networkName {
       padding-top: 0.5em;
       padding-bottom: 0.5em;
-      opacity: 0.7;
+      opacity: 0.54;
     }
     .userImage {
-      width: 50px;
-      height: 50px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
+      margin-left: -6px;
     }
 
     </style>
 
     <div hidden?='{{ui.onlineNetwork==null}}'>
       <div class='userInfo'>
-        <div style="padding:1em">
-          <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
-              src='{{ui.onlineNetwork.imageData}}'>
-          <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
-          <div class='userNameOrId'>
-            {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
-          </div>
+        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
+            src='{{ui.onlineNetwork.imageData}}'>
+        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
+        <div class='userNameOrId'>
+          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
         </div>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
