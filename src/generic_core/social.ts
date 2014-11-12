@@ -412,7 +412,17 @@ module Social {
             // Upon successful login, save local client information.
             this.startMonitor_();
             this.log('logged into uProxy');
-            return this.prepareLocalInstance(freedomClient.userId);
+            return this.prepareLocalInstance(freedomClient.userId).then(() => {
+              // Notify UI that this network is online before we fulfill
+              // the onceLoggedIn_ promise.  This ensures that the UI knows
+              // that the network is online before we send user updates.
+              var payload :UI.NetworkMessage = {
+                name: this.name,
+                online: true,
+                userId: freedomClient.userId
+              };
+              ui.update(uProxy.Update.NETWORK, payload);
+            });
           });
       return this.onceLoggedIn_
           .then(() => {

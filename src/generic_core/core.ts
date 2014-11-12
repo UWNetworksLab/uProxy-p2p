@@ -70,10 +70,6 @@ class UIConnector implements uProxy.UIAPI {
     this.update(uProxy.Update.NOTIFICATION, notificationText);
   }
 
-  public isProxying = () : boolean => {
-    return remoteProxyInstance != null;
-  }
-
 }
 var ui = new UIConnector();
 
@@ -199,7 +195,6 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           Social.networks[networkName][userId] = network;
           delete Social.pendingNetworks[networkName];
-          ui.updateAll();
           console.log('Successfully logged in to ' + networkName +
                       ' with user id ' + userId);
         }).catch(() => {

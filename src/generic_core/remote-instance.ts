@@ -301,6 +301,9 @@ module Core {
             // TODO: notification to the user on remote-close?
             this.user.notifyUI();
             this.socksToRtc_ = null;
+            // Update global remoteProxyInstance to indicate we are no longer
+            // getting access.
+            remoteProxyInstance = null;
           });
           return endpoint;
         })
@@ -503,7 +506,7 @@ module Core {
       }
       if (this.socksToRtc_) {
         console.log('Stopping socksToRtc_ for logout');
-        this.socksToRtc_.stop();
+        this.stop();
       }
     }
 
