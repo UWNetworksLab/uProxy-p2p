@@ -87,4 +87,22 @@ class ChromeBrowserApi implements BrowserAPI {
   public openFaq = (pageAnchor :string) => {
     chrome.tabs.create({url: "../polymer/faq.html#" + pageAnchor});
   }
+
+  // Other.
+
+  /**
+    * Launch a tab with the url if no existing tab is open with that url.
+    * @param relativeUrl must refer to a local page and should be relative
+    *                    to the extension URL.
+    */
+  public launchTabIfNotOpen = (relativeUrl :string) => {
+    chrome.tabs.query({currentWindow: true}, function(tabs){
+      for (var i = 0; i < tabs.length; i++) {
+        if (tabs[i].url == chrome.extension.getURL(relativeUrl)) {
+          return;
+        }
+      }
+      chrome.tabs.create({url: "../" + relativeUrl});
+    });
+  }
 }
