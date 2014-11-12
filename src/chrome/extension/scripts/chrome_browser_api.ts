@@ -62,30 +62,30 @@ class ChromeBrowserApi implements BrowserAPI {
   };
 
   public stopUsingProxy = (askUser :boolean) => {
-      if (askUser && this.running_ == true) {
-        // If we want to confirm with the user if they want to revert their
-        // proxy settings.
+    if (askUser && this.running_ == true) {
+      // If we want to confirm with the user if they want to revert their
+      // proxy settings.
 
-        chrome.tabs.query({currentWindow: true}, function(tabs){
-          // See if the disconnect page is open in this window.
-          var isDisconnectTabOpen = false;
-          for (var i = 0; i < tabs.length; i++) {
-            if (tabs[i].url ===
-                chrome.extension.getURL("polymer/disconnected.html")) {
-              isDisconnectTabOpen = true;
-              break;
-            }
+      chrome.tabs.query({currentWindow: true}, function(tabs){
+        // See if the disconnect page is open in this window.
+        var isDisconnectTabOpen = false;
+        for (var i = 0; i < tabs.length; i++) {
+          if (tabs[i].url ===
+              chrome.extension.getURL("polymer/disconnected.html")) {
+            isDisconnectTabOpen = true;
+            break;
           }
+        }
 
-          if (!isDisconnectTabOpen) {
-            // Create a tab which prompts the user to decide if they want
-            // to reset their proxy config.
-            chrome.tabs.create({url: "../polymer/disconnected.html"});
-          }
-        });
-      } else if (!askUser && this.running_ == true) {
-        this.revertProxySettings_();
-      }
+        if (!isDisconnectTabOpen) {
+          // Create a tab which prompts the user to decide if they want
+          // to reset their proxy config.
+          chrome.tabs.create({url: "../polymer/disconnected.html"});
+        }
+      });
+    } else if (!askUser && this.running_ == true) {
+      this.revertProxySettings_();
+    }
   };
 
   private revertProxySettings_ = () => {
