@@ -49,55 +49,79 @@ declare module WebRtc {
     DISCONNECTED  // End-state, cannot change.
   }
 
-  class PeerConnection {
-    constructor(config:PeerConnectionConfig);
-
+  interface PeerConnectionInterface {
     // The state of this peer connection.
-    public pcState :State;
+    pcState :State;
 
     // All open data channels.
     // NOTE: There exists a bug in Chrome prior to version 37 which causes
     //       entries in this object to continue to exist even after
     //       the remote peer has closed a data channel.
-    public dataChannels     :{[channelLabel:string] : DataChannel};
+    dataChannels     :{[channelLabel:string] : DataChannel};
 
     // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
     // i.e. when either |handleSignalMessage| is called with an offer message,
     // or when |negotiateConnection| is called. The promise is never be rejected
     // and is guarenteed to fulfilled before |onceConnected|.
-    public onceConnecting  :Promise<void>;
+    onceConnecting  :Promise<void>;
     // The |onceConnected| promise is fulfilled when pcState === CONNECTED
-    public onceConnected :Promise<ConnectionAddresses>;
+    onceConnected :Promise<ConnectionAddresses>;
     // The |onceDisconnected| promise is fulfilled when pcState === DISCONNECTED
-    public onceDisconnected :Promise<void>;
+    onceDisconnected :Promise<void>;
 
     // Try to connect to the peer. Will change state from |WAITING| to
     // |CONNECTING|. If there was an error, promise is rejected. Otherwise
     // returned promise === |onceConnected|.
-    public negotiateConnection :() => Promise<ConnectionAddresses>;
+    negotiateConnection :() => Promise<ConnectionAddresses>;
 
     // A peer connection can either open a data channel to the peer (will
     // change from |WAITING| state to |CONNECTING|)
-    public openDataChannel :(channelLabel: string,
+    openDataChannel :(channelLabel: string,
         options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
         Promise<DataChannel>;
     // Or handle data channels opened by the peer (these events will )
-    public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
+    peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
 
     // The |handleSignalMessage| function should be called with signalling
     // messages from the remote peer.
-    public handleSignalMessage :(signal:SignallingMessage) => void;
+    handleSignalMessage :(signal:SignallingMessage) => void;
     // The underlying handler that holds/handles signals intended to go to the
     // remote peer. A handler should be set that sends messages to the remote
     // peer.
-    public signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
+    signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
 
     // Closing the peer connection will close all associated data channels
     // and set |pcState| to |DISCONNECTED| (and hence fulfills
     // |onceDisconnected|)
-    public close: () => void;
+    close: () => void;
 
     // Helpful for debugging
+    toString: () => string;
+    peerName :string;
+  }
+
+  class PeerConnection implements PeerConnectionInterface {
+    constructor(config:PeerConnectionConfig);
+
+    public pcState :State;
+    public dataChannels     :{[channelLabel:string] : DataChannel};
+
+    public onceConnecting  :Promise<void>;
+    public onceConnected :Promise<ConnectionAddresses>;
+    public onceDisconnected :Promise<void>;
+
+    public negotiateConnection :() => Promise<ConnectionAddresses>;
+
+    public openDataChannel :(channelLabel: string,
+                             options?: freedom_RTCPeerConnection.RTCDataChannelInit) => Promise<DataChannel>;
+
+    public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
+
+    public handleSignalMessage :(signal:SignallingMessage) => void;
+    public signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
+
+    public close: () => void;
+
     public toString: () => string;
     public peerName :string;
   }
