@@ -65,7 +65,7 @@ class ChromeBrowserApi implements BrowserAPI {
     if (askUser && this.running_ == true) {
       // Create a tab which prompts the user to decide if they want
       // to reset their proxy config.
-      chrome.tabs.create({url: "../polymer/disconnected.html"});
+      this.launchTabIfNotOpen("polymer/disconnected.html");
     } else if (!askUser && this.running_ == true) {
       this.revertProxySettings_();
     }
