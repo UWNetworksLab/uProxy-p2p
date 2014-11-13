@@ -128,14 +128,6 @@ class MockCore implements uProxy.CoreAPI {
   stop = () => {
   }
 
-  updateDescription(description) {
-    console.log('Updating description to ' + description);
-  }
-
-  updateSharingState(sharing) {
-    console.log('Updating sharing state to ' + sharing);
-  }
-
   updateGlobalSettings(newGlobalSettings) {
     console.log('Updating global settings to '
         + JSON.stringify(newGlobalSettings));

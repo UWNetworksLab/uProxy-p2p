@@ -148,19 +148,6 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
-  updateDescription = (description :string) => {
-    // TODO: determine if novelty check is necessary.
-    console.log('Updating description to ' + description);
-    this.sendCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-                     description);
-  }
-
-  updateSharingState = (isSharing :boolean) => {
-    console.log('Updating sharing state to ' + isSharing);
-    this.sendCommand(uProxy.Command.UPDATE_SHARING_STATE,
-                     isSharing);
-  }
-
   updateGlobalSettings = (newGlobalSettings :Core.GlobalSettings) => {
     console.log('Updating global settings to ' + JSON.stringify(newGlobalSettings));
     this.sendCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS,
