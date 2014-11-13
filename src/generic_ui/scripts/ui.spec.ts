@@ -15,7 +15,8 @@ var model :UI.Model = {
     'onlineNonUproxy': [],
     'offlineNonUproxy': []
   },
-  description: ''
+  description: '',
+  sharing: false
 };
 
 describe('UI.UserInterface', () => {

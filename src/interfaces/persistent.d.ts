@@ -56,4 +56,8 @@ declare module Core {
     description :string;
   }
 
+  export interface StoredSharingState {
+    sharing :boolean;
+  }
+
 }  // module Core

@@ -38,7 +38,8 @@ var model :UI.Model = {
     'onlineNonUproxy': [],
     'offlineNonUproxy': []
   },
-  description: ''
+  description: '',
+  sharing: false
 };
 
 // TODO(): remove this if there's no use for it.

@@ -52,8 +52,9 @@ class UIConnector implements uProxy.UIAPI {
       Social.notifyUI(network);
     }
     // Only send ALL update to UI when description is loaded.
-    core.loadDescription.then(() => {
-      this.update(uProxy.Update.ALL, {'description': core.description});
+    Promise.all([core.loadDescription, core.loadSharing]).then(() => {
+      this.update(uProxy.Update.ALL, {'description': core.description,
+                                      'sharing': core.sharing});
     });
   }
 
@@ -84,6 +85,8 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
+  public sharing :boolean = false;
+  public loadSharing :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -104,6 +107,14 @@ class uProxyCore implements uProxy.CoreAPI {
           this.description = loadedDescriptionObj.description;
         }).catch((e) => {
           console.log('No description loaded', e);
+        });
+
+    this.loadSharing = storage.load<Core.StoredSharingState>('sharing')
+        .then((loadedSharingStateObj :Core.StoredSharingState) => {
+          console.log('Loaded sharing state: ' + loadedSharingStateObj.sharing);
+          this.sharing = loadedSharingStateObj.sharing;
+        }).catch((e) => {
+          console.log('No sharing state loaded', e);
         });
   }
 
@@ -268,6 +279,17 @@ class uProxyCore implements uProxy.CoreAPI {
     core.description = newDescription;
   }
 
+  public updateSharingState = (newSharingState:boolean) => {
+    var newSharingStateObj :Core.StoredSharingState = {
+      sharing: newSharingState
+    };
+    storage.save<Core.StoredSharingState>('sharing', newSharingStateObj);
+    core.sharing = newSharingState;
+    ui.update(uProxy.Update.ALL, {'description': core.description,
+                                'sharing': core.sharing});
+  }
+
+
   /**
    * Modifies the local consent value as the result of a local user action.
    * This is a distinct pathway from receiving consent bits over the wire, which
@@ -399,6 +421,7 @@ core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
+core.onCommand(uProxy.Command.UPDATE_SHARING_STATE, core.updateSharingState);
 
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

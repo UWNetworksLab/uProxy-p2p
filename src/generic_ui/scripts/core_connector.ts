@@ -154,6 +154,12 @@ class CoreConnector implements uProxy.CoreAPI {
                      description);
   }
 
+  updateSharingState = (isSharing :boolean) => {
+    console.log('Updating sharing state to ' + isSharing);
+    this.sendCommand(uProxy.Command.UPDATE_SHARING_STATE,
+                     isSharing);
+  }
+
   // TODO: Implement this or remove it.
   // changeOption = (option) => {
   //   console.log('Changing option ' + option);

@@ -39,7 +39,8 @@ module uProxy {
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    SEND_CREDENTIALS
+    SEND_CREDENTIALS,
+    UPDATE_SHARING_STATE
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -147,6 +148,7 @@ module uProxy {
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
+    updateSharingState(sharing :boolean) : void;
 
     login(network :string) : Promise<void>;
     logout(networkInfo :NetworkInfo) : void;

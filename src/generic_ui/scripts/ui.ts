@@ -44,6 +44,7 @@ module UI {
     networks : UI.Network[];
     contacts : Contacts;
     description :string;
+    sharing :boolean;
   }
 
   /**
@@ -102,6 +103,7 @@ module UI {
       core.onUpdate(uProxy.Update.ALL, (state :Object) => {
         console.log('Received uProxy.Update.ALL:', state);
         model.description = state['description'];
+        model.sharing = state['sharing'];
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
         // from the core, so one-to-one mappinsg from the old json-patch code cannot
