@@ -440,6 +440,11 @@ module.exports = (grunt) ->
         src: ['**']
         dest: '.'
 
+    polymercompile:
+      ui:
+        options:
+          files: 'third_party/lib/paper-*/*html'
+
     clean: ['build/**', '.tscache']
 
  # grunt.initConfig
@@ -454,6 +459,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
+
+  grunt.loadTasks('tasks');
 
   #-------------------------------------------------------------------------
   # Define the tasks

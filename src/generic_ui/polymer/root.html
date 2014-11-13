@@ -19,7 +19,8 @@
         border: none; margin: auto;
         text-align: left;
         overflow: hidden;
-        background: url('../icons/internet.png') center top no-repeat #fff;
+        background-color: white;
+        color: rgb(112, 112, 112);
       }
       #btnSettings {
         position: absolute; left: 0; top: 0;
@@ -42,8 +43,7 @@
       </uproxy-button>
     </uproxy-toolbar>
 
-    <uproxy-splash id='splash'
-      class='{{ { active:(UI.View.SPLASH==ui.view) } | tokenList }}'>
+    <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
     <uproxy-networks id='networks'
