@@ -7,6 +7,7 @@
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='../../interfaces/persistent.d.ts'/>
 /// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
@@ -43,8 +44,7 @@ module UI {
   export interface Model {
     networks : UI.Network[];
     contacts : Contacts;
-    description :string;
-    sharing :boolean;
+    globalSettings : Core.GlobalSettings;
   }
 
   /**
@@ -100,10 +100,9 @@ module UI {
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uProxy.Update.ALL, (state :Object) => {
+      core.onUpdate(uProxy.Update.ALL, (state :Core.GlobalSettings) => {
         console.log('Received uProxy.Update.ALL:', state);
-        model.description = state['description'];
-        model.sharing = state['sharing'];
+        model.globalSettings = state;
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
         // from the core, so one-to-one mappinsg from the old json-patch code cannot

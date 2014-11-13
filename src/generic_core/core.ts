@@ -51,10 +51,9 @@ class UIConnector implements uProxy.UIAPI {
     for (var network in Social.networks) {
       Social.notifyUI(network);
     }
-    // Only send ALL update to UI when description is loaded.
-    Promise.all([core.loadDescription, core.loadSharing]).then(() => {
-      this.update(uProxy.Update.ALL, {'description': core.description,
-                                      'sharing': core.sharing});
+    // Only send ALL update to UI when global settings have loaded.
+    core.loadGlobalSettings.then(() => {
+      this.update(uProxy.Update.ALL, core.globalSettings);
     });
   }
 
@@ -83,10 +82,10 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  public description :string = 'My computer';
-  public loadDescription :Promise<void> = null;
-  public sharing :boolean = false;
-  public loadSharing :Promise<void> = null;
+  public globalSettings :Core.GlobalSettings
+      = {'description': 'My Computer',
+         'sharing': false};
+  public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -99,22 +98,14 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
-    // TODO: description isn't loading properly after a restart in chrome,
+    // TODO: description/globalSettings isn't loading properly after a restart in chrome,
     // although save then load immediately after works.
-    this.loadDescription = storage.load<Core.StoredDescription>('description')
-        .then((loadedDescriptionObj :Core.StoredDescription) => {
-          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
-          this.description = loadedDescriptionObj.description;
+    this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
+        .then((globalSettingsObj :Core.GlobalSettings) => {
+          console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
+          this.globalSettings = globalSettingsObj;
         }).catch((e) => {
-          console.log('No description loaded', e);
-        });
-
-    this.loadSharing = storage.load<Core.StoredSharingState>('sharing')
-        .then((loadedSharingStateObj :Core.StoredSharingState) => {
-          console.log('Loaded sharing state: ' + loadedSharingStateObj.sharing);
-          this.sharing = loadedSharingStateObj.sharing;
-        }).catch((e) => {
-          console.log('No sharing state loaded', e);
+          console.log('No global settings loaded', e);
         });
   }
 
@@ -269,26 +260,12 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (newDescription:string) => {
-    // TODO: Send the new description to peers.  Right now we assume that users
-    // can't update the description after they are signed in.
-    var newDescriptionObj :Core.StoredDescription = {
-      description: newDescription
-    };
-    storage.save<Core.StoredDescription>('description', newDescriptionObj);
-    core.description = newDescription;
-  }
 
-  public updateSharingState = (newSharingState:boolean) => {
-    var newSharingStateObj :Core.StoredSharingState = {
-      sharing: newSharingState
-    };
-    storage.save<Core.StoredSharingState>('sharing', newSharingStateObj);
-    core.sharing = newSharingState;
-    ui.update(uProxy.Update.ALL, {'description': core.description,
-                                'sharing': core.sharing});
+  public updateGlobalSettings = (newGlobalSettings:Core.GlobalSettings) => {
+    storage.save<Core.GlobalSettings>('globalSettings', newGlobalSettings);
+    core.globalSettings = newGlobalSettings;
+    ui.update(uProxy.Update.ALL, newGlobalSettings);
   }
-
 
   /**
    * Modifies the local consent value as the result of a local user action.
@@ -412,16 +389,13 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 //   // TODO: Handle changes that might affect proxying.
 // });
 
-core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-               core.updateDescription);
-
 // TODO: make the invite mechanism an actual process.
 // core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 // });
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
-core.onCommand(uProxy.Command.UPDATE_SHARING_STATE, core.updateSharingState);
+core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 
 
 // Now that this module has got itself setup, it sends a 'ready' message to the

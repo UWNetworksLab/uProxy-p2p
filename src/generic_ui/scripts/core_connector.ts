@@ -4,6 +4,7 @@
  * Handles all connection and communication with the uProxy core.
  */
 /// <reference path='../../uproxy.ts'/>
+/// <reference path='../../interfaces/persistent.d.ts' />
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 interface FullfillAndReject {
@@ -159,6 +160,13 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.UPDATE_SHARING_STATE,
                      isSharing);
   }
+
+  updateGlobalSettings = (newGlobalSettings :Core.GlobalSettings) => {
+    console.log('Updating global settings to ' + JSON.stringify(newGlobalSettings));
+    this.sendCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+                     newGlobalSettings);
+  }
+
 
   // TODO: Implement this or remove it.
   // changeOption = (option) => {

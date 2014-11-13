@@ -9,6 +9,7 @@
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
+/// <reference path='interfaces/persistent.d.ts' />
 /// <reference path='networking-typings/communications.d.ts' />
 
 module uProxy {
@@ -40,7 +41,8 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_SHARING_STATE
+    UPDATE_SHARING_STATE,
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -144,11 +146,10 @@ module uProxy {
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
-    updateDescription(description :string) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
-    updateSharingState(sharing :boolean) : void;
+    updateGlobalSettings(globalSettings :Core.GlobalSettings) : void;
 
     login(network :string) : Promise<void>;
     logout(networkInfo :NetworkInfo) : void;

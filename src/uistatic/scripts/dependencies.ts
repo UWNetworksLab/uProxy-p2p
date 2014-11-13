@@ -17,8 +17,7 @@ var model :UI.Model = {
     'onlineNonUproxy': [],
     'offlineNonUproxy': []
   },
-  description: 'My Computer',
-  sharing: false
+  globalSettings: {}
 };
 
 class MockBrowserApi implements BrowserAPI {
@@ -135,6 +134,11 @@ class MockCore implements uProxy.CoreAPI {
 
   updateSharingState(sharing) {
     console.log('Updating sharing state to ' + sharing);
+  }
+
+  updateGlobalSettings(newGlobalSettings) {
+    console.log('Updating global settings to '
+        + JSON.stringify(newGlobalSettings));
   }
 
   changeOption(option) {

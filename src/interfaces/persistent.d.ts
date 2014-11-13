@@ -52,12 +52,8 @@ declare module Core {
   }  // interface Core.Persistent
 
   // Object containing description so it can be saved to storage.
-  export interface StoredDescription {
+  export interface GlobalSettings {
     description :string;
-  }
-
-  export interface StoredSharingState {
     sharing :boolean;
   }
-
 }  // module Core
