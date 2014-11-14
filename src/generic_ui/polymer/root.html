@@ -4,7 +4,6 @@
 <link rel="import" href='button.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='networks.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -45,10 +44,6 @@
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
-
-    <uproxy-networks id='networks'
-      class='{{ { active:(UI.View.NETWORKS==ui.view) } | tokenList }}'>
-    </uproxy-networks>
 
     <uproxy-settings id='settings'
       class='{{ { active:(UI.View.SETTINGS==ui.view) } | tokenList }}'>

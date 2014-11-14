@@ -6,7 +6,6 @@ declare var ui :UI.UserInterface;
 declare var core :uProxy.CoreAPI;
 
 Polymer({
-  // TODO: turn into typescript enums
   isLoggingIn: false,
   network: {},
   connect: function() {
