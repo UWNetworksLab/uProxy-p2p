@@ -415,6 +415,12 @@ module Core {
       return false;
     }
 
+    public handleLogout = () => {
+      for (var instanceId in this.instances_) {
+        this.instances_[instanceId].handleLogout();
+      }
+    }
+
   }  // class User
 
   export interface UserState {

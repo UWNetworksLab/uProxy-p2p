@@ -1,5 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href='description.html'>
+<link rel="import" href='faq-link.html'>
 
 <polymer-element name='uproxy-settings' attributes=''>
 
@@ -9,46 +10,65 @@
       position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%; width: 300px;
-      padding-top: 50px;
-      background-color: #fff;
+      height: 100%; width: 100%;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      top: -100%;
-    }
-    :host(.active) {
-      top: 0;
-      overflow: hidden;
-    }
-    .setting {
-      padding: 16px;
-      border-bottom: 1px solid #ccc;
-      color: #888;
-    }
-    h1 {
-      font-size: 16px;
-      font-weight: 100;
-      color: #333;
-    }
-    #sas {
-      padding-left: 36px;
-      color: #5a7;
+      left: -100%;
+      z-index: 2000;  /* appear on top of toolbar */
+      position: absolute;
+      width: 300px;
+      height: 100%;
+      background-color: #ffffff;
+      z-index: 2001;
       font-size: 14px;
     }
+    :host(.active) {
+      left: 0;
+      overflow: hidden;
+    }
+    .userInfo {
+      background-color: #009688;
+      width: 100%;
+      color: white;
+      margin-bottom: 32px;
+      padding: 32px;
+      line-height: 24px;
+    }
+    .actionLink {
+      cursor: pointer;
+      padding-left: 32px;
+      line-height: 32px;
+      color: rgb(112, 112, 112);
+    }
+    .userNameOrId {
+      font-size: 16px;
+    }
+    .networkName {
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      opacity: 0.54;
+    }
+    .userImage {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      margin-left: -6px;
+    }
+
     </style>
 
-    <div class='setting'>
-      <h1>Your security phrase<h1>
-      <span id='sas'>melon toast horse rocket</span>
-    </div>
-
-    <div class='setting'>
-      <h1>Public Mode</h1>
-    </div>
-
-    <div class='setting'>
-      <h1>STUN Servers</h1>
+    <div hidden?='{{ui.onlineNetwork==null}}'>
+      <div class='userInfo'>
+        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
+            src='{{ui.onlineNetwork.imageData}}'>
+        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
+        <div class='userNameOrId'>
+          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+        </div>
+      </div>
+      <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
+      <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
     </div>
 
   </template>
