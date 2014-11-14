@@ -22,6 +22,7 @@
     h1 {
       font-size: 18px;
       color: #009688;  /* dark green */
+      margin-bottom: 2em;
     }
     #proxy-pic {
       opacity: 0.3;
@@ -67,14 +68,22 @@
       margin-bottom: 1em;
     }
     p {
-      margin-top: 2em;
+      margin-top: 1em;
     }
     .getShareButton {
       margin-top: 2em;
     }
+    .prevArrow {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+    }
     </style>
 
-    <div id='intro1' hidden?='{{0!==state}}'>
+    <img src='../icons/arrow-left.png' on-tap='{{prev}}' class='prevArrow'
+        hidden?='{{0==ui.splashState}}'>
+
+    <div id='intro1' hidden?='{{0!==ui.splashState}}'>
       <div class='view'>
         <img class='smiley' src='../icons/smiley.png'>
         <h1>uProxy</h1>
@@ -88,7 +97,7 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='description' hidden?='{{1!==state}}'>
+    <div id='description' hidden?='{{1!==ui.splashState}}'>
       <div class='view'>
         <h1>What name should others see when this device is online?</h1>
         <uproxy-description></uproxy-description>
@@ -100,7 +109,7 @@
       </div>
     </div>
 
-    <div id='getOrShare' hidden?='{{2!==state}}'>
+    <div id='getOrShare' hidden?='{{2!==ui.splashState}}'>
       <div class='view'>
         <h1>How would you like to start?</h1>
         <!-- TODO: make get/share buttons actually set user modality -->
@@ -118,7 +127,7 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='networks' hidden?='{{3!==state}}'>
+    <div id='networks' hidden?='{{3!==ui.splashState}}'>
       <div class='view'>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
@@ -134,7 +143,7 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='nextWrapper' hidden?='{{2==state || 3==state}}'>
+    <div id='nextWrapper' hidden?='{{2==ui.splashState || 3==ui.splashState}}'>
       <paper-button raised on-tap='{{next}}'>Next</paper-button>
     </div>
 

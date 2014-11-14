@@ -2,20 +2,26 @@
  * Script for the introductory splash screen.
  */
 var DESCRIPTION_STATE = 1;
-var NETWORKS_STATE = 3;
+var TOTAL_NUM_STATES = 4;
 Polymer({
   networks: model.networks,
-  state: 0,
-  next: function() {
-    if (NETWORKS_STATE == this.state) {
-      console.error('ignoring next click from network page');
+  ui: ui,
+  setState: function(state) {
+    if (state < 0 || state > TOTAL_NUM_STATES) {
+      console.error('Invalid call to setState: ' + state);
       return;
     }
-    this.state++;
-    if (DESCRIPTION_STATE == this.state) {
+    ui.splashState = state;
+    if (DESCRIPTION_STATE == ui.splashState) {
       var desc = this.$.description.children[1];
       desc.$['device-name'].focus();
     }
+  },
+  next: function() {
+    this.setState(ui.splashState + 1);
+  },
+  prev: function() {
+    this.setState(ui.splashState - 1);
   },
   ready: function() {}
 });
