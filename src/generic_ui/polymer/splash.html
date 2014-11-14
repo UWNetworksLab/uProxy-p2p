@@ -43,7 +43,12 @@
       opacity: 0;
       z-index: -1;
     }
-    #next {
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      width: 150px;
+    }
+    #nextWrapper {
       position: absolute;
       bottom: 80px; left: 0;
       width: 100%;
@@ -52,6 +57,9 @@
       margin-bottom: 1em;
     }
     p {
+      margin-top: 2em;
+    }
+    .getShareButton {
       margin-top: 2em;
     }
     </style>
@@ -77,16 +85,15 @@
 
     <div class='view' id='getOrShare' hidden?='{{2!==state}}'>
       <h1>How would you like to start?</h1>
-      <p>
-      <paper-button raised>Get access</paper-button>
-      <paper-button raised>Share access</paper-button>
-      </p>
+      <paper-button raised class='getShareButton'>Get access</paper-button>
+      <p>... if you need to get access from a friend</p>
+      <paper-button raised class='getShareButton'>Share access</paper-button>
+      <p>... if you have friends who may need to get access from you</p>
     </div>
 
-    <uproxy-button on-tap='{{next}}' id='next'
-        img='../icons/play.png'>
-      Next
-    </uproxy-button>
+    <div id='nextWrapper'>
+      <paper-button raised on-tap='{{next}}'>Next</paper-button>
+    </div>
 
   </template>
   <script src='splash.js'></script>
