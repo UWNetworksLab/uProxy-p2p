@@ -1,7 +1,7 @@
 /**
  * Script for the introductory splash screen.
  */
-var DESCRIPTION_STATE = 2;
+var DESCRIPTION_STATE = 1;
 var NUM_STATES = 3;
 Polymer({
   state: 0,

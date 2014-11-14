@@ -65,20 +65,21 @@
       </p>
     </div>
 
-    <div class='view' id='getOrShare' hidden?='{{1!==state}}'>
-      <h1>How would you like to start?</h1>
-      <p>
-      <paper-button raised>Get access</paper-button>
-      </p>
-    </div>
-
-    <div class='view' id='description' hidden?='{{2!==state}}'>
+    <div class='view' id='description' hidden?='{{1!==state}}'>
       <h1>What name should others see when this device is online?</h1>
       <uproxy-description></uproxy-description>
       <p>
       Giving this device a name will let others know how they are connecting
       with you. It also means you can have more than one device with uProxy
       installed and proxy from one to the other.
+      </p>
+    </div>
+
+    <div class='view' id='getOrShare' hidden?='{{2!==state}}'>
+      <h1>How would you like to start?</h1>
+      <p>
+      <paper-button raised>Get access</paper-button>
+      <paper-button raised>Share access</paper-button>
       </p>
     </div>
 

@@ -146,7 +146,13 @@ module.exports = (grunt) ->
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
-          src: ['third_party/**/*.js']
+          src: [
+            'third_party/freedom-ts-hacks/*.js',
+            'third_party/lib/core-component-page/**/*.js',
+            'third_party/lib/lodash/**/*.js',
+            'third_party/lib/platform/**/*.js',
+            'third_party/lib/polymer/**/*.js'
+            ]
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
@@ -184,7 +190,13 @@ module.exports = (grunt) ->
           dest: chromeExtDevPath + 'scripts/'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: [
+            'core-*/**',
+            'lodash/**',
+            'platform/**',
+            'polymer/**',
+            'paper-*/*.css'
+          ]
           dest: chromeExtDevPath + 'lib'
         } ]
 
@@ -331,7 +343,13 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: [
+            'core-*/**',
+            'lodash/**',
+            'platform/**',
+            'polymer/**',
+            'paper-*/*.css'
+          ]
           dest: firefoxDevPath + 'data/lib'
         } ]
 
@@ -440,10 +458,11 @@ module.exports = (grunt) ->
         src: ['**']
         dest: '.'
 
-    polymercompile:
-      ui:
+    polymerPaperCompile:
+      chrome_ui:
         options:
-          files: 'third_party/lib/paper-*/*html'
+          src_dir: 'third_party/lib'
+          dest_dir: chromeExtDevPath + 'lib'
 
     clean: ['build/**', '.tscache']
 
@@ -504,6 +523,9 @@ module.exports = (grunt) ->
     'ts:chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
+    # TODO: should this be before copy_extension?  this is clobbering
+    # some files moved by copy extension...  which should be ignored
+    'polymerPaperCompile:chrome_ui'
     # 'shell:extract_chrome_tests'
   ]
 
