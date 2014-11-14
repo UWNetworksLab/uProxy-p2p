@@ -46,6 +46,9 @@
     #search:hover {
       border-color: #aaa;
     }
+    #sharingStatusBox {
+      padding: 20px;
+    }
     ::-webkit-input-placeholder {
       color: #ccc;
       font-weight: 100;
@@ -53,6 +56,17 @@
     </style>
 
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
+
+    <div id="sharingStatusBox">
+      <div id="sharingStatus" hidden?='{{ !model.globalSettings.sharing }}'>
+        Available for sharing.<br>
+        <button on-click='{{ toggleSharing }}'>Stop Sharing</button>
+      </div>
+      <div id="notSharingStatus" hidden?='{{ model.globalSettings.sharing }}'>
+        Unavailable for sharing.<br>
+        <button on-click='{{ toggleSharing }}'>Start Sharing</button>
+      </div>
+    </div>
 
     <!-- trusted uProxy contacts -->
     <uproxy-roster-group
