@@ -83,6 +83,13 @@ FILES =
     'socks-to-rtc/socks-to-rtc.js'
     'rtc-to-net/rtc-to-net.js'
   ]
+  thirdPartyUi: [
+    'core-*/**',
+    'lodash/**',
+    'platform/**',
+    'polymer/**',
+    'paper-*/*.css'
+  ]
 
 
 module.exports = (grunt) ->
@@ -190,13 +197,7 @@ module.exports = (grunt) ->
           dest: chromeExtDevPath + 'scripts/'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: [
-            'core-*/**',
-            'lodash/**',
-            'platform/**',
-            'polymer/**',
-            'paper-*/*.css'
-          ]
+          src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
         } ]
 
@@ -343,13 +344,7 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: [
-            'core-*/**',
-            'lodash/**',
-            'platform/**',
-            'polymer/**',
-            'paper-*/*.css'
-          ]
+          src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
         } ]
 
@@ -523,8 +518,6 @@ module.exports = (grunt) ->
     'ts:chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
-    # TODO: should this be before copy_extension?  this is clobbering
-    # some files moved by copy extension...  which should be ignored
     'polymerPaperCompile:chrome_ui'
     # 'shell:extract_chrome_tests'
   ]
