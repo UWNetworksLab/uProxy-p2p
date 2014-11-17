@@ -41,10 +41,10 @@
       line-height: 32px;
       color: rgb(112, 112, 112);
     }
-    .userInfoFirstLine {
+    .userInfoName, .userInfoIDWithoutName {
       font-size: 16px;
     }
-    .userInfoSecondLine {
+    .userInfoID {
       font-size: 14px;
       opacity: 0.54;
     }
@@ -68,12 +68,12 @@
         <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
         <!-- show userName and userId if both are available -->
         <div hidden?='{{!ui.onlineNetwork.userName}}'>
-          <div class='userInfoFirstLine'>{{ui.onlineNetwork.userName}}</div>
-          <div class='userInfoSecondLine'>{{ui.onlineNetwork.userId}}</div>
+          <div class='userInfoName'>{{ui.onlineNetwork.userName}}</div>
+          <div class='userInfoID'>{{ui.onlineNetwork.userId}}</div>
         </div>
         <!-- otherwise show only userId -->
         <div hidden?='{{ui.onlineNetwork.userName}}'>
-          <div class='userInfoFirstLine'>{{ui.onlineNetwork.userId}}</div>
+          <div class='userInfoIDWithoutName'>{{ui.onlineNetwork.userId}}</div>
         </div>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
