@@ -154,7 +154,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     console.log('Disconnected from app, previous status was ' +
                 this.status.connected);
 
-    if (true){//this.status.connected) {
+    if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.
       // TODO: display a notification to the user when we have a good way to
       // check if they are currently getting or giving access.
