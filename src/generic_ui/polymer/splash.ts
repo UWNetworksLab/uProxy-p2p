@@ -13,7 +13,7 @@ Polymer({
     }
     ui.splashState = state;
     if (DESCRIPTION_STATE == ui.splashState) {
-      var desc = this.$.description.children[1];
+      var desc = this.$.description.children[0].children[1];
       desc.$['device-name'].focus();
     }
   },
