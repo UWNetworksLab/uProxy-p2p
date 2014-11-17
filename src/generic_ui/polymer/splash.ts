@@ -1,7 +1,6 @@
 /**
  * Script for the introductory splash screen.
  */
-console.log('top of splash.ts')
 Polymer({
   SPLASH_STATES: {
     INTRO: 0,
@@ -31,5 +30,3 @@ Polymer({
   },
   ready: function() {}
 });
-
-console.log('end of splash.ts')
