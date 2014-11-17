@@ -2,53 +2,26 @@
 
 module.exports = function (grunt) {
   var fs = require('fs-extra');
-  var glob = require('glob');
   var pkg = require('../package.json');
 
   grunt.registerMultiTask('polymerPaperCompile', pkg.description, function() {
-    // Get src_dir and dest_dir directories from options, add trailing /
-    // if needed.
-    var options = this.options({});
-    var destDir = options.dest_dir;
+    // Get src files.
+    var srcFiles = this.files[0].src;
+
+    // Add trailing / to destDir if needed
+    var destDir = this.files[0].dest;
     if (destDir.charAt(destDir.length - 1) != '/') {
       destDir += '/';
     }
-    var srcDir = options.src_dir;
-    if (srcDir.charAt(srcDir.length - 1) != '/') {
-      srcDir += '/';
-    }
 
-    // Process all paper (Material Design) elements from srcDir.
-    var files = getFiles(srcDir + '/paper-*/paper-*.html');
-    for (var i = 0; i < files.length; i++) {
-      var inputHtmlFilename = files[i];
-      processFile(inputHtmlFilename, srcDir, destDir);
+    for (var i = 0; i < srcFiles.length; i++) {
+      var inputHtmlFilename = srcFiles[i];
+      processFile(inputHtmlFilename, destDir);
     }
 
     grunt.log.writeln(
-        'polymerPaperCompile: processed ' + files.length + ' files');
+        'polymerPaperCompile: processed ' + srcFiles.length + ' files');
   });
-
-  // Returns an array of file names matching filePattern.
-  function getFiles(filePattern) {
-    var out = [];
-    if (filePattern instanceof Array) {
-      filePattern.forEach(function(spec) {
-        out = out.concat(getFiles(spec));
-      });
-    } else if (filePattern.path) {
-      out = glob.sync(filePattern.path).map(function(path) {
-        return {
-          path: path,
-          include: filePattern.include,
-          name: filePattern.name || path
-        }
-      });
-    } else {
-      out = glob.sync(filePattern);
-    }
-    return out;
-  }
 
   function parseHtml(originalHtml) {
     // This assumes only 1 <script> tag per html file, and also
@@ -62,12 +35,11 @@ module.exports = function (grunt) {
     };
   }
 
-  function getDestDir(inputHtmlFilename, srcDir, destParentDir) {
-    // Figure out the subDir, e.g. if srcDir is third_party/lib/ and the
-    // inputHtmlFilename is third_party/lib/paper-button/paper-button-base.html
-    // then the subDir should be paper-button
-    var subDir = inputHtmlFilename.substr(srcDir.length);
-    subDir = subDir.substr(0, subDir.lastIndexOf('/'));
+  function getDestDir(inputHtmlFilename, destParentDir) {
+    // Figure out the subDir, e.g. if inputHtmlFilename is
+    // third_party/lib/paper-button/paper-button-base.html
+    // then the subDir should be paper-button.
+    var subDir = inputHtmlFilename.match(/([^\/]*)\/[^\/]*$/)[1];
     return destParentDir + subDir;
   }
 
@@ -79,14 +51,14 @@ module.exports = function (grunt) {
     return filenamePrefix.substr(0, filenamePrefix.length - '.html'.length);
   }
 
-  function processFile(inputHtmlFilename, srcDir, destParentDir) {
+  function processFile(inputHtmlFilename, destParentDir) {
     // Read original file and get script contents
     var originalHtml = fs.readFileSync(inputHtmlFilename).toString();
     var htmlData = parseHtml(originalHtml);
 
     // Create destination dir, e.g.
     // build/dev/chrome/extension/lib/paper-tabs
-    var destDir = getDestDir(inputHtmlFilename, srcDir, destParentDir);
+    var destDir = getDestDir(inputHtmlFilename, destParentDir);
     fs.mkdirpSync(destDir);
 
     // Construct output filenames

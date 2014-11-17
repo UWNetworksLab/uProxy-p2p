@@ -455,9 +455,10 @@ module.exports = (grunt) ->
 
     polymerPaperCompile:
       chrome_ui:
-        options:
-          src_dir: 'third_party/lib'
-          dest_dir: chromeExtDevPath + 'lib'
+        files: [
+          src: 'third_party/lib/paper-*/paper-*.html'
+          dest: chromeExtDevPath + 'lib'
+        ]
 
     clean: ['build/**', '.tscache']
 
