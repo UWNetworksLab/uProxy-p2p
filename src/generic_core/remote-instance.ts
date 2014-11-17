@@ -39,6 +39,7 @@ module Core {
     public description :string;
     public bytesSent   :number;
     public bytesReceived    :number;
+    public sharing     :boolean;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -160,10 +161,15 @@ module Core {
      */
     public handleSignal = (type:uProxy.MessageType,
                            signalFromRemote:Object) => {
+      console.log("core state: " + JSON.stringify(core.globalSettings));
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
           if (!this.consent.localGrantsAccessToRemote) {
             console.warn('Remote side attempted access without permission');
+            return;
+          } else if (!core.globalSettings.sharing) {
+            console.log('Rejected client connection because sharing is ' +
+                'disabled.');
             return;
           }
           // If the remote peer sent signal as the client, we act as server.
@@ -348,8 +354,10 @@ module Core {
       this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
+      this.sharing = data.sharing;
       this.user.notifyUI();
       this.updateDate = new Date();
+      console.log("REMOTEINSTANCE.UPDATE " + JSON.stringify(data));
     }
 
     /**

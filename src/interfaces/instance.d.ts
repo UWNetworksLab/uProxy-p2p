@@ -53,10 +53,9 @@ interface Instance {
   instanceId  :string;
   keyHash     :string;
   consent     ?:Consent.State;
-  status      ?:string;
+  status      ?:string; // Status on social network e.g. online or offline.
   notify      ?:boolean;   // TODO: replace with better notications
 }
-
 
 /**
  * Instance Handshakes are sent between uProxy installations to notify each
@@ -66,6 +65,7 @@ interface InstanceHandshake {
   instanceId  :string;
   keyHash     :string;
   description ?:string;  // TODO: Determine if description is actually optional.
+  sharing     ?:boolean; // If user if available for sharing access.
 }
 
 interface InstanceMessage {

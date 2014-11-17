@@ -7,6 +7,18 @@ Polymer({
   description: model.globalSettings.description,
   update: function() {
     model.globalSettings.description = this.description;
-    core.updateGlobalSettings(model.globalSettings);
+    core.updateGlobalSettings({newSettings:model.globalSettings,
+                           path:this.path});
+  },
+
+  ready: function() {
+    this.path = <InstancePath>{
+      network : {
+       name: this.network.name,
+       userId: this.network.userId
+      },
+      userId: this.userId,
+      instanceId: this.instance.instanceId
+    };
   }
 });

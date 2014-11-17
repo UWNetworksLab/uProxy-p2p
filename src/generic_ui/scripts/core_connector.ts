@@ -143,10 +143,10 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
-  updateGlobalSettings = (newGlobalSettings :Core.GlobalSettings) => {
-    console.log('Updating global settings to ' + JSON.stringify(newGlobalSettings));
+  updateGlobalSettings = (command :Core.GlobalSettingsCommand) => {
+    console.log('Updating global settings to ' + JSON.stringify(command));
     this.sendCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS,
-                     newGlobalSettings);
+                     command);
   }
 
 

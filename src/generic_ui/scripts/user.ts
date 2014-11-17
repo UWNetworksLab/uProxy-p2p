@@ -47,6 +47,9 @@ module UI {
     // Does not use an enum because we need a string value, and typescript
     // enums evaluate to numbers.
     public getCategory = () : string => {
+
+
+      // change onlineOrOffline to "appearOnlineOrOffline" and check value of core.isSharing
       var onlineOrOffline = this.isOnline ? 'online' : 'offline';
       if (this.instances.length == 0) {
         return onlineOrOffline + 'NonUproxy';

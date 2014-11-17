@@ -56,4 +56,11 @@ declare module Core {
     description :string;
     sharing :boolean;
   }
+
+  export interface GlobalSettingsCommand {
+    path         :InstancePath;
+    newSettings  :Core.GlobalSettings;
+  }
+
+
 }  // module Core

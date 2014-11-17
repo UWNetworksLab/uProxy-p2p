@@ -31,7 +31,7 @@ module uProxy {
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.
-    UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
     // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
@@ -40,7 +40,6 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_SHARING_STATE,
     UPDATE_GLOBAL_SETTINGS
   }
 
@@ -145,7 +144,7 @@ module uProxy {
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
-    updateGlobalSettings(globalSettings :Core.GlobalSettings) : void;
+    updateGlobalSettings(command :Core.GlobalSettingsCommand) : void;
 
     login(network :string) : Promise<void>;
     logout(networkInfo :NetworkInfo) : Promise<void>;

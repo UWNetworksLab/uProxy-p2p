@@ -10,9 +10,19 @@ Polymer({
   offlineNonUproxyContacts: model.contacts.offlineNonUproxy,
   toggleSharing: function() {
     model.globalSettings.sharing = !this.model.globalSettings.sharing;
-    core.updateGlobalSettings(model.globalSettings);
+    core.updateGlobalSettings({newSettings:model.globalSettings,
+                               path:this.path});
   },
   ready: function() {
+    this.path = <InstancePath>{
+      network : {
+       name: this.network.name,
+       userId: this.network.userId
+      },
+      userId: this.userId,
+      instanceId: this.instance.instanceId
+    };
+
     console.log('initializing roster');
     // this.contacts.push({
       // name: 'alice',
