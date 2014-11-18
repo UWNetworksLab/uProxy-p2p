@@ -7,6 +7,7 @@
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
+/// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
@@ -23,9 +24,20 @@ class ChromeUIConnector {
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(Object) => void;
 
+  private installIncompletePage :string = '../install-incomplete.html';
+  private installCompletePage :string = '../install-complete.html';
+  private installStatusPage :string;
+  private launchInstallStatusPage = () => {
+    window.open(this.installStatusPage);
+  }
+
   constructor() {
     this.extPort_ = null;
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
+    // Until the extension is connected, we assume uProxy installation is
+    // incomplete.
+    this.installStatusPage = this.installIncompletePage;
+    chrome.app.runtime.onLaunched.addListener(this.launchInstallStatusPage);
   }
 
   /**
@@ -49,6 +61,15 @@ class ChromeUIConnector {
     // this app, so it knows the connection was successful.
     this.extPort_.postMessage(ChromeGlue.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
+
+    // Once the extension is connected, we know that installation of uProxy
+    // is complete.
+    this.installStatusPage = this.installCompletePage;
+    this.extPort_.onDisconnect.addListener(function(){
+      // If the extension disconnects, we should show an error
+      // page.
+      this.installStatusPage = this.installIncompletePage;
+    }.bind(this));
   }
 
   /**
@@ -87,7 +108,7 @@ class ChromeUIConnector {
         data: data
     });
   }
-  
+
   public setOnCredentials = (onCredentials :(Object) => void) => {
     this.onCredentials_ = onCredentials;
   }
