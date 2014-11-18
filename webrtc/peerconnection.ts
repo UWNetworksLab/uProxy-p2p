@@ -149,17 +149,14 @@ module WebRtc {
     public fromPeerCandidateQueue :
         Handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
 
-    // https://code.google.com/p/webrtc/issues/detail?id=3778
-    private closeWorkaroundIndex_ = 0;
-
     // Data channel that acts as a control for if the peer connection should be
     // open or closed. Created during connection start up.
-    // i.e. this connection's onceConnected is true once this data channel is 
+    // i.e. this connection's onceConnected is true once this data channel is
     // ready and the connection is closed if this data channel is closed.
     private controlDataChannel :DataChannel;
-    // Label for the control data channel. Because channel labels must be 
-    // unique, the empty string was chosen to create a simple naming 
-    // restriction for new data channels--all other data channels must have 
+    // Label for the control data channel. Because channel labels must be
+    // unique, the empty string was chosen to create a simple naming
+    // restriction for new data channels--all other data channels must have
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
@@ -577,20 +574,12 @@ module WebRtc {
         : Promise<DataChannel> => {
       log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
           '; options=' + JSON.stringify(options));
-      
-      // Only the control data channel can have an empty channel label. 
+
+      // Only the control data channel can have an empty channel label.
       if (this.controlDataChannel != null && channelLabel === '') {
         throw new Error('Channel label can not be an empty string.');
       }
 
-      // https://code.google.com/p/webrtc/issues/detail?id=3778
-      if (options !== undefined) {
-        if (!('id' in options)) {
-          options.id = this.closeWorkaroundIndex_++;
-        }
-      } else {
-        options = { id: this.closeWorkaroundIndex_++ };
-      }
       return  this.pc_.createDataChannel(channelLabel, options)
           .then(this.addRtcDataChannel_);
     }
@@ -632,11 +621,11 @@ module WebRtc {
     // Saves the given data channel as the control channel for this peer
     // connection. The appropriate callbacks for opening/closing
     // this channel are registered here.
-    private registerControlChannel_ = (controlChannel:DataChannel) 
+    private registerControlChannel_ = (controlChannel:DataChannel)
         : Promise<void> => {
       this.controlDataChannel = controlChannel;
       this.controlDataChannel.onceClosed.then(this.close);
-      return this.controlDataChannel.onceOpened.then(this.completeConnection_);      
+      return this.controlDataChannel.onceOpened.then(this.completeConnection_);
     }
 
     // For debugging: prints the state of the peer connection including all
