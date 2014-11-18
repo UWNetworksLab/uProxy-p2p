@@ -121,11 +121,6 @@ class CoreConnector implements uProxy.CoreAPI {
 
   // --- CoreAPI interface requirements (sending COMMANDS) ---
 
-  reset = () => {
-    console.log('Resetting.');
-    this.sendCommand(uProxy.Command.RESET, null);
-  }
-
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
   sendInstance = (clientId) => {
@@ -164,7 +159,7 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGIN, network);
   }
 
-  logout = (networkInfo :NetworkInfo) => {
-    this.sendCommand(uProxy.Command.LOGOUT, networkInfo);
+  logout = (networkInfo :NetworkInfo) : Promise<void> => {
+    return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 }  // class CoreConnector

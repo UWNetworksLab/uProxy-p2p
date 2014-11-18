@@ -289,5 +289,74 @@ describe('UI.UserInterface', () => {
     });
   });
 
+  describe('syncNetwork_', () => {
+
+    it('Creates new networks', () => {
+      expect(model.networks.length).toEqual(0);
+      var networkMessage :UI.NetworkMessage = {
+        name:   'Google',
+        userId: '',
+        online: false
+      };
+      ui['syncNetwork_'](networkMessage);
+      expect(model.networks.length).toEqual(1);
+      var network = ui['getNetwork'](networkMessage.name);
+      expect(network).toBeDefined();
+      expect(network.name).toEqual(networkMessage.name);
+      expect(network.userId).toEqual(networkMessage.userId);
+      expect(network.online).toEqual(networkMessage.online);
+      expect(ui.onlineNetwork).toEqual(null);
+    });
+
+    it('Updates onlineNetwork', () => {
+      var networkMessage :UI.NetworkMessage = {
+        name:   'Facebook',
+        userId: '1234',
+        online: true
+      };
+      ui['syncNetwork_'](networkMessage);
+      expect(ui.onlineNetwork).toBeDefined();
+      expect(ui.onlineNetwork.name).toEqual(networkMessage.name);
+      expect(ui.onlineNetwork.userId).toEqual(networkMessage.userId);
+      expect(ui.onlineNetwork.online).toEqual(networkMessage.online);
+    });
+
+    it('Clears fields when network goes offline', () => {
+      // Login
+      var networkMessage :UI.NetworkMessage = {
+        name:   'Facebook',
+        userId: '1234',
+        online: true
+      };
+      ui['syncNetwork_'](networkMessage);
+
+      // Simulate a USER_SELF update to set name and imageData
+      updateToHandlerMap[uProxy.Update.USER_SELF]
+          .call(ui,
+                {
+                  network: 'Facebook',
+                  user: {
+                    name: 'testName',
+                    userId: '1234',
+                    imageData: 'imageData'
+                  }
+                });
+      var network :UI.Network = ui['getNetwork'](networkMessage.name);
+      expect(network.userName).toEqual('testName');
+      expect(network.imageData).toEqual('imageData');
+
+      // Logout
+      networkMessage  = {name: 'Facebook', userId: '', online: false};
+      ui['syncNetwork_'](networkMessage);
+      expect(ui.onlineNetwork).toEqual(null);
+      network = ui['getNetwork'](networkMessage.name);
+      expect(network).toBeDefined();
+      expect(network.roster).toEqual({});
+      expect(network.userName).toEqual(null);
+      expect(network.imageData).toEqual(null);
+    });
+
+  });  // syncNetwork_
+
   // TODO: more specs
 });  // UI.UserInterface

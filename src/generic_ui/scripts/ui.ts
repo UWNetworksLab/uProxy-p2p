@@ -53,6 +53,8 @@ module UI {
     name   :string;
     // TODO(salomegeo): Add more information about the user.
     userId :string;
+    imageData ?:string;
+    userName ?:string;
     online :boolean;
     roster :{ [userId:string] :User }
   }
@@ -74,17 +76,19 @@ module UI {
     // sas-rtc.
     public localFingerprint :string = null;
 
-    myName = '';
-    myPic = null;
-
     // Instance you are getting access from.
     // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
     public instanceGettingAccessFrom = null;
+
     // The instances you are giving access to.
     // Remote instances are added to this set if their access.isClient value
     // is true.
     public instancesGivingAccessTo = {};
+
+    // The network currently logged into (UI only supports 1 logged in network
+    // at a time, not including Manual), or null if not logged in.
+    public onlineNetwork :Network = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -116,7 +120,15 @@ module UI {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         var profile :UI.UserProfileMessage = payload.user;
-        this.getNetwork(payload.network).userId = profile.userId;
+        var network :UI.Network = this.getNetwork(payload.network);
+        if (!network) {
+          console.error('Network not found for uProxy.Update.USER_SELF',
+              payload);
+          return;
+        }
+        network.userId = profile.userId;
+        network.imageData = profile.imageData;
+        network.userName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
@@ -242,11 +254,14 @@ module UI {
         existingNetwork.online = network.online;
         existingNetwork.userId = network.userId;
         if (!network.online) {
+          // Clear roster and option user info from offline network.
           for (var userId in existingNetwork.roster) {
             var user = existingNetwork.roster[userId];
             this.categorizeUser_(user, user.getCategory(), null);
           }
           existingNetwork.roster = {};
+          existingNetwork.userName = null;
+          existingNetwork.imageData = null;
         }
       } else {
         model.networks.push({
@@ -256,19 +271,16 @@ module UI {
           roster: {}
         });
       }
-    }
-
-    // Determine whether uProxy is connected to some network.
-    // TODO: Make these functional and write specs.
-    public loggedIn = () => {
-      for (var networkId in model.networks) {
-        if (model.networks[networkId].online &&
-            // TODO: figure out how to reference Social.MANUAL_NETWORK_ID here
-            model.networks[networkId].name !== "manual") {
-          return true;
+  
+      // Figure out which network we are signed into (currently user can only
+      // be signed into 1 network at a time in the UI, not counting manual). 
+      this.onlineNetwork = null;     
+      for (var i = 0; i < model.networks.length; ++i) {
+        if (model.networks[i].online && model.networks[i].name != 'Manual') {
+          this.onlineNetwork = model.networks[i];
+          break;
         }
       }
-      return false;
     }
 
     // Synchronize the data about the current user.
@@ -282,7 +294,18 @@ module UI {
       if (!network) {
         console.warn('Received USER for non-existing network.');
         return;
+      } else if (!network.online) {
+        // Ignore all user updates when the network is offline.
+        // These user updates may come in asynchrously after logging out of a
+        // network, e.g. if the UI logs out of Google while we are getting
+        // access, we will first completely logout and then asynchronously
+        // get an update for the user when the peerconnection has closed - in
+        // this case the user should already have been removed from the roster
+        // in the UI and stay removed.
+        return;
       }
+
+
       // Construct a UI-specific user object.
       var profile = payload.user;
       // Update / create if necessary a user, both in the network-specific
@@ -333,7 +356,7 @@ module UI {
       }
     }
 
-    public openFaq = (pageAnchor :string) => {
+    public openFaq = (pageAnchor ?:string) => {
       this.browserApi.openFaq(pageAnchor);
     }
   }  // class UserInterface
