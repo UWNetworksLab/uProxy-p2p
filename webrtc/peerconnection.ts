@@ -216,11 +216,11 @@ module WebRtc {
 
       this.pc_ = freedom['core.rtcpeerconnection'](this.config_.webrtcPcConfig);
       // Add basic event handlers.
-      this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.RTCIceCandidate) => {
-        if(candidate) {
+      this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
+        if(candidate.candidate) {
           this.signalForPeerQueue.handle({
             type: SignalType.CANDIDATE,
-            candidate: candidate
+            candidate: candidate.candidate
           });
         } else {
           this.signalForPeerQueue.handle(

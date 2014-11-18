@@ -35,6 +35,10 @@ declare module freedom_RTCPeerConnection {
     sdpMLineIndex ?:number;
   }
 
+  interface OnIceCandidateEvent {
+    candidate :RTCIceCandidate
+  }
+
   interface RTCDataChannelInit {
     ordered ?:boolean;
     maxPacketLifeTime ?:number;
@@ -82,7 +86,7 @@ declare module freedom_RTCPeerConnection {
 
     on(t:string, f:Function) : void;
     on(t:'onnegotiationneeded', f:() => void) : void;
-    on(t:'onicecandidate', f:(d:RTCIceCandidate) => void) : void;
+    on(t:'onicecandidate', f:(d:OnIceCandidateEvent) => void) : void;
     on(t:'onsignalingstatechange', f:() => void) : void;
     on(t:'onaddstream', f:(d:{stream:number}) => void) : void;
     on(t:'onremovestream', f:(d:{stream:number}) => void) : void;
