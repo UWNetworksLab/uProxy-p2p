@@ -141,7 +141,7 @@ class MockCore implements uProxy.CoreAPI {
     ui.syncUser(generateFakeUserMessage());
     return Promise.resolve<void>();
   }
-  logout(network) :Promise<void> {
+  logout = (network) :Promise<void> => {
     console.log('Logging out of', network);
     ui['syncNetwork_']({
       name: 'google',
