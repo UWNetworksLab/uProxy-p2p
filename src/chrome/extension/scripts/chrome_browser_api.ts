@@ -99,6 +99,7 @@ class ChromeBrowserApi implements BrowserAPI {
     chrome.tabs.query({currentWindow: true}, function(tabs){
       for (var i = 0; i < tabs.length; i++) {
         if (tabs[i].url == chrome.extension.getURL(relativeUrl)) {
+          chrome.tabs.update(tabs[i].id, {url: "../" + relativeUrl, active: true});
           return;
         }
       }
