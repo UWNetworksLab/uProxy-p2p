@@ -28,7 +28,7 @@ var ui :UI.UserInterface;
 // sequence on the chromeConnector object.
 describe('core-connector', () => {
 
-  ui = jasmine.createSpyObj('UI.UserInterface', 
+  ui = jasmine.createSpyObj('UI.UserInterface',
     ['stopGettingInUiAndConfig',
     'sync',
     'update',
@@ -52,7 +52,10 @@ describe('core-connector', () => {
     spyOn(chromeConnector, 'connect').and.callThrough()
     // Get chrome.runtime.connect to return null as if there were no App to
     // connect to.
+    // chrome.runtime and chrome.browserAction are mocks found in
+    // chrome_mocks.ts.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
+    spyOn(chrome.browserAction, 'setPopup');
     connectPromise = chromeConnector.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
   });
