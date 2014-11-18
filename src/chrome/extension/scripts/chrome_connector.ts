@@ -133,6 +133,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.removeListener(ackResponse);
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
+        ui.view = UI.View.SPLASH;
         chrome.browserAction.setPopup({popup: "polymer/popup.html"});
         F(this.appPort_);
       };
