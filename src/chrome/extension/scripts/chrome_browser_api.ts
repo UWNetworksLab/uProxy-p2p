@@ -65,8 +65,8 @@ class ChromeBrowserApi implements BrowserAPI {
     if (askUser && this.running_ == true) {
       // Create a tab which prompts the user to decide if they want
       // to reset their proxy config.
-      chrome.tabs.create({url: "../polymer/disconnected.html"});
-    } else {
+      this.launchTabIfNotOpen("polymer/disconnected.html");
+    } else if (!askUser && this.running_ == true) {
       this.revertProxySettings_();
     }
   };
@@ -91,5 +91,24 @@ class ChromeBrowserApi implements BrowserAPI {
     } else {
       chrome.tabs.create({url: faqUrl});
     }
+  }
+
+  // Other.
+
+  /**
+    * Launch a tab with the url if no existing tab is open with that url.
+    * @param relativeUrl must refer to a local page and should be relative
+    *                    to the extension URL.
+    */
+  public launchTabIfNotOpen = (relativeUrl :string) => {
+    chrome.tabs.query({currentWindow: true}, function(tabs){
+      for (var i = 0; i < tabs.length; i++) {
+        if (tabs[i].url == chrome.extension.getURL(relativeUrl)) {
+          chrome.tabs.update(tabs[i].id, {url: "../" + relativeUrl, active: true});
+          return;
+        }
+      }
+      chrome.tabs.create({url: "../" + relativeUrl});
+    });
   }
 }

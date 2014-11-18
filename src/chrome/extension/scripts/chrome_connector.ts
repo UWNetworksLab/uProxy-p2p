@@ -140,8 +140,9 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
       this.appPort_.postMessage(ChromeGlue.CONNECT);
     }).catch((e) => {
       console.log(e);
-      // Manually invoke disconnect handler which will retry connection.
-      this.onDisconnectHandler_();
+      // Retry connection.
+      console.warn('Retrying connection in ' + (SYNC_TIMEOUT/1000) + 's...');
+      setTimeout(this.connect, SYNC_TIMEOUT);
       return Promise.reject(new Error('Unable to connect to uProxy App.'));
     });
   }
@@ -153,14 +154,16 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     console.log('Disconnected from app, previous status was ' +
                 this.status.connected);
 
-    // Update this.status and this.appPort_ to ensure we are disconnected.
-    this.status.connected = false;
-    this.appPort_ = null;
+    if (this.status.connected) {
+      // Ensure that proxying has stopped and update this.status.
+      // TODO: display a notification to the user when we have a good way to
+      // check if they are currently getting or giving access.
+      ui.stopGettingInUiAndConfig(true);
+      this.status.connected = false;
+    }
 
-    // Ensure that proxying has stopped.
-    // TODO: display a notification to the user when we have a good way to
-    // check if they are currently getting or giving access.
-    ui.stopGettingInUiAndConfig(true);
+    // Update this.appPort_ to ensure we are disconnected.
+    this.appPort_ = null;
 
     console.warn('Retrying connection in ' + (SYNC_TIMEOUT/1000) + 's...');
     setTimeout(this.connect, SYNC_TIMEOUT);
