@@ -141,12 +141,13 @@ class MockCore implements uProxy.CoreAPI {
     ui.syncUser(generateFakeUserMessage());
     return Promise.resolve<void>();
   }
-  logout(network) {
+  logout(network) :Promise<void> {
     console.log('Logging out of', network);
     ui['syncNetwork_']({
       name: 'google',
       online: false
     });
+    return Promise.resolve<void>();
   }
   onUpdate(update, handler) {
     // In the 'real uProxy', this is where the UI installs update handlers for
