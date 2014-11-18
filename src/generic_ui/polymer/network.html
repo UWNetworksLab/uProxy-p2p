@@ -34,6 +34,11 @@
         position: relative;
         cursor: default;
       }
+      #connected {
+        color: #bbb;
+        position: relative;
+        cursor: default;
+      }
       #hourglass {
         position: absolute;
         height: 28px; width: 28px;
@@ -60,13 +65,15 @@
 
     <div class='network'>
       <h1>{{ network.name }}</h1>
-      <span hidden?='{{LOGGED_OUT!=state}}'>
-        <button on-tap='{{connect}}'>Connect</button>
+      <span hidden?='{{isLoggingIn}}'>
+        <span hidden?='{{network.online}}'>
+          <button on-tap='{{connect}}'>Connect</button>
+        </span>
+        <span id='connnected' hidden?='{{!network.online}}'>
+          Connected
+        </span>
       </span>
-      <span hidden?='{{LOGGED_IN!=state}}'>
-        <button on-tap='{{disconnect}}'>Disconnect</button>
-      </span>
-      <span id='waiting' hidden?='{{LOGGING_IN!=state}}'>
+      <span id='waiting' hidden?='{{!isLoggingIn}}'>
         Waiting for sign in...
         <div id='hourglass'></div>
       </span>

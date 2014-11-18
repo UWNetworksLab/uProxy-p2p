@@ -22,7 +22,7 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   // For FAQ.
 
-  public openFaq = (pageAnchor :string) => {}
+  public openFaq = (pageAnchor ?:string) => {}
 
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
