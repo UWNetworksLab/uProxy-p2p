@@ -16,7 +16,6 @@ declare var core :CoreConnector;
 // - extractCode(url): returns a promise that fulfills with credentials on
 //   success.
 class ChromeTabAuth {
-  private tabId_ :number = -1;
 
   constructor() {
   }
@@ -33,46 +32,22 @@ class ChromeTabAuth {
     throw new Error('Operation not implemented');
   }
 
+  public onTabChange = (tabId, changeInfo, tab) => {
+    if (tab.url.indexOf(REDIRECT_URL) === 0) {
+      chrome.tabs.onUpdated.removeListener(this.onTabChange);
+      chrome.tabs.remove(tabId);
+      this.extractCode(tab.url).then((credentials :any) => {
+        this.sendCredentials_(credentials);
+      }).catch((e) => {
+        this.onError_(e.toString());
+      });
+    }
+  };
+
   private launchAuthTab_ = () : void => {
-    var onTabChange = (tabId, changeInfo, tab) => {
-      if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
-        chrome.tabs.onUpdated.removeListener(onTabChange);
-        chrome.tabs.onRemoved.removeListener(onTabClose);
-        chrome.tabs.onReplaced.removeListener(onTabReplace);
-        this.tabId_ = -1;
-        chrome.tabs.remove(tabId);
-        this.extractCode(tab.url).then((credentials :any) => {
-          this.sendCredentials_(credentials);
-        }).catch((e) => {
-          this.onError_(e.toString());
-        });
-      }
-    };
-
-    // Cleanup state and return error if the tab is closed before the tab
-    // is redirected to REDIRECT_URL
-    var onTabClose = function(tabId, removeInfo) {
-        if (tabId == this.tabId_) {
-          chrome.tabs.onUpdated.removeListener(onTabChange);
-          chrome.tabs.onRemoved.removeListener(onTabClose);
-          chrome.tabs.onReplaced.removeListener(onTabReplace);
-          this.tabId_ = -1;
-          this.onError_('Login abandoned.');
-        }
-    }.bind(this);
-
-    var onTabReplace = function(addedTabId, removedTabId) {
-      if (removedTabId == this.tabId_) {
-        this.tabId_ = addedTabId;
-      }
-    }.bind(this);
-
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
-                       function(tab: chrome.tabs.Tab) {
-      this.tabId_ = tab.id;
-      chrome.tabs.onRemoved.addListener(onTabClose);
-      chrome.tabs.onUpdated.addListener(onTabChange);
-      chrome.tabs.onReplaced.addListener(onTabReplace);
+                        function(tab: chrome.tabs.Tab) {
+      chrome.tabs.onUpdated.addListener(this.onTabChange);
     }.bind(this));
   }
 
