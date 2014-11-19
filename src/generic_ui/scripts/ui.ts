@@ -200,7 +200,13 @@ module UI {
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('give.png');
+      } else if (askUser) {
+        this.browserApi.setIcon('error.png');
+      } else {
+        this.browserApi.setIcon('default.png');
+      }
       this.browserApi.stopUsingProxy(askUser);
     }
 
@@ -208,7 +214,11 @@ module UI {
       * Sets extension icon to default and undoes proxy configuration.
       */
     public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
-      this.browserApi.setIcon('uproxy-19-c.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('getgive.png');
+      } else {
+        this.browserApi.setIcon('get.png');
+      }
       this.browserApi.startUsingProxy(endpoint);
     }
 
@@ -216,14 +226,26 @@ module UI {
       * Set extension icon to the 'giving' icon.
       */
     public startGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19-p.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('getgive.png');
+      } else {
+        this.browserApi.setIcon('give.png');
+      }
     }
 
     /**
       * Set extension icon to the default icon.
       */
     public stopGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('get.png');
+      } else {
+        this.browserApi.setIcon('default.png');
+      }
+    }
+
+    public logoutInUi = () => {
+      this.browserApi.setIcon('offline.png');
     }
 
     public isGettingAccess = () => {
@@ -249,6 +271,14 @@ module UI {
     private syncNetwork_ = (network :UI.NetworkMessage) => {
       console.log('uProxy.Update.NETWORK', network, model.networks);
       console.log(model);
+
+      // If you are now online (on a non-manual network), and were
+      // previously offline, show the default (logo) icon.
+      if (network.online && network.name != 'Manual'
+          && this.onlineNetwork == null) {
+        this.browserApi.setIcon('default.png');
+      }
+
       var existingNetwork = this.getNetwork(network.name);
       if (existingNetwork) {
         existingNetwork.online = network.online;
@@ -271,10 +301,10 @@ module UI {
           roster: {}
         });
       }
-  
+
       // Figure out which network we are signed into (currently user can only
-      // be signed into 1 network at a time in the UI, not counting manual). 
-      this.onlineNetwork = null;     
+      // be signed into 1 network at a time in the UI, not counting manual).
+      this.onlineNetwork = null;
       for (var i = 0; i < model.networks.length; ++i) {
         if (model.networks[i].online && model.networks[i].name != 'Manual') {
           this.onlineNetwork = model.networks[i];

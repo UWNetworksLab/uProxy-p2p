@@ -5,9 +5,9 @@
   "description": "__MSG_appDescription__",
   "minimum_chrome_version": "38",
   "icons": {
-    "16": "icons/uproxy-16.png",
-    "19": "icons/uproxy-19.png",
-    "128": "icons/uproxy-128.png"
+    "16": "icons/offline.png",
+    "19": "icons/offline.png",
+    "128": "icons/offline.png"
   },
   "default_locale": "en",
   "background": {
@@ -29,7 +29,7 @@
   },
   "browser_action": {
     "default_icon": {
-      "19": "icons/uproxy-19.png"
+      "19": "icons/offline.png"
     },
     "default_title": "__MSG_appName__",
     "default_popup": "polymer/popup.html"

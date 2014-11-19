@@ -23,6 +23,9 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
+  var giveIcon :string = 'give.png';
+  var getIcon :string = 'get.png';
+  var defaultIcon :string = 'default.png';
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -117,6 +120,9 @@ describe('UI.UserInterface', () => {
 
   describe('Update giving and getting state in UI', () => {
 
+    // TODO (lucyhe): Add tests for users who are giving and getting
+    // simultaneously.
+
     it('isGivingAccess updates when you start and stop giving', () => {
       expect(ui.isGivingAccess()).toEqual(false);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
@@ -141,7 +147,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
     });
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +
@@ -149,7 +155,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
@@ -159,7 +165,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .not.toHaveBeenCalledWith('uproxy-19.png');
+          .not.toHaveBeenCalledWith(defaultIcon);
     });
 
     it('Extension icon changes if you stop giving to all getters',
@@ -167,7 +173,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
@@ -179,7 +185,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19.png');
+          .toHaveBeenCalledWith(defaultIcon);
     });
 
     it('Extension icon changes when you start getting access', () => {
@@ -190,18 +196,18 @@ describe('UI.UserInterface', () => {
       // getting access.
       ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-c.png');
+          .toHaveBeenCalledWith(getIcon);
     });
 
     it('Extension icon changes when you stop getting access', () => {
       ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
       ui.instanceGettingAccessFrom = 'testGiverId';
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-c.png');
+          .toHaveBeenCalledWith(getIcon);
       updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
           .call(ui, {instanceId: 'testGiverId', error: false});
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19.png');
+          .toHaveBeenCalledWith(defaultIcon);
     });
   });  // Update giving and/or getting state in UI
 
