@@ -1,42 +1,38 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
-<link rel="import" href='button.html'>
-<link rel="import" href='description.html'>
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='button.html'>
+<link rel='import' href='description.html'>
+<link rel='import' href='faq-link.html'>
+<link rel='import' href='network.html'>
 
 <polymer-element name='uproxy-splash' attributes=''>
   <template>
     <style>
     :host {
-      position: absolute;
       display: block;
       box-sizing: border-box;
       height: 100%; width: 100%;
       text-align: center;
-      padding-top: 200px;
-      font-size: 12px;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
+      font-size: 1.1em;
       right: -100%;
-      color: #999;
-    }
-    :host(.active) {
       right: 0px;
       z-index: 100;
+      line-height: 24px;
     }
     h1 {
-      font-size: 16px;
-      color: #666;
+      font-size: 1.4em;
+      color: #009688;  /* dark green */
+      margin-bottom: 2em;
     }
     #proxy-pic {
       opacity: 0.3;
     }
     .view {
       position: absolute;
-      padding: 32px;
+      width: 80%;
+      margin-left: 10%;
+      padding-top: 100px;
       opacity: 1;
-      -webkit-transition: all 0.46s !important;
-      -moz-transition: all 0.46s !important;
-      transition: all 0.46s !important;
       z-index: 100;
     }
     .view[hidden] {
@@ -44,35 +40,111 @@
       opacity: 0;
       z-index: -1;
     }
-    #next {
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      width: 150px;
+    }
+    uproxy-network {
+      padding-bottom: 32px;
+    }
+    #nextWrapper {
       position: absolute;
-      bottom: 80px; left: 0;
+      bottom: 120px; left: 0;
       width: 100%;
+    }
+    uproxy-faq-link {
+      position: absolute;
+      bottom: 1em; left: 0;
+      width: 100%;
+      padding-top: 1em;
+      border-top: 1px solid #ddd;
+      text-transform: uppercase;
+    }
+    .uproxy-logo {
+      margin-bottom: 1em;
+    }
+    p {
+      margin-top: 1em;
+    }
+    .getShareButton {
+      margin-top: 2em;
+    }
+    .prevArrow {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      cursor: pointer;
     }
     </style>
 
-    <div class='view' id='intro' hidden?='{{0!==state}}'>
-      <h1>Share your pathway to the Internet</h1>
-      <p>
-      uProxy helps users protect each other from third parties who may try to
-      watch, block, or redirect users' Internet connections.
-      </p>
+    <img src='../icons/arrow-left.png' on-tap='{{prev}}' class='prevArrow'
+        hidden?='{{SPLASH_STATES.INTRO==ui.splashState}}'>
+
+    <div id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
+      <div class='view'>
+        <img class='uproxy-logo' src='../icons/smiley.png'>
+        <h1>uProxy</h1>
+        <p>
+          uProxy helps you share your access to the internet or get internet
+          access from friends
+        </p>
+      </div>
+      <uproxy-faq-link anchor='LearnMore'>
+        Learn more about uProxy
+      </uproxy-faq-link>
     </div>
 
-    <div class='view' id='description' hidden?='{{1!==state}}'>
-      <h1>What name should others see when this device is online?</h1>
-      <uproxy-description></uproxy-description>
-      <p>
-      Giving this device a name will let others know how they are connecting
-      with you. It also means you can have more than one device with uProxy
-      installed and proxy from one to the other.
-      </p>
+    <div id='description' hidden?='{{SPLASH_STATES.DESCRIPTION!==ui.splashState}}'>
+      <div class='view'>
+        <h1>What name should others see when this device is online?</h1>
+        <uproxy-description></uproxy-description>
+        <p>
+        Giving this device a name will let others know how they are connecting
+        with you. It also means you can have more than one device with uProxy
+        installed and proxy from one to the other.
+        </p>
+      </div>
     </div>
 
-    <uproxy-button on-tap='{{next}}' id='next'
-        img='../icons/play.png'>
-      Next
-    </uproxy-button>
+    <div id='getOrShare' hidden?='{{SPLASH_STATES.GET_OR_SHARE!==ui.splashState}}'>
+      <div class='view'>
+        <h1>How would you like to start?</h1>
+        <!-- TODO: make get/share buttons actually set user modality -->
+        <paper-button raised class='getShareButton' on-tap='{{next}}'>
+          Get access
+        </paper-button>
+        <p>... if you need to get access from a friend</p>
+        <paper-button raised class='getShareButton' on-tap='{{next}}'>
+          Share access
+        </paper-button>
+        <p>... if you have friends who may need to get access from you</p>
+      </div>
+      <uproxy-faq-link anchor='GetOrGive'>
+        Learn more about these
+      </uproxy-faq-link>
+    </div>
+
+    <div id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
+      <div class='view'>
+        <h1>Where can you find your contacts the quickest?</h1>
+        <p>Sign into a network to load your friends</p>
+        <template repeat='{{ n in networks }}' vertical layout>
+          <uproxy-network network='{{n}}'></uproxy-network>
+        </template>
+        <p style="margin-top: 0">
+          We won't share your data or post publicly without your consent
+        </p>
+      </div>
+      <uproxy-faq-link anchor='Privacy'>
+        Learn more about privacy
+      </uproxy-faq-link>
+    </div>
+
+    <div id='nextWrapper'
+      hidden?='{{SPLASH_STATES.GET_OR_SHARE==ui.splashState || SPLASH_STATES.NETWORKS==ui.splashState}}'>
+      <paper-button raised on-tap='{{next}}'>Next</paper-button>
+    </div>
 
   </template>
   <script src='splash.js'></script>
