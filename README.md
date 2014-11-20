@@ -33,9 +33,9 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - On Ubuntu, you can do `apt-get install nodejs`.
-    - We also need to create symlink ( if we are not running legacy node) 
-    - Use this 
-    - ln -s /usr/bin/nodejs /usr/bin/node 
+    - We also need to create symlink ( if we are not running legacy node) <br>
+      Use this: <br>
+      ln -s /usr/bin/nodejs /usr/bin/node 
 
     - On Archlinux, you can do 'pacman -S nodejs'.
 
