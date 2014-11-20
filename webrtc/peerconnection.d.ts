@@ -49,7 +49,7 @@ declare module WebRtc {
     DISCONNECTED  // End-state, cannot change.
   }
 
-  interface PeerConnectionInterface {
+  interface PeerConnectionInterface<TSignallingMessage> {
     // The state of this peer connection.
     pcState :State;
 
@@ -84,11 +84,11 @@ declare module WebRtc {
 
     // The |handleSignalMessage| function should be called with signalling
     // messages from the remote peer.
-    handleSignalMessage :(signal:SignallingMessage) => void;
+    handleSignalMessage :(signal:TSignallingMessage) => void;
     // The underlying handler that holds/handles signals intended to go to the
     // remote peer. A handler should be set that sends messages to the remote
     // peer.
-    signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
+    signalForPeerQueue :Handler.Queue<TSignallingMessage, void>;
 
     // Closing the peer connection will close all associated data channels
     // and set |pcState| to |DISCONNECTED| (and hence fulfills
@@ -100,7 +100,7 @@ declare module WebRtc {
     peerName :string;
   }
 
-  class PeerConnection implements PeerConnectionInterface {
+  class PeerConnection implements PeerConnectionInterface<SignallingMessage> {
     constructor(config:PeerConnectionConfig);
 
     public pcState :State;
