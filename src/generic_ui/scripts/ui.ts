@@ -72,6 +72,10 @@ module UI {
 
     public view :View;  // Appearance.
 
+    // Current state within the splash (onboarding).  Needs to be part
+    // of the ui object so it can be saved/restored when popup closes and opens.
+    public splashState :number = 0;
+
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
