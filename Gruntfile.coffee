@@ -459,6 +459,11 @@ module.exports = (grunt) ->
           src: 'third_party/lib/paper-*/paper-*.html'
           dest: chromeExtDevPath + 'lib'
         ]
+      firefox_ui:
+        files: [
+          src: 'third_party/lib/paper-*/paper-*.html'
+          dest: firefoxDevPath + 'data/lib'
+        ]
 
     clean: ['build/**', '.tscache']
 
@@ -530,6 +535,7 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
+    'polymerPaperCompile:firefox_ui'
   ]
 
   taskManager.add 'build_firefox_xpi', [

@@ -8,11 +8,10 @@ Polymer({
     GET_OR_SHARE: 2,
     NETWORKS: 3
   },
-  TOTAL_NUM_STATES: 4,
   networks: model.networks,
   ui: ui,
   setState: function(state) {
-    if (state < 0 || state > this.TOTAL_NUM_STATES) {
+    if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
       console.error('Invalid call to setState: ' + state);
       return;
     }
