@@ -23,9 +23,9 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
-  var giveIcon :string = 'give.png';
-  var getIcon :string = 'get.png';
-  var defaultIcon :string = 'default.png';
+  var giveIcon :string = 'giving-19.png';
+  var getIcon :string = 'sharing-19.png';
+  var defaultIcon :string = 'default-19.png';
 
   beforeEach(() => {
     // Create a fresh UI object before each test.

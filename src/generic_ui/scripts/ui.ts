@@ -201,11 +201,11 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('give.png');
+        this.browserApi.setIcon('sharing-19.png');
       } else if (askUser) {
-        this.browserApi.setIcon('error.png');
+        this.browserApi.setIcon('error-19.png');
       } else {
-        this.browserApi.setIcon('default.png');
+        this.browserApi.setIcon('default-19.png');
       }
       this.browserApi.stopUsingProxy(askUser);
     }
@@ -215,9 +215,9 @@ module UI {
       */
     public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('getgive.png');
+        this.browserApi.setIcon('sharing-getting-19.png');
       } else {
-        this.browserApi.setIcon('get.png');
+        this.browserApi.setIcon('getting-19.png');
       }
       this.browserApi.startUsingProxy(endpoint);
     }
@@ -227,9 +227,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('getgive.png');
+        this.browserApi.setIcon('sharing-getting-19.png');
       } else {
-        this.browserApi.setIcon('give.png');
+        this.browserApi.setIcon('sharing-19.png');
       }
     }
 
@@ -238,14 +238,14 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('get.png');
+        this.browserApi.setIcon('getting-19.png');
       } else {
-        this.browserApi.setIcon('default.png');
+        this.browserApi.setIcon('default-19.png');
       }
     }
 
     public logoutInUi = () => {
-      this.browserApi.setIcon('offline.png');
+      this.browserApi.setIcon('offline-19.png');
     }
 
     public isGettingAccess = () => {
@@ -276,7 +276,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && this.onlineNetwork == null) {
-        this.browserApi.setIcon('default.png');
+        this.browserApi.setIcon('default-19.png');
       }
 
       var existingNetwork = this.getNetwork(network.name);
