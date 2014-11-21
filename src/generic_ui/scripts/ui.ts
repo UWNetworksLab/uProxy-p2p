@@ -27,6 +27,14 @@ module UI {
     SETTINGS,
   }
 
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
+  }
+
   export interface Contacts {
     onlineTrustedUproxy :UI.User[];
     offlineTrustedUproxy :UI.User[];
@@ -93,6 +101,8 @@ module UI {
     // The network currently logged into (UI only supports 1 logged in network
     // at a time, not including Manual), or null if not logged in.
     public onlineNetwork :Network = null;
+
+    public mode :Mode = Mode.GET;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.

@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/paper-paper-button raised/paper-paper-button raised.html">
 
 <polymer-element name='uproxy-instance' attributes='userId, instance, network'>
   <template>
@@ -6,18 +7,16 @@
     :host {
       display: block; padding: 8px;
       border-top: 1px solid #ddd;
-      font-size: 10px;
     }
-    button {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      padding: 8px;
-      outline: none;
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      font-size: 1em;
+      padding-left: 1em;
+      padding-right: 1em;
     }
-    button:hover { box-shadow: 1px 2px 4px #aaa; }
-    button:active { box-shadow: 1px 2px 4px #aaa inset; }
-    p, span {
-      margin: 0;
+    p {
+      margin-top: 1em;
       color: #888;
     }
     #description {
@@ -27,7 +26,7 @@
     #getControls {
       margin-top: 1em;
     }
-    #giveControls {
+    #shareControls {
       margin-top: 1em;
     }
     </style>
@@ -38,69 +37,68 @@
 
     <!-- TODO(jetpack): replace these state-dependent buttons with
     simpler UI, exposing state bits directly. -->
-    <div id='getControls'>
+    <div id='getControls' hidden?='{{ui.mode!=UI.Mode.GET}}'>
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <button hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
-          Start
-        </button>
-        <button hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
-          Stop
-        </button>
+        <paper-button raised hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
+          Start getting access
+        </paper-button>
+        <paper-button raised hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
+          Stop getting access
+        </paper-button>
         <p>You have access.</p>
       </div>
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && !getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <button on-tap='{{ cancelRequest }}'>
+        <paper-button raised on-tap='{{ cancelRequest }}'>
           Cancel Request
-        </button>
-        <span>Waiting for permission... </span>
+        </paper-button>
+        <p>Waiting for permission... </p>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal && !getConsentState().ignoringRemoteUserOffer ) }}'>
-        <button on-tap='{{ request }}'>Accept Offer</button>
-        <button on-tap='{{ ignoreOffer }}'>Decline</button>
+        <paper-button raised on-tap='{{ request }}'>Accept Offer</paper-button>
+        <paper-button raised on-tap='{{ ignoreOffer }}'>Decline</paper-button>
         <p>They've offered you access.</p>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal && getConsentState().ignoringRemoteUserOffer ) }}'>
-        <button on-tap='{{ unignoreOffer }}'>Stop ignoring offers</button>
+        <paper-button raised on-tap='{{ unignoreOffer }}'>Stop ignoring offers</paper-button>
         <p>They've offered you access.</p>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && !getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <button on-tap='{{ request }}'>
-          Request
-        </button>
-        <p>Request access from contact before connection.</p>
+        <paper-button raised on-tap='{{ request }}'>
+          Ask for access
+        </paper-button>
       </div>
 
     </div>
 
-    <div id='giveControls'>
+    <div id='shareControls' hidden?='{{ui.mode!=UI.Mode.SHARE}}'>
 
       <div hidden?='{{ !( getConsentState().localGrantsAccessToRemote && getConsentState().remoteRequestsAccessFromLocal ) }}'>
-        <button on-tap='{{ cancelOffer }}'>Revoke Access</button>
+        <paper-button raised on-tap='{{ cancelOffer }}'>Revoke Access</paper-button>
         <p>You've given them access.</p>
       </div>
 
       <div hidden?='{{ !( getConsentState().localGrantsAccessToRemote && !getConsentState().remoteRequestsAccessFromLocal ) }}'>
-        <button on-tap='{{ cancelOffer }}'>Cancel Offer</button>
+        <paper-button raised on-tap='{{ cancelOffer }}'>Cancel Offer</paper-button>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localGrantsAccessToRemote && getConsentState().remoteRequestsAccessFromLocal && !getConsentState().ignoringRemoteUserRequest ) }}'>
-        <button on-tap='{{ offer }}'>Grant</button>
-        <button on-tap='{{ ignoreRequest }}'>Ignore</button>
+        <paper-button raised on-tap='{{ offer }}'>Grant</paper-button>
+        <paper-button raised on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
         <p>They requested access through you.</p>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localGrantsAccessToRemote && getConsentState().remoteRequestsAccessFromLocal && getConsentState().ignoringRemoteUserRequest ) }}'>
-        <button on-tap='{{ unignoreRequest }}'>Stop ignoring requests</button>
+        <paper-button raised on-tap='{{ unignoreRequest }}'>Stop ignoring requests</paper-button>
         <p>They requested access through you.</p>
       </div>
 
       <div hidden?='{{ !( !getConsentState().localGrantsAccessToRemote && !getConsentState().remoteRequestsAccessFromLocal ) }}'>
-        <button on-tap='{{ offer }}'>Offer Access</button>
+        <paper-button raised on-tap='{{ offer }}'>Offer Access</paper-button>
         <p>You have not granted them access.</p>
       </div>
 
