@@ -14,7 +14,7 @@ declare var model         :UI.Model;
 
 module UI {
 
-  export var DEFAULT_USER_IMG = 'icons/contact-default.png';
+  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
   /**
    * Enumeration of mutually-exclusive view states.
