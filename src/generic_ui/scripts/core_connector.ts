@@ -162,4 +162,8 @@ class CoreConnector implements uProxy.CoreAPI {
   logout = (networkInfo :NetworkInfo) : Promise<void> => {
     return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
+
+  setStunServer = (command :uProxy.StunServerCommand) : void => {
+    this.sendCommand(uProxy.Command.SET_STUN_SERVER, command);
+  }
 }  // class CoreConnector

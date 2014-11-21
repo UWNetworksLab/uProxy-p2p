@@ -80,6 +80,11 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
+  public iceServers = [{url: 'stun:stun.l.google.com:19302'},
+                       {url: 'stun:stun1.l.google.com:19302'},
+                       {url: 'stun:stun2.l.google.com:19302'},
+                       {url: 'stun:stun3.l.google.com:19302'},
+                       {url: 'stun:stun4.l.google.com:19302'}];
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -333,6 +338,19 @@ class uProxyCore implements uProxy.CoreAPI {
     return user.getInstance(path.instanceId);
   }
 
+  public setStunServer = (command :uProxy.StunServerCommand) : void => {
+    var networkName = command.networkInfo.name;
+    var userId = command.networkInfo.userId;
+    var network = Social.getNetwork(networkName, userId);
+    if (network.roster) {
+      for (var id in network.roster) {
+        network.roster[id].handleLogout();
+      }
+    }
+    this.iceServers = [];
+    this.iceServers.push({url:command.server});
+    console.log(this.iceServers);
+  }
 }  // class uProxyCore
 
 
@@ -378,6 +396,7 @@ core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 
+core.onCommand(uProxy.Command.SET_STUN_SERVER, core.setStunServer);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -59,11 +59,7 @@ module Core {
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
         webrtcPcConfig: {
-          iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                       {url: 'stun:stun1.l.google.com:19302'},
-                       {url: 'stun:stun2.l.google.com:19302'},
-                       {url: 'stun:stun3.l.google.com:19302'},
-                       {url: 'stun:stun4.l.google.com:19302'}]
+          iceServers: core.iceServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
@@ -72,11 +68,7 @@ module Core {
       };
     public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
         webrtcPcConfig: {
-          iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                       {url: 'stun:stun1.l.google.com:19302'},
-                       {url: 'stun:stun2.l.google.com:19302'},
-                       {url: 'stun:stun3.l.google.com:19302'},
-                       {url: 'stun:stun4.l.google.com:19302'}]
+          iceServers: core.iceServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
@@ -169,6 +161,7 @@ module Core {
           // If the remote peer sent signal as the client, we act as server.
           if(!this.rtcToNet_) {
             // TODO: make this into a separate function
+            this.rtcNetPcConfig.webrtcPcConfig.iceServers = core.iceServers;
             this.rtcToNet_ = new RtcToNet.RtcToNet(
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
@@ -262,6 +255,7 @@ module Core {
           address: '127.0.0.1',
           port: 0
       }
+      this.socksRtcPcConfig.webrtcPcConfig.iceServers = core.iceServers;
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
           this.socksRtcPcConfig);

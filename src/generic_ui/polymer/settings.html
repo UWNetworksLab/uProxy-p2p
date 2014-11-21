@@ -55,6 +55,13 @@
       border-radius: 50%;
       margin-left: -6px;
     }
+    #advancedSettings {
+      padding-left: 32px;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      color: red;
+    }
 
     </style>
 
@@ -66,6 +73,11 @@
         <div class='userNameOrId'>
           {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
         </div>
+      </div>
+      <div class='actionLink' on-tap='{{toggleAdvancedSettings}}'>Advanced Settings</div>
+      <div id='advancedSettings' hidden?='{{!advancedSettings}}'>
+        <input placeholder='Custom STUN server' value='{{customStunServer}}'></input> <button on-click="{{setStunServer}}">Set Server</button><br>
+        <p class='advancedSettingsText'>Setting a custom STUN server will terminate all existing connections.</p>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
       <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
