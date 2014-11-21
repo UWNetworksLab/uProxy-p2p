@@ -27,5 +27,13 @@ Polymer({
   prev: function() {
     this.setState(ui.splashState - 1);
   },
+  setGetMode: function() {
+    ui.mode = UI.Mode.GET;
+    this.next();
+  },
+  setShareMode: function() {
+    ui.mode = UI.Mode.SHARE;
+    this.next();
+  },
   ready: function() {}
 });
