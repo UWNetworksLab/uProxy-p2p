@@ -80,11 +80,12 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-  public iceServers = [{url: 'stun:stun.l.google.com:19302'},
-                       {url: 'stun:stun1.l.google.com:19302'},
-                       {url: 'stun:stun2.l.google.com:19302'},
-                       {url: 'stun:stun3.l.google.com:19302'},
-                       {url: 'stun:stun4.l.google.com:19302'}];
+  public webrtcPcConfig =
+      {iceServers: [{url: 'stun:stun.l.google.com:19302'},
+                    {url: 'stun:stun1.l.google.com:19302'},
+                    {url: 'stun:stun2.l.google.com:19302'},
+                    {url: 'stun:stun3.l.google.com:19302'},
+                    {url: 'stun:stun4.l.google.com:19302'}]};
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -347,9 +348,8 @@ class uProxyCore implements uProxy.CoreAPI {
         network.roster[id].handleLogout();
       }
     }
-    this.iceServers = [];
-    this.iceServers.push({url:command.server});
-    console.log(this.iceServers);
+    this.webrtcPcConfig = {iceServers:[]};
+    this.webrtcPcConfig.iceServers.push({url:command.server});
   }
 }  // class uProxyCore
 

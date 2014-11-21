@@ -58,18 +58,14 @@ module Core {
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
-        webrtcPcConfig: {
-          iceServers: core.iceServers
-        },
+        webrtcPcConfig: core.webrtcPcConfig,
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
         },
         peerName: 'socksRtc'
       };
     public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
-        webrtcPcConfig: {
-          iceServers: core.iceServers
-        },
+        webrtcPcConfig: core.webrtcPcConfig,
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
         },
@@ -161,7 +157,6 @@ module Core {
           // If the remote peer sent signal as the client, we act as server.
           if(!this.rtcToNet_) {
             // TODO: make this into a separate function
-            this.rtcNetPcConfig.webrtcPcConfig.iceServers = core.iceServers;
             this.rtcToNet_ = new RtcToNet.RtcToNet(
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
@@ -255,7 +250,6 @@ module Core {
           address: '127.0.0.1',
           port: 0
       }
-      this.socksRtcPcConfig.webrtcPcConfig.iceServers = core.iceServers;
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
           this.socksRtcPcConfig);
