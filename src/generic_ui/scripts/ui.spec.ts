@@ -23,8 +23,8 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
-  var giveIcon :string = 'giving-19.png';
-  var getIcon :string = 'sharing-19.png';
+  var giveIcon :string = 'sharing-19.png';
+  var getIcon :string = 'getting-19.png';
   var defaultIcon :string = 'default-19.png';
 
   beforeEach(() => {
