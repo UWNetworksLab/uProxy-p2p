@@ -135,7 +135,7 @@ describe('UI.UserInterface', () => {
 
     it('isGettingAccess updates when you start and stop getting', () => {
       // Note that setting and clearing instanceGettingAccessFrom is done in
-      // polymer/instance.ts.
+      // ui.ts.
       expect(ui.isGettingAccess()).toEqual(false);
       ui.instanceGettingAccessFrom = 'testGiverId';
       expect(ui.isGettingAccess()).toEqual(true);

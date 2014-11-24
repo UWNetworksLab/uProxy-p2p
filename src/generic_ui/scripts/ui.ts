@@ -81,13 +81,11 @@ module UI {
     public localFingerprint :string = null;
 
     // Instance you are getting access from.
-    // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
     public instanceGettingAccessFrom = null;
 
     // The instances you are giving access to.
-    // Remote instances are added to this set if their access.isClient value
-    // is true.
+    // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
     // The network currently logged into (UI only supports 1 logged in network
@@ -248,7 +246,7 @@ module UI {
       }
     }
 
-    public logoutInUi = () => {
+    public setOfflineIcon = () => {
       this.browserApi.setIcon('offline-19.png');
     }
 
