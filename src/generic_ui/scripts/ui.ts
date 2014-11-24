@@ -170,6 +170,8 @@ module UI {
 
       core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
           (instanceId :string) => {
+        // TODO (lucyhe): Update instancesGivingAccessTo before calling
+        // startGivingInUi so that isGiving() is updated as early as possible.
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
