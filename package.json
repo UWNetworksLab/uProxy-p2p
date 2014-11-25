@@ -20,6 +20,8 @@
     "es6-promise": "^0.1.1",
     "freedom-social-facebook": "~0.0.5",
     "freedom-social-xmpp": "~0.2.1",
+    "freedom-for-chrome": "~0.4.0",
+    "freedom-for-firefox": "~0.6.0",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
@@ -38,8 +40,8 @@
     "grunt-verbosity": "^0.2.2",
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
-    "uproxy-lib": "^14.0.0",
-    "uproxy-networking": "^2.1.2"
+    "uproxy-lib": "^16.0.0",
+    "uproxy-networking": "^3.0.0"
   },
   "private": true,
   "scripts": {

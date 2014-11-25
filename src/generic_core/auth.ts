@@ -4,7 +4,7 @@
  * This file contains functions related to uProxy authentication.
  * TODO: Hook the video-auth SAS-RTC component into here.
  */
-/// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
 module Auth {
 
@@ -37,7 +37,7 @@ module Auth {
     // Hacky fake setup to maneuver around the SimpleDataPeer encapsulation
     // so that createOffer can work.
     // TODO: Update freedom so we don't have to create a signalling channel just
-    // to have access to a basic RTCPeerConnection method.
+    // to have access to a basic rtcpeerconnection method.
     if (null === sigChannelPromise_) {
       sigChannelPromise_ = fCore_.createChannel().then((chan) => {
         console.log('Created useless signalling channel: ', chan);
@@ -55,7 +55,7 @@ module Auth {
   /**
    * Use a regex to extract just the fingerprint string from an sdp header.
    */
-  export function extractFingerprint(desc:RTCSessionDescription) : string {
+  export function extractFingerprint(desc:freedom_RTCPeerConnection.RTCSessionDescription) : string {
     var sdp = desc.sdp;
     var captured = sdp.match(SDP_FINGERPRINT_REGEX);
     if (!captured || !captured[1]) {

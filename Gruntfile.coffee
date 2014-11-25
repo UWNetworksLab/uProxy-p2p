@@ -223,10 +223,9 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
-          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom/'
+          expand: true, cwd: 'node_modules/freedom-for-chrome/'
           src: [
-            'freedom-for-chrome-for-uproxy.js'
-            'uproxy-core-env.js'
+            'freedom-for-chrome.js'
           ]
           dest: chromeAppDevPath + 'lib/'
         }, {
@@ -260,6 +259,7 @@ module.exports = (grunt) ->
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
           src: [
+            'logging/logging.js'
             'arraybuffers/arraybuffers.js'
             'handler/queue.js'
           ],
@@ -319,8 +319,8 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
-          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom'
-          src: ['freedom-for-firefox-for-uproxy.jsm']
+          expand: true, cwd: 'node_modules/freedom-for-firefox/'
+          src: ['freedom-for-firefox.jsm']
           dest: firefoxDevPath + 'data'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
@@ -339,10 +339,18 @@ module.exports = (grunt) ->
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-facebook'
         }, {
-          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: [
+            'logging/logging.js'
+            'arraybuffers/arraybuffers.js'
+            'handler/queue.js'
+          ],
+          dest: firefoxDevPath + 'data/core/uproxy-lib'
+        }, { # Copy uproxy-networking files.
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'

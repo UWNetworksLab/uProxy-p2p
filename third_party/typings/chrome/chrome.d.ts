@@ -3,8 +3,6 @@
 // Definitions by: Matthew Kimber <https://github.com/matthewkimber>, otiai10 <https://github.com/otiai10>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path='../webrtc/MediaStream.d.ts'/>
-
 ////////////////////
 // Alarms
 ////////////////////

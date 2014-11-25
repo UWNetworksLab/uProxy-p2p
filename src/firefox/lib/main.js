@@ -3,7 +3,7 @@ var panels = require("sdk/panel");
 var self = require("sdk/self");
 const {Cu} = require("chrome");
 
-Cu.import(self.data.url('freedom-for-firefox-for-uproxy.jsm'));
+Cu.import(self.data.url('freedom-for-firefox.jsm'));
 
 // Main uProxy button.
 var button = buttons.ActionButton({
@@ -36,17 +36,10 @@ var panel = panels.Panel({
 
 // Load freedom.
 var manifest = self.data.url('core/freedom-module.json');
-var freedom =
-    setupFreedom(manifest, {
-      freedomcfg: function(register) {
-            register('core.view', require('view_googleauth.js').View_googleAuth);
-            register('core.storage', require('firefox_storage.js').Storage_firefox);
-          },
-      portType: 'BackgroundFrame'
-    });
-
-// Set up connection between freedom and content script.
-require('glue.js').setUpConnection(freedom, panel, button);
+freedom(manifest, {}).then(function(interface) {
+  // Set up connection between freedom and content script.
+  require('glue.js').setUpConnection(interface(), panel, button);
+});
 
 
 function start(state) {

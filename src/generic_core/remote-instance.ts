@@ -59,11 +59,11 @@ module Core {
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
         webrtcPcConfig: {
-          iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                       {url: 'stun:stun1.l.google.com:19302'},
-                       {url: 'stun:stun2.l.google.com:19302'},
-                       {url: 'stun:stun3.l.google.com:19302'},
-                       {url: 'stun:stun4.l.google.com:19302'}]
+          iceServers: [{urls: ['stun:stun.l.google.com:19302']},
+                       {urls: ['stun:stun1.l.google.com:19302']},
+                       {urls: ['stun:stun2.l.google.com:19302']},
+                       {urls: ['stun:stun3.l.google.com:19302']},
+                       {urls: ['stun:stun4.l.google.com:19302']}]
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
@@ -72,11 +72,11 @@ module Core {
       };
     public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
         webrtcPcConfig: {
-          iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                       {url: 'stun:stun1.l.google.com:19302'},
-                       {url: 'stun:stun2.l.google.com:19302'},
-                       {url: 'stun:stun3.l.google.com:19302'},
-                       {url: 'stun:stun4.l.google.com:19302'}]
+          iceServers: [{urls: ['stun:stun.l.google.com:19302']},
+                       {urls: ['stun:stun1.l.google.com:19302']},
+                       {urls: ['stun:stun2.l.google.com:19302']},
+                       {urls: ['stun:stun3.l.google.com:19302']},
+                       {urls: ['stun:stun4.l.google.com:19302']}]
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]

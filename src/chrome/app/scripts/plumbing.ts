@@ -7,17 +7,15 @@
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
-
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-var uProxyAppChannel = freedom;  // Guaranteed to exist.
+var uProxyAppChannel; // = freedom;   Guaranteed to exist.
 
-/**
- * See the ChromeCoreConnector, which communicates to this class.
- * TODO: Finish this class with tests and pull into its own file.
- */
+// See the ChromeCoreConnector, which communicates to this class.
+// TODO: Finish this class with tests and pull into its own file.
+
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
@@ -28,9 +26,7 @@ class ChromeUIConnector {
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
   }
 
-  /**
-   * Handler for when the uProxy Chrome Extension connects to this uProxy App.
-   */
+  // Handler for when the uProxy Chrome Extension connects to this uProxy App.
   private onConnect_ = (port :chrome.runtime.Port) => {
     // Security: only allow the official uproxy extension to control the backend.
     // We don't want another extension secretly making you proxy others, or
@@ -51,10 +47,8 @@ class ChromeUIConnector {
     this.extPort_.onMessage.addListener(this.onExtMsg_);
   }
 
-  /**
-   * Receive a message from the extension.
-   * This usually installs freedom handlers.
-   */
+  // Receive a message from the extension.
+  // This usually installs freedom handlers.
   private onExtMsg_ = (msg :uProxy.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
@@ -87,10 +81,13 @@ class ChromeUIConnector {
         data: data
     });
   }
-  
+
   public setOnCredentials = (onCredentials :(Object) => void) => {
     this.onCredentials_ = onCredentials;
   }
 }
-var connector = new ChromeUIConnector();
-console.log('Starting uProxy app...');
+freedom('scripts/freedom-module.json').then(function(interface:any) {
+  uProxyAppChannel = interface();
+  var connector = new ChromeUIConnector();
+  console.log('Starting uProxy app...');
+});

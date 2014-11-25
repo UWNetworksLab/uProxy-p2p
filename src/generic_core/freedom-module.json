@@ -6,6 +6,7 @@
       "uproxy-lib/arraybuffers/arraybuffers.js",
       "uproxy-lib/handler/queue.js",
       "uproxy-networking/ipaddrjs/ipaddr.min.js",
+      "uproxy-lib/logging/logging.js",
       "uproxy-networking/tcp/tcp.js",
       "uproxy-networking/socks-common/socks-headers.js",
       "uproxy-networking/socks-to-rtc/socks-to-rtc.js",
@@ -38,7 +39,7 @@
     }
   },
   "permissions": [
-    "core.log",
+    "core.console",
     "core.peerconnection",
     "core.uproxypeerconnection",
     "core.tcpsocket",

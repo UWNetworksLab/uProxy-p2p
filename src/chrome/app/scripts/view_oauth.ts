@@ -9,8 +9,6 @@ declare var connector :ChromeUIConnector;
 
 var View_oauth = function(app, dispatchEvent) {
   this.dispatchEvent = dispatchEvent;
-  this.authMan = null;
-  this.manualDialog = null;
   this.socialNetworkName = null;
   if (app.manifest.name == 'Google Social Provider') {
     this.socialNetworkName = 'Google';
