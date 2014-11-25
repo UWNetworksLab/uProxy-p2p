@@ -104,6 +104,11 @@ module UI {
 
     public mode :Mode = Mode.GET;
 
+    private mapInstanceIdToUserName_ = {};
+
+    public gettingStatus :string = null;
+    public sharingStatus :string = null;
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -174,6 +179,7 @@ module UI {
         if (data.instanceId === this.instanceGettingAccessFrom) {
           this.instanceGettingAccessFrom = null;
           this.stopGettingInUiAndConfig(data.error);
+          this.updateGettingStatusBar();
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
@@ -186,6 +192,7 @@ module UI {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
+        this.updateSharingStatusBar();
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -194,9 +201,44 @@ module UI {
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
+        this.updateSharingStatusBar();
       });
 
       console.log('Created the UserInterface');
+    }
+
+    public updateGettingStatusBar = () => {
+      if (this.instanceGettingAccessFrom) {
+        var userName =
+            this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
+        if (userName) {
+          this.gettingStatus = 'Getting access from ' + userName;
+        } else {
+          this.gettingStatus = null;
+          console.error('unable to find user name for instance ' +
+              this.instanceGettingAccessFrom);
+        }
+      } else {
+        this.gettingStatus = null;
+      }
+    }
+
+    public updateSharingStatusBar = () => {
+      var instanceIds = Object.keys(this.instancesGivingAccessTo);
+      if (instanceIds.length === 0) {
+        this.sharingStatus = null;
+      } else if (instanceIds.length === 1) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]];
+      } else if (instanceIds.length === 2) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            this.mapInstanceIdToUserName_[instanceIds[1]];
+      } else {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            (instanceIds.length - 1) + ' others';
+      }
     }
 
     public showNotification = (notificationText :string) => {
@@ -285,10 +327,10 @@ module UI {
           roster: {}
         });
       }
-  
+
       // Figure out which network we are signed into (currently user can only
-      // be signed into 1 network at a time in the UI, not counting manual). 
-      this.onlineNetwork = null;     
+      // be signed into 1 network at a time in the UI, not counting manual).
+      this.onlineNetwork = null;
       for (var i = 0; i < model.networks.length; ++i) {
         if (model.networks[i].online && model.networks[i].name != 'Manual') {
           this.onlineNetwork = model.networks[i];
@@ -343,6 +385,10 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
+      for (var i = 0; i < user.instances.length; ++i) {
+        var instanceId = user.instances[i].instanceId;
+        this.mapInstanceIdToUserName_[instanceId] = user.name;
+      }
 
       var newCategory = user.getCategory();
       this.categorizeUser_(user, oldCategory, newCategory);
