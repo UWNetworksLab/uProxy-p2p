@@ -80,17 +80,12 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-  public socksRtcStunServers = [{url: 'stun:stun.l.google.com:19302'},
+  private defaultStunServers_ = [{url: 'stun:stun.l.google.com:19302'},
                                 {url: 'stun:stun1.l.google.com:19302'},
                                 {url: 'stun:stun2.l.google.com:19302'},
                                 {url: 'stun:stun3.l.google.com:19302'},
                                 {url: 'stun:stun4.l.google.com:19302'}];
-  public rtcNetStunServers = [{url: 'stun:stun.l.google.com:19302'},
-                              {url: 'stun:stun1.l.google.com:19302'},
-                              {url: 'stun:stun2.l.google.com:19302'},
-                              {url: 'stun:stun3.l.google.com:19302'},
-                              {url: 'stun:stun4.l.google.com:19302'}];
-
+  public stunServers = this.defaultStunServers_;
   constructor() {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
@@ -343,21 +338,10 @@ class uProxyCore implements uProxy.CoreAPI {
     return user.getInstance(path.instanceId);
   }
 
-  public setStunServer = (command :uProxy.StunServerCommand) : void => {
-    var networkName = command.networkInfo.name;
-    var userId = command.networkInfo.userId;
-    var network = Social.getNetwork(networkName, userId);
-
-    if (command.socksRtcStunServer) {
-      this.socksRtcStunServers = [];
-      this.socksRtcStunServers.push({url:command.socksRtcStunServer});
-      console.log(this.socksRtcStunServers);
-    }
-    if (command.rtcNetStunServer) {
-      this.rtcNetStunServers  = [];
-      this.rtcNetStunServers.push({url:command.rtcNetStunServer});
-      console.log(this.rtcNetStunServers);
-    }
+  public setStunServer = (customStunServer :string) : void => {
+    this.stunServers = [];
+    this.stunServers.push({url:customStunServer});
+    console.log(this.stunServers);
   }
 }  // class uProxyCore
 

@@ -146,7 +146,7 @@ module Core {
                 connection. */
                 {
                   webrtcPcConfig: {
-                    iceServers: core.rtcNetStunServers
+                    iceServers: core.stunServers
                   },
                   webrtcMediaConstraints: {
                     optional: [{DtlsSrtpKeyAgreement: true}]
@@ -250,7 +250,7 @@ module Core {
           connection. */
           {
             webrtcPcConfig: {
-              iceServers: core.socksRtcStunServers
+              iceServers: core.stunServers
             },
             webrtcMediaConstraints: {
               optional: [{DtlsSrtpKeyAgreement: true}]

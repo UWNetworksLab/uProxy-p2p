@@ -9,22 +9,8 @@ Polymer({
   toggleAdvancedSettings: function() {
     this.advancedSettings = !this.advancedSettings;
   },
-  setSocksRtcStunServer: function() {
-    core.setStunServer({networkInfo: {
-                              name: ui.onlineNetwork.name,
-                              userId: ui.onlineNetwork.userId
-                              },
-                            socksRtcStunServer: this.socksRtcStunServer
-                            });
-    this.$.confirmNewServer.hidden = false;
-  },
-  setRtcNetStunServer: function() {
-    core.setStunServer({networkInfo: {
-                              name: ui.onlineNetwork.name,
-                              userId: ui.onlineNetwork.userId
-                              },
-                            rtcNetStunServer: this.rtcNetStunServer
-                            });
+  setStunServer: function() {
+    core.setStunServer(this.stunServer);
     this.$.confirmNewServer.hidden = false;
   },
   ready: function() {

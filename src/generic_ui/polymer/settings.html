@@ -85,8 +85,7 @@
       </div>
       <div class='actionLink' on-tap='{{toggleAdvancedSettings}}'>Advanced Settings</div>
       <div id='advancedSettings' hidden?='{{!advancedSettings}}'>
-        <input placeholder='SocksToRtc STUN server' value='{{socksRtcStunServer}}' size='30'></input><button on-click="{{setSocksRtcStunServer}}">Update</button><br><br>
-        <input placeholder='RtcToNet STUN server' value='{{rtcNetStunServer}}' size='30'></input><button on-click="{{setRtcNetStunServer}}">Update</button><br>
+        <input placeholder='Custom STUN server' value='{{stunServer}}' size='30'></input> <button on-click="{{setStunServer}}">Update</button><br><br>
         <p id='confirmNewServer' hidden>STUN server updated. New server will be used for future connections.</p>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
