@@ -14,7 +14,7 @@ declare var model         :UI.Model;
 
 module UI {
 
-  export var DEFAULT_USER_IMG = 'icons/contact-default.png';
+  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
   /**
    * Enumeration of mutually-exclusive view states.
@@ -25,6 +25,14 @@ module UI {
     USER,
     NETWORKS,
     SETTINGS,
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
   }
 
   export interface Contacts {
@@ -72,6 +80,10 @@ module UI {
 
     public view :View;  // Appearance.
 
+    // Current state within the splash (onboarding).  Needs to be part
+    // of the ui object so it can be saved/restored when popup closes and opens.
+    public splashState :number = 0;
+
     // TODO: Put this into the 'auth' service, which will eventually include
     // sas-rtc.
     public localFingerprint :string = null;
@@ -89,6 +101,8 @@ module UI {
     // The network currently logged into (UI only supports 1 logged in network
     // at a time, not including Manual), or null if not logged in.
     public onlineNetwork :Network = null;
+
+    public mode :Mode = Mode.GET;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.

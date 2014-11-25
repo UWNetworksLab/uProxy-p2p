@@ -83,6 +83,13 @@ FILES =
     'socks-to-rtc/socks-to-rtc.js'
     'rtc-to-net/rtc-to-net.js'
   ]
+  thirdPartyUi: [
+    'core-*/**',
+    'lodash/**',
+    'platform/**',
+    'polymer/**',
+    'paper-*/*.css'
+  ]
 
 
 module.exports = (grunt) ->
@@ -146,7 +153,13 @@ module.exports = (grunt) ->
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
-          src: ['third_party/**/*.js']
+          src: [
+            'third_party/freedom-ts-hacks/*.js',
+            'third_party/lib/core-component-page/**/*.js',
+            'third_party/lib/lodash/**/*.js',
+            'third_party/lib/platform/**/*.js',
+            'third_party/lib/polymer/**/*.js'
+            ]
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
@@ -184,7 +197,7 @@ module.exports = (grunt) ->
           dest: chromeExtDevPath + 'scripts/'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
         } ]
 
@@ -331,7 +344,7 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
         } ]
 
@@ -440,6 +453,18 @@ module.exports = (grunt) ->
         src: ['**']
         dest: '.'
 
+    polymerPaperCompile:
+      chrome_ui:
+        files: [
+          src: 'third_party/lib/paper-*/paper-*.html'
+          dest: chromeExtDevPath + 'lib'
+        ]
+      firefox_ui:
+        files: [
+          src: 'third_party/lib/paper-*/paper-*.html'
+          dest: firefoxDevPath + 'data/lib'
+        ]
+
     clean: ['build/**', '.tscache']
 
  # grunt.initConfig
@@ -454,6 +479,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
+
+  grunt.loadTasks('tasks');
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -497,6 +524,7 @@ module.exports = (grunt) ->
     'ts:chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
+    'polymerPaperCompile:chrome_ui'
     # 'shell:extract_chrome_tests'
   ]
 
@@ -507,6 +535,7 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
+    'polymerPaperCompile:firefox_ui'
   ]
 
   taskManager.add 'build_firefox_xpi', [

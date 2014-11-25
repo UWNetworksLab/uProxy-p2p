@@ -1,10 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href='splash.html'>
-<link rel="import" href='toolbar.html'>
-<link rel="import" href='button.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='networks.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -19,10 +16,39 @@
         border: none; margin: auto;
         text-align: left;
         overflow: hidden;
-        background: url('../icons/internet.png') center top no-repeat #fff;
+        background-color: white;
+        color: rgb(112, 112, 112);
+      }
+      #toolbar {
+        position: absolute;
+        top: 0; left: 0;
+        display: block;
+        height: 100px; width: 100%;
+        background-color: #009688;
+        z-index: 1000;
       }
       #btnSettings {
-        position: absolute; left: 0; top: 0;
+        position: absolute;
+        width: 28px; height: 28px;
+        left: 11px; top: 11px;  /* (50px - 28px) / 2 */
+        opacity: 0.6;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+        -webkit-transition: all 0.23s !important;
+        -moz-transition: all 0.23s !important;
+        transition: all 0.23s !important;
+      }
+      #title {
+        font-size: 1.75em;
+        color: white;
+        position: absolute;
+        left: 50px;
+        margin-top: 0.7em;
+      }
+      #btnSettings:hover {
+        opacity: 1.0;
       }
       #darkMask {
         background-color: rgba(0, 0, 0, 0.5);
@@ -33,29 +59,68 @@
         position: absolute;
         z-index: 1001;
       }
+      #roster {
+        position: absolute;
+        display: inline-block;
+        box-sizing: border-box;
+        height: 500px;  /* 600px - top */
+        width: 100%;
+        background-color: white;
+        top: 100px;
+        overflow-y: hidden;
+        overflow-y: scroll;
+        right: 0px;
+        z-index: 100;
+      }
+      .getShareTab {
+        position: absolute;
+        bottom: 0px;
+        padding-bottom: 15px;
+        width: 30%;
+        margin-left: 10%;
+        text-align: center;
+        color: white;
+        font-size: 1.2em;
+        cursor: pointer;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+      .getShareTab.active {
+        opacity: 1.0;
+        border-bottom: 3px solid #20F1DE;  /* teal */
+        padding-bottom: 12px;  /* normal padding-bottom - border size */
+      }
+      #shareTab {
+        left: 50%;
+      }
+
     </style>
 
-    <uproxy-toolbar hidden?='{{ !ui.onlineNetwork }}'>
-      <uproxy-button id='btnSettings'
-          on-tap='{{ settingsView }}'
-          img='../icons/more_vert_white.svg'>
-      </uproxy-button>
-    </uproxy-toolbar>
+    <div id='toolbar' hidden?='{{ !ui.onlineNetwork }}'>
+      <img src='../icons/more_vert_white.svg' id='btnSettings'
+        on-tap='{{ settingsView }}'>
+      <h1 id='title'>uProxy</h1>
+      <div id='getTab'
+          class='getShareTab {{ui.mode==UI.Mode.GET ? "active" : ""}}'
+          on-tap='{{setGetMode}}'>
+        Get Access
+      </div>
+      <div id='shareTab'
+          class='getShareTab {{ui.mode==UI.Mode.SHARE ? "active" : ""}}'
+          on-tap='{{setShareMode}}'>
+        Share Access
+      </div>
+    </div>
 
-    <uproxy-splash id='splash'
-      class='{{ { active:(UI.View.SPLASH==ui.view) } | tokenList }}'>
+    <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
-
-    <uproxy-networks id='networks'
-      class='{{ { active:(UI.View.NETWORKS==ui.view) } | tokenList }}'>
-    </uproxy-networks>
 
     <uproxy-settings id='settings'
       class='{{ { active:(UI.View.SETTINGS==ui.view) } | tokenList }}'>
     </uproxy-settings>
 
     <uproxy-roster id='roster'
-      class='{{ { active: (UI.View.ROSTER==ui.view), hidden: (UI.View.SPLASH==ui.view || !ui.onlineNetwork) } | tokenList }}'>
+      hidden?='{{UI.View.SPLASH==ui.view || !ui.onlineNetwork}}'>
     </uproxy-roster>
 
     <!-- Dark mask displayed on top of roster when settings is visible -->
