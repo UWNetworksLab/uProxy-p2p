@@ -58,7 +58,7 @@
     #advancedSettings {
       padding-left: 32px;
     }
-    .advancedSettingsText {
+    #confirmNewServer {
       font-size: 12px;
       color: red;
     }
@@ -76,8 +76,9 @@
       </div>
       <div class='actionLink' on-tap='{{toggleAdvancedSettings}}'>Advanced Settings</div>
       <div id='advancedSettings' hidden?='{{!advancedSettings}}'>
-        <input placeholder='Custom STUN server' value='{{customStunServer}}'></input> <button on-click="{{setStunServer}}">Set Server</button><br>
-        <p class='advancedSettingsText'>Setting a custom STUN server will terminate all existing connections.</p>
+        <input placeholder='SocksToRtc STUN server' value='{{socksRtcStunServer}}' size='30'></input><button on-click="{{setSocksRtcStunServer}}">Update</button><br><br>
+        <input placeholder='RtcToNet STUN server' value='{{rtcNetStunServer}}' size='30'></input><button on-click="{{setRtcNetStunServer}}">Update</button><br>
+        <p id='confirmNewServer' hidden>STUN server updated. New server will be used for future connections.</p>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
       <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>

@@ -120,7 +120,8 @@ module uProxy {
 
   export interface StunServerCommand {
     networkInfo :NetworkInfo;
-    server :string;
+    socksRtcStunServer ?:string;
+    rtcNetStunServer ?:string;
   }
 
   // --- Core <--> UI Interfaces ---

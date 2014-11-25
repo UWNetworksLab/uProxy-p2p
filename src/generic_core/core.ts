@@ -80,12 +80,16 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-  public webrtcPcConfig =
-      {iceServers: [{url: 'stun:stun.l.google.com:19302'},
-                    {url: 'stun:stun1.l.google.com:19302'},
-                    {url: 'stun:stun2.l.google.com:19302'},
-                    {url: 'stun:stun3.l.google.com:19302'},
-                    {url: 'stun:stun4.l.google.com:19302'}]};
+  public socksRtcStunServers = [{url: 'stun:stun.l.google.com:19302'},
+                                {url: 'stun:stun1.l.google.com:19302'},
+                                {url: 'stun:stun2.l.google.com:19302'},
+                                {url: 'stun:stun3.l.google.com:19302'},
+                                {url: 'stun:stun4.l.google.com:19302'}];
+  public rtcNetStunServers = [{url: 'stun:stun.l.google.com:19302'},
+                              {url: 'stun:stun1.l.google.com:19302'},
+                              {url: 'stun:stun2.l.google.com:19302'},
+                              {url: 'stun:stun3.l.google.com:19302'},
+                              {url: 'stun:stun4.l.google.com:19302'}];
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -343,13 +347,17 @@ class uProxyCore implements uProxy.CoreAPI {
     var networkName = command.networkInfo.name;
     var userId = command.networkInfo.userId;
     var network = Social.getNetwork(networkName, userId);
-    if (network.roster) {
-      for (var id in network.roster) {
-        network.roster[id].handleLogout();
-      }
+
+    if (command.socksRtcStunServer) {
+      this.socksRtcStunServers = [];
+      this.socksRtcStunServers.push({url:command.socksRtcStunServer});
+      console.log(this.socksRtcStunServers);
     }
-    this.webrtcPcConfig = {iceServers:[]};
-    this.webrtcPcConfig.iceServers.push({url:command.server});
+    if (command.rtcNetStunServer) {
+      this.rtcNetStunServers  = [];
+      this.rtcNetStunServers.push({url:command.rtcNetStunServer});
+      console.log(this.rtcNetStunServers);
+    }
   }
 }  // class uProxyCore
 

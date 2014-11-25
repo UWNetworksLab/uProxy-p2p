@@ -9,12 +9,23 @@ Polymer({
   toggleAdvancedSettings: function() {
     this.advancedSettings = !this.advancedSettings;
   },
-  setStunServer: function() {
-    console.log(this.customStunServer);
-    core.setStunServer({networkInfo:
-                          {name: ui.onlineNetwork.name,
-                           userId: ui.onlineNetwork.userId},
-                        server: this.customStunServer});
+  setSocksRtcStunServer: function() {
+    core.setStunServer({networkInfo: {
+                              name: ui.onlineNetwork.name,
+                              userId: ui.onlineNetwork.userId
+                              },
+                            socksRtcStunServer: this.socksRtcStunServer
+                            });
+    this.$.confirmNewServer.hidden = false;
+  },
+  setRtcNetStunServer: function() {
+    core.setStunServer({networkInfo: {
+                              name: ui.onlineNetwork.name,
+                              userId: ui.onlineNetwork.userId
+                              },
+                            rtcNetStunServer: this.rtcNetStunServer
+                            });
+    this.$.confirmNewServer.hidden = false;
   },
   ready: function() {
     this.ui = ui;
