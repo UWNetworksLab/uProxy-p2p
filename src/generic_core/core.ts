@@ -27,7 +27,7 @@ var storage = new Core.Storage();
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
 // this to be freedom, and communicate using 'emit's and 'on's.
-var bgAppPageChannel = freedom();
+var bgAppPageChannel = new freedom();
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.

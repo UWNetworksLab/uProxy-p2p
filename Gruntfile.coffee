@@ -416,6 +416,7 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/typescript-src/mocks/freedom-mocks.js'
+              'node_modules/uproxy-lib/dist/logging/logging.js'
               'build/typescript-src/socks-to-rtc/socks-to-rtc.js'
               'build/typescript-src/rtc-to-net/rtc-to-net.js'
               'build/typescript-src/uproxy.js'
