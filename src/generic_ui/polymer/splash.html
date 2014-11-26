@@ -1,6 +1,5 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='button.html'>
 <link rel='import' href='description.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
@@ -11,7 +10,8 @@
     :host {
       display: block;
       box-sizing: border-box;
-      height: 100%; width: 100%;
+      height: 100%;
+      width: 100%;
       text-align: center;
       font-size: 1.1em;
       right: -100%;
@@ -50,15 +50,17 @@
     }
     #nextWrapper {
       position: absolute;
-      bottom: 120px; left: 0;
+      bottom: 120px;
+      left: 0;
       width: 100%;
     }
     uproxy-faq-link {
       position: absolute;
-      bottom: 1em; left: 0;
+      bottom: 1em;
+      left: 0;
       width: 100%;
       padding-top: 1em;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid rgb(221, 221, 221);
       text-transform: uppercase;
     }
     .uproxy-logo {
