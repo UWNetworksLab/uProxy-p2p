@@ -85,6 +85,7 @@ class uProxyCore implements uProxy.CoreAPI {
                                 {url: 'stun:stun2.l.google.com:19302'},
                                 {url: 'stun:stun3.l.google.com:19302'},
                                 {url: 'stun:stun4.l.google.com:19302'}];
+  private _RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
   public stunServers = this.defaultStunServers_;
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -339,9 +340,11 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public setStunServer = (customStunServer :string) : void => {
-    this.stunServers = [];
-    this.stunServers.push({url:customStunServer});
-    console.log(this.stunServers);
+    if (customStunServer === this._RESET_STUN_SERVERS_) {
+      this.stunServers = this.defaultStunServers_;
+      return;
+    }
+    this.stunServers = [{url:customStunServer}];
   }
 }  // class uProxyCore
 

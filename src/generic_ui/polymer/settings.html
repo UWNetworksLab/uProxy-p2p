@@ -80,7 +80,7 @@
     #advancedSettings {
       padding-left: 32px;
     }
-    #confirmNewServer {
+    .advancedSettingsText {
       font-size: 12px;
       color: red;
     }
@@ -111,8 +111,9 @@
         <paper-input-decorator label="Custom STUN server">
           <input is="core-input" value='{{stunServer}}'>
         </paper-input-decorator>
-         <paper-button on-tap="{{setStunServer}}">Update</paper-button><br><br>
-        <p id='confirmNewServer' hidden>STUN server updated. New server will be used for future connections.</p>
+         <paper-button on-tap="{{setStunServer}}">Update</paper-button> <paper-button on-tap="{{resetStunServers}}">Reset</paper-button><br><br>
+        <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
+        <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
       <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
