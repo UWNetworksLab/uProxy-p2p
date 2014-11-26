@@ -1,5 +1,5 @@
 Polymer({
-  advancedSettings: false,
+  displayAdvancedSettings: false,
   logOut: function() {
     core.logout({name: ui.onlineNetwork.name,
                  userId: ui.onlineNetwork.userId}).then(() => {
@@ -7,7 +7,7 @@ Polymer({
     });
   },
   toggleAdvancedSettings: function() {
-    this.advancedSettings = !this.advancedSettings;
+    this.displayAdvancedSettings = !this.displayAdvancedSettings;
   },
   setStunServer: function() {
     core.setStunServer(this.stunServer);

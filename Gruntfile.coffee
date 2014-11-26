@@ -84,11 +84,15 @@ FILES =
     'rtc-to-net/rtc-to-net.js'
   ]
   thirdPartyUi: [
-    'core-*/**',
+    # .html files from core-* and paper-* components are copied
+    # separately via polymerPaperCompile.
+    'core-*/*.css',
+    'core-*/*.js',
     'lodash/**',
     'platform/**',
     'polymer/**',
-    'paper-*/*.css'
+    'paper-*/*.css',
+    'paper-*/*.js'
   ]
 
 
@@ -455,15 +459,21 @@ module.exports = (grunt) ->
 
     polymerPaperCompile:
       chrome_ui:
-        files: [
-          src: 'third_party/lib/paper-*/paper-*.html'
-          dest: chromeExtDevPath + 'lib'
-        ]
+        files: [ {
+            src: 'third_party/lib/paper-*/paper-*.html'
+            dest: chromeExtDevPath + 'lib'
+          }, {
+            src: 'third_party/lib/core-*/core-*.html'
+            dest: chromeExtDevPath + 'lib'
+          } ]
       firefox_ui:
-        files: [
-          src: 'third_party/lib/paper-*/paper-*.html'
-          dest: firefoxDevPath + 'data/lib'
-        ]
+        files: [ {
+            src: 'third_party/lib/paper-*/paper-*.html'
+            dest: firefoxDevPath + 'data/lib'
+          }, {
+            src: 'third_party/lib/core-*/core-*.html'
+            dest: firefoxDevPath + 'data/lib'
+          } ]
 
     clean: ['build/**', '.tscache']
 
