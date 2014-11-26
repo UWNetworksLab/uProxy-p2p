@@ -208,6 +208,7 @@ module UI {
     }
 
     public updateGettingStatusBar = () => {
+      // TODO: localize this.
       if (this.instanceGettingAccessFrom) {
         var userName =
             this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
@@ -224,6 +225,8 @@ module UI {
     }
 
     public updateSharingStatusBar = () => {
+      // TODO: localize this - may require simpler formatting to work
+      // in all languages.
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
       if (instanceIds.length === 0) {
         this.sharingStatus = null;
