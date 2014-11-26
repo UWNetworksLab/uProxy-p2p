@@ -6,17 +6,16 @@
     <style>
     :host {
       display: block; padding: 8px;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid rgb(221, 221, 221);
     }
     paper-button {
-      background: #ddd;
+      background: rgb(221, 221, 221);
       color: rgb(112, 112, 112);
       font-size: 1em;
       padding-left: 1em;
       padding-right: 1em;
     }
-    #startGettingButton, #acceptOfferButton, #declineOfferButton,
-    #askForAccessButton, #grantButton, #ignoreButton, #offerAccessButton {
+    .highlightedButton {
       background: #009688;  /* dark green */
       color: white;
     }
@@ -49,7 +48,7 @@
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal ) }}'>
         <p class='highlighted'>{{user.name || user.userId }} has granted you access</p>
-        <paper-button id='startGettingButton' raised
+        <paper-button class='highlightedButton' raised
             hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
           Start getting access
         </paper-button>
@@ -66,8 +65,8 @@
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal && !getConsentState().ignoringRemoteUserOffer ) }}'>
-        <paper-button id='acceptOfferButton' raised on-tap='{{ request }}'>Accept Offer</paper-button>
-        <paper-button id='declineOfferButton' raised on-tap='{{ ignoreOffer }}'>Decline</paper-button>
+        <paper-button class='highlightedButton' raised on-tap='{{ request }}'>Accept Offer</paper-button>
+        <paper-button class='highlightedButton' raised on-tap='{{ ignoreOffer }}'>Decline</paper-button>
         <p>They've offered you access.</p>
       </div>
 
@@ -77,7 +76,7 @@
       </div>
 
       <div hidden?='{{ !( !getConsentState().localRequestsAccessFromRemote && !getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <paper-button raised id='askForAccessButton' on-tap='{{ request }}'>
+        <paper-button raised class='highlightedButton' on-tap='{{ request }}'>
           Ask for access
         </paper-button>
       </div>
@@ -96,8 +95,8 @@
       </div>
 
       <div hidden?='{{ !( !getConsentState().localGrantsAccessToRemote && getConsentState().remoteRequestsAccessFromLocal && !getConsentState().ignoringRemoteUserRequest ) }}'>
-        <paper-button raised id='grantButton' on-tap='{{ offer }}'>Grant</paper-button>
-        <paper-button raised id='ignoreButton' on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
+        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Grant</paper-button>
+        <paper-button raised class='highlightedButton' on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
         <p>They requested access through you.</p>
       </div>
 
@@ -107,7 +106,7 @@
       </div>
 
       <div hidden?='{{ !( !getConsentState().localGrantsAccessToRemote && !getConsentState().remoteRequestsAccessFromLocal ) }}'>
-        <paper-button raised id='offerAccessButton' on-tap='{{ offer }}'>Offer Access</paper-button>
+        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Offer Access</paper-button>
         <p>You have not granted them access.</p>
       </div>
 
