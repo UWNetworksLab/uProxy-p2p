@@ -32,7 +32,7 @@
       "19": "icons/uproxy-19.png"
     },
     "default_title": "__MSG_appName__",
-    "default_popup": "polymer/popup.html"
+    "default_popup": "install-incomplete.html"
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
