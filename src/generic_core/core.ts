@@ -342,9 +342,9 @@ class uProxyCore implements uProxy.CoreAPI {
   public setStunServer = (customStunServer :string) : void => {
     if (customStunServer === this._RESET_STUN_SERVERS_) {
       this.stunServers = this.defaultStunServers_;
-      return;
+    } else {
+      this.stunServers = [{url:customStunServer}];
     }
-    this.stunServers = [{url:customStunServer}];
   }
 }  // class uProxyCore
 
