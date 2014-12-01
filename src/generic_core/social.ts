@@ -63,8 +63,9 @@ module Social {
       }
     }
 
-    Social.networks[MANUAL_NETWORK_ID] = {
-        '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
+    // TODO: re-enable manual networks here when all code is ready
+    // Social.networks[MANUAL_NETWORK_ID] = {
+    //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
   }
 
   /**

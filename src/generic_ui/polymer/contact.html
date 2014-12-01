@@ -74,7 +74,7 @@
         <div id='instances' hidden?='{{!contact.expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
-                userId='{{ contact.userId }}'
+                user='{{ contact }}'
                 instance='{{ i }}'
                 network='{{contact.network}}'>
             </uproxy-instance>
