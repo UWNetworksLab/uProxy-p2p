@@ -96,7 +96,7 @@ module.exports = function (grunt) {
     var outputHtmlFilename = destDir + '/' + filenamePrefix + '.html';
     var outputJsFilename = destDir + '/' + filenamePrefix + '.js';
 
-    // Read original file and get script contents
+    // Read original file and get script contents.
     var originalHtml = fs.readFileSync(inputHtmlFilename).toString();
 
     var htmlWithoutComments = removeComments(originalHtml);

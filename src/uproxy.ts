@@ -118,11 +118,6 @@ module uProxy {
     message         :uProxy.Message;
   }
 
-  export interface StunServerCommand {
-    networkInfo :NetworkInfo;
-    stunServer :string;
-  }
-
   // --- Core <--> UI Interfaces ---
 
   /**
