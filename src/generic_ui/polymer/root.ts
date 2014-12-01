@@ -12,6 +12,12 @@ Polymer({
     console.log('rosterView called');
     ui['view'] = UI.View.ROSTER;
   },
+  setGetMode: function() {
+    ui.mode = UI.Mode.GET;
+  },
+  setShareMode: function() {
+    ui.mode = UI.Mode.SHARE;
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;

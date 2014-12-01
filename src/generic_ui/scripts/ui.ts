@@ -14,7 +14,7 @@ declare var model         :UI.Model;
 
 module UI {
 
-  export var DEFAULT_USER_IMG = 'icons/contact-default.png';
+  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
   /**
    * Enumeration of mutually-exclusive view states.
@@ -25,6 +25,14 @@ module UI {
     USER,
     NETWORKS,
     SETTINGS,
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
   }
 
   export interface Contacts {
@@ -91,6 +99,13 @@ module UI {
     // The network currently logged into (UI only supports 1 logged in network
     // at a time, not including Manual), or null if not logged in.
     public onlineNetwork :Network = null;
+
+    public mode :Mode = Mode.GET;
+
+    private mapInstanceIdToUserName_ = {};
+
+    public gettingStatus :string = null;
+    public sharingStatus :string = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -162,6 +177,7 @@ module UI {
         if (data.instanceId === this.instanceGettingAccessFrom) {
           this.instanceGettingAccessFrom = null;
           this.stopGettingInUiAndConfig(data.error);
+          this.updateGettingStatusBar();
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
@@ -176,6 +192,7 @@ module UI {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
+        this.updateSharingStatusBar();
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -184,9 +201,47 @@ module UI {
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
+        this.updateSharingStatusBar();
       });
 
       console.log('Created the UserInterface');
+    }
+
+    public updateGettingStatusBar = () => {
+      // TODO: localize this.
+      if (this.instanceGettingAccessFrom) {
+        var userName =
+            this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
+        if (userName) {
+          this.gettingStatus = 'Getting access from ' + userName;
+        } else {
+          this.gettingStatus = null;
+          console.error('unable to find user name for instance ' +
+              this.instanceGettingAccessFrom);
+        }
+      } else {
+        this.gettingStatus = null;
+      }
+    }
+
+    public updateSharingStatusBar = () => {
+      // TODO: localize this - may require simpler formatting to work
+      // in all languages.
+      var instanceIds = Object.keys(this.instancesGivingAccessTo);
+      if (instanceIds.length === 0) {
+        this.sharingStatus = null;
+      } else if (instanceIds.length === 1) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]];
+      } else if (instanceIds.length === 2) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            this.mapInstanceIdToUserName_[instanceIds[1]];
+      } else {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            (instanceIds.length - 1) + ' others';
+      }
     }
 
     public showNotification = (notificationText :string) => {
@@ -363,6 +418,10 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
+      for (var i = 0; i < user.instances.length; ++i) {
+        var instanceId = user.instances[i].instanceId;
+        this.mapInstanceIdToUserName_[instanceId] = user.name;
+      }
 
       var newCategory = user.getCategory();
       this.categorizeUser_(user, oldCategory, newCategory);

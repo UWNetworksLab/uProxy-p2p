@@ -6,7 +6,7 @@ Polymer({
        name: this.network.name,
        userId: this.network.userId
       },
-      userId: this.userId,
+      userId: this.user.userId,
       instanceId: this.instance.instanceId
     };
     // Expose global ui object and UI module in this context. This allows the
@@ -22,6 +22,7 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(endpoint);
       this.ui.instanceGettingAccessFrom = this.instance.instanceId;
+      this.ui.updateGettingStatusBar();
     });
   },
   stop: function() {
