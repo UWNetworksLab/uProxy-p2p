@@ -15,8 +15,8 @@ class MockSocial {
 
 describe('freedomClientToUproxyClient', () => {
   var freedomClient :freedom_Social.ClientState = {
-    userId: 'mockmyself@mock.com',
-    clientId: 'fakemyself@mock.com/foo',
+    userId: 'mockmyself',
+    clientId: 'fakemyself',
     status: 'ONLINE',
     timestamp: 12345
   };
@@ -43,8 +43,8 @@ describe('Social.FreedomNetwork', () => {
 
   var loginPromise :Promise<void>;
   var fakeFreedomClient :freedom_Social.ClientState = {
-    userId: 'mockmyself@mock.com',
-    clientId: 'fakemyself@mock.com/foo',
+    userId: 'mockmyself',
+    clientId: 'fakemyself',
     status: 'ONLINE',
     timestamp: 12345
   };
@@ -88,15 +88,15 @@ describe('Social.FreedomNetwork', () => {
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);
         var freedomClientState :freedom_Social.ClientState = {
-          userId: 'fakeuser@mock.com',
-          clientId: 'fakeclient@mock.com/foo',
+          userId: 'fakeuser',
+          clientId: 'fakeclient',
           status: 'ONLINE_WITH_OTHER_APP',
           timestamp: 12345
         };
         // Add user to the roster;
         network.handleClientState(freedomClientState);
         expect(Object.keys(network.roster).length).toEqual(1);
-        var friend = network.getUser('fakeuser@mock.com');
+        var friend = network.getUser('fakeuser');
         spyOn(friend, 'monitor');
         expect(friend.isOnline()).toEqual(true);
         // Wait for 5 seconds and make sure monitoring was called.
@@ -125,7 +125,7 @@ describe('Social.FreedomNetwork', () => {
       // Pretend the social API's logout succeeded.
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
 
-      var friend = network.getUser('fakeuser@mock.com');
+      var friend = network.getUser('fakeuser');
       spyOn(friend, 'monitor');
       // Monitoring is still running.
       jasmine.clock().tick(5000);
@@ -181,22 +181,22 @@ describe('Social.FreedomNetwork', () => {
       network.myInstance = new Core.LocalInstance(network, 'fakeId');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
-        userId: 'mockuser@mock.com',
+        userId: 'mockuser',
         name: 'mock1',
         timestamp: Date.now()
       });
       expect(Object.keys(network.roster).length).toEqual(1);
-      var user = network.getUser('mockuser@mock.com');
+      var user = network.getUser('mockuser');
       expect(user).toBeDefined;
       expect(user.name).toEqual('mock1');
     });
 
     it('updates existing user', () => {
       expect(Object.keys(network.roster).length).toEqual(1);
-      var user = network.getUser('mockuser@mock.com');
+      var user = network.getUser('mockuser');
       spyOn(user, 'update').and.callThrough();
       network.handleUserProfile({
-        userId: 'mockuser@mock.com',
+        userId: 'mockuser',
         name: 'newname',
         timestamp: Date.now()
       });
@@ -206,11 +206,11 @@ describe('Social.FreedomNetwork', () => {
     });
 
     it('passes |onClientState| to correct client', () => {
-      var user = network.getUser('mockuser@mock.com');
+      var user = network.getUser('mockuser');
       spyOn(user, 'handleClient');
       var freedomClientState :freedom_Social.ClientState = {
-        userId: 'mockuser@mock.com',
-        clientId: 'fakeclient@mock.com/foo',
+        userId: 'mockuser',
+        clientId: 'fakeclient',
         status: 'ONLINE',
         timestamp: 12345
       };
@@ -228,8 +228,8 @@ describe('Social.FreedomNetwork', () => {
         return user;
       });
       var freedomClientState :freedom_Social.ClientState = {
-        userId: 'im_not_here@mock.com',
-        clientId: 'fakeclient@mock.com/foo',
+        userId: 'im_not_here',
+        clientId: 'fakeclient',
         status: 'ONLINE',
         timestamp: 12345
       };
@@ -238,12 +238,12 @@ describe('Social.FreedomNetwork', () => {
     });
 
     it('passes |onMessage| to correct client', () => {
-      var user = network.getUser('mockuser@mock.com');
+      var user = network.getUser('mockuser');
       spyOn(user, 'handleMessage');
       var msg = {
         from: {
-          userId: 'mockuser@mock.com',
-          clientId: 'fakeclient@mock.com/foo',
+          userId: 'mockuser',
+          clientId: 'fakeclient',
           status: 'ONLINE',
           timestamp: 12345
         },
@@ -252,18 +252,18 @@ describe('Social.FreedomNetwork', () => {
         })
       };
       network.handleMessage(msg);
-      expect(user.handleMessage).toHaveBeenCalledWith('fakeclient@mock.com/foo', {
+      expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
         'cats': 'meow'
       });
     });
 
     it('adds placeholder when receiving Message with userId not in roster', () => {
-      var user = network.getUser('mockuser@mock.com');
+      var user = network.getUser('mockuser');
       spyOn(user, 'handleMessage');
       var msg = {
         from: {
-          userId: 'im_still_not_here@mock.com',
-          clientId: 'fakeclient@mock.com/foo',
+          userId: 'im_still_not_here',
+          clientId: 'fakeclient',
           status: 'ONLINE',
           timestamp: 12345
         },
@@ -271,7 +271,7 @@ describe('Social.FreedomNetwork', () => {
       };
       network.handleMessage(msg);
       expect(user.handleMessage).not.toHaveBeenCalled();
-      expect(network.getUser('im_still_not_here@mock.com')).toBeDefined();
+      expect(network.getUser('im_still_not_here')).toBeDefined();
       expect(console.warn).not.toHaveBeenCalled();
     });
 
@@ -311,12 +311,12 @@ describe('Social.FreedomNetwork', () => {
   });
 
   it('JSON.parse and stringify messages at the right layer', () => {
-    var user = network.getUser('mockuser@mock.com');
+    var user = network.getUser('mockuser');
     spyOn(user, 'handleMessage');
     var inMsg = {
       from: {
-        userId: 'mockuser@mock.com',
-        clientId: 'fakeclient@mock.com/foo',
+        userId: 'mockuser',
+        clientId: 'fakeclient',
         status: 'ONLINE',
         timestamp: 12345
       },

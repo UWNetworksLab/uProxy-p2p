@@ -32,9 +32,9 @@ describe('Firewall.SocialUserProfile', () => {
   ];
   
   var valueFailingUserProfiles = [
-    // Failed regex on a string field
+    // Failed for reserved word on a string field
     {
-      'userId' : 'alice',
+      'userId' : '__proto__',
       'timestamp' : 7
     },
     // Failed numerical value on a number field.
@@ -106,9 +106,9 @@ describe('Firewall.SocialClientState', () => {
   ];
   
   var valueFailingClientStates = [
-    // Failed regex on a string field
+    // Failed reserved word on a string field
     {
-      'userId' : 'alice',
+      'userId' : '__proto__',
       'clientId' : 'alice@gmail.com/Android-19078634adfkj',
       'status' : 'Happy',
       'timestamp' : 30,
@@ -193,10 +193,10 @@ describe('Firewall.SocialIncomingMessage', () => {
   ];
   
   var valueFailingIncomingMessages = [
-    // Failed regex on a string field
+    // Failed reserved word on a string field
     {
       'from' : {
-        'userId' : 'alice',
+        'userId' : '__proto__',
         'clientId' : 'alice@gmail.com/Android-19078634adfkj',
         'status' : 'Happy',
         'timestamp' : 30,

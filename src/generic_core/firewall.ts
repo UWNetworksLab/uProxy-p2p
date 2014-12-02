@@ -42,25 +42,9 @@ module Firewall {
 
   // Whether |s| is some sort of keyword in JS.  We also include the
   // properties of Object.
-  export function IsKeyword(s :string) : boolean {
+  export function IsReservedWord(s :string) : boolean {
     var keywords = [ "__proto__", "__noSuchMethod__", "__defineGetter__",
-                     "__defineSetter__", "__lookupGetter__", "__lookupSetter__",
-                     "constructor", "__count__", "__parent__",
-                     "abstract", "else", "instanceof", "super", 
-                     "boolean", "enum", "int", "switch", 
-                     "break", "export", "interface", "synchronized", 
-                     "byte", "extends", "let", "this", 
-                     "case", "false", "long", "throw", 
-                     "catch", "final", "native", "throws", 
-                     "char", "finally", "new", "transient", 
-                     "class", "float", "null", "true", 
-                     "const", "for", "package", "try", 
-                     "continue", "function", "private", "typeof", 
-                     "debugger", "goto", "protected", "var", 
-                     "default", "if", "public", "void", 
-                     "delete", "implements", "return", "volatile", 
-                     "do", "import", "short", "while", 
-                     "double", "in", "static", "with" ];
+                     "__defineSetter__", "__lookupGetter__", "__lookupSetter__"];
     for (var k in keywords) {
       if (s == keywords[k]) {
         return true;
@@ -74,51 +58,29 @@ module Firewall {
     return false;
   }
 
-  export function IsObjectMethod(s :string) : boolean {
-    // Returns whether 's' is a method on Object, which is just a little fishy.
+  export function IsPredefinedOnObject(s :string) : boolean {
+    // Returns whether 's' is predefined on Object, which is just a little fishy.
     var tester = {};
     return (typeof(tester[s]) != 'undefined');
   }
 
   export function IsUserId(s :string, response :ResponsePolicy) : boolean {
-    var USERID_PATTERN = new RegExp( '[a-z._0-9]+@[a-z.-_0-9]+', 'i');
-    if (USERID_PATTERN.test(s)) {
-      return true;
-    } else {
-      if (IsKeyword(s) || HasBadChars(s) || IsObjectMethod(s)) {
-        response.onValidationFailure(s, Severity.LikelyAttack);
-      } else {
-        response.onValidationFailure(s, Severity.MalformedInput);
-      }
+    if (IsReservedWord(s) || HasBadChars(s) || IsPredefinedOnObject(s)) {
+      response.onValidationFailure(s, Severity.LikelyAttack);
       return false;
-    }
+    } 
+    return true;
   }
 
   export function IsClientId(s :string, response :ResponsePolicy) : boolean {
-    // Split the string on the first /.  The left is a UserId, the
-    // right is to be matched against a regex.
-    if (s.split("/").length > 2) {
-      response.onValidationFailure(s, Severity.MalformedInput);
-      return false;
-    }
-    var id_left = s.split("/")[0];
-    var id_right = s.split("/")[1];
-    if (!IsUserId(id_left, response)) {
+    if (IsReservedWord(s) || HasBadChars(s) || IsPredefinedOnObject(s)) {
+      response.onValidationFailure(s, Severity.LikelyAttack);
       return false;
     } else {
-      var INSTANCEID_PATTERN = new RegExp( '[a-z_0-9]+', 'i');
-      if (INSTANCEID_PATTERN.test(id_right)) {
-        return true;
-      } else {
-        if (IsKeyword(s) || HasBadChars(s) || IsObjectMethod(s)) {
-          response.onValidationFailure(s, Severity.LikelyAttack);
-        } else {
-          response.onValidationFailure(s, Severity.MalformedInput);
-        }
-        return false;
-      }
+      return true;
     }
   }        
+
   var USER_PROFILE_SCHEMA = {
     'userId' : 'string',
     'timestamp' : 'number',
