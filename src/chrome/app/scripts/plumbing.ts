@@ -86,7 +86,7 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-freedom('scripts/freedom-module.json').then(function(interface:any) {
+freedom('scripts/freedom-module.json', {oauth: [Chrome_oauth]}).then(function(interface:any) {
   uProxyAppChannel = interface();
   var connector = new ChromeUIConnector();
   console.log('Starting uProxy app...');

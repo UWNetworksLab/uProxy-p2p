@@ -231,7 +231,7 @@ module.exports = (grunt) ->
         }, {
           expand: true, cwd: 'node_modules/freedom-social-xmpp', flatten: true
           src: [
-            'build/**'
+            'dist/**'
           ]
           dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
         }, {
@@ -331,7 +331,7 @@ module.exports = (grunt) ->
           src: ['websocket-server/**']
           dest: firefoxDevPath + 'data/lib'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
         }, {
