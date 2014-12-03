@@ -13,7 +13,7 @@ var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-var uProxyAppChannel; // = freedom;   Guaranteed to exist.
+var uProxyAppChannel;
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
