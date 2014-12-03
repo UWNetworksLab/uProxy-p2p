@@ -5,9 +5,9 @@
   "description": "__MSG_appDescription__",
   "minimum_chrome_version": "38",
   "icons": {
-    "16": "icons/uproxy-16.png",
-    "19": "icons/uproxy-19.png",
-    "128": "icons/uproxy-128.png"
+    "16": "icons/default-16.png",
+    "19": "icons/default-19.png",
+    "128": "icons/default-128.png"
   },
   "default_locale": "en",
   "background": {
@@ -28,11 +28,9 @@
     ]
   },
   "browser_action": {
-    "default_icon": {
-      "19": "icons/uproxy-19.png"
-    },
+    "default_icon": "icons/offline-19.png",
     "default_title": "__MSG_appName__",
-    "default_popup": "polymer/popup.html"
+    "default_popup": "install-incomplete.html"
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [

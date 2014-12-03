@@ -89,13 +89,11 @@ module UI {
     public localFingerprint :string = null;
 
     // Instance you are getting access from.
-    // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
     public instanceGettingAccessFrom = null;
 
     // The instances you are giving access to.
-    // Remote instances are added to this set if their access.isClient value
-    // is true.
+    // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
     // The network currently logged into (UI only supports 1 logged in network
@@ -103,6 +101,11 @@ module UI {
     public onlineNetwork :Network = null;
 
     public mode :Mode = Mode.GET;
+
+    private mapInstanceIdToUserName_ = {};
+
+    public gettingStatus :string = null;
+    public sharingStatus :string = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -174,6 +177,7 @@ module UI {
         if (data.instanceId === this.instanceGettingAccessFrom) {
           this.instanceGettingAccessFrom = null;
           this.stopGettingInUiAndConfig(data.error);
+          this.updateGettingStatusBar();
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
@@ -182,10 +186,13 @@ module UI {
 
       core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
           (instanceId :string) => {
+        // TODO (lucyhe): Update instancesGivingAccessTo before calling
+        // startGivingInUi so that isGiving() is updated as early as possible.
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
+        this.updateSharingStatusBar();
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -194,9 +201,47 @@ module UI {
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
+        this.updateSharingStatusBar();
       });
 
       console.log('Created the UserInterface');
+    }
+
+    public updateGettingStatusBar = () => {
+      // TODO: localize this.
+      if (this.instanceGettingAccessFrom) {
+        var userName =
+            this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
+        if (userName) {
+          this.gettingStatus = 'Getting access from ' + userName;
+        } else {
+          this.gettingStatus = null;
+          console.error('unable to find user name for instance ' +
+              this.instanceGettingAccessFrom);
+        }
+      } else {
+        this.gettingStatus = null;
+      }
+    }
+
+    public updateSharingStatusBar = () => {
+      // TODO: localize this - may require simpler formatting to work
+      // in all languages.
+      var instanceIds = Object.keys(this.instancesGivingAccessTo);
+      if (instanceIds.length === 0) {
+        this.sharingStatus = null;
+      } else if (instanceIds.length === 1) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]];
+      } else if (instanceIds.length === 2) {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            this.mapInstanceIdToUserName_[instanceIds[1]];
+      } else {
+        this.sharingStatus = 'Sharing access with ' +
+            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            (instanceIds.length - 1) + ' others';
+      }
     }
 
     public showNotification = (notificationText :string) => {
@@ -214,7 +259,13 @@ module UI {
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('sharing-19.png');
+      } else if (askUser) {
+        this.browserApi.setIcon('error-19.png');
+      } else {
+        this.browserApi.setIcon('default-19.png');
+      }
       this.browserApi.stopUsingProxy(askUser);
     }
 
@@ -222,7 +273,11 @@ module UI {
       * Sets extension icon to default and undoes proxy configuration.
       */
     public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
-      this.browserApi.setIcon('uproxy-19-c.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('sharing-getting-19.png');
+      } else {
+        this.browserApi.setIcon('getting-19.png');
+      }
       this.browserApi.startUsingProxy(endpoint);
     }
 
@@ -230,14 +285,26 @@ module UI {
       * Set extension icon to the 'giving' icon.
       */
     public startGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19-p.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('sharing-getting-19.png');
+      } else {
+        this.browserApi.setIcon('sharing-19.png');
+      }
     }
 
     /**
       * Set extension icon to the default icon.
       */
     public stopGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('getting-19.png');
+      } else {
+        this.browserApi.setIcon('default-19.png');
+      }
+    }
+
+    public setOfflineIcon = () => {
+      this.browserApi.setIcon('offline-19.png');
     }
 
     public isGettingAccess = () => {
@@ -263,6 +330,14 @@ module UI {
     private syncNetwork_ = (network :UI.NetworkMessage) => {
       console.log('uProxy.Update.NETWORK', network, model.networks);
       console.log(model);
+
+      // If you are now online (on a non-manual network), and were
+      // previously offline, show the default (logo) icon.
+      if (network.online && network.name != 'Manual'
+          && this.onlineNetwork == null) {
+        this.browserApi.setIcon('default-19.png');
+      }
+
       var existingNetwork = this.getNetwork(network.name);
       if (existingNetwork) {
         existingNetwork.online = network.online;
@@ -285,10 +360,10 @@ module UI {
           roster: {}
         });
       }
-  
+
       // Figure out which network we are signed into (currently user can only
-      // be signed into 1 network at a time in the UI, not counting manual). 
-      this.onlineNetwork = null;     
+      // be signed into 1 network at a time in the UI, not counting manual).
+      this.onlineNetwork = null;
       for (var i = 0; i < model.networks.length; ++i) {
         if (model.networks[i].online && model.networks[i].name != 'Manual') {
           this.onlineNetwork = model.networks[i];
@@ -343,6 +418,10 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
+      for (var i = 0; i < user.instances.length; ++i) {
+        var instanceId = user.instances[i].instanceId;
+        this.mapInstanceIdToUserName_[instanceId] = user.name;
+      }
 
       var newCategory = user.getCategory();
       this.categorizeUser_(user, oldCategory, newCategory);

@@ -23,6 +23,9 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
+  var giveIcon :string = 'sharing-19.png';
+  var getIcon :string = 'getting-19.png';
+  var defaultIcon :string = 'default-19.png';
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -38,6 +41,9 @@ describe('UI.UserInterface', () => {
     mockBrowserApi = jasmine.createSpyObj('browserApi',
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
+    ui['mapInstanceIdToUserName_'] = {
+      'testInstanceId': 'Alice'
+    };
     model.networks = [];
   });
 
@@ -89,8 +95,8 @@ describe('UI.UserInterface', () => {
       clientInstance.consent.localRequestsAccessFromRemote = true;
       clientInstance.consent.remoteGrantsAccessToLocal = true;
       var serverInstance :UI.Instance = {
-        instanceId: 'instance1',
-        description: 'description1',
+        instanceId: 'instance2',
+        description: 'description2',
         consent: new Consent.State(),
         access: {asClient: false, asProxy: false},
         isOnline: true,
@@ -112,10 +118,15 @@ describe('UI.UserInterface', () => {
       ui.syncUser(payload);
       var user :UI.User = model.networks[0].roster['testUserId'];
       expect(user).toBeDefined();
+      expect(ui['mapInstanceIdToUserName_']['instance1']).toEqual('Alice');
+      expect(ui['mapInstanceIdToUserName_']['instance2']).toEqual('Alice');
     });
   }); // syncUser
 
   describe('Update giving and getting state in UI', () => {
+
+    // TODO (lucyhe): Add tests for users who are giving and getting
+    // simultaneously.
 
     it('isGivingAccess updates when you start and stop giving', () => {
       expect(ui.isGivingAccess()).toEqual(false);
@@ -129,7 +140,7 @@ describe('UI.UserInterface', () => {
 
     it('isGettingAccess updates when you start and stop getting', () => {
       // Note that setting and clearing instanceGettingAccessFrom is done in
-      // polymer/instance.ts.
+      // ui.ts.
       expect(ui.isGettingAccess()).toEqual(false);
       ui.instanceGettingAccessFrom = 'testGiverId';
       expect(ui.isGettingAccess()).toEqual(true);
@@ -141,7 +152,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
     });
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +
@@ -149,7 +160,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
@@ -159,7 +170,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .not.toHaveBeenCalledWith('uproxy-19.png');
+          .not.toHaveBeenCalledWith(defaultIcon);
     });
 
     it('Extension icon changes if you stop giving to all getters',
@@ -167,7 +178,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-p.png');
+          .toHaveBeenCalledWith(giveIcon);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
@@ -179,7 +190,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19.png');
+          .toHaveBeenCalledWith(defaultIcon);
     });
 
     it('Extension icon changes when you start getting access', () => {
@@ -190,18 +201,39 @@ describe('UI.UserInterface', () => {
       // getting access.
       ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-c.png');
+          .toHaveBeenCalledWith(getIcon);
     });
 
     it('Extension icon changes when you stop getting access', () => {
       ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
       ui.instanceGettingAccessFrom = 'testGiverId';
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19-c.png');
+          .toHaveBeenCalledWith(getIcon);
       updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
           .call(ui, {instanceId: 'testGiverId', error: false});
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith('uproxy-19.png');
+          .toHaveBeenCalledWith(defaultIcon);
+    });
+
+    it('Sharing status updates when you start and stop sharing', () => {
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testInstanceId');
+      expect(ui.sharingStatus).toEqual('Sharing access with Alice');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testInstanceId');
+      expect(ui.sharingStatus).toEqual(null);
+    });
+
+    it('Getting status updates when you start and stop getting', () => {
+      // Note that setting and clearing instanceGettingAccessFrom is done in
+      // polymer/instance.ts.
+      expect(ui.gettingStatus).toEqual(null);
+      ui.instanceGettingAccessFrom = 'testInstanceId';
+      ui.updateGettingStatusBar();
+      expect(ui.gettingStatus).toEqual('Getting access from Alice');
+      ui.instanceGettingAccessFrom = null;
+      ui.updateGettingStatusBar();
+      expect(ui.gettingStatus).toEqual(null);
     });
   });  // Update giving and/or getting state in UI
 
