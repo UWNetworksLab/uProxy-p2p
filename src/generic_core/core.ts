@@ -80,15 +80,15 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-  private defaultStunServers_ = [{url: 'stun:stun.l.google.com:19302'},
+  private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
                                 {url: 'stun:stun1.l.google.com:19302'},
                                 {url: 'stun:stun2.l.google.com:19302'},
                                 {url: 'stun:stun3.l.google.com:19302'},
                                 {url: 'stun:stun4.l.google.com:19302'}];
   // String constant passed to setStunServer that indicates that STUN servers
   // should be reset to default values.
-  private _RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
-  public stunServers = this.defaultStunServers_;
+  private RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
+  public stunServers = this.DEFAULT_STUN_SERVERS_;
   constructor() {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
@@ -345,8 +345,8 @@ class uProxyCore implements uProxy.CoreAPI {
    * Set customized STUN servers.
    */
   public setStunServer = (customStunServer :string) : void => {
-    if (customStunServer === this._RESET_STUN_SERVERS_) {
-      this.stunServers = this.defaultStunServers_;
+    if (customStunServer === this.RESET_STUN_SERVERS_) {
+      this.stunServers = this.DEFAULT_STUN_SERVERS_;
     } else {
       this.stunServers = [{url:customStunServer}];
     }
