@@ -36,12 +36,31 @@ module UI {
   }
 
   export interface Contacts {
-    onlineTrustedUproxy :UI.User[];
-    offlineTrustedUproxy :UI.User[];
-    onlineUntrustedUproxy :UI.User[];
-    offlineUntrustedUproxy :UI.User[];
-    onlineNonUproxy :UI.User[];
-    offlineNonUproxy :UI.User[];
+    getAccessContacts : {
+      onlineOfferingYouAccess :UI.User[];
+      offlineOfferingYouAccess :UI.User[];
+      onlineTrustedUproxy :UI.User[];
+      offlineTrustedUproxy :UI.User[];
+      onlineUntrustedUproxy :UI.User[];
+      offlineUntrustedUproxy :UI.User[];
+      onlineNonUproxy :UI.User[];
+      offlineNonUproxy :UI.User[];
+    };
+    shareAccessContacts : {
+      onlineRequestingAccessFromYou :UI.User[];
+      offlineRequestingAccessFromYou :UI.User[];
+      onlineTrustedUproxy :UI.User[];
+      offlineTrustedUproxy :UI.User[];
+      onlineUntrustedUproxy :UI.User[];
+      offlineUntrustedUproxy :UI.User[];
+      onlineNonUproxy :UI.User[];
+      offlineNonUproxy :UI.User[];
+    }
+  }
+
+  export interface UserCategories {
+    getTab :string;
+    shareTab :string;
   }
 
   /**
@@ -346,7 +365,11 @@ module UI {
           // Clear roster and option user info from offline network.
           for (var userId in existingNetwork.roster) {
             var user = existingNetwork.roster[userId];
-            this.categorizeUser_(user, user.getCategory(), null);
+            var userCategories = user.getCategory();
+            this.categorizeUser_(user, model.contacts.getAccessContacts,
+                userCategories.getTab, null);
+            this.categorizeUser_(user, model.contacts.shareAccessContacts,
+                userCategories.shareTab, null);
           }
           existingNetwork.roster = {};
           existingNetwork.userName = null;
@@ -401,7 +424,7 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = network.roster[profile.userId];
-      var oldCategory = null;
+      var oldUserCategories = {getTab: null, shareTab: null};
 
       // CONSIDER: we might want to check if this user has been our proxy
       // server and if so stop the proxying if they are no longer proxying
@@ -413,7 +436,7 @@ module UI {
         network.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.
-        oldCategory = user.getCategory();
+        oldUserCategories = user.getCategory();
       }
 
       user.update(profile);
@@ -423,19 +446,23 @@ module UI {
         this.mapInstanceIdToUserName_[instanceId] = user.name;
       }
 
-      var newCategory = user.getCategory();
-      this.categorizeUser_(user, oldCategory, newCategory);
+      var newUserCategories = user.getCategory();
+      // Update the user's category in both get and share tabs.
+      this.categorizeUser_(user, model.contacts.getAccessContacts,
+          oldUserCategories.getTab, newUserCategories.getTab);
+      this.categorizeUser_(user, model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
 
       console.log('Synchronized user.', user);
     };
 
-    private categorizeUser_ = (user, oldCategory, newCategory) => {
+    private categorizeUser_ = (user, contacts, oldCategory, newCategory) => {
       if (oldCategory == null) {
         // User hasn't yet been categorized.
-        model.contacts[newCategory].push(user);
+        contacts[newCategory].push(user);
       } else if (oldCategory != newCategory) {
         // Remove user from old category.
-        var oldCategoryArray = model.contacts[oldCategory];
+        var oldCategoryArray = contacts[oldCategory];
         for (var i = 0; i < oldCategoryArray.length; ++i) {
           if (oldCategoryArray[i] == user) {
             oldCategoryArray.splice(i, 1);
@@ -444,7 +471,7 @@ module UI {
         }
         // Add users to new category.
         if (newCategory) {
-          model.contacts[newCategory].push(user);
+          contacts[newCategory].push(user);
         }
       }
     }

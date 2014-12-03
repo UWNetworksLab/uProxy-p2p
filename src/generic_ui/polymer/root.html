@@ -65,11 +65,11 @@
         position: absolute;
         z-index: 1001;
       }
-      #roster-panel {
+      .roster-panel {
         display: table-row;
         height: 100%;
       }
-      #roster {
+      .roster {
         position: relative;
         background-color: white;
         height: 100%;
@@ -136,8 +136,19 @@
         </div>
       </div>
 
-      <div id='roster-panel'>
-        <uproxy-roster id='roster'>
+      <div class='{{ui.mode==UI.Mode.GET ? "roster-panel" : ""}}'>
+        <uproxy-roster id='get-roster'
+            class='{{ui.mode==UI.Mode.GET ? "roster" : ""}}'
+            contacts='{{model.contacts.getAccessContacts}}'
+            hidden?='{{ui.mode!=UI.Mode.GET}}'>
+        </uproxy-roster>
+      </div>
+
+      <div class='{{ui.mode==UI.Mode.SHARE ? "roster-panel" : ""}}'>
+        <uproxy-roster id='share-roster'
+            class='{{ui.mode==UI.Mode.SHARE ? "roster" : ""}}'
+            contacts='{{model.contacts.shareAccessContacts}}'
+            hidden?='{{ui.mode!=UI.Mode.SHARE}}'>
         </uproxy-roster>
       </div>
 

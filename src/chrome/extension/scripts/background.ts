@@ -31,12 +31,26 @@ var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var model :UI.Model = {
   networks: [],
   contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
+    'getAccessContacts' : {
+      'onlineOfferingYouAccess': [],
+      'offlineOfferingYouAccess': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlineRequestingAccessFromYou': [],
+      'offlineRequestingAccessFromYou': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
   },
   description: ''
 };
