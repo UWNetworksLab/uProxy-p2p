@@ -23,7 +23,7 @@
     }
     #frame {
       box-sizing: border-box;
-      padding: 0;
+      padding-left: 1em;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
@@ -43,18 +43,21 @@
     }
     #words {
       display: inline-block;
-      width: 298px;
+      width: 290px;
+      padding-left: 8px;
     }
     h1 {
       display: block;
-      font-size: 16px; font-weight: 100;
-      margin: 0; padding: 16px 8px 0;
+      font-size: 16px;
+      font-weight: 100;
+      margin: 0;
+      padding-top: 16px;
     }
     .hasInstances #words:hover h1 {
       color: #aaa;
     }
     #instances {
-      padding: 8px;
+      padding-top: 8px;
     }
     #actions {
       padding: 8px;
@@ -64,7 +67,7 @@
     }
     </style>
 
-    <div tabindex='-1'  id='frame'
+    <div tabindex='-1' id='frame'
         class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
      <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
