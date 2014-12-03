@@ -133,6 +133,9 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.removeListener(ackResponse);
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
+        // Once connected, the extension popup should show it's start page.
+        ui.view = UI.View.SPLASH;
+        chrome.browserAction.setPopup({popup: "polymer/popup.html"});
         F(this.appPort_);
       };
       this.appPort_.onMessage.addListener(ackResponse);
@@ -153,6 +156,9 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     // be establish (i.e. this.appPort_.postMessage in connect_ failed).
     console.log('Disconnected from app, previous status was ' +
                 this.status.connected);
+    // When disconnected from the app, the extension should launch
+    // an instruction to install the app.
+    chrome.browserAction.setPopup({popup: "install-incomplete.html"});
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.

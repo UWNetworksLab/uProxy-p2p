@@ -89,13 +89,11 @@ module UI {
     public localFingerprint :string = null;
 
     // Instance you are getting access from.
-    // Set to the remote instance for which access.isProxy = true.
     // Null if you are not getting access.
     public instanceGettingAccessFrom = null;
 
     // The instances you are giving access to.
-    // Remote instances are added to this set if their access.isClient value
-    // is true.
+    // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
     // The network currently logged into (UI only supports 1 logged in network
@@ -188,6 +186,8 @@ module UI {
 
       core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
           (instanceId :string) => {
+        // TODO (lucyhe): Update instancesGivingAccessTo before calling
+        // startGivingInUi so that isGiving() is updated as early as possible.
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
@@ -259,7 +259,13 @@ module UI {
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('sharing-19.png');
+      } else if (askUser) {
+        this.browserApi.setIcon('error-19.png');
+      } else {
+        this.browserApi.setIcon('default-19.png');
+      }
       this.browserApi.stopUsingProxy(askUser);
     }
 
@@ -267,7 +273,11 @@ module UI {
       * Sets extension icon to default and undoes proxy configuration.
       */
     public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
-      this.browserApi.setIcon('uproxy-19-c.png');
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon('sharing-getting-19.png');
+      } else {
+        this.browserApi.setIcon('getting-19.png');
+      }
       this.browserApi.startUsingProxy(endpoint);
     }
 
@@ -275,14 +285,26 @@ module UI {
       * Set extension icon to the 'giving' icon.
       */
     public startGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19-p.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('sharing-getting-19.png');
+      } else {
+        this.browserApi.setIcon('sharing-19.png');
+      }
     }
 
     /**
       * Set extension icon to the default icon.
       */
     public stopGivingInUi = () => {
-      this.browserApi.setIcon('uproxy-19.png');
+      if (this.isGettingAccess()) {
+        this.browserApi.setIcon('getting-19.png');
+      } else {
+        this.browserApi.setIcon('default-19.png');
+      }
+    }
+
+    public setOfflineIcon = () => {
+      this.browserApi.setIcon('offline-19.png');
     }
 
     public isGettingAccess = () => {
@@ -308,6 +330,14 @@ module UI {
     private syncNetwork_ = (network :UI.NetworkMessage) => {
       console.log('uProxy.Update.NETWORK', network, model.networks);
       console.log(model);
+
+      // If you are now online (on a non-manual network), and were
+      // previously offline, show the default (logo) icon.
+      if (network.online && network.name != 'Manual'
+          && this.onlineNetwork == null) {
+        this.browserApi.setIcon('default-19.png');
+      }
+
       var existingNetwork = this.getNetwork(network.name);
       if (existingNetwork) {
         existingNetwork.online = network.online;

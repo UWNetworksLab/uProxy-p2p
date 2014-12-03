@@ -15,3 +15,10 @@ module chrome.runtime {
     console.log('Mock chrome.runtime.connect.');
   }
 }
+
+module chrome.browserAction {
+
+  export function setPopup(url) {
+    console.log('Mock chrome.browserAction.setPopup.');
+  }
+}
