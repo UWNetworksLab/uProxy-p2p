@@ -85,10 +85,10 @@ FILES =
   ]
   thirdPartyUi: [
     'core-*/**',
-    'lodash/**',
     'platform/**',
     'polymer/**',
-    'paper-*/*.css'
+    'paper-*/*.css',
+    'webcomponentsjs/**'
   ]
 
 
@@ -156,9 +156,9 @@ module.exports = (grunt) ->
           src: [
             'third_party/freedom-ts-hacks/*.js',
             'third_party/lib/core-component-page/**/*.js',
-            'third_party/lib/lodash/**/*.js',
             'third_party/lib/platform/**/*.js',
-            'third_party/lib/polymer/**/*.js'
+            'third_party/lib/polymer/**/*.js',
+            'third_party/lib/webcomponentsjs/**/*.js'
             ]
           dest: 'build/'
           onlyIf: 'modified'
