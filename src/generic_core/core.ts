@@ -349,11 +349,13 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public setStunServer = (customStunServer :string) : void => {
     if (customStunServer === this.RESET_STUN_SERVERS_) {
+      // Clear the existing servers and add in each default server.
       this.stunServers.splice(0, this.stunServers.length);
       for (var i = 0; i < this.DEFAULT_STUN_SERVERS_.length; ++i) {
         this.stunServers.push(this.DEFAULT_STUN_SERVERS_[i]);
       }
     } else {
+      // Clear the existing servers and push the new server.
       this.stunServers.splice(0, this.stunServers.length);
       this.stunServers.push({url:customStunServer});
     }
