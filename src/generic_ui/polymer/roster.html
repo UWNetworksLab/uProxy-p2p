@@ -34,6 +34,7 @@
 
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
+
     <div id="sharingStatusBox">
       <div id="sharingStatus">
         Available for sharing.<br>
@@ -45,6 +46,19 @@
       </div>
     </div>
 
+    <!-- uProxy contacts offering access to or requesting access from user -->
+    <uproxy-roster-group
+        groupTitle='{{ui.mode==UI.Mode.GET ? "Users offering you access" : "Users requesting access from you"}}'
+        onlineContacts='{{ onlinePending }}'
+        offlineContacts='{{ offlinePending }}'
+        searchQuery='{{ searchQuery }}'
+        pending="{{ true }}"></uproxy-roster-group>
+
+    <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
+    <hr color="#eee"
+        hidden?='{{ ((onlinePending.length == 0 && offlinePending.length == 0)) || (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) }}'></hr>
+
+
     <!-- trusted uProxy contacts -->
     <uproxy-roster-group
         groupTitle='Trusted uProxy Friends'
@@ -52,9 +66,9 @@
         offlineContacts='{{ offlineTrustedUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
-    <!-- Hide HR between Trusted and Untrusted if either group is completely empty -->
+    <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
     <hr color="#eee"
-        hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || (onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) }}'></hr>
+        hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlinePending.length == 0 && offlinePending.length == 0)) }}'></hr>
 
     <!-- untrusted uProxy contacts -->
     <uproxy-roster-group
@@ -63,9 +77,9 @@
         offlineContacts='{{ offlineUntrustedUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
-    <!-- hide hr if there are no non-uproxy contacts, or if there are only non-uProxy contacts -->
+    <!-- Hide HR if there are no Non-uProxy contacts, or if there are only Non-uProxy contacts -->
     <hr color="#eee"
-        hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0)) }}'></hr>
+        hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) && (onlinePending.length == 0 && offlinePending.length == 0)) }}'></hr>
 
     <!-- non uProxy contacts -->
     <uproxy-roster-group

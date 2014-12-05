@@ -69,7 +69,7 @@
         display: table-row;
         height: 100%;
       }
-      #roster {
+      .roster {
         position: relative;
         background-color: white;
         height: 100%;
@@ -143,7 +143,13 @@
       </div>
 
       <div id='roster-panel'>
-        <uproxy-roster id='roster'>
+        <uproxy-roster id='get-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.GET}}'
+            contacts='{{model.contacts.getAccessContacts}}'>
+        </uproxy-roster>
+        <uproxy-roster id='share-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.SHARE}}'
+            contacts='{{model.contacts.shareAccessContacts}}'>
         </uproxy-roster>
       </div>
 

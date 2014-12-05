@@ -10,12 +10,26 @@ console.log('This is not a real uProxy frontend.');
 var model :UI.Model = {
   networks: [],
   contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
+    'getAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
   },
   globalSettings: {}
 };
