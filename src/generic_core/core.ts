@@ -88,7 +88,10 @@ class uProxyCore implements uProxy.CoreAPI {
   // String constant passed to setStunServer that indicates that STUN servers
   // should be reset to default values.
   private RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
-  public stunServers = this.DEFAULT_STUN_SERVERS_;
+  // Initially, the STUN servers are a copy of the default.
+  // We need to use slice to copy the values, otherwise modifying this
+  // variable can modify DEFAULT_STUN_SERVERS_ as well.
+  public stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
   constructor() {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
@@ -346,9 +349,13 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public setStunServer = (customStunServer :string) : void => {
     if (customStunServer === this.RESET_STUN_SERVERS_) {
-      this.stunServers = this.DEFAULT_STUN_SERVERS_;
+      this.stunServers.splice(0, this.stunServers.length);
+      for (var i = 0; i < this.DEFAULT_STUN_SERVERS_.length; ++i) {
+        this.stunServers.push(this.DEFAULT_STUN_SERVERS_[i]);
+      }
     } else {
-      this.stunServers = [{url:customStunServer}];
+      this.stunServers.splice(0, this.stunServers.length);
+      this.stunServers.push({url:customStunServer});
     }
   }
 }  // class uProxyCore

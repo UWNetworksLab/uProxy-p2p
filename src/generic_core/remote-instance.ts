@@ -55,6 +55,26 @@ module Core {
     // received are only forwarded to the UI once every second.
     private isUIUpdatePending = false;
 
+    // The configuration used to setup peer-connections. This should be
+    // available under advanced options.
+    public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
+      webrtcPcConfig: {
+         iceServers: core.stunServers
+        },
+        webrtcMediaConstraints: {
+          optional: [{DtlsSrtpKeyAgreement: true}]
+        },
+        peerName: 'socksRtc'
+      };
+    public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
+      webrtcPcConfig: {
+         iceServers: core.stunServers
+        },
+        webrtcMediaConstraints: {
+          optional: [{DtlsSrtpKeyAgreement: true}]
+        },
+        peerName: 'rtcNet'
+      };
     public rtcNetProxyConfig :RtcToNet.ProxyConfig = {
       allowNonUnicast: false
     };
@@ -142,17 +162,7 @@ module Core {
           if(!this.rtcToNet_) {
             // TODO: make this into a separate function
             this.rtcToNet_ = new RtcToNet.RtcToNet(
-                /* The WebRtc.PeerConnectionConfig used to set up the peer
-                connection. */
-                {
-                  webrtcPcConfig: {
-                    iceServers: core.stunServers
-                  },
-                  webrtcMediaConstraints: {
-                    optional: [{DtlsSrtpKeyAgreement: true}]
-                  },
-                  peerName: 'rtcNet'
-                }, this.rtcNetProxyConfig);
+                this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
               console.log('rtcToNet_.onceClosed called');
               this.access.asClient = false;
@@ -246,17 +256,7 @@ module Core {
       }
       this.socksToRtc_ = new SocksToRtc.SocksToRtc(
           endpoint,
-          /* The WebRtc.PeerConnectionConfig used to set up the peer
-          connection. */
-          {
-            webrtcPcConfig: {
-              iceServers: core.stunServers
-            },
-            webrtcMediaConstraints: {
-              optional: [{DtlsSrtpKeyAgreement: true}]
-            },
-            peerName: 'socksRtc'
-          });
+          this.socksRtcPcConfig);
       this.socksToRtc_.signalsForPeer.setSyncHandler((signal) => {
         this.send({
           type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
