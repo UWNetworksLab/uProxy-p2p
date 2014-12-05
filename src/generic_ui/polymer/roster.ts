@@ -9,7 +9,6 @@ Polymer({
   onlineNonUproxyContacts: model.contacts.onlineNonUproxy,
   offlineNonUproxyContacts: model.contacts.offlineNonUproxy,
   toggleSharing: function() {
-    model.globalSettings.sharing = !this.model.globalSettings.sharing;
     core.updateGlobalSettings({newSettings:model.globalSettings,
                                path:this.path});
   },
