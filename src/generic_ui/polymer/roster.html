@@ -5,25 +5,6 @@
 
   <template>
     <style>
-    :host {
-      position: absolute;
-      display: inline-block;
-      box-sizing: border-box;
-      height: 550px;
-      width: 100%;
-      background-color: white;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-      top: 50px;
-      overflow-y: hidden;
-      overflow-y: scroll;
-      right: 0px;
-      z-index: 100;
-    }
-    :host(.hidden) {
-      right: -100%;
-    }
     #search {
       display: block;
       box-sizing: border-box;
@@ -34,7 +15,7 @@
       color: #888;
       outline: none;
       border: none;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid rgb(221, 221, 221);
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
@@ -66,7 +47,7 @@
 
     <!-- trusted uProxy contacts -->
     <uproxy-roster-group
-        title='Trusted uProxy Friends'
+        groupTitle='Trusted uProxy Friends'
         onlineContacts='{{ onlineTrustedUproxyContacts }}'
         offlineContacts='{{ offlineTrustedUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>
@@ -77,7 +58,7 @@
 
     <!-- untrusted uProxy contacts -->
     <uproxy-roster-group
-        title='All uProxy Contacts'
+        groupTitle='All uProxy Contacts'
         onlineContacts='{{ onlineUntrustedUproxyContacts }}'
         offlineContacts='{{ offlineUntrustedUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>
@@ -88,7 +69,7 @@
 
     <!-- non uProxy contacts -->
     <uproxy-roster-group
-        title='Non uProxy Contacts'
+        groupTitle='Non uProxy Contacts'
         onlineContacts='{{ onlineNonUproxyContacts }}'
         offlineContacts='{{ offlineNonUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>

@@ -40,7 +40,11 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
+<<<<<<< HEAD
     UPDATE_GLOBAL_SETTINGS
+=======
+    SET_STUN_SERVER
+>>>>>>> origin/dev
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -152,6 +156,8 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
+
+    setStunServer(customStunServer :string) : void;
   }
 
   /**

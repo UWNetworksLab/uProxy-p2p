@@ -1,4 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../lib/core-icons/core-icons.html'>
 <link rel="import" href='description.html'>
 <link rel="import" href='faq-link.html'>
 
@@ -28,7 +31,7 @@
       overflow: hidden;
     }
     .userInfo {
-      background-color: #009688;
+      background-color: #009688;  /* dark green */
       width: 100%;
       color: white;
       margin-bottom: 32px;
@@ -41,12 +44,15 @@
       line-height: 32px;
       color: rgb(112, 112, 112);
     }
-    .userNameOrId {
+    .userInfoName, .userInfoIDWithoutName {
       font-size: 16px;
+    }
+    .userInfoID {
+      font-size: 14px;
+      opacity: 0.54;
     }
     .networkName {
       padding-top: 0.5em;
-      padding-bottom: 0.5em;
       opacity: 0.54;
     }
     .userImage {
@@ -54,6 +60,30 @@
       height: 54px;
       border-radius: 50%;
       margin-left: -6px;
+    }
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      width: 70px;
+    }
+    paper-input-decorator {
+      max-width: 60%;
+    }
+    paper-input-decorator /deep/ .unfocused-underline,
+    paper-input-decorator /deep/ .focused-underline,
+    paper-input-decorator /deep/ .cursor {
+        background-color: #009688;
+    }
+    core-icon {
+      height: 12px;
+    }
+    #advancedSettings {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      color: rgb(112, 112, 112);
     }
 
     </style>
@@ -63,9 +93,28 @@
         <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
             src='{{ui.onlineNetwork.imageData}}'>
         <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
-        <div class='userNameOrId'>
-          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+        <!-- show userName and userId if both are available -->
+        <div hidden?='{{!ui.onlineNetwork.userName}}'>
+          <div class='userInfoName'>{{ui.onlineNetwork.userName}}</div>
+          <div class='userInfoID'>{{ui.onlineNetwork.userId}}</div>
         </div>
+        <!-- otherwise show only userId -->
+        <div hidden?='{{ui.onlineNetwork.userName}}'>
+          <div class='userInfoIDWithoutName'>{{ui.onlineNetwork.userId}}</div>
+        </div>
+      </div>
+      <div class='actionLink' on-tap='{{toggleAdvancedSettings}}'>
+        Advanced Settings
+        <core-icon icon="expand-more" hidden?='{{displayAdvancedSettings}}'></core-icon>
+        <core-icon icon="expand-less" hidden?='{{!displayAdvancedSettings}}'></core-icon>
+      </div>
+      <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
+        <paper-input-decorator label="Custom STUN server">
+          <input is="core-input" value='{{stunServer}}'>
+        </paper-input-decorator>
+         <paper-button on-tap="{{setStunServer}}">Update</paper-button> <paper-button on-tap="{{resetStunServers}}">Reset</paper-button><br><br>
+        <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
+        <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
       <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
