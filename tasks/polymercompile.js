@@ -5,34 +5,68 @@ module.exports = function (grunt) {
   var pkg = require('../package.json');
 
   grunt.registerMultiTask('polymerPaperCompile', pkg.description, function() {
-    // Get src files.
-    var srcFiles = this.files[0].src;
+    for (var i = 0; i < this.files.length; i++) {
+      // Get src files.
+      var srcFiles = this.files[i].src;
 
-    // Add trailing / to destDir if needed
-    var destDir = this.files[0].dest;
-    if (destDir.charAt(destDir.length - 1) != '/') {
-      destDir += '/';
+      // Add trailing / to destDir if needed
+      var destDir = this.files[i].dest;
+      if (destDir.charAt(destDir.length - 1) != '/') {
+        destDir += '/';
+      }
+
+      for (var j = 0; j < srcFiles.length; j++) {
+        var inputHtmlFilename = srcFiles[j];
+        processFile(inputHtmlFilename, destDir);
+      }
+
+      grunt.log.writeln(
+          'polymerPaperCompile: processed ' + srcFiles.length + ' files');
     }
-
-    for (var i = 0; i < srcFiles.length; i++) {
-      var inputHtmlFilename = srcFiles[i];
-      processFile(inputHtmlFilename, destDir);
-    }
-
-    grunt.log.writeln(
-        'polymerPaperCompile: processed ' + srcFiles.length + ' files');
   });
 
+  function removeComments(originalHtml) {
+    var startIndex = originalHtml.indexOf('<!--');
+    if (startIndex < 0) {
+      return originalHtml;
+    }
+    var endIndex = originalHtml.indexOf('-->');
+    if (endIndex < 0) {
+      grunt.log.error('File has invalid comment.');
+    }
+    endIndex += '-->'.length;
+    return removeComments(originalHtml.substr(0, startIndex) +
+        originalHtml.substr(endIndex, originalHtml.length-endIndex));
+  }
+
+  /**
+    * Takes an HTML page and returns it as an array of objects, each with
+    * the contents of a <script> tag and the HTML preceding that tag.
+    *
+    * e.g. parseHtml('abc<script>123</script>def<script>456</script>ghi')
+    * returns
+    * [{scriptContents: '123', precedingHtml: 'abc'},
+    *  {scriptContents: '456', precedingHtml: 'def'},
+    *  {scriptContents: '', precedingHtml: 'ghi'}]
+    */
   function parseHtml(originalHtml) {
-    // This assumes only 1 <script> tag per html file, and also
-    // no comments including </script>
-    var startIndex = originalHtml.indexOf('<script>') + '<script>'.length;
+    var startIndex = originalHtml.indexOf('<script>');
+    if (startIndex < 0) {
+      return [{scriptContents: '',
+              precedingHtml: originalHtml}];
+    }
+    startIndex += '<script>'.length;
     var endIndex = originalHtml.indexOf('</script>');
-    return {
+    if (endIndex < 0) {
+      grunt.log.error('File has invalid script.');
+    }
+    var nextScript = {
       scriptContents: originalHtml.substr(startIndex, endIndex - startIndex),
-      startIndex: startIndex,
-      endIndex: endIndex
+      precedingHtml: originalHtml.substr(0, startIndex - '<script>'.length)
     };
+
+    var moreScripts = parseHtml(originalHtml.substr(endIndex + '</script>'.length));
+    return [nextScript].concat(moreScripts);
   }
 
   function getDestDir(inputHtmlFilename, destParentDir) {
@@ -52,10 +86,6 @@ module.exports = function (grunt) {
   }
 
   function processFile(inputHtmlFilename, destParentDir) {
-    // Read original file and get script contents
-    var originalHtml = fs.readFileSync(inputHtmlFilename).toString();
-    var htmlData = parseHtml(originalHtml);
-
     // Create destination dir, e.g.
     // build/dev/chrome/extension/lib/paper-tabs
     var destDir = getDestDir(inputHtmlFilename, destParentDir);
@@ -66,21 +96,37 @@ module.exports = function (grunt) {
     var outputHtmlFilename = destDir + '/' + filenamePrefix + '.html';
     var outputJsFilename = destDir + '/' + filenamePrefix + '.js';
 
-    if (!htmlData.scriptContents) {
+    // Read original file and get script contents.
+    var originalHtml = fs.readFileSync(inputHtmlFilename).toString();
+
+    var htmlWithoutComments = removeComments(originalHtml);
+    var htmlData = parseHtml(htmlWithoutComments);
+
+    if (!htmlData || htmlData[0].scriptContents === '') {
       // HTML files with no inline scripts should be copied to destDir.
       fs.copySync(inputHtmlFilename, outputHtmlFilename);
       return;
     }
 
-    // Create new html
-    var newHtml = originalHtml.substr(0, htmlData.startIndex - 1) + ' src="' +
-        filenamePrefix + '.js">' + originalHtml.substr(htmlData.endIndex);
+    // Create new JavaScript and HTML files.
+
+    // Insert the new script's source tag where the first <script>
+    // tag was found, i.e. right after htmlData[0].precedingHtml
+    var newHtml = htmlData[0].precedingHtml +
+        '<script src="' + filenamePrefix + '.js"></script>';
+    var newJs = htmlData[0].scriptContents;
+
+    for (var i = 1; i < htmlData.length; ++i){
+      newHtml += htmlData[i].precedingHtml;
+      newJs += htmlData[i].scriptContents;
+    }
+
     var buffer = new Buffer(newHtml);
     var fd = fs.openSync(outputHtmlFilename, 'w');
     fs.writeSync(fd, buffer, 0, buffer.length, null);
 
     // Create new JS file
-    buffer = new Buffer(htmlData.scriptContents);
+    buffer = new Buffer(newJs);
     var fd = fs.openSync(outputJsFilename, 'w');
     fs.writeSync(fd, buffer, 0, buffer.length, null);
   }
