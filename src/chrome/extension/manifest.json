@@ -1,8 +1,8 @@
 {
-  "name": "uProxy, part 1 of 2",
+  "name": "__MSG_extName__",
   "version": "0.4.0",
   "manifest_version": 2,
-  "description": "(Alpha version) uProxy, part 1 of 2.  You will also need part 2 of 2 to use uProxy.",
+  "description": "__MSG_extDescription__",
   "minimum_chrome_version": "38",
   "icons": {
     "16": "icons/default-16.png",
@@ -29,7 +29,7 @@
   },
   "browser_action": {
     "default_icon": "icons/offline-19.png",
-    "default_title": "uProxy",
+    "default_title": "__MSG_extTitle__",
     "default_popup": "install-incomplete.html"
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
