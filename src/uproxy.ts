@@ -142,10 +142,10 @@ module uProxy {
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
+    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
-    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
 
     login(network :string) : Promise<void>;
     logout(networkInfo :NetworkInfo) : Promise<void>;

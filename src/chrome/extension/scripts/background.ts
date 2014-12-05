@@ -53,7 +53,8 @@ var model :UI.Model = {
     }
   },
   globalSettings : {
-    'description' : ''
+    'description' : '',
+    'stunServers' : []
   }
 };
 

@@ -78,10 +78,6 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  public globalSettings :Core.GlobalSettings
-      = {'description': 'My Computer'};
-  public loadGlobalSettings :Promise<void> = null;
-
   private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
                                 {url: 'stun:stun1.l.google.com:19302'},
                                 {url: 'stun:stun2.l.google.com:19302'},
@@ -94,7 +90,10 @@ class uProxyCore implements uProxy.CoreAPI {
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
-  public stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+  public globalSettings :Core.GlobalSettings
+      = {description : 'My Computer',
+         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
+  public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -113,6 +112,10 @@ class uProxyCore implements uProxy.CoreAPI {
         .then((globalSettingsObj :Core.GlobalSettings) => {
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
           this.globalSettings = globalSettingsObj;
+          if (!this.globalSettings.stunServers
+              || this.globalSettings.stunServers.length == 0) {
+            this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
         }).catch((e) => {
           console.log('No global settings loaded', e);
         });
@@ -255,7 +258,16 @@ class uProxyCore implements uProxy.CoreAPI {
 
   public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
     storage.save<Core.GlobalSettings>('globalSettings', newSettings);
-    core.globalSettings = newSettings;
+
+    // Clear the existing servers and add in each new server.
+    // Trying globalSettings = newSettings does not correctly update
+    // pre-existing references to stunServers (e.g. from RemoteInstances).
+    this.globalSettings.stunServers
+        .splice(0, this.globalSettings.stunServers.length);
+    for (var i = 0; i < newSettings.stunServers.length; ++i) {
+      this.globalSettings.stunServers.push(newSettings.stunServers[i]);
+    }
+    this.globalSettings.description = newSettings.description;
   }
 
   /**
@@ -348,6 +360,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Set customized STUN servers.
    */
   public setStunServer = (customStunServer :string) : void => {
+    /*
     if (customStunServer === this.RESET_STUN_SERVERS_) {
       // Clear the existing servers and add in each default server.
       this.stunServers.splice(0, this.stunServers.length);
@@ -358,7 +371,7 @@ class uProxyCore implements uProxy.CoreAPI {
       // Clear the existing servers and push the new server.
       this.stunServers.splice(0, this.stunServers.length);
       this.stunServers.push({url:customStunServer});
-    }
+    }*/
   }
 }  // class uProxyCore
 
