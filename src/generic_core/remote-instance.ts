@@ -58,12 +58,8 @@ module Core {
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
-        webrtcPcConfig: {
-          iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-                       {urls: ['stun:stun1.l.google.com:19302']},
-                       {urls: ['stun:stun2.l.google.com:19302']},
-                       {urls: ['stun:stun3.l.google.com:19302']},
-                       {urls: ['stun:stun4.l.google.com:19302']}]
+      webrtcPcConfig: {
+         iceServers: core.stunServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
@@ -71,12 +67,8 @@ module Core {
         peerName: 'socksRtc'
       };
     public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
-        webrtcPcConfig: {
-          iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-                       {urls: ['stun:stun1.l.google.com:19302']},
-                       {urls: ['stun:stun2.l.google.com:19302']},
-                       {urls: ['stun:stun3.l.google.com:19302']},
-                       {urls: ['stun:stun4.l.google.com:19302']}]
+      webrtcPcConfig: {
+         iceServers: core.stunServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]

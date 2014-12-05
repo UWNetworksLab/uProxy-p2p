@@ -69,7 +69,7 @@
         display: table-row;
         height: 100%;
       }
-      #roster {
+      .roster {
         position: relative;
         background-color: white;
         height: 100%;
@@ -105,11 +105,17 @@
       }
       .statusText {
         color: white;
-        padding: 1em;
+        padding-left: 1em;
+        padding-right: 1em;
+        padding-top: 0.75em;
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
         width: 358px;
+      }
+      .statusText img {
+        vertical-align: middle;
+        padding-right: 1em;
       }
 
     </style>
@@ -137,16 +143,22 @@
       </div>
 
       <div id='roster-panel'>
-        <uproxy-roster id='roster'>
+        <uproxy-roster id='get-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.GET}}'
+            contacts='{{model.contacts.getAccessContacts}}'>
+        </uproxy-roster>
+        <uproxy-roster id='share-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.SHARE}}'
+            contacts='{{model.contacts.shareAccessContacts}}'>
         </uproxy-roster>
       </div>
 
       <div id='status'>
         <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-          <div class='statusText'>{{ui.gettingStatus}}</div>
+          <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
         </div>
         <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-          <div class='statusText'>{{ui.sharingStatus}}</div>
+          <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
         </div>
       </div>
 
