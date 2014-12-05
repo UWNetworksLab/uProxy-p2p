@@ -58,13 +58,13 @@ describe('Firewall.SocialUserProfile', () => {
   });
 
   it('accepts good profiles', () => {
-    expect(Firewall.IsValidUserProfile( 
+    expect(Firewall.isValidUserProfile( 
         <freedom_Social.UserProfile> goodUserProfile, policy)).toBe(true);
   });
 
   it('rejects structurally-different profiles', () => {
     for (var i in schemaFailingUserProfiles) {
-      expect(Firewall.IsValidUserProfile( 
+      expect(Firewall.isValidUserProfile( 
           <freedom_Social.UserProfile> schemaFailingUserProfiles[i],
         policy)).toBe(false);
     }
@@ -73,7 +73,7 @@ describe('Firewall.SocialUserProfile', () => {
 
   it('rejects profiles with bad values', () => {
     for (var i in valueFailingUserProfiles) {
-      expect(Firewall.IsValidUserProfile( 
+      expect(Firewall.isValidUserProfile( 
           <freedom_Social.UserProfile> valueFailingUserProfiles[i],
         policy)).toBe(false);
     }
@@ -137,13 +137,13 @@ describe('Firewall.SocialClientState', () => {
   });
 
   it('accepts good client states', () => {
-    expect(Firewall.IsValidClientState( 
+    expect(Firewall.isValidClientState( 
         <freedom_Social.ClientState> goodClientState, policy)).toBe(true);
   });
 
   it('rejects structurally-different client states', () => {
     for (var i in schemaFailingClientStates) {
-      expect(Firewall.IsValidClientState( 
+      expect(Firewall.isValidClientState( 
           <freedom_Social.ClientState> schemaFailingClientStates[i],
         policy)).toBe(false);
     }
@@ -152,7 +152,7 @@ describe('Firewall.SocialClientState', () => {
 
   it('rejects client states with bad values', () => {
     for (var i in valueFailingClientStates) {
-      expect(Firewall.IsValidClientState( 
+      expect(Firewall.isValidClientState( 
           <freedom_Social.ClientState> valueFailingClientStates[i],
         policy)).toBe(false);
     }
@@ -231,13 +231,13 @@ describe('Firewall.SocialIncomingMessage', () => {
   });
 
   it('accepts good incoming messages', () => {
-    expect(Firewall.IsValidIncomingMessage( 
+    expect(Firewall.isValidIncomingMessage( 
         <freedom_Social.IncomingMessage> goodIncomingMessage, policy)).toBe(true);
   });
 
   it('rejects structurally-different incoming messages', () => {
     for (var i in schemaFailingIncomingMessages) {
-      expect(Firewall.IsValidIncomingMessage( 
+      expect(Firewall.isValidIncomingMessage( 
           <freedom_Social.IncomingMessage> schemaFailingIncomingMessages[i],
         policy)).toBe(false);
     }
@@ -246,7 +246,7 @@ describe('Firewall.SocialIncomingMessage', () => {
 
   it('rejects incoming messages with bad values', () => {
     for (var i in valueFailingIncomingMessages) {
-      expect(Firewall.IsValidIncomingMessage( 
+      expect(Firewall.isValidIncomingMessage( 
           <freedom_Social.IncomingMessage> valueFailingIncomingMessages[i],
         policy)).toBe(false);
     }

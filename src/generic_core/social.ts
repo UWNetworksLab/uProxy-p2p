@@ -291,7 +291,7 @@ module Social {
      */
     public handleUserProfile = (profile :freedom_Social.UserProfile) => {
       var userId = profile.userId;
-      if (!Firewall.IsValidUserProfile(profile, null)) {
+      if (!Firewall.isValidUserProfile(profile, null)) {
         return;
       }
       // Check if this is ourself, in which case we update our own info.
@@ -337,7 +337,7 @@ module Social {
      */
     public handleClientState = (freedomClient :freedom_Social.ClientState)
         : void => {
-      if (!Firewall.IsValidClientState(freedomClient, null)) {
+      if (!Firewall.isValidClientState(freedomClient, null)) {
         return;
       }
       var client :UProxyClient.State =
@@ -367,7 +367,7 @@ module Social {
      */
     public handleMessage = (incoming :freedom_Social.IncomingMessage)
         : void => {
-      if (!Firewall.IsValidIncomingMessage(incoming, null)) {
+      if (!Firewall.isValidIncomingMessage(incoming, null)) {
         return;
       }
       var userId = incoming.from.userId;

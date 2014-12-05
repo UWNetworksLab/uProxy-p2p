@@ -33,8 +33,8 @@ module Firewall {
 
   export class DefaultResponsePolicy implements ResponsePolicy {
     public onValidationFailure(s :string, level :Severity) {
-      console.log("DROPPING MESSAGE ON VALIDATION FAILURE.  Severity: " + 
-                  level + ", text: " + s);
+      console.warn("DROPPING MESSAGE ON VALIDATION FAILURE.  Severity: " + 
+                   level + ", text: " + s);
     }
   }
 
@@ -42,7 +42,7 @@ module Firewall {
 
   // Whether |s| is some sort of keyword in JS.  We also include the
   // properties of Object.
-  export function IsReservedWord(s :string) : boolean {
+  export function isReservedWord(s :string) : boolean {
     var keywords = [ "__proto__", "__noSuchMethod__", "__defineGetter__",
                      "__defineSetter__", "__lookupGetter__", "__lookupSetter__"];
     for (var k in keywords) {
@@ -53,27 +53,27 @@ module Firewall {
     return false;
   }
 
-  export function HasBadChars(s :string) : boolean {
+  export function hasBadChars(s :string) : boolean {
     // TODO: consider unicode-based attack vectors.
     return false;
   }
 
-  export function IsPredefinedOnObject(s :string) : boolean {
+  export function isPredefinedOnObject(s :string) : boolean {
     // Returns whether 's' is predefined on Object, which is just a little fishy.
     var tester = {};
     return (typeof(tester[s]) != 'undefined');
   }
 
-  export function IsUserId(s :string, response :ResponsePolicy) : boolean {
-    if (IsReservedWord(s) || HasBadChars(s) || IsPredefinedOnObject(s)) {
+  export function isUserId(s :string, response :ResponsePolicy) : boolean {
+    if (isReservedWord(s) || hasBadChars(s) || isPredefinedOnObject(s)) {
       response.onValidationFailure(s, Severity.LikelyAttack);
       return false;
     } 
     return true;
   }
 
-  export function IsClientId(s :string, response :ResponsePolicy) : boolean {
-    if (IsReservedWord(s) || HasBadChars(s) || IsPredefinedOnObject(s)) {
+  export function isClientId(s :string, response :ResponsePolicy) : boolean {
+    if (isReservedWord(s) || hasBadChars(s) || isPredefinedOnObject(s)) {
       response.onValidationFailure(s, Severity.LikelyAttack);
       return false;
     } else {
@@ -89,7 +89,7 @@ module Firewall {
     'imageData' : '?string'
   };
 
-  function CheckSchema(object, schema) : boolean {
+  function checkSchema(object, schema) : boolean {
     if (object === null || typeof object !== 'object') {
       return false;
     }
@@ -126,25 +126,27 @@ module Firewall {
       object_keys_matched == 0;
   }
 
-  export function IsValidUserProfile(profile :freedom_Social.UserProfile, 
+  export function isValidUserProfile(profile :freedom_Social.UserProfile, 
                                      response :ResponsePolicy) : boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
     }
 
+    // Call this when we're not handing the |response| object to
+    // methods (where they'd call onValidationFailure themselves)
     function fail() {
       response.onValidationFailure(JSON.stringify(profile),
                                    Severity.MalformedInput);
     }
 
     // UserProfile can only have 5 properties.
-    if (!CheckSchema(profile, USER_PROFILE_SCHEMA)) {
+    if (!checkSchema(profile, USER_PROFILE_SCHEMA)) {
       fail();
       return false;
     }
 
     // Validate fields.
-    if (!IsUserId(profile.userId, response)) {
+    if (!isUserId(profile.userId, response)) {
       return false;
     }
 
@@ -164,31 +166,33 @@ module Firewall {
     'timestamp' : 'number'
   };
 
-  export function IsValidClientState(state :freedom_Social.ClientState,
+  export function isValidClientState(state :freedom_Social.ClientState,
                                      response :ResponsePolicy) : boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
     }
 
+    // Call this when we're not handing the |response| object to
+    // methods (where they'd call onValidationFailure themselves)
     function fail() {
       response.onValidationFailure(JSON.stringify(state), 
                                    Severity.MalformedInput);
     }
 
-    if (!CheckSchema(state, CLIENT_STATE_SCHEMA)) {
+    if (!checkSchema(state, CLIENT_STATE_SCHEMA)) {
       fail();
       return false;
     }
 
-    if (!IsUserId(state.userId, response)) {
+    if (!isUserId(state.userId, response)) {
       return false;
     }
     
-    if (!IsClientId(state.clientId, response)) {
+    if (!isClientId(state.clientId, response)) {
       return false;
     }
 
-    if (HasBadChars(state.status)) {
+    if (hasBadChars(state.status)) {
       fail();
       return false;
     }
@@ -206,23 +210,25 @@ module Firewall {
     'message' : 'string'
   };
 
-  export function IsValidIncomingMessage(state :freedom_Social.IncomingMessage, 
+  export function isValidIncomingMessage(state :freedom_Social.IncomingMessage, 
                                          response :ResponsePolicy) :boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
     }
 
+    // Call this when we're not handing the |response| object to
+    // methods (where they'd call onValidationFailure themselves)
     function fail() {
       response.onValidationFailure(JSON.stringify(state), 
                                    Severity.MalformedInput);
     }
 
-    if (!CheckSchema(state, INCOMING_MESSAGE_SCHEMA)) {
+    if (!checkSchema(state, INCOMING_MESSAGE_SCHEMA)) {
       fail();
       return false;
     }
 
-    if (!IsValidClientState(state.from, response)) {
+    if (!isValidClientState(state.from, response)) {
       return false;
     }
 
