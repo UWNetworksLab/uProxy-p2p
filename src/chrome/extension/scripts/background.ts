@@ -10,7 +10,6 @@
 
 /// <reference path='chrome_browser_api.ts' />
 /// <reference path='chrome_connector.ts' />
-/// <reference path='google_auth.ts' />
 /// <reference path='chrome_tab_auth.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
