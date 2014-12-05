@@ -87,6 +87,7 @@ class uProxyCore implements uProxy.CoreAPI {
                                 {url: 'stun:stun4.l.google.com:19302'}];
   // String constant passed to setStunServer that indicates that STUN servers
   // should be reset to default values.
+  // TODO (lucyhe): Load STUN servers from storage.
   private RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this

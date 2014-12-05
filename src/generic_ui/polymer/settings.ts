@@ -18,10 +18,16 @@ Polymer({
   },
   setStunServer: function() {
     core.setStunServer(this.stunServer);
+    if(!this.$.confirmResetServers.hidden) {
+      this.$.confirmResetServers.hidden = true;
+    }
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
     core.setStunServer('_DEFAULT_SERVERS_');
+    if(!this.$.confirmNewServer.hidden) {
+      this.$.confirmNewServer.hidden = true;
+    }
     this.$.confirmResetServers.hidden = false;
   },
   ready: function() {
