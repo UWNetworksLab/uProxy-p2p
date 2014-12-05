@@ -1,9 +1,6 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 
 Polymer({
-  toggleSharing: function() {
-    core.updateGlobalSettings(model.globalSettings);
-  },
   ready: function() {
     console.log('initializing roster');
     // this.contacts.push({
@@ -14,7 +11,6 @@ Polymer({
     // this.contacts.push({ name: 'charlie' });
     // this.contacts.push({ name: 'dave' });
     // this.contacts.push({ name: 'eve' });
-
     this.ui = ui;
     this.UI = UI;
 
@@ -29,7 +25,6 @@ Polymer({
     this.offlineUntrustedUproxyContacts = this.contacts.offlineUntrustedUproxy;
     this.onlineNonUproxyContacts = this.contacts.onlineNonUproxy;
     this.offlineNonUproxyContacts = this.contacts.offlineNonUproxy;
-
   },
   searchQuery: ''
 });

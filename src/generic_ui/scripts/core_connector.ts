@@ -149,7 +149,6 @@ class CoreConnector implements uProxy.CoreAPI {
                      newSettings);
   }
 
-
   // TODO: Implement this or remove it.
   // changeOption = (option) => {
   //   console.log('Changing option ' + option);

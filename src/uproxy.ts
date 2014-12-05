@@ -31,7 +31,7 @@ module uProxy {
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.
-    // Skip UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip unused UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
     // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
@@ -40,8 +40,8 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_GLOBAL_SETTINGS,
-    SET_STUN_SERVER
+    SET_STUN_SERVER,
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
