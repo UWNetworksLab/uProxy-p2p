@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "uProxy Core App",
-  "description": "(Alpha version: do not use for real!) You need the uProxy Extension to actually use uProxy. uProxy Core App for Chrome provides underlying networking and storage features of uProxy. ",
+  "name": "uProxy, part 2 of 2",
+  "description": "(Alpha version) uProxy, part 2 of 2.  You will also need part 1 of 2 to use uProxy.",
   "minimum_chrome_version": "38",
   "version": "0.4.0",
   "icons": {
