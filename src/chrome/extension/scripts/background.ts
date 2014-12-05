@@ -39,8 +39,7 @@ var model :UI.Model = {
     'offlineNonUproxy': []
   },
   globalSettings : {
-    'description' : '',
-    'sharing' : false
+    'description' : ''
   }
 };
 

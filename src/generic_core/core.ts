@@ -79,8 +79,7 @@ var ui = new UIConnector();
  */
 class uProxyCore implements uProxy.CoreAPI {
   public globalSettings :Core.GlobalSettings
-      = {'description': 'My Computer',
-         'sharing': false};
+      = {'description': 'My Computer'};
   public loadGlobalSettings :Promise<void> = null;
 
   private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
@@ -257,8 +256,9 @@ class uProxyCore implements uProxy.CoreAPI {
   public updateGlobalSettings = (command:Core.GlobalSettingsCommand) => {
     storage.save<Core.GlobalSettings>('globalSettings', command.newSettings);
     core.globalSettings = command.newSettings;
-    ui.update(uProxy.Update.ALL, core.globalSettings);
 
+  /*
+    ui.update(uProxy.Update.ALL, core.globalSettings);
     var network = Social.getNetwork(command.path.network.name, command.path.network.userId);
     if (!network) {
       console.error('No network ' + command.path.network.name);
@@ -269,7 +269,7 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error('No user ' + command.path.userId);
       return;
     }
-    user.sendInstanceUpdateToPeers();
+    user.sendInstanceUpdateToPeers();*/
   }
 
   /**

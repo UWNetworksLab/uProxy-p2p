@@ -421,16 +421,6 @@ module Core {
       }
     }
 
-    public sendInstanceUpdateToPeers = () : void => {
-      for (var key in this.clientIdToStatusMap) {
-        this.network.sendInstanceHandshake(
-            key, this.getConsentForClient_(key))
-            .then(() => {
-              this.log('Sent sharing update to ' + key);
-            });
-      }
-    }
-
   }  // class User
 
   export interface UserState {

@@ -93,8 +93,7 @@ module Core {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
-        description: core.globalSettings.description,
-        sharing: core.globalSettings.sharing
+        description: core.globalSettings.description
       };
     }
 

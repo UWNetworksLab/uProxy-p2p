@@ -35,11 +35,11 @@
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
     <div id="sharingStatusBox">
-      <div id="sharingStatus" hidden?='{{ !model.globalSettings.sharing }}'>
+      <div id="sharingStatus">
         Available for sharing.<br>
         <button on-click='{{ toggleSharing }}'>Stop Sharing</button>
       </div>
-      <div id="notSharingStatus" hidden?='{{ model.globalSettings.sharing }}'>
+      <div id="notSharingStatus">
         Unavailable for sharing.<br>
         <button on-click='{{ toggleSharing }}'>Start Sharing</button>
       </div>

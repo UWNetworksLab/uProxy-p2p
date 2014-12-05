@@ -40,11 +40,8 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-<<<<<<< HEAD
-    UPDATE_GLOBAL_SETTINGS
-=======
+    UPDATE_GLOBAL_SETTINGS,
     SET_STUN_SERVER
->>>>>>> origin/dev
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must

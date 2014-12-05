@@ -65,7 +65,6 @@ interface InstanceHandshake {
   instanceId  :string;
   keyHash     :string;
   description ?:string;  // TODO: Determine if description is actually optional.
-  sharing     ?:boolean; // If user if available for sharing access.
 }
 
 interface InstanceMessage {
