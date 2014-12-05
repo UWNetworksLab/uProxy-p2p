@@ -168,6 +168,9 @@ class MockCore implements uProxy.CoreAPI {
     // events received from the Core. Since this is a standalone UI, there is
     // only a mock core, and all interaction is fake beyond this point.
   }
+
+  setStunServer = (customStunServer :string) : void => {
+  }
 }
 
 var mockCore = new MockCore();

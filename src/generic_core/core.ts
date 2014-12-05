@@ -80,11 +80,11 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-  private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
-                                {url: 'stun:stun1.l.google.com:19302'},
-                                {url: 'stun:stun2.l.google.com:19302'},
-                                {url: 'stun:stun3.l.google.com:19302'},
-                                {url: 'stun:stun4.l.google.com:19302'}];
+  private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
+                                {urls: ['stun:stun1.l.google.com:19302']},
+                                {urls: ['stun:stun2.l.google.com:19302']},
+                                {urls: ['stun:stun3.l.google.com:19302']},
+                                {urls: ['stun:stun4.l.google.com:19302']}];
   // String constant passed to setStunServer that indicates that STUN servers
   // should be reset to default values.
   // TODO (lucyhe): Load STUN servers from storage.
