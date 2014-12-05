@@ -253,23 +253,9 @@ class uProxyCore implements uProxy.CoreAPI {
    * instances.
    */
 
-  public updateGlobalSettings = (command:Core.GlobalSettingsCommand) => {
-    storage.save<Core.GlobalSettings>('globalSettings', command.newSettings);
-    core.globalSettings = command.newSettings;
-
-  /*
-    ui.update(uProxy.Update.ALL, core.globalSettings);
-    var network = Social.getNetwork(command.path.network.name, command.path.network.userId);
-    if (!network) {
-      console.error('No network ' + command.path.network.name);
-      return;
-    }
-    var user = network.getUser(command.path.userId);
-    if (!user) {
-      console.error('No user ' + command.path.userId);
-      return;
-    }
-    user.sendInstanceUpdateToPeers();*/
+  public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
+    storage.save<Core.GlobalSettings>('globalSettings', newSettings);
+    core.globalSettings = newSettings;
   }
 
   /**

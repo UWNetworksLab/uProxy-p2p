@@ -2,19 +2,9 @@
 
 Polymer({
   toggleSharing: function() {
-    core.updateGlobalSettings({newSettings:model.globalSettings,
-                               path:this.path});
+    core.updateGlobalSettings(model.globalSettings);
   },
   ready: function() {
-    this.path = <InstancePath>{
-      network : {
-       name: this.network.name,
-       userId: this.network.userId
-      },
-      userId: this.userId,
-      instanceId: this.instance.instanceId
-    };
-
     console.log('initializing roster');
     // this.contacts.push({
       // name: 'alice',

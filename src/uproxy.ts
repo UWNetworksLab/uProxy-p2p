@@ -145,7 +145,7 @@ module uProxy {
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
-    updateGlobalSettings(command :Core.GlobalSettingsCommand) : void;
+    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
 
     login(network :string) : Promise<void>;
     logout(networkInfo :NetworkInfo) : Promise<void>;

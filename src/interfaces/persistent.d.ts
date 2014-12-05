@@ -54,13 +54,6 @@ declare module Core {
   // Object containing description so it can be saved to storage.
   export interface GlobalSettings {
     description :string;
-    sharing :boolean;
   }
-
-  export interface GlobalSettingsCommand {
-    path         :InstancePath;
-    newSettings  :Core.GlobalSettings;
-  }
-
 
 }  // module Core

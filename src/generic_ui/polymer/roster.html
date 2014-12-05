@@ -23,9 +23,6 @@
     #search:hover {
       border-color: #aaa;
     }
-    #sharingStatusBox {
-      padding: 20px;
-    }
     ::-webkit-input-placeholder {
       color: #ccc;
       font-weight: 100;
@@ -33,18 +30,6 @@
     </style>
 
     <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
-
-
-    <div id="sharingStatusBox">
-      <div id="sharingStatus">
-        Available for sharing.<br>
-        <button on-click='{{ toggleSharing }}'>Stop Sharing</button>
-      </div>
-      <div id="notSharingStatus">
-        Unavailable for sharing.<br>
-        <button on-click='{{ toggleSharing }}'>Start Sharing</button>
-      </div>
-    </div>
 
     <!-- uProxy contacts offering access to or requesting access from user -->
     <uproxy-roster-group
