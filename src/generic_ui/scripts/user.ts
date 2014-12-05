@@ -46,7 +46,7 @@ module UI {
     // Returns two strings, where each matches an array name in model.contacts.
     // Does not use an enum because we need a string value, and typescript
     // enums evaluate to numbers.
-    public getCategory = () : UI.UserCategories => {
+    public getCategories = () : UI.UserCategories => {
       var onlineOrOffline = this.isOnline ? 'online' : 'offline';
       if (this.instances.length == 0) {
         return {getTab: onlineOrOffline + 'NonUproxy',

@@ -365,7 +365,7 @@ module UI {
           // Clear roster and option user info from offline network.
           for (var userId in existingNetwork.roster) {
             var user = existingNetwork.roster[userId];
-            var userCategories = user.getCategory();
+            var userCategories = user.getCategories();
             this.categorizeUser_(user, model.contacts.getAccessContacts,
                 userCategories.getTab, null);
             this.categorizeUser_(user, model.contacts.shareAccessContacts,
@@ -436,7 +436,7 @@ module UI {
         network.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.
-        oldUserCategories = user.getCategory();
+        oldUserCategories = user.getCategories();
       }
 
       user.update(profile);
@@ -446,7 +446,7 @@ module UI {
         this.mapInstanceIdToUserName_[instanceId] = user.name;
       }
 
-      var newUserCategories = user.getCategory();
+      var newUserCategories = user.getCategories();
       // Update the user's category in both get and share tabs.
       this.categorizeUser_(user, model.contacts.getAccessContacts,
           oldUserCategories.getTab, newUserCategories.getTab);
