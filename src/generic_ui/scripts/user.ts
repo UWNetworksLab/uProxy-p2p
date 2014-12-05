@@ -43,23 +43,43 @@ module UI {
       this.isOnline = profile.isOnline;
     }
 
-    // Returns a string which matches the array names in model.contacts.
+    // Returns two strings, where each matches an array name in model.contacts.
     // Does not use an enum because we need a string value, and typescript
     // enums evaluate to numbers.
-    public getCategory = () : string => {
+    public getCategories = () : UI.UserCategories => {
       var onlineOrOffline = this.isOnline ? 'online' : 'offline';
       if (this.instances.length == 0) {
-        return onlineOrOffline + 'NonUproxy';
+        return {getTab: onlineOrOffline + 'NonUproxy',
+                shareTab: onlineOrOffline + 'NonUproxy'};
       }
+
+      var categories = {getTab: onlineOrOffline + 'UntrustedUproxy',
+                        shareTab: onlineOrOffline + 'UntrustedUproxy'};
+
       // Check if any instances have non-none consent state.
       for (var i = 0; i < this.instances.length; ++i) {
         // TODO: check these values / change after consent rewrite.
-        if (this.instances[i].consent.localGrantsAccessToRemote ||
-            this.instances[i].consent.remoteGrantsAccessToLocal) {
-          return onlineOrOffline + 'TrustedUproxy';
+
+        // Share tab.
+        if (this.instances[i].consent.remoteRequestsAccessFromLocal &&
+            !this.instances[i].consent.ignoringRemoteUserRequest &&
+            !this.instances[i].consent.localGrantsAccessToRemote) {
+          categories.shareTab = onlineOrOffline + 'Pending';
+        } else if (this.instances[i].consent.localGrantsAccessToRemote) {
+          categories.shareTab = onlineOrOffline + 'TrustedUproxy';
+        }
+
+        // Get tab.
+        if (this.instances[i].consent.remoteGrantsAccessToLocal &&
+            !this.instances[i].consent.ignoringRemoteUserOffer &&
+            !this.instances[i].consent.localRequestsAccessFromRemote) {
+          categories.getTab = onlineOrOffline + 'Pending';
+        } else if (this.instances[i].consent.localRequestsAccessFromRemote) {
+          categories.getTab = onlineOrOffline + 'TrustedUproxy';
         }
       }
-      return onlineOrOffline + 'UntrustedUproxy';
+
+      return categories;
     }
 
   }  // class UI.User

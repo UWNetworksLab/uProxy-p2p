@@ -47,10 +47,12 @@ module Core {
    */
   export class User implements BaseUser {
 
+    // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
+    // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
