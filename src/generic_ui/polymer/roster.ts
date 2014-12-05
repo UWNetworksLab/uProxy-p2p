@@ -14,8 +14,9 @@ Polymer({
     this.ui = ui;
     this.UI = UI;
 
-    // Contacts offering you access or requesting access from you are only defined in
-    // the get and share tabs respectively. Initialize the values here.
+    // Initialize roster here.
+    // this.contacts contains either all the contact groups for the get tab
+    // or all the contact groups for the share tab.
     this.onlinePending = this.contacts.onlinePending;
     this.offlinePending = this.contacts.offlinePending;
     this.onlineTrustedUproxyContacts = this.contacts.onlineTrustedUproxy;

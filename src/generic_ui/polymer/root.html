@@ -65,7 +65,7 @@
         position: absolute;
         z-index: 1001;
       }
-      .roster-panel {
+      #roster-panel {
         display: table-row;
         height: 100%;
       }
@@ -142,7 +142,7 @@
         </div>
       </div>
 
-      <div class='roster-panel'>
+      <div id='roster-panel'>
         <uproxy-roster id='get-roster' class='roster'
             hidden?='{{ui.mode!=UI.Mode.GET}}'
             contacts='{{model.contacts.getAccessContacts}}'>
