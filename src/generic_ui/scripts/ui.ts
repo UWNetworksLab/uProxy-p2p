@@ -37,8 +37,8 @@ module UI {
 
   export interface Contacts {
     getAccessContacts : {
-      onlineOfferingYouAccess :UI.User[];
-      offlineOfferingYouAccess :UI.User[];
+      onlinePending :UI.User[];
+      offlinePending :UI.User[];
       onlineTrustedUproxy :UI.User[];
       offlineTrustedUproxy :UI.User[];
       onlineUntrustedUproxy :UI.User[];
@@ -47,8 +47,8 @@ module UI {
       offlineNonUproxy :UI.User[];
     };
     shareAccessContacts : {
-      onlineRequestingAccessFromYou :UI.User[];
-      offlineRequestingAccessFromYou :UI.User[];
+      onlinePending :UI.User[];
+      offlinePending :UI.User[];
       onlineTrustedUproxy :UI.User[];
       offlineTrustedUproxy :UI.User[];
       onlineUntrustedUproxy :UI.User[];

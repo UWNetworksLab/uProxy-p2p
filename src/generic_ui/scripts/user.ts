@@ -64,7 +64,7 @@ module UI {
         if (this.instances[i].consent.remoteRequestsAccessFromLocal &&
             !this.instances[i].consent.ignoringRemoteUserRequest &&
             !this.instances[i].consent.localGrantsAccessToRemote) {
-          categories.shareTab = onlineOrOffline + 'RequestingAccessFromYou';
+          categories.shareTab = onlineOrOffline + 'Pending';
         } else if (this.instances[i].consent.localGrantsAccessToRemote) {
           categories.shareTab = onlineOrOffline + 'TrustedUproxy';
         }
@@ -73,8 +73,7 @@ module UI {
         if (this.instances[i].consent.remoteGrantsAccessToLocal &&
             !this.instances[i].consent.ignoringRemoteUserOffer &&
             !this.instances[i].consent.localRequestsAccessFromRemote) {
-          // && forTab == get
-          categories.getTab = onlineOrOffline + 'OfferingYouAccess';
+          categories.getTab = onlineOrOffline + 'Pending';
         } else if (this.instances[i].consent.localRequestsAccessFromRemote) {
           categories.getTab = onlineOrOffline + 'TrustedUproxy';
         }

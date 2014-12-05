@@ -32,8 +32,8 @@ var model :UI.Model = {
   networks: [],
   contacts: {
     'getAccessContacts' : {
-      'onlineOfferingYouAccess': [],
-      'offlineOfferingYouAccess': [],
+      'onlinePending': [],
+      'offlinePending': [],
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
@@ -42,8 +42,8 @@ var model :UI.Model = {
       'offlineNonUproxy': []
     },
     'shareAccessContacts' : {
-      'onlineRequestingAccessFromYou': [],
-      'offlineRequestingAccessFromYou': [],
+      'onlinePending': [],
+      'offlinePending': [],
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],

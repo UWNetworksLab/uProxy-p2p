@@ -136,19 +136,14 @@
         </div>
       </div>
 
-      <div class='{{ui.mode==UI.Mode.GET ? "roster-panel" : ""}}'>
-        <uproxy-roster id='get-roster'
-            class='{{ui.mode==UI.Mode.GET ? "roster" : ""}}'
-            contacts='{{model.contacts.getAccessContacts}}'
-            hidden?='{{ui.mode!=UI.Mode.GET}}'>
+      <div class='roster-panel'>
+        <uproxy-roster id='get-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.GET}}'
+            contacts='{{model.contacts.getAccessContacts}}'>
         </uproxy-roster>
-      </div>
-
-      <div class='{{ui.mode==UI.Mode.SHARE ? "roster-panel" : ""}}'>
-        <uproxy-roster id='share-roster'
-            class='{{ui.mode==UI.Mode.SHARE ? "roster" : ""}}'
-            contacts='{{model.contacts.shareAccessContacts}}'
-            hidden?='{{ui.mode!=UI.Mode.SHARE}}'>
+        <uproxy-roster id='share-roster' class='roster'
+            hidden?='{{ui.mode!=UI.Mode.SHARE}}'
+            contacts='{{model.contacts.shareAccessContacts}}'>
         </uproxy-roster>
       </div>
 

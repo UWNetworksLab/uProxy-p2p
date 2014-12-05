@@ -9,8 +9,8 @@ var model :UI.Model = {
   ],
   contacts: {
     'getAccessContacts' : {
-      'onlineOfferingYouAccess': [],
-      'offlineOfferingYouAccess': [],
+      'onlinePending': [],
+      'offlinePending': [],
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
@@ -19,8 +19,8 @@ var model :UI.Model = {
       'offlineNonUproxy': []
     },
     'shareAccessContacts' : {
-      'onlineRequestingAccessFromYou': [],
-      'offlineRequestingAccessFromYou': [],
+      'onlinePending': [],
+      'offlinePending': [],
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
