@@ -36,7 +36,8 @@
         groupTitle='{{ui.mode==UI.Mode.GET ? "Users offering you access" : "Users requesting access from you"}}'
         onlineContacts='{{ onlinePending }}'
         offlineContacts='{{ offlinePending }}'
-        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
+        searchQuery='{{ searchQuery }}'
+        pending="{{ true }}"></uproxy-roster-group>
 
     <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
     <hr color="#eee"

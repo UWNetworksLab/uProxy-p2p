@@ -2,19 +2,19 @@
 <link rel='import' href='contact.html'>
 
 <polymer-element name='uproxy-roster-group'
-    attributes='onlineContacts, offlineContacts, groupTitle, searchQuery'>
+    attributes='onlineContacts, offlineContacts, groupTitle, searchQuery, pending'>
 
   <template>
     <style>
     .header {
       font-size: 14px;
-      color: #888;
       margin: 0.5em;
     }
     </style>
 
     <div class='header'
-        hidden?='{{ onlineContacts.length == 0 && offlineContacts.length == 0 }}'>
+        hidden?='{{ onlineContacts.length == 0 && offlineContacts.length == 0 }}'
+        style='color: {{ pending ? "#009688" : "#888"}}'>
         {{ groupTitle }}
     </div>
 
