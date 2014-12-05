@@ -4,7 +4,7 @@
 declare var ui :UI.UserInterface;
 
 Polymer({
-  model: {},
+  model: model,
   settingsView: function() {
     ui['view'] = UI.View.SETTINGS;
   },

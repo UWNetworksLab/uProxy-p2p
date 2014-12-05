@@ -2,7 +2,7 @@
 <link rel="import" href='description.html'>
 <link rel="import" href='faq-link.html'>
 
-<polymer-element name='uproxy-settings' attributes=''>
+<polymer-element name='uproxy-settings'>
 
   <template>
     <style>
@@ -61,19 +61,19 @@
 
     </style>
 
-    <div hidden?='{{ui.onlineNetwork==null}}'>
+    <div hidden?='{{model.onlineNetwork==null}}'>
       <div class='userInfo'>
-        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
-            src='{{ui.onlineNetwork.imageData}}'>
-        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
+        <img class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
+            src='{{model.onlineNetwork.imageData}}'>
+        <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
         <!-- show userName and userId if both are available -->
-        <div hidden?='{{!ui.onlineNetwork.userName}}'>
-          <div class='userInfoName'>{{ui.onlineNetwork.userName}}</div>
-          <div class='userInfoID'>{{ui.onlineNetwork.userId}}</div>
+        <div hidden?='{{!model.onlineNetwork.userName}}'>
+          <div class='userInfoName'>{{model.onlineNetwork.userName}}</div>
+          <div class='userInfoID'>{{model.onlineNetwork.userId}}</div>
         </div>
         <!-- otherwise show only userId -->
-        <div hidden?='{{ui.onlineNetwork.userName}}'>
-          <div class='userInfoIDWithoutName'>{{ui.onlineNetwork.userId}}</div>
+        <div hidden?='{{model.onlineNetwork.userName}}'>
+          <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
         </div>
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>

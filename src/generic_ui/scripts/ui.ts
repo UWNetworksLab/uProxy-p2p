@@ -49,8 +49,9 @@ module UI {
    * TODO: Probably put the model in its own file.
    */
   export interface Model {
-    networks : UI.Network[];
-    contacts : Contacts;
+    networkNames :string[];
+    onlineNetwork :UI.Network;
+    contacts :Contacts;
     description :string;
   }
 
@@ -96,10 +97,6 @@ module UI {
     // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
-    // The network currently logged into (UI only supports 1 logged in network
-    // at a time, not including Manual), or null if not logged in.
-    public onlineNetwork :Network = null;
-
     public mode :Mode = Mode.GET;
 
     private mapInstanceIdToUserName_ = {};
@@ -120,8 +117,9 @@ module UI {
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uProxy.Update.ALL, (state :Object) => {
-        console.log('Received uProxy.Update.ALL:', state);
+      core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
+        console.log('Received uProxy.Update.INITIAL_STATE:', state);
+        model.networkNames = state['networkNames'];
         model.description = state['description'];
         // TODO: Implement this after a better payload message is implemented.
         // There is now a difference between the UI Model and the state object
@@ -136,16 +134,16 @@ module UI {
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
-        var profile :UI.UserProfileMessage = payload.user;
-        var network :UI.Network = this.getNetwork(payload.network);
-        if (!network) {
-          console.error('Network not found for uProxy.Update.USER_SELF',
-              payload);
+        if (!model.onlineNetwork ||
+            payload.network != model.onlineNetwork.name) {
+          console.error('uProxy.Update.USER_SELF message for invalid network',
+              payload.network);
           return;
         }
-        network.userId = profile.userId;
-        network.imageData = profile.imageData;
-        network.userName = profile.name;
+        var profile :UI.UserProfileMessage = payload.user;
+        model.onlineNetwork.userId = profile.userId;
+        model.onlineNetwork.imageData = profile.imageData;
+        model.onlineNetwork.userName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
@@ -315,60 +313,39 @@ module UI {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
-    private getNetwork = (networkName :string) => {
-      for (var networkId in model.networks) {
-        if (model.networks[networkId].name === networkName) {
-          return model.networks[networkId];
-        }
-      }
-      return null;
-    }
-
     /**
      * Synchronize a new network to be visible on this UI.
      */
     private syncNetwork_ = (network :UI.NetworkMessage) => {
-      console.log('uProxy.Update.NETWORK', network, model.networks);
-      console.log(model);
+      console.log('uProxy.Update.NETWORK', network);
+      console.log('model: ', model);
 
       // If you are now online (on a non-manual network), and were
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
-          && this.onlineNetwork == null) {
+          && model.onlineNetwork == null) {
         this.browserApi.setIcon('default-19.png');
       }
 
-      var existingNetwork = this.getNetwork(network.name);
-      if (existingNetwork) {
-        existingNetwork.online = network.online;
-        existingNetwork.userId = network.userId;
-        if (!network.online) {
-          // Clear roster and option user info from offline network.
-          for (var userId in existingNetwork.roster) {
-            var user = existingNetwork.roster[userId];
-            this.categorizeUser_(user, user.getCategory(), null);
-          }
-          existingNetwork.roster = {};
-          existingNetwork.userName = null;
-          existingNetwork.imageData = null;
+      if (model.onlineNetwork &&
+          (network.online && network.name != model.onlineNetwork.name) ||
+          (!network.online && network.name == model.onlineNetwork.name)) {
+        // onlineNetwork exists and has either been changed or logged out.
+        // Clear roster and option user info from offline network.
+        for (var userId in model.onlineNetwork.roster) {
+          var user = model.onlineNetwork.roster[userId];
+          this.categorizeUser_(user, user.getCategory(), null);
         }
-      } else {
-        model.networks.push({
+        model.onlineNetwork = null;
+      }
+
+      if (network.online && !model.onlineNetwork) {
+        model.onlineNetwork = {
           name:   network.name,
           userId: network.userId,
           online: network.online,
           roster: {}
-        });
-      }
-
-      // Figure out which network we are signed into (currently user can only
-      // be signed into 1 network at a time in the UI, not counting manual).
-      this.onlineNetwork = null;
-      for (var i = 0; i < model.networks.length; ++i) {
-        if (model.networks[i].online && model.networks[i].name != 'Manual') {
-          this.onlineNetwork = model.networks[i];
-          break;
-        }
+        };
       }
     }
 
@@ -379,11 +356,7 @@ module UI {
      * Synchronize data about some friend.
      */
     public syncUser = (payload :UI.UserMessage) => {
-      var network = this.getNetwork(payload.network);
-      if (!network) {
-        console.warn('Received USER for non-existing network.');
-        return;
-      } else if (!network.online) {
+      if (!model.onlineNetwork || model.onlineNetwork.name != payload.network) {
         // Ignore all user updates when the network is offline.
         // These user updates may come in asynchrously after logging out of a
         // network, e.g. if the UI logs out of Google while we are getting
@@ -394,13 +367,12 @@ module UI {
         return;
       }
 
-
       // Construct a UI-specific user object.
       var profile = payload.user;
       // Update / create if necessary a user, both in the network-specific
       // roster and the global roster.
       var user :UI.User;
-      user = network.roster[profile.userId];
+      user = model.onlineNetwork.roster[profile.userId];
       var oldCategory = null;
 
       // CONSIDER: we might want to check if this user has been our proxy
@@ -409,8 +381,8 @@ module UI {
       // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId, network);
-        network.roster[profile.userId] = user;
+        user = new UI.User(profile.userId, model.onlineNetwork);
+        model.onlineNetwork.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.
         oldCategory = user.getCategory();

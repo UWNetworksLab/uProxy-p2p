@@ -8,7 +8,8 @@
 console.log('This is not a real uProxy frontend.');
 
 var model :UI.Model = {
-  networks: [],
+  networkNames: [],
+  onlineNetwork: null,
   contacts: {
     'onlineTrustedUproxy': [],
     'offlineTrustedUproxy': [],

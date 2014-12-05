@@ -130,8 +130,8 @@
       <div class='view'>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
-        <template repeat='{{ n in networks }}' vertical layout>
-          <uproxy-network network='{{n}}'></uproxy-network>
+        <template repeat='{{ n in networkNames }}' vertical layout>
+          <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p style="margin-top: 0">
           We won't share your data or post publicly without your consent

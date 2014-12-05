@@ -4,15 +4,16 @@ var ui;
 var core;
 
 var model = {
-    networks: [],
-    contacts: {
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    }
+  networkNames: [],
+  onlineNetwork: null,
+  contacts: {
+    'onlineTrustedUproxy': [],
+    'offlineTrustedUproxy': [],
+    'onlineUntrustedUproxy': [],
+    'offlineUntrustedUproxy': [],
+    'onlineNonUproxy': [],
+    'offlineNonUproxy': []
+  }
 };
 
 function initUI() {

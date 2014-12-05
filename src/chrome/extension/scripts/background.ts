@@ -29,7 +29,8 @@ var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 
 // Singleton model for data bindings.
 var model :UI.Model = {
-  networks: [],
+  networkNames: [],
+  onlineNetwork: null,
   contacts: {
     'onlineTrustedUproxy': [],
     'offlineTrustedUproxy': [],
