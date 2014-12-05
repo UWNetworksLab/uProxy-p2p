@@ -80,7 +80,19 @@ var ui = new UIConnector();
 class uProxyCore implements uProxy.CoreAPI {
   public description :string = 'My computer';
   public loadDescription :Promise<void> = null;
-
+  private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
+                                {url: 'stun:stun1.l.google.com:19302'},
+                                {url: 'stun:stun2.l.google.com:19302'},
+                                {url: 'stun:stun3.l.google.com:19302'},
+                                {url: 'stun:stun4.l.google.com:19302'}];
+  // String constant passed to setStunServer that indicates that STUN servers
+  // should be reset to default values.
+  // TODO (lucyhe): Load STUN servers from storage.
+  private RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
+  // Initially, the STUN servers are a copy of the default.
+  // We need to use slice to copy the values, otherwise modifying this
+  // variable can modify DEFAULT_STUN_SERVERS_ as well.
+  public stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
   constructor() {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
@@ -333,6 +345,22 @@ class uProxyCore implements uProxy.CoreAPI {
     return user.getInstance(path.instanceId);
   }
 
+  /**
+   * Set customized STUN servers.
+   */
+  public setStunServer = (customStunServer :string) : void => {
+    if (customStunServer === this.RESET_STUN_SERVERS_) {
+      // Clear the existing servers and add in each default server.
+      this.stunServers.splice(0, this.stunServers.length);
+      for (var i = 0; i < this.DEFAULT_STUN_SERVERS_.length; ++i) {
+        this.stunServers.push(this.DEFAULT_STUN_SERVERS_[i]);
+      }
+    } else {
+      // Clear the existing servers and push the new server.
+      this.stunServers.splice(0, this.stunServers.length);
+      this.stunServers.push({url:customStunServer});
+    }
+  }
 }  // class uProxyCore
 
 
@@ -378,6 +406,7 @@ core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 
+core.onCommand(uProxy.Command.SET_STUN_SERVER, core.setStunServer);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
