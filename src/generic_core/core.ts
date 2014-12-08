@@ -102,8 +102,6 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
-    // TODO: description/globalSettings isn't loading properly after a restart in chrome,
-    // although save then load immediately after works.
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
         .then((globalSettingsObj :Core.GlobalSettings) => {
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));

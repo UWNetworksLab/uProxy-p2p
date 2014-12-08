@@ -143,10 +143,6 @@ module UI {
       core.onUpdate(uProxy.Update.ALL, (state :Core.GlobalSettings) => {
         console.log('Received uProxy.Update.ALL:', state);
         model.globalSettings = state;
-        // TODO: Implement this after a better payload message is implemented.
-        // There is now a difference between the UI Model and the state object
-        // from the core, so one-to-one mappinsg from the old json-patch code cannot
-        // work.
       });
 
       // Add or update the online status of a network.
