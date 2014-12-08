@@ -3,9 +3,22 @@ var ui;
 
 var core;
 
-var model = {
-    networks: [],
-    contacts: {
+var model  = {
+  networks: [],
+  contacts: {
+    'getAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
@@ -13,7 +26,10 @@ var model = {
       'onlineNonUproxy': [],
       'offlineNonUproxy': []
     }
+  },
+  description: ''
 };
+
 
 function initUI() {
     var firefoxConnector = new FirefoxConnector();
