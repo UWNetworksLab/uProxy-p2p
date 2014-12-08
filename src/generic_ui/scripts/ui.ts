@@ -84,7 +84,6 @@ module UI {
     userId :string;
     imageData ?:string;
     userName ?:string;
-    online :boolean;
     roster :{ [userId:string] :User }
   }
 
@@ -363,7 +362,6 @@ module UI {
         model.onlineNetwork = {
           name:   network.name,
           userId: network.userId,
-          online: network.online,
           roster: {}
         };
       }

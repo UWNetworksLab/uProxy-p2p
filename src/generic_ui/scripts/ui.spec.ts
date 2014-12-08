@@ -269,7 +269,6 @@ describe('UI.UserInterface', () => {
       expect(model.onlineNetwork).toBeDefined();
       expect(model.onlineNetwork.name).toEqual(networkMessage.name);
       expect(model.onlineNetwork.userId).toEqual(networkMessage.userId);
-      expect(model.onlineNetwork.online).toEqual(networkMessage.online);
     });
 
     it('Clears fields when network goes offline', () => {
