@@ -3,7 +3,7 @@ var ui;
 
 var core;
 
-var model  = {
+var model = {
   networks: [],
   contacts: {
     'getAccessContacts' : {
@@ -27,7 +27,10 @@ var model  = {
       'offlineNonUproxy': []
     }
   },
-  description: ''
+  globalSettings : {
+    'description' : '',
+    'stunServers' : []
+  }
 };
 
 
