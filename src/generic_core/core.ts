@@ -47,13 +47,13 @@ class UIConnector implements uProxy.UIAPI {
   }
 
   public sendInitialState = () => {
-    // Only send ALL update to UI when description is loaded.
-    core.loadDescription.then(() => {
+    // Only send update to UI when global settings have loaded.
+    core.loadGlobalSettings.then(() => {
       this.update(
           uProxy.Update.INITIAL_STATE,
           {
             networkNames: Object.keys(Social.networks),
-            description: core.description
+            globalSettings: core.globalSettings
           });
     });
   }
@@ -79,8 +79,18 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  public description :string = 'My computer';
-  public loadDescription :Promise<void> = null;
+  private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
+                                {url: 'stun:stun1.l.google.com:19302'},
+                                {url: 'stun:stun2.l.google.com:19302'},
+                                {url: 'stun:stun3.l.google.com:19302'},
+                                {url: 'stun:stun4.l.google.com:19302'}];
+  // Initially, the STUN servers are a copy of the default.
+  // We need to use slice to copy the values, otherwise modifying this
+  // variable can modify DEFAULT_STUN_SERVERS_ as well.
+  public globalSettings :Core.GlobalSettings
+      = {description : 'My Computer',
+         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
+  public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -93,14 +103,16 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
-    // TODO: description isn't loading properly after a restart in chrome,
-    // although save then load immediately after works.
-    this.loadDescription = storage.load<Core.StoredDescription>('description')
-        .then((loadedDescriptionObj :Core.StoredDescription) => {
-          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
-          this.description = loadedDescriptionObj.description;
+    this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
+        .then((globalSettingsObj :Core.GlobalSettings) => {
+          console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
+          this.globalSettings = globalSettingsObj;
+          if (!this.globalSettings.stunServers
+              || this.globalSettings.stunServers.length == 0) {
+            this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
         }).catch((e) => {
-          console.log('No description loaded', e);
+          console.log('No global settings loaded', e);
         });
   }
 
@@ -238,14 +250,19 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (newDescription:string) => {
-    // TODO: Send the new description to peers.  Right now we assume that users
-    // can't update the description after they are signed in.
-    var newDescriptionObj :Core.StoredDescription = {
-      description: newDescription
-    };
-    storage.save<Core.StoredDescription>('description', newDescriptionObj);
-    core.description = newDescription;
+
+  public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
+    storage.save<Core.GlobalSettings>('globalSettings', newSettings);
+
+    // Clear the existing servers and add in each new server.
+    // Trying globalSettings = newSettings does not correctly update
+    // pre-existing references to stunServers (e.g. from RemoteInstances).
+    this.globalSettings.stunServers
+        .splice(0, this.globalSettings.stunServers.length);
+    for (var i = 0; i < newSettings.stunServers.length; ++i) {
+      this.globalSettings.stunServers.push(newSettings.stunServers[i]);
+    }
+    this.globalSettings.description = newSettings.description;
   }
 
   /**
@@ -333,7 +350,6 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
-
 }  // class uProxyCore
 
 
@@ -369,16 +385,13 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 //   // TODO: Handle changes that might affect proxying.
 // });
 
-core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-               core.updateDescription);
-
 // TODO: make the invite mechanism an actual process.
 // core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 // });
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
-
+core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

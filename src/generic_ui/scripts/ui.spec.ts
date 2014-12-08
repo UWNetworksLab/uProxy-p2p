@@ -8,12 +8,26 @@ var model :UI.Model = {
   networks: [
   ],
   contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
+    'getAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
   },
   description: ''
 };
@@ -67,13 +81,20 @@ describe('UI.UserInterface', () => {
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
-      expect(model.contacts.onlineNonUproxy.length).toEqual(1);
-      expect(model.contacts.onlineNonUproxy[0]).toEqual(user);
-      expect(model.contacts.offlineNonUproxy.length).toEqual(0);
-      expect(model.contacts.onlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.onlineUntrustedUproxy.length).toEqual(0);
-      expect(model.contacts.offlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(1);
+      expect(model.contacts.getAccessContacts.onlineNonUproxy[0]).toEqual(user);
+      expect(model.contacts.getAccessContacts.offlineNonUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.offlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.onlineNonUproxy.length).toEqual(1);
+      expect(model.contacts.shareAccessContacts.onlineNonUproxy[0]).toEqual(user);
+      expect(model.contacts.shareAccessContacts.offlineNonUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.onlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.offlineTrustedUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
     });
 
     it('Sets correct flags for uProxy users', () => {

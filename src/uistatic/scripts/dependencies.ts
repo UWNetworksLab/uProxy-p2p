@@ -11,14 +11,28 @@ var model :UI.Model = {
   networkNames: [],
   onlineNetwork: null,
   contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
+    'getAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
   },
-  description: 'My Computer'
+  globalSettings: {}
 };
 
 class MockBrowserApi implements BrowserAPI {
@@ -126,9 +140,11 @@ class MockCore implements uProxy.CoreAPI {
   stop = () => {
   }
 
-  updateDescription(description) {
-    console.log('Updating description to ' + description);
+  updateGlobalSettings(newGlobalSettings) {
+    console.log('Updating global settings to '
+        + JSON.stringify(newGlobalSettings));
   }
+
   changeOption(option) {
     console.log('Changing option ' + option);
   }

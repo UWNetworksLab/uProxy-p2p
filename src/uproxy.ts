@@ -9,6 +9,7 @@
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
+/// <reference path='interfaces/persistent.d.ts' />
 /// <reference path='networking-typings/communications.d.ts' />
 
 module uProxy {
@@ -30,7 +31,7 @@ module uProxy {
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.
-    UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip unused UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
     // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
@@ -38,7 +39,8 @@ module uProxy {
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    SEND_CREDENTIALS
+    SEND_CREDENTIALS,
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -139,7 +141,7 @@ module uProxy {
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
-    updateDescription(description :string) : void;
+    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;

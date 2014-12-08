@@ -32,14 +32,31 @@ var model :UI.Model = {
   networkNames: [],
   onlineNetwork: null,
   contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
+    'getAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts' : {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
   },
-  description: ''
+  globalSettings : {
+    'description' : '',
+    'stunServers' : []
+  }
 };
 
 // TODO(): remove this if there's no use for it.

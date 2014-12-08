@@ -4,6 +4,7 @@
  * Handles all connection and communication with the uProxy core.
  */
 /// <reference path='../../uproxy.ts'/>
+/// <reference path='../../interfaces/persistent.d.ts' />
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 interface FullfillAndReject {
@@ -142,11 +143,10 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
-  updateDescription = (description :string) => {
-    // TODO: determine if novelty check is necessary.
-    console.log('Updating description to ' + description);
-    this.sendCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-                     description);
+  updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
+    console.log('Updating global settings to ' + JSON.stringify(newSettings));
+    this.sendCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+                     newSettings);
   }
 
   // TODO: Implement this or remove it.

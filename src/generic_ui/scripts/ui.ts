@@ -7,6 +7,7 @@
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
+/// <reference path='../../interfaces/persistent.d.ts'/>
 /// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
@@ -36,12 +37,31 @@ module UI {
   }
 
   export interface Contacts {
-    onlineTrustedUproxy :UI.User[];
-    offlineTrustedUproxy :UI.User[];
-    onlineUntrustedUproxy :UI.User[];
-    offlineUntrustedUproxy :UI.User[];
-    onlineNonUproxy :UI.User[];
-    offlineNonUproxy :UI.User[];
+    getAccessContacts : {
+      onlinePending :UI.User[];
+      offlinePending :UI.User[];
+      onlineTrustedUproxy :UI.User[];
+      offlineTrustedUproxy :UI.User[];
+      onlineUntrustedUproxy :UI.User[];
+      offlineUntrustedUproxy :UI.User[];
+      onlineNonUproxy :UI.User[];
+      offlineNonUproxy :UI.User[];
+    };
+    shareAccessContacts : {
+      onlinePending :UI.User[];
+      offlinePending :UI.User[];
+      onlineTrustedUproxy :UI.User[];
+      offlineTrustedUproxy :UI.User[];
+      onlineUntrustedUproxy :UI.User[];
+      offlineUntrustedUproxy :UI.User[];
+      onlineNonUproxy :UI.User[];
+      offlineNonUproxy :UI.User[];
+    }
+  }
+
+  export interface UserCategories {
+    getTab :string;
+    shareTab :string;
   }
 
   /**
@@ -51,8 +71,8 @@ module UI {
   export interface Model {
     networkNames :string[];
     onlineNetwork :UI.Network;
-    contacts :Contacts;
-    description :string;
+    contacts : Contacts;
+    globalSettings : Core.GlobalSettings;
   }
 
   /**
@@ -120,11 +140,7 @@ module UI {
       core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
         console.log('Received uProxy.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
-        model.description = state['description'];
-        // TODO: Implement this after a better payload message is implemented.
-        // There is now a difference between the UI Model and the state object
-        // from the core, so one-to-one mappinsg from the old json-patch code cannot
-        // work.
+        model.globalSettings = state['globalSettings'];
       });
 
       // Add or update the online status of a network.
@@ -334,7 +350,11 @@ module UI {
         // Clear roster and option user info from offline network.
         for (var userId in model.onlineNetwork.roster) {
           var user = model.onlineNetwork.roster[userId];
-          this.categorizeUser_(user, user.getCategory(), null);
+          var userCategories = user.getCategories();
+          this.categorizeUser_(user, model.contacts.getAccessContacts,
+              userCategories.getTab, null);
+          this.categorizeUser_(user, model.contacts.shareAccessContacts,
+              userCategories.shareTab, null);
         }
         model.onlineNetwork = null;
       }
@@ -373,7 +393,7 @@ module UI {
       // roster and the global roster.
       var user :UI.User;
       user = model.onlineNetwork.roster[profile.userId];
-      var oldCategory = null;
+      var oldUserCategories = {getTab: null, shareTab: null};
 
       // CONSIDER: we might want to check if this user has been our proxy
       // server and if so stop the proxying if they are no longer proxying
@@ -385,7 +405,7 @@ module UI {
         model.onlineNetwork.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.
-        oldCategory = user.getCategory();
+        oldUserCategories = user.getCategories();
       }
 
       user.update(profile);
@@ -395,19 +415,23 @@ module UI {
         this.mapInstanceIdToUserName_[instanceId] = user.name;
       }
 
-      var newCategory = user.getCategory();
-      this.categorizeUser_(user, oldCategory, newCategory);
+      var newUserCategories = user.getCategories();
+      // Update the user's category in both get and share tabs.
+      this.categorizeUser_(user, model.contacts.getAccessContacts,
+          oldUserCategories.getTab, newUserCategories.getTab);
+      this.categorizeUser_(user, model.contacts.shareAccessContacts,
+          oldUserCategories.shareTab, newUserCategories.shareTab);
 
       console.log('Synchronized user.', user);
     };
 
-    private categorizeUser_ = (user, oldCategory, newCategory) => {
+    private categorizeUser_ = (user, contacts, oldCategory, newCategory) => {
       if (oldCategory == null) {
         // User hasn't yet been categorized.
-        model.contacts[newCategory].push(user);
+        contacts[newCategory].push(user);
       } else if (oldCategory != newCategory) {
         // Remove user from old category.
-        var oldCategoryArray = model.contacts[oldCategory];
+        var oldCategoryArray = contacts[oldCategory];
         for (var i = 0; i < oldCategoryArray.length; ++i) {
           if (oldCategoryArray[i] == user) {
             oldCategoryArray.splice(i, 1);
@@ -416,7 +440,7 @@ module UI {
         }
         // Add users to new category.
         if (newCategory) {
-          model.contacts[newCategory].push(user);
+          contacts[newCategory].push(user);
         }
       }
     }
