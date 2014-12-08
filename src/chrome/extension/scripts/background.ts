@@ -52,7 +52,10 @@ var model :UI.Model = {
       'offlineNonUproxy': []
     }
   },
-  description: ''
+  globalSettings : {
+    'description' : '',
+    'stunServers' : []
+  }
 };
 
 // TODO(): remove this if there's no use for it.
