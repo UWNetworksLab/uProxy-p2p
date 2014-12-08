@@ -1,11 +1,15 @@
 {
-  "appName": {
-    "message": "uProxy Extension",
+  "extName": {
+    "message": "uProxy, part 1 of 2",
     "description": "The title that appears in the Chrome Extensions listing"
   },
-  "appDescription": {
-    "message": "(Alpha version: do not use for real!) Provides the user-interface for the uProxy Core App. You need to also have installed the  the uProxy Core App to use uProxy.",
+  "extDescription": {
+    "message": "(Alpha version) uProxy, part 1 of 2.  You will also need part 2 of 2 to use uProxy.",
     "description": "The description that appears in the Chrome Extensions listing"
+  },
+  "extTitle": {
+    "message": "uProxy",
+    "description": "The title that appears in the Chrome Extensions tooltip"
   },
   "giveAccess": {
     "message": "Give Access",
