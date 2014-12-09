@@ -117,6 +117,12 @@
         vertical-align: middle;
         padding-right: 1em;
       }
+      #sharingEnabled {
+        position: absolute;
+        left: 332px;
+        top: 20px;
+        cursor: pointer;
+      }
 
     </style>
 
@@ -130,6 +136,9 @@
         <img src='../icons/hamburger.png' id='btnSettings'
           on-tap='{{ settingsView }}'>
         <h1 id='title'>uProxy</h1>
+        <img src='../icons/sharing-enabled-toolbar.png' id='sharingEnabled'
+          hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+          on-tap='{{setShareMode}}'>
         <div id='getTab'
             class='getShareTab {{ui.mode==UI.Mode.GET ? "active" : ""}}'
             on-tap='{{setGetMode}}'>
