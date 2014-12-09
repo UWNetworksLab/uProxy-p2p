@@ -43,6 +43,9 @@ var model :UI.Model = {
   }
 };
 
+// TODO: currently we have a UI object (typescript module, i.e. namespace)
+// and a ui object (singleton intance of UI.UserInterface).  We should
+// change the names of these to avoid confusion.
 module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
@@ -136,7 +139,7 @@ module UI {
 
     // Instance you are getting access from.
     // Null if you are not getting access.
-    public instanceGettingAccessFrom = null;
+    private instanceGettingAccessFrom_ = null;
 
     // The instances you are giving access to.
     // Remote instances to add to this set are received in messages from Core.
@@ -144,7 +147,7 @@ module UI {
 
     public mode :Mode = Mode.GET;
 
-    private mapInstanceIdToUserName_ = {};
+    private mapInstanceIdToUser_ :{[instanceId :string] :UI.User} = {};
 
     public gettingStatus :string = null;
     public sharingStatus :string = null;
@@ -213,10 +216,8 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
           (data :any) => {
-        if (data.instanceId === this.instanceGettingAccessFrom) {
-          this.instanceGettingAccessFrom = null;
+        if (data.instanceId === this.instanceGettingAccessFrom_) {
           this.stopGettingInUiAndConfig(data.error);
-          this.updateGettingStatusBar();
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
@@ -231,7 +232,9 @@ module UI {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
-        this.updateSharingStatusBar();
+        this.updateSharingStatusBar_();
+
+        this.mapInstanceIdToUser_[instanceId].isGettingFromMe = true;
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -240,30 +243,35 @@ module UI {
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
-        this.updateSharingStatusBar();
+
+        // Update user.isGettingFromMe
+        var isGettingFromMe = false;
+        var user = this.mapInstanceIdToUser_[instanceId];
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
+            isGettingFromMe = true;
+            break;
+          }
+        }
+        user.isGettingFromMe = isGettingFromMe;
+
+        this.updateSharingStatusBar_();
       });
 
       console.log('Created the UserInterface');
     }
 
-    public updateGettingStatusBar = () => {
+    private updateGettingStatusBar_ = () => {
       // TODO: localize this.
-      if (this.instanceGettingAccessFrom) {
-        var userName =
-            this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
-        if (userName) {
-          this.gettingStatus = 'Getting access from ' + userName;
-        } else {
-          this.gettingStatus = null;
-          console.error('unable to find user name for instance ' +
-              this.instanceGettingAccessFrom);
-        }
+      if (this.instanceGettingAccessFrom_) {
+        this.gettingStatus = 'Getting access from ' +
+            this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name;
       } else {
         this.gettingStatus = null;
       }
     }
 
-    public updateSharingStatusBar = () => {
+    private updateSharingStatusBar_ = () => {
       // TODO: localize this - may require simpler formatting to work
       // in all languages.
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
@@ -271,14 +279,14 @@ module UI {
         this.sharingStatus = null;
       } else if (instanceIds.length === 1) {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]];
+            this.mapInstanceIdToUser_[instanceIds[0]].name;
       } else if (instanceIds.length === 2) {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
-            this.mapInstanceIdToUserName_[instanceIds[1]];
+            this.mapInstanceIdToUser_[instanceIds[0]].name + ' and ' +
+            this.mapInstanceIdToUser_[instanceIds[1]].name;
       } else {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            this.mapInstanceIdToUser_[instanceIds[0]].name + ' and ' +
             (instanceIds.length - 1) + ' others';
       }
     }
@@ -295,6 +303,9 @@ module UI {
      * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
+      var instanceId = this.instanceGettingAccessFrom_;
+      this.instanceGettingAccessFrom_ = null;
+
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
@@ -305,18 +316,33 @@ module UI {
       } else {
         this.browserApi.setIcon('default-19.png');
       }
+
+      this.updateGettingStatusBar_();
+
+      if (instanceId) {
+        this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
+      }
+
       this.browserApi.stopUsingProxy(askUser);
     }
 
     /**
       * Sets extension icon to default and undoes proxy configuration.
       */
-    public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
+    public startGettingInUiAndConfig =
+        (instanceId :string, endpoint :Net.Endpoint) => {
+      this.instanceGettingAccessFrom_ = instanceId;
+
       if (this.isGivingAccess()) {
         this.browserApi.setIcon('sharing-getting-19.png');
       } else {
         this.browserApi.setIcon('getting-19.png');
       }
+
+      this.updateGettingStatusBar_();
+
+      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+
       this.browserApi.startUsingProxy(endpoint);
     }
 
@@ -347,7 +373,7 @@ module UI {
     }
 
     public isGettingAccess = () => {
-      return this.instanceGettingAccessFrom != null;
+      return this.instanceGettingAccessFrom_ != null;
     }
 
     public isGivingAccess = () => {
@@ -436,7 +462,7 @@ module UI {
       user.instances = payload.instances;
       for (var i = 0; i < user.instances.length; ++i) {
         var instanceId = user.instances[i].instanceId;
-        this.mapInstanceIdToUserName_[instanceId] = user.name;
+        this.mapInstanceIdToUser_[instanceId] = user;
       }
 
       var newUserCategories = user.getCategories();
