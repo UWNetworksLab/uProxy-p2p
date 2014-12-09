@@ -93,7 +93,7 @@ module Core {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
-        description: core.description
+        description: core.globalSettings.description
       };
     }
 

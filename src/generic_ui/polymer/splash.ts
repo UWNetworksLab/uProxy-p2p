@@ -8,7 +8,7 @@ Polymer({
     GET_OR_SHARE: 2,
     NETWORKS: 3
   },
-  networks: model.networks,
+  networkNames: model.networkNames,
   ui: ui,
   setState: function(state) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {

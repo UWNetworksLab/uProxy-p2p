@@ -52,8 +52,13 @@ declare module Core {
   }  // interface Core.Persistent
 
   // Object containing description so it can be saved to storage.
-  export interface StoredDescription {
+  export interface GlobalSettings {
     description :string;
+    stunServers :Core.StunServer[];
+  }
+
+  export interface StunServer {
+    url :string;
   }
 
 }  // module Core

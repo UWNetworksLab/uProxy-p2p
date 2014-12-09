@@ -130,7 +130,7 @@
     </uproxy-splash>
 
     <div id='logged-in-controls'
-        hidden?='{{ UI.View.SPLASH==ui.view || !ui.onlineNetwork }}'>
+        hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
 
       <div id='toolbar'>
         <img src='../icons/hamburger.png' id='btnSettings'

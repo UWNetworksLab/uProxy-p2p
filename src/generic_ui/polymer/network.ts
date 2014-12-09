@@ -7,16 +7,10 @@ declare var core :uProxy.CoreAPI;
 
 Polymer({
   isLoggingIn: false,
-  network: {},
   connect: function() {
-    if (!this.network) {
-      console.error('uproxy-network with no network specified!');
-      return;
-    }
-    console.log('connect fired!');
     this.isLoggingIn = true;
-    core.login(this.network.name).then(() => {
-      console.log('connected to ' + this.network.name);
+    core.login(this.networkName).then(() => {
+      console.log('connected to ' + this.networkName);
       this.isLoggingIn = false;
       ui.view = UI.View.ROSTER;
     });

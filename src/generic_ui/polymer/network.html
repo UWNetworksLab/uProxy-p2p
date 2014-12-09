@@ -1,7 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 
-<polymer-element name='uproxy-network' attributes='network'>
+<polymer-element name='uproxy-network' attributes='networkName'>
   <template>
     <style>
       :host {
@@ -50,13 +50,10 @@
 
     <div class='network'>
       <span hidden?='{{isLoggingIn}}'>
-        <span hidden?='{{network.online}}'>
-          <paper-button raised on-tap='{{connect}}' class='{{ network.name }}'>
-            {{ network.name }}
+        <span>
+          <paper-button raised on-tap='{{connect}}' class='{{ networkName }}'>
+            {{ networkName }}
           </button>
-        </span>
-        <span id='connnected' hidden?='{{!network.online}}'>
-          Connected
         </span>
       </span>
       <span id='waiting' hidden?='{{!isLoggingIn}}'>
