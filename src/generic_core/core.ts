@@ -358,7 +358,7 @@ class uProxyCore implements uProxy.CoreAPI {
     } else {
       // Clear the existing servers and push the new server.
       this.stunServers.splice(0, this.stunServers.length);
-      this.stunServers.push({url:customStunServer});
+      this.stunServers.push({urls: [customStunServer]});
     }
   }
 }  // class uProxyCore

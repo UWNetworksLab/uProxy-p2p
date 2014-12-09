@@ -83,6 +83,13 @@ FILES =
     'socks-to-rtc/socks-to-rtc.js'
     'rtc-to-net/rtc-to-net.js'
   ]
+  uproxy_lib_common: [
+    'logging/logging.js'
+    'arraybuffers/arraybuffers.js'
+    'handler/queue.js'
+    'webrtc/datachannel.js'
+    'webrtc/peerconnection.js'
+  ]
   thirdPartyUi: [
     # .html files from core-* and paper-* components are copied
     # separately via polymerPaperCompile.
@@ -263,11 +270,7 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
-          src: [
-            'logging/logging.js'
-            'arraybuffers/arraybuffers.js'
-            'handler/queue.js'
-          ],
+          src: FILES.uproxy_lib_common,
           dest: chromeAppDevPath + 'scripts/uproxy-lib/'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
@@ -349,11 +352,7 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
-          src: [
-            'logging/logging.js'
-            'arraybuffers/arraybuffers.js'
-            'handler/queue.js'
-          ],
+          src: FILES.uproxy_lib_common,
           dest: firefoxDevPath + 'data/core/uproxy-lib'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'third_party/lib'
