@@ -58,6 +58,14 @@ var model :UI.Model = {
   }
 };
 
+// Chrome Window ID given to the uProxy popup.
+var popupWindowId = -1;
+// The URL to launch when the user clicks on the extension icon.
+var popupUrl = "polymer/install-incomplete.html";
+// Chrome Window ID of the window used to launch uProxy,
+// i.e. the window where the extension icon was clicked.
+var mainWindowId = -1;
+
 // TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('onInstalled: previousVersion', details.previousVersion);
@@ -69,16 +77,32 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 /**
+  * Set the URL launched by clicking the browser icon.
+  */
+function setPopupUrl(url) : void {
+  popupUrl = url;
+  // If an existing popup exists, close it because the popup URL has changed.
+  // The next time the user clicks on the browser icon, a new page should be
+  // launched.
+  if (popupWindowId != -1) {
+    chrome.windows.remove(popupWindowId);
+    popupWindowId == -1;
+  }
+}
+
+/**
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
  */
 function initUI() : UI.UserInterface {
+  var chromeBrowserApi = new ChromeBrowserApi();
+  chrome.browserAction.onClicked
+    .addListener(chromeBrowserApi.bringUproxyToFront);
 
   chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
-  var chromeBrowserApi = new ChromeBrowserApi();
   var oAuth = new OAuth();
   chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.getCredentials.bind(oAuth));

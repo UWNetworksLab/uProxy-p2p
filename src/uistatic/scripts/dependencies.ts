@@ -41,6 +41,7 @@ class MockBrowserApi implements BrowserAPI {
   startUsingProxy() {}
   stopUsingProxy(askUser) {}
   openFaq(pageAnchor) {}
+  bringUproxyToFront() {}
 }
 
 function generateFakeUserMessage() :UI.UserMessage {

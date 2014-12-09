@@ -66,6 +66,7 @@ class ChromeTabAuth {
 
     chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
                        function(tab: chrome.tabs.Tab) {
+      chrome.windows.update(mainWindowId, {focused: true});
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);

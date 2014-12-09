@@ -331,6 +331,10 @@ module UI {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
+    public bringUproxyToFront = () => {
+      this.browserApi.bringUproxyToFront();
+    }
+
     private getNetwork = (networkName :string) => {
       for (var networkId in model.networks) {
         if (model.networks[networkId].name === networkName) {

@@ -19,6 +19,7 @@ Polymer({
       console.log('connected to ' + this.network.name);
       this.isLoggingIn = false;
       ui.view = UI.View.ROSTER;
+      ui.bringUproxyToFront();
     });
 
     // Restore the button after a timeout.

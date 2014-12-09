@@ -111,4 +111,25 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.tabs.create({url: "../" + relativeUrl});
     });
   }
+
+  public bringUproxyToFront = () => {
+    if (popupWindowId == -1) {
+      chrome.windows.getLastFocused((windowThatLaunchedUproxy) => {
+        mainWindowId = windowThatLaunchedUproxy.id;
+      });
+      chrome.windows.create({url: popupUrl,
+                             type: "popup",
+                             width: 371,
+                             height: 600}, (popup) => {
+        popupWindowId = popup.id;
+      });
+      chrome.windows.onRemoved.addListener((closedWindowId) => {
+        if (closedWindowId == popupWindowId) {
+          popupWindowId = -1;
+        }
+      });
+    } else {
+      chrome.windows.update(popupWindowId, {focused: true});
+    }
+  }
 }
