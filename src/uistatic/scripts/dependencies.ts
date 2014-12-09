@@ -7,33 +7,6 @@
 
 console.log('This is not a real uProxy frontend.');
 
-var model :UI.Model = {
-  networks: [],
-  contacts: {
-    'getAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    },
-    'shareAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    }
-  },
-  description: 'My Computer'
-};
-
 class MockBrowserApi implements BrowserAPI {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
@@ -139,9 +112,11 @@ class MockCore implements uProxy.CoreAPI {
   stop = () => {
   }
 
-  updateDescription(description) {
-    console.log('Updating description to ' + description);
+  updateGlobalSettings(newGlobalSettings) {
+    console.log('Updating global settings to '
+        + JSON.stringify(newGlobalSettings));
   }
+
   changeOption(option) {
     console.log('Changing option ' + option);
   }

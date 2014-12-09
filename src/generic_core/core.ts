@@ -46,14 +46,15 @@ class UIConnector implements uProxy.UIAPI {
     bgAppPageChannel.emit('' + type, data);
   }
 
-  public updateAll = () => {
-    console.log('sending ALL state to UI.');
-    for (var network in Social.networks) {
-      Social.notifyUI(network);
-    }
-    // Only send ALL update to UI when description is loaded.
-    core.loadDescription.then(() => {
-      this.update(uProxy.Update.ALL, {'description': core.description});
+  public sendInitialState = () => {
+    // Only send update to UI when global settings have loaded.
+    core.loadGlobalSettings.then(() => {
+      this.update(
+          uProxy.Update.INITIAL_STATE,
+          {
+            networkNames: Object.keys(Social.networks),
+            globalSettings: core.globalSettings
+          });
     });
   }
 
@@ -78,21 +79,20 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  public description :string = 'My computer';
-  public loadDescription :Promise<void> = null;
   private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
                                 {urls: ['stun:stun1.l.google.com:19302']},
                                 {urls: ['stun:stun2.l.google.com:19302']},
                                 {urls: ['stun:stun3.l.google.com:19302']},
                                 {urls: ['stun:stun4.l.google.com:19302']}];
-  // String constant passed to setStunServer that indicates that STUN servers
-  // should be reset to default values.
-  // TODO (lucyhe): Load STUN servers from storage.
-  private RESET_STUN_SERVERS_ = '_DEFAULT_SERVERS_';
+
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
-  public stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+  public globalSettings :Core.GlobalSettings
+      = {description : 'My Computer',
+         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
+  public loadGlobalSettings :Promise<void> = null;
+
   constructor() {
     console.log('Preparing uProxy Core.');
     // Send the local webrtc fingerprint to the UI.
@@ -104,14 +104,16 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
-    // TODO: description isn't loading properly after a restart in chrome,
-    // although save then load immediately after works.
-    this.loadDescription = storage.load<Core.StoredDescription>('description')
-        .then((loadedDescriptionObj :Core.StoredDescription) => {
-          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
-          this.description = loadedDescriptionObj.description;
+    this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
+        .then((globalSettingsObj :Core.GlobalSettings) => {
+          console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
+          this.globalSettings = globalSettingsObj;
+          if (!this.globalSettings.stunServers
+              || this.globalSettings.stunServers.length == 0) {
+            this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
         }).catch((e) => {
-          console.log('No description loaded', e);
+          console.log('No global settings loaded', e);
         });
   }
 
@@ -176,12 +178,12 @@ class uProxyCore implements uProxy.CoreAPI {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (networkName:string) : Promise<void> => {
+  public login = (networkName :string) : Promise<void> => {
     if (networkName === Social.MANUAL_NETWORK_ID) {
       var network = Social.getNetwork(networkName, '');
       var loginPromise = network.login(true);
       loginPromise.then(() => {
-        ui.updateAll();
+        Social.notifyUI(networkName);
         console.log('Logged in to manual network');
       });
       return loginPromise;
@@ -221,7 +223,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkInfo:NetworkInfo) : Promise<void> => {
+  public logout = (networkInfo :NetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     var userId = networkInfo.userId;
     var network = Social.getNetwork(networkName, userId);
@@ -233,7 +235,7 @@ class uProxyCore implements uProxy.CoreAPI {
       if (networkName !== Social.MANUAL_NETWORK_ID) {
         delete Social.networks[networkName][userId];
       }
-      ui.updateAll();
+      Social.notifyUI(networkName);
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: disable auto-login
@@ -249,14 +251,19 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (newDescription:string) => {
-    // TODO: Send the new description to peers.  Right now we assume that users
-    // can't update the description after they are signed in.
-    var newDescriptionObj :Core.StoredDescription = {
-      description: newDescription
-    };
-    storage.save<Core.StoredDescription>('description', newDescriptionObj);
-    core.description = newDescription;
+
+  public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
+    storage.save<Core.GlobalSettings>('globalSettings', newSettings);
+
+    // Clear the existing servers and add in each new server.
+    // Trying globalSettings = newSettings does not correctly update
+    // pre-existing references to stunServers (e.g. from RemoteInstances).
+    this.globalSettings.stunServers
+        .splice(0, this.globalSettings.stunServers.length);
+    for (var i = 0; i < newSettings.stunServers.length; ++i) {
+      this.globalSettings.stunServers.push(newSettings.stunServers[i]);
+    }
+    this.globalSettings.description = newSettings.description;
   }
 
   /**
@@ -344,6 +351,7 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
+<<<<<<< HEAD
 
   /**
    * Set customized STUN servers.
@@ -361,6 +369,8 @@ class uProxyCore implements uProxy.CoreAPI {
       this.stunServers.push({urls: [customStunServer]});
     }
   }
+=======
+>>>>>>> 4dd51a099a82345ca156a14b951a40466d3f16c5
 }  // class uProxyCore
 
 
@@ -377,7 +387,7 @@ function _validateKeyHash(keyHash:string) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-core.onCommand(uProxy.Command.REFRESH_UI, ui.updateAll);
+core.onCommand(uProxy.Command.GET_INITIAL_STATE, ui.sendInitialState);
 // When the login message is sent from the extension, assume it's explicit.
 core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
 core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
@@ -396,17 +406,13 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 //   // TODO: Handle changes that might affect proxying.
 // });
 
-core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-               core.updateDescription);
-
 // TODO: make the invite mechanism an actual process.
 // core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 // });
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
-
-core.onCommand(uProxy.Command.SET_STUN_SERVER, core.setStunServer);
+core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -59,7 +59,7 @@ module Core {
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
       webrtcPcConfig: {
-         iceServers: core.stunServers
+         iceServers: core.globalSettings.stunServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]
@@ -68,7 +68,7 @@ module Core {
       };
     public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
       webrtcPcConfig: {
-         iceServers: core.stunServers
+         iceServers: core.globalSettings.stunServers
         },
         webrtcMediaConstraints: {
           optional: [{DtlsSrtpKeyAgreement: true}]

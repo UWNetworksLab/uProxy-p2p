@@ -1,8 +1,14 @@
 Polymer({
+  model: model,
+  DEFAULT_STUN_SERVERS: [{url: 'stun:stun.l.google.com:19302'},
+                         {url: 'stun:stun1.l.google.com:19302'},
+                         {url: 'stun:stun2.l.google.com:19302'},
+                         {url: 'stun:stun3.l.google.com:19302'},
+                         {url: 'stun:stun4.l.google.com:19302'}],
   displayAdvancedSettings: false,
   logOut: function() {
-    core.logout({name: ui.onlineNetwork.name,
-                 userId: ui.onlineNetwork.userId}).then(() => {
+    core.logout({name: model.onlineNetwork.name,
+                 userId: model.onlineNetwork.userId}).then(() => {
       ui.view = UI.View.SPLASH;
       ui.setOfflineIcon();
     });
@@ -17,14 +23,16 @@ Polymer({
     }
   },
   setStunServer: function() {
-    core.setStunServer(this.stunServer);
+    model.globalSettings.stunServers = [{url: this.stunServer}];
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;
     }
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
-    core.setStunServer('_DEFAULT_SERVERS_');
+    model.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS;
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmNewServer.hidden) {
       this.$.confirmNewServer.hidden = true;
     }
