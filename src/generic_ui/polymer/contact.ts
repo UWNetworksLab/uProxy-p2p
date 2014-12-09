@@ -18,6 +18,8 @@ Polymer({
     console.log('collapse', this.contact.expanded);
   },
   ready: function() {
+    this.ui = ui;
+    this.UI = UI;
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
     }

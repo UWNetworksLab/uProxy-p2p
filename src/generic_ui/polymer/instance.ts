@@ -20,9 +20,7 @@ Polymer({
     core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
-      this.ui.startGettingInUiAndConfig(endpoint);
-      this.ui.instanceGettingAccessFrom = this.instance.instanceId;
-      this.ui.updateGettingStatusBar();
+      this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     });
   },
   stop: function() {
