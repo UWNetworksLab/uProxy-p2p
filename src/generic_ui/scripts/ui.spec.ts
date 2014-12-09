@@ -2,36 +2,6 @@
 /// <reference path='../../generic_core/consent.ts' />
 /// <reference path='ui.ts' />
 
-// TODO: move model, mockCore, and mockBrowserApi to a file
-// where they can be re-used.
-var model :UI.Model = {
-  networks: [
-  ],
-  contacts: {
-    'getAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    },
-    'shareAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    }
-  },
-  description: ''
-};
-
 describe('UI.UserInterface', () => {
 
   var ui :UI.UserInterface;

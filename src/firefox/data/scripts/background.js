@@ -3,19 +3,6 @@ var ui;
 
 var core;
 
-var model = {
-  networkNames: [],
-  onlineNetwork: null,
-  contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
-  }
-};
-
 function initUI() {
     var firefoxConnector = new FirefoxConnector();
     core = new CoreConnector(firefoxConnector);

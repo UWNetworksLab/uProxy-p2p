@@ -11,7 +11,37 @@
 /// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
-declare var model         :UI.Model;
+// Singleton model for data bindings.
+var model :UI.Model = {
+  networkNames: [],
+  onlineNetwork: null,
+  contacts: {
+    'getAccessContacts': {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts': {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
+  },
+  globalSettings : {
+    'description' : '',
+    'stunServers' : []
+  }
+};
 
 module UI {
 
@@ -59,21 +89,17 @@ module UI {
     }
   }
 
-  export interface UserCategories {
-    getTab :string;
-    shareTab :string;
-  }
-
-  /**
-   * Structure of the uProxy UI model object:
-   * TODO: Probably put the model in its own file.
-   */
   export interface Model {
     networkNames :string[];
     onlineNetwork :UI.Network;
     contacts : Contacts;
     globalSettings : Core.GlobalSettings;
   }
+
+   export interface UserCategories {
+     getTab :string;
+     shareTab :string;
+   }
 
   /**
    * Specific to one particular Social network.
