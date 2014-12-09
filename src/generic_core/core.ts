@@ -351,26 +351,6 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
-<<<<<<< HEAD
-
-  /**
-   * Set customized STUN servers.
-   */
-  public setStunServer = (customStunServer :string) : void => {
-    if (customStunServer === this.RESET_STUN_SERVERS_) {
-      // Clear the existing servers and add in each default server.
-      this.stunServers.splice(0, this.stunServers.length);
-      for (var i = 0; i < this.DEFAULT_STUN_SERVERS_.length; ++i) {
-        this.stunServers.push(this.DEFAULT_STUN_SERVERS_[i]);
-      }
-    } else {
-      // Clear the existing servers and push the new server.
-      this.stunServers.splice(0, this.stunServers.length);
-      this.stunServers.push({urls: [customStunServer]});
-    }
-  }
-=======
->>>>>>> 4dd51a099a82345ca156a14b951a40466d3f16c5
 }  // class uProxyCore
 
 

@@ -54,11 +54,7 @@ declare module Core {
   // Object containing description so it can be saved to storage.
   export interface GlobalSettings {
     description :string;
-    stunServers :Core.StunServer[];
-  }
-
-  export interface StunServer {
-    url :string;
+    stunServers :freedom_RTCPeerConnection.RTCIceServer[];
   }
 
 }  // module Core
