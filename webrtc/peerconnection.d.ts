@@ -34,14 +34,6 @@ declare module WebRtc {
     port:number;
   }
 
-  // Once you are connected to the peer, you know the local/remote addresses.
-  interface ConnectionAddresses {
-    local  :Endpoint;  // the local transport address/port
-    localType: string;
-    remote :Endpoint;  // the remote peer's transport address/port
-    remoteType: string;
-  }
-
   enum State {
     WAITING,      // Can move to CONNECTING.
     CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
@@ -65,14 +57,14 @@ declare module WebRtc {
     // and is guarenteed to fulfilled before |onceConnected|.
     onceConnecting  :Promise<void>;
     // The |onceConnected| promise is fulfilled when pcState === CONNECTED
-    onceConnected :Promise<ConnectionAddresses>;
+    onceConnected :Promise<void>;
     // The |onceDisconnected| promise is fulfilled when pcState === DISCONNECTED
     onceDisconnected :Promise<void>;
 
     // Try to connect to the peer. Will change state from |WAITING| to
     // |CONNECTING|. If there was an error, promise is rejected. Otherwise
     // returned promise === |onceConnected|.
-    negotiateConnection :() => Promise<ConnectionAddresses>;
+    negotiateConnection :() => Promise<void>;
 
     // A peer connection can either open a data channel to the peer (will
     // change from |WAITING| state to |CONNECTING|)
@@ -107,10 +99,10 @@ declare module WebRtc {
     public dataChannels     :{[channelLabel:string] : DataChannel};
 
     public onceConnecting  :Promise<void>;
-    public onceConnected :Promise<ConnectionAddresses>;
+    public onceConnected :Promise<void>;
     public onceDisconnected :Promise<void>;
 
-    public negotiateConnection :() => Promise<ConnectionAddresses>;
+    public negotiateConnection :() => Promise<void>;
 
     public openDataChannel :(channelLabel: string,
                              options?: freedom_RTCPeerConnection.RTCDataChannelInit) => Promise<DataChannel>;

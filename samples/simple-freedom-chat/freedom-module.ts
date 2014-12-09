@@ -39,12 +39,8 @@ function makePeerConnection(name:string) {
   };
   var pc : WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
-  pc.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
-    log.info(name + ' connected: ' +
-        endpoints.local.address + ':' + endpoints.local.port +
-        ' (' + endpoints.localType + ') <-> ' +
-        endpoints.remote.address + ':' + endpoints.remote.port +
-        ' (' + endpoints.remoteType + ')');
+  pc.onceConnected.then(() => {
+    log.info(name + ' connected');
   });
   pc.onceDisconnected.then(() => {
     log.info(name + ': onceDisconnected');
@@ -74,8 +70,8 @@ b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
 // Negotiate a peerconnection. Once negotiated, enable the UI and add
 // send/receive handlers.
 a.negotiateConnection()
-  .then((endpoints:WebRtc.ConnectionAddresses) => {
-    log.info('a: negotiated connection to: ' + JSON.stringify(endpoints));
+  .then(() => {
+    log.info('a: negotiated connection');
   }, (e:any) => {
     log.error('could not negotiate peerconnection: ' + e.message);
     freedom().emit('error', {})

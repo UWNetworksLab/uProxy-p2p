@@ -30,12 +30,8 @@ function makePeerConnection() : WebRtc.PeerConnection {
     freedom().emit('signalForPeer', signal);
   });
 
-  pc.onceConnected.then((endpoints:WebRtc.ConnectionAddresses) => {
-    log.info('connected: ' +
-         endpoints.local.address + ':' + endpoints.local.port +
-         ' (' + endpoints.localType + ') <-> ' +
-         endpoints.remote.address + ':' + endpoints.remote.port +
-         ' (' + endpoints.remoteType + ')');
+  pc.onceConnected.then(() => {
+    log.info('connected');
   });
 
   pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
@@ -53,7 +49,7 @@ var pc :WebRtc.PeerConnection;
 freedom().on('start', () => {
   pc = makePeerConnection();
   pc.negotiateConnection()
-    .then((endpoints:WebRtc.ConnectionAddresses) => {
+    .then(() => {
       return pc.openDataChannel('text');
     })
     .then(connectDataChannel)

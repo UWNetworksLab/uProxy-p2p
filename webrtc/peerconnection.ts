@@ -45,14 +45,6 @@ module WebRtc {
     port:number;
   }
 
-  // Once you are connected to the peer, you know the local/remote addresses.
-  export interface ConnectionAddresses {
-    local  :Endpoint;  // the local transport address/port
-    localType: string;
-    remote :Endpoint;  // the remote peer's transport address/port
-    remoteType: string;
-  }
-
   export enum State {
     WAITING,      // Can move to CONNECTING.
     CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
@@ -124,7 +116,7 @@ module WebRtc {
     // |onceConnected| and |onceDisconnected| promises. Must only be
     // called once (per respective promise).
     private fulfillConnecting_    : () => void;
-    private fulfillConnected_     :(addresses:ConnectionAddresses) => void;
+    private fulfillConnected_     :() => void;
     private rejectConnected_      :(e:Error) => void;
     private fulfillDisconnected_  :() => void;
 
@@ -137,7 +129,7 @@ module WebRtc {
     public onceConnecting  :Promise<void>;
     // Fulfilled once we are connected to the peer. Rejected if connection fails
     // to be established.
-    public onceConnected  :Promise<ConnectionAddresses>;
+    public onceConnected  :Promise<void>;
     // Fulfilled when disconnected. Will never reject.
     public onceDisconnected :Promise<void>;
 
@@ -173,11 +165,11 @@ module WebRtc {
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;
         });
-      this.onceConnected = new Promise<ConnectionAddresses>((F,R) => {
+      this.onceConnected = new Promise<void>((F,R) => {
           // This ensures that onceConnecting consequences happen before
           // onceConnected.
-          this.fulfillConnected_ = (addresses:ConnectionAddresses) => {
-            this.onceConnecting.then(F.bind(null,addresses));
+          this.fulfillConnected_ = () => {
+            this.onceConnecting.then(F);
           };
           this.rejectConnected_ = R;
         });
@@ -316,116 +308,14 @@ module WebRtc {
     }
 
     // Once we have connected, we need to fulfill the connection promise and set
-    // the state. This also involves getting stats on WebRtc so we know what the
-    // connection addresses are so the onceConnected and negotiate connection
-    // promises can be fulfilled with the addresses.
+    // the state.
     private completeConnection_ = () : void => {
-      log.debug('completeConnection_');
-      var getPeerConnectionEndpoints = () : Promise<ConnectionAddresses> => {
-        log.debug('getPeerConnectionEndpoints');
-        return new Promise((F, R) => {
-          var tryGetStats = () => {
-            log.debug('tryGetStats');
-            this.pc_.getStats().then((report:any) => {
-              log.debug('searching stats report');
-              var result : any = {};
-              var candidateTypeMapping : any = {
-                'host': 'local',
-                'serverreflexive': 'stun',
-                'peerreflexive': 'prflx',
-                'relayed': 'relay'
-              };
-              var processChromeReport = (report:any, F:(c:ConnectionAddresses) => void) : boolean => {
-                for (var key in report) {
-                  var stats = report[key];
-                  // Search for the endpoints in use.
-                  // There's a bug in Chrome whereby RTCPeerConnection.getStats(),
-                  // when that RTCPeerConnection is configured to use a TURN server,
-                  // reports multiple channels, *some of which have the non-relay
-                  // candidates and are reported as active*. Fortunately, the report
-                  // quickly fixes itself and a workaround seems to be to wait until
-                  // some bytes are sent over the channel -- fortunately, again,
-                  // this happens automatically as part of keeping the channel alive.
-                  //
-                  // Tracking here:
-                  //   https://code.google.com/p/webrtc/issues/detail?id=3665
-                  //
-                  // Note that the inactive/failed channel remains visible at
-                  // chrome://webrtc-internals/.
-                  if (stats.type === 'googCandidatePair' &&
-                      stats.googActiveConnection === 'true' &&
-                      parseInt(stats.bytesSent) > 0) {
-                    log.debug('found chrome stats report');
-                    var localFields = stats.googLocalAddress.split(':');
-                    var remoteFields = stats.googRemoteAddress.split(':');
-                    F({
-                      local: {
-                        address: localFields[0],
-                        port: parseInt(localFields[1])
-                      },
-                      remote: {
-                        address: remoteFields[0],
-                        port: parseInt(remoteFields[1])
-                      },
-                      localType: stats.googLocalCandidateType,
-                      remoteType: stats.googRemoteCandidateType
-                    });
-                    return true;
-                  }
-                }
-                return false;
-              };
-
-              var processFirefoxReport = (report:any, F:(c:ConnectionAddresses) => void) : boolean => {
-                for(var key in report) {
-                  var stats = report[key];
-                  if (stats.type === 'candidatepair' && stats.selected) {
-                    log.debug('found firefox stats report');
-                    var localCandidate = report[stats.localCandidateId];
-                    var remoteCandidate = report[stats.remoteCandidateId];
-                    F({
-                      local: {
-                        address: localCandidate.ipAddress,
-                        port: localCandidate.portNumber
-                      },
-                      localType:
-                          candidateTypeMapping[localCandidate.candidateType] || 'unknown',
-                      remote: {
-                        address: remoteCandidate.ipAddress,
-                        port: remoteCandidate.portNumber
-                      },
-                      remoteType:
-                          candidateTypeMapping[remoteCandidate.candidateType] || 'unknown'
-                    });
-                    return true;
-                  }
-                }
-                return false;
-              };
-
-              if (processFirefoxReport(report, F) || processChromeReport(report, F)) {
-                return;
-              }
-              window.setTimeout(tryGetStats, 200);
-            }, R);
-          }
-          tryGetStats();
-        });
-      };
-      getPeerConnectionEndpoints()
-          .then((addresses: ConnectionAddresses) => {
-            log.debug('calling fulfillConnected_');
-            this.pcState = State.CONNECTED;
-            this.fulfillConnected_(addresses);
-        })
-      .catch((e) => {
-          // Error (unclear from the spec if this can actually happen)
-          this.closeWithError_(this.peerName + ': ' +
-              'onSignallingStateChange getStats error: ' + e.toString());
-      });
+      log.debug('completeConnection_, calling fulfillConnected_');
+      this.pcState = State.CONNECTED;
+      this.fulfillConnected_();
     }
 
-    public negotiateConnection = () : Promise<ConnectionAddresses> => {
+    public negotiateConnection = () : Promise<void> => {
       log.debug('negotiateConnection()');
       // In order for the initial SDP header to include the provision for having
       // data channels (without it, we would have to re-negotiate SDP after the
@@ -441,7 +331,7 @@ module WebRtc {
     // Called when openDataChannel is called to and we have not yet negotiated
     // our connection, or called when some WebRTC internal event requires
     // renegotiation of SDP headers.
-    private negotiateConnection_ = () : Promise<ConnectionAddresses> => {
+    private negotiateConnection_ = () : Promise<void> => {
       log.debug(this.peerName + ': ' + 'negotiateConnection_');
       if (this.pcState === State.DISCONNECTED) {
         return Promise.reject(new Error(this.peerName + ': ' +
