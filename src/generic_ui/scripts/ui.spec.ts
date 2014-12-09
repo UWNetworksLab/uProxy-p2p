@@ -2,36 +2,6 @@
 /// <reference path='../../generic_core/consent.ts' />
 /// <reference path='ui.ts' />
 
-// TODO: move model, mockCore, and mockBrowserApi to a file
-// where they can be re-used.
-var model :UI.Model = {
-  networks: [
-  ],
-  contacts: {
-    'getAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    },
-    'shareAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    }
-  },
-  description: ''
-};
-
 describe('UI.UserInterface', () => {
 
   var ui :UI.UserInterface;
@@ -58,7 +28,6 @@ describe('UI.UserInterface', () => {
     ui['mapInstanceIdToUserName_'] = {
       'testInstanceId': 'Alice'
     };
-    model.networks = [];
   });
 
   describe('syncUser', () => {
@@ -80,7 +49,7 @@ describe('UI.UserInterface', () => {
         instances: []
       };
       ui.syncUser(payload);
-      var user :UI.User = model.networks[0].roster['testUserId'];
+      var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
       expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(1);
       expect(model.contacts.getAccessContacts.onlineNonUproxy[0]).toEqual(user);
@@ -137,7 +106,7 @@ describe('UI.UserInterface', () => {
         instances: [clientInstance, serverInstance]
       };
       ui.syncUser(payload);
-      var user :UI.User = model.networks[0].roster['testUserId'];
+      var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
       expect(ui['mapInstanceIdToUserName_']['instance1']).toEqual('Alice');
       expect(ui['mapInstanceIdToUserName_']['instance2']).toEqual('Alice');
@@ -258,112 +227,7 @@ describe('UI.UserInterface', () => {
     });
   });  // Update giving and/or getting state in UI
 
-  describe('Sync network list', () => {
-
-    var networkName0 = 'MockNetwork0';
-    var networkName1 = 'MockNetwork1';
-
-    var networkMessage = {
-      name: networkName0,
-      online: false,
-      userId : ''
-    };
-
-    it('Add networks', () => {
-      // Add a network
-      updateToHandlerMap[uProxy.Update.NETWORK]
-          .call(ui, networkMessage);
-      expect(model.networks.length).toEqual(1);
-      expect(model.networks[0].name).toEqual(networkName0);
-
-      // Add a new network
-      networkMessage.name = networkName1;
-      updateToHandlerMap[uProxy.Update.NETWORK]
-          .call(ui, networkMessage);
-      expect(model.networks.length).toEqual(2);
-      expect(model.networks[1].name).toEqual(networkName1);
-
-      // Update existing network;
-      networkMessage.online = true;
-      networkMessage.userId = 'fakeUserID';
-      updateToHandlerMap[uProxy.Update.NETWORK]
-          .call(ui, networkMessage);
-      expect(model.networks.length).toEqual(2);
-      expect(model.networks[0].online).toEqual(false);
-      expect(model.networks[1].online).toEqual(true);
-
-      // Log in with mockNetwork0.
-      networkMessage.name = networkName0;
-      updateToHandlerMap[uProxy.Update.NETWORK]
-          .call(ui, networkMessage);
-      expect(model.networks.length).toEqual(2);
-      expect(model.networks[0].online).toEqual(true);
-      expect(model.networks[1].online).toEqual(true);
-      expect(model.networks[0].roster).toEqual({});
-      expect(model.networks[1].roster).toEqual({});
-
-      // Add some users for both networks;
-      // TODO(salomegeo): move this to beforeEach
-      model.contacts.getAccessContacts.onlineNonUproxy = [];
-      model.contacts.shareAccessContacts.onlineNonUproxy = [];
-      var payload :UI.UserMessage = {
-        network: networkName0,
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData',
-          isOnline: true
-        },
-        instances: []
-      };
-      ui.syncUser(payload);
-      expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(1);
-      expect(model.contacts.shareAccessContacts.onlineNonUproxy.length).toEqual(1);
-
-      payload.network = networkName1;
-      for (var i = 0; i < 10; i++) {
-        payload.user.userId = 'testUserId' + i;
-        ui.syncUser(payload);
-      }
-      expect(Object.keys(model.networks[0].roster).length).toEqual(1);
-      expect(Object.keys(model.networks[1].roster).length).toEqual(10);
-      expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(11);
-      expect(model.contacts.shareAccessContacts.onlineNonUproxy.length).toEqual(11);
-
-      // Log out from network1, make sure roster is clear
-      // Check that it doesn't clear network0 buddylist
-      networkMessage.online = false;
-      networkMessage.name = networkName1;
-      updateToHandlerMap[uProxy.Update.NETWORK]
-          .call(ui, networkMessage);
-      expect(Object.keys(model.networks[0].roster).length).toEqual(1);
-      expect(Object.keys(model.networks[1].roster).length).toEqual(0);
-      expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(1);
-      expect(model.contacts.shareAccessContacts.onlineNonUproxy.length).toEqual(1);
-    });
-
-    it('Clear roster after log out', () => {
-    });
-  });
-
   describe('syncNetwork_', () => {
-
-    it('Creates new networks', () => {
-      expect(model.networks.length).toEqual(0);
-      var networkMessage :UI.NetworkMessage = {
-        name:   'Google',
-        userId: '',
-        online: false
-      };
-      ui['syncNetwork_'](networkMessage);
-      expect(model.networks.length).toEqual(1);
-      var network = ui['getNetwork'](networkMessage.name);
-      expect(network).toBeDefined();
-      expect(network.name).toEqual(networkMessage.name);
-      expect(network.userId).toEqual(networkMessage.userId);
-      expect(network.online).toEqual(networkMessage.online);
-      expect(ui.onlineNetwork).toEqual(null);
-    });
 
     it('Updates onlineNetwork', () => {
       var networkMessage :UI.NetworkMessage = {
@@ -372,10 +236,9 @@ describe('UI.UserInterface', () => {
         online: true
       };
       ui['syncNetwork_'](networkMessage);
-      expect(ui.onlineNetwork).toBeDefined();
-      expect(ui.onlineNetwork.name).toEqual(networkMessage.name);
-      expect(ui.onlineNetwork.userId).toEqual(networkMessage.userId);
-      expect(ui.onlineNetwork.online).toEqual(networkMessage.online);
+      expect(model.onlineNetwork).toBeDefined();
+      expect(model.onlineNetwork.name).toEqual(networkMessage.name);
+      expect(model.onlineNetwork.userId).toEqual(networkMessage.userId);
     });
 
     it('Clears fields when network goes offline', () => {
@@ -398,19 +261,13 @@ describe('UI.UserInterface', () => {
                     imageData: 'imageData'
                   }
                 });
-      var network :UI.Network = ui['getNetwork'](networkMessage.name);
-      expect(network.userName).toEqual('testName');
-      expect(network.imageData).toEqual('imageData');
+      expect(model.onlineNetwork.userName).toEqual('testName');
+      expect(model.onlineNetwork.imageData).toEqual('imageData');
 
       // Logout
       networkMessage  = {name: 'Facebook', userId: '', online: false};
       ui['syncNetwork_'](networkMessage);
-      expect(ui.onlineNetwork).toEqual(null);
-      network = ui['getNetwork'](networkMessage.name);
-      expect(network).toBeDefined();
-      expect(network.roster).toEqual({});
-      expect(network.userName).toEqual(null);
-      expect(network.imageData).toEqual(null);
+      expect(model.onlineNetwork).toEqual(null);
     });
 
   });  // syncNetwork_

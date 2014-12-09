@@ -24,7 +24,7 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
-    REFRESH_UI = 1000,
+    GET_INITIAL_STATE = 1000,
     // Skip REFRESH and RESET commands that have been removed
     LOGIN = 1003,
     LOGOUT,
@@ -48,7 +48,7 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Update {
-    ALL = 2000,
+    INITIAL_STATE = 2000,
     NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
