@@ -72,7 +72,11 @@
      <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
       <div id='words'>
-        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
+        <!--
+        // The integer below is the cutoff length for contact names. 
+        // If it is longer than 30 the tooltip will be displayed
+          -->
+        <h1 title='{{ (contact.name.length > 30) ? contact.name : "" }}' on-mousedown='{{ toggle }}'>{{ getShortenedContact() }}</h1>
         <div id='userId' hidden?='{{!contact.expanded}}'>{{ contact.userId }}</div>
         <div id='instances' hidden?='{{!contact.expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>

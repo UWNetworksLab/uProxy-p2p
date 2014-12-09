@@ -21,5 +21,15 @@ Polymer({
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
     }
+  },
+
+  getShortenedContact: function() {
+    // The integer below is the cutoff length for contact names. 
+    // If it is longer than 30 it will be truncated
+    if (this.contact.name.length > 30) {
+      return this.contact.name.substring(0,8) + '...';
+    }
+    return this.contact.name;
   }
+  
 });
