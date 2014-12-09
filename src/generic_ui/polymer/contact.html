@@ -73,9 +73,9 @@
     <div tabindex='-1' id='frame'
         class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
      <!-- on-blur='{{ collapse }}'> -->
-      <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
+      <img id='avatar' src='{{ contact.imageData }}' on-tap='{{ toggle }}'/>
       <div id='words'>
-        <div class='nameRow' on-mousedown='{{ toggle }}'>
+        <div class='nameRow' on-tap='{{ toggle }}'>
           <div class='name'>{{ contact.name }}</div>
           <img src='../icons/getting.png' class='accessIcon'
               hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>

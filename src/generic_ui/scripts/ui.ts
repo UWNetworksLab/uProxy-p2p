@@ -43,6 +43,9 @@ var model :UI.Model = {
   }
 };
 
+// TODO: currently we have a UI object (typescript module, i.e. namespace)
+// and a ui object (singleton intance of UI.UserInterface).  We should
+// change the names of these to avoid confusion.
 module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
