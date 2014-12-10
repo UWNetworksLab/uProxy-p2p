@@ -9,6 +9,8 @@ var Chrome_oauth = function() {
 };
 
 Chrome_oauth.prototype.initiateOAuth = function(redirectURIs, continuation) {
+  // If we have uproxy.org pick that one,
+  // otherwise pick the first http from the list.
   var redirect;
   for (var i in redirectURIs) {
     if (redirectURIs[i] === 'https://www.uproxy.org/oauth-redirect-uri') {

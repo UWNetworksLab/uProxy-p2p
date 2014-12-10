@@ -43,6 +43,9 @@
     "uproxy-lib": "^17.0.0",
     "uproxy-networking": "^3.0.2"
   },
+  "peerDependencies" : {
+    "freedom": "~0.6.11"
+  },
   "private": true,
   "scripts": {
     "test": "grunt test --verbose",
