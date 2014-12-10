@@ -83,12 +83,6 @@ module UI {
       return categories;
     }
 
-    private getOrdinal = (n :number) => {
-      // TODO: translate this.
-      var specialCases = {1: '1st', 2: '2nd', 3: '3rd'};
-      return specialCases[n] || (n + 'th');
-    }
-
     public updateInstanceDescriptions = () => {
       if (this.instances.length <= 1) {
         // Leave descriptions unchanged if there are 0 or 1 instances.
@@ -97,8 +91,8 @@ module UI {
       for (var i = 0; i < this.instances.length; ++i) {
         var instance = this.instances[i];
         if (!instance.description) {
-          // Set description to "1st Computer", "2nd Computer", etc.
-          instance.description = this.getOrdinal(i + 1) + ' Computer';
+          // Set description to "Computer 1", "Computer 2", etc.
+          instance.description = 'Computer ' + (i + 1);
         }
       }
     }

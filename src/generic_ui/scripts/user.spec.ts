@@ -54,9 +54,9 @@ describe('UI.User', () => {
       getInstance('instance3', '')
     ];
     user.updateInstanceDescriptions();
-    expect(user.instances[0].description).toEqual('1st Computer');
+    expect(user.instances[0].description).toEqual('Computer 1');
     expect(user.instances[1].description).toEqual('laptop');
-    expect(user.instances[2].description).toEqual('3rd Computer');
+    expect(user.instances[2].description).toEqual('Computer 3');
   });
 
   // TODO: more specs
