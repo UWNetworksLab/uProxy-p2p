@@ -119,15 +119,60 @@
       }
       #sharingEnabled {
         position: absolute;
-        left: 332px;
+        right: 20px;
         top: 20px;
         cursor: pointer;
+      }
+      #sharingEnabledInfo {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        height: 100%;
+        width: 100%;
+        background-color: #009688;
+        z-index: 11;
+        opacity: 0.8;
+      }
+      #sharingEnabledBubble {
+        position: absolute;
+        right: 10px;
+        top: 12px;
+        height: 39px;
+        width: 39px;
+        background-color: white;
+        opacity: 0.9;
+        border-radius: 50%;
+      }
+      #sharingEnabledHelpText {
+        position: relative;
+        top: 15%;
+        padding: 40px;
+        color: white;
+      }
+      #confirmSharingEnabled:hover {
+        cursor: pointer;
+      }
+      #sharingEnabledHeader {
+        font-size: 1.7em;
       }
 
     </style>
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
+
+    <div id='sharingEnabledInfo'
+         hidden?='{{(model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || !model.globalSettings.newToUproxy || UI.View.ROSTER!=ui.view}}'>
+      <div id='sharingEnabledBubble'></div>
+      <img src='../icons/sharing-enabled-toolbar.png' id='sharingEnabled'>
+      <div id='sharingEnabledHelpText'>
+        <p id='sharingEnabledHeader'>Sharing enabled</p>
+        <br>
+        The icon in the top right means you're available for sharing access with friends you've offered access to.
+        <br><br>
+        <p id='confirmSharingEnabled' on-click='{{confirmSharingEnabled}}'>GOT IT</b>
+      </div>
+    </div>
 
     <div id='logged-in-controls'
         hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>

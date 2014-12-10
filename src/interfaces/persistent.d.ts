@@ -55,6 +55,7 @@ declare module Core {
   export interface GlobalSettings {
     description :string;
     stunServers :Core.StunServer[];
+    newToUproxy :boolean;
   }
 
   export interface StunServer {

@@ -18,6 +18,10 @@ Polymer({
   setShareMode: function() {
     ui.mode = UI.Mode.SHARE;
   },
+  confirmSharingEnabled: function() {
+    model.globalSettings.newToUproxy = false;
+    core.updateGlobalSettings(model.globalSettings);
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;

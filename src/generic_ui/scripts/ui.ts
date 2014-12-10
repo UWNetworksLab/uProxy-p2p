@@ -39,7 +39,8 @@ var model :UI.Model = {
   },
   globalSettings : {
     'description' : '',
-    'stunServers' : []
+    'stunServers' : [],
+    'newToUproxy' : true
   }
 };
 

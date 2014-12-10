@@ -89,7 +89,8 @@ class uProxyCore implements uProxy.CoreAPI {
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
   public globalSettings :Core.GlobalSettings
       = {description : 'My Computer',
-         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
+         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0),
+         newToUproxy : true};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -107,9 +108,17 @@ class uProxyCore implements uProxy.CoreAPI {
         .then((globalSettingsObj :Core.GlobalSettings) => {
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
           this.globalSettings = globalSettingsObj;
+          // If no custom STUN servers were found in storage, use the default
+          // servers.
           if (!this.globalSettings.stunServers
               || this.globalSettings.stunServers.length == 0) {
             this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
+          // If storage does not know if this user is new to uProxy,
+          // assume the user is new so that they will get helpful
+          // onboarding information.
+          if (this.globalSettings.newToUproxy == null) {
+            this.globalSettings.newToUproxy = true;
           }
         }).catch((e) => {
           console.log('No global settings loaded', e);
@@ -263,6 +272,7 @@ class uProxyCore implements uProxy.CoreAPI {
       this.globalSettings.stunServers.push(newSettings.stunServers[i]);
     }
     this.globalSettings.description = newSettings.description;
+    this.globalSettings.newToUproxy = newSettings.newToUproxy;
   }
 
   /**
