@@ -47,7 +47,9 @@
     }
     </style>
 
-    <div id='description'>{{ instance.description }}</div>
+    <div id='description' hidden?='{{ !instance.description }}'>
+      {{ instance.description }}
+    </div>
 
     <!-- TODO(jetpack): replace these state-dependent buttons with
     simpler UI, exposing state bits directly. -->

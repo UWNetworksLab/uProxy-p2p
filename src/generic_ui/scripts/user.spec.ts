@@ -11,6 +11,18 @@ describe('UI.User', () => {
     spyOn(console, 'warn');
   });
 
+  function getInstance(id :string, description :string) {
+    return {
+      instanceId: id,
+      description: description,
+      consent: new Consent.State(),
+      access: {asClient: false, asProxy: false},
+      isOnline: true,
+      bytesSent: 0,
+      bytesReceived: 0
+    };
+  }
+
   it('creates with the correct userId', () => {
     user = new UI.User('fakeuser', null);
     expect(user.userId).toEqual('fakeuser');
@@ -27,6 +39,24 @@ describe('UI.User', () => {
     });
     expect(user.name).toEqual('fakename');
     expect(user.imageData).toEqual('fakeimage.uri');
+  });
+
+  it('does not change description if only 1 instance', () => {
+    user.instances = [getInstance('instance1', '')];
+    user.updateInstanceDescriptions();
+    expect(user.instances[0].description).toEqual('');
+  });
+
+  it('updates empty descriptions when multiple instances', () => {
+    user.instances = [
+      getInstance('instance1', ''),
+      getInstance('instance2', 'laptop'),
+      getInstance('instance3', '')
+    ];
+    user.updateInstanceDescriptions();
+    expect(user.instances[0].description).toEqual('1st Computer');
+    expect(user.instances[1].description).toEqual('laptop');
+    expect(user.instances[2].description).toEqual('3rd Computer');
   });
 
   // TODO: more specs

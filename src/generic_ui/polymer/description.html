@@ -1,27 +1,11 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
+<link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
 
 <polymer-element name='uproxy-description' attributes=''>
   <template>
-    <style>
-    #device-name {
-      box-sizing: border-box;
-      padding: 12px 16px;
-      font-size: 16px;
-      line-height: 20px;
-      color: #888;
-      outline: none;
-      border: none;
-      border-bottom: 1px solid rgb(221, 221, 221);
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    #device-name:hover {
-      border-color: #aaa;
-    }
-    </style>
-    <input type='text' id='device-name' placeholder='Description'
-        on-blur='{{update}}' value='{{description}}'></input>
+    <paper-input-decorator label="Description">
+      <input is="core-input" value='{{description}}' on-blur='{{update}}'>
+    </paper-input-decorator>
   </template>
   <script src='description.js'></script>
 </polymer-element>
