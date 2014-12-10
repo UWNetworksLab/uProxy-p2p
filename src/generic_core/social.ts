@@ -195,6 +195,10 @@ module Social {
       console.error('!!! [' + this.name + '] ' + msg);
     }
 
+    public resendInstanceHandshakes = () => {
+      // Do nothing for non-freedom networks (e.g. manual).
+    }
+
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
@@ -492,6 +496,12 @@ module Social {
         clearInterval(this.monitorIntervalId_);
       }
       this.monitorIntervalId_ = null;
+    }
+
+    public resendInstanceHandshakes = () => {
+      for (var userId in this.roster) {
+        this.roster[userId].resendInstanceHandshakes();
+      }
     }
 
   }  // class Social.FreedomNetwork

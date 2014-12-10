@@ -460,6 +460,7 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
+      user.updateInstanceDescriptions();
       for (var i = 0; i < user.instances.length; ++i) {
         var instanceId = user.instances[i].instanceId;
         this.mapInstanceIdToUser_[instanceId] = user;

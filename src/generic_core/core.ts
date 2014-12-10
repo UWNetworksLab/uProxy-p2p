@@ -88,7 +88,7 @@ class uProxyCore implements uProxy.CoreAPI {
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
   public globalSettings :Core.GlobalSettings
-      = {description : 'My Computer',
+      = {description : '',
          stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
   public loadGlobalSettings :Promise<void> = null;
 
@@ -262,7 +262,16 @@ class uProxyCore implements uProxy.CoreAPI {
     for (var i = 0; i < newSettings.stunServers.length; ++i) {
       this.globalSettings.stunServers.push(newSettings.stunServers[i]);
     }
-    this.globalSettings.description = newSettings.description;
+
+    if (newSettings.description != this.globalSettings.description) {
+      this.globalSettings.description = newSettings.description;
+      // Resend instance info to update description for logged in networks.
+      for (var networkName in Social.networks) {
+        for (var userId in Social.networks[networkName]) {
+          Social.networks[networkName][userId].resendInstanceHandshakes();
+        }
+      }
+    }
   }
 
   /**
