@@ -15,9 +15,10 @@ module UI {
   export class User implements BaseUser {
 
     public name            :string;
-    public url             :string;
     public imageData       :string;
     public isOnline        :boolean;
+    public isGettingFromMe :boolean = false;
+    public isSharingWithMe :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
     public instances       :UI.Instance[];
@@ -25,7 +26,7 @@ module UI {
     /**
      * Initialize the user to an 'empty' default.
      */
-    constructor(public userId:string, public network :UI.Network) {
+    constructor(public userId :string, public network :UI.Network) {
       console.log('new user: ' + this.userId);
       this.name = '';
       this.instances = [];
@@ -80,6 +81,20 @@ module UI {
       }
 
       return categories;
+    }
+
+    public updateInstanceDescriptions = () => {
+      if (this.instances.length <= 1) {
+        // Leave descriptions unchanged if there are 0 or 1 instances.
+        return;
+      }
+      for (var i = 0; i < this.instances.length; ++i) {
+        var instance = this.instances[i];
+        if (!instance.description) {
+          // Set description to "Computer 1", "Computer 2", etc.
+          instance.description = 'Computer ' + (i + 1);
+        }
+      }
     }
 
   }  // class UI.User
