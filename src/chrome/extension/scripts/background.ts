@@ -53,7 +53,7 @@ function initUI() : UI.UserInterface {
     function() {
       return {cancel: true};
     },
-    {urls: [REDIRECT_URL + "*"]},
+    {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
     ['blocking']
   );
 

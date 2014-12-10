@@ -1,7 +1,5 @@
 /**
- * Hackety hack. Used by:
- *  - Google XMPP
- *  - Manual identity
+ * Chrome oauth provider
  **/
 /// <reference path='plumbing.ts'/>
 
@@ -11,15 +9,32 @@ var Chrome_oauth = function() {
 };
 
 Chrome_oauth.prototype.initiateOAuth = function(redirectURIs, continuation) {
-  continuation({
-    redirect: 'https://www.uproxy.org/oauth-redirect-uri',
-    state: ''
-  });
-  return true;
+  var redirect;
+  for (var i in redirectURIs) {
+    if (redirectURIs[i] === 'https://www.uproxy.org/oauth-redirect-uri') {
+      redirect = redirectURIs[i];
+      break;
+    }
+
+    if (redirect !== '' && (redirectURIs[i].indexOf('https://') === 0 ||
+        redirectURIs[i].indexOf('http://') === 0)) {
+      redirect = redirectURIs[i];
+    }
+  }
+
+  if (redirect) {
+    continuation({
+      redirect: redirect,
+      state: ''
+    });
+    return true
+  }
+  return false;
 }
 
 Chrome_oauth.prototype.launchAuthFlow = function(authUrl, stateObj, continuation) {
-  connector.sendToUI(uProxy.Update.GET_CREDENTIALS, authUrl);
+  connector.sendToUI(uProxy.Update.GET_CREDENTIALS,
+                    {url :authUrl, redirect :stateObj.redirect});
   connector.setOnCredentials((result) => {
     continuation(result);
   });

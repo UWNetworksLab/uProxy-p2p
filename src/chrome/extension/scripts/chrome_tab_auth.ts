@@ -3,8 +3,6 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
-var REDIRECT_URL = "https://www.uproxy.org/oauth-redirect-uri";
-
 declare var core :CoreConnector;
 
 // TODO: write a similar class for Firefox that will implement a common
@@ -21,18 +19,18 @@ class ChromeTabAuth {
   constructor() {
   }
 
-  public login = (url :string) : void => {
+  public login = (oauthInfo :OAuthInfo) : void => {
     if (this.tabId_ === -1) {
-      this.launchAuthTab_(url);
+      this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
     } else {
       chrome.tabs.update(this.tabId_, {active:true});
     }
   }
 
 
-  private launchAuthTab_ = (url :string) : void => {
+  private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
-      if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
+      if (tab.id === this.tabId_ && tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
