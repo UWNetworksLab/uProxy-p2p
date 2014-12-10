@@ -44,6 +44,10 @@
       line-height: 32px;
       color: rgb(112, 112, 112);
     }
+    #descriptionWrapper {
+      padding-left: 32px;
+      color: rgb(112, 112, 112);
+    }
     .userInfoName, .userInfoIDWithoutName {
       font-size: 16px;
     }
@@ -102,6 +106,10 @@
         <div hidden?='{{model.onlineNetwork.userName}}'>
           <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
         </div>
+      </div>
+      <div id='descriptionWrapper'>
+        Device description
+        <uproxy-description></uproxy-description>
       </div>
       <div class='actionLink' on-tap='{{toggleAdvancedSettings}}'>
         Advanced Settings

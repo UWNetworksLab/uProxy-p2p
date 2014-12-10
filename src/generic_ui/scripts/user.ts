@@ -83,6 +83,20 @@ module UI {
       return categories;
     }
 
+    public updateInstanceDescriptions = () => {
+      if (this.instances.length <= 1) {
+        // Leave descriptions unchanged if there are 0 or 1 instances.
+        return;
+      }
+      for (var i = 0; i < this.instances.length; ++i) {
+        var instance = this.instances[i];
+        if (!instance.description) {
+          // Set description to "Computer 1", "Computer 2", etc.
+          instance.description = 'Computer ' + (i + 1);
+        }
+      }
+    }
+
   }  // class UI.User
 
 } // module UI

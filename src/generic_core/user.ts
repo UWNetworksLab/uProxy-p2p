@@ -423,6 +423,14 @@ module Core {
       }
     }
 
+    public resendInstanceHandshakes = () => {
+      for (var instanceId in this.instanceToClientMap_) {
+        var clientId = this.instanceToClientMap_[instanceId];
+        this.network.sendInstanceHandshake(
+            clientId, this.getConsentForClient_(clientId));
+      }
+    }
+
   }  // class User
 
   export interface UserState {
