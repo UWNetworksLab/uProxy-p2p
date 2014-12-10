@@ -15,9 +15,10 @@ module UI {
   export class User implements BaseUser {
 
     public name            :string;
-    public url             :string;
     public imageData       :string;
     public isOnline        :boolean;
+    public isGettingFromMe :boolean = false;
+    public isSharingWithMe :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
     public instances       :UI.Instance[];
@@ -25,7 +26,7 @@ module UI {
     /**
      * Initialize the user to an 'empty' default.
      */
-    constructor(public userId:string, public network :UI.Network) {
+    constructor(public userId :string, public network :UI.Network) {
       console.log('new user: ' + this.userId);
       this.name = '';
       this.instances = [];
