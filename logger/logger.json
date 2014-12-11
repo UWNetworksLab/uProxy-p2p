@@ -1,0 +1,15 @@
+{
+  "name": "uProxy Logger",
+  "description": "Logger for aggregating uProxy logs, and filtering.",
+  "app": {
+    "script": "logger.js"
+  },
+  "constraints": {
+    "isolation": "never"
+  },
+  "provides": ["console"],
+  "default": "console",
+  "permissions": [
+    "core.console"
+  ]
+}

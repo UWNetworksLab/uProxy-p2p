@@ -25,24 +25,6 @@ interface CoreProviderCallback<T> {
 }
 
 declare module freedom {
-
-  // This is the interface that exists in the environment of a core provider's
-  // definition.
-  module CoreProviderEnv {
-    // The interface for the global `fdom` object.
-    interface Fdom {
-      apis :Apis;
-    }
-    interface Apis {
-      // Register the core provider wheer |classDef| is the class object.
-      register(coreProviderName:string, classDef:Function) : void;
-
-      // This sets the object that defines the freedom interface for the given
-      // core provider name.
-      set(coreProviderName:string, freedomClassSpec:any) : void;
-    }
-  }
-
   //----------------------------------------------------------------------------
   // Generic top level freedom interfaces
   //----------------------------------------------------------------------------
@@ -55,6 +37,14 @@ declare module freedom {
   interface Provider {
     providePromise(implementationClass:Object) : void;
   }
+  
+  interface Logger {
+    debug(...args:any[]) : void;
+    info(...args:any[]) : void;
+    log(...args:any[]) : void;
+    warn(...args:any[]) : void;
+    error(...args:any[]) : void;
+  }
 
   // See |Core_unprivileged| in |core.unprivileged.js|
   interface Core {
@@ -66,6 +56,7 @@ declare module freedom {
         : Promise<Channel<T,T2>>;
     // Returns the list of identifiers describing the dependency path.
     getId() : Promise<string[]>;
+    getLogger(tag:string) : Promise<Logger>;
   }
 
   // Channels are ways that freedom modules can send each other messages.
