@@ -116,20 +116,31 @@ class ChromeBrowserApi implements BrowserAPI {
     if (popupWindowId == -1) {
       chrome.windows.getLastFocused((windowThatLaunchedUproxy) => {
         mainWindowId = windowThatLaunchedUproxy.id;
+        var popupTop = windowThatLaunchedUproxy.top + 70;
+        var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
+        chrome.windows.create({url: popupUrl,
+                               type: "popup",
+                               width: 371,
+                               height: 600,
+                               top: popupTop,
+                               left: popupLeft}, (popup) => {
+          popupWindowId = popup.id;
+        });
       });
-      chrome.windows.create({url: popupUrl,
-                             type: "popup",
-                             width: 371,
-                             height: 600}, (popup) => {
-        popupWindowId = popup.id;
-      });
+
       chrome.windows.onRemoved.addListener((closedWindowId) => {
         if (closedWindowId == popupWindowId) {
           popupWindowId = -1;
         }
       });
     } else {
-      chrome.windows.update(popupWindowId, {focused: true});
+      chrome.windows.getLastFocused((windowThatLaunchedUproxy) => {
+        mainWindowId = windowThatLaunchedUproxy.id;
+        var popupTop = windowThatLaunchedUproxy.top + 70;
+        var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
+
+        chrome.windows.update(popupWindowId, {focused: true, top: popupTop, left: popupLeft});
+      });
     }
   }
 }

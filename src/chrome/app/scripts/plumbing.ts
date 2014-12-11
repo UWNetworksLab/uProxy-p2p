@@ -28,7 +28,11 @@ class ChromeUIConnector {
   private INSTALL_COMPLETE_PAGE_ :string = '../install-complete.html';
   private installStatusPage_ :string;
   private launchInstallStatusPage_ = () => {
-    window.open(this.installStatusPage_);
+    this.extPort_.postMessage({
+        cmd: 'fired',
+        type: uProxy.Update.LAUNCH_UPROXY,
+        data: 'launch'
+    });
   }
 
   constructor() {

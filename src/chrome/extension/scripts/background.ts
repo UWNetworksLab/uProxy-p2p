@@ -65,6 +65,7 @@ var popupUrl = "polymer/install-incomplete.html";
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked.
 var mainWindowId = -1;
+var chromeBrowserApi :ChromeBrowserApi;
 
 // TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
@@ -95,7 +96,7 @@ function setPopupUrl(url) : void {
  * updates from the Chrome App side propogate to the UI.
  */
 function initUI() : UI.UserInterface {
-  var chromeBrowserApi = new ChromeBrowserApi();
+  chromeBrowserApi = new ChromeBrowserApi();
   chrome.browserAction.onClicked
     .addListener(chromeBrowserApi.bringUproxyToFront);
 
