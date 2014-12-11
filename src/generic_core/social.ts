@@ -340,7 +340,8 @@ module Social {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
       if (client.userId == this.myInstance.userId) {
-        // TODO: Should we do anything in particular for our own client?
+        // Log out if it's our own client id.
+        // TODO: Consider adding myself to the roster.
         if (client.clientId === this.myInstance.clientId &&
             client.status === UProxyClient.Status.OFFLINE) {
           core.logout({name: this.name, userId: this.myInstance.userId});
