@@ -360,6 +360,9 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
+
+  public restart = () => {
+  }
 }  // class uProxyCore
 
 

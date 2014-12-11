@@ -25,6 +25,7 @@ module uProxy {
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
     GET_INITIAL_STATE = 1000,
+    RESTART,
     // Skip REFRESH and RESET commands that have been removed
     LOGIN = 1003,
     LOGOUT,
@@ -152,6 +153,8 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
+
+    restart() : void;
   }
 
   /**
@@ -172,6 +175,8 @@ module uProxy {
     send(payload :Payload, skipQueue ?:Boolean) : void;
 
     onUpdate(update :Update, handler :Function) : void;
+
+    restart() : void;
 
     status :StatusObject;
   }

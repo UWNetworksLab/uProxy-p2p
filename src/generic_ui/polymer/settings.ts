@@ -13,6 +13,10 @@ Polymer({
       ui.setOfflineIcon();
     });
   },
+  restart: function() {
+    window.close();
+    core.restart();
+  },
   toggleAdvancedSettings: function() {
     this.displayAdvancedSettings = !this.displayAdvancedSettings;
     if (!this.displayAdvancedSettings) {
