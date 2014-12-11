@@ -40,7 +40,7 @@ var model :UI.Model = {
   globalSettings : {
     'description' : '',
     'stunServers' : [],
-    'newToUproxy' : true
+    'hasSeenSharingEnabledScreen' : false
   }
 };
 

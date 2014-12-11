@@ -90,7 +90,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public globalSettings :Core.GlobalSettings
       = {description : '',
          stunServers : this.DEFAULT_STUN_SERVERS_.slice(0),
-         newToUproxy : true};
+         hasSeenSharingEnabledScreen : false};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -117,8 +117,8 @@ class uProxyCore implements uProxy.CoreAPI {
           // If storage does not know if this user is new to uProxy,
           // assume the user is new so that they will get helpful
           // onboarding information.
-          if (this.globalSettings.newToUproxy == null) {
-            this.globalSettings.newToUproxy = true;
+          if (this.globalSettings.hasSeenSharingEnabledScreen == null) {
+            this.globalSettings.hasSeenSharingEnabledScreen = false;
           }
         }).catch((e) => {
           console.log('No global settings loaded', e);
@@ -282,8 +282,10 @@ class uProxyCore implements uProxy.CoreAPI {
       }
     }
 
-    if(newSettings.newToUproxy != this.globalSettings.newToUproxy) {
-      this.globalSettings.newToUproxy = newSettings.newToUproxy;
+    if (newSettings.hasSeenSharingEnabledScreen
+        != this.globalSettings.hasSeenSharingEnabledScreen) {
+      this.globalSettings.hasSeenSharingEnabledScreen
+          = newSettings.hasSeenSharingEnabledScreen;
     }
   }
 

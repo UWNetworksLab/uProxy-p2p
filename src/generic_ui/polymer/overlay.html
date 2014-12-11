@@ -1,0 +1,75 @@
+<link rel='import' href='../lib/polymer/polymer.html'>
+
+<!--
+The overlay element creates a translucent mask over the popup
+in order to deliver important messages to the user. In order to
+use this element, the height, width, position, message and the
+hasSeenBefore attribute need to be provided when the element is
+created.
+
+
+Example:
+
+<style>
+  #testOverlay {
+    position: absolute;
+    bottom: 200px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+  }
+</style>
+
+<uproxy-overlay id='testOverlay' hasSeenBefore='hasSeenHelloWorld'>
+  <div id='message'>Hello World!<div>
+</uproxy-overlay>
+
+
+Two things you must do:
+
+1) The main text in the overlay MUST be provided in a div with the
+id='message'. This is so that the main text is automatically positioned,
+while other components of the overlay (e.g. the sharing enabled icon)
+can be otherwise positioned.
+
+2) The element needs to have a hasSeenBefore attribute. This attribute
+is the name of the global variable that keeps track of whether or not
+an overlay has been seen before. Clicking "GOT IT" will change this
+value to true. The variable is expected to be found in model.globalSettings.
+i.e. in the example we would expect model.globalSettings.hasSeenHelloWorld
+to track if the overlay has been seen.
+-->
+
+<polymer-element name='uproxy-overlay' attributes='hasSeenBefore'>
+  <template>
+    <style>
+      :host {
+        background-color: #009688;
+        z-index: 10000;
+        opacity: 0.8;
+        color: white;
+      }
+      polyfill-next-selector { content: '#message'; }
+      ::content #message {
+        position: relative;
+        top: 15%;
+        padding: 40px 40px 0px 40px;
+      }
+      #gotItContainer {
+        position: relative;
+        top: 15%;
+        padding: 0px 40px 40px 40px;
+      }
+      #gotIt {
+        cursor: pointer;
+      }
+    </style>
+
+    <content></content><br><br>
+    <div id="gotItContainer">
+      <span id="gotIt" on-click='{{confirmSeen}}'>GOT IT</span>
+    </div>
+
+  </template>
+  <script src='overlay.js'></script>
+</polymer-element>
