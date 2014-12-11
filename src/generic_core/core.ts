@@ -27,7 +27,7 @@ var storage = new Core.Storage();
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
 // this to be freedom, and communicate using 'emit's and 'on's.
-var bgAppPageChannel = freedom;
+var bgAppPageChannel = new freedom();
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
@@ -79,11 +79,12 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  private DEFAULT_STUN_SERVERS_ = [{url: 'stun:stun.l.google.com:19302'},
-                                {url: 'stun:stun1.l.google.com:19302'},
-                                {url: 'stun:stun2.l.google.com:19302'},
-                                {url: 'stun:stun3.l.google.com:19302'},
-                                {url: 'stun:stun4.l.google.com:19302'}];
+  private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
+                                {urls: ['stun:stun1.l.google.com:19302']},
+                                {urls: ['stun:stun2.l.google.com:19302']},
+                                {urls: ['stun:stun3.l.google.com:19302']},
+                                {urls: ['stun:stun4.l.google.com:19302']}];
+
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
