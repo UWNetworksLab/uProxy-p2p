@@ -17,6 +17,7 @@
  *    },
  *    ...
  */
+/// <reference path='firewall.ts' />
 /// <reference path='local-instance.ts' />
 /// <reference path='user.ts' />
 /// <reference path='util.ts' />
@@ -294,6 +295,9 @@ module Social {
      */
     public handleUserProfile = (profile :freedom_Social.UserProfile) => {
       var userId = profile.userId;
+      if (!Firewall.isValidUserProfile(profile, null)) {
+        return;
+      }
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
         // TODO: we may want to verify that our status is ONLINE before
@@ -337,6 +341,9 @@ module Social {
      */
     public handleClientState = (freedomClient :freedom_Social.ClientState)
         : void => {
+      if (!Firewall.isValidClientState(freedomClient, null)) {
+        return;
+      }
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
       if (client.userId == this.myInstance.userId) {
@@ -364,6 +371,9 @@ module Social {
      */
     public handleMessage = (incoming :freedom_Social.IncomingMessage)
         : void => {
+      if (!Firewall.isValidIncomingMessage(incoming, null)) {
+        return;
+      }
       var userId = incoming.from.userId;
       if (this.isNewFriend_(userId)) {
         this.log('received Message for ' + userId + ' before UserProfile.');
