@@ -21,7 +21,7 @@ var mockAppPort = () => {
   };
 };
 
-// Mock the global function used to change the URL launched when the
+// Mock the global function that changes the URL launched when the
 // extension icon is clicked.
 var setPopupUrl = () => {};
 
