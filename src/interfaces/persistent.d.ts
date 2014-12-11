@@ -1,3 +1,5 @@
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
+
 declare module Core {
 
   /**
