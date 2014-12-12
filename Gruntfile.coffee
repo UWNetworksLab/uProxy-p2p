@@ -419,7 +419,6 @@ module.exports = (grunt) ->
               'build/typescript-src/generic_core/util.js'
               'build/typescript-src/generic_core/nouns-and-adjectives.js'
               'build/typescript-src/generic_core/constants.js'
-              'build/typescript-src/generic_core/firewall.js'
               'build/typescript-src/generic_core/consent.js'
               'build/typescript-src/generic_core/auth.js'
               'build/typescript-src/generic_core/social-enum.js'
