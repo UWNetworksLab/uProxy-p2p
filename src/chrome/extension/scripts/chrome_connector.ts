@@ -229,9 +229,6 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
       handlers.forEach((handler) => { handler(msg.data); });
       // TODO: Fire a DOM update? Decide if this should happen here or during a
       // ui.sync call.
-    } else if (msg.data == 'launch') {
-      console.log('received launch message');
-      chromeBrowserApi.bringUproxyToFront();
     }
   }
 

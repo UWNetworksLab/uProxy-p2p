@@ -23,21 +23,29 @@ class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(Object) => void;
-
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
-  private installStatusPage_ :string;
+
+  // Launch a popup instructing the user to install the extension.
   private launchInstallIncompletePage_ = () => {
-    chrome.app.window.create(this.INSTALL_INCOMPLETE_PAGE_,
-        {innerBounds: {
-          height: 600,
-          width: 371
-        }});
+    var installIncompletePopup = chrome.app.window.get('install-incomplete');
+    if (!installIncompletePopup) {
+      chrome.app.window.create(this.INSTALL_INCOMPLETE_PAGE_,
+          { id: 'install-extension',
+            innerBounds: {
+            height: 600,
+            width: 371
+          }});
+    } else {
+      installIncompletePopup.focus();
+    }
   }
+
+  // If we are connected to the extension, launch uproxy.
   private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: uProxy.Update.LAUNCH_UPROXY,
-        data: 'launch'
+        data: ''
     });
   }
 

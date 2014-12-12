@@ -113,9 +113,20 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (popupWindowId == chrome.windows.WINDOW_ID_NONE) {
-      // If the popup is not open, open the popup under the extension icon
-      // in the window launching uProxy.
+    if (popupWindowId == chrome.windows.WINDOW_ID_NONE
+        && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
+      // If neither popup nor Chrome window are open (e.g. if uProxy is launched
+      // by the app), then allow the popup to open at a default location.
+      chrome.windows.create({url: popupUrl,
+                     type: "popup",
+                     width: 371,
+                     height: 600}, (popup) => {
+        popupWindowId = popup.id;
+      });
+    } else if (popupWindowId == chrome.windows.WINDOW_ID_NONE
+        && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
+      // If the popup is not open, but uProxy is being launched from a Chrome
+      // window, open the popup under the extension icon in that window.
       chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
         if (windowThatLaunchedUproxy) {
           // TODO (lucyhe): test this positioning in Firefox & Windows.

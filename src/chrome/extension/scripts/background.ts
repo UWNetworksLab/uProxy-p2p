@@ -84,6 +84,8 @@ function initUI() : UI.UserInterface {
   });
 
   chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
+  chromeConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
+                           chromeBrowserApi.bringUproxyToFront);
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
