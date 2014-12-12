@@ -11,9 +11,8 @@ module Auth {
   export var localKey :string = null;  // Key extracted from peerconnection.
   export var ttl      :number = 0;  // Expiry of the key.
 
-  var sigChannelPromise_ = null;
   var fCore_ = freedom.core();
-  var pc_ = freedom['core.peerconnection']();
+  var pc_ = freedom['core.rtcpeerconnection']();
 
   // This regular expression captures the fingerprint from an sdp header.
   // TODO: Allow hashes other than sha-256.
@@ -34,17 +33,8 @@ module Auth {
       return Promise.reject(new Error(
           'freedom core.peerconnection missing createOffer!'));
     }
-    // Hacky fake setup to maneuver around the SimpleDataPeer encapsulation
-    // so that createOffer can work.
-    // TODO: Update freedom so we don't have to create a signalling channel just
-    // to have access to a basic rtcpeerconnection method.
-    if (null === sigChannelPromise_) {
-      sigChannelPromise_ = fCore_.createChannel().then((chan) => {
-        console.log('Created useless signalling channel: ', chan);
-        pc_.setup(chan.identifier, 'unused', [], false);
-      });
-    }
-    return sigChannelPromise_.then(pc_.createOffer)
+
+    return pc_.createOffer()
         .then(extractFingerprint)
         .catch((e) => {
           console.error('Could not fetch local fingerprint.');
