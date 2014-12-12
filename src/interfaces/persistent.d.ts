@@ -59,5 +59,4 @@ declare module Core {
     stunServers :freedom_RTCPeerConnection.RTCIceServer[];
     hasSeenSharingEnabledScreen :boolean;
   }
-
 }  // module Core
