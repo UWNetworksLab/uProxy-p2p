@@ -114,8 +114,8 @@ class uProxyCore implements uProxy.CoreAPI {
               || this.globalSettings.stunServers.length == 0) {
             this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
           }
-          // If storage does not know if this user is new to uProxy,
-          // assume the user is new so that they will get helpful
+          // If storage does not know if this user has seen a specific overlay
+          // yet, assume the user has not seen it so that they will not miss any
           // onboarding information.
           if (this.globalSettings.hasSeenSharingEnabledScreen == null) {
             this.globalSettings.hasSeenSharingEnabledScreen = false;
