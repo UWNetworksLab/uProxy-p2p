@@ -84,6 +84,13 @@ FILES =
     'socks-to-rtc/socks-to-rtc.js'
     'rtc-to-net/rtc-to-net.js'
   ]
+  uproxy_lib_common: [
+    'logging/logging.js'
+    'arraybuffers/arraybuffers.js'
+    'handler/queue.js'
+    'webrtc/datachannel.js'
+    'webrtc/peerconnection.js'
+  ]
   thirdPartyUi: [
     # .html files from core-* and paper-* components are copied
     # separately via polymerPaperCompile.
@@ -229,24 +236,17 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
-          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom/'
+          expand: true, cwd: 'node_modules/freedom-for-chrome/'
           src: [
-            'freedom-for-chrome-for-uproxy.js'
-            'uproxy-core-env.js'
+            'freedom-for-chrome.js'
           ]
           dest: chromeAppDevPath + 'lib/'
         }, {
           expand: true, cwd: 'node_modules/freedom-social-xmpp', flatten: true
           src: [
-            'build/**'
+            'dist/**'
           ]
           dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
-        }, {
-          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
-          src: [
-            '**'
-          ]
-          dest: chromeAppDevPath + 'lib/freedom-social-facebook'
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
           src: [
@@ -265,10 +265,7 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
-          src: [
-            'arraybuffers/arraybuffers.js'
-            'handler/queue.js'
-          ],
+          src: FILES.uproxy_lib_common,
           dest: chromeAppDevPath + 'scripts/uproxy-lib/'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
@@ -325,8 +322,8 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
-          expand: true, cwd: 'node_modules/uproxy-lib/dist/freedom'
-          src: ['freedom-for-firefox-for-uproxy.jsm']
+          expand: true, cwd: 'node_modules/freedom-for-firefox/'
+          src: ['freedom-for-firefox.jsm']
           dest: firefoxDevPath + 'data'
         }, { # Copy uproxy-networking files.
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
@@ -337,18 +334,18 @@ module.exports = (grunt) ->
           src: ['websocket-server/**']
           dest: firefoxDevPath + 'data/lib'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
-          src: ['**']
-          dest: firefoxDevPath + 'data/lib/freedom-social-facebook'
-        }, {
-          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: firefoxDevPath + 'data/core/uproxy-lib'
+        }, { # Copy uproxy-networking files.
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
@@ -481,6 +478,7 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/typescript-src/mocks/freedom-mocks.js'
+              'node_modules/uproxy-lib/dist/logging/logging.js'
               'build/typescript-src/socks-to-rtc/socks-to-rtc.js'
               'build/typescript-src/rtc-to-net/rtc-to-net.js'
               'build/typescript-src/uproxy.js'
