@@ -136,7 +136,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         // Once connected, the extension popup should show it's start page.
         ui.view = UI.View.SPLASH;
         chrome.browserAction.setIcon({path: "icons/offline-19.png"});
-        chrome.browserAction.setPopup({popup: "polymer/popup.html"});
+        setPopupUrl("polymer/popup.html");
         F(this.appPort_);
       };
       this.appPort_.onMessage.addListener(ackResponse);
@@ -159,7 +159,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, the extension should launch
     // an instruction to install the app.
-    chrome.browserAction.setPopup({popup: "install-incomplete.html"});
+    setPopupUrl("install-incomplete.html");
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.

@@ -39,7 +39,8 @@ var model :UI.Model = {
   },
   globalSettings : {
     'description' : '',
-    'stunServers' : []
+    'stunServers' : [],
+    'hasSeenSharingEnabledScreen' : false
   }
 };
 
@@ -378,6 +379,10 @@ module UI {
 
     public isGivingAccess = () => {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
+    }
+
+    public bringUproxyToFront = () => {
+      this.browserApi.bringUproxyToFront();
     }
 
     /**

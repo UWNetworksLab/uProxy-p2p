@@ -9,6 +9,7 @@ interface BrowserAPI {
   setIcon(iconFile :string) : void;
   // Open a new tab with the uProxy FAQ.
   openFaq(pageAnchor :string) : void;
+  bringUproxyToFront() : void;
 }
 
 declare var Notification : {
