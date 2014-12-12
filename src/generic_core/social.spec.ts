@@ -267,7 +267,7 @@ describe('Social.FreedomNetwork', () => {
           status: 'ONLINE',
           timestamp: 12345
         },
-        message: JSON.stringify({"text":"nothing here"})
+        message: null
       };
       network.handleMessage(msg);
       expect(user.handleMessage).not.toHaveBeenCalled();
