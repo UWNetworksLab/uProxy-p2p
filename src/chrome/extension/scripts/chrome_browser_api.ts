@@ -113,34 +113,27 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (popupWindowId == -1) {
-      chrome.windows.getLastFocused((windowThatLaunchedUproxy) => {
-        mainWindowId = windowThatLaunchedUproxy.id;
-        var popupTop = windowThatLaunchedUproxy.top + 70;
-        var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-        chrome.windows.create({url: popupUrl,
-                               type: "popup",
-                               width: 371,
-                               height: 600,
-                               top: popupTop,
-                               left: popupLeft}, (popup) => {
-          popupWindowId = popup.id;
-        });
-      });
-
-      chrome.windows.onRemoved.addListener((closedWindowId) => {
-        if (closedWindowId == popupWindowId) {
-          popupWindowId = -1;
+    if (popupWindowId == chrome.windows.WINDOW_ID_NONE) {
+      // If the popup is not open, open the popup under the extension icon
+      // in the window launching uProxy.
+      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
+        if (windowThatLaunchedUproxy) {
+          // TODO (lucyhe): test this positioning in Firefox & Windows.
+          var popupTop = windowThatLaunchedUproxy.top + 70;
+          var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
+          chrome.windows.create({url: popupUrl,
+                                 type: "popup",
+                                 width: 371,
+                                 height: 600,
+                                 top: popupTop,
+                                 left: popupLeft}, (popup) => {
+            popupWindowId = popup.id;
+          });
         }
       });
     } else {
-      chrome.windows.getLastFocused((windowThatLaunchedUproxy) => {
-        mainWindowId = windowThatLaunchedUproxy.id;
-        var popupTop = windowThatLaunchedUproxy.top + 70;
-        var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-
-        chrome.windows.update(popupWindowId, {focused: true, top: popupTop, left: popupLeft});
-      });
+      // If the popup is already open, simply focus on it.
+      chrome.windows.update(popupWindowId, {focused: true});
     }
   }
 }

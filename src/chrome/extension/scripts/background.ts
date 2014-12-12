@@ -59,12 +59,12 @@ var model :UI.Model = {
 };
 
 // Chrome Window ID given to the uProxy popup.
-var popupWindowId = -1;
+var popupWindowId = chrome.windows.WINDOW_ID_NONE;
 // The URL to launch when the user clicks on the extension icon.
 var popupUrl = "polymer/install-incomplete.html";
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked.
-var mainWindowId = -1;
+var mainWindowId = chrome.windows.WINDOW_ID_NONE;
 var chromeBrowserApi :ChromeBrowserApi;
 
 // TODO(): remove this if there's no use for it.
@@ -81,13 +81,17 @@ chrome.runtime.onSuspend.addListener(() => {
   * Set the URL launched by clicking the browser icon.
   */
 function setPopupUrl(url) : void {
+  if (popupUrl == url) {
+    return;
+  }
+
   popupUrl = url;
   // If an existing popup exists, close it because the popup URL has changed.
   // The next time the user clicks on the browser icon, a new page should be
   // launched.
-  if (popupWindowId != -1) {
+  if (popupWindowId != chrome.windows.WINDOW_ID_NONE) {
     chrome.windows.remove(popupWindowId);
-    popupWindowId == -1;
+    popupWindowId == chrome.windows.WINDOW_ID_NONE;
   }
 }
 
@@ -97,8 +101,20 @@ function setPopupUrl(url) : void {
  */
 function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
-  chrome.browserAction.onClicked
-    .addListener(chromeBrowserApi.bringUproxyToFront);
+  chrome.browserAction.onClicked.addListener((tab) => {
+    // When the extension icon is clicked, open uProxy.
+    mainWindowId = tab.windowId;
+    chromeBrowserApi.bringUproxyToFront();
+  });
+  chrome.windows.onRemoved.addListener((closedWindowId) => {
+    // If either the window launching uProxy, or the popup with uProxy
+    // is closed, reset the IDs tracking those windows.
+    if (closedWindowId == popupWindowId) {
+      popupWindowId = chrome.windows.WINDOW_ID_NONE;
+    } else if (closedWindowId == mainWindowId) {
+      mainWindowId = chrome.windows.WINDOW_ID_NONE;
+    }
+  });
 
   chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
   chromeConnector.connect();
