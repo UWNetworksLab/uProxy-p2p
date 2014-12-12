@@ -1,6 +1,5 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='description.html'>
 <link rel='import' href='faq-link.html'>
 <link rel='import' href='network.html'>
 
@@ -97,18 +96,6 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='description' hidden?='{{SPLASH_STATES.DESCRIPTION!==ui.splashState}}'>
-      <div class='view'>
-        <h1>What name should others see when this device is online?</h1>
-        <uproxy-description></uproxy-description>
-        <p>
-        Giving this device a name will let others know how they are connecting
-        with you. It also means you can have more than one device with uProxy
-        installed and proxy from one to the other.
-        </p>
-      </div>
-    </div>
-
     <div id='getOrShare' hidden?='{{SPLASH_STATES.GET_OR_SHARE!==ui.splashState}}'>
       <div class='view'>
         <h1>How would you like to start?</h1>
@@ -130,8 +117,8 @@
       <div class='view'>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
-        <template repeat='{{ n in networks }}' vertical layout>
-          <uproxy-network network='{{n}}'></uproxy-network>
+        <template repeat='{{ n in networkNames }}' vertical layout>
+          <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p style="margin-top: 0">
           We won't share your data or post publicly without your consent

@@ -11,8 +11,42 @@
 /// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
-declare var model         :UI.Model;
+// Singleton model for data bindings.
+var model :UI.Model = {
+  networkNames: [],
+  onlineNetwork: null,
+  contacts: {
+    'getAccessContacts': {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    },
+    'shareAccessContacts': {
+      'onlinePending': [],
+      'offlinePending': [],
+      'onlineTrustedUproxy': [],
+      'offlineTrustedUproxy': [],
+      'onlineUntrustedUproxy': [],
+      'offlineUntrustedUproxy': [],
+      'onlineNonUproxy': [],
+      'offlineNonUproxy': []
+    }
+  },
+  globalSettings : {
+    'description' : '',
+    'stunServers' : [],
+    'hasSeenSharingEnabledScreen' : false
+  }
+};
 
+// TODO: currently we have a UI object (typescript module, i.e. namespace)
+// and a ui object (singleton intance of UI.UserInterface).  We should
+// change the names of these to avoid confusion.
 module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
@@ -59,20 +93,17 @@ module UI {
     }
   }
 
-  export interface UserCategories {
-    getTab :string;
-    shareTab :string;
-  }
-
-  /**
-   * Structure of the uProxy UI model object:
-   * TODO: Probably put the model in its own file.
-   */
   export interface Model {
-    networks : UI.Network[];
+    networkNames :string[];
+    onlineNetwork :UI.Network;
     contacts : Contacts;
     globalSettings : Core.GlobalSettings;
   }
+
+   export interface UserCategories {
+     getTab :string;
+     shareTab :string;
+   }
 
   /**
    * Specific to one particular Social network.
@@ -83,7 +114,6 @@ module UI {
     userId :string;
     imageData ?:string;
     userName ?:string;
-    online :boolean;
     roster :{ [userId:string] :User }
   }
 
@@ -110,19 +140,15 @@ module UI {
 
     // Instance you are getting access from.
     // Null if you are not getting access.
-    public instanceGettingAccessFrom = null;
+    private instanceGettingAccessFrom_ = null;
 
     // The instances you are giving access to.
     // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
-    // The network currently logged into (UI only supports 1 logged in network
-    // at a time, not including Manual), or null if not logged in.
-    public onlineNetwork :Network = null;
-
     public mode :Mode = Mode.GET;
 
-    private mapInstanceIdToUserName_ = {};
+    private mapInstanceIdToUser_ :{[instanceId :string] :UI.User} = {};
 
     public gettingStatus :string = null;
     public sharingStatus :string = null;
@@ -140,9 +166,10 @@ module UI {
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uProxy.Update.ALL, (state :Core.GlobalSettings) => {
-        console.log('Received uProxy.Update.ALL:', state);
-        model.globalSettings = state;
+      core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
+        console.log('Received uProxy.Update.INITIAL_STATE:', state);
+        model.networkNames = state['networkNames'];
+        model.globalSettings = state['globalSettings'];
       });
 
       // Add or update the online status of a network.
@@ -152,16 +179,16 @@ module UI {
       core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
-        var profile :UI.UserProfileMessage = payload.user;
-        var network :UI.Network = this.getNetwork(payload.network);
-        if (!network) {
-          console.error('Network not found for uProxy.Update.USER_SELF',
-              payload);
+        if (!model.onlineNetwork ||
+            payload.network != model.onlineNetwork.name) {
+          console.error('uProxy.Update.USER_SELF message for invalid network',
+              payload.network);
           return;
         }
-        network.userId = profile.userId;
-        network.imageData = profile.imageData;
-        network.userName = profile.name;
+        var profile :UI.UserProfileMessage = payload.user;
+        model.onlineNetwork.userId = profile.userId;
+        model.onlineNetwork.imageData = profile.imageData;
+        model.onlineNetwork.userName = profile.name;
       });
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
@@ -190,10 +217,8 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
           (data :any) => {
-        if (data.instanceId === this.instanceGettingAccessFrom) {
-          this.instanceGettingAccessFrom = null;
+        if (data.instanceId === this.instanceGettingAccessFrom_) {
           this.stopGettingInUiAndConfig(data.error);
-          this.updateGettingStatusBar();
         } else {
           console.warn('Can\'t stop getting access from friend you were not ' +
               'already getting access from.');
@@ -208,7 +233,9 @@ module UI {
           this.startGivingInUi();
         }
         this.instancesGivingAccessTo[instanceId] = true;
-        this.updateSharingStatusBar();
+        this.updateSharingStatusBar_();
+
+        this.mapInstanceIdToUser_[instanceId].isGettingFromMe = true;
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -217,30 +244,35 @@ module UI {
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
-        this.updateSharingStatusBar();
+
+        // Update user.isGettingFromMe
+        var isGettingFromMe = false;
+        var user = this.mapInstanceIdToUser_[instanceId];
+        for (var i = 0; i < user.instances.length; ++i) {
+          if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
+            isGettingFromMe = true;
+            break;
+          }
+        }
+        user.isGettingFromMe = isGettingFromMe;
+
+        this.updateSharingStatusBar_();
       });
 
       console.log('Created the UserInterface');
     }
 
-    public updateGettingStatusBar = () => {
+    private updateGettingStatusBar_ = () => {
       // TODO: localize this.
-      if (this.instanceGettingAccessFrom) {
-        var userName =
-            this.mapInstanceIdToUserName_[this.instanceGettingAccessFrom];
-        if (userName) {
-          this.gettingStatus = 'Getting access from ' + userName;
-        } else {
-          this.gettingStatus = null;
-          console.error('unable to find user name for instance ' +
-              this.instanceGettingAccessFrom);
-        }
+      if (this.instanceGettingAccessFrom_) {
+        this.gettingStatus = 'Getting access from ' +
+            this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name;
       } else {
         this.gettingStatus = null;
       }
     }
 
-    public updateSharingStatusBar = () => {
+    private updateSharingStatusBar_ = () => {
       // TODO: localize this - may require simpler formatting to work
       // in all languages.
       var instanceIds = Object.keys(this.instancesGivingAccessTo);
@@ -248,14 +280,14 @@ module UI {
         this.sharingStatus = null;
       } else if (instanceIds.length === 1) {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]];
+            this.mapInstanceIdToUser_[instanceIds[0]].name;
       } else if (instanceIds.length === 2) {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
-            this.mapInstanceIdToUserName_[instanceIds[1]];
+            this.mapInstanceIdToUser_[instanceIds[0]].name + ' and ' +
+            this.mapInstanceIdToUser_[instanceIds[1]].name;
       } else {
         this.sharingStatus = 'Sharing access with ' +
-            this.mapInstanceIdToUserName_[instanceIds[0]] + ' and ' +
+            this.mapInstanceIdToUser_[instanceIds[0]].name + ' and ' +
             (instanceIds.length - 1) + ' others';
       }
     }
@@ -272,6 +304,9 @@ module UI {
      * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
+      var instanceId = this.instanceGettingAccessFrom_;
+      this.instanceGettingAccessFrom_ = null;
+
       // TODO (lucyhe): if askUser is true we might want a different
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
@@ -282,18 +317,33 @@ module UI {
       } else {
         this.browserApi.setIcon('default-19.png');
       }
+
+      this.updateGettingStatusBar_();
+
+      if (instanceId) {
+        this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
+      }
+
       this.browserApi.stopUsingProxy(askUser);
     }
 
     /**
       * Sets extension icon to default and undoes proxy configuration.
       */
-    public startGettingInUiAndConfig = (endpoint:Net.Endpoint) => {
+    public startGettingInUiAndConfig =
+        (instanceId :string, endpoint :Net.Endpoint) => {
+      this.instanceGettingAccessFrom_ = instanceId;
+
       if (this.isGivingAccess()) {
         this.browserApi.setIcon('sharing-getting-19.png');
       } else {
         this.browserApi.setIcon('getting-19.png');
       }
+
+      this.updateGettingStatusBar_();
+
+      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+
       this.browserApi.startUsingProxy(endpoint);
     }
 
@@ -324,7 +374,7 @@ module UI {
     }
 
     public isGettingAccess = () => {
-      return this.instanceGettingAccessFrom != null;
+      return this.instanceGettingAccessFrom_ != null;
     }
 
     public isGivingAccess = () => {
@@ -335,64 +385,42 @@ module UI {
       this.browserApi.bringUproxyToFront();
     }
 
-    private getNetwork = (networkName :string) => {
-      for (var networkId in model.networks) {
-        if (model.networks[networkId].name === networkName) {
-          return model.networks[networkId];
-        }
-      }
-      return null;
-    }
-
     /**
      * Synchronize a new network to be visible on this UI.
      */
     private syncNetwork_ = (network :UI.NetworkMessage) => {
-      console.log('uProxy.Update.NETWORK', network, model.networks);
-      console.log(model);
+      console.log('uProxy.Update.NETWORK', network);
+      console.log('model: ', model);
 
       // If you are now online (on a non-manual network), and were
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
-          && this.onlineNetwork == null) {
+          && model.onlineNetwork == null) {
         this.browserApi.setIcon('default-19.png');
       }
 
-      var existingNetwork = this.getNetwork(network.name);
-      if (existingNetwork) {
-        existingNetwork.online = network.online;
-        existingNetwork.userId = network.userId;
-        if (!network.online) {
-          // Clear roster and option user info from offline network.
-          for (var userId in existingNetwork.roster) {
-            var user = existingNetwork.roster[userId];
-            var userCategories = user.getCategories();
-            this.categorizeUser_(user, model.contacts.getAccessContacts,
-                userCategories.getTab, null);
-            this.categorizeUser_(user, model.contacts.shareAccessContacts,
-                userCategories.shareTab, null);
-          }
-          existingNetwork.roster = {};
-          existingNetwork.userName = null;
-          existingNetwork.imageData = null;
+      if (model.onlineNetwork &&
+          (network.online && network.name != model.onlineNetwork.name) ||
+          (!network.online && network.name == model.onlineNetwork.name)) {
+        // onlineNetwork exists and has either been changed or logged out.
+        // Clear roster and option user info from offline network.
+        for (var userId in model.onlineNetwork.roster) {
+          var user = model.onlineNetwork.roster[userId];
+          var userCategories = user.getCategories();
+          this.categorizeUser_(user, model.contacts.getAccessContacts,
+              userCategories.getTab, null);
+          this.categorizeUser_(user, model.contacts.shareAccessContacts,
+              userCategories.shareTab, null);
         }
-      } else {
-        model.networks.push({
-          name:   network.name,
-          userId: network.userId,
-          online: network.online,
-          roster: {}
-        });
+        model.onlineNetwork = null;
       }
 
-      // Figure out which network we are signed into (currently user can only
-      // be signed into 1 network at a time in the UI, not counting manual).
-      this.onlineNetwork = null;
-      for (var i = 0; i < model.networks.length; ++i) {
-        if (model.networks[i].online && model.networks[i].name != 'Manual') {
-          this.onlineNetwork = model.networks[i];
-          break;
-        }
+      if (network.online && !model.onlineNetwork) {
+        model.onlineNetwork = {
+          name:   network.name,
+          userId: network.userId,
+          roster: {}
+        };
       }
     }
 
@@ -403,11 +431,7 @@ module UI {
      * Synchronize data about some friend.
      */
     public syncUser = (payload :UI.UserMessage) => {
-      var network = this.getNetwork(payload.network);
-      if (!network) {
-        console.warn('Received USER for non-existing network.');
-        return;
-      } else if (!network.online) {
+      if (!model.onlineNetwork || model.onlineNetwork.name != payload.network) {
         // Ignore all user updates when the network is offline.
         // These user updates may come in asynchrously after logging out of a
         // network, e.g. if the UI logs out of Google while we are getting
@@ -418,13 +442,12 @@ module UI {
         return;
       }
 
-
       // Construct a UI-specific user object.
       var profile = payload.user;
       // Update / create if necessary a user, both in the network-specific
       // roster and the global roster.
       var user :UI.User;
-      user = network.roster[profile.userId];
+      user = model.onlineNetwork.roster[profile.userId];
       var oldUserCategories = {getTab: null, shareTab: null};
 
       // CONSIDER: we might want to check if this user has been our proxy
@@ -433,8 +456,8 @@ module UI {
       // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId, network);
-        network.roster[profile.userId] = user;
+        user = new UI.User(profile.userId, model.onlineNetwork);
+        model.onlineNetwork.roster[profile.userId] = user;
       } else {
         // Existing user, get the category before modifying any properties.
         oldUserCategories = user.getCategories();
@@ -442,9 +465,10 @@ module UI {
 
       user.update(profile);
       user.instances = payload.instances;
+      user.updateInstanceDescriptions();
       for (var i = 0; i < user.instances.length; ++i) {
         var instanceId = user.instances[i].instanceId;
-        this.mapInstanceIdToUserName_[instanceId] = user.name;
+        this.mapInstanceIdToUser_[instanceId] = user;
       }
 
       var newUserCategories = user.getCategories();

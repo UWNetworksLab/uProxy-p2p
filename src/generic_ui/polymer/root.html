@@ -2,6 +2,7 @@
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
+<link rel="import" href='overlay.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -117,19 +118,63 @@
         vertical-align: middle;
         padding-right: 1em;
       }
+      .clickable {
+        cursor: pointer;
+      }
+      .sharingEnabled {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
+      #sharingEnabledInfo {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        height: 100%;
+        width: 100%;
+      }
+      #sharingEnabledBubble {
+        position: absolute;
+        right: 10px;
+        top: 12px;
+        height: 39px;
+        width: 39px;
+        background-color: white;
+        opacity: 0.9;
+        border-radius: 50%;
+      }
+      #sharingEnabledHeader {
+        font-size: 1.7em;
+      }
 
     </style>
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
+    <uproxy-overlay id='sharingEnabledInfo'
+         hidden?='{{(model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen || UI.View.ROSTER!=ui.view}}'
+         hasSeenBefore='hasSeenSharingEnabledScreen'>
+      <div id='sharingEnabledBubble'></div>
+      <img src='../icons/sharing-enabled-toolbar.png' class='sharingEnabled'>
+      <div id='message'>
+        <p id='sharingEnabledHeader'>Sharing enabled</p>
+        <br>
+        The icon in the top right means you're available for sharing access with friends you've offered access to.
+      </div>
+    </uproxy-overlay>
+
     <div id='logged-in-controls'
-        hidden?='{{ UI.View.SPLASH==ui.view || !ui.onlineNetwork }}'>
+        hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
 
       <div id='toolbar'>
         <img src='../icons/hamburger.png' id='btnSettings'
           on-tap='{{ settingsView }}'>
         <h1 id='title'>uProxy</h1>
+        <img src='../icons/sharing-enabled-toolbar.png'
+          class='sharingEnabled clickable'
+          hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+          on-tap='{{setShareMode}}'>
         <div id='getTab'
             class='getShareTab {{ui.mode==UI.Mode.GET ? "active" : ""}}'
             on-tap='{{setGetMode}}'>

@@ -25,9 +25,15 @@ class ChromeUIConnector {
   private onCredentials_ :(Object) => void;
 
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
-  private INSTALL_COMPLETE_PAGE_ :string = '../install-complete.html';
   private installStatusPage_ :string;
-  private launchInstallStatusPage_ = () => {
+  private launchInstallIncompletePage_ = () => {
+    chrome.app.window.create(this.INSTALL_INCOMPLETE_PAGE_,
+        {innerBounds: {
+          height: 600,
+          width: 371
+        }});
+  }
+  private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: uProxy.Update.LAUNCH_UPROXY,
@@ -40,8 +46,7 @@ class ChromeUIConnector {
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
     // Until the extension is connected, we assume uProxy installation is
     // incomplete.
-    this.installStatusPage_ = this.INSTALL_INCOMPLETE_PAGE_;
-    chrome.app.runtime.onLaunched.addListener(this.launchInstallStatusPage_);
+    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
   }
 
   /**
@@ -68,11 +73,13 @@ class ChromeUIConnector {
 
     // Once the extension is connected, we know that installation of uProxy
     // is complete.
-    this.installStatusPage_ = this.INSTALL_COMPLETE_PAGE_;
+    chrome.app.runtime.onLaunched.removeListener(this.launchInstallIncompletePage_);
+    chrome.app.runtime.onLaunched.addListener(this.launchUproxy_);
     this.extPort_.onDisconnect.addListener(function(){
       // If the extension disconnects, we should show an error
       // page.
-      this.installStatusPage_ = this.INSTALL_INCOMPLETE_PAGE_;
+      chrome.app.runtime.onLaunched.removeListener(this.launchUproxy_);
+      chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
     }.bind(this));
   }
 

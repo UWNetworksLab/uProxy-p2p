@@ -2,8 +2,7 @@
  * background.ts
  *
  * This is the background page for the Extension. It maintains a chrome runtime
- * connection with the App, consistent state changes with the UI (see ui.js)
- * and holds the data model for both the popup and options page.
+ * connection with the App, consistent state changes with the UI (see ui.js).
  */
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
@@ -25,38 +24,6 @@ var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
 var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
-
-
-// Singleton model for data bindings.
-var model :UI.Model = {
-  networks: [],
-  contacts: {
-    'getAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    },
-    'shareAccessContacts' : {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
-    }
-  },
-  globalSettings : {
-    'description' : '',
-    'stunServers' : []
-  }
-};
 
 // Chrome Window ID given to the uProxy popup.
 var popupWindowId = chrome.windows.WINDOW_ID_NONE;
