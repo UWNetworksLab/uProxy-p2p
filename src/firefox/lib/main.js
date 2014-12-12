@@ -26,17 +26,7 @@ freedom(manifest, {}).then(function(interface) {
   panel = panels.Panel({
     width: 371,
     height: 600,
-    contentURL: self.data.url("polymer/popup.html"),
-    contentScriptFile: [
-      self.data.url("scripts/port.js"),
-      self.data.url("scripts/user.js"),
-      self.data.url("scripts/uproxy.js"),
-      self.data.url("scripts/ui.js"),
-      self.data.url("scripts/firefox_browser_api.js"),
-      self.data.url("scripts/firefox_connector.js"),
-      self.data.url("scripts/core_connector.js"),
-      self.data.url("scripts/background.js")],
-    contentScriptWhen: 'start'
+    contentURL: self.data.url("polymer/popup.html")
   })
 
   // Set up connection between freedom and content script.
