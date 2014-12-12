@@ -13,7 +13,7 @@ var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-var uProxyAppChannel;
+var uProxyAppChannel : OnAndEmit<any,any>;
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
@@ -108,9 +108,9 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-freedom('scripts/freedom-module.json', {
+var uproxyModule = new freedom('scripts/freedom-module.json', {
   oauth: [Chrome_oauth]
-}).then(function(interface:any) {
+}).then(function(interface : () => OnAndEmit<any,any>) {
   uProxyAppChannel = interface();
   connector = new ChromeUIConnector();
   console.log('Starting uProxy app...');
