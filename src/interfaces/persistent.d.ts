@@ -55,6 +55,7 @@ declare module Core {
   export interface GlobalSettings {
     description :string;
     stunServers :Core.StunServer[];
+    hasSeenSharingEnabledScreen :boolean;
   }
 
   export interface StunServer {
