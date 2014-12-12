@@ -21,6 +21,10 @@ var mockAppPort = () => {
   };
 };
 
+// Mock the global function that changes the URL launched when the
+// extension icon is clicked.
+var setPopupUrl = () => {};
+
 // Mock UI.
 var ui :UI.UserInterface;
 
@@ -55,7 +59,6 @@ describe('core-connector', () => {
     // chrome.runtime and chrome.browserAction are mocks found in
     // chrome_mocks.ts.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
-    spyOn(chrome.browserAction, 'setPopup');
     connectPromise = chromeConnector.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
   });

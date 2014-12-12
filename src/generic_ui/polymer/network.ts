@@ -13,6 +13,7 @@ Polymer({
       console.log('connected to ' + this.networkName);
       this.isLoggingIn = false;
       ui.view = UI.View.ROSTER;
+      ui.bringUproxyToFront();
     });
 
     // Restore the button after a timeout.

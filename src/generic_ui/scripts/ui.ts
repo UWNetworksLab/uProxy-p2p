@@ -381,6 +381,10 @@ module UI {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
+    public bringUproxyToFront = () => {
+      this.browserApi.bringUproxyToFront();
+    }
+
     /**
      * Synchronize a new network to be visible on this UI.
      */
