@@ -25,21 +25,3 @@ module chrome.browserAction {
     console.log('Mock chrome.browserAction.setIcon.');
   }
 }
-
-/*
-module chrome.windows {
-
-  export function create(url) {
-    console.log('Mock chrome.windows.create.');
-  }
-  export function remove(url) {
-    console.log('Mock chrome.windows.remove.');
-  }
-  export function getLastFocused(url) {
-    console.log('Mock chrome.windows.getLastFocused.');
-  }
-  export function onRemoved(url) {
-    console.log('Mock chrome.windows.onRemoved.');
-  }
-}*/
-
