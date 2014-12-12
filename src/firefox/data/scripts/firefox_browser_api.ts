@@ -34,4 +34,8 @@ class FirefoxBrowserApi implements BrowserAPI {
   public stopUsingProxy = (askUser :boolean) => {
     port.emit('stopUsingProxy', askUser);
   }
+
+  public bringUproxyToFront = () => {
+    port.emit('showPanel');
+  }
 }

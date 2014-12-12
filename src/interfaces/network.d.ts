@@ -68,6 +68,11 @@ declare module Social {
     sendInstanceHandshake :(clientId:string, consent :Consent.WireState) => Promise<void>;
 
     /**
+      * Resends the instance handeshake to all uProxy instances.
+      */
+    resendInstanceHandshakes :() => void;
+
+    /**
      * Sends a message to a remote client.
      *
      * Assumes that |clientId| is valid. Implementations of Social.Network do

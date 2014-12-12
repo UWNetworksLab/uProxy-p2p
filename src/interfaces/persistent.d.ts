@@ -57,6 +57,6 @@ declare module Core {
   export interface GlobalSettings {
     description :string;
     stunServers :freedom_RTCPeerConnection.RTCIceServer[];
+    hasSeenSharingEnabledScreen :boolean;
   }
-
 }  // module Core

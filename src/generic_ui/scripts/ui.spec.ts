@@ -25,10 +25,30 @@ describe('UI.UserInterface', () => {
     mockBrowserApi = jasmine.createSpyObj('browserApi',
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
-    ui['mapInstanceIdToUserName_'] = {
-      'testInstanceId': 'Alice'
-    };
   });
+
+  function syncUserAndInstance(
+      userId :string, userName :string, instanceId :string) {
+    var payload :UI.UserMessage = {
+      network: 'testNetwork',
+      user: {
+        userId: userId,
+        name: userName,
+        imageData: 'testImageData',
+        isOnline: true
+      },
+      instances: [{
+        instanceId: instanceId,
+        description: 'description1',
+        consent: new Consent.State(),
+        access: {asClient: false, asProxy: false},
+        isOnline: true,
+        bytesSent: 0,
+        bytesReceived: 0
+      }]
+    };
+    ui.syncUser(payload);
+  }
 
   describe('syncUser', () => {
 
@@ -108,8 +128,8 @@ describe('UI.UserInterface', () => {
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
-      expect(ui['mapInstanceIdToUserName_']['instance1']).toEqual('Alice');
-      expect(ui['mapInstanceIdToUserName_']['instance2']).toEqual('Alice');
+      expect(ui['mapInstanceIdToUser_']['instance1'].name).toEqual('Alice');
+      expect(ui['mapInstanceIdToUser_']['instance2'].name).toEqual('Alice');
     });
   }); // syncUser
 
@@ -119,26 +139,33 @@ describe('UI.UserInterface', () => {
     // simultaneously.
 
     it('isGivingAccess updates when you start and stop giving', () => {
+      syncUserAndInstance('userId', 'userName', 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(false);
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(true);
+      expect(ui['mapInstanceIdToUser_']['testGetterId'].isGettingFromMe)
+          .toEqual(true);
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(false);
+      expect(ui['mapInstanceIdToUser_']['testGetterId'].isGettingFromMe)
+          .toEqual(false);
     });
 
     it('isGettingAccess updates when you start and stop getting', () => {
-      // Note that setting and clearing instanceGettingAccessFrom is done in
+      // Note that setting and clearing instanceGettingAccessFrom_ is done in
       // ui.ts.
+      syncUserAndInstance('userId', 'userName', 'instanceId');
       expect(ui.isGettingAccess()).toEqual(false);
-      ui.instanceGettingAccessFrom = 'testGiverId';
+      ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(ui.isGettingAccess()).toEqual(true);
-      ui.instanceGettingAccessFrom = null;
+      ui['instanceGettingAccessFrom_'] = null;
       expect(ui.isGettingAccess()).toEqual(false);
     });
 
     it('Extension icon changes when you start giving access', () => {
+      syncUserAndInstance('userId', 'userName', 'testGetterId');
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
@@ -147,6 +174,8 @@ describe('UI.UserInterface', () => {
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +
         'getters', () => {
+      syncUserAndInstance('userId', 'userName', 'testGetterId');
+      syncUserAndInstance('userId', 'userName', 'testGetterId2');
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
@@ -165,6 +194,8 @@ describe('UI.UserInterface', () => {
 
     it('Extension icon changes if you stop giving to all getters',
         () => {
+      syncUserAndInstance('userId', 'userName', 'testGetterId');
+      syncUserAndInstance('userId', 'userName', 'testGetterId2');
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
@@ -189,14 +220,18 @@ describe('UI.UserInterface', () => {
       // if the core.start promise fulfills. (see polymer/instance.ts)
       // TODO (lucyhe): update this test if we add new ways to start
       // getting access.
-      ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
+      syncUserAndInstance('userId', 'userName', 'testInstanceId');
+      ui.startGettingInUiAndConfig(
+          'testInstanceId', { address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(getIcon);
     });
 
     it('Extension icon changes when you stop getting access', () => {
-      ui.startGettingInUiAndConfig({ address : 'testAddress' , port : 0 });
-      ui.instanceGettingAccessFrom = 'testGiverId';
+      syncUserAndInstance('userId', 'userName', 'testGiverId');
+      ui.startGettingInUiAndConfig(
+          'testGiverId', { address : 'testAddress' , port : 0 });
+      ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(getIcon);
       updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
@@ -206,6 +241,7 @@ describe('UI.UserInterface', () => {
     });
 
     it('Sharing status updates when you start and stop sharing', () => {
+      syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual('Sharing access with Alice');
@@ -215,14 +251,15 @@ describe('UI.UserInterface', () => {
     });
 
     it('Getting status updates when you start and stop getting', () => {
-      // Note that setting and clearing instanceGettingAccessFrom is done in
+      // Note that setting and clearing instanceGettingAccessFrom_ is done in
       // polymer/instance.ts.
+      syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       expect(ui.gettingStatus).toEqual(null);
-      ui.instanceGettingAccessFrom = 'testInstanceId';
-      ui.updateGettingStatusBar();
+      ui['instanceGettingAccessFrom_'] = 'testInstanceId';
+      ui['updateGettingStatusBar_']();
       expect(ui.gettingStatus).toEqual('Getting access from Alice');
-      ui.instanceGettingAccessFrom = null;
-      ui.updateGettingStatusBar();
+      ui['instanceGettingAccessFrom_'] = null;
+      ui['updateGettingStatusBar_']();
       expect(ui.gettingStatus).toEqual(null);
     });
   });  // Update giving and/or getting state in UI
