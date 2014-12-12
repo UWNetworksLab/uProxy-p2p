@@ -37,10 +37,11 @@ var model :UI.Model = {
       'offlineNonUproxy': []
     }
   },
-  globalSettings : {
-    'description' : '',
-    'stunServers' : [],
-    'hasSeenSharingEnabledScreen' : false
+  globalSettings: {
+    'description': '',
+    'stunServers': [],
+    'hasSeenSharingEnabledScreen': false,
+    'hasSeenWelcome': false
   }
 };
 
@@ -381,10 +382,6 @@ module UI {
       return Object.keys(this.instancesGivingAccessTo).length > 0;
     }
 
-    public bringUproxyToFront = () => {
-      this.browserApi.bringUproxyToFront();
-    }
-
     /**
      * Synchronize a new network to be visible on this UI.
      */
@@ -503,6 +500,10 @@ module UI {
 
     public openFaq = (pageAnchor ?:string) => {
       this.browserApi.openFaq(pageAnchor);
+    }
+
+    public bringUproxyToFront = () => {
+      this.browserApi.bringUproxyToFront();
     }
   }  // class UserInterface
 
