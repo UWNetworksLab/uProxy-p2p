@@ -96,7 +96,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?:string) => {
+  public sendToUI = (type :uProxy.Update, data ?:any) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
