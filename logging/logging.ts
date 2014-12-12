@@ -4,15 +4,18 @@ module Logging {
   // Created freedom.js loggers
   var loggers :{[tag:string]:freedom.Logger} = {};
 
-  // Messages waiting on a logger.
+  // Messages waiting on a logger. {Level, message} objects, which will be sent
+  // to the freedom.js logger but are received synchronously with construction
+  // before the logger promise has resolved.
   interface Msg {
     level:string
     msg:string
   }
   var waiters :{[tag:string]:Msg[]} = {};
 
-  // Perform log message formatting. This method is set to public for
-  // testing purpose. The function is not exposed in as freedom module API.
+  // Perform log message formatting. Formats an array of arguments to a
+  // single string.
+  // TODO: switch to rest arguments.
   function formatStringMessageWithArgs_(msg:string, args?:any[])
       : string {
     var formatted_msg = msg;
