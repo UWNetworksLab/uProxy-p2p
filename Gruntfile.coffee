@@ -622,6 +622,11 @@ module.exports = (grunt) ->
     'concat:firefox_uproxy'
     'polymerPaperCompile:firefox_ui'
   ]
+ 
+  taskManager.add 'build_firefox_xpi', [
+    'build_firefox'
+    'compress:main'
+  ]
 
   # Radiatus build tasks.
   taskManager.add 'build_radiatus', [
@@ -631,14 +636,10 @@ module.exports = (grunt) ->
     'polymerPaperCompile:radiatus_ui'
   ]
 
-  taskManager.add 'build_firefox_xpi', [
-    'build_firefox'
-    'compress:main'
-  ]
-
   taskManager.add 'build', [
     'build_chrome'
     'build_firefox'
+    'build_radiatus'
     'build_uistatic'
   ]
 
