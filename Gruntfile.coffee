@@ -419,7 +419,7 @@ module.exports = (grunt) ->
         }, {
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
-          dest: radiatusDevPath + 'scripts/'
+          dest: radiatusDevPath + 'lib/'
         } ]
 
     }  # copy

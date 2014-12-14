@@ -24,6 +24,23 @@
       "social-enum.js",
       "social.js",
       "core.js"
+    ],
+    "index": "../polymer/popup.html",
+    "static": [
+      "../lib/webcomponentsjs/webcomponents.js",
+      "../polymer/root.html",
+      "../polymer/popup.js",
+      "../scripts/ui.js",
+      "../scripts/ui.js.map",
+      "../scripts/uproxy.js",
+      "../scripts/uproxy.js.map",
+      "../scripts/util.js",
+      "../scripts/util.js.map",
+      "../scripts/user.js",
+      "../scripts/user.js.map",
+      "../scripts/consent.js",
+      "../scripts/consent.js.map",
+      "../styles/eurostile.ttf"
     ]
   },
   "dependencies": {
