@@ -401,17 +401,21 @@ module.exports = (grunt) ->
           src: ['websocket-server/**']
           dest: radiatusDevPath + 'scripts/'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
           src: ['**']
-          dest: radiatusDevPath + 'scripts/freedom-social-xmpp'
+          dest: radiatusDevPath + 'lib/freedom-social-xmpp'
         }, {
           expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
           src: ['**']
-          dest: radiatusDevPath + 'scripts/freedom-social-facebook'
+          dest: radiatusDevPath + 'lib/freedom-social-facebook'
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
-          dest: radiatusDevPath + 'scripts/storage'
+          dest: radiatusDevPath + 'lib/storage'
+        }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: radiatusDevPath + 'scripts/uproxy-lib'
         }, {
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
