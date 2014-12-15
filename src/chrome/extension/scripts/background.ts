@@ -24,19 +24,22 @@ var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
 var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
+var chromeBrowserApi :ChromeBrowserApi;
 
 // Chrome Window ID given to the uProxy popup.
 var popupWindowId = chrome.windows.WINDOW_ID_NONE;
 // The URL to launch when the user clicks on the extension icon.
-var popupUrl = "polymer/install-incomplete.html";
+var popupUrl = "application-missing.html";
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked.
 var mainWindowId = chrome.windows.WINDOW_ID_NONE;
-var chromeBrowserApi :ChromeBrowserApi;
+var extensionNewlyInstalled = false;
 
-// TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log('onInstalled: previousVersion', details.previousVersion);
+  extensionNewlyInstalled = true;
+  if (chromeBrowserApi) {
+    chromeBrowserApi.bringUproxyToFront();
+  }
 });
 
 chrome.runtime.onSuspend.addListener(() => {
@@ -47,7 +50,7 @@ chrome.runtime.onSuspend.addListener(() => {
 /**
   * Set the URL launched by clicking the browser icon.
   */
-function setPopupUrl(url) : void {
+var setPopupUrl = (url) : void => {
   if (popupUrl == url) {
     return;
   }
@@ -58,8 +61,15 @@ function setPopupUrl(url) : void {
   // launched.
   if (popupWindowId != chrome.windows.WINDOW_ID_NONE) {
     chrome.windows.remove(popupWindowId);
-    popupWindowId == chrome.windows.WINDOW_ID_NONE;
+    popupWindowId = chrome.windows.WINDOW_ID_NONE;
   }
+}
+
+// Launch the Chrome webstore page for the uProxy app.
+function openDownloadAppPage() : void {
+  chrome.tabs.create({url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'});
+  chrome.windows.update(mainWindowId, {focused: true});
+  chromeConnector.waitingForAppInstall = true;
 }
 
 /**
@@ -107,4 +117,7 @@ function initUI() : UI.UserInterface {
 console.log('Initializing chrome extension background page...');
 if (undefined === ui) {
   ui = initUI();
+  if (extensionNewlyInstalled) {
+    chromeBrowserApi.bringUproxyToFront();
+  }
 }
