@@ -78,6 +78,10 @@ module Core {
       });
     }
 
+    public keys = () : Promise<string[]> => {
+      return fStorage.keys();
+    }
+
     // --------------------------------------------------------------------------
     //  Options
     // TODO: Move options to its own class and fix it.

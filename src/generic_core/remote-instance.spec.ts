@@ -13,11 +13,15 @@ describe('Core.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
-      'getLocalInstanceId',
       'send',
       'notifyUI',
       'instanceToClient'
   ]);
+
+  user['getLocalInstanceId'] = function() {
+      return 'localInstanceId';
+  }
+
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
           'onceReady'
@@ -33,6 +37,83 @@ describe('Core.RemoteInstance', () => {
     spyOn(console, 'warn');
     spyOn(console, 'error');
   });
+  describe('storage', () => {
+    var realStorage = new Core.Storage;
+    var saved;
+    var loaded;
+    var instance0;
+
+   it('fresh instance has no state', (done) => {
+       storage.load = function(key) {
+        loaded = realStorage.load(key);
+        return loaded;
+      };
+      storage.save = function(key, value) {
+        saved = realStorage.save(key, value);
+        return saved;
+      };
+      instance0 = new Core.RemoteInstance(user, 'instanceId', null);
+
+      expect(loaded).toBeDefined();
+      loaded.catch(() => {
+        expect(instance0.description).not.toBeDefined();
+        expect(instance0.keyHash).not.toBeDefined();
+        expect(instance0.consent).toEqual(new Consent.State);
+        done();
+      });
+    });
+
+    it('update', (done) => {
+      var handshake :InstanceHandshake = {
+        instanceId : 'instanceId',
+        keyHash : 'dummy-keyhash',
+        description: 'home computer'
+      };
+      spyOn(instance0, 'sendConsent');
+      instance0.update(handshake);
+      instance0.modifyConsent(Consent.UserAction.REQUEST);
+      expect(saved).toBeDefined();
+
+      saved.then(() => {
+        var instance1 = new Core.RemoteInstance(user, 'instanceId', null);
+        loaded.then(() => {
+          expect(instance1.currentState()).toEqual(instance0.currentState());
+        }).then(done);
+      });
+    });
+
+    it ('delay loading', (done) => {
+      var fulfill;
+      var loaded = realStorage.load(instance0.getStorePath());
+      storage.load = function(key) {
+        var delay = new Promise((F, R) => {
+          fulfill = F;
+        });
+        return delay.then(() => {
+          return loaded;
+        });
+      }
+
+      var handshake :InstanceHandshake = {
+        instanceId : 'instanceId',
+        keyHash : 'new-keyhash',
+        description: 'new description'
+      };
+      var instance2 = new Core.RemoteInstance(user, 'instanceId', handshake);
+      var consent :Consent.WireState = {
+        isRequesting: true,
+        isOffering: true,
+      };
+      instance2.updateConsent(consent);
+      fulfill();
+      loaded.then(() => {
+        instance2.description = 'new description';
+        expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
+        storage = new Core.Storage;
+      }).then(done);
+    })
+  });
 
   it('constructs from a received Instance Handshake', () => {
     var handshake :Instance = {
@@ -40,7 +121,7 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    instance = new Core.RemoteInstance(user, handshake);
+    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
   });
 
@@ -124,7 +205,6 @@ describe('Core.RemoteInstance', () => {
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(false);
     });
   });
-
 
   describe('local consent towards remote client', () => {
 
@@ -287,12 +367,12 @@ describe('Core.RemoteInstance', () => {
     user.network = <Social.Network><any>jasmine.createSpyObj(
         'network', ['sendInstanceHandshake']);
 
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(user, {
+    var bob = new Core.RemoteInstance(user, 'instance-bob', {
       instanceId: 'instance-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
@@ -320,7 +400,7 @@ describe('Core.RemoteInstance', () => {
 
   describe('proxying', () => {
 
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
@@ -374,7 +454,7 @@ describe('Core.RemoteInstance', () => {
   describe('signalling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
