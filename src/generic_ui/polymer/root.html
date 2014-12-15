@@ -133,6 +133,23 @@
         height: 100%;
         width: 100%;
       }
+      #welcomeOverlay {
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        height: 220px;
+        width: 100%;
+      }
+      #welcomeOverlay h1 {
+        margin-top: 0;
+      }
+      #welcomeOverlay ul {
+        line-height: 1.5em;
+        margin-bottom: 0;
+      }
+      #welcomeOverlay .welcomeGetShareLink {
+        cursor: pointer;
+      }
       #sharingEnabledBubble {
         position: absolute;
         right: 10px;
@@ -152,20 +169,41 @@
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
-    <uproxy-overlay id='sharingEnabledInfo'
-         hidden?='{{(model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen || UI.View.ROSTER!=ui.view}}'
-         hasSeenBefore='hasSeenSharingEnabledScreen'>
-      <div id='sharingEnabledBubble'></div>
-      <img src='../icons/sharing-enabled-toolbar.png' class='sharingEnabled'>
-      <div id='message'>
-        <p id='sharingEnabledHeader'>Sharing enabled</p>
-        <br>
-        The icon in the top right means you're available for sharing access with friends you've offered access to.
-      </div>
-    </uproxy-overlay>
-
     <div id='logged-in-controls'
         hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
+
+      <uproxy-overlay id='welcomeOverlay'
+           hidden?='{{model.globalSettings.hasSeenWelcome}}'
+           hasSeenBefore='hasSeenWelcome'>
+         <div class='message'>
+           <h1>Welcome to uProxy</h1>
+           <div>To get started</div>
+           <ul>
+             <li>
+               Please select
+               <span class='welcomeGetShareLink' on-tap='{{setGetMode}}'>GET ACCESS</span> or
+               <span class='welcomeGetShareLink' on-tap='{{setShareMode}}'>SHARE ACCESS</span>
+             </li>
+             <li>
+               Click on a friend to
+               <span hidden?='{{ui.mode!=UI.Mode.GET}}'>ask for access</span>
+               <span hidden?='{{ui.mode!=UI.Mode.SHARE}}'>offer access</span>
+             </li>
+           </ul>
+         </div>
+      </uproxy-overlay>
+
+      <uproxy-overlay id='sharingEnabledInfo'
+           hidden?='{{(model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen || UI.View.ROSTER!=ui.view}}'
+           hasSeenBefore='hasSeenSharingEnabledScreen'>
+        <div id='sharingEnabledBubble'></div>
+        <img src='../icons/sharing-enabled-toolbar.png' class='sharingEnabled'>
+        <div class='message'>
+          <p id='sharingEnabledHeader'>Sharing enabled</p>
+          <br>
+          The icon in the top right means you're available for sharing access with friends you've offered access to.
+        </div>
+      </uproxy-overlay>
 
       <div id='toolbar'>
         <img src='../icons/hamburger.png' id='btnSettings'

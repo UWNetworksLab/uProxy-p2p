@@ -89,9 +89,10 @@ class uProxyCore implements uProxy.CoreAPI {
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
   public globalSettings :Core.GlobalSettings
-      = {description : '',
-         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0),
-         hasSeenSharingEnabledScreen : false};
+      = {description: '',
+         stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
+         hasSeenSharingEnabledScreen: false,
+         hasSeenWelcome: false};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -120,6 +121,9 @@ class uProxyCore implements uProxy.CoreAPI {
           // onboarding information.
           if (this.globalSettings.hasSeenSharingEnabledScreen == null) {
             this.globalSettings.hasSeenSharingEnabledScreen = false;
+          }
+          if (this.globalSettings.hasSeenWelcome == null) {
+            this.globalSettings.hasSeenWelcome = false;
           }
         }).catch((e) => {
           console.log('No global settings loaded', e);
@@ -283,11 +287,9 @@ class uProxyCore implements uProxy.CoreAPI {
       }
     }
 
-    if (newSettings.hasSeenSharingEnabledScreen
-        != this.globalSettings.hasSeenSharingEnabledScreen) {
-      this.globalSettings.hasSeenSharingEnabledScreen
-          = newSettings.hasSeenSharingEnabledScreen;
-    }
+    this.globalSettings.hasSeenSharingEnabledScreen =
+        newSettings.hasSeenSharingEnabledScreen;
+    this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
   }
 
   /**

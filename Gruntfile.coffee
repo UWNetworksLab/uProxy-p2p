@@ -30,7 +30,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['**/*.ts'],
+    src: [ '**/*.ts', '**/*.html' ],
     dest: 'build/typescript-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -94,13 +94,9 @@ FILES =
   thirdPartyUi: [
     # .html files from core-* and paper-* components are copied
     # separately via polymerPaperCompile.
-    'core-*/*.css',
-    'core-*/*.js',
     'lodash/**',
     'platform/**',
     'polymer/**',
-    'paper-*/*.css',
-    'paper-*/*.js'
     'webcomponentsjs/**'
   ]
 
@@ -128,6 +124,11 @@ module.exports = (grunt) ->
       uproxyLibTypescriptSrc: Rule.symlinkSrc 'uproxy-lib'
 
       uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
+
+      polymer:
+        src: 'third_party/lib'
+        dest: 'build/typescript-src/generic_ui/lib'
+
 
     shell: {
 
@@ -187,13 +188,13 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: ['**', '!**/*.ts']
+          src: [ 'styles/**' ]
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['**', '!**/*.spec.js']
+          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Icons
@@ -303,18 +304,18 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: ['**', '!**/*.ts']
+          src: [ 'styles/**' ]
           dest: firefoxDevPath + 'data/'
         }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['**'],
-          dest: firefoxDevPath + 'data'
+          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          dest: firefoxDevPath + 'data/'
         }, {
           # Icons
           expand: true, cwd: 'src/'
           src: ['icons/*']
-          dest: firefoxDevPath + 'data'
+          dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/typescript-src', flatten: true
           src: FILES.uproxy_common.concat([
@@ -528,31 +529,18 @@ module.exports = (grunt) ->
         src: ['**']
         dest: '.'
 
-    polymerPaperCompile:
-      chrome_ui:
-        files: [ {
-            src: 'third_party/lib/paper-*/paper-*.html'
-            dest: chromeExtDevPath + 'lib'
-          }, {
-            src: 'third_party/lib/core-*/core-*.html'
-            dest: chromeExtDevPath + 'lib'
-          } ]
-      firefox_ui:
-        files: [ {
-            src: 'third_party/lib/paper-*/paper-*.html'
-            dest: firefoxDevPath + 'data/lib'
-          }, {
-            src: 'third_party/lib/core-*/core-*.html'
-            dest: firefoxDevPath + 'data/lib'
-          } ]
-      radiatus_ui:
-        files: [ {
-            src: 'third_party/lib/paper-*/paper-*.html'
-            dest: radiatusDevPath + 'lib'
-          }, {
-            src: 'third_party/lib/core-*/core-*.html'
-            dest: radiatusDevPath + 'lib'
-          } ]
+    vulcanize:
+      withinline:
+        options:
+          inline: true
+        files:
+          'build/typescript-src/generic_ui/polymer/vulcanized-inline.html': 'build/typescript-src/generic_ui/polymer/root.html'
+      withcsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/typescript-src/generic_ui/polymer/vulcanized.html': 'build/typescript-src/generic_ui/polymer/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -568,8 +556,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
-
-  grunt.loadTasks('tasks');
+  grunt.loadNpmTasks 'grunt-vulcanize'
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -584,6 +571,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
+    'symlink:polymer'
   ]
 
   # --- Build tasks ---
@@ -596,6 +584,8 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_ui', [
     'base'
     'ts:generic_ui'
+    'vulcanize:withinline'
+    'vulcanize:withcsp'
   ]
 
   taskManager.add('build_uistatic', [
@@ -613,7 +603,6 @@ module.exports = (grunt) ->
     'ts:chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
-    'polymerPaperCompile:chrome_ui'
     # 'shell:extract_chrome_tests'
   ]
 
@@ -624,7 +613,6 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
-    'polymerPaperCompile:firefox_ui'
   ]
  
   taskManager.add 'build_firefox_xpi', [
