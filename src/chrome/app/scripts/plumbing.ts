@@ -4,6 +4,7 @@
  * This file must be included *after* the freedom script and manifest are
  * loaded.
  */
+/// <reference path='chrome_oauth.ts' />
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
