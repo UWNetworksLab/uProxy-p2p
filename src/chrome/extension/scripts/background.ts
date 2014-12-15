@@ -47,7 +47,7 @@ chrome.runtime.onSuspend.addListener(() => {
 /**
   * Set the URL launched by clicking the browser icon.
   */
-function setPopupUrl(url) : void {
+var setPopupUrl = (url) : void => {
   if (popupUrl == url) {
     return;
   }
