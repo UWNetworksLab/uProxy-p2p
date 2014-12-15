@@ -47,6 +47,10 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
   private disconnectPromise_ :Promise<void>;
   private fulfillDisconnect_ :Function;
 
+  // Whether waiting for app installation is blocking the extension-app
+  // connection. If this is true, the uProxy popup should automatically
+  // be brought to the front after installation.
+  public waitingForAppInstall :boolean = false;
 
   /**
    * As soon as one constructs the CoreBrowserConnector, it will attempt to connect.
@@ -137,6 +141,12 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         ui.view = UI.View.SPLASH;
         chrome.browserAction.setIcon({path: "icons/offline-19.png"});
         setPopupUrl("index.html");
+        if (this.waitingForAppInstall) {
+          chromeBrowserApi.bringUproxyToFront();
+          // Set value to false since app has installed and connected
+          // to extension.
+          this.waitingForAppInstall = false;
+        }
         F(this.appPort_);
       };
       this.appPort_.onMessage.addListener(ackResponse);
@@ -159,7 +169,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, the extension should launch
     // an instruction to install the app.
-    setPopupUrl("install-incomplete.html");
+    setPopupUrl("application-missing.html");
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.
