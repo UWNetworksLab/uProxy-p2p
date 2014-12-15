@@ -64,7 +64,7 @@ function setPopupUrl(url) : void {
 
 // Launch the Chrome webstore page for the uProxy app.
 function openDownloadAppPage() : void {
-  chrome.tabs.create({url: '/* WEBSTORE LINK */'});
+  chrome.tabs.create({url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'});
   chrome.windows.update(mainWindowId, {focused: true});
   chromeConnector.waitingForAppInstall = true;
 }
