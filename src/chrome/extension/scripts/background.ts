@@ -29,18 +29,10 @@ var chromeBrowserApi :ChromeBrowserApi;
 // Chrome Window ID given to the uProxy popup.
 var popupWindowId = chrome.windows.WINDOW_ID_NONE;
 // The URL to launch when the user clicks on the extension icon.
-var popupUrl = "application-missing.html";
+var popupUrl = "app-missing.html";
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked.
 var mainWindowId = chrome.windows.WINDOW_ID_NONE;
-var extensionNewlyInstalled = false;
-
-chrome.runtime.onInstalled.addListener((details) => {
-  extensionNewlyInstalled = true;
-  if (chromeBrowserApi) {
-    chromeBrowserApi.bringUproxyToFront();
-  }
-});
 
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
@@ -67,8 +59,12 @@ var setPopupUrl = (url) : void => {
 
 // Launch the Chrome webstore page for the uProxy app.
 function openDownloadAppPage() : void {
-  chrome.tabs.create({url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'});
-  chrome.windows.update(mainWindowId, {focused: true});
+  chrome.tabs.create(
+      {url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'},
+      (tab) => {
+        // Focus on the new Chrome Webstore tab.
+        chrome.windows.update(tab.windowId, {focused: true});
+      });
   chromeConnector.waitingForAppInstall = true;
 }
 
@@ -78,6 +74,7 @@ function openDownloadAppPage() : void {
  */
 function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
+  chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
   chrome.browserAction.onClicked.addListener((tab) => {
     // When the extension icon is clicked, open uProxy.
     mainWindowId = tab.windowId;
@@ -117,7 +114,4 @@ function initUI() : UI.UserInterface {
 console.log('Initializing chrome extension background page...');
 if (undefined === ui) {
   ui = initUI();
-  if (extensionNewlyInstalled) {
-    chromeBrowserApi.bringUproxyToFront();
-  }
 }
