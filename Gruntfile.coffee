@@ -29,7 +29,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['**/*.*'],
+    src: [ '**/*.ts', '**/*.html' ],
     dest: 'build/typescript-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -460,20 +460,12 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      chrome_ui:
+      root:
         options:
           csp: true
           strip: true
         files:
-          'build/dev/chrome/extension/polymer/vulcanized.html': 'build/typescript-src/generic_ui/polymer/root.html'
-      #firefox_ui:
-      #  files: [ {
-      #      src: 'third_party/lib/paper-*/paper-*.html'
-      #      dest: firefoxDevPath + 'data/lib'
-      #    }, {
-      #      src: 'third_party/lib/core-*/core-*.html'
-      #      dest: firefoxDevPath + 'data/lib'
-      #    } ]
+          'build/typescript-src/generic_ui/polymer/vulcanized.html': 'build/typescript-src/generic_ui/polymer/root.html'
 
     clean: ['build/**', '.tscache']
 
