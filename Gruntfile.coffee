@@ -460,12 +460,17 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      root:
+      withinline:
+        options:
+          inline: true
+        files:
+          'build/typescript-src/generic_ui/polymer/vulcanized-inline.html': 'build/typescript-src/generic_ui/polymer/root.html'
+      withcsp:
         options:
           csp: true
           strip: true
         files:
-          'build/typescript-src/generic_ui/polymer/vulcanized.html': 'build/typescript-src/generic_ui/polymer/root.html'
+          'build/typescript-src/generic_ui/polymer/vulcanized.html': 'build/typescript-src/generic_ui/polymer/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -509,7 +514,8 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_ui', [
     'base'
     'ts:generic_ui'
-    'vulcanize'
+    'vulcanize:withinline'
+    'vulcanize:withcsp'
   ]
 
   taskManager.add('build_uistatic', [
