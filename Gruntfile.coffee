@@ -306,18 +306,18 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: ['**', '!**/*.ts']
+          src: [ 'styles/**' ]
           dest: firefoxDevPath + 'data/'
         }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['**'],
-          dest: firefoxDevPath + 'data'
+          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          dest: firefoxDevPath + 'data/'
         }, {
           # Icons
           expand: true, cwd: 'src/'
           src: ['icons/*']
-          dest: firefoxDevPath + 'data'
+          dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/typescript-src', flatten: true
           src: FILES.uproxy_common.concat([
@@ -345,7 +345,7 @@ module.exports = (grunt) ->
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-facebook'
         }, {
-          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
         }, {

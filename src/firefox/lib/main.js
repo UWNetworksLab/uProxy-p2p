@@ -21,7 +21,7 @@ var button = buttons.ActionButton({
 var panel = panels.Panel({
   width: 371,
   height: 600,
-  contentURL: self.data.url("polymer/popup.html"),
+  contentURL: self.data.url("index.html"),
   contentScriptFile: [
     self.data.url("scripts/port.js"),
     self.data.url("scripts/user.js"),
