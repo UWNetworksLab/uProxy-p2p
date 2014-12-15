@@ -29,7 +29,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: [ '**/*.ts', '**/*.html' ],
+    src: ['**/*.ts', '**/*.html'],
     dest: 'build/typescript-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -180,7 +180,7 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: [ 'styles/**' ]
+          src: ['styles/**']
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.
@@ -306,7 +306,7 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: [ 'styles/**' ]
+          src: ['styles/**']
           dest: firefoxDevPath + 'data/'
         }, {
         # ... the generic UI stuff
