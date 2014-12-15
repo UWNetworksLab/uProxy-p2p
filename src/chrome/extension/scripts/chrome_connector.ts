@@ -143,6 +143,9 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         setPopupUrl("polymer/popup.html");
         if (this.waitingForAppInstall) {
           chromeBrowserApi.bringUproxyToFront();
+          // Set value to false since app has installed and connected
+          // to extension.
+          this.waitingForAppInstall = false;
         }
         F(this.appPort_);
       };
