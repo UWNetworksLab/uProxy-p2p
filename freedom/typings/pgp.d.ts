@@ -22,12 +22,4 @@ interface PgpProvider {
                 verifyKey?:string) :Promise<VerifyDecryptResult>;
   armor(data:ArrayBuffer, type?:string) :Promise<string>;
   dearmor(data:string) :Promise<ArrayBuffer>;
-
-  // "Internal" API specific to e2e
-  importKey(keyStr:string) :Promise<string[]>;
-  generateKey(name:string, email:string) :Promise<void>;
-  deleteKey(uid:string) :Promise<void>;
-  searchPrivateKey(uid:string) :Promise<PgpKey[]>;
-  searchPublicKey(uid:string) :Promise<PgpKey[]>;
-  providePromises(provider:Object) :void;
 }
