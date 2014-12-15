@@ -22,6 +22,7 @@ declare module chrome.app.runtime {
 
     interface LaunchedEvent {
         addListener(callback: (launchData: LaunchData) => void);
+        removeListener(callback: () => void);
     }
 
     interface RestartedEvent {
@@ -73,7 +74,7 @@ declare module chrome.app.window {
         frame?: string; // "none", "chrome"
         bounds?: Bounds;
         transparentBackground?: boolean;
-        state?: string; // "normal", "fullscreen", "maximized", "minimized" 
+        state?: string; // "normal", "fullscreen", "maximized", "minimized"
         hidden?: boolean;
         resizable?: boolean;
         singleton?: boolean;
@@ -81,6 +82,7 @@ declare module chrome.app.window {
 
     export function create(url: string, options?: CreateOptions, callback?: (created_window: AppWindow) => void): void;
     export function current(): AppWindow;
+    export function get(id: string): AppWindow;
 
     interface WindowEvent {
         addListener(callback: () => void): void;
