@@ -33,10 +33,13 @@ var popupUrl = "application-missing.html";
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked.
 var mainWindowId = chrome.windows.WINDOW_ID_NONE;
+var extensionNewlyInstalled = false;
 
-// TODO(): remove this if there's no use for it.
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log('onInstalled: previousVersion', details.previousVersion);
+  extensionNewlyInstalled = true;
+  if (chromeBrowserApi) {
+    chromeBrowserApi.bringUproxyToFront();
+  }
 });
 
 chrome.runtime.onSuspend.addListener(() => {
@@ -114,4 +117,7 @@ function initUI() : UI.UserInterface {
 console.log('Initializing chrome extension background page...');
 if (undefined === ui) {
   ui = initUI();
+  if (extensionNewlyInstalled) {
+    chromeBrowserApi.bringUproxyToFront();
+  }
 }
