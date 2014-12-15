@@ -107,7 +107,7 @@ mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['core'] = () => { return new MockCore(); };
 freedom['core.console'] = () => { return new MockLog(); };
-freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
+freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 
 var DEBUG = true;
