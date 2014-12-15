@@ -9,8 +9,7 @@
 
 /// <reference path='chrome_browser_api.ts' />
 /// <reference path='chrome_connector.ts' />
-/// <reference path='google_auth.ts' />
-/// <reference path='oauth.ts' />
+/// <reference path='chrome_tab_auth.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
@@ -99,15 +98,16 @@ function initUI() : UI.UserInterface {
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
-  var oAuth = new OAuth();
+  var chromeBrowserApi = new ChromeBrowserApi();
+  var oAuth = new ChromeTabAuth();
   chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
-                           oAuth.getCredentials.bind(oAuth));
+                           oAuth.login.bind(oAuth));
 
   chrome.webRequest.onBeforeRequest.addListener(
     function() {
       return {cancel: true};
     },
-    {urls: [REDIRECT_URL + "*"]},
+    {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
     ['blocking']
   );
 
