@@ -56,6 +56,7 @@ declare module Core {
     description :string;
     stunServers :Core.StunServer[];
     hasSeenSharingEnabledScreen :boolean;
+    hasSeenWelcome :boolean;
   }
 
   export interface StunServer {

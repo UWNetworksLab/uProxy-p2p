@@ -21,14 +21,14 @@ Example:
 </style>
 
 <uproxy-overlay id='testOverlay' hasSeenBefore='hasSeenHelloWorld'>
-  <div id='message'>Hello World!<div>
+  <div class='message'>Hello World!<div>
 </uproxy-overlay>
 
 
 Two things you must do:
 
 1) The main text in the overlay MUST be provided in a div with the
-id='message'. This is so that the main text is automatically positioned,
+class='message'. This is so that the main text is automatically positioned,
 while other components of the overlay (e.g. the sharing enabled icon)
 can be otherwise positioned.
 
@@ -49,26 +49,21 @@ to track if the overlay has been seen.
         opacity: 0.8;
         color: white;
       }
-      polyfill-next-selector { content: '#message'; }
-      ::content #message {
+      polyfill-next-selector { content: '.message'; }
+      ::content .message {
         position: relative;
-        top: 15%;
         padding: 40px 40px 0px 40px;
       }
-      #gotItContainer {
-        position: relative;
-        top: 15%;
-        padding: 0px 40px 40px 40px;
-      }
       #gotIt {
+        display: inline-block;
+        margin-left: 40px;
+        margin-top: 2em;
         cursor: pointer;
       }
     </style>
 
-    <content></content><br><br>
-    <div id="gotItContainer">
-      <span id="gotIt" on-click='{{confirmSeen}}'>GOT IT</span>
-    </div>
+    <content></content>
+    <div id="gotIt" on-click='{{confirmSeen}}'>GOT IT</div>
 
   </template>
   <script src='overlay.js'></script>
