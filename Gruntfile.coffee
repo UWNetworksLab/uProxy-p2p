@@ -194,7 +194,7 @@ module.exports = (grunt) ->
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', 'index.html', 'polymer/popup.js*', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Icons
@@ -367,7 +367,7 @@ module.exports = (grunt) ->
           dest: radiatusDevPath + 'scripts/'
         }, {
           expand: true, cwd: 'build/typescript-src'
-          src: ['uproxy.js']
+          src: ['uproxy.js*']
           dest: radiatusDevPath + 'scripts/'
           # ... the generic core stuff
         }, {
@@ -377,12 +377,12 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: ['**', '!**/*.ts']
+          src: [ 'styles/**' ]
           dest: radiatusDevPath + '/'
         }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['**'],
+          src: [ 'scripts/**', 'index.html', 'polymer/popup.js*', 'polymer/vulcanized.*', '!**/*.ts' ]
           dest: radiatusDevPath + '/'
         }, {
           # Icons
@@ -625,7 +625,6 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'copy:radiatus'
-    'polymerPaperCompile:radiatus_ui'
   ]
 
   taskManager.add 'build', [
