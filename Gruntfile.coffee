@@ -180,13 +180,13 @@ module.exports = (grunt) ->
         }, {
           # generic_ui HTML and non-typescript assets.
           expand: true, cwd: 'src/generic_ui',
-          src: ['**', '!**/*.ts']
+          src: [ 'styles/**' ]
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/typescript-src/generic_ui'
-          src: ['**', '!**/*.spec.js']
+          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Icons
