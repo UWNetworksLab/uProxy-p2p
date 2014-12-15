@@ -47,10 +47,12 @@ module Core {
    */
   export class User implements BaseUser, Core.Persistent {
 
+    // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
+    // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
@@ -450,6 +452,20 @@ module Core {
         imageData: this.profile.imageData,
         instanceIds: Object.keys(this.instances_)
       });
+    }
+
+    public handleLogout = () => {
+      for (var instanceId in this.instances_) {
+        this.instances_[instanceId].handleLogout();
+      }
+    }
+
+    public resendInstanceHandshakes = () => {
+      for (var instanceId in this.instanceToClientMap_) {
+        var clientId = this.instanceToClientMap_[instanceId];
+        this.network.sendInstanceHandshake(
+            clientId, this.getConsentForClient_(clientId));
+      }
     }
 
   }  // class User

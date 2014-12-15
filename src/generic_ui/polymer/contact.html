@@ -23,7 +23,7 @@
     }
     #frame {
       box-sizing: border-box;
-      padding: 0;
+      padding-left: 1em;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
@@ -37,24 +37,30 @@
     .offline {
       opacity: 0.5;
     }
-    #userId {
-      color: #888;
-      margin-top: 0.5em;
-    }
     #words {
       display: inline-block;
-      width: 268px;
+      width: 290px;
+      padding-left: 8px;
     }
-    h1 {
+    .nameRow {
       display: block;
-      font-size: 16px; font-weight: 100;
-      margin: 0; padding: 16px 8px 0;
+      font-size: 16px;
+      font-weight: 100;
+      margin: 0;
+      padding-top: 16px;
+    }
+    .name {
+      display: inline-block;
+      width: 255px;
+    }
+    .accessIcon {
+      vertical-align: middle;
     }
     .hasInstances #words:hover h1 {
       color: #aaa;
     }
     #instances {
-      padding: 8px;
+      padding-top: 8px;
     }
     #actions {
       padding: 8px;
@@ -64,17 +70,22 @@
     }
     </style>
 
-    <div tabindex='-1'  id='frame'
+    <div tabindex='-1' id='frame'
         class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
      <!-- on-blur='{{ collapse }}'> -->
-      <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
+      <img id='avatar' src='{{ contact.imageData }}' on-tap='{{ toggle }}'/>
       <div id='words'>
-        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
-        <div id='userId' hidden?='{{!contact.expanded}}'>{{ contact.userId }}</div>
+        <div class='nameRow' on-tap='{{ toggle }}'>
+          <div class='name'>{{ contact.name }}</div>
+          <img src='../icons/getting.png' class='accessIcon'
+              hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
+          <img src='../icons/sharing.png' class='accessIcon'
+              hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
+        </div>
         <div id='instances' hidden?='{{!contact.expanded}}'>
           <template repeat='{{ i in contact.instances }}' vertical layout>
             <uproxy-instance
-                userId='{{ contact.userId }}'
+                user='{{ contact }}'
                 instance='{{ i }}'
                 network='{{contact.network}}'>
             </uproxy-instance>

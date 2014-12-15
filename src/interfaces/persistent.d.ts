@@ -1,3 +1,5 @@
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
+
 declare module Core {
 
   /**
@@ -52,8 +54,10 @@ declare module Core {
   }  // interface Core.Persistent
 
   // Object containing description so it can be saved to storage.
-  export interface StoredDescription {
+  export interface GlobalSettings {
     description :string;
+    stunServers :freedom_RTCPeerConnection.RTCIceServer[];
+    hasSeenSharingEnabledScreen :boolean;
+    hasSeenWelcome :boolean;
   }
-
 }  // module Core

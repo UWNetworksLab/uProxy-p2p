@@ -23,7 +23,8 @@ describe('Authentication', () => {
 
   it('extracts correctly on single-line sdp', (done) => {
     var fakeSessionDescription = {
-      sdp: 'a=fingerprint:sha-256 ' + mockFingerprint + '\r\n'
+      sdp: 'a=fingerprint:sha-256 ' + mockFingerprint + '\r\n',
+      type: ''
     };
     var fingerprint = Auth.extractFingerprint(fakeSessionDescription);
     expect(fingerprint).toEqual(mockFingerprint);
@@ -32,7 +33,8 @@ describe('Authentication', () => {
 
   it('returns null on short fingerprint', (done) => {
     var fakeSessionDescription = {
-      sdp: 'a=fingerprint:sha-256 ' + mockFingerprint.slice(3) + '\r\n'
+      sdp: 'a=fingerprint:sha-256 ' + mockFingerprint.slice(3) + '\r\n',
+      type: ''
     };
     var fingerprint = Auth.extractFingerprint(fakeSessionDescription);
     expect(fingerprint).toEqual(null);
@@ -41,7 +43,8 @@ describe('Authentication', () => {
 
   it('returns null on sub-line attack', (done) => {
     var fakeSessionDescription = {
-      sdp: 'a=extmap:5 a=fingerprint:sha-256 ' + mockFingerprint + '\r\n'
+      sdp: 'a=extmap:5 a=fingerprint:sha-256 ' + mockFingerprint + '\r\n',
+      type: ''
     };
     var fingerprint = Auth.extractFingerprint(fakeSessionDescription);
     expect(fingerprint).toEqual(null);

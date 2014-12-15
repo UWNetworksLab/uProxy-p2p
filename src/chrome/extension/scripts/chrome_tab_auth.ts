@@ -3,8 +3,6 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
-var REDIRECT_URL = "https://www.uproxy.org/oauth-redirect-uri";
-
 declare var core :CoreConnector;
 
 // TODO: write a similar class for Firefox that will implement a common
@@ -21,34 +19,23 @@ class ChromeTabAuth {
   constructor() {
   }
 
-  public login = () : void => {
+  public login = (oauthInfo :OAuthInfo) : void => {
     if (this.tabId_ === -1) {
-      this.launchAuthTab_();
+      this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
     } else {
       chrome.tabs.update(this.tabId_, {active:true});
     }
   }
 
-  public getOauthUrl = (redirctUrl) : string => {
-    throw new Error('Operation not implemented');
-  }
 
-  public extractCode = (url) : Promise<any> => {
-    throw new Error('Operation not implemented');
-  }
-
-  private launchAuthTab_ = () : void => {
+  private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
-      if (tab.id === this.tabId_ && tab.url.indexOf(REDIRECT_URL) === 0) {
+      if (tab.id === this.tabId_ && tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.onRemoved.removeListener(onTabClose);
         this.tabId_ = -1;
         chrome.tabs.remove(tabId);
-        this.extractCode(tab.url).then((credentials :any) => {
-          this.sendCredentials_(credentials);
-        }).catch((e) => {
-          this.onError_(e.toString());
-        });
+        this.sendCredentials_(tab.url);
       }
     };
 
@@ -64,8 +51,9 @@ class ChromeTabAuth {
     }.bind(this);
 
 
-    chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
+    chrome.tabs.create({url: url},
                        function(tab: chrome.tabs.Tab) {
+      chrome.windows.update(mainWindowId, {focused: true});
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);
@@ -73,12 +61,10 @@ class ChromeTabAuth {
   }
 
   private onError_ = (errorText :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'error', message: errorText});
+    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, errorText);
   }
 
-  private sendCredentials_ = (credentials :GoogleTalkCredentials) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'auth', message: credentials});
+  private sendCredentials_ = (url :string) : void => {
+    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, url);
   }
 }

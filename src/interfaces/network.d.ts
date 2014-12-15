@@ -70,12 +70,9 @@ declare module Social {
     sendInstanceHandshake :(clientId:string, consent :Consent.WireState) => Promise<void>;
 
     /**
-     * Oftentimes, network will receive client IDs belonging to remote
-     * contacts known to be uProxy-enabled. This may happen prior to receiving
-     * the local vcard, which is required for constructing the local Instance
-     * Message. In this case, those instance messages must be queued.
-     */
-    flushQueuedInstanceMessages :() => void;
+      * Resends the instance handeshake to all uProxy instances.
+      */
+    resendInstanceHandshakes :() => void;
 
     /**
      * Sends a message to a remote client.

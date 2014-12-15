@@ -21,6 +21,10 @@ var mockAppPort = () => {
   };
 };
 
+// Mock the global function that changes the URL launched when the
+// extension icon is clicked.
+setPopupUrl = () => {};
+
 // Mock UI.
 var ui :UI.UserInterface;
 
@@ -28,7 +32,7 @@ var ui :UI.UserInterface;
 // sequence on the chromeConnector object.
 describe('core-connector', () => {
 
-  ui = jasmine.createSpyObj('UI.UserInterface', 
+  ui = jasmine.createSpyObj('UI.UserInterface',
     ['stopGettingInUiAndConfig',
     'sync',
     'update',
@@ -52,6 +56,8 @@ describe('core-connector', () => {
     spyOn(chromeConnector, 'connect').and.callThrough()
     // Get chrome.runtime.connect to return null as if there were no App to
     // connect to.
+    // chrome.runtime and chrome.browserAction are mocks found in
+    // chrome_mocks.ts.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
     connectPromise = chromeConnector.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
@@ -104,6 +110,7 @@ describe('core-connector', () => {
 
     // Begin successful connection attempt to App.
     spyOn(chromeConnector, 'send').and.callFake(() => {});
+    spyOn(chrome.browserAction, 'setIcon');
     expect(chromeConnector.status.connected).toEqual(false);
     chromeConnector.connect().then(() => {
       expect(chromeConnector['appPort_']).not.toBeNull();
@@ -116,6 +123,8 @@ describe('core-connector', () => {
       expect(chromeConnector['send']).toHaveBeenCalledWith({
         cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
       });
+      expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
+        {path: "icons/offline-19.png"});
     }).then(done);
   });
 

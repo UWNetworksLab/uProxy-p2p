@@ -33,6 +33,9 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - On Ubuntu, you can do `apt-get install nodejs`.
+    - We also need to create symlink ( if we are not running legacy node) <br>
+      Use this: <br>
+      ln -s /usr/bin/nodejs /usr/bin/node 
 
     - On Archlinux, you can do 'pacman -S nodejs'.
 
@@ -58,11 +61,11 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 1. Clone uProxy and its submodules (and its submodules' submodules...):
 `git clone https://github.com/uProxy/uProxy.git`
-or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github setup (useful if you use 2-step auth for github, which you should do).
+or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
-2. Run `bower install` to install any bower dependencies.
+2. In the uProxy repository's root directory, run `bower install` to install any bower dependencies.
 
-3. Run `npm install`. This will install all local dependencies,
+3. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies,
 as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update the dependencies.
@@ -83,11 +86,11 @@ One of the reasons we are doing this source code release is so that the communit
 
 ### Proxying between 2 instances of Chrome
 
-To test proxying without using multiple computers, you will need to launch 2 separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
+To test proxying without using multiple computers, you will need to launch two separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
 ```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta```
 where DIR_NAME is set to the name of a new directory.  You may re-use your normal instance of Chrome if you wish to only run this command once.
 
-In each instance of Chrome, load the uProxy app and extension.  Then in each instance, sign into Google with gmail accounts that have already added each other as contacts.  After sign in both contacts should be visible on each others roster without changing the default filters.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's App and trace should appear indicating the flow of traffic.
+In each instance of Chrome, load the uProxy app and extension.  Then in each instance, sign into Google with gmail accounts that have already added each other as contacts.  After sign-in both contacts should be visible on each other's roster without changing the default filters.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's App and trace should appear indicating the flow of traffic.
 
 
 ### Development and re-building uProxy
@@ -100,7 +103,7 @@ of uProxy's Grunt commands:
    *  `build_chrome_app` - Build just Chrome app
    *  `build_chrome_extension` - Build just Chrome extension
    *  `build_firefox` - Build just Firefox
-   *  `build_uistatic` - Build the static ui.
+   *  `build_uistatic` - Build the static UI.
  *  `clean` - Cleans up
  *  `watch` - Watch for changes and recompile as needed.
  *  `test` - Run unit tests
@@ -124,17 +127,17 @@ The following hints may help you if it goes wrong and you need to debug and fix 
 
 - A file called `bower.json` provides details of packages for the UI, typically JavaScript for the browser. Run `bower install` to download and install the dependencies. They are typically installed in a directory called `lib` (as defined by a local file called `.bowerrc`).
 
-- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. You can run bower by hand from the `bower install` and look out for error messages.
+- If bower fails, it doesn't tell you. Sometimes things don't work because it failed to install something that you need. When you run `bower install`, look out for error messages.
 
-- If things are not working, check that you have a recent version of bower, npm, and node.
+- If things are not working, check that you have recent versions of bower, npm, and node.
 
 
 ## Layout of files
 
 Configuration and setup files
- * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uproxy.
- * `bower.json` specified dependent libraries from Bower.
- * `package.json` specified dependent libraries from NPM.
+ * `Gruntfile.js` a file that specifies common tasks, e.g. how to build and package uProxy.
+ * `bower.json` specifies dependent libraries from Bower.
+ * `package.json` specifies dependent libraries from NPM.
  * `.gitignore` what git should ignore
  * `.bowerrc` tells bower where to put files
  * `.travis.yml` Travis auto-testing

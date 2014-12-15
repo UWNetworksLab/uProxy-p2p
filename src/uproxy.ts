@@ -9,6 +9,7 @@
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
+/// <reference path='interfaces/persistent.d.ts' />
 /// <reference path='networking-typings/communications.d.ts' />
 
 module uProxy {
@@ -23,15 +24,14 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
-    REFRESH_UI = 1000,
-    // Skip unused REFRESH. (Refresh what, anyway?)
-    RESET = 1002,  // logs out of all networks
-    LOGIN,
+    GET_INITIAL_STATE = 1000,
+    // Skip REFRESH and RESET commands that have been removed
+    LOGIN = 1003,
     LOGOUT,
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.
-    UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip unused UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
     // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
@@ -39,7 +39,8 @@ module uProxy {
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    SEND_CREDENTIALS
+    SEND_CREDENTIALS,
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -47,7 +48,7 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Update {
-    ALL = 2000,
+    INITIAL_STATE = 2000,
     NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
@@ -68,7 +69,8 @@ module uProxy {
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
-    GET_CREDENTIALS
+    GET_CREDENTIALS,
+    LAUNCH_UPROXY
   }
 
   /**
@@ -130,9 +132,6 @@ module uProxy {
   // TODO: Rename CoreApi.
   export interface CoreAPI {
 
-    // Clears all state and storage.
-    reset() : void;
-
     // Send your own instanceId to target clientId.
     // TODO: Implement this or remove it.
     // sendInstanceHandshakeMessage(clientId :string) : void;
@@ -143,13 +142,13 @@ module uProxy {
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
-    updateDescription(description :string) : void;
+    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
-    logout(networkInfo :NetworkInfo) : void;
+    logout(networkInfo :NetworkInfo) : Promise<void>;
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
@@ -248,4 +247,9 @@ module UProxyClient {
 // TODO: this is chrome-specific. Move to the right place.
 interface StatusObject {
   connected :boolean;
+}
+
+interface OAuthInfo {
+  url :string;
+  redirect :string
 }

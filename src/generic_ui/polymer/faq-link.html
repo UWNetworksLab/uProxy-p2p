@@ -1,0 +1,27 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+
+<!--
+
+Example usage of faq-link:
+<uproxy-faq-link anchor='privacy'>Privacy Info</uproxy-faq-link>
+This will display a button with the text 'Privacy Info' and open
+a new tab linking to faq.html#privacy
+
+-->
+
+<polymer-element name='uproxy-faq-link' attributes='anchor'>
+
+  <template>
+    <style>
+      span {
+        cursor: pointer;
+      }
+    </style>
+
+    <span on-click='{{ openFaq }}'><content></content></span>
+
+  </template>
+
+  <script src='faq-link.js'></script>
+
+</polymer-element>

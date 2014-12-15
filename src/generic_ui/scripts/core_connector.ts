@@ -4,6 +4,7 @@
  * Handles all connection and communication with the uProxy core.
  */
 /// <reference path='../../uproxy.ts'/>
+/// <reference path='../../interfaces/persistent.d.ts' />
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 interface FullfillAndReject {
@@ -121,11 +122,6 @@ class CoreConnector implements uProxy.CoreAPI {
 
   // --- CoreAPI interface requirements (sending COMMANDS) ---
 
-  reset = () => {
-    console.log('Resetting.');
-    this.sendCommand(uProxy.Command.RESET, null);
-  }
-
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
   sendInstance = (clientId) => {
@@ -147,11 +143,10 @@ class CoreConnector implements uProxy.CoreAPI {
     this.sendCommand(uProxy.Command.STOP_PROXYING);
   }
 
-  updateDescription = (description :string) => {
-    // TODO: determine if novelty check is necessary.
-    console.log('Updating description to ' + description);
-    this.sendCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-                     description);
+  updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
+    console.log('Updating global settings to ' + JSON.stringify(newSettings));
+    this.sendCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+                     newSettings);
   }
 
   // TODO: Implement this or remove it.
@@ -164,7 +159,7 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGIN, network);
   }
 
-  logout = (networkInfo :NetworkInfo) => {
-    this.sendCommand(uProxy.Command.LOGOUT, networkInfo);
+  logout = (networkInfo :NetworkInfo) : Promise<void> => {
+    return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 }  // class CoreConnector

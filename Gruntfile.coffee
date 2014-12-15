@@ -18,8 +18,6 @@ path = require 'path'
 
 getNodePath = (module) =>
   Path.dirname(require.resolve(module + '/package.json'))
-uproxyLibPath = getNodePath 'uproxy-lib'
-uproxyNetworkingPath = getNodePath 'uproxy-networking'
 
 chromeExtDevPath = 'build/dev/chrome/extension/'
 chromeAppDevPath = 'build/dev/chrome/app/'
@@ -79,13 +77,30 @@ FILES =
   ]
 
   uproxy_networking_common: [
-    'arraybuffers/arraybuffers.js'
-    'handler/queue.js'
-    'ipaddr/ipaddr.min.js'
+    'ipaddrjs/ipaddr.min.js'
     'tcp/tcp.js'
     'socks-common/socks-headers.js'
     'socks-to-rtc/socks-to-rtc.js'
     'rtc-to-net/rtc-to-net.js'
+  ]
+  uproxy_lib_common: [
+    'logging/logging.js'
+    'arraybuffers/arraybuffers.js'
+    'handler/queue.js'
+    'webrtc/datachannel.js'
+    'webrtc/peerconnection.js'
+  ]
+  thirdPartyUi: [
+    # .html files from core-* and paper-* components are copied
+    # separately via polymerPaperCompile.
+    'core-*/*.css',
+    'core-*/*.js',
+    'lodash/**',
+    'platform/**',
+    'polymer/**',
+    'paper-*/*.css',
+    'paper-*/*.js'
+    'webcomponentsjs/**'
   ]
 
 
@@ -105,7 +120,7 @@ module.exports = (grunt) ->
       typescriptSrc: Rule.symlinkSrc '.'
       thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
 
-      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty uproxyNetworkingPath
+      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-networking'
       uproxyNetworkingTypescriptSrc: Rule.symlinkSrc 'uproxy-networking'
 
       uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
@@ -150,17 +165,16 @@ module.exports = (grunt) ->
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
-          src: ['third_party/**/*.js']
+          src: [
+            'third_party/freedom-ts-hacks/*.js',
+            'third_party/lib/core-component-page/**/*.js',
+            'third_party/lib/platform/**/*.js',
+            'third_party/lib/polymer/**/*.js',
+            'third_party/lib/webcomponentsjs/**/*.js'
+            ]
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
-
-      # Compiled javascript from say, uproxy-lib and uproxy-networking.
-      # core_libs: { files: [ {
-          # expand: true, cwd: uproxyLibPath + '/build'
-          # src: ['**/*.js']
-          # dest: 'build/dev/'
-        # } ]}
 
       chrome_extension:
         nonull: true
@@ -195,13 +209,13 @@ module.exports = (grunt) ->
           dest: chromeExtDevPath + 'scripts/'
         }, {
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
         } ]
 
       chrome_app:
         nonull: true
-        
+
         files: [ {  # Copy .js, .json, etc from src to build/dev/chrome/app
           expand: true, cwd: 'src/chrome/app'
           src: ['**', '!**/*.spec.js', '!**/*.md', '!**/*.ts']
@@ -221,24 +235,17 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
-          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom/'
+          expand: true, cwd: 'node_modules/freedom-for-chrome/'
           src: [
-            'freedom-for-chrome-for-uproxy.js'
-            'uproxy-core-env.js'
+            'freedom-for-chrome.js'
           ]
           dest: chromeAppDevPath + 'lib/'
         }, {
           expand: true, cwd: 'node_modules/freedom-social-xmpp', flatten: true
           src: [
-            'build/**'
+            'dist/**'
           ]
           dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
-        }, {
-          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
-          src: [
-            '**'
-          ]
-          dest: chromeAppDevPath + 'lib/freedom-social-facebook'
         }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
           src: [
@@ -253,10 +260,14 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # uProxy Icons.
           expand: true, cwd: 'src/'
-          src: ['icons/uproxy-*.png']
+          src: ['icons/default-*.png']
           dest: chromeAppDevPath
+        }, { # Copy uproxy-lib files.
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: chromeAppDevPath + 'scripts/uproxy-lib/'
         }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: chromeAppDevPath + 'scripts/uproxy-networking/'
         }]
@@ -310,11 +321,11 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
-          expand: true, cwd: 'node_modules/uproxy-lib/build/freedom'
-          src: ['freedom-for-firefox-for-uproxy.jsm']
+          expand: true, cwd: 'node_modules/freedom-for-firefox/'
+          src: ['freedom-for-firefox.jsm']
           dest: firefoxDevPath + 'data'
         }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'node_modules/uproxy-networking/build/',
+          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: firefoxDevPath + 'data/core/uproxy-networking'
         }, {
@@ -322,20 +333,20 @@ module.exports = (grunt) ->
           src: ['websocket-server/**']
           dest: firefoxDevPath + 'data/lib'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/build/'
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
         }, {
-          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
-          src: ['**']
-          dest: firefoxDevPath + 'data/lib/freedom-social-facebook'
-        }, {
-          expand: true, cwd: 'node_modules/freedom/providers/storage/isolated'
+          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
         }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: firefoxDevPath + 'data/core/uproxy-lib'
+        }, { # Copy uproxy-networking files.
           expand: true, cwd: 'third_party/lib'
-          src: ['**']
+          src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
         } ]
 
@@ -399,6 +410,7 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/typescript-src/mocks/freedom-mocks.js'
+              'node_modules/uproxy-lib/dist/logging/logging.js'
               'build/typescript-src/socks-to-rtc/socks-to-rtc.js'
               'build/typescript-src/rtc-to-net/rtc-to-net.js'
               'build/typescript-src/uproxy.js'
@@ -444,6 +456,24 @@ module.exports = (grunt) ->
         src: ['**']
         dest: '.'
 
+    polymerPaperCompile:
+      chrome_ui:
+        files: [ {
+            src: 'third_party/lib/paper-*/paper-*.html'
+            dest: chromeExtDevPath + 'lib'
+          }, {
+            src: 'third_party/lib/core-*/core-*.html'
+            dest: chromeExtDevPath + 'lib'
+          } ]
+      firefox_ui:
+        files: [ {
+            src: 'third_party/lib/paper-*/paper-*.html'
+            dest: firefoxDevPath + 'data/lib'
+          }, {
+            src: 'third_party/lib/core-*/core-*.html'
+            dest: firefoxDevPath + 'data/lib'
+          } ]
+
     clean: ['build/**', '.tscache']
 
  # grunt.initConfig
@@ -458,6 +488,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
+
+  grunt.loadTasks('tasks');
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -501,6 +533,7 @@ module.exports = (grunt) ->
     'ts:chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
+    'polymerPaperCompile:chrome_ui'
     # 'shell:extract_chrome_tests'
   ]
 
@@ -511,6 +544,7 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
+    'polymerPaperCompile:firefox_ui'
   ]
 
   taskManager.add 'build_firefox_xpi', [

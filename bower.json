@@ -2,8 +2,11 @@
   "name": "uProxy",
   "version": "0.4.0",
   "dependencies": {
-    "lodash": "~1.3.1",
-    "polymer": "~0.4.0"
+    "polymer": "^0.5.1",
+    "paper-elements": "Polymer/paper-elements#~0.5.1",
+    "core-input": "Polymer/core-input#^0.5.0",
+    "core-style": "Polymer/core-style#^0.5.0",
+    "core-icons": "Polymer/core-icons#~0.5.1"
   },
   "devDependencies": {}
 }

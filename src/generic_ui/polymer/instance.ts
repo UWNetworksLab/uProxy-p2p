@@ -6,7 +6,7 @@ Polymer({
        name: this.network.name,
        userId: this.network.userId
       },
-      userId: this.userId,
+      userId: this.user.userId,
       instanceId: this.instance.instanceId
     };
     // Expose global ui object and UI module in this context. This allows the
@@ -20,15 +20,12 @@ Polymer({
     core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
-      this.ui.startGettingInUiAndConfig(endpoint);
-      this.ui.instanceGettingAccessFrom = this.instance.instanceId;
+      this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     });
   },
   stop: function() {
     console.log('[polymer] calling core.stop()');
     core.stop();
-    this.ui.stopGettingInUiAndConfig();
-    this.ui.instanceGettingAccessFrom = null;
   },
 
   // |action| is the string end for a Consent.UserAction

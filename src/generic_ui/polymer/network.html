@@ -1,33 +1,23 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/paper-button/paper-button.html'>
 
-<polymer-element name='uproxy-network' attributes='network'>
+<polymer-element name='uproxy-network' attributes='networkName'>
   <template>
     <style>
       :host {
         display: block;
         box-sizing: border-box;
-        width: 100%; height: 110px;
-        padding: 16px;
-        border-bottom: 1px solid #ccc;
       }
-      button, input[type='checkbox'] {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        padding: 8px;
-        outline: none;
+      paper-button {
+        color: white;
+        width: 150px;
+        background: #009688;  /* default to dark green */
       }
-      button:hover {
-        box-shadow: 1px 2px 4px #aaa;
+      paper-button.Google {
+        background: #dd4b39;
       }
-      button:active {
-        box-shadow: 1px 2px 4px #aaa inset;
-      }
-      h1 {
-        font-weight: 100;
-        font-size: 16px;
-        display: block;
-        width: 80px;
-        font-variant: small-caps;
+      paper-button.Facebook {
+        background: #3b5998;
       }
       #waiting {
         color: #bbb;
@@ -59,22 +49,17 @@
     </style>
 
     <div class='network'>
-      <h1>{{ network.name }}</h1>
-      <span hidden?='{{LOGGED_OUT!=state}}'>
-        <button on-tap='{{connect}}'>Connect</button>
+      <span hidden?='{{isLoggingIn}}'>
+        <span>
+          <paper-button raised on-tap='{{connect}}' class='{{ networkName }}'>
+            {{ networkName }}
+          </button>
+        </span>
       </span>
-      <span hidden?='{{LOGGED_IN!=state}}'>
-        <button on-tap='{{disconnect}}'>Disconnect</button>
-      </span>
-      <span id='waiting' hidden?='{{LOGGING_IN!=state}}'>
+      <span id='waiting' hidden?='{{!isLoggingIn}}'>
         Waiting for sign in...
         <div id='hourglass'></div>
       </span>
-      <!--
-      <input type='checkbox'>
-        Remember?
-      </input>
-      -->
     </div>
   </template>
   <script src='network.js'></script>

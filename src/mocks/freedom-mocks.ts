@@ -100,15 +100,15 @@ class MockSocial {
 class MockLog {
 }
 
-var freedom = new MockChannel();
+var freedom = MockChannel;
 freedom['storage'] = () => { return new MockStorage({}); };
 var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['core'] = () => { return new MockCore(); };
-freedom['core.log'] = () => { return new MockLog(); };
-freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
+freedom['core.console'] = () => { return new MockLog(); };
+freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 
 var DEBUG = true;

@@ -1,29 +1,20 @@
 // Fake dependency which mocks all interactions such that the UI can work.
 /// <reference path='../../uproxy.ts' />
 /// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/browser_action.d.ts'/>
+/// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../networking-typings/communications.d.ts' />
 
 console.log('This is not a real uProxy frontend.');
 
-var model :UI.Model = {
-  networks: [],
-  contacts: {
-    'onlineTrustedUproxy': [],
-    'offlineTrustedUproxy': [],
-    'onlineUntrustedUproxy': [],
-    'offlineUntrustedUproxy': [],
-    'onlineNonUproxy': [],
-    'offlineNonUproxy': []
-  },
-  description: 'My Computer'
-};
-
-class MockNotifications implements BrowserAction {
+class MockBrowserApi implements BrowserAPI {
   setIcon(iconFile) {
     console.log('setting icon to ' + iconFile);
   }
+  startUsingProxy() {}
+  stopUsingProxy(askUser) {}
+  openFaq(pageAnchor) {}
+  bringUproxyToFront() {}
 }
 
 function generateFakeUserMessage() :UI.UserMessage {
@@ -61,9 +52,6 @@ class MockCore implements uProxy.CoreAPI {
   }
   connected = () => {
     return true;  // Static UI core is always 'connected'.
-  }
-  reset() {
-    console.log('Resetting.');
   }
   sendInstance(clientId) {
     console.log('Sending instance ID to ' + clientId);
@@ -125,9 +113,11 @@ class MockCore implements uProxy.CoreAPI {
   stop = () => {
   }
 
-  updateDescription(description) {
-    console.log('Updating description to ' + description);
+  updateGlobalSettings(newGlobalSettings) {
+    console.log('Updating global settings to '
+        + JSON.stringify(newGlobalSettings));
   }
+
   changeOption(option) {
     console.log('Changing option ' + option);
   }
@@ -141,12 +131,13 @@ class MockCore implements uProxy.CoreAPI {
     ui.syncUser(generateFakeUserMessage());
     return Promise.resolve<void>();
   }
-  logout(network) {
+  logout = (network) :Promise<void> => {
     console.log('Logging out of', network);
     ui['syncNetwork_']({
       name: 'google',
       online: false
     });
+    return Promise.resolve<void>();
   }
   onUpdate(update, handler) {
     // In the 'real uProxy', this is where the UI installs update handlers for
@@ -158,7 +149,7 @@ class MockCore implements uProxy.CoreAPI {
 var mockCore = new MockCore();
 var ui :uProxy.UIAPI = new UI.UserInterface(
     mockCore,
-    new MockNotifications());
+    new MockBrowserApi());
 
 var core = mockCore;
 

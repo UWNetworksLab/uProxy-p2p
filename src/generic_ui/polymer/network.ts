@@ -6,49 +6,25 @@ declare var ui :UI.UserInterface;
 declare var core :uProxy.CoreAPI;
 
 Polymer({
-  // TODO: turn into typescript enums
-  network: {},
-  LOGGED_OUT: 0,
-  LOGGING_IN: 1,
-  LOGGED_IN: 2,
+  isLoggingIn: false,
   connect: function() {
-    if (!this.network) {
-      console.error('uproxy-network with no network specified!');
-      return;
-    }
-    console.log('connect fired!');
-    this.state = this.LOGGING_IN;
-    core.login(this.network.name).then(() => {
-      console.log('connected to ' + this.network.name);
-      this.state = this.LOGGED_IN;
+    this.isLoggingIn = true;
+    core.login(this.networkName).then(() => {
+      console.log('connected to ' + this.networkName);
+      this.isLoggingIn = false;
       ui.view = UI.View.ROSTER;
+      ui.bringUproxyToFront();
     });
 
     // Restore the button after a timeout.
     this.async(() => {
       if (this.LOGGED_IN != this.state) {
-        this.state = this.LOGGED_OUT;
+        this.isLoggingIn = false;
       }
     // TODO: Make the timeout the same as LOGIN_TIMEOUT as in core / social.ts,
     // or better yet, figure out a better way to deal with promise rejects in
     // the various cases between failed login or duplicate login attempts.
     }, null, 5000);
   },
-
-  disconnect: function() {
-    if (!this.network) {
-      console.error('uproxy-network with no network specified!');
-      return;
-    }
-    core.logout({name:this.network.name,
-                 userId: this.network.userId});
-    console.log('disconnected from ' + this.network.name);
-    this.state = this.LOGGED_OUT;
-  },
-
-  ready: function() {
-    // TODO: Probably turn this into a more reasonable enum to prevent doubling
-    // state.
-    this.state = this.network.online? this.LOGGED_IN : this.LOGGED_OUT;
-  },
+  ready: function() {},
 });

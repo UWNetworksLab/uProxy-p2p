@@ -63,8 +63,9 @@ module Social {
       }
     }
 
-    Social.networks[MANUAL_NETWORK_ID] = {
-        '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
+    // TODO: re-enable manual networks here when all code is ready
+    // Social.networks[MANUAL_NETWORK_ID] = {
+    //     '': new Social.ManualNetwork(MANUAL_NETWORK_ID)};
   }
 
   /**
@@ -166,7 +167,8 @@ module Social {
         // instead of dropping this message.
         // Currently we will keep receiving INSTANCE_REQUEST until instance
         // handshake is sent to the peer.
-        throw Error('Not ready to send handshake');
+        console.error('Not ready to send handshake');
+        return;
       }
       var handshake = {
         type: uProxy.MessageType.INSTANCE,
@@ -193,6 +195,10 @@ module Social {
      */
     public error = (msg :string) : void => {
       console.error('!!! [' + this.name + '] ' + msg);
+    }
+
+    public resendInstanceHandshakes = () => {
+      // Do nothing for non-freedom networks (e.g. manual).
     }
 
     //================ Subclasses must override these methods ================//
@@ -295,8 +301,6 @@ module Social {
         // TODO: we may want to verify that our status is ONLINE before
         // sending out any instance messages.
         this.log('<-- XMPP(self) [' + profile.name + ']\n' + profile);
-        // Send our own InstanceMessage to any queued-up clients.
-        this.flushQueuedInstanceMessages();
 
         // Update UI with own information.
         var userProfileMessage :UI.UserProfileMessage = {
@@ -430,7 +434,17 @@ module Social {
             // Upon successful login, save local client information.
             this.startMonitor_();
             this.log('logged into uProxy');
-            return this.prepareLocalInstance(freedomClient.userId);
+            return this.prepareLocalInstance(freedomClient.userId).then(() => {
+              // Notify UI that this network is online before we fulfill
+              // the onceLoggedIn_ promise.  This ensures that the UI knows
+              // that the network is online before we send user updates.
+              var payload :UI.NetworkMessage = {
+                name: this.name,
+                online: true,
+                userId: freedomClient.userId
+              };
+              ui.update(uProxy.Update.NETWORK, payload);
+            });
           });
       return this.onceLoggedIn_
           .then(() => {
@@ -450,6 +464,9 @@ module Social {
     public logout = () : Promise<void> => {
       this.myInstance = null;
       this.stopMonitor_();
+      for (var userId in this.roster) {
+        this.roster[userId].handleLogout();
+      }
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
       });
@@ -499,6 +516,12 @@ module Social {
       this.monitorIntervalId_ = null;
     }
 
+    public resendInstanceHandshakes = () => {
+      for (var userId in this.roster) {
+        this.roster[userId].resendInstanceHandshakes();
+      }
+    }
+
   }  // class Social.FreedomNetwork
 
 
@@ -529,10 +552,6 @@ module Social {
 
     public logout = () : Promise<void> => {
       return Promise.resolve<void>();
-    }
-
-    // Does not apply to ManualNetwork. Nothing to do.
-    public flushQueuedInstanceMessages = () => {
     }
 
     public send = (recipientClientId :string,
