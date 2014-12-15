@@ -47,6 +47,7 @@
   },
   "private": true,
   "scripts": {
-    "test": "grunt test --verbose"
+    "test": "grunt test --verbose",
+    "prepublish": "grunt test"
   }
 }
