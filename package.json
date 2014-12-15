@@ -44,6 +44,6 @@
   "private": true,
   "scripts": {
     "test": "grunt test --verbose",
-    "prepublish": "grunt test"
+    "prepublish": "bower install && grunt test"
   }
 }
