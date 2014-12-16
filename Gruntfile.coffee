@@ -556,7 +556,6 @@ module.exports = (grunt) ->
     'copy:firefox'
     'concat:firefox_uproxy'
     'concat:firefox_dependencies'
-    'polymerPaperCompile:firefox_ui'
   ]
 
   taskManager.add 'build_firefox_xpi', [
