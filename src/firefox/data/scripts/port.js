@@ -3,4 +3,4 @@
  * This runs in content script, where communication to main add-on environment happens
  * throught self.port on/emit.
  */
-var port = self.port
+var port = addon.port

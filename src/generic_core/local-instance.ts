@@ -17,7 +17,7 @@ module Core {
   // uproxy-lib, or directly use end-to-end implementation.
   function randomUint8() : number {
     var randomArray = new Uint8Array(1);
-    crypto.getRandomValues(randomArray);
+    //crypto.getRandomValues(randomArray);
     return randomArray[0];
   }
 
