@@ -165,7 +165,6 @@ module.exports = (grunt) ->
                 firefoxDevPath + 'data/scripts/user.js'
                 firefoxDevPath + 'data/scripts/uproxy.js'
                 firefoxDevPath + 'data/scripts/ui.js'
-                firefoxDevPath + 'data/scripts/ui.js'
                 firefoxDevPath + 'data/scripts/firefox_browser_api.js'
                 firefoxDevPath + 'data/scripts/firefox_connector.js'
                 firefoxDevPath + 'data/scripts/core_connector.js'
@@ -331,8 +330,7 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/compile-src', flatten: true
-          src: FILES.uproxy_common.concat([
-            'firefox/data/scripts/*.js']),
+          src: ['uproxy.js', 'firefox/data/scripts/*.js'],
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
