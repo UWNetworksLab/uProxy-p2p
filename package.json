@@ -35,8 +35,8 @@
     "grunt-contrib-yuidoc": "~0.4.0",
     "grunt-shell": "~0.3.1",
     "grunt-ts": "^1.11",
-    "typescript": "^1.1.0-1",
     "grunt-verbosity": "^0.2.2",
+    "grunt-vulcanize": "^0.6.0",
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
     "uproxy-lib": "^17.0.0",
@@ -48,6 +48,6 @@
   "private": true,
   "scripts": {
     "test": "grunt test --verbose",
-    "prepublish": "grunt test"
+    "prepublish": "bower install && grunt test"
   }
 }
