@@ -371,12 +371,12 @@ module.exports = (grunt) ->
           ]
           dest: radiatusDevPath + 'scripts/'
         }, {
-          expand: true, cwd: 'build/typescript-src'
+          expand: true, cwd: 'build/compile-src'
           src: ['uproxy.js*']
           dest: radiatusDevPath + 'scripts/'
           # ... the generic core stuff
         }, {
-          expand: true, cwd: 'build/typescript-src/generic_core'
+          expand: true, cwd: 'build/compile-src/generic_core'
           src: ['**'],
           dest: radiatusDevPath + 'scripts/'
         }, {
@@ -386,7 +386,7 @@ module.exports = (grunt) ->
           dest: radiatusDevPath + '/'
         }, {
         # ... the generic UI stuff
-          expand: true, cwd: 'build/typescript-src/generic_ui'
+          expand: true, cwd: 'build/compile-src/generic_ui'
           src: [ 'scripts/**', 'index.html', 'polymer/popup.js*', 'polymer/vulcanized.*', '!**/*.ts' ]
           dest: radiatusDevPath + '/'
         }, {
@@ -395,7 +395,7 @@ module.exports = (grunt) ->
           src: ['icons/*']
           dest: radiatusDevPath + '/'
         }, {
-          expand: true, cwd: 'build/typescript-src', flatten: true
+          expand: true, cwd: 'build/compile-src', flatten: true
           src: FILES.uproxy_common,
           dest: radiatusDevPath + 'scripts/'
         }, { # Copy uproxy-networking files.
