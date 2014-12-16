@@ -49,9 +49,6 @@ class UIConnector implements uProxy.UIAPI {
   public sendInitialState = () => {
     // Only send update to UI when global settings have loaded.
     core.loadGlobalSettings.then(() => {
-          //freedom().core().getLogger('core').then(function(l) {
-          //  l.log('loaded from storage ');//), core.globalSettings);
-          //});
       this.update(
           uProxy.Update.INITIAL_STATE,
           {
@@ -129,9 +126,6 @@ class uProxyCore implements uProxy.CoreAPI {
             this.globalSettings.hasSeenWelcome = false;
           }
         }).catch((e) => {
-          freedom().core().getLogger('globalSettings').then(function(l) {
-            l.log('didnt load anything from storage ');
-          });
           console.log('No global settings loaded', e);
         });
   }
