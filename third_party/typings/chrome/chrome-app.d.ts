@@ -1,4 +1,4 @@
-﻿// Type definitions for Chrome packaged application development
+// Type definitions for Chrome packaged application development
 // Project: http://developer.chrome.com/apps/
 // Definitions by: Adam Lay <https://github.com/AdamLay>, MIZUNE Pine <https://github.com/pine613>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -22,7 +22,7 @@ declare module chrome.app.runtime {
 
     interface LaunchedEvent {
         addListener(callback: (launchData: LaunchData) => void);
-        removeListener(callback: () => void);
+        removeListener(callback: (launchData: LaunchData) => void)
     }
 
     interface RestartedEvent {
@@ -82,7 +82,7 @@ declare module chrome.app.window {
 
     export function create(url: string, options?: CreateOptions, callback?: (created_window: AppWindow) => void): void;
     export function current(): AppWindow;
-    export function get(id: string): AppWindow;
+    export function get(name: string): AppWindow;
 
     interface WindowEvent {
         addListener(callback: () => void): void;

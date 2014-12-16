@@ -25,6 +25,7 @@ describe('UI.UserInterface', () => {
     mockBrowserApi = jasmine.createSpyObj('browserApi',
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
+    spyOn(console, 'log');
   });
 
   function syncUserAndInstance(

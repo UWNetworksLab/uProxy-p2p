@@ -4,6 +4,7 @@
  * This file must be included *after* the freedom script and manifest are
  * loaded.
  */
+/// <reference path='chrome_oauth.ts' />
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
@@ -13,12 +14,12 @@ var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-var uProxyAppChannel = freedom;  // Guaranteed to exist.
+var connector :ChromeUIConnector;
+var uProxyAppChannel : OnAndEmit<any,any>;
 
-/**
- * See the ChromeCoreConnector, which communicates to this class.
- * TODO: Finish this class with tests and pull into its own file.
- */
+// See the ChromeCoreConnector, which communicates to this class.
+// TODO: Finish this class with tests and pull into its own file.
+
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
@@ -57,9 +58,7 @@ class ChromeUIConnector {
     chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
   }
 
-  /**
-   * Handler for when the uProxy Chrome Extension connects to this uProxy App.
-   */
+  // Handler for when the uProxy Chrome Extension connects to this uProxy App.
   private onConnect_ = (port :chrome.runtime.Port) => {
     // Security: only allow the official uproxy extension to control the backend.
     // We don't want another extension secretly making you proxy others, or
@@ -91,10 +90,8 @@ class ChromeUIConnector {
     }.bind(this));
   }
 
-  /**
-   * Receive a message from the extension.
-   * This usually installs freedom handlers.
-   */
+  // Receive a message from the extension.
+  // This usually installs freedom handlers.
   private onExtMsg_ = (msg :uProxy.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
@@ -120,7 +117,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?:string) => {
+  public sendToUI = (type :uProxy.Update, data ?:any) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
@@ -132,5 +129,10 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-var connector = new ChromeUIConnector();
-console.log('Starting uProxy app...');
+var uproxyModule = new freedom('scripts/freedom-module.json', {
+  oauth: [Chrome_oauth]
+}).then(function(UProxy : () => void) {
+  uProxyAppChannel = new UProxy();
+  connector = new ChromeUIConnector();
+  console.log('Starting uProxy app...');
+});

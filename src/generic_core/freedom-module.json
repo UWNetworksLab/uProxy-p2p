@@ -6,6 +6,9 @@
       "uproxy-lib/arraybuffers/arraybuffers.js",
       "uproxy-lib/handler/queue.js",
       "uproxy-networking/ipaddrjs/ipaddr.min.js",
+      "uproxy-lib/logging/logging.js",
+      "uproxy-lib/webrtc/datachannel.js",
+      "uproxy-lib/webrtc/peerconnection.js",
       "uproxy-networking/tcp/tcp.js",
       "uproxy-networking/socks-common/socks-headers.js",
       "uproxy-networking/socks-to-rtc/socks-to-rtc.js",
@@ -28,19 +31,15 @@
       "url": "../lib/freedom-social-xmpp/social.google.json",
       "api": "social"
     },
-    "SOCIAL-Facebook": {
-      "url": "../lib/freedom-social-facebook/social.facebook.json",
-      "api": "social"
-    },
     "storage": {
       "url": "../lib/storage/storage.shared.json",
       "api": "storage"
     }
   },
   "permissions": [
-    "core.log",
-    "core.peerconnection",
-    "core.uproxypeerconnection",
+    "core.console",
+    "core.rtcpeerconnection",
+    "core.rtcdatachannel",
     "core.tcpsocket",
     "core.udpsocket"
   ]
