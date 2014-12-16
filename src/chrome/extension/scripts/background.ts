@@ -74,6 +74,8 @@ function openDownloadAppPage() : void {
  */
 function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
+  // TODO (lucyhe): Make sure that the "install" event isn't missed if we
+  // are adding the listener after the event is fired.
   chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
   chrome.browserAction.onClicked.addListener((tab) => {
     // When the extension icon is clicked, open uProxy.
