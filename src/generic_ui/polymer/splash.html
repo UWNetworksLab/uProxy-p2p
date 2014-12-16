@@ -97,7 +97,7 @@
       <div class='view'>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
-        <template repeat='{{ n in networkNames }}' vertical layout>
+        <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p style="margin-top: 0">

@@ -34,6 +34,8 @@ declare module Social {
      */
     login :(remember:boolean) => Promise<void>;
 
+    getStorePath :() => string;
+
     /**
      * Does nothing if already logged out.
      */

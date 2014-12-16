@@ -248,3 +248,8 @@ module UProxyClient {
 interface StatusObject {
   connected :boolean;
 }
+
+interface OAuthInfo {
+  url :string;
+  redirect :string
+}

@@ -118,6 +118,10 @@ module Social {
       this.roster = {};
     }
 
+    public getStorePath = () => {
+      return this.myInstance.instanceId + '/roster/';
+    }
+
     /**
      * Returns the local instance. If it doesn't exist, load local instance
      * from storage, or create a new one if this is the first time this uProxy
@@ -142,12 +146,6 @@ module Social {
       });
     }
 
-    //==================== Core.Persistent implementation ====================//
-
-    public getStorePath = () => {
-      return this.name + '/';
-    }
-
     //===================== Social.Network implementation ====================//
 
     public getLocalInstance = () : Core.LocalInstance => {
@@ -165,8 +163,12 @@ module Social {
      */
     public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
       if (!this.myInstance) {
+        // TODO: consider waiting until myInstance is constructing
+        // instead of dropping this message.
+        // Currently we will keep receiving INSTANCE_REQUEST until instance
+        // handshake is sent to the peer.
         console.error('Not ready to send handshake');
-        throw Error('Not ready to send handshake');
+        return;
       }
       var handshake = {
         type: uProxy.MessageType.INSTANCE,
@@ -402,6 +404,21 @@ module Social {
              !(userId in this.roster);
     }
 
+    public restoreFromStorage() {
+      // xmpp is weird, so we need to do this.
+      storage.keys().then((keys :string[]) => {
+        var myKey = this.getStorePath();
+        for (var i in keys) {
+          if (keys[i].indexOf(myKey) === 0) {
+            var userId = keys[i].substr(myKey.length);
+            if (this.isNewFriend_(userId)) {
+              this.addUser_(userId);
+            }
+          }
+        }
+      });
+    }
+
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
@@ -431,6 +448,7 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(() => {
+            this.restoreFromStorage();
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })

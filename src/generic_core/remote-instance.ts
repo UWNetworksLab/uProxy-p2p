@@ -34,11 +34,11 @@ module Core {
    */
   export class RemoteInstance implements Instance, Core.Persistent {
 
-    public instanceId  :string;
     public keyHash     :string
     public description :string;
     public bytesSent   :number;
     public bytesReceived    :number;
+    public readFromStorage :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -47,7 +47,6 @@ module Core {
       asClient: false,
       asProxy:  false
     };
-    public updateDate = null;
     private transport  :Transport;
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
     // scheduled to run in the next second.
@@ -87,12 +86,6 @@ module Core {
     // from the peer and handling them by proxying them to the internet.
     private rtcToNet_ :RtcToNet.RtcToNet = null;
 
-    // Functions to fulfill or reject the promise returned by start method.
-    // These will only be set while waiting for socks-to-rtc to setup
-    // peer-to-peer connection, otherwise they will be null.
-    private fulfillStartRequest_ = null;
-    private rejectStartRequest_ = null;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -101,6 +94,7 @@ module Core {
     constructor(
         // The User which this instance belongs to.
         public user :Core.User,
+        public instanceId :string,
         // The last instance handshake from the peer.  This data may be fresh
         // (over the wire) or recovered from disk (and stored in a
         // RemoteInstanceState, which subclasses InstanceHandshake).
@@ -108,12 +102,18 @@ module Core {
       // Load consent state if it exists.  The consent state does not exist when
       // processing an initial instance handshake, only when restoring one from
       // storage.
-      this.update(data);
+      if (data) {
+        this.update(data);
+      }
+
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
             this.restoreState(state);
+            this.readFromStorage = true;
             this.user.notifyUI();
           }).catch((e) => {
+            this.user.notifyUI();
+            this.readFromStorage = true;
             console.log('Did not have consent state for this instanceId');
           });
 
@@ -337,11 +337,12 @@ module Core {
       // WARNING: |data| is UNTRUSTED, because it is often provided directly by
       // the remote peer.  Therefore, we MUST NOT make use of any consent
       // information that might be present.
-      this.instanceId = data.instanceId;
       this.keyHash = data.keyHash;
       this.description = data.description;
+      if (this.readFromStorage) {
+        this.saveToStorage();
+      }
       this.user.notifyUI();
-      this.updateDate = new Date();
     }
 
     /**
@@ -455,13 +456,30 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     this.getConsentBits()
+        consent:     this.consent,
+        description: this.description,
+        keyHash:     this.keyHash
       });
     }
+
+    /**
+     * Restore state from storage
+     * if remote instance state was set, only overwrite fields
+     * that correspond to local user action.
+     */
     public restoreState = (state :RemoteInstanceState) => {
-      this.consent.localRequestsAccessFromRemote = state.consent.isRequesting;
-      this.consent.localGrantsAccessToRemote = state.consent.isOffering;
-      this.sendConsent();
+      if (typeof this.description === 'undefined') {
+        this.description = state.description;
+        this.keyHash = state.keyHash;
+        this.consent = state.consent;
+      } else {
+        this.consent.localRequestsAccessFromRemote =
+            state.consent.localRequestsAccessFromRemote;
+        this.consent.localGrantsAccessToRemote =
+            state.consent.localGrantsAccessToRemote;
+        this.saveToStorage();
+        this.sendConsent();
+      }
     }
 
     /**
@@ -505,7 +523,9 @@ module Core {
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState {
-    consent     :Consent.WireState;
+    consent     :Consent.State;
+    description :string;
+    keyHash     :string;
   }
 
   // TODO: Implement obfuscation.
