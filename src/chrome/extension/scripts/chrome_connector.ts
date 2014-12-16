@@ -260,14 +260,12 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
   }
 
   public restart() {
-    var ready :uProxy.Payload = {
+    var restart :uProxy.Payload = {
       cmd: 'emit',
       type: uProxy.Command.RESTART,
       promiseId: 0
     }
-    this.send(ready);
-    setTimeout(function() {
-      chrome.runtime.reload();
-    }, 3000);
+    this.send(restart);
+    chrome.runtime.reload();
   }
 }  // class ChromeConnector

@@ -14,7 +14,6 @@ Polymer({
     });
   },
   restart: function() {
-    window.close();
     core.restart();
   },
   toggleAdvancedSettings: function() {
