@@ -169,7 +169,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, the extension should launch
     // an instruction to install the app.
-    setPopupUrl("application-missing.html");
+    setPopupUrl("app-missing.html");
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.
