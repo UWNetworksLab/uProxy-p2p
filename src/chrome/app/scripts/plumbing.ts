@@ -4,6 +4,7 @@
  * This file must be included *after* the freedom script and manifest are
  * loaded.
  */
+/// <reference path='chrome_oauth.ts' />
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
 /// <reference path='../../util/chrome_glue.ts' />
@@ -13,7 +14,8 @@ var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 
 // Remember which handlers freedom has installed.
 var installedFreedomHooks = [];
-var uProxyAppChannel;
+var connector :ChromeUIConnector;
+var uProxyAppChannel : OnAndEmit<any,any>;
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
@@ -22,12 +24,30 @@ class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(Object) => void;
-
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
-  private INSTALL_COMPLETE_PAGE_ :string = '../install-complete.html';
-  private installStatusPage_ :string;
-  private launchInstallStatusPage_ = () => {
-    window.open(this.installStatusPage_);
+
+  // Launch a popup instructing the user to install the extension.
+  private launchInstallIncompletePage_ = () => {
+    var installIncompletePopup = chrome.app.window.get('install-incomplete');
+    if (!installIncompletePopup) {
+      chrome.app.window.create(this.INSTALL_INCOMPLETE_PAGE_,
+          { id: 'install-extension',
+            innerBounds: {
+            height: 600,
+            width: 371
+          }});
+    } else {
+      installIncompletePopup.focus();
+    }
+  }
+
+  // If we are connected to the extension, launch uproxy.
+  private launchUproxy_ = () => {
+    this.extPort_.postMessage({
+        cmd: 'fired',
+        type: uProxy.Update.LAUNCH_UPROXY,
+        data: ''
+    });
   }
 
   constructor() {
@@ -35,8 +55,7 @@ class ChromeUIConnector {
     chrome.runtime.onConnectExternal.addListener(this.onConnect_);
     // Until the extension is connected, we assume uProxy installation is
     // incomplete.
-    this.installStatusPage_ = this.INSTALL_INCOMPLETE_PAGE_;
-    chrome.app.runtime.onLaunched.addListener(this.launchInstallStatusPage_);
+    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
   }
 
   // Handler for when the uProxy Chrome Extension connects to this uProxy App.
@@ -61,11 +80,13 @@ class ChromeUIConnector {
 
     // Once the extension is connected, we know that installation of uProxy
     // is complete.
-    this.installStatusPage_ = this.INSTALL_COMPLETE_PAGE_;
+    chrome.app.runtime.onLaunched.removeListener(this.launchInstallIncompletePage_);
+    chrome.app.runtime.onLaunched.addListener(this.launchUproxy_);
     this.extPort_.onDisconnect.addListener(function(){
       // If the extension disconnects, we should show an error
       // page.
-      this.installStatusPage_ = this.INSTALL_INCOMPLETE_PAGE_;
+      chrome.app.runtime.onLaunched.removeListener(this.launchUproxy_);
+      chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
     }.bind(this));
   }
 
@@ -99,7 +120,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?:string) => {
+  public sendToUI = (type :uProxy.Update, data ?:any) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
@@ -111,10 +132,10 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-freedom('scripts/freedom-module.json', {
+var uproxyModule = new freedom('scripts/freedom-module.json', {
   oauth: [Chrome_oauth]
-}).then(function(interface:any) {
-  uProxyAppChannel = interface();
+}).then(function(UProxy : () => void) {
+  uProxyAppChannel = new UProxy();
   connector = new ChromeUIConnector();
   console.log('Starting uProxy app...');
 });

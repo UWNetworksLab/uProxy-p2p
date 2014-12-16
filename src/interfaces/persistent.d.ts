@@ -1,3 +1,5 @@
+/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
+
 declare module Core {
 
   /**
@@ -55,6 +57,7 @@ declare module Core {
   export interface GlobalSettings {
     description :string;
     stunServers :freedom_RTCPeerConnection.RTCIceServer[];
+    hasSeenSharingEnabledScreen :boolean;
+    hasSeenWelcome :boolean;
   }
-
 }  // module Core

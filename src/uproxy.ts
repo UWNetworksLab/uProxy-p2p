@@ -70,7 +70,8 @@ module uProxy {
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
-    GET_CREDENTIALS
+    GET_CREDENTIALS,
+    LAUNCH_UPROXY
   }
 
   /**

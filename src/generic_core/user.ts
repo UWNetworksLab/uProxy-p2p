@@ -45,7 +45,7 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser {
+  export class User implements BaseUser, Core.Persistent {
 
     // Name of the user as provided by the social network.
     public name :string;
@@ -79,6 +79,9 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+      storage.load<UserState>(this.getStorePath()).then((state) => {
+        this.restoreState(state);
+      });
     }
 
     /**
@@ -269,18 +272,14 @@ module Core {
           existingInstance.sendConsent();
         }
       } else {
-        existingInstance = new Core.RemoteInstance(this, instance);
+        existingInstance = new Core.RemoteInstance(this, instanceId, instance);
         this.instances_[instanceId] = existingInstance;
+        this.saveToStorage();
       }
 
       if (data.consent) {
         existingInstance.updateConsent(data.consent);
       }
-
-      // TODO: this may send a duplicate notification to the UI, because
-      // instance.update and the instance constructor both notify the UI.
-      // This shouldn't be a problem but we may want to clean this up.
-      this.notifyUI();
     }
 
     /**
@@ -326,8 +325,10 @@ module Core {
 
       var instanceStatesForUi = [];
       for (var instanceId in this.instances_) {
-        instanceStatesForUi.push(
-          this.instances_[instanceId].currentStateForUi());
+        if (this.instances_[instanceId].readFromStorage) {
+          instanceStatesForUi.push(
+              this.instances_[instanceId].currentStateForUi());
+        }
       }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
@@ -417,6 +418,42 @@ module Core {
       return false;
     }
 
+    public getStorePath() {
+      return this.network.getStorePath() + this.userId;
+    }
+
+    public saveToStorage = () => {
+      var state = this.currentState();
+      storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+    }
+
+    public restoreState = (state :UserState) => {
+      if (this.name === 'pending') {
+        this.name = state.name;
+      }
+
+      if (typeof this.profile.imageData === 'undefined') {
+        this.profile.imageData = state.imageData;
+      }
+      for (var i in state.instanceIds) {
+        var instanceId = state.instanceIds[i];
+        console.log('new instance Id ' + instanceId);
+        if (!(instanceId in this.instances_)) {
+          this.instances_[instanceId] =
+              new Core.RemoteInstance(this, instanceId, null);
+        }
+      }
+      this.notifyUI();
+    }
+
+    public currentState = () :UserState => {
+      return cloneDeep({
+        name : this.name,
+        imageData: this.profile.imageData,
+        instanceIds: Object.keys(this.instances_)
+      });
+    }
+
     public handleLogout = () => {
       for (var instanceId in this.instances_) {
         this.instances_[instanceId].handleLogout();
@@ -434,12 +471,11 @@ module Core {
   }  // class User
 
   export interface UserState {
-    userId      :string;
     name        :string;
+    imageData     :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
-    // Don't save the clients, because those are completely ephemeral.
   }
 
 }  // module uProxy

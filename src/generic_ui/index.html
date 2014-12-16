@@ -3,18 +3,17 @@
 
 <head>
   <title>uProxy polymer UI</title>
-  <meta charset="UTF-8">
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <script src='../lib/webcomponentsjs/webcomponents.js'></script>
+  <script src='lib/webcomponentsjs/webcomponents.js'></script>
 
-  <script src='../scripts/ui_enums.js'></script>
-  <script src='../scripts/dependencies.js'></script>
+  <script src='scripts/ui_enums.js'></script>
+  <script src='scripts/dependencies.js'></script>
 
-  <link rel='import' href='root.html'>
+  <link rel='import' href='polymer/vulcanized.html'>
   <style>
   @font-face {
     font-family: eurostyle;
-    src: url('../styles/eurostile.ttf');
+    src: url('styles/eurostile.ttf');
   }
   body {
     position: relative;
@@ -31,7 +30,7 @@
 
 <body unresolved touch-action='auto'>
   <uproxy-root></uproxy-root>
-  <script src='popup.js'></script>
+  <script src='polymer/popup.js'></script>
 </body>
 
 </html>

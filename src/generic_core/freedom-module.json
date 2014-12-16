@@ -38,7 +38,6 @@
   },
   "permissions": [
     "core.console",
-    "core.peerconnection",
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",

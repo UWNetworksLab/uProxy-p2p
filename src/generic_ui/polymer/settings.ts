@@ -1,10 +1,10 @@
 Polymer({
   model: model,
-  DEFAULT_STUN_SERVERS: [{url: 'stun:stun.l.google.com:19302'},
-                         {url: 'stun:stun1.l.google.com:19302'},
-                         {url: 'stun:stun2.l.google.com:19302'},
-                         {url: 'stun:stun3.l.google.com:19302'},
-                         {url: 'stun:stun4.l.google.com:19302'}],
+  DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
+                         {urls: ['stun:stun1.l.google.com:19302']},
+                         {urls: ['stun:stun2.l.google.com:19302']},
+                         {urls: ['stun:stun3.l.google.com:19302']},
+                         {urls: ['stun:stun4.l.google.com:19302']}],
   displayAdvancedSettings: false,
   logOut: function() {
     core.logout({name: model.onlineNetwork.name,
@@ -27,7 +27,7 @@ Polymer({
     }
   },
   setStunServer: function() {
-    model.globalSettings.stunServers = [{url: this.stunServer}];
+    model.globalSettings.stunServers = [{urls: [this.stunServer]}];
     core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;

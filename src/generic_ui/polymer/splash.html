@@ -68,9 +68,6 @@
     p {
       margin-top: 1em;
     }
-    .getShareButton {
-      margin-top: 2em;
-    }
     .prevArrow {
       position: absolute;
       left: 8px;
@@ -96,28 +93,11 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='getOrShare' hidden?='{{SPLASH_STATES.GET_OR_SHARE!==ui.splashState}}'>
-      <div class='view'>
-        <h1>How would you like to start?</h1>
-        <paper-button raised class='getShareButton' on-tap='{{setGetMode}}'>
-          Get access
-        </paper-button>
-        <p>... if you need to get access from a friend</p>
-        <paper-button raised class='getShareButton' on-tap='{{setShareMode}}'>
-          Share access
-        </paper-button>
-        <p>... if you have friends who may need to get access from you</p>
-      </div>
-      <uproxy-faq-link anchor='GetOrGive'>
-        Learn more about these
-      </uproxy-faq-link>
-    </div>
-
     <div id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
       <div class='view'>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
-        <template repeat='{{ n in networkNames }}' vertical layout>
+        <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p style="margin-top: 0">

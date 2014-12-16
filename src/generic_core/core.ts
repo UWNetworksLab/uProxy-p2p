@@ -89,8 +89,10 @@ class uProxyCore implements uProxy.CoreAPI {
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
   public globalSettings :Core.GlobalSettings
-      = {description : '',
-         stunServers : this.DEFAULT_STUN_SERVERS_.slice(0)};
+      = {description: '',
+         stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
+         hasSeenSharingEnabledScreen: false,
+         hasSeenWelcome: false};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -108,9 +110,20 @@ class uProxyCore implements uProxy.CoreAPI {
         .then((globalSettingsObj :Core.GlobalSettings) => {
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
           this.globalSettings = globalSettingsObj;
+          // If no custom STUN servers were found in storage, use the default
+          // servers.
           if (!this.globalSettings.stunServers
               || this.globalSettings.stunServers.length == 0) {
             this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
+          // If storage does not know if this user has seen a specific overlay
+          // yet, assume the user has not seen it so that they will not miss any
+          // onboarding information.
+          if (this.globalSettings.hasSeenSharingEnabledScreen == null) {
+            this.globalSettings.hasSeenSharingEnabledScreen = false;
+          }
+          if (this.globalSettings.hasSeenWelcome == null) {
+            this.globalSettings.hasSeenWelcome = false;
           }
         }).catch((e) => {
           console.log('No global settings loaded', e);
@@ -273,6 +286,10 @@ class uProxyCore implements uProxy.CoreAPI {
         }
       }
     }
+
+    this.globalSettings.hasSeenSharingEnabledScreen =
+        newSettings.hasSeenSharingEnabledScreen;
+    this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
   }
 
   /**

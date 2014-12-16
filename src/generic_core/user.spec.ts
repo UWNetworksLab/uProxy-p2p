@@ -25,10 +25,14 @@ describe('Core.User', () => {
     spyOn(console, 'warn');
   });
 
-  it('creates with the correct userId', () => {
+  it('creates with the correct userId', (done) => {
     user = new Core.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
     expect(user['network']).toEqual(network);
+    storage.load(user.getStorePath()).catch((e) => {
+      // User should not be in storage
+      done();
+    })
   });
 
   it('creates with pending name if there was no profile', () => {
@@ -208,7 +212,19 @@ describe('Core.User', () => {
       // Don't test reconnection promises in this sub-suite.
     });
 
-    it('syncs clientId <--> instanceId mapping', () => {
+    it('syncs clientId <--> instanceId mapping', (done) => {
+      var realStorage = new Core.Storage;
+      var saved;
+      var loaded;
+      storage.load = function(key) {
+        loaded = realStorage.load(key);
+        return loaded;
+      };
+      storage.save = function(key, value) {
+        saved = realStorage.save(key, value);
+        return saved;
+      };
+
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
       user['syncInstance_']('fakeclient', instanceHandshake);
@@ -216,6 +232,17 @@ describe('Core.User', () => {
       expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
       instance = user.getInstance('fakeinstance');
       expect(instance).toBeDefined();
+      expect(saved).toBeDefined();
+
+      saved.then(() => {
+        var newUser = new Core.User(network, 'fakeuser');
+        loaded.then(() => {
+          var newInstance = newUser.getInstance('fakeinstance');
+          expect(newInstance).toBeDefined();
+          expect(newUser.name).toEqual(user.name);
+          expect(newUser.profile.imageData).toEqual(user.profile.imageData);
+        }).then(done);
+      });
     });
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
@@ -236,6 +263,7 @@ describe('Core.User', () => {
     });
 
     it('sends consent message if Instance already exists', () => {
+      instanceHandshake.consent = null;
       expect(instance).toBeDefined();
       spyOn(instance, 'sendConsent');
       user['syncInstance_']('fakeclient', instanceHandshake);

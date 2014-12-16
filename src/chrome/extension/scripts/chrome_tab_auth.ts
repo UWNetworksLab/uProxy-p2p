@@ -53,6 +53,7 @@ class ChromeTabAuth {
 
     chrome.tabs.create({url: url},
                        function(tab: chrome.tabs.Tab) {
+      chrome.windows.update(tab.windowId, {focused: true});
       this.tabId_ = tab.id;
       chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);

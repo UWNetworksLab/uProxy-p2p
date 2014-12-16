@@ -5,6 +5,7 @@
  * TODO: firefox bindings.
  */
 /// <reference path='user.ts' />
+/// <reference path='ui_enums.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -37,9 +38,11 @@ var model :UI.Model = {
       'offlineNonUproxy': []
     }
   },
-  globalSettings : {
-    'description' : '',
-    'stunServers' : []
+  globalSettings: {
+    'description': '',
+    'stunServers': [],
+    'hasSeenSharingEnabledScreen': false,
+    'hasSeenWelcome': false
   }
 };
 
@@ -49,25 +52,6 @@ var model :UI.Model = {
 module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
-
-  /**
-   * Enumeration of mutually-exclusive view states.
-   */
-  export enum View {
-    SPLASH = 0,
-    ROSTER,
-    USER,
-    NETWORKS,
-    SETTINGS,
-  }
-
-  /**
-   * Enumeration of mutually-exclusive UI modes.
-   */
-  export enum Mode {
-    GET = 0,
-    SHARE
-  }
 
   export interface Contacts {
     getAccessContacts : {
@@ -498,6 +482,10 @@ module UI {
 
     public openFaq = (pageAnchor ?:string) => {
       this.browserApi.openFaq(pageAnchor);
+    }
+
+    public bringUproxyToFront = () => {
+      this.browserApi.bringUproxyToFront();
     }
   }  // class UserInterface
 

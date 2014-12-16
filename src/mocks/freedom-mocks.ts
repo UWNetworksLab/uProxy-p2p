@@ -5,6 +5,7 @@
  */
 
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../freedom/typings/storage.d.ts' />
 
 
 class MockCore {
@@ -37,7 +38,7 @@ class MockCorePeerConnection {
 
 }  // class MockPeerConnection
 
-class MockStorage {
+class MockStorage implements freedom_Storage {
 
   private store_;
 
@@ -46,7 +47,7 @@ class MockStorage {
   }
 
   public keys = () => {
-    return Object.keys(this.store_);
+    return Promise.resolve(Object.keys(this.store_));
   }
 
   public get = (key) => {
@@ -74,7 +75,7 @@ class MockStorage {
 
   public clear = () => {
     this.store_ = {};
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
 
 }  // class MockStorage
@@ -107,7 +108,7 @@ mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['core'] = () => { return new MockCore(); };
 freedom['core.console'] = () => { return new MockLog(); };
-freedom['core.peerconnection'] = () => { return new MockCorePeerConnection(); };
+freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 
 var DEBUG = true;

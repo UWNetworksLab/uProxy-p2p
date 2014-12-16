@@ -41,6 +41,10 @@ function setUpConnection(freedom, panel, button) {
       '19': './icons/' + iconFile,
     }
   });
+
+  panel.port.on('showPanel', function() {
+    panel.show();
+  });
 }
 
 exports.setUpConnection = setUpConnection
