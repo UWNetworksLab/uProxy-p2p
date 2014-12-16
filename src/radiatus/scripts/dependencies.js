@@ -14,6 +14,7 @@
         this._queue.push({cmd: 'send', args: [payload, skipQueue]});
         return;
       }
+      console.log("emit:"+payload.type+":"+payload.data);
       freedomRoot.emit(payload.type+'', {data: payload.data, promiseId: payload.promiseId});
     },
     onUpdate: function(update, handler) {
@@ -21,7 +22,15 @@
         this._queue.push({cmd: 'onUpdate', args: [update, handler]});
         return;
       }
+      freedomRoot.on(update+'', function(data){console.log("on:"+update+":"+data)});
       freedomRoot.on(update+'', handler);
+    },
+    getInitialState: function() {
+      this.send({
+        cmd: 'emit',
+        type: uProxy.Command.GET_INITIAL_STATE,
+        promiseId: 0
+      });
     },
     _queue: [],
     _flushqueue: function() {
@@ -98,6 +107,7 @@
     freedom('freedom-module.json', {}).then(function(Root) {
       freedomRoot = new Root();
       radiatusConnector._flushQueue();
+      radiatusConnector.getInitialState();
     });
     // Set exports.core and exports.ui
     // exports.model is set implicitly in ui.js
