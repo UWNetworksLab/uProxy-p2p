@@ -6,7 +6,7 @@ Polymer({
     INTRO: 0,
     NETWORKS: 1
   },
-  networkNames: model.networkNames,
+  model: model,
   ui: ui,
   setState: function(state) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
