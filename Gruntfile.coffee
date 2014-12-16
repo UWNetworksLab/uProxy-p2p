@@ -410,8 +410,8 @@ module.exports = (grunt) ->
       generic_core:
         src: FILES.jasmine_helpers
             .concat [
-              'node_modules/uproxy-lib/dist/logging/logging.js'
               'build/compile-src/mocks/freedom-mocks.js'
+              'node_modules/uproxy-lib/dist/logging/logging.js'
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
