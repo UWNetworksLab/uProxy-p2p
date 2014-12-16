@@ -18,9 +18,9 @@
   ],
   "devDependencies": {
     "es6-promise": "^0.1.1",
-    "freedom-social-xmpp": "0.3.3",
     "freedom-for-chrome": "0.4.7",
     "freedom-for-firefox": "0.6.4",
+    "freedom-social-xmpp": "0.3.3",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
@@ -42,12 +42,13 @@
     "uproxy-lib": "^17.0.0",
     "uproxy-networking": "^3.0.2"
   },
-  "peerDependencies" : {
+  "peerDependencies": {
     "freedom": "~0.6.11"
   },
   "private": true,
   "scripts": {
     "test": "grunt test --verbose",
-    "prepublish": "bower install && grunt test"
+    "prepublish": "bower install && grunt test",
+    "radiatus": "node node_modules/radiatus/app.js -d build/dev/radiatus/scripts/freedom-module.json"
   }
 }

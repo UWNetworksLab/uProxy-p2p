@@ -355,7 +355,12 @@ module.exports = (grunt) ->
       # Radiatus. 
       # Assumes the top-level tasks generic_core and generic_ui completed.
       radiatus:
-        files: [ {  # Freedom manifest for uproxy
+        files: [ {
+          # The platform specific stuff, and...
+          expand: true, cwd: 'src/radiatus/'
+          src: [ '**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: radiatusDevPath
+        }, {  # Freedom manifest for uproxy
           expand: true, cwd: 'src/generic_core/'
           src: ['freedom-module.json']
           dest: radiatusDevPath + 'scripts/'

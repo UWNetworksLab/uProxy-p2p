@@ -32,6 +32,7 @@
       "../polymer/vulcanized.js",
       "../polymer/popup.js",
       "../polymer/popup.js.map",
+      "dependencies.js",
       "ui.js",
       "ui.js.map",
       "uproxy.js",
@@ -42,7 +43,16 @@
       "user.js.map",
       "consent.js",
       "consent.js.map",
-      "../styles/eurostile.ttf"
+      "core_connector.js",
+      "core_connector.js.map",
+      "../styles/eurostile.ttf",
+      "../icons/arrow-left.png",
+      "../icons/sharing.png",
+      "../icons/smiley.png",
+      "../icons/sharing-enabled.png",
+      "../icons/sharing-enabled-toolbar.png",
+      "../icons/hamburger.png",
+      "../icons/getting.png"
     ]
   },
   "dependencies": {
