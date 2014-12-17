@@ -224,7 +224,7 @@ module WebRtc {
       });
       this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
       this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
-      this.pc_.oniceconnectionstatechange = this.onIceConnectionStateChange_;
+      this.pc_.on('oniceconnectionstatechange', this.onIceConnectionStateChange_);
 
       if(this.config_.initiateConnection) {
         this.negotiateConnection().catch((e:Error) => {
@@ -314,13 +314,14 @@ module WebRtc {
     // response, and goes to 'disconnected' or 'failed' if pings consistently
     // fail.
     private onIceConnectionStateChange_ = () : void => {
-      var state = this.pc_.iceConnectionState;
+      var state = this.pc_.getIceConnectionState().then((state:string) => {
         // No action is needed when the state reaches 'connected', because
         // |this.completeConnection_| is called by the datachannel's |onopen|.
         if ((state === 'disconnected' || state === 'failed') &&
             this.pcState != State.DISCONNECTED) {
         this.closeWithError_('Connection lost: ' + state);
-      }
+        }
+      });
     }
 
     // Once we have connected, we need to fulfill the connection promise and set
