@@ -120,9 +120,7 @@ class ChromeBrowserApi implements BrowserAPI {
       chrome.windows.create({url: popupUrl,
                      type: "popup",
                      width: 371,
-                     height: 600}, (popup) => {
-        popupWindowId = popup.id;
-      });
+                     height: 600}, this.newPopupCreated_);
     } else if (popupWindowId == chrome.windows.WINDOW_ID_NONE
         && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
       // If the popup is not open, but uProxy is being launched from a Chrome
@@ -137,14 +135,19 @@ class ChromeBrowserApi implements BrowserAPI {
                                  width: 371,
                                  height: 600,
                                  top: popupTop,
-                                 left: popupLeft}, (popup) => {
-            popupWindowId = popup.id;
-          });
+                                 left: popupLeft}, this.newPopupCreated_);
         }
       });
     } else {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(popupWindowId, {focused: true});
+    }
+  }
+
+  private newPopupCreated_ = (popup) => {
+    popupWindowId = popup.id;
+    if (popup.tabs[0].url != chrome.extension.getURL(popupUrl)) {
+      chrome.tabs.update(popup.tabs[0].id, {url: popupUrl});
     }
   }
 }

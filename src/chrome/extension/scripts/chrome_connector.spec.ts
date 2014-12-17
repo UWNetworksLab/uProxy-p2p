@@ -23,7 +23,7 @@ var mockAppPort = () => {
 
 // Mock the global function that changes the URL launched when the
 // extension icon is clicked.
-setPopupUrl = () => {};
+updatePopupUrl = () => {};
 
 // Mock UI.
 var ui :UI.UserInterface;

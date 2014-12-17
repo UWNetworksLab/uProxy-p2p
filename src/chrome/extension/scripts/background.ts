@@ -39,9 +39,9 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 /**
-  * Set the URL launched by clicking the browser icon.
+  * Set the URL of the uProxy popup.
   */
-var setPopupUrl = (url) : void => {
+var updatePopupUrl = (url) : void => {
   if (popupUrl == url) {
     return;
   }
