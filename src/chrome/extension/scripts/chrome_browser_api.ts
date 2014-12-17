@@ -26,6 +26,16 @@ class ChromeBrowserApi implements BrowserAPI {
   private uproxyConfig_ :chrome.proxy.ProxyConfig = null;
   private running_ :boolean = false;
 
+  // For managing popup.
+
+  // Chrome Window ID given to the uProxy popup.
+  private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
+  // The URL to launch when the user clicks on the extension icon.
+  private popupUrl_ = "app-missing.html";
+  // Chrome Window ID of the window used to launch uProxy,
+  // i.e. the window where the extension icon was clicked.
+  private mainWindowId_ = chrome.windows.WINDOW_ID_NONE;
+
   constructor() {
     // use localhost
     this.uproxyConfig_ = {
@@ -42,6 +52,21 @@ class ChromeBrowserApi implements BrowserAPI {
     // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
     // is why we employ a hacky thing here.
     chrome.proxy.settings['clear']({scope: 'regular'});
+
+    chrome.browserAction.onClicked.addListener((tab) => {
+      // When the extension icon is clicked, open uProxy.
+      this.mainWindowId_ = tab.windowId;
+      this.bringUproxyToFront();
+    });
+    chrome.windows.onRemoved.addListener((closedWindowId) => {
+      // If either the window launching uProxy, or the popup with uProxy
+      // is closed, reset the IDs tracking those windows.
+      if (closedWindowId == this.popupWindowId_) {
+        this.popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
+      } else if (closedWindowId == this.mainWindowId_) {
+        this.mainWindowId_ = chrome.windows.WINDOW_ID_NONE;
+      }
+    });
   }
 
   public startUsingProxy = (endpoint:Net.Endpoint) => {
@@ -113,24 +138,24 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (popupWindowId == chrome.windows.WINDOW_ID_NONE
-        && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
+    if (this.popupWindowId_ == chrome.windows.WINDOW_ID_NONE
+        && this.mainWindowId_ == chrome.windows.WINDOW_ID_NONE) {
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
       // by the app), then allow the popup to open at a default location.
-      chrome.windows.create({url: popupUrl,
+      chrome.windows.create({url: this.popupUrl_,
                      type: "popup",
                      width: 371,
                      height: 600}, this.newPopupCreated_);
-    } else if (popupWindowId == chrome.windows.WINDOW_ID_NONE
-        && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
+    } else if (this.popupWindowId_ == chrome.windows.WINDOW_ID_NONE
+        && this.mainWindowId_ != chrome.windows.WINDOW_ID_NONE) {
       // If the popup is not open, but uProxy is being launched from a Chrome
       // window, open the popup under the extension icon in that window.
-      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
+      chrome.windows.get(this.mainWindowId_, (windowThatLaunchedUproxy) => {
         if (windowThatLaunchedUproxy) {
           // TODO (lucyhe): test this positioning in Firefox & Windows.
           var popupTop = windowThatLaunchedUproxy.top + 70;
           var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: popupUrl,
+          chrome.windows.create({url: this.popupUrl_,
                                  type: "popup",
                                  width: 371,
                                  height: 600,
@@ -140,14 +165,37 @@ class ChromeBrowserApi implements BrowserAPI {
       });
     } else {
       // If the popup is already open, simply focus on it.
-      chrome.windows.update(popupWindowId, {focused: true});
+      chrome.windows.update(this.popupWindowId_, {focused: true});
     }
   }
 
+  /**
+    * Callback passed to chrome.windows.create.
+    */
   private newPopupCreated_ = (popup) => {
-    popupWindowId = popup.id;
-    if (popup.tabs[0].url != chrome.extension.getURL(popupUrl)) {
-      chrome.tabs.update(popup.tabs[0].id, {url: popupUrl});
+    this.popupWindowId_ = popup.id;
+    // If the url of the newly created tab no longer matches the
+    // expected popup URL, update the tab.
+    if (popup.tabs[0].url != chrome.extension.getURL(this.popupUrl_)) {
+      chrome.tabs.update(popup.tabs[0].id, {url: this.popupUrl_});
+    }
+  }
+
+  /**
+    * Set the URL of the uProxy popup.
+    */
+  public updatePopupUrl = (url) => {
+    if (this.popupUrl_ == url) {
+      return;
+    }
+
+    this.popupUrl_ = url;
+    // If an existing popup exists, update the page shown in the existing
+    // popup.
+    if (this.popupWindowId_ != chrome.windows.WINDOW_ID_NONE) {
+      chrome.windows.get(this.popupWindowId_, {populate: true}, (popupWindow) => {
+        chrome.tabs.update(popupWindow.tabs[0].id, {url: this.popupUrl_});
+      });
     }
   }
 }
