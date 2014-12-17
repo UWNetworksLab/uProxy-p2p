@@ -26,7 +26,6 @@ var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var chromeBrowserApi :ChromeBrowserApi;
 
 
-
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
