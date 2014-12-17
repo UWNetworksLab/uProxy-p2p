@@ -47,12 +47,12 @@ var setPopupUrl = (url) : void => {
   }
 
   popupUrl = url;
-  // If an existing popup exists, close it because the popup URL has changed.
-  // The next time the user clicks on the browser icon, a new page should be
-  // launched.
+  // If an existing popup exists, update the page shown in the existing
+  // popup.
   if (popupWindowId != chrome.windows.WINDOW_ID_NONE) {
-    chrome.windows.remove(popupWindowId);
-    popupWindowId = chrome.windows.WINDOW_ID_NONE;
+    chrome.windows.get(popupWindowId, {populate: true}, (popupWindow) => {
+      chrome.tabs.update(popupWindow.tabs[0].id, {url: url});
+    });
   }
 }
 

@@ -142,7 +142,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         chrome.browserAction.setIcon({path: "icons/offline-19.png"});
         setPopupUrl("index.html");
         if (this.waitingForAppInstall) {
-          chromeBrowserApi.bringUproxyToFront();
+          ui.bringUproxyToFront();
           // Set value to false since app has installed and connected
           // to extension.
           this.waitingForAppInstall = false;
