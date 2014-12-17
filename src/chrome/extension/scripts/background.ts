@@ -51,7 +51,7 @@ var setPopupUrl = (url) : void => {
   // popup.
   if (popupWindowId != chrome.windows.WINDOW_ID_NONE) {
     chrome.windows.get(popupWindowId, {populate: true}, (popupWindow) => {
-      chrome.tabs.update(popupWindow.tabs[0].id, {url: url});
+      chrome.tabs.update(popupWindow.tabs[0].id, {url: popupUrl});
     });
   }
 }
@@ -97,7 +97,6 @@ function initUI() : UI.UserInterface {
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
-  var chromeBrowserApi = new ChromeBrowserApi();
   var oAuth = new ChromeTabAuth();
   chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
