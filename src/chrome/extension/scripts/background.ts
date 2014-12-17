@@ -25,36 +25,11 @@ var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAP
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var chromeBrowserApi :ChromeBrowserApi;
 
-// Chrome Window ID given to the uProxy popup.
-var popupWindowId = chrome.windows.WINDOW_ID_NONE;
-// The URL to launch when the user clicks on the extension icon.
-var popupUrl = "app-missing.html";
-// Chrome Window ID of the window used to launch uProxy,
-// i.e. the window where the extension icon was clicked.
-var mainWindowId = chrome.windows.WINDOW_ID_NONE;
 
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
 });
-
-/**
-  * Set the URL launched by clicking the browser icon.
-  */
-var setPopupUrl = (url) : void => {
-  if (popupUrl == url) {
-    return;
-  }
-
-  popupUrl = url;
-  // If an existing popup exists, close it because the popup URL has changed.
-  // The next time the user clicks on the browser icon, a new page should be
-  // launched.
-  if (popupWindowId != chrome.windows.WINDOW_ID_NONE) {
-    chrome.windows.remove(popupWindowId);
-    popupWindowId = chrome.windows.WINDOW_ID_NONE;
-  }
-}
 
 // Launch the Chrome webstore page for the uProxy app.
 function openDownloadAppPage() : void {
@@ -76,20 +51,6 @@ function initUI() : UI.UserInterface {
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
   chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
-  chrome.browserAction.onClicked.addListener((tab) => {
-    // When the extension icon is clicked, open uProxy.
-    mainWindowId = tab.windowId;
-    chromeBrowserApi.bringUproxyToFront();
-  });
-  chrome.windows.onRemoved.addListener((closedWindowId) => {
-    // If either the window launching uProxy, or the popup with uProxy
-    // is closed, reset the IDs tracking those windows.
-    if (closedWindowId == popupWindowId) {
-      popupWindowId = chrome.windows.WINDOW_ID_NONE;
-    } else if (closedWindowId == mainWindowId) {
-      mainWindowId = chrome.windows.WINDOW_ID_NONE;
-    }
-  });
 
   chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
   chromeConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
@@ -97,7 +58,6 @@ function initUI() : UI.UserInterface {
   chromeConnector.connect();
 
   core = new CoreConnector(chromeConnector);
-  var chromeBrowserApi = new ChromeBrowserApi();
   var oAuth = new ChromeTabAuth();
   chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));

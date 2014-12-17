@@ -196,6 +196,12 @@ module.exports = (grunt) ->
           src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
+          # Chrome-only polymer.
+          # (Assumes the typescript task has executed)
+          expand: true, cwd: 'build/compile-src/chrome/extension'
+          src: ['vulcanized-chrome.*']
+          dest: chromeExtDevPath
+        }, {
           # Icons
           expand: true, cwd: 'src/'
           src: ['icons/*']
@@ -469,6 +475,17 @@ module.exports = (grunt) ->
           strip: true
         files:
           'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
+      chromeinline:
+        options:
+          inline: true
+        files:
+          'build/compile-src/chrome/extension/vulcanized-inline.html': 'build/compile-src/chrome/extension/app-missing-polymer.html'
+      chromecsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/compile-src/chrome/extension/vulcanized-chrome.html': 'build/compile-src/chrome/extension/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -529,6 +546,8 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'ts:chrome'
+    'vulcanize:chromeinline'
+    'vulcanize:chromecsp'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
