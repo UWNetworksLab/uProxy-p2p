@@ -26,9 +26,12 @@ var chatPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('c
 var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chatPanel_sendMessageButton');
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
-freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) {
+freedom('freedom-module.json', {
+  'logger': 'lib/logger/logger.json',
+  'debug': 'log'
+}).then(function(CopyPaste:any) {
   // TODO: typings for the freedom module
-  var copypaste :any = interface();
+  var copypaste :any = new CopyPaste();
 
   // DOM nodes that we will choose from either the offer panel or the
   // answer panel once the user chooses whether to offer/answer.

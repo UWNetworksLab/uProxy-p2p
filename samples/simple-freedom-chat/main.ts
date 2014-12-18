@@ -9,9 +9,12 @@ var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
-freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) {
+freedom('freedom-module.json', {
+  'logger': 'lib/logger/logger.json',
+  'debug': 'log'
+}).then(function(Chat:any) {
   // TODO: typings for the freedom module
-  var chat :any = interface();
+  var chat :any = new Chat();
 
   chat.on('ready', function() {
     sendAreaA.disabled = false;
