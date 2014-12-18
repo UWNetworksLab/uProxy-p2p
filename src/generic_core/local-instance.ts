@@ -25,6 +25,7 @@ module Core {
 
     public instanceId  :string;
     public keyHash     :string;
+    public clientId    :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
