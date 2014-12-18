@@ -108,6 +108,9 @@ class uProxyCore implements uProxy.CoreAPI {
 
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
         .then((globalSettingsObj :Core.GlobalSettings) => {
+          if (!globalSettingsObj) {
+            return;
+          }
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
           this.globalSettings = globalSettingsObj;
           // If no custom STUN servers were found in storage, use the default
