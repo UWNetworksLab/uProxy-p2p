@@ -15,12 +15,6 @@ module Core {
   //
   // TODO: gather up uses of random and put them into a common directory in
   // uproxy-lib, or directly use end-to-end implementation.
-  function randomUint8() : number {
-    var randomArray = new Uint8Array(1);
-    crypto.getRandomValues(randomArray);
-    return randomArray[0];
-  }
-
   export class LocalInstance implements Instance, Core.Persistent {
 
     public instanceId  :string;
@@ -77,7 +71,7 @@ module Core {
       // serialised?
       for (var i = 0; i < 20; i++) {
         // 20 bytes for the instance ID.  This we can keep.
-        hex = Math.floor(randomUint8()).toString(16);
+        hex = Math.floor(Math.random() * 256).toString(16);
         id += ('00'.substr(0, 2 - hex.length) + hex);
       }
       return id;

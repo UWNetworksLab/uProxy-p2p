@@ -50,11 +50,14 @@ module Core {
     public load = <T>(key :string) : Promise<T> => {
       this.log('loading ' + key);
       return fStorage.get(key).then((result :string) => {
+        if (typeof result === 'undefined' || result === null) {
+          return Promise.reject('non-existing key');
+        }
         this.log('Loaded [' + key + '] : ' + result);
         return <T>JSON.parse(result);
       }, (e) => {
         this.log(e.message);
-        return Promise.reject('non-existing key');
+        return Promise.reject('storage lookup failed');
         // return <T>{};
       });
     }
