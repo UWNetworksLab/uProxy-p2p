@@ -170,3 +170,5 @@ Dynamically created directories (`grunt clean` should remove them)
  * [NPM](https://www.npmjs.org/) (and the `package.json` file): NPM (node package manager) us used to specify dependencies on node modules we use for compilation, e.g. typescript and grunt. These dependencies get places in the `node_modules` directory
  * [Travis](https://travis-ci.org/): a continuous build system
  * [TypeScript](http://www.typescriptlang.org/) as the primary language, which compiles to JavaScript. This does type checking and has some syntax improvements on JS, while letting us incrementally migrate and easily include external JS packages and frameworks
+
+ test
