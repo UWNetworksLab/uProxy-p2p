@@ -20,7 +20,7 @@
     "es6-promise": "^0.1.1",
     "freedom-social-xmpp": "0.3.3",
     "freedom-for-chrome": "0.4.7",
-    "freedom-for-firefox": "0.6.4",
+    "freedom-for-firefox": "0.6.5",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
