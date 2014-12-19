@@ -138,11 +138,7 @@ module Social {
         this.myInstance = new Core.LocalInstance(this, userId);
         this.log('generating new local instance: ' +
                  this.myInstance.instanceId);
-        return this.myInstance.prepare().then(() => {
-            return storage.save<Instance>(key, this.myInstance.currentState());
-          }).then((prev) => {
-            this.log('saved new local instance to storage');
-          });
+        return storage.save<Instance>(key, this.myInstance.currentState());
       });
     }
 

@@ -10,7 +10,6 @@
 /// <reference path='../webrtc/peerconnection.d.ts' />
 /// <reference path='../rtc-to-net/rtc-to-net.ts' />
 /// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
-/// <reference path='auth.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='core.ts' />
 /// <reference path='remote-transport.ts' />

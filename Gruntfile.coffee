@@ -437,7 +437,6 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/nouns-and-adjectives.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
-              'build/compile-src/generic_core/auth.js'
               'build/compile-src/generic_core/social-enum.js'
               'build/compile-src/generic_core/local-instance.js'
               'build/compile-src/generic_core/remote-instance.js'
