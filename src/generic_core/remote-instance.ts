@@ -373,7 +373,7 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      if (this.user.isInstanceOnline(this.isntanceId)) {
+      if (this.user.isInstanceOnline(this.instanceId)) {
         this.user.network.sendInstanceHandshake(
             this.user.instanceToClient(this.instanceId), this.getConsentBits());
       }

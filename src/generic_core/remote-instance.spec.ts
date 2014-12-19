@@ -364,6 +364,10 @@ describe('Core.RemoteInstance', () => {
       return instanceId;
     });
 
+    user.isInstanceOnline = function() {
+      return true;
+    };
+
     user.network = <Social.Network><any>jasmine.createSpyObj(
         'network', ['sendInstanceHandshake']);
 
