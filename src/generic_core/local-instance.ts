@@ -40,18 +40,6 @@ module Core {
       this.keyHash = null;
     }
 
-    /**
-     * Some preparation for the LocalInstance is asynchronous, so interaction
-     * should wait until this function completes.
-     */
-    public prepare = () : Promise<void> => {
-      return Auth.getLocalFingerprint().then((fingerprint) => {
-        this.keyHash = fingerprint;
-        console.log('Finished generating LocalInstance: ',
-            this.instanceId,
-            this.keyHash);
-      })
-    }
 
     /**
      * Obtain storage prefix for the LocalInstance.
