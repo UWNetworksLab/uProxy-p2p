@@ -112,8 +112,8 @@ module Core {
             this.readFromStorage = true;
             this.user.notifyUI();
           }).catch((e) => {
-            this.user.notifyUI();
             this.readFromStorage = true;
+            this.user.notifyUI();
             console.log('Did not have consent state for this instanceId');
           });
 
@@ -373,8 +373,10 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      this.user.network.sendInstanceHandshake(
-          this.user.instanceToClient(this.instanceId), this.getConsentBits());
+      if (this.user.isInstanceOnline(this.isntanceId)) {
+        this.user.network.sendInstanceHandshake(
+            this.user.instanceToClient(this.instanceId), this.getConsentBits());
+      }
     }
 
     /**
