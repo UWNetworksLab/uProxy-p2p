@@ -156,9 +156,22 @@ module.exports = (grunt) ->
           src: [firefoxDevPath + 'data/core/uproxy.js'
                 firefoxDevPath + 'lib/exports.js']
           dest: firefoxDevPath + 'lib/uproxy.js'
-        } ]
+        }]
       }
 
+      firefox_dependencies: {
+        files: [ {
+          src: [firefoxDevPath + 'data/scripts/port.js'
+                firefoxDevPath + 'data/scripts/user.js'
+                firefoxDevPath + 'data/scripts/uproxy.js'
+                firefoxDevPath + 'data/scripts/ui.js'
+                firefoxDevPath + 'data/scripts/firefox_browser_api.js'
+                firefoxDevPath + 'data/scripts/firefox_connector.js'
+                firefoxDevPath + 'data/scripts/core_connector.js'
+                firefoxDevPath + 'data/scripts/background.js']
+          dest: firefoxDevPath + 'data/scripts/dependencies.js'
+        }]
+      }
     }  # concat
 
     #-------------------------------------------------------------------------
@@ -323,8 +336,7 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/compile-src', flatten: true
-          src: FILES.uproxy_common.concat([
-            'firefox/data/scripts/*.js']),
+          src: ['uproxy.js', 'firefox/data/scripts/*.js'],
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
@@ -560,6 +572,7 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
+    'concat:firefox_dependencies'
   ]
 
   taskManager.add 'build_firefox_xpi', [
