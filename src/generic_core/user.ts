@@ -57,6 +57,20 @@ module Core {
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
+    public static create = (network :Social.Network,
+                            userId  :string) : Promise<User> => {
+      var user = new User(network, userId);
+      return new Promise((fulfill, reject) => {
+        storage.load<UserState>(user.getStorePath()).then((state) => {
+          user.restoreState(state).then(() => {
+            fulfill(user);
+          });
+        }).catch(() => {
+          fulfill(user);
+        });
+      });
+    }
+
     /**
      * Users are constructed purely on the basis of receiving a userId.
      * They may or may not have a :UserProfile (because the Network may have
@@ -79,9 +93,6 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
-      storage.load<UserState>(this.getStorePath()).then((state) => {
-        this.restoreState(state);
-      });
     }
 
     /**
@@ -152,8 +163,8 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(
-                client.clientId, this.getConsentForClient_(client.clientId));
+            this.network.sendInstanceHandshake(client.clientId,
+                this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
@@ -182,17 +193,19 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) :
+        Promise<void> => {
       if (!(clientId in this.clientIdToStatusMap)) {
-        console.error(this.userId +
-            ' received message for non-existing client: ' + clientId);
-        return;
+        var errorStr = this.userId +
+            ' received message for non-existing client: ' + clientId;
+        console.error(errorStr);
+        return Promise.reject(errorStr);
       }
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceMessage>msg.data);
-          break;
+          return this.syncInstance_(clientId, <InstanceMessage>msg.data);
+
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
@@ -201,18 +214,22 @@ module Core {
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
-            console.error('failed to get instance for clientId ' + clientId);
-            return;
+            return Promise.reject(
+                'failed to get instance for clientId ' + clientId);
           }
           instance.handleSignal(msg.type, msg.data);
-          break;
+          return Promise.resolve<void>();
+
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
           this.network.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
-          break;
+          return Promise.resolve<void>();
+
         default:
-          console.error(this.userId + ' received invalid message.', msg);
+          var errorStr = this.userId + ' received invalid message.' + msg;
+          console.error(errorStr);
+          return Promise.reject(errorStr);
       }
     }
 
@@ -247,7 +264,7 @@ module Core {
      * this user's instance table.
      */
     private syncInstance_ = (clientId :string, data :InstanceMessage)
-        : void => {
+        : Promise<void> => {
       var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '
@@ -270,15 +287,21 @@ module Core {
         existingInstance.update(instance);
         if (!data.consent) {
           existingInstance.sendConsent();
+        } else {
+          existingInstance.updateConsent(data.consent);
         }
+        return Promise.resolve<void>();
       } else {
-        existingInstance = new Core.RemoteInstance(this, instanceId, instance);
-        this.instances_[instanceId] = existingInstance;
-        this.saveToStorage();
-      }
-
-      if (data.consent) {
-        existingInstance.updateConsent(data.consent);
+        // Create a new instance.
+        return Core.RemoteInstance.create(this, instanceId, instance)
+            .then((newInstance) => {
+              this.instances_[instanceId] = newInstance;
+              this.saveToStorage();
+              this.notifyUI();
+              if (data.consent) {
+                newInstance.updateConsent(data.consent);
+              }
+            });
       }
     }
 
@@ -325,10 +348,8 @@ module Core {
 
       var instanceStatesForUi = [];
       for (var instanceId in this.instances_) {
-        if (this.instances_[instanceId].readFromStorage) {
-          instanceStatesForUi.push(
-              this.instances_[instanceId].currentStateForUi());
-        }
+        instanceStatesForUi.push(
+            this.instances_[instanceId].currentStateForUi());
       }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
@@ -427,7 +448,7 @@ module Core {
       storage.save<UserState>(this.getStorePath(), state).then((old) => {});
     }
 
-    public restoreState = (state :UserState) => {
+    public restoreState = (state :UserState) : Promise<void> => {
       if (this.name === 'pending') {
         this.name = state.name;
       }
@@ -435,15 +456,25 @@ module Core {
       if (typeof this.profile.imageData === 'undefined') {
         this.profile.imageData = state.imageData;
       }
+
+      // Restore all instances.
+      var instancePromises = [];
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
-        console.log('new instance Id ' + instanceId);
         if (!(instanceId in this.instances_)) {
-          this.instances_[instanceId] =
-              new Core.RemoteInstance(this, instanceId, null);
+          instancePromises.push(
+              Core.RemoteInstance.create(this, instanceId, null)
+                  .then((newInstance) => {
+                    this.instances_[instanceId] = newInstance;
+                  })
+              );
         }
       }
-      this.notifyUI();
+
+      // Update the UI after all instances have been created.g
+      return Promise.all(instancePromises).then(() => {
+        this.notifyUI();
+      });
     }
 
     public currentState = () :UserState => {

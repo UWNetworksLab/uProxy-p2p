@@ -44,7 +44,7 @@ describe('Core.RemoteInstance', () => {
     var instance0;
 
    it('fresh instance has no state', (done) => {
-       storage.load = function(key) {
+      storage.load = function(key) {
         loaded = realStorage.load(key);
         return loaded;
       };
@@ -52,15 +52,17 @@ describe('Core.RemoteInstance', () => {
         saved = realStorage.save(key, value);
         return saved;
       };
-      instance0 = new Core.RemoteInstance(user, 'instanceId', null);
-
-      expect(loaded).toBeDefined();
-      loaded.catch(() => {
-        expect(instance0.description).not.toBeDefined();
-        expect(instance0.keyHash).not.toBeDefined();
-        expect(instance0.consent).toEqual(new Consent.State);
-        done();
-      });
+      Core.RemoteInstance.create(user, 'instanceId', null)
+          .then((newInstance) => {
+            instance0 = newInstance;
+            expect(loaded).toBeDefined();
+            loaded.catch(() => {
+              expect(instance0.description).not.toBeDefined();
+              expect(instance0.keyHash).not.toBeDefined();
+              expect(instance0.consent).toEqual(new Consent.State);
+              done();
+            });
+          });
     });
 
     it('update', (done) => {
@@ -75,10 +77,13 @@ describe('Core.RemoteInstance', () => {
       expect(saved).toBeDefined();
 
       saved.then(() => {
-        var instance1 = new Core.RemoteInstance(user, 'instanceId', null);
-        loaded.then(() => {
-          expect(instance1.currentState()).toEqual(instance0.currentState());
-        }).then(done);
+        Core.RemoteInstance.create(user, 'instanceId', null)
+            .then((newInstance) => {
+                loaded.then(() => {
+                  expect(newInstance.currentState())
+                      .toEqual(instance0.currentState());
+                }).then(done);
+            });
       });
     });
 
@@ -99,30 +104,36 @@ describe('Core.RemoteInstance', () => {
         keyHash : 'new-keyhash',
         description: 'new description'
       };
-      var instance2 = new Core.RemoteInstance(user, 'instanceId', handshake);
-      var consent :Consent.WireState = {
-        isRequesting: true,
-        isOffering: true,
-      };
-      instance2.updateConsent(consent);
+      Core.RemoteInstance.create(user, 'instanceId', handshake)
+          .then((instance2) => {
+            var consent :Consent.WireState = {
+              isRequesting: true,
+              isOffering: true,
+            };
+            instance2.updateConsent(consent);
+            loaded.then(() => {
+              instance2.description = 'new description';
+              expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
+              expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
+              storage = new Core.Storage;
+            }).then(done);
+      });
       fulfill();
-      loaded.then(() => {
-        instance2.description = 'new description';
-        expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
-        expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
-        storage = new Core.Storage;
-      }).then(done);
     })
   });
 
-  it('constructs from a received Instance Handshake', () => {
+  it('constructs from a received Instance Handshake', (done) => {
     var handshake :Instance = {
       instanceId: 'fakeinstance',
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
-    expect(instance.instanceId).toEqual('fakeinstance');
+    Core.RemoteInstance.create(user, 'fakeinstance', handshake)
+        .then((newInstance) => {
+          instance = newInstance;
+          expect(instance.instanceId).toEqual('fakeinstance');
+          done();
+        });
   });
 
   it('begins with lowest consent bits', () => {

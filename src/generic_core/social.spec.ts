@@ -13,6 +13,12 @@ class MockSocial {
   }
 }
 
+// Valid message that won't have side effects on network/user/instance objects.
+var validMessage = {
+  type: uProxy.MessageType.INSTANCE_REQUEST,
+  data: null
+};
+
 describe('freedomClientToUproxyClient', () => {
   var freedomClient :freedom_Social.ClientState = {
     userId: 'mockmyself',
@@ -51,9 +57,8 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    spyOn(console, 'log');
+    //spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
 
   it('initialize networks', () => {
@@ -105,15 +110,17 @@ describe('Social.FreedomNetwork', () => {
           timestamp: 12345
         };
         // Add user to the roster;
-        network.handleClientState(freedomClientState);
-        expect(Object.keys(network.roster).length).toEqual(2);
-        var friend = network.getUser('fakeuser');
-        spyOn(friend, 'monitor');
-        expect(friend.isOnline()).toEqual(true);
-        // Wait for 5 seconds and make sure monitoring was called.
-        jasmine.clock().tick(5000);
-        expect(friend.monitor).toHaveBeenCalled();
-      }).then(done);
+        network.handleClientState(freedomClientState).then(() => {
+          expect(Object.keys(network.roster).length).toEqual(2);
+          var friend = network.getUser('fakeuser');
+          spyOn(friend, 'monitor');
+          expect(friend.isOnline()).toEqual(true);
+          // Wait for 5 seconds and make sure monitoring was called.
+          jasmine.clock().tick(5000);
+          expect(friend.monitor).toHaveBeenCalled();
+          done();
+        });
+      });
       fulfillFunc(fakeFreedomClient);
       // We need to tick a clock in order promises to be resolved.
       jasmine.clock().tick(1);
@@ -187,7 +194,7 @@ describe('Social.FreedomNetwork', () => {
 
   describe('incoming events', () => {
 
-    it('adds a new user for |onUserProfile|', () => {
+    it('adds a new user for |onUserProfile|', (done) => {
       network = new Social.FreedomNetwork('mock');
       network.myInstance = new Core.LocalInstance(network, 'fakeId');
       expect(Object.keys(network.roster).length).toEqual(0);
@@ -195,14 +202,16 @@ describe('Social.FreedomNetwork', () => {
         userId: 'mockuser',
         name: 'mock1',
         timestamp: Date.now()
+      }).then(() => {
+        expect(Object.keys(network.roster).length).toEqual(1);
+        var user = network.getUser('mockuser');
+        expect(user).toBeDefined;
+        expect(user.name).toEqual('mock1');
+        done();
       });
-      expect(Object.keys(network.roster).length).toEqual(1);
-      var user = network.getUser('mockuser');
-      expect(user).toBeDefined;
-      expect(user.name).toEqual('mock1');
     });
 
-    it('updates existing user', () => {
+    it('updates existing user', (done) => {
       expect(Object.keys(network.roster).length).toEqual(1);
       var user = network.getUser('mockuser');
       spyOn(user, 'update').and.callThrough();
@@ -210,13 +219,15 @@ describe('Social.FreedomNetwork', () => {
         userId: 'mockuser',
         name: 'newname',
         timestamp: Date.now()
+      }).then(() => {
+        expect(user.update).toHaveBeenCalled();
+        expect(user).toBeDefined;
+        expect(user.name).toEqual('newname');
+        done();
       });
-      expect(user.update).toHaveBeenCalled();
-      expect(user).toBeDefined;
-      expect(user.name).toEqual('newname');
     });
 
-    it('passes |onClientState| to correct client', () => {
+    it('passes |onClientState| to correct client', (done) => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleClient');
       var freedomClientState :freedom_Social.ClientState = {
@@ -225,30 +236,39 @@ describe('Social.FreedomNetwork', () => {
         status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(freedomClientState);
-      expect(user.handleClient).toHaveBeenCalledWith(
-        freedomClientToUproxyClient(freedomClientState));
+      network.handleClientState(freedomClientState).then(() => {
+        expect(user.handleClient).toHaveBeenCalledWith(
+          freedomClientToUproxyClient(freedomClientState));
+        done();
+      });
     });
 
     it('adds placeholder when receiving ClientState with userId not in roster',
-        () => {
-      var user;
-      spyOn(network, 'getUser').and.callFake((userId) => {
-        user = network.roster[userId];
-        spyOn(user, 'handleClient');
-        return user;
-      });
+        (done) => {
+      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
+      network['freedomApi_'].sendMessage.and.callFake(() => {
+        return Promise.resolve();
+      })
+      // spyOn(network, 'getUser').and.callFake((userId) => {
+      //   var user = network.roster[userId];
+      //   spyOn(user, 'handleClient');
+      //   return user;
+      // });
       var freedomClientState :freedom_Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
         status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(freedomClientState);
-      expect(user.handleClient).toHaveBeenCalled();
+      network.handleClientState(freedomClientState).then(() => {
+        var user = network.getUser('im_not_here');
+        expect(user).toBeDefined();
+        // expect(user.handleClient).toHaveBeenCalled();
+        done();
+      }).catch((e) => { console.error('got error: ' + e); });
     });
 
-    it('passes |onMessage| to correct client', () => {
+    it('passes |onMessage| to correct client', (done) => {
       var user = network.getUser('mockuser');
       spyOn(user, 'handleMessage');
       var msg = {
@@ -262,15 +282,15 @@ describe('Social.FreedomNetwork', () => {
           'cats': 'meow'
         })
       };
-      network.handleMessage(msg);
-      expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
-        'cats': 'meow'
-      });
+      network.handleMessage(msg).then(() => {
+        expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
+          'cats': 'meow'
+        });
+        done();
+      }).catch((e) => { console.error('got error: ' + e); });
     });
 
-    it('adds placeholder when receiving Message with userId not in roster', () => {
-      var user = network.getUser('mockuser');
-      spyOn(user, 'handleMessage');
+    it('adds placeholder when receiving Message with userId not in roster', (done) => {
       var msg = {
         from: {
           userId: 'im_still_not_here',
@@ -278,12 +298,13 @@ describe('Social.FreedomNetwork', () => {
           status: 'ONLINE',
           timestamp: 12345
         },
-        message: null
+        message: JSON.stringify(validMessage)
       };
-      network.handleMessage(msg);
-      expect(user.handleMessage).not.toHaveBeenCalled();
-      expect(network.getUser('im_still_not_here')).toBeDefined();
-      expect(console.warn).not.toHaveBeenCalled();
+      network.handleMessage(msg).then(() => {
+        var user = network.getUser('im_still_not_here');
+        expect(user).toBeDefined();
+        done();
+      }).catch((e) => { console.error('got error: ' + e); });
     });
 
   });  // describe events & communication
@@ -321,7 +342,7 @@ describe('Social.FreedomNetwork', () => {
 
   });
 
-  it('JSON.parse and stringify messages at the right layer', () => {
+  it('JSON.parse and stringify messages at the right layer', (done) => {
     var user = network.getUser('mockuser');
     spyOn(user, 'handleMessage');
     var inMsg = {
@@ -336,17 +357,19 @@ describe('Social.FreedomNetwork', () => {
       })
     };
     spyOn(JSON, 'parse').and.callThrough();
-    network.handleMessage(inMsg);
-    expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
-    var outMsg = {
-      type: uProxy.MessageType.INSTANCE,
-      data: {
-        'tigers': 'are also cats'
-      }
-    };
-    spyOn(JSON, 'stringify').and.callThrough();
-    network.send('fakeclient', outMsg)
-    expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
+    network.handleMessage(inMsg).then(() => {
+      expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
+      var outMsg = {
+        type: uProxy.MessageType.INSTANCE,
+        data: {
+          'tigers': 'are also cats'
+        }
+      };
+      spyOn(JSON, 'stringify').and.callThrough();
+      network.send('fakeclient', outMsg)
+      expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
+      done();
+    });
   });
 
   // TODO: get this unit test to pass.
@@ -380,7 +403,6 @@ describe('Social.ManualNetwork', () => {
     // Silence logging to keep test output clean.
     spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
 
   it('can send messages to the UI', () => {
@@ -398,45 +420,33 @@ describe('Social.ManualNetwork', () => {
         uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
   });
 
-  it('adds the sender to the roster upon receving a message', () => {
+  it('adds the sender to the roster upon receving a message', (done) => {
     var senderClientId = 'dummy_client_id';
     var senderUserId = senderClientId;
     spyOn(network, 'getStorePath').and.returnValue('');
 
-    var message :uProxy.Message = {
-      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      }
-    };
-
-    network.receive(senderClientId, message);
-    expect(network.getUser(senderUserId)).toBeDefined();
+    network.receive(senderClientId, validMessage).then(() => {
+      expect(network.getUser(senderUserId)).toBeDefined();
+      done();
+    }).catch((e) => { console.error('got error: ' + e); });
   });
 
-  it('routes received messages appropriately', () => {
+  it('routes received messages appropriately', (done) => {
     var senderClientId = 'dummy_client_id';
     var senderUserId = senderClientId;
 
-    var message :uProxy.Message = {
-      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      }
-    };
-
     // Send an initial message so ManualNetwork creates the user object that we
     // will spy on.
-    network.receive(senderClientId, message);
-    var user = network.getUser(senderUserId);
-    expect(user).toBeDefined();
-    spyOn(user, 'handleMessage');
-
-    network.receive(senderClientId, message);
-
-    expect(user.handleMessage).toHaveBeenCalledWith(senderClientId, message);
+    network.receive(senderClientId, validMessage).then(() => {
+      var user = network.getUser(senderUserId);
+      expect(user).toBeDefined();
+      spyOn(user, 'handleMessage');
+      network.receive(senderClientId, validMessage).then(() => {
+        expect(user.handleMessage).toHaveBeenCalledWith(
+            senderClientId, validMessage);
+        done();
+      }).catch((e) => { console.error('B: got error: ' + e); });
+    }).catch((e) => { console.error('A: got error: ' + e); });
   });
 
 });
