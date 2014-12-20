@@ -57,7 +57,7 @@ describe('Social.FreedomNetwork', () => {
 
   beforeEach(() => {
     // Spy / override log messages to keep test output clean.
-    //spyOn(console, 'log');
+    spyOn(console, 'log');
     spyOn(console, 'warn');
   });
 

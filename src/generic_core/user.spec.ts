@@ -21,8 +21,8 @@ describe('Core.User', () => {
   var instance :Core.RemoteInstance;
 
   beforeEach(() => {
-    // spyOn(console, 'log');
-    // spyOn(console, 'warn');
+    spyOn(console, 'log');
+    spyOn(console, 'warn');
   });
 
   it('creates with the correct userId', (done) => {
