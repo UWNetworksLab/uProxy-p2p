@@ -19,7 +19,6 @@
   "devDependencies": {
     "es6-promise": "^0.1.1",
     "freedom-social-xmpp": "0.3.3",
-    "freedom-for-chrome": "0.4.7",
     "freedom-for-firefox": "0.6.5",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
@@ -40,7 +39,8 @@
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
     "uproxy-lib": "^17.0.0",
-    "uproxy-networking": "^3.0.2"
+    "uproxy-networking": "^3.0.2",
+    "freedom-for-chrome": "0.4.7"
   },
   "peerDependencies" : {
     "freedom": "~0.6.11"
