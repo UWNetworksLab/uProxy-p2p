@@ -2,15 +2,13 @@
 /// <reference path='social.ts' />
 
 class MockSocial {
+  public blah = 'foo';
   public on = () => {}
   public emit = () => {}
   public manifest = () => {}
   public login = () => {}
   public logout = () => {}
-  public api = {
-    on: () => {},
-    sendMessage: () => {}
-  }
+  public sendMessage = () => { return Promise.resolve(); }
 }
 
 // Valid message that won't have side effects on network/user/instance objects.
@@ -244,11 +242,6 @@ describe('Social.FreedomNetwork', () => {
 
     it('adds placeholder when receiving ClientState with userId not in roster',
         (done) => {
-      // Mock out sendMessage to return an immediately resolved promise.
-      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
-      network['freedomApi_'].sendMessage.and.callFake(() => {
-        return Promise.resolve();
-      });
       var freedomClientState :freedom_Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
