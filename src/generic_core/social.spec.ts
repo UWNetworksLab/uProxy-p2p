@@ -2,7 +2,6 @@
 /// <reference path='social.ts' />
 
 class MockSocial {
-  public blah = 'foo';
   public on = () => {}
   public emit = () => {}
   public manifest = () => {}
