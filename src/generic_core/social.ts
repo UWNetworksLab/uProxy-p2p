@@ -382,7 +382,13 @@ module Social {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
       if (client.userId == this.myInstance.userId) {
-        // TODO: Should we do anything in particular for our own client?
+        // Log out if it's our own client id.
+        // TODO: Consider adding myself to the roster.
+        if (client.clientId === this.myInstance.clientId &&
+            client.status === UProxyClient.Status.OFFLINE) {
+          ui.showNotification('You have been logged out of ' + this.name);
+          core.logout({name: this.name, userId: this.myInstance.userId});
+        }
         this.log('received own ClientState: ' + JSON.stringify(client));
         return Promise.resolve<void>();
       }
@@ -450,6 +456,7 @@ module Social {
             this.startMonitor_();
             this.log('logged into uProxy');
             return this.prepareLocalInstance(freedomClient.userId).then(() => {
+              this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
               // that the network is online before we send user updates.

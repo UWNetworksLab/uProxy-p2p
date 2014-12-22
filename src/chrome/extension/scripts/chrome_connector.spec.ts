@@ -48,8 +48,6 @@ describe('core-connector', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
 
   it('attempts chrome.runtime.connect().', () => {

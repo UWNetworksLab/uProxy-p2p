@@ -391,6 +391,8 @@ module UI {
           this.categorizeUser_(user, model.contacts.shareAccessContacts,
               userCategories.shareTab, null);
         }
+        this.setOfflineIcon();
+        this.view = UI.View.SPLASH;
         model.onlineNetwork = null;
       }
 

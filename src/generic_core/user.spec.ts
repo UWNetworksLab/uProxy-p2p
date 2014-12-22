@@ -22,7 +22,6 @@ describe('Core.User', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
   it('creates with the correct userId', (done) => {

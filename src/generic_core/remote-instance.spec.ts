@@ -18,6 +18,9 @@ describe('Core.RemoteInstance', () => {
       'instanceToClient'
   ]);
 
+  user.network = <Social.Network><any>jasmine.createSpyObj(
+      'network', ['sendInstanceHandshake']);
+
   user['getLocalInstanceId'] = function() {
       return 'localInstanceId';
   }
@@ -35,7 +38,6 @@ describe('Core.RemoteInstance', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
   describe('storage', () => {
     var realStorage = new Core.Storage;
@@ -374,9 +376,6 @@ describe('Core.RemoteInstance', () => {
     (<any>user.instanceToClient).and.callFake((instanceId) => {
       return instanceId;
     });
-
-    user.network = <Social.Network><any>jasmine.createSpyObj(
-        'network', ['sendInstanceHandshake']);
 
     var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
