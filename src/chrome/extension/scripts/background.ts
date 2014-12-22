@@ -19,7 +19,6 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 
 
-var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
 var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
@@ -46,7 +45,6 @@ function openDownloadAppPage() : void {
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
  */
-function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
@@ -69,11 +67,3 @@ function initUI() : UI.UserInterface {
     {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
     ['blocking']
   );
-
-  return new UI.UserInterface(core, chromeBrowserApi);
-}
-
-console.log('Initializing chrome extension background page...');
-if (undefined === ui) {
-  ui = initUI();
-}

@@ -138,7 +138,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show it's start page.
-        ui.view = UI.View.SPLASH;
+        //ui.view = UI.View.SPLASH;
         chrome.browserAction.setIcon({path: "icons/offline-19.png"});
         chromeBrowserApi.updatePopupUrl("index.html");
         if (this.waitingForAppInstall) {
@@ -175,7 +175,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
       // Ensure that proxying has stopped and update this.status.
       // TODO: display a notification to the user when we have a good way to
       // check if they are currently getting or giving access.
-      ui.stopGettingInUiAndConfig(true);
+      //ui.stopGettingInUiAndConfig(true);
       this.status.connected = false;
     }
 
