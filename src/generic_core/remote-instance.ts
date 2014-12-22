@@ -38,6 +38,9 @@ module Core {
     public description :string;
     public bytesSent   :number = 0;
     public bytesReceived    :number = 0;
+
+    // Used to prevent saving state while we have not yet loaded the state
+    // from storage.
     private storageLookupComplete_ :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
@@ -105,12 +108,15 @@ module Core {
               remoteInstance.restoreState(state);
               remoteInstance.storageLookupComplete_ = true;
               fulfill(remoteInstance);
-            }).catch((e) => {
+            }, (e) => {
               // Instance not found in storage - we should fulfill the create
               // promise anyway as this is not an error.
               console.log('No stored state for instance ' + instanceId);
               remoteInstance.storageLookupComplete_ = true;
               fulfill(remoteInstance);
+            }).catch((e) => {
+              console.error('Uncaught error in RemoteInstance.create: ' + e);
+              reject(remoteInstance);
             });
       });
     }

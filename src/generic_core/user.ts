@@ -64,10 +64,13 @@ module Core {
         storage.load<UserState>(user.getStorePath()).then((state) => {
           user.restoreState(state).then(fulfill.bind({}, user),
                                         fulfill.bind({}, user));
-        }).catch(() => {
+        }, (e) => {
           // User not found in storage - we should fulfill the create promise
           // anyway as this is not an error.
           fulfill(user);
+        }).catch((e) => {
+          console.error('Uncaught error in User.create: ' + e);
+          reject(user);
         });
       });
     }
