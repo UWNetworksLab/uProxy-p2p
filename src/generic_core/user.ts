@@ -214,6 +214,7 @@ module Core {
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
+            // issues: https://github.com/uProxy/uproxy/pull/729
             return Promise.reject(
                 'failed to get instance for clientId ' + clientId);
           }
@@ -265,6 +266,9 @@ module Core {
      */
     private syncInstance_ = (clientId :string, data :InstanceMessage)
         : Promise<void> => {
+      // TODO: use handlerQueues to process instances messages in order, to
+      // address potential race conditions described in
+      // https://github.com/uProxy/uproxy/issues/734
       var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '

@@ -224,7 +224,6 @@ describe('Core.User', () => {
       };
       storage.save = function(key, value) {
         saved = realStorage.save(key, value);
-        //saved = function() { return Promise.resolve(); };
         return saved;
       };
 

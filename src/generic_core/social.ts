@@ -153,8 +153,8 @@ module Social {
      * we've yet to receive a UserProfile. In any case, we can begin with an
      * inital user.
      *
-     * Assumes that |userId| is in fact a new user. (There will be a problem if
-     * it overwrites an existing user in the roster.)
+     * Assumes that |userId| is in fact a new user. (Promise will be rejected
+     * if the user is already in the roster.)
      */
     protected addUser_ = (userId :string) : Promise<Core.User> => {
       if (!this.isNewFriend_(userId)) {

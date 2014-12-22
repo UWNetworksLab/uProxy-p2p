@@ -249,11 +249,6 @@ describe('Social.FreedomNetwork', () => {
       network['freedomApi_'].sendMessage.and.callFake(() => {
         return Promise.resolve();
       })
-      // spyOn(network, 'getUser').and.callFake((userId) => {
-      //   var user = network.roster[userId];
-      //   spyOn(user, 'handleClient');
-      //   return user;
-      // });
       var freedomClientState :freedom_Social.ClientState = {
         userId: 'im_not_here',
         clientId: 'fakeclient',
@@ -263,7 +258,6 @@ describe('Social.FreedomNetwork', () => {
       network.handleClientState(freedomClientState).then(() => {
         var user = network.getUser('im_not_here');
         expect(user).toBeDefined();
-        // expect(user.handleClient).toHaveBeenCalled();
         done();
       }).catch((e) => { console.error('got error: ' + e); });
     });
@@ -437,16 +431,16 @@ describe('Social.ManualNetwork', () => {
 
     // Send an initial message so ManualNetwork creates the user object that we
     // will spy on.
-    network.receive(senderClientId, validMessage).then(() => {
-      var user = network.getUser(senderUserId);
-      expect(user).toBeDefined();
-      spyOn(user, 'handleMessage');
-      network.receive(senderClientId, validMessage).then(() => {
-        expect(user.handleMessage).toHaveBeenCalledWith(
-            senderClientId, validMessage);
-        done();
-      }).catch((e) => { console.error('B: got error: ' + e); });
-    }).catch((e) => { console.error('A: got error: ' + e); });
-  });
+    network.receive(senderClientId, validMessage)
+        .then(() => {
+          var user = network.getUser(senderUserId);
+          expect(user).toBeDefined();
+          spyOn(user, 'handleMessage');
+          return network.receive(senderClientId, validMessage).then(() => {
+            expect(user.handleMessage).toHaveBeenCalledWith(
+                senderClientId, validMessage);
+          });
+        }).then(done)
+          .catch((e) => { console.error('Got error: ' + e); })
 
 });
