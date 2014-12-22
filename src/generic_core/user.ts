@@ -62,10 +62,11 @@ module Core {
       var user = new User(network, userId);
       return new Promise((fulfill, reject) => {
         storage.load<UserState>(user.getStorePath()).then((state) => {
-          user.restoreState(state).then(() => {
-            fulfill(user);
-          });
+          user.restoreState(state).then(fulfill.bind({}, user),
+                                        fulfill.bind({}, user));
         }).catch(() => {
+          // User not found in storage - we should fulfill the create promise
+          // anyway as this is not an error.
           fulfill(user);
         });
       });

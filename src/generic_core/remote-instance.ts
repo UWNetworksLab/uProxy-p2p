@@ -38,7 +38,7 @@ module Core {
     public description :string;
     public bytesSent   :number = 0;
     public bytesReceived    :number = 0;
-    private readFromStorage_ :boolean = false;
+    private storageLookupComplete_ :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -103,12 +103,13 @@ module Core {
         storage.load<RemoteInstanceState>(remoteInstance.getStorePath())
             .then((state) => {
               remoteInstance.restoreState(state);
-              remoteInstance.readFromStorage_ = true;
+              remoteInstance.storageLookupComplete_ = true;
               fulfill(remoteInstance);
             }).catch((e) => {
-              // Not an error if instance is not yet in storage.
+              // Instance not found in storage - we should fulfill the create
+              // promise anyway as this is not an error.
               console.log('No stored state for instance ' + instanceId);
-              remoteInstance.readFromStorage_ = true;
+              remoteInstance.storageLookupComplete_ = true;
               fulfill(remoteInstance);
             });
       });
@@ -356,7 +357,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      if (this.readFromStorage_) {
+      if (this.storageLookupComplete_) {
         this.saveToStorage();
       }
       this.user.notifyUI();
