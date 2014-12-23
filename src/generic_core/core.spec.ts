@@ -32,7 +32,6 @@ describe('Core', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
 
   it('passes modifyConsent to the correct instance', () => {
