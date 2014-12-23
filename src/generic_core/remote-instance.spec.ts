@@ -25,6 +25,10 @@ describe('Core.RemoteInstance', () => {
       return 'localInstanceId';
   }
 
+  user.isInstanceOnline = function() {
+    return true;
+  };
+
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
           'onceReady'
@@ -376,10 +380,6 @@ describe('Core.RemoteInstance', () => {
     (<any>user.instanceToClient).and.callFake((instanceId) => {
       return instanceId;
     });
-
-    user.isInstanceOnline = function() {
-      return true;
-    };
 
     var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
