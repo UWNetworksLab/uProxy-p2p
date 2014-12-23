@@ -415,6 +415,7 @@ module UI {
       }
 
       if (network.online && !model.onlineNetwork) {
+        this.view = UI.View.ROSTER;
         model.onlineNetwork = {
           name:   network.name,
           userId: network.userId,
