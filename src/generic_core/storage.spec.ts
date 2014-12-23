@@ -9,8 +9,6 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
   })
 
   it('starts with empty storage', (done) => {

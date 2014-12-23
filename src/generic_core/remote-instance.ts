@@ -36,9 +36,12 @@ module Core {
 
     public keyHash     :string
     public description :string;
-    public bytesSent   :number;
-    public bytesReceived    :number;
-    public readFromStorage :boolean = false;
+    public bytesSent   :number = 0;
+    public bytesReceived    :number = 0;
+
+    // Used to prevent saving state while we have not yet loaded the state
+    // from storage.
+    private storageLookupComplete_ :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -86,10 +89,45 @@ module Core {
     // from the peer and handling them by proxying them to the internet.
     private rtcToNet_ :RtcToNet.RtcToNet = null;
 
+    // Factory method, returns a Promise to be fulfilled with the newly
+    // created RemoteInstance object.  This method should be used
+    // rather than invoking the constructor directly to ensure a properly
+    // loaded RemoteInstance
+    public static create = (
+        // The User which this instance belongs to.
+        user :Core.User,
+        instanceId :string,
+        // The last instance handshake from the peer.  This data may be fresh
+        // (over the wire) or recovered from disk (and stored in a
+        // RemoteInstanceState, which subclasses InstanceHandshake).
+        data :InstanceHandshake) : Promise<RemoteInstance> => {
+      return new Promise((fulfill, reject) => {
+        var remoteInstance = new RemoteInstance(user, instanceId, data);
+        storage.load<RemoteInstanceState>(remoteInstance.getStorePath())
+            .then((state) => {
+              remoteInstance.restoreState(state);
+              remoteInstance.storageLookupComplete_ = true;
+              fulfill(remoteInstance);
+            }, (e) => {
+              // Instance not found in storage - we should fulfill the create
+              // promise anyway as this is not an error.
+              console.log('No stored state for instance ' + instanceId);
+              remoteInstance.storageLookupComplete_ = true;
+              fulfill(remoteInstance);
+            }).catch((e) => {
+              console.error('Uncaught error in RemoteInstance.create: ' + e);
+              reject(remoteInstance);
+            });
+      });
+    }
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
      * with the lowest consent values.
+     * Users of RemoteInstance should call the static .create method
+     * rather than directly calling this, in order to get a RemoteInstance
+     * that has been loaded from storage.
      */
     constructor(
         // The User which this instance belongs to.
@@ -105,20 +143,6 @@ module Core {
       if (data) {
         this.update(data);
       }
-
-      storage.load<RemoteInstanceState>(this.getStorePath())
-          .then((state) => {
-            this.restoreState(state);
-            this.readFromStorage = true;
-            this.user.notifyUI();
-          }).catch((e) => {
-            this.readFromStorage = true;
-            this.user.notifyUI();
-            console.log('Did not have consent state for this instanceId');
-          });
-
-      this.bytesSent = 0;
-      this.bytesReceived = 0;
     }
 
     /**
@@ -339,7 +363,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      if (this.readFromStorage) {
+      if (this.storageLookupComplete_) {
         this.saveToStorage();
       }
       this.user.notifyUI();
