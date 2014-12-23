@@ -149,12 +149,8 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     /**
-     * Sometimes Network receives messages or ClientStates for userIds for which
-     * we've yet to receive a UserProfile. In any case, we can begin with an
-     * inital user.
-     *
-     * Assumes that |userId| is in fact a new user. (Promise will be rejected
-     * if the user is already in the roster.)
+     * Adds a new user to the roster.  Promise will be rejected if the user is
+     * already in the roster.
      */
     protected addUser_ = (userId :string) : Promise<Core.User> => {
       if (!this.isNewFriend_(userId)) {
@@ -167,16 +163,16 @@ module Social {
       });
     }
 
+    /**
+     * Returns a User object for userId.  If the userId is not found in the
+     * roster, a new User object will be created - in that case the User may
+     * be missing fields like .name if it is not found in storage.
+     */
     protected getOrAddUser_ = (userId :string) : Promise<Core.User> => {
-      return new Promise((fulfill, reject) => {
-        if (this.isNewFriend_(userId)) {
-          this.addUser_(userId).then((user) => {
-            fulfill(user);
-          });
-        } else {
-          fulfill(this.getUser(userId));
-        }
-      });
+      if (this.isNewFriend_(userId)) {
+        return this.addUser_(userId);
+      }
+      return Promise.resolve(this.getUser(userId));
     }
 
     /**

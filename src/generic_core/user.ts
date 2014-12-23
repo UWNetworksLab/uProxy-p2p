@@ -218,7 +218,7 @@ module Core {
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
-            // issues: https://github.com/uProxy/uproxy/pull/729
+            // issues: https://github.com/uProxy/uproxy/pull/732
             return Promise.reject(
                 'failed to get instance for clientId ' + clientId);
           }
