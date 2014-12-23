@@ -3,8 +3,8 @@
 General setup:  
 
  * install docker on your system
- * make an **image** using this directory (sudo docker build .)
- * make a **container** using that image (sudo docker run <hash-of-image>)
+ * make an **image** using this directory (`sudo docker build .` -> sha1 identifying image)
+ * make a **container** using that image (`sudo docker run <hash-of-image>`)
  * use it to test.
  
  ## (Goo|u)buntu Setup
