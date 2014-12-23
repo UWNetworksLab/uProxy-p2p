@@ -55,6 +55,9 @@ class UIConnector implements uProxy.UIAPI {
             networkNames: Object.keys(Social.networks),
             globalSettings: core.globalSettings
           });
+      for (var networkName in Social.networks) {
+        Social.notifyUI(networkName);
+      }
     });
   }
 

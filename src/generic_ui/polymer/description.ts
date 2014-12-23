@@ -3,6 +3,7 @@
 
 declare var core :uProxy.CoreAPI;
 
+console.log('loading description ' + model.globalSettings.description);
 Polymer({
   description: model.globalSettings.description,
   update: function() {

@@ -99,6 +99,12 @@ module Social {
       userId: userId
     };
     ui.update(uProxy.Update.NETWORK, payload);
+
+    if (online) {
+      for (var friend in networks[networkName][userId].roster) {
+        networks[networkName][userId].roster[friend].notifyUI();
+      }
+    }
   }
 
   // Implements those portions of the Network interface for which the logic is
