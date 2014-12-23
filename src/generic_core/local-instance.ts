@@ -37,7 +37,7 @@ module Core {
         return;
       }
       this.instanceId = LocalInstance.generateInstanceID();
-      this.keyHash = null;
+      this.keyHash = '';
     }
 
     /**
