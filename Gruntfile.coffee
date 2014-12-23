@@ -215,9 +215,9 @@ module.exports = (grunt) ->
           src: ['vulcanized-chrome.*']
           dest: chromeExtDevPath
         }, {
-          # Icons
+          # Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/*']
+          src: ['icons/*', 'fonts/*']
           dest: chromeExtDevPath
         }, {
           expand: true, cwd: 'build/compile-src/', flatten: true
@@ -278,9 +278,9 @@ module.exports = (grunt) ->
             'freedom-ts-hacks/social-enum.js'
           ]
           dest: chromeAppDevPath + 'scripts/'
-        }, {  # uProxy Icons.
+        }, {  # uProxy Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/default-*.png']
+          src: ['icons/default-*.png', 'fonts/*']
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
@@ -330,9 +330,9 @@ module.exports = (grunt) ->
           src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
           dest: firefoxDevPath + 'data/'
         }, {
-          # Icons
+          # Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/*']
+          src: ['icons/*', 'fonts/*']
           dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/compile-src', flatten: true

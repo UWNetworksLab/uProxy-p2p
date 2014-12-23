@@ -138,11 +138,7 @@ module Social {
         this.myInstance = new Core.LocalInstance(this, userId);
         this.log('generating new local instance: ' +
                  this.myInstance.instanceId);
-        return this.myInstance.prepare().then(() => {
-            return storage.save<Instance>(key, this.myInstance.currentState());
-          }).then((prev) => {
-            this.log('saved new local instance to storage');
-          });
+        return storage.save<Instance>(key, this.myInstance.currentState());
       });
     }
 
@@ -471,11 +467,11 @@ module Social {
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
-          .catch(() => {
+          .catch((e) => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
             ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again.');
+                         '. Please try again. ' + JSON.stringify(e));
             return Promise.reject(new Error('Could not login.'));
           });
     }
