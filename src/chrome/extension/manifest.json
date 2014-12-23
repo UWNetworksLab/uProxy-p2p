@@ -10,7 +10,6 @@
     "128": "icons/default-128.png"
   },
   "default_locale": "en",
-  },
   "browser_action": {
     "default_icon": "icons/offline-19.png",
     "default_title": "__MSG_extTitle__"
