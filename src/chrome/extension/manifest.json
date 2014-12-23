@@ -10,17 +10,6 @@
     "128": "icons/default-128.png"
   },
   "default_locale": "en",
-  "background": {
-    "persistent": true,
-    "scripts": [
-      "scripts/chrome_glue.js",
-      "scripts/uproxy.js",
-      "scripts/chrome_browser_api.js",
-      "scripts/core_connector.js",
-      "scripts/chrome_tab_auth.js",
-      "scripts/chrome_connector.js",
-      "scripts/background.js"
-    ]
   },
   "browser_action": {
     "default_icon": "icons/offline-19.png",
