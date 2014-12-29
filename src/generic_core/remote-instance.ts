@@ -278,10 +278,8 @@ module Core {
           address: '127.0.0.1',
           port: 0
       }
-      this.socksToRtc_ = new SocksToRtc.SocksToRtc(
-          endpoint,
-          this.socksRtcPcConfig);
-      this.socksToRtc_.signalsForPeer.setSyncHandler((signal) => {
+      this.socksToRtc_ = new SocksToRtc.SocksToRtc();
+      this.socksToRtc_.on('signalForPeer', (signal) => {
         this.send({
           type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
           data: signal
@@ -291,36 +289,36 @@ module Core {
       // UI about the increase in data exchanged. Increment the bytes
       // sent/received variables in real time, but use a timer to control
       // when notifyUI() is called.
-      this.socksToRtc_.bytesReceivedFromPeer
-          .setSyncHandler((numBytes:number) => {
+      this.socksToRtc_.on('bytesReceivedFromPeer', (numBytes:number) => {
         this.bytesReceived += numBytes;
         this.updateBytesInUI();
       });
-      this.socksToRtc_.bytesSentToPeer
-          .setSyncHandler((numBytes:number) => {
+      this.socksToRtc_.on('bytesSentToPeer', (numBytes:number) => {
         this.bytesSent += numBytes;
         this.updateBytesInUI();
       });
-      // TODO: Update to onceReady() once uproxy-networking fixes it.
-      return this.socksToRtc_.onceReady.then((endpoint:Net.Endpoint) => {
+      this.socksToRtc_.on('stopped', () => {
+        console.log('socksToRtc_.once(\'stopped\', ...) called');
+        ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+                  {instanceId: this.instanceId,
+                   error: this.access.asProxy});
+        this.access.asProxy = false;
+        this.bytesSent = 0;
+        this.bytesReceived = 0;
+        // TODO: notification to the user on remote-close?
+        this.user.notifyUI();
+        this.socksToRtc_ = null;
+        // Update global remoteProxyInstance to indicate we are no longer
+        // getting access.
+        remoteProxyInstance = null;
+      });
+      return this.socksToRtc_.start(
+          endpoint,
+          this.socksRtcPcConfig)
+        .then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
-          this.socksToRtc_.onceStopped().then(() => {
-            console.log('socksToRtc_.onceStopped called');
-            ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
-                      {instanceId: this.instanceId,
-                       error: this.access.asProxy});
-            this.access.asProxy = false;
-            this.bytesSent = 0;
-            this.bytesReceived = 0;
-            // TODO: notification to the user on remote-close?
-            this.user.notifyUI();
-            this.socksToRtc_ = null;
-            // Update global remoteProxyInstance to indicate we are no longer
-            // getting access.
-            remoteProxyInstance = null;
-          });
           return endpoint;
         })
         // TODO: remove catch & error print: that should happen at the level
