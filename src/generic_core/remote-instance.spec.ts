@@ -423,12 +423,12 @@ describe('Core.RemoteInstance', () => {
     });
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
     var fakeSocksToRtc = {
-      'onceReady': Promise.resolve(),
-      'onceStopped': () => { return new Promise((F,R) => {}); },
-      'stop': () => {},
-      'signalsForPeer': { 'setSyncHandler': () => {} },
-      'bytesReceivedFromPeer' : { 'setSyncHandler': () => {} },
-      'bytesSentToPeer' : { 'setSyncHandler': () => {} },
+      'start':
+          (endpoint:Net.Endpoint, pcConfig:WebRtc.PeerConnectionConfig) => {
+         return Promise.resolve(endpoint);
+      },
+      'on': (t:string, f:Function) => {},
+      'stop': () => { return Promise.resolve(); }
     };
 
     it('can start proxying', (done) => {
