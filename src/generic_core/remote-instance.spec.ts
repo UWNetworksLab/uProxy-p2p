@@ -25,6 +25,14 @@ describe('Core.RemoteInstance', () => {
       return 'localInstanceId';
   }
 
+  user.isInstanceOnline = function() {
+    return true;
+  };
+
+  var socksToRtc =
+      <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
+          'onceReady'
+      ]);
   var instance :Core.RemoteInstance;
   var localPeerId = {
     clientInstancePath: 'clientInstancePath',
