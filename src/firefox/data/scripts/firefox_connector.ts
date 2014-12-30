@@ -41,6 +41,7 @@ class FirefoxConnector implements uProxy.CoreBrowserConnector {
 
   public restart = () => {
     // TODO implement restart for firefox
+    // https://github.com/uProxy/uproxy/issues/751
   }
 
 }  // class FirefoxConnector
