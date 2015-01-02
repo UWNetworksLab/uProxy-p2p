@@ -156,9 +156,22 @@ module.exports = (grunt) ->
           src: [firefoxDevPath + 'data/core/uproxy.js'
                 firefoxDevPath + 'lib/exports.js']
           dest: firefoxDevPath + 'lib/uproxy.js'
-        } ]
+        }]
       }
 
+      firefox_dependencies: {
+        files: [ {
+          src: [firefoxDevPath + 'data/scripts/port.js'
+                firefoxDevPath + 'data/scripts/user.js'
+                firefoxDevPath + 'data/scripts/uproxy.js'
+                firefoxDevPath + 'data/scripts/ui.js'
+                firefoxDevPath + 'data/scripts/firefox_browser_api.js'
+                firefoxDevPath + 'data/scripts/firefox_connector.js'
+                firefoxDevPath + 'data/scripts/core_connector.js'
+                firefoxDevPath + 'data/scripts/background.js']
+          dest: firefoxDevPath + 'data/scripts/dependencies.js'
+        }]
+      }
     }  # concat
 
     #-------------------------------------------------------------------------
@@ -202,9 +215,9 @@ module.exports = (grunt) ->
           src: ['vulcanized-chrome.*']
           dest: chromeExtDevPath
         }, {
-          # Icons
+          # Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/*']
+          src: ['icons/*', 'fonts/*']
           dest: chromeExtDevPath
         }, {
           expand: true, cwd: 'build/compile-src/', flatten: true
@@ -265,9 +278,9 @@ module.exports = (grunt) ->
             'freedom-ts-hacks/social-enum.js'
           ]
           dest: chromeAppDevPath + 'scripts/'
-        }, {  # uProxy Icons.
+        }, {  # uProxy Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/default-*.png']
+          src: ['icons/default-*.png', 'fonts/*']
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
@@ -317,14 +330,13 @@ module.exports = (grunt) ->
           src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
           dest: firefoxDevPath + 'data/'
         }, {
-          # Icons
+          # Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/*']
+          src: ['icons/*', 'fonts/*']
           dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/compile-src', flatten: true
-          src: FILES.uproxy_common.concat([
-            'firefox/data/scripts/*.js']),
+          src: ['uproxy.js', 'firefox/data/scripts/*.js'],
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
@@ -560,6 +572,7 @@ module.exports = (grunt) ->
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
+    'concat:firefox_dependencies'
   ]
 
   taskManager.add 'build_firefox_xpi', [

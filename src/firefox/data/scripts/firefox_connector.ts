@@ -21,6 +21,12 @@ class FirefoxConnector implements uProxy.CoreBrowserConnector {
 
   constructor() {
     this.status = { connected: true };
+    var ready :uProxy.Payload = {
+      cmd: 'emit',
+      type: uProxy.Command.GET_INITIAL_STATE,
+      promiseId: 0
+    }
+    this.send(ready);
   }
 
 

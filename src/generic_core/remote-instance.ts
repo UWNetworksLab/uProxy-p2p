@@ -36,9 +36,12 @@ module Core {
 
     public keyHash     :string
     public description :string;
-    public bytesSent   :number;
-    public bytesReceived    :number;
-    public readFromStorage :boolean = false;
+    public bytesSent   :number = 0;
+    public bytesReceived    :number = 0;
+
+    // Used to prevent saving state while we have not yet loaded the state
+    // from storage.
+    private storageLookupComplete_ :boolean = false;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -86,10 +89,45 @@ module Core {
     // from the peer and handling them by proxying them to the internet.
     private rtcToNet_ :RtcToNet.RtcToNet = null;
 
+    // Factory method, returns a Promise to be fulfilled with the newly
+    // created RemoteInstance object.  This method should be used
+    // rather than invoking the constructor directly to ensure a properly
+    // loaded RemoteInstance
+    public static create = (
+        // The User which this instance belongs to.
+        user :Core.User,
+        instanceId :string,
+        // The last instance handshake from the peer.  This data may be fresh
+        // (over the wire) or recovered from disk (and stored in a
+        // RemoteInstanceState, which subclasses InstanceHandshake).
+        data :InstanceHandshake) : Promise<RemoteInstance> => {
+      return new Promise((fulfill, reject) => {
+        var remoteInstance = new RemoteInstance(user, instanceId, data);
+        storage.load<RemoteInstanceState>(remoteInstance.getStorePath())
+            .then((state) => {
+              remoteInstance.restoreState(state);
+              remoteInstance.storageLookupComplete_ = true;
+              fulfill(remoteInstance);
+            }, (e) => {
+              // Instance not found in storage - we should fulfill the create
+              // promise anyway as this is not an error.
+              console.log('No stored state for instance ' + instanceId);
+              remoteInstance.storageLookupComplete_ = true;
+              fulfill(remoteInstance);
+            }).catch((e) => {
+              console.error('Uncaught error in RemoteInstance.create: ' + e);
+              reject(remoteInstance);
+            });
+      });
+    }
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
      * with the lowest consent values.
+     * Users of RemoteInstance should call the static .create method
+     * rather than directly calling this, in order to get a RemoteInstance
+     * that has been loaded from storage.
      */
     constructor(
         // The User which this instance belongs to.
@@ -105,20 +143,6 @@ module Core {
       if (data) {
         this.update(data);
       }
-
-      storage.load<RemoteInstanceState>(this.getStorePath())
-          .then((state) => {
-            this.restoreState(state);
-            this.readFromStorage = true;
-            this.user.notifyUI();
-          }).catch((e) => {
-            this.user.notifyUI();
-            this.readFromStorage = true;
-            console.log('Did not have consent state for this instanceId');
-          });
-
-      this.bytesSent = 0;
-      this.bytesReceived = 0;
     }
 
     /**
@@ -254,10 +278,8 @@ module Core {
           address: '127.0.0.1',
           port: 0
       }
-      this.socksToRtc_ = new SocksToRtc.SocksToRtc(
-          endpoint,
-          this.socksRtcPcConfig);
-      this.socksToRtc_.signalsForPeer.setSyncHandler((signal) => {
+      this.socksToRtc_ = new SocksToRtc.SocksToRtc();
+      this.socksToRtc_.on('signalForPeer', (signal) => {
         this.send({
           type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
           data: signal
@@ -267,36 +289,36 @@ module Core {
       // UI about the increase in data exchanged. Increment the bytes
       // sent/received variables in real time, but use a timer to control
       // when notifyUI() is called.
-      this.socksToRtc_.bytesReceivedFromPeer
-          .setSyncHandler((numBytes:number) => {
+      this.socksToRtc_.on('bytesReceivedFromPeer', (numBytes:number) => {
         this.bytesReceived += numBytes;
         this.updateBytesInUI();
       });
-      this.socksToRtc_.bytesSentToPeer
-          .setSyncHandler((numBytes:number) => {
+      this.socksToRtc_.on('bytesSentToPeer', (numBytes:number) => {
         this.bytesSent += numBytes;
         this.updateBytesInUI();
       });
-      // TODO: Update to onceReady() once uproxy-networking fixes it.
-      return this.socksToRtc_.onceReady.then((endpoint:Net.Endpoint) => {
+      this.socksToRtc_.on('stopped', () => {
+        console.log('socksToRtc_.once(\'stopped\', ...) called');
+        ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+                  {instanceId: this.instanceId,
+                   error: this.access.asProxy});
+        this.access.asProxy = false;
+        this.bytesSent = 0;
+        this.bytesReceived = 0;
+        // TODO: notification to the user on remote-close?
+        this.user.notifyUI();
+        this.socksToRtc_ = null;
+        // Update global remoteProxyInstance to indicate we are no longer
+        // getting access.
+        remoteProxyInstance = null;
+      });
+      return this.socksToRtc_.start(
+          endpoint,
+          this.socksRtcPcConfig)
+        .then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
           this.access.asProxy = true;
           this.user.notifyUI();
-          this.socksToRtc_.onceStopped().then(() => {
-            console.log('socksToRtc_.onceStopped called');
-            ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
-                      {instanceId: this.instanceId,
-                       error: this.access.asProxy});
-            this.access.asProxy = false;
-            this.bytesSent = 0;
-            this.bytesReceived = 0;
-            // TODO: notification to the user on remote-close?
-            this.user.notifyUI();
-            this.socksToRtc_ = null;
-            // Update global remoteProxyInstance to indicate we are no longer
-            // getting access.
-            remoteProxyInstance = null;
-          });
           return endpoint;
         })
         // TODO: remove catch & error print: that should happen at the level
@@ -339,7 +361,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      if (this.readFromStorage) {
+      if (this.storageLookupComplete_) {
         this.saveToStorage();
       }
       this.user.notifyUI();
@@ -373,8 +395,10 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      this.user.network.sendInstanceHandshake(
-          this.user.instanceToClient(this.instanceId), this.getConsentBits());
+      if (this.user.isInstanceOnline(this.instanceId)) {
+        this.user.network.sendInstanceHandshake(
+            this.user.instanceToClient(this.instanceId), this.getConsentBits());
+      }
     }
 
     /**

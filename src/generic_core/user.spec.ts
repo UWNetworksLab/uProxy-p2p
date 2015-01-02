@@ -22,17 +22,18 @@ describe('Core.User', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
   it('creates with the correct userId', (done) => {
-    user = new Core.User(network, 'fakeuser');
-    expect(user.userId).toEqual('fakeuser');
-    expect(user['network']).toEqual(network);
-    storage.load(user.getStorePath()).catch((e) => {
-      // User should not be in storage
-      done();
-    })
+    Core.User.create(network, 'fakeuser').then((newUser) => {
+      user = newUser;
+      expect(user.userId).toEqual('fakeuser');
+      expect(user['network']).toEqual(network);
+      storage.load(user.getStorePath()).catch((e) => {
+        // User should not be in storage
+        done();
+      })
+    });
   });
 
   it('creates with pending name if there was no profile', () => {
@@ -227,22 +228,14 @@ describe('Core.User', () => {
 
       expect(user.instanceToClient('fakeinstance')).toBeUndefined();
       expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user['syncInstance_']('fakeclient', instanceHandshake);
-      expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
-      expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
-      instance = user.getInstance('fakeinstance');
-      expect(instance).toBeDefined();
-      expect(saved).toBeDefined();
-
-      saved.then(() => {
-        var newUser = new Core.User(network, 'fakeuser');
-        loaded.then(() => {
-          var newInstance = newUser.getInstance('fakeinstance');
-          expect(newInstance).toBeDefined();
-          expect(newUser.name).toEqual(user.name);
-          expect(newUser.profile.imageData).toEqual(user.profile.imageData);
-        }).then(done);
-      });
+      user['syncInstance_']('fakeclient', instanceHandshake).then(() => {
+        expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
+        expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
+        instance = user.getInstance('fakeinstance');
+        expect(instance).toBeDefined();
+        expect(saved).toBeDefined();
+        done();
+      }).catch((e) => { console.error('error: ' + e) });
     });
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
