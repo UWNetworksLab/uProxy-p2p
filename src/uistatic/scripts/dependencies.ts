@@ -23,8 +23,7 @@ function generateFakeUserMessage() :UI.UserMessage {
     user: {
       userId: 'alice',
       name: 'Alice uProxy',
-      timestamp: Date.now(),
-      isOnline: true
+      timestamp: Date.now()
     },
     instances: [
       {

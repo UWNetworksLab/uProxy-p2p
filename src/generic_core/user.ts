@@ -151,6 +151,11 @@ module Core {
             'received client with unexpected userId: ' + client.userId);
         return;
       }
+      else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        // Ignore non-uproxy contacts
+        return;
+      }
+
       this.log('received client' + JSON.stringify(client));
       if (client.clientId in this.clientIdToStatusMap &&
           this.clientIdToStatusMap[client.clientId] == client.status) {
@@ -177,11 +182,6 @@ module Core {
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
           this.removeClient_(client.clientId);
-          break;
-        case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
-          // TODO: Figure out potential invite or chat-mechanism for non-uProxy
-          // clients.
-          this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         default:
           console.warn('Received client ' + client.clientId +
@@ -359,6 +359,16 @@ module Core {
         instanceStatesForUi.push(
             this.instances_[instanceId].currentStateForUi());
       }
+      if (instanceStatesForUi.length === 0) {
+        // Don't send users to UI if they don't have any instances (i.e. are not
+        // uProxy users).
+        // TODO: ideally we should not have User objects for users without
+        // instances, but for now we create Users whenever we get a UserProfile
+        // or ClientState from the social provider that isn't
+        // ONLINE_WITH_OTHER_APP.  For now this is necessary because we don't
+        // yet load instances from storage until User objects are created.
+        return;
+      }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
@@ -367,8 +377,7 @@ module Core {
         user: {
           userId: this.profile.userId,
           name: this.profile.name,
-          imageData: this.profile.imageData,
-          isOnline: this.isOnline()
+          imageData: this.profile.imageData
         },
         instances: instanceStatesForUi
       })
@@ -403,36 +412,6 @@ module Core {
         data: {}
       };
       this.network.send(clientId, instanceRequestMsg);
-    }
-
-    public isOnline = () : boolean => {
-      // For each instance we know about, check if it's online.
-      var hasInstances = false;
-      var hasOnlineInstances = false;
-      for (var instanceId in this.instances_) {
-        hasInstances = true;
-        if (this.isInstanceOnline(instanceId)) {
-          hasOnlineInstances = true;
-          break;
-        }
-      }
-
-      // If the user has instances, return true iff any of them are online.
-      if (hasInstances) {
-        return hasOnlineInstances;
-      }
-
-      // If the user does not have instances, check if they are online with
-      // another app.
-      for (var clientId in this.clientIdToStatusMap) {
-        var status = this.clientIdToStatusMap[clientId];
-        if (status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
-          return true;
-        }
-      }
-
-      // User is not online.
-      return false;
     }
 
     public isInstanceOnline = (instanceId :string) : boolean => {

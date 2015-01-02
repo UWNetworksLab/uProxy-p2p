@@ -35,8 +35,7 @@ describe('UI.UserInterface', () => {
       user: {
         userId: userId,
         name: userName,
-        imageData: 'testImageData',
-        isOnline: true
+        imageData: 'testImageData'
       },
       instances: [{
         instanceId: instanceId,
@@ -64,27 +63,28 @@ describe('UI.UserInterface', () => {
         user: {
           userId: 'testUserId',
           name: 'Alice',
-          imageData: 'testImageData',
-          isOnline: true
+          imageData: 'testImageData'
         },
-        instances: []
+        instances: [{
+          instanceId: 'instance1',
+          description: 'description1',
+          consent: new Consent.State(),
+          access: {asClient: false, asProxy: false},
+          isOnline: true,
+          bytesSent: 0,
+          bytesReceived: 0
+        }]
       };
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
-      expect(model.contacts.getAccessContacts.onlineNonUproxy.length).toEqual(1);
-      expect(model.contacts.getAccessContacts.onlineNonUproxy[0]).toEqual(user);
-      expect(model.contacts.getAccessContacts.offlineNonUproxy.length).toEqual(0);
       expect(model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
       expect(model.contacts.getAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
       expect(model.contacts.getAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
-      expect(model.contacts.shareAccessContacts.onlineNonUproxy.length).toEqual(1);
-      expect(model.contacts.shareAccessContacts.onlineNonUproxy[0]).toEqual(user);
-      expect(model.contacts.shareAccessContacts.offlineNonUproxy.length).toEqual(0);
       expect(model.contacts.shareAccessContacts.onlineTrustedUproxy.length).toEqual(0);
       expect(model.contacts.shareAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(0);
+      expect(model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
       expect(model.contacts.shareAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
     });
 
@@ -121,8 +121,7 @@ describe('UI.UserInterface', () => {
         user: {
           userId: 'testUserId',
           name: 'Alice',
-          imageData: 'testImageData',
-          isOnline: true
+          imageData: 'testImageData'
         },
         instances: [clientInstance, serverInstance]
       };

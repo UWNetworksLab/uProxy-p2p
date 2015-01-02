@@ -16,7 +16,6 @@ module UI {
 
     public name            :string;
     public imageData       :string;
-    public isOnline        :boolean;
     public isGettingFromMe :boolean = false;
     public isSharingWithMe :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
@@ -41,46 +40,61 @@ module UI {
       }
       this.name = profile.name;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
-      this.isOnline = profile.isOnline;
     }
 
     // Returns two strings, where each matches an array name in model.contacts.
     // Does not use an enum because we need a string value, and typescript
     // enums evaluate to numbers.
     public getCategories = () : UI.UserCategories => {
-      var onlineOrOffline = this.isOnline ? 'online' : 'offline';
-      if (this.instances.length == 0) {
-        return {getTab: onlineOrOffline + 'NonUproxy',
-                shareTab: onlineOrOffline + 'NonUproxy'};
-      }
-
-      var categories = {getTab: onlineOrOffline + 'UntrustedUproxy',
-                        shareTab: onlineOrOffline + 'UntrustedUproxy'};
-
-      // Check if any instances have non-none consent state.
+      var isOnline = false;
+      var isTrustedForSharing = false;
+      var isTrustedForGetting = false;
+      var isPendingForSharing = false;
+      var isPendingForGetting = false;
       for (var i = 0; i < this.instances.length; ++i) {
-        // TODO: check these values / change after consent rewrite.
-
-        // Share tab.
-        if (this.instances[i].consent.remoteRequestsAccessFromLocal &&
-            !this.instances[i].consent.ignoringRemoteUserRequest &&
-            !this.instances[i].consent.localGrantsAccessToRemote) {
-          categories.shareTab = onlineOrOffline + 'Pending';
-        } else if (this.instances[i].consent.localGrantsAccessToRemote) {
-          categories.shareTab = onlineOrOffline + 'TrustedUproxy';
+        var instance = this.instances[i];
+        if (instance.isOnline) {
+          isOnline = true;
         }
-
+        // Share tab.
+        if (instance.consent.remoteRequestsAccessFromLocal &&
+            !instance.consent.ignoringRemoteUserRequest &&
+            !instance.consent.localGrantsAccessToRemote) {
+          isPendingForSharing = true;
+        }
+        if (instance.consent.localGrantsAccessToRemote) {
+          isTrustedForSharing = true;
+        }
         // Get tab.
-        if (this.instances[i].consent.remoteGrantsAccessToLocal &&
-            !this.instances[i].consent.ignoringRemoteUserOffer &&
-            !this.instances[i].consent.localRequestsAccessFromRemote) {
-          categories.getTab = onlineOrOffline + 'Pending';
-        } else if (this.instances[i].consent.localRequestsAccessFromRemote) {
-          categories.getTab = onlineOrOffline + 'TrustedUproxy';
+        if (instance.consent.remoteGrantsAccessToLocal &&
+            !instance.consent.ignoringRemoteUserOffer &&
+            !instance.consent.localRequestsAccessFromRemote) {
+          isPendingForGetting = true;
+        }
+        if (instance.consent.localRequestsAccessFromRemote) {
+          isTrustedForGetting = true;
         }
       }
 
-      return categories;
+      // Convert booleans into strings.
+      var isOnlineString = isOnline ? 'online' : 'offline';
+      var gettingTrustString = 'UntrustedUproxy';
+      if (isPendingForGetting) {
+        gettingTrustString = 'Pending';
+      } else if (isTrustedForGetting) {
+        gettingTrustString = 'TrustedUproxy';
+      }
+      var sharingTrustString = 'UntrustedUproxy';
+      if (isPendingForSharing) {
+        sharingTrustString = 'Pending';
+      } else if (isTrustedForSharing) {
+        sharingTrustString = 'TrustedUproxy';
+      }
+
+      return {
+        getTab: isOnlineString + gettingTrustString,
+        shareTab: isOnlineString + sharingTrustString
+      };
     }
 
     public updateInstanceDescriptions = () => {

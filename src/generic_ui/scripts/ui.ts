@@ -23,9 +23,7 @@ var model :UI.Model = {
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
+      'offlineUntrustedUproxy': []
     },
     'shareAccessContacts': {
       'onlinePending': [],
@@ -33,9 +31,7 @@ var model :UI.Model = {
       'onlineTrustedUproxy': [],
       'offlineTrustedUproxy': [],
       'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': [],
-      'onlineNonUproxy': [],
-      'offlineNonUproxy': []
+      'offlineUntrustedUproxy': []
     }
   },
   globalSettings: {
@@ -61,8 +57,6 @@ module UI {
       offlineTrustedUproxy :UI.User[];
       onlineUntrustedUproxy :UI.User[];
       offlineUntrustedUproxy :UI.User[];
-      onlineNonUproxy :UI.User[];
-      offlineNonUproxy :UI.User[];
     };
     shareAccessContacts : {
       onlinePending :UI.User[];
@@ -71,8 +65,6 @@ module UI {
       offlineTrustedUproxy :UI.User[];
       onlineUntrustedUproxy :UI.User[];
       offlineUntrustedUproxy :UI.User[];
-      onlineNonUproxy :UI.User[];
-      offlineNonUproxy :UI.User[];
     }
   }
 
@@ -420,6 +412,10 @@ module UI {
         // get an update for the user when the peerconnection has closed - in
         // this case the user should already have been removed from the roster
         // in the UI and stay removed.
+        return;
+      } else if (payload.instances.length === 0) {
+        // Core should not send the UI any Users without instances.
+        console.error('Received User with no instances', payload);
         return;
       }
 
