@@ -10,6 +10,64 @@ import Handler = require('../handler/queue');
 
 import DataChannel = DataChannels.DataChannel;
 
+export enum State {
+  WAITING,      // Can move to CONNECTING.
+  CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
+  CONNECTED,    // Can move to DISCONNECTED.
+  DISCONNECTED  // End-state, cannot change.
+}
+
+export interface PeerConnection<TSignallingMessage> {
+  // The state of this peer connection.
+  pcState :State;
+
+  // All open data channels.
+  // NOTE: There exists a bug in Chrome prior to version 37 which causes
+  //       entries in this object to continue to exist even after
+  //       the remote peer has closed a data channel.
+  dataChannels     :{[channelLabel:string] : DataChannel};
+
+  // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
+  // i.e. when either |handleSignalMessage| is called with an offer message,
+  // or when |negotiateConnection| is called. The promise is never be rejected
+  // and is guarenteed to fulfilled before |onceConnected|.
+  onceConnecting  :Promise<void>;
+  // The |onceConnected| promise is fulfilled when pcState === CONNECTED
+  onceConnected :Promise<void>;
+  // The |onceDisconnected| promise is fulfilled when pcState === DISCONNECTED
+  onceDisconnected :Promise<void>;
+
+  // Try to connect to the peer. Will change state from |WAITING| to
+  // |CONNECTING|. If there was an error, promise is rejected. Otherwise
+  // returned promise === |onceConnected|.
+  negotiateConnection :() => Promise<void>;
+
+  // A peer connection can either open a data channel to the peer (will
+  // change from |WAITING| state to |CONNECTING|)
+  openDataChannel :(channelLabel: string,
+      options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
+      Promise<DataChannel>;
+  // Or handle data channels opened by the peer (these events will )
+  peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
+
+  // The |handleSignalMessage| function should be called with signalling
+  // messages from the remote peer.
+  handleSignalMessage :(signal:TSignallingMessage) => void;
+  // The underlying handler that holds/handles signals intended to go to the
+  // remote peer. A handler should be set that sends messages to the remote
+  // peer.
+  signalForPeerQueue :Handler.Queue<TSignallingMessage, void>;
+
+  // Closing the peer connection will close all associated data channels
+  // and set |pcState| to |DISCONNECTED| (and hence fulfills
+  // |onceDisconnected|)
+  close: () => void;
+
+  // Helpful for debugging
+  toString: () => string;
+  peerName :string;
+}
+
 // DataPeer - a class that wraps peer connections and data channels.
 //
 // This class assumes WebRTC is available; this is provided by freedom.js.
@@ -34,6 +92,12 @@ export interface SignallingMessage {
   description   ?:freedom_RTCPeerConnection.RTCSessionDescription;
 }
 
+export function createPeerConnection(
+      config:PeerConnectionConfig)
+    : PeerConnection<SignallingMessage> {
+  return new PeerConnectionClass(config);
+}
+
 // Possible candidate types, e.g. RELAY if a host is only accessible
 // via a TURN server. The values are taken from this file; as the comment
 // suggests, not all values may be found in practice:
@@ -45,13 +109,6 @@ export interface Endpoint {
   address:string; // IPv4, IPv6, or domain name.
   port:number;
 }
-
-export enum State {
-  WAITING,      // Can move to CONNECTING.
-  CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
-  CONNECTED,    // Can move to DISCONNECTED.
-  DISCONNECTED  // End-state, cannot change.
-};
 
 // Quick port of djb2 for comparison of SDP headers to choose initiator.
 export var stringHash = (s:string) : number => {
@@ -67,7 +124,7 @@ var log :Logging.Log = new Logging.Log('PeerConnection');
 
 // Global listing of active peer connections. Helpful for debugging when you
 // are in Freedom.
-export var peerConnections :{ [name:string] : PeerConnection } = {};
+export var peerConnections :{ [name:string] : PeerConnection<SignallingMessage> } = {};
 
 // A wrapper for peer-connection and it's associated data channels.
 // The most important diagram is this one:
@@ -103,7 +160,7 @@ export var peerConnections :{ [name:string] : PeerConnection } = {};
 //   3. (callback) -> controlDataChannel.onceOpened
 //      3.1. completeConnection_ -> pc_.getStats
 //      3.3. [Fulfill onceConnected]
-export class PeerConnection {
+export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
 
   // Name for debugging.
   public peerName     :string;
@@ -339,7 +396,7 @@ export class PeerConnection {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.openDataChannel(PeerConnection.CONTROL_CHANNEL_LABEL)
+    return this.openDataChannel(PeerConnectionClass.CONTROL_CHANNEL_LABEL)
         .then(this.registerControlChannel_)
         .then(() => {
           return this.onceConnected;
@@ -501,7 +558,7 @@ export class PeerConnection {
       log.debug(this.peerName + ': onPeerStartedDataChannel');
       this.addRtcDataChannel_(channelInfo.channel).then((dc:DataChannel) => {
         var label :string = dc.getLabel();
-        if (label === PeerConnection.CONTROL_CHANNEL_LABEL) {
+        if (label === PeerConnectionClass.CONTROL_CHANNEL_LABEL) {
           // If the peer has started the control channel, register it
           // as this user's control channel as well.
           this.registerControlChannel_(dc);
@@ -548,4 +605,4 @@ export class PeerConnection {
     s += '}';
     return s;
   }
-}  // class PeerConnection
+}  // class PeerConnectionClass
