@@ -47,7 +47,7 @@ module Core {
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
     public access      :AccessState = {
-      localGettingFromRemote:  GettingState.NONE,
+      localGettingFromRemote: GettingState.NONE,
       localSharingWithRemote: SharingState.NONE
     };
     private transport  :Transport;

@@ -335,8 +335,8 @@ class uProxyCore implements uProxy.CoreAPI {
       // remote.start will send an update to the UI.
       return endpoint;
     }).catch((e) => {
-      console.error('Error starting proxy: ', e);
       remoteProxyInstance = null;
+      return Promise.reject('Error starting proxy');
     });
   }
 
