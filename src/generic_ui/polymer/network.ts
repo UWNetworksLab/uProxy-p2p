@@ -3,7 +3,7 @@
 /// <reference path='../scripts/ui.ts' />
 
 declare var ui :UI.UserInterface;
-declare var core :uProxy.CoreAPI;
+declare var core :CoreConnector;
 
 Polymer({
   isLoggingIn: false,

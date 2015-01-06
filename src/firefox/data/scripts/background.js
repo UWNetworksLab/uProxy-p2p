@@ -14,3 +14,5 @@ function initUI() {
 if (undefined === ui) {
     ui = initUI();
 }
+
+var browser = 'firefox';

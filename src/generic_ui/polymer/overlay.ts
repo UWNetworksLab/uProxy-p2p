@@ -1,7 +1,7 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../../uproxy.ts' />
+/// <reference path='../scripts/core_connector.ts' />
 
-declare var core :uProxy.CoreAPI;
+declare var core :CoreConnector;
 
 Polymer({
   model: model,

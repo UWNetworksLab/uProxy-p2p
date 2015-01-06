@@ -1,5 +1,6 @@
 Polymer({
   model: model,
+  browser: browser,
   DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
                          {urls: ['stun:stun1.l.google.com:19302']},
                          {urls: ['stun:stun2.l.google.com:19302']},
@@ -12,6 +13,9 @@ Polymer({
       ui.view = UI.View.SPLASH;
       ui.setOfflineIcon();
     });
+  },
+  restart: function() {
+    core.restart();
   },
   toggleAdvancedSettings: function() {
     this.displayAdvancedSettings = !this.displayAdvancedSettings;

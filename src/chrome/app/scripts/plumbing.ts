@@ -100,6 +100,9 @@ class ChromeUIConnector {
       if (msg.type == uProxy.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
       }
+      if (msg.type == uProxy.Command.RESTART) {
+        chrome.runtime.reload();
+      }
       uProxyAppChannel.emit(msgType,
                             <uProxy.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
 

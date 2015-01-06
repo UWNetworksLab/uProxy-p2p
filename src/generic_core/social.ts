@@ -138,15 +138,48 @@ module Social {
         this.myInstance = new Core.LocalInstance(this, userId);
         this.log('generating new local instance: ' +
                  this.myInstance.instanceId);
-        return this.myInstance.prepare().then(() => {
-            return storage.save<Instance>(key, this.myInstance.currentState());
-          }).then((prev) => {
-            this.log('saved new local instance to storage');
-          });
+        return storage.save<Instance>(key, this.myInstance.currentState());
       });
     }
 
     //===================== Social.Network implementation ====================//
+
+    /**
+     * Adds a new user to the roster.  Promise will be rejected if the user is
+     * already in the roster.
+     */
+    protected addUser_ = (userId :string) : Promise<Core.User> => {
+      if (!this.isNewFriend_(userId)) {
+        return Promise.reject(this.name + ': cannot add already existing user!');
+      }
+      return Core.User.create(this, userId).then((newUser) => {
+        this.log('added "' + userId + '" to roster.');
+        this.roster[userId] = newUser;
+        return newUser;
+      });
+    }
+
+    /**
+     * Returns a User object for userId.  If the userId is not found in the
+     * roster, a new User object will be created - in that case the User may
+     * be missing fields like .name if it is not found in storage.
+     */
+    protected getOrAddUser_ = (userId :string) : Promise<Core.User> => {
+      if (this.isNewFriend_(userId)) {
+        return this.addUser_(userId);
+      }
+      return Promise.resolve(this.getUser(userId));
+    }
+
+    /**
+     * Helper to determine if |userId| is a "new friend" to be added to the
+     * roster, and also isn't just our own userId, since we can receive XMPP
+     * messages for ourself too.
+     */
+    protected isNewFriend_ = (userId :string) : boolean => {
+      return !(this.myInstance && this.myInstance.userId == userId) &&
+             !(userId in this.roster);
+    }
 
     public getLocalInstance = () : Core.LocalInstance => {
       return this.myInstance;
@@ -177,7 +210,6 @@ module Social {
          consent: consent
         }
       };
-
       return this.send(clientId, handshake).then(() => {
         this.log('Sent instance handshake to ' + clientId);
       });
@@ -294,7 +326,8 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile) => {
+    public handleUserProfile = (profile :freedom_Social.UserProfile)
+        : Promise<void> => {
       var userId = profile.userId;
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
@@ -314,15 +347,14 @@ module Social {
           user:    userProfileMessage
         });
 
-        return;
+        return Promise.resolve<void>();
       }
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
       this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
-      if (!(userId in this.roster)) {
-        this.addUser_(userId);
-      }
-      this.getUser(userId).update(profile);
+      return this.getOrAddUser_(userId).then((user) => {
+        user.update(profile);
+      });
     }
 
     /**
@@ -338,7 +370,7 @@ module Social {
      * Public to permit testing.
      */
     public handleClientState = (freedomClient :freedom_Social.ClientState)
-        : void => {
+        : Promise<void> => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
       if (client.userId == this.myInstance.userId) {
@@ -350,14 +382,11 @@ module Social {
           core.logout({name: this.name, userId: this.myInstance.userId});
         }
         this.log('received own ClientState: ' + JSON.stringify(client));
-        return;
+        return Promise.resolve<void>();
       }
-      if (this.isNewFriend_(client.userId)) {
-        this.log('received ClientState for ' + client.userId +
-                 ' before UserProfile.');
-        this.addUser_(client.userId);
-      }
-      this.getUser(client.userId).handleClient(client);
+      return this.getOrAddUser_(client.userId).then((user) => {
+        user.handleClient(client);
+      });
     }
 
     /**
@@ -371,57 +400,35 @@ module Social {
      * Public to permit testing.
      */
     public handleMessage = (incoming :freedom_Social.IncomingMessage)
-        : void => {
+        : Promise<void> => {
       var userId = incoming.from.userId;
-      if (this.isNewFriend_(userId)) {
-        this.log('received Message for ' + userId + ' before UserProfile.');
-        this.addUser_(userId);
-      }
       var msg :uProxy.Message = JSON.parse(incoming.message);
       this.log('received <------ ' + incoming.message);
-      this.getUser(userId).handleMessage(incoming.from.clientId, msg);
-    }
-
-    /**
-     * Sometimes Network receives messages or ClientStates for userIds for which
-     * we've yet to receive a UserProfile. In any case, we can begin with an
-     * inital user.
-     *
-     * Assumes that |userId| is in fact a new user. (There will be a problem if
-     * it overwrites an existing user in the roster.)
-     */
-    private addUser_ = (userId :string) => {
-      if (!this.isNewFriend_(userId)) {
-        this.error(this.name + ': cannot add already existing user!');
-        return;
-      }
-      this.log('added "' + userId + '" to roster.');
-      this.roster[userId] = new Core.User(this, userId);
-      // Remember the new user.
-    }
-
-    /**
-     * Helper to determine if |userId| is a "new friend" to be added to the
-     * roster, and also isn't just our own userId, since we can receive XMPP
-     * messages for ourself too.
-     */
-    private isNewFriend_ = (userId :string) : boolean => {
-      return !(userId == this.myInstance.userId) &&
-             !(userId in this.roster);
+      return this.getOrAddUser_(userId).then((user) => {
+        if (!user.clientIdToStatusMap[incoming.from.clientId]) {
+          // Add client.
+          var client :UProxyClient.State =
+            freedomClientToUproxyClient(incoming.from);
+          user.handleClient(client);
+        }
+        return user.handleMessage(incoming.from.clientId, msg);
+      });
     }
 
     public restoreFromStorage() {
       // xmpp is weird, so we need to do this.
-      storage.keys().then((keys :string[]) => {
+      return storage.keys().then((keys :string[]) => {
+        var allAddUserPromises = [];
         var myKey = this.getStorePath();
         for (var i in keys) {
           if (keys[i].indexOf(myKey) === 0) {
             var userId = keys[i].substr(myKey.length);
             if (this.isNewFriend_(userId)) {
-              this.addUser_(userId);
+              allAddUserPromises.push(this.addUser_(userId));
             }
           }
         }
+        return Promise.all(allAddUserPromises);
       });
     }
 
@@ -455,15 +462,16 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(() => {
-            this.restoreFromStorage();
+            return this.restoreFromStorage();
+          }).then(() => {
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
           })
-          .catch(() => {
+          .catch((e) => {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
             ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again.');
+                         '. Please try again. ' + JSON.stringify(e));
             return Promise.reject(new Error('Could not login.'));
           });
     }
@@ -576,7 +584,7 @@ module Social {
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :uProxy.Message) : void => {
+                      message :uProxy.Message) : Promise<void> => {
       this.log('Manual network received incoming message; senderClientId=[' +
                senderClientId + '], message=' + JSON.stringify(message));
 
@@ -584,11 +592,13 @@ module Social {
       // sender client ID doubles as the sender user ID.
       var senderUserId = senderClientId;
 
-      if (!(senderUserId in this.roster)) {
-        this.roster[senderUserId] = new Core.User(this, senderUserId);
-      }
-
-      this.getUser(senderUserId).handleMessage(senderUserId, message);
+      return this.getOrAddUser_(senderUserId).then((user) => {
+        // Hack so that handleMessage treats this client as online and doesn't
+        // reject.
+        // TODO: refactor manual network to have its own client messages.
+        user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
+        return user.handleMessage(senderUserId, message);
+      });
     }
 
   }  // class ManualNetwork

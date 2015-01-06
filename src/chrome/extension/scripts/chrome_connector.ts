@@ -259,4 +259,13 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
     return port;
   }
 
+  public restart() {
+    var restart :uProxy.Payload = {
+      cmd: 'emit',
+      type: uProxy.Command.RESTART,
+      promiseId: 0
+    }
+    this.send(restart);
+    chrome.runtime.reload();
+  }
 }  // class ChromeConnector

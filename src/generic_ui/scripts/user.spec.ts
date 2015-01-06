@@ -8,7 +8,6 @@ describe('UI.User', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
   function getInstance(id :string, description :string) {
