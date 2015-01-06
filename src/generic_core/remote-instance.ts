@@ -46,10 +46,8 @@ module Core {
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
-    public access      :AccessState = {
-      localGettingFromRemote: GettingState.NONE,
-      localSharingWithRemote: SharingState.NONE
-    };
+    public localGettingFromRemote = GettingState.NONE;
+    public localSharingWithRemote = SharingState.NONE;
     private transport  :Transport;
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
     // scheduled to run in the next second.
@@ -189,7 +187,7 @@ module Core {
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
               console.log('rtcToNet_.onceClosed called');
-              this.access.localSharingWithRemote = SharingState.NONE;
+              this.localSharingWithRemote = SharingState.NONE;
               ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
               this.rtcToNet_ = null;
               this.bytesSent = 0;
@@ -220,7 +218,7 @@ module Core {
               this.updateBytesInUI();
             });
             this.rtcToNet_.onceReady.then(() => {
-              this.access.localSharingWithRemote = SharingState.SHARING_ACCESS;
+              this.localSharingWithRemote = SharingState.SHARING_ACCESS;
               ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
               this.user.notifyUI();
             }).catch((e) => {
@@ -260,7 +258,7 @@ module Core {
       if (!this.consent.remoteGrantsAccessToLocal) {
         console.warn('Lacking permission to proxy!');
         return Promise.reject('Lacking permission to proxy!');
-      } else if (this.access.localGettingFromRemote !== GettingState.NONE) {
+      } else if (this.localGettingFromRemote !== GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
@@ -310,12 +308,16 @@ module Core {
         // If there is an error when trying to start proxying, and a stopped
         // event is fired, an error will be displayed as a result of the start
         // promise rejecting.
+        // TODO: consider removing error field from STOP_GETTING_FROM_FRIEND
+        // The UI should know whether it was a user-initiated stopped event
+        // or not (based on whether they clicked stop/logout, or based on
+        // whether the browser's proxy was set).
         var isError =
-            this.access.localGettingFromRemote == GettingState.GETTING_ACCESS;
+            this.localGettingFromRemote == GettingState.GETTING_ACCESS;
         ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
                   {instanceId: this.instanceId, error: isError});
 
-        this.access.localGettingFromRemote = GettingState.NONE;
+        this.localGettingFromRemote = GettingState.NONE;
         this.bytesSent = 0;
         this.bytesReceived = 0;
         this.user.notifyUI();
@@ -326,7 +328,7 @@ module Core {
       });
 
       // Set flag to indicate that we are currently trying to get access
-      this.access.localGettingFromRemote = GettingState.TRYING_TO_GET_ACCESS;
+      this.localGettingFromRemote = GettingState.TRYING_TO_GET_ACCESS;
       this.user.notifyUI();
 
       return this.socksToRtc_.start(
@@ -334,7 +336,7 @@ module Core {
           this.socksRtcPcConfig)
         .then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
-          this.access.localGettingFromRemote = GettingState.GETTING_ACCESS;
+          this.localGettingFromRemote = GettingState.GETTING_ACCESS;
           this.user.notifyUI();
           return endpoint;
         }).catch((e:Error) => {
@@ -343,13 +345,13 @@ module Core {
           // event should still be emitted, and all cleanup can happen there.
           console.warn('Could not start proxy through ' + this.user.userId +
               '; ' + e.toString());
-          this.access.localGettingFromRemote = GettingState.NONE;
+          this.localGettingFromRemote = GettingState.NONE;
           return Promise.reject('Could not start proxy');
         });
     }
 
     public updateClientProxyConnection = (isConnected :boolean) => {
-      this.access.localSharingWithRemote =
+      this.localSharingWithRemote =
           isConnected ? SharingState.SHARING_ACCESS : SharingState.NONE;
       this.user.notifyUI();
     }
@@ -358,11 +360,11 @@ module Core {
      * Stop using this remote instance as a proxy server.
      */
     public stop = () : void => {
-      if (this.access.localGettingFromRemote === GettingState.NONE) {
+      if (this.localGettingFromRemote === GettingState.NONE) {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
-      this.access.localGettingFromRemote = GettingState.NONE;
+      this.localGettingFromRemote = GettingState.NONE;
       this.socksToRtc_.stop();
     }
 
@@ -396,7 +398,7 @@ module Core {
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
       if (Consent.UserAction.CANCEL_OFFER === action &&
-          this.access.localSharingWithRemote == SharingState.SHARING_ACCESS) {
+          this.localSharingWithRemote == SharingState.SHARING_ACCESS) {
         this.rtcToNet_.close();
       }
       // Send new consent bits to the remote client, and save to storage.
@@ -529,14 +531,15 @@ module Core {
      */
     public currentStateForUi = () :UI.Instance => {
       return cloneDeep({
-        instanceId:           this.instanceId,
-        description:          this.description,
-        keyHash:              this.keyHash,
-        consent:              this.consent,
-        access:               this.access,
-        isOnline:             this.user.isInstanceOnline(this.instanceId),
-        bytesSent:            this.bytesSent,
-        bytesReceived:        this.bytesReceived
+        instanceId:             this.instanceId,
+        description:            this.description,
+        keyHash:                this.keyHash,
+        consent:                this.consent,
+        localGettingFromRemote: this.localGettingFromRemote,
+        localSharingWithRemote: this.localSharingWithRemote,
+        isOnline:               this.user.isInstanceOnline(this.instanceId),
+        bytesSent:              this.bytesSent,
+        bytesReceived:          this.bytesReceived
       });
     }
 

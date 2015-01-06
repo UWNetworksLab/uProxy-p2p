@@ -33,7 +33,7 @@ function generateFakeUserMessage() :UI.UserMessage {
         isOnline: true,
         consent: new Consent.State(),
         access: {
-          localSharingWithRemote: LocalSharingWithRemote.NONE,
+          localSharingWithRemote: SharingState.NONE,
           localGettingFromRemote: GettingState.NONE
         },
         bytesSent: 0,

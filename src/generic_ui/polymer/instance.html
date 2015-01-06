@@ -57,7 +57,7 @@
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal ) }}'>
         <!-- not getting or trying to get access -->
-        <div hidden?='{{ instance.access.localGettingFromRemote != GettingState.NONE }}'>
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
           <p class='highlighted'>
             <img src='../icons/checkmark.png'> {{user.name || user.userId }} has granted you access
           </p>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- trying to get access -->
-        <div hidden?='{{ instance.access.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
           <p class='preButtonText'>
             <img src='../icons/clock.png' class='clock'> Trying to get access from {{user.name || user.userId }}
           </p>
@@ -77,7 +77,7 @@
         </div>
 
         <!-- currently getting access -->
-        <div hidden?='{{ instance.access.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
           <paper-button raised on-tap='{{ stop }}'>
             Stop getting access
           </paper-button>

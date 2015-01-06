@@ -269,7 +269,3 @@ enum SharingState {
   NONE = 200,
   SHARING_ACCESS
 };
-interface AccessState {
-  localGettingFromRemote :GettingState;
-  localSharingWithRemote :SharingState;
-}
