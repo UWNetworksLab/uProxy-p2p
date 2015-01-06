@@ -42,7 +42,7 @@
     p.askingText {
       margin-bottom: 0;
     }
-    p.askingText img {
+    img.clock {
       vertical-align: bottom;
     }
     </style>
@@ -56,20 +56,36 @@
     <div id='getControls' hidden?='{{ui.mode!=UI.Mode.GET}}'>
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <p class='highlighted'>
-          <img src='../icons/checkmark.png'> {{user.name || user.userId }} has granted you access
-        </p>
-        <paper-button class='highlightedButton' raised
-            hidden?='{{ instance.access.asProxy }}' on-tap='{{ start }}'>
-          Start getting access
-        </paper-button>
-        <paper-button raised hidden?='{{ !instance.access.asProxy }}' on-tap='{{ stop }}'>
-          Stop getting access
-        </paper-button>
+        <!-- not getting or trying to get access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.NONE }}'>
+          <p class='highlighted'>
+            <img src='../icons/checkmark.png'> {{user.name || user.userId }} has granted you access
+          </p>
+          <paper-button class='highlightedButton' raised on-tap='{{ start }}'>
+            Start getting access
+          </paper-button>
+        </div>
+
+        <!-- trying to get access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
+          <p class='preButtonText'>
+            <img src='../icons/clock.png' class='clock'> Trying to get access from {{user.name || user.userId }}
+          </p>
+          <paper-button raised on-tap='{{ stop }}'>
+            Cancel
+          </paper-button>
+        </div>
+
+        <!-- currently getting access -->
+        <div hidden?='{{ instance.localGettingFromRemote != GettingState.GETTING_ACCESS }}'>
+          <paper-button raised on-tap='{{ stop }}'>
+            Stop getting access
+          </paper-button>
+        </div>
       </div>
 
       <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && !getConsentState().remoteGrantsAccessToLocal ) }}'>
-        <p class='preButtonText askingText'><img src='../icons/clock.png'> Asking for access</p>
+        <p class='preButtonText askingText'><img src='../icons/clock.png' class='clock'> Asking for access</p>
         <p class='preButtonText'>You will be able to get access when they accept.</p>
         <paper-button raised on-tap='{{ cancelRequest }}'>Cancel Request</paper-button>
       </div>

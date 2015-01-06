@@ -432,35 +432,38 @@ describe('Core.RemoteInstance', () => {
     };
 
     it('can start proxying', (done) => {
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
       alice.consent.localRequestsAccessFromRemote = true;
       alice.consent.remoteGrantsAccessToLocal = true;
       // The module & constructor of SocksToRtc may change in the near future.
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
-        expect(alice.access.asProxy).toEqual(true);
+        expect(alice.localGettingFromRemote)
+            .toEqual(GettingState.GETTING_ACCESS);
         done();
       });
       expect(SocksToRtc.SocksToRtc).toHaveBeenCalled();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote)
+          .toEqual(GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('can stop proxying', () => {
       alice.stop();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
     it('refuses to start proxy without permission', () => {
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.consent = new Consent.State();
-      alice.access.asProxy = false;
+      alice.localGettingFromRemote = GettingState.NONE;
       alice.start();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
     it('does not stop proxying when already stopped', () => {
       alice.stop();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
   });  // describe proxying
