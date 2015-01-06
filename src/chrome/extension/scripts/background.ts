@@ -31,6 +31,14 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
+chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+        if (request) {
+          sendResponse({message: "Extension installed."});
+        }
+        return true;
+    });
+
 // Launch the Chrome webstore page for the uProxy app.
 function openDownloadAppPage() : void {
   chrome.tabs.create(
