@@ -1,4 +1,4 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 // Note: until bug https://github.com/Microsoft/TypeScript/issues/52 we cannot
 // have multiple declare statements for the freedom module in different files.

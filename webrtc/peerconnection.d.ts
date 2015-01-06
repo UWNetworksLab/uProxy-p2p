@@ -41,7 +41,7 @@ declare module WebRtc {
     DISCONNECTED  // End-state, cannot change.
   }
 
-  interface PeerConnectionInterface<TSignallingMessage> {
+  interface PeerConnection<TSignallingMessage> {
     // The state of this peer connection.
     pcState :State;
 
@@ -92,31 +92,8 @@ declare module WebRtc {
     peerName :string;
   }
 
-  class PeerConnection implements PeerConnectionInterface<SignallingMessage> {
-    constructor(config:PeerConnectionConfig);
-
-    public pcState :State;
-    public dataChannels     :{[channelLabel:string] : DataChannel};
-
-    public onceConnecting  :Promise<void>;
-    public onceConnected :Promise<void>;
-    public onceDisconnected :Promise<void>;
-
-    public negotiateConnection :() => Promise<void>;
-
-    public openDataChannel :(channelLabel: string,
-                             options?: freedom_RTCPeerConnection.RTCDataChannelInit) => Promise<DataChannel>;
-
-    public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
-
-    public handleSignalMessage :(signal:SignallingMessage) => void;
-    public signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
-
-    public close: () => void;
-
-    public toString: () => string;
-    public peerName :string;
-  }
+  function CreatePeerConnection(config:PeerConnectionConfig)
+    : PeerConnection<SignallingMessage>;
 
   // Generic helper functions useful for debugging.
   var stringHash :(s: string, bytes: number) => string;

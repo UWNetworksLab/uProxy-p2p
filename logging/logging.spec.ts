@@ -1,5 +1,6 @@
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path="logging.d.ts" />
+/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+
+import Logging = require('logging');
 
 describe("logger from core environment", () => {
   var log1 = new Logging.Log('tag1');
