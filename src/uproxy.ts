@@ -256,3 +256,20 @@ interface OAuthInfo {
   url :string;
   redirect :string
 }
+
+
+// Describing whether or not a remote instance is currently accessing or not,
+// assuming consent is GRANTED for that particular pathway.
+enum GettingState {
+  NONE = 100,
+  TRYING_TO_GET_ACCESS,
+  GETTING_ACCESS
+};
+enum SharingState {
+  NONE = 200,
+  SHARING_ACCESS
+};
+interface AccessState {
+  localGettingFromRemote :GettingState;
+  localSharingWithRemote :SharingState;
+}

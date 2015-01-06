@@ -328,11 +328,15 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(err);
       return Promise.reject(err);
     }
-    // remote.start will send an update to the UI.
+    // Remember this instance as our proxy.  Set this before start fulfills
+    // in case the user decides to cancel the proxy before it begins.
+    remoteProxyInstance = remote;
     return remote.start().then((endpoint:Net.Endpoint) => {
-      // Remember this instance as our proxy.
-      remoteProxyInstance = remote;
+      // remote.start will send an update to the UI.
       return endpoint;
+    }).catch((e) => {
+      console.error('Error starting proxy: ', e);
+      remoteProxyInstance = null;
     });
   }
 

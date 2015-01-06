@@ -47,8 +47,8 @@ module Core {
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
     public access      :AccessState = {
-      asClient: false,
-      asProxy:  false
+      localGettingFromRemote:  GettingState.NONE,
+      localSharingWithRemote: SharingState.NONE
     };
     private transport  :Transport;
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
@@ -189,7 +189,7 @@ module Core {
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
               console.log('rtcToNet_.onceClosed called');
-              this.access.asClient = false;
+              this.access.localSharingWithRemote = SharingState.NONE;
               ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
               this.rtcToNet_ = null;
               this.bytesSent = 0;
@@ -220,9 +220,12 @@ module Core {
               this.updateBytesInUI();
             });
             this.rtcToNet_.onceReady.then(() => {
-              this.access.asClient = true;
+              this.access.localSharingWithRemote = SharingState.SHARING_ACCESS;
               ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
               this.user.notifyUI();
+            }).catch((e) => {
+              console.error('error start rtcToNet: ', e);
+              this.rtcToNet_ = null;
             });
           }
           // TODO: signalFromRemote needs to get converted into a
@@ -257,7 +260,7 @@ module Core {
       if (!this.consent.remoteGrantsAccessToLocal) {
         console.warn('Lacking permission to proxy!');
         return Promise.reject('Lacking permission to proxy!');
-      } else if (this.access.asProxy) {
+      } else if (this.access.localGettingFromRemote !== GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         console.warn('Already proxying through ' + this.instanceId);
@@ -278,6 +281,7 @@ module Core {
           address: '127.0.0.1',
           port: 0
       }
+
       this.socksToRtc_ = new SocksToRtc.SocksToRtc();
       this.socksToRtc_.on('signalForPeer', (signal) => {
         this.send({
@@ -285,6 +289,7 @@ module Core {
           data: signal
         });
       });
+
       // When bytes are sent to or received through the proxy, notify the
       // UI about the increase in data exchanged. Increment the bytes
       // sent/received variables in real time, but use a timer to control
@@ -297,57 +302,68 @@ module Core {
         this.bytesSent += numBytes;
         this.updateBytesInUI();
       });
+
       this.socksToRtc_.on('stopped', () => {
         console.log('socksToRtc_.once(\'stopped\', ...) called');
+        // Stopped event is only considered an error if the user had been
+        // getting access and we hadn't called this.socksToRtc_.stop
+        // If there is an error when trying to start proxying, and a stopped
+        // event is fired, an error will be displayed as a result of the start
+        // promise rejecting.
+        var isError =
+            this.access.localGettingFromRemote == GettingState.GETTING_ACCESS;
         ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND,
-                  {instanceId: this.instanceId,
-                   error: this.access.asProxy});
-        this.access.asProxy = false;
+                  {instanceId: this.instanceId, error: isError});
+
+        this.access.localGettingFromRemote = GettingState.NONE;
         this.bytesSent = 0;
         this.bytesReceived = 0;
-        // TODO: notification to the user on remote-close?
         this.user.notifyUI();
         this.socksToRtc_ = null;
         // Update global remoteProxyInstance to indicate we are no longer
         // getting access.
         remoteProxyInstance = null;
       });
+
+      // Set flag to indicate that we are currently trying to get access
+      this.access.localGettingFromRemote = GettingState.TRYING_TO_GET_ACCESS;
+      this.user.notifyUI();
+
       return this.socksToRtc_.start(
           endpoint,
           this.socksRtcPcConfig)
         .then((endpoint:Net.Endpoint) => {
           console.log('Proxy now ready through ' + this.user.userId);
-          this.access.asProxy = true;
+          this.access.localGettingFromRemote = GettingState.GETTING_ACCESS;
           this.user.notifyUI();
           return endpoint;
-        })
-        // TODO: remove catch & error print: that should happen at the level
-        // above.
-        .catch((e:Error) => {
-          console.error('Could not start proxy through ' + this.user.userId +
+        }).catch((e:Error) => {
+          // This may not be an error if the user cancelled proxying
+          // before start had a chance to complete.  In that case a 'stopped'
+          // event should still be emitted, and all cleanup can happen there.
+          console.warn('Could not start proxy through ' + this.user.userId +
               '; ' + e.toString());
+          this.access.localGettingFromRemote = GettingState.NONE;
           return Promise.reject('Could not start proxy');
         });
     }
 
     public updateClientProxyConnection = (isConnected :boolean) => {
-      this.access.asClient = isConnected;
+      this.access.localSharingWithRemote =
+          isConnected ? SharingState.SHARING_ACCESS : SharingState.NONE;
       this.user.notifyUI();
     }
 
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () :void => {
-      if (!this.access.asProxy) {
+    public stop = () : void => {
+      if (this.access.localGettingFromRemote === GettingState.NONE) {
         console.warn('Cannot stop proxying when not proxying.');
         return;
       }
-      this.access.asProxy = false;
-
+      this.access.localGettingFromRemote = GettingState.NONE;
       this.socksToRtc_.stop();
-      // TODO: Remove the access.asProxy/asClient, maybe replace with getters
-      // once whether socksToRtc_ or rtcToNet_ objects are null means the same.
     }
 
     /**
@@ -379,7 +395,8 @@ module Core {
       }
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
-      if (Consent.UserAction.CANCEL_OFFER === action && this.access.asClient) {
+      if (Consent.UserAction.CANCEL_OFFER === action &&
+          this.access.localSharingWithRemote == SharingState.SHARING_ACCESS) {
         this.rtcToNet_.close();
       }
       // Send new consent bits to the remote client, and save to storage.

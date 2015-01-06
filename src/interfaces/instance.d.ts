@@ -20,12 +20,6 @@ interface ConsentMessage {
   consent    :Consent.WireState;
 }
 
-// Describing whether or not a remote instance is currently accessing or not,
-// assuming consent is GRANTED for that particular pathway.
-interface AccessState {
-  asClient :boolean;
-  asProxy  :boolean;
-}
 interface NetworkInfo {
   name :string;
   userId :string;
