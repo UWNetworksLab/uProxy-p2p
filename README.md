@@ -52,11 +52,6 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
-- [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
-
-    - This is assuming you have `ruby` and `rubygems` installed.
-
-
 ### Setup of uProxy codebase
 
 1. Clone uProxy and its submodules (and its submodules' submodules...):
