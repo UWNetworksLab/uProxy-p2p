@@ -23,8 +23,6 @@ Polymer({
     this.offlineTrustedUproxyContacts = this.contacts.offlineTrustedUproxy;
     this.onlineUntrustedUproxyContacts = this.contacts.onlineUntrustedUproxy;
     this.offlineUntrustedUproxyContacts = this.contacts.offlineUntrustedUproxy;
-    this.onlineNonUproxyContacts = this.contacts.onlineNonUproxy;
-    this.offlineNonUproxyContacts = this.contacts.offlineNonUproxy;
   },
   searchQuery: ''
 });

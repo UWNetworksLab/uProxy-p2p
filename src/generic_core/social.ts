@@ -339,8 +339,7 @@ module Social {
         var userProfileMessage :UI.UserProfileMessage = {
           userId: profile.userId,
           name: profile.name,
-          imageData: profile.imageData,
-          isOnline: true
+          imageData: profile.imageData
         };
         ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
           network: this.name,
@@ -373,6 +372,11 @@ module Social {
         : Promise<void> => {
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
+      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        // Ignore clients that aren't using uProxy.
+        return;
+      }
+
       if (client.userId == this.myInstance.userId) {
         // Log out if it's our own client id.
         // TODO: Consider adding myself to the roster.
@@ -384,6 +388,7 @@ module Social {
         this.log('received own ClientState: ' + JSON.stringify(client));
         return Promise.resolve<void>();
       }
+
       return this.getOrAddUser_(client.userId).then((user) => {
         user.handleClient(client);
       });
@@ -404,14 +409,20 @@ module Social {
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
       this.log('received <------ ' + incoming.message);
+
+      var client :UProxyClient.State =
+          freedomClientToUproxyClient(incoming.from);
+      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        // Ignore clients that aren't using uProxy.
+        return;
+      }
+
       return this.getOrAddUser_(userId).then((user) => {
-        if (!user.clientIdToStatusMap[incoming.from.clientId]) {
+        if (!user.clientIdToStatusMap[client.clientId]) {
           // Add client.
-          var client :UProxyClient.State =
-            freedomClientToUproxyClient(incoming.from);
           user.handleClient(client);
         }
-        return user.handleMessage(incoming.from.clientId, msg);
+        return user.handleMessage(client.clientId, msg);
       });
     }
 

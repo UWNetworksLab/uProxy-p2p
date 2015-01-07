@@ -20,13 +20,15 @@
 
     <template repeat='{{ c in onlineContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'
+          isOnline='{{ true }}'>
       </uproxy-contact>
     </template>
 
     <template repeat='{{ c in offlineContacts }}' vertical layout>
       <uproxy-contact contact='{{ c }}'
-          hidden?='{{ hideForSearch(c.name, searchQuery) }}'>
+          hidden?='{{ hideForSearch(c.name, searchQuery) }}'
+          isOnline='{{ false }}'>
       </uproxy-contact>
     </template>
 
