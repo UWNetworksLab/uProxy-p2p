@@ -80,16 +80,16 @@ declare module freedom_RTCPeerConnection {
     close() : Promise<void>;
 
     createDataChannel(label:string, init:RTCDataChannelInit) : Promise<string>;
-    on(t:'ondatachannel', f:(d:{channel:string}) => void) : void;
 
     getStats(selector?:string) : Promise<any>;
 
-    on(t:string, f:Function) : void;
+    on(t:'ondatachannel', f:(d:{channel:string}) => void) : void;
     on(t:'onnegotiationneeded', f:() => void) : void;
     on(t:'onicecandidate', f:(d:OnIceCandidateEvent) => void) : void;
     on(t:'onsignalingstatechange', f:() => void) : void;
     on(t:'onaddstream', f:(d:{stream:number}) => void) : void;
     on(t:'onremovestream', f:(d:{stream:number}) => void) : void;
     on(t:'oniceconnectionstatechange', f:() => void) : void;
+    on(t:string, f:Function) : void;
   }
 }
