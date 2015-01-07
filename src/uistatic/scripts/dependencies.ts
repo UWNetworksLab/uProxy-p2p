@@ -32,10 +32,8 @@ function generateFakeUserMessage() :UI.UserMessage {
         description: 'fake instance for alice',
         isOnline: true,
         consent: new Consent.State(),
-        access: {
-          localSharingWithRemote: SharingState.NONE,
-          localGettingFromRemote: GettingState.NONE
-        },
+        localSharingWithRemote: SharingState.NONE,
+        localGettingFromRemote: GettingState.NONE,
         bytesSent: 0,
         bytesReceived: 0
       }
