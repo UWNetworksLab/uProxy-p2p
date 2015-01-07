@@ -54,17 +54,11 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 ### Setup of uProxy codebase
 
-1. Clone uProxy and its submodules (and its submodules' submodules...):
-`git clone https://github.com/uProxy/uProxy.git`
-or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
+ 1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
-2. In the uProxy repository's root directory, run `bower install` to install any bower dependencies.
-
-3. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies,
-as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
+ 1. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies, as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update the dependencies.
-
 
 ### Building and installing and running for Chrome
 
