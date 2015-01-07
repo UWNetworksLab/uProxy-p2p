@@ -45,6 +45,8 @@ module UI {
     // Returns two strings, where each matches an array name in model.contacts.
     // Does not use an enum because we need a string value, and typescript
     // enums evaluate to numbers.
+    // CONSIDER: Avoid strings for values and string-param dependencies
+    // https://github.com/uProxy/uproxy/issues/769
     public getCategories = () : UI.UserCategories => {
       var isOnline = false;
       var isTrustedForSharing = false;
