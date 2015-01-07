@@ -25,6 +25,7 @@ module uProxy {
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
     GET_INITIAL_STATE = 1000,
+    RESTART,
     // Skip REFRESH and RESET commands that have been removed
     LOGIN = 1003,
     LOGOUT,
@@ -174,6 +175,8 @@ module uProxy {
 
     onUpdate(update :Update, handler :Function) : void;
 
+    restart() : void;
+
     status :StatusObject;
   }
 
@@ -253,3 +256,16 @@ interface OAuthInfo {
   url :string;
   redirect :string
 }
+
+
+// Describing whether or not a remote instance is currently accessing or not,
+// assuming consent is GRANTED for that particular pathway.
+enum GettingState {
+  NONE = 100,
+  TRYING_TO_GET_ACCESS,
+  GETTING_ACCESS
+};
+enum SharingState {
+  NONE = 200,
+  SHARING_ACCESS
+};

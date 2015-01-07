@@ -126,6 +126,7 @@
       </div>
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
       <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
+      <div class='actionLink' on-tap='{{restart}}' hidden?='{{browser!=="chrome"}}'>Restart</div>
     </div>
 
   </template>

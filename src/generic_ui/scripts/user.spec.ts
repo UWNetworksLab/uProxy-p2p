@@ -8,7 +8,6 @@ describe('UI.User', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
   function getInstance(id :string, description :string) {
@@ -16,7 +15,8 @@ describe('UI.User', () => {
       instanceId: id,
       description: description,
       consent: new Consent.State(),
-      access: {asClient: false, asProxy: false},
+      access: {localSharingWithRemote: SharingState.NONE,
+               localGettingFromRemote: GettingState.NONE},
       isOnline: true,
       bytesSent: 0,
       bytesReceived: 0

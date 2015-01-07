@@ -162,4 +162,8 @@ class CoreConnector implements uProxy.CoreAPI {
   logout = (networkInfo :NetworkInfo) : Promise<void> => {
     return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
+
+  restart = () => {
+    this.browserConnector_.restart();
+  }
 }  // class CoreConnector

@@ -21,12 +21,9 @@ var mockAppPort = () => {
   };
 };
 
-// Mock the global function that changes the URL launched when the
-// extension icon is clicked.
-setPopupUrl = () => {};
-
 // Mock UI.
 var ui :UI.UserInterface;
+var chromeBrowserApi :ChromeBrowserApi;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the chromeConnector object.
@@ -38,6 +35,9 @@ describe('core-connector', () => {
     'update',
     'syncUser',
     'showNotification']);
+  chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
+    ['updatePopupUrl',
+     'bringUproxyToFront']);
 
   var chromeConnector :ChromeConnector;
   chromeConnector = new ChromeConnector();
@@ -48,8 +48,6 @@ describe('core-connector', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
   });
 
   it('attempts chrome.runtime.connect().', () => {
