@@ -1,4 +1,5 @@
-/// <reference path='../../webrtc/peerconnection.d.ts' />
+import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
+import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
 
 // Freedom apps don't have direct access to the page so this
 // file mediates between the page's controls and the Freedom app.
@@ -38,7 +39,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
 
   // Stores the parsed messages for use later, if & when the user clicks the
   // button for consuming the messages.
-  var parsedInboundMessages :WebRtc.SignallingMessage[];
+  var parsedInboundMessages :SignallingMessage[];
 
   startPanel_answerLinkNode.onclick =
       function(event:MouseEvent) : any {
@@ -102,18 +103,18 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   // appropriate. Returns null if the field contents are malformed.
   function parseInboundMessages(inboundMessageField:HTMLInputElement,
                                 consumeMessageButton:HTMLElement)
-      : WebRtc.SignallingMessage[] {
+      : SignallingMessage[] {
     var signals :string[] = inboundMessageField.value.trim().split('\n');
 
-    // Each line should be a JSON representation of a WebRtc.SignallingMessage.
+    // Each line should be a JSON representation of a SignallingMessage.
     // Parse the lines here.
-    var parsedSignals :WebRtc.SignallingMessage[] = [];
+    var parsedSignals :SignallingMessage[] = [];
     for (var i = 0; i < signals.length; i++) {
       var s :string = signals[i].trim();
 
       // TODO: Consider detecting the error if the text is well-formed JSON but
-      // does not represent a WebRtc.SignallingMessage.
-      var signal :WebRtc.SignallingMessage;
+      // does not represent a SignallingMessage.
+      var signal :SignallingMessage;
       try {
         signal = JSON.parse(s);
       } catch (e) {
@@ -157,7 +158,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   //
   // TODO: Accumulate signalling messages until we have all of them, and only
   // then update the textarea.
-  copypaste.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
+  copypaste.on('signalForPeer', (signal:SignallingMessage) => {
     step2ContainerNode.style.display = 'block';
 
     outboundMessageNode.value =

@@ -1,9 +1,18 @@
-/// <reference path="../../webrtc/peerconnection.d.ts" />
-/// <reference path="../../logging/logging.d.ts" />
+import Logging = require('../logging/logging');
+
+import DataChannelInterfaces = require('../../webrtc/datachannel.i');
+import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
+import WebRtc = require('../../webrtc/webrtc');
+
+import PeerConnection = PeerConnectionInterfaces.PeerConnection;
+import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
+import DataChannel = DataChannelInterfaces.Channel;
+import Data = DataChannelInterfaces.Data;
+import PeerConnectionConfig = DataChannelInterfaces.PeerConnectionConfig;
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 
-var pcConfig :WebRtc.PeerConnectionConfig = {
+var pcConfig :PeerConnectionConfig = {
   webrtcPcConfig: {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                  {urls: ['stun:stun1.l.google.com:19302']}]
@@ -11,8 +20,8 @@ var pcConfig :WebRtc.PeerConnectionConfig = {
   peerName: 'pc'
 };
 
-function connectDataChannel(d:WebRtc.DataChannel) {
-  d.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
+function connectDataChannel(d:DataChannel) {
+  d.dataFromPeerQueue.setSyncHandler((data:Data) => {
     freedom().emit('messageFromPeer', data.str);
   });
 
@@ -23,10 +32,10 @@ function connectDataChannel(d:WebRtc.DataChannel) {
   });
 }
 
-function makePeerConnection() : WebRtc.PeerConnection {
-  var pc :WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
+function makePeerConnection() : PeerConnection {
+  var pc :PeerConnection = WebRtc.createPeerConnection(pcConfig);
 
-  pc.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
+  pc.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
     freedom().emit('signalForPeer', signal);
   });
 
@@ -34,7 +43,7 @@ function makePeerConnection() : WebRtc.PeerConnection {
     log.info('connected');
   });
 
-  pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
+  pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     if (d.getLabel() === 'text') {
       connectDataChannel(d);
       freedom().emit('ready');
@@ -44,7 +53,7 @@ function makePeerConnection() : WebRtc.PeerConnection {
   return pc;
 }
 
-var pc :WebRtc.PeerConnection;
+var pc :PeerConnection;
 
 freedom().on('start', () => {
   pc = makePeerConnection();
@@ -64,7 +73,7 @@ freedom().on('start', () => {
 // Receive signalling channel messages from the UI.
 // If pc doesn't exist yet then we are responding to the remote
 // peer's initiation.
-freedom().on('signalFromPeer', (signal:WebRtc.SignallingMessage) => {
+freedom().on('signalFromPeer', (signal:SignallingMessage) => {
   if (pc === undefined) {
     pc = makePeerConnection();
   }

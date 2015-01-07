@@ -2,129 +2,26 @@
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 /// <reference path='../freedom/typings/freedom.d.ts' />
 
-import DataChannels = require('datachannels');
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');
 import Random = require('../crypto/random');
+import Djb2 = require('../crypto/djb2hash');
+
 import Handler = require('../handler/queue');
 
-import DataChannel = DataChannels.DataChannel;
+import DataChannelClass = require('datachannel');
+import DataChannelInterfaces = require('datachannel.i');
+import DataChannel = DataChannelInterfaces.Channel;
 
-export enum State {
-  WAITING,      // Can move to CONNECTING.
-  CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
-  CONNECTED,    // Can move to DISCONNECTED.
-  DISCONNECTED  // End-state, cannot change.
-}
-
-export interface PeerConnection<TSignallingMessage> {
-  // The state of this peer connection.
-  pcState :State;
-
-  // All open data channels.
-  // NOTE: There exists a bug in Chrome prior to version 37 which causes
-  //       entries in this object to continue to exist even after
-  //       the remote peer has closed a data channel.
-  dataChannels     :{[channelLabel:string] : DataChannel};
-
-  // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
-  // i.e. when either |handleSignalMessage| is called with an offer message,
-  // or when |negotiateConnection| is called. The promise is never be rejected
-  // and is guarenteed to fulfilled before |onceConnected|.
-  onceConnecting  :Promise<void>;
-  // The |onceConnected| promise is fulfilled when pcState === CONNECTED
-  onceConnected :Promise<void>;
-  // The |onceDisconnected| promise is fulfilled when pcState === DISCONNECTED
-  onceDisconnected :Promise<void>;
-
-  // Try to connect to the peer. Will change state from |WAITING| to
-  // |CONNECTING|. If there was an error, promise is rejected. Otherwise
-  // returned promise === |onceConnected|.
-  negotiateConnection :() => Promise<void>;
-
-  // A peer connection can either open a data channel to the peer (will
-  // change from |WAITING| state to |CONNECTING|)
-  openDataChannel :(channelLabel: string,
-      options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
-      Promise<DataChannel>;
-  // Or handle data channels opened by the peer (these events will )
-  peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
-
-  // The |handleSignalMessage| function should be called with signalling
-  // messages from the remote peer.
-  handleSignalMessage :(signal:TSignallingMessage) => void;
-  // The underlying handler that holds/handles signals intended to go to the
-  // remote peer. A handler should be set that sends messages to the remote
-  // peer.
-  signalForPeerQueue :Handler.Queue<TSignallingMessage, void>;
-
-  // Closing the peer connection will close all associated data channels
-  // and set |pcState| to |DISCONNECTED| (and hence fulfills
-  // |onceDisconnected|)
-  close: () => void;
-
-  // Helpful for debugging
-  toString: () => string;
-  peerName :string;
-}
-
-// DataPeer - a class that wraps peer connections and data channels.
-//
-// This class assumes WebRTC is available; this is provided by freedom.js.
-
-export interface PeerConnectionConfig {
-  webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
-  peerName               ?:string;   // For debugging
-  initiateConnection     ?:boolean;  // defaults to false
-}
-
-export enum SignalType {
-  OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
-}
-
-export interface SignallingMessage {
-  // CONSIDER: use string-enum when typescript supports it.
-  type          :SignalType
-  // The |candidate| parameter is set iff type === CANDIDATE
-  candidate     ?:freedom_RTCPeerConnection.RTCIceCandidate;
-  // The |description| parameter is set iff type === OFFER or
-  // type === ANSWER
-  description   ?:freedom_RTCPeerConnection.RTCSessionDescription;
-}
-
-export function createPeerConnection(
-      config:PeerConnectionConfig)
-    : PeerConnection<SignallingMessage> {
-  return new PeerConnectionClass(config);
-}
-
-// Possible candidate types, e.g. RELAY if a host is only accessible
-// via a TURN server. The values are taken from this file; as the comment
-// suggests, not all values may be found in practice:
-//   https://code.google.com/p/chromium/codesearch#chromium/src/third_party/libjingle/source/talk/p2p/base/port.cc
-
-// This should match the uproxy-networking/network-typings/communications.d.ts
-// type with the same name (Net.Endpoint).
-export interface Endpoint {
-  address:string; // IPv4, IPv6, or domain name.
-  port:number;
-}
-
-// Quick port of djb2 for comparison of SDP headers to choose initiator.
-export var stringHash = (s:string) : number => {
-  var hash = 5381;
-  for (var i = 0; i < s.length; i++) {
-    hash = ((hash << 5) + hash) + s.charCodeAt(i); // hash * 33 + c
-  }
-  return hash;
-}
+import PeerConnectionInterfaces = require('peerconnection.i');
+import State = PeerConnectionInterfaces.State;
+import PeerConnection = PeerConnectionInterfaces.PeerConnection;
+import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
+import SignalType = PeerConnectionInterfaces.SignalType;
+import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
 
 // Logger for this module.
 var log :Logging.Log = new Logging.Log('PeerConnection');
-
-// Global listing of active peer connections. Helpful for debugging when you
-// are in Freedom.
-export var peerConnections :{ [name:string] : PeerConnection<SignallingMessage> } = {};
 
 // A wrapper for peer-connection and it's associated data channels.
 // The most important diagram is this one:
@@ -160,7 +57,11 @@ export var peerConnections :{ [name:string] : PeerConnection<SignallingMessage> 
 //   3. (callback) -> controlDataChannel.onceOpened
 //      3.1. completeConnection_ -> pc_.getStats
 //      3.3. [Fulfill onceConnected]
-export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
+class PeerConnectionClass implements PeerConnection<SignallingMessage> {
+
+  // Global listing of active peer connections. Helpful for debugging when you
+  // are in Freedom.
+  public static peerConnections :{ [name:string] : PeerConnection<SignallingMessage> } = {};
 
   // Name for debugging.
   public peerName     :string;
@@ -237,11 +138,11 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
 
     // Once connected, add to global listing. Helpful for debugging.
     this.onceConnected.then(() => {
-      peerConnections[this.peerName] = this;
+      PeerConnectionClass.peerConnections[this.peerName] = this;
     });
     // Once disconnected, remove from global listing.
     this.onceDisconnected.then(() => {
-      delete peerConnections[this.peerName];
+      delete PeerConnectionClass.peerConnections[this.peerName];
     });
 
     // New data channels from the peer.
@@ -449,8 +350,8 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
             (localOffer:freedom_RTCPeerConnection.RTCSessionDescription) => {
-          if (stringHash(JSON.stringify(remoteOffer.sdp)) <
-              stringHash(JSON.stringify(localOffer.sdp))) {
+          if (Djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
+              Djb2.stringHash(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
             return Promise.reject('Simultaneous offers not yet implemented.');
           } else {
@@ -573,7 +474,8 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
   // Add a rtc data channel and return the it wrapped as a DataChannel
   private addRtcDataChannel_ = (id:string)
       : Promise<DataChannel> => {
-    return DataChannels.fromId(id).then((dataChannel:DataChannel) => {
+    return DataChannelClass.createFromFreedomId(id)
+        .then((dataChannel:DataChannel) => {
       var label = dataChannel.getLabel();
       this.dataChannels[label] = dataChannel;
       dataChannel.onceClosed.then(() => {
@@ -606,3 +508,5 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     return s;
   }
 }  // class PeerConnectionClass
+
+export = PeerConnectionClass
