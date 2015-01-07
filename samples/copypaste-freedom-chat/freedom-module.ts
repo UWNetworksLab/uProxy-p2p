@@ -1,4 +1,4 @@
-import Logging = require('../logging/logging');
+import Logging = require('../../logging/logging');
 
 import DataChannelInterfaces = require('../../webrtc/datachannel.i');
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
@@ -6,9 +6,10 @@ import WebRtc = require('../../webrtc/webrtc');
 
 import PeerConnection = PeerConnectionInterfaces.PeerConnection;
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
+import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
+
 import DataChannel = DataChannelInterfaces.Channel;
 import Data = DataChannelInterfaces.Data;
-import PeerConnectionConfig = DataChannelInterfaces.PeerConnectionConfig;
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 
@@ -20,23 +21,26 @@ var pcConfig :PeerConnectionConfig = {
   peerName: 'pc'
 };
 
+var parentModule = freedom();
+
 function connectDataChannel(d:DataChannel) {
   d.dataFromPeerQueue.setSyncHandler((data:Data) => {
-    freedom().emit('messageFromPeer', data.str);
+    parentModule.emit('messageFromPeer', data.str);
   });
 
-  freedom().on('messageFromPeer', (message:string) => {
+  parentModule.on('messageFromPeer', (message:string) => {
     d.send({ str: message }).catch((e) => {
       log.error('error sending chat message: ' + e.message);
     });
   });
 }
 
-function makePeerConnection() : PeerConnection {
-  var pc :PeerConnection = WebRtc.createPeerConnection(pcConfig);
+function makePeerConnection() : PeerConnection<SignallingMessage> {
+  var pc :PeerConnection<SignallingMessage> =
+      WebRtc.createPeerConnection(pcConfig);
 
   pc.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
-    freedom().emit('signalForPeer', signal);
+    parentModule.emit('signalForPeer', signal);
   });
 
   pc.onceConnected.then(() => {
@@ -46,16 +50,16 @@ function makePeerConnection() : PeerConnection {
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     if (d.getLabel() === 'text') {
       connectDataChannel(d);
-      freedom().emit('ready');
+      parentModule.emit('ready');
     }
   });
 
   return pc;
 }
 
-var pc :PeerConnection;
+var pc :PeerConnection<SignallingMessage>;
 
-freedom().on('start', () => {
+parentModule.on('start', () => {
   pc = makePeerConnection();
   pc.negotiateConnection()
     .then(() => {
@@ -73,7 +77,7 @@ freedom().on('start', () => {
 // Receive signalling channel messages from the UI.
 // If pc doesn't exist yet then we are responding to the remote
 // peer's initiation.
-freedom().on('signalFromPeer', (signal:SignallingMessage) => {
+parentModule.on('signalFromPeer', (signal:SignallingMessage) => {
   if (pc === undefined) {
     pc = makePeerConnection();
   }
