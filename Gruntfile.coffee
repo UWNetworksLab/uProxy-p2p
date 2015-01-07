@@ -499,7 +499,7 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/chrome/extension/vulcanized-chrome.html': 'build/compile-src/chrome/extension/vulcanized-inline.html'
 
-    clean: ['build/**', '.tscache']
+    clean: ['build', '.tscache', 'third_party/lib']
 
  # grunt.initConfig
 
