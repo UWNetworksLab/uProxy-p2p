@@ -42,8 +42,8 @@ describe('UI.UserInterface', () => {
         instanceId: instanceId,
         description: 'description1',
         consent: new Consent.State(),
-        access: {localSharingWithRemote: SharingState.NONE,
-                 localGettingFromRemote: GettingState.NONE},
+        localSharingWithRemote: SharingState.NONE,
+        localGettingFromRemote: GettingState.NONE,
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
