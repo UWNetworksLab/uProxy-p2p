@@ -1,12 +1,26 @@
-/// <reference path='messages.d.ts' />
-/// <reference path='../../logging/logging.d.ts' />
-/// <reference path="../../webrtc/peerconnection.d.ts" />
-/// <reference path="../../third_party/typings/tsd.d.ts" />
 /// <reference path="../../freedom/typings/freedom.d.ts" />
+
+import Logging = require('../../logging/logging');
+
+import DataChannelInterfaces = require('../../webrtc/datachannel.i');
+import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
+import WebRtc = require('../../webrtc/webrtc');
+
+import PeerConnection = PeerConnectionInterfaces.PeerConnection;
+import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
+import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
+
+import DataChannel = DataChannelInterfaces.Channel;
+import Data = DataChannelInterfaces.Data;
+
+import Message = require('messages.i');
+
 
 var log :Logging.Log = new Logging.Log('freedomchat');
 
-function connectDataChannel(name:string, d:WebRtc.DataChannel) {
+var parentFreedomModule = freedom();
+
+function connectDataChannel(name:string, d:DataChannel) {
     d.onceOpened.then(() => {
       log.info(name + ': onceOpened: ' +
           d.toString());
@@ -15,29 +29,29 @@ function connectDataChannel(name:string, d:WebRtc.DataChannel) {
       log.info(name + ': onceClosed: ' +
           d.toString());
     });
-    d.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
+    d.dataFromPeerQueue.setSyncHandler((data:Data) => {
       log.info(name + ': dataFromPeer: ' + JSON.stringify(data));
       // Handle messages received on the datachannel(s).
-      freedom().emit('receive' + name, {
+      parentFreedomModule.emit('receive' + name, {
         message: data.str
       });
     });
 
-  freedom().on('send' + name, (message:Chat.Message) => {
+  parentFreedomModule.on('send' + name, (message:Message) => {
     d.send({str: message.message})
   });
 }
 
 // Make a peer connection which logs stuff that happens.
 function makePeerConnection(name:string) {
-  var pcConfig :WebRtc.PeerConnectionConfig = {
+  var pcConfig :PeerConnectionConfig = {
     webrtcPcConfig: {
       iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                    {urls: ['stun:stun1.l.google.com:19302']}]
     },
     peerName: name
   };
-  var pc : WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
+  var pc :PeerConnection<SignallingMessage> = WebRtc.createPeerConnection(pcConfig);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
@@ -45,7 +59,7 @@ function makePeerConnection(name:string) {
   pc.onceDisconnected.then(() => {
     log.info(name + ': onceDisconnected');
   });
-  pc.peerOpenedChannelQueue.setSyncHandler((d:WebRtc.DataChannel) => {
+  pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     log.info(name + ': peerOpenedChannelQueue: ' + d.toString());
     connectDataChannel(name, d);
   });
@@ -53,16 +67,16 @@ function makePeerConnection(name:string) {
   return pc;
 }
 
-var a :WebRtc.PeerConnection = makePeerConnection('A');
-var b :WebRtc.PeerConnection = makePeerConnection('B')
+var a :PeerConnection<SignallingMessage> = makePeerConnection('A');
+var b :PeerConnection<SignallingMessage> = makePeerConnection('B')
 
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
-a.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
+a.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
   log.info('a: sending signal to b.');
   b.handleSignalMessage(signal);
 });
-b.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
+b.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
   log.info('b: sending signal to a.');
   a.handleSignalMessage(signal);
 });
@@ -74,14 +88,14 @@ a.negotiateConnection()
     log.info('a: negotiated connection');
   }, (e:any) => {
     log.error('could not negotiate peerconnection: ' + e.message);
-    freedom().emit('error', {})
+    parentFreedomModule.emit('error', {})
   })
   .then(() => { return a.openDataChannel('text'); })
-  .then((aTextDataChannel:WebRtc.DataChannel) => {
+  .then((aTextDataChannel:DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
-    freedom().emit('ready', {});
+    parentFreedomModule.emit('ready', {});
   })
   .catch((e:any) => {
     log.error('error while opening datachannel: ' + e.message);
-    freedom().emit('error', {})
+    parentFreedomModule.emit('error', {})
   });

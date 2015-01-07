@@ -1,5 +1,6 @@
-/// <reference path='messages.d.ts' />
 /// <reference path="../../freedom/typings/freedom.d.ts" />
+
+import Message = require('messages.i');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -9,9 +10,10 @@ var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
-freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) {
+freedom('freedom-module.json', { 'debug': 'log' }).then(
+    (simpleChatFactory:() => OnAndEmit<any,any>) => {
   // TODO: typings for the freedom module
-  var chat :any = interface();
+  var chat :OnAndEmit<any,any> = simpleChatFactory();
 
   chat.on('ready', function() {
     sendAreaA.disabled = false;
@@ -31,7 +33,7 @@ freedom('freedom-module.json', { 'debug': 'log' }).then(function(interface:any) 
   sendButtonA.onclick = send.bind(null, 'A', sendAreaA);
   sendButtonB.onclick = send.bind(null, 'B', sendAreaB);
 
-  function receive(textArea:HTMLInputElement, msg:Chat.Message) {
+  function receive(textArea:HTMLInputElement, msg:Message) {
     textArea.value = msg.message;
   }
   chat.on('receiveA', receive.bind(null, receiveAreaA));
