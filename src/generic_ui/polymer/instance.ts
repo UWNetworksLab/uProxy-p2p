@@ -1,4 +1,6 @@
 Polymer({
+  // Make GettingState enum available to polymer
+  GettingState: GettingState,
 
   ready: function() {
     this.path = <InstancePath>{
@@ -21,6 +23,8 @@ Polymer({
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
+    }).catch((e) => {
+      ui.showNotification('Unable to get access from ' + this.user.name);
     });
   },
   stop: function() {
