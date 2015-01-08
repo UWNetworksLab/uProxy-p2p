@@ -58,7 +58,14 @@ function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
-  chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
+  chrome.runtime.onInstalled.addListener(() => {
+    chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+        // TODO (lucyhe): update this link. Current URL is for testing only!
+        if (tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) {
+          chromeBrowserApi.bringUproxyToFront();
+        }
+    });
+  });
 
   chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
   chromeConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
