@@ -102,7 +102,7 @@ describe('Social.FreedomNetwork', () => {
         var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
-          status: 'ONLINE_WITH_OTHER_APP',
+          status: 'ONLINE',
           timestamp: 12345
         };
         // Add user to the roster;
@@ -110,7 +110,6 @@ describe('Social.FreedomNetwork', () => {
           expect(Object.keys(network.roster).length).toEqual(2);
           var friend = network.getUser('fakeuser');
           spyOn(friend, 'monitor');
-          expect(friend.isOnline()).toEqual(true);
           // Advance clock 5 seconds and make sure monitoring was called.
           jasmine.clock().tick(5000);
           expect(friend.monitor).toHaveBeenCalled();

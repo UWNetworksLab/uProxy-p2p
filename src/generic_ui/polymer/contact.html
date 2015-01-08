@@ -1,7 +1,7 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='instance.html'>
 
-<polymer-element name='uproxy-contact' attributes='contact'>
+<polymer-element name='uproxy-contact' attributes='contact, isOnline'>
 
   <template>
     <style>
@@ -27,15 +27,13 @@
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
+      cursor: pointer;
     }
     #avatar {
       width: 36px; height: 36px;
       margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: top;
-    }
-    .offline {
-      opacity: 0.5;
     }
     #words {
       display: inline-block;
@@ -55,7 +53,7 @@
     .accessIcon {
       vertical-align: middle;
     }
-    .hasInstances #words:hover h1 {
+    #words:hover h1 {
       color: #aaa;
     }
     #instances {
@@ -64,13 +62,14 @@
     #actions {
       padding: 8px;
     }
-    .hasInstances {
-      cursor: pointer;
+    .offline #avatar,
+    .offline .nameRow {
+      opacity: 0.5;
     }
     </style>
 
     <div tabindex='-1' id='frame'
-        class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
+        class='{{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
      <!-- on-blur='{{ collapse }}'> -->
       <img id='avatar' src='{{ contact.imageData }}' on-tap='{{ toggle }}'/>
       <div id='words'>

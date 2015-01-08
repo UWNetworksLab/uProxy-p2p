@@ -23,8 +23,7 @@ function generateFakeUserMessage() :UI.UserMessage {
     user: {
       userId: 'alice',
       name: 'Alice uProxy',
-      timestamp: Date.now(),
-      isOnline: true
+      timestamp: Date.now()
     },
     instances: [
       {
@@ -32,10 +31,8 @@ function generateFakeUserMessage() :UI.UserMessage {
         description: 'fake instance for alice',
         isOnline: true,
         consent: new Consent.State(),
-        access: {
-          asClient: false,
-          asProxy: false
-        },
+        localSharingWithRemote: SharingState.NONE,
+        localGettingFromRemote: GettingState.NONE,
         bytesSent: 0,
         bytesReceived: 0
       }

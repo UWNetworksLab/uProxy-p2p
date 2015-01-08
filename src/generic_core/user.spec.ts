@@ -95,18 +95,15 @@ describe('Core.User', () => {
     expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
-  it('does not send instance messages to non-uProxy clients', () => {
-    network.sendInstanceHandshake.calls.reset();
+  it('does not add clients that are ONLINE_WITH_OTHER_APP', () => {
     var clientState :UProxyClient.State = {
       userId: 'fakeuser',
-      clientId: 'fakeclient-not-uproxy',
+      clientId: 'fakeNonUproxyClient',
       status: UProxyClient.Status.ONLINE_WITH_OTHER_APP,
-      timestamp: 12345
+      timestamp: 12346
     };
     user.handleClient(clientState);
-    expect(user.clientIdToStatusMap['fakeclient-not-uproxy']).toEqual(
-        UProxyClient.Status.ONLINE_WITH_OTHER_APP);
-    expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
+    expect(user.clientIdToStatusMap['fakeNonUproxyClient']).not.toBeDefined();
   });
 
   it('deletes DISCONNECTED client', () => {

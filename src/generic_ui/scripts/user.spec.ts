@@ -15,7 +15,8 @@ describe('UI.User', () => {
       instanceId: id,
       description: description,
       consent: new Consent.State(),
-      access: {asClient: false, asProxy: false},
+      localSharingWithRemote: SharingState.NONE,
+      localGettingFromRemote: GettingState.NONE,
       isOnline: true,
       bytesSent: 0,
       bytesReceived: 0
@@ -33,8 +34,7 @@ describe('UI.User', () => {
       userId: 'fakeuser',
       name: 'fakename',
       imageData: 'fakeimage.uri',
-      timestamp: Date.now(),
-      isOnline: true
+      timestamp: Date.now()
     });
     expect(user.name).toEqual('fakename');
     expect(user.imageData).toEqual('fakeimage.uri');

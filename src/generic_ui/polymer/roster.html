@@ -60,17 +60,6 @@
         offlineContacts='{{ offlineUntrustedUproxyContacts }}'
         searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
-    <!-- Hide HR if there are no Non-uProxy contacts, or if there are only Non-uProxy contacts -->
-    <hr color="#eee"
-        hidden?='{{ (onlineNonUproxyContacts.length == 0 && offlineNonUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) && (onlinePending.length == 0 && offlinePending.length == 0)) }}'></hr>
-
-    <!-- non uProxy contacts -->
-    <uproxy-roster-group
-        groupTitle='Non uProxy Contacts'
-        onlineContacts='{{ onlineNonUproxyContacts }}'
-        offlineContacts='{{ offlineNonUproxyContacts }}'
-        searchQuery='{{ searchQuery }}'></uproxy-roster-group>
-
   </template>
 
   <script src='roster.js'></script>
