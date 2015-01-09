@@ -25,12 +25,13 @@ declare module freedom_RTCDataChannel {
     getReadyState() : Promise<string>;
     getBufferedAmount() : Promise<number>;
 
-    on(t:string, f:Function) : void;
     on(t:'onopen', f:() => void) : void;
     on(t:'onerror', f:() => void) : void;
     on(t:'onclose', f:() => void) : void;
-    close() : Promise<void>;
     on(t:'onmessage', f:(m:Message) => void) : void;
+    on(t:string, f:Function) : void;
+
+    close() : Promise<void>;
     getBinaryType() : Promise<string>;
     setBinaryType(type:string) : Promise<void>;
     send(message:string) : Promise<void>;

@@ -35,7 +35,7 @@
       url          ?:string;
       // Image URI (e.g. data:image/png;base64,adkwe329...)
       imageData    ?:string;
-      timestamp    :number;
+      timestamp    ?:number;
     }
 
     interface Users   { [userId:string]   : UserProfile; }
