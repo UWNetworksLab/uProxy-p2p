@@ -2,7 +2,7 @@
 // logging.d.ts.
 //
 
-declare module Logger {
+declare module LoggingProvider {
   class Log {
     constructor();
     debug(tag:string, msg:string) : void;

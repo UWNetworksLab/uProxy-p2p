@@ -10,7 +10,7 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
-  'logger': 'lib/logger/logger.json',
+  'logger': 'lib/loggingprovider/loggingprovider.json',
   'debug': 'log'
 }).then(function(Chat:any) {
   // TODO: typings for the freedom module

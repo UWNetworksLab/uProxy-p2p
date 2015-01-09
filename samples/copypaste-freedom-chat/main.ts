@@ -27,7 +27,7 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
-  'logger': 'lib/logger/logger.json',
+  'logger': 'lib/loggingprovider/loggingprovider.json',
   'debug': 'log'
 }).then(function(CopyPaste:any) {
   // TODO: typings for the freedom module

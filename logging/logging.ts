@@ -1,18 +1,7 @@
 /// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 
 module Logging {
-  // Created freedom.js loggers
-  var loggers :{[tag:string]:freedom.Logger} = {};
-
-  // Messages waiting on a logger. {Level, message} objects, which will be sent
-  // to the freedom.js logger but are received synchronously with construction
-  // before the logger promise has resolved.
-  interface Msg {
-    level:string
-    msg:string
-  }
-  var waiters :{[tag:string]:Msg[]} = {};
-
   // Perform log message formatting. Formats an array of arguments to a
   // single string.
   // TODO: switch to rest arguments.
@@ -26,64 +15,47 @@ module Logging {
     }
     return formatted_msg;
   }
-
-  function doLog(level:string, tag:string, msg:string, args?:any[]) : void {
-    if (tag in loggers) {
-      var logger = loggers[tag];
-      var realLog = (msg:string) => {};
-
-      if (level === 'debug') {
-        realLog = logger.debug;
-      } else if (level === 'info') {
-        realLog = logger.info;
-      } else if (level === 'warn') {
-        realLog = logger.warn;
-      } else if (level === 'error') {
-        realLog = logger.error;
-      }
-      
-      return realLog(formatStringMessageWithArgs_(msg, args));
-    }
-    if (!(tag in waiters)) {
-      waiters[tag] = [];
-    }
-    waiters[tag].push({level: level, msg: formatStringMessageWithArgs_(msg, args)});
-  }
   
-  function registerLogger(tag:string, logger:freedom.Logger) : void {
-    loggers[tag] = logger;
-    if (tag in waiters) {
-      for (var i = 0; i < waiters[tag].length; i += 1) {
-        var msg:Msg = waiters[tag][i];
-        doLog(msg.level, tag, msg.msg);
+  interface loggable {
+    (logger: freedom.Logger): void;
+  }
+
+  function doLog(level:string, msg:string, args?:any[]) : loggable {
+    var message = formatStringMessageWithArgs_(msg, args);
+
+    return (logger: freedom.Logger) => {
+      if (level === 'debug') {
+        logger.debug(message);
+      } else if (level === 'info') {
+        logger.info(message);
+      } else if (level === 'warn') {
+        logger.warn(message);
+      } else if (level === 'error') {
+        logger.error(message);
       }
-      delete waiters[tag];
-    }
+    };
   }
 
   export class Log {
+    private logger :Promise<Freedom.logger>;
     constructor(private tag_:string) {
-      freedom['core']().getLogger(this.tag_).then((logger:freedom.Logger) => {
-        registerLogger(this.tag_, logger);
-      });
+      this.logger = freedom['core']().getLogger(this.tag_);
     }
     // Logs message in debug level.
     public debug = (msg: string, args?:any[]) : void => {
-      doLog('debug', this.tag_, msg, args);
+      this.logger.then(doLog('debug', msg, args));
     }
     // Logs message in info level.
     public info = (msg: string, args?:any[]) : void => {
-      doLog('info', this.tag_, msg, args);
+      this.logger.then(doLog('info', msg, args));
     }
     // Logs message in warn level.
     public warn = (msg: string, args?:any[]) : void => {
-      doLog('warn', this.tag_, msg, args);
+      this.logger.then(doLog('warn', msg, args));
     }
     // Logs message in error level.
     public error = (msg: string, args?:any[]) : void => {
-      doLog('error', this.tag_, msg, args);
+      this.logger.then(doLog('error', msg, args));
     }
   }
 }
-
-

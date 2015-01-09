@@ -1,8 +1,8 @@
 {
-  "name": "uProxy Logger",
-  "description": "Logger for aggregating uProxy logs, and filtering.",
+  "name": "uProxy Logging Provider",
+  "description": "Logging Provider for aggregating uProxy logs, and filtering.",
   "app": {
-    "script": "logger.js"
+    "script": "loggingProvider.js"
   },
   "constraints": {
     "isolation": "never"

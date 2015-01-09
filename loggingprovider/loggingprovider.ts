@@ -1,7 +1,7 @@
 /// <reference path='../freedom/typings/freedom.d.ts' />
 /// <reference path='../freedom/typings/console.d.ts' />
 
-module Logger {
+module LoggingProvider {
   export interface Message {
     timestamp :Date; // the timestamp the log was called (in core runtime).
     level :string; // one of D=Debug, I=Info, W=Warning, E=Error
