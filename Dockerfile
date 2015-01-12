@@ -12,6 +12,7 @@ RUN apt-get update -qqy \
    
 
 RUN npm install -g grunt-cli
+RUN npm install -g bower
 ADD . /uproxy
 WORKDIR /uproxy
 
