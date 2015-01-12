@@ -65,7 +65,8 @@ function initUI() : UI.UserInterface {
         // Do not open the extension when it's installed if the user is
         // going through the inline install flow.
         // TODO (lucyhe): update this link. Current URL is for testing only!
-        if (tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) {
+        if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
+            (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
           chromeBrowserApi.bringUproxyToFront();
         }
     });
