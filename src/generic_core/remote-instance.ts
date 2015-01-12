@@ -55,6 +55,9 @@ module Core {
     // received are only forwarded to the UI once every second.
     private isUIUpdatePending = false;
 
+    // Number of milliseconds before timing out socksToRtc_.start
+    public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
     public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
@@ -330,6 +333,16 @@ module Core {
       // Set flag to indicate that we are currently trying to get access
       this.localGettingFromRemote = GettingState.TRYING_TO_GET_ACCESS;
       this.user.notifyUI();
+
+      // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
+      setTimeout(() => {
+        if (this.localGettingFromRemote == GettingState.TRYING_TO_GET_ACCESS) {
+          // This will cause the promise returned by this.socksToRtc_.start
+          // to reject, which will trigger an error message in the UI.
+          console.warn('Timing out socksToRtc_ connection');
+          this.socksToRtc_.stop();
+        }
+      }, this.SOCKS_TO_RTC_TIMEOUT);
 
       return this.socksToRtc_.start(
           endpoint,
