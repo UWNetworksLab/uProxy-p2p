@@ -6,5 +6,5 @@ sleep 3
 cd /uproxy
 
 bower install --allow-root
-grunt build
+
 grunt test 
