@@ -33,6 +33,8 @@ chrome.runtime.onSuspend.addListener(() => {
 
 chrome.runtime.onMessageExternal.addListener(
     function(request, sender, sendResponse) {
+        // Reply to pings from the uproxy website that are checking if the
+        // extension is installed.
         if (request) {
           sendResponse({message: "Extension installed."});
         }
@@ -60,6 +62,8 @@ function initUI() : UI.UserInterface {
   // are adding the listener after the event is fired.
   chrome.runtime.onInstalled.addListener(() => {
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+        // Do not open the extension when it's installed if the user is
+        // going through the inline install flow.
         // TODO (lucyhe): update this link. Current URL is for testing only!
         if (tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) {
           chromeBrowserApi.bringUproxyToFront();
