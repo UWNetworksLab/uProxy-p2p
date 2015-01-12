@@ -9,6 +9,7 @@ USER root
 RUN apt-get update -qqy \
   && apt-get -qqy install \
     nodejs nodejs-legacy git npm 
+    ln -s /usr/bin/nodejs /usr/bin/node
 
 RUN npm install -g grunt-cli
 ADD . /uproxy
