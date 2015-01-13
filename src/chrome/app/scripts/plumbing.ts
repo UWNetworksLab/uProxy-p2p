@@ -139,3 +139,13 @@ var uproxyModule = new freedom('scripts/freedom-module.json', {
   connector = new ChromeUIConnector();
   console.log('Starting uProxy app...');
 });
+
+// Reply to pings from the uproxy website that are checking if the
+// application is installed.
+chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+        if (request) {
+          sendResponse({message: "Application installed."});
+        }
+        return true;
+    });
