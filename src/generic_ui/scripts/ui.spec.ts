@@ -70,7 +70,8 @@ describe('UI.UserInterface', () => {
           instanceId: 'instance1',
           description: 'description1',
           consent: new Consent.State(),
-          access: {asClient: false, asProxy: false},
+          localSharingWithRemote: SharingState.NONE,
+          localGettingFromRemote: GettingState.NONE,
           isOnline: true,
           bytesSent: 0,
           bytesReceived: 0
@@ -99,8 +100,8 @@ describe('UI.UserInterface', () => {
         instanceId: 'instance1',
         description: 'description1',
         consent: new Consent.State(),
-        access: {localSharingWithRemote: SharingState.NONE,
-                 localGettingFromRemote: GettingState.NONE},
+        localSharingWithRemote: SharingState.NONE,
+        localGettingFromRemote: GettingState.NONE,
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0
@@ -111,8 +112,8 @@ describe('UI.UserInterface', () => {
         instanceId: 'instance2',
         description: 'description2',
         consent: new Consent.State(),
-        access: {localSharingWithRemote: SharingState.NONE,
-                 localGettingFromRemote: GettingState.NONE},
+        localSharingWithRemote: SharingState.NONE,
+        localGettingFromRemote: GettingState.NONE,
         isOnline: true,
         bytesSent: 0,
         bytesReceived: 0

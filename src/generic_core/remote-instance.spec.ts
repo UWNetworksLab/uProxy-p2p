@@ -466,6 +466,28 @@ describe('Core.RemoteInstance', () => {
       expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
+    it('stops socksToRtc if start does not complete', (done) => {
+      jasmine.clock().install();
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      alice.consent.localRequestsAccessFromRemote = true;
+      alice.consent.remoteGrantsAccessToLocal = true;
+      // Mock socksToRtc to not fulfill start promise
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
+        'start':
+            (endpoint:Net.Endpoint, pcConfig:WebRtc.PeerConnectionConfig) => {
+           return new Promise((F, R) => {});
+        },
+        'on': (t:string, f:Function) => {},
+        'stop': () => {
+          done();
+          return Promise.resolve();
+        }
+      });
+      alice.start();
+      jasmine.clock().tick(alice.SOCKS_TO_RTC_TIMEOUT + 1);
+      jasmine.clock().uninstall();
+    });
+
   });  // describe proxying
 
   describe('signalling', () => {
@@ -488,6 +510,7 @@ describe('Core.RemoteInstance', () => {
     beforeEach(() => {
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.consent.localGrantsAccessToRemote = true;
     });
 

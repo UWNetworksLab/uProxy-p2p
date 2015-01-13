@@ -75,9 +75,15 @@ class ChromeBrowserApi implements BrowserAPI {
       this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
       console.log('Directing Chrome proxy settings to uProxy');
       this.running_ = true;
-      chrome.proxy['settings']['get']({incognito:false},
+      chrome.proxy.settings.get({incognito:false},
         (details) => {
-          this.preUproxyConfig_ = details.value;
+          // TODO (lucyhe): Remove this if statement when Chrome issue 448172
+          // is resolved and we can safely assume that details is defined.
+          if (details) {
+            this.preUproxyConfig_ = details.value;
+          } else {
+            this.preUproxyConfig_ = {mode: "system"};
+          }
           chrome.proxy.settings.set({
               value: this.uproxyConfig_,
               scope: 'regular'
