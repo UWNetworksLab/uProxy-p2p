@@ -64,7 +64,6 @@ function initUI() : UI.UserInterface {
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
         // Do not open the extension when it's installed if the user is
         // going through the inline install flow.
-        // TODO (lucyhe): remove the appspot testing URL when no longer needed.
         if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
             (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
           chromeBrowserApi.bringUproxyToFront();
