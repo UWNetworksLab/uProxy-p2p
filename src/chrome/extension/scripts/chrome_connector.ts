@@ -1,5 +1,5 @@
 /**
- * core_connector.ts
+ * chrome_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
@@ -169,7 +169,7 @@ class ChromeConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, the extension should launch
     // an instruction to install the app.
-    chromeBrowserApi.updatePopupUrl("app-missing.html");
+    chromeBrowserApi.updatePopupUrl("polymer/app-missing.html");
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.

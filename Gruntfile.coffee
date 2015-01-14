@@ -211,9 +211,9 @@ module.exports = (grunt) ->
         }, {
           # Chrome-only polymer.
           # (Assumes the typescript task has executed)
-          expand: true, cwd: 'build/compile-src/chrome/extension'
+          expand: true, cwd: 'build/compile-src/chrome/extension/polymer'
           src: ['vulcanized-chrome.*']
-          dest: chromeExtDevPath
+          dest: chromeExtDevPath + 'polymer'
         }, {
           # Icons and fonts
           expand: true, cwd: 'src/'
@@ -417,13 +417,20 @@ module.exports = (grunt) ->
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
+              'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
               'build/compile-src/chrome/extension/scripts/chrome_connector.js'
+              'build/compile-src/chrome/extension/scripts/chrome_tab_auth.js'
               'build/compile-src/chrome/util/chrome_glue.js'
             ]
         options:
           specs: 'build/compile-src/chrome/**/*.spec.js'
-          outfile: 'build/compile-src/chrome/SpecRunner.html'
-          keepRunner: true
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/chrome_extension/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/chrome_extension'
 
       generic_core:
         src: FILES.jasmine_helpers
@@ -448,10 +455,15 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
-          outfile: 'build/compile-src/generic_core/SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
-          keepRunner: true,
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/generic_core/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/generic_core'
 
       generic_ui:
         src: FILES.jasmine_helpers
@@ -459,11 +471,18 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
+              'build/compile-src/generic_ui/scripts/core_connector.js'
             ]
         options:
           specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
-          outfile: 'build/compile-src/generic_ui/SpecRunner.html'
-          keepRunner: true
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/generic_ui/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/generic_ui'
+
 
     compress:
       main:
@@ -491,13 +510,13 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/chrome/extension/vulcanized-inline.html': 'build/compile-src/chrome/extension/app-missing-polymer.html'
+          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing-polymer.html'
       chromecsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/chrome/extension/vulcanized-chrome.html': 'build/compile-src/chrome/extension/vulcanized-inline.html'
+          'build/compile-src/chrome/extension/polymer/vulcanized-chrome.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 

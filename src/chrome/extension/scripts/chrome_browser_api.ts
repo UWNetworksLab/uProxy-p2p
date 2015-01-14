@@ -31,7 +31,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private popupUrl_ = "app-missing.html";
+  private popupUrl_ = "polymer/app-missing.html";
   // Chrome Window ID of the window used to launch uProxy,
   // i.e. the window where the extension icon was clicked.
   private mainWindowId_ = chrome.windows.WINDOW_ID_NONE;
@@ -51,7 +51,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
     // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
     // is why we employ a hacky thing here.
-    chrome.proxy.settings['clear']({scope: 'regular'});
+    chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.browserAction.onClicked.addListener((tab) => {
       // When the extension icon is clicked, open uProxy.
