@@ -78,7 +78,7 @@ class AggregateHandlerClass<T,T2> implements AggregateHandler<T,T2> {
   }
 }
 
-export function CreateAggregateHandler<T,T2>(aggregator :Aggregator<T,T2>)
+export function createAggregateHandler<T,T2>(aggregator :Aggregator<T,T2>)
     : AggregateHandler<T,T2> {
   return new AggregateHandlerClass(aggregator);
 }

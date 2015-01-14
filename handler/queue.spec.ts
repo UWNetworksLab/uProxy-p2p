@@ -148,7 +148,7 @@ describe('Aggregated Handler Queue', function() {
     // A simple aggregator of numbers up to the specified |min|, at which
     // point the string of the sum of the numbers is returned.
     var MIN_AGGREGATION_VALUE = 10;
-    aggregateTo10Handler = new Aggregate.CreateAggregateHandler<number,string>(
+    aggregateTo10Handler = Aggregate.createAggregateHandler<number,string>(
         new NumberSumAggregator(MIN_AGGREGATION_VALUE));
     ncallbacks = 0;
   });
