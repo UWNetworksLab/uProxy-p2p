@@ -7,10 +7,12 @@ describe("Logging Provider", () => {
   var message4 = LoggingProvider.makeMessage('W', 'test', 'Bob pinged Alice with id=123456');
   var message5 = LoggingProvider.makeMessage('E', 'test', 'Bob pinged Alice with id=123456');
   var loggingProvider :LoggingProvider.Log;
+  var loggingControl :LoggingProvider.LoggingProvider;
   
   beforeEach(() => {
     loggingProvider = new LoggingProvider.Log();
-    LoggingProvider.clearLogs();
+    loggingControl = new LoggingProvider.LoggingProvider();
+    loggingControl.clearLogs();
   });
 
   it('formats string', () => {
@@ -30,28 +32,28 @@ describe("Logging Provider", () => {
     loggingProvider.debug('tag1', 'simple string');
     loggingProvider.info('tag1', 'second string');
     loggingProvider.error('tag1', 'third string');
-    expect(LoggingProvider.getLogs().join('\n')).toMatch(
+    expect(loggingControl.getLogs().join('\n')).toMatch(
       /E \[.*\] third string/);
 
     // set to log all messages.
-    LoggingProvider.clearLogs();
-    LoggingProvider.setBufferedLogFilter(['*:D']);
+    loggingControl.clearLogs();
+    loggingControl.setBufferedLogFilter(['*:D']);
     loggingProvider.debug('tag1', 'simple string');
     loggingProvider.info('tag1', 'second string');
     loggingProvider.error('tag1', 'third string');
-    expect(LoggingProvider.getLogs().join('\n')).toMatch(
+    expect(loggingControl.getLogs().join('\n')).toMatch(
       /D \[.*\] simple string\nI \[.*\] second string\nE \[.*\] third string/);
 
      // set to log messages with level >= info.
-    LoggingProvider.clearLogs();
-    LoggingProvider.setBufferedLogFilter(['*:I']);
+    loggingControl.clearLogs();
+    loggingControl.setBufferedLogFilter(['*:I']);
     loggingProvider.debug('tag1', 'simple string');
     loggingProvider.info('tag2', 'second string');
     loggingProvider.error('tag3', 'third string');
-    expect(LoggingProvider.getLogs().join('\n')).toMatch(
+    expect(loggingControl.getLogs().join('\n')).toMatch(
       /I \[.*\] second string\nE \[.*\] third string/);
 
     // restore back to default.
-    LoggingProvider.setBufferedLogFilter(['*:E']);
+    loggingControl.setBufferedLogFilter(['*:E']);
   });
 });

@@ -9,7 +9,7 @@ module LoggingProvider {
     message :string; // the actual log message.
   }
 
-// The screen.
+  // The screen.
   var console :freedom_Console.Console = freedom['core.console']();
 
   // Besides output to console, log can also be buffered for later retrieval
@@ -98,67 +98,7 @@ module LoggingProvider {
     }
   }
 
-  // Gets log as a encrypted blob, which can be transported in insecure
-  // channel.
-  export function getEncrypedLogBuffer(tags:string[]) : ArrayBuffer {
-    // TODO: to be implemented.
-    return new ArrayBuffer(0);
-  }
-
-  // Gets log in plaintext, which should really be used in development env
-  // only.
-  // Usage: getLogs(['network', 'xmpp']);
-  // It will return log message with tag 'netowrk' and 'xmpp' only.
-  // getLogs() without specify any tag will return all messages.
-  export function getLogs(tags?:string[]) : string[] {
-    // TODO: use input to select log message.
-    if(!tags || tags.length === 0) {
-      return logBuffer.map(formatMessage);
-    } else {
-      return logBuffer.filter((m:Message) => {
-        return tags.indexOf(m.tag) >= 0;
-      }).map(formatMessage);
-    }
-  }
-
-  // Clears all the logs stored in buffer.
-  export function clearLogs() : void {
-    logBuffer = [];
-  }
-  // Enables/Disables log facility.
-  export function enable() : void {
-    enabled = true;
-  }
-  // Enables/Disables log facility.
-  export function disable() : void {
-    enabled = false;
-  }
-
-  // Sets the log filter for console output. Caller can specify logs of
-  // desired tags and levels for console output.
-  // Usage example: setConsoleFilter("*:E", "network:D")
-  // It means: output message in Error level for any module
-  //           output message in debug level and above for "network" module.
-  export function setConsoleFilter(args: string[]) : void {
-    consoleFilter = {};
-    for (var i = 0; i < args.length; i++) {
-      var parts = args[i].split(':');
-      consoleFilter[parts[0]] = parts[1];
-    }
-  }
-
-  // Sets the log filter for buffered log.
-  // Usage example: setBufferedLogFilter("*:E", "network:D")
-  // It means: buffer message in Error level for any module
-  //           buffer message in debug level and above for "network" module.
-  export function setBufferedLogFilter(args: string[]) : void {
-    bufferedLogFilter = {};
-    for (var i = 0; i < args.length; i++) {
-      var parts = args[i].split(':');
-      bufferedLogFilter[parts[0]] = parts[1];
-    }
-  }
-
+  // Interface for accumulating log messages.
   export class Log {
     constructor() {}
 
@@ -183,7 +123,74 @@ module LoggingProvider {
     }
   }
 
+  // Interface for managinge & retreiving log messages.
+  export class LoggingProvider {
+    constructor() {}
+
+    // Gets log as a encrypted blob, which can be transported in insecure
+    // channel.
+    public getEncrypedLogBuffer = (tags:string[]) : ArrayBuffer => {
+      // TODO: to be implemented.
+      return new ArrayBuffer(0);
+    }
+  
+    // Gets log in plaintext, which should really be used in development env
+    // only.
+    // Usage: getLogs(['network', 'xmpp']);
+    // It will return log message with tag 'netowrk' and 'xmpp' only.
+    // getLogs() without specify any tag will return all messages.
+    public getLogs = (tags?:string[]) : string[] => {
+      // TODO: use input to select log message.
+      if(!tags || tags.length === 0) {
+        return logBuffer.map(formatMessage);
+      } else {
+        return logBuffer.filter((m:Message) => {
+          return tags.indexOf(m.tag) >= 0;
+        }).map(formatMessage);
+      }
+    }
+  
+    // Clears all the logs stored in buffer.
+    public clearLogs = () : void => {
+      logBuffer = [];
+    }
+    // Enables/Disables log facility.
+    public enable = () : void => {
+      enabled = true;
+    }
+    // Enables/Disables log facility.
+    public disable = () : void => {
+      enabled = false;
+    }
+  
+    // Sets the log filter for console output. Caller can specify logs of
+    // desired tags and levels for console output.
+    // Usage example: setConsoleFilter("*:E", "network:D")
+    // It means: output message in Error level for any module
+    //           output message in debug level and above for "network" module.
+    public setConsoleFilter = (args: string[]) : void => {
+      consoleFilter = {};
+      for (var i = 0; i < args.length; i++) {
+        var parts = args[i].split(':');
+        consoleFilter[parts[0]] = parts[1];
+      }
+    }
+  
+    // Sets the log filter for buffered log.
+    // Usage example: setBufferedLogFilter("*:E", "network:D")
+    // It means: buffer message in Error level for any module
+    //           buffer message in debug level and above for "network" module.
+    public setBufferedLogFilter = (args: string[]) : void => {
+      bufferedLogFilter = {};
+      for (var i = 0; i < args.length; i++) {
+        var parts = args[i].split(':');
+        bufferedLogFilter[parts[0]] = parts[1];
+      }
+    }
+  }
+
   if (typeof freedom !== 'undefined') {
     freedom().provideSynchronous(Log);
+    freedom['loggingprovider']().provideSynchronous(LoggingProvider);
   }
 }

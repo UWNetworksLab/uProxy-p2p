@@ -79,6 +79,10 @@ a.negotiateConnection()
   .then(() => { return a.openDataChannel('text'); })
   .then((aTextDataChannel:WebRtc.DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
+
+    // Change logging tolerance once connected.
+    freedom['loggingprovider']().setConsoleFilter("*:I");
+
     freedom().emit('ready', {});
   })
   .catch((e:any) => {

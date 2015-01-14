@@ -11,7 +11,7 @@ var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
   'logger': 'lib/loggingprovider/loggingprovider.json',
-  'debug': 'log'
+  'debug': 'debug'
 }).then(function(Chat:any) {
   // TODO: typings for the freedom module
   var chat :any = new Chat();

@@ -7,6 +7,7 @@ var freedom = function() {
     provideSynchronous: function() {}
   };
 };
+freedom['loggingprovider'] = freedom;
 freedom['loggers'] = {};
 freedom['core'] = function () {
   return {
