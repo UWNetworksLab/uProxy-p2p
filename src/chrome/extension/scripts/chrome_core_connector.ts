@@ -1,5 +1,5 @@
 /**
- * chrome_connector.ts
+ * chrome_core_connector.ts
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
@@ -27,7 +27,7 @@ var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
  * that the user (which is the Extension / UI) won't have to deal with
  * connectivity explicitly, but has the option to chain promises if desired.
  */
-class ChromeConnector implements uProxy.CoreBrowserConnector {
+class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
 
   private appId_   :string;                // ID of target Chrome App.
   private appPort_ :chrome.runtime.Port;   // For speaking to App.

@@ -8,7 +8,7 @@
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
 /// <reference path='chrome_browser_api.ts' />
-/// <reference path='chrome_connector.ts' />
+/// <reference path='chrome_core_connector.ts' />
 /// <reference path='chrome_tab_auth.ts' />
 
 /// <reference path='../../../interfaces/ui.d.ts' />
@@ -21,7 +21,7 @@
 
 var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-var chromeConnector :ChromeConnector;  // way for ui to speak to a uProxy.CoreAPI
+var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var chromeBrowserApi :ChromeBrowserApi;
 
@@ -39,7 +39,7 @@ function openDownloadAppPage() : void {
         // Focus on the new Chrome Webstore tab.
         chrome.windows.update(tab.windowId, {focused: true});
       });
-  chromeConnector.waitingForAppInstall = true;
+  chromeCoreConnector.waitingForAppInstall = true;
 }
 
 /**
@@ -52,14 +52,14 @@ function initUI() : UI.UserInterface {
   // are adding the listener after the event is fired.
   chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
 
-  chromeConnector = new ChromeConnector({ name: 'uproxy-extension-to-app-port' });
-  chromeConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
+  chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+  chromeCoreConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
                            chromeBrowserApi.bringUproxyToFront);
-  chromeConnector.connect();
+  chromeCoreConnector.connect();
 
-  core = new CoreConnector(chromeConnector);
+  core = new CoreConnector(chromeCoreConnector);
   var oAuth = new ChromeTabAuth();
-  chromeConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
+  chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
 
   chrome.webRequest.onBeforeRequest.addListener(
