@@ -20,7 +20,7 @@ export function jasmineSpec(name:string) {
   };
 }
 
-export function browserifyTypeScript(filepath:string) {
+export function browserify(filepath:string) {
   return {
     src: ['build/dev/' + filepath + '.js'],
     dest: 'build/dev/' + filepath + '.static.js',
