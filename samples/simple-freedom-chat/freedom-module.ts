@@ -13,7 +13,7 @@ import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
 import DataChannel = DataChannelInterfaces.Channel;
 import Data = DataChannelInterfaces.Data;
 
-import Message = require('messages.i');
+import Message = require('./messages.i');
 
 
 var log :Logging.Log = new Logging.Log('freedomchat');

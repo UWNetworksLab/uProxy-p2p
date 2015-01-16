@@ -1,4 +1,4 @@
-import ArrayBuffers = require('arraybuffers');
+import ArrayBuffers = require('./arraybuffers');
 
 // Small internal utility class for accumulating array buffers into a
 // single buffer (until that buffer is big enough).

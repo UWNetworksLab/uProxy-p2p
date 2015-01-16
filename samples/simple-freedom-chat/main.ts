@@ -1,6 +1,6 @@
 /// <reference path="../../freedom/typings/freedom.d.ts" />
 
-import Message = require('messages.i');
+import Message = require('./messages.i');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");

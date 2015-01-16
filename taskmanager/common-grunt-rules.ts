@@ -13,7 +13,7 @@ export function jasmineSpec(name:string) {
                 'dist/promise-1.0.0.js')
     ],
     options: {
-      specs: 'build/dev/' + name + '/**/*.spec.js',
+      specs: 'build/dev/' + name + '/**/*.spec.static.js',
       outfile: 'build/dev/' + name + '/SpecRunner.html',
       keepRunner: true
     }
@@ -22,11 +22,10 @@ export function jasmineSpec(name:string) {
 
 export function browserifyTypeScript(filepath:string) {
   return {
-    src: [filepath + '.ts'],
-    dest: filepath + '.js',
-    browserifyOptions: {
+    src: ['build/dev/' + filepath + '.js'],
+    dest: 'build/dev/' + filepath + '.static.js',
+    options: {
       debug: true,
-      transform: ['tsify']
     }
   };
 }
