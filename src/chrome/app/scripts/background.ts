@@ -1,5 +1,5 @@
 /**
- * plumbing.ts
+ * background.ts
  *
  * This file must be included *after* the freedom script and manifest are
  * loaded.
