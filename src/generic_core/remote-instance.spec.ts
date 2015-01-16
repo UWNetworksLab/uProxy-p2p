@@ -544,9 +544,6 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('handles signal from server peer as client', (done) => {
-      // Alice needs to already have a socksToRtc_ objected created in order
-      // to handle signals from the server peer.
-      // alice['socksToRtc_'] = fakeSocksToRtc;
       alice.consent.remoteGrantsAccessToLocal = true;
       alice.start().then(() => {
         alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeCandidate)
