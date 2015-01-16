@@ -40,8 +40,6 @@ declare module freedom_PeerConnection {
     closeDataChannel(channelLabel:string) : Promise<void>;
     close() : Promise<void>;
 
-    // Generic freedom `on` handler.
-    on(t:string, f:Function) : void;
     on(t:'onReceived', f:(d:freedom_PeerConnection.DataChannelMessage) => void) : void;
     on(t:'onClose', f:() => void) : void;
     // The |onOpenDataChannel| and |onCloseDataChannel| events happen when the
@@ -50,6 +48,8 @@ declare module freedom_PeerConnection {
         : void;
     on(t:'onCloseDataChannel', f:(d:freedom_PeerConnection.DataChannelInfo) => void)
         : void;
+    // Generic freedom `on` handler.
+    on(t:string, f:Function) : void;
 
     // Given a channel Label, returns the buffered amount on that channel. TODO:
     // this should probably not be exposed. buffering should be handled inside.

@@ -94,6 +94,8 @@ a.negotiateConnection()
   .then((aTextDataChannel:DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
     parentFreedomModule.emit('ready', {});
+    // Change logging tolerance once connected.
+    parentFreedomModule['loggingprovider']().setConsoleFilter("*:I");
   })
   .catch((e:any) => {
     log.error('error while opening datachannel: ' + e.message);

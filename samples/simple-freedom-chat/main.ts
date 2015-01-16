@@ -10,7 +10,10 @@ var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
-freedom('freedom-module.json', { 'debug': 'log' }).then(
+freedom('freedom-module.json', {
+    'logger': 'lib/loggingprovider/loggingprovider.json',
+    'debug': 'debug'
+  }).then(
     (simpleChatFactory:() => OnAndEmit<any,any>) => {
   // TODO: typings for the freedom module
   var chat :OnAndEmit<any,any> = simpleChatFactory();

@@ -1,0 +1,26 @@
+{
+  "name": "uProxy Logging Provider",
+  "description": "Logging Provider for aggregating uProxy logs, and filtering.",
+  "app": {
+    "script": "loggingprovider.js"
+  },
+  "constraints": {
+    "isolation": "never"
+  },
+  "provides": ["console", "loggingprovider"],
+  "default": "console",
+  "permissions": [
+    "core.console"
+  ],
+  "api": {
+    "loggingprovider": {
+      "getEncrypedLogBuffer": {"type": "method", "value": [["array", "string"]], "ret": "buffer"},
+      "getLogs": {"type": "method", "value": [["array", "string"]], "ret": ["array", "string"]},
+      "clearLogs": {"type": "method", "value": []},
+      "enable" : {"type": "method", "value": []},
+      "disable" : {"type": "method", "value": []},
+      "setConsoleFilter": {"type": "method", "value": [["array", "string"]]},
+      "setBufferedLogFilter": {"type": "method", "value": [["array", "string"]]}
+    }
+  }
+}

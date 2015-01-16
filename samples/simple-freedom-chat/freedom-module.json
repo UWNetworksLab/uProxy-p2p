@@ -10,8 +10,13 @@
       "freedom-module.js"
     ]
   },
+  "dependencies": {
+    "loggingprovider": {
+      "url": "lib/loggingprovider/loggingprovider.json",
+      "api": "loggingprovider"
+    }
+  },
   "permissions": [
-    "core.console",
     "core.rtcdatachannel",
     "core.rtcpeerconnection"
   ]

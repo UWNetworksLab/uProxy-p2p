@@ -1,5 +1,6 @@
-/// <reference path="../../freedom/typings/freedom.d.ts" />
+// /// <reference path="../../freedom/typings/freedom.d.ts" />
 
+import freedom = require('../../freedom/typings/freedom.d.ts');
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
 
@@ -29,7 +30,10 @@ var chatPanel_outboundMessageNode = <HTMLInputElement>document.getElementById('c
 var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chatPanel_sendMessageButton');
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
-freedom('freedom-module.json', { 'debug': 'log' }).then(
+freedom('freedom-module.json', {
+    'logger': 'lib/loggingprovider/loggingprovider.json',
+    'debug': 'log'
+  }).then(
     (copypasteModuleFactory:() => OnAndEmit<any,any>) => {
   // TODO: Make this have a freedom API.
   var copypaste :OnAndEmit<any,any> = copypasteModuleFactory();
