@@ -494,41 +494,70 @@ describe('Core.RemoteInstance', () => {
   describe('signalling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice = new Core.RemoteInstance(user, 'instance-alice', {
-      instanceId: 'instance-alice',
-      keyHash:    'fake-hash-alice',
-      description: 'alice peer',
-    });
-    var fakeSocksToRtc = { 'handleSignalFromPeer': () => {} };
-    var fakeRtcToNet = { 'handleSignalFromPeer': () => {} };
-    alice['socksToRtc_'] = <SocksToRtc.SocksToRtc><any>fakeSocksToRtc;
-    alice['rtcToNet_'] = <RtcToNet.RtcToNet><any>fakeRtcToNet;
-    // TODO: Turn into a WebRtc.SignallingMessage?
-    var fakeSignal :Object = {
-      data: 'really fake signal'
+    var alice;  // Reset before each test in beforeEach
+    var fakeSocksToRtc = {
+      'handleSignalFromPeer': () => {},
+      'on': () => {},
+      'start': () => { return Promise.resolve(); },
+      'stop': () => { return Promise.resolve(); }
+    };
+    var fakeRtcToNet = {
+      'handleSignalFromPeer': () => {},
+      'onceClosed': new Promise((F, R) => {}),  // return unresolved promise
+      'signalsForPeer': {setSyncHandler: () => {}},
+      'bytesReceivedFromPeer': {setSyncHandler: () => {}},
+      'bytesSentToPeer': {setSyncHandler: () => {}},
+      'onceReady': new Promise((F, R) => {})  // return unresolved promise
+    };
+    var fakeOffer :Object = {
+      type: WebRtc.SignalType.OFFER,
+      data: 'really fake offer'
+    };
+    var fakeCandidate :Object = {
+      type: WebRtc.SignalType.CANDIDATE,
+      data: 'really fake candidate'
     };
 
     beforeEach(() => {
+      alice = new Core.RemoteInstance(user, 'instance-alice', {
+        instanceId: 'instance-alice',
+        keyHash:    'fake-hash-alice',
+        description: 'alice peer',
+      });
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(RtcToNet, 'RtcToNet').and.returnValue(fakeRtcToNet);
       alice.consent.localGrantsAccessToRemote = true;
     });
 
-    it('handles signal from client peer as server', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+    it('ignores CANDIDATE signal from client peer as server without OFFER', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-      expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
-    });
-
-    it('handles signal from server peer as client', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
-      expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
     });
 
+    it('handles OFFER signal from client peer as server', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeOffer)
+      expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+      expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeOffer);
+    });
+
+    it('handles signal from server peer as client', (done) => {
+      // Alice needs to already have a socksToRtc_ objected created in order
+      // to handle signals from the server peer.
+      // alice['socksToRtc_'] = fakeSocksToRtc;
+      alice.consent.remoteGrantsAccessToLocal = true;
+      alice.start().then(() => {
+        alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeCandidate)
+        expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeCandidate);
+        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+        done();
+      }).catch((e) => console.error('error calling start: ' + e));
+    });
+
     it('rejects invalid signals', () => {
-      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeSignal)
+      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeCandidate)
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
@@ -536,7 +565,7 @@ describe('Core.RemoteInstance', () => {
 
     it('rejects message from client if consent has not been granted', () => {
       alice.consent.localGrantsAccessToRemote = false;
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();

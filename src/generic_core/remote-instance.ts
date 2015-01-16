@@ -174,6 +174,7 @@ module Core {
      * instance, and pass it along to the relevant socks-rtc module.
      * TODO: spec
      * TODO: assuming that signal is valid, should we remove signal?
+     * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:uProxy.MessageType,
                            signalFromRemote:Object) => {
