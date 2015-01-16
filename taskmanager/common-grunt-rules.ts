@@ -1,5 +1,8 @@
 // common-grunt-rules
+
 /// <reference path='../../third_party/typings/node/node.d.ts' />
+
+import path = require('path');
 
 // Assumes that the each spec file is a fully browserified js file.
 export function jasmineSpec(name:string) {
