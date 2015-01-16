@@ -383,6 +383,9 @@ module.exports = (grunt) ->
       generic_core: Rule.typescriptSrcLenient 'compile-src/generic_core'
       generic_core_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_core'
 
+      logging: Rule.typescriptSrcLenient 'compile-src/logging'
+      webrtc: Rule.typescriptSrcLenient 'compile-src/webrtc'
+
       # TODO: Remove uistatic / make it the same as uipolymer once polymer is
       # fully integrated.
       uistatic: Rule.typescriptSrcLenient 'compile-src/uistatic'
@@ -429,7 +432,8 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/mocks/freedom-mocks.js'
-              'build/dev/chrome/app/scripts/uproxy-lib/logging/logging.js'
+              'build/compile-src/logging/logging.js'
+              'build/compile-src/webrtc/peerconnection.js'
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
@@ -445,7 +449,6 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
               'build/compile-src/generic_core/core.js'
-              'build/dev/chrome/app/scripts/uproxy-lib/webrtc/peerconnection.js'
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
@@ -590,6 +593,8 @@ module.exports = (grunt) ->
   # --- Testing tasks ---
   taskManager.add 'test_core', [
     'build_generic_core'
+    'ts:logging'
+    'ts:webrtc'
     'ts:generic_core_specs'
     'ts:mocks'
     'jasmine:generic_core'
