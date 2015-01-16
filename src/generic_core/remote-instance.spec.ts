@@ -494,7 +494,7 @@ describe('Core.RemoteInstance', () => {
   describe('signalling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice;  // Reset before each test in beforeEach
+    var alice :Core.RemoteInstance;  // Reset before each test in beforeEach
     var fakeSocksToRtc = {
       'handleSignalFromPeer': () => {},
       'on': () => {},
