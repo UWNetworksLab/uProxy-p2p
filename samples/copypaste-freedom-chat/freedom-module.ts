@@ -1,3 +1,5 @@
+/// <reference path="../../freedom/typings/freedom-module-env.d.ts" />
+
 import Logging = require('../../logging/logging');
 
 import DataChannelInterfaces = require('../../webrtc/datachannel.i');

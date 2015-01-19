@@ -1,6 +1,5 @@
-// /// <reference path="../../freedom/typings/freedom.d.ts" />
+/// <reference path="../../freedom/typings/freedom-core-env.d.ts" />
 
-import freedom = require('../../freedom/typings/freedom.d.ts');
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
 

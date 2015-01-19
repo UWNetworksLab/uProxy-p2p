@@ -1,9 +1,10 @@
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../freedom/typings/freedom-module-env.d.ts" />
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
 // TODO: switch to rest arguments.
+// TODO: move this into the provider.
 function formatStringMessageWithArgs_(msg:string, args?:any[])
     : string {
   var formatted_msg = msg;
@@ -38,7 +39,7 @@ function doLog(level:string, msg:string, args?:any[]) : loggable {
 export class Log {
   private logger :Promise<Freedom.logger>;
   constructor(private tag_:string) {
-    this.logger = freedom['core']().getLogger(this.tag_);
+    this.logger = freedom.core().getLogger(this.tag_);
   }
   // Logs message in debug level.
   public debug = (msg: string, args?:any[]) : void => {

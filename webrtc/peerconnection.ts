@@ -1,6 +1,6 @@
 /// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
-/// <reference path='../freedom/typings/freedom.d.ts' />
+/// <reference path='../freedom/typings/freedom-common.d.ts' />
 
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');

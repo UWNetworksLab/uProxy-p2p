@@ -1,7 +1,8 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path="../freedom/typings/freedom-module-env.d.ts" />
 
+import freedom = require('../../freedom/mocks/jasmine-mock-freedom-module-env');
 import Logging = require('./logging');
-import freedom = require('../freedom/typings/freedom.d.ts');
 
 describe("Client Logging Shim", () => {
   it('forwards logs to freedom', (done) => {

@@ -1,4 +1,4 @@
-/// <reference path="../../freedom/typings/freedom.d.ts" />
+/// <reference path="../../freedom/typings/freedom-core-env.d.ts" />
 
 import Message = require('./messages.i');
 

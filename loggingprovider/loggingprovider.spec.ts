@@ -1,5 +1,6 @@
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path="loggingprovider.d.ts" />
+/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+
+import LoggingProvider = require('./loggingprovider');
 
 describe("Logging Provider", () => {
   var message1 = LoggingProvider.makeMessage('D', 'tag', 'simple string');
@@ -8,7 +9,7 @@ describe("Logging Provider", () => {
   var message5 = LoggingProvider.makeMessage('E', 'test', 'Bob pinged Alice with id=123456');
   var loggingProvider :LoggingProvider.Log;
   var loggingControl :LoggingProvider.LoggingProvider;
-  
+
   beforeEach(() => {
     loggingProvider = new LoggingProvider.Log();
     loggingControl = new LoggingProvider.LoggingProvider();
@@ -28,7 +29,7 @@ describe("Logging Provider", () => {
 
   it('grab logs', () => {
     // testing default behavior, only log error messages.
-    
+
     loggingProvider.debug('tag1', 'simple string');
     loggingProvider.info('tag1', 'second string');
     loggingProvider.error('tag1', 'third string');
