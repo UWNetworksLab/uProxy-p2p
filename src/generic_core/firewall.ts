@@ -83,10 +83,12 @@ module Firewall {
 
   var USER_PROFILE_SCHEMA = {
     'userId' : 'string',
-    'timestamp' : 'number',
+    'timestamp' : '?number',
     'name' : '?string',
     'url' : '?string',
-    'imageData' : '?string'
+    'imageData' : '?string',
+    'lastUpdated' : '?number',
+    'lastSeen' : '?number'
   };
 
   function checkSchema(object, schema) : boolean {
