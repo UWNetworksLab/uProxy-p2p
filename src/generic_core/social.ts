@@ -377,7 +377,7 @@ module Social {
         : Promise<void> => {
       if (!Firewall.isValidClientState(freedomClient, null)) {
         this.log("got client state: " + JSON.stringify(freedomClient));
-        ui.showNotification("Failed client profile firewall check");
+        ui.showNotification("Failed client state firewall check");
       }
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
