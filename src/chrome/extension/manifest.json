@@ -3,7 +3,7 @@
   "version": "0.5.3",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
-  "minimum_chrome_version": "38",
+  "minimum_chrome_version": "41.0.2272",
   "icons": {
     "16": "icons/default-16.png",
     "19": "icons/default-19.png",
