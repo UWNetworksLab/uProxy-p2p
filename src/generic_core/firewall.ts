@@ -165,7 +165,9 @@ module Firewall {
     'userId' : 'string',
     'clientId' : 'string',
     'status' : 'string',
-    'timestamp' : 'number'
+    'timestamp' : '?number',
+    'lastUpdated' : '?number',
+    'lastSeen' : '?number'
   };
 
   export function isValidClientState(state :freedom_Social.ClientState,
