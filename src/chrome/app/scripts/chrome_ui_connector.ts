@@ -1,6 +1,11 @@
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
+
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
+var installedFreedomHooks = [];
+declare var uProxyAppChannel :OnAndEmit<any,any>;
 
 class ChromeUIConnector {
 

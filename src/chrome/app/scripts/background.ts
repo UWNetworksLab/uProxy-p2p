@@ -12,7 +12,6 @@
 /// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 // Remember which handlers freedom has installed.
-var installedFreedomHooks = [];
 var connector :ChromeUIConnector;
 var uProxyAppChannel : OnAndEmit<any,any>;
 

@@ -423,7 +423,7 @@ module.exports = (grunt) ->
               'build/compile-src/chrome/util/chrome_glue.js'
             ]
         options:
-          specs: 'build/compile-src/chrome/**/*.spec.js'
+          specs: 'build/compile-src/chrome/extension/**/*.spec.js'
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:
             coverage: 'build/coverage/chrome_extension/coverage.json'
@@ -431,6 +431,23 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/chrome_extension'
+
+      chrome_app:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/compile-src/mocks/chrome_mocks.js'
+              'build/compile-src/chrome/app/scripts/chrome_ui_connector.js'
+              'build/compile-src/chrome/util/chrome_glue.js'
+            ]
+        options:
+          specs: 'build/compile-src/chrome/app/**/*.spec.js'
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/chrome_app/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/chrome_app'
 
       generic_core:
         src: FILES.jasmine_helpers
@@ -619,11 +636,12 @@ module.exports = (grunt) ->
     'jasmine:generic_ui'
   ]
 
-  taskManager.add 'test_chrome_extension', [
+  taskManager.add 'test_chrome', [
     'build_chrome'
     'ts:chrome_specs'
     'ts:mocks'
     'jasmine:chrome_extension'
+    'jasmine:chrome_app'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
@@ -631,7 +649,7 @@ module.exports = (grunt) ->
   taskManager.add 'test', [
     'test_core'
     'test_ui'
-    'test_chrome_extension'
+    'test_chrome'
   ]
 
   taskManager.add 'everything', [
