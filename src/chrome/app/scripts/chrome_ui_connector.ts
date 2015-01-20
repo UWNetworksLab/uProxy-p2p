@@ -114,3 +114,4 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
+

@@ -31,6 +31,16 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
+chrome.runtime.onMessageExternal.addListener(
+    function(request, sender, sendResponse) {
+        // Reply to pings from the uproxy website that are checking if the
+        // extension is installed.
+        if (request) {
+          sendResponse({message: "Extension installed."});
+        }
+        return true;
+    });
+
 // Launch the Chrome webstore page for the uProxy app.
 function openDownloadAppPage() : void {
   chrome.tabs.create(
@@ -50,7 +60,16 @@ function initUI() : UI.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
-  chrome.runtime.onInstalled.addListener(chromeBrowserApi.bringUproxyToFront);
+  chrome.runtime.onInstalled.addListener(() => {
+    chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+        // Do not open the extension when it's installed if the user is
+        // going through the inline install flow.
+        if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
+            (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
+          chromeBrowserApi.bringUproxyToFront();
+        }
+    });
+  });
 
   chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   chromeCoreConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
