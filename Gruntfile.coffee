@@ -467,6 +467,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/social-enum.js'
               'build/compile-src/generic_core/local-instance.js'
               'build/compile-src/generic_core/remote-instance.js'
+              'build/compile-src/generic_core/firewall.js'
               'build/compile-src/generic_core/user.js'
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
