@@ -1,4 +1,4 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 // This file defines 'handler queues'. These are an abstraction for a stream of
 // events (which can also be thought of as element of data) is added to

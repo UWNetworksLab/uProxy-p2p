@@ -1,5 +1,5 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../freedom/typings/freedom-module-env.d.ts" />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
@@ -37,7 +37,7 @@ function doLog(level:string, msg:string, args?:any[]) : loggable {
 }
 
 export class Log {
-  private logger :Promise<Freedom.logger>;
+  private logger :Promise<freedom.Logger>;
   constructor(private tag_:string) {
     this.logger = freedom.core().getLogger(this.tag_);
   }

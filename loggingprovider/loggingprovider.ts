@@ -1,5 +1,6 @@
-/// <reference path='../freedom/typings/freedom-common.d.ts' />
-/// <reference path='../freedom/typings/console.d.ts' />
+/// <reference path='../../third_party/typings/freedom/freedom-common.d.ts' />
+/// <reference path='../../third_party/typings/freedom/console.d.ts' />
+/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 export interface Message {
   timestamp :Date; // the timestamp the log was called (in core runtime).
@@ -98,7 +99,7 @@ export function doRealLog(level:string, tag:string, msg:string)
 }
 
 // Interface for accumulating log messages.
-export class Log implements freedom_Console.Console {
+export class Log {
   constructor() {}
 
   // Logs message in debug level.
@@ -124,6 +125,7 @@ export class Log implements freedom_Console.Console {
 
 // Interface for managinge & retreiving log messages.
 // Note: this is really a fake class: all data is in fact global.
+// TODO: rename this to LoggingManager or something sensible.
 export class LoggingProvider {
   constructor() {}
 

@@ -3,11 +3,7 @@
   "description": "top-level freedom manifest",
   "app": {
     "script": [
-      "lib/handler/queue.js",
-      "lib/logging/logging.js",
-      "lib/webrtc/datachannel.js",
-      "lib/webrtc/peerconnection.js",
-      "freedom-module.js"
+      "freedom-module.static.js"
     ]
   },
   "permissions": [

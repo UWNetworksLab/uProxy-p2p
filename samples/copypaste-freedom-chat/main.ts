@@ -1,4 +1,4 @@
-/// <reference path="../../freedom/typings/freedom-core-env.d.ts" />
+/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
@@ -33,9 +33,9 @@ freedom('freedom-module.json', {
     'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'log'
   }).then(
-    (copypasteModuleFactory:() => OnAndEmit<any,any>) => {
+    (copypasteModuleFactory:() => freedom.OnAndEmit<any,any>) => {
   // TODO: Make this have a freedom API.
-  var copypaste :OnAndEmit<any,any> = copypasteModuleFactory();
+  var copypaste :freedom.OnAndEmit<any,any> = copypasteModuleFactory();
 
   // DOM nodes that we will choose from either the offer panel or the
   // answer panel once the user chooses whether to offer/answer.

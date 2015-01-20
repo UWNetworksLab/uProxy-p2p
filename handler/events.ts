@@ -1,4 +1,4 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 // A Handler abstraction for events. This abstraction allows all event handlers
 // to produce an event type and for a summarization of those events to be the

@@ -1,5 +1,5 @@
-/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../third_party/typings/freedom/rtcpeerconnection.d.ts' />
 
 import DataChannelInterfaces = require('datachannel.i');
 import ArrayBuffers = require('../arraybuffers/arraybuffers');

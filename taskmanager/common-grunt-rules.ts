@@ -13,8 +13,8 @@ export function jasmineSpec(name:string) {
                 'dist/promise-1.0.0.js')
     ],
     options: {
-      specs: 'build/dev/' + name + '/**/*.spec.static.js',
-      outfile: 'build/dev/' + name + '/SpecRunner.html',
+      specs: 'build/src/' + name + '/**/*.spec.static.js',
+      outfile: 'build/src/' + name + '/SpecRunner.html',
       keepRunner: true
     }
   };
@@ -22,8 +22,8 @@ export function jasmineSpec(name:string) {
 
 export function browserify(filepath:string) {
   return {
-    src: ['build/dev/' + filepath + '.js'],
-    dest: 'build/dev/' + filepath + '.static.js',
+    src: ['build/src/' + filepath + '.js'],
+    dest: 'build/src/' + filepath + '.static.js',
     options: {
       debug: true,
     }

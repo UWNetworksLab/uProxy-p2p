@@ -11,6 +11,7 @@ describe("Logging Provider", () => {
   var loggingControl :LoggingProvider.LoggingProvider;
 
   beforeEach(() => {
+    // TODO: fix this crazy naming.
     loggingProvider = new LoggingProvider.Log();
     loggingControl = new LoggingProvider.LoggingProvider();
     loggingControl.clearLogs();

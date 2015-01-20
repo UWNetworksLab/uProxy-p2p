@@ -1,4 +1,4 @@
-/// <reference path="../../freedom/typings/freedom-core-env.d.ts" />
+/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 
 import Message = require('./messages.i');
 
@@ -14,9 +14,9 @@ freedom('freedom-module.json', {
     'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'debug'
   }).then(
-    (simpleChatFactory:() => OnAndEmit<any,any>) => {
+    (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {
   // TODO: typings for the freedom module
-  var chat :OnAndEmit<any,any> = simpleChatFactory();
+  var chat :freedom.OnAndEmit<any,any> = simpleChatFactory();
 
   chat.on('ready', function() {
     sendAreaA.disabled = false;
