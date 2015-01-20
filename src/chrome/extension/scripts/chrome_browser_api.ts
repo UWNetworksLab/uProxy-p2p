@@ -51,7 +51,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
     // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
     // is why we employ a hacky thing here.
-    chrome.proxy.settings.clear({scope: 'regular'});
+    chrome.proxy.settings['clear']({scope: 'regular'});
 
     chrome.browserAction.onClicked.addListener((tab) => {
       // When the extension icon is clicked, open uProxy.

@@ -418,7 +418,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
               'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
-              'build/compile-src/chrome/extension/scripts/chrome_connector.js'
+              'build/compile-src/chrome/extension/scripts/chrome_core_connector.js'
               'build/compile-src/chrome/extension/scripts/chrome_tab_auth.js'
               'build/compile-src/chrome/util/chrome_glue.js'
             ]
