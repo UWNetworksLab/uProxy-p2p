@@ -1,5 +1,7 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
+
+import freedomTypes = require('freedom');
+import freedom = require('../../third_party/typings/freedom/freedom-module-env');
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
@@ -17,13 +19,13 @@ function formatStringMessageWithArgs_(msg:string, args?:any[])
 }
 
 interface loggable {
-  (logger: freedom.Logger): void;
+  (logger: freedomTypes.Logger): void;
 }
 
 function doLog(level:string, msg:string, args?:any[]) : loggable {
   var message = formatStringMessageWithArgs_(msg, args);
 
-  return (logger: freedom.Logger) => {
+  return (logger: freedomTypes.Logger) => {
     if (level === 'debug') {
       logger.debug(message);
     } else if (level === 'info') {
@@ -37,7 +39,7 @@ function doLog(level:string, msg:string, args?:any[]) : loggable {
 }
 
 export class Log {
-  private logger :Promise<freedom.Logger>;
+  private logger :Promise<freedomTypes.Logger>;
   constructor(private tag_:string) {
     this.logger = freedom.core().getLogger(this.tag_);
   }

@@ -2,6 +2,8 @@
 /// <reference path='../../third_party/typings/freedom/rtcpeerconnection.d.ts' />
 /// <reference path='../../third_party/typings/freedom/freedom-common.d.ts' />
 
+import freedom = require('../../third_party/typings/freedom/freedom-module-env');
+
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');
 import Random = require('../crypto/random');

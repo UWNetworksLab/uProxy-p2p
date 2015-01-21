@@ -7,6 +7,8 @@
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
 
+import freedom = require('../../third_party/typings/freedom/freedom-module-env');
+
 import DataChannels = require('datachannel.i');
 import Handler = require('../handler/queue');
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
