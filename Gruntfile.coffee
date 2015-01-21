@@ -144,13 +144,6 @@ module.exports = (grunt) ->
 
     concat: {
 
-      uistatic: {
-        files: [ {
-          src: ['build/uistatic/src/generic_ui/scripts/ui.js'
-                 'build/uistatic/src/uistatic/scripts/dependencies.js']
-          dest: 'build/uistatic/scripts/dependencies.js' } ]
-      }
-
       firefox_uproxy: {
         files: [ {
           src: [firefoxDevPath + 'data/core/uproxy.js'
@@ -206,7 +199,7 @@ module.exports = (grunt) ->
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', 'index.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Chrome-only polymer.
@@ -327,7 +320,7 @@ module.exports = (grunt) ->
         }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', 'index.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: firefoxDevPath + 'data/'
         }, {
           # Icons and fonts
@@ -388,7 +381,6 @@ module.exports = (grunt) ->
 
       # TODO: Remove uistatic / make it the same as uipolymer once polymer is
       # fully integrated.
-      uistatic: Rule.typescriptSrcLenient 'compile-src/uistatic'
       uipolymer: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer'
 
       # Mocks to help jasmine along. These typescript files must be compiled
@@ -549,13 +541,6 @@ module.exports = (grunt) ->
     'vulcanize:withcsp'
   ]
 
-  taskManager.add('build_uistatic', [
-    'build_generic_ui',
-    'ts:uistatic',
-    # 'concat:uistatic',
-    # 'copy:uistatic'
-  ]);
-
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
@@ -587,7 +572,6 @@ module.exports = (grunt) ->
   taskManager.add 'build', [
     'build_chrome'
     'build_firefox'
-    'build_uistatic'
   ]
 
   # --- Testing tasks ---
