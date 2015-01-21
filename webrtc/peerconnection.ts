@@ -16,7 +16,6 @@ module WebRtc {
   export interface PeerConnectionConfig {
     webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
     peerName               ?:string;   // For debugging
-    initiateConnection     ?:boolean;  // defaults to false
   }
 
   export enum SignalType {
@@ -225,13 +224,6 @@ module WebRtc {
       this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
       this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
       this.pc_.on('oniceconnectionstatechange', this.onIceConnectionStateChange_);
-
-      if(this.config_.initiateConnection) {
-        this.negotiateConnection().catch((e:Error) => {
-          log.error(this.peerName + ': negotiateConnection: ' + e.toString() +
-            '; this.toString()= ' + this.toString());
-        });
-      }
     }
 
     // Close the peer connection. This function is idempotent.

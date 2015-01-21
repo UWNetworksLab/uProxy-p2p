@@ -11,7 +11,6 @@ declare module WebRtc {
   interface PeerConnectionConfig {
     webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
     peerName               ?:string;
-    initiateConnection     ?:boolean;
   }
 
   enum SignalType {
