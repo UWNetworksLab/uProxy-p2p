@@ -486,7 +486,6 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
-              'build/compile-src/generic_ui/scripts/core_connector.js'
             ]
         options:
           specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
