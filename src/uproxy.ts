@@ -269,3 +269,13 @@ enum SharingState {
   NONE = 200,
   SHARING_ACCESS
 };
+
+// Enums for Chrome App-Extension communication.
+// Used when the Extension and App are initiating their connection.
+//
+// TODO: Eliminate this someday, when we can make uProxy in chrome not be split
+// between an app and an extension.
+module ChromeMessage {
+  export var CONNECT :string = 'connect';
+  export var ACK :string = 'ack';
+}

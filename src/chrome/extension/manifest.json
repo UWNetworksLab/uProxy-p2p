@@ -13,14 +13,13 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/chrome_glue.js",
       "scripts/uproxy.js",
       "scripts/user.js",
       "scripts/ui.js",
       "scripts/chrome_browser_api.js",
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",
-      "scripts/chrome_connector.js",
+      "scripts/chrome_core_connector.js",
       "scripts/background.js"
     ]
   },

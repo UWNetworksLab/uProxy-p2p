@@ -211,9 +211,9 @@ module.exports = (grunt) ->
         }, {
           # Chrome-only polymer.
           # (Assumes the typescript task has executed)
-          expand: true, cwd: 'build/compile-src/chrome/extension'
+          expand: true, cwd: 'build/compile-src/chrome/extension/polymer'
           src: ['vulcanized-chrome.*']
-          dest: chromeExtDevPath
+          dest: chromeExtDevPath + 'polymer'
         }, {
           # Icons and fonts
           expand: true, cwd: 'src/'
@@ -223,7 +223,6 @@ module.exports = (grunt) ->
           expand: true, cwd: 'build/compile-src/', flatten: true
           src: FILES.uproxy_common
             .concat [
-              'chrome/util/chrome_glue.js',
               'chrome/extension/scripts/*.js'
             ]
           dest: chromeExtDevPath + 'scripts/'
@@ -250,7 +249,6 @@ module.exports = (grunt) ->
             'uproxy.js'
             'chrome/app/scripts/*.js'
             'generic_core/**/*.js'
-            'chrome/util/chrome_glue.js'
             '!**/*.spec.js'
           ]
           dest: chromeAppDevPath + 'scripts/'
@@ -417,16 +415,40 @@ module.exports = (grunt) ->
       chrome_extension:
         src: FILES.jasmine_helpers
             .concat [
+              'build/compile-src/uproxy.js'
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
-              'build/compile-src/chrome/extension/scripts/chrome_connector.js'
-              'build/compile-src/chrome/util/chrome_glue.js'
+              'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
+              'build/compile-src/chrome/extension/scripts/chrome_core_connector.js'
+              'build/compile-src/chrome/extension/scripts/chrome_tab_auth.js'
             ]
         options:
-          specs: 'build/compile-src/chrome/**/*.spec.js'
-          outfile: 'build/compile-src/chrome/SpecRunner.html'
-          keepRunner: true
+          specs: 'build/compile-src/chrome/extension/**/*.spec.js'
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/chrome_extension/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/chrome_extension'
+
+      chrome_app:
+        src: FILES.jasmine_helpers
+            .concat [
+              'build/compile-src/uproxy.js'
+              'build/compile-src/mocks/chrome_mocks.js'
+              'build/compile-src/chrome/app/scripts/chrome_ui_connector.js'
+            ]
+        options:
+          specs: 'build/compile-src/chrome/app/**/*.spec.js'
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/chrome_app/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/chrome_app'
 
       generic_core:
         src: FILES.jasmine_helpers
@@ -452,10 +474,15 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
-          outfile: 'build/compile-src/generic_core/SpecRunner.html'
           # NOTE: Put any helper test-data files here:
           helpers: []
-          keepRunner: true,
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/generic_core/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/generic_core'
 
       generic_ui:
         src: FILES.jasmine_helpers
@@ -466,8 +493,14 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
-          outfile: 'build/compile-src/generic_ui/SpecRunner.html'
-          keepRunner: true
+          template: require('grunt-template-jasmine-istanbul')
+          templateOptions:
+            coverage: 'build/coverage/generic_ui/coverage.json'
+            report:
+              type: 'html'
+              options:
+                dir: 'build/coverage/generic_ui'
+
 
     compress:
       main:
@@ -495,13 +528,13 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/chrome/extension/vulcanized-inline.html': 'build/compile-src/chrome/extension/app-missing-polymer.html'
+          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing.html'
       chromecsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/chrome/extension/vulcanized-chrome.html': 'build/compile-src/chrome/extension/vulcanized-inline.html'
+          'build/compile-src/chrome/extension/polymer/vulcanized-chrome.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -606,11 +639,12 @@ module.exports = (grunt) ->
     'jasmine:generic_ui'
   ]
 
-  taskManager.add 'test_chrome_extension', [
+  taskManager.add 'test_chrome', [
     'build_chrome'
     'ts:chrome_specs'
     'ts:mocks'
     'jasmine:chrome_extension'
+    'jasmine:chrome_app'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
@@ -618,7 +652,7 @@ module.exports = (grunt) ->
   taskManager.add 'test', [
     'test_core'
     'test_ui'
-    'test_chrome_extension'
+    'test_chrome'
   ]
 
   taskManager.add 'everything', [

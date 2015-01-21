@@ -6,8 +6,11 @@
  */
 
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
+
+// TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uProxy = require('uproxy.js').uProxy;
 
+// TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
     from.on(command, function(data) {
