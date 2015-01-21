@@ -62,7 +62,7 @@ class ChromeUIConnector {
     // Because there is no callback when you call runtime.connect and it
     // sucessfully connects, the extension depends on a message received from
     // this app, so it knows the connection was successful.
-    this.extPort_.postMessage(ChromeGlue.ACK);
+    this.extPort_.postMessage(ChromeMessage.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
 
     // Once the extension is connected, we know that installation of uProxy

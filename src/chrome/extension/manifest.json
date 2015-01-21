@@ -13,7 +13,6 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/chrome_glue.js",
       "scripts/uproxy.js",
       "scripts/user.js",
       "scripts/ui.js",

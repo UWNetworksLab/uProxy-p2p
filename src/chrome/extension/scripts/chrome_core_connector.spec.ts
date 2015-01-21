@@ -96,9 +96,9 @@ describe('core-connector', () => {
     });
     // Short-circuit postMessage to pretend Chrome App ACKS correctly.
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      expect(port.postMessage).toHaveBeenCalledWith(ChromeGlue.CONNECT);
+      expect(port.postMessage).toHaveBeenCalledWith(ChromeMessage.CONNECT);
       expect(acker).not.toBeNull();
-      acker(ChromeGlue.ACK);
+      acker(ChromeMessage.ACK);
     });
 
     // Capture the disconnection fulfillment or next spec.
@@ -172,7 +172,7 @@ describe('core-connector', () => {
       acker = handler;
     });
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      acker(ChromeGlue.ACK);
+      acker(ChromeMessage.ACK);
     });
     // Spy the queue flusher for the next spec.
     spyOn(chromeCoreConnector, 'flushQueue').and.callFake(() => {

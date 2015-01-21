@@ -5,7 +5,6 @@
  */
 /// <reference path='background.ts'/>
 /// <reference path='../../../uproxy.ts'/>
-/// <reference path='../../util/chrome_glue.ts' />
 
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
@@ -127,7 +126,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       // (there is no callback for a runtime connection [25 Aug 2013])
       var ackResponse :Function = (msg :string) => {
         console.log('connect_: in ackResponse');
-        if (ChromeGlue.ACK !== msg) {
+        if (ChromeMessage.ACK !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
         }
         // Replace message listener for the updating mechanism.
@@ -151,7 +150,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       };
       this.appPort_.onMessage.addListener(ackResponse);
       // Send 'hi', which should prompt App to respond with ack.
-      this.appPort_.postMessage(ChromeGlue.CONNECT);
+      this.appPort_.postMessage(ChromeMessage.CONNECT);
     }).catch((e) => {
       console.log(e);
       // Retry connection.

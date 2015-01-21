@@ -8,7 +8,6 @@
 /// <reference path='chrome_ui_connector.ts' />
 /// <reference path='../../../uproxy.ts' />
 /// <reference path='../../../freedom/typings/freedom.d.ts' />
-/// <reference path='../../util/chrome_glue.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 // Remember which handlers freedom has installed.

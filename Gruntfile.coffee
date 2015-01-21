@@ -223,7 +223,6 @@ module.exports = (grunt) ->
           expand: true, cwd: 'build/compile-src/', flatten: true
           src: FILES.uproxy_common
             .concat [
-              'chrome/util/chrome_glue.js',
               'chrome/extension/scripts/*.js'
             ]
           dest: chromeExtDevPath + 'scripts/'
@@ -250,7 +249,6 @@ module.exports = (grunt) ->
             'uproxy.js'
             'chrome/app/scripts/*.js'
             'generic_core/**/*.js'
-            'chrome/util/chrome_glue.js'
             '!**/*.spec.js'
           ]
           dest: chromeAppDevPath + 'scripts/'
@@ -414,13 +412,13 @@ module.exports = (grunt) ->
       chrome_extension:
         src: FILES.jasmine_helpers
             .concat [
+              'build/compile-src/uproxy.js'
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
               'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
               'build/compile-src/chrome/extension/scripts/chrome_core_connector.js'
               'build/compile-src/chrome/extension/scripts/chrome_tab_auth.js'
-              'build/compile-src/chrome/util/chrome_glue.js'
             ]
         options:
           specs: 'build/compile-src/chrome/extension/**/*.spec.js'
@@ -435,9 +433,9 @@ module.exports = (grunt) ->
       chrome_app:
         src: FILES.jasmine_helpers
             .concat [
+              'build/compile-src/uproxy.js'
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/chrome/app/scripts/chrome_ui_connector.js'
-              'build/compile-src/chrome/util/chrome_glue.js'
             ]
         options:
           specs: 'build/compile-src/chrome/app/**/*.spec.js'
