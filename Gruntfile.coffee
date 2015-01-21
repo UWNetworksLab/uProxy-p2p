@@ -528,7 +528,7 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing-polymer.html'
+          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing.html'
       chromecsp:
         options:
           csp: true

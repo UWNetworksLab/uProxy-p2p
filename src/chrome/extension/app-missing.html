@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Popup displayed if the Chrome App is not installed. Contains just the
+app-missing Polymer element. -->
+<html>
+
+<head>
+  <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
+  <script src='lib/webcomponentsjs/webcomponents.js'></script>
+
+  <script src='scripts/dependencies.js'></script>
+
+  <link rel='import' href='polymer/vulcanized-chrome.html'>
+  <style>
+  @font-face {
+    font-family: Roboto, sans-serif;
+    src: url('../styles/eurostile.ttf');
+  }
+  body {
+    width: 371px; height: 600px;
+    display: block;
+    text-align: center;
+    font-family: Roboto, sans-serif;
+    font-size: 13px;
+    background-color: white;
+    padding-top: 200px;
+    margin: 0px;
+  }
+  </style>
+</head>
+
+<body unresolved touch-action='auto'>
+  <uproxy-app-missing></uproxy-app-missing>
+</body>
+
+</html>

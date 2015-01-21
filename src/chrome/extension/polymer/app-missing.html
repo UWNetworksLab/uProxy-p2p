@@ -1,33 +1,30 @@
-<!doctype html>
-<html>
+<link rel="import" href="../../../generic_ui/lib/polymer/polymer.html">
+<link rel="import" href="../../../generic_ui/lib/paper-button/paper-button.html">
 
-<head>
-  <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <script src='../lib/webcomponentsjs/webcomponents.js'></script>
+<polymer-element name='uproxy-app-missing'>
+  <template>
+    <style>
+      :host {
+        text-align: center;
+        font-size: 1em;
+        color: rgb(112, 112, 112);
+      }
+      h1 {
+        font-size: 1.4em;
+        color: #009688;  /* dark green */
+      }
+      .highlightedButton {
+        background: #009688;  /* dark green */
+        color: white;
+      }
+    </style>
 
-  <script src='../scripts/dependencies.js'></script>
+    <h1>You're almost ready to use uProxy!</h1>
+    <br>
+    Download and enable part 2 of uProxy to get started.
+    <br><br>
+    <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>NEXT</paper-button>
 
-  <link rel='import' href='vulcanized-chrome.html'>
-  <style>
-  @font-face {
-    font-family: Roboto, sans-serif;
-    src: url('../styles/eurostile.ttf');
-  }
-  body {
-    width: 371px; height: 600px;
-    display: block;
-    text-align: center;
-    font-family: Roboto, sans-serif;
-    font-size: 13px;
-    background-color: white;
-    padding-top: 200px;
-    margin: 0px;
-  }
-  </style>
-</head>
-
-<body unresolved touch-action='auto'>
-  <uproxy-app-missing></uproxy-app-missing>
-</body>
-
-</html>
+  </template>
+  <script src='app-missing.js'></script>
+</polymer-element>

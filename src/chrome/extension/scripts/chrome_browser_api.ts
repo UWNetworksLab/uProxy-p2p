@@ -31,7 +31,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private popupUrl_ = "polymer/app-missing.html";
+  private popupUrl_ = "app-missing.html";
   // Chrome Window ID of the window used to launch uProxy,
   // i.e. the window where the extension icon was clicked.
   private mainWindowId_ = chrome.windows.WINDOW_ID_NONE;
