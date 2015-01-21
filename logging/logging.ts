@@ -1,7 +1,8 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
-import freedomTypes = require('freedom');
-import freedom = require('../../third_party/typings/freedom/freedom-module-env');
+import freedomTypes = require('freedom.i');
+//import freedom = require('../../third_party/typings/freedom/freedom-module-env');
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.

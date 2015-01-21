@@ -1,57 +1,53 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import freedomMocker = require('../../third_party/typings/freedom/mocks/jasmine-mock-freedom-module-env');
 import Logging = require('./logging');
-import freedomVar = require('../../third_party/typings/freedom/freedom-module-env');
 
-var freedom = freedomVar;
-
-// freedom must be defined in the top level because code that uses freedom
-// assumes it is a top level varibale.
-
-describe("Client Logging Shim", () => {
+describe("Client logging shim using Freedom", () => {
 
   beforeEach(() => {
-    // Reset the freedom env.
+    // Reset the mock freedom environment.
     freedom = freedomMocker.makeMockFreedomInModuleEnv();
   });
 
-  it('forwards logs to freedom', (done) => {
-    var mockLogger = jasmine.createSpyObj(
-      'tag1', ['debug', 'log', 'info', 'warn', 'error'])
-    var getLoggerMock = spyOn(freedom.core(), "getLogger");
-    getLoggerMock.and.returnValue(mockLogger);
+  it('new Logging.log forwards log calls to the named freedom core logger.',
+      (done) => {
+    var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
+      'tag1', ['debug', 'log', 'info', 'warn', 'error']));
+    var mockGetLogger = spyOn(freedom.core(), "getLogger");
+    mockGetLogger.and.returnValue(mockLoggerPromise);
 
     var log1 = new Logging.Log('tag1');
-    expect(getLoggerMock).toHaveBeenCalledWith('tag1');
+    expect(mockGetLogger).toHaveBeenCalledWith('tag1');
 
     log1.error('test-error-string');
     log1.debug('test-debug-string');
 
-    // Timeout is used to make sure the the promise resolution
-    // setTimeout(() => {
+    mockLoggerPromise.then((mockLogger) => {
       expect(mockLogger.debug).toHaveBeenCalledWith('test-debug-string');
       expect(mockLogger.error).toHaveBeenCalledWith('test-error-string');
       expect(mockLogger.log).not.toHaveBeenCalledWith('test-error-string');
       done();
-    // }, 0);
+    });
   });
-/*
+
   it('Collapses arguments into flattened messages', (done) => {
-    var freedom = freedomMocker.makeFakeFreedomInModuleEnv();
-    var mockLogger = jasmine.createSpyObj(
-      'tag1', ['debug', 'log', 'info', 'warn', 'error'])
-    spyOn(freedom.core(), "getLogger").and.returnValue(mockLogger);
+    var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
+      'tag1', ['debug', 'log', 'info', 'warn', 'error']));
+    var mockGetLogger = spyOn(freedom.core(), "getLogger");
+    mockGetLogger.and.returnValue(mockLoggerPromise);
 
     var log2 = new Logging.Log('tag2');
     log2.info('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
-    expect(freedom.core().getLogger).toHaveBeenCalledWith('tag2');
+    expect(mockGetLogger).not.toHaveBeenCalledWith('tag1');
+    expect(mockGetLogger).toHaveBeenCalledWith('tag2');
 
-    //setTimeout(() => {
+    mockLoggerPromise.then((mockLogger) => {
       expect(mockLogger.info)
         .toHaveBeenCalledWith('Bob pinged Alice with id=123456');
       done();
-    //}, 0);
+    });
   });
-*/
+
 });
