@@ -174,17 +174,20 @@ module Core {
      * instance, and pass it along to the relevant socks-rtc module.
      * TODO: spec
      * TODO: assuming that signal is valid, should we remove signal?
+     * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:uProxy.MessageType,
                            signalFromRemote:Object) => {
       switch (type) {
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          // If the remote peer sent signal as the client, we act as server.
           if (!this.consent.localGrantsAccessToRemote) {
             console.warn('Remote side attempted access without permission');
             return;
           }
-          // If the remote peer sent signal as the client, we act as server.
-          if(!this.rtcToNet_) {
+
+          // Create a new rtcToNet object everytime there is an OFFER signal
+          if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
             // TODO: make this into a separate function
             this.rtcToNet_ = new RtcToNet.RtcToNet(
                 this.rtcNetPcConfig, this.rtcNetProxyConfig);
@@ -229,9 +232,12 @@ module Core {
               this.rtcToNet_ = null;
             });
           }
-          // TODO: signalFromRemote needs to get converted into a
-          // WebRtc.SignallingMessage. This probably doesn't actually work right
-          // now.
+          if (!this.rtcToNet_) {
+            // rtcToNet_ should be created when we receive an OFFER message
+            console.warn('Received SIGNAL_FROM_CLIENT_PEER without OFFER',
+                signalFromRemote);
+            return;
+          }
           this.rtcToNet_.handleSignalFromPeer(
               <WebRtc.SignallingMessage>signalFromRemote);
           break;
