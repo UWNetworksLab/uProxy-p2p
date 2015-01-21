@@ -20,10 +20,10 @@ module Firewall {
   export enum Severity {
     // Incorrect input.  No claims on intent.
     MalformedInput,
-    // Invoked when it looks like a pretty blatant attempt to force
-    // a failure/explit in uProxy.  We have some heuristics for
-    // determining likely attacks, such as identifiers that include
-    // curly braces, or specialized JS keywords like __proto__.
+    // Invoked when it looks like a pretty blatant attempt to force a
+    // failure/explit in uProxy.  We have some heuristics for
+    // determining likely attacks, such as identifiers that are
+    // specialized JS keywords like __proto__.
     LikelyAttack,
   };
 
