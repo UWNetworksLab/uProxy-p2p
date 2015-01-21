@@ -331,8 +331,8 @@ module Social {
         : Promise<void> => {
       var userId = profile.userId;
       if (!Firewall.isValidUserProfile(profile, null)) {
-        this.log("got user profile: " + JSON.stringify(profile));
-        ui.showNotification("Failed user profile firewall check");
+        this.error("Firewall: invalid user profile: " + JSON.stringify(profile));
+        return Promise.reject("Invalid user profile");
       }
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
@@ -376,8 +376,8 @@ module Social {
     public handleClientState = (freedomClient :freedom_Social.ClientState)
         : Promise<void> => {
       if (!Firewall.isValidClientState(freedomClient, null)) {
-        this.log("got client state: " + JSON.stringify(freedomClient));
-        ui.showNotification("Failed client state firewall check");
+        this.error("Firewall: invalid client state: " + JSON.stringify(freedomClient));
+        return Promise.reject("Failed client state firewall check");
       }
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
@@ -416,8 +416,8 @@ module Social {
     public handleMessage = (incoming :freedom_Social.IncomingMessage)
         : Promise<void> => {
       if (!Firewall.isValidIncomingMessage(incoming, null)) {
-        this.log("got incoming message: " + JSON.stringify(incoming));
-        ui.showNotification("Failed incoming message firewall check");
+        this.error("Firewall: invalid incoming message: " + JSON.stringify(incoming));
+        return Promise.reject("Failed incoming message firewall check");
       }
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
