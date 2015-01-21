@@ -20,7 +20,3 @@ module chrome.browserAction {
     console.log('Mock chrome.browserAction.setIcon.');
   }
 }
-
-module chrome.proxy {
-  export var ProxyConfig = null;
-}
