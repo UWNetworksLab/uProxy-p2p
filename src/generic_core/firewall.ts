@@ -33,7 +33,7 @@ module Firewall {
 
   export class DefaultResponsePolicy implements ResponsePolicy {
     public onValidationFailure(s :string, level :Severity) {
-      console.warn("DROPPING MESSAGE ON VALIDATION FAILURE.  Severity: " + 
+      console.warn("DROPPING MESSAGE ON VALIDATION FAILURE.  Severity: " +
                    level + ", text: " + s);
     }
   }
@@ -68,7 +68,7 @@ module Firewall {
     if (isReservedWord(s) || hasBadChars(s) || isPredefinedOnObject(s)) {
       response.onValidationFailure(s, Severity.LikelyAttack);
       return false;
-    } 
+    }
     return true;
   }
 
@@ -79,7 +79,7 @@ module Firewall {
     } else {
       return true;
     }
-  }        
+  }
 
   var USER_PROFILE_SCHEMA = {
     'userId' : 'string',
@@ -124,11 +124,11 @@ module Firewall {
       }
     }
 
-    return remaining_required == 0 && 
+    return remaining_required == 0 &&
       object_keys_matched == 0;
   }
 
-  export function isValidUserProfile(profile :freedom_Social.UserProfile, 
+  export function isValidUserProfile(profile :freedom_Social.UserProfile,
                                      response :ResponsePolicy) : boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
@@ -179,7 +179,7 @@ module Firewall {
     // Call this when we're not handing the |response| object to
     // methods (where they'd call onValidationFailure themselves)
     function fail() {
-      response.onValidationFailure(JSON.stringify(state), 
+      response.onValidationFailure(JSON.stringify(state),
                                    Severity.MalformedInput);
     }
 
@@ -191,7 +191,7 @@ module Firewall {
     if (!isUserId(state.userId, response)) {
       return false;
     }
-    
+
     if (!isClientId(state.clientId, response)) {
       return false;
     }
@@ -205,7 +205,7 @@ module Firewall {
       fail();
       return false;
     }
-    
+
     return true;
   }
 
@@ -214,7 +214,7 @@ module Firewall {
     'message' : 'string'
   };
 
-  export function isValidIncomingMessage(state :freedom_Social.IncomingMessage, 
+  export function isValidIncomingMessage(state :freedom_Social.IncomingMessage,
                                          response :ResponsePolicy) :boolean {
     if (response == null) {
       response = DEFAULT_RESPONSE_POLICY;
@@ -223,7 +223,7 @@ module Firewall {
     // Call this when we're not handing the |response| object to
     // methods (where they'd call onValidationFailure themselves)
     function fail() {
-      response.onValidationFailure(JSON.stringify(state), 
+      response.onValidationFailure(JSON.stringify(state),
                                    Severity.MalformedInput);
     }
 
