@@ -10,17 +10,12 @@
 
 // Mock out chrome.
 module chrome.runtime {
-
   export function connect(connect) {
     console.log('Mock chrome.runtime.connect.');
   }
 }
 
 module chrome.browserAction {
-
-  export function setPopup(url) {
-    console.log('Mock chrome.browserAction.setPopup.');
-  }
   export function setIcon(filename) {
     console.log('Mock chrome.browserAction.setIcon.');
   }

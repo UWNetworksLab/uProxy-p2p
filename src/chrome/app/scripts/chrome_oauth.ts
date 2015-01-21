@@ -1,7 +1,7 @@
 /**
  * Chrome oauth provider
  **/
-/// <reference path='plumbing.ts'/>
+/// <reference path='background.ts'/>
 
 var connector :ChromeUIConnector;
 

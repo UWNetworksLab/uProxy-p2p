@@ -1,4 +1,4 @@
-/// <reference path='chrome_connector.ts' />
+/// <reference path='chrome_core_connector.ts' />
 /// <reference path='../../../generic_ui/scripts/core_connector.ts' />
 /// <reference path='../../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
@@ -26,7 +26,7 @@ var ui :UI.UserInterface;
 var chromeBrowserApi :ChromeBrowserApi;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
-// sequence on the chromeConnector object.
+// sequence on the chromeCoreConnector object.
 describe('core-connector', () => {
 
   ui = jasmine.createSpyObj('UI.UserInterface',
@@ -39,10 +39,10 @@ describe('core-connector', () => {
     ['updatePopupUrl',
      'bringUproxyToFront']);
 
-  var chromeConnector :ChromeConnector;
-  chromeConnector = new ChromeConnector();
+  var chromeCoreConnector :ChromeCoreConnector;
+  chromeCoreConnector = new ChromeCoreConnector();
 
-  var core = new CoreConnector(chromeConnector);
+  var core = new CoreConnector(chromeCoreConnector);
 
   var connectPromise :Promise<void>;
 
@@ -51,27 +51,27 @@ describe('core-connector', () => {
   });
 
   it('attempts chrome.runtime.connect().', () => {
-    spyOn(chromeConnector, 'connect').and.callThrough()
+    spyOn(chromeCoreConnector, 'connect').and.callThrough()
     // Get chrome.runtime.connect to return null as if there were no App to
     // connect to.
     // chrome.runtime and chrome.browserAction are mocks found in
     // chrome_mocks.ts.
     spyOn(chrome.runtime, 'connect').and.returnValue(null);
-    connectPromise = chromeConnector.connect();
+    connectPromise = chromeCoreConnector.connect();
     expect(chrome.runtime.connect).toHaveBeenCalled();
   });
 
   it('fails to connect with no App present.', (done) => {
     connectPromise.catch((e) => {
-      expect(chromeConnector.status.connected).toEqual(false);
-      expect(chromeConnector['appPort_']).toEqual(null);
+      expect(chromeCoreConnector.status.connected).toEqual(false);
+      expect(chromeCoreConnector['appPort_']).toEqual(null);
     }).then(done);
   });
 
   it('continues polling while disconnected.', (done) => {
     // Spying with a fake will prevent the actual implementations polling
     // behavior after its caught. This allows the next spec to start fresh.
-    spyOn(chromeConnector, 'connect').and.callFake(() => {
+    spyOn(chromeCoreConnector, 'connect').and.callFake(() => {
       console.log('caught connection retry.');
       connectPromise = null;
       done();
@@ -87,18 +87,18 @@ describe('core-connector', () => {
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
     spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
       if (null !== acker) {
-        expect(handler).toEqual(chromeConnector['receive_']);
+        expect(handler).toEqual(chromeCoreConnector['receive_']);
         return;
       }
       spyOn(port.onMessage, 'removeListener');
-      // Extract ack function from the depths of chromeConnector.
+      // Extract ack function from the depths of chromeCoreConnector.
       acker = handler;
     });
     // Short-circuit postMessage to pretend Chrome App ACKS correctly.
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      expect(port.postMessage).toHaveBeenCalledWith(ChromeGlue.CONNECT);
+      expect(port.postMessage).toHaveBeenCalledWith(ChromeMessage.CONNECT);
       expect(acker).not.toBeNull();
-      acker(ChromeGlue.ACK);
+      acker(ChromeMessage.ACK);
     });
 
     // Capture the disconnection fulfillment or next spec.
@@ -107,18 +107,18 @@ describe('core-connector', () => {
     });
 
     // Begin successful connection attempt to App.
-    spyOn(chromeConnector, 'send').and.callFake(() => {});
+    spyOn(chromeCoreConnector, 'send').and.callFake(() => {});
     spyOn(chrome.browserAction, 'setIcon');
-    expect(chromeConnector.status.connected).toEqual(false);
-    chromeConnector.connect().then(() => {
-      expect(chromeConnector['appPort_']).not.toBeNull();
+    expect(chromeCoreConnector.status.connected).toEqual(false);
+    chromeCoreConnector.connect().then(() => {
+      expect(chromeCoreConnector['appPort_']).not.toBeNull();
       expect(port.onMessage.removeListener).toHaveBeenCalled();
-      expect(chromeConnector.status.connected).toEqual(true);
+      expect(chromeCoreConnector.status.connected).toEqual(true);
       // Check that onUpdate callbacks were successfully sent to app.
-      expect(chromeConnector['send']).toHaveBeenCalledWith({
+      expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
         cmd: 'on', type: uProxy.Update.COMMAND_FULFILLED
       });
-      expect(chromeConnector['send']).toHaveBeenCalledWith({
+      expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
         cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
       });
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
@@ -134,25 +134,25 @@ describe('core-connector', () => {
     // test we could instead mock out window.setTimeout and verify that it
     // is called with the expected params.
     expect(disconnect).not.toBeNull();
-    spyOn(chromeConnector, 'connect').and.callFake(() => { done(); })
+    spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); })
     disconnect();
-    expect(chromeConnector.status.connected).toEqual(false);
-    expect(chromeConnector['appPort_']).toBeNull();
+    expect(chromeCoreConnector.status.connected).toEqual(false);
+    expect(chromeCoreConnector['appPort_']).toBeNull();
     expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
   });
 
   it('send queues message while disconnected.', () => {
     var payload = { cmd: 'test1', type: 1 };
-    chromeConnector['send'](payload);
-    expect(chromeConnector['queue_']).toEqual([
+    chromeCoreConnector['send'](payload);
+    expect(chromeCoreConnector['queue_']).toEqual([
         { cmd: 'test1', type: 1 }
     ]);
   });
 
   it('queues messages in the right order.', () => {
     var payload = { cmd: 'test2', type: 2 };
-    chromeConnector['send'](payload);
-    expect(chromeConnector['queue_']).toEqual([
+    chromeCoreConnector['send'](payload);
+    expect(chromeCoreConnector['queue_']).toEqual([
         { cmd: 'test1', type: 1 },
         { cmd: 'test2', type: 2 }
     ]);
@@ -172,16 +172,16 @@ describe('core-connector', () => {
       acker = handler;
     });
     spyOn(port, 'postMessage').and.callFake((msg) => {
-      acker(ChromeGlue.ACK);
+      acker(ChromeMessage.ACK);
     });
     // Spy the queue flusher for the next spec.
-    spyOn(chromeConnector, 'flushQueue').and.callFake(() => {
+    spyOn(chromeCoreConnector, 'flushQueue').and.callFake(() => {
       flushed = true;
     });
     // Begin successful connection attempt to App.
-    expect(chromeConnector.status.connected).toEqual(false);
-    chromeConnector.connect().then(() => {
-      expect(chromeConnector.status.connected).toEqual(true);
+    expect(chromeCoreConnector.status.connected).toEqual(false);
+    chromeCoreConnector.connect().then(() => {
+      expect(chromeCoreConnector.status.connected).toEqual(true);
     }).then(done);
   });
 
@@ -191,11 +191,11 @@ describe('core-connector', () => {
 
   it('flushes the queue correctly.', () => {
     var flushed = [];
-    spyOn(chromeConnector, 'send').and.callFake((payload) => {
+    spyOn(chromeCoreConnector, 'send').and.callFake((payload) => {
       flushed.push(payload);
     });
-    chromeConnector.flushQueue();
-    expect(chromeConnector['queue_']).toEqual([]);
+    chromeCoreConnector.flushQueue();
+    expect(chromeCoreConnector['queue_']).toEqual([]);
     expect(flushed).toEqual([
         { cmd: 'test1', type: 1 },
         { cmd: 'test2', type: 2 }
@@ -203,11 +203,11 @@ describe('core-connector', () => {
   });
 
   it('onUpdate calls send.', () => {
-    spyOn(chromeConnector, 'send');
+    spyOn(chromeCoreConnector, 'send');
     // TODO: Cannot use the uProxy.Update enum until the 'common' communications
-    // chromeConnector.onUpdate(uProxy.Update.ALL, () => {});
+    // chromeCoreConnector.onUpdate(uProxy.Update.ALL, () => {});
     // typescript file is ready.
-    // expect(chromeConnector['send']).toHaveBeenCalledWith({
+    // expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
       // cmd: 'on',
       // type: uProxy.Update.ALL
     // });

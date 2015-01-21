@@ -1,24 +1,11 @@
-/**
- * plumbing.ts
- *
- * This file must be included *after* the freedom script and manifest are
- * loaded.
- */
-/// <reference path='chrome_oauth.ts' />
-/// <reference path='../../../uproxy.ts' />
-/// <reference path='../../../freedom/typings/freedom.d.ts' />
-/// <reference path='../../util/chrome_glue.ts' />
+/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
-
-var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-
-// Remember which handlers freedom has installed.
-var installedFreedomHooks = [];
-var connector :ChromeUIConnector;
-var uProxyAppChannel : OnAndEmit<any,any>;
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
+var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
+var installedFreedomHooks = [];
+declare var uProxyAppChannel :OnAndEmit<any,any>;
 
 class ChromeUIConnector {
 
@@ -75,7 +62,7 @@ class ChromeUIConnector {
     // Because there is no callback when you call runtime.connect and it
     // sucessfully connects, the extension depends on a message received from
     // this app, so it knows the connection was successful.
-    this.extPort_.postMessage(ChromeGlue.ACK);
+    this.extPort_.postMessage(ChromeMessage.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
 
     // Once the extension is connected, we know that installation of uProxy
@@ -132,20 +119,4 @@ class ChromeUIConnector {
     this.onCredentials_ = onCredentials;
   }
 }
-var uproxyModule = new freedom('scripts/freedom-module.json', {
-  oauth: [Chrome_oauth]
-}).then(function(UProxy : () => void) {
-  uProxyAppChannel = new UProxy();
-  connector = new ChromeUIConnector();
-  console.log('Starting uProxy app...');
-});
 
-// Reply to pings from the uproxy website that are checking if the
-// application is installed.
-chrome.runtime.onMessageExternal.addListener(
-    function(request, sender, sendResponse) {
-        if (request) {
-          sendResponse({message: "Application installed."});
-        }
-        return true;
-    });
