@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/typings/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
 
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;

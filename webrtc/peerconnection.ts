@@ -1,9 +1,9 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../third_party/typings/freedom/rtcpeerconnection.d.ts' />
-/// <reference path='../../third_party/typings/freedom/freedom-common.d.ts' />
-/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../third_party/freedom/rtcpeerconnection.d.ts' />
+/// <reference path='../../third_party/freedom/freedom-common.d.ts' />
+/// <reference path='../../third_party/freedom/freedom-module-env.d.ts' />
 
-// import freedom = require('../../third_party/typings/freedom/freedom-module-env');
+// import freedom = require('../../third_party/freedom/freedom-module-env');
 
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');

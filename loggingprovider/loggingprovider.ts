@@ -1,8 +1,8 @@
-/// <reference path='../../third_party/typings/freedom/freedom-common.d.ts' />
-/// <reference path='../../third_party/typings/freedom/console.d.ts' />
-/// <reference path='../../third_party/typings/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../third_party/freedom/freedom-common.d.ts' />
+/// <reference path='../../third_party/freedom/console.d.ts' />
+/// <reference path='../../third_party/freedom/freedom-module-env.d.ts' />
 
-// import freedom = require('../../third_party/typings/freedom/freedom-module-env');
+// import freedom = require('../../third_party/freedom/freedom-module-env');
 
 export interface Message {
   timestamp :Date; // the timestamp the log was called (in core runtime).
