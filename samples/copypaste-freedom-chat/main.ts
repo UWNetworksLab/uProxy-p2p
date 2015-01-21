@@ -3,6 +3,8 @@
 import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
 import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
 
+import freedomTypes = require('freedom.i');
+
 // Freedom apps don't have direct access to the page so this
 // file mediates between the page's controls and the Freedom app.
 
@@ -33,9 +35,9 @@ freedom('freedom-module.json', {
     'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'log'
   }).then(
-    (copypasteModuleFactory:() => freedom.OnAndEmit<any,any>) => {
+    (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {
   // TODO: Make this have a freedom API.
-  var copypaste :freedom.OnAndEmit<any,any> = copypasteModuleFactory();
+  var copypaste :freedomTypes.OnAndEmit<any,any> = copypasteModuleFactory();
 
   // DOM nodes that we will choose from either the offer panel or the
   // answer panel once the user chooses whether to offer/answer.

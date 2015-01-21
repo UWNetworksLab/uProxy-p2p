@@ -2,17 +2,10 @@
 /// <reference path='../../third_party/freedom/console.d.ts' />
 /// <reference path='../../third_party/freedom/freedom-module-env.d.ts' />
 
-// import freedom = require('../../third_party/freedom/freedom-module-env');
+import logging = require('loggingprovider.i');
 
-export interface Message {
-  timestamp :Date; // the timestamp the log was called (in core runtime).
-  level :string; // one of D=Debug, I=Info, W=Warning, E=Error
-  tag :string; // any string, used for viewing specific module logs.
-  message :string; // the actual log message.
-}
-
-// The screen.
-var console :freedom_Console.Console = freedom['core.console']();
+// The freedom console provider.
+var freedomConsole :freedom_Console.Console = freedom['core.console']();
 
 // Besides output to console, log can also be buffered for later retrieval
 // through "getLogs". This is the maximum number of buffered log before it is
@@ -22,7 +15,7 @@ var console :freedom_Console.Console = freedom['core.console']();
 var MAX_BUFFERED_LOG = 1000;
 
 // Logs waiting for the logger to exist.
-var logBuffer: Message[] = [];
+var logBuffer: logging.Message[] = [];
 
 // TODO: we probably will change it to false as default.
 var enabled = true;
@@ -54,11 +47,12 @@ function isLevelAllowed_(request:string, permitted:string) : boolean {
   return LEVEL_CHARS.indexOf(request) >= LEVEL_CHARS.indexOf(permitted);
 }
 
-export function formatMessage(l:Message) : string {
+export function formatMessage(l:logging.Message) : string {
   return l.level + ' [' + dateToString_(l.timestamp) + '] ' + l.message;
 }
 
-export function makeMessage(level:string, tag:string, msg:string) : Message {
+export function makeMessage(level:string, tag:string, msg:string)
+    : logging.Message {
   return {
     timestamp: new Date(),
     level: level,
@@ -77,17 +71,17 @@ function checkFilter_(level:string, tag:string, filter:{[s: string]: string;})
 export function doRealLog(level:string, tag:string, msg:string)
     : void {
   if (!enabled) { return; }
-  var Message :Message = makeMessage(level, tag, msg);
+  var message :logging.Message = makeMessage(level, tag, msg);
 
   if (checkFilter_(level, tag, consoleFilter)) {
     if(level === 'D') {
-      console.debug(tag, formatMessage(Message));
+      freedomConsole.debug(tag, formatMessage(message));
     } else if(level === 'I') {
-      console.log(tag, formatMessage(Message));
+      freedomConsole.log(tag, formatMessage(message));
     } else if(level === 'W') {
-      console.warn(tag, formatMessage(Message));
+      freedomConsole.warn(tag, formatMessage(message));
     } else {
-      console.error(tag, formatMessage(Message));
+      freedomConsole.error(tag, formatMessage(message));
     }
   }
 
@@ -96,12 +90,12 @@ export function doRealLog(level:string, tag:string, msg:string)
       // trim from the head 10 percent each time.
       logBuffer.splice(0, MAX_BUFFERED_LOG / 10);
     }
-    logBuffer.push(Message);
+    logBuffer.push(message);
   }
 }
 
 // Interface for accumulating log messages.
-export class Log {
+export class Log implements logging.Log {
   constructor() {}
 
   // Logs message in debug level.
@@ -128,7 +122,7 @@ export class Log {
 // Interface for managinge & retreiving log messages.
 // Note: this is really a fake class: all data is in fact global.
 // TODO: rename this to LoggingManager or something sensible.
-export class LoggingProvider {
+export class LoggingController implements logging.Controller  {
   constructor() {}
 
   // Gets log as a encrypted blob, which can be transported in insecure
@@ -148,7 +142,7 @@ export class LoggingProvider {
     if(!tags || tags.length === 0) {
       return logBuffer.map(formatMessage);
     } else {
-      return logBuffer.filter((m:Message) => {
+      return logBuffer.filter((m:logging.Message) => {
         return tags.indexOf(m.tag) >= 0;
       }).map(formatMessage);
     }
@@ -195,5 +189,5 @@ export class LoggingProvider {
 
 if (typeof freedom !== 'undefined') {
   freedom().provideSynchronous(Log);
-  freedom['loggingprovider']().provideSynchronous(LoggingProvider);
+  freedom['loggingcontroller']().provideSynchronous(LoggingController);
 }

@@ -2,9 +2,6 @@
 /// <reference path='../../third_party/freedom/rtcpeerconnection.d.ts' />
 
 import DataChannelInterfaces = require('datachannel.i');
-import ArrayBuffers = require('../arraybuffers/arraybuffers');
-import Logging = require('../logging/logging');
-import Random = require('../crypto/random');
 import Handler = require('../handler/queue');
 
 import DataChannel = DataChannelInterfaces.Channel;

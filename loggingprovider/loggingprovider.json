@@ -7,13 +7,13 @@
   "constraints": {
     "isolation": "never"
   },
-  "provides": ["console", "loggingprovider"],
+  "provides": ["console", "loggingcontroller"],
   "default": "console",
   "permissions": [
     "core.console"
   ],
   "api": {
-    "loggingprovider": {
+    "loggingcontroller": {
       "getEncrypedLogBuffer": {"type": "method", "value": [["array", "string"]], "ret": "buffer"},
       "getLogs": {"type": "method", "value": [["array", "string"]], "ret": ["array", "string"]},
       "clearLogs": {"type": "method", "value": []},

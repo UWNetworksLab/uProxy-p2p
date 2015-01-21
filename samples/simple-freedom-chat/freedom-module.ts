@@ -95,6 +95,7 @@ a.negotiateConnection()
     connectDataChannel('A', aTextDataChannel);
     parentFreedomModule.emit('ready', {});
     // Change logging tolerance once connected.
+    // TODO: cleanup provider to show that we are supposed to do that.
     parentFreedomModule['loggingprovider']().setConsoleFilter("*:I");
   })
   .catch((e:any) => {
