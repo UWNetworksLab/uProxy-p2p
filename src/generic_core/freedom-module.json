@@ -24,6 +24,29 @@
       "social-enum.js",
       "social.js",
       "core.js"
+    ],
+    "index": "../index.html",
+    "static": [
+      "../lib/webcomponentsjs/webcomponents.js",
+      "../polymer/vulcanized.html",
+      "../polymer/vulcanized.js",
+      "../polymer/popup.js",
+      "../polymer/popup.js.map",
+      "dependencies.js",
+      "ui.js",
+      "ui.js.map",
+      "ui_enums.js",
+      "ui_enums.js.map",
+      "core_connector.js",
+      "core_connector.js.map",
+      "../styles/eurostile.ttf",
+      "../icons/arrow-left.png",
+      "../icons/sharing.png",
+      "../icons/smiley.png",
+      "../icons/sharing-enabled.png",
+      "../icons/sharing-enabled-toolbar.png",
+      "../icons/hamburger.png",
+      "../icons/getting.png"
     ]
   },
   "dependencies": {

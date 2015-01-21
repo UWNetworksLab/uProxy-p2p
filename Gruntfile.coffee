@@ -22,6 +22,7 @@ getNodePath = (module) =>
 chromeExtDevPath = 'build/dev/chrome/extension/'
 chromeAppDevPath = 'build/dev/chrome/app/'
 firefoxDevPath = 'build/dev/firefox/'
+radiatusDevPath = 'build/dev/radiatus/'
 
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 # We need *.ts files for typescript compilation
@@ -206,7 +207,7 @@ module.exports = (grunt) ->
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/popup.js', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', 'index.html', 'polymer/popup.js*', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Chrome-only polymer.
@@ -365,6 +366,82 @@ module.exports = (grunt) ->
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
+        } ]
+        
+      # Radiatus. 
+      # Assumes the top-level tasks generic_core and generic_ui completed.
+      radiatus:
+        files: [ {
+          # The platform specific stuff, and...
+          expand: true, cwd: 'src/radiatus/'
+          src: [ '**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: radiatusDevPath
+        }, {  # Freedom manifest for uproxy
+          expand: true, cwd: 'src/generic_core/'
+          src: ['freedom-module.json']
+          dest: radiatusDevPath + 'scripts/'
+        }, {  # Additional hack - TODO: remove this once social enum is gone.
+          expand: true, cwd: 'third_party', flatten: true
+          src: [
+            'freedom-ts-hacks/social-enum.js'
+          ]
+          dest: radiatusDevPath + 'scripts/'
+        }, {
+          expand: true, cwd: 'build/compile-src'
+          src: ['uproxy.js*']
+          dest: radiatusDevPath + 'scripts/'
+          # ... the generic core stuff
+        }, {
+          expand: true, cwd: 'build/compile-src/generic_core'
+          src: ['**'],
+          dest: radiatusDevPath + 'scripts/'
+        }, {
+          # generic_ui HTML and non-typescript assets.
+          expand: true, cwd: 'src/generic_ui',
+          src: [ 'styles/**' ]
+          dest: radiatusDevPath + '/'
+        }, {
+        # ... the generic UI stuff
+          expand: true, cwd: 'build/compile-src/generic_ui'
+          src: [ 'scripts/**', 'index.html', 'polymer/popup.js*', 'polymer/vulcanized.*', '!**/*.ts' ]
+          dest: radiatusDevPath + '/'
+        }, {
+          # Icons
+          expand: true, cwd: 'src/'
+          src: ['icons/*']
+          dest: radiatusDevPath + '/'
+        }, {
+          expand: true, cwd: 'build/compile-src', flatten: true
+          src: FILES.uproxy_common,
+          dest: radiatusDevPath + 'scripts/'
+        }, { # Copy uproxy-networking files.
+          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
+          src: FILES.uproxy_networking_common,
+          dest: radiatusDevPath + 'scripts/uproxy-networking'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/social'
+          src: ['websocket-server/**']
+          dest: radiatusDevPath + 'scripts/'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
+          src: ['**']
+          dest: radiatusDevPath + 'lib/freedom-social-xmpp'
+        }, {
+          expand: true, cwd: 'node_modules/freedom-social-facebook/build/src/',
+          src: ['**']
+          dest: radiatusDevPath + 'lib/freedom-social-facebook'
+        }, {
+          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
+          src: ['**']
+          dest: radiatusDevPath + 'lib/storage'
+        }, {
+          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
+          src: FILES.uproxy_lib_common,
+          dest: radiatusDevPath + 'scripts/uproxy-lib'
+        }, {
+          expand: true, cwd: 'third_party/lib'
+          src: FILES.thirdPartyUi
+          dest: radiatusDevPath + 'lib/'
         } ]
 
     }  # copy
@@ -611,15 +688,23 @@ module.exports = (grunt) ->
     'concat:firefox_uproxy'
     'concat:firefox_dependencies'
   ]
-
+ 
   taskManager.add 'build_firefox_xpi', [
     'build_firefox'
     'compress:main'
   ]
 
+  # Radiatus build tasks.
+  taskManager.add 'build_radiatus', [
+    'build_generic_ui'
+    'build_generic_core'
+    'copy:radiatus'
+  ]
+
   taskManager.add 'build', [
     'build_chrome'
     'build_firefox'
+    'build_radiatus'
     'build_uistatic'
   ]
 

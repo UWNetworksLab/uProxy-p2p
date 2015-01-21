@@ -43,12 +43,13 @@
     "uproxy-lib": "^17.0.0",
     "uproxy-networking": "^5.0.0"
   },
-  "peerDependencies" : {
+  "peerDependencies": {
     "freedom": "~0.6.11"
   },
   "private": true,
   "scripts": {
     "test": "grunt test --verbose",
-    "prepublish": "bower install && grunt test"
+    "prepublish": "bower install && grunt test",
+    "radiatus": "node node_modules/radiatus/app.js -d build/dev/radiatus/scripts/freedom-module.json"
   }
 }
