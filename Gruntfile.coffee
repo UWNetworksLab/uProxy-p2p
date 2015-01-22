@@ -399,6 +399,8 @@ module.exports = (grunt) ->
       # uProxy firefox specific typescript
       firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
 
+      integration: Rule.typescriptSpecDeclLenient 'compile-src/integration'
+
     }  # typescript
 
     #-------------------------------------------------------------------------
@@ -492,7 +494,19 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_ui'
-
+    integration: {
+      all: {
+        options: {
+          template: 'node_modules/freedom-for-chrome/spec/helper/'
+          templateId: 'whatever'
+          spec: ['build/compile-src/integration/*.spec.js']
+          helper: [
+            {path: 'node_modules/freedom-for-chrome/freedom-for-chrome.js', include: false}
+          ]
+          keepBrowser: false
+        }
+      }
+    }
 
     compress:
       main:
@@ -543,6 +557,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
+  grunt.loadTasks 'node_modules/freedom-for-chrome/tasks'
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -631,12 +646,19 @@ module.exports = (grunt) ->
     'jasmine:chrome_app'
   ]
 
+  taskManager.add 'integration_test', [
+    'base'
+    'ts:integration'
+    'integration'
+  ]
+
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
     'test_core'
     'test_ui'
     'test_chrome'
+    'integration_test'
   ]
 
   taskManager.add 'everything', [
