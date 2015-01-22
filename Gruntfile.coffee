@@ -199,7 +199,7 @@ module.exports = (grunt) ->
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Chrome-only polymer.
@@ -318,7 +318,7 @@ module.exports = (grunt) ->
         }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', 'index.html', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: firefoxDevPath + 'data/'
         }, {
           # Icons and fonts

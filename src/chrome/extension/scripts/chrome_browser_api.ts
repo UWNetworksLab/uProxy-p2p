@@ -96,7 +96,7 @@ class ChromeBrowserApi implements BrowserAPI {
     if (askUser && this.running_ == true) {
       // Create a tab which prompts the user to decide if they want
       // to reset their proxy config.
-      this.launchTabIfNotOpen("polymer/disconnected.html");
+      this.launchTabIfNotOpen("disconnected.html");
     } else if (!askUser && this.running_ == true) {
       this.revertProxySettings_();
     }
@@ -116,7 +116,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // For FAQ.
 
   public openFaq = (pageAnchor ?:string) => {
-    var faqUrl = "../polymer/faq.html";
+    var faqUrl = "../faq.html";
     if (pageAnchor) {
       chrome.tabs.create({url: faqUrl + '#' + pageAnchor});
     } else {
