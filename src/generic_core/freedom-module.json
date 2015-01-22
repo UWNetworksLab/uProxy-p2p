@@ -17,6 +17,7 @@
       "util.js",
       "auth.js",
       "consent.js",
+      "firewall.js",
       "storage.js",
       "local-instance.js",
       "remote-instance.js",
