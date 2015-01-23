@@ -360,6 +360,13 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/lib'
         } ]
 
+      integration:
+        files: [ {
+          # Copy compiled Chrome App code, required for integration tests
+          expand: true, cwd: chromeAppDevPath
+          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: 'build/compile-src/integration'
+        } ]
     }  # copy
 
     #-------------------------------------------------------------------------
@@ -501,8 +508,8 @@ module.exports = (grunt) ->
               'build/compile-src/integration/*.spec.js']
         options: {
           helpers: [
-            'build/compile-src/generic_core/*.json',
-            'build/compile-src/generic_core/*.js'
+            'build/compile-src/integration/**/*.js'
+            'build/compile-src/integration/**/*.json'
           ],
           keepRunner: true
         }
@@ -649,8 +656,8 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'integration_test', [
-    'base'
-    'build_generic_core'
+    'build_chrome'
+    'copy:integration'
     'ts:integration'
     'jasmine_chromeapp'
   ]

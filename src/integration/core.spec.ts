@@ -2,7 +2,7 @@
 
 describe('uproxy core', function() {
   it('loads freedom module', (done) => {
-    var uproxyModule = new freedom('scripts/build/compile-src/generic_core/freedom-module.json', {
+    var uproxyModule = new freedom('scripts/build/compile-src/integration/scripts/freedom-module.json', {
     }).then(function(UProxy : () => void) {
       var uProxyAppChannel = new UProxy();
       uProxyAppChannel.on('ready', done);
