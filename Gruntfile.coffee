@@ -494,16 +494,17 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_ui'
+
     jasmine_chromeapp: {
-      aasdfl: {
+      all: {
         src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
               'build/compile-src/integration/*.spec.js']
         options: {
-          helper: [
+          helpers: [
             'build/compile-src/generic_core/*.json',
             'build/compile-src/generic_core/*.js'
-          ]
-          keepRunner: false
+          ],
+          keepRunner: true
         }
       }
     }
@@ -649,6 +650,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'integration_test', [
     'base'
+    'build_generic_core'
     'ts:integration'
     'jasmine_chromeapp'
   ]

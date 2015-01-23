@@ -19,6 +19,7 @@
 *.vtg
 *~
 build
+.build
 distr
 npm-debug.log
 tmp
