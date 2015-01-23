@@ -658,7 +658,6 @@ module.exports = (grunt) ->
     'test_core'
     'test_ui'
     'test_chrome'
-    'integration_test'
   ]
 
   taskManager.add 'everything', [
