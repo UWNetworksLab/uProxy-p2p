@@ -32,8 +32,8 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/loggingprovider.json',
-    'debug': 'log'
+    // 'logger': 'lib/loggingprovider/loggingprovider.json',
+    'debug': 'debug'
   }).then(
     (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {
   // TODO: Make this have a freedom API.
@@ -50,7 +50,7 @@ freedom('freedom-module.json', {
   var parsedInboundMessages :SignallingMessage[];
 
   startPanel_answerLinkNode.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         step2ContainerNode = offerPanel_step2ContainerNode;
         outboundMessageNode = offerPanel_outboundMessageNode;
         inboundMessageNode = offerPanel_inboundMessageNode;
@@ -60,7 +60,7 @@ freedom('freedom-module.json', {
       };
 
   startPanel_offerLinkNode.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         step2ContainerNode = answerPanel_step2ContainerNode;
         outboundMessageNode = answerPanel_outboundMessageNode;
         inboundMessageNode = answerPanel_inboundMessageNode;
@@ -72,35 +72,35 @@ freedom('freedom-module.json', {
   // Tells the Freedom app to create an instance of the socks-to-rtc
   // Freedom module and initiate a connection.
   answerPanel_generateIceCandidatesButton.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         this.disabled = true;
 
         copypaste.emit('start', {});
       };
 
   offerPanel_inboundMessageNode.onkeyup =
-      function(event:Event) : any {
+      function(event:Event) : void {
         parsedInboundMessages = parseInboundMessages(this, offerPanel_consumeInboundMessageButtonNode);
       };
 
   answerPanel_inboundMessageNode.onkeyup =
-      function(event:Event) : any {
+      function(event:Event) : void {
         parsedInboundMessages = parseInboundMessages(this, answerPanel_consumeInboundMessageButtonNode);
       };
 
   offerPanel_consumeInboundMessageButtonNode.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         consumeInboundMessage(offerPanel_inboundMessageNode);
       };
 
   answerPanel_consumeInboundMessageButtonNode.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         consumeInboundMessage(answerPanel_inboundMessageNode);
         answerPanel_consumeInboundMessageButtonNode.disabled = true;
       };
 
   chatPanel_sendMessageButtonNode.onclick =
-      function(event:MouseEvent) : any {
+      function(event:MouseEvent) : void {
         // TODO: cannot send empty messages
         copypaste.emit('messageFromPeer',
             chatPanel_outboundMessageNode.value || '(empty message)');
@@ -180,6 +180,7 @@ freedom('freedom-module.json', {
 
   // Called when a peer-to-peer connection has been established.
   copypaste.on('ready', () => {
+    console.log('ready');
     offerPanelNode.style.display = 'none';
     answerPanelNode.style.display = 'none';
     chatPanelNode.style.display = 'block';

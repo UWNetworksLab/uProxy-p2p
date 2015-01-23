@@ -51,8 +51,11 @@ function makePeerConnection() : PeerConnection<SignallingMessage> {
 
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     if (d.getLabel() === 'text') {
+      log.info('connected data channel');
       connectDataChannel(d);
       parentModule.emit('ready');
+    } else {
+      log.info('ignored created data channel: ' + d.getLabel());
     }
   });
 
@@ -69,7 +72,7 @@ parentModule.on('start', () => {
     })
     .then(connectDataChannel)
     .then(() => {
-      freedom().emit('ready');
+      parentModule.emit('ready');
     })
     .catch((e:Error) => {
       log.error('could not negotiate peerconnection: ' + e.message);
