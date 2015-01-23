@@ -1,9 +1,7 @@
-import PeerConnectionInterfaces = require('./peerconnection.i');
+import WebRtcTypes = require('./types');
 import PeerConnectionClass = require('./peerconnection');
 
-export function createPeerConnection(
-      config:PeerConnectionInterfaces.PeerConnectionConfig)
-    : PeerConnectionInterfaces.PeerConnection<
-        PeerConnectionInterfaces.SignallingMessage> {
+export function createPeerConnection(config:WebRtcTypes.PeerConnectionConfig)
+    : WebRtcTypes.PeerConnection<WebRtcTypes.SignallingMessage> {
   return new PeerConnectionClass(config);
 }

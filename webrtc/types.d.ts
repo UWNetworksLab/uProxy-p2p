@@ -1,16 +1,50 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../third_party/freedom/rtcpeerconnection.d.ts' />
 
-import DataChannelInterfaces = require('./datachannel.i');
 import Handler = require('../handler/queue');
+import Enums = require('./enums');
+import SignalType = Enums.SignalType;
+import State = Enums.State;
 
-import DataChannel = DataChannelInterfaces.Channel;
+export interface Channel {
+  // Guarenteed to be invarient for the life of the data channel.
+  getLabel : () => string;
 
-export enum State {
-  WAITING,      // Can move to CONNECTING.
-  CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
-  CONNECTED,    // Can move to DISCONNECTED.
-  DISCONNECTED  // End-state, cannot change.
+  // Promise for when the data channel has been openned.
+  onceOpened : Promise<void>;
+
+  // Promise for when the data channel has been closed (only fulfilled after
+  // the data channel has been openned).
+  // NOTE: There exists a bug in Chrome prior to version 37 which prevents
+  //       this from fulfilling on the remote peer.
+  onceClosed : Promise<void>;
+
+  // Data from the peer. No data will be added to the queue after |onceClosed|
+  // is fulfilled.
+  dataFromPeerQueue :Handler.QueueHandler<Data, void>;
+
+  // Send data; promise returns when all the data has been passed on to the
+  // undertlying network layer for ending.
+  send(data:Data) : Promise<void>;
+
+  // Closes this data channel.
+  // A channel cannot be re-opened once this has been called.
+  close() : void;
+
+  toString() : string;
+}
+
+// Data sent to or received from a peer on a data channel in the peer
+// connection.
+export interface Data {
+  str ?:string;
+  buffer ?:ArrayBuffer;
+  // TODO: add when supported by WebRtc in Chrome and FF.
+  // https://code.google.com/p/webrtc/issues/detail?id=2276
+  //
+  // bufferView  ?:ArrayBufferView;
+  // blob        ?:Blob
+  // domString   ?:DOMString
 }
 
 export interface PeerConnection<TSignallingMessage> {
@@ -21,7 +55,7 @@ export interface PeerConnection<TSignallingMessage> {
   // NOTE: There exists a bug in Chrome prior to version 37 which causes
   //       entries in this object to continue to exist even after
   //       the remote peer has closed a data channel.
-  dataChannels     :{[channelLabel:string] : DataChannel};
+  dataChannels     :{[channelLabel:string] : Channel};
 
   // The |onceConnecting| promise is fulfilled when |pcState === CONNECTING|.
   // i.e. when either |handleSignalMessage| is called with an offer message,
@@ -42,9 +76,9 @@ export interface PeerConnection<TSignallingMessage> {
   // change from |WAITING| state to |CONNECTING|)
   openDataChannel :(channelLabel: string,
       options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
-      Promise<DataChannel>;
+      Promise<Channel>;
   // Or handle data channels opened by the peer (these events will )
-  peerOpenedChannelQueue :Handler.QueueHandler<DataChannel, void>;
+  peerOpenedChannelQueue :Handler.QueueHandler<Channel, void>;
 
   // The |handleSignalMessage| function should be called with signalling
   // messages from the remote peer.
@@ -74,12 +108,9 @@ export interface PeerConnectionConfig {
   initiateConnection     ?:boolean;  // defaults to false
 }
 
-export enum SignalType {
-  OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
-}
-
 export interface SignallingMessage {
-  // CONSIDER: use string-enum when typescript supports it.
+  // TODO: make an abstraction for the data, only the signal type needs to be
+  // known by consumers of this type.
   type          :SignalType
   // The |candidate| parameter is set iff type === CANDIDATE
   candidate     ?:freedom_RTCPeerConnection.RTCIceCandidate;

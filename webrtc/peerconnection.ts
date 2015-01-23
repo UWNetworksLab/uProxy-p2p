@@ -13,15 +13,16 @@ import Djb2 = require('../crypto/djb2hash');
 import Handler = require('../handler/queue');
 
 import DataChannelClass = require('./datachannel');
-import DataChannelInterfaces = require('./datachannel.i');
-import DataChannel = DataChannelInterfaces.Channel;
 
-import PeerConnectionInterfaces = require('./peerconnection.i');
-import State = PeerConnectionInterfaces.State;
-import PeerConnection = PeerConnectionInterfaces.PeerConnection;
-import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
-import SignalType = PeerConnectionInterfaces.SignalType;
-import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
+import Enums = require('./enums');
+import State = Enums.State;
+import SignalType = Enums.SignalType;
+
+import WebRtcTypes = require('./types');
+import DataChannel = WebRtcTypes.Channel;
+import PeerConnection = WebRtcTypes.PeerConnection;
+import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;
+import SignallingMessage = WebRtcTypes.SignallingMessage;
 
 // Logger for this module.
 var log :Logging.Log = new Logging.Log('PeerConnection');

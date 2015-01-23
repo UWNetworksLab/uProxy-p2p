@@ -11,7 +11,7 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/loggingprovider.json',
+    //'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'debug'
   }).then(
     (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {

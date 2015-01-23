@@ -2,16 +2,14 @@
 
 import Logging = require('../../logging/logging');
 
-import DataChannelInterfaces = require('../../webrtc/datachannel.i');
-import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
+import WebRtcTypes = require('../../webrtc/types');
 import WebRtc = require('../../webrtc/webrtc');
 
-import PeerConnection = PeerConnectionInterfaces.PeerConnection;
-import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
-import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
-
-import DataChannel = DataChannelInterfaces.Channel;
-import Data = DataChannelInterfaces.Data;
+import PeerConnection = WebRtcTypes.PeerConnection;
+import SignallingMessage = WebRtcTypes.SignallingMessage;
+import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;
+import DataChannel = WebRtcTypes.Channel;
+import Data = WebRtcTypes.Data;
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 

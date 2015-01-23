@@ -1,7 +1,7 @@
 /// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
 
-import PeerConnectionInterfaces = require('../../webrtc/peerconnection.i');
-import SignallingMessage = PeerConnectionInterfaces.SignallingMessage;
+import WebRtcTypes = require('../../webrtc/types');
+import SignallingMessage = WebRtcTypes.SignallingMessage;
 
 import freedomTypes = require('freedom.i');
 
