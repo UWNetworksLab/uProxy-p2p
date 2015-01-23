@@ -494,16 +494,16 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_ui'
-    integration: {
-      all: {
+    jasmine_chromeapp: {
+      aasdfl: {
+        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+              'build/compile-src/integration/*.spec.js']
         options: {
-          template: 'node_modules/freedom-for-chrome/spec/helper/'
-          templateId: 'whatever'
-          spec: ['build/compile-src/integration/*.spec.js']
           helper: [
-            {path: 'node_modules/freedom-for-chrome/freedom-for-chrome.js', include: false}
+            'build/compile-src/generic_core/*.json',
+            'build/compile-src/generic_core/*.js'
           ]
-          keepBrowser: false
+          keepRunner: false
         }
       }
     }
@@ -557,7 +557,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
-  grunt.loadTasks 'node_modules/freedom-for-chrome/tasks'
+  grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
+  grunt.loadNpmTasks 'grunt-jasmine-node2'
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -649,7 +650,7 @@ module.exports = (grunt) ->
   taskManager.add 'integration_test', [
     'base'
     'ts:integration'
-    'integration'
+    'jasmine_chromeapp'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
