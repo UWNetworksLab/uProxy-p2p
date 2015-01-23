@@ -1,3 +1,4 @@
+/// <reference path='../../../third_party/freedom/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
 
 import Message = require('./messages.i');
@@ -11,7 +12,7 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
-    //'logger': 'lib/loggingprovider/loggingprovider.json',
+    'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'debug'
   }).then(
     (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {

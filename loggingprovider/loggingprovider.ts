@@ -5,7 +5,8 @@
 import logging = require('loggingprovider.i');
 
 // The freedom console provider.
-var freedomConsole :freedom_Console.Console = freedom['core.console']();
+var freedomConsole
+ :freedom_Console.Console = freedom['core.console']();
 
 // Besides output to console, log can also be buffered for later retrieval
 // through "getLogs". This is the maximum number of buffered log before it is
@@ -119,7 +120,7 @@ export class Log implements logging.Log {
   }
 }
 
-// Interface for managinge & retreiving log messages.
+// Interface for managing & retreiving log messages.
 // Note: this is really a fake class: all data is in fact global.
 // TODO: rename this to LoggingManager or something sensible.
 export class LoggingController implements logging.Controller  {

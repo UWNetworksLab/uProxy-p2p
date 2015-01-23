@@ -1,3 +1,4 @@
+/// <reference path='../../../third_party/freedom/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
 
 import WebRtcTypes = require('../../webrtc/types');
@@ -32,7 +33,7 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
-    // 'logger': 'lib/loggingprovider/loggingprovider.json',
+    'logger': 'lib/loggingprovider/loggingprovider.json',
     'debug': 'debug'
   }).then(
     (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {

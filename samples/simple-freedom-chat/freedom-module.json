@@ -7,7 +7,7 @@
     ]
   },
   "dependencies": {
-    "loggingprovider": {
+    "loggingcontroller": {
       "url": "lib/loggingprovider/loggingprovider.json",
       "api": "loggingcontroller"
     }

@@ -92,8 +92,9 @@ a.negotiateConnection()
   .then((aTextDataChannel:DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
     parentFreedomModule.emit('ready', {});
-    // Change logging tolerance once connected.
-    // TODO: cleanup provider to show that we are supposed to do that.
+    // Change logging tolerance once connected. This is to demo how to use the
+    // logging controller. TODO: cleanup provider to show that we are supposed
+    // to do that.
     freedom['loggingcontroller']().setConsoleFilter("*:I");
   })
   .catch((e:any) => {
