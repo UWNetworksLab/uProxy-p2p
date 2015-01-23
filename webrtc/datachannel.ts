@@ -10,7 +10,7 @@
 
 // import freedom = require('../../third_party/freedom/freedom-module-env');
 
-import DataChannels = require('datachannel.i');
+import DataChannels = require('./datachannel.i');
 import Handler = require('../handler/queue');
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');

@@ -1,7 +1,7 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../third_party/freedom/rtcpeerconnection.d.ts' />
 
-import DataChannelInterfaces = require('datachannel.i');
+import DataChannelInterfaces = require('./datachannel.i');
 import Handler = require('../handler/queue');
 
 import DataChannel = DataChannelInterfaces.Channel;

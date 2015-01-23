@@ -11,7 +11,7 @@ describe("Client logging shim using Freedom", () => {
     freedom = freedomMocker.makeErrorMockFreedomInModuleEnv();
   });
 
-  it('new Logging.log forwards log calls to the named freedom core logger.',
+  it('A new Logging.Log forwards all logging to the named freedom core logger.',
       (done) => {
     var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
       'tag1', ['debug', 'log', 'info', 'warn', 'error']));

@@ -1,5 +1,5 @@
-import PeerConnectionInterfaces = require('peerconnection.i');
-import PeerConnectionClass = require('peerconnection');
+import PeerConnectionInterfaces = require('./peerconnection.i');
+import PeerConnectionClass = require('./peerconnection');
 
 export function createPeerConnection(
       config:PeerConnectionInterfaces.PeerConnectionConfig)

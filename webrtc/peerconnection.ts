@@ -12,11 +12,11 @@ import Djb2 = require('../crypto/djb2hash');
 
 import Handler = require('../handler/queue');
 
-import DataChannelClass = require('datachannel');
-import DataChannelInterfaces = require('datachannel.i');
+import DataChannelClass = require('./datachannel');
+import DataChannelInterfaces = require('./datachannel.i');
 import DataChannel = DataChannelInterfaces.Channel;
 
-import PeerConnectionInterfaces = require('peerconnection.i');
+import PeerConnectionInterfaces = require('./peerconnection.i');
 import State = PeerConnectionInterfaces.State;
 import PeerConnection = PeerConnectionInterfaces.PeerConnection;
 import PeerConnectionConfig = PeerConnectionInterfaces.PeerConnectionConfig;
