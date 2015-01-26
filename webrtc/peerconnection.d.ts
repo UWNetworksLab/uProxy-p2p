@@ -92,7 +92,7 @@ declare module WebRtc {
   }
 
   class PeerConnection implements PeerConnectionInterface<SignallingMessage> {
-    constructor(config:PeerConnectionConfig);
+    constructor(pc:freedom_RTCPeerConnection.RTCPeerConnection);
 
     public pcState :State;
     public dataChannels     :{[channelLabel:string] : DataChannel};

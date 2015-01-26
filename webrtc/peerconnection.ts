@@ -106,8 +106,6 @@ module WebRtc {
     // Name for debugging.
     public peerName     :string;
 
-    // The WebRtc peer connection.
-    private pc_            :freedom_RTCPeerConnection.RTCPeerConnection;
     // All WebRtc data channels associated with this data peer.
     public dataChannels     :{[channelLabel:string] : DataChannel};
 
@@ -151,15 +149,8 @@ module WebRtc {
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
-    // if |createOffer| is true, the constructor will immidiately initiate
-    // negotiation.
-    constructor(private config_ :PeerConnectionConfig) {
-      if (config_.webrtcPcConfig === undefined) {
-        throw new Error('must specify peerconnection config');
-      }
-
-      this.peerName = this.config_.peerName ||
-          'unnamed-pc-' + crypto.randomUint32();
+    constructor(private pc_ :freedom_RTCPeerConnection.RTCPeerConnection) {
+      this.peerName = 'unnamed-pc-111'; // + crypto.randomUint32();
 
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;
@@ -202,7 +193,6 @@ module WebRtc {
 
       this.dataChannels = {};
 
-      this.pc_ = freedom['core.rtcpeerconnection'](this.config_.webrtcPcConfig);
       // Add basic event handlers.
       this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
         if(candidate.candidate) {

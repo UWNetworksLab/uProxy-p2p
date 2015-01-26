@@ -2,6 +2,7 @@
 /// <reference path='../../logging/logging.d.ts' />
 /// <reference path="../../webrtc/peerconnection.d.ts" />
 /// <reference path="../../third_party/typings/tsd.d.ts" />
+/// <reference path="../../freedom/typings/rtcpeerconnection.d.ts" />
 /// <reference path="../../freedom/typings/freedom.d.ts" />
 
 var log :Logging.Log = new Logging.Log('freedomchat');
@@ -30,14 +31,14 @@ function connectDataChannel(name:string, d:WebRtc.DataChannel) {
 
 // Make a peer connection which logs stuff that happens.
 function makePeerConnection(name:string) {
-  var pcConfig :WebRtc.PeerConnectionConfig = {
-    webrtcPcConfig: {
-      iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-                   {urls: ['stun:stun1.l.google.com:19302']}]
-    },
-    peerName: name
+  var config :freedom_RTCPeerConnection.RTCConfiguration = {
+    iceServers: [{
+      urls: ['stun:stun.l.google.com:19302']},
+      {urls: ['stun:stun1.l.google.com:19302']}]
   };
-  var pc : WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
+  var provider :freedom_RTCPeerConnection.RTCPeerConnection =
+      freedom['core.rtcpeerconnection'](config);
+  var pc = new WebRtc.PeerConnection(provider);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
