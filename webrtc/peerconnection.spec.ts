@@ -41,7 +41,7 @@ describe('peerconnection', function() {
     (<any>mockPeerConnection.setLocalDescription).and.returnValue(Promise.resolve());
     (<any>mockPeerConnection.getLocalDescription).and.returnValue(Promise.resolve({hello: 'world'}));
 
-    var pc = new WebRtc.PeerConnection(mockPeerConnection);
+    var pc = new WebRtc.PeerConnection(mockPeerConnection, 'test');
     pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {
       expect(signal.type).toEqual(WebRtc.SignalType.OFFER);
       pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {

@@ -96,8 +96,16 @@ declare module WebRtc {
     public static fromRtcPeerConnection(
         pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection;
 
+    // Name is used in logging output and is useful for debugging when
+    // there's >1 peerconnection in the app.
+    public static fromRtcPeerConnectionWithName(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection,
+        name:string) : PeerConnection;
+
     // Private constructor.
-    constructor(pc:freedom_RTCPeerConnection.RTCPeerConnection);
+    constructor(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection,
+        name:string);
 
     public pcState :State;
     public dataChannels     :{[channelLabel:string] : DataChannel};
