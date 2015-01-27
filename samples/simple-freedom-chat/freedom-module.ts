@@ -38,7 +38,7 @@ function makePeerConnection(name:string) {
   };
   var provider :freedom_RTCPeerConnection.RTCPeerConnection =
       freedom['core.rtcpeerconnection'](config);
-  var pc = new WebRtc.PeerConnection(provider);
+  var pc = WebRtc.PeerConnection.fromRtcPeerConnection(provider);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');

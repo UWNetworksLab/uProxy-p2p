@@ -92,6 +92,11 @@ declare module WebRtc {
   }
 
   class PeerConnection implements PeerConnectionInterface<SignallingMessage> {
+
+    public static fromRtcPeerConnection(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection;
+
+    // Private constructor.
     constructor(pc:freedom_RTCPeerConnection.RTCPeerConnection);
 
     public pcState :State;

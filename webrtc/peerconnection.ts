@@ -156,6 +156,11 @@ module WebRtc {
       this.fulfillSdpSignalExchanged_ = F;
     });
 
+    public static fromRtcPeerConnection = (
+        pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection => {
+      return new PeerConnection(pc);
+    }
+
     constructor(private pc_ :freedom_RTCPeerConnection.RTCPeerConnection) {
       this.peerName = 'unnamed-pc-111'; // + crypto.randomUint32();
 
