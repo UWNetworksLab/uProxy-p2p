@@ -1,14 +1,12 @@
+/// <reference path="../../freedom/typings/rtcpeerconnection.d.ts" />
 /// <reference path="../../webrtc/peerconnection.d.ts" />
 /// <reference path="../../logging/logging.d.ts" />
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 
-var pcConfig :WebRtc.PeerConnectionConfig = {
-  webrtcPcConfig: {
-    iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-                 {urls: ['stun:stun1.l.google.com:19302']}]
-  },
-  peerName: 'pc'
+var config :freedom_RTCPeerConnection.RTCConfiguration = {
+  iceServers: [{urls: ['stun:stun.l.google.com:19302']},
+               {urls: ['stun:stun1.l.google.com:19302']}]
 };
 
 function connectDataChannel(d:WebRtc.DataChannel) {
@@ -24,7 +22,9 @@ function connectDataChannel(d:WebRtc.DataChannel) {
 }
 
 function makePeerConnection() : WebRtc.PeerConnection {
-  var pc :WebRtc.PeerConnection = new WebRtc.PeerConnection(pcConfig);
+  var provider :freedom_RTCPeerConnection.RTCPeerConnection =
+      freedom['core.rtcpeerconnection'](config);
+  var pc = WebRtc.PeerConnection.fromRtcPeerConnection(provider);
 
   pc.signalForPeerQueue.setSyncHandler((signal:WebRtc.SignallingMessage) => {
     freedom().emit('signalForPeer', signal);
