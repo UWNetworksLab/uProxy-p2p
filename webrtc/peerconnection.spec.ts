@@ -18,6 +18,10 @@ describe('peerconnection', function() {
 
   it('message ordering', (done) => {
     var negotiateCallback :any;
+
+    // Invoke the onicecandidate callback as soon as it's been attached.
+    // From the point of view of peerconnection, this simulates the receipt
+    // of an ICE candidate prior to an SDP.
     mockPeerConnection.on = (eventName:string, callback:any) => {
       if (eventName === 'onicecandidate') {
         var mockCandidateEvent :freedom_RTCPeerConnection.OnIceCandidateEvent = {
