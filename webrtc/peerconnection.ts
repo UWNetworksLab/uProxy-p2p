@@ -149,6 +149,13 @@ module WebRtc {
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
+    // Call this once an OFFER or ANSWER signal has been sent
+    // on the signalling channel.
+    private fulfillSdpSignalExchanged_ :() => void;
+    private onceSdpSignalExchanged_ = new Promise((F, R) => {
+      this.fulfillSdpSignalExchanged_ = F;
+    });
+
     constructor(private pc_ :freedom_RTCPeerConnection.RTCPeerConnection) {
       this.peerName = 'unnamed-pc-111'; // + crypto.randomUint32();
 
@@ -196,12 +203,12 @@ module WebRtc {
       // Add basic event handlers.
       this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
         if(candidate.candidate) {
-          this.signalForPeerQueue.handle({
+          this.emitSignal_({
             type: SignalType.CANDIDATE,
             candidate: candidate.candidate
           });
         } else {
-          this.signalForPeerQueue.handle(
+          this.emitSignal_(
               {type: SignalType.NO_MORE_CANDIDATES});
         }
       });
@@ -353,7 +360,7 @@ module WebRtc {
             .then(this.pc_.setLocalDescription)
             .then(this.pc_.getLocalDescription)
             .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-              this.signalForPeerQueue.handle({
+              this.emitSignal_({
                 type: SignalType.OFFER,
                 description: {type: d.type, sdp: d.sdp}
               });
@@ -407,7 +414,7 @@ module WebRtc {
                 .then(this.pc_.setLocalDescription)
                 .then(this.pc_.getLocalDescription)
                 .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-                  this.signalForPeerQueue.handle(
+                  this.emitSignal_(
                       {type: SignalType.ANSWER,
                        description: {type: d.type, sdp: d.sdp} });
                 })
@@ -515,6 +522,21 @@ module WebRtc {
       this.controlDataChannel = controlChannel;
       this.controlDataChannel.onceClosed.then(this.close);
       return this.controlDataChannel.onceOpened.then(this.completeConnection_);
+    }
+
+    // Adds a signal to signalForPeerQueue.
+    // OFFER and ANSWER signals are sent immediately but all other
+    // signals block until an OFFER or ANSWER has first been sent.
+    private emitSignal_ = (signal:SignallingMessage) : void => {
+      if (signal.type === SignalType.OFFER ||
+          signal.type === SignalType.ANSWER) {
+        this.signalForPeerQueue.handle(signal);
+        this.fulfillSdpSignalExchanged_();
+      } else {
+        this.onceSdpSignalExchanged_.then(() => {
+          this.signalForPeerQueue.handle(signal);
+        });
+      }
     }
 
     // For debugging: prints the state of the peer connection including all
