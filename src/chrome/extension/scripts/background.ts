@@ -24,7 +24,10 @@ var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
 var chromeBrowserApi :ChromeBrowserApi;
-
+// Chrome Window ID of the window used to launch uProxy,
+// i.e. the window where the extension icon was clicked
+// or the window where the user is completing the install flow.
+var mainWindowId = chrome.windows.WINDOW_ID_NONE;
 
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
@@ -41,15 +44,33 @@ chrome.runtime.onMessageExternal.addListener(
         return true;
     });
 
-// Launch the Chrome webstore page for the uProxy app.
+// Launch the Chrome webstore page for the uProxy app,
+// or activate the user's tab open to uproxy.org/chrome-install
 function openDownloadAppPage() : void {
-  chrome.tabs.create(
-      {url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'},
-      (tab) => {
-        // Focus on the new Chrome Webstore tab.
-        chrome.windows.update(tab.windowId, {focused: true});
+  chrome.windows.get(mainWindowId, {populate: true},
+      (windowThatLaunchedUproxy) => {
+        if (windowThatLaunchedUproxy) {
+          for (var i = 0; i < windowThatLaunchedUproxy.tabs.length; i++) {
+            // If the user is installing via the inline install flow,
+            // instead of sending them to the webstore to install the app,
+            // bring them back to uproxy.org/chrome-install
+            if ((windowThatLaunchedUproxy.tabs[i].url.indexOf("uproxysite.appspot.com/chrome-install") > -1) ||
+                (windowThatLaunchedUproxy.tabs[i].url.indexOf("uproxy.org/chrome-install") > -1)) {
+              chrome.tabs.update(windowThatLaunchedUproxy.tabs[i].id, {active:true});
+              chrome.windows.update(mainWindowId, {focused: true});
+              return;
+            }
+          }
+        }
+        // Only reached if the user didn't have uproxy.org/chrome-install open.
+        chromeCoreConnector.waitingForAppInstall = true;
+        chrome.tabs.create(
+            {url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'},
+            (tab) => {
+              // Focus on the new Chrome Webstore tab.
+              chrome.windows.update(tab.windowId, {focused: true});
+            });
       });
-  chromeCoreConnector.waitingForAppInstall = true;
 }
 
 /**
@@ -69,6 +90,11 @@ function initUI() : UI.UserInterface {
           chromeBrowserApi.bringUproxyToFront();
         }
     });
+  });
+  chrome.browserAction.onClicked.addListener((tab) => {
+    // When the extension icon is clicked, open uProxy.
+    mainWindowId = tab.windowId;
+    chromeBrowserApi.bringUproxyToFront();
   });
 
   chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
