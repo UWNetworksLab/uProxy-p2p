@@ -19,9 +19,9 @@ describe('peerconnection', function() {
   // setLocalDescription, is not initiated prior to sending the OFFER signal:
   //   https://github.com/uProxy/uproxy/issues/784
   it('candidate gathering should not start before offer signal has been emitted', (done) => {
-    var negotiateCallback :any;
+    var negotiateCallback :() => void;
 
-    mockPeerConnection.on = (eventName:string, callback:any) => {
+    mockPeerConnection.on = (eventName:string, callback:() => void) => {
       if (eventName === 'onnegotiationneeded') {
         negotiateCallback = callback;
       }
