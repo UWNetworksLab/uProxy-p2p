@@ -144,13 +144,6 @@ module WebRtc {
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
-    // Call this once an OFFER or ANSWER signal has been sent
-    // on the signalling channel.
-    private fulfillSdpSignalExchanged_ :() => void;
-    private onceSdpSignalExchanged_ = new Promise((F, R) => {
-      this.fulfillSdpSignalExchanged_ = F;
-    });
-
     public static fromRtcPeerConnection = (
         pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection => {
       return new PeerConnection(pc, 'unnamed');
@@ -209,12 +202,12 @@ module WebRtc {
       // Add basic event handlers.
       this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
         if(candidate.candidate) {
-          this.emitSignal_({
+          this.signalForPeerQueue.handle({
             type: SignalType.CANDIDATE,
             candidate: candidate.candidate
           });
         } else {
-          this.emitSignal_(
+          this.signalForPeerQueue.handle(
               {type: SignalType.NO_MORE_CANDIDATES});
         }
       });
@@ -363,13 +356,17 @@ module WebRtc {
         this.pcState = State.CONNECTING;
         this.fulfillConnecting_();
         this.pc_.createOffer()
-            .then(this.pc_.setLocalDescription)
-            .then(this.pc_.getLocalDescription)
             .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-              this.emitSignal_({
+              // Emit the offer signal before calling setLocalDescription, which
+              // initiates ICE candidate gathering. If we did the reverse then
+              // we may emit ICE candidate signals before the offer, confusing
+              // some clients:
+              //   https://github.com/uProxy/uproxy/issues/784
+              this.signalForPeerQueue.handle({
                 type: SignalType.OFFER,
                 description: {type: d.type, sdp: d.sdp}
               });
+              this.pc_.setLocalDescription(d);
             })
             .catch((e) => {
               this.closeWithError_('Failed to set local description: ' +
@@ -417,12 +414,14 @@ module WebRtc {
             this.fulfillConnecting_();
             this.pc_.setRemoteDescription(signal.description)  // initial offer from peer
                 .then(this.pc_.createAnswer)
-                .then(this.pc_.setLocalDescription)
-                .then(this.pc_.getLocalDescription)
                 .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-                  this.emitSignal_(
+                  // As with the offer, we must emit the signal before
+                  // setting the local description to ensure that we send the
+                  // ANSWER before any ICE candidates.
+                  this.signalForPeerQueue.handle(
                       {type: SignalType.ANSWER,
                        description: {type: d.type, sdp: d.sdp} });
+                  this.pc_.setLocalDescription(d);
                 })
                 .then(() => {
                   this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
@@ -528,21 +527,6 @@ module WebRtc {
       this.controlDataChannel = controlChannel;
       this.controlDataChannel.onceClosed.then(this.close);
       return this.controlDataChannel.onceOpened.then(this.completeConnection_);
-    }
-
-    // Adds a signal to signalForPeerQueue.
-    // OFFER and ANSWER signals are sent immediately but all other
-    // signals block until an OFFER or ANSWER has first been sent.
-    private emitSignal_ = (signal:SignallingMessage) : void => {
-      if (signal.type === SignalType.OFFER ||
-          signal.type === SignalType.ANSWER) {
-        this.signalForPeerQueue.handle(signal);
-        this.fulfillSdpSignalExchanged_();
-      } else {
-        this.onceSdpSignalExchanged_.then(() => {
-          this.signalForPeerQueue.handle(signal);
-        });
-      }
     }
 
     // For debugging: prints the state of the peer connection including all
