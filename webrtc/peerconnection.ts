@@ -12,11 +12,6 @@
 // This class assumes WebRTC is available; this is provided by freedom.js.
 module WebRtc {
 
-  export interface PeerConnectionConfig {
-    webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
-    peerName               ?:string;   // For debugging
-  }
-
   export enum SignalType {
     OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
   }
