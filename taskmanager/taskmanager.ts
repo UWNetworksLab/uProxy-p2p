@@ -144,5 +144,5 @@ module TaskManager {
 
 // A bit of a hack to allow this file to be compiled normally and still used by
 // commonjs-style require.
-var exports = (exports || {});
+var exports :any = (exports || {});
 exports.Manager = TaskManager.Manager;

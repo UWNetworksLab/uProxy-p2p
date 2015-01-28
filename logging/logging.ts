@@ -37,7 +37,7 @@ module Logging {
   }
 
   export class Log {
-    private logger :Promise<Freedom.logger>;
+    private logger :Promise<freedom.Logger>;
     constructor(private tag_:string) {
       this.logger = freedom['core']().getLogger(this.tag_);
     }
