@@ -144,9 +144,13 @@ module WebRtc {
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
+    // Number of automatically generated names generated so far.
+    private static automaticNameIndex = 0;
+
     public static fromRtcPeerConnection = (
         pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection => {
-      return new PeerConnection(pc, 'unnamed');
+      return new PeerConnection(pc, 'unnamed-' +
+          (++PeerConnection.automaticNameIndex));
     }
 
     public static fromRtcPeerConnectionWithName = (
