@@ -11,48 +11,46 @@ describe('peerconnection', function() {
       'on',
       'createDataChannel',
       'createOffer',
-      'setLocalDescription',
-      'getLocalDescription'
+      'setLocalDescription'
     ]);
   });
 
-  it('message ordering', (done) => {
+  // Ensure that ICE candidate gathering, which is initiated by a call to
+  // setLocalDescription, is not initiated prior to sending the OFFER signal:
+  //   https://github.com/uProxy/uproxy/issues/784
+  it('candidate gathering should not start before offer signal has been emitted', (done) => {
     var negotiateCallback :any;
 
-    // Invoke the onicecandidate callback as soon as it's been attached.
-    // From the point of view of peerconnection, this simulates the receipt
-    // of an ICE candidate prior to an SDP.
     mockPeerConnection.on = (eventName:string, callback:any) => {
-      if (eventName === 'onicecandidate') {
-        var mockCandidateEvent :freedom_RTCPeerConnection.OnIceCandidateEvent = {
-          candidate: {
-            candidate: 'fake:candidate:yo'
-          }
-        };
-        callback(mockCandidateEvent);
-      }
       if (eventName === 'onnegotiationneeded') {
         negotiateCallback = callback;
       }
     };
 
-    mockPeerConnection.createDataChannel = (label:string, init:freedom_RTCPeerConnection.RTCDataChannelInit) => {
+    mockPeerConnection.createDataChannel = (label:string,
+        init:freedom_RTCPeerConnection.RTCDataChannelInit) => {
       negotiateCallback();
       return Promise.resolve('mocklabel');
     };
 
-    (<any>mockPeerConnection.createOffer).and.returnValue(Promise.resolve());
-    (<any>mockPeerConnection.setLocalDescription).and.returnValue(Promise.resolve());
-    (<any>mockPeerConnection.getLocalDescription).and.returnValue(Promise.resolve({hello: 'world'}));
+    var mockOffer :freedom_RTCPeerConnection.RTCSessionDescription = {
+      type: 'sdp',
+      sdp: 'mock:sdp'
+    };
+
+    (<any>mockPeerConnection.createOffer).and.returnValue(
+        Promise.resolve(mockOffer));
+    (<any>mockPeerConnection.setLocalDescription).and.returnValue(
+        Promise.resolve());
 
     var pc = new WebRtc.PeerConnection(mockPeerConnection, 'test');
+
     pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {
       expect(signal.type).toEqual(WebRtc.SignalType.OFFER);
-      pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {
-        expect(signal.type).toEqual(WebRtc.SignalType.CANDIDATE);
-        done();
-      });
+      expect(mockPeerConnection.setLocalDescription).not.toHaveBeenCalled();
+      done();
     });
+
     pc.negotiateConnection();
   });
 });
