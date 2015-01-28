@@ -1,14 +1,12 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../third_party/freedom/rtcdatachannel.d.ts' />
-/// <reference path='../../third_party/freedom/freedom-module-env.d.ts' />
+/// <reference path='../freedom/typings/rtcdatachannel.d.ts' />
+/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
 // This class assumes WebRTC is available; this is provided by the cross-
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
-
-// import freedom = require('../../third_party/freedom/freedom-module-env');
 
 import WebRtcTypes = require('./types');
 import Handler = require('../handler/queue');

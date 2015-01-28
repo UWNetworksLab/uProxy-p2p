@@ -1,5 +1,5 @@
-/// <reference path='../../../third_party/freedom/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom/freedom-core-env.d.ts' />
+/// <reference path='../../freedom/typings/freedom-common.d.ts' />
+/// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
 
 import WebRtcTypes = require('../../webrtc/types');
 import SignallingMessage = WebRtcTypes.SignallingMessage;

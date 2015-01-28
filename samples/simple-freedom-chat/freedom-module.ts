@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom/freedom-module-env.d.ts' />
+/// <reference path='../../freedom/typings/freedom-module-env.d.ts' />
 
 import Logging = require('../../logging/logging');
 

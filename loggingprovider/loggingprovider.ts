@@ -1,6 +1,6 @@
-/// <reference path='../../third_party/freedom/freedom-common.d.ts' />
-/// <reference path='../../third_party/freedom/console.d.ts' />
-/// <reference path='../../third_party/freedom/freedom-module-env.d.ts' />
+/// <reference path='../freedom/typings/freedom-common.d.ts' />
+/// <reference path='../freedom/typings/console.d.ts' />
+/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
 import logging = require('loggingprovider.i');
 
