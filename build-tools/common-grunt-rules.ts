@@ -70,7 +70,7 @@ export class Rule {
     };
   }
 
-  // Grunt copy target creator: for copying freedom.js to
+  // Make a copy rule to copy the appropriate freedomjs file to the path
   public copyFreedomToDest(freedomRuntimeName:string, destPath:string)
       : CopyRule {
     var freedomjsPath = require.resolve(freedomRuntimeName);
