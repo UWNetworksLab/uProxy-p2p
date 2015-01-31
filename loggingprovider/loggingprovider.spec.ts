@@ -1,19 +1,19 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
+// Setup freedom mock environment.
 import freedomMocker = require('../freedom/mocks/jasmine-mock-freedom-module-env');
-
-import logging = require('loggingprovider.i');
 
 // We need null mock freedom console (not one that raises errors). The
 // loggingprovider in this file ignore freedom's calls to the core console
 // provider.
-var mockFreedomCoreConsoleObjFn = () => {
-  return new freedomMocker.NullMockFreedomConsole();
-}
+//
 // TODO: support adding the close param to the function object. Or persuade
 // freedom to improve its namespace management.
 //   mockFreedomCoreConsoleObjFn.close = (f:freedom_Console.Console) => {};
+var mockFreedomCoreConsoleObjFn = () => {
+  return new freedomMocker.NullMockFreedomConsole();
+}
 
 // We need to mock freedom before the LoggingProvider import, because the
 // import/require statement that loads |LoggingProvider| will call
@@ -25,8 +25,8 @@ freedom = freedomMocker.makeNullMockFreedomInModuleEnv({
   }
 });
 
+import logging = require('loggingprovider.i');
 import LoggingProvider = require('./loggingprovider');
-
 
 describe("Logging Provider", () => {
   var logger :logging.Log;
