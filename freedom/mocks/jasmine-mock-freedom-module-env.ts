@@ -5,7 +5,7 @@
 
 import freedomTypes = require('freedom.i');
 
-export class ErrorMockParentModuleThing implements freedomTypes.ParentModuleThing {
+export class AbstractParentModuleThing implements freedomTypes.ParentModuleThing {
   public on(t:string, f:Function) : void {
     throw new Error('not implemented in mock');
   }
@@ -23,7 +23,7 @@ export class ErrorMockParentModuleThing implements freedomTypes.ParentModuleThin
   }
 }
 
-export class ErrorMockFreedomCore implements freedomTypes.Core {
+export class AbstractFreedomCore implements freedomTypes.Core {
   public getLogger(loggerName:string) : Promise<freedomTypes.Logger> {
     throw new Error('not implemented in mock');
   }
@@ -38,7 +38,7 @@ export class ErrorMockFreedomCore implements freedomTypes.Core {
   }
 }
 
-export class ErrorMockFreedomConsole implements freedom_Console.Console {
+export class AbstractFreedomConsole implements freedom_Console.Console {
   public log(source:string, message:string) : Promise<void> {
     throw new Error('not implemented in mock');
   }
@@ -57,20 +57,20 @@ export class ErrorMockFreedomConsole implements freedom_Console.Console {
 }
 
 
-export class NullMockModuleSelfConstructor implements freedomTypes.ModuleSelfConstructor {
+export class SkeletonModuleSelfConstructor implements freedomTypes.ModuleSelfConstructor {
   public provideSynchronous(classFn:Function) : void {}
   public provideAsynchronous(classFn:Function) : void {}
   public providePromises(classFn:Function) : void {}
 }
 
-export class NullMockParentModuleThing
-    extends NullMockModuleSelfConstructor
+export class SkeletonParentModuleThing
+    extends SkeletonModuleSelfConstructor
     implements freedomTypes.ParentModuleThing {
   public on(t:string, f:Function) : void {}
   public emit(t:string, x:any) : void {}
 }
 
-export class NullMockFreedomCore implements freedomTypes.Core {
+export class SkeletonFreedomCore implements freedomTypes.Core {
   public getLogger(loggerName:string) : Promise<freedomTypes.Logger> {
     return Promise.resolve<freedomTypes.Logger>(null);
   }
@@ -85,7 +85,7 @@ export class NullMockFreedomCore implements freedomTypes.Core {
   }
 }
 
-export class NullMockFreedomConsole implements freedom_Console.Console {
+export class SkeletonFreedomConsole implements freedom_Console.Console {
   public log(source:string, message:string) : Promise<void> {
     return Promise.resolve<void>();
   }
@@ -103,59 +103,44 @@ export class NullMockFreedomConsole implements freedom_Console.Console {
   }
 }
 
-export function makeNullMockFreedomInModuleEnv(
+// See the definition of freedomTypes.FreedomInModuleEnv for more info on the
+// curious type of a freedom object. :)
+export function makeSkeletonFreedomInModuleEnv(
     providerFactories ?: {[name:string] : Function})
     : freedomTypes.FreedomInModuleEnv {
 
-  // Each freedom() call in a module env gives a new on/emit interface to the
-  // parent module.
-  var freedom : any = () => {
-    return new NullMockParentModuleThing();
-  }
+  var freedom :freedomTypes.FreedomInModuleEnv;
 
-  // Note: unlike other freedom
-  var core_ = new NullMockFreedomCore();
+  var freeedomParentModuleThing_ = new SkeletonParentModuleThing();
+  var freedomFn = () => { return freeedomParentModuleThing_; }
+  freedom = <any>freedomFn;
+
+  var core_ = new SkeletonFreedomCore();
   freedom['core'] = () => { return core_; }
 
   for(var providerName in providerFactories) {
     freedom[providerName] = providerFactories[providerName];
   }
-
-  //freedom['provideSynchronous'] = () : void => {};
-  //freedom['provideAsynchronous'] = () : void => {};
-  //freedom['providePromise'] = () : void => {};
 
   return freedom;
 }
 
-export function makeErrorMockFreedomInModuleEnv(
+export function makeAbstractFreedomInModuleEnv(
     providerFactories ?: {[name:string] : Function})
     : freedomTypes.FreedomInModuleEnv {
-  // Each freedom() call in a module env gives a new on/emit interface to the
-  // parent module.
-  var freedom : any = () => {
-    return new NullMockParentModuleThing();
-  }
 
-  // Note: unlike other freedom
-  var core_ = new NullMockFreedomCore();
+  var freedom :freedomTypes.FreedomInModuleEnv;
+
+  var freeedomParentModuleThing_ = new SkeletonParentModuleThing();
+  var freedomFn = () => { return freeedomParentModuleThing_; }
+  freedom = <any>freedomFn;
+
+  var core_ = new SkeletonFreedomCore();
   freedom['core'] = () => { return core_; }
 
   for(var providerName in providerFactories) {
     freedom[providerName] = providerFactories[providerName];
   }
-
-/*
-  freedom['provideSynchronous'] = () : void => {
-    throw new Error('not implemented in mock');
-  };
-  freedom['provideAsynchronous'] = () : void => {
-    throw new Error('not implemented in mock');
-  };
-  freedom['providePromise'] = () : void => {
-    throw new Error('not implemented in mock');
-  };
-*/
 
   return freedom;
 }

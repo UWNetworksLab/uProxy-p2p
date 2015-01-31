@@ -94,11 +94,12 @@ declare module freedom {
 
   interface FreedomInModuleEnv {
     // Represents the call to freedom(), which returns the parent module's
-    // freedom stub interface in an on/emit style.
+    // freedom stub interface in an on/emit style. This is a getter.
     (): ParentModuleThing;
 
     // Creates an interface to the freedom core provider which can be used to
     // create loggers and channels.
+    // Note: unlike other providers, core is a getter.
     core : () => Core;
 
     // We use this specification so that you can reference freedom sub-modules by
