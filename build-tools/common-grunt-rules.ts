@@ -65,7 +65,7 @@ export class Rule {
       src: [ path.join(this.config.devBuildDir, filepath + '.js')],
       dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
       options: {
-        debug: true,
+        debug: false,
       }
     };
   }

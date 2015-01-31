@@ -20,7 +20,6 @@ export interface Log {
 
 // Interface for managinge & retreiving log messages.
 // Note: this is really a fake class: all data is in fact global.
-// TODO: rename this to LoggingManager or something sensible.
 export interface Controller {
   getEncrypedLogBuffer(tags:string[]) : ArrayBuffer;
 
@@ -52,7 +51,6 @@ export interface Controller {
   setBufferedLogFilter(args: string[]) : void;
 }
 
-//
 export interface LoggingProviderModule {
   formatMessage(l:Message) : string;
   makeMessage(level:string, tag:string, msg:string) : Message;
