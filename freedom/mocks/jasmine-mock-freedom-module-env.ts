@@ -3,7 +3,7 @@
 /// <reference path="../typings/console.d.ts" />
 /// <reference path="../typings/freedom-common.d.ts" />
 
-import freedomTypes = require('freedom.i');
+import freedomTypes = require('freedom.types');
 
 export class AbstractParentModuleThing implements freedomTypes.ParentModuleThing {
   public on(t:string, f:Function) : void {

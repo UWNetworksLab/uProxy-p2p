@@ -1,7 +1,7 @@
 /// <reference path='../../freedom/typings/freedom-common.d.ts' />
 /// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
 
-import Message = require('./messages.i');
+import Message = require('./message.types');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");

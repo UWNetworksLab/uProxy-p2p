@@ -1,11 +1,14 @@
 /// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 // A Handler abstraction for events. This abstraction allows all event handlers
-// to produce an event type and for a summarization of those events to be the
-// actual hanlder. This is intended for use with Hnalder Queues (|queue.ts|).
+// to produce an output that can be passed back to the code that causes the
+// event to be handled. This can be used for summarization/retriggering of
+// compound events. e.g. to revieve and accumulate buffers until the amount of
+// data is above a certain size. This is intended for use with Hanlder Queues
+// (See |queue.ts|).
 
-// Interface abbreviations.
 export interface FunctionOf1Arg<T,T2> { (x:T) : T2; }
+
 // CONSIDER: allow async functions, it would use soemghing like this:
 // export interface PromiseFunctionOf1Arg<T,T2> { (x:T) : Promise<T2>; }
 

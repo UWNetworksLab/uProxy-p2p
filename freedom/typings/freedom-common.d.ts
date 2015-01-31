@@ -109,8 +109,13 @@ declare module freedom {
   }
 }
 
-// This allows use of syntax: import freedomTypes = require('freedom.i');
-// which gives finer control to the naming prefix for types.
-declare module "freedom.i" {
+// By having both the freedom module declared above, and this quoted
+// declaration, it allows a typescript <reference ...> header to be used and
+// then for types to then be found by `freedom.TypeName` (e.g. in the other
+// freedom typing files), as well as a using the require style inclusion of the
+// importing the freedom types using a statement of the form |import
+// freedomTypes = require('freedom.types');| within normal typescript code, e.g.
+// see the jasmine freedom mock in mocks subdirectory of freedom.
+declare module "freedom.types" {
     export = freedom;
 }

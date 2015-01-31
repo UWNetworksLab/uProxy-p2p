@@ -1,10 +1,10 @@
 /// <reference path='../../freedom/typings/freedom-common.d.ts' />
 /// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
 
-import WebRtcTypes = require('../../webrtc/types');
+import WebRtcTypes = require('../../webrtc/webrtc.types');
 import SignallingMessage = WebRtcTypes.SignallingMessage;
 
-import freedomTypes = require('freedom.i');
+import freedomTypes = require('freedom.types');
 
 // Freedom apps don't have direct access to the page so this
 // file mediates between the page's controls and the Freedom app.

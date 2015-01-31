@@ -25,7 +25,7 @@ freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
   }
 });
 
-import logging = require('loggingprovider.i');
+import logging = require('loggingprovider.types');
 import LoggingProvider = require('./loggingprovider');
 
 describe("Logging Provider", () => {

@@ -8,7 +8,7 @@
 // platform compatibility library webrtc-adaptor.js (from:
 // https://code.google.com/p/webrtc/source/browse/stable/samples/js/base/adapter.js)
 
-import WebRtcTypes = require('./types');
+import WebRtcTypes = require('./webrtc.types');
 import Handler = require('../handler/queue');
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');

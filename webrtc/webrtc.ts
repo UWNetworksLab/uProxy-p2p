@@ -1,4 +1,4 @@
-import WebRtcTypes = require('./types');
+import WebRtcTypes = require('./webrtc.types');
 import PeerConnectionClass = require('./peerconnection');
 
 export function createPeerConnection(config:WebRtcTypes.PeerConnectionConfig)

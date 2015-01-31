@@ -2,7 +2,7 @@
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
 import Handler = require('../handler/queue');
-import Enums = require('./enums');
+import Enums = require('./webrtc.enums');
 import SignalType = Enums.SignalType;
 import State = Enums.State;
 

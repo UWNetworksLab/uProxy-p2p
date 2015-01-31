@@ -12,11 +12,11 @@ import Handler = require('../handler/queue');
 
 import DataChannelClass = require('./datachannel');
 
-import Enums = require('./enums');
+import Enums = require('./webrtc.enums');
 import State = Enums.State;
 import SignalType = Enums.SignalType;
 
-import WebRtcTypes = require('./types');
+import WebRtcTypes = require('./webrtc.types');
 import DataChannel = WebRtcTypes.Channel;
 import PeerConnection = WebRtcTypes.PeerConnection;
 import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;

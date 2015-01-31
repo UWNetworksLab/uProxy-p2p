@@ -2,7 +2,7 @@
 
 import Logging = require('../../logging/logging');
 
-import WebRtcTypes = require('../../webrtc/types');
+import WebRtcTypes = require('../../webrtc/webrtc.types');
 import WebRtc = require('../../webrtc/webrtc');
 
 import PeerConnection = WebRtcTypes.PeerConnection;
@@ -11,7 +11,7 @@ import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;
 import DataChannel = WebRtcTypes.Channel;
 import Data = WebRtcTypes.Data;
 
-import Message = require('./messages.i');
+import Message = require('./message.types');
 
 
 var log :Logging.Log = new Logging.Log('freedomchat');

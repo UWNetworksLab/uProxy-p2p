@@ -2,7 +2,7 @@
 
 import Logging = require('../../logging/logging');
 
-import WebRtcTypes = require('../../webrtc/types');
+import WebRtcTypes = require('../../webrtc/webrtc.types');
 import WebRtc = require('../../webrtc/webrtc');
 
 import PeerConnection = WebRtcTypes.PeerConnection;

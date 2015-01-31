@@ -2,7 +2,7 @@
 /// <reference path='../freedom/typings/console.d.ts' />
 /// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
-import logging = require('loggingprovider.i');
+import logging = require('loggingprovider.types');
 
 // The freedom console provider.
 var freedomConsole

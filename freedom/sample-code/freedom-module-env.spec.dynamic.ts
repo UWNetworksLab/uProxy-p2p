@@ -1,5 +1,5 @@
-// This is a dummy file to make sure that we typescheck the freedom-stypescript-
-// api files.
+// This is a dummy file to make sure that we typecheck the
+// freedom-typescript-api files.
 
 /// <reference path='../typings/freedom-common.d.ts' />
 /// <reference path='../typings/freedom-module-env.d.ts' />
