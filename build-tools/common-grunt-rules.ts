@@ -26,15 +26,17 @@ export interface BrowserifyRule {
   };
 }
 
+export interface CopyFilesDescription {
+  src     : string[];
+  dest    : string;
+  expand ?: boolean;
+  cwd    ?: string;
+  nonull ?: boolean;
+  onlyIf ?: string; // can be: 'modified'
+}
+
 export interface CopyRule {
-  files :{
-    src     : string[];
-    dest    : string;
-    expand ?: boolean;
-    cwd    ?: string;
-    nonull ?: boolean;
-    onlyIf ?: string; // can be: 'modified'
-  }[];
+  files :CopyFilesDescription[];
 }
 
 
@@ -70,34 +72,38 @@ export class Rule {
     };
   }
 
-  // Make a copy rule to copy the appropriate freedomjs file to the path
-  public copyFreedomToDest(freedomRuntimeName:string, destPath:string)
-      : CopyRule {
+  // Grunt copy target creator: copies freedom libraries and the freedomjs file
+  // to the destination path.
+  public copyFreedomLibs(freedomRuntimeName: string,
+      freedomLibPaths:string[], destPath:string) : CopyRule {
+    // Provide a file-set to be copied for each freedom module that is lised in
+    // |freedomLibPaths|
+    var filesForlibPaths :CopyFilesDescription[] = freedomLibPaths.map(
+          (libPath) => {
+      return {
+        expand: true,
+        cwd: this.config.devBuildDir,
+        src: [
+          libPath + '/*.json',
+          libPath + '/*.js',
+          libPath + '/*.html',
+          libPath + '/*.css',
+          '!' + libPath + '/*.spec.js',
+          '!' + libPath + '/SpecRunner.html'
+        ],
+        dest: destPath,
+        onlyIf: 'modified'
+      }
+    });
+    // Copy the main freedom javascript runtime specified in
+    // |freedomRuntimeName|.
     var freedomjsPath = require.resolve(freedomRuntimeName);
-    var fileTarget = { files: [{
-      nonull: true,
-      src: [freedomjsPath],
-      dest: path.join(destPath,path.basename(freedomjsPath)),
-      onlyIf: 'modified'
-    }] };
-    return fileTarget;
-  }
-
-  // Grunt copy target creator: for copy a freedom library directory
-  public copySomeFreedomLib(libPath:string, destPath:string) : CopyRule {
-    return { files: [{
-      expand: true,
-      cwd: this.config.devBuildDir,
-      src: [
-        libPath + '/*.json',
-        libPath + '/*.js',
-        libPath + '/*.html',
-        libPath + '/*.css',
-        '!' + libPath + '/*.spec.js',
-        '!' + libPath + '/SpecRunner.html'
-      ],
-      dest: destPath,
-      onlyIf: 'modified'
-    }] };
+    filesForlibPaths.push({
+        nonull: true,
+        src: [freedomjsPath],
+        dest: path.join(destPath,path.basename(freedomjsPath)),
+        onlyIf: 'modified'
+      });
+    return { files: filesForlibPaths };
   }
 }
