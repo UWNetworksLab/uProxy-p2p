@@ -120,6 +120,7 @@ describe('uproxy core', function() {
         }
       })
     });
+
     Promise.all([aliceLoaded, bobLoaded]).then(done);
   });
 
@@ -218,8 +219,8 @@ describe('uproxy core', function() {
                {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: 5});
     alice.on('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
       if (data.promiseId === 5) {
-        //bob.emit('' + uProxy.Command.MODIFY_CONSENT,
-        //                 {data: {path: alicePath, action:Consent.UserAction.CANCEL_OFFER}});
+        bob.emit('' + uProxy.Command.MODIFY_CONSENT,
+                         {data: {path: alicePath, action:Consent.UserAction.CANCEL_OFFER}});
         bob.emit('' + uProxy.Command.LOGOUT,
                    {data: {name: 'Google', userId: BOB.EMAIL}, promiseId: 3});
         done();
@@ -252,7 +253,6 @@ describe('uproxy core', function() {
     });
   });
 
-/*
   it('try proxying again', (done) => {
     bob.emit('' + uProxy.Command.MODIFY_CONSENT,
                      {data: {path: alicePath, action:Consent.UserAction.REQUEST}});
@@ -269,5 +269,4 @@ describe('uproxy core', function() {
       done();
     });
   });
-*/
 });
