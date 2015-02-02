@@ -452,7 +452,7 @@ module Core {
           instancePromises.push(
               Core.RemoteInstance.create(this, instanceId, null)
                   .then((newInstance) => {
-                    this.instances_[instanceId] = newInstance;
+                    this.instances_[newInstance.instanceId] = newInstance;
                   })
               );
         }
