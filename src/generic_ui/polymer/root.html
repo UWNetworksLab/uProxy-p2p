@@ -15,13 +15,11 @@
         display: block;
         border: none; margin: auto;
         text-align: left;
-        overflow: hidden;
         background-color: white;
         color: rgb(112, 112, 112);
       }
       #toolbar {
-        display: table-row;
-        height: 100px; width: 100%;
+        height: 100px;
         background-color: #009688;
       }
       #btnSettings {
@@ -36,10 +34,6 @@
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
         transition: all 0.23s !important;
-      }
-      #logged-in-controls {
-        display: table;
-        width: 100%;
       }
       #title {
         font-size: 1.75em;
@@ -63,14 +57,8 @@
         position: absolute;
         z-index: 1001;
       }
-      #roster-panel {
-        display: table-row;
-        height: 100%;
-      }
       .roster {
         position: relative;
-        background-color: white;
-        height: 100%;
         overflow-y: auto;
         display: block;
       }
@@ -95,7 +83,9 @@
         left: 50%;
       }
       #status {
-        display: table-row;
+        position: absolute;
+        width: 100%;
+        bottom: 0px;
       }
       .statusRow {
         height: 3em;
