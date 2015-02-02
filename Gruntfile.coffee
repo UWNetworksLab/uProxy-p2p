@@ -505,6 +505,8 @@ module.exports = (grunt) ->
     jasmine_chromeapp: {
       all: {
         src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+              'build/compile-src/integration/scripts/uproxy.js',
+              'build/compile-src/integration/scripts/consent.js',
               'build/compile-src/integration/*.spec.js']
         options: {
           helpers: [
