@@ -3,7 +3,7 @@
 //
 // Typescript definitions for the Freedom Storage API.
 
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 
 //declare module freedom {
   declare module freedom_Storage {

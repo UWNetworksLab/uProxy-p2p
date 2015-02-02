@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
 import Handler = require('../handler/queue');

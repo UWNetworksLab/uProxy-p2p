@@ -1,6 +1,6 @@
 // common-grunt-rules
 
-/// <reference path='../../third_party/typings/node/node.d.ts' />
+/// <reference path='../../build/third_party/typings/node/node.d.ts' />
 
 import path = require('path');
 

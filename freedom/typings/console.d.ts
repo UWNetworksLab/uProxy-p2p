@@ -1,6 +1,6 @@
 // Typescript file for core.console in:
 // https://github.com/freedomjs/freedom/blob/master/interface/core.console.json
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 
 declare module freedom_Console {
   interface Console {

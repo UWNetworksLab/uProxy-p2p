@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../build/third_party/typings/jasmine/jasmine.d.ts' />
 
 import ArrayBuffers = require('./arraybuffers');
 

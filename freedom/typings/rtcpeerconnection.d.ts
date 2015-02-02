@@ -1,7 +1,7 @@
 // Typescript file for core.rtcpeerconnection in:
 // https://github.com/freedomjs/freedom/blob/master/interface/core.rtcpeerconnection.json
 
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 
 declare module freedom_RTCPeerConnection {
   interface RTCIceServer {
