@@ -1,5 +1,5 @@
 /// <reference path='../../build/third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
 // Setup freedom mock environment.
 import freedomMocker = require('../freedom/mocks/jasmine-mock-freedom-module-env');
