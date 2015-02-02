@@ -27,7 +27,6 @@
       opacity: 0.3;
     }
     .view {
-      position: absolute;
       width: 80%;
       margin-left: 10%;
       padding-top: 50px;
@@ -48,17 +47,17 @@
       padding-bottom: 32px;
     }
     #nextWrapper {
-      position: absolute;
-      bottom: 120px;
+      margin-top: 50px;
       left: 0;
       width: 100%;
     }
     uproxy-faq-link {
       position: absolute;
-      bottom: 1em;
+      bottom: 0;
       left: 0;
       width: 100%;
       padding-top: 1em;
+      padding-bottom: 1em;
       border-top: 1px solid rgb(221, 221, 221);
       text-transform: uppercase;
     }
@@ -87,7 +86,12 @@
           uProxy helps you share your access to the internet or get internet
           access from friends
         </p>
+
+        <div id='nextWrapper'>
+          <paper-button raised on-tap='{{next}}'>Next</paper-button>
+        </div>
       </div>
+
       <uproxy-faq-link anchor='LearnMore'>
         Learn more about uProxy
       </uproxy-faq-link>
@@ -107,11 +111,6 @@
       <uproxy-faq-link anchor='Privacy'>
         Learn more about privacy
       </uproxy-faq-link>
-    </div>
-
-    <div id='nextWrapper'
-      hidden?='{{SPLASH_STATES.GET_OR_SHARE==ui.splashState || SPLASH_STATES.NETWORKS==ui.splashState}}'>
-      <paper-button raised on-tap='{{next}}'>Next</paper-button>
     </div>
 
   </template>
