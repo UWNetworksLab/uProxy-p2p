@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -18,9 +18,9 @@
   ],
   "devDependencies": {
     "es6-promise": "^0.1.1",
-    "freedom-social-xmpp": "~0.3.5",
-    "freedom-for-chrome": "~0.4.8",
-    "freedom-for-firefox": "~0.6.6",
+    "freedom-social-xmpp": "~0.3.6",
+    "freedom-for-chrome": "~0.4.11",
+    "freedom-for-firefox": "~0.6.7",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
@@ -42,11 +42,11 @@
     "grunt-vulcanize": "^0.6.0",
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
-    "uproxy-lib": "^17.0.0",
+    "uproxy-lib": "^18.0.0",
     "uproxy-networking": "^5.0.0"
   },
   "peerDependencies" : {
-    "freedom": "~0.6.11"
+    "freedom": "~0.6.18"
   },
   "private": true,
   "scripts": {
