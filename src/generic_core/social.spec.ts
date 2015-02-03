@@ -149,7 +149,6 @@ describe('Social.FreedomNetwork', () => {
         jasmine.clock().tick(5000);
         expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
-        expect(network.myInstance).toEqual(null);
       }).then(done);
     });
 
