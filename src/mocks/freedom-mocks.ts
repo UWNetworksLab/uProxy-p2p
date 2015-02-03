@@ -1,10 +1,13 @@
 /**
  * freedom-mocks.ts
  *
+ * Mock freedom objects used for uProxy unit tests. The mock classes below
+ * implement different freedom interfaces found in freedom/typings/freedom.d.ts.
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../freedom/typings/storage.d.ts' />
 
 
