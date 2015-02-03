@@ -20,6 +20,11 @@ class MockCore {
 
   public getId = () => { return ['useless']; }
 
+  public getLogger = (tag) => {
+    var logger = jasmine.createSpyObj('logger-'+tag, ['log', 'info', 'error']);
+    freedom['loggers'][tag] = logger;
+    return Promise.resolve(logger);
+  }
 }  // class MockCore
 
 class MockCorePeerConnection {
@@ -106,6 +111,7 @@ var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
+freedom['loggers'] = {};
 freedom['core'] = () => { return new MockCore(); };
 freedom['core.console'] = () => { return new MockLog(); };
 freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
