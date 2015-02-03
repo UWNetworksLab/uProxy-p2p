@@ -111,6 +111,7 @@ module Core {
       this.name = profile.name;
       this.profile = profile;
       this.log('Updating...');
+      this.saveToStorage();
       this.notifyUI();
     }
 
