@@ -106,7 +106,9 @@ describe('uproxy core', function() {
                      <uProxy.PromiseCommand>{data: 'Google', promiseId: 1});
     var aliceLoaded = new Promise(function(fulfill, reject) {
       alice.on('' + uProxy.Update.USER_FRIEND, (data) => {
-        if (data.user.userId === BOB.ANONYMIZED_ID && data.instances.length > 0) {
+        if (data.user.userId === BOB.ANONYMIZED_ID
+           && data.user.name === 'Bob Freedom'
+           && data.instances.length > 0) {
           BOB.INSTANCE_ID = data.instances[0].instanceId;
           fulfill();;
         }
@@ -114,7 +116,9 @@ describe('uproxy core', function() {
     });
     var bobLoaded = new Promise(function(fulfill, reject) {
       bob.on('' + uProxy.Update.USER_FRIEND, (data) => {
-        if (data.user.userId === ALICE.ANONYMIZED_ID && data.instances.length > 0) {
+        if (data.user.userId === ALICE.ANONYMIZED_ID
+            && data.user.name === 'Alice Freedom'
+            && data.instances.length > 0) {
           ALICE.INSTANCE_ID = data.instances[0].instanceId;
           fulfill();
         }
@@ -232,11 +236,10 @@ describe('uproxy core', function() {
     alice.emit('' + uProxy.Command.LOGIN,
                {data: 'Google', promiseId: 10});
     alice.on('' + uProxy.Update.USER_FRIEND, (data) => {
-      console.log(data);
-      done();
       if (data.user.userId === BOB.ANONYMIZED_ID && data.instances.length > 0
           && data.instances[0].instanceId === BOB.INSTANCE_ID
-          && data.instances[0].consent.remoteGrantssAccessToLocal) {
+          && data.instances[0].consent.remoteGrantsAccessToLocal
+          && !data.instances[0].consent.localGrantsAccessToRemote) {
         alice.emit('' + uProxy.Command.MODIFY_CONSENT,
                          {data: {path: bobPath, action:Consent.UserAction.OFFER}});
         bob.emit('' + uProxy.Command.LOGIN,
@@ -247,6 +250,7 @@ describe('uproxy core', function() {
               && data.instances[0].consent.remoteRequestsAccessFromLocal
               && !data.instances[0].consent.localGrantsAccessToRemote
               && data.instances[0].consent.remoteGrantsAccessToLocal) {
+            done();
           }
         });
       }
@@ -269,4 +273,5 @@ describe('uproxy core', function() {
       done();
     });
   });
+
 });

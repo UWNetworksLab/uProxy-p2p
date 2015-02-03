@@ -514,7 +514,7 @@ module.exports = (grunt) ->
             'build/compile-src/integration/**/*.js'
             'build/compile-src/integration/**/*.json'
           ],
-          keepRunner: false
+          keepRunner: true
         }
       }
     }
