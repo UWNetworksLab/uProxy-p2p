@@ -54,8 +54,8 @@
     }
     </style>
 
-    <div tabindex='-1' class='frame'
-        class='{{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
+    <div tabindex='-1' class='frame
+        {{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
       <div on-tap='{{ toggle}}' class='nameRow'>
         <img class='avatar' src='{{ contact.imageData }}' />
         <span class='name'>{{ contact.name }}</span>
