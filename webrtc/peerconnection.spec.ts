@@ -3,19 +3,23 @@
 
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
+import MockFreedomRtcDataChannel =
+  require('../freedom/mocks/mock-rtcdatachannel');
 import MockFreedomRtcPeerConnection =
   require('../freedom/mocks/mock-rtcpeerconnection');
 import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-freedom = freedomMocker.makeSkeletonFreedomInModuleEnv();
+freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
+  'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
+});
 
 import WebRtcTypes = require('./webrtc.types');
 import WebRtcEnums = require('./webrtc.enums');
 import PeerConnectionClass = require('./peerconnection');
 
-xdescribe('peerconnection', function() {
+describe('peerconnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
 
   beforeEach(function() {
@@ -36,7 +40,8 @@ xdescribe('peerconnection', function() {
           label:string, init:RTCDataChannelInit) => {
       mockRtcPeerConnection.eventHandler.fakeAnEvent(
           'onnegotiationneeded', null);
-    }).and.callThrough();
+      return Promise.resolve('foo-channel-id');
+    });
 
     // Make |createOffer| resolve to a mock offer.
     var createOfferSpy = spyOn(mockRtcPeerConnection, "createOffer");

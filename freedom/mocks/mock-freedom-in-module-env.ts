@@ -61,7 +61,7 @@ export function makeSkeletonFreedomInModuleEnv(
 
   var freeedomParentModuleThing_ = new SkeletonParentModuleThing();
   var freedomFn = () => { return freeedomParentModuleThing_; }
-  freedom = <any>freedomFn;
+  freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
 
   var core_ = new SkeletonFreedomCore();
   freedom['core'] = () => { return core_; }

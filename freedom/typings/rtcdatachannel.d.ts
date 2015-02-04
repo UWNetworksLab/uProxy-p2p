@@ -12,8 +12,9 @@ declare module freedom_RTCDataChannel {
     binary        ?:Blob;  // Not yet supported in Chrome.
   }
 
-  class RTCDataChannel {
-    constructor(id:string);
+  // Constructed by |freedom['rtcdatachannel'](id)| where |id| is a string
+  // representing the channel id created by an |rtcpeerconnection| object.
+  interface RTCDataChannel {
     getLabel() : Promise<string>;
     getOrdered() : Promise<boolean>;
     getMaxPacketLifeTime() : Promise<number>;
