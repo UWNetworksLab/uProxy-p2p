@@ -44,7 +44,7 @@ export class Rule {
   // Grunt Jasmine target creator
   // Assumes that the each spec file is a fully browserified js file.
   public jasmineSpec(name:string, morefiles?:string[]) : JasmineRule {
-    if(!morefiles) { morefiles = []; }
+    if (!morefiles) { morefiles = []; }
     return {
       src: [
         require.resolve('arraybuffer-slice'),
@@ -57,6 +57,7 @@ export class Rule {
         keepRunner: true,
         template: require('grunt-template-jasmine-istanbul'),
         templateOptions: {
+          files: ['**/*', '!node_modules/**'],
           // Output location for coverage results
           coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
           report: {
@@ -77,6 +78,18 @@ export class Rule {
       dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
       options: {
         debug: true,
+      }
+    };
+  }
+
+  // Grunt browserify target creator, instrumented for istanbul
+  public browserifySpec(filepath:string) : BrowserifyRule {
+    return {
+      src: [ path.join(this.config.devBuildDir, filepath + '.spec.js') ],
+      dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
+      options: {
+        debug: true,
+        transform: [['browserify-istanbul', { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
       }
     };
   }
