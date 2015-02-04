@@ -2,7 +2,7 @@
 /// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
 // Setup freedom mock environment.
-import freedomMocker = require('../freedom/mocks/jasmine-mock-freedom-module-env');
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 
 // We need null mock freedom console (not one that raises errors). The
 // loggingprovider in this file ignore freedom's calls to the core console

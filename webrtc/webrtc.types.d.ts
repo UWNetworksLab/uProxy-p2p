@@ -95,7 +95,7 @@ export interface PeerConnection<TSignallingMessage> {
 
   // Helpful for debugging
   toString: () => string;
-  peerName :string;
+  peerName_ :string;
 }
 
 export interface SignallingMessage {

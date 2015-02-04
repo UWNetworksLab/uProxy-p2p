@@ -6,8 +6,8 @@ import freedomTypes = require('freedom.types');
 // fake events. Useful for mocking out freedom freedom modules that will raise
 // events.
 class MockFreedomEventHandler implements freedomTypes.EventHandler {
-  private onHandlerTable_ : [string : Function[]] = {};
-  private onceHandlerTable_ : [string : Function[]] = {};
+  private onHandlerTable_ : {[t:string] : Function[]} = {};
+  private onceHandlerTable_ : {[t:string] : Function[]} = {};
 
   private static removeFromArray_<T>(x:T, a:T[]) {
     var index = a.indexOf(x);

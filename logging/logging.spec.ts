@@ -1,7 +1,7 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../freedom/typings/freedom-module-env.d.ts' />
 
-import freedomMocker = require('../freedom/mocks/jasmine-mock-freedom-module-env');
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 import Logging = require('./logging');
 
 describe("Client logging shim using Freedom", () => {

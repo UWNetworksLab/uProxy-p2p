@@ -1,14 +1,19 @@
-/// <reference path='peerconnection.d.ts' />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+
+import WebRtcTypes = require('./webrtc.types');
+import WebRtcEnums = require('./webrtc.enums');
+import PeerConnectionClass = require('./peerconnection');
 
 import MockFreedomRtcPeerConnection =
   require('../freedom/mocks/mock-rtcpeerconnection');
 import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
+import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 
 describe('peerconnection', function() {
-  var mockRtcPeerConnection :RTCPeerConnection;
+  var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
 
   beforeEach(function() {
     mockRtcPeerConnection = new MockFreedomRtcPeerConnection();
@@ -24,18 +29,19 @@ describe('peerconnection', function() {
     // cause |mockRtcPeerConnection.createOffer| to be called.
     var createDataChannelSpy =
       spyOn(mockRtcPeerConnection, "createDataChannel");
-    createDataChannelSpy.and.callFake((x) => {
-      mockRtcPeerConnection.eventHandler.fakeEvent('onnegotiationneeded', null)
-      createDataChannelSpy.and.stub(x);
+    createDataChannelSpy.and.callFake((label:string, init:RTCDataChannelInit) => {
+      mockRtcPeerConnection.eventHandler
+        .fakeAnEvent('onnegotiationneeded', null);
+      createDataChannelSpy.and.stub(label, init);
     })
 
     // Make |createOffer| resolve to a mock offer.
     var createOfferSpy = spyOn(mockRtcPeerConnection, "createOffer");
     var mockOffer :freedom_RTCPeerConnection.RTCSessionDescription = {
       type: 'sdp',
-      sdp: 'mock:sdp';
+      sdp: 'mock:sdp'
     };
-    createOfferSpy.and.returnVaue(new Promise.resolve(mockOffer));
+    createOfferSpy.and.returnValue(Promise.resolve(mockOffer));
 
     // We mock setLocalDescription, because we want to check that it has not
     // been called by the time the first signalling message is added to the
@@ -43,11 +49,11 @@ describe('peerconnection', function() {
     var setLocalDescriptionSpy =
       spyOn(mockRtcPeerConnection, "setLocalDescription");
 
-    var pc = new WebRtc.PeerConnection(mockRtcPeerConnection, 'test');
+    var pc = new PeerConnectionClass(mockRtcPeerConnection, 'test');
     pc.negotiateConnection();
 
-    pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {
-      expect(signal.type).toEqual(WebRtc.SignalType.OFFER);
+    pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtcTypes.SignallingMessage) => {
+      expect(signal.type).toEqual(WebRtcEnums.SignalType.OFFER);
       expect(setLocalDescriptionSpy).not.toHaveBeenCalled();
       done();
     });

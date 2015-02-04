@@ -109,13 +109,9 @@ class PeerConnectionClass implements PeerConnection<SignallingMessage> {
 
   constructor(
       private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
-      private peerName_:string) {
-    if (config_.webrtcPcConfig === undefined) {
-      throw new Error('must specify peerconnection config');
-    }
-
+      public peerName_:string) {
     this.peerName_ = this.peerName_ ||
-        ('unnamed-' + (++PeerConnection.automaticNameIndex_));
+        ('unnamed-' + (++PeerConnectionClass.automaticNameIndex_));
 
     this.onceConnecting = new Promise<void>((F,R) => {
         this.fulfillConnecting_ = F;
@@ -354,6 +350,60 @@ class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     });
   }
 
+  private handleOfferSignalMessage_ =
+      (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
+    this.breakOfferTie_(description)
+      .then(() => {
+        this.pcState = State.CONNECTING;
+        this.fulfillConnecting_();
+        // initial offer from peer
+        return this.pc_.setRemoteDescription(description)
+      })
+      .then(this.pc_.createAnswer)
+      .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+        // As with the offer, we must emit the signal before
+        // setting the local description to ensure that we send the
+        // ANSWER before any ICE candidates.
+        this.signalForPeerQueue.handle(
+            {type: SignalType.ANSWER,
+             description: {type: d.type, sdp: d.sdp} });
+        this.pc_.setLocalDescription(d);
+      })
+      .then(() => {
+        this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
+      })
+      .catch((e) => {
+        this.closeWithError_('Failed to connect to offer:' +
+            e.toString());
+      });
+  }
+
+  private handleAnswerSignalMessage_ =
+      (description:freedom_RTCPeerConnection.RTCSessionDescription) : void => {
+    this.pc_.setRemoteDescription(description)
+      .then(() => {
+        this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
+      })
+      .catch((e) => {
+        this.closeWithError_('Failed to set remote description: ' +
+            ': ' +  JSON.stringify(description) + ' (' +
+            typeof(description) + '); Error: ' + e.toString());
+      });
+  }
+
+  private handleCandidateSignalMessage_ =
+    (candidate:freedom_RTCPeerConnection.RTCIceCandidate) : void => {
+    // CONSIDER: Should we be passing/getting the SDP line index?
+    // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
+    try {
+      this.fromPeerCandidateQueue.handle(candidate);
+    } catch(e) {
+      log.error(this.peerName_ + ': ' + 'addIceCandidate: ' +
+        JSON.stringify(candidate) + ' (' + typeof(candidate) +
+        '); Error: ' + e.toString());
+    }
+  }
+
   // Handle a signalling message from the remote peer.
   public handleSignalMessage = (signal :SignallingMessage) : void => {
     log.debug(this.peerName_ + ': ' + 'handleSignalMessage: \n' +
@@ -364,55 +414,16 @@ class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     // extra random number. TODO: instead of hash, we could use the IP/port
     // candidate list which is guarenteed to be unique for 2 peers.
     switch(signal.type) {
-      //
       case SignalType.OFFER:
-        this.breakOfferTie_(signal.description).then(() => {
-          this.pcState = State.CONNECTING;
-          this.fulfillConnecting_();
-          this.pc_.setRemoteDescription(signal.description)  // initial offer from peer
-              .then(this.pc_.createAnswer)
-                // As with the offer, we must emit the signal before
-                // setting the local description to ensure that we send the
-                // ANSWER before any ICE candidates.
-                this.signalForPeerQueue.handle(
-                    {type: SignalType.ANSWER,
-                     description: {type: d.type, sdp: d.sdp} });
-                this.pc_.setLocalDescription(d);
-              })
-              .then(() => {
-                this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
-              })
-              .catch((e) => {
-                this.closeWithError_('Failed to connect to offer:' +
-                    e.toString());
-              });
-              this.pc_.setLocalDescription(d);
-            })
-            .catch(this.closeWithError_);
+        this.handleOfferSignalMessage_(signal.description);
         break;
       // Answer to an offer we sent
       case SignalType.ANSWER:
-        this.pc_.setRemoteDescription(signal.description)
-            .then(() => {
-                this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
-              })
-            .catch((e) => {
-                this.closeWithError_('Failed to set remote description: ' +
-                    ': ' +  JSON.stringify(signal.description) + ' (' +
-                    typeof(signal.description) + '); Error: ' + e.toString());
-              });
+        this.handleAnswerSignalMessage_(signal.description);
         break;
       // Add remote ice candidate.
       case SignalType.CANDIDATE:
-        // CONSIDER: Should we be passing/getting the SDP line index?
-        // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
-        try {
-          this.fromPeerCandidateQueue.handle(signal.candidate);
-        } catch(e) {
-          log.error(this.peerName_ + ': ' + 'addIceCandidate: ' +
-              JSON.stringify(signal.candidate) + ' (' +
-              typeof(signal.candidate) + '); Error: ' + e.toString());
-        }
+        this.handleCandidateSignalMessage_(signal.candidate);
         break;
       case SignalType.NO_MORE_CANDIDATES:
         log.debug(this.peerName_ + ': handleSignalMessage: noMoreCandidates');

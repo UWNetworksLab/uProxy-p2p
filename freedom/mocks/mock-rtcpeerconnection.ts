@@ -2,6 +2,7 @@
 /// <reference path="../typings/freedom-common.d.ts" />
 /// <reference path="../typings/rtcpeerconnection.d.ts" />
 
+import RTCConfiguration = freedom_RTCPeerConnection.RTCConfiguration;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
 import RTCOfferOptions = freedom_RTCPeerConnection.RTCOfferOptions;
@@ -11,7 +12,7 @@ import RTCSessionDescription = freedom_RTCPeerConnection.RTCSessionDescription;
 import MockEventHandler = require('mock-freedomeventhandler');
 
 class MockFreedomRtcPeerConnection implements RTCPeerConnection {
-  public mockEventHandler = new MockEventHandler(
+  public eventHandler = new MockEventHandler(
     ['ondatachannel', 'onnegotiationneeded', 'onicecandidate',
      'onsignalingstatechange', 'onaddstream', 'onremovestream',
      'oniceconnectionstatechange']);
@@ -19,8 +20,8 @@ class MockFreedomRtcPeerConnection implements RTCPeerConnection {
   // Construct a new skeleton peer connection.
   constructor() {}
 
-  public on(t:string, f:Function) { this.mockEventHandler.on(t,f); }
-  public once(t:string, f:Function) { this.mockEventHandler.once(t,f); }
+  public on(t:string, f:Function) { this.eventHandler.on(t,f); }
+  public once(t:string, f:Function) { this.eventHandler.once(t,f); }
 
   public createOffer(options?:RTCOfferOptions) : Promise<RTCSessionDescription> {
     return Promise.resolve(null);
