@@ -449,7 +449,7 @@ class PeerConnectionClass implements PeerConnection<SignallingMessage> {
       throw new Error('Channel label can not be an empty string.');
     }
 
-    return  this.pc_.createDataChannel(channelLabel, options)
+    return this.pc_.createDataChannel(channelLabel, options)
         .then(this.addRtcDataChannel_);
   }
 

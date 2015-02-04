@@ -3,14 +3,17 @@
 
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
-import WebRtcTypes = require('./webrtc.types');
-import WebRtcEnums = require('./webrtc.enums');
-import PeerConnectionClass = require('./peerconnection');
-
 import MockFreedomRtcPeerConnection =
   require('../freedom/mocks/mock-rtcpeerconnection');
 import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
+
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeSkeletonFreedomInModuleEnv();
+
+import WebRtcTypes = require('./webrtc.types');
+import WebRtcEnums = require('./webrtc.enums');
+import PeerConnectionClass = require('./peerconnection');
 
 describe('peerconnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
@@ -29,11 +32,11 @@ describe('peerconnection', function() {
     // cause |mockRtcPeerConnection.createOffer| to be called.
     var createDataChannelSpy =
       spyOn(mockRtcPeerConnection, "createDataChannel");
-    createDataChannelSpy.and.callFake((label:string, init:RTCDataChannelInit) => {
-      mockRtcPeerConnection.eventHandler
-        .fakeAnEvent('onnegotiationneeded', null);
-      createDataChannelSpy.and.stub(label, init);
-    })
+    createDataChannelSpy.and.callFake((
+          label:string, init:RTCDataChannelInit) => {
+      mockRtcPeerConnection.eventHandler.fakeAnEvent(
+          'onnegotiationneeded', null);
+    }).and.callThrough();
 
     // Make |createOffer| resolve to a mock offer.
     var createOfferSpy = spyOn(mockRtcPeerConnection, "createOffer");
@@ -52,7 +55,8 @@ describe('peerconnection', function() {
     var pc = new PeerConnectionClass(mockRtcPeerConnection, 'test');
     pc.negotiateConnection();
 
-    pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtcTypes.SignallingMessage) => {
+    pc.signalForPeerQueue.setSyncNextHandler(
+        (signal:WebRtcTypes.SignallingMessage) => {
       expect(signal.type).toEqual(WebRtcEnums.SignalType.OFFER);
       expect(setLocalDescriptionSpy).not.toHaveBeenCalled();
       done();

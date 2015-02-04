@@ -9,7 +9,7 @@ import RTCOfferOptions = freedom_RTCPeerConnection.RTCOfferOptions;
 import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCSessionDescription = freedom_RTCPeerConnection.RTCSessionDescription;
 
-import MockEventHandler = require('mock-freedomeventhandler');
+import MockEventHandler = require('./mock-eventhandler');
 
 class MockFreedomRtcPeerConnection implements RTCPeerConnection {
   public eventHandler = new MockEventHandler(

@@ -8,7 +8,6 @@ import WebRtc = require('../../webrtc/webrtc');
 
 import PeerConnection = WebRtcTypes.PeerConnection;
 import SignallingMessage = WebRtcTypes.SignallingMessage;
-import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;
 import DataChannel = WebRtcTypes.Channel;
 import Data = WebRtcTypes.Data;
 

@@ -8,7 +8,7 @@ export function createPeerConnection(
     : WebRtcTypes.PeerConnection<WebRtcTypes.SignallingMessage> {
   var freedomRtcPc = freedom['core.rtcpeerconnection'](config);
   // Note: |peerConnection| will take responsibility for freeing memory and
-  // closing down of freedomRtcPc once the underlying peer connection is closed.
-  var peerConnection = new PeerConnectionClass(freedomRtcPc, name);
-  return peerConnection;
+  // closing down of |freedomRtcPc| once the underlying peer connection is
+  // closed.
+  return new PeerConnectionClass(freedomRtcPc, name);
 }
