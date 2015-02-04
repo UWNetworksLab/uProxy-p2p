@@ -47,10 +47,10 @@ declare module freedom_RTCPeerConnection {
     id ?:number;
   }
 
-  class RTCPeerConnection {
-    // Construct a new peer connection.
-    constructor(config:RTCConfiguration);
-
+  // Note: the freedom factory constructor
+  // |freedom['rtcpeerconnection'](config)| to create an RTCPeerConnection has
+  // |RTCConfiguration| as the type of its config its argument.
+  interface RTCPeerConnection {
     createOffer(options?:RTCOfferOptions) : Promise<RTCSessionDescription>;
     createAnswer() : Promise<RTCSessionDescription>;
 
@@ -89,6 +89,6 @@ declare module freedom_RTCPeerConnection {
     on(t:'onaddstream', f:(d:{stream:number}) => void) : void;
     on(t:'onremovestream', f:(d:{stream:number}) => void) : void;
     on(t:'oniceconnectionstatechange', f:() => void) : void;
-    on(t:string, f:Function) : void;
+    //on(t:string, f:Function) : void;
   }
 }

@@ -98,16 +98,6 @@ export interface PeerConnection<TSignallingMessage> {
   peerName :string;
 }
 
-// DataPeer - a class that wraps peer connections and data channels.
-//
-// This class assumes WebRTC is available; this is provided by freedom.js.
-
-export interface PeerConnectionConfig {
-  webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
-  peerName               ?:string;   // For debugging
-  initiateConnection     ?:boolean;  // defaults to false
-}
-
 export interface SignallingMessage {
   // TODO: make an abstraction for the data, only the signal type needs to be
   // known by consumers of this type.

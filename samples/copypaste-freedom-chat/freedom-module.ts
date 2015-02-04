@@ -1,4 +1,5 @@
 /// <reference path='../../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path="../../freedom/typings/rtcpeerconnection.d.ts" />
 
 import Logging = require('../../logging/logging');
 
@@ -13,12 +14,9 @@ import Data = WebRtcTypes.Data;
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 
-var pcConfig :PeerConnectionConfig = {
-  webrtcPcConfig: {
+var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                  {urls: ['stun:stun1.l.google.com:19302']}]
-  },
-  peerName: 'pc'
 };
 
 var parentModule = freedom();

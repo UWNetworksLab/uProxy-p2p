@@ -7,9 +7,20 @@ declare module freedom {
     (eventType:string, handler:(eventData:T) => void) : void;
   }
 
+  // TODO: replace OnAndEmit with EventHandler and EventEmitter;
   interface OnAndEmit<T,T2> {
     on   :EventHandlerFn<T>;
     emit :EventDispatchFn<T2>;
+  }
+
+  interface EventHandler {
+    // Adds |f| as an event handler for all subsiquent events of type |t|.
+    on(t:string,f:Function) : void;
+    // Adds |f| as an event handler for only the next event of type |t|.
+    once(t:string,f:Function) : void;
+    // The |off| function removes the event event handling function |f| from
+    // both |on| and the |once| event handling.
+    off(t:string,f:Function) : void;
   }
 
   interface PortModule<T,T2> extends OnAndEmit<T,T2> {

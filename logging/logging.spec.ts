@@ -15,11 +15,11 @@ describe("Client logging shim using Freedom", () => {
       (done) => {
     var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
       'tag1', ['debug', 'log', 'info', 'warn', 'error']));
-    var mockGetLogger = spyOn(freedom.core(), "getLogger");
-    mockGetLogger.and.returnValue(mockLoggerPromise);
+    var getLoggerSpy = spyOn(freedom.core(), "getLogger");
+    getLoggerSpy.and.returnValue(mockLoggerPromise);
 
     var log1 = new Logging.Log('tag1');
-    expect(mockGetLogger).toHaveBeenCalledWith('tag1');
+    expect(getLoggerSpy).toHaveBeenCalledWith('tag1');
 
     log1.error('test-error-string');
     log1.debug('test-debug-string');
@@ -35,13 +35,13 @@ describe("Client logging shim using Freedom", () => {
   it('Collapses arguments into flattened messages', (done) => {
     var mockLoggerPromise = Promise.resolve(jasmine.createSpyObj(
       'tag1', ['debug', 'log', 'info', 'warn', 'error']));
-    var mockGetLogger = spyOn(freedom.core(), "getLogger");
-    mockGetLogger.and.returnValue(mockLoggerPromise);
+    var getLoggerSpy = spyOn(freedom.core(), "getLogger");
+    getLoggerSpy.and.returnValue(mockLoggerPromise);
 
     var log2 = new Logging.Log('tag2');
     log2.info('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
-    expect(mockGetLogger).not.toHaveBeenCalledWith('tag1');
-    expect(mockGetLogger).toHaveBeenCalledWith('tag2');
+    expect(getLoggerSpy).not.toHaveBeenCalledWith('tag1');
+    expect(getLoggerSpy).toHaveBeenCalledWith('tag2');
 
     mockLoggerPromise.then((mockLogger) => {
       expect(mockLogger.info)
