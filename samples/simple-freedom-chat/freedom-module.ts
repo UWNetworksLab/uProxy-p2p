@@ -3,13 +3,13 @@
 
 import Logging = require('../../logging/logging');
 
-import WebRtcTypes = require('../../webrtc/webrtc.types');
-import WebRtc = require('../../webrtc/webrtc');
+import PeerConnections = require('../../webrtc/peerconnection');
+import DataChannels = require('../../webrtc/datachannel');
 
-import PeerConnection = WebRtcTypes.PeerConnection;
-import SignallingMessage = WebRtcTypes.SignallingMessage;
-import DataChannel = WebRtcTypes.Channel;
-import Data = WebRtcTypes.Data;
+import PeerConnection = PeerConnections.PeerConnection;
+import SignallingMessage = PeerConnections.SignallingMessage;
+import DataChannel = DataChannels.DataChannel;
+import Data = DataChannels.Data;
 
 import Message = require('./message.types');
 
@@ -47,7 +47,7 @@ function makePeerConnection(name:string) {
       {urls: ['stun:stun1.l.google.com:19302']}]
   };
   var pc :PeerConnection<SignallingMessage> =
-    WebRtc.createPeerConnection(pcConfig, name);
+    PeerConnections.createPeerConnection(pcConfig, name);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
