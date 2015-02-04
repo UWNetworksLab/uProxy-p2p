@@ -111,6 +111,7 @@ module Core {
       this.name = profile.name;
       this.profile = profile;
       this.log('Updating...');
+      this.saveToStorage();
       this.notifyUI();
     }
 
@@ -452,7 +453,7 @@ module Core {
           instancePromises.push(
               Core.RemoteInstance.create(this, instanceId, null)
                   .then((newInstance) => {
-                    this.instances_[instanceId] = newInstance;
+                    this.instances_[newInstance.instanceId] = newInstance;
                   })
               );
         }

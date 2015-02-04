@@ -501,7 +501,6 @@ module Social {
     }
 
     public logout = () : Promise<void> => {
-      this.myInstance = null;
       this.stopMonitor_();
       for (var userId in this.roster) {
         this.roster[userId].handleLogout();
