@@ -34,6 +34,8 @@ declare module freedom {
     providePromises :(classFn?:Function) => void;
   }
 
+  // TODO(ldixon): find out what freedom calls this and make a better name.
+  // https://github.com/uProxy/uproxy/issues/853
   interface ParentModuleThing extends ModuleSelfConstructor, OnAndEmit<any,any>
     {}
 
