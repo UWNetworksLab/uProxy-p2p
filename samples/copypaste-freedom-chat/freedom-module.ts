@@ -3,13 +3,13 @@
 
 import Logging = require('../../logging/logging');
 
-import WebRtcTypes = require('../../webrtc/webrtc.types');
-import WebRtc = require('../../webrtc/webrtc');
+import PeerConnections = require('../../webrtc/peerconnection');
+import DataChannels = require('../../webrtc/datachannel');
 
-import PeerConnection = WebRtcTypes.PeerConnection;
-import SignallingMessage = WebRtcTypes.SignallingMessage;
-import DataChannel = WebRtcTypes.Channel;
-import Data = WebRtcTypes.Data;
+import PeerConnection = PeerConnections.PeerConnection;
+import SignallingMessage = PeerConnections.SignallingMessage;
+import DataChannel = DataChannels.DataChannel;
+import Data = DataChannels.Data;
 
 var log :Logging.Log = new Logging.Log('copypaste-socks');
 
@@ -34,7 +34,7 @@ function connectDataChannel(d:DataChannel) {
 
 function makePeerConnection() : PeerConnection<SignallingMessage> {
   var pc :PeerConnection<SignallingMessage> =
-      WebRtc.createPeerConnection(pcConfig);
+      PeerConnections.createPeerConnection(pcConfig);
 
   pc.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
     parentModule.emit('signalForPeer', signal);
