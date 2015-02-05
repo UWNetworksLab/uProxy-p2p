@@ -1,10 +1,13 @@
-/// <reference path='../../freedom/typings/freedom-common.d.ts' />
-/// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import WebRtcTypes = require('../../webrtc/types');
-import SignallingMessage = WebRtcTypes.SignallingMessage;
+import freedomTypes = require('freedom.types');
 
-import freedomTypes = require('freedom.i');
+// This is an abstract type intended to abstract over the signalling messages.
+interface SignallingMessage {
+  // We use this patten to add a specially named member to avoid type-clashes.
+  abstract_type_SignallingMessage: Object;
+}
 
 // Freedom apps don't have direct access to the page so this
 // file mediates between the page's controls and the Freedom app.
@@ -33,7 +36,7 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/loggingprovider.json',
+    'logger': 'lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(
     (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {

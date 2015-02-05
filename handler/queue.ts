@@ -1,20 +1,17 @@
-/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
 
 // This file defines 'handler queues'. These are an abstraction for a stream of
-// events (which can also be thought of as element of data) is added to
-// asynchronously along with a stream of functions to handle those events. Each
-// event is guarenteed to be handled, and gets a promise for the result. A
-// function handling an event may set the function to handle future events, or
-// stop handling events and le the event stream queue up things to handle.
+// events (but think of an event as an element of data to be handled) along with
+// a stream of functions to handle the events. Each event is guarenteed to be
+// handled, and gets a promise for the result of that event being handled. A
+// function handling an event may set the function that handles future events,
+// or it may stop handling events in which case the event stream will be queued
+// until a handler is set.
 //
 // This is a bit like traditional event handlers, but each thing in the hanlder
 // queue must be handled by exactly one handler (although that handler may
 // itself call several functions). This allows async assignment of the handler
 // along with asynchronous adding of events to the queue.
-//
-// Hadler queues support a stream of data to have handler set for the next
-// element of data, and that by handling that element of data, a new handler may
-// be constructed to handle following element of data.
 //
 // CONSIDER: How efficient is a new Error? Maybe best to have rejection
 // without an error since the error is not meaningful.

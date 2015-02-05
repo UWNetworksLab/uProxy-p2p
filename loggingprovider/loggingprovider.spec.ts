@@ -1,32 +1,32 @@
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path='../../build/third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import freedomMocker = require('../freedom/mocks/jasmine-mock-freedom-module-env');
-
-import logging = require('loggingprovider.i');
+// Setup freedom mock environment.
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 
 // We need null mock freedom console (not one that raises errors). The
 // loggingprovider in this file ignore freedom's calls to the core console
 // provider.
-var mockFreedomCoreConsoleObjFn = () => {
-  return new freedomMocker.NullMockFreedomConsole();
-}
+//
 // TODO: support adding the close param to the function object. Or persuade
 // freedom to improve its namespace management.
 //   mockFreedomCoreConsoleObjFn.close = (f:freedom_Console.Console) => {};
+var mockFreedomCoreConsoleObjFn = () => {
+  return new freedomMocker.SkeletonFreedomConsole();
+}
 
 // We need to mock freedom before the LoggingProvider import, because the
 // import/require statement that loads |LoggingProvider| will call
 // freedom['core.console'] (we need to first ensure it is defined!).
-freedom = freedomMocker.makeNullMockFreedomInModuleEnv({
+freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
   'core.console': mockFreedomCoreConsoleObjFn,
   'loggingcontroller': () => {
-    return new freedomMocker.NullMockModuleSelfConstructor();
+    return new freedomMocker.SkeletonModuleSelfConstructor();
   }
 });
 
+import logging = require('loggingprovider.types');
 import LoggingProvider = require('./loggingprovider');
-
 
 describe("Logging Provider", () => {
   var logger :logging.Log;

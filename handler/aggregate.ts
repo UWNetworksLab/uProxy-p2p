@@ -1,4 +1,4 @@
-/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
 
 // The |Aggregator| interface aggregates objects of type |T| to form a
 // compound object of type |T2|. It may have internal data, including time
@@ -8,12 +8,12 @@
 // calling |check| twice without an |input| in between will result in the null
 // the second time; although this is not strictly enforced it is recommended).
 export interface Aggregator<T,T2> {
-    // Add something to be aggregated.
-    input :(x:T) => void;
-    // The |check| function returns null when aggregation is not ready. Returns
-    // ab object of typed |T2| when aggregation is ready and the object of type
-    // |T2| is the aggreated thing.
-    check :() => T2;
+  // Add something to be aggregated.
+  input :(x:T) => void;
+  // The |check| function returns null when aggregation is not ready. Returns
+  // ab object of typed |T2| when aggregation is ready and the object of type
+  // |T2| is the aggreated thing.
+  check :() => T2;
 }
 
 // Aggregate handler for things of type |T| until the given |aggregator|

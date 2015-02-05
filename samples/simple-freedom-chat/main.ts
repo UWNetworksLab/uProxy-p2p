@@ -1,7 +1,7 @@
-/// <reference path='../../freedom/typings/freedom-common.d.ts' />
-/// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-core-env.d.ts' />
 
-import Message = require('./messages.i');
+import Message = require('./message.types');
 
 var sendButtonA = document.getElementById("sendButtonA");
 var sendButtonB = document.getElementById("sendButtonB");
@@ -12,7 +12,7 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/loggingprovider.json',
+    'logger': 'lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(
     (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {

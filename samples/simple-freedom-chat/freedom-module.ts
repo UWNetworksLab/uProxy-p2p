@@ -1,18 +1,17 @@
-/// <reference path='../../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import Logging = require('../../logging/logging');
 
-import WebRtcTypes = require('../../webrtc/types');
-import WebRtc = require('../../webrtc/webrtc');
+import PeerConnections = require('../../webrtc/peerconnection');
+import DataChannels = require('../../webrtc/datachannel');
 
-import PeerConnection = WebRtcTypes.PeerConnection;
-import SignallingMessage = WebRtcTypes.SignallingMessage;
-import PeerConnectionConfig = WebRtcTypes.PeerConnectionConfig;
-import DataChannel = WebRtcTypes.Channel;
-import Data = WebRtcTypes.Data;
+import PeerConnection = PeerConnections.PeerConnection;
+import SignallingMessage = PeerConnections.SignallingMessage;
+import DataChannel = DataChannels.DataChannel;
+import Data = DataChannels.Data;
 
-import Message = require('./messages.i');
-
+import Message = require('./message.types');
 
 var log :Logging.Log = new Logging.Log('freedomchat');
 
@@ -42,14 +41,13 @@ function connectDataChannel(name:string, d:DataChannel) {
 
 // Make a peer connection which logs stuff that happens.
 function makePeerConnection(name:string) {
-  var pcConfig :PeerConnectionConfig = {
-    webrtcPcConfig: {
-      iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-                   {urls: ['stun:stun1.l.google.com:19302']}]
-    },
-    peerName: name
+  var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+    iceServers: [{
+      urls: ['stun:stun.l.google.com:19302']},
+      {urls: ['stun:stun1.l.google.com:19302']}]
   };
-  var pc :PeerConnection<SignallingMessage> = WebRtc.createPeerConnection(pcConfig);
+  var pc :PeerConnection<SignallingMessage> =
+    PeerConnections.createPeerConnection(pcConfig, name);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
