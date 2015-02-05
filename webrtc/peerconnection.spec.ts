@@ -10,7 +10,7 @@ import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
 });
 
@@ -35,16 +35,15 @@ describe('PeerConnection', function() {
     // |mockRtcPeerConnection.createOffer| to be called. We also resolve with a
     // fake channel id for the created channel.
     var createDataChannelSpy =
-      spyOn(mockRtcPeerConnection, "createDataChannel");
+      spyOn(mockRtcPeerConnection, 'createDataChannel');
     createDataChannelSpy.and.callFake((
           label:string, init:RTCDataChannelInit) => {
-      mockRtcPeerConnection.eventHandler.fakeAnEvent(
-          'onnegotiationneeded');
+      mockRtcPeerConnection.fakeAnEvent('onnegotiationneeded');
       return Promise.resolve('foo-channel-id');
     });
 
     // Make |createOffer| resolve to a mock offer.
-    var createOfferSpy = spyOn(mockRtcPeerConnection, "createOffer");
+    var createOfferSpy = spyOn(mockRtcPeerConnection, 'createOffer');
     var mockOffer :freedom_RTCPeerConnection.RTCSessionDescription = {
       type: 'sdp',
       sdp: 'mock:sdp'
@@ -55,7 +54,7 @@ describe('PeerConnection', function() {
     // been called by the time the first signalling message is added to the
     // handler queue.
     var setLocalDescriptionSpy =
-      spyOn(mockRtcPeerConnection, "setLocalDescription");
+      spyOn(mockRtcPeerConnection, 'setLocalDescription');
 
     var pc = new PeerConnectionClass(mockRtcPeerConnection, 'test');
     pc.negotiateConnection();

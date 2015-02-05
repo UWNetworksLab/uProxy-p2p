@@ -1,6 +1,6 @@
-/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../../../build/third_party/freedom-typings/freedom-common.d.ts" />
-/// <reference path="../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts" />
+/// <reference path='../../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import RTCConfiguration = freedom_RTCPeerConnection.RTCConfiguration;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
@@ -11,21 +11,18 @@ import RTCSessionDescription = freedom_RTCPeerConnection.RTCSessionDescription;
 
 import MockEventHandler = require('./mock-eventhandler');
 
-class MockFreedomRtcPeerConnection implements RTCPeerConnection {
-  public eventHandler = new MockEventHandler(
-    ['ondatachannel', 'onnegotiationneeded', 'onicecandidate',
+class MockFreedomRtcPeerConnection extends MockEventHandler
+    implements RTCPeerConnection {
+  constructor() {
+    super(['ondatachannel', 'onnegotiationneeded', 'onicecandidate',
      'onsignalingstatechange', 'onaddstream', 'onremovestream',
      'oniceconnectionstatechange']);
-
-  // Construct a new skeleton peer connection.
-  constructor() {}
-
-  public on(t:string, f:Function) { this.eventHandler.on(t,f); }
-  public once(t:string, f:Function) { this.eventHandler.once(t,f); }
+  }
 
   public createOffer(options?:RTCOfferOptions) : Promise<RTCSessionDescription> {
     return Promise.resolve(null);
   }
+
   public createAnswer() : Promise<RTCSessionDescription> {
     return Promise.resolve(null);
   }
@@ -33,12 +30,15 @@ class MockFreedomRtcPeerConnection implements RTCPeerConnection {
   public setLocalDescription(desc:RTCSessionDescription) : Promise<void> {
     return Promise.resolve<void>();
   }
+
   public getLocalDescription() : Promise<RTCSessionDescription> {
     return Promise.resolve(null);
   }
+
   public setRemoteDescription(desc:RTCSessionDescription) : Promise<void> {
     return Promise.resolve<void>();
   }
+
   public getRemoteDescription() : Promise<RTCSessionDescription> {
     return Promise.resolve(null);
   }
@@ -58,6 +58,7 @@ class MockFreedomRtcPeerConnection implements RTCPeerConnection {
   public getIceGatheringState() : Promise<string> {
     return Promise.resolve(null);
   }
+
   public getIceConnectionState() : Promise<string> {
     return Promise.resolve(null);
   }
@@ -69,17 +70,21 @@ class MockFreedomRtcPeerConnection implements RTCPeerConnection {
   public getLocalStreams() : Promise<string[]> {
     return Promise.resolve(null);
   }
+
   public getRemoteStreams() : Promise<string[]> {
     return Promise.resolve(null);
   }
+
   public getStreamById(id:string) : Promise<string> {
     return Promise.resolve(null);
   }
+
   public addStream(ref:string) : Promise<void> {
     return Promise.resolve<void>();
   }
+
   public removeStream(ref:string) : Promise<void> {
-    return Promise.resolve<void>();
+   return Promise.resolve<void>();
   }
 
   public close() : Promise<void> {
