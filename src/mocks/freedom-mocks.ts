@@ -1,10 +1,13 @@
 /**
  * freedom-mocks.ts
  *
+ * Mock freedom objects used for uProxy unit tests. The mock classes below
+ * implement different freedom interfaces found in freedom/typings/freedom.d.ts.
  * This file must be compiled independently of all other typescript in uProxy.
  */
 
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../freedom/typings/storage.d.ts' />
 
 
@@ -20,6 +23,11 @@ class MockCore {
 
   public getId = () => { return ['useless']; }
 
+  public getLogger = (tag) => {
+    var logger = jasmine.createSpyObj('logger-'+tag, ['log', 'info', 'error']);
+    freedom['loggers'][tag] = logger;
+    return Promise.resolve(logger);
+  }
 }  // class MockCore
 
 class MockCorePeerConnection {
@@ -106,6 +114,7 @@ var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
+freedom['loggers'] = {};
 freedom['core'] = () => { return new MockCore(); };
 freedom['core.console'] = () => { return new MockLog(); };
 freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
