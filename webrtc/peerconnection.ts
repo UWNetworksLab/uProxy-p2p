@@ -603,6 +603,6 @@ export function createPeerConnection(
   // Note: |peerConnection| will take responsibility for freeing memory and
   // closing down of |freedomRtcPc| once the underlying peer connection is
   // closed.
-  return new PeerConnectionClass(freedomRtcPc, name);
+  return new PeerConnectionClass(freedomRtcPc, debugPcName);
 }
 

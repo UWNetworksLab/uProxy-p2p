@@ -84,12 +84,10 @@ export class Rule {
         expand: true,
         cwd: this.config.devBuildDir,
         src: [
-          libPath + '/*.json',
-          libPath + '/*.js',
-          libPath + '/*.html',
-          libPath + '/*.css',
-          '!' + libPath + '/*.spec.js',
-          '!' + libPath + '/SpecRunner.html'
+          libPath + '/**/*',
+          '!' + libPath + '/**/*.ts',
+          '!' + libPath + '/**/*.spec.js',
+          '!' + libPath + '/**/SpecRunner.html'
         ],
         dest: destPath,
         onlyIf: 'modified'
