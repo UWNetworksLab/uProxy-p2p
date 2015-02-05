@@ -1,6 +1,6 @@
 // Typescript file for core.rtcdatachannel in:
 // https://github.com/freedomjs/freedom/blob/master/interface/core.rtcdatachannel.json
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='freedom-common.d.ts' />
 
 declare module freedom_RTCDataChannel {
