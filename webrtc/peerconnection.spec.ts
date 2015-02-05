@@ -26,19 +26,21 @@ describe('peerconnection', function() {
   });
 
   // Ensure that ICE candidate gathering, which is initiated by a call to
-  // setLocalDescription, is not initiated prior to sending the OFFER signal:
+  // |setLocalDescription|, is not initiated prior to sending the OFFER signal:
   //   https://github.com/uProxy/uproxy/issues/784
   it('Candidate gathering should not start before offer signal is sent',
       (done) => {
-    // When |mockRtcPeerConnection.createDataChannel| is called (happens from
-    // negotiateConnection), make a fake 'onnegotiationneeded' event. This will
-    // cause |mockRtcPeerConnection.createOffer| to be called.
+    // When |mockRtcPeerConnection.createDataChannel| is called (happens when
+    // calling |pc.negotiateConnection| below), we make a fake
+    // 'onnegotiationneeded' event. This will cause
+    // |mockRtcPeerConnection.createOffer| to be called. We also resolve with a
+    // fake channel id for the created channel.
     var createDataChannelSpy =
       spyOn(mockRtcPeerConnection, "createDataChannel");
     createDataChannelSpy.and.callFake((
           label:string, init:RTCDataChannelInit) => {
       mockRtcPeerConnection.eventHandler.fakeAnEvent(
-          'onnegotiationneeded', null);
+          'onnegotiationneeded');
       return Promise.resolve('foo-channel-id');
     });
 
@@ -62,7 +64,7 @@ describe('peerconnection', function() {
     pc.signalForPeerQueue.setSyncNextHandler(
         (signal:PeerConnection.SignallingMessage) => {
       expect(signal.type).toEqual(PeerConnection.SignalType.OFFER);
-      expect(setLocalDescriptionSpy).not.toHaveBeenCalled();
+      expect(mockRtcPeerConnection.setLocalDescription).not.toHaveBeenCalled();
       done();
     });
 

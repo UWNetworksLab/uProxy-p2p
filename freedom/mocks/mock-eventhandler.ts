@@ -34,7 +34,7 @@ class MockFreedomEventHandler implements freedomTypes.EventHandler {
   }
 
   // Note: this is not part of the freedom interface.
-  public fakeAnEvent(t:string, x:Object) {
+  public fakeAnEvent(t:string, x?:Object) {
     this.onHandlerTable_[t].map((f) => { f(x); });
     this.onceHandlerTable_[t].map((f) => { f(x); });
     this.onceHandlerTable_[t] = [];
