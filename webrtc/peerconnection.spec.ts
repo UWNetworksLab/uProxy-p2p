@@ -39,8 +39,7 @@ describe('peerconnection', function() {
       spyOn(mockRtcPeerConnection, 'createDataChannel');
     createDataChannelSpy.and.callFake((
           label:string, init:RTCDataChannelInit) => {
-      mockRtcPeerConnection.eventHandler.fakeAnEvent(
-          'onnegotiationneeded');
+      mockRtcPeerConnection.fakeAnEvent('onnegotiationneeded');
       return Promise.resolve('foo-channel-id');
     });
 

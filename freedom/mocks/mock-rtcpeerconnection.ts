@@ -11,8 +11,8 @@ import RTCSessionDescription = freedom_RTCPeerConnection.RTCSessionDescription;
 
 import MockEventHandler = require('./mock-eventhandler');
 
-class MockFreedomRtcPeerConnection implements RTCPeerConnection
-    extends MockEventHandler {
+class MockFreedomRtcPeerConnection extends MockEventHandler
+    implements RTCPeerConnection {
   constructor() {
     super(['ondatachannel', 'onnegotiationneeded', 'onicecandidate',
      'onsignalingstatechange', 'onaddstream', 'onremovestream',

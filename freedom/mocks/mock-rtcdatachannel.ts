@@ -13,8 +13,8 @@ import RTCDataChannel = freedom_RTCDataChannel.RTCDataChannel;
 
 import MockEventHandler = require('./mock-eventhandler');
 
-class MockFreedomRtcDataChannel implements RTCDataChannel
-    extends MockEventHandler {
+class MockFreedomRtcDataChannel extends MockEventHandler
+    implements RTCDataChannel {
   constructor() {
     super(['onopen', 'onerror', 'onclose', 'onmessage']);
   }
