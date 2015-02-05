@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/// <reference path="../../../build/third_party/freedom-typings/freedom-common.d.ts" />
-=======
-/// <reference path='../typings/freedom-common.d.ts' />
->>>>>>> iislucas-fix-pc-tests
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
 
 import freedomTypes = require('freedom.types');
 
