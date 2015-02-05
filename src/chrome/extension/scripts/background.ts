@@ -63,14 +63,16 @@ function openDownloadAppPage() : void {
     }
     // Only reached if the user didn't have uproxy.org/chrome-install open,
     // allowing us to assume the user is completeing the webstore install flow.
-    // After the app is installed via the webstore, open up uProxy.
-    chromeCoreConnector.onceConnected.then(chromeBrowserApi.bringUproxyToFront);
+    // For consistency, we direct them to the app download page in the webstore
+    // instead of uproxy.org.
     chrome.tabs.create(
         {url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'},
         (tab) => {
           // Focus on the new Chrome Webstore tab.
           chrome.windows.update(tab.windowId, {focused: true});
         });
+    // After the app is installed via the webstore, open up uProxy.
+    chromeCoreConnector.onceConnected.then(chromeBrowserApi.bringUproxyToFront);
   });
 }
 
