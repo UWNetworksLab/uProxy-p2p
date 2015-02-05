@@ -62,15 +62,21 @@ export class Rule {
           files: ['**/*', '!node_modules/**'],
           // Output location for coverage results
           coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
-          report: {
-            type: 'html',
-            options: {
-              dir: path.join(this.config.devBuildDir, name, 'coverage')
+          report: [
+            { type: 'html',
+              options: {
+                dir: path.join(this.config.devBuildDir, name, 'coverage')
+              }
+            },
+            { type: 'lcov',
+              options: {
+                dir: path.join(this.config.devBuildDir, name, 'coverage')
+              }
             }
-          }
+          ]
         }
       }
-    };
+    }
   }
 
   // Grunt browserify target creator
@@ -84,7 +90,6 @@ export class Rule {
     };
   }
 
-<<<<<<< HEAD
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string) : BrowserifyRule {
     return {
@@ -92,15 +97,12 @@ export class Rule {
       dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
       options: {
         debug: true,
-        transform: [['browserify-istanbul', { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
+        transform: [['browserify-istanbul',
+                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
       }
     };
   }
 
-  // Grunt copy target creator: for copying freedom.js to
-  public copyFreedomToDest(freedomRuntimeName:string, destPath:string)
-      : CopyRule {
-=======
   // Grunt copy target creator: copies freedom libraries and the freedomjs file
   // to the destination path.
   public copyFreedomLibs(freedomRuntimeName: string,
@@ -124,7 +126,6 @@ export class Rule {
     });
     // Copy the main freedom javascript runtime specified in
     // |freedomRuntimeName|.
->>>>>>> iislucas-changes-for-networking
     var freedomjsPath = require.resolve(freedomRuntimeName);
     filesForlibPaths.push({
         nonull: true,
@@ -134,4 +135,5 @@ export class Rule {
       });
     return { files: filesForlibPaths };
   }
-}
+
+}  // class Rule
