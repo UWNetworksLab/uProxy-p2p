@@ -8,7 +8,7 @@ describe("Client logging shim using Freedom", () => {
 
   beforeEach(() => {
     // Reset the mock freedom environment.
-    freedom = freedomMocker.makeSkeletonFreedomInModuleEnv();
+    freedom = freedomMocker.makeMockFreedomInModuleEnv();
   });
 
   it('A new Logging.Log forwards all logging to the named freedom core logger.',

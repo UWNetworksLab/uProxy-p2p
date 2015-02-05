@@ -11,7 +11,7 @@ import RTCPeerConnection = freedom_RTCPeerConnection.RTCPeerConnection;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
-freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
 });
 
