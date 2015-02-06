@@ -75,7 +75,8 @@ export class Rule {
   // Grunt copy target creator: copies freedom libraries and the freedomjs file
   // to the destination path.
   public copyFreedomLibs(freedomRuntimeName: string,
-      freedomLibPaths:string[], destPath:string) : CopyRule {
+      freedomLibPaths:string[], destName:string) : CopyRule {
+    var destPath = path.join(this.config.devBuildDir, destName, 'lib');
     // Provide a file-set to be copied for each freedom module that is lised in
     // |freedomLibPaths|
     var filesForlibPaths :CopyFilesDescription[] = freedomLibPaths.map(
