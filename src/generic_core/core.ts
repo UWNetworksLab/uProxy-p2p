@@ -245,10 +245,6 @@ class uProxyCore implements uProxy.CoreAPI {
       return;
     }
     return network.logout().then(() => {
-      if (networkName !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[networkName][userId];
-      }
-      Social.notifyUI(networkName);
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: disable auto-login

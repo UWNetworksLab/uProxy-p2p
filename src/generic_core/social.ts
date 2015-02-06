@@ -48,6 +48,13 @@ module Social {
   export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
   export var pendingNetworks:{[networkName:string]:Network} = {};
 
+  export function removeNetwork(networkName :string, userId :string) {
+    if (networkName !== MANUAL_NETWORK_ID) {
+      delete networks[networkName][userId];
+    }
+    notifyUI(networkName);
+  }
+
   /**
    * Goes through network names and gets a reference to each social provider.
    */
@@ -80,7 +87,7 @@ module Social {
 
     if (!(userId in networks[networkName])) {
       console.log('Not logged in with userId ' + userId + ' in network ' + networkName);
-      return null
+      return null;
     }
     return networks[networkName][userId];
   }
@@ -274,6 +281,9 @@ module Social {
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
 
+    private fulfillLogout_ : () => void;
+    private onceLoggedOut_ : Promise<void>;
+
     /**
      * Initializes the Freedom social provider for this FreedomNetwork and
      * attaches event handlers.
@@ -391,8 +401,7 @@ module Social {
         // TODO: Consider adding myself to the roster.
         if (client.clientId === this.myInstance.clientId &&
             client.status === UProxyClient.Status.OFFLINE) {
-          ui.showNotification('You have been logged out of ' + this.name);
-          core.logout({name: this.name, userId: this.myInstance.userId});
+          this.fulfillLogout_();
         }
         this.log('received own ClientState: ' + JSON.stringify(client));
         return Promise.resolve<void>();
@@ -486,10 +495,15 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(() => {
-            return this.restoreFromStorage();
-          }).then(() => {
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
+            this.onceLoggedOut_ = new Promise((F, R) => {
+              this.fulfillLogout_ = F;
+            }).then(() => {
+              ui.showNotification('You have been logged out of ' + this.name);
+              Social.removeNetwork(this.name, this.myInstance.userId);
+            });
+            this.restoreFromStorage();
           })
           .catch((e) => {
             this.onceLoggedIn_ = null;
@@ -507,6 +521,7 @@ module Social {
       }
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
+        this.fulfillLogout_();
       });
     }
 
