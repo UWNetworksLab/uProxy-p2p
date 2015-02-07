@@ -3,18 +3,17 @@
 /// <reference path='../../build/third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import ArrayBuffers = require('../arraybuffers/arraybuffers');
-import Logging = require('../logging/logging');
-import Djb2 = require('../crypto/djb2hash');
+import djb2 = require('../crypto/djb2hash');
+import handler = require('../handler/queue');
+import datachannel = require('./datachannel');
 
-import Handler = require('../handler/queue');
+import logging = require('../logging/logging');
+var log :logging.Log = new logging.Log('PeerConnection');
 
-import DataChannels = require('./datachannel');
-import DataChannelClass = DataChannels.DataChannelClass;
-import DataChannel = DataChannels.DataChannel;
-
-// Logger for this module.
-var log :Logging.Log = new Logging.Log('PeerConnection');
+// These are exported for convenience so that typescript tools that use
+// peerconnection.ts only need to require peerconnection and not datachannel.
+export interface DataChannel extends datachannel.DataChannel {}
+export interface Data extends datachannel.Data {}
 
 // This should match the uproxy-networking/network-typings/communications.d.ts
 // type with the same name (Net.Endpoint).
@@ -76,7 +75,7 @@ export interface PeerConnection<TSignallingMessage> {
       options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
       Promise<DataChannel>;
   // Or handle data channels opened by the peer (these events will )
-  peerOpenedChannelQueue :Handler.QueueHandler<DataChannel, void>;
+  peerOpenedChannelQueue :handler.QueueHandler<DataChannel, void>;
 
   // The |handleSignalMessage| function should be called with signalling
   // messages from the remote peer.
@@ -84,7 +83,7 @@ export interface PeerConnection<TSignallingMessage> {
   // The underlying handler that holds/handles signals intended to go to the
   // remote peer. A handler should be set that sends messages to the remote
   // peer.
-  signalForPeerQueue :Handler.QueueHandler<TSignallingMessage, void>;
+  signalForPeerQueue :handler.QueueHandler<TSignallingMessage, void>;
 
   // Closing the peer connection will close all associated data channels
   // and set |pcState| to |DISCONNECTED| (and hence fulfills
@@ -162,12 +161,12 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
   public onceDisconnected :Promise<void>;
 
   // Queue of channels opened up by the remote peer.
-  public peerOpenedChannelQueue :Handler.Queue<DataChannel,void>;
+  public peerOpenedChannelQueue :handler.Queue<DataChannel,void>;
 
   // Signals to be send to the remote peer by this peer.
-  public signalForPeerQueue :Handler.Queue<SignallingMessage,void>;
+  public signalForPeerQueue :handler.Queue<SignallingMessage,void>;
   public fromPeerCandidateQueue :
-      Handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
+      handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
 
   // Internal promise completion functions for the |onceConnecting|,
   // |onceConnected| and |onceDisconnected| promises. Must only be
@@ -220,15 +219,15 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     });
 
     // New data channels from the peer.
-    this.peerOpenedChannelQueue = new Handler.Queue<DataChannel,void>();
+    this.peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
 
     // Messages to send to the peer.
-    this.signalForPeerQueue = new Handler.Queue<SignallingMessage,void>();
+    this.signalForPeerQueue = new handler.Queue<SignallingMessage,void>();
 
     // candidates form the peer; need to be queued until after remote
     // descrption has been set.
     this.fromPeerCandidateQueue =
-        new Handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
+        new handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>();
 
     // This state variable is an abstraction of the PeerConnection state that
     // simplifies usage and management of state.
@@ -420,8 +419,8 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
             (localOffer:freedom_RTCPeerConnection.RTCSessionDescription) => {
-          if (Djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
-              Djb2.stringHash(JSON.stringify(localOffer.sdp))) {
+          if (djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
+              djb2.stringHash(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
             return Promise.reject('Simultaneous offers not yet implemented.');
           } else {
@@ -561,7 +560,7 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
   // Add a rtc data channel and return the it wrapped as a DataChannel
   private addRtcDataChannel_ = (id:string)
       : Promise<DataChannel> => {
-    return DataChannelClass.createFromFreedomId(id)
+    return datachannel.createFromFreedomId(id)
         .then((dataChannel:DataChannel) => {
       var label = dataChannel.getLabel();
       this.dataChannels[label] = dataChannel;
