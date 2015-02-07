@@ -366,7 +366,11 @@ module.exports = (grunt) ->
           expand: true, cwd: chromeAppDevPath
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
           dest: 'build/compile-src/integration'
-        } ]
+        }, {
+          expand: true, cwd: 'src/integration/'
+          src: ['gtalk_credentials.js']
+          dest: 'build/compile-src/integration'
+        }]
     }  # copy
 
     #-------------------------------------------------------------------------
@@ -406,7 +410,8 @@ module.exports = (grunt) ->
       # uProxy firefox specific typescript
       firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
 
-      integration: Rule.typescriptSpecDeclLenient 'compile-src/integration'
+      integration_specs: Rule.typescriptSpecDeclLenient 'compile-src/integration'
+      integration: Rule.typescriptSrcLenient 'compile-src/integration'
 
     }  # typescript
 
@@ -508,10 +513,14 @@ module.exports = (grunt) ->
         src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
               'build/compile-src/integration/scripts/uproxy.js',
               'build/compile-src/integration/scripts/consent.js',
-              'build/compile-src/integration/*.spec.js']
+              'build/compile-src/integration/scripts/uproxy-lib/logging/logging.js',
+              'build/compile-src/integration/scripts/uproxy-networking/tcp/tcp.js',
+              'build/compile-src/integration/gtalk_credentials.js',
+              'build/compile-src/integration/test_connection.js',
+              'build/compile-src/integration/core.spec.js']
         options: {
           helpers: [
-            'build/compile-src/integration/**/*.js'
+            'build/compile-src/integration/**/*.js',
             'build/compile-src/integration/**/*.json'
           ],
           keepRunner: true
@@ -662,6 +671,7 @@ module.exports = (grunt) ->
     'build_chrome'
     'copy:integration'
     'ts:integration'
+    'ts:integration_specs'
     'jasmine_chromeapp'
   ]
 
