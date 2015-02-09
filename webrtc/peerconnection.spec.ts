@@ -17,7 +17,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 import PeerConnection = require('./peerconnection');
 import PeerConnectionClass = PeerConnection.PeerConnectionClass;
 
-describe('PeerConnection', function() {
+describe('WebRtc / PeerConnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
 
   beforeEach(function() {
@@ -38,7 +38,7 @@ describe('PeerConnection', function() {
       spyOn(mockRtcPeerConnection, 'createDataChannel');
     createDataChannelSpy.and.callFake((
           label:string, init:RTCDataChannelInit) => {
-      mockRtcPeerConnection.fakeAnEvent('onnegotiationneeded');
+      mockRtcPeerConnection.handleEvent('onnegotiationneeded');
       return Promise.resolve('foo-channel-id');
     });
 
