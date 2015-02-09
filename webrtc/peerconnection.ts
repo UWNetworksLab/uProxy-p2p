@@ -89,10 +89,6 @@ export interface PeerConnection<TSignallingMessage> {
   // and set |pcState| to |DISCONNECTED| (and hence fulfills
   // |onceDisconnected|)
   close: () => void;
-
-  // Helpful for debugging
-  toString: () => string;
-  peerName_ :string;
 }
 
 export interface SignallingMessage {
