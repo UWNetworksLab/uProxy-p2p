@@ -12,16 +12,16 @@ import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 // freedom to improve its namespace management.
 //   mockFreedomCoreConsoleObjFn.close = (f:freedom_Console.Console) => {};
 var mockFreedomCoreConsoleObjFn = () => {
-  return new freedomMocker.SkeletonFreedomConsole();
+  return new freedomMocker.MockFreedomConsole();
 }
 
 // We need to mock freedom before the LoggingProvider import, because the
 // import/require statement that loads |LoggingProvider| will call
 // freedom['core.console'] (we need to first ensure it is defined!).
-freedom = freedomMocker.makeSkeletonFreedomInModuleEnv({
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.console': mockFreedomCoreConsoleObjFn,
   'loggingcontroller': () => {
-    return new freedomMocker.SkeletonModuleSelfConstructor();
+    return new freedomMocker.MockModuleSelfConstructor();
   }
 });
 

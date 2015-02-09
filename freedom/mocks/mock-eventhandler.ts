@@ -1,4 +1,4 @@
-/// <reference path="../../../build/third_party/freedom-typings/freedom-common.d.ts" />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
 
 import freedomTypes = require('freedom.types');
 
@@ -6,38 +6,45 @@ import freedomTypes = require('freedom.types');
 // fake events. Useful for mocking out freedom freedom modules that will raise
 // events.
 class MockFreedomEventHandler implements freedomTypes.EventHandler {
-  private onHandlerTable_ : {[t:string] : Function[]} = {};
-  private onceHandlerTable_ : {[t:string] : Function[]} = {};
+  private onHandlerTable_ : {[eventName:string] : Function[]} = {};
+  private onceHandlerTable_ : {[eventName:string] : Function[]} = {};
 
-  private static removeFromArray_<T>(x:T, a:T[]) {
+  private static removeFromArray_<T>(x:T, a:T[]) : void {
     var index = a.indexOf(x);
     if (index > -1) { a.splice(index, 1); }
   }
 
-  constructor(public eventTypes_:string[]) {
-    eventTypes_.map((t) => {
-      this.onHandlerTable_[t] = [];
-      this.onceHandlerTable_[t] = [];
+  constructor(eventTypes_:string[]) {
+    eventTypes_.map((eventName) => {
+      this.onHandlerTable_[eventName] = [];
+      this.onceHandlerTable_[eventName] = [];
     });
   }
 
-  public on(t:string,f:Function) {
-    this.onHandlerTable_[t].push(f);
+  public on(eventName:string, callback:Function) : void {
+    this.onHandlerTable_[eventName].push(callback);
   }
-  public once(t:string,f:Function) {
-    this.onceHandlerTable_[t].push(f);
+
+  public once(eventName:string, callback:Function) {
+    this.onceHandlerTable_[eventName].push(callback);
   }
-  // off removes the event from both |onHandlerTable_| and |onceHandlerTable_|.
-  public off(t:string,f:Function) {
-    MockFreedomEventHandler.removeFromArray_(f,this.onHandlerTable_[t]);
-    MockFreedomEventHandler.removeFromArray_(f,this.onceHandlerTable_[t]);
+
+  // Off removes the event from both |onHandlerTable_| and |onceHandlerTable_|.
+  // See: https://github.com/freedomjs/freedom/wiki/freedom.js-structure:-Consumer-Interface
+  public off(eventName:string, callback:Function) : void {
+    MockFreedomEventHandler.removeFromArray_(callback,
+        this.onHandlerTable_[eventName]);
+    MockFreedomEventHandler.removeFromArray_(callback,
+        this.onceHandlerTable_[eventName]);
   }
 
   // Note: this is not part of the freedom interface.
-  public fakeAnEvent(t:string, x?:Object) {
-    this.onHandlerTable_[t].map((f) => { f(x); });
-    this.onceHandlerTable_[t].map((f) => { f(x); });
-    this.onceHandlerTable_[t] = [];
+  public handleEvent(eventName:string, eventArgument?:Object) : void {
+    this.onHandlerTable_[eventName].map(
+        (callback) => { callback(eventArgument); });
+    this.onceHandlerTable_[eventName].map(
+        (callback) => { callback(eventArgument); });
+    this.onceHandlerTable_[eventName] = [];
   }
 }
 

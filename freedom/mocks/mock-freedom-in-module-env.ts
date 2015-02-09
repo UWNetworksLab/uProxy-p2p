@@ -1,24 +1,24 @@
-/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../../../build/third_party/freedom-typings/console.d.ts" />
-/// <reference path="../../../build/third_party/freedom-typings/freedom-common.d.ts" />
+/// <reference path='../../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/console.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
 
 import freedomTypes = require('freedom.types');
 
 
-export class SkeletonModuleSelfConstructor implements freedomTypes.ModuleSelfConstructor {
+export class MockModuleSelfConstructor implements freedomTypes.ModuleSelfConstructor {
   public provideSynchronous(classFn:Function) : void {}
   public provideAsynchronous(classFn:Function) : void {}
   public providePromises(classFn:Function) : void {}
 }
 
-export class SkeletonParentModuleThing
-    extends SkeletonModuleSelfConstructor
+export class MockParentModuleThing
+    extends MockModuleSelfConstructor
     implements freedomTypes.ParentModuleThing {
   public on(t:string, f:Function) : void {}
   public emit(t:string, x:any) : void {}
 }
 
-export class SkeletonFreedomCore implements freedomTypes.Core {
+export class MockFreedomCore implements freedomTypes.Core {
   public getLogger(loggerName:string) : Promise<freedomTypes.Logger> {
     return Promise.resolve<freedomTypes.Logger>(null);
   }
@@ -33,7 +33,7 @@ export class SkeletonFreedomCore implements freedomTypes.Core {
   }
 }
 
-export class SkeletonFreedomConsole implements freedom_Console.Console {
+export class MockFreedomConsole implements freedom_Console.Console {
   public log(source:string, message:string) : Promise<void> {
     return Promise.resolve<void>();
   }
@@ -53,17 +53,17 @@ export class SkeletonFreedomConsole implements freedom_Console.Console {
 
 // See the definition of freedomTypes.FreedomInModuleEnv for more info on the
 // curious type of a freedom object. :)
-export function makeSkeletonFreedomInModuleEnv(
+export function makeMockFreedomInModuleEnv(
     providerFactories ?: {[name:string] : Function})
     : freedomTypes.FreedomInModuleEnv {
 
   var freedom :freedomTypes.FreedomInModuleEnv;
 
-  var freeedomParentModuleThing_ = new SkeletonParentModuleThing();
+  var freeedomParentModuleThing_ = new MockParentModuleThing();
   var freedomFn = () => { return freeedomParentModuleThing_; }
   freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
 
-  var core_ = new SkeletonFreedomCore();
+  var core_ = new MockFreedomCore();
   freedom['core'] = () => { return core_; }
 
   for(var providerName in providerFactories) {
