@@ -40,9 +40,12 @@ function setUpConnection(freedom, panel, button) {
   });
 
   panel.port.on('setIcon', function(iconFile) {
-    button.icon = {
-      '19': './icons/' + iconFile,
-    }
+    button.state("window", {
+      icon : {
+        '16': './icons/' + iconFile,
+        '19': './icons/' + iconFile
+      }
+    });
   });
 
   panel.port.on('showPanel', function() {

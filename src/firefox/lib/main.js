@@ -12,7 +12,7 @@ var button = buttons.ActionButton({
   icon: {
     "16": "./icons/NotLoggedIn_32.gif",
     "19": "./icons/NotLoggedIn_32.gif",
-    "128": "./icons/uproxy-128.png"
+    "128": "./icons/LoggedIn_256.gif"
   },
   onClick: start
 });
