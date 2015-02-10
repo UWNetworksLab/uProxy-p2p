@@ -128,6 +128,14 @@ module UI {
     public gettingStatus :string = null;
     public sharingStatus :string = null;
 
+    // Filenames for icons.
+    private static DEFAULT_ICON_ :string = 'LoggedIn_32.gif';
+    private static LOGGED_OUT_ICON_ :string = 'NotLoggedIn_32.gif';
+    private static SHARING_ICON_ :string = 'SharingAccess_32.gif';
+    private static GETTING_ICON_ :string = 'GettingAccess_32.gif';
+    private static ERROR_ICON_ :string = 'Error_32.gif';
+    private static GETTING_SHARING_ICON_ :string = 'GettingandSharingAccess_32.gif';
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -269,7 +277,7 @@ module UI {
 
     public showNotification = (notificationText :string) => {
       new Notification('uProxy', { body: notificationText,
-                                   icon: 'icons/uproxy-128.png'});
+                                   icon: 'icons/LoggedIn_256.gif'});
     }
 
     /**
@@ -286,11 +294,11 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UserInterface.SHARING_ICON_);
       } else if (askUser) {
-        this.browserApi.setIcon('error-19.png');
+        this.browserApi.setIcon(UserInterface.ERROR_ICON_);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
       }
 
       this.updateGettingStatusBar_();
@@ -310,9 +318,9 @@ module UI {
       this.instanceGettingAccessFrom_ = instanceId;
 
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
+        this.browserApi.setIcon(UserInterface.GETTING_SHARING_ICON_);
       } else {
-        this.browserApi.setIcon('getting-19.png');
+        this.browserApi.setIcon(UserInterface.GETTING_ICON_);
       }
 
       this.updateGettingStatusBar_();
@@ -327,9 +335,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
+        this.browserApi.setIcon(UserInterface.GETTING_SHARING_ICON_);
       } else {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UserInterface.SHARING_ICON_);
       }
     }
 
@@ -338,14 +346,14 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('getting-19.png');
+        this.browserApi.setIcon(UserInterface.GETTING_ICON_);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
       }
     }
 
     public setOfflineIcon = () => {
-      this.browserApi.setIcon('offline-19.png');
+      this.browserApi.setIcon(UserInterface.LOGGED_OUT_ICON_);
     }
 
     public isGettingAccess = () => {
@@ -367,7 +375,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && model.onlineNetwork == null) {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
       }
 
       if (model.onlineNetwork &&
