@@ -6,13 +6,8 @@
   <template>
     <style>
     :host {
-      position: relative;
-      display: inline-block;
       box-sizing: border-box;
-      width: 100%;
-      background-color: #fff;
       margin: 0;
-      overflow: hidden;
       z-index: 10;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -21,75 +16,65 @@
     div:focus {
       outline: 0; /* disable blue focus outline around contact */
     }
-    #frame {
+    .frame {
       box-sizing: border-box;
-      padding-left: 1em;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
+    }
+    .nameRow {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 40px; /* room for accessIcon */
       cursor: pointer;
     }
-    #avatar {
+    .avatar {
       width: 36px; height: 36px;
       margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
-      vertical-align: top;
-    }
-    #words {
-      display: inline-block;
-      width: 278px;
-      padding-left: 8px;
-    }
-    .nameRow {
-      display: block;
-      font-size: 16px;
-      margin: 0;
-      padding-top: 16px;
-    }
-    .name {
-      display: inline-block;
-      width: 255px;
-    }
-    .accessIcon {
       vertical-align: middle;
     }
-    #words:hover h1 {
-      color: #aaa;
+    .name {
+      font-size: 16px;
     }
-    #instances {
+    .accessIcon {
+      position: absolute;
+      right: 0;
+      margin-top: 1em; /* line up with text (hacky) */
+      padding-right: 15px;
+    }
+    .instances {
       padding-top: 8px;
+      margin-left: 52px; /* line up with right bound of contact picture */
+      margin-right: 40px; /* line up with end of name div (before accessIcon) */
     }
-    #actions {
-      padding: 8px;
-    }
-    .offline #avatar,
     .offline .nameRow {
       opacity: 0.5;
     }
     </style>
 
-    <div tabindex='-1' id='frame'
-        class='{{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
-     <!-- on-blur='{{ collapse }}'> -->
-      <img id='avatar' src='{{ contact.imageData }}' on-tap='{{ toggle }}'/>
-      <div id='words'>
-        <div class='nameRow' on-tap='{{ toggle }}'>
-          <div class='name'>{{ contact.name }}</div>
-          <img src='../icons/getting.png' class='accessIcon'
-              hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
-          <img src='../icons/sharing.png' class='accessIcon'
-              hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
-        </div>
-        <div id='instances' hidden?='{{!contact.expanded}}'>
-          <template repeat='{{ i in contact.instances }}' vertical layout>
-            <uproxy-instance
-                user='{{ contact }}'
-                instance='{{ i }}'
-                network='{{contact.network}}'>
-            </uproxy-instance>
-          </template>
-        </div>
+    <div tabindex='-1' class='frame
+        {{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
+      <div on-tap='{{ toggle}}' class='nameRow'>
+        <img class='avatar' src='{{ contact.imageData }}' />
+        <span class='name'>{{ contact.name }}</span>
+        <img src='../icons/getting.png' class='accessIcon'
+            hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
+        <img src='../icons/sharing.png' class='accessIcon'
+            hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
       </div>
+
+      <div class='instances' hidden?='{{!contact.expanded}}'>
+        <template repeat='{{ i in contact.instances }}' vertical layout>
+          <uproxy-instance
+              user='{{ contact }}'
+              instance='{{ i }}'
+              network='{{contact.network}}'>
+          </uproxy-instance>
+        </template>
+      </div>
+
     </div>
   </template>
 
