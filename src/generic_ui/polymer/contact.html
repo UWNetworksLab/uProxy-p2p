@@ -61,9 +61,9 @@
       <div on-tap='{{ toggle}}' class='nameRow'>
         <img class='avatar' src='{{ contact.imageData }}' />
         <span class='name'>{{ contact.name }}</span>
-        <img src='../icons/GettingAccess_UI_40.gif' class='accessIcon'
+        <img src="{{ '../icons/' + UI.BUDDY_GETTING_ICON }}" class='accessIcon'
             hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
-        <img src='../icons/SharingAccess_UI_40.gif' class='accessIcon'
+        <img src="{{ '../icons/' + UI.BUDDY_SHARING_ICON }}" class='accessIcon'
             hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
       </div>
 

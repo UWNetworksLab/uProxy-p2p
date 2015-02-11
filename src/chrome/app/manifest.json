@@ -6,7 +6,7 @@
   "version": "0.6.0",
   "default_locale": "en",
   "icons": {
-      "128": "icons/Default_128.png"
+      "128": "icons/128_online.png"
   },
   "app": {
     "background": {

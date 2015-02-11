@@ -39,11 +39,9 @@ function setUpConnection(freedom, panel, button) {
     proxyConfig.stopUsingProxy(askUser);
   });
 
-  panel.port.on('setIcon', function(iconFile) {
+  panel.port.on('setIcon', function(iconFiles) {
     button.state("window", {
-      icon : {
-        '32': './icons/' + iconFile
-      }
+      icon : iconFiles
     });
   });
 

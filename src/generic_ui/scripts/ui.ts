@@ -47,7 +47,23 @@ var model :UI.Model = {
 // change the names of these to avoid confusion.
 module UI {
 
+  // Filenames for icons.
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
+
+  // When updating the icon strings below, default icons in the Chrome manifests
+  // and Firefox main.js should also be changed to match.
+
+  // Icons for browser bar, also used for notifications.
+  export var DEFAULT_ICON :string = 'online.gif';
+  export var LOGGED_OUT_ICON :string = 'offline.gif';
+  export var SHARING_ICON :string = 'sharing.gif';
+  export var GETTING_ICON :string = 'getting.gif';
+  export var ERROR_ICON :string = 'error.gif';
+  export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
+  // The icons that appear beside your buddy if they are getting/giving.
+  export var BUDDY_GETTING_ICON :string = 'GettingAccess_UI_40.gif'
+  export var BUDDY_SHARING_ICON :string = 'SharingAccess_UI_40.gif'
+
 
   export interface Contacts {
     getAccessContacts : {
@@ -127,14 +143,6 @@ module UI {
 
     public gettingStatus :string = null;
     public sharingStatus :string = null;
-
-    // Filenames for icons.
-    private static DEFAULT_ICON_ :string = 'LoggedIn_32.gif';
-    private static LOGGED_OUT_ICON_ :string = 'NotLoggedIn_32.gif';
-    private static SHARING_ICON_ :string = 'SharingAccess_32.gif';
-    private static GETTING_ICON_ :string = 'GettingAccess_32.gif';
-    private static ERROR_ICON_ :string = 'Error_32.gif';
-    private static GETTING_SHARING_ICON_ :string = 'GettingandSharingAccess_32.gif';
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -277,7 +285,7 @@ module UI {
 
     public showNotification = (notificationText :string) => {
       new Notification('uProxy', { body: notificationText,
-                                   icon: 'icons/' + UserInterface.DEFAULT_ICON_});
+                                   icon: 'icons/' + UI.DEFAULT_ICON});
     }
 
     /**
@@ -294,11 +302,11 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon(UserInterface.SHARING_ICON_);
+        this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
-        this.browserApi.setIcon(UserInterface.ERROR_ICON_);
+        this.browserApi.setIcon(UI.ERROR_ICON);
       } else {
-        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
 
       this.updateGettingStatusBar_();
@@ -318,9 +326,9 @@ module UI {
       this.instanceGettingAccessFrom_ = instanceId;
 
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon(UserInterface.GETTING_SHARING_ICON_);
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon(UserInterface.GETTING_ICON_);
+        this.browserApi.setIcon(UI.GETTING_ICON);
       }
 
       this.updateGettingStatusBar_();
@@ -335,9 +343,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon(UserInterface.GETTING_SHARING_ICON_);
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon(UserInterface.SHARING_ICON_);
+        this.browserApi.setIcon(UI.SHARING_ICON);
       }
     }
 
@@ -346,14 +354,14 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon(UserInterface.GETTING_ICON_);
+        this.browserApi.setIcon(UI.GETTING_ICON);
       } else {
-        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
     }
 
     public setOfflineIcon = () => {
-      this.browserApi.setIcon(UserInterface.LOGGED_OUT_ICON_);
+      this.browserApi.setIcon(UI.LOGGED_OUT_ICON);
     }
 
     public isGettingAccess = () => {
@@ -375,7 +383,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && model.onlineNetwork == null) {
-        this.browserApi.setIcon(UserInterface.DEFAULT_ICON_);
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
 
       if (model.onlineNetwork &&

@@ -17,7 +17,12 @@ class FirefoxBrowserApi implements BrowserAPI {
   // For browser icon.
 
   public setIcon = (iconFile :string) : void => {
-    port.emit('setIcon', iconFile);
+    port.emit('setIcon',
+        {
+          "18": "./icons/19_" + iconFile,
+          "32": "./icons/32_" + UI.DEFAULT_ICON,
+          "36": "./icons/38_" + iconFile
+        });
   }
 
   // For FAQ.

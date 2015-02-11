@@ -122,7 +122,7 @@ describe('core-connector', () => {
         cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
       });
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
-        {path: "icons/NotLoggedIn_32.gif"});
+        {path: "icons/" + UI.LOGGED_OUT_ICON});
     }).then(done);
   });
 
