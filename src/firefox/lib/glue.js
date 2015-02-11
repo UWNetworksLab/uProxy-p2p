@@ -42,8 +42,7 @@ function setUpConnection(freedom, panel, button) {
   panel.port.on('setIcon', function(iconFile) {
     button.state("window", {
       icon : {
-        '16': './icons/' + iconFile,
-        '19': './icons/' + iconFile
+        '32': './icons/' + iconFile
       }
     });
   });
