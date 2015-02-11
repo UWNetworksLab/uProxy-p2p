@@ -188,7 +188,9 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
 
   constructor(
       private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
-      public peerName_:string) {
+      // Public for debugging; note this is not part of the peer connection
+      // interface
+      public peerName_ ?:string) {
     this.peerName_ = this.peerName_ ||
         ('unnamed-' + (++PeerConnectionClass.automaticNameIndex_));
 
