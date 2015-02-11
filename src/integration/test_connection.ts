@@ -104,17 +104,12 @@ class ProxyTester {
       return Promise.reject(e.message + ' ' + e.stack);
     }
   }
+}
 
-  public testConnection = (socksEndpoint :Net.Endpoint) : Promise<Boolean> => {
-    var input;
-    this.startEchoServer().then((port:number) => {
-      return this.connect(socksEndpoint, port);
-    }).then((connectionId :string) => {
-      return this.echo(connectionId, input);
-    }).then((output :ArrayBuffer) => {
-      return Promise.resolve(ArrayBuffers.byteEquality(input, output));
-    }).catch((e :any) => {
-      Promise.reject(e);
-    })
-  }
+interface Freedom {
+  providePromises: (a:new (f:any) => ProxyTester) => void;
+};
+
+if (typeof freedom !== 'undefined') {
+  freedom().providePromises(ProxyTester);
 }

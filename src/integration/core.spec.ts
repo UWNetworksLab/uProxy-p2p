@@ -1,6 +1,25 @@
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../uproxy.ts' />
-
+var testConnection = (socksEndpoint :Net.Endpoint) : Promise<Boolean> => {
+  return freedom('scripts/build/compile-src/integration/integration.json', {debug:'log'}).then((interface :any) => {
+    var testModule = new interface();
+    var input;
+    testModule.startEchoServer().then((port:number) => {
+      console.log('started echo server, connect ');
+      console.log(socksEndpoint);
+      return testModule.connect(socksEndpoint, port, "");
+    }).then((connectionId :string) => {
+      console.log('connected, echo something');
+      return testModule.echo(connectionId, input);
+    }).then((output :ArrayBuffer) => {
+      console.log('got echo results');
+      return Promise.resolve(ArrayBuffers.byteEquality(input, output));
+    }).catch((e :any) => {
+      console.log('command rejected ', e);
+      return Promise.reject(e);
+    })
+  });
+}
 declare var ALICE;
 declare var BOB;
 var REDIRECT_URL = 'http://localhost';
@@ -66,7 +85,6 @@ describe('uproxy core', function() {
   var alicePath;
   var bobPath;
   var promiseId = 0;
-  var proxyTester = new ProxyTester;
   it('loads uproxy', (done) => {
     // Ensure that aliceSocialInterface and bobSocialInterface are set.
     var AliceOAuthView = function() {};
@@ -166,7 +184,8 @@ describe('uproxy core', function() {
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
         expect(data.promiseId).toEqual(promiseId);
-        proxyTester.testConnection(data.endpoints).then((proxying) => {
+        console.log('command was fulfilled', data);
+        testConnection(data.argsForCallback).then((proxying) => {
           expect(proxying).toEqual(true);
           fulfill();
         });

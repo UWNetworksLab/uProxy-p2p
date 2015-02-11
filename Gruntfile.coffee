@@ -368,7 +368,7 @@ module.exports = (grunt) ->
           dest: 'build/compile-src/integration'
         }, {
           expand: true, cwd: 'src/integration/'
-          src: ['gtalk_credentials.js']
+          src: ['gtalk_credentials.js', 'integration.json']
           dest: 'build/compile-src/integration'
         }]
     }  # copy
@@ -513,10 +513,7 @@ module.exports = (grunt) ->
         src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
               'build/compile-src/integration/scripts/uproxy.js',
               'build/compile-src/integration/scripts/consent.js',
-              'build/compile-src/integration/scripts/uproxy-lib/logging/logging.js',
-              'build/compile-src/integration/scripts/uproxy-networking/tcp/tcp.js',
               'build/compile-src/integration/gtalk_credentials.js',
-              'build/compile-src/integration/test_connection.js',
               'build/compile-src/integration/core.spec.js']
         options: {
           helpers: [
