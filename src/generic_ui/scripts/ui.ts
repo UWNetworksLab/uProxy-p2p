@@ -277,7 +277,7 @@ module UI {
 
     public showNotification = (notificationText :string) => {
       new Notification('uProxy', { body: notificationText,
-                                   icon: 'icons/LoggedIn_256.gif'});
+                                   icon: 'icons/' + UserInterface.DEFAULT_ICON_});
     }
 
     /**

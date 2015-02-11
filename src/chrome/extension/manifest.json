@@ -5,9 +5,7 @@
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2267",
   "icons": {
-    "16": "icons/LoggedIn_32.gif",
-    "19": "icons/LoggedIn_38.gif",
-    "128": "icons/LoggedIn_256.gif"
+    "128": "icons/Default_128.png"
   },
   "default_locale": "en",
   "background": {

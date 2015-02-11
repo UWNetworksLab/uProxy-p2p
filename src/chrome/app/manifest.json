@@ -6,9 +6,7 @@
   "version": "0.6.0",
   "default_locale": "en",
   "icons": {
-      "128": "icons/LoggedIn_256.gif",
-      "19": "icons/LoggedIn_38.gif",
-      "16": "icons/LoggedIn_32.gif"
+      "128": "icons/Default_128.png"
   },
   "app": {
     "background": {
