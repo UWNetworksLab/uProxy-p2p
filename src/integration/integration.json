@@ -1,0 +1,55 @@
+{
+  "name": "fully proxying integration tests",
+  "app": {
+    "script": [
+      "scripts/uproxy-lib/arraybuffers/arraybuffers.js",
+      "scripts/uproxy-lib/handler/queue.js",
+      "scripts/uproxy-networking/ipaddrjs/ipaddr.min.js",
+      "scripts/uproxy-lib/logging/logging.js",
+      "scripts/uproxy-networking/tcp/tcp.js",
+      "scripts/uproxy-lib/webrtc/datachannel.js",
+      "scripts/uproxy-lib/webrtc/peerconnection.js",
+      "scripts/uproxy-networking/socks-common/socks-headers.js",
+      "scripts/uproxy-networking/socks-to-rtc/socks-to-rtc.js",
+      "scripts/uproxy-networking/rtc-to-net/rtc-to-net.js",
+      "test_connection.js"
+    ]
+  },
+  "provides": [
+    "ProxyIntegrationTest"
+  ],
+  "default": "ProxyIntegrationTest",
+  "api": {
+    "ProxyIntegrationTest": {
+      "constructor": {
+        "value": ["boolean"]
+      },
+      "startEchoServer": {
+        "type": "method",
+        "value": [],
+        "ret": "number"
+      },
+      "connect": {
+        "type": "method",
+        "value": [["string", "number"], "number", "string"],
+        "ret": "string"
+      },
+      "echo": {
+        "type": "method",
+        "value": ["string", "buffer"],
+        "ret": "buffer"
+      },
+      "echoMultiple": {
+        "type": "method",
+        "value": ["string", ["array", "buffer"]],
+        "ret": ["array", "buffer"]
+      }
+    }
+  },
+  "permissions": [
+    "core.rtcpeerconnection",
+    "core.rtcdatachannel",
+    "core.tcpsocket",
+    "core.udpsocket"
+  ]
+}

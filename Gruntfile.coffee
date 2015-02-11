@@ -514,13 +514,18 @@ module.exports = (grunt) ->
               'build/compile-src/integration/scripts/uproxy.js',
               'build/compile-src/integration/scripts/consent.js',
               'build/compile-src/integration/gtalk_credentials.js',
+              'build/compile-src/integration/**/*.js',
+              'build/compile-src/integration/**/*.json',
               'build/compile-src/integration/core.spec.js']
         options: {
-          helpers: [
-            'build/compile-src/integration/**/*.js',
-            'build/compile-src/integration/**/*.json'
+          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+                  'build/compile-src/integration/scripts/uproxy.js',
+                  'build/compile-src/integration/scripts/consent.js',
+                  'build/compile-src/integration/gtalk_credentials.js',
+                  'build/compile-src/integration/core.spec.js'
           ],
-          keepRunner: true
+          keepRunner: true,
+          binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary"
         }
       }
     }

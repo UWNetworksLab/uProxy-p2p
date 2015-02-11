@@ -6,7 +6,7 @@
 class ProxyTester {
   private socksEndpoint_ : Promise<Net.Endpoint>;
   private echoServer_ :Tcp.Server;
-  private connection_ :{ [index:string]: Tcp.Connection; } = {};
+  private connections_ :{ [index:string]: Tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
 
   constructor() {
