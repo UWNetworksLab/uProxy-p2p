@@ -10,9 +10,7 @@ var button = buttons.ActionButton({
   id: "uProxy-button",
   label: "uProxy-button",
   icon: {
-    "16": "./icons/NotLoggedIn_32.gif",
-    "19": "./icons/NotLoggedIn_32.gif",
-    "128": "./icons/LoggedIn_256.gif"
+    "32": "./icons/NotLoggedIn_32.gif"
   },
   onClick: start
 });
