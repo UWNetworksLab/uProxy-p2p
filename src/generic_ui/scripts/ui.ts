@@ -284,8 +284,12 @@ module UI {
     }
 
     public showNotification = (notificationText :string) => {
-      new Notification('uProxy', { body: notificationText,
-                                   icon: 'icons/' + UI.DEFAULT_ICON});
+      var notification =
+          new Notification('uProxy', { body: notificationText,
+                           icon: 'icons/' + UI.DEFAULT_ICON});
+      setTimeout(function() {
+        notification.close();
+      }, 5000);
     }
 
     /**
