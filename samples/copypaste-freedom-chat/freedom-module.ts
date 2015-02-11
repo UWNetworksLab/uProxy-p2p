@@ -1,17 +1,15 @@
-/// <reference path='../../freedom/typings/freedom-module-env.d.ts' />
-/// <reference path="../../freedom/typings/rtcpeerconnection.d.ts" />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
-import Logging = require('../../logging/logging');
+import logging = require('../../logging/logging');
 
-import PeerConnections = require('../../webrtc/peerconnection');
-import DataChannels = require('../../webrtc/datachannel');
+import peerconnection = require('../../webrtc/peerconnection');
+import PeerConnection = peerconnection.PeerConnection;
+import SignallingMessage = peerconnection.SignallingMessage;
+import DataChannel = peerconnection.DataChannel;
+import Data = peerconnection.Data;
 
-import PeerConnection = PeerConnections.PeerConnection;
-import SignallingMessage = PeerConnections.SignallingMessage;
-import DataChannel = DataChannels.DataChannel;
-import Data = DataChannels.Data;
-
-var log :Logging.Log = new Logging.Log('copypaste-socks');
+var log :logging.Log = new logging.Log('copypaste-socks');
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
@@ -34,7 +32,7 @@ function connectDataChannel(d:DataChannel) {
 
 function makePeerConnection() : PeerConnection<SignallingMessage> {
   var pc :PeerConnection<SignallingMessage> =
-      PeerConnections.createPeerConnection(pcConfig);
+      peerconnection.createPeerConnection(pcConfig);
 
   pc.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
     parentModule.emit('signalForPeer', signal);

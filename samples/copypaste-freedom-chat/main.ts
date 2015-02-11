@@ -1,5 +1,5 @@
-/// <reference path='../../freedom/typings/freedom-common.d.ts' />
-/// <reference path='../../freedom/typings/freedom-core-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-core-env.d.ts' />
 
 import freedomTypes = require('freedom.types');
 
@@ -36,7 +36,7 @@ var chatPanel_sendMessageButtonNode = <HTMLElement>document.getElementById('chat
 var chatPanel_inboundMessageNode = <HTMLInputElement>document.getElementById('chatPanel_inboundMessage');
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/loggingprovider.json',
+    'logger': 'lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(
     (copypasteModuleFactory:() => freedomTypes.OnAndEmit<any,any>) => {

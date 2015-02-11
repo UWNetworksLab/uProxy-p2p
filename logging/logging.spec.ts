@@ -1,5 +1,5 @@
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path='../../build/third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 import Logging = require('./logging');
@@ -8,7 +8,7 @@ describe("Client logging shim using Freedom", () => {
 
   beforeEach(() => {
     // Reset the mock freedom environment.
-    freedom = freedomMocker.makeSkeletonFreedomInModuleEnv();
+    freedom = freedomMocker.makeMockFreedomInModuleEnv();
   });
 
   it('A new Logging.Log forwards all logging to the named freedom core logger.',
