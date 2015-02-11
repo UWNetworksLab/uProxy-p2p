@@ -42,8 +42,8 @@
     "grunt-vulcanize": "^0.6.0",
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
-    "uproxy-lib": "^18.0.0",
-    "uproxy-networking": "^5.0.0"
+    "uproxy-lib": "^19.0.0",
+    "uproxy-networking": "^5.2.0"
   },
   "peerDependencies" : {
     "freedom": "~0.6.18"
