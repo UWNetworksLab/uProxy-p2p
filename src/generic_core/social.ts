@@ -500,6 +500,10 @@ module Social {
             this.onceLoggedOut_ = new Promise((F, R) => {
               this.fulfillLogout_ = F;
             }).then(() => {
+              this.stopMonitor_();
+              for (var userId in this.roster) {
+                this.roster[userId].handleLogout();
+              }
               ui.showNotification('You have been logged out of ' + this.name);
               Social.removeNetwork(this.name, this.myInstance.userId);
             });
@@ -515,10 +519,6 @@ module Social {
     }
 
     public logout = () : Promise<void> => {
-      this.stopMonitor_();
-      for (var userId in this.roster) {
-        this.roster[userId].handleLogout();
-      }
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
         this.fulfillLogout_();
