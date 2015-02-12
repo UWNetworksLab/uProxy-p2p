@@ -12,4 +12,4 @@ Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/
 
 - Run 'cd build/dev/firefox'
 
-- Run `cfx run` and Firefox should launch
+- Run `cfx run` and Firefox should launch with the uProxy add-on installed
