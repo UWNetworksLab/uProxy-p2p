@@ -5,7 +5,7 @@ node_js:
 notifications:
   email:
     recipients:
-      - freedom@cs.washington.edu
+      - uproxy-eng@googlegroups.com 
     on_success: change
     on_failure: always
 before_install:
