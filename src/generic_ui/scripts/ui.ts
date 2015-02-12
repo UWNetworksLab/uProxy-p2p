@@ -5,7 +5,6 @@
  * TODO: firefox bindings.
  */
 /// <reference path='user.ts' />
-/// <reference path='ui_enums.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -46,6 +45,22 @@ var model :UI.Model = {
 // and a ui object (singleton intance of UI.UserInterface).  We should
 // change the names of these to avoid confusion.
 module UI {
+
+  // Filenames for icons.
+  // Two important things about using these strings:
+  // 1) When updating the icon strings below, default values in the Chrome
+  // manifests and Firefox main.js should also be changed to match.
+  // 2) These are only the suffixes of the icon names. Because we have
+  // different sizes of icons, the actual filenames have the dimension
+  // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
+
+  // Icons for browser bar, also used for notifications.
+  export var DEFAULT_ICON :string = 'online.gif';
+  export var LOGGED_OUT_ICON :string = 'offline.gif';
+  export var SHARING_ICON :string = 'sharing.gif';
+  export var GETTING_ICON :string = 'getting.gif';
+  export var ERROR_ICON :string = 'error.gif';
+  export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
@@ -90,6 +105,25 @@ module UI {
     imageData ?:string;
     userName ?:string;
     roster :{ [userId:string] :User }
+  }
+
+  /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    ROSTER,
+    USER,
+    NETWORKS,
+    SETTINGS,
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
   }
 
   /**
@@ -270,7 +304,7 @@ module UI {
     public showNotification = (notificationText :string) => {
       var notification =
           new Notification('uProxy', { body: notificationText,
-                           icon: 'icons/uproxy-128.png'});
+                           icon: 'icons/38_' + UI.DEFAULT_ICON});
       setTimeout(function() {
         notification.close();
       }, 5000);
@@ -290,11 +324,11 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
-        this.browserApi.setIcon('error-19.png');
+        this.browserApi.setIcon(UI.ERROR_ICON);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
 
       this.updateGettingStatusBar_();
@@ -314,9 +348,9 @@ module UI {
       this.instanceGettingAccessFrom_ = instanceId;
 
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon('getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_ICON);
       }
 
       this.updateGettingStatusBar_();
@@ -331,9 +365,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UI.SHARING_ICON);
       }
     }
 
@@ -342,14 +376,14 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_ICON);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
     }
 
     public setOfflineIcon = () => {
-      this.browserApi.setIcon('offline-19.png');
+      this.browserApi.setIcon(UI.LOGGED_OUT_ICON);
     }
 
     public isGettingAccess = () => {
@@ -371,7 +405,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && model.onlineNetwork == null) {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
 
       if (model.onlineNetwork &&

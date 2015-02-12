@@ -16,7 +16,10 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public setIcon = (iconFile :string) : void => {
     chrome.browserAction.setIcon({
-      path: this.ICON_DIR + iconFile
+      path: {
+        "19" : this.ICON_DIR + "19_" + iconFile,
+        "38" : this.ICON_DIR + "38_" + iconFile,
+      }
     });
   }
 
