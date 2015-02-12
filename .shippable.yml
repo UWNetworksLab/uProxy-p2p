@@ -1,4 +1,4 @@
-build_image: freedomjs/freedom
+build_image: uProxy/uproxy
 language: node_js
 node_js:
 - '0.10'
