@@ -8,8 +8,7 @@ Polymer({
     this.$.proxyReverted.hidden = false;
   },
   ready: function() {
-    // Expose global ui & UI objects in this context.
+    // Expose global ui object in this context.
     this.ui = ui;
-    this.UI = UI;
   }
 });
