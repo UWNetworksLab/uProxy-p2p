@@ -81,6 +81,15 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
+
+      var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
+      var restoreFunc = network.restoreFromStorage.bind(network);
+      spyOn(network, 'restoreFromStorage').and.callFake(() => {
+        restoreFunc().then(() => {
+          fulfillStorage();
+        })
+      });
+
       var promises :Promise<void>[] = [];
       promises.push(<any>storage.save<Instance>('mockmockmyself', {
           instanceId: 'dummy-instance-id',
@@ -97,23 +106,25 @@ describe('Social.FreedomNetwork', () => {
             fakeFreedomClient.userId);
         expect(network['myInstance'].instanceId).toEqual(
             'dummy-instance-id');
-        expect(Object.keys(network.roster).length).toEqual(1);
-        expect(network.getUser('somefriend')).toBeDefined();
         var freedomClientState :freedom_Social.ClientState = {
           userId: 'fakeuser',
           clientId: 'fakeclient',
           status: 'ONLINE',
           timestamp: 12345
         };
-        // Add user to the roster;
-        network.handleClientState(freedomClientState).then(() => {
-          expect(Object.keys(network.roster).length).toEqual(2);
-          var friend = network.getUser('fakeuser');
-          spyOn(friend, 'monitor');
-          // Advance clock 5 seconds and make sure monitoring was called.
-          jasmine.clock().tick(5000);
-          expect(friend.monitor).toHaveBeenCalled();
-          done();
+        onceStorageDone.then(() => {
+          expect(Object.keys(network.roster).length).toEqual(1);
+          expect(network.getUser('somefriend')).toBeDefined();
+          // Add user to the roster;
+          network.handleClientState(freedomClientState).then(() => {
+            expect(Object.keys(network.roster).length).toEqual(2);
+            var friend = network.getUser('fakeuser');
+            spyOn(friend, 'monitor');
+            // Advance clock 5 seconds and make sure monitoring was called.
+            jasmine.clock().tick(5000);
+            expect(friend.monitor).toHaveBeenCalled();
+            done();
+          });
         });
       });
       fulfillFunc(fakeFreedomClient);
