@@ -92,7 +92,8 @@ class uProxyCore implements uProxy.CoreAPI {
       = {description: '',
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
-         hasSeenWelcome: false};
+         hasSeenWelcome: false,
+         allowNonUnicast: false};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -124,6 +125,9 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
+          }
+          if (this.globalSettings.allowNonUnicast == null) {
+            this.globalSettings.allowNonUnicast = false;
           }
         }).catch((e) => {
           console.log('No global settings loaded', e);
@@ -290,6 +294,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.allowNonUnicast = newSettings.allowNonUnicast;
   }
 
   /**
@@ -315,6 +320,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * RemoteInstance exists.
    */
   public start = (path :InstancePath) : Promise<Net.Endpoint> => {
+    console.log('global settings is ', this.globalSettings);
     // Disable any previous proxying session.
     if (remoteProxyInstance) {
       console.log('Existing proxying session! Terminating...');

@@ -66,9 +66,6 @@ module Core {
     public rtcNetPcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
       iceServers: core.globalSettings.stunServers
     };
-    public rtcNetProxyConfig :RtcToNet.ProxyConfig = {
-      allowNonUnicast: false
-    };
 
     // If set, this is the localhost socks server that is receiving
     // connections and sending them to the peer.
@@ -177,8 +174,11 @@ module Core {
           // Create a new rtcToNet object everytime there is an OFFER signal
           if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
             // TODO: make this into a separate function
+            var rtcNetProxyConfig :RtcToNet.ProxyConfig = {
+              allowNonUnicast: core.globalSettings.allowNonUnicast
+            };
             this.rtcToNet_ = new RtcToNet.RtcToNet(
-                this.rtcNetPcConfig, this.rtcNetProxyConfig);
+                this.rtcNetPcConfig, rtcNetProxyConfig);
             this.rtcToNet_.onceClosed.then(() => {
               console.log('rtcToNet_.onceClosed called');
               this.localSharingWithRemote = SharingState.NONE;

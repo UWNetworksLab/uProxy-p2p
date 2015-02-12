@@ -1,4 +1,3 @@
-
 /// <reference path="../networking-typings/communications.d.ts" />
 /// <reference path="../socks-common/socks-headers.d.ts" />
 /// <reference path="../tcp/tcp.d.ts" />
@@ -63,7 +62,7 @@ class ProxyTester {
     });
   }
 
-  public connect = (socksEndpoint: Net.endpoint,
+  public connect = (socksEndpoint: Net.Endpoint,
                     port:number,
                     address?:string) : Promise<string> => {
     var echoEndpoint :Net.Endpoint = {
@@ -107,7 +106,7 @@ class ProxyTester {
 }
 
 interface Freedom {
-  providePromises: (a:new (f:any) => ProxyTester) => void;
+  //providesPromises: (a:new (f:any) => ProxyTester) => void;
 };
 
 if (typeof freedom !== 'undefined') {

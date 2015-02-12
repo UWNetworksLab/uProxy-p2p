@@ -1,3 +1,4 @@
+declare var browser :string;
 Polymer({
   model: model,
   browser: browser,

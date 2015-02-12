@@ -31,7 +31,7 @@
       },
       "connect": {
         "type": "method",
-        "value": [["string", "number"], "number", "string"],
+        "value": [{"address": "string", "port":"number"}, "number", "string"],
         "ret": "string"
       },
       "echo": {
