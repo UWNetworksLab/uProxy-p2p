@@ -60,24 +60,12 @@ module Core {
 
     // The configuration used to setup peer-connections. This should be
     // available under advanced options.
-    public socksRtcPcConfig :WebRtc.PeerConnectionConfig = {
-      webrtcPcConfig: {
-         iceServers: core.globalSettings.stunServers
-        },
-        webrtcMediaConstraints: {
-          optional: [{DtlsSrtpKeyAgreement: true}]
-        },
-        peerName: 'socksRtc'
-      };
-    public rtcNetPcConfig :WebRtc.PeerConnectionConfig = {
-      webrtcPcConfig: {
-         iceServers: core.globalSettings.stunServers
-        },
-        webrtcMediaConstraints: {
-          optional: [{DtlsSrtpKeyAgreement: true}]
-        },
-        peerName: 'rtcNet'
-      };
+    public socksRtcPcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+      iceServers: core.globalSettings.stunServers
+    };
+    public rtcNetPcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
+      iceServers: core.globalSettings.stunServers
+    };
     public rtcNetProxyConfig :RtcToNet.ProxyConfig = {
       allowNonUnicast: false
     };
