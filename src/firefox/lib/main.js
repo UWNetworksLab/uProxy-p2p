@@ -11,7 +11,6 @@ var button = buttons.ActionButton({
   label: "uProxy-button",
   icon: {
     "18": "./icons/19_offline.gif",
-    "32": "./icons/32_online.gif",
     "36": "./icons/38_offline.gif"
   },
   onClick: start

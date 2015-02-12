@@ -20,7 +20,6 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('setIcon',
         {
           "18": "./icons/19_" + iconFile,
-          "32": "./icons/32_" + UI.DEFAULT_ICON,
           "36": "./icons/38_" + iconFile
         });
   }

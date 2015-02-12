@@ -5,7 +5,6 @@
  * TODO: firefox bindings.
  */
 /// <reference path='user.ts' />
-/// <reference path='ui_enums.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -48,8 +47,6 @@ var model :UI.Model = {
 module UI {
 
   // Filenames for icons.
-  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
-
   // When updating the icon strings below, default icons in the Chrome manifests
   // and Firefox main.js should also be changed to match.
 
@@ -60,10 +57,8 @@ module UI {
   export var GETTING_ICON :string = 'getting.gif';
   export var ERROR_ICON :string = 'error.gif';
   export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
-  // The icons that appear beside your buddy if they are getting/giving.
-  export var BUDDY_GETTING_ICON :string = 'GettingAccess_UI_40.gif'
-  export var BUDDY_SHARING_ICON :string = 'SharingAccess_UI_40.gif'
 
+  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
   export interface Contacts {
     getAccessContacts : {
@@ -106,6 +101,25 @@ module UI {
     imageData ?:string;
     userName ?:string;
     roster :{ [userId:string] :User }
+  }
+
+  /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    ROSTER,
+    USER,
+    NETWORKS,
+    SETTINGS,
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
   }
 
   /**
@@ -286,7 +300,7 @@ module UI {
     public showNotification = (notificationText :string) => {
       var notification =
           new Notification('uProxy', { body: notificationText,
-                           icon: 'icons/' + UI.DEFAULT_ICON});
+                           icon: 'icons/38_' + UI.DEFAULT_ICON});
       setTimeout(function() {
         notification.close();
       }, 5000);
