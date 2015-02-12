@@ -47,8 +47,12 @@ var model :UI.Model = {
 module UI {
 
   // Filenames for icons.
-  // When updating the icon strings below, default icons in the Chrome manifests
-  // and Firefox main.js should also be changed to match.
+  // Two important things about using these strings:
+  // 1) When updating the icon strings below, default values in the Chrome
+  // manifests and Firefox main.js should also be changed to match.
+  // 2) These are only the suffixes of the icon names. Because we have
+  // different sizes of icons, the actual filenames have the dimension
+  // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
 
   // Icons for browser bar, also used for notifications.
   export var DEFAULT_ICON :string = 'online.gif';

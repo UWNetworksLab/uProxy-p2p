@@ -1,1 +1,0 @@
-"/Users/lucyhe/uproxy/uproxy/build/compile-src/firefox/data/scripts/firefox_browser_api.ts" "/Users/lucyhe/uproxy/uproxy/build/compile-src/firefox/data/scripts/firefox_connector.ts" --sourcemap --removeComments --target ES5 --module amd --sourceRoot build/
