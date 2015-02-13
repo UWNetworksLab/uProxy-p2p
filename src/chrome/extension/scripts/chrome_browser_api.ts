@@ -193,7 +193,7 @@ class ChromeBrowserApi implements BrowserAPI {
     * Callback passed to chrome.windows.create.
     */
   private newPopupCreated_ = (popup) => {
-    console.log("Time between browser icon click and popup launch (ms):" +
+    console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
