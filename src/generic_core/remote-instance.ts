@@ -357,12 +357,6 @@ module Core {
         });
     }
 
-    public updateClientProxyConnection = (isConnected :boolean) => {
-      this.localSharingWithRemote =
-          isConnected ? SharingState.SHARING_ACCESS : SharingState.NONE;
-      this.user.notifyUI();
-    }
-
     /**
      * Stop using this remote instance as a proxy server.
      */
