@@ -32,6 +32,7 @@ var bgAppPageChannel = new freedom();
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
 var remoteProxyInstance : Core.RemoteInstance = null;
+var remoteProxyConnection : Core.RemoteConnection = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -105,6 +106,8 @@ class uProxyCore implements uProxy.CoreAPI {
     }).catch((e) => {
       console.error(e);
     });
+
+    remoteProxyConnection = new Core.RemoteConnection(ui.update);
 
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
         .then((globalSettingsObj :Core.GlobalSettings) => {
