@@ -143,7 +143,12 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         this.status.connected = true;
         // Once connected, the extension popup should show it's start page.
         ui.view = UI.View.SPLASH;
-        chrome.browserAction.setIcon({path: "icons/offline-19.png"});
+        chrome.browserAction.setIcon({
+          path: {
+            "19": "icons/19_" + UI.LOGGED_OUT_ICON,
+            "38": "icons/38_" + UI.LOGGED_OUT_ICON
+          }
+        });
         chromeBrowserApi.updatePopupUrl("index.html");
         this.fulfillConnect_();
         F(this.appPort_);

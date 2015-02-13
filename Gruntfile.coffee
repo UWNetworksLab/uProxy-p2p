@@ -271,7 +271,7 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # uProxy Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/default-*.png', 'fonts/*']
+          src: ['icons/128_online.png', 'fonts/*']
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
