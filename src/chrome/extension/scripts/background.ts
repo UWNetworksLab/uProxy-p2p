@@ -76,6 +76,19 @@ function openDownloadAppPage() : void {
   });
 }
 
+// If the app is installed but the "App Missing" page is open, make sure to advance
+// them to the Splash page.
+function splashIfAppNotMissing() : void {
+  if (chromeCoreConnector.status.connected) {
+    // If the user hit "Back" to get to the app-missing page, chromeBrowserApi
+    // still thinks that we are on index.html, and will not refresh if we try to
+    // update to the same URL. So we have to update to the app-missing page before
+    // updating to index.html
+    chromeBrowserApi.updatePopupUrl("app-missing.html");
+    chromeBrowserApi.updatePopupUrl("index.html");
+  }
+}
+
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
