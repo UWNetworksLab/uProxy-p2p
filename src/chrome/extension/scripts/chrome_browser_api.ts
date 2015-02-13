@@ -35,11 +35,16 @@ class ChromeBrowserApi implements BrowserAPI {
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
   private popupUrl_ = "app-missing.html";
-  // The last time we tried to create a popup.
-  private lastPopupCreated_ = Date.now();
-  // Minimum time between trying to create two popups, to prevent
-  // two from launching if the events are fired too quickly.
-  private popupCreationWaitTime_ = 1000;
+  // When we last called chrome.windows.create (for logging purposes).
+  private popupCreationStartTime_ = Date.now();
+
+  enum PopupState {
+    NOT_LAUNCHED,
+    LAUNCHING,
+    LAUNCHED
+  }
+
+  private popupState_ = PopupState.NOT_LAUNCHED;
 
   constructor() {
     // use localhost
@@ -63,6 +68,7 @@ class ChromeBrowserApi implements BrowserAPI {
       // is closed, reset the IDs tracking those windows.
       if (closedWindowId == this.popupWindowId_) {
         this.popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
+        this.popupState_ = PopupState.NOT_LAUNCHED;
       } else if (closedWindowId == mainWindowId) {
         mainWindowId = chrome.windows.WINDOW_ID_NONE;
       }
@@ -144,42 +150,42 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    var time = Date.now();
-    if (this.popupWindowId_ == chrome.windows.WINDOW_ID_NONE
+    if (this.popupState_ == PopupState.NOT_LAUNCHED
         && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
-      if (time - this.lastPopupCreated_ > this.popupCreationWaitTime_){
-        this.lastPopupCreated_ = time;
-        // If neither popup nor Chrome window are open (e.g. if uProxy is launched
-        // after webstore installation), then allow the popup to open at a default
-        // location.
-        chrome.windows.create({url: this.popupUrl_,
-                       type: "popup",
-                       width: 371,
-                       height: 600}, this.newPopupCreated_);
-      }
-    } else if (this.popupWindowId_ == chrome.windows.WINDOW_ID_NONE
+      this.popupState_ = PopupState.LAUNCHING;
+      this.popupCreationStartTime_ = Date.now();
+      // If neither popup nor Chrome window are open (e.g. if uProxy is launched
+      // after webstore installation), then allow the popup to open at a default
+      // location.
+      chrome.windows.create({url: this.popupUrl_,
+                     type: "popup",
+                     width: 371,
+                     height: 600}, this.newPopupCreated_);
+
+    } else if (this.popupState_ == PopupState.NOT_LAUNCHED
         && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
-      if (time - this.lastPopupCreated_ > this.popupCreationWaitTime_){
-        this.lastPopupCreated_ = time;
-        // If the popup is not open, but uProxy is being launched from a Chrome
-        // window, open the popup under the extension icon in that window.
-        chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
-          if (windowThatLaunchedUproxy) {
-            // TODO (lucyhe): test this positioning in Firefox & Windows.
-            var popupTop = windowThatLaunchedUproxy.top + 70;
-            var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-            chrome.windows.create({url: this.popupUrl_,
-                                   type: "popup",
-                                   width: 371,
-                                   height: 600,
-                                   top: popupTop,
-                                   left: popupLeft}, this.newPopupCreated_);
-          }
-        });
-      }
-    } else {
+      this.popupState_ = PopupState.LAUNCHING;
+      this.popupCreationStartTime_ = Date.now();
+      // If the popup is not open, but uProxy is being launched from a Chrome
+      // window, open the popup under the extension icon in that window.
+      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
+        if (windowThatLaunchedUproxy) {
+          // TODO (lucyhe): test this positioning in Firefox & Windows.
+          var popupTop = windowThatLaunchedUproxy.top + 70;
+          var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
+          chrome.windows.create({url: this.popupUrl_,
+                                 type: "popup",
+                                 width: 371,
+                                 height: 600,
+                                 top: popupTop,
+                                 left: popupLeft}, this.newPopupCreated_);
+        }
+      });
+    } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
+    } else {
+      console.log("Waiting for popup to launch...");
     }
   }
 
@@ -187,7 +193,10 @@ class ChromeBrowserApi implements BrowserAPI {
     * Callback passed to chrome.windows.create.
     */
   private newPopupCreated_ = (popup) => {
+    console.log("Time between browser icon click and popup launch (ms):" +
+        (Date.now() - this.popupCreationStartTime_);
     this.popupWindowId_ = popup.id;
+    this.popupState_ = PopupState.LAUNCHED;
     // If the url of the newly created tab no longer matches the
     // expected popup URL, update the tab.
     if (popup.tabs[0].url != chrome.extension.getURL(this.popupUrl_)) {
