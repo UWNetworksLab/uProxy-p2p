@@ -79,6 +79,7 @@ var Helper = {
 };  // end of Helper
 
 describe('uproxy core', function() {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   var uProxyFreedom = 'scripts/build/compile-src/integration/scripts/freedom-module.json';
   var alice;
   var bob;
@@ -252,8 +253,10 @@ describe('uproxy core', function() {
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
         expect(data.promiseId).toEqual(promiseId);
-        // test proxing
-        fulfill();
+        testConnection(data.argsForCallback).then((proxying) => {
+          expect(proxying).toEqual(true);
+          fulfill();
+        });
       });
     });
 

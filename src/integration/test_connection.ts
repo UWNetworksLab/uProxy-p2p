@@ -3,7 +3,6 @@
 /// <reference path="../tcp/tcp.d.ts" />
 
 class ProxyTester {
-  private socksEndpoint_ : Promise<Net.Endpoint>;
   private echoServer_ :Tcp.Server;
   private connections_ :{ [index:string]: Tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
