@@ -8,6 +8,12 @@
 /// <reference path='../../../networking-typings/communications.d.ts' />
 
 
+enum PopupState {
+    NOT_LAUNCHED,
+    LAUNCHING,
+    LAUNCHED
+}
+
 class ChromeBrowserApi implements BrowserAPI {
 
   // For browser action.
@@ -37,12 +43,6 @@ class ChromeBrowserApi implements BrowserAPI {
   private popupUrl_ = "app-missing.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
-
-  enum PopupState {
-    NOT_LAUNCHED,
-    LAUNCHING,
-    LAUNCHED
-  }
 
   private popupState_ = PopupState.NOT_LAUNCHED;
 
@@ -194,7 +194,7 @@ class ChromeBrowserApi implements BrowserAPI {
     */
   private newPopupCreated_ = (popup) => {
     console.log("Time between browser icon click and popup launch (ms):" +
-        (Date.now() - this.popupCreationStartTime_);
+        (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
     // If the url of the newly created tab no longer matches the
