@@ -330,9 +330,10 @@ describe('uproxy core', function() {
         bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
       }
     };
-    alice.once('' + uProxy.Update.NETWORK, (data) => {
-      expect(data.name).toEqual('Google');
-      alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+    alice.on('' + uProxy.Update.NETWORK, (data) => {
+      if (data.online) {
+        alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+      }
     })
   });
 

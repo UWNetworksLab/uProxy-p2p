@@ -316,7 +316,6 @@ class uProxyCore implements uProxy.CoreAPI {
    * RemoteInstance exists.
    */
   public start = (path :InstancePath) : Promise<Net.Endpoint> => {
-    console.log('global settings is ', this.globalSettings);
     // Disable any previous proxying session.
     if (remoteProxyInstance) {
       console.log('Existing proxying session! Terminating...');
