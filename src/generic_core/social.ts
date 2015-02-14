@@ -156,15 +156,14 @@ module Social {
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) : Promise<Core.User> => {
+    protected addUser_ = (userId :string) : Core.User => {
       if (!this.isNewFriend_(userId)) {
-        return Promise.reject(this.name + ': cannot add already existing user!');
+        this.error(this.name + ': cannot add already existing user!');
       }
-      return Core.User.create(this, userId).then((newUser) => {
-        this.log('added "' + userId + '" to roster.');
-        this.roster[userId] = newUser;
-        return newUser;
-      });
+      this.log('added "' + userId + '" to roster.');
+      var newUser = new Core.User(this, userId);
+      this.roster[userId] = newUser;
+      return newUser;
     }
 
     /**
@@ -172,11 +171,11 @@ module Social {
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
      */
-    protected getOrAddUser_ = (userId :string) : Promise<Core.User> => {
+    protected getOrAddUser_ = (userId :string) : Core.User => {
       if (this.isNewFriend_(userId)) {
         return this.addUser_(userId);
       }
-      return Promise.resolve(this.getUser(userId));
+      return this.getUser(userId);
     }
 
     /**
@@ -366,9 +365,8 @@ module Social {
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
       this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
-      return this.getOrAddUser_(userId).then((user) => {
-        user.update(profile);
-      });
+      this.getOrAddUser_(userId).update(profile);
+      return Promise.resolve<void>();
     }
 
     /**
@@ -407,9 +405,7 @@ module Social {
         return Promise.resolve<void>();
       }
 
-      return this.getOrAddUser_(client.userId).then((user) => {
-        user.handleClient(client);
-      });
+      this.getOrAddUser_(client.userId).handleClient(client);
     }
 
     /**
@@ -439,13 +435,12 @@ module Social {
         return;
       }
 
-      return this.getOrAddUser_(userId).then((user) => {
-        if (!user.clientIdToStatusMap[client.clientId]) {
-          // Add client.
-          user.handleClient(client);
-        }
-        return user.handleMessage(client.clientId, msg);
-      });
+      var user = this.getOrAddUser_(userId);
+      if (!user.clientIdToStatusMap[client.clientId]) {
+        // Add client.
+        user.handleClient(client);
+      }
+      return user.handleMessage(client.clientId, msg);
     }
 
     public restoreFromStorage() {
@@ -457,11 +452,11 @@ module Social {
           if (keys[i].indexOf(myKey) === 0) {
             var userId = keys[i].substr(myKey.length);
             if (this.isNewFriend_(userId)) {
-              allAddUserPromises.push(this.addUser_(userId));
+              this.addUser_(userId);
             }
           }
         }
-        return Promise.all(allAddUserPromises);
+		return Promise.resolve();
       });
     }
 
@@ -630,13 +625,12 @@ module Social {
       // sender client ID doubles as the sender user ID.
       var senderUserId = senderClientId;
 
-      return this.getOrAddUser_(senderUserId).then((user) => {
-        // Hack so that handleMessage treats this client as online and doesn't
-        // reject.
-        // TODO: refactor manual network to have its own client messages.
-        user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
-        return user.handleMessage(senderUserId, message);
-      });
+      var user =this.getOrAddUser_(senderUserId);
+      // Hack so that handleMessage treats this client as online and doesn't
+      // reject.
+      // TODO: refactor manual network to have its own client messages.
+      user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
+      return user.handleMessage(senderUserId, message);
     }
 
   }  // class ManualNetwork

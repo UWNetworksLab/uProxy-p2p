@@ -25,15 +25,13 @@ describe('Core.User', () => {
   });
 
   it('creates with the correct userId', (done) => {
-    Core.User.create(network, 'fakeuser').then((newUser) => {
-      user = newUser;
-      expect(user.userId).toEqual('fakeuser');
-      expect(user['network']).toEqual(network);
-      storage.load(user.getStorePath()).catch((e) => {
-        // User should not be in storage
-        done();
-      })
-    });
+    var user = new Core.User(network, 'fakeuser');
+    expect(user.userId).toEqual('fakeuser');
+    expect(user['network']).toEqual(network);
+    storage.load(user.getStorePath()).catch((e) => {
+      // User should not be in storage
+      done();
+    })
   });
 
   it('creates with pending name if there was no profile', () => {

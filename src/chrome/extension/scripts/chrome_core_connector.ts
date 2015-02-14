@@ -43,16 +43,13 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   // TODO: Replace with Core -> UI specified update API.
   private listeners_ :{[type :string] : Function[]};
 
-  private disconnectPromise_ :Promise<void>;
-  private fulfillDisconnect_ :Function;
-
   // Whether waiting for app installation is blocking the extension-app
   // connection. If this is true, the uProxy popup should automatically
   // be brought to the front after installation.
   public waitingForAppInstall :boolean = false;
 
   private fulfillConnect_ :Function;
-  public onceConnected :Promise<void> = new Promise((F, R) => {
+  public onceConnected :Promise<void> = new Promise<void>((F, R) => {
     this.fulfillConnect_ = F;
   });
 
@@ -181,7 +178,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       // check if they are currently getting or giving access.
       ui.stopGettingInUiAndConfig(true);
       this.status.connected = false;
-      this.onceConnected = new Promise((F, R) => { this.fulfillConnect_ = F; });
+      this.onceConnected = new Promise<void>((F, R) => { this.fulfillConnect_ = F; });
     }
 
     // Update this.appPort_ to ensure we are disconnected.

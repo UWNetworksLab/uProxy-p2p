@@ -81,7 +81,8 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
-
+      
+      var fulfillStorage;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
       var restoreFunc = network.restoreFromStorage.bind(network);
       spyOn(network, 'restoreFromStorage').and.callFake(() => {

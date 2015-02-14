@@ -56,24 +56,9 @@ module Core {
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
-
-    public static create = (network :Social.Network,
-                            userId  :string) : Promise<User> => {
-      var user = new User(network, userId);
-      return new Promise((fulfill, reject) => {
-        storage.load<UserState>(user.getStorePath()).then((state) => {
-          user.restoreState(state).then(fulfill.bind({}, user),
-                                        fulfill.bind({}, user));
-        }, (e) => {
-          // User not found in storage - we should fulfill the create promise
-          // anyway as this is not an error.
-          fulfill(user);
-        }).catch((e) => {
-          console.error('Uncaught error in User.create: ' + e);
-          reject(user);
-        });
-      });
-    }
+    
+    private fulfillStorageRead_ : () => void;
+    private onceReadFromStorage_ : Promise<void>;
 
     /**
      * Users are constructed purely on the basis of receiving a userId.
@@ -97,6 +82,18 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+      this.onceReadFromStorage_ = new Promise<void>((F, R) => {
+        this.fulfillStorageRead_ = F;
+      });
+
+      storage.load<UserState>(this.getStorePath()).then((state) => {
+        this.restoreState(state)
+        this.fulfillStorageRead_();
+      }).catch((e) => {
+        // User not found in storage - we should fulfill the create promise
+        // anyway as this is not an error.
+        this.fulfillStorageRead_();
+      });
     }
 
     /**
@@ -302,15 +299,13 @@ module Core {
         return Promise.resolve<void>();
       } else {
         // Create a new instance.
-        return Core.RemoteInstance.create(this, instanceId, instance)
-            .then((newInstance) => {
-              this.instances_[instanceId] = newInstance;
-              this.saveToStorage();
-              this.notifyUI();
-              if (data.consent) {
-                newInstance.updateConsent(data.consent);
-              }
-            });
+        var newInstance = new Core.RemoteInstance(this, instanceId, instance);
+        this.instances_[instanceId] = newInstance;
+        this.saveToStorage();
+        this.notifyUI();
+        if (data.consent) {
+          newInstance.updateConsent(data.consent);
+        }
       }
     }
 
@@ -343,6 +338,10 @@ module Core {
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
     public notifyUI = () => {
+      this.onceReadFromStorage_.then(this.notifyUI_);
+    }
+
+    private notifyUI_ = () => {
       if ('pending' == this.name) {
         this.log('Not showing UI without profile.');
         return;
@@ -432,11 +431,13 @@ module Core {
     }
 
     public saveToStorage = () => {
-      var state = this.currentState();
-      storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+      this.onceReadFromStorage_.then(() => {
+        var state = this.currentState();
+        storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+      });
     }
 
-    public restoreState = (state :UserState) : Promise<void> => {
+    public restoreState = (state :UserState) : void => {
       if (this.name === 'pending') {
         this.name = state.name;
       }
@@ -450,19 +451,11 @@ module Core {
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
-          instancePromises.push(
-              Core.RemoteInstance.create(this, instanceId, null)
-                  .then((newInstance) => {
-                    this.instances_[newInstance.instanceId] = newInstance;
-                  })
-              );
+          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
         }
       }
 
-      // Update the UI after all instances have been created.g
-      return Promise.all(instancePromises).then(() => {
-        this.notifyUI();
-      });
+      this.notifyUI();
     }
 
     public currentState = () :UserState => {

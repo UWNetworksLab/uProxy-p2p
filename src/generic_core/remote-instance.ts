@@ -41,7 +41,8 @@ module Core {
 
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
-    private storageLookupComplete_ :boolean = false;
+    private fulfillStorageRead_ : () => void;
+    private onceReadFromStorage_ : Promise<void>;
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -78,38 +79,6 @@ module Core {
     // from the peer and handling them by proxying them to the internet.
     private rtcToNet_ :RtcToNet.RtcToNet = null;
 
-    // Factory method, returns a Promise to be fulfilled with the newly
-    // created RemoteInstance object.  This method should be used
-    // rather than invoking the constructor directly to ensure a properly
-    // loaded RemoteInstance
-    public static create = (
-        // The User which this instance belongs to.
-        user :Core.User,
-        instanceId :string,
-        // The last instance handshake from the peer.  This data may be fresh
-        // (over the wire) or recovered from disk (and stored in a
-        // RemoteInstanceState, which subclasses InstanceHandshake).
-        data :InstanceHandshake) : Promise<RemoteInstance> => {
-      return new Promise((fulfill, reject) => {
-        var remoteInstance = new RemoteInstance(user, instanceId, data);
-        storage.load<RemoteInstanceState>(remoteInstance.getStorePath())
-            .then((state) => {
-              remoteInstance.restoreState(state);
-              remoteInstance.storageLookupComplete_ = true;
-              fulfill(remoteInstance);
-            }, (e) => {
-              // Instance not found in storage - we should fulfill the create
-              // promise anyway as this is not an error.
-              console.log('No stored state for instance ' + instanceId);
-              remoteInstance.storageLookupComplete_ = true;
-              fulfill(remoteInstance);
-            }).catch((e) => {
-              console.error('Uncaught error in RemoteInstance.create: ' + e);
-              reject(remoteInstance);
-            });
-      });
-    }
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -132,6 +101,21 @@ module Core {
       if (data) {
         this.update(data);
       }
+
+      this.onceReadFromStorage_ = new Promise<void>((F, R) => {
+        this.fulfillStorageRead_ = F;
+      });
+
+      storage.load<RemoteInstanceState>(this.getStorePath())
+          .then((state) => {
+            this.restoreState(state);
+            this.fulfillStorageRead_();
+          }).catch((e) => {
+            // Instance not found in storage - we should fulfill the create
+            // promise anyway as this is not an error.
+            console.log('No stored state for instance ' + instanceId);
+            this.fulfillStorageRead_();
+          });
     }
 
     /**
@@ -386,10 +370,10 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      if (this.storageLookupComplete_) {
+      this.onceReadFromStorage_.then(() => {
         this.saveToStorage();
-      }
-      this.user.notifyUI();
+        this.user.notifyUI();
+      });
     }
 
     /**
