@@ -41,9 +41,9 @@ module Core {
 
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
-    private fulfillStorageRead_ : () => void;
-    private onceReadFromStorage_ : Promise<void> = new Promise<void>((F, R) => {
-      this.fulfillStorageRead_ = F;
+    private fulfillStorageLoad_ : () => void;
+    private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageLoad_ = F;
     });
 
 
@@ -108,12 +108,12 @@ module Core {
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
             this.restoreState(state);
-            this.fulfillStorageRead_();
+            this.fulfillStorageLoad_();
           }).catch((e) => {
             // Instance not found in storage - we should fulfill the create
             // promise anyway as this is not an error.
             console.log('No stored state for instance ' + instanceId);
-            this.fulfillStorageRead_();
+            this.fulfillStorageLoad_();
           });
     }
 
@@ -369,7 +369,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      this.onceReadFromStorage_.then(() => {
+      this.onceLoaded_.then(() => {
         this.saveToStorage();
         this.user.notifyUI();
       });

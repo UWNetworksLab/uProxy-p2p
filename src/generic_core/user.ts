@@ -57,9 +57,9 @@ module Core {
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
     
-    private fulfillStorageRead_ : () => void;
-    private onceReadFromStorage_ : Promise<void> = new Promise<void>((F, R) => {
-      this.fulfillStorageRead_ = F;
+    private fulfillStorageLoad_ : () => void;
+    private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageLoad_ = F;
     });
 
     /**
@@ -87,11 +87,11 @@ module Core {
 
       storage.load<UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state)
-        this.fulfillStorageRead_();
+        this.fulfillStorageLoad_();
       }).catch((e) => {
         // User not found in storage - we should fulfill the create promise
         // anyway as this is not an error.
-        this.fulfillStorageRead_();
+        this.fulfillStorageLoad_();
       });
     }
 
@@ -337,7 +337,7 @@ module Core {
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
     public notifyUI = () => {
-      this.onceReadFromStorage_.then(this.notifyUI_);
+      this.onceLoaded_.then(this.notifyUI_);
     }
 
     private notifyUI_ = () => {
@@ -430,7 +430,7 @@ module Core {
     }
 
     public saveToStorage = () => {
-      this.onceReadFromStorage_.then(() => {
+      this.onceLoaded_.then(() => {
         var state = this.currentState();
         storage.save<UserState>(this.getStorePath(), state).then((old) => {});
       });
@@ -453,7 +453,6 @@ module Core {
           this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
         }
       }
-
       this.notifyUI();
     }
 
