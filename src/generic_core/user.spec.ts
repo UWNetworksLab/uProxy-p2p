@@ -25,7 +25,7 @@ describe('Core.User', () => {
   });
 
   it('creates with the correct userId', (done) => {
-    var user = new Core.User(network, 'fakeuser');
+    user = new Core.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
     expect(user['network']).toEqual(network);
     storage.load(user.getStorePath()).catch((e) => {

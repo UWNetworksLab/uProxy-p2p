@@ -406,6 +406,7 @@ module Social {
       }
 
       this.getOrAddUser_(client.userId).handleClient(client);
+      return Promise.resolve<void>();
     }
 
     /**
@@ -456,7 +457,6 @@ module Social {
             }
           }
         }
-		return Promise.resolve();
       });
     }
 

@@ -42,7 +42,10 @@ module Core {
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
     private fulfillStorageRead_ : () => void;
-    private onceReadFromStorage_ : Promise<void>;
+    private onceReadFromStorage_ : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageRead_ = F;
+    });
+
 
     public consent     :Consent.State = new Consent.State();
     // Current proxy access activity of the remote instance with respect to the
@@ -101,10 +104,6 @@ module Core {
       if (data) {
         this.update(data);
       }
-
-      this.onceReadFromStorage_ = new Promise<void>((F, R) => {
-        this.fulfillStorageRead_ = F;
-      });
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {

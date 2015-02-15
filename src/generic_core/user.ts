@@ -58,7 +58,9 @@ module Core {
     private instanceToClientMap_ :{ [instanceId :string] :string };
     
     private fulfillStorageRead_ : () => void;
-    private onceReadFromStorage_ : Promise<void>;
+    private onceReadFromStorage_ : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageRead_ = F;
+    });
 
     /**
      * Users are constructed purely on the basis of receiving a userId.
@@ -82,9 +84,6 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
-      this.onceReadFromStorage_ = new Promise<void>((F, R) => {
-        this.fulfillStorageRead_ = F;
-      });
 
       storage.load<UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state)
@@ -296,7 +295,6 @@ module Core {
         } else {
           existingInstance.updateConsent(data.consent);
         }
-        return Promise.resolve<void>();
       } else {
         // Create a new instance.
         var newInstance = new Core.RemoteInstance(this, instanceId, instance);
@@ -307,6 +305,7 @@ module Core {
           newInstance.updateConsent(data.consent);
         }
       }
+      return Promise.resolve<void>();
     }
 
     /**

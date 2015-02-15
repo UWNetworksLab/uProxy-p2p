@@ -127,7 +127,7 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    var instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
+    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
     done();
   });

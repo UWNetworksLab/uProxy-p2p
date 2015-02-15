@@ -17,6 +17,10 @@ var VALID_MESSAGE = {
 };
 
 describe('freedomClientToUproxyClient', () => {
+  beforeEach(() => {
+    spyOn(console, 'log');
+  });
+
   var freedomClient :freedom_Social.ClientState = {
     userId: 'mockmyself',
     clientId: 'fakemyself',
@@ -266,7 +270,7 @@ describe('Social.FreedomNetwork', () => {
 
     it('passes |onMessage| to correct client', (done) => {
       var user = network.getUser('mockuser');
-      spyOn(user, 'handleMessage');
+      spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
       var msg = {
         from: {
           userId: 'mockuser',
@@ -340,7 +344,7 @@ describe('Social.FreedomNetwork', () => {
 
   it('JSON.parse and stringify messages at the right layer', (done) => {
     var user = network.getUser('mockuser');
-    spyOn(user, 'handleMessage');
+    spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
     var inMsg = {
       from: {
         userId: 'mockuser',
@@ -436,7 +440,7 @@ describe('Social.ManualNetwork', () => {
         .then(() => {
           var user = network.getUser(senderUserId);
           expect(user).toBeDefined();
-          spyOn(user, 'handleMessage');
+          spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
           return network.receive(senderClientId, VALID_MESSAGE).then(() => {
             expect(user.handleMessage).toHaveBeenCalledWith(
                 senderClientId, VALID_MESSAGE);
