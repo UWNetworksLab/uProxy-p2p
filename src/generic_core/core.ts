@@ -21,6 +21,8 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 /// <reference path='../networking-typings/communications.d.ts' />
 
+// Note that the proxy runs extremely slowly in debug ('*:D') mode.
+freedom['loggingprovider']().setConsoleFilter(['*:I']);
 
 var storage = new Core.Storage();
 
