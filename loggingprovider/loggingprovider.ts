@@ -42,7 +42,7 @@ var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
 
 // Generates current timestamp in form "M d H:m:s.S"
 function dateToString_(d:Date) : string {
-  return MONTH_NAMES[d.Month()] + ' ' + d.getDate() + ' ' +
+  return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ' ' +
       (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' +
       (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ':' +
       (d.getSeconds() < 10 ? '0' : '') + d.getSeconds() + '.' +
