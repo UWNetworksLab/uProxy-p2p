@@ -309,6 +309,29 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   /**
+   * Begins a copy-paste (direct) proxying session as the getter
+   */
+  public startCopyPasteGet = () : Promise<Net.Endpoint> => {
+    return remoteProxyConnection.startGet();
+  }
+
+  public stopCopyPasteGet = () => {
+    remoteProxyConnection.stopGet();
+  }
+
+  public startCopyPasteShare = () => {
+    remoteProxyConnection.startShare();
+  }
+
+  public stopCopyPasteShare = () => {
+    remoteProxyConnection.stopShare();
+  }
+
+  public sendSignal = (signal :uProxy.Message) => {
+    remoteProxyConnection.handleSignal(signal);
+  }
+
+  /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
@@ -405,6 +428,20 @@ core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
 // core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
 //                core.sendInstanceHandshakeMessage);
 core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
+
+core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
+                      core.startCopyPasteGet);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+               core.stopCopyPasteGet);
+
+core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
+               core.startCopyPasteShare);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+               core.stopCopyPasteShare);
+
+core.onCommand(uProxy.Command.SIGNALLING_MESSAGE, core.sendSignal);
 
 core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
 core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
