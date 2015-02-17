@@ -12,6 +12,9 @@ var port :ContentScriptPort;
 class FirefoxBrowserApi implements BrowserAPI {
 
   constructor() {
+    port.on('handleUrlData', function(url :string) {
+      ui.handleUrlData(url);
+    });
   }
 
   // For browser icon.

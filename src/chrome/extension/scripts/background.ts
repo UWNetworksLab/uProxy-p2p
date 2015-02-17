@@ -109,12 +109,31 @@ function initUI() : UI.UserInterface {
   var oAuth = new ChromeTabAuth();
   chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
+  var lastUrl = '';
 
   chrome.webRequest.onBeforeRequest.addListener(
     function() {
       return {cancel: true};
     },
     {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
+    ['blocking']
+  );
+
+  chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+      var url = details.url;
+      if (lastUrl !== url) {
+        ui.handleUrlData(url);
+      } else {
+        console.warn('Received duplicate url events', url);
+      }
+      lastUrl = url;
+
+      return {
+        redirectUrl: chrome.extension.getURL('index.html')
+      };
+    },
+    { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
     ['blocking']
   );
 
