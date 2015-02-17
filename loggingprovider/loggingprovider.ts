@@ -37,10 +37,15 @@ var bufferedLogFilter: {[s: string]: string;} = {'*': 'E'};
 // to level number.
 var LEVEL_CHARS = 'DIWE';
 
-// Generates current timestamp in form "m/d H:m:s.S"
+var MONTH_NAMES = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Generates current timestamp in form "M d H:m:s.S"
 function dateToString_(d:Date) : string {
-  return d.getMonth() + '/' + d.getDate() + ' ' + d.getHours() +
-      ':' + d.getMinutes() + ':' + d.getSeconds() + '.' +
+  return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ' ' +
+      (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' +
+      (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ':' +
+      (d.getSeconds() < 10 ? '0' : '') + d.getSeconds() + '.' +
       d.getMilliseconds();
 }
 
