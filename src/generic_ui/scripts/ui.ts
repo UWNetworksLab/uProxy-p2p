@@ -6,6 +6,7 @@
  */
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
+/// <reference path='../../webrtc/peerconnection.d.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
 /// <reference path='../../interfaces/browser-api.d.ts'/>
@@ -112,6 +113,7 @@ module UI {
    */
   export enum View {
     SPLASH = 0,
+    COPYPASTE,
     ROSTER,
     USER,
     NETWORKS,
@@ -161,6 +163,14 @@ module UI {
 
     public gettingStatus :string = null;
     public sharingStatus :string = null;
+
+    public copyPasteGettingState :GettingState = GettingState.NONE;
+    public copyPasteSharingState :SharingState = SharingState.NONE;
+    public copyPasteBytesSent :number = 0;
+    public copyPasteBytesReceived :number = 0;
+
+    public copyPasteGettingMessage :string = '';
+    public copyPasteSharingMessage :string = '';
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -222,6 +232,58 @@ module UI {
         console.log('Manual network outbound message: ' +
                     JSON.stringify(message));
         // TODO: Display the message in the 'manual network' UI.
+      });
+
+      core.onUpdate(uProxy.Update.SIGNALLING_MESSAGE, (message :uProxy.Message) => {
+        var data :uProxy.Message[] = [], str = '';
+
+        switch (message.type) {
+          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+            str = this.copyPasteGettingMessage;
+            break;
+          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+            str = this.copyPasteSharingMessage;
+            break;
+        }
+
+        if (str) {
+          data = JSON.parse(atob(decodeURIComponent(str)));
+        }
+
+        data.push(message);
+
+        str = encodeURIComponent(btoa(JSON.stringify(data)));
+
+        // reverse of above switch (since I can't just use a reference)
+        switch (message.type) {
+          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+            this.copyPasteGettingMessage = str;
+            break;
+          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+            this.copyPasteSharingMessage = str;
+            break;
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
+        this.stopGettingInUiAndConfig(error);
+
+        if (UI.View.COPYPASTE === this.view) {
+          this.view = UI.View.SPLASH;
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STOP_GIVING, () => {
+        if (UI.View.COPYPASTE === this.view) {
+          this.view = UI.View.SPLASH; //TODO do not do this if it because of a restart
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STATE, (state) => {
+        this.copyPasteGettingState = state.localGettingFromRemote;
+        this.copyPasteSharingState = state.localSharingWithRemote;
+        this.copyPasteBytesSent = state.bytesSent;
+        this.copyPasteBytesReceived = state.bytesReceived;
       });
 
       core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
