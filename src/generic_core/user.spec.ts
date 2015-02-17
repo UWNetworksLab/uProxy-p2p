@@ -211,26 +211,21 @@ describe('Core.User', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
       var saved;
-      var loaded;
-      storage.load = function(key) {
-        loaded = realStorage.load(key);
-        return loaded;
-      };
       storage.save = function(key, value) {
         saved = realStorage.save(key, value);
         return saved;
       };
-
-      expect(user.instanceToClient('fakeinstance')).toBeUndefined();
-      expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user['syncInstance_']('fakeclient', instanceHandshake).then(() => {
+        expect(user.instanceToClient('fakeinstance')).toBeUndefined();
+        expect(user.clientToInstance('fakeclient')).toBeUndefined();
+        user['syncInstance_']('fakeclient', instanceHandshake);
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
         expect(instance).toBeDefined();
-        expect(saved).toBeDefined();
-        done();
-      }).catch((e) => { console.error('error: ' + e) });
+        user['onceLoaded_'].then(() => {
+          expect(saved).toBeDefined();
+          done();
+        });
     });
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {

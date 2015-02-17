@@ -342,6 +342,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public stop = () => {
     if (!remoteProxyInstance) {
       console.error('Cannot stop proxying when there is no proxy');
+      return;
     }
     remoteProxyInstance.stop();
     remoteProxyInstance = null;

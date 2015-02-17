@@ -29,12 +29,6 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
-
-  interface InstanceReconnection {
-    promise :Promise<string>;  // Fulfilled with new clientID upon reconnection.
-    fulfill :Function;         // Call fulfill when instance reconnects.
-  }
-
   /**
    * Core.User
    *
@@ -86,7 +80,7 @@ module Core {
       this.instanceToClientMap_ = {};
 
       storage.load<UserState>(this.getStorePath()).then((state) => {
-        this.restoreState(state)
+        this.restoreState(state);
         this.fulfillStorageLoad_();
       }).catch((e) => {
         // User not found in storage - we should fulfill the create promise
@@ -194,18 +188,18 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) :
-        Promise<void> => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         var errorStr = this.userId +
             ' received message for non-existing client: ' + clientId;
         console.error(errorStr);
-        return Promise.reject(errorStr);
+        return;
       }
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          return this.syncInstance_(clientId, <InstanceMessage>msg.data);
+          this.syncInstance_(clientId, <InstanceMessage>msg.data);
+          return;
 
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
@@ -216,22 +210,21 @@ module Core {
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
             // issues: https://github.com/uProxy/uproxy/pull/732
-            return Promise.reject(
-                'failed to get instance for clientId ' + clientId);
+            console.error('failed to get instance for clientId ' + clientId);
+            return;
           }
           instance.handleSignal(msg.type, msg.data);
-          return Promise.resolve<void>();
+          return;
 
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
           this.network.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
-          return Promise.resolve<void>();
+          return;
 
         default:
           var errorStr = this.userId + ' received invalid message.' + msg;
           console.error(errorStr);
-          return Promise.reject(errorStr);
       }
     }
 
@@ -265,8 +258,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :InstanceMessage)
-        : Promise<void> => {
+    private syncInstance_ = (clientId :string, data :InstanceMessage) : void => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -305,7 +297,6 @@ module Core {
           newInstance.updateConsent(data.consent);
         }
       }
-      return Promise.resolve<void>();
     }
 
     /**
@@ -446,7 +437,6 @@ module Core {
       }
 
       // Restore all instances.
-      var instancePromises = [];
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {

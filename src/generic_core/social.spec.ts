@@ -282,12 +282,11 @@ describe('Social.FreedomNetwork', () => {
           'cats': 'meow'
         })
       };
-      network.handleMessage(msg).then(() => {
-        expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
-          'cats': 'meow'
-        });
-        done();
-      }).catch((e) => { console.error('got error: ' + e); });
+      network.handleMessage(msg);
+      expect(user.handleMessage).toHaveBeenCalledWith('fakeclient', {
+        'cats': 'meow'
+      });
+      done();
     });
 
     it('adds placeholder when receiving Message with userId not in roster', (done) => {
@@ -300,11 +299,10 @@ describe('Social.FreedomNetwork', () => {
         },
         message: JSON.stringify(VALID_MESSAGE)
       };
-      network.handleMessage(msg).then(() => {
-        var user = network.getUser('im_still_not_here');
-        expect(user).toBeDefined();
-        done();
-      }).catch((e) => { console.error('got error: ' + e); });
+      network.handleMessage(msg);
+      var user = network.getUser('im_still_not_here');
+      expect(user).toBeDefined();
+      done();
     });
 
   });  // describe events & communication
@@ -357,19 +355,18 @@ describe('Social.FreedomNetwork', () => {
       })
     };
     spyOn(JSON, 'parse').and.callThrough();
-    network.handleMessage(inMsg).then(() => {
-      expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
-      var outMsg = {
-        type: uProxy.MessageType.INSTANCE,
-        data: {
-          'tigers': 'are also cats'
-        }
-      };
-      spyOn(JSON, 'stringify').and.callThrough();
-      network.send('fakeclient', outMsg)
-      expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
-      done();
-    });
+    network.handleMessage(inMsg);
+    expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
+    var outMsg = {
+      type: uProxy.MessageType.INSTANCE,
+      data: {
+        'tigers': 'are also cats'
+      }
+    };
+    spyOn(JSON, 'stringify').and.callThrough();
+    network.send('fakeclient', outMsg)
+    expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
+    done();
   });
 
   // TODO: get this unit test to pass.
@@ -424,10 +421,9 @@ describe('Social.ManualNetwork', () => {
     var senderUserId = senderClientId;
     spyOn(network, 'getStorePath').and.returnValue('');
 
-    network.receive(senderClientId, VALID_MESSAGE).then(() => {
-      expect(network.getUser(senderUserId)).toBeDefined();
-      done();
-    }).catch((e) => { console.error('got error: ' + e); });
+    network.receive(senderClientId, VALID_MESSAGE);
+    expect(network.getUser(senderUserId)).toBeDefined();
+    done();
   });
 
   it('routes received messages appropriately', (done) => {
@@ -437,16 +433,13 @@ describe('Social.ManualNetwork', () => {
     // Send an initial message so ManualNetwork creates the user object that we
     // will spy on.
     network.receive(senderClientId, VALID_MESSAGE)
-        .then(() => {
-          var user = network.getUser(senderUserId);
-          expect(user).toBeDefined();
-          spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
-          return network.receive(senderClientId, VALID_MESSAGE).then(() => {
-            expect(user.handleMessage).toHaveBeenCalledWith(
-                senderClientId, VALID_MESSAGE);
-          });
-        }).then(done)
-          .catch((e) => { console.error('Got error: ' + e); });
+    var user = network.getUser(senderUserId);
+    expect(user).toBeDefined();
+    spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
+    network.receive(senderClientId, VALID_MESSAGE);
+    expect(user.handleMessage).toHaveBeenCalledWith(
+        senderClientId, VALID_MESSAGE);
+    done();
   });
 
 });

@@ -42,6 +42,8 @@ module Core {
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
     private fulfillStorageLoad_ : () => void;
+    private fulfillNameReceived_ : () => void;
+
     private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
     });

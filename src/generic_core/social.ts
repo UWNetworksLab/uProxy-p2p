@@ -419,11 +419,10 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage)
-        : Promise<void> => {
+    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
       if (!Firewall.isValidIncomingMessage(incoming, null)) {
         this.error("Firewall: invalid incoming message: " + JSON.stringify(incoming));
-        return Promise.reject("Failed incoming message firewall check");
+        return;
       }
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
@@ -441,13 +440,12 @@ module Social {
         // Add client.
         user.handleClient(client);
       }
-      return user.handleMessage(client.clientId, msg);
+      user.handleMessage(client.clientId, msg);
     }
 
     public restoreFromStorage() {
       // xmpp is weird, so we need to do this.
       return storage.keys().then((keys :string[]) => {
-        var allAddUserPromises = [];
         var myKey = this.getStorePath();
         for (var i in keys) {
           if (keys[i].indexOf(myKey) === 0) {
@@ -617,7 +615,7 @@ module Social {
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :uProxy.Message) : Promise<void> => {
+                      message :uProxy.Message) : void => {
       this.log('Manual network received incoming message; senderClientId=[' +
                senderClientId + '], message=' + JSON.stringify(message));
 
@@ -630,7 +628,7 @@ module Social {
       // reject.
       // TODO: refactor manual network to have its own client messages.
       user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
-      return user.handleMessage(senderUserId, message);
+      user.handleMessage(senderUserId, message);
     }
 
   }  // class ManualNetwork
