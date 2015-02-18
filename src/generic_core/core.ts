@@ -1,4 +1,4 @@
-/**
+remoteProxy/**
  * core.ts
  *
  * This is the primary uproxy code. It maintains in-memory state,
@@ -32,6 +32,11 @@ var bgAppPageChannel = new freedom();
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
 var remoteProxyInstance : Core.RemoteInstance = null;
+
+// This is a global instance of RemoteConnection that is currently used for
+// either sharing or using a proxy through the copy+paste interface (i.e.
+// without an instance)
+var copyPasteConnection : Core.RemoteConnection = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -105,6 +110,8 @@ class uProxyCore implements uProxy.CoreAPI {
     }).catch((e) => {
       console.error(e);
     });
+
+    copyPasteConnection = new Core.RemoteConnection(ui.update);
 
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
         .then((globalSettingsObj :Core.GlobalSettings) => {

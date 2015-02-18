@@ -71,7 +71,14 @@ module uProxy {
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
     GET_CREDENTIALS,
-    LAUNCH_UPROXY
+    LAUNCH_UPROXY,
+
+    SIGNALLING_MESSAGE, /* copypaste messages */
+    START_GETTING,
+    STOP_GETTING,
+    START_GIVING,
+    STOP_GIVING,
+    STATE
   }
 
   /**
@@ -267,6 +274,7 @@ enum GettingState {
 };
 enum SharingState {
   NONE = 200,
+  TRYING_TO_SHARE_ACCESS,
   SHARING_ACCESS
 };
 
