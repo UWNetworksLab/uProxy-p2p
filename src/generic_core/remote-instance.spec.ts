@@ -423,13 +423,23 @@ describe('Core.RemoteInstance', () => {
       bytesReceived: 0
     });
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
+    // TODO once using uproxy-lib v20+, move to real mocks
     var fakeSocksToRtc = {
+      handlers: {},
       'start':
-          (endpoint:Net.Endpoint, pcConfig:WebRtc.PeerConnectionConfig) => {
-         return Promise.resolve(endpoint);
+          (
+            endpoint:Net.Endpoint,
+            pcConfig:freedom_RTCPeerConnection.RTCConfiguration
+          ) => {
+        return Promise.resolve(endpoint);
       },
-      'on': (t:string, f:Function) => {},
-      'stop': () => { return Promise.resolve(); }
+      'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
+      'stop': () => {
+        if (typeof fakeSocksToRtc.handlers['stopped'] === 'function') {
+          fakeSocksToRtc.handlers['stopped']();
+        }
+        return Promise.resolve();
+      }
     };
 
     it('can start proxying', (done) => {
@@ -475,8 +485,11 @@ describe('Core.RemoteInstance', () => {
       // Mock socksToRtc to not fulfill start promise
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
         'start':
-            (endpoint:Net.Endpoint, pcConfig:WebRtc.PeerConnectionConfig) => {
-           return new Promise((F, R) => {});
+            (
+              endpoint:Net.Endpoint,
+              pcConfig:freedom_RTCPeerConnection.RTCConfiguration
+            ) => {
+          return new Promise((F, R) => {});
         },
         'on': (t:string, f:Function) => {},
         'stop': () => {

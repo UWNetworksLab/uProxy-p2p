@@ -264,6 +264,7 @@ module UI {
           }
         }
         user.isGettingFromMe = isGettingFromMe;
+        this.showNotification(user.name + ' stopped proxying through you');
 
         this.updateSharingStatusBar_();
       });
