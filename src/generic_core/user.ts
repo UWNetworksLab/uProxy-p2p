@@ -52,7 +52,7 @@ module Core {
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
     private fulfillStorageLoad_ : () => void;
-    private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
+    public onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
     }).then(() => {
       this.notifyUI();
@@ -266,7 +266,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :InstanceMessage) => {
+    public syncInstance_ = (clientId :string, data :InstanceMessage) => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
