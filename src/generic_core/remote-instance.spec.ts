@@ -29,7 +29,7 @@ describe('Core.RemoteInstance', () => {
   user.isInstanceOnline = function() {
     return true;
   };
-  user.onceNameReceived = Promise.resolve();
+  user.onceNameReceived = Promise.resolve<void>();
 
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
@@ -56,7 +56,7 @@ describe('Core.RemoteInstance', () => {
         return saved;
       };
       instance0 = new Core.RemoteInstance(user, 'instanceId', null);
-      instance0['onceLoaded_'].then(() => {
+      instance0.onceLoaded.then(() => {
         expect(instance0.description).not.toBeDefined();
         expect(instance0.keyHash).not.toBeDefined();
         expect(instance0.consent).toEqual(new Consent.State);
@@ -74,11 +74,11 @@ describe('Core.RemoteInstance', () => {
       instance0.update(handshake);
       instance0.modifyConsent(Consent.UserAction.REQUEST);
 
-      instance0['onceLoaded_'].then(() => {
+      instance0.onceLoaded.then(() => {
         expect(saved).toBeDefined();
         saved.then(() => {
           var newInstance = new Core.RemoteInstance(user, 'instanceId', null);
-          newInstance['onceLoaded_'].then(() => {
+          newInstance.onceLoaded.then(() => {
             expect(newInstance.currentState()).toEqual(instance0.currentState());
             done();
           });
@@ -390,14 +390,14 @@ describe('Core.RemoteInstance', () => {
 
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
-    alice['onceLoaded_'].then(() => {
+    alice.onceLoaded.then(() => {
       expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
       expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
       expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
       expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
       // Bob accepts / offers
       bob.modifyConsent(Consent.UserAction.OFFER);
-      bob['onceLoaded_'].then(() => {
+      bob.onceLoaded.then(() => {
         expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
         expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
         done()

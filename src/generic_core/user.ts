@@ -54,7 +54,9 @@ module Core {
     private fulfillStorageLoad_ : () => void;
     private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
-    }).then(this.notifyUI);
+    }).then(() => {
+      this.notifyUI();
+    });
 
     private fulfillNameReceived_ : () => void;
     public onceNameReceived : Promise<void> = new Promise<void>((F, R) => {

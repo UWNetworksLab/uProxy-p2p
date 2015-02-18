@@ -43,8 +43,10 @@ module Core {
     // from storage.
     private fulfillStorageLoad_ : () => void;
 
-    private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
+    public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
+    }).then(() => {
+      this.user.notifyUI();
     });
 
 
@@ -370,10 +372,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      this.onceLoaded_.then(() => {
-        this.saveToStorage();
-        this.user.notifyUI();
-      });
+      this.saveToStorage();
     }
 
     /**
@@ -405,7 +404,7 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      this.onceLoaded_.then(() => {
+      this.onceLoaded.then(() => {
         if (this.user.isInstanceOnline(this.instanceId)) {
           this.user.network.sendInstanceHandshake(
               this.user.instanceToClient(this.instanceId), this.getConsentBits());
@@ -481,7 +480,7 @@ module Core {
     }
 
     private saveToStorage = () => {
-      this.onceLoaded_.then(() => {
+      this.onceLoaded.then(() => {
         var state = this.currentState();
         storage.save<RemoteInstanceState>(this.getStorePath(), state)
             .then((old) => {
