@@ -18,4 +18,4 @@ install:
   - "bower install --allow-root"
   - "shippable_retry npm install"
 script:
-  - "grunt test"
+  - "grunt test --verbose"
