@@ -410,6 +410,21 @@ core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
 //                core.sendInstanceHandshakeMessage);
 core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
 
+core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
+                      copyPasteConnection.startGet);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+               copyPasteConnection.stopGet);
+
+core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
+               copyPasteConnection.startShare);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+               copyPasteConnection.stopShare);
+
+core.onCommand(uProxy.Command.SIGNALLING_MESSAGE,
+               copyPasteConnection.handleSignal);
+
 core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
 core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 
