@@ -15,6 +15,7 @@ before_install:
 install:
   - "google-chrome --version"
   - "firefox -v"
+  - "bower install"
   - "shippable_retry npm install"
 script:
   - "grunt test"
