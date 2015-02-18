@@ -159,7 +159,7 @@ class uProxyCore implements uProxy.CoreAPI {
         var err = 'onPromiseCommand called for cmd ' + cmd +
                   'with promiseId undefined';
         console.error(err)
-        return Promise.reject(err);
+        return Promise.reject(new Error(err));
       }
 
       // Call handler function, then return success or failure to UI.
@@ -172,7 +172,7 @@ class uProxyCore implements uProxy.CoreAPI {
         (errorForCallback :Error) => {
           ui.update(uProxy.Update.COMMAND_REJECTED,
               { promiseId: args.promiseId,
-                errorForCallback: errorForCallback });
+                errorForCallback: errorForCallback.toString() });
         }
       );
     };
@@ -205,7 +205,7 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!(networkName in Social.networks)) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
-      return Promise.reject(warn);
+      return Promise.reject(new Error(warn));
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
@@ -322,7 +322,7 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!remote) {
       var err = 'Instance ' + path.instanceId + ' does not exist for proxying.';
       console.error(err);
-      return Promise.reject(err);
+      return Promise.reject(new Error(err));
     }
     // Remember this instance as our proxy.  Set this before start fulfills
     // in case the user decides to cancel the proxy before it begins.
@@ -332,7 +332,7 @@ class uProxyCore implements uProxy.CoreAPI {
       return endpoint;
     }).catch((e) => {
       remoteProxyInstance = null;
-      return Promise.reject('Error starting proxy');
+      return Promise.reject(new Error('Error starting proxy'));
     });
   }
 

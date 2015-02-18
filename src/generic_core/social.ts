@@ -514,7 +514,7 @@ module Social {
             this.error('Could not login.');
             ui.sendError('There was a problem signing in to ' + this.name +
                          '. Please try again. ');
-            return Promise.reject('Could not login.');
+            return Promise.reject(new Error('Could not login.'));
           });
     }
 
