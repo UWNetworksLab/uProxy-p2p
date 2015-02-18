@@ -38,7 +38,7 @@ Rule.symlink = (dir, dest='') =>
 # the path to its src/ directory.
 Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
 Rule.symlinkThirdParty = (module) =>
-  Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
+  Rule.symlink(Path.join(Path.dirname(require.resolve(module + '/package.json')), 'third_party'), 'third_party')
 
 
 # # TODO: When we make the 'distribution' build which uglifies all js and removes
