@@ -4,5 +4,8 @@
 Polymer({
   downloadApp: function() {
     openDownloadAppPage();
+  },
+  ready: function() {
+    showSplashIfAppNotMissing();
   }
 });
