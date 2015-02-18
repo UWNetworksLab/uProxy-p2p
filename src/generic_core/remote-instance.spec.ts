@@ -29,6 +29,7 @@ describe('Core.RemoteInstance', () => {
   user.isInstanceOnline = function() {
     return true;
   };
+  user.onceNameReceived = Promise.resolve();
 
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
@@ -47,21 +48,15 @@ describe('Core.RemoteInstance', () => {
   describe('storage', () => {
     var realStorage = new Core.Storage;
     var saved;
-    var loaded;
     var instance0;
 
    it('fresh instance has no state', (done) => {
-      storage.load = function(key) {
-        loaded = realStorage.load(key);
-        return loaded;
-      };
       storage.save = function(key, value) {
         saved = realStorage.save(key, value);
         return saved;
       };
       instance0 = new Core.RemoteInstance(user, 'instanceId', null);
-      expect(loaded).toBeDefined();
-      loaded.catch(() => {
+      instance0['onceLoaded_'].then(() => {
         expect(instance0.description).not.toBeDefined();
         expect(instance0.keyHash).not.toBeDefined();
         expect(instance0.consent).toEqual(new Consent.State);
@@ -78,13 +73,16 @@ describe('Core.RemoteInstance', () => {
       spyOn(instance0, 'sendConsent');
       instance0.update(handshake);
       instance0.modifyConsent(Consent.UserAction.REQUEST);
-      expect(saved).toBeDefined();
 
-      saved.then(() => {
-        var newInstance = new Core.RemoteInstance(user, 'instanceId', null);
-        loaded.then(() => {
-          expect(newInstance.currentState()).toEqual(instance0.currentState());
-        }).then(done);
+      instance0['onceLoaded_'].then(() => {
+        expect(saved).toBeDefined();
+        saved.then(() => {
+          var newInstance = new Core.RemoteInstance(user, 'instanceId', null);
+          newInstance['onceLoaded_'].then(() => {
+            expect(newInstance.currentState()).toEqual(instance0.currentState());
+            done();
+          });
+        });
       });
     });
 
@@ -366,40 +364,45 @@ describe('Core.RemoteInstance', () => {
 
   });
 
-  it('two remote instances establish mutual consent', () => {
+  it('two remote instances establish mutual consent', (done) => {
     (<any>user.instanceToClient).and.callFake((instanceId) => {
       return instanceId;
     });
 
-    var alice = new Core.RemoteInstance(user, 'instance-alice', {
-      instanceId: 'instance-alice',
+    var alice = new Core.RemoteInstance(user, 'instanceId-alice', {
+      instanceId: 'instanceId-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(user, 'instance-bob', {
-      instanceId: 'instance-bob',
+    var bob = new Core.RemoteInstance(user, 'instanceId-bob', {
+      instanceId: 'instanceId-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
     });
 
     (<any>user.network.sendInstanceHandshake).and.callFake((clientId, consent) => {
-      if (clientId === 'instance-alice') {
+      if (clientId === 'instanceId-alice') {
         bob.updateConsent(consent);
-      } else if (clientId === 'instance-bob') {
+      } else if (clientId === 'instanceId-bob') {
         alice.updateConsent(consent);
       }
     });
 
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
-    expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
-    expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
-    // Bob accepts / offers
-    bob.modifyConsent(Consent.UserAction.OFFER);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+    alice['onceLoaded_'].then(() => {
+      expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
+      expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
+      expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
+      expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
+      // Bob accepts / offers
+      bob.modifyConsent(Consent.UserAction.OFFER);
+      bob['onceLoaded_'].then(() => {
+        expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
+        expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+        done()
+      });
+    });
   });
 
   describe('proxying', () => {

@@ -42,7 +42,6 @@ module Core {
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
     private fulfillStorageLoad_ : () => void;
-    private fulfillNameReceived_ : () => void;
 
     private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
@@ -406,10 +405,12 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      if (this.user.isInstanceOnline(this.instanceId)) {
-        this.user.network.sendInstanceHandshake(
-            this.user.instanceToClient(this.instanceId), this.getConsentBits());
-      }
+      this.onceLoaded_.then(() => {
+        if (this.user.isInstanceOnline(this.instanceId)) {
+          this.user.network.sendInstanceHandshake(
+              this.user.instanceToClient(this.instanceId), this.getConsentBits());
+        }
+      });
     }
 
     /**
@@ -435,14 +436,14 @@ module Core {
             && !this.consent.ignoringRemoteUserOffer) {
           // newly granted access
           if (this.consent.localRequestsAccessFromRemote) {
-            note = this.user.name + ' granted you access.';
+            note = ' granted you access.';
           } else {
-            note = this.user.name + ' offered you access.';
+            note = ' offered you access.';
           }
         } else {
           // newly revoked access
           if (!this.consent.ignoringRemoteUserOffer) {
-            note = this.user.name + ' revoked your access.';
+            note = ' revoked your access.';
           }
         }
       }
@@ -452,16 +453,18 @@ module Core {
             && !this.consent.ignoringRemoteUserRequest) {
           // newly requested/accepted access
           if (this.consent.localGrantsAccessToRemote) {
-            note = this.user.name + ' has accepted your offer of access.';
+            note = ' has accepted your offer of access.';
           } else {
-            note = this.user.name + ' is requesting access.';
+            note = ' is requesting access.';
           }
         }
         // No notification for cancelled requests.
       }
 
       if (note) {
-        ui.showNotification(note);
+        this.user.onceNameReceived.then(() => {
+          ui.showNotification(this.user.name + note);
+        });
       }
     }
 
@@ -478,10 +481,12 @@ module Core {
     }
 
     private saveToStorage = () => {
-      var state = this.currentState();
-      storage.save<RemoteInstanceState>(this.getStorePath(), state)
-          .then((old) => {
-        console.log('Saved instance ' + this.instanceId + ' to storage.');
+      this.onceLoaded_.then(() => {
+        var state = this.currentState();
+        storage.save<RemoteInstanceState>(this.getStorePath(), state)
+            .then((old) => {
+          console.log('Saved instance ' + this.instanceId + ' to storage.');
+        });
       });
     }
 

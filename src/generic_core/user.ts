@@ -50,10 +50,15 @@ module Core {
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
-    
+
     private fulfillStorageLoad_ : () => void;
     private onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
+    }).then(this.notifyUI);
+
+    private fulfillNameReceived_ : () => void;
+    public onceNameReceived : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillNameReceived_ = F;
     });
 
     /**
@@ -99,6 +104,7 @@ module Core {
                     ' with unexpected userID: ' + profile.userId);
       }
       this.name = profile.name;
+      this.fulfillNameReceived_();
       this.profile = profile;
       this.log('Updating...');
       this.saveToStorage();
@@ -328,10 +334,6 @@ module Core {
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
     public notifyUI = () => {
-      this.onceLoaded_.then(this.notifyUI_);
-    }
-
-    private notifyUI_ = () => {
       if ('pending' == this.name) {
         this.log('Not showing UI without profile.');
         return;
@@ -432,6 +434,10 @@ module Core {
         this.name = state.name;
       }
 
+      if (this.name !== 'pending') {
+        this.fulfillNameReceived_();
+      }
+
       if (typeof this.profile.imageData === 'undefined') {
         this.profile.imageData = state.imageData;
       }
@@ -443,7 +449,6 @@ module Core {
           this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
         }
       }
-      this.notifyUI();
     }
 
     public currentState = () :UserState => {
