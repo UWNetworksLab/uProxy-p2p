@@ -171,6 +171,9 @@ module UI {
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
+    // TODO not needed, exists to handle typescript errors
+    private core_ :uProxy.CoreAPI = null;
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -180,6 +183,7 @@ module UI {
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
       this.view = View.SPLASH;  // Begin at the splash intro.
+      this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -361,6 +365,48 @@ module UI {
             this.mapInstanceIdToUser_[instanceIds[0]].name + ' and ' +
             (instanceIds.length - 1) + ' others';
       }
+    }
+
+    public handleUrlData = (url :string) => {
+      var payload;
+      console.log('received url data from browser');
+
+      var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+      if (!match) {
+        console.error('parsed url that did not match');
+      }
+
+      try {
+        payload = JSON.parse(atob(decodeURIComponent(match[2])));
+      } catch (e) {
+        console.error('malformed string from browser');
+      }
+
+      // at this point, we assume everything is good, so let's check state
+      switch (match[1]) {
+        case 'request':
+          if (SharingState.NONE !== this.copyPasteSharingState) {
+            console.warn('previous sharing connection already existed, restarting');
+            this.core_.stopCopyPasteShare();
+          }
+
+          this.copyPasteSharingMessage = '';
+          this.core_.startCopyPasteShare();
+          break;
+        case 'offer':
+          if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
+            console.warn('currently not expecting any information, aborting');
+            return;
+          }
+          break;
+      }
+
+      console.log('Sending messages from url to app');
+      for (var i in payload) {
+        this.core_.sendCopyPasteSignal(payload[i]);
+      }
+
+      this.view = UI.View.COPYPASTE;
     }
 
     public showNotification = (notificationText :string) => {
