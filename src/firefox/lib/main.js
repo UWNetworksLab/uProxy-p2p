@@ -20,7 +20,11 @@ var panel;
 
 // Load freedom.
 var manifest = self.data.url('core/freedom-module.json');
-freedom(manifest, {}).then(function(uproxy) {
+var loggingProviderManifest = self.data.url("core/uproxy-lib/loggingprovider/loggingprovider.json");
+freedom(manifest, {
+  'logger': loggingProviderManifest,
+  'debug': 'debug'
+}).then(function(uproxy) {
   // Panel that gets displayed when user clicks the button.
   panel = panels.Panel({
     width: 371,
