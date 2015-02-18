@@ -469,7 +469,7 @@ module.exports = (grunt) ->
           specs: 'build/compile-src/generic_core/**/*.spec.js'
           # NOTE: Put any helper test-data files here:
           keepRunner: true
-          outfile: 'build/compile-src/SpecRunner.html'
+          outfile: 'build/compile-src/generic_core/SpecRunner.html'
           helpers: []
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:

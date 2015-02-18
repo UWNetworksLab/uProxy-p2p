@@ -58,8 +58,8 @@ module Core {
       this.notifyUI();
     });
 
-    private fulfillNameReceived_ : () => void;
-    public onceNameReceived : Promise<void> = new Promise<void>((F, R) => {
+    private fulfillNameReceived_ : (string) => void;
+    public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
       this.fulfillNameReceived_ = F;
     });
 
@@ -106,7 +106,7 @@ module Core {
                     ' with unexpected userID: ' + profile.userId);
       }
       this.name = profile.name;
-      this.fulfillNameReceived_();
+      this.fulfillNameReceived_(this.name);
       this.profile = profile;
       this.log('Updating...');
       this.saveToStorage();
@@ -196,7 +196,7 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) => {
       if (!(clientId in this.clientIdToStatusMap)) {
         var errorStr = this.userId +
             ' received message for non-existing client: ' + clientId;
@@ -266,7 +266,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :InstanceMessage) : void => {
+    private syncInstance_ = (clientId :string, data :InstanceMessage) => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -437,7 +437,7 @@ module Core {
       }
 
       if (this.name !== 'pending') {
-        this.fulfillNameReceived_();
+        this.fulfillNameReceived_(this.name);
       }
 
       if (typeof this.profile.imageData === 'undefined') {

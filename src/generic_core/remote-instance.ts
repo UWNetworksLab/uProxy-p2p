@@ -461,8 +461,8 @@ module Core {
       }
 
       if (note) {
-        this.user.onceNameReceived.then(() => {
-          ui.showNotification(this.user.name + note);
+        this.user.onceNameReceived.then((name :string) => {
+          ui.showNotification(name + note);
         });
       }
     }

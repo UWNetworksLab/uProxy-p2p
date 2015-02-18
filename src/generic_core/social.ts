@@ -336,12 +336,11 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile)
-        : Promise<void> => {
+    public handleUserProfile = (profile :freedom_Social.UserProfile) => {
       var userId = profile.userId;
       if (!Firewall.isValidUserProfile(profile, null)) {
         this.error("Firewall: invalid user profile: " + JSON.stringify(profile));
-        return Promise.reject("Invalid user profile");
+        return;
       }
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
@@ -360,13 +359,12 @@ module Social {
           user:    userProfileMessage
         });
 
-        return Promise.resolve<void>();
+        return;
       }
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
       this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
       this.getOrAddUser_(userId).update(profile);
-      return Promise.resolve<void>();
     }
 
     /**
@@ -381,11 +379,10 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState)
-        : Promise<void> => {
+    public handleClientState = (freedomClient :freedom_Social.ClientState) => {
       if (!Firewall.isValidClientState(freedomClient, null)) {
         this.error("Firewall: invalid client state: " + JSON.stringify(freedomClient));
-        return Promise.reject("Failed client state firewall check");
+        return;
       }
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
@@ -402,11 +399,10 @@ module Social {
           this.fulfillLogout_();
         }
         this.log('received own ClientState: ' + JSON.stringify(client));
-        return Promise.resolve<void>();
+        return;
       }
 
       this.getOrAddUser_(client.userId).handleClient(client);
-      return Promise.resolve<void>();
     }
 
     /**
@@ -419,7 +415,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
+    public handleMessage = (incoming :freedom_Social.IncomingMessage) => {
       if (!Firewall.isValidIncomingMessage(incoming, null)) {
         this.error("Firewall: invalid incoming message: " + JSON.stringify(incoming));
         return;

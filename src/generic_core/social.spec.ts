@@ -121,15 +121,14 @@ describe('Social.FreedomNetwork', () => {
           expect(Object.keys(network.roster).length).toEqual(1);
           expect(network.getUser('somefriend')).toBeDefined();
           // Add user to the roster;
-          network.handleClientState(freedomClientState).then(() => {
-            expect(Object.keys(network.roster).length).toEqual(2);
-            var friend = network.getUser('fakeuser');
-            spyOn(friend, 'monitor');
-            // Advance clock 5 seconds and make sure monitoring was called.
-            jasmine.clock().tick(5000);
-            expect(friend.monitor).toHaveBeenCalled();
-            done();
-          });
+          network.handleClientState(freedomClientState);
+          expect(Object.keys(network.roster).length).toEqual(2);
+          var friend = network.getUser('fakeuser');
+          spyOn(friend, 'monitor');
+          // Advance clock 5 seconds and make sure monitoring was called.
+          jasmine.clock().tick(5000);
+          expect(friend.monitor).toHaveBeenCalled();
+          done();
         });
       });
       fulfillFunc(fakeFreedomClient);
@@ -212,13 +211,12 @@ describe('Social.FreedomNetwork', () => {
         userId: 'mockuser',
         name: 'mock1',
         timestamp: Date.now()
-      }).then(() => {
-        expect(Object.keys(network.roster).length).toEqual(1);
-        var user = network.getUser('mockuser');
-        expect(user).toBeDefined;
-        expect(user.name).toEqual('mock1');
-        done();
       });
+      expect(Object.keys(network.roster).length).toEqual(1);
+      var user = network.getUser('mockuser');
+      expect(user).toBeDefined;
+      expect(user.name).toEqual('mock1');
+      done();
     });
 
     it('updates existing user', (done) => {
@@ -229,12 +227,11 @@ describe('Social.FreedomNetwork', () => {
         userId: 'mockuser',
         name: 'newname',
         timestamp: Date.now()
-      }).then(() => {
-        expect(user.update).toHaveBeenCalled();
-        expect(user).toBeDefined;
-        expect(user.name).toEqual('newname');
-        done();
       });
+      expect(user.update).toHaveBeenCalled();
+      expect(user).toBeDefined;
+      expect(user.name).toEqual('newname');
+      done();
     });
 
     it('passes |onClientState| to correct client', (done) => {
@@ -246,11 +243,10 @@ describe('Social.FreedomNetwork', () => {
         status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(freedomClientState).then(() => {
-        expect(user.handleClient).toHaveBeenCalledWith(
-          freedomClientToUproxyClient(freedomClientState));
-        done();
-      });
+      network.handleClientState(freedomClientState);
+      expect(user.handleClient).toHaveBeenCalledWith(
+        freedomClientToUproxyClient(freedomClientState));
+      done();
     });
 
     it('adds placeholder when receiving ClientState with userId not in roster',
@@ -261,11 +257,10 @@ describe('Social.FreedomNetwork', () => {
         status: 'ONLINE',
         timestamp: 12345
       };
-      network.handleClientState(freedomClientState).then(() => {
-        var user = network.getUser('im_not_here');
-        expect(user).toBeDefined();
-        done();
-      }).catch((e) => { console.error('got error: ' + e); });
+      network.handleClientState(freedomClientState);
+      var user = network.getUser('im_not_here');
+      expect(user).toBeDefined();
+      done();
     });
 
     it('passes |onMessage| to correct client', (done) => {

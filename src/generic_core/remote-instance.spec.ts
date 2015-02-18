@@ -29,7 +29,7 @@ describe('Core.RemoteInstance', () => {
   user.isInstanceOnline = function() {
     return true;
   };
-  user.onceNameReceived = Promise.resolve<void>();
+  user.onceNameReceived = Promise.resolve<string>("name");
 
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
