@@ -40,6 +40,7 @@ describe("Logging Provider", () => {
   beforeEach(() => {
     logger = new LoggingProvider.Log();
     loggingControl = new LoggingProvider.LoggingController();
+    loggingControl.setBufferedLogFilter(['*:E']);
     loggingControl.clearLogs();
   });
 
@@ -79,9 +80,6 @@ describe("Logging Provider", () => {
     logger.error('tag3', 'third string');
     expect(loggingControl.getLogs().join('\n')).toMatch(
       /I \[.*\] second string\nE \[.*\] third string/);
-
-    // restore back to default.
-    loggingControl.setBufferedLogFilter(['*:E']);
   });
 
   it('Specific filtering level for tag overrides *', () => {
@@ -97,7 +95,5 @@ describe("Logging Provider", () => {
     expect(logs).not.toMatch(/second string/);
     expect(logs).toMatch(/first string/);
     expect(logs).toMatch(/third string/);
-
-    loggingControl.setBufferedLogFilter(['*:E']);
   });
 });
