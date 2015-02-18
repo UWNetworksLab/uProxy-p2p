@@ -78,7 +78,7 @@ function openDownloadAppPage() : void {
 
 // If the app is installed but the "App Missing" page is open, make sure to advance
 // them to the Splash page.
-function splashIfAppNotMissing() : void {
+function showSplashIfAppNotMissing() : void {
   if (chromeCoreConnector.status.connected) {
     // If the user hit "Back" to get to the app-missing page, chromeBrowserApi
     // still thinks that we are on index.html, and will not refresh if we try to

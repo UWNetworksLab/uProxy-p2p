@@ -10,6 +10,6 @@ var browser = 'chrome';
 
 // Functions used by app-missing.ts which need access to the background page.
 var openDownloadAppPage = chrome.extension.getBackgroundPage().openDownloadAppPage;
-var splashIfAppNotMissing = chrome.extension.getBackgroundPage().splashIfAppNotMissing;
+var showSplashIfAppNotMissing = chrome.extension.getBackgroundPage().showSplashIfAppNotMissing;
 
 console.log('Loaded dependencies for Chrome Extension.');

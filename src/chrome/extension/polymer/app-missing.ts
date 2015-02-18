@@ -6,6 +6,6 @@ Polymer({
     openDownloadAppPage();
   },
   ready: function() {
-    splashIfAppNotMissing();
+    showSplashIfAppNotMissing();
   }
 });
