@@ -6,12 +6,18 @@
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
+/// <reference path='../../../interfaces/ui.d.ts' />
 
 var port :ContentScriptPort;
+
+declare var ui :UI.UserInterface;
 
 class FirefoxBrowserApi implements BrowserAPI {
 
   constructor() {
+    port.on('handleUrlData', function(url :string) {
+      ui.handleUrlData(url);
+    });
   }
 
   // For browser icon.

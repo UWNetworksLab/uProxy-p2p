@@ -4,6 +4,7 @@
 <link rel="import" href='settings.html'>
 <link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
+<link rel='import' href='copypaste.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -161,6 +162,9 @@
       }
 
     </style>
+
+    <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
+    </uproxy-copypaste>
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
