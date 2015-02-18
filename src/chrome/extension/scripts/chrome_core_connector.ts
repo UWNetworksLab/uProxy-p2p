@@ -52,7 +52,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   public waitingForAppInstall :boolean = false;
 
   private fulfillConnect_ :Function;
-  public onceConnected :Promise<void> = new Promise((F, R) => {
+  public onceConnected = new Promise((F, R) => {
     this.fulfillConnect_ = F;
   });
 
