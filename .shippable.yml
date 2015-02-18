@@ -5,12 +5,13 @@ node_js:
 notifications:
   email:
     recipients:
-      - uproxy-eng@googlegroups.com 
+      - uproxy-eng@googlegroups.com
     on_success: change
     on_failure: always
 before_install:
   - "export DISPLAY=:10.0"
   - "Xvfb :10 -screen 0 1280x1024x24 &"
+  - "npm install -g bower"
 install:
   - "google-chrome --version"
   - "firefox -v"
