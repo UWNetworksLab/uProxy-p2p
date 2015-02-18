@@ -48,7 +48,6 @@ module Core {
     // local instance of uProxy.
     public localGettingFromRemote = GettingState.NONE;
     public localSharingWithRemote = SharingState.NONE;
-    private transport  :Transport;
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
     // scheduled to run in the next second.
     // Used by SocksToRtc & RtcToNet Handlers to make sure bytes sent and
@@ -355,12 +354,6 @@ module Core {
           this.localGettingFromRemote = GettingState.NONE;
           return Promise.reject('Could not start proxy');
         });
-    }
-
-    public updateClientProxyConnection = (isConnected :boolean) => {
-      this.localSharingWithRemote =
-          isConnected ? SharingState.SHARING_ACCESS : SharingState.NONE;
-      this.user.notifyUI();
     }
 
     /**

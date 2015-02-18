@@ -87,6 +87,8 @@ FILES =
   ]
   uproxy_lib_common: [
     'logging/logging.js'
+    'loggingprovider/loggingprovider.js'
+    'loggingprovider/loggingprovider.json'
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
     'webrtc/datachannel.js'

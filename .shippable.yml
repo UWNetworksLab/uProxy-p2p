@@ -12,8 +12,8 @@ before_install:
   - "export DISPLAY=:10.0"
   - "Xvfb :10 -screen 0 1280x1024x24 &"
 install:
-  - "git branch"
-  - "git pull"
+  - "google-chrome --version"
+  - "firefox -v"
   - "shippable_retry npm install"
 script:
   - "grunt test"
