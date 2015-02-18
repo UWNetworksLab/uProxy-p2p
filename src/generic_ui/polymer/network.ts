@@ -14,6 +14,8 @@ Polymer({
       this.isLoggingIn = false;
       ui.view = UI.View.ROSTER;
       ui.bringUproxyToFront();
+    }).catch((e) => {
+      console.warn('Did not log in ');
     });
 
     // Restore the button after a timeout.

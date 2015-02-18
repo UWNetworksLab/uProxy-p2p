@@ -513,8 +513,8 @@ module Social {
             this.onceLoggedIn_ = null;
             this.error('Could not login.');
             ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again. ' + JSON.stringify(e));
-            return Promise.reject(new Error('Could not login.'));
+                         '. Please try again. ');
+            return Promise.reject('Could not login.');
           });
     }
 
