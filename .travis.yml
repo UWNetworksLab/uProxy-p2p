@@ -2,9 +2,9 @@ language: node_js
 node_js:
   - "0.11"
   - "0.10"
-install:
+before_install:
   - npm install grunt -g grunt-cli
   - npm install -g bower
-  - bower install --allow-root
+  - bower install
 script:
   - grunt test --verbose
