@@ -104,6 +104,7 @@
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
+        <a href='#' on-tap='{{ copypaste }}'>Set up a one time connection</a>
         <p style="margin-top: 0">
           We won't share your data or post publicly without your consent
         </p>
