@@ -1,7 +1,6 @@
 /// <reference path='../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
 /// <reference path='../../build/third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import djb2 = require('../crypto/djb2hash');
 import handler = require('../handler/queue');
