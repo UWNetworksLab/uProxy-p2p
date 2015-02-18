@@ -314,14 +314,19 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
           (instanceId :string) => {
+        var isGettingFromMe = false;
+        var user = this.mapInstanceIdToUser_[instanceId];
+
+        // only show a notification if we knew we were prokying
+        if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
+          this.showNotification(user.name + ' stopped proxying through you');
+        }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
 
         // Update user.isGettingFromMe
-        var isGettingFromMe = false;
-        var user = this.mapInstanceIdToUser_[instanceId];
         for (var i = 0; i < user.instances.length; ++i) {
           if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
             isGettingFromMe = true;
@@ -329,7 +334,6 @@ module UI {
           }
         }
         user.isGettingFromMe = isGettingFromMe;
-        this.showNotification(user.name + ' stopped proxying through you');
 
         this.updateSharingStatusBar_();
       });
