@@ -20,7 +20,11 @@ var panel;
 
 // Load freedom.
 var manifest = self.data.url('core/freedom-module.json');
-freedom(manifest, {}).then(function(uproxy) {
+var loggingProviderManifest = self.data.url("core/uproxy-lib/loggingprovider/loggingprovider.json");
+freedom(manifest, {
+  'logger': loggingProviderManifest,
+  'debug': 'debug'
+}).then(function(uproxy) {
   // Panel that gets displayed when user clicks the button.
   panel = panels.Panel({
     width: 371,
@@ -30,6 +34,7 @@ freedom(manifest, {}).then(function(uproxy) {
 
   // Set up connection between freedom and content script.
   require('glue.js').setUpConnection(new uproxy(), panel, button);
+  require('url-handler.js').setup(panel);
 });
 
 

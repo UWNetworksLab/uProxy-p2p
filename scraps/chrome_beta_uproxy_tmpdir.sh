@@ -40,9 +40,9 @@ function usage()
 }
 
 # run the quanto-core
-function run_chrome_mac_chrome_beta ()
+function run_chrome_mac_chrome_canary ()
 {
-    CMD="/Applications/Google\ Chrome-beta.app/Contents/MacOS/Google\ Chrome --user-data-dir=${ROOT_DIR}/tmp/user_${USERNAME} --load-and-launch-app=${ROOT_DIR}/build/dev/chrome/app --load-extension=${ROOT_DIR}/build/dev/chrome/extension $@"
+    CMD="/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary --user-data-dir=${ROOT_DIR}/tmp/user_${USERNAME} --load-and-launch-app=${ROOT_DIR}/build/dev/chrome/app --load-extension=${ROOT_DIR}/build/dev/chrome/extension $@"
     echo "Running: $CMD"
     echo
     bash -c "$CMD"
@@ -50,7 +50,7 @@ function run_chrome_mac_chrome_beta ()
 
 if [ "$TOOL" = "mac" ]; then
     shift
-    run_chrome_mac_chrome_beta
-else 
+    run_chrome_mac_chrome_canary
+else
     usage
 fi
