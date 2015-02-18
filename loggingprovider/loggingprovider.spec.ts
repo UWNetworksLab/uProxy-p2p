@@ -83,4 +83,21 @@ describe("Logging Provider", () => {
     // restore back to default.
     loggingControl.setBufferedLogFilter(['*:E']);
   });
+
+  it('Specific filtering level for tag overrides *', () => {
+    var logs :string;
+    loggingControl.clearLogs();
+    loggingControl.setBufferedLogFilter(['*:D', 'tag2:I']);
+    logger.debug('tag1', 'first string');
+    logger.debug('tag2', 'second string');
+    logger.info('tag3', 'third string');
+
+    logs = loggingControl.getLogs().join('\n');
+
+    expect(logs).not.toMatch(/second string/);
+    expect(logs).toMatch(/first string/);
+    expect(logs).toMatch(/third string/);
+
+    loggingControl.setBufferedLogFilter(['*:E']);
+  });
 });

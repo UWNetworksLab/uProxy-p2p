@@ -64,8 +64,13 @@ export function makeMessage(level:string, tag:string, msg:string)
 
 function checkFilter_(level:string, tag:string, filter:{[s: string]: string;})
     : boolean {
-  return '*' in filter && isLevelAllowed_(level, filter['*']) ||
-         tag in filter && isLevelAllowed_(level, filter[tag]);
+  // if we explicitly specify a logging level for the tag, use that
+  if (tag in filter) {
+    return isLevelAllowed_(level, filter[tag]);
+  }
+
+  // if the logging level was not explicitly specified, use * if present
+  return '*' in filter && isLevelAllowed_(level, filter['*']);
 }
 
 // Function that actally adds things to the log and does the console output.
