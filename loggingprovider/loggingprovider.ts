@@ -21,16 +21,87 @@ var logBuffer: logging.Message[] = [];
 // TODO: we probably will change it to false as default.
 var enabled = true;
 
-// The console filter controls what is displayed in console.
-// Entries in the console filter map are of the form:
-//   'tag': LEVEL
-// It specifies the minimum level of log that will be printed to console for
-// module 'tag'. '*' is a wildcard tag that applies to all messages.
-var consoleFilter: {[s: string]: string;} = {'*': 'D'};
+// This represents a possible destination for log messages.  To make use of
+// this, the class should be inherited from and the log_ method reimplemented
+// to record the message in whichever way is best for that transport.
+class AbstractLoggingDestination {
+  // These filters control what is displayed/saved for the different log types.
+  // Entries for each type should be of the form:
+  //   'tag': LEVEL
+  // where LEVEL is the minimum level of log that will be processed for the
+  // module 'tag'.  '*' is a wildcard tag that applies to any message that is not
+  // specifically specified
+  private filters_ :{[tag :string] :string} = {};
 
-// Similar to console filter, this filter controls what log is saved to
-// internal log buffer, which can be retrieved for diagnosis purpose.
-var bufferedLogFilter: {[s: string]: string;} = {'*': 'E'};
+  constructor(filters :{[tag :string] :string}) {
+    this.filters_ = filters;
+  }
+
+  private checkFilter_ = (level :string, tag :string) => {
+    if (tag in this.filters_) {
+      return isLevelAllowed_(level, this.filters_[tag]);
+    }
+
+    return '*' in this.filters_ && isLevelAllowed_(level, this.filters_['*']);
+  }
+
+  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
+    throw Error('not implemented');
+  }
+
+  public log = (level :string, tag :string, message :logging.Message) :void => {
+    if (this.checkFilter_(level, tag)) {
+      this.log_(level, tag, message);
+    }
+  }
+
+  public setFilter = (args :string[]) => {
+    this.filters_ = {};
+    var parts :string[];
+
+    for (var i in args) {
+      parts = args[i].split(':');
+      this.filters_[parts[0]] = parts[1];
+    }
+  }
+}
+
+// A logging destination for printing the message directly to the console
+class ConsoleLoggingDestination extends AbstractLoggingDestination {
+  constructor() {
+    super({'*': 'D'});
+  }
+
+  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
+    if (level === 'D') {
+      freedomConsole.debug(tag, formatMessage(message));
+    } else if (level === 'I') {
+      freedomConsole.log(tag, formatMessage(message));
+    } else if (level === 'W') {
+      freedomConsole.warn(tag, formatMessage(message));
+    } else {
+      freedomConsole.error(tag, formatMessage(message));
+    }
+  }
+}
+
+class BufferedLoggingDestination extends AbstractLoggingDestination {
+  constructor() {
+    super({'*': 'E'});
+  }
+
+  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
+    if (logBuffer.length > MAX_BUFFERED_LOG) {
+      logBuffer.splice(0, MAX_BUFFERED_LOG / 10);
+    }
+    logBuffer.push(message);
+  }
+}
+
+var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {
+  console: new ConsoleLoggingDestination(),
+  buffered: new BufferedLoggingDestination()
+}
 
 // The filter API uses letter to select log level, D for debug, I for info,
 // W for warn, and E for error. This string is used to convert from letter
@@ -67,41 +138,14 @@ export function makeMessage(level:string, tag:string, msg:string)
   };
 }
 
-function checkFilter_(level:string, tag:string, filter:{[s: string]: string;})
-    : boolean {
-  // if we explicitly specify a logging level for the tag, use that
-  if (tag in filter) {
-    return isLevelAllowed_(level, filter[tag]);
-  }
-
-  // if the logging level was not explicitly specified, use * if present
-  return '*' in filter && isLevelAllowed_(level, filter['*']);
-}
-
 // Function that actally adds things to the log and does the console output.
 export function doRealLog(level:string, tag:string, msg:string)
     : void {
   if (!enabled) { return; }
   var message :logging.Message = makeMessage(level, tag, msg);
 
-  if (checkFilter_(level, tag, consoleFilter)) {
-    if(level === 'D') {
-      freedomConsole.debug(tag, formatMessage(message));
-    } else if(level === 'I') {
-      freedomConsole.log(tag, formatMessage(message));
-    } else if(level === 'W') {
-      freedomConsole.warn(tag, formatMessage(message));
-    } else {
-      freedomConsole.error(tag, formatMessage(message));
-    }
-  }
-
-  if (checkFilter_(level, tag, bufferedLogFilter)) {
-    if (logBuffer.length > MAX_BUFFERED_LOG) {
-      // trim from the head 10 percent each time.
-      logBuffer.splice(0, MAX_BUFFERED_LOG / 10);
-    }
-    logBuffer.push(message);
+  for (var i in loggingDestinations) {
+    loggingDestinations[i].log(level, tag, message);
   }
 }
 
@@ -150,7 +194,7 @@ export class LoggingController implements logging.Controller  {
   // getLogs() without specify any tag will return all messages.
   public getLogs = (tags?:string[]) : string[] => {
     // TODO: use input to select log message.
-    if(!tags || tags.length === 0) {
+    if (!tags || tags.length === 0) {
       return logBuffer.map(formatMessage);
     } else {
       return logBuffer.filter((m:logging.Message) => {
@@ -163,6 +207,7 @@ export class LoggingController implements logging.Controller  {
   public clearLogs = () : void => {
     logBuffer = [];
   }
+
   // Enables/Disables log facility.
   public enable = () : void => {
     enabled = true;
@@ -178,11 +223,7 @@ export class LoggingController implements logging.Controller  {
   // It means: output message in Error level for any module
   //           output message in debug level and above for "network" module.
   public setConsoleFilter = (args: string[]) : void => {
-    consoleFilter = {};
-    for (var i = 0; i < args.length; i++) {
-      var parts = args[i].split(':');
-      consoleFilter[parts[0]] = parts[1];
-    }
+    loggingDestinations['console'].setFilter(args);
   }
 
   // Sets the log filter for buffered log.
@@ -190,11 +231,7 @@ export class LoggingController implements logging.Controller  {
   // It means: buffer message in Error level for any module
   //           buffer message in debug level and above for "network" module.
   public setBufferedLogFilter = (args: string[]) : void => {
-    bufferedLogFilter = {};
-    for (var i = 0; i < args.length; i++) {
-      var parts = args[i].split(':');
-      bufferedLogFilter[parts[0]] = parts[1];
-    }
+    loggingDestinations['buffered'].setFilter(args);
   }
 }
 
