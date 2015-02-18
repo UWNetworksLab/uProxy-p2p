@@ -21,6 +21,7 @@
       "storage.js",
       "local-instance.js",
       "remote-instance.js",
+      "remote-connection.js",
       "user.js",
       "social-enum.js",
       "social.js",

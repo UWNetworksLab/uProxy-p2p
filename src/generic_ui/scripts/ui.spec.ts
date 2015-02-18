@@ -23,6 +23,7 @@ describe('UI.UserInterface', () => {
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
+    spyOn(ui, 'showNotification');
   });
 
   function syncUserAndInstance(

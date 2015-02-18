@@ -37,6 +37,11 @@ module uProxy {
     START_PROXYING = 1010,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
+    START_PROXYING_COPYPASTE_GET,
+    STOP_PROXYING_COPYPASTE_GET,
+    START_PROXYING_COPYPASTE_SHARE,
+    STOP_PROXYING_COPYPASTE_SHARE,
+    COPYPASTE_SIGNALLING_MESSAGE,
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
@@ -71,7 +76,14 @@ module uProxy {
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
     GET_CREDENTIALS,
-    LAUNCH_UPROXY
+    LAUNCH_UPROXY,
+
+    SIGNALLING_MESSAGE, /* copypaste messages */
+    START_GETTING,
+    STOP_GETTING,
+    START_GIVING,
+    STOP_GIVING,
+    STATE
   }
 
   /**
@@ -138,6 +150,14 @@ module uProxy {
     // sendInstanceHandshakeMessage(clientId :string) : void;
 
     modifyConsent(command :ConsentCommand) : void;
+
+    // CopyPaste interactions
+    startCopyPasteGet() : Promise<Net.Endpoint>;
+    stopCopyPasteGet() : void;
+    startCopyPasteShare() : void;
+    stopCopyPasteShare() : void;
+
+    sendCopyPasteSignal(signal :uProxy.Message) : void;
 
     // Using peer as a proxy.
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
@@ -267,6 +287,7 @@ enum GettingState {
 };
 enum SharingState {
   NONE = 200,
+  TRYING_TO_SHARE_ACCESS,
   SHARING_ACCESS
 };
 
