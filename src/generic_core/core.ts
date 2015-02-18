@@ -325,6 +325,11 @@ class uProxyCore implements uProxy.CoreAPI {
       remoteProxyInstance.stop();
       remoteProxyInstance = null;
     }
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      console.log('Existing copy+paste proxying session! Terminating...');
+      copyPasteConnection.stopGet();
+    }
+
     var remote = this.getInstance(path);
     if (!remote) {
       var err = 'Instance ' + path.instanceId + ' does not exist for proxying.';
