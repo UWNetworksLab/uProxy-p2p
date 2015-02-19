@@ -4,6 +4,7 @@
 <link rel="import" href='settings.html'>
 <link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
+<link rel='import' href='copypaste.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -18,9 +19,16 @@
         background-color: white;
         color: rgb(112, 112, 112);
       }
+      #logged-in-controls {
+        margin-top: 100px;
+      }
       #toolbar {
         height: 100px;
         background-color: #009688;
+        position: fixed;
+        top: 0;
+        z-index: 1;
+        width: 100%;
       }
       #btnSettings {
         position: absolute;
@@ -83,7 +91,7 @@
         left: 50%;
       }
       #status {
-        position: absolute;
+        position: fixed;
         width: 100%;
         bottom: 0px;
       }
@@ -154,6 +162,9 @@
       }
 
     </style>
+
+    <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
+    </uproxy-copypaste>
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>

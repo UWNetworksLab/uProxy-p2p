@@ -21,5 +21,8 @@ Polymer({
   prev: function() {
     this.setState(ui.splashState - 1);
   },
+  copypaste: function() {
+    initCopyPaste();
+  },
   ready: function() {}
 });

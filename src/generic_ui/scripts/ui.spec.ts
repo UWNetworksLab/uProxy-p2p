@@ -23,6 +23,7 @@ describe('UI.UserInterface', () => {
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
+    spyOn(ui, 'showNotification');
   });
 
   function syncUserAndInstance(
@@ -249,6 +250,22 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual(null);
+    });
+
+    it('No notification when you stop sharing and are not already proxying', () => {
+      syncUserAndInstance('userId', 'Alice', 'testInstanceId');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testInstanceId');
+      expect(ui.showNotification).not.toHaveBeenCalled();
+    });
+
+    it('Notification when you stop sharing', () => {
+      syncUserAndInstance('userId', 'Alice', 'testInstanceId');
+      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+          .call(ui, 'testInstanceId');
+      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+          .call(ui, 'testInstanceId');
+      expect(ui.showNotification).toHaveBeenCalled();
     });
 
     it('Getting status updates when you start and stop getting', () => {

@@ -46,9 +46,5 @@
   "peerDependencies" : {
     "freedom": "~0.6.18"
   },
-  "private": true,
-  "scripts": {
-    "test": "grunt test --verbose",
-    "prepublish": "bower install && grunt test"
-  }
+  "private": true
 }

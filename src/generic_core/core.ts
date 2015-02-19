@@ -21,6 +21,8 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 /// <reference path='../networking-typings/communications.d.ts' />
 
+// Note that the proxy runs extremely slowly in debug ('*:D') mode.
+freedom['loggingprovider']().setConsoleFilter(['*:I']);
 
 var storage = new Core.Storage();
 
@@ -32,6 +34,11 @@ var bgAppPageChannel = new freedom();
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
 var remoteProxyInstance : Core.RemoteInstance = null;
+
+// This is a global instance of RemoteConnection that is currently used for
+// either sharing or using a proxy through the copy+paste interface (i.e.
+// without an instance)
+var copyPasteConnection : Core.RemoteConnection = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -106,6 +113,8 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
+    copyPasteConnection = new Core.RemoteConnection(ui.update);
+
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
         .then((globalSettingsObj :Core.GlobalSettings) => {
           console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
@@ -159,7 +168,7 @@ class uProxyCore implements uProxy.CoreAPI {
         var err = 'onPromiseCommand called for cmd ' + cmd +
                   'with promiseId undefined';
         console.error(err)
-        return Promise.reject(err);
+        return Promise.reject(new Error(err));
       }
 
       // Call handler function, then return success or failure to UI.
@@ -172,7 +181,7 @@ class uProxyCore implements uProxy.CoreAPI {
         (errorForCallback :Error) => {
           ui.update(uProxy.Update.COMMAND_REJECTED,
               { promiseId: args.promiseId,
-                errorForCallback: errorForCallback });
+                errorForCallback: errorForCallback.toString() });
         }
       );
     };
@@ -205,7 +214,7 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!(networkName in Social.networks)) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
-      return Promise.reject(warn);
+      return Promise.reject(new Error(warn));
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
@@ -305,6 +314,32 @@ class uProxyCore implements uProxy.CoreAPI {
     instance.modifyConsent(command.action);
   }
 
+  public startCopyPasteGet = () : Promise<Net.Endpoint> => {
+    if (remoteProxyInstance) {
+      console.log('Existing proxying session! Terminating...');
+      remoteProxyInstance.stop();
+      remoteProxyInstance = null;
+    }
+
+    return copyPasteConnection.startGet();
+  }
+
+  public stopCopyPasteGet = () => {
+    copyPasteConnection.stopGet();
+  }
+
+  public startCopyPasteShare = () => {
+    copyPasteConnection.startShare();
+  }
+
+  public stopCopyPasteShare = () => {
+    copyPasteConnection.stopShare();
+  }
+
+  public sendCopyPasteSignal = (signal :uProxy.Message) => {
+    copyPasteConnection.handleSignal(signal);
+  }
+
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
@@ -318,11 +353,16 @@ class uProxyCore implements uProxy.CoreAPI {
       remoteProxyInstance.stop();
       remoteProxyInstance = null;
     }
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      console.log('Existing copy+paste proxying session! Terminating...');
+      copyPasteConnection.stopGet();
+    }
+
     var remote = this.getInstance(path);
     if (!remote) {
       var err = 'Instance ' + path.instanceId + ' does not exist for proxying.';
       console.error(err);
-      return Promise.reject(err);
+      return Promise.reject(new Error(err));
     }
     // Remember this instance as our proxy.  Set this before start fulfills
     // in case the user decides to cancel the proxy before it begins.
@@ -332,7 +372,7 @@ class uProxyCore implements uProxy.CoreAPI {
       return endpoint;
     }).catch((e) => {
       remoteProxyInstance = null;
-      return Promise.reject('Error starting proxy');
+      return Promise.reject(new Error('Error starting proxy'));
     });
   }
 
@@ -403,6 +443,21 @@ core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
 // core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
 //                core.sendInstanceHandshakeMessage);
 core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
+
+core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
+                      core.startCopyPasteGet);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+               core.stopCopyPasteGet);
+
+core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
+               core.startCopyPasteShare);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+               core.stopCopyPasteShare);
+
+core.onCommand(uProxy.Command.COPYPASTE_SIGNALLING_MESSAGE,
+               core.sendCopyPasteSignal);
 
 core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
 core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);

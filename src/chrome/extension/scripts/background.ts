@@ -76,6 +76,19 @@ function openDownloadAppPage() : void {
   });
 }
 
+// If the app is installed but the "App Missing" page is open, make sure to advance
+// them to the Splash page.
+function showSplashIfAppNotMissing() : void {
+  if (chromeCoreConnector.status.connected) {
+    // If the user hit "Back" to get to the app-missing page, chromeBrowserApi
+    // still thinks that we are on index.html, and will not refresh if we try to
+    // update to the same URL. So we have to update to the app-missing page before
+    // updating to index.html
+    chromeBrowserApi.updatePopupUrl("app-missing.html");
+    chromeBrowserApi.updatePopupUrl("index.html");
+  }
+}
+
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
@@ -110,11 +123,36 @@ function initUI() : UI.UserInterface {
   chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
 
+  // used for de-duplicating urls caught by the listeners
+  var lastUrl = '';
+
   chrome.webRequest.onBeforeRequest.addListener(
     function() {
       return {cancel: true};
     },
     {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
+    ['blocking']
+  );
+
+  chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+      var url = details.url;
+
+      // Chome seems to sometimes send the same url to us twice, we never
+      // should be receiving the exact same data twice so de-dupe any url
+      // with the last one we received before processing it
+      if (lastUrl !== url) {
+        ui.handleUrlData(url);
+      } else {
+        console.warn('Received duplicate url events', url);
+      }
+      lastUrl = url;
+
+      return {
+        redirectUrl: chrome.extension.getURL('index.html')
+      };
+    },
+    { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
     ['blocking']
   );
 

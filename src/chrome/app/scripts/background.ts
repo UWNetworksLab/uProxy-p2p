@@ -15,6 +15,8 @@ var connector :ChromeUIConnector;
 var uProxyAppChannel : OnAndEmit<any,any>;
 
 var uproxyModule = new freedom('scripts/freedom-module.json', {
+  'logger': 'scripts/uproxy-lib/loggingprovider/loggingprovider.json',
+  'debug': 'debug',
   oauth: [Chrome_oauth]
 }).then(function(UProxy : () => void) {
   uProxyAppChannel = new UProxy();

@@ -87,6 +87,8 @@ FILES =
   ]
   uproxy_lib_common: [
     'logging/logging.js'
+    'loggingprovider/loggingprovider.js'
+    'loggingprovider/loggingprovider.json'
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
     'webrtc/datachannel.js'
@@ -459,6 +461,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/social-enum.js'
               'build/compile-src/generic_core/local-instance.js'
               'build/compile-src/generic_core/remote-instance.js'
+              'build/compile-src/generic_core/remote-connection.js'
               'build/compile-src/generic_core/firewall.js'
               'build/compile-src/generic_core/user.js'
               'build/compile-src/generic_core/storage.js'
