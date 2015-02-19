@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='link.html'>
 
 <!--
 
@@ -12,14 +13,9 @@ a new tab linking to faq.html#privacy
 <polymer-element name='uproxy-faq-link' attributes='anchor'>
 
   <template>
-    <style>
-      span {
-        cursor: pointer;
-      }
-    </style>
-
-    <span on-click='{{ openFaq }}'><content></content></span>
-
+    <uproxy-link role='link' on-tap='{{ openFaq }}'>
+      <content></content>
+    </uproxy-link>
   </template>
 
   <script src='faq-link.js'></script>
