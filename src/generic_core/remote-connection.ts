@@ -20,6 +20,8 @@ module Core {
     private socksToRtc_ :SocksToRtc.SocksToRtc = null;
     private rtcToNet_ :RtcToNet.RtcToNet = null;
 
+    private isUpdatePending_ = false;
+
     //TODO set up a better type for this
     private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
 
@@ -183,14 +185,30 @@ module Core {
       this.stateRefresh_();
     }
 
+    /*
+     * This handles doing a delayed call to the stateRefresh_ function for any
+     * updates we expect to be extremely common but do not need immediate
+     * information about (i.e. bytes sent/received).  The update is delayed by
+     * a second and we will not do any other updates in the meantime.
+     */
+    private delayedUpdate_ = () => {
+      if (!this.isUpdatePending_) {
+        setTimeout(() => {
+          this.stateRefresh_();
+          this.isUpdatePending_ = false;
+        }, 1000);
+        this.isUpdatePending_ = true;
+      }
+    }
+
     private handleBytesReceived_ = (bytes :number) => {
       this.bytesReceived_ += bytes;
-      this.stateRefresh_();
+      this.delayedUpdate_();
     }
 
     private handleBytesSent_ = (bytes :number) => {
       this.bytesSent_ += bytes;
-      this.stateRefresh_();
+      this.delayedUpdate_();
     }
 
     private stateRefresh_ = () => {
