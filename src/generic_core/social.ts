@@ -126,7 +126,7 @@ module Social {
       this.roster = {};
     }
 
-    public getStorePath = () : void => {
+    public getStorePath = () : string => {
       return this.myInstance.instanceId + '/roster/';
     }
 
@@ -312,7 +312,7 @@ module Social {
      * TODO: This should either be factored into a wrapper class to 'sanitize'
      * social providers' async behavior, or directly into freedom.
      */
-    private delayForLogin_ = (handler :Function) : void => {
+    private delayForLogin_ = (handler :Function) => {
       return (arg :any) => {
         if (!this.onceLoggedIn_) {
           this.error('Not logged in.');

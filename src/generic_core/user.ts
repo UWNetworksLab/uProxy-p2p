@@ -244,7 +244,7 @@ module Core {
       return (this.instances_[instanceId]).getConsentBits();;
     }
 
-    public getInstance = (instanceId:string) : void => {
+    public getInstance = (instanceId:string) : Core.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
