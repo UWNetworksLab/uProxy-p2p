@@ -100,7 +100,7 @@ module Core {
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom_Social.UserProfile) => {
+    public update = (profile :freedom_Social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);
@@ -144,7 +144,7 @@ module Core {
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :UProxyClient.State) => {
+    public handleClient = (client :UProxyClient.State) : void => {
       if (client.userId != this.userId) {
         console.error(this.userId +
             'received client with unexpected userId: ' + client.userId);
@@ -196,7 +196,7 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         var errorStr = this.userId +
             ' received message for non-existing client: ' + clientId;
@@ -244,7 +244,7 @@ module Core {
       return (this.instances_[instanceId]).getConsentBits();;
     }
 
-    public getInstance = (instanceId:string) => {
+    public getInstance = (instanceId:string) : void => {
       return this.instances_[instanceId];
     }
 
@@ -266,7 +266,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    public syncInstance_ = (clientId :string, data :InstanceMessage) => {
+    public syncInstance_ = (clientId :string, data :InstanceMessage) : void => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -322,7 +322,7 @@ module Core {
      * Remove a client from this User. Also removes the client <--> instance
      * mapping if it exists.
      */
-    private removeClient_ = (clientId:string) => {
+    private removeClient_ = (clientId:string) : void => {
       delete this.clientIdToStatusMap[clientId];
       var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
@@ -335,7 +335,7 @@ module Core {
      * Send the latest full state about everything in this user to the UI.
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
-    public notifyUI = () => {
+    public notifyUI = () : void => {
       if ('pending' == this.name) {
         this.log('Not showing UI without profile.');
         return;
@@ -424,7 +424,7 @@ module Core {
       return this.network.getStorePath() + this.userId;
     }
 
-    public saveToStorage = () => {
+    public saveToStorage = () : void => {
       this.onceLoaded_.then(() => {
         var state = this.currentState();
         storage.save<UserState>(this.getStorePath(), state).then((old) => {});
@@ -461,13 +461,13 @@ module Core {
       });
     }
 
-    public handleLogout = () => {
+    public handleLogout = () : void => {
       for (var instanceId in this.instances_) {
         this.instances_[instanceId].handleLogout();
       }
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       for (var instanceId in this.instanceToClientMap_) {
         var clientId = this.instanceToClientMap_[instanceId];
         this.network.sendInstanceHandshake(

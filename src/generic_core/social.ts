@@ -126,7 +126,7 @@ module Social {
       this.roster = {};
     }
 
-    public getStorePath = () => {
+    public getStorePath = () : void => {
       return this.myInstance.instanceId + '/roster/';
     }
 
@@ -236,7 +236,7 @@ module Social {
       console.error('!!! [' + this.name + '] ' + msg);
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
@@ -249,7 +249,7 @@ module Social {
     public logout = () : Promise<void> => {
       throw new Error('Operation not implemented');
     }
-    public flushQueuedInstanceMessages = () => {
+    public flushQueuedInstanceMessages = () : void => {
       throw new Error('Operation not implemented');
     }
     public send = (recipientClientId :string,
@@ -312,7 +312,7 @@ module Social {
      * TODO: This should either be factored into a wrapper class to 'sanitize'
      * social providers' async behavior, or directly into freedom.
      */
-    private delayForLogin_ = (handler :Function) => {
+    private delayForLogin_ = (handler :Function) : void => {
       return (arg :any) => {
         if (!this.onceLoggedIn_) {
           this.error('Not logged in.');
@@ -336,7 +336,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile) => {
+    public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
       var userId = profile.userId;
       if (!Firewall.isValidUserProfile(profile, null)) {
         this.error("Firewall: invalid user profile: " + JSON.stringify(profile));
@@ -379,7 +379,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState) => {
+    public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
       if (!Firewall.isValidClientState(freedomClient, null)) {
         this.error("Firewall: invalid client state: " + JSON.stringify(freedomClient));
         return;
@@ -415,7 +415,7 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage) => {
+    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
       if (!Firewall.isValidIncomingMessage(incoming, null)) {
         this.error("Firewall: invalid incoming message: " + JSON.stringify(incoming));
         return;
@@ -558,7 +558,7 @@ module Social {
       this.monitorIntervalId_ = null;
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       for (var userId in this.roster) {
         this.roster[userId].resendInstanceHandshakes();
       }
