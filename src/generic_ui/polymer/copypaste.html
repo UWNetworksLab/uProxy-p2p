@@ -37,7 +37,7 @@
       <div class='prevArrow'>
         <img src='../icons/arrow-left.png' on-tap='{{prev}}' />
       </div>
-      <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState }}'>
+      <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection
       </span>
       <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
@@ -45,7 +45,7 @@
       </span>
     </div>
 
-    <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState }}'>
+    <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>
       <p>Copy and paste this URL to your friend over a secure channel.</p>
 
       <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'

@@ -393,16 +393,6 @@ module Core {
       });
     }
 
-    private updateBytesInUI = () :void => {
-      if (!this.isUIUpdatePending) {
-        setTimeout(() => {
-          this.user.notifyUI();
-          this.isUIUpdatePending = false;
-        }, 1000);
-        this.isUIUpdatePending = true;
-      }
-    }
-
     public handleLogout = () => {
       if (this.connection_.localSharingWithRemote !== SharingState.NONE) {
         console.log('Closing rtcToNet_ for logout');

@@ -276,9 +276,22 @@ module UI {
         }
       });
 
+      core.onUpdate(uProxy.Update.START_GIVING, () => {
+        if (!this.isGivingAccess()) {
+          this.startGivingInUi();
+        }
+      });
+
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
-        if (UI.View.COPYPASTE === this.view) {
-          this.view = UI.View.SPLASH; //TODO do not do this if it because of a restart
+        if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
+          if (UI.View.COPYPASTE === this.view) {
+            this.view = UI.View.SPLASH;
+          }
+        }
+
+        this.copyPasteSharingState = SharingState.NONE;
+        if (!this.isGivingAccess()) {
+          this.stopGivingInUi();
         }
       });
 
@@ -337,8 +350,6 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
-
-      console.log('Created the UserInterface');
     }
 
     private updateGettingStatusBar_ = () => {
@@ -439,8 +450,10 @@ module UI {
         this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
         this.browserApi.setIcon(UI.ERROR_ICON);
-      } else {
+      } else if (model.onlineNetwork) {
         this.browserApi.setIcon(UI.DEFAULT_ICON);
+      } else {
+        this.setOfflineIcon();
       }
 
       this.updateGettingStatusBar_();
@@ -452,6 +465,14 @@ module UI {
       this.browserApi.stopUsingProxy(askUser);
     }
 
+    public startGettingInUi = () => {
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
+      } else {
+        this.browserApi.setIcon(UI.GETTING_ICON);
+      }
+    }
+
     /**
       * Sets extension icon to default and undoes proxy configuration.
       */
@@ -459,11 +480,7 @@ module UI {
         (instanceId :string, endpoint :Net.Endpoint) => {
       this.instanceGettingAccessFrom_ = instanceId;
 
-      if (this.isGivingAccess()) {
-        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
-      } else {
-        this.browserApi.setIcon(UI.GETTING_ICON);
-      }
+      this.startGettingInUi();
 
       this.updateGettingStatusBar_();
 
@@ -489,8 +506,10 @@ module UI {
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
         this.browserApi.setIcon(UI.GETTING_ICON);
-      } else {
+      } else if (model.onlineNetwork) {
         this.browserApi.setIcon(UI.DEFAULT_ICON);
+      } else {
+        this.setOfflineIcon();
       }
     }
 
@@ -503,7 +522,8 @@ module UI {
     }
 
     public isGivingAccess = () => {
-      return Object.keys(this.instancesGivingAccessTo).length > 0;
+      return Object.keys(this.instancesGivingAccessTo).length > 0 ||
+             this.copyPasteSharingState === SharingState.SHARING_ACCESS;
     }
 
     /**

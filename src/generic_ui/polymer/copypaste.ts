@@ -12,6 +12,7 @@ function initCopyPaste() {
     ui.copyPasteGettingMessage = '';
     core.startCopyPasteGet().then((endpoint) => {
       console.log('start getting connection through copy-paste');
+      this.ui.startGettingInUi();
       ui.browserApi.startUsingProxy(endpoint);
     }).catch((e) => {
       console.error('error when starting copy paste get', e);
