@@ -95,7 +95,7 @@ describe('Client logging shim using Freedom', () => {
       });
     });
 
-    it('stringify objections', (done) => {
+    it('stringify objects', (done) => {
       var log = new Logging.Log('tag');
       var obj = { foo: 'bar' };
 
