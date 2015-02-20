@@ -52,7 +52,7 @@ module Core {
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
     private fulfillStorageLoad_ : () => void;
-    public onceLoaded_ : Promise<void> = new Promise<void>((F, R) => {
+    public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
     }).then(() => {
       this.notifyUI();
@@ -425,7 +425,7 @@ module Core {
     }
 
     public saveToStorage = () : void => {
-      this.onceLoaded_.then(() => {
+      this.onceLoaded.then(() => {
         var state = this.currentState();
         storage.save<UserState>(this.getStorePath(), state).then((old) => {});
       });

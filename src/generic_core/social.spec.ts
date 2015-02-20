@@ -337,7 +337,7 @@ describe('Social.FreedomNetwork', () => {
 
   it('JSON.parse and stringify messages at the right layer', (done) => {
     var user = network.getUser('mockuser');
-    spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
+    spyOn(user, 'handleMessage');
     var inMsg = {
       from: {
         userId: 'mockuser',

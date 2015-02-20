@@ -222,7 +222,7 @@ describe('Core.User', () => {
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
         expect(instance).toBeDefined();
-        user.onceLoaded_.then(() => {
+        user.onceLoaded.then(() => {
           expect(saved).toBeDefined();
           done();
         });
