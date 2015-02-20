@@ -85,6 +85,28 @@ describe('Client logging shim using Freedom', () => {
       });
     });
 
+    it('Adds unspecified arguments to the end', (done) => {
+      var log = new Logging.Log('tag');
+
+      log.info('%1', 'foo', 'bar');
+      mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
+        expect(mockLogger.info).toHaveBeenCalledWith('foo bar');
+        done();
+      });
+    });
+
+    it('stringify objections', (done) => {
+      var log = new Logging.Log('tag');
+      var obj = { foo: 'bar' };
+
+      log.info('%1', obj);
+
+      mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
+        expect(mockLogger.info).toHaveBeenCalledWith(JSON.stringify(obj));
+        done();
+      });
+    });
+
   });
 
 });

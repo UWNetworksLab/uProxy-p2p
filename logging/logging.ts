@@ -6,15 +6,28 @@ import freedomTypes = require('freedom.types');
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
 // TODO: move this into the provider.
-function formatStringMessageWithArgs_(msg:string, args :any[])
+function formatStringMessageWithArgs_(args :any[])
     : string {
-  var formatted_msg = msg;
+  var msg = '';
+  var arg :any;
 
   for (var i = 0; i < args.length; i++) {
-    formatted_msg = formatted_msg.replace('%' + (i + 1), args[i]);
+    arg = args[i];
+    if ('string' !== typeof(arg)) {
+      arg = JSON.stringify(arg);
+    }
+
+    if (-1 !== msg.indexOf('%' + i)) {
+      msg = msg.replace('%' + i, arg);
+    } else {
+      if (msg.length) {
+        msg += ' ';
+      }
+      msg += arg;
+    }
   }
 
-  return formatted_msg;
+  return msg;
 }
 
 export class Log {
@@ -23,14 +36,14 @@ export class Log {
     this.logger = freedom.core().getLogger(this.tag_);
   }
 
-  private log_ = (level :string, msg :string, args :any[]) :void => {
+  private log_ = (level :string, args :any[]) :void => {
     var message :string;
 
-    if (1 === args.length && Array.isArray(args[0])) {
-      args = args[0];
+    if (2 === args.length && 'string' === typeof(args[0]) && Array.isArray(args[1])) {
+      args = [args[0]].concat(args[1].slice());
     }
 
-    message = formatStringMessageWithArgs_(msg, args);
+    message = formatStringMessageWithArgs_(args);
 
     this.logger.then((logger :freedomTypes.Logger) => {
       // essentially do logger[level](message) minus the type warning
@@ -48,19 +61,19 @@ export class Log {
   }
 
   // Logs message in debug level.
-  public debug = (msg: string, ...args :any[]) :void => {
-    this.log_('debug', msg, args);
+  public debug = (...args :any[]) :void => {
+    this.log_('debug', args);
   }
   // Logs message in info level.
-  public info = (msg: string, ...args :any[]) :void => {
-    this.log_('info', msg, args);
+  public info = (...args :any[]) :void => {
+    this.log_('info', args);
   }
   // Logs message in warn level.
-  public warn = (msg: string, ...args :any[]) :void => {
-    this.log_('warn', msg, args);
+  public warn = (...args :any[]) :void => {
+    this.log_('warn', args);
   }
   // Logs message in error level.
-  public error = (msg: string, ...args :any[]) :void => {
-    this.log_('error', msg, args);
+  public error = (...args :any[]) :void => {
+    this.log_('error', args);
   }
 }
