@@ -14,48 +14,27 @@ declare var core :CoreConnector;
 // - extractCode(url): returns a promise that fulfills with credentials on
 //   success.
 class ChromeTabAuth {
-  private tabId_ :number = -1;
 
   constructor() {
   }
 
   public login = (oauthInfo :OAuthInfo) : void => {
-    if (this.tabId_ === -1) {
-      this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
-    } else {
-      chrome.tabs.update(this.tabId_, {active:true});
-    }
+    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
   }
 
 
   private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
     var onTabChange = (tabId, changeInfo, tab) => {
-      if (tab.id === this.tabId_ && tab.url.indexOf(redirectUrl) === 0) {
+      if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
-        chrome.tabs.onRemoved.removeListener(onTabClose);
-        this.tabId_ = -1;
         chrome.tabs.remove(tabId);
         this.sendCredentials_(tab.url);
       }
     };
 
-    // Cleanup state and return error if the tab is closed before the tab
-    // is redirected to REDIRECT_URL
-    var onTabClose = function(tabId, removeInfo) {
-        if (tabId == this.tabId_) {
-          chrome.tabs.onUpdated.removeListener(onTabChange);
-          chrome.tabs.onRemoved.removeListener(onTabClose);
-          this.tabId_ = -1;
-          this.onError_('Login abandoned.');
-        }
-    }.bind(this);
-
-
     chrome.tabs.create({url: url},
                        function(tab: chrome.tabs.Tab) {
       chrome.windows.update(tab.windowId, {focused: true});
-      this.tabId_ = tab.id;
-      chrome.tabs.onRemoved.addListener(onTabClose);
       chrome.tabs.onUpdated.addListener(onTabChange);
     }.bind(this));
   }
