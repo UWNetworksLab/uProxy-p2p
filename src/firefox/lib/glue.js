@@ -6,8 +6,13 @@
  */
 
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
-var uProxy = require('uproxy.js').uProxy;
 
+// TODO: rename uproxy.js/ts to uproxy-enums.js/ts
+var uProxy = require('uproxy.js').uProxy;
+var { Ci, Cr } = require("chrome");
+var events = require("sdk/system/events");
+
+// TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
     from.on(command, function(data) {
@@ -36,10 +41,14 @@ function setUpConnection(freedom, panel, button) {
     proxyConfig.stopUsingProxy(askUser);
   });
 
-  panel.port.on('setIcon', function(iconFile) {
-    button.icon = {
-      '19': './icons/' + iconFile,
-    }
+  panel.port.on('setIcon', function(iconFiles) {
+    button.state("window", {
+      icon : iconFiles
+    });
+  });
+
+  panel.port.on('showPanel', function() {
+    panel.show();
   });
 }
 

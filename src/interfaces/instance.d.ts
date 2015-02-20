@@ -10,6 +10,8 @@
  * about their current status and consent level.
  */
 
+/// <reference path='../generic_core/consent.ts' />
+
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
@@ -18,12 +20,6 @@ interface ConsentMessage {
   consent    :Consent.WireState;
 }
 
-// Describing whether or not a remote instance is currently accessing or not,
-// assuming consent is GRANTED for that particular pathway.
-interface AccessState {
-  asClient :boolean;
-  asProxy  :boolean;
-}
 interface NetworkInfo {
   name :string;
   userId :string;
@@ -53,10 +49,9 @@ interface Instance {
   instanceId  :string;
   keyHash     :string;
   consent     ?:Consent.State;
-  status      ?:string;
+  status      ?:string; // Status on social network e.g. online or offline.
   notify      ?:boolean;   // TODO: replace with better notications
 }
-
 
 /**
  * Instance Handshakes are sent between uProxy installations to notify each

@@ -8,7 +8,6 @@ describe('Core.LocalInstance', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
   it('initializes with valid id and keyhash', () => {

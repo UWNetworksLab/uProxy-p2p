@@ -1,0 +1,98 @@
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+
+<polymer-element name='uproxy-copypaste' attributes=''>
+  <template>
+    <style>
+    :host {
+      text-align: center;
+    }
+    #cptoolbar {
+      height: 50px;
+      background: grey;
+      color: white;
+    }
+    #cptoolbar * {
+      line-height: 50px;
+    }
+    .prevArrow {
+      float: left;
+    }
+    .prevArrow img {
+      cursor: pointer;
+      height: 24px;
+      width: 24px;
+      margin: 8px;
+      vertical-align: middle;
+    }
+    textarea.message {
+      width: 80%;
+      height: 10em;
+    }
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+    }
+    </style>
+    <div id='cptoolbar'>
+      <div class='prevArrow'>
+        <img src='../icons/arrow-left.png' on-tap='{{prev}}' />
+      </div>
+      <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
+        Request a one time connection
+      </span>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
+        Share a one time connection
+      </span>
+    </div>
+
+    <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>
+      <p>Copy and paste this URL to your friend over a secure channel.</p>
+
+      <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'
+        class='message'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
+
+      <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>Loading...</span>
+
+      <p>
+        To finish setting up the connection, your friend needs to click on the
+        link and send you a link from their uProxy client.  When you click on
+        it, you'll be ready to start getting access.
+      </p>
+    </div>
+
+    <div id='getting' hidden?='{{ GettingState.GETTING_ACCESS !== ui.copyPasteGettingState }}'>
+      <p>Success!  A one time connection has been established.</p>
+
+      <p>To start getting access from your friend, click the button below.</p>
+
+      <paper-button on-tap='{{ stopGetting }}'>Stop getting access</paper-button>
+    </div>
+
+    <div id='sharing-link' hidden?='{{ SharingState.TRYING_TO_SHARE_ACCESS !== ui.copyPasteSharingState }}'>
+      <p>Your friend has requested to use your internet connection.</p>
+
+      <p>
+        If you'd like to give them access, copy and paste this URL back to
+        them.
+      </p>
+
+      <textarea readonly hidden?='{{ !ui.copyPasteSharingMessage.length }}'
+        class='message'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
+
+      <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>Loading...</span>
+
+      <p>
+        To complete the setup, they have to click ond the link and begin
+        getting access.
+      </p>
+    </div>
+
+    <div id='sharing' hidden?='{{ SharingState.SHARING_ACCESS !== ui.copyPasteSharingState }}'>
+      <p>Success!  A one time connection has been established.</p>
+
+      <paper-button on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
+    </div>
+
+  </template>
+  <script src='copypaste.js'></script>
+</polymer-element>

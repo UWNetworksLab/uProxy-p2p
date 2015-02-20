@@ -21,6 +21,12 @@ class FirefoxConnector implements uProxy.CoreBrowserConnector {
 
   constructor() {
     this.status = { connected: true };
+    var ready :uProxy.Payload = {
+      cmd: 'emit',
+      type: uProxy.Command.GET_INITIAL_STATE,
+      promiseId: 0
+    }
+    this.send(ready);
   }
 
 
@@ -37,6 +43,11 @@ class FirefoxConnector implements uProxy.CoreBrowserConnector {
   public send = (payload :uProxy.Payload,
                  skipQueue :Boolean = false) => {
     port.emit('' + payload.type, {data: payload.data, promiseId: payload.promiseId});
+  }
+
+  public restart = () => {
+    // TODO implement restart for firefox
+    // https://github.com/uProxy/uproxy/issues/751
   }
 
 }  // class FirefoxConnector

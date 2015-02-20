@@ -1,4 +1,6 @@
 Polymer({
+  // Make GettingState enum available to polymer
+  GettingState: GettingState,
 
   ready: function() {
     this.path = <InstancePath>{
@@ -6,7 +8,7 @@ Polymer({
        name: this.network.name,
        userId: this.network.userId
       },
-      userId: this.userId,
+      userId: this.user.userId,
       instanceId: this.instance.instanceId
     };
     // Expose global ui object and UI module in this context. This allows the
@@ -20,8 +22,9 @@ Polymer({
     core.start(this.path).then((endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
-      this.ui.startGettingInUiAndConfig(endpoint);
-      this.ui.instanceGettingAccessFrom = this.instance.instanceId;
+      this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
+    }).catch((e) => {
+      ui.showNotification('Unable to get access from ' + this.user.name);
     });
   },
   stop: function() {

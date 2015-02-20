@@ -1,17 +1,16 @@
 {
   "manifest_version": 2,
-  "name": "uProxy Core App",
-  "description": "(Alpha version: do not use for real!) You need the uProxy Extension to actually use uProxy. uProxy Core App for Chrome provides underlying networking and storage features of uProxy. ",
-  "minimum_chrome_version": "38",
-  "version": "0.4.0",
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDescription__",
+  "minimum_chrome_version": "41.0.2267",
+  "version": "0.6.0",
+  "default_locale": "en",
   "icons": {
-      "128": "icons/uproxy-128.png",
-      "19": "icons/uproxy-19.png",
-      "16": "icons/uproxy-16.png"
+      "128": "icons/128_online.png"
   },
   "app": {
     "background": {
-      "page": "uproxy.html"
+      "page": "background.html"
     }
   },
   "permissions": [
@@ -21,6 +20,10 @@
     "tcp": { "connect" : "" },
     "tcpServer": { "listen": "" },
     "udp": { "send": "", "bind": "" }
+  },
+  "externally_connectable": {
+    "ids" : ["pjpcdnccaekokkkeheolmpkfifcbibnj"],
+    "matches" : ["*://*.uproxy.org/*", "*://1-0-2-inline-install-dot-uproxysite.appspot.com/*"]
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk6KrQptZchMYwQN8CsbRVmhV/COoR0lxansERcz+OrkPctUBSTQVYJw3t17+6JyMPnKYR2DMKCTeYQGrmXzm2U0KpujEKN3WSTtZI4ynTzKbGhWIYo6exaHufcslJngEG91ua/q1fJz3e5Mla8+tIsT9bVdVf4NLfODNbky/Uo0M6KpOLO9r2zJoiO0yg4ThBH+TkNwH8icvHJbt2LzZVRSZtQ1Wl1uT15vnwJPOEYVQkpnEMY5yMBPxyOZ1AmUx714YAas80pSZ7+BlM9ReIirYB7lxeY6hAqs4u8iP5SDh5bg6YFXeYecwQyvnKglLdHq6djy9QyVLKUKxFzMH/wIDAQAB"
 }

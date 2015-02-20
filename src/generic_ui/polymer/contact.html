@@ -1,18 +1,13 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='instance.html'>
 
-<polymer-element name='uproxy-contact' attributes='contact'>
+<polymer-element name='uproxy-contact' attributes='contact, isOnline'>
 
   <template>
     <style>
     :host {
-      position: relative;
-      display: inline-block;
       box-sizing: border-box;
-      width: 100%;
-      background-color: #fff;
       margin: 0;
-      overflow: hidden;
       z-index: 10;
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -21,66 +16,67 @@
     div:focus {
       outline: 0; /* disable blue focus outline around contact */
     }
-    #frame {
+    .frame {
       box-sizing: border-box;
-      padding: 0;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    #avatar {
+    .nameRow {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: 40px; /* room for accessIcon */
+      cursor: pointer;
+    }
+    .avatar {
       width: 36px; height: 36px;
       margin: 8px; border: none; border-radius: 50%;
       background-color: #eee;
-      vertical-align: top;
+      vertical-align: middle;
     }
-    .offline {
+    .name {
+      font-size: 16px;
+    }
+    .accessIcon {
+      position: absolute;
+      right: 0;
+      margin-top: 1em; /* line up with text (hacky) */
+      padding-right: 15px;
+      width: 20px;
+      height: 20px;
+    }
+    .instances {
+      padding-top: 8px;
+      margin-left: 52px; /* line up with right bound of contact picture */
+      margin-right: 40px; /* line up with end of name div (before accessIcon) */
+    }
+    .offline .nameRow {
       opacity: 0.5;
-    }
-    #userId {
-      color: #888;
-      margin-top: 0.5em;
-    }
-    #words {
-      display: inline-block;
-      width: 298px;
-    }
-    h1 {
-      display: block;
-      font-size: 16px; font-weight: 100;
-      margin: 0; padding: 16px 8px 0;
-    }
-    .hasInstances #words:hover h1 {
-      color: #aaa;
-    }
-    #instances {
-      padding: 8px;
-    }
-    #actions {
-      padding: 8px;
-    }
-    .hasInstances {
-      cursor: pointer;
     }
     </style>
 
-    <div tabindex='-1'  id='frame'
-        class='{{ contact.expanded ? "expanded" : "" }} {{ contact.instances.length > 0 ? "hasInstances" : "" }} {{ contact.isOnline ? "online" : "offline" }} '>
-     <!-- on-blur='{{ collapse }}'> -->
-      <img id='avatar' src='{{ contact.imageData }}' on-mousedown='{{ toggle }}'/>
-      <div id='words'>
-        <h1 on-mousedown='{{ toggle }}'>{{ contact.name }}</h1>
-        <div id='userId' hidden?='{{!contact.expanded}}'>{{ contact.userId }}</div>
-        <div id='instances' hidden?='{{!contact.expanded}}'>
-          <template repeat='{{ i in contact.instances }}' vertical layout>
-            <uproxy-instance
-                userId='{{ contact.userId }}'
-                instance='{{ i }}'
-                network='{{contact.network}}'>
-            </uproxy-instance>
-          </template>
-        </div>
+    <div tabindex='-1' class='frame
+        {{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
+      <div on-tap='{{ toggle}}' class='nameRow'>
+        <img class='avatar' src='{{ contact.imageData }}' />
+        <span class='name'>{{ contact.name }}</span>
+        <img src='../icons/GettingAccess_UI_40.gif' class='accessIcon'
+            hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
+        <img src='../icons/SharingAccess_UI_40.gif' class='accessIcon'
+            hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
       </div>
+
+      <div class='instances' hidden?='{{!contact.expanded}}'>
+        <template repeat='{{ i in contact.instances }}' vertical layout>
+          <uproxy-instance
+              user='{{ contact }}'
+              instance='{{ i }}'
+              network='{{contact.network}}'>
+          </uproxy-instance>
+        </template>
+      </div>
+
     </div>
   </template>
 

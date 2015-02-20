@@ -1,0 +1,21 @@
+build_image: freedomjs/freedom
+language: node_js
+node_js:
+- '0.10'
+notifications:
+  email:
+    recipients:
+      - uproxy-eng@googlegroups.com
+    on_success: change
+    on_failure: always
+before_install:
+  - "export DISPLAY=:10.0"
+  - "Xvfb :10 -screen 0 1280x1024x24 &"
+  - "google-chrome --version"
+  - "firefox -v"
+install:
+  - "npm install -g bower"
+  - "bower install --allow-root"
+  - "shippable_retry npm install"
+script:
+  - "grunt test --verbose"

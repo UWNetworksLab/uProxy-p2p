@@ -22,7 +22,6 @@ declare module UI {
     userId       :string;
     name         ?:string;
     imageData    ?:string; // Image URI (e.g. data:image/png;base64,adkwe329...)
-    isOnline     :boolean;
   }
 
   export interface UserMessage {
@@ -49,13 +48,14 @@ declare module UI {
    * TODO: Maybe turn this into an actual class. We'll see.
    */
   export interface Instance {
-    instanceId           :string;
-    description          :string;
-    consent              :Consent.State;
-    access               :AccessState;
-    isOnline             :boolean;
-    bytesSent            :number;
-    bytesReceived        :number;
+    instanceId             :string;
+    description            :string;
+    consent                :Consent.State;
+    localGettingFromRemote :GettingState;
+    localSharingWithRemote :SharingState;
+    isOnline               :boolean;
+    bytesSent              :number;
+    bytesReceived          :number;
   }
 
   /**

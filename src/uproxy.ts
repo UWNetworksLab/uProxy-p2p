@@ -9,6 +9,7 @@
 // TODO: Move the notifications somewhere better.
 /// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
+/// <reference path='interfaces/persistent.d.ts' />
 /// <reference path='networking-typings/communications.d.ts' />
 
 module uProxy {
@@ -23,22 +24,29 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Command {
-    REFRESH_UI = 1000,
+    GET_INITIAL_STATE = 1000,
+    RESTART,
     // Skip REFRESH and RESET commands that have been removed
     LOGIN = 1003,
     LOGOUT,
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
     // Skip unused INVITE. (Invite who to do what, anyway?)
     // Skip unused CHANGE_OPTION = 1007.
-    UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
+    // Skip unused UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
     // Skip unused DISMISS_NOTIFICATION.
     START_PROXYING = 1010,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
+    START_PROXYING_COPYPASTE_GET,
+    STOP_PROXYING_COPYPASTE_GET,
+    START_PROXYING_COPYPASTE_SHARE,
+    STOP_PROXYING_COPYPASTE_SHARE,
+    COPYPASTE_SIGNALLING_MESSAGE,
 
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-    SEND_CREDENTIALS
+    SEND_CREDENTIALS,
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -46,7 +54,7 @@ module uProxy {
   //
   // TODO: Finalize which of these can be removed, then clean up accordingly.
   export enum Update {
-    ALL = 2000,
+    INITIAL_STATE = 2000,
     NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
@@ -67,7 +75,15 @@ module uProxy {
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
-    GET_CREDENTIALS
+    GET_CREDENTIALS,
+    LAUNCH_UPROXY,
+
+    SIGNALLING_MESSAGE, /* copypaste messages */
+    START_GETTING,
+    STOP_GETTING,
+    START_GIVING,
+    STOP_GIVING,
+    STATE
   }
 
   /**
@@ -135,11 +151,19 @@ module uProxy {
 
     modifyConsent(command :ConsentCommand) : void;
 
+    // CopyPaste interactions
+    startCopyPasteGet() : Promise<Net.Endpoint>;
+    stopCopyPasteGet() : void;
+    startCopyPasteShare() : void;
+    stopCopyPasteShare() : void;
+
+    sendCopyPasteSignal(signal :uProxy.Message) : void;
+
     // Using peer as a proxy.
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
     stop () : void;
 
-    updateDescription(description :string) : void;
+    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
@@ -170,6 +194,8 @@ module uProxy {
     send(payload :Payload, skipQueue ?:Boolean) : void;
 
     onUpdate(update :Update, handler :Function) : void;
+
+    restart() : void;
 
     status :StatusObject;
   }
@@ -244,4 +270,33 @@ module UProxyClient {
 // TODO: this is chrome-specific. Move to the right place.
 interface StatusObject {
   connected :boolean;
+}
+
+interface OAuthInfo {
+  url :string;
+  redirect :string
+}
+
+
+// Describing whether or not a remote instance is currently accessing or not,
+// assuming consent is GRANTED for that particular pathway.
+enum GettingState {
+  NONE = 100,
+  TRYING_TO_GET_ACCESS,
+  GETTING_ACCESS
+};
+enum SharingState {
+  NONE = 200,
+  TRYING_TO_SHARE_ACCESS,
+  SHARING_ACCESS
+};
+
+// Enums for Chrome App-Extension communication.
+// Used when the Extension and App are initiating their connection.
+//
+// TODO: Eliminate this someday, when we can make uProxy in chrome not be split
+// between an app and an extension.
+module ChromeMessage {
+  export var CONNECT :string = 'connect';
+  export var ACK :string = 'ack';
 }

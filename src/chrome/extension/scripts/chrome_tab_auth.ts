@@ -3,8 +3,6 @@
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
-var REDIRECT_URL = "https://www.uproxy.org/oauth-redirect-uri";
-
 declare var core :CoreConnector;
 
 // TODO: write a similar class for Firefox that will implement a common
@@ -20,44 +18,32 @@ class ChromeTabAuth {
   constructor() {
   }
 
-  public login = () : void => {
-    this.launchAuthTab_();
+  public login = (oauthInfo :OAuthInfo) : void => {
+    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
   }
 
-  public getOauthUrl = (redirctUrl) : string => {
-    throw new Error('Operation not implemented');
-  }
 
-  public extractCode = (url) : Promise<any> => {
-    throw new Error('Operation not implemented');
-  }
+  private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
+    var onTabChange = (tabId, changeInfo, tab) => {
+      if (tab.url.indexOf(redirectUrl) === 0) {
+        chrome.tabs.onUpdated.removeListener(onTabChange);
+        chrome.tabs.remove(tabId);
+        this.sendCredentials_(tab.url);
+      }
+    };
 
-  public onTabChange = (tabId, changeInfo, tab) => {
-    if (tab.url.indexOf(REDIRECT_URL) === 0) {
-      chrome.tabs.onUpdated.removeListener(this.onTabChange);
-      chrome.tabs.remove(tabId);
-      this.extractCode(tab.url).then((credentials :any) => {
-        this.sendCredentials_(credentials);
-      }).catch((e) => {
-        this.onError_(e.toString());
-      });
-    }
-  };
-
-  private launchAuthTab_ = () : void => {
-    chrome.tabs.create({url: this.getOauthUrl(REDIRECT_URL)},
-                        function(tab: chrome.tabs.Tab) {
-      chrome.tabs.onUpdated.addListener(this.onTabChange);
+    chrome.tabs.create({url: url},
+                       function(tab: chrome.tabs.Tab) {
+      chrome.windows.update(tab.windowId, {focused: true});
+      chrome.tabs.onUpdated.addListener(onTabChange);
     }.bind(this));
   }
 
   private onError_ = (errorText :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'error', message: errorText});
+    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, errorText);
   }
 
-  private sendCredentials_ = (credentials :GoogleTalkCredentials) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS,
-                     {cmd: 'auth', message: credentials});
+  private sendCredentials_ = (url :string) : void => {
+    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, url);
   }
 }

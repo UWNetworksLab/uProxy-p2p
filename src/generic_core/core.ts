@@ -21,17 +21,24 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 /// <reference path='../networking-typings/communications.d.ts' />
 
+// Note that the proxy runs extremely slowly in debug ('*:D') mode.
+freedom['loggingprovider']().setConsoleFilter(['*:I']);
 
 var storage = new Core.Storage();
 
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
 // this to be freedom, and communicate using 'emit's and 'on's.
-var bgAppPageChannel = freedom;
+var bgAppPageChannel = new freedom();
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
 var remoteProxyInstance : Core.RemoteInstance = null;
+
+// This is a global instance of RemoteConnection that is currently used for
+// either sharing or using a proxy through the copy+paste interface (i.e.
+// without an instance)
+var copyPasteConnection : Core.RemoteConnection = null;
 
 // Entry-point into the UI.
 class UIConnector implements uProxy.UIAPI {
@@ -46,14 +53,15 @@ class UIConnector implements uProxy.UIAPI {
     bgAppPageChannel.emit('' + type, data);
   }
 
-  public updateAll = () => {
-    console.log('sending ALL state to UI.');
-    for (var network in Social.networks) {
-      Social.notifyUI(network);
-    }
-    // Only send ALL update to UI when description is loaded.
-    core.loadDescription.then(() => {
-      this.update(uProxy.Update.ALL, {'description': core.description});
+  public sendInitialState = () => {
+    // Only send update to UI when global settings have loaded.
+    core.loadGlobalSettings.then(() => {
+      this.update(
+          uProxy.Update.INITIAL_STATE,
+          {
+            networkNames: Object.keys(Social.networks),
+            globalSettings: core.globalSettings
+          });
     });
   }
 
@@ -78,8 +86,21 @@ var ui = new UIConnector();
  * sends updates to the UI, and handles commands from the UI.
  */
 class uProxyCore implements uProxy.CoreAPI {
-  public description :string = 'My computer';
-  public loadDescription :Promise<void> = null;
+  private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
+                                {urls: ['stun:stun1.l.google.com:19302']},
+                                {urls: ['stun:stun2.l.google.com:19302']},
+                                {urls: ['stun:stun3.l.google.com:19302']},
+                                {urls: ['stun:stun4.l.google.com:19302']}];
+
+  // Initially, the STUN servers are a copy of the default.
+  // We need to use slice to copy the values, otherwise modifying this
+  // variable can modify DEFAULT_STUN_SERVERS_ as well.
+  public globalSettings :Core.GlobalSettings
+      = {description: '',
+         stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
+         hasSeenSharingEnabledScreen: false,
+         hasSeenWelcome: false};
+  public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
     console.log('Preparing uProxy Core.');
@@ -92,14 +113,29 @@ class uProxyCore implements uProxy.CoreAPI {
       console.error(e);
     });
 
-    // TODO: description isn't loading properly after a restart in chrome,
-    // although save then load immediately after works.
-    this.loadDescription = storage.load<Core.StoredDescription>('description')
-        .then((loadedDescriptionObj :Core.StoredDescription) => {
-          console.log('Loaded description: "' + loadedDescriptionObj.description + '"');
-          this.description = loadedDescriptionObj.description;
+    copyPasteConnection = new Core.RemoteConnection(ui.update);
+
+    this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
+        .then((globalSettingsObj :Core.GlobalSettings) => {
+          console.log('Loaded global settings: ' + JSON.stringify(globalSettingsObj));
+          this.globalSettings = globalSettingsObj;
+          // If no custom STUN servers were found in storage, use the default
+          // servers.
+          if (!this.globalSettings.stunServers
+              || this.globalSettings.stunServers.length == 0) {
+            this.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS_.slice(0);
+          }
+          // If storage does not know if this user has seen a specific overlay
+          // yet, assume the user has not seen it so that they will not miss any
+          // onboarding information.
+          if (this.globalSettings.hasSeenSharingEnabledScreen == null) {
+            this.globalSettings.hasSeenSharingEnabledScreen = false;
+          }
+          if (this.globalSettings.hasSeenWelcome == null) {
+            this.globalSettings.hasSeenWelcome = false;
+          }
         }).catch((e) => {
-          console.log('No description loaded', e);
+          console.log('No global settings loaded', e);
         });
   }
 
@@ -132,7 +168,7 @@ class uProxyCore implements uProxy.CoreAPI {
         var err = 'onPromiseCommand called for cmd ' + cmd +
                   'with promiseId undefined';
         console.error(err)
-        return Promise.reject(err);
+        return Promise.reject(new Error(err));
       }
 
       // Call handler function, then return success or failure to UI.
@@ -145,7 +181,7 @@ class uProxyCore implements uProxy.CoreAPI {
         (errorForCallback :Error) => {
           ui.update(uProxy.Update.COMMAND_REJECTED,
               { promiseId: args.promiseId,
-                errorForCallback: errorForCallback });
+                errorForCallback: errorForCallback.toString() });
         }
       );
     };
@@ -164,12 +200,12 @@ class uProxyCore implements uProxy.CoreAPI {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (networkName:string) : Promise<void> => {
+  public login = (networkName :string) : Promise<void> => {
     if (networkName === Social.MANUAL_NETWORK_ID) {
       var network = Social.getNetwork(networkName, '');
       var loginPromise = network.login(true);
       loginPromise.then(() => {
-        ui.updateAll();
+        Social.notifyUI(networkName);
         console.log('Logged in to manual network');
       });
       return loginPromise;
@@ -178,7 +214,7 @@ class uProxyCore implements uProxy.CoreAPI {
     if (!(networkName in Social.networks)) {
       var warn = 'Network ' + networkName + ' does not exist.';
       console.warn(warn)
-      return Promise.reject(warn);
+      return Promise.reject(new Error(warn));
     }
     var network = Social.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
@@ -209,7 +245,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkInfo:NetworkInfo) : Promise<void> => {
+  public logout = (networkInfo :NetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     var userId = networkInfo.userId;
     var network = Social.getNetwork(networkName, userId);
@@ -218,10 +254,6 @@ class uProxyCore implements uProxy.CoreAPI {
       return;
     }
     return network.logout().then(() => {
-      if (networkName !== Social.MANUAL_NETWORK_ID) {
-        delete Social.networks[networkName][userId];
-      }
-      ui.updateAll();
       console.log('Successfully logged out of ' + networkName);
     });
     // TODO: disable auto-login
@@ -237,14 +269,32 @@ class uProxyCore implements uProxy.CoreAPI {
    * local instances will then propogate their description update to all
    * instances.
    */
-  public updateDescription = (newDescription:string) => {
-    // TODO: Send the new description to peers.  Right now we assume that users
-    // can't update the description after they are signed in.
-    var newDescriptionObj :Core.StoredDescription = {
-      description: newDescription
-    };
-    storage.save<Core.StoredDescription>('description', newDescriptionObj);
-    core.description = newDescription;
+
+  public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
+    storage.save<Core.GlobalSettings>('globalSettings', newSettings);
+
+    // Clear the existing servers and add in each new server.
+    // Trying globalSettings = newSettings does not correctly update
+    // pre-existing references to stunServers (e.g. from RemoteInstances).
+    this.globalSettings.stunServers
+        .splice(0, this.globalSettings.stunServers.length);
+    for (var i = 0; i < newSettings.stunServers.length; ++i) {
+      this.globalSettings.stunServers.push(newSettings.stunServers[i]);
+    }
+
+    if (newSettings.description != this.globalSettings.description) {
+      this.globalSettings.description = newSettings.description;
+      // Resend instance info to update description for logged in networks.
+      for (var networkName in Social.networks) {
+        for (var userId in Social.networks[networkName]) {
+          Social.networks[networkName][userId].resendInstanceHandshakes();
+        }
+      }
+    }
+
+    this.globalSettings.hasSeenSharingEnabledScreen =
+        newSettings.hasSeenSharingEnabledScreen;
+    this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
   }
 
   /**
@@ -264,6 +314,32 @@ class uProxyCore implements uProxy.CoreAPI {
     instance.modifyConsent(command.action);
   }
 
+  public startCopyPasteGet = () : Promise<Net.Endpoint> => {
+    if (remoteProxyInstance) {
+      console.log('Existing proxying session! Terminating...');
+      remoteProxyInstance.stop();
+      remoteProxyInstance = null;
+    }
+
+    return copyPasteConnection.startGet();
+  }
+
+  public stopCopyPasteGet = () => {
+    copyPasteConnection.stopGet();
+  }
+
+  public startCopyPasteShare = () => {
+    copyPasteConnection.startShare();
+  }
+
+  public stopCopyPasteShare = () => {
+    copyPasteConnection.stopShare();
+  }
+
+  public sendCopyPasteSignal = (signal :uProxy.Message) => {
+    copyPasteConnection.handleSignal(signal);
+  }
+
   /**
    * Begin using a peer as a proxy server.
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
@@ -277,17 +353,26 @@ class uProxyCore implements uProxy.CoreAPI {
       remoteProxyInstance.stop();
       remoteProxyInstance = null;
     }
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      console.log('Existing copy+paste proxying session! Terminating...');
+      copyPasteConnection.stopGet();
+    }
+
     var remote = this.getInstance(path);
     if (!remote) {
       var err = 'Instance ' + path.instanceId + ' does not exist for proxying.';
       console.error(err);
-      return Promise.reject(err);
+      return Promise.reject(new Error(err));
     }
-    // remote.start will send an update to the UI.
+    // Remember this instance as our proxy.  Set this before start fulfills
+    // in case the user decides to cancel the proxy before it begins.
+    remoteProxyInstance = remote;
     return remote.start().then((endpoint:Net.Endpoint) => {
-      // Remember this instance as our proxy.
-      remoteProxyInstance = remote;
+      // remote.start will send an update to the UI.
       return endpoint;
+    }).catch((e) => {
+      remoteProxyInstance = null;
+      return Promise.reject(new Error('Error starting proxy'));
     });
   }
 
@@ -297,6 +382,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public stop = () => {
     if (!remoteProxyInstance) {
       console.error('Cannot stop proxying when there is no proxy');
+      return;
     }
     remoteProxyInstance.stop();
     remoteProxyInstance = null;
@@ -332,7 +418,6 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
-
 }  // class uProxyCore
 
 
@@ -349,7 +434,7 @@ function _validateKeyHash(keyHash:string) {
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-core.onCommand(uProxy.Command.REFRESH_UI, ui.updateAll);
+core.onCommand(uProxy.Command.GET_INITIAL_STATE, ui.sendInitialState);
 // When the login message is sent from the extension, assume it's explicit.
 core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
 core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
@@ -358,6 +443,21 @@ core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
 // core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
 //                core.sendInstanceHandshakeMessage);
 core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
+
+core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
+                      core.startCopyPasteGet);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+               core.stopCopyPasteGet);
+
+core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
+               core.startCopyPasteShare);
+
+core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+               core.stopCopyPasteShare);
+
+core.onCommand(uProxy.Command.COPYPASTE_SIGNALLING_MESSAGE,
+               core.sendCopyPasteSignal);
 
 core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
 core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
@@ -368,16 +468,13 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 //   // TODO: Handle changes that might affect proxying.
 // });
 
-core.onCommand(uProxy.Command.UPDATE_LOCAL_DEVICE_DESCRIPTION,
-               core.updateDescription);
-
 // TODO: make the invite mechanism an actual process.
 // core.onCommand(uProxy.Command.INVITE, (userId:string) => {
 // });
 
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
-
+core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -1,8 +1,12 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../lib/core-icons/core-icons.html'>
 <link rel="import" href='description.html'>
-<link rel="import" href='faq-link.html'>
+<link rel="import" href="faq-link.html">
+<link rel='import' href='link.html'>
 
-<polymer-element name='uproxy-settings' attributes=''>
+<polymer-element name='uproxy-settings'>
 
   <template>
     <style>
@@ -22,13 +26,15 @@
       background-color: #ffffff;
       z-index: 2001;
       font-size: 14px;
+      visibility: hidden;
     }
     :host(.active) {
       left: 0;
       overflow: hidden;
+      visibility: visible;
     }
     .userInfo {
-      background-color: #009688;
+      background-color: #009688;  /* dark green */
       width: 100%;
       color: white;
       margin-bottom: 32px;
@@ -40,13 +46,21 @@
       padding-left: 32px;
       line-height: 32px;
       color: rgb(112, 112, 112);
+      display: block;
     }
-    .userNameOrId {
+    #descriptionWrapper {
+      padding-left: 32px;
+      color: rgb(112, 112, 112);
+    }
+    .userInfoName, .userInfoIDWithoutName {
       font-size: 16px;
+    }
+    .userInfoID {
+      font-size: 14px;
+      opacity: 0.54;
     }
     .networkName {
       padding-top: 0.5em;
-      padding-bottom: 0.5em;
       opacity: 0.54;
     }
     .userImage {
@@ -55,20 +69,78 @@
       border-radius: 50%;
       margin-left: -6px;
     }
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      width: 70px;
+    }
+    paper-button:focus {
+      border: 1px solid #008074;
+    }
+    paper-input-decorator {
+      max-width: 60%;
+    }
+    paper-input-decorator /deep/ .unfocused-underline,
+    paper-input-decorator /deep/ .focused-underline,
+    paper-input-decorator /deep/ .cursor {
+        background-color: #009688;
+    }
+    core-icon {
+      height: 12px;
+    }
+    #advancedSettings {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      color: rgb(112, 112, 112);
+    }
 
     </style>
 
-    <div hidden?='{{ui.onlineNetwork==null}}'>
+    <div hidden?='{{model.onlineNetwork==null}}'>
       <div class='userInfo'>
-        <img class='userImage' hidden?='{{ui.onlineNetwork.imageData==null}}'
-            src='{{ui.onlineNetwork.imageData}}'>
-        <div class='networkName'>Connected with {{ui.onlineNetwork.name}}</div>
-        <div class='userNameOrId'>
-          {{ui.onlineNetwork.userName ? ui.onlineNetwork.userName : ui.onlineNetwork.userId}}
+        <img class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
+            src='{{model.onlineNetwork.imageData}}'>
+        <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
+        <!-- show userName and userId if both are available -->
+        <div hidden?='{{!model.onlineNetwork.userName}}'>
+          <div class='userInfoName'>{{model.onlineNetwork.userName}}</div>
+          <div class='userInfoID'>{{model.onlineNetwork.userId}}</div>
+        </div>
+        <!-- otherwise show only userId -->
+        <div hidden?='{{model.onlineNetwork.userName}}'>
+          <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
         </div>
       </div>
+      <div id='descriptionWrapper'>
+        Device description
+        <uproxy-description></uproxy-description>
+      </div>
+      <uproxy-link class='actionLink' on-tap='{{ toggleAdvancedSettings }}' role='button'>
+        Advanced Settings
+        <core-icon icon="expand-more" hidden?='{{displayAdvancedSettings}}'></core-icon>
+        <core-icon icon="expand-less" hidden?='{{!displayAdvancedSettings}}'></core-icon>
+      </uproxy-link>
+      <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
+        <paper-input-decorator label="Custom STUN server">
+          <input is="core-input" value='{{stunServer}}'>
+        </paper-input-decorator>
+        <paper-button class='button' on-tap="{{setStunServer}}">Update</paper-button>
+        <paper-button class='button' on-tap="{{resetStunServers}}">Reset</paper-button>
+        <br><br>
+        <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
+        <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
+      </div>
+
       <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
-      <div class='actionLink' on-tap='{{logOut}}'>Log-out of uProxy</div>
+      <uproxy-link class='actionLink' on-tap='{{ logOut }}' role='button'>
+        Log-out of uProxy
+      </uproxy-link>
+      <uproxy-link class='actionLink' on-tap='{{ restart }}' hidden?='{{ browser !== "chrome" }}' role='button'>
+        Restart
+      </uproxy-link>
     </div>
 
   </template>

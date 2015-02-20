@@ -9,9 +9,15 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
-    spyOn(console, 'error');
   })
+
+  it('starts with empty storage', (done) => {
+    storage.reset().then(() => {
+      storage.keys().then((keys) => {
+        expect(keys).toEqual([]);
+      }).then(done);
+    });
+  });
 
   it('saves and loads to storage', (done) => {
     storage.save('birds', {
@@ -21,7 +27,10 @@ describe('Core.Storage', () => {
         expect(result).toEqual({
           'can': 'chirp'
         });
-      }).then(done);
+        storage.keys().then((keys) => {
+          expect(keys).toEqual(['birds']);
+        }).then(done);
+      });
     });
   });
 
@@ -50,7 +59,10 @@ describe('Core.Storage', () => {
           expect(result).toEqual({
             'actually': 'meow'
           });
-        }).then(done);
+          storage.keys().then((keys) => {
+            expect(keys).toEqual(['birds', 'cats']);
+          }).then(done);
+        });
       })
     });
   });

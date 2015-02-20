@@ -34,6 +34,8 @@ declare module Social {
      */
     login :(remember:boolean) => Promise<void>;
 
+    getStorePath :() => string;
+
     /**
      * Does nothing if already logged out.
      */
@@ -66,6 +68,11 @@ declare module Social {
      * unilaterally sent.
      */
     sendInstanceHandshake :(clientId:string, consent :Consent.WireState) => Promise<void>;
+
+    /**
+      * Resends the instance handeshake to all uProxy instances.
+      */
+    resendInstanceHandshakes :() => void;
 
     /**
      * Sends a message to a remote client.

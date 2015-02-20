@@ -29,12 +29,6 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
-
-  interface InstanceReconnection {
-    promise :Promise<string>;  // Fulfilled with new clientID upon reconnection.
-    fulfill :Function;         // Call fulfill when instance reconnects.
-  }
-
   /**
    * Core.User
    *
@@ -45,15 +39,29 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser {
+  export class User implements BaseUser, Core.Persistent {
 
+    // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
+    // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
+
+    private fulfillStorageLoad_ : () => void;
+    public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageLoad_ = F;
+    }).then(() => {
+      this.notifyUI();
+    });
+
+    private fulfillNameReceived_ : (string) => void;
+    public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
+      this.fulfillNameReceived_ = F;
+    });
 
     /**
      * Users are constructed purely on the basis of receiving a userId.
@@ -77,20 +85,31 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+
+      storage.load<UserState>(this.getStorePath()).then((state) => {
+        this.restoreState(state);
+        this.fulfillStorageLoad_();
+      }).catch((e) => {
+        // User not found in storage - we should fulfill the create promise
+        // anyway as this is not an error.
+        this.fulfillStorageLoad_();
+      });
     }
 
     /**
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom_Social.UserProfile) => {
+    public update = (profile :freedom_Social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);
       }
       this.name = profile.name;
+      this.fulfillNameReceived_(this.name);
       this.profile = profile;
       this.log('Updating...');
+      this.saveToStorage();
       this.notifyUI();
     }
 
@@ -125,12 +144,17 @@ module Core {
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :UProxyClient.State) => {
+    public handleClient = (client :UProxyClient.State) : void => {
       if (client.userId != this.userId) {
         console.error(this.userId +
             'received client with unexpected userId: ' + client.userId);
         return;
       }
+      else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+        // Ignore non-uproxy contacts
+        return;
+      }
+
       this.log('received client' + JSON.stringify(client));
       if (client.clientId in this.clientIdToStatusMap &&
           this.clientIdToStatusMap[client.clientId] == client.status) {
@@ -147,8 +171,8 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(
-                client.clientId, this.getConsentForClient_(client.clientId));
+            this.network.sendInstanceHandshake(client.clientId,
+                this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
@@ -157,11 +181,6 @@ module Core {
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
           this.removeClient_(client.clientId);
-          break;
-        case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
-          // TODO: Figure out potential invite or chat-mechanism for non-uProxy
-          // clients.
-          this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         default:
           console.warn('Received client ' + client.clientId +
@@ -177,17 +196,19 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
-        console.error(this.userId +
-            ' received message for non-existing client: ' + clientId);
+        var errorStr = this.userId +
+            ' received message for non-existing client: ' + clientId;
+        console.error(errorStr);
         return;
       }
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
           this.syncInstance_(clientId, <InstanceMessage>msg.data);
-          break;
+          return;
+
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
@@ -196,18 +217,22 @@ module Core {
             // received an onUserProfile and onClientState event, but not yet
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
+            // issues: https://github.com/uProxy/uproxy/pull/732
             console.error('failed to get instance for clientId ' + clientId);
             return;
           }
           instance.handleSignal(msg.type, msg.data);
-          break;
+          return;
+
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
           this.network.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
-          break;
+          return;
+
         default:
-          console.error(this.userId + ' received invalid message.', msg);
+          var errorStr = this.userId + ' received invalid message.' + msg;
+          console.error(errorStr);
       }
     }
 
@@ -219,7 +244,7 @@ module Core {
       return (this.instances_[instanceId]).getConsentBits();;
     }
 
-    public getInstance = (instanceId:string) => {
+    public getInstance = (instanceId:string) : Core.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
@@ -241,8 +266,10 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :InstanceMessage)
-        : void => {
+    public syncInstance_ = (clientId :string, data :InstanceMessage) : void => {
+      // TODO: use handlerQueues to process instances messages in order, to
+      // address potential race conditions described in
+      // https://github.com/uProxy/uproxy/issues/734
       var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         console.error('Received an Instance Handshake from a non-uProxy client! '
@@ -265,20 +292,19 @@ module Core {
         existingInstance.update(instance);
         if (!data.consent) {
           existingInstance.sendConsent();
+        } else {
+          existingInstance.updateConsent(data.consent);
         }
       } else {
-        existingInstance = new Core.RemoteInstance(this, instance);
-        this.instances_[instanceId] = existingInstance;
+        // Create a new instance.
+        var newInstance = new Core.RemoteInstance(this, instanceId, instance);
+        this.instances_[instanceId] = newInstance;
+        this.saveToStorage();
+        this.notifyUI();
+        if (data.consent) {
+          newInstance.updateConsent(data.consent);
+        }
       }
-
-      if (data.consent) {
-        existingInstance.updateConsent(data.consent);
-      }
-
-      // TODO: this may send a duplicate notification to the UI, because
-      // instance.update and the instance constructor both notify the UI.
-      // This shouldn't be a problem but we may want to clean this up.
-      this.notifyUI();
     }
 
     /**
@@ -296,7 +322,7 @@ module Core {
      * Remove a client from this User. Also removes the client <--> instance
      * mapping if it exists.
      */
-    private removeClient_ = (clientId:string) => {
+    private removeClient_ = (clientId:string) : void => {
       delete this.clientIdToStatusMap[clientId];
       var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
@@ -309,7 +335,7 @@ module Core {
      * Send the latest full state about everything in this user to the UI.
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
-    public notifyUI = () => {
+    public notifyUI = () : void => {
       if ('pending' == this.name) {
         this.log('Not showing UI without profile.');
         return;
@@ -325,7 +351,17 @@ module Core {
       var instanceStatesForUi = [];
       for (var instanceId in this.instances_) {
         instanceStatesForUi.push(
-          this.instances_[instanceId].currentStateForUi());
+            this.instances_[instanceId].currentStateForUi());
+      }
+      if (instanceStatesForUi.length === 0) {
+        // Don't send users to UI if they don't have any instances (i.e. are not
+        // uProxy users).
+        // TODO: ideally we should not have User objects for users without
+        // instances, but for now we create Users whenever we get a UserProfile
+        // or ClientState from the social provider that isn't
+        // ONLINE_WITH_OTHER_APP.  For now this is necessary because we don't
+        // yet load instances from storage until User objects are created.
+        return;
       }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
@@ -335,8 +371,7 @@ module Core {
         user: {
           userId: this.profile.userId,
           name: this.profile.name,
-          imageData: this.profile.imageData,
-          isOnline: this.isOnline()
+          imageData: this.profile.imageData
         },
         instances: instanceStatesForUi
       })
@@ -373,36 +408,6 @@ module Core {
       this.network.send(clientId, instanceRequestMsg);
     }
 
-    public isOnline = () : boolean => {
-      // For each instance we know about, check if it's online.
-      var hasInstances = false;
-      var hasOnlineInstances = false;
-      for (var instanceId in this.instances_) {
-        hasInstances = true;
-        if (this.isInstanceOnline(instanceId)) {
-          hasOnlineInstances = true;
-          break;
-        }
-      }
-
-      // If the user has instances, return true iff any of them are online.
-      if (hasInstances) {
-        return hasOnlineInstances;
-      }
-
-      // If the user does not have instances, check if they are online with
-      // another app.
-      for (var clientId in this.clientIdToStatusMap) {
-        var status = this.clientIdToStatusMap[clientId];
-        if (status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
-          return true;
-        }
-      }
-
-      // User is not online.
-      return false;
-    }
-
     public isInstanceOnline = (instanceId :string) : boolean => {
       var clientId = this.instanceToClientMap_[instanceId];
       if (!clientId) {
@@ -415,21 +420,69 @@ module Core {
       return false;
     }
 
-    public handleLogout = () => {
+    public getStorePath() {
+      return this.network.getStorePath() + this.userId;
+    }
+
+    public saveToStorage = () : void => {
+      this.onceLoaded.then(() => {
+        var state = this.currentState();
+        storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+      });
+    }
+
+    public restoreState = (state :UserState) : void => {
+      if (this.name === 'pending') {
+        this.name = state.name;
+      }
+
+      if (this.name !== 'pending') {
+        this.fulfillNameReceived_(this.name);
+      }
+
+      if (typeof this.profile.imageData === 'undefined') {
+        this.profile.imageData = state.imageData;
+      }
+
+      // Restore all instances.
+      for (var i in state.instanceIds) {
+        var instanceId = state.instanceIds[i];
+        if (!(instanceId in this.instances_)) {
+          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
+        }
+      }
+    }
+
+    public currentState = () :UserState => {
+      return cloneDeep({
+        name : this.name,
+        imageData: this.profile.imageData,
+        instanceIds: Object.keys(this.instances_)
+      });
+    }
+
+    public handleLogout = () : void => {
       for (var instanceId in this.instances_) {
         this.instances_[instanceId].handleLogout();
+      }
+    }
+
+    public resendInstanceHandshakes = () : void => {
+      for (var instanceId in this.instanceToClientMap_) {
+        var clientId = this.instanceToClientMap_[instanceId];
+        this.network.sendInstanceHandshake(
+            clientId, this.getConsentForClient_(clientId));
       }
     }
 
   }  // class User
 
   export interface UserState {
-    userId      :string;
     name        :string;
+    imageData     :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
-    // Don't save the clients, because those are completely ephemeral.
   }
 
 }  // module uProxy

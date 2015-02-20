@@ -6,6 +6,9 @@
       "uproxy-lib/arraybuffers/arraybuffers.js",
       "uproxy-lib/handler/queue.js",
       "uproxy-networking/ipaddrjs/ipaddr.min.js",
+      "uproxy-lib/logging/logging.js",
+      "uproxy-lib/webrtc/datachannel.js",
+      "uproxy-lib/webrtc/peerconnection.js",
       "uproxy-networking/tcp/tcp.js",
       "uproxy-networking/socks-common/socks-headers.js",
       "uproxy-networking/socks-to-rtc/socks-to-rtc.js",
@@ -14,9 +17,11 @@
       "util.js",
       "auth.js",
       "consent.js",
+      "firewall.js",
       "storage.js",
       "local-instance.js",
       "remote-instance.js",
+      "remote-connection.js",
       "user.js",
       "social-enum.js",
       "social.js",
@@ -28,19 +33,18 @@
       "url": "../lib/freedom-social-xmpp/social.google.json",
       "api": "social"
     },
-    "SOCIAL-Facebook": {
-      "url": "../lib/freedom-social-facebook/social.facebook.json",
-      "api": "social"
-    },
     "storage": {
       "url": "../lib/storage/storage.shared.json",
       "api": "storage"
+    },
+    "loggingprovider": {
+      "url": "uproxy-lib/loggingprovider/loggingprovider.json",
+      "api": "loggingprovider"
     }
   },
   "permissions": [
-    "core.log",
-    "core.peerconnection",
-    "core.uproxypeerconnection",
+    "core.rtcpeerconnection",
+    "core.rtcdatachannel",
     "core.tcpsocket",
     "core.udpsocket"
   ]

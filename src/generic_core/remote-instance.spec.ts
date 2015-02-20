@@ -7,17 +7,30 @@
  * correct consent values between remote instances.
  */
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../webrtc/peerconnection.d.ts' />
 /// <reference path='remote-instance.ts' />
 
 describe('Core.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
-      'getLocalInstanceId',
       'send',
       'notifyUI',
       'instanceToClient'
   ]);
+
+  user.network = <Social.Network><any>jasmine.createSpyObj(
+      'network', ['sendInstanceHandshake']);
+
+  user['getLocalInstanceId'] = function() {
+      return 'localInstanceId';
+  }
+
+  user.isInstanceOnline = function() {
+    return true;
+  };
+  user.onceNameReceived = Promise.resolve<string>("name");
+
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
           'onceReady'
@@ -31,17 +44,89 @@ describe('Core.RemoteInstance', () => {
   beforeEach(() => {
     spyOn(console, 'log');
     spyOn(console, 'warn');
-    spyOn(console, 'error');
+  });
+  describe('storage', () => {
+    var realStorage = new Core.Storage;
+    var saved;
+    var instance0;
+
+   it('fresh instance has no state', (done) => {
+      storage.save = function(key, value) {
+        saved = realStorage.save(key, value);
+        return saved;
+      };
+      instance0 = new Core.RemoteInstance(user, 'instanceId', null);
+      instance0.onceLoaded.then(() => {
+        expect(instance0.description).not.toBeDefined();
+        expect(instance0.keyHash).not.toBeDefined();
+        expect(instance0.consent).toEqual(new Consent.State);
+        done();
+      });
+    });
+
+    it('update', (done) => {
+      var handshake :InstanceHandshake = {
+        instanceId : 'instanceId',
+        keyHash : 'dummy-keyhash',
+        description: 'home computer'
+      };
+      spyOn(instance0, 'sendConsent');
+      instance0.update(handshake);
+      instance0.modifyConsent(Consent.UserAction.REQUEST);
+
+      instance0.onceLoaded.then(() => {
+        expect(saved).toBeDefined();
+        saved.then(() => {
+          var newInstance = new Core.RemoteInstance(user, 'instanceId', null);
+          newInstance.onceLoaded.then(() => {
+            expect(newInstance.currentState()).toEqual(instance0.currentState());
+            done();
+          });
+        });
+      });
+    });
+
+    it ('delay loading', (done) => {
+      var fulfill;
+      storage.load = function(key) {
+        var delay = new Promise((F, R) => {
+          fulfill = F;
+        });
+        return delay.then(() => {
+          return realStorage.load(instance0.getStorePath());
+        });
+      }
+
+      var handshake :InstanceHandshake = {
+        instanceId : 'instanceId',
+        keyHash : 'new-keyhash',
+        description: 'new description'
+      };
+      var instance2 = new Core.RemoteInstance(user, 'instanceId', handshake);
+      var consent :Consent.WireState = {
+        isRequesting: true,
+        isOffering: true,
+      };
+      instance2.updateConsent(consent);
+      instance2.onceLoaded.then(() => {
+        instance2.description = 'new description';
+        expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
+        storage = new Core.Storage;
+      }).then(done);
+      fulfill();
+    })
   });
 
-  it('constructs from a received Instance Handshake', () => {
+  it('constructs from a received Instance Handshake', (done) => {
     var handshake :Instance = {
       instanceId: 'fakeinstance',
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    instance = new Core.RemoteInstance(user, handshake);
+    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
     expect(instance.instanceId).toEqual('fakeinstance');
+    done();
   });
 
   it('begins with lowest consent bits', () => {
@@ -125,7 +210,6 @@ describe('Core.RemoteInstance', () => {
     });
   });
 
-
   describe('local consent towards remote client', () => {
 
     beforeEach(() => {
@@ -206,35 +290,44 @@ describe('Core.RemoteInstance', () => {
       expect(instance.consent).toEqual(new Consent.State());
     });
 
-    it('remote cancels their consent', () => {
+    it('remote cancels their consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = true;
       instance.consent.remoteGrantsAccessToLocal = true;
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+        done();
+      });
     });
 
-    it('remote gives consent', () => {
+    it('remote gives consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = false;
       instance.consent.remoteGrantsAccessToLocal = false;
       instance.updateConsent({
         isRequesting: true,
         isOffering:   true
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+        done();
+      });
     });
 
-    it('receiving consent bits sends update to UI', () => {
+    it('receiving consent bits sends update to UI', (done) => {
       instance.consent = new Consent.State();
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(user.notifyUI).toHaveBeenCalled();
+      instance.onceLoaded.then(() => {
+        expect(user.notifyUI).toHaveBeenCalled();
+        done();
+      });
     });
 
   });
@@ -279,48 +372,50 @@ describe('Core.RemoteInstance', () => {
 
   });
 
-  it('two remote instances establish mutual consent', () => {
+  it('two remote instances establish mutual consent', (done) => {
     (<any>user.instanceToClient).and.callFake((instanceId) => {
       return instanceId;
     });
 
-    user.network = <Social.Network><any>jasmine.createSpyObj(
-        'network', ['sendInstanceHandshake']);
-
-    var alice = new Core.RemoteInstance(user, {
-      instanceId: 'instance-alice',
+    var alice = new Core.RemoteInstance(user, 'instanceId-alice', {
+      instanceId: 'instanceId-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(user, {
-      instanceId: 'instance-bob',
+    var bob = new Core.RemoteInstance(user, 'instanceId-bob', {
+      instanceId: 'instanceId-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
     });
 
     (<any>user.network.sendInstanceHandshake).and.callFake((clientId, consent) => {
-      if (clientId === 'instance-alice') {
+      if (clientId === 'instanceId-alice') {
         bob.updateConsent(consent);
-      } else if (clientId === 'instance-bob') {
+      } else if (clientId === 'instanceId-bob') {
         alice.updateConsent(consent);
       }
     });
 
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
-    expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
-    expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
-    // Bob accepts / offers
-    bob.modifyConsent(Consent.UserAction.OFFER);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+    Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
+      expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
+      expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
+      expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
+      expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
+      // Bob accepts / offers
+      bob.modifyConsent(Consent.UserAction.OFFER);
+      Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
+        expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
+        expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+        done()
+      });
+    });
   });
 
   describe('proxying', () => {
 
-    var alice = new Core.RemoteInstance(user, {
+    var alice = new Core.RemoteInstance(user, 'instance-alice', {
       instanceId: 'instance-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
@@ -328,45 +423,80 @@ describe('Core.RemoteInstance', () => {
       bytesReceived: 0
     });
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
+    // TODO once using uproxy-lib v20+, move to real mocks (examples:
+    // https://github.com/uProxy/uproxy-lib/blob/dev/src/freedom/mocks/mock-eventhandler.ts
+    // https://github.com/uProxy/uproxy-lib/blob/dev/src/webrtc/peerconnection.spec.ts
+    // )
     var fakeSocksToRtc = {
-      'onceReady': Promise.resolve(),
-      'onceStopped': () => { return new Promise((F,R) => {}); },
-      'stop': () => {},
-      'signalsForPeer': { 'setSyncHandler': () => {} },
-      'bytesReceivedFromPeer' : { 'setSyncHandler': () => {} },
-      'bytesSentToPeer' : { 'setSyncHandler': () => {} },
+      handlers: {},
+      'start':
+          (endpoint:Net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
+         return Promise.resolve(endpoint);
+      },
+      'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
+      'stop': () => {
+        if (typeof fakeSocksToRtc.handlers['stopped'] === 'function') {
+          fakeSocksToRtc.handlers['stopped']();
+        }
+        return Promise.resolve();
+      }
     };
 
     it('can start proxying', (done) => {
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
       alice.consent.localRequestsAccessFromRemote = true;
       alice.consent.remoteGrantsAccessToLocal = true;
       // The module & constructor of SocksToRtc may change in the near future.
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
-        expect(alice.access.asProxy).toEqual(true);
+        expect(alice.localGettingFromRemote)
+            .toEqual(GettingState.GETTING_ACCESS);
         done();
       });
       expect(SocksToRtc.SocksToRtc).toHaveBeenCalled();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote)
+          .toEqual(GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('can stop proxying', () => {
       alice.stop();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
     it('refuses to start proxy without permission', () => {
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.consent = new Consent.State();
-      alice.access.asProxy = false;
+      alice.localGettingFromRemote = GettingState.NONE;
       alice.start();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
     });
 
     it('does not stop proxying when already stopped', () => {
       alice.stop();
-      expect(alice.access.asProxy).toEqual(false);
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+    });
+
+    it('stops socksToRtc if start does not complete', (done) => {
+      jasmine.clock().install();
+      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      alice.consent.localRequestsAccessFromRemote = true;
+      alice.consent.remoteGrantsAccessToLocal = true;
+      // Mock socksToRtc to not fulfill start promise
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
+        'start':
+            (endpoint:Net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
+           return new Promise((F, R) => {});
+        },
+        'on': (t:string, f:Function) => {},
+        'stop': () => {
+          done();
+          return Promise.resolve();
+        }
+      });
+      alice.start();
+      jasmine.clock().tick(alice.SOCKS_TO_RTC_TIMEOUT + 1);
+      jasmine.clock().uninstall();
     });
 
   });  // describe proxying
@@ -374,40 +504,67 @@ describe('Core.RemoteInstance', () => {
   describe('signalling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice = new Core.RemoteInstance(user, {
-      instanceId: 'instance-alice',
-      keyHash:    'fake-hash-alice',
-      description: 'alice peer',
-    });
-    var fakeSocksToRtc = { 'handleSignalFromPeer': () => {} };
-    var fakeRtcToNet = { 'handleSignalFromPeer': () => {} };
-    alice['socksToRtc_'] = <SocksToRtc.SocksToRtc><any>fakeSocksToRtc;
-    alice['rtcToNet_'] = <RtcToNet.RtcToNet><any>fakeRtcToNet;
-    // TODO: Turn into a WebRtc.SignallingMessage?
-    var fakeSignal :Object = {
-      data: 'really fake signal'
+    var alice :Core.RemoteInstance;  // Reset before each test in beforeEach
+    var fakeSocksToRtc = {
+      'handleSignalFromPeer': () => {},
+      'on': () => {},
+      'start': () => { return Promise.resolve(); },
+      'stop': () => { return Promise.resolve(); }
+    };
+    var fakeRtcToNet = {
+      'handleSignalFromPeer': () => {},
+      'onceClosed': new Promise((F, R) => {}),  // return unresolved promise
+      'signalsForPeer': {setSyncHandler: () => {}},
+      'bytesReceivedFromPeer': {setSyncHandler: () => {}},
+      'bytesSentToPeer': {setSyncHandler: () => {}},
+      'onceReady': new Promise((F, R) => {})  // return unresolved promise
+    };
+    var fakeOffer :Object = {
+      type: WebRtc.SignalType.OFFER,
+      data: 'really fake offer'
+    };
+    var fakeCandidate :Object = {
+      type: WebRtc.SignalType.CANDIDATE,
+      data: 'really fake candidate'
     };
 
     beforeEach(() => {
+      alice = new Core.RemoteInstance(user, 'instance-alice', {
+        instanceId: 'instance-alice',
+        keyHash:    'fake-hash-alice',
+        description: 'alice peer',
+      });
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
+      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(RtcToNet, 'RtcToNet').and.returnValue(fakeRtcToNet);
       alice.consent.localGrantsAccessToRemote = true;
     });
 
-    it('handles signal from client peer as server', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+    it('ignores CANDIDATE signal from client peer as server without OFFER', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-      expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
-    });
-
-    it('handles signal from server peer as client', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeSignal)
-      expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeSignal);
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
     });
 
+    it('handles OFFER signal from client peer as server', () => {
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeOffer)
+      expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
+      expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeOffer);
+    });
+
+    it('handles signal from server peer as client', (done) => {
+      alice.consent.remoteGrantsAccessToLocal = true;
+      alice.start().then(() => {
+        alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeCandidate)
+        expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeCandidate);
+        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
+        done();
+      }).catch((e) => console.error('error calling start: ' + e));
+    });
+
     it('rejects invalid signals', () => {
-      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeSignal)
+      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeCandidate)
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
@@ -415,12 +572,11 @@ describe('Core.RemoteInstance', () => {
 
     it('rejects message from client if consent has not been granted', () => {
       alice.consent.localGrantsAccessToRemote = false;
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeSignal)
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalled();
     });
 
   });  // describe signalling
-
 });

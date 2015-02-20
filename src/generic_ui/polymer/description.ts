@@ -1,11 +1,12 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../../uproxy.ts' />
+/// <reference path='../scripts/core_connector.ts' />
 
-declare var core :uProxy.CoreAPI;
+declare var core :CoreConnector;
 
 Polymer({
-  description: model.description,
+  description: model.globalSettings.description,
   update: function() {
-    core.updateDescription(this.description);
+    model.globalSettings.description = this.description;
+    core.updateGlobalSettings(model.globalSettings);
   }
 });

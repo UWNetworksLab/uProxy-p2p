@@ -5,6 +5,7 @@
 ## Build Status
 
 Dev: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=dev)](https://travis-ci.org/uProxy/uproxy)
+[![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbdc/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbdc/builds/latest)
 Master: [![Build Status](https://travis-ci.org/uProxy/uproxy.svg?branch=master)](https://travis-ci.org/uProxy/uproxy)
 
 ## Tools
@@ -33,6 +34,9 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - On Ubuntu, you can do `apt-get install nodejs`.
+    - We also need to create symlink ( if we are not running legacy node) <br>
+      Use this: <br>
+      ln -s /usr/bin/nodejs /usr/bin/node 
 
     - On Archlinux, you can do 'pacman -S nodejs'.
 
@@ -49,24 +53,13 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
-- [Typescript](http://www.typescriptlang.org/): Install globally with  `npm install -g typescript`
-
-    - This is assuming you have `ruby` and `rubygems` installed.
-
-
 ### Setup of uProxy codebase
 
-1. Clone uProxy and its submodules (and its submodules' submodules...):
-`git clone https://github.com/uProxy/uProxy.git`
-or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
+ 1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
-2. In the uProxy repository's root directory, run `bower install` to install any bower dependencies.
-
-3. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies,
-as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
+ 1. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies, as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update the dependencies.
-
 
 ### Building and installing and running for Chrome
 
