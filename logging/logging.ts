@@ -9,18 +9,17 @@ import freedomTypes = require('freedom.types');
 function formatStringMessageWithArgs_(args :any[])
     : string {
   var msg = '';
-  var arg :any;
 
   for (var i = 0; i < args.length; i++) {
-    arg = args[i];
-    if ('string' !== typeof(arg)) {
+    var arg = args[i];
+    if ('string' !== typeof(arg) && !(arg instanceof String)) {
       arg = JSON.stringify(arg);
     }
 
     if (-1 !== msg.indexOf('%' + i)) {
       msg = msg.replace('%' + i, arg);
     } else {
-      if (msg.length) {
+      if (msg.length > 0) {
         msg += ' ';
       }
       msg += arg;
@@ -37,13 +36,13 @@ export class Log {
   }
 
   private log_ = (level :string, args :any[]) :void => {
-    var message :string;
-
-    if (2 === args.length && 'string' === typeof(args[0]) && Array.isArray(args[1])) {
+    if (2 === args.length &&
+        ('string' === typeof(args[0]) || args[0] instanceof String) &&
+        Array.isArray(args[1])) {
       args = [args[0]].concat(args[1].slice());
     }
 
-    message = formatStringMessageWithArgs_(args);
+    var message = formatStringMessageWithArgs_(args);
 
     this.logger.then((logger :freedomTypes.Logger) => {
       // essentially do logger[level](message) minus the type warning
