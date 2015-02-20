@@ -53,35 +53,38 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 - [Grunt](http://gruntjs.com/): Install globally with `npm install -g grunt-cli`
 
-### Setup of uProxy codebase
+### Building uProxy from source
 
  1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
- 1. In the uProxy repository's root directory, run `npm install`. This will install all local dependencies, as appropriate to run in Chrome and Firefox. The first time you run this, you'll see lots of npm, bower and grunt messages. Check the last couple of lines in case there is an error.
+ 1. In the root uProxy directory, run:
+   * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).
+   * `bower install` - this will install the static content dependencies (mostly Polymer components).
+   * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
-Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update the dependencies.
+Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
 
-### Building and installing and running for Chrome
+### Installing and running in Chrome
 
 These are the steps to try uProxy in the Chrome browser.
 
-- Run `grunt build_chrome` from the root directory of the repository to compile
-  all the typescript and prepare the assets.
+- In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled
+- Click 'Load unpacked extension...' and select `build/dev/chrome/app`
+- Click 'Load unpacked extension...' and select `build/dev/chrome/extension`
 
-- In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled, and click 'Load unpacked extension...' for both `build/dev/chrome/app` and `build/dev/chrome/extension`. You need both the uProxy Chrome App and the Extension.
+You need both the uProxy Chrome App and the uProxy Extension.
 
-Please don’t submit uProxy to the Chrome Web Store or Firefox Marketplace. uProxy is under active development and the team takes its responsibility to provide security very seriously; we don’t want at-risk groups that may not be technically sophisticated — journalists, human-rights workers, et al — to rely on uProxy until we feel it’s ready. Prematurely making uProxy available could have very serious real world ramifications.
+*Please don’t submit uProxy to the Chrome Web Store or Firefox Marketplace*. uProxy is under active development and the team takes its responsibility to provide security very seriously; we don’t want at-risk groups that may not be technically sophisticated — journalists, human-rights workers, et al — to rely on uProxy until we feel it’s ready. Prematurely making uProxy available could have very serious real world ramifications. Before we release uProxy to the browser stores, we want the source code examined and reviewed so that the community as a whole can help us make sure that we haven’t overlooked anything in our implementation. Once we feel that uProxy is ready, we will release it via the browser web stores ourselves.
 
-One of the reasons we are doing this source code release is so that the community as a whole can help us make sure that we haven’t overlooked anything in our implementation. Once we feel that uProxy is ready, we will release it via the browser web stores ourselves.
-
-### Proxying between 2 instances of Chrome
+### Testing uProxy between 2 instances of Chrome
 
 To test proxying without using multiple computers, you will need to launch two separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
-```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta```
-where DIR_NAME is set to the name of a new directory.  You may re-use your normal instance of Chrome if you wish to only run this command once.
+```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta-test-user```
+where DIR_NAME is set to the name of a directory where you want to store custom chrome profiles, e.g. `/tmp/`.
 
-In each instance of Chrome, load the uProxy app and extension.  Then in each instance, sign into Google with gmail accounts that have already added each other as contacts.  After sign-in both contacts should be visible on each other's roster without changing the default filters.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's App and trace should appear indicating the flow of traffic.
+In each instance of Chrome, load the uProxy app and extension as describe above. 
 
+Then in each instance, within uProxy, sign into Google with gmail accounts that have already added each other as contacts.  After sign-in both contacts should be visible on each other's roster.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's uProxy Chrome App. You should see traces indicating the flow of traffic through the proxy.
 
 ### Development and re-building uProxy
 
