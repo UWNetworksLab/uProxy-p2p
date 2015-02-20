@@ -117,7 +117,7 @@ module UI {
     USER,
     NETWORKS,
     SETTINGS,
-    BROWSER_ELEMENT
+    BROWSER
   }
 
   /**

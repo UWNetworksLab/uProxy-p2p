@@ -574,12 +574,6 @@ module.exports = (grunt) ->
     'ts:generic_ui'
   ]
 
-  taskManager.add 'vulcanize_chrome', [
-
-    'vulcanize:chromeinline'
-    'vulcanize:chromecsp'
-  ]
-
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
@@ -589,7 +583,8 @@ module.exports = (grunt) ->
     'build_generic_core'
     'ts:chrome_app'
     'ts:chrome_ext'
-    'vulcanize_chrome'
+    'vulcanize:chromeinline'
+    'vulcanize:chromecsp'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
