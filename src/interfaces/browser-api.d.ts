@@ -10,6 +10,7 @@ interface BrowserAPI {
   // Open a new tab with the uProxy FAQ.
   openFaq(pageAnchor :string) : void;
   bringUproxyToFront() : void;
+  customElement : string;
 }
 
 declare var Notification : {

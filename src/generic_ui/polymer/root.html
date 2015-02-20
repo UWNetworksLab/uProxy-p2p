@@ -5,6 +5,7 @@
 <link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
 <link rel='import' href='copypaste.html'>
+<link rel='import' href='browser-elements.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -162,6 +163,8 @@
       }
 
     </style>
+
+    <div id='browserElementContainer' hidden?='{{UI.View.BROWSER_ELEMENT !== ui.view}}'></div>
 
     <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>

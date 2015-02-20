@@ -22,5 +22,11 @@ Polymer({
     // Expose global ui object and UI module in this context.
     this.ui = ui;
     this.UI = UI;
+    if(ui.browserApi.customElement){
+      var div = document.createElement("div");
+      var browserCustomElement = document.createElement(ui.browserApi.customElement);
+      div.innerHTML = browserCustomElement.outerHTML;
+      this.$.browserElementContainer.appendChild(div.childNodes[0]);
+    }
   }
 });

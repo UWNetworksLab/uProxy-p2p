@@ -16,6 +16,8 @@ enum PopupState {
 
 class ChromeBrowserApi implements BrowserAPI {
 
+  public customElement = "uproxy-app-missing";
+
   // For browser action.
 
   public ICON_DIR :string = 'icons/';
@@ -40,7 +42,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private popupUrl_ = "app-missing.html";
+  private popupUrl_ = "index.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 

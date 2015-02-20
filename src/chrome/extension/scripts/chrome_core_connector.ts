@@ -149,7 +149,6 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
             "38": "icons/38_" + UI.LOGGED_OUT_ICON
           }
         });
-        chromeBrowserApi.updatePopupUrl("index.html");
         this.fulfillConnect_();
         F(this.appPort_);
       };
@@ -171,9 +170,10 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
     // be establish (i.e. this.appPort_.postMessage in connect_ failed).
     console.log('Disconnected from app, previous status was ' +
                 this.status.connected);
-    // When disconnected from the app, the extension should launch
-    // an instruction to install the app.
-    chromeBrowserApi.updatePopupUrl("app-missing.html");
+    // When disconnected from the app, we should show the browser specific page
+    // that shows the "app missing" message.
+    ui.view = UI.View.BROWSER_ELEMENT;
+
 
     if (this.status.connected) {
       // Ensure that proxying has stopped and update this.status.

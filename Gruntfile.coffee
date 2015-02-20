@@ -126,6 +126,9 @@ module.exports = (grunt) ->
 
       uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
 
+      polymerChrome: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer_chrome')
+      chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer_chrome')
+
       polymer:
         src: 'third_party/lib'
         dest: 'build/compile-src/generic_ui/lib'
@@ -190,7 +193,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts']
+          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
           dest: chromeExtDevPath
         }, {
           # generic_ui HTML and non-typescript assets.
@@ -203,12 +206,6 @@ module.exports = (grunt) ->
           expand: true, cwd: 'build/compile-src/generic_ui'
           src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
-        }, {
-          # Chrome-only polymer.
-          # (Assumes the typescript task has executed)
-          expand: true, cwd: 'build/compile-src/chrome/extension/polymer'
-          src: ['vulcanized-chrome.*']
-          dest: chromeExtDevPath + 'polymer'
         }, {
           # Icons and fonts
           expand: true, cwd: 'src/'
@@ -395,7 +392,8 @@ module.exports = (grunt) ->
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
-      chrome: Rule.typescriptSrcLenient 'compile-src/chrome'
+      chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
+      chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/scripts'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
       # uProxy firefox specific typescript
@@ -524,13 +522,13 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing.html'
+          'build/compile-src/generic_ui/polymer_chrome/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer_chrome/root.html'
       chromecsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-chrome.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
+          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer_chrome/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -574,18 +572,24 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_ui', [
     'base'
     'ts:generic_ui'
-    'vulcanize:withinline'
-    'vulcanize:withcsp'
+  ]
+
+  taskManager.add 'vulcanize_chrome', [
+
+    'vulcanize:chromeinline'
+    'vulcanize:chromecsp'
   ]
 
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
+    'symlink:polymerChrome'
+    'symlink:chromeBrowserElements'
     'build_generic_ui'
     'build_generic_core'
-    'ts:chrome'
-    'vulcanize:chromeinline'
-    'vulcanize:chromecsp'
+    'ts:chrome_app'
+    'ts:chrome_ext'
+    'vulcanize_chrome'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
