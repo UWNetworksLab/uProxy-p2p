@@ -49,16 +49,12 @@
     </style>
 
     <div class='network'>
-      <span hidden?='{{isLoggingIn}}'>
+      <span>
         <span>
           <paper-button raised on-tap='{{connect}}' class='{{ networkName }}'>
             {{ networkName }}
           </button>
         </span>
-      </span>
-      <span id='waiting' hidden?='{{!isLoggingIn}}'>
-        Waiting for sign in...
-        <div id='hourglass'></div>
       </span>
     </div>
   </template>

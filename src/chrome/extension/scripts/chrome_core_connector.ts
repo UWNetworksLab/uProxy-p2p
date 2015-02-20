@@ -43,13 +43,15 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   // TODO: Replace with Core -> UI specified update API.
   private listeners_ :{[type :string] : Function[]};
 
-  private disconnectPromise_ :Promise<void>;
-  private fulfillDisconnect_ :Function;
-
   // Whether waiting for app installation is blocking the extension-app
   // connection. If this is true, the uProxy popup should automatically
   // be brought to the front after installation.
   public waitingForAppInstall :boolean = false;
+
+  private fulfillConnect_ :Function;
+  public onceConnected :Promise<void> = new Promise<void>((F, R) => {
+    this.fulfillConnect_ = F;
+  });
 
   /**
    * As soon as one constructs the CoreBrowserConnector, it will attempt to connect.
@@ -138,14 +140,14 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         this.status.connected = true;
         // Once connected, the extension popup should show it's start page.
         ui.view = UI.View.SPLASH;
-        chrome.browserAction.setIcon({path: "icons/offline-19.png"});
+        chrome.browserAction.setIcon({
+          path: {
+            "19": "icons/19_" + UI.LOGGED_OUT_ICON,
+            "38": "icons/38_" + UI.LOGGED_OUT_ICON
+          }
+        });
         chromeBrowserApi.updatePopupUrl("index.html");
-        if (this.waitingForAppInstall) {
-          chromeBrowserApi.bringUproxyToFront();
-          // Set value to false since app has installed and connected
-          // to extension.
-          this.waitingForAppInstall = false;
-        }
+        this.fulfillConnect_();
         F(this.appPort_);
       };
       this.appPort_.onMessage.addListener(ackResponse);
@@ -176,6 +178,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       // check if they are currently getting or giving access.
       ui.stopGettingInUiAndConfig(true);
       this.status.connected = false;
+      this.onceConnected = new Promise<void>((F, R) => { this.fulfillConnect_ = F; });
     }
 
     // Update this.appPort_ to ensure we are disconnected.

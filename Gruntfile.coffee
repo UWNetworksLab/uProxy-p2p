@@ -87,6 +87,8 @@ FILES =
   ]
   uproxy_lib_common: [
     'logging/logging.js'
+    'loggingprovider/loggingprovider.js'
+    'loggingprovider/loggingprovider.json'
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
     'webrtc/datachannel.js'
@@ -271,7 +273,7 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # uProxy Icons and fonts
           expand: true, cwd: 'src/'
-          src: ['icons/default-*.png', 'fonts/*']
+          src: ['icons/128_online.png', 'fonts/*']
           dest: chromeAppDevPath
         }, { # Copy uproxy-lib files.
           expand: true, cwd: 'node_modules/uproxy-lib/dist/',
@@ -466,13 +468,12 @@ module.exports = (grunt) ->
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
               'build/compile-src/generic_core/util.js'
-              'build/compile-src/generic_core/nouns-and-adjectives.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
-              'build/compile-src/generic_core/auth.js'
               'build/compile-src/generic_core/social-enum.js'
               'build/compile-src/generic_core/local-instance.js'
               'build/compile-src/generic_core/remote-instance.js'
+              'build/compile-src/generic_core/remote-connection.js'
               'build/compile-src/generic_core/firewall.js'
               'build/compile-src/generic_core/user.js'
               'build/compile-src/generic_core/storage.js'
@@ -482,6 +483,8 @@ module.exports = (grunt) ->
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
           # NOTE: Put any helper test-data files here:
+          keepRunner: true
+          outfile: 'build/compile-src/generic_core/SpecRunner.html'
           helpers: []
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:

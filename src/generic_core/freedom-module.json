@@ -15,12 +15,12 @@
       "uproxy-networking/rtc-to-net/rtc-to-net.js",
       "uproxy.js",
       "util.js",
-      "auth.js",
       "consent.js",
       "firewall.js",
       "storage.js",
       "local-instance.js",
       "remote-instance.js",
+      "remote-connection.js",
       "user.js",
       "social-enum.js",
       "social.js",
@@ -35,10 +35,13 @@
     "storage": {
       "url": "../lib/storage/storage.shared.json",
       "api": "storage"
+    },
+    "loggingprovider": {
+      "url": "uproxy-lib/loggingprovider/loggingprovider.json",
+      "api": "loggingprovider"
     }
   },
   "permissions": [
-    "core.console",
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",

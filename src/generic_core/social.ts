@@ -48,6 +48,13 @@ module Social {
   export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
   export var pendingNetworks:{[networkName:string]:Network} = {};
 
+  export function removeNetwork(networkName :string, userId :string) {
+    if (networkName !== MANUAL_NETWORK_ID) {
+      delete networks[networkName][userId];
+    }
+    notifyUI(networkName);
+  }
+
   /**
    * Goes through network names and gets a reference to each social provider.
    */
@@ -80,7 +87,7 @@ module Social {
 
     if (!(userId in networks[networkName])) {
       console.log('Not logged in with userId ' + userId + ' in network ' + networkName);
-      return null
+      return null;
     }
     return networks[networkName][userId];
   }
@@ -119,7 +126,7 @@ module Social {
       this.roster = {};
     }
 
-    public getStorePath = () => {
+    public getStorePath = () : string => {
       return this.myInstance.instanceId + '/roster/';
     }
 
@@ -149,15 +156,14 @@ module Social {
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) : Promise<Core.User> => {
+    protected addUser_ = (userId :string) : Core.User => {
       if (!this.isNewFriend_(userId)) {
-        return Promise.reject(this.name + ': cannot add already existing user!');
+        this.error(this.name + ': cannot add already existing user!');
       }
-      return Core.User.create(this, userId).then((newUser) => {
-        this.log('added "' + userId + '" to roster.');
-        this.roster[userId] = newUser;
-        return newUser;
-      });
+      this.log('added "' + userId + '" to roster.');
+      var newUser = new Core.User(this, userId);
+      this.roster[userId] = newUser;
+      return newUser;
     }
 
     /**
@@ -165,11 +171,11 @@ module Social {
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
      */
-    protected getOrAddUser_ = (userId :string) : Promise<Core.User> => {
+    protected getOrAddUser_ = (userId :string) : Core.User => {
       if (this.isNewFriend_(userId)) {
         return this.addUser_(userId);
       }
-      return Promise.resolve(this.getUser(userId));
+      return this.getUser(userId);
     }
 
     /**
@@ -230,7 +236,7 @@ module Social {
       console.error('!!! [' + this.name + '] ' + msg);
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
@@ -243,7 +249,7 @@ module Social {
     public logout = () : Promise<void> => {
       throw new Error('Operation not implemented');
     }
-    public flushQueuedInstanceMessages = () => {
+    public flushQueuedInstanceMessages = () : void => {
       throw new Error('Operation not implemented');
     }
     public send = (recipientClientId :string,
@@ -273,6 +279,9 @@ module Social {
 
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
+
+    private fulfillLogout_ : () => void;
+    private onceLoggedOut_ : Promise<void>;
 
     /**
      * Initializes the Freedom social provider for this FreedomNetwork and
@@ -327,12 +336,11 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleUserProfile = (profile :freedom_Social.UserProfile)
-        : Promise<void> => {
+    public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
       var userId = profile.userId;
       if (!Firewall.isValidUserProfile(profile, null)) {
         this.error("Firewall: invalid user profile: " + JSON.stringify(profile));
-        return Promise.reject("Invalid user profile");
+        return;
       }
       // Check if this is ourself, in which case we update our own info.
       if (userId == this.myInstance.userId) {
@@ -351,14 +359,12 @@ module Social {
           user:    userProfileMessage
         });
 
-        return Promise.resolve<void>();
+        return;
       }
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
       this.log('<--- XMPP(friend) [' + profile.name + ']' + profile);
-      return this.getOrAddUser_(userId).then((user) => {
-        user.update(profile);
-      });
+      this.getOrAddUser_(userId).update(profile);
     }
 
     /**
@@ -373,11 +379,10 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleClientState = (freedomClient :freedom_Social.ClientState)
-        : Promise<void> => {
+    public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
       if (!Firewall.isValidClientState(freedomClient, null)) {
         this.error("Firewall: invalid client state: " + JSON.stringify(freedomClient));
-        return Promise.reject("Failed client state firewall check");
+        return;
       }
       var client :UProxyClient.State =
         freedomClientToUproxyClient(freedomClient);
@@ -391,16 +396,13 @@ module Social {
         // TODO: Consider adding myself to the roster.
         if (client.clientId === this.myInstance.clientId &&
             client.status === UProxyClient.Status.OFFLINE) {
-          ui.showNotification('You have been logged out of ' + this.name);
-          core.logout({name: this.name, userId: this.myInstance.userId});
+          this.fulfillLogout_();
         }
         this.log('received own ClientState: ' + JSON.stringify(client));
-        return Promise.resolve<void>();
+        return;
       }
 
-      return this.getOrAddUser_(client.userId).then((user) => {
-        user.handleClient(client);
-      });
+      this.getOrAddUser_(client.userId).handleClient(client);
     }
 
     /**
@@ -413,11 +415,10 @@ module Social {
      *
      * Public to permit testing.
      */
-    public handleMessage = (incoming :freedom_Social.IncomingMessage)
-        : Promise<void> => {
+    public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
       if (!Firewall.isValidIncomingMessage(incoming, null)) {
         this.error("Firewall: invalid incoming message: " + JSON.stringify(incoming));
-        return Promise.reject("Failed incoming message firewall check");
+        return;
       }
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
@@ -430,29 +431,26 @@ module Social {
         return;
       }
 
-      return this.getOrAddUser_(userId).then((user) => {
-        if (!user.clientIdToStatusMap[client.clientId]) {
-          // Add client.
-          user.handleClient(client);
-        }
-        return user.handleMessage(client.clientId, msg);
-      });
+      var user = this.getOrAddUser_(userId);
+      if (!user.clientIdToStatusMap[client.clientId]) {
+        // Add client.
+        user.handleClient(client);
+      }
+      user.handleMessage(client.clientId, msg);
     }
 
     public restoreFromStorage() {
       // xmpp is weird, so we need to do this.
       return storage.keys().then((keys :string[]) => {
-        var allAddUserPromises = [];
         var myKey = this.getStorePath();
         for (var i in keys) {
           if (keys[i].indexOf(myKey) === 0) {
             var userId = keys[i].substr(myKey.length);
             if (this.isNewFriend_(userId)) {
-              allAddUserPromises.push(this.addUser_(userId));
+              this.addUser_(userId);
             }
           }
         }
-        return Promise.all(allAddUserPromises);
       });
     }
 
@@ -486,27 +484,32 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(() => {
-            return this.restoreFromStorage();
-          }).then(() => {
             ui.showNotification('You successfully signed on to ' + this.name +
                                 ' as ' + this.myInstance.userId);
+            this.onceLoggedOut_ = new Promise((F, R) => {
+              this.fulfillLogout_ = F;
+            }).then(() => {
+              this.stopMonitor_();
+              for (var userId in this.roster) {
+                this.roster[userId].handleLogout();
+              }
+              ui.showNotification('You have been logged out of ' + this.name);
+              Social.removeNetwork(this.name, this.myInstance.userId);
+            });
+            this.restoreFromStorage();
           })
           .catch((e) => {
-            this.onceLoggedIn_ = null;
             this.error('Could not login.');
             ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again. ' + JSON.stringify(e));
+                         '. Please try again. ');
             return Promise.reject(new Error('Could not login.'));
           });
     }
 
     public logout = () : Promise<void> => {
-      this.stopMonitor_();
-      for (var userId in this.roster) {
-        this.roster[userId].handleLogout();
-      }
       return this.freedomApi_.logout().then(() => {
         this.log('logged out.');
+        this.fulfillLogout_();
       });
     }
 
@@ -554,7 +557,7 @@ module Social {
       this.monitorIntervalId_ = null;
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       for (var userId in this.roster) {
         this.roster[userId].resendInstanceHandshakes();
       }
@@ -607,7 +610,7 @@ module Social {
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :uProxy.Message) : Promise<void> => {
+                      message :uProxy.Message) : void => {
       this.log('Manual network received incoming message; senderClientId=[' +
                senderClientId + '], message=' + JSON.stringify(message));
 
@@ -615,13 +618,12 @@ module Social {
       // sender client ID doubles as the sender user ID.
       var senderUserId = senderClientId;
 
-      return this.getOrAddUser_(senderUserId).then((user) => {
-        // Hack so that handleMessage treats this client as online and doesn't
-        // reject.
-        // TODO: refactor manual network to have its own client messages.
-        user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
-        return user.handleMessage(senderUserId, message);
-      });
+      var user =this.getOrAddUser_(senderUserId);
+      // Hack so that handleMessage treats this client as online and doesn't
+      // reject.
+      // TODO: refactor manual network to have its own client messages.
+      user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
+      user.handleMessage(senderUserId, message);
     }
 
   }  // class ManualNetwork

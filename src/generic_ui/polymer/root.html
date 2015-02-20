@@ -4,27 +4,31 @@
 <link rel="import" href='settings.html'>
 <link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
+<link rel='import' href='copypaste.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
   <template>
     <style>
       :host {
-        position: absolute;
-        width: 371px; height: 600px;
         left: 0;
         top: 0;
         display: block;
         border: none; margin: auto;
         text-align: left;
-        overflow: hidden;
         background-color: white;
         color: rgb(112, 112, 112);
       }
+      #logged-in-controls {
+        margin-top: 100px;
+      }
       #toolbar {
-        display: table-row;
-        height: 100px; width: 100%;
+        height: 100px;
         background-color: #009688;
+        position: fixed;
+        top: 0;
+        z-index: 1;
+        width: 100%;
       }
       #btnSettings {
         position: absolute;
@@ -38,12 +42,6 @@
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
         transition: all 0.23s !important;
-      }
-      #logged-in-controls {
-        display: table;
-        width: 100%;
-        height: 600px;
-        position: relative;
       }
       #title {
         font-size: 1.75em;
@@ -67,14 +65,8 @@
         position: absolute;
         z-index: 1001;
       }
-      #roster-panel {
-        display: table-row;
-        height: 100%;
-      }
       .roster {
         position: relative;
-        background-color: white;
-        height: 100%;
         overflow-y: auto;
         display: block;
       }
@@ -99,7 +91,9 @@
         left: 50%;
       }
       #status {
-        display: table-row;
+        position: fixed;
+        width: 100%;
+        bottom: 0px;
       }
       .statusRow {
         height: 3em;
@@ -113,11 +107,12 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-        width: 358px;
       }
       .statusText img {
         vertical-align: middle;
         padding-right: 1em;
+        width: 20px;
+        height: 20px;
       }
       .clickable {
         cursor: pointer;
@@ -167,6 +162,9 @@
       }
 
     </style>
+
+    <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
+    </uproxy-copypaste>
 
     <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
@@ -240,10 +238,10 @@
 
       <div id='status'>
         <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-          <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+          <div class='statusText'><img src='../icons/GettingAccess_UI_40.gif'>{{ui.gettingStatus}}</div>
         </div>
         <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-          <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+          <div class='statusText'><img src='../icons/SharingAccess_UI_40.gif'>{{ui.sharingStatus}}</div>
         </div>
       </div>
 

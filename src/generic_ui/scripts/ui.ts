@@ -5,7 +5,6 @@
  * TODO: firefox bindings.
  */
 /// <reference path='user.ts' />
-/// <reference path='ui_enums.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -46,6 +45,22 @@ var model :UI.Model = {
 // and a ui object (singleton intance of UI.UserInterface).  We should
 // change the names of these to avoid confusion.
 module UI {
+
+  // Filenames for icons.
+  // Two important things about using these strings:
+  // 1) When updating the icon strings below, default values in the Chrome
+  // manifests and Firefox main.js should also be changed to match.
+  // 2) These are only the suffixes of the icon names. Because we have
+  // different sizes of icons, the actual filenames have the dimension
+  // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
+
+  // Icons for browser bar, also used for notifications.
+  export var DEFAULT_ICON :string = 'online.gif';
+  export var LOGGED_OUT_ICON :string = 'offline.gif';
+  export var SHARING_ICON :string = 'sharing.gif';
+  export var GETTING_ICON :string = 'getting.gif';
+  export var ERROR_ICON :string = 'error.gif';
+  export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
@@ -93,6 +108,26 @@ module UI {
   }
 
   /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    COPYPASTE,
+    ROSTER,
+    USER,
+    NETWORKS,
+    SETTINGS,
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
+  }
+
+  /**
    * The User Interface class.
    *
    * Keeps persistent state between the popup opening and closing.
@@ -109,10 +144,6 @@ module UI {
     // of the ui object so it can be saved/restored when popup closes and opens.
     public splashState :number = 0;
 
-    // TODO: Put this into the 'auth' service, which will eventually include
-    // sas-rtc.
-    public localFingerprint :string = null;
-
     // Instance you are getting access from.
     // Null if you are not getting access.
     private instanceGettingAccessFrom_ = null;
@@ -128,6 +159,17 @@ module UI {
     public gettingStatus :string = null;
     public sharingStatus :string = null;
 
+    public copyPasteGettingState :GettingState = GettingState.NONE;
+    public copyPasteSharingState :SharingState = SharingState.NONE;
+    public copyPasteBytesSent :number = 0;
+    public copyPasteBytesReceived :number = 0;
+
+    public copyPasteGettingMessage :string = '';
+    public copyPasteSharingMessage :string = '';
+
+    // TODO not needed, exists to handle typescript errors
+    private core_ :uProxy.CoreAPI = null;
+
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
@@ -137,6 +179,7 @@ module UI {
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
       this.view = View.SPLASH;  // Begin at the splash intro.
+      this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -178,16 +221,76 @@ module UI {
         this.showNotification(notificationText);
       });
 
-      core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
-        this.localFingerprint = payload;
-        console.log('Received local fingerprint: ' + this.localFingerprint);
-      });
-
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
                     (message :uProxy.Message) => {
         console.log('Manual network outbound message: ' +
                     JSON.stringify(message));
         // TODO: Display the message in the 'manual network' UI.
+      });
+
+      core.onUpdate(uProxy.Update.SIGNALLING_MESSAGE, (message :uProxy.Message) => {
+        var data :uProxy.Message[] = [], str = '';
+
+        switch (message.type) {
+          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+            str = this.copyPasteGettingMessage;
+            break;
+          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+            str = this.copyPasteSharingMessage;
+            break;
+        }
+
+        if (str) {
+          data = JSON.parse(atob(decodeURIComponent(str)));
+        }
+
+        data.push(message);
+
+        str = encodeURIComponent(btoa(JSON.stringify(data)));
+
+        // reverse of above switch (since I can't just use a reference)
+        switch (message.type) {
+          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+            this.copyPasteGettingMessage = str;
+            break;
+          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+            this.copyPasteSharingMessage = str;
+            break;
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
+        this.stopGettingInUiAndConfig(error);
+
+        if (UI.View.COPYPASTE === this.view) {
+          this.view = UI.View.SPLASH;
+        }
+      });
+
+      core.onUpdate(uProxy.Update.START_GIVING, () => {
+        if (!this.isGivingAccess()) {
+          this.startGivingInUi();
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STOP_GIVING, () => {
+        if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
+          if (UI.View.COPYPASTE === this.view) {
+            this.view = UI.View.SPLASH;
+          }
+        }
+
+        this.copyPasteSharingState = SharingState.NONE;
+        if (!this.isGivingAccess()) {
+          this.stopGivingInUi();
+        }
+      });
+
+      core.onUpdate(uProxy.Update.STATE, (state) => {
+        this.copyPasteGettingState = state.localGettingFromRemote;
+        this.copyPasteSharingState = state.localSharingWithRemote;
+        this.copyPasteBytesSent = state.bytesSent;
+        this.copyPasteBytesReceived = state.bytesReceived;
       });
 
       core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
@@ -215,14 +318,19 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
           (instanceId :string) => {
+        var isGettingFromMe = false;
+        var user = this.mapInstanceIdToUser_[instanceId];
+
+        // only show a notification if we knew we were prokying
+        if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
+          this.showNotification(user.name + ' stopped proxying through you');
+        }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
 
         // Update user.isGettingFromMe
-        var isGettingFromMe = false;
-        var user = this.mapInstanceIdToUser_[instanceId];
         for (var i = 0; i < user.instances.length; ++i) {
           if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
             isGettingFromMe = true;
@@ -233,8 +341,6 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
-
-      console.log('Created the UserInterface');
     }
 
     private updateGettingStatusBar_ = () => {
@@ -267,9 +373,55 @@ module UI {
       }
     }
 
+    public handleUrlData = (url :string) => {
+      var payload;
+      console.log('received url data from browser');
+
+      var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
+      if (!match) {
+        console.error('parsed url that did not match');
+      }
+
+      try {
+        payload = JSON.parse(atob(decodeURIComponent(match[2])));
+      } catch (e) {
+        console.error('malformed string from browser');
+      }
+
+      // at this point, we assume everything is good, so let's check state
+      switch (match[1]) {
+        case 'request':
+          if (SharingState.NONE !== this.copyPasteSharingState) {
+            console.warn('previous sharing connection already existed, restarting');
+            this.core_.stopCopyPasteShare();
+          }
+
+          this.copyPasteSharingMessage = '';
+          this.core_.startCopyPasteShare();
+          break;
+        case 'offer':
+          if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
+            console.warn('currently not expecting any information, aborting');
+            return;
+          }
+          break;
+      }
+
+      console.log('Sending messages from url to app');
+      for (var i in payload) {
+        this.core_.sendCopyPasteSignal(payload[i]);
+      }
+
+      this.view = UI.View.COPYPASTE;
+    }
+
     public showNotification = (notificationText :string) => {
-      new Notification('uProxy', { body: notificationText,
-                                   icon: 'icons/uproxy-128.png'});
+      var notification =
+          new Notification('uProxy', { body: notificationText,
+                           icon: 'icons/38_' + UI.DEFAULT_ICON});
+      setTimeout(function() {
+        notification.close();
+      }, 5000);
     }
 
     /**
@@ -286,11 +438,13 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
-        this.browserApi.setIcon('error-19.png');
+        this.browserApi.setIcon(UI.ERROR_ICON);
+      } else if (model.onlineNetwork) {
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.setOfflineIcon();
       }
 
       this.updateGettingStatusBar_();
@@ -302,6 +456,14 @@ module UI {
       this.browserApi.stopUsingProxy(askUser);
     }
 
+    public startGettingInUi = () => {
+      if (this.isGivingAccess()) {
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
+      } else {
+        this.browserApi.setIcon(UI.GETTING_ICON);
+      }
+    }
+
     /**
       * Sets extension icon to default and undoes proxy configuration.
       */
@@ -309,11 +471,7 @@ module UI {
         (instanceId :string, endpoint :Net.Endpoint) => {
       this.instanceGettingAccessFrom_ = instanceId;
 
-      if (this.isGivingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
-      } else {
-        this.browserApi.setIcon('getting-19.png');
-      }
+      this.startGettingInUi();
 
       this.updateGettingStatusBar_();
 
@@ -327,9 +485,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('sharing-getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon('sharing-19.png');
+        this.browserApi.setIcon(UI.SHARING_ICON);
       }
     }
 
@@ -338,14 +496,16 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon('getting-19.png');
+        this.browserApi.setIcon(UI.GETTING_ICON);
+      } else if (model.onlineNetwork) {
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       } else {
-        this.browserApi.setIcon('default-19.png');
+        this.setOfflineIcon();
       }
     }
 
     public setOfflineIcon = () => {
-      this.browserApi.setIcon('offline-19.png');
+      this.browserApi.setIcon(UI.LOGGED_OUT_ICON);
     }
 
     public isGettingAccess = () => {
@@ -353,7 +513,8 @@ module UI {
     }
 
     public isGivingAccess = () => {
-      return Object.keys(this.instancesGivingAccessTo).length > 0;
+      return Object.keys(this.instancesGivingAccessTo).length > 0 ||
+             this.copyPasteSharingState === SharingState.SHARING_ACCESS;
     }
 
     /**
@@ -367,7 +528,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && model.onlineNetwork == null) {
-        this.browserApi.setIcon('default-19.png');
+        this.browserApi.setIcon(UI.DEFAULT_ICON);
       }
 
       if (model.onlineNetwork &&
