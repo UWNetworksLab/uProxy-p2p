@@ -26,15 +26,10 @@ module uProxy {
   export enum Command {
     GET_INITIAL_STATE = 1000,
     RESTART,
-    // Skip REFRESH and RESET commands that have been removed
-    LOGIN = 1003,
+    LOGIN,
     LOGOUT,
     SEND_INSTANCE_HANDSHAKE_MESSAGE,
-    // Skip unused INVITE. (Invite who to do what, anyway?)
-    // Skip unused CHANGE_OPTION = 1007.
-    // Skip unused UPDATE_LOCAL_DEVICE_DESCRIPTION = 1008,
-    // Skip unused DISMISS_NOTIFICATION.
-    START_PROXYING = 1010,
+    START_PROXYING,
     STOP_PROXYING,
     MODIFY_CONSENT,       // TODO: make this work with the consent piece.
     START_PROXYING_COPYPASTE_GET,
