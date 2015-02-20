@@ -42,7 +42,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private popupUrl_ = "index.html";
+  private POPUP_URL = "index.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -159,7 +159,7 @@ class ChromeBrowserApi implements BrowserAPI {
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
       // after webstore installation), then allow the popup to open at a default
       // location.
-      chrome.windows.create({url: this.popupUrl_,
+      chrome.windows.create({url: this.POPUP_URL,
                      type: "popup",
                      width: 371,
                      height: 600}, this.newPopupCreated_);
@@ -175,7 +175,7 @@ class ChromeBrowserApi implements BrowserAPI {
           // TODO (lucyhe): test this positioning in Firefox & Windows.
           var popupTop = windowThatLaunchedUproxy.top + 70;
           var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: this.popupUrl_,
+          chrome.windows.create({url: this.POPUP_URL,
                                  type: "popup",
                                  width: 371,
                                  height: 600,
@@ -199,28 +199,5 @@ class ChromeBrowserApi implements BrowserAPI {
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
-    // If the url of the newly created tab no longer matches the
-    // expected popup URL, update the tab.
-    if (popup.tabs[0].url != chrome.extension.getURL(this.popupUrl_)) {
-      chrome.tabs.update(popup.tabs[0].id, {url: this.popupUrl_});
-    }
-  }
-
-  /**
-    * Set the URL of the uProxy popup.
-    */
-  public updatePopupUrl = (url) => {
-    if (this.popupUrl_ == url) {
-      return;
-    }
-
-    this.popupUrl_ = url;
-    // If an existing popup exists, update the page shown in the existing
-    // popup.
-    if (this.popupWindowId_ != chrome.windows.WINDOW_ID_NONE) {
-      chrome.windows.get(this.popupWindowId_, {populate: true}, (popupWindow) => {
-        chrome.tabs.update(popupWindow.tabs[0].id, {url: this.popupUrl_});
-      });
-    }
   }
 }
