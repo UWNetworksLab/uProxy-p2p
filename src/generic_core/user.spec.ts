@@ -25,15 +25,13 @@ describe('Core.User', () => {
   });
 
   it('creates with the correct userId', (done) => {
-    Core.User.create(network, 'fakeuser').then((newUser) => {
-      user = newUser;
-      expect(user.userId).toEqual('fakeuser');
-      expect(user['network']).toEqual(network);
-      storage.load(user.getStorePath()).catch((e) => {
-        // User should not be in storage
-        done();
-      })
-    });
+    user = new Core.User(network, 'fakeuser');
+    expect(user.userId).toEqual('fakeuser');
+    expect(user['network']).toEqual(network);
+    storage.load(user.getStorePath()).catch((e) => {
+      // User should not be in storage
+      done();
+    })
   });
 
   it('creates with pending name if there was no profile', () => {
@@ -151,7 +149,7 @@ describe('Core.User', () => {
           'foo': 1
         }
       });
-      expect(user['syncInstance_']).toHaveBeenCalled();
+      expect(user.syncInstance_).toHaveBeenCalled();
     });
 
     it('handles a SIGNAL* messages', () => {
@@ -213,26 +211,21 @@ describe('Core.User', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
       var saved;
-      var loaded;
-      storage.load = function(key) {
-        loaded = realStorage.load(key);
-        return loaded;
-      };
       storage.save = function(key, value) {
         saved = realStorage.save(key, value);
         return saved;
       };
-
-      expect(user.instanceToClient('fakeinstance')).toBeUndefined();
-      expect(user.clientToInstance('fakeclient')).toBeUndefined();
-      user['syncInstance_']('fakeclient', instanceHandshake).then(() => {
+        expect(user.instanceToClient('fakeinstance')).toBeUndefined();
+        expect(user.clientToInstance('fakeclient')).toBeUndefined();
+        user.syncInstance_('fakeclient', instanceHandshake);
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
         expect(instance).toBeDefined();
-        expect(saved).toBeDefined();
-        done();
-      }).catch((e) => { console.error('error: ' + e) });
+        user.onceLoaded.then(() => {
+          expect(saved).toBeDefined();
+          done();
+        });
     });
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
@@ -246,7 +239,7 @@ describe('Core.User', () => {
       // Add the new client.
       user.handleClient(clientState);
       // Pretend a valid instance message has been sent from the new client.
-      user['syncInstance_']('fakeclient2', instanceHandshake);
+      user.syncInstance_('fakeclient2', instanceHandshake);
       expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient2');
       expect(user.clientToInstance('fakeclient')).toEqual(null);
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
@@ -256,12 +249,12 @@ describe('Core.User', () => {
       instanceHandshake.consent = null;
       expect(instance).toBeDefined();
       spyOn(instance, 'sendConsent');
-      user['syncInstance_']('fakeclient', instanceHandshake);
+      user.syncInstance_('fakeclient', instanceHandshake);
       expect(instance.sendConsent).toHaveBeenCalled();
     });
 
     it('syncs UI after updating instance', () => {
-      user['syncInstance_']('fakeclient', instanceHandshake);
+      user.syncInstance_('fakeclient', instanceHandshake);
     });
 
   });  // describe client <---> instance
