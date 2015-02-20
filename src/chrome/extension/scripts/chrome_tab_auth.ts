@@ -1,5 +1,4 @@
 /// <reference path='../../../generic_ui/scripts/core_connector.ts'/>
-/// <reference path='../../../interfaces/authentication-manager.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../uproxy.ts' />
 
