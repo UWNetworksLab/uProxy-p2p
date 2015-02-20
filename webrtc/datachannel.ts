@@ -54,6 +54,10 @@ export interface DataChannel {
   // undertlying network layer for ending.
   send(data:Data) : Promise<void>;
 
+  // Returns the number of bytes which have been passed to send() but
+  // which have not yet been transmitted to the network.
+  getBufferedAmount() : Promise<number>;
+
   // Closes this data channel.
   // A channel cannot be re-opened once this has been called.
   close() : void;
@@ -257,6 +261,10 @@ export class DataChannelClass implements DataChannel {
 
   public close = () : void => {
     this.rtcDataChannel_.close();
+  }
+
+  public getBufferedAmount = () : Promise<number> => {
+    return this.rtcDataChannel_.getBufferedAmount();
   }
 
   public toString = () : string => {
