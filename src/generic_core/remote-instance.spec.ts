@@ -88,13 +88,12 @@ describe('Core.RemoteInstance', () => {
 
     it ('delay loading', (done) => {
       var fulfill;
-      var loaded = realStorage.load(instance0.getStorePath());
       storage.load = function(key) {
         var delay = new Promise((F, R) => {
           fulfill = F;
         });
         return delay.then(() => {
-          return loaded;
+          return realStorage.load(instance0.getStorePath());
         });
       }
 
@@ -109,7 +108,7 @@ describe('Core.RemoteInstance', () => {
         isOffering: true,
       };
       instance2.updateConsent(consent);
-      loaded.then(() => {
+      instance2.onceLoaded.then(() => {
         instance2.description = 'new description';
         expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
         expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
@@ -291,35 +290,44 @@ describe('Core.RemoteInstance', () => {
       expect(instance.consent).toEqual(new Consent.State());
     });
 
-    it('remote cancels their consent', () => {
+    it('remote cancels their consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = true;
       instance.consent.remoteGrantsAccessToLocal = true;
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+        done();
+      });
     });
 
-    it('remote gives consent', () => {
+    it('remote gives consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = false;
       instance.consent.remoteGrantsAccessToLocal = false;
       instance.updateConsent({
         isRequesting: true,
         isOffering:   true
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+        done();
+      });
     });
 
-    it('receiving consent bits sends update to UI', () => {
+    it('receiving consent bits sends update to UI', (done) => {
       instance.consent = new Consent.State();
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(user.notifyUI).toHaveBeenCalled();
+      instance.onceLoaded.then(() => {
+        expect(user.notifyUI).toHaveBeenCalled();
+        done();
+      });
     });
 
   });
@@ -390,14 +398,14 @@ describe('Core.RemoteInstance', () => {
 
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
-    alice.onceLoaded.then(() => {
+    Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
       expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
       expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
       expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
       expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
       // Bob accepts / offers
       bob.modifyConsent(Consent.UserAction.OFFER);
-      bob.onceLoaded.then(() => {
+      Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
         expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
         expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
         done()

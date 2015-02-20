@@ -260,6 +260,12 @@ module Core {
      * accordingly.
      */
     public updateConsent = (bits:Consent.WireState) => {
+      this.onceLoaded.then(() => {
+        this.updateConsent_(bits);
+      });
+    }
+
+    public updateConsent_ = (bits:Consent.WireState) => {
 
       var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
       var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
@@ -350,18 +356,9 @@ module Core {
      * that correspond to local user action.
      */
     public restoreState = (state :RemoteInstanceState) => {
-      if (typeof this.description === 'undefined') {
-        this.description = state.description;
-        this.keyHash = state.keyHash;
-        this.consent = state.consent;
-      } else {
-        this.consent.localRequestsAccessFromRemote =
-            state.consent.localRequestsAccessFromRemote;
-        this.consent.localGrantsAccessToRemote =
-            state.consent.localGrantsAccessToRemote;
-        this.saveToStorage();
-        this.sendConsent();
-      }
+      this.description = state.description;
+      this.keyHash = state.keyHash;
+      this.consent = state.consent;
     }
 
     /**
