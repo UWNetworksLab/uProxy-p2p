@@ -58,11 +58,8 @@ module uProxy {
     NETWORK,      // One particular network.
     USER_SELF,    // Local / myself on the network.
     USER_FRIEND,  // Remote friend on the roster.
-    // Skip unused CLIENT.       // Single client for a User.
-    INSTANCE = 2005,
-    // Skip unused DESCRIPTION.
-    // Skip unused ID_MAPS = 2007.  // ClientId <---> InstanceId mappings.
-    COMMAND_FULFILLED = 2008,
+    INSTANCE,
+    COMMAND_FULFILLED,
     COMMAND_REJECTED,
     START_GETTING_FROM_FRIEND,
     STOP_GETTING_FROM_FRIEND,
@@ -70,7 +67,6 @@ module uProxy {
     STOP_GIVING_TO_FRIEND,
     ERROR,
     NOTIFICATION,
-    LOCAL_FINGERPRINT,  // From the WebRTC peer connection.
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider

@@ -144,10 +144,6 @@ module UI {
     // of the ui object so it can be saved/restored when popup closes and opens.
     public splashState :number = 0;
 
-    // TODO: Put this into the 'auth' service, which will eventually include
-    // sas-rtc.
-    public localFingerprint :string = null;
-
     // Instance you are getting access from.
     // Null if you are not getting access.
     private instanceGettingAccessFrom_ = null;
@@ -223,11 +219,6 @@ module UI {
       core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
         this.showNotification(notificationText);
-      });
-
-      core.onUpdate(uProxy.Update.LOCAL_FINGERPRINT, (payload :string) => {
-        this.localFingerprint = payload;
-        console.log('Received local fingerprint: ' + this.localFingerprint);
       });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
