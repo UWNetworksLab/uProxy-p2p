@@ -64,7 +64,11 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
 
-### Installing and running in Chrome
+### Installing and running
+
+*Please don’t submit uProxy to the Chrome Web Store or Firefox Marketplace*. uProxy is under active development and the team takes its responsibility to provide security very seriously; we don’t want at-risk groups that may not be technically sophisticated — journalists, human-rights workers, et al — to rely on uProxy until we feel it’s ready. Prematurely making uProxy available could have very serious real world ramifications. Before we release uProxy to the browser stores, we want the source code examined and reviewed so that the community as a whole can help us make sure that we haven’t overlooked anything in our implementation. Once we feel that uProxy is ready, we will release it via the browser web stores ourselves.
+
+#### Chrome
 
 These are the steps to try uProxy in the Chrome browser.
 
@@ -74,15 +78,32 @@ These are the steps to try uProxy in the Chrome browser.
 
 You need both the uProxy Chrome App and the uProxy Extension.
 
-*Please don’t submit uProxy to the Chrome Web Store or Firefox Marketplace*. uProxy is under active development and the team takes its responsibility to provide security very seriously; we don’t want at-risk groups that may not be technically sophisticated — journalists, human-rights workers, et al — to rely on uProxy until we feel it’s ready. Prematurely making uProxy available could have very serious real world ramifications. Before we release uProxy to the browser stores, we want the source code examined and reviewed so that the community as a whole can help us make sure that we haven’t overlooked anything in our implementation. Once we feel that uProxy is ready, we will release it via the browser web stores ourselves.
+You can use `grunt build_chrome` from the root directory of the repository to re-compile just Chrome components.
 
-### Testing uProxy between 2 instances of Chrome
+#### Firefox
 
-To test proxying without using multiple computers, you will need to launch two separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
+These are the steps to try uProxy in the Firefox browser.
+
+- To run the add-on you need to have the Firefox add-on SDK installed.
+Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
+    - A quick way to get started is to download/extract the zip mentioned in "Prerequisites"
+
+- Run `cd build/dev/firefox`
+
+- Run `cfx run` and Firefox should launch with the uProxy add-on installed
+
+You can use `grunt build_firefox` from the root directory of the repository to compile just Firefox comonents.
+
+
+#### Starting two instances of Chrome on the same machine
+
+To test proxying without using multiple computers, you can launch two separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
 ```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta-test-user```
 where DIR_NAME is set to the name of a directory where you want to store custom chrome profiles, e.g. `/tmp/`.
 
 In each instance of Chrome, load the uProxy app and extension as describe above. 
+
+You can also test between one instance of Chrome and one instance in Firefox. 
 
 Then in each instance, within uProxy, sign into Google with gmail accounts that have already added each other as contacts.  After sign-in both contacts should be visible on each other's roster.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's uProxy Chrome App. You should see traces indicating the flow of traffic through the proxy.
 
