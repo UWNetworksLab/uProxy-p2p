@@ -129,6 +129,9 @@ module.exports = (grunt) ->
       polymerChrome: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer_chrome')
       chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer_chrome')
 
+      polymerFirefox: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer_firefox')
+      firefoxBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/firefox/data/polymer'), 'generic_ui/polymer_firefox')
+
       polymer:
         src: 'third_party/lib'
         dest: 'build/compile-src/generic_ui/lib'
@@ -394,9 +397,11 @@ module.exports = (grunt) ->
       # actual distribution directory.
       chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
       chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/scripts'
+      chrome_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer_chrome'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
       # uProxy firefox specific typescript
+      firefox_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer_firefox'
       firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
 
     }  # typescript
@@ -507,17 +512,6 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      withinline:
-        options:
-          inline: true
-        files:
-          'build/compile-src/generic_ui/polymer/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer/root.html'
-      withcsp:
-        options:
-          csp: true
-          strip: true
-        files:
-          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
       chromeinline:
         options:
           inline: true
@@ -529,6 +523,17 @@ module.exports = (grunt) ->
           strip: true
         files:
           'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer_chrome/vulcanized-inline.html'
+      firefoxinline:
+        options:
+          inline: true
+        files:
+          'build/compile-src/generic_ui/polymer_firefox/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer_firefox/root.html'
+      firefoxcsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer_firefox/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -577,10 +582,11 @@ module.exports = (grunt) ->
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
+    'base'
     'symlink:polymerChrome'
     'symlink:chromeBrowserElements'
-    'build_generic_ui'
-    'build_generic_core'
+    'ts:generic_core'
+    'ts:chrome_ui'
     'ts:chrome_app'
     'ts:chrome_ext'
     'vulcanize:chromeinline'
@@ -592,9 +598,14 @@ module.exports = (grunt) ->
 
   # Firefox build tasks.
   taskManager.add 'build_firefox', [
-    'build_generic_ui'
-    'build_generic_core'
+    'base'
+    'symlink:polymerFirefox'
+    'symlink:firefoxBrowserElements'
+    'ts:generic_core'
+    'ts:firefox_ui'
     'ts:firefox'
+    'vulcanize:firefoxinline'
+    'vulcanize:firefoxcsp'
     'copy:firefox'
     'concat:firefox_uproxy'
     'concat:firefox_dependencies'
