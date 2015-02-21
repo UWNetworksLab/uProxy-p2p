@@ -63,7 +63,6 @@ module Core {
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
 
     private connection_ :Core.RemoteConnection = null;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized

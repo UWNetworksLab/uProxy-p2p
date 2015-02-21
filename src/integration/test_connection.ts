@@ -1,12 +1,10 @@
-
 /// <reference path="../networking-typings/communications.d.ts" />
 /// <reference path="../socks-common/socks-headers.d.ts" />
 /// <reference path="../tcp/tcp.d.ts" />
 
 class ProxyTester {
-  private socksEndpoint_ : Promise<Net.Endpoint>;
   private echoServer_ :Tcp.Server;
-  private connection_ :{ [index:string]: Tcp.Connection; } = {};
+  private connections_ :{ [index:string]: Tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
 
   constructor() {
@@ -63,7 +61,7 @@ class ProxyTester {
     });
   }
 
-  public connect = (socksEndpoint: Net.endpoint,
+  public connect = (socksEndpoint: Net.Endpoint,
                     port:number,
                     address?:string) : Promise<string> => {
     var echoEndpoint :Net.Endpoint = {
@@ -104,17 +102,12 @@ class ProxyTester {
       return Promise.reject(e.message + ' ' + e.stack);
     }
   }
+}
 
-  public testConnection = (socksEndpoint :Net.Endpoint) : Promise<Boolean> => {
-    var input;
-    this.startEchoServer().then((port:number) => {
-      return this.connect(socksEndpoint, port);
-    }).then((connectionId :string) => {
-      return this.echo(connectionId, input);
-    }).then((output :ArrayBuffer) => {
-      return Promise.resolve(ArrayBuffers.byteEquality(input, output));
-    }).catch((e :any) => {
-      Promise.reject(e);
-    })
-  }
+interface Freedom {
+  //providesPromises: (a:new (f:any) => ProxyTester) => void;
+};
+
+if (typeof freedom !== 'undefined') {
+  freedom().providePromises(ProxyTester);
 }

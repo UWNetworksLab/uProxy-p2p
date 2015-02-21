@@ -37,7 +37,8 @@ var model :UI.Model = {
     'description': '',
     'stunServers': [],
     'hasSeenSharingEnabledScreen': false,
-    'hasSeenWelcome': false
+    'hasSeenWelcome': false,
+    'allowNonUnicast': false
   }
 };
 

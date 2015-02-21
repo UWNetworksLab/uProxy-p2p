@@ -1,6 +1,25 @@
 /// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../uproxy.ts' />
+/// <reference path='../arraybuffers/arraybuffers.ts' />
 
+var testConnection = (socksEndpoint :Net.Endpoint) : Promise<Boolean> => {
+  return freedom('scripts/build/compile-src/integration/integration.json', {debug:'log'}).then((interface :any) => {
+    var testModule = new interface();
+    var input = ArrayBuffers.stringToArrayBuffer('arbitrary test string');
+    return testModule.startEchoServer().then((port:number) => {
+      return testModule.connect(socksEndpoint, port, "").
+          then((connectionId :string) => {
+        return testModule.echo(connectionId, input)
+            .then((output :ArrayBuffer) => {
+          return Promise.resolve(
+            ArrayBuffers.byteEquality(input, output));
+        })
+      });
+    }).catch((e :any) => {
+      return Promise.reject(e);
+    })
+  });
+}
 declare var ALICE;
 declare var BOB;
 var REDIRECT_URL = 'http://localhost';
@@ -60,13 +79,13 @@ var Helper = {
 };  // end of Helper
 
 describe('uproxy core', function() {
+  //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   var uProxyFreedom = 'scripts/build/compile-src/integration/scripts/freedom-module.json';
   var alice;
   var bob;
   var alicePath;
   var bobPath;
   var promiseId = 0;
-  var proxyTester = new ProxyTester;
   it('loads uproxy', (done) => {
     // Ensure that aliceSocialInterface and bobSocialInterface are set.
     var AliceOAuthView = function() {};
@@ -89,11 +108,22 @@ describe('uproxy core', function() {
   });
 
   it('logs in', (done) => {
+    var promises = [];
     alice.emit('' + uProxy.Command.LOGIN,
                      <uProxy.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
+    promises.push(new Promise(function(fulfill, reject) {
+      alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
+        fulfill();
+      });
+    }));
     bob.emit('' + uProxy.Command.LOGIN,
                      <uProxy.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
-    var aliceLoaded = new Promise(function(fulfill, reject) {
+    promises.push(new Promise(function(fulfill, reject) {
+      bob.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
+        fulfill();
+      });
+    }));
+    promises.push(new Promise(function(fulfill, reject) {
       alice.on('' + uProxy.Update.USER_FRIEND, (data) => {
         if (data.user.userId === BOB.ANONYMIZED_ID
            && data.user.name === BOB.NAME
@@ -102,8 +132,8 @@ describe('uproxy core', function() {
           fulfill();;
         }
       })
-    });
-    var bobLoaded = new Promise(function(fulfill, reject) {
+    }));
+    promises.push(new Promise(function(fulfill, reject) {
       bob.on('' + uProxy.Update.USER_FRIEND, (data) => {
         if (data.user.userId === ALICE.ANONYMIZED_ID
             && data.user.name === ALICE.NAME
@@ -112,9 +142,22 @@ describe('uproxy core', function() {
           fulfill();
         }
       })
-    });
+    }));
 
-    Promise.all([aliceLoaded, bobLoaded]).then(done);
+    Promise.all(promises).then(() => {
+      var globalSettings = {
+        description: '',
+        stunServers: [],
+        hasSeenSharingEnabledScreen: true,
+        hasSeenWelcome: false,
+        allowNonUnicast: true
+      };
+      alice.emit('' + uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+                 {data: globalSettings});
+      bob.emit('' + uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+               {data: globalSettings});
+      done();
+    });
   });
 
   it('ask and get permission', (done) => {
@@ -166,7 +209,7 @@ describe('uproxy core', function() {
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
         expect(data.promiseId).toEqual(promiseId);
-        proxyTester.testConnection(data.endpoints).then((proxying) => {
+        testConnection(data.argsForCallback).then((proxying) => {
           expect(proxying).toEqual(true);
           fulfill();
         });
@@ -210,8 +253,10 @@ describe('uproxy core', function() {
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
         expect(data.promiseId).toEqual(promiseId);
-        // test proxing
-        fulfill();
+        testConnection(data.argsForCallback).then((proxying) => {
+          expect(proxying).toEqual(true);
+          fulfill();
+        });
       });
     });
 
@@ -231,7 +276,7 @@ describe('uproxy core', function() {
     // alice not proxying
     var bobStopped = new Promise(function(fulfill, reject) {
       bob.once('' + uProxy.Update.STOP_GIVING_TO_FRIEND, (data) => {
-        expect(data).toEqual(ALICE.INSTANCE_ID);
+        //expect(data).toEqual(ALICE.INSTANCE_ID);
         fulfill();
       });
     });
@@ -273,7 +318,6 @@ describe('uproxy core', function() {
         bob.emit('' + uProxy.Command.LOGIN,
                  {data: 'Google', promiseId: ++promiseId});
         var bobFriend = function(data) {
-          console.log(data);
           if (data.user.userId === ALICE.ANONYMIZED_ID && data.instances.length > 0
               && data.instances[0].instanceId === ALICE.INSTANCE_ID
               && data.instances[0].consent.remoteRequestsAccessFromLocal
@@ -286,9 +330,10 @@ describe('uproxy core', function() {
         bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
       }
     };
-    alice.once('' + uProxy.Update.NETWORK, (data) => {
-      expect(data.name).toEqual('Google');
-      alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+    alice.on('' + uProxy.Update.NETWORK, (data) => {
+      if (data.online) {
+        alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+      }
     })
   });
 
