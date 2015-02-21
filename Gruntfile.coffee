@@ -26,17 +26,33 @@ firefoxDevPath = 'build/dev/firefox/'
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 # We need *.ts files for typescript compilation
 # and *.html files for polymer vulcanize compilation
-Rule.symlink = (dir, dest='') =>
-  { files: [ {
-    expand: true,
-    overwrite: true,
-    cwd: dir,
-    src: ['**/*.ts', '**/*.html'],
-    dest: 'build/compile-src/' + dest} ] }
+Rule.symlink = (dir, dest='', exclude='') =>
+  if (exclude!='')
+    console.log(exclude);
+    { files: [ {
+        expand: true,
+        overwrite: true,
+        cwd: dir,
+        src: ['**/*.ts', '**/*.html', exclude],
+        dest: 'build/compile-src/' + dest} ] }
+  else
+    console.log('inner no exclude');
+    { files: [ {
+      expand: true,
+      overwrite: true,
+      cwd: dir,
+      src: ['**/*.ts', '**/*.html'],
+      dest: 'build/compile-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
 # the path to its src/ directory.
-Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
+Rule.symlinkSrc = (module, exclude='') =>
+  if (exclude!='')
+    console.log(exclude);
+    Rule.symlink Path.join(getNodePath(module), 'src', exclude)
+  else
+    console.log('no exclude');
+    Rule.symlink Path.join(getNodePath(module), 'src')
 Rule.symlinkThirdParty = (module) =>
   Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
 
@@ -115,7 +131,7 @@ module.exports = (grunt) ->
     symlink:
       # Symlink all module directories in `src` into compile-src, and
       # merge `third_party` from different places as well.
-      typescriptSrc: Rule.symlinkSrc '.'
+      typescriptSrc: Rule.symlinkSrc('.','!**/polymer/**')
       thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
 
       uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-networking'
