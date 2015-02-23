@@ -169,7 +169,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, we should show the browser specific page
     // that shows the "app missing" message.
-    ui.view = UI.View.BROWSER;
+    ui.view = UI.View.BROWSER_ERROR;
 
 
     if (this.status.connected) {

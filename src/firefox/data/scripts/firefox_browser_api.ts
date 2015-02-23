@@ -14,7 +14,7 @@ declare var ui :UI.UserInterface;
 
 class FirefoxBrowserApi implements BrowserAPI {
 
-  public customElement;
+  public browserSpecificElement;
 
   constructor() {
     port.on('handleUrlData', function(url :string) {

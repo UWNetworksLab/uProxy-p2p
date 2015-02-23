@@ -16,7 +16,7 @@ enum PopupState {
 
 class ChromeBrowserApi implements BrowserAPI {
 
-  public customElement = "uproxy-app-missing";
+  public browserSpecificElement = "uproxy-app-missing";
 
   // For browser action.
 
