@@ -29,12 +29,6 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
-
-  interface InstanceReconnection {
-    promise :Promise<string>;  // Fulfilled with new clientID upon reconnection.
-    fulfill :Function;         // Call fulfill when instance reconnects.
-  }
-
   /**
    * Core.User
    *
@@ -57,23 +51,17 @@ module Core {
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
-    public static create = (network :Social.Network,
-                            userId  :string) : Promise<User> => {
-      var user = new User(network, userId);
-      return new Promise((fulfill, reject) => {
-        storage.load<UserState>(user.getStorePath()).then((state) => {
-          user.restoreState(state).then(fulfill.bind({}, user),
-                                        fulfill.bind({}, user));
-        }, (e) => {
-          // User not found in storage - we should fulfill the create promise
-          // anyway as this is not an error.
-          fulfill(user);
-        }).catch((e) => {
-          console.error('Uncaught error in User.create: ' + e);
-          reject(user);
-        });
-      });
-    }
+    private fulfillStorageLoad_ : () => void;
+    public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageLoad_ = F;
+    }).then(() => {
+      this.notifyUI();
+    });
+
+    private fulfillNameReceived_ : (string) => void;
+    public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
+      this.fulfillNameReceived_ = F;
+    });
 
     /**
      * Users are constructed purely on the basis of receiving a userId.
@@ -97,18 +85,28 @@ module Core {
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+
+      storage.load<UserState>(this.getStorePath()).then((state) => {
+        this.restoreState(state);
+        this.fulfillStorageLoad_();
+      }).catch((e) => {
+        // User not found in storage - we should fulfill the create promise
+        // anyway as this is not an error.
+        this.fulfillStorageLoad_();
+      });
     }
 
     /**
      * Update the information about this user.
      * The userId must match.
      */
-    public update = (profile :freedom_Social.UserProfile) => {
+    public update = (profile :freedom_Social.UserProfile) : void => {
       if (profile.userId != this.userId) {
         throw Error('Updating User ' + this.userId +
                     ' with unexpected userID: ' + profile.userId);
       }
       this.name = profile.name;
+      this.fulfillNameReceived_(this.name);
       this.profile = profile;
       this.log('Updating...');
       this.saveToStorage();
@@ -146,7 +144,7 @@ module Core {
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :UProxyClient.State) => {
+    public handleClient = (client :UProxyClient.State) : void => {
       if (client.userId != this.userId) {
         console.error(this.userId +
             'received client with unexpected userId: ' + client.userId);
@@ -198,18 +196,18 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) :
-        Promise<void> => {
+    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         var errorStr = this.userId +
             ' received message for non-existing client: ' + clientId;
         console.error(errorStr);
-        return Promise.reject(errorStr);
+        return;
       }
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          return this.syncInstance_(clientId, <InstanceMessage>msg.data);
+          this.syncInstance_(clientId, <InstanceMessage>msg.data);
+          return;
 
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
         case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
@@ -220,22 +218,21 @@ module Core {
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
             // issues: https://github.com/uProxy/uproxy/pull/732
-            return Promise.reject(
-                'failed to get instance for clientId ' + clientId);
+            console.error('failed to get instance for clientId ' + clientId);
+            return;
           }
           instance.handleSignal(msg.type, msg.data);
-          return Promise.resolve<void>();
+          return;
 
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
           this.network.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
-          return Promise.resolve<void>();
+          return;
 
         default:
           var errorStr = this.userId + ' received invalid message.' + msg;
           console.error(errorStr);
-          return Promise.reject(errorStr);
       }
     }
 
@@ -247,7 +244,7 @@ module Core {
       return (this.instances_[instanceId]).getConsentBits();;
     }
 
-    public getInstance = (instanceId:string) => {
+    public getInstance = (instanceId:string) : Core.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
@@ -269,8 +266,7 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    private syncInstance_ = (clientId :string, data :InstanceMessage)
-        : Promise<void> => {
+    public syncInstance_ = (clientId :string, data :InstanceMessage) : void => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
@@ -299,18 +295,15 @@ module Core {
         } else {
           existingInstance.updateConsent(data.consent);
         }
-        return Promise.resolve<void>();
       } else {
         // Create a new instance.
-        return Core.RemoteInstance.create(this, instanceId, instance)
-            .then((newInstance) => {
-              this.instances_[instanceId] = newInstance;
-              this.saveToStorage();
-              this.notifyUI();
-              if (data.consent) {
-                newInstance.updateConsent(data.consent);
-              }
-            });
+        var newInstance = new Core.RemoteInstance(this, instanceId, instance);
+        this.instances_[instanceId] = newInstance;
+        this.saveToStorage();
+        this.notifyUI();
+        if (data.consent) {
+          newInstance.updateConsent(data.consent);
+        }
       }
     }
 
@@ -329,7 +322,7 @@ module Core {
      * Remove a client from this User. Also removes the client <--> instance
      * mapping if it exists.
      */
-    private removeClient_ = (clientId:string) => {
+    private removeClient_ = (clientId:string) : void => {
       delete this.clientIdToStatusMap[clientId];
       var instanceId = this.clientToInstanceMap_[clientId];
       if (instanceId) {
@@ -342,7 +335,7 @@ module Core {
      * Send the latest full state about everything in this user to the UI.
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
-    public notifyUI = () => {
+    public notifyUI = () : void => {
       if ('pending' == this.name) {
         this.log('Not showing UI without profile.');
         return;
@@ -431,14 +424,20 @@ module Core {
       return this.network.getStorePath() + this.userId;
     }
 
-    public saveToStorage = () => {
-      var state = this.currentState();
-      storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+    public saveToStorage = () : void => {
+      this.onceLoaded.then(() => {
+        var state = this.currentState();
+        storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+      });
     }
 
-    public restoreState = (state :UserState) : Promise<void> => {
+    public restoreState = (state :UserState) : void => {
       if (this.name === 'pending') {
         this.name = state.name;
+      }
+
+      if (this.name !== 'pending') {
+        this.fulfillNameReceived_(this.name);
       }
 
       if (typeof this.profile.imageData === 'undefined') {
@@ -446,23 +445,12 @@ module Core {
       }
 
       // Restore all instances.
-      var instancePromises = [];
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
-          instancePromises.push(
-              Core.RemoteInstance.create(this, instanceId, null)
-                  .then((newInstance) => {
-                    this.instances_[newInstance.instanceId] = newInstance;
-                  })
-              );
+          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
         }
       }
-
-      // Update the UI after all instances have been created.g
-      return Promise.all(instancePromises).then(() => {
-        this.notifyUI();
-      });
     }
 
     public currentState = () :UserState => {
@@ -473,13 +461,13 @@ module Core {
       });
     }
 
-    public handleLogout = () => {
+    public handleLogout = () : void => {
       for (var instanceId in this.instances_) {
         this.instances_[instanceId].handleLogout();
       }
     }
 
-    public resendInstanceHandshakes = () => {
+    public resendInstanceHandshakes = () : void => {
       for (var instanceId in this.instanceToClientMap_) {
         var clientId = this.instanceToClientMap_[instanceId];
         this.network.sendInstanceHandshake(

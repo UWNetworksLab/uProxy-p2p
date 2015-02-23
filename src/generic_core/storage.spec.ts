@@ -12,11 +12,22 @@ describe('Core.Storage', () => {
   })
 
   it('starts with empty storage', (done) => {
-    storage.reset().then(() => {
-      storage.keys().then((keys) => {
-        expect(keys).toEqual([]);
-      }).then(done);
-    });
+    // Delay first test for 1 second, so that writes from previous tests have
+    // time to complete, before we reset.  Without this, test cases from
+    // social.spec.ts or local-instance.spec.ts can end up writing to storage
+    // event after reset is complete - this is because they are testing
+    // functionality which writes to storage (e.g. updating a user), but not
+    // waiting for storage writes to be complete before calling done and
+    // moving on to the next test.
+    // TODO: change all test cases to wait on storage writes to be complete
+    // before calling done, then we can remove this setTimeout hack.
+    setTimeout(function() {
+      storage.reset().then(() => {
+        storage.keys().then((keys) => {
+          expect(keys).toEqual([]);
+        }).then(done);
+      });
+    }, 1000);
   });
 
   it('saves and loads to storage', (done) => {

@@ -29,6 +29,7 @@ describe('Core.RemoteInstance', () => {
   user.isInstanceOnline = function() {
     return true;
   };
+  user.onceNameReceived = Promise.resolve<string>("name");
 
   var socksToRtc =
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
@@ -47,29 +48,20 @@ describe('Core.RemoteInstance', () => {
   describe('storage', () => {
     var realStorage = new Core.Storage;
     var saved;
-    var loaded;
     var instance0;
 
    it('fresh instance has no state', (done) => {
-      storage.load = function(key) {
-        loaded = realStorage.load(key);
-        return loaded;
-      };
       storage.save = function(key, value) {
         saved = realStorage.save(key, value);
         return saved;
       };
-      Core.RemoteInstance.create(user, 'instanceId', null)
-          .then((newInstance) => {
-            instance0 = newInstance;
-            expect(loaded).toBeDefined();
-            loaded.catch(() => {
-              expect(instance0.description).not.toBeDefined();
-              expect(instance0.keyHash).not.toBeDefined();
-              expect(instance0.consent).toEqual(new Consent.State);
-              done();
-            });
-          });
+      instance0 = new Core.RemoteInstance(user, 'instanceId', null);
+      instance0.onceLoaded.then(() => {
+        expect(instance0.description).not.toBeDefined();
+        expect(instance0.keyHash).not.toBeDefined();
+        expect(instance0.consent).toEqual(new Consent.State);
+        done();
+      });
     });
 
     it('update', (done) => {
@@ -81,28 +73,27 @@ describe('Core.RemoteInstance', () => {
       spyOn(instance0, 'sendConsent');
       instance0.update(handshake);
       instance0.modifyConsent(Consent.UserAction.REQUEST);
-      expect(saved).toBeDefined();
 
-      saved.then(() => {
-        Core.RemoteInstance.create(user, 'instanceId', null)
-            .then((newInstance) => {
-                loaded.then(() => {
-                  expect(newInstance.currentState())
-                      .toEqual(instance0.currentState());
-                }).then(done);
-            });
+      instance0.onceLoaded.then(() => {
+        expect(saved).toBeDefined();
+        saved.then(() => {
+          var newInstance = new Core.RemoteInstance(user, 'instanceId', null);
+          newInstance.onceLoaded.then(() => {
+            expect(newInstance.currentState()).toEqual(instance0.currentState());
+            done();
+          });
+        });
       });
     });
 
     it ('delay loading', (done) => {
       var fulfill;
-      var loaded = realStorage.load(instance0.getStorePath());
       storage.load = function(key) {
         var delay = new Promise((F, R) => {
           fulfill = F;
         });
         return delay.then(() => {
-          return loaded;
+          return realStorage.load(instance0.getStorePath());
         });
       }
 
@@ -111,20 +102,18 @@ describe('Core.RemoteInstance', () => {
         keyHash : 'new-keyhash',
         description: 'new description'
       };
-      Core.RemoteInstance.create(user, 'instanceId', handshake)
-          .then((instance2) => {
-            var consent :Consent.WireState = {
-              isRequesting: true,
-              isOffering: true,
-            };
-            instance2.updateConsent(consent);
-            loaded.then(() => {
-              instance2.description = 'new description';
-              expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
-              expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
-              storage = new Core.Storage;
-            }).then(done);
-      });
+      var instance2 = new Core.RemoteInstance(user, 'instanceId', handshake);
+      var consent :Consent.WireState = {
+        isRequesting: true,
+        isOffering: true,
+      };
+      instance2.updateConsent(consent);
+      instance2.onceLoaded.then(() => {
+        instance2.description = 'new description';
+        expect(instance2.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance2.consent.remoteGrantsAccessToLocal).toEqual(true);
+        storage = new Core.Storage;
+      }).then(done);
       fulfill();
     })
   });
@@ -135,12 +124,9 @@ describe('Core.RemoteInstance', () => {
       keyHash:    'fakehash',
       description: 'totally fake',
     }
-    Core.RemoteInstance.create(user, 'fakeinstance', handshake)
-        .then((newInstance) => {
-          instance = newInstance;
-          expect(instance.instanceId).toEqual('fakeinstance');
-          done();
-        });
+    instance = new Core.RemoteInstance(user, 'fakeinstance', handshake);
+    expect(instance.instanceId).toEqual('fakeinstance');
+    done();
   });
 
   it('begins with lowest consent bits', () => {
@@ -304,35 +290,44 @@ describe('Core.RemoteInstance', () => {
       expect(instance.consent).toEqual(new Consent.State());
     });
 
-    it('remote cancels their consent', () => {
+    it('remote cancels their consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = true;
       instance.consent.remoteGrantsAccessToLocal = true;
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(false);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(false);
+        done();
+      });
     });
 
-    it('remote gives consent', () => {
+    it('remote gives consent', (done) => {
       instance.consent.remoteRequestsAccessFromLocal = false;
       instance.consent.remoteGrantsAccessToLocal = false;
       instance.updateConsent({
         isRequesting: true,
         isOffering:   true
       });
-      expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
-      expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+      instance.onceLoaded.then(() => {
+        expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
+        done();
+      });
     });
 
-    it('receiving consent bits sends update to UI', () => {
+    it('receiving consent bits sends update to UI', (done) => {
       instance.consent = new Consent.State();
       instance.updateConsent({
         isRequesting: false,
         isOffering:   false
       });
-      expect(user.notifyUI).toHaveBeenCalled();
+      instance.onceLoaded.then(() => {
+        expect(user.notifyUI).toHaveBeenCalled();
+        done();
+      });
     });
 
   });
@@ -377,40 +372,45 @@ describe('Core.RemoteInstance', () => {
 
   });
 
-  it('two remote instances establish mutual consent', () => {
+  it('two remote instances establish mutual consent', (done) => {
     (<any>user.instanceToClient).and.callFake((instanceId) => {
       return instanceId;
     });
 
-    var alice = new Core.RemoteInstance(user, 'instance-alice', {
-      instanceId: 'instance-alice',
+    var alice = new Core.RemoteInstance(user, 'instanceId-alice', {
+      instanceId: 'instanceId-alice',
       keyHash:    'fake-hash-alice',
       description: 'alice peer',
     });
-    var bob = new Core.RemoteInstance(user, 'instance-bob', {
-      instanceId: 'instance-bob',
+    var bob = new Core.RemoteInstance(user, 'instanceId-bob', {
+      instanceId: 'instanceId-bob',
       keyHash:    'fake-hash-bob',
       description: 'alice peer',
     });
 
     (<any>user.network.sendInstanceHandshake).and.callFake((clientId, consent) => {
-      if (clientId === 'instance-alice') {
+      if (clientId === 'instanceId-alice') {
         bob.updateConsent(consent);
-      } else if (clientId === 'instance-bob') {
+      } else if (clientId === 'instanceId-bob') {
         alice.updateConsent(consent);
       }
     });
 
     // Alice wants to proxy through Bob.
     alice.modifyConsent(Consent.UserAction.REQUEST);
-    expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
-    expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
-    // Bob accepts / offers
-    bob.modifyConsent(Consent.UserAction.OFFER);
-    expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
-    expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+    Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
+      expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
+      expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
+      expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
+      expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
+      // Bob accepts / offers
+      bob.modifyConsent(Consent.UserAction.OFFER);
+      Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
+        expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
+        expect(bob.consent.localGrantsAccessToRemote).toEqual(true);
+        done()
+      });
+    });
   });
 
   describe('proxying', () => {
@@ -430,11 +430,8 @@ describe('Core.RemoteInstance', () => {
     var fakeSocksToRtc = {
       handlers: {},
       'start':
-          (
-            endpoint:Net.Endpoint,
-            pcConfig:freedom_RTCPeerConnection.RTCConfiguration
-          ) => {
-        return Promise.resolve(endpoint);
+          (endpoint:Net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
+         return Promise.resolve(endpoint);
       },
       'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
       'stop': () => {
@@ -488,11 +485,8 @@ describe('Core.RemoteInstance', () => {
       // Mock socksToRtc to not fulfill start promise
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
         'start':
-            (
-              endpoint:Net.Endpoint,
-              pcConfig:freedom_RTCPeerConnection.RTCConfiguration
-            ) => {
-          return new Promise((F, R) => {});
+            (endpoint:Net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
+           return new Promise((F, R) => {});
         },
         'on': (t:string, f:Function) => {},
         'stop': () => {
@@ -585,5 +579,4 @@ describe('Core.RemoteInstance', () => {
     });
 
   });  // describe signalling
-
 });

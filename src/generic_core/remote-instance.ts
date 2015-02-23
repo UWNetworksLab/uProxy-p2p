@@ -8,10 +8,8 @@
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='auth.ts' />
 /// <reference path='consent.ts' />
 /// <reference path='core.ts' />
-/// <reference path='remote-transport.ts' />
 /// <reference path='remote-connection.ts' />
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
@@ -45,7 +43,14 @@ module Core {
 
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
-    private storageLookupComplete_ :boolean = false;
+    private fulfillStorageLoad_ : () => void;
+
+    public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillStorageLoad_ = F;
+    }).then(() => {
+      this.user.notifyUI();
+    });
+
 
     public consent     :Consent.State = new Consent.State();
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
@@ -58,38 +63,6 @@ module Core {
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
 
     private connection_ :Core.RemoteConnection = null;
-
-    // Factory method, returns a Promise to be fulfilled with the newly
-    // created RemoteInstance object.  This method should be used
-    // rather than invoking the constructor directly to ensure a properly
-    // loaded RemoteInstance
-    public static create = (
-        // The User which this instance belongs to.
-        user :Core.User,
-        instanceId :string,
-        // The last instance handshake from the peer.  This data may be fresh
-        // (over the wire) or recovered from disk (and stored in a
-        // RemoteInstanceState, which subclasses InstanceHandshake).
-        data :InstanceHandshake) : Promise<RemoteInstance> => {
-      return new Promise((fulfill, reject) => {
-        var remoteInstance = new RemoteInstance(user, instanceId, data);
-        storage.load<RemoteInstanceState>(remoteInstance.getStorePath())
-        .then((state) => {
-          remoteInstance.restoreState(state);
-          remoteInstance.storageLookupComplete_ = true;
-          fulfill(remoteInstance);
-        }, (e) => {
-          // Instance not found in storage - we should fulfill the create
-          // promise anyway as this is not an error.
-          console.log('No stored state for instance ' + instanceId);
-          remoteInstance.storageLookupComplete_ = true;
-          fulfill(remoteInstance);
-        }).catch((e) => {
-          console.error('Uncaught error in RemoteInstance.create: ' + e);
-          reject(remoteInstance);
-        });
-      });
-    }
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -115,6 +88,17 @@ module Core {
       if (data) {
         this.update(data);
       }
+
+      storage.load<RemoteInstanceState>(this.getStorePath())
+          .then((state) => {
+            this.restoreState(state);
+            this.fulfillStorageLoad_();
+          }).catch((e) => {
+            // Instance not found in storage - we should fulfill the create
+            // promise anyway as this is not an error.
+            console.log('No stored state for instance ' + instanceId);
+            this.fulfillStorageLoad_();
+          });
     }
 
     private handleConnectionUpdate_ = (update :uProxy.Update, data?:any) => {
@@ -229,10 +213,7 @@ module Core {
       // information that might be present.
       this.keyHash = data.keyHash;
       this.description = data.description;
-      if (this.storageLookupComplete_) {
-        this.saveToStorage();
-      }
-      this.user.notifyUI();
+      this.saveToStorage();
     }
 
     /**
@@ -264,10 +245,12 @@ module Core {
      * already existing instance.
      */
     public sendConsent = () => {
-      if (this.user.isInstanceOnline(this.instanceId)) {
-        this.user.network.sendInstanceHandshake(
-            this.user.instanceToClient(this.instanceId), this.getConsentBits());
-      }
+      this.onceLoaded.then(() => {
+        if (this.user.isInstanceOnline(this.instanceId)) {
+          this.user.network.sendInstanceHandshake(
+              this.user.instanceToClient(this.instanceId), this.getConsentBits());
+        }
+      });
     }
 
     /**
@@ -275,6 +258,12 @@ module Core {
      * accordingly.
      */
     public updateConsent = (bits:Consent.WireState) => {
+      this.onceLoaded.then(() => {
+        this.updateConsent_(bits);
+      });
+    }
+
+    public updateConsent_ = (bits:Consent.WireState) => {
 
       var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
       var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
@@ -293,14 +282,14 @@ module Core {
             && !this.consent.ignoringRemoteUserOffer) {
           // newly granted access
           if (this.consent.localRequestsAccessFromRemote) {
-            note = this.user.name + ' granted you access.';
+            note = ' granted you access.';
           } else {
-            note = this.user.name + ' offered you access.';
+            note = ' offered you access.';
           }
         } else {
           // newly revoked access
           if (!this.consent.ignoringRemoteUserOffer) {
-            note = this.user.name + ' revoked your access.';
+            note = ' revoked your access.';
           }
         }
       }
@@ -310,16 +299,18 @@ module Core {
             && !this.consent.ignoringRemoteUserRequest) {
           // newly requested/accepted access
           if (this.consent.localGrantsAccessToRemote) {
-            note = this.user.name + ' has accepted your offer of access.';
+            note = ' has accepted your offer of access.';
           } else {
-            note = this.user.name + ' is requesting access.';
+            note = ' is requesting access.';
           }
         }
         // No notification for cancelled requests.
       }
 
       if (note) {
-        ui.showNotification(note);
+        this.user.onceNameReceived.then((name :string) => {
+          ui.showNotification(name + note);
+        });
       }
     }
 
@@ -336,10 +327,12 @@ module Core {
     }
 
     private saveToStorage = () => {
-      var state = this.currentState();
-      storage.save<RemoteInstanceState>(this.getStorePath(), state)
-          .then((old) => {
-        console.log('Saved instance ' + this.instanceId + ' to storage.');
+      this.onceLoaded.then(() => {
+        var state = this.currentState();
+        storage.save<RemoteInstanceState>(this.getStorePath(), state)
+            .then((old) => {
+          console.log('Saved instance ' + this.instanceId + ' to storage.');
+        });
       });
     }
 
@@ -361,18 +354,9 @@ module Core {
      * that correspond to local user action.
      */
     public restoreState = (state :RemoteInstanceState) => {
-      if (typeof this.description === 'undefined') {
-        this.description = state.description;
-        this.keyHash = state.keyHash;
-        this.consent = state.consent;
-      } else {
-        this.consent.localRequestsAccessFromRemote =
-            state.consent.localRequestsAccessFromRemote;
-        this.consent.localGrantsAccessToRemote =
-            state.consent.localGrantsAccessToRemote;
-        this.saveToStorage();
-        this.sendConsent();
-      }
+      this.description = state.description;
+      this.keyHash = state.keyHash;
+      this.consent = state.consent;
     }
 
     /**
@@ -391,16 +375,6 @@ module Core {
         bytesSent:              this.bytesSent,
         bytesReceived:          this.bytesReceived
       });
-    }
-
-    private updateBytesInUI = () :void => {
-      if (!this.isUIUpdatePending) {
-        setTimeout(() => {
-          this.user.notifyUI();
-          this.isUIUpdatePending = false;
-        }, 1000);
-        this.isUIUpdatePending = true;
-      }
     }
 
     public handleLogout = () => {

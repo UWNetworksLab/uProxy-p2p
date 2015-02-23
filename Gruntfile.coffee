@@ -460,10 +460,8 @@ module.exports = (grunt) ->
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
               'build/compile-src/generic_core/util.js'
-              'build/compile-src/generic_core/nouns-and-adjectives.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
-              'build/compile-src/generic_core/auth.js'
               'build/compile-src/generic_core/social-enum.js'
               'build/compile-src/generic_core/local-instance.js'
               'build/compile-src/generic_core/remote-instance.js'
@@ -477,6 +475,8 @@ module.exports = (grunt) ->
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
           # NOTE: Put any helper test-data files here:
+          keepRunner: true
+          outfile: 'build/compile-src/generic_core/SpecRunner.html'
           helpers: []
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:

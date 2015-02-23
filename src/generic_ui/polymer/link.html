@@ -1,0 +1,27 @@
+<link rel="import" href='../lib/core-a11y-keys/core-a11y-keys.html'>
+
+<!--
+This is a link element we can use in UProxy that will automatically enable
+basic acessibility features (being able to tab-select and access it through
+keypresses).
+
+Usage: <uproxy-link role='(button|link)' on-tap='{{ EVENT }}'>CONTENT</uproxy-link>
+-->
+
+<polymer-element name='uproxy-link' tabindex='0'>
+  <template>
+    <style>
+      span {
+        cursor: pointer;
+      }
+    </style>
+
+    <span>
+      <content></content>
+    </span>
+
+    <core-a11y-keys keys='space enter' target='{{}}' on-keys-pressed='{{ handleKey }}'></core-a11y-keys>
+  </template>
+
+  <script src='link.js'></script>
+</polymer-element>

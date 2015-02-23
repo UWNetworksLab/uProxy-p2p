@@ -104,15 +104,6 @@ class uProxyCore implements uProxy.CoreAPI {
 
   constructor() {
     console.log('Preparing uProxy Core.');
-    // Send the local webrtc fingerprint to the UI.
-    // TODO: enable once we can use peerconnection from within the webworker.
-    Auth.getLocalFingerprint().then((fingerprint) => {
-      console.log('Fetched local WebRTC fingerprint: ' + fingerprint);
-      ui.update(uProxy.Update.LOCAL_FINGERPRINT, fingerprint);
-    }).catch((e) => {
-      console.error(e);
-    });
-
     copyPasteConnection = new Core.RemoteConnection(ui.update);
 
     this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
@@ -382,6 +373,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public stop = () => {
     if (!remoteProxyInstance) {
       console.error('Cannot stop proxying when there is no proxy');
+      return;
     }
     remoteProxyInstance.stop();
     remoteProxyInstance = null;
