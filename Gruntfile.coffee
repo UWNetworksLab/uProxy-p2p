@@ -26,33 +26,18 @@ firefoxDevPath = 'build/dev/firefox/'
 # TODO: Move this into common-grunt-rules in uproxy-lib.
 # We need *.ts files for typescript compilation
 # and *.html files for polymer vulcanize compilation
-Rule.symlink = (dir, dest='', exclude='') =>
-  if (exclude!='')
-    console.log(exclude);
-    { files: [ {
-        expand: true,
-        overwrite: true,
-        cwd: dir,
-        src: ['**/*.ts', '**/*.html', exclude],
-        dest: 'build/compile-src/' + dest} ] }
-  else
-    console.log('inner no exclude');
-    { files: [ {
-      expand: true,
-      overwrite: true,
-      cwd: dir,
-      src: ['**/*.ts', '**/*.html'],
-      dest: 'build/compile-src/' + dest} ] }
+Rule.symlink = (dir, dest='') =>
+  { files: [ {
+    expand: true,
+    overwrite: true,
+    cwd: dir,
+    src: ['**/*.ts', '**/*.html'],
+    dest: 'build/compile-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
 # the path to its src/ directory.
-Rule.symlinkSrc = (module, exclude='') =>
-  if (exclude!='')
-    console.log(exclude);
-    Rule.symlink Path.join(getNodePath(module), 'src', exclude)
-  else
-    console.log('no exclude');
-    Rule.symlink Path.join(getNodePath(module), 'src')
+Rule.symlinkSrc = (module) =>
+  Rule.symlink Path.join(getNodePath(module), 'src')
 Rule.symlinkThirdParty = (module) =>
   Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
 
@@ -77,7 +62,11 @@ Rule.typescriptSpecDeclLenient = (name) =>
   rule = Rule.typescriptSpecDecl name
   rule.options.noImplicitAny = false
   rule
-
+Rule.typescriptSrcLenientNeverFast = (name) =>
+  rule = Rule.typescriptSrc name
+  rule.options.noImplicitAny = false
+  rule.options.fast = 'never'
+  rule
 
 # TODO: Move more file lists here.
 FILES =
@@ -131,7 +120,7 @@ module.exports = (grunt) ->
     symlink:
       # Symlink all module directories in `src` into compile-src, and
       # merge `third_party` from different places as well.
-      typescriptSrc: Rule.symlinkSrc('.','!**/polymer/**')
+      typescriptSrc: Rule.symlinkSrc '.'
       thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
 
       uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-networking'
@@ -142,13 +131,11 @@ module.exports = (grunt) ->
 
       uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
 
-      polymerChrome: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer_chrome')
-      chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer_chrome')
+      genericPolymerElements: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer')
+      chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer')
+      firefoxBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/firefox/data/polymer'), 'generic_ui/polymer')
 
-      polymerFirefox: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer_firefox')
-      firefoxBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/firefox/data/polymer'), 'generic_ui/polymer_firefox')
-
-      polymer:
+      polymerLib:
         src: 'third_party/lib'
         dest: 'build/compile-src/generic_ui/lib'
 
@@ -385,7 +372,7 @@ module.exports = (grunt) ->
     ts: {
 
       # uProxy UI without any platform dependencies
-      generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
+      generic_ui: Rule.typescriptSrcLenientNeverFast 'compile-src/generic_ui'
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
 
       # Core uProxy without any platform dependencies
@@ -413,11 +400,9 @@ module.exports = (grunt) ->
       # actual distribution directory.
       chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
       chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/scripts'
-      chrome_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer_chrome'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
       # uProxy firefox specific typescript
-      firefox_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer_firefox'
       firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
 
     }  # typescript
@@ -528,28 +513,22 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      chromeinline:
+      inline:
         options:
           inline: true
         files:
-          'build/compile-src/generic_ui/polymer_chrome/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer_chrome/root.html'
-      chromecsp:
+          'build/compile-src/generic_ui/polymer/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer/root.html'
+      csp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer_chrome/vulcanized-inline.html'
-      firefoxinline:
-        options:
-          inline: true
-        files:
-          'build/compile-src/generic_ui/polymer_firefox/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer_firefox/root.html'
-      firefoxcsp:
-        options:
-          csp: true
-          strip: true
-        files:
-          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer_firefox/vulcanized-inline.html'
+          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
+
+    remove:
+      allPolymerElements:
+        fileList: ['**']
+        dirList: ['build/compile-src/generic_ui/polymer/']
 
     clean: ['build/**', '.tscache']
 
@@ -562,6 +541,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
+  grunt.loadNpmTasks 'grunt-remove'
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
@@ -580,7 +560,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
-    'symlink:polymer'
+    'symlink:polymerLib'
   ]
 
   # --- Build tasks ---
@@ -595,18 +575,22 @@ module.exports = (grunt) ->
     'ts:generic_ui'
   ]
 
+  taskManager.add 'build_ui_and_vulcanize', [
+    'ts:generic_ui'
+    'vulcanize:inline'
+    'vulcanize:csp'
+  ]
+
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
-    'base'
-    'symlink:polymerChrome'
+    'build_generic_core'
+    'remove:allPolymerElements'
+    'symlink:genericPolymerElements'
     'symlink:chromeBrowserElements'
-    'ts:generic_core'
-    'ts:chrome_ui'
+    'build_ui_and_vulcanize'
     'ts:chrome_app'
     'ts:chrome_ext'
-    'vulcanize:chromeinline'
-    'vulcanize:chromecsp'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
@@ -614,14 +598,12 @@ module.exports = (grunt) ->
 
   # Firefox build tasks.
   taskManager.add 'build_firefox', [
-    'base'
-    'symlink:polymerFirefox'
+    'build_generic_core'
+    'remove:allPolymerElements'
+    'symlink:genericPolymerElements'
     'symlink:firefoxBrowserElements'
-    'ts:generic_core'
-    'ts:firefox_ui'
+    'build_ui_and_vulcanize'
     'ts:firefox'
-    'vulcanize:firefoxinline'
-    'vulcanize:firefoxcsp'
     'copy:firefox'
     'concat:firefox_uproxy'
     'concat:firefox_dependencies'
