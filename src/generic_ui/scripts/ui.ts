@@ -114,8 +114,6 @@ module UI {
     SPLASH = 0,
     COPYPASTE,
     ROSTER,
-    USER,
-    NETWORKS,
     SETTINGS,
   }
 
