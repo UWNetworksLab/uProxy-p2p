@@ -616,11 +616,6 @@ module.exports = (grunt) ->
     'compress:main'
   ]
 
-  taskManager.add 'build', [
-    'build_chrome'
-    'build_firefox'
-  ]
-
   # --- Testing tasks ---
   taskManager.add 'test_core', [
     'build_generic_core'
@@ -645,14 +640,6 @@ module.exports = (grunt) ->
     'jasmine:chrome_app'
   ]
 
-  # This is the target run by Travis. Targets in here should run locally
-  # and on Travis/Sauce Labs.
-  taskManager.add 'test', [
-    'test_core'
-    'test_ui'
-    'test_chrome'
-  ]
-
   taskManager.add 'everything', [
     'tsd:refresh'
     'build'
@@ -662,6 +649,23 @@ module.exports = (grunt) ->
   taskManager.add 'default', [
     'build'
   ]
+
+  # Register 'build' and 'test' without the task manager because we do not
+  # want the subtasks to be 'flattened'. E.g. Chrome and Firefox share tasks
+  # that need to be run during each browser's build process, and we want
+  # the tests to be independent of each other.
+  grunt.registerTask('build', [
+    'build_chrome',
+    'build_firefox'
+  ]);
+
+  # This is the target run by Travis. Targets in here should run locally
+  # and on Travis/Sauce Labs.
+  grunt.registerTask('test', [
+    'test_core',
+    'test_ui',
+    'test_chrome'
+  ]);
 
   #-------------------------------------------------------------------------
   # Register the tasks
