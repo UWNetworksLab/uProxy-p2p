@@ -375,6 +375,12 @@ module UI {
       var payload;
       console.log('received url data from browser');
 
+      if (model.onlineNetwork) {
+        // TODO propogate this to chrome tab page (blocking on #955
+        console.log('Ignoring URL since we have an active network');
+        return;
+      }
+
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
