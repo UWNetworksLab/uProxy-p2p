@@ -290,6 +290,7 @@ describe('uproxy core', function() {
 
     Promise.all([aliceStopped, bobStopped]).then(done);
   });
+
   it('log out', (done) => {
     alice.emit('' + uProxy.Command.LOGOUT,
                {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: ++promiseId});
@@ -307,34 +308,40 @@ describe('uproxy core', function() {
   it('log back in and check permissions', (done) => {
     alice.emit('' + uProxy.Command.LOGIN,
                {data: 'Google', promiseId: ++promiseId});
+    var aliceLoggedIn = new Promise((F, R) => {
+      alice.on('' + uProxy.Command.NETWORK, (data) => {
+        console.log('network update ', data);
+        if (data.online) {
+          F();
+        }
+      });
+    });
     var aliceFriend = function(data) {
-      if (data.user.userId === BOB.ANONYMIZED_ID && data.instances.length > 0
-          && data.instances[0].instanceId === BOB.INSTANCE_ID
-          && data.instances[0].consent.remoteGrantsAccessToLocal
-          && !data.instances[0].consent.localGrantsAccessToRemote) {
-        alice.emit('' + uProxy.Command.MODIFY_CONSENT,
-                         {data: {path: bobPath, action:Consent.UserAction.OFFER}});
-        alice.off('' + uProxy.Update.USER_FRIEND, aliceFriend);
-        bob.emit('' + uProxy.Command.LOGIN,
-                 {data: 'Google', promiseId: ++promiseId});
-        var bobFriend = function(data) {
-          if (data.user.userId === ALICE.ANONYMIZED_ID && data.instances.length > 0
-              && data.instances[0].instanceId === ALICE.INSTANCE_ID
-              && data.instances[0].consent.remoteRequestsAccessFromLocal
-              && !data.instances[0].consent.localGrantsAccessToRemote
-              && data.instances[0].consent.remoteGrantsAccessToLocal) {
-            bob.off('' + uProxy.Update.USER_FRIEND, bobFriend);
-            done();
-          }
-        };
-        bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
-      }
+      aliceLoggedIn.then(() => {
+        if (data.user.userId === BOB.ANONYMIZED_ID && data.instances.length > 0
+            && data.instances[0].instanceId === BOB.INSTANCE_ID
+            && data.instances[0].consent.remoteGrantsAccessToLocal
+            && !data.instances[0].consent.localGrantsAccessToRemote) {
+          alice.emit('' + uProxy.Command.MODIFY_CONSENT,
+                           {data: {path: bobPath, action:Consent.UserAction.OFFER}});
+          alice.off('' + uProxy.Update.USER_FRIEND, aliceFriend);
+          bob.emit('' + uProxy.Command.LOGIN,
+                   {data: 'Google', promiseId: ++promiseId});
+          var bobFriend = function(data) {
+            if (data.user.userId === ALICE.ANONYMIZED_ID && data.instances.length > 0
+                && data.instances[0].instanceId === ALICE.INSTANCE_ID
+                && data.instances[0].consent.remoteRequestsAccessFromLocal
+                && !data.instances[0].consent.localGrantsAccessToRemote
+                && data.instances[0].consent.remoteGrantsAccessToLocal) {
+              bob.off('' + uProxy.Update.USER_FRIEND, bobFriend);
+              done();
+            }
+          };
+          bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
+        }
+      });
     };
-    alice.on('' + uProxy.Update.NETWORK, (data) => {
-      if (data.online) {
-        alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
-      }
-    })
+    alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
   });
 
   it('try proxying again', (done) => {

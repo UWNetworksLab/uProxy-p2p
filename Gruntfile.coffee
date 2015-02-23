@@ -528,8 +528,8 @@ module.exports = (grunt) ->
                   'build/compile-src/integration/gtalk_credentials.js',
                   'build/compile-src/integration/core.spec.js'
           ],
+	      # Change this to true for debugging
           keepRunner: true,
-          #binary: "/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary"
         }
       }
     }
