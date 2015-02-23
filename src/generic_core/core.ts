@@ -192,7 +192,6 @@ class uProxyCore implements uProxy.CoreAPI {
    * Access various social networks using the Social API.
    */
   public login = (networkName :string) : Promise<void> => {
-    throw 'making it to fail';
     if (networkName === Social.MANUAL_NETWORK_ID) {
       var network = Social.getNetwork(networkName, '');
       var loginPromise = network.login(true);

@@ -21,12 +21,6 @@ var uproxyModule = new freedom('scripts/freedom-module.json', {
 }).then(function(UProxy : () => void) {
   uProxyAppChannel = new UProxy();
   connector = new ChromeUIConnector();
-  UProxy.onClose(uProxyAppChannel, function() {
-    console.error('module closed');
-  });
-  UProxy.onError(uProxyAppChannel, function() {
-    console.error('module error');
-  });
   console.log('Starting uProxy app...');
 });
 
