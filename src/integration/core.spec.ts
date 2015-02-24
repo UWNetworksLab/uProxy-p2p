@@ -294,7 +294,7 @@ describe('uproxy core', function() {
   it('log out', (done) => {
     alice.emit('' + uProxy.Command.LOGOUT,
                {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: ++promiseId});
-    
+
     alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
       expect(data.promiseId).toEqual(promiseId);
       bob.emit('' + uProxy.Command.MODIFY_CONSENT,
@@ -309,9 +309,8 @@ describe('uproxy core', function() {
     alice.emit('' + uProxy.Command.LOGIN,
                {data: 'Google', promiseId: ++promiseId});
     var aliceLoggedIn = new Promise((F, R) => {
-      alice.on('' + uProxy.Command.NETWORK, (data) => {
-        console.log('network update ', data);
-        if (data.online) {
+      alice.on('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
+        if (data.promiseId === promiseId) {
           F();
         }
       });
@@ -341,7 +340,11 @@ describe('uproxy core', function() {
         }
       });
     };
-    alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+    alice.on('' + uProxy.Update.NETWORK, (data) => {
+      if (data.online) {
+        alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+      }
+    });
   });
 
   it('try proxying again', (done) => {
