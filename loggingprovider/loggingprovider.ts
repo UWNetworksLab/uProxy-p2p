@@ -1,12 +1,11 @@
-/// <reference path='../../build/third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../build/third_party/freedom-typings/console.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import logging = require('loggingprovider.types');
 
 // The freedom console provider.
-var freedomConsole
- :freedom_Console.Console = freedom['core.console']();
+var freedomConsole :freedom_Console.Console = freedom['core.console']();
 
 // Besides output to console, log can also be buffered for later retrieval
 // through "getLogs". This is the maximum number of buffered log before it is
@@ -98,10 +97,15 @@ class BufferedLoggingDestination extends AbstractLoggingDestination {
   }
 }
 
-var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {
-  console: new ConsoleLoggingDestination(),
-  buffered: new BufferedLoggingDestination()
-}
+var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {};
+var logDestination = {
+  CONSOLE: 'console',
+  BUFFERED: 'buffered'
+};
+loggingDestinations[logDestination.BUFFERED] =
+  new BufferedLoggingDestination();
+loggingDestinations[logDestination.CONSOLE] =
+  new ConsoleLoggingDestination();
 
 // The filter API uses letter to select log level, D for debug, I for info,
 // W for warn, and E for error. This string is used to convert from letter
@@ -151,7 +155,6 @@ export function doRealLog(level:string, tag:string, msg:string)
 
 // Interface for accumulating log messages.
 export class Log implements logging.Log {
-  constructor() {}
 
   // Logs message in debug level.
   public debug = (source:string, msg: string) : void => {
@@ -178,7 +181,6 @@ export class Log implements logging.Log {
 // Note: this is really a fake class: all data is in fact global.
 // TODO: rename this to LoggingManager or something sensible.
 export class LoggingController implements logging.Controller  {
-  constructor() {}
 
   // Gets log as a encrypted blob, which can be transported in insecure
   // channel.
@@ -223,7 +225,7 @@ export class LoggingController implements logging.Controller  {
   // It means: output message in Error level for any module
   //           output message in debug level and above for "network" module.
   public setConsoleFilter = (args: string[]) : void => {
-    loggingDestinations['console'].setFilter(args);
+    loggingDestinations[logDestination.CONSOLE].setFilter(args);
   }
 
   // Sets the log filter for buffered log.
@@ -231,11 +233,6 @@ export class LoggingController implements logging.Controller  {
   // It means: buffer message in Error level for any module
   //           buffer message in debug level and above for "network" module.
   public setBufferedLogFilter = (args: string[]) : void => {
-    loggingDestinations['buffered'].setFilter(args);
+    loggingDestinations[logDestination.BUFFERED].setFilter(args);
   }
-}
-
-if (typeof freedom !== 'undefined') {
-  freedom().provideSynchronous(Log);
-  freedom['loggingcontroller']().provideSynchronous(LoggingController);
 }

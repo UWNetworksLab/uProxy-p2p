@@ -2,7 +2,7 @@
   "name": "uProxy Logging Provider",
   "description": "Logging Provider for aggregating uProxy logs, and filtering.",
   "app": {
-    "script": "loggingprovider.static.js"
+    "script": "freedom-module.static.js"
   },
   "constraints": {
     "isolation": "never"

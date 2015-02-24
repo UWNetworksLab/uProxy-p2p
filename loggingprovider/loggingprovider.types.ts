@@ -50,9 +50,3 @@ export interface Controller {
   //           buffer message in debug level and above for "network" module.
   setBufferedLogFilter(args: string[]) : void;
 }
-
-export interface LoggingProviderModule {
-  formatMessage(l:Message) : string;
-  makeMessage(level:string, tag:string, msg:string) : Message;
-  doRealLog(level:string, tag:string, msg:string) : void;
-}
