@@ -283,6 +283,22 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: chromeAppDevPath + 'scripts/uproxy-networking/'
+        }, {
+          # Copy third party UI files required for polymer.
+          expand: true, cwd: 'third_party/lib'
+          src: FILES.thirdPartyUi
+          dest: chromeAppDevPath + 'lib'
+        }, {
+          # Chrome app polymer.
+          # (Assumes vulcanize tasks have executed)
+          expand: true, cwd: 'build/compile-src/chrome/app/polymer'
+          src: ['vulcanized.*']
+          dest: chromeAppDevPath + 'polymer'
+        }, {
+          # Copy font from styles.
+          expand: true, cwd: 'src/generic_ui',
+          src: ['styles/**']
+          dest: chromeExtDevPath
         }]
 
       # Firefox. Assumes the top-level tasks generic_core and generic_ui
@@ -531,6 +547,18 @@ module.exports = (grunt) ->
           strip: true
         files:
           'build/compile-src/chrome/extension/polymer/vulcanized-chrome.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
+      chromeappinline:
+        options:
+          inline: true
+        files:
+          'build/compile-src/chrome/app/polymer/vulcanized-inline.html': 'build/compile-src/chrome/app/polymer/ext-missing.html'
+      chromeappcsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/compile-src/chrome/app/polymer/vulcanized.html': 'build/compile-src/chrome/app/polymer/vulcanized-inline.html'
+
 
     clean: ['build/**', '.tscache']
 
@@ -584,6 +612,8 @@ module.exports = (grunt) ->
     'build_generic_ui'
     'build_generic_core'
     'ts:chrome'
+    'vulcanize:chromeappinline'
+    'vulcanize:chromeappcsp'
     'vulcanize:chromeinline'
     'vulcanize:chromecsp'
     'copy:chrome_app'
