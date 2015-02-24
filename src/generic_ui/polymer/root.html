@@ -2,9 +2,9 @@
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
 <link rel='import' href='copypaste.html'>
+<link rel='import' href='tip.html'>
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -67,7 +67,6 @@
       }
       .roster {
         position: relative;
-        overflow-y: auto;
         display: block;
       }
       .getShareTab {
@@ -122,45 +121,9 @@
         right: 20px;
         top: 20px;
       }
-      #sharingEnabledInfo {
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        height: 100%;
-        width: 100%;
+      uproxy-tip {
+        z-index: 1;
       }
-      #welcomeOverlay {
-        position: absolute;
-        left: 0px;
-        bottom: 0px;
-        height: 255px;
-        width: 100%;
-      }
-      #welcomeOverlay h1 {
-        margin-top: 0;
-      }
-      #welcomeOverlay ul {
-        line-height: 1.5em;
-        margin-bottom: 0;
-        padding-left: 1.5em;
-      }
-      #welcomeOverlay .welcomeGetShareLink {
-        cursor: pointer;
-      }
-      #sharingEnabledBubble {
-        position: absolute;
-        right: 10px;
-        top: 12px;
-        height: 39px;
-        width: 39px;
-        background-color: white;
-        opacity: 0.9;
-        border-radius: 50%;
-      }
-      #sharingEnabledHeader {
-        font-size: 1.7em;
-      }
-
     </style>
 
     <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
@@ -172,39 +135,6 @@
     <div id='logged-in-controls'
         hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
 
-      <uproxy-overlay id='welcomeOverlay'
-           hidden?='{{model.globalSettings.hasSeenWelcome}}'
-           hasSeenBefore='hasSeenWelcome'>
-         <div class='message'>
-           <h1>Welcome to uProxy</h1>
-           <div>To get started</div>
-           <ul>
-             <li>
-               Please select
-               <span class='welcomeGetShareLink' on-tap='{{setGetMode}}'>GET ACCESS</span> or
-               <span class='welcomeGetShareLink' on-tap='{{setShareMode}}'>SHARE ACCESS</span>
-             </li>
-             <li>
-               Click on a friend to
-               <span hidden?='{{ui.mode!=UI.Mode.GET}}'>ask for access</span>
-               <span hidden?='{{ui.mode!=UI.Mode.SHARE}}'>offer access</span>
-             </li>
-           </ul>
-         </div>
-      </uproxy-overlay>
-
-      <uproxy-overlay id='sharingEnabledInfo'
-           hidden?='{{(model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen || UI.View.ROSTER!=ui.view}}'
-           hasSeenBefore='hasSeenSharingEnabledScreen'>
-        <div id='sharingEnabledBubble'></div>
-        <img src='../icons/sharing-enabled-toolbar.png' class='sharingEnabled'>
-        <div class='message'>
-          <p id='sharingEnabledHeader'>Sharing enabled</p>
-          <br>
-          The icon in the top right means you're available for sharing access with friends you've offered access to.
-        </div>
-      </uproxy-overlay>
-
       <div id='toolbar'>
         <img src='../icons/hamburger.png' id='btnSettings'
           on-tap='{{ settingsView }}'>
@@ -213,6 +143,13 @@
           class='sharingEnabled clickable'
           hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
           on-tap='{{setShareMode}}'>
+
+        <uproxy-tip on-closed='{{ closedSharing }}' hidden?='{{ (model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen }}'>
+          <h3>Sharing Enabled</h3>
+          <p>This icon means you're available for sharing access with friends you've offered access to.</p>
+        </uproxy-tip>
+
+
         <div id='getTab'
             class='getShareTab {{ui.mode==UI.Mode.GET ? "active" : ""}}'
             on-tap='{{setGetMode}}'>
@@ -224,6 +161,14 @@
           Share Access
         </div>
       </div>
+
+      <uproxy-tip on-closed='{{ closedWelcome }}' hidden?='{{ model.globalSettings.hasSeenWelcome }}'>
+        <h3>Welcome to uProxy!</h3>
+        <p>
+          To get started, choose "Get access" or "Share access" and then click
+          on a friend to connect.
+        </p>
+      </uproxy-tip>
 
       <div id='roster-panel'>
         <uproxy-roster id='get-roster' class='roster'
