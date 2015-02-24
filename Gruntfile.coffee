@@ -294,11 +294,6 @@ module.exports = (grunt) ->
           expand: true, cwd: 'build/compile-src/chrome/app/polymer'
           src: ['vulcanized.*']
           dest: chromeAppDevPath + 'polymer'
-        }, {
-          # Copy font from styles.
-          expand: true, cwd: 'src/generic_ui',
-          src: ['styles/**']
-          dest: chromeExtDevPath
         }]
 
       # Firefox. Assumes the top-level tasks generic_core and generic_ui
