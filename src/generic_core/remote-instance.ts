@@ -190,9 +190,9 @@ module Core {
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet().then((endpoints: Net.Endpoint) => {
+      return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
         this.clearTimeout_();
-        return Promise.resolve(endpoints);
+        return endpoints;
       });
     }
 
