@@ -539,8 +539,8 @@ module.exports = (grunt) ->
                   'build/compile-src/integration/gtalk_credentials.js',
                   'build/compile-src/integration/core.spec.js'
           ],
-	      # Change this to true for debugging
-          keepRunner: true,
+          # Uncomment this for debugging
+          #keepRunner: true,
         }
       }
     }
