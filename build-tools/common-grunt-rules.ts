@@ -150,11 +150,11 @@ export class Rule {
     // Copy the main javascript runtime specified in
     // |npmLibName|.
     npmLibNames.map((npmLibName) => {
-      var freedomjsPath = require.resolve(npmLibName);
+      var npmPath = require.resolve(npmLibName);
       filesForlibPaths.push({
           nonull: true,
-          src: [freedomjsPath],
-          dest: path.join(destPath,path.basename(freedomjsPath)),
+          src: [npmPath],
+          dest: path.join(destPath,path.basename(npmPath)),
           onlyIf: 'modified'
         });
     });
