@@ -62,6 +62,7 @@ module Core {
     public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
       this.fulfillNameReceived_ = F;
     });
+    public static numberOfUsers = 0;
 
     /**
      * Users are constructed purely on the basis of receiving a userId.
@@ -75,6 +76,7 @@ module Core {
      */
     constructor(public network :Social.Network,
                 public userId  :string) {
+      numberOfUsers++;
       console.log('New user: ' + userId);
       this.name = 'pending';
       this.profile = {

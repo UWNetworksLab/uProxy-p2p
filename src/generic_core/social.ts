@@ -353,6 +353,7 @@ module Social {
           userId: profile.userId,
           name: profile.name,
           imageData: profile.imageData
+          totalContacts: 
         };
         ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
           network: this.name,

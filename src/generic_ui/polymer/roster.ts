@@ -2,6 +2,26 @@
 
 Polymer({
   model: model,
+  finishedSearchingForContacts: false,
+  isEmpty: function(onlineTrustedUproxyContacts, 
+                    offlineTrustedUproxyContacts,
+                    onlinePending,
+                    offlinePending,
+                    onlineUntrustedUproxyContacts,
+                    offlineUntrustedUproxyContacts)) {
+    if (this.onlineUntrustedUproxyContacts.length + 
+        this.offlineUntrustedUproxyContacts.length + 
+        this.onlineTrustedUproxyContacts.length + 
+        this.offlineTrustedUproxyContacts.length + 
+        this.onlinePending.length +
+        this.offlinePending.length == 0) {
+      this.searchForContacts();
+      return true;
+    }
+  },
+  searchForContacts: function() {
+    
+  }
   ready: function() {
     console.log('initializing roster');
     // this.contacts.push({

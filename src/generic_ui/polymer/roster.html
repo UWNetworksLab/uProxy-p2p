@@ -37,8 +37,10 @@
     </style>
 
     <div id='noContactsFound' hidden?='{{ onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0 }}'>
+    <div id='noContactsFound' hidden?='{{ isEmpty(onlineTrustedUproxyContacts, offlineTrustedUproxyContacts, onlinePending, offlinePending, onlineUntrustedUproxyContacts, offlineUntrustedUproxyContacts) }}'>  
       <img src='../icons/contact-default.png'>
-      <div>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
+      <div id='searchingForContacts'>Searching through {{  }} contacts...</div>
+      <div id='noContactsFoundMessage' hidden?='{{ !finishedSearchingForContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
     </div>
 
     <div hidden?='{{ !(onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
