@@ -6,7 +6,7 @@ import freedomTypes = require('freedom.types');
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
 // TODO: move this into the provider.
-function formatStringMessageWithArgs_(args :any[])
+function formatStringMessageWithArgs_(args :Object[])
     : string {
   var msg = '';
 
@@ -17,7 +17,7 @@ function formatStringMessageWithArgs_(args :any[])
     }
 
     if (-1 !== msg.indexOf('%' + i)) {
-      msg = msg.replace('%' + i, arg);
+      msg = msg.replace('%' + i, <string>arg);
     } else {
       if (msg.length > 0) {
         msg += ' ';
@@ -35,11 +35,15 @@ export class Log {
     this.logger = freedom.core().getLogger(this.tag_);
   }
 
-  private log_ = (level :string, args :any[]) :void => {
+  private log_ = (level :string, arg :Object, args :Object[]) :void => {
+    // arg exists to make sure at least one argument is given, we want to treat
+    // all the arguments as a single array however
+    args.unshift(arg);
+
     if (2 === args.length &&
         ('string' === typeof(args[0]) || args[0] instanceof String) &&
         Array.isArray(args[1])) {
-      args = [args[0]].concat(args[1].slice());
+      args = [args[0]].concat((<Object[]>args[1]).slice());
     }
 
     var message = formatStringMessageWithArgs_(args);
@@ -60,19 +64,19 @@ export class Log {
   }
 
   // Logs message in debug level.
-  public debug = (...args :any[]) :void => {
-    this.log_('debug', args);
+  public debug = (arg :Object, ...args :Object[]) :void => {
+    this.log_('debug', arg, args);
   }
   // Logs message in info level.
-  public info = (...args :any[]) :void => {
-    this.log_('info', args);
+  public info = (arg :Object, ...args :Object[]) :void => {
+    this.log_('info', arg, args);
   }
   // Logs message in warn level.
-  public warn = (...args :any[]) :void => {
-    this.log_('warn', args);
+  public warn = (arg :Object, ...args :Object[]) :void => {
+    this.log_('warn', arg, args);
   }
   // Logs message in error level.
-  public error = (...args :any[]) :void => {
-    this.log_('error', args);
+  public error = (arg :Object, ...args :Object[]) :void => {
+    this.log_('error', arg, args);
   }
 }
