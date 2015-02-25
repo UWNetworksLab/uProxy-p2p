@@ -8,6 +8,7 @@ export interface RuleConfig {
   // The directory where things should be built to.
   devBuildDir :string;
   thirdPartyBuildDir :string;
+  localLibsDestPath :string;
 }
 
 export interface JasmineRule {
@@ -109,7 +110,10 @@ export class Rule {
   public copyLibs(npmLibNames: string[],
       localLibs:string[], thirdPartyLibs:string[],
       destName:string) : CopyRule {
+
     var destPath = path.join(this.config.devBuildDir, destName);
+    var localLibsDestPath = path.join(this.config.devBuildDir,
+        destName, this.config.localLibsDestPath);
 
     var filesForlibPaths :CopyFilesDescription[] = [];
 
@@ -125,7 +129,7 @@ export class Rule {
           '!' + libPath + '/**/*.spec.js',
           '!' + libPath + '/**/SpecRunner.html'
         ],
-        dest: destPath,
+        dest: localLibsDestPath,
         onlyIf: 'modified'
       });
     });
