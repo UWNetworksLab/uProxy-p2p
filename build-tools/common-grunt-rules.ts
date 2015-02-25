@@ -109,7 +109,7 @@ export class Rule {
   public copyLibs(npmLibNames: string[],
       localLibs:string[], thirdPartyLibs:string[],
       destName:string) : CopyRule {
-    var destPath = path.join(this.config.devBuildDir, destName, 'lib');
+    var destPath = path.join(this.config.devBuildDir, destName);
 
     var filesForlibPaths :CopyFilesDescription[] = [];
 
