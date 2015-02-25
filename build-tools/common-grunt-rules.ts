@@ -1,12 +1,13 @@
 // common-grunt-rules
 
-/// <reference path='../../build/third_party/typings/node/node.d.ts' />
+/// <reference path='../../../third_party/typings/node/node.d.ts' />
 
 import path = require('path');
 
 export interface RuleConfig {
   // The directory where things should be built to.
   devBuildDir :string;
+  thirdPartyBuildDir :string;
 }
 
 export interface JasmineRule {
@@ -105,14 +106,17 @@ export class Rule {
 
   // Grunt copy target creator: copies freedom libraries and the freedomjs file
   // to the destination path.
-  public copyFreedomLibs(freedomRuntimeName: string,
-      freedomLibPaths:string[], destName:string) : CopyRule {
+  public copyLibs(npmLibNames: string[],
+      localLibs:string[], thirdPartyLibs:string[],
+      destName:string) : CopyRule {
     var destPath = path.join(this.config.devBuildDir, destName, 'lib');
-    // Provide a file-set to be copied for each freedom module that is lised in
-    // |freedomLibPaths|
-    var filesForlibPaths :CopyFilesDescription[] = freedomLibPaths.map(
-          (libPath) => {
-      return {
+
+    var filesForlibPaths :CopyFilesDescription[] = [];
+
+    // Provide a file-set to be copied for each local module that is listed in
+    // |localLibs|
+    localLibs.map((libPath) => {
+      filesForlibPaths.push({
         expand: true,
         cwd: this.config.devBuildDir,
         src: [
@@ -123,17 +127,38 @@ export class Rule {
         ],
         dest: destPath,
         onlyIf: 'modified'
-      }
+      });
     });
-    // Copy the main freedom javascript runtime specified in
-    // |freedomRuntimeName|.
-    var freedomjsPath = require.resolve(freedomRuntimeName);
-    filesForlibPaths.push({
-        nonull: true,
-        src: [freedomjsPath],
-        dest: path.join(destPath,path.basename(freedomjsPath)),
+
+    // Provide a file-set to be copied for each local third_party module that is
+    // listed in |thirdPartyLibs|
+    thirdPartyLibs.map((libPath) => {
+      filesForlibPaths.push({
+        expand: true,
+        cwd: this.config.thirdPartyBuildDir,
+        src: [
+          libPath + '/**/*',
+          '!' + libPath + '/**/*.ts',
+          '!' + libPath + '/**/*.spec.js',
+          '!' + libPath + '/**/SpecRunner.html'
+        ],
+        dest: destPath,
         onlyIf: 'modified'
       });
+    });
+
+    // Copy the main javascript runtime specified in
+    // |npmLibName|.
+    npmLibNames.map((npmLibName) => {
+      var freedomjsPath = require.resolve(npmLibName);
+      filesForlibPaths.push({
+          nonull: true,
+          src: [freedomjsPath],
+          dest: path.join(destPath,path.basename(freedomjsPath)),
+          onlyIf: 'modified'
+        });
+    });
+
     return { files: filesForlibPaths };
   }
 
