@@ -4,8 +4,6 @@ Polymer({
     this.remove();
   },
   doReposition: function() {
-    var prev = this.previousSibling;
-
     // TODO The below code is in place to deal with the fact that nearly all
     // the elements we use are initially in the DOM but hidden until the user
     // switches to their view.  In this state, they do not have a well-defined
@@ -13,19 +11,15 @@ Polymer({
     // In the future, it would be nice to move to a model where elements are
     // not created until we want to show them, this chunk of code can be
     // removed once that happens.
+
+    var prev = this.previousSibling;
     if (prev.offsetLeft === 0 && prev.offsetTop === 0 && prev.offsetWidth === 0
         && prev.offsetHeight === 0) {
-      setTimeout(() => {
-        this.doReposition();
-      }, 500);
+      this.async(this.doReposition, null, 500);
       return;
     }
-    this.reposition();
 
-    // it takes a moment for some elements to fully render so try a second time
-    setTimeout(() => {
-      this.reposition();
-    }, 100);
+    this.reposition();
   },
   reposition: function() {
     var prev = this.previousSibling;
