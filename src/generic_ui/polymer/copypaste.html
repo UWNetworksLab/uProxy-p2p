@@ -24,6 +24,9 @@
       margin: 8px;
       vertical-align: middle;
     }
+    .error {
+      color: red;
+    }
     textarea.message {
       width: 80%;
       height: 10em;
@@ -43,6 +46,14 @@
       <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
         Share a one time connection
       </span>
+      <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>
+        Manual Connection
+      </span>
+    </div>
+
+    <div class='error' hidden?='{{ !ui.copyPasteUrlError }}'>
+      There was an error parsing the uproxy connection link, please try
+      navigating to the link again or asking your friend for a new link.
     </div>
 
     <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>
