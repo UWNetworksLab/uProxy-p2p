@@ -5,9 +5,16 @@ Polymer({
   },
   doReposition: function() {
     var prev = this.previousSibling;
+
+    // TODO The below code is in place to deal with the fact that nearly all
+    // the elements we use are initially in the DOM but hidden until the user
+    // switches to their view.  In this state, they do not have a well-defined
+    // position, which causes us to be unable to correctly position the elemnt.
+    // In the future, it would be nice to move to a model where elements are
+    // not created until we want to show them, this chunk of code can be
+    // removed once that happens.
     if (prev.offsetLeft === 0 && prev.offsetTop === 0 && prev.offsetWidth === 0
         && prev.offsetHeight === 0) {
-      /* if the DOM is not set up yet, keep checking every half second */
       setTimeout(() => {
         this.doReposition();
       }, 500);
