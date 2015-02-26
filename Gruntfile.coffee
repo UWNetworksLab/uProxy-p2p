@@ -404,15 +404,16 @@ module.exports = (grunt) ->
       # be many 'duplicate identifiers' and similar typescript conflicts.
       mocks: Rule.typescriptSrcLenient 'compile-src/mocks'
 
-      # Compile typescript for all chrome components. This will do both the app
-      # and extension in one go, along with their specs, because they all share
-      # references to the same parts of uProxy. This avoids double-compiling,
-      # (which in this case, is beyond TaskManager's reach.)
+      # Compile typescript for all chrome components.
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
+      # Only need to compile extension/scripts because extension/polymer is copied
+      # into generic_ui to be compiled.
       chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
-      chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/scripts'
+      # For the app we compile app/scripts and app/polymer because the app's
+      # polymer is used separately from generic_ui.
+      chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
       # uProxy firefox specific typescript
