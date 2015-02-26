@@ -313,7 +313,9 @@ module UI {
         this.instancesGivingAccessTo[instanceId] = true;
         this.updateSharingStatusBar_();
 
-        this.mapInstanceIdToUser_[instanceId].isGettingFromMe = true;
+        var user = this.mapInstanceIdToUser_[instanceId];
+        user.isGettingFromMe = true;
+        this.showNotification(user.name + ' started proxying through you');
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
