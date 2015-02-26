@@ -29,24 +29,37 @@ Polymer({
     }
 
     var prevCntr = prev.offsetLeft + prev.offsetWidth / 2;
-    var prevHeight;
+    var parentWidth = this.parentElement.offsetWidth;
 
     this.style.top = (prev.offsetHeight + prev.offsetTop) + 'px';
-    if (prevCntr < 200) {
-      /* position our left edge near the center */
+
+    /* width should be half of the parent width, between min and max */
+    if (parentWidth < 400) {
       this.style.width = '200px';
-      this.style.left = (prevCntr - 10) + 'px';
-      this.$.arrow.style.left = '0px';
-    } else if (this.parentElement.offsetWidth - prevCntr < 200) {
-      /* position our right edge near the center */
-      this.style.width = '200px';
-      this.style.left = (prevCntr - 190) + 'px';
-      this.$.arrow.style.right = '0px';
+    } else if (parentWidth < 800) {
+      this.style.width = (parentWidth / 2) + 'px';
     } else {
+      this.style.width = '400px';
+    }
+
+    if (prevCntr * 3 < parentWidth) {
+      /* center is in the left third of the screen, arrow on left side */
+      this.style.left = (prevCntr - 10) + 'px';
+
+      this.$.arrow.style.left = '0px';
+      this.$.arrow.style['margin-left'] = '0';
+    } else if (prevCntr * 3 / 2 < parentWidth) {
+      /* center is in the middle third of the screen, arrow in middle */
       this.style.left = (prevCntr - this.offsetWidth / 2) + 'px';
 
       this.$.arrow.style.left = '50%';
       this.$.arrow.style['margin-left'] = '-10px';
+    } else {
+      /* center is in the right third of the screen, arrow on right side */
+      this.style.left = (prevCntr - (this.offsetWidth - 10)) + 'px';
+
+      this.$.arrow.style.right = '0px';
+      this.$.arrow.style['margin-left'] = '0';
     }
   },
   attached: function() {
