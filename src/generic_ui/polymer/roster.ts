@@ -28,10 +28,10 @@ Polymer({
   },
   loadContacts: function() {
     this.loadingContacts = true;
-    // The loading contacts page will be shown for at least 1.5 seconds. In this
-    // time, if contacts load, we will transition directly to the roster.
+    // Show the loading contacts page for at least 1.5 seconds. In this
+    // time, if contacts load, transition directly to the roster.
     // If no contacts have loaded, show the animation for a total of 5 seconds,
-    // and then the "No Contacts Found" message will be displayed.
+    // and then display the "no online friends" message.
     setTimeout(function(){
       var numberOfContacts = this.onlinePending.length +
                    this.offlinePending.length +
