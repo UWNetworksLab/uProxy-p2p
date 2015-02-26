@@ -125,6 +125,7 @@ function initUI() : UI.UserInterface {
 
   // used for de-duplicating urls caught by the listeners
   var lastUrl = '';
+  var lastUrlTime = 0;
 
   chrome.webRequest.onBeforeRequest.addListener(
     function() {
@@ -140,13 +141,16 @@ function initUI() : UI.UserInterface {
 
       // Chome seems to sometimes send the same url to us twice, we never
       // should be receiving the exact same data twice so de-dupe any url
-      // with the last one we received before processing it
-      if (lastUrl !== url) {
+      // with the last one we received before processing it.  We also want
+      // to allow a url to be pasted twice if there has been at least a second
+      // delay in order to allow users to try connecting again.
+      if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
         ui.handleUrlData(url);
       } else {
         console.warn('Received duplicate url events', url);
       }
       lastUrl = url;
+      lastUrlTime = Date.now();
 
       return {
         redirectUrl: chrome.extension.getURL('copypaste.html')
