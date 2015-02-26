@@ -384,6 +384,7 @@ module UI {
         return;
       }
 
+      this.browserApi.bringUproxyToFront();
       this.view = UI.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)

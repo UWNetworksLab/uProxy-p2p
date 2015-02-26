@@ -149,7 +149,7 @@ function initUI() : UI.UserInterface {
       lastUrl = url;
 
       return {
-        redirectUrl: chrome.extension.getURL('index.html')
+        redirectUrl: chrome.extension.getURL('copypaste.html')
       };
     },
     { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
