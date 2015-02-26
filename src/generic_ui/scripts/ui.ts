@@ -379,8 +379,8 @@ module UI {
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
-        // TODO propogate this to chrome tab page (blocking on #955
         console.log('Ignoring URL since we have an active network');
+        this.copyPasteUrlError = true;
         return;
       }
 
