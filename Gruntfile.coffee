@@ -288,6 +288,17 @@ module.exports = (grunt) ->
           expand: true, cwd: 'node_modules/uproxy-networking/dist/',
           src: FILES.uproxy_networking_common,
           dest: chromeAppDevPath + 'scripts/uproxy-networking/'
+        }, {
+          # Copy third party UI files required for polymer.
+          expand: true, cwd: 'third_party/lib'
+          src: FILES.thirdPartyUi
+          dest: chromeAppDevPath + 'lib'
+        }, {
+          # Chrome app polymer.
+          # (Assumes vulcanize tasks have executed)
+          expand: true, cwd: 'build/compile-src/chrome/app/polymer'
+          src: ['vulcanized.*']
+          dest: chromeAppDevPath + 'polymer'
         }]
 
       # Firefox. Assumes the top-level tasks generic_core and generic_ui
@@ -526,6 +537,17 @@ module.exports = (grunt) ->
           strip: true
         files:
           'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
+      chromeappinline:
+        options:
+          inline: true
+        files:
+          'build/compile-src/chrome/app/polymer/vulcanized-inline.html': 'build/compile-src/chrome/app/polymer/ext-missing.html'
+      chromeappcsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/compile-src/chrome/app/polymer/vulcanized.html': 'build/compile-src/chrome/app/polymer/vulcanized-inline.html'
 
     remove:
       allPolymerElements:
@@ -593,6 +615,8 @@ module.exports = (grunt) ->
     'build_ui_and_vulcanize'
     'ts:chrome_app'
     'ts:chrome_ext'
+    'vulcanize:chromeappinline'
+    'vulcanize:chromeappcsp'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'

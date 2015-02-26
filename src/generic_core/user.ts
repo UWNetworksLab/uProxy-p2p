@@ -300,11 +300,11 @@ module Core {
         var newInstance = new Core.RemoteInstance(this, instanceId, instance);
         this.instances_[instanceId] = newInstance;
         this.saveToStorage();
-        this.notifyUI();
         if (data.consent) {
           newInstance.updateConsent(data.consent);
         }
       }
+      this.notifyUI();
     }
 
     /**

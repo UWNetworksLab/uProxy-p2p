@@ -8,7 +8,7 @@ keypresses).
 Usage: <uproxy-link role='(button|link)' on-tap='{{ EVENT }}'>CONTENT</uproxy-link>
 -->
 
-<polymer-element name='uproxy-link' tabindex='0'>
+<polymer-element name='uproxy-link'>
   <template>
     <style>
       span {
@@ -16,7 +16,7 @@ Usage: <uproxy-link role='(button|link)' on-tap='{{ EVENT }}'>CONTENT</uproxy-li
       }
     </style>
 
-    <span>
+    <span tabindex='0'>
       <content></content>
     </span>
 

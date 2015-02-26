@@ -1,0 +1,29 @@
+<link rel="import" href="../../../generic_ui/lib/polymer/polymer.html">
+<link rel="import" href="../../../generic_ui/lib/paper-button/paper-button.html">
+
+<polymer-element name='uproxy-ext-missing'>
+  <template>
+    <style>
+      :host {
+        text-align: center;
+        font-size: 1em;
+        color: rgb(112, 112, 112);
+      }
+      h1 {
+        font-size: 1.4em;
+        color: #009688;  /* dark green */
+      }
+      .highlightedButton {
+        background: #009688;  /* dark green */
+        color: white;
+      }
+    </style>
+
+    <h1>You're almost ready to use uProxy!</h1>
+    Download and enable part 1 of uProxy to get started.
+    <br><br>
+    <paper-button class='highlightedButton' raised on-tap='{{ downloadExt }}'>NEXT</paper-button>
+
+  </template>
+  <script src='ext-missing.js'></script>
+</polymer-element>
