@@ -114,8 +114,6 @@ module UI {
     SPLASH = 0,
     COPYPASTE,
     ROSTER,
-    USER,
-    NETWORKS,
     SETTINGS,
   }
 
@@ -164,6 +162,7 @@ module UI {
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
+    public copyPasteUrlError :boolean = false;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
@@ -313,7 +312,9 @@ module UI {
         this.instancesGivingAccessTo[instanceId] = true;
         this.updateSharingStatusBar_();
 
-        this.mapInstanceIdToUser_[instanceId].isGettingFromMe = true;
+        var user = this.mapInstanceIdToUser_[instanceId];
+        user.isGettingFromMe = true;
+        this.showNotification(user.name + ' started proxying through you');
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -377,15 +378,28 @@ module UI {
       var payload;
       console.log('received url data from browser');
 
+      if (model.onlineNetwork) {
+        // TODO propogate this to chrome tab page (blocking on #955
+        console.log('Ignoring URL since we have an active network');
+        return;
+      }
+
+      this.view = UI.View.COPYPASTE;
+
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
+        this.copyPasteUrlError = true;
+        return;
       }
 
+      this.copyPasteUrlError = false;
       try {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
+        this.copyPasteUrlError = true;
+        return;
       }
 
       // at this point, we assume everything is good, so let's check state
@@ -411,8 +425,6 @@ module UI {
       for (var i in payload) {
         this.core_.sendCopyPasteSignal(payload[i]);
       }
-
-      this.view = UI.View.COPYPASTE;
     }
 
     public showNotification = (notificationText :string) => {

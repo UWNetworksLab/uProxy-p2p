@@ -61,6 +61,7 @@ module Core {
 
     // Number of milliseconds before timing out socksToRtc_.start
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+    private startupTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
 
@@ -113,6 +114,7 @@ module Core {
           ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
         case uProxy.Update.STOP_GETTING:
+          this.clearTimeout_();
           ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
@@ -183,16 +185,22 @@ module Core {
       }
 
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
-      setTimeout(() => {
-        if (GettingState.TRYING_TO_GET_ACCESS === this.connection_.localGettingFromRemote) {
-          // This will cause the promise returned by this.socksToRtc_.start
-          // to reject, which will trigger an error message in the UI.
-          console.warn('Timing out socksToRtc_ connection');
-          this.connection_.stopGet();
-        }
+      this.startupTimeout_ = setTimeout(() => {
+        console.warn('Timing out socksToRtc_ connection');
+        this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet();
+      return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
+        this.clearTimeout_();
+        return endpoints;
+      });
+    }
+
+    private clearTimeout_ = () => {
+      if (this.startupTimeout_) {
+        clearTimeout(this.startupTimeout_);
+        this.startupTimeout_ = null;
+      }
     }
 
     /**
