@@ -2,36 +2,17 @@
 
 Polymer({
   model: model,
-  finishedSearchingForContacts: false,
-  isEmpty: function(onlineTrustedUproxyContacts,
-                    offlineTrustedUproxyContacts,
-                    onlinePending,
-                    offlinePending,
-                    onlineUntrustedUproxyContacts,
-                    offlineUntrustedUproxyContacts)) {
-    if (this.onlineUntrustedUproxyContacts.length +
-        this.offlineUntrustedUproxyContacts.length +
-        this.onlineTrustedUproxyContacts.length +
-        this.offlineTrustedUproxyContacts.length +
-        this.onlinePending.length +
-        this.offlinePending.length == 0) {
-      this.searchForContacts();
-      return true;
-    }
-  },
-  searchForContacts: function() {
-
-  }
+  loadingContacts: false,
+  searchQuery: '',
+  onlineTrustedUproxyContacts: [],
+  offlineTrustedUproxyContacts: [],
+  onlinePending: [],
+  offlinePending: [],
+  onlineUntrustedUproxyContacts: [],
+  offlineUntrustedUproxyContacts: [],
   ready: function() {
     console.log('initializing roster');
-    // this.contacts.push({
-      // name: 'alice',
-      // description: 'just some laptop'
-    // });
-    // this.contacts.push({ name: 'bob' });
-    // this.contacts.push({ name: 'charlie' });
-    // this.contacts.push({ name: 'dave' });
-    // this.contacts.push({ name: 'eve' });
+
     this.ui = ui;
     this.UI = UI;
 
@@ -45,5 +26,24 @@ Polymer({
     this.onlineUntrustedUproxyContacts = this.contacts.onlineUntrustedUproxy;
     this.offlineUntrustedUproxyContacts = this.contacts.offlineUntrustedUproxy;
   },
-  searchQuery: ''
+  loadContacts: function() {
+    this.loadingContacts = true;
+    // The loading contacts page will be shown for at least 1.5 seconds. In this
+    // time, if contacts load, we will transition directly to the roster.
+    // If no contacts have loaded, show the animation for a total of 5 seconds,
+    // and then the "No Contacts Found" message will be displayed.
+    setTimeout(function(){
+      var numberOfContacts = this.onlinePending.length +
+                   this.offlinePending.length +
+                   this.onlineTrustedUproxyContacts.length +
+                   this.offlineTrustedUproxyContacts.length +
+                   this.onlineUntrustedUproxyContacts.length +
+                   this.offlineUntrustedUproxyContacts.length;
+      if (numberOfContacts == 0) {
+        setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
+      } else {
+        this.loadingContacts = false;
+      }
+    }.bind(this), 1500);
+  }
 });

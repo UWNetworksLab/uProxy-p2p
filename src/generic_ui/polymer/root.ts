@@ -5,6 +5,15 @@ declare var ui :UI.UserInterface;
 
 Polymer({
   model: model,
+  updateView: function(e, detail, sender) {
+    // If we're switching from the SPLASH page to the ROSTER, fire an
+    // event indicating the user has logged in. roster.ts listens for
+    // this event.
+    if (detail.view == UI.View.ROSTER && ui['view'] == UI.View.SPLASH) {
+      this.fire('core-signal', {name: "login-success"});
+    }
+    ui['view'] = detail.view;
+  },
   settingsView: function() {
     ui['view'] = UI.View.SETTINGS;
   },

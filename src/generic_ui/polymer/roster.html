@@ -1,4 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/paper-progress/paper-progress.html'>
+<link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel='import' href='roster-group.html'>
 
 <polymer-element name='uproxy-roster' attributes='contacts'>
@@ -26,24 +28,41 @@
     ::-webkit-input-placeholder {
       color: #ccc;
     }
-    #noContactsFound {
+    #loadContacts {
       text-align: center;
       margin: 75px;
     }
-    #noContactsFound div {
-      margin-top: 2em;
+    #loadContacts div {
       font-size: 17px;
+    }
+    #noContactsFound {
+      margin-top: 2em;
+    }
+    #loadingContacts {
+      margin-top: 0.5em;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
+    paper-progress {
+      margin-bottom: 1em;
     }
     </style>
 
-    <div id='noContactsFound' hidden?='{{ onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0 }}'>
-    <div id='noContactsFound' hidden?='{{ isEmpty(onlineTrustedUproxyContacts, offlineTrustedUproxyContacts, onlinePending, offlinePending, onlineUntrustedUproxyContacts, offlineUntrustedUproxyContacts) }}'>  
+    <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
+    <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
+
+    <!-- Shown if we're waiting for contacts to load or if there are no contacts -->
+    <div id='loadContacts' hidden?='{{ !loadingContacts && (onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
       <img src='../icons/contact-default.png'>
-      <div id='searchingForContacts'>Searching through {{  }} contacts...</div>
-      <div id='noContactsFoundMessage' hidden?='{{ !finishedSearchingForContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
+      <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
+        Loading uProxy friends
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
     </div>
 
-    <div hidden?='{{ !(onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
+    <div hidden?='{{ loadingContacts || !(onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
       <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->

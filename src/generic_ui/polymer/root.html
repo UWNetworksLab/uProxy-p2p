@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -6,7 +7,7 @@
 <link rel="import" href='confirm.html'>
 <link rel='import' href='copypaste.html'>
 
-<polymer-element name='uproxy-root' attributes='model'>
+<polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}'>
 
   <template>
     <style>
