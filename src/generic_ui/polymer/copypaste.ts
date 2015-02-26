@@ -26,6 +26,12 @@ Polymer({
   model: model,
   ui: ui,
   prev: function() {
+    // do not let the user navigate away from this view if copypaste is active
+    if (ui.copyPasteGettingState === GettingState.GETTING_ACCESS ||
+        ui.copyPasteSharingState === SharingState.SHARING_ACCESS) {
+      return;
+    }
+
     ui.view = UI.View.SPLASH;
   },
   stopGetting: function() {

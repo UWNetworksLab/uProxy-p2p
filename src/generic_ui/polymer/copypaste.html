@@ -27,6 +27,10 @@
     .error {
       color: red;
     }
+    .prevArrow.disabled img {
+      cursor: not-allowed;
+      opacity: .4;
+    }
     textarea.message {
       width: 80%;
       height: 10em;
@@ -37,7 +41,7 @@
     }
     </style>
     <div id='cptoolbar'>
-      <div class='prevArrow'>
+      <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
         <img src='../icons/arrow-left.png' on-tap='{{prev}}' />
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>

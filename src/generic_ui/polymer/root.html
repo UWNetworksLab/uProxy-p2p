@@ -170,7 +170,7 @@
     </uproxy-splash>
 
     <div id='logged-in-controls'
-        hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
+        hidden?='{{ ui.view !== UI.View.ROSTER && ui.view !== UI.View.SETTINGS }}'>
 
       <uproxy-overlay id='welcomeOverlay'
            hidden?='{{model.globalSettings.hasSeenWelcome}}'
