@@ -114,8 +114,6 @@ module UI {
     SPLASH = 0,
     COPYPASTE,
     ROSTER,
-    USER,
-    NETWORKS,
     SETTINGS,
   }
 
@@ -379,6 +377,12 @@ module UI {
     public handleUrlData = (url :string) => {
       var payload;
       console.log('received url data from browser');
+
+      if (model.onlineNetwork) {
+        // TODO propogate this to chrome tab page (blocking on #955
+        console.log('Ignoring URL since we have an active network');
+        return;
+      }
 
       this.view = UI.View.COPYPASTE;
 
