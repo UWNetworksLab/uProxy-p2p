@@ -5,37 +5,36 @@ import freedomTypes = require('freedom.types');
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
-// TODO: switch to rest arguments.
 // TODO: move this into the provider.
-function formatStringMessageWithArgs_(msg:string, args?:any[])
+function formatStringMessageWithArgs_(args :Object[])
     : string {
-  var formatted_msg = msg;
-  if (args && args.length) {
-    for (var i = 0; i < args.length; i++) {
-      formatted_msg = formatted_msg.replace('%' + (i + 1), args[i]);
+  var msg = '';
+
+  for (var i = 0; i < args.length; i++) {
+    var arg = args[i];
+    if ('string' !== typeof(arg) && !(arg instanceof String)) {
+      try {
+        arg = JSON.stringify(arg);
+      } catch (e) {
+        if (arg && typeof(arg.toString) === 'function') {
+          arg = arg.toString();
+        } else {
+          arg = e.message;
+        }
+      }
+    }
+
+    if (-1 !== msg.indexOf('%' + i)) {
+      msg = msg.replace('%' + i, <string>arg);
+    } else {
+      if (msg.length > 0) {
+        msg += ' ';
+      }
+      msg += arg;
     }
   }
-  return formatted_msg;
-}
 
-interface loggable {
-  (logger: freedomTypes.Logger): void;
-}
-
-function doLog(level:string, msg:string, args?:any[]) : loggable {
-  var message = formatStringMessageWithArgs_(msg, args);
-
-  return (logger: freedomTypes.Logger) => {
-    if (level === 'debug') {
-      logger.debug(message);
-    } else if (level === 'info') {
-      logger.info(message);
-    } else if (level === 'warn') {
-      logger.warn(message);
-    } else if (level === 'error') {
-      logger.error(message);
-    }
-  };
+  return msg;
 }
 
 export class Log {
@@ -43,20 +42,49 @@ export class Log {
   constructor(private tag_:string) {
     this.logger = freedom.core().getLogger(this.tag_);
   }
+
+  private log_ = (level :string, arg :Object, args :Object[]) :void => {
+    // arg exists to make sure at least one argument is given, we want to treat
+    // all the arguments as a single array however
+    args.unshift(arg);
+
+    if (2 === args.length &&
+        ('string' === typeof(args[0]) || args[0] instanceof String) &&
+        Array.isArray(args[1])) {
+      args = [args[0]].concat((<Object[]>args[1]).slice());
+    }
+
+    var message = formatStringMessageWithArgs_(args);
+
+    this.logger.then((logger :freedomTypes.Logger) => {
+      // essentially do logger[level](message) minus the type warning
+      switch (level) {
+        case 'debug':
+          return logger.debug(message);
+        case 'info':
+          return logger.info(message);
+        case 'warn':
+          return logger.warn(message);
+        case 'error':
+          return logger.error(message);
+      }
+    });
+  }
+
   // Logs message in debug level.
-  public debug = (msg: string, args?:any[]) : void => {
-    this.logger.then(doLog('debug', msg, args));
+  public debug = (arg :Object, ...args :Object[]) :void => {
+    this.log_('debug', arg, args);
   }
   // Logs message in info level.
-  public info = (msg: string, args?:any[]) : void => {
-    this.logger.then(doLog('info', msg, args));
+  public info = (arg :Object, ...args :Object[]) :void => {
+    this.log_('info', arg, args);
   }
   // Logs message in warn level.
-  public warn = (msg: string, args?:any[]) : void => {
-    this.logger.then(doLog('warn', msg, args));
+  public warn = (arg :Object, ...args :Object[]) :void => {
+    this.log_('warn', arg, args);
   }
   // Logs message in error level.
-  public error = (msg: string, args?:any[]) : void => {
-    this.logger.then(doLog('error', msg, args));
+  public error = (arg :Object, ...args :Object[]) :void => {
+    this.log_('error', arg, args);
   }
 }
