@@ -4,9 +4,8 @@
 declare var core :CoreConnector;
 
 Polymer({
-  description: model.globalSettings.description,
+  model: model,
   update: function() {
-    model.globalSettings.description = this.description;
     core.updateGlobalSettings(model.globalSettings);
   }
 });

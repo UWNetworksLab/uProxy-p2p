@@ -24,6 +24,13 @@
       margin: 8px;
       vertical-align: middle;
     }
+    .error {
+      color: red;
+    }
+    .prevArrow.disabled img {
+      cursor: not-allowed;
+      opacity: .4;
+    }
     textarea.message {
       width: 80%;
       height: 10em;
@@ -34,7 +41,7 @@
     }
     </style>
     <div id='cptoolbar'>
-      <div class='prevArrow'>
+      <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
         <img src='../icons/arrow-left.png' on-tap='{{prev}}' />
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
@@ -43,6 +50,14 @@
       <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
         Share a one time connection
       </span>
+      <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>
+        Manual Connection
+      </span>
+    </div>
+
+    <div class='error' hidden?='{{ !ui.copyPasteUrlError }}'>
+      There was an error parsing the uproxy connection link, please try
+      navigating to the link again or asking your friend for a new link.
     </div>
 
     <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>

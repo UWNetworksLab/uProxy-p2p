@@ -4,7 +4,7 @@
 <polymer-element name='uproxy-description' attributes=''>
   <template>
     <paper-input-decorator label="Description">
-      <input is="core-input" value='{{description}}' on-blur='{{update}}' />
+      <input is="core-input" value='{{model.globalSettings.description}}' on-blur='{{update}}' />
     </paper-input-decorator>
   </template>
   <script src='description.js'></script>
