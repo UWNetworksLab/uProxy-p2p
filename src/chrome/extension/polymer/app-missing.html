@@ -1,5 +1,5 @@
-<link rel="import" href="../../../generic_ui/lib/polymer/polymer.html">
-<link rel="import" href="../../../generic_ui/lib/paper-button/paper-button.html">
+<link rel='import' href='../lib/polymer/polymer.html'>
+<link rel='import' href='../lib/paper-button/paper-button.html'>
 
 <polymer-element name='uproxy-app-missing'>
   <template>
@@ -18,12 +18,11 @@
         color: white;
       }
     </style>
-
-    <h1>You're almost ready to use uProxy!</h1>
-    <br>
-    Download and enable part 2 of uProxy to get started.
-    <br><br>
-    <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>NEXT</paper-button>
+    <div>
+      <h1>You're almost ready to use uProxy!</h1>
+      <div>Download and enable part 2 of uProxy to get started.</div><br>
+      <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>NEXT</paper-button>
+    </div>
 
   </template>
   <script src='app-missing.js'></script>

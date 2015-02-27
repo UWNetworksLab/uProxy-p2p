@@ -61,7 +61,14 @@ Rule.typescriptSpecDeclLenient = (name) =>
   rule = Rule.typescriptSpecDecl name
   rule.options.noImplicitAny = false
   rule
-
+# fast = 'never' refers to recompiling even if .tscache suggests that the
+# same files were already compiled. Needed to recompile generic_ui
+# between Chrome/FF builds in case polymer/ contents have changes.
+Rule.typescriptSrcLenientNeverFast = (name) =>
+  rule = Rule.typescriptSrc name
+  rule.options.noImplicitAny = false
+  rule.options.fast = 'never'
+  rule
 
 # TODO: Move more file lists here.
 FILES =
@@ -126,7 +133,11 @@ module.exports = (grunt) ->
 
       uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
 
-      polymer:
+      genericPolymerElements: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer')
+      chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer')
+      firefoxBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/firefox/data/polymer'), 'generic_ui/polymer')
+
+      polymerLib:
         src: 'third_party/lib'
         dest: 'build/compile-src/generic_ui/lib'
 
@@ -190,7 +201,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts']
+          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
           dest: chromeExtDevPath
         }, {
           # generic_ui HTML and non-typescript assets.
@@ -203,12 +214,6 @@ module.exports = (grunt) ->
           expand: true, cwd: 'build/compile-src/generic_ui'
           src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
           dest: chromeExtDevPath
-        }, {
-          # Chrome-only polymer.
-          # (Assumes the typescript task has executed)
-          expand: true, cwd: 'build/compile-src/chrome/extension/polymer'
-          src: ['vulcanized-chrome.*']
-          dest: chromeExtDevPath + 'polymer'
         }, {
           # Icons and fonts
           expand: true, cwd: 'src/'
@@ -380,7 +385,7 @@ module.exports = (grunt) ->
     ts: {
 
       # uProxy UI without any platform dependencies
-      generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
+      generic_ui: Rule.typescriptSrcLenientNeverFast 'compile-src/generic_ui'
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
 
       # Core uProxy without any platform dependencies
@@ -399,14 +404,16 @@ module.exports = (grunt) ->
       # be many 'duplicate identifiers' and similar typescript conflicts.
       mocks: Rule.typescriptSrcLenient 'compile-src/mocks'
 
-      # Compile typescript for all chrome components. This will do both the app
-      # and extension in one go, along with their specs, because they all share
-      # references to the same parts of uProxy. This avoids double-compiling,
-      # (which in this case, is beyond TaskManager's reach.)
+      # Compile typescript for all chrome components.
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
-      chrome: Rule.typescriptSrcLenient 'compile-src/chrome'
+      # Only need to compile extension/scripts because extension/polymer is copied
+      # into generic_ui to be compiled.
+      chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
+      # For the app we compile app/scripts and app/polymer because the app's
+      # polymer is used separately from generic_ui.
+      chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
       # uProxy firefox specific typescript
@@ -520,28 +527,17 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      withinline:
+      inline:
         options:
           inline: true
         files:
           'build/compile-src/generic_ui/polymer/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer/root.html'
-      withcsp:
+      csp:
         options:
           csp: true
           strip: true
         files:
           'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
-      chromeinline:
-        options:
-          inline: true
-        files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/app-missing.html'
-      chromecsp:
-        options:
-          csp: true
-          strip: true
-        files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-chrome.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
       chromeappinline:
         options:
           inline: true
@@ -554,6 +550,10 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/chrome/app/polymer/vulcanized.html': 'build/compile-src/chrome/app/polymer/vulcanized-inline.html'
 
+    remove:
+      allPolymerElements:
+        fileList: ['**']
+        dirList: ['build/compile-src/generic_ui/polymer/']
 
     clean: ['build/**', '.tscache']
 
@@ -566,6 +566,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
+  grunt.loadNpmTasks 'grunt-remove'
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
@@ -584,7 +585,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
-    'symlink:polymer'
+    'symlink:polymerLib'
   ]
 
   # --- Build tasks ---
@@ -597,20 +598,26 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_ui', [
     'base'
     'ts:generic_ui'
-    'vulcanize:withinline'
-    'vulcanize:withcsp'
+  ]
+
+  taskManager.add 'build_ui_and_vulcanize', [
+    'ts:generic_ui'
+    'vulcanize:inline'
+    'vulcanize:csp'
   ]
 
   # The Chrome App and the Chrome Extension cannot be built separately. They
   # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
-    'build_generic_ui'
     'build_generic_core'
-    'ts:chrome'
+    'remove:allPolymerElements'
+    'symlink:genericPolymerElements'
+    'symlink:chromeBrowserElements'
+    'build_ui_and_vulcanize'
+    'ts:chrome_app'
+    'ts:chrome_ext'
     'vulcanize:chromeappinline'
     'vulcanize:chromeappcsp'
-    'vulcanize:chromeinline'
-    'vulcanize:chromecsp'
     'copy:chrome_app'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
@@ -618,8 +625,11 @@ module.exports = (grunt) ->
 
   # Firefox build tasks.
   taskManager.add 'build_firefox', [
-    'build_generic_ui'
     'build_generic_core'
+    'remove:allPolymerElements'
+    'symlink:genericPolymerElements'
+    'symlink:firefoxBrowserElements'
+    'build_ui_and_vulcanize'
     'ts:firefox'
     'copy:firefox'
     'concat:firefox_uproxy'
@@ -629,11 +639,6 @@ module.exports = (grunt) ->
   taskManager.add 'build_firefox_xpi', [
     'build_firefox'
     'compress:main'
-  ]
-
-  taskManager.add 'build', [
-    'build_chrome'
-    'build_firefox'
   ]
 
   # --- Testing tasks ---
@@ -660,14 +665,6 @@ module.exports = (grunt) ->
     'jasmine:chrome_app'
   ]
 
-  # This is the target run by Travis. Targets in here should run locally
-  # and on Travis/Sauce Labs.
-  taskManager.add 'test', [
-    'test_core'
-    'test_ui'
-    'test_chrome'
-  ]
-
   taskManager.add 'everything', [
     'tsd:refresh'
     'build'
@@ -677,6 +674,23 @@ module.exports = (grunt) ->
   taskManager.add 'default', [
     'build'
   ]
+
+  # Register 'build' and 'test' without the task manager because we do not
+  # want the subtasks to be 'flattened'. E.g. Chrome and Firefox share tasks
+  # that need to be run during each browser's build process, and we want
+  # the tests to be independent of each other.
+  grunt.registerTask('build', [
+    'build_chrome',
+    'build_firefox'
+  ]);
+
+  # This is the target run by Travis. Targets in here should run locally
+  # and on Travis/Sauce Labs.
+  grunt.registerTask('test', [
+    'test_core',
+    'test_ui',
+    'test_chrome'
+  ]);
 
   #-------------------------------------------------------------------------
   # Register the tasks

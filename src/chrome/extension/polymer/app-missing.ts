@@ -1,11 +1,9 @@
-/// <reference path='../../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../../../uproxy.ts' />
+/// <reference path='../../interfaces/ui-polymer.d.ts' />
+
+declare var openDownloadAppPage :Function;
 
 Polymer({
   downloadApp: function() {
     openDownloadAppPage();
-  },
-  ready: function() {
-    showSplashIfAppNotMissing();
   }
 });
