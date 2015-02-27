@@ -174,7 +174,6 @@ class uProxyCore implements uProxy.CoreAPI {
             promiseId: args.promiseId,
             errorForCallback: errorForCallback.toString()
           };
-          console.warn('rejecting promise command', rejectionData);
           ui.update(uProxy.Update.COMMAND_REJECTED, rejectionData);
         }
       );

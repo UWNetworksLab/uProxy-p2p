@@ -148,7 +148,7 @@ describe('Social.FreedomNetwork', () => {
         () => {
           expect(network['error']).toHaveBeenCalledWith('Could not login.');
           done()
-        });;
+        });
       // We need to tick a clock in order promises to be resolved.
       jasmine.clock().tick(1);
     });

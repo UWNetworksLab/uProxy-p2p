@@ -217,7 +217,7 @@ module Core {
       if (typeof instanceId === 'undefined') {
         return null;
       }
-      return (this.instances_[instanceId]).getConsentBits();;
+      return (this.instances_[instanceId]).getConsentBits();
     }
 
     public getInstance = (instanceId:string) : Core.RemoteInstance => {
