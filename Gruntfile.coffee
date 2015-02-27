@@ -192,19 +192,19 @@ module.exports = (grunt) ->
           onlyIf: 'modified'
         } ] }
 
+      # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
         nonull: true
         files: [ {
-          # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'build/compile-src/generic_ui/polymer'
           src: ['*.js', '*.html']
           dest: 'build/compile-src/chrome/extension/polymer'
         } ]
 
+      # Copy compiled generic Polymer to Firefox so it can be vulcanized.
       generic_ui_to_firefox:
         nonull: true
         files: [ {
-          # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'build/compile-src/generic_ui/polymer'
           src: ['*.js', '*.html']
           dest: 'build/compile-src/firefox/data/polymer'
