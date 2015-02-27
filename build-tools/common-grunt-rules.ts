@@ -5,9 +5,13 @@
 import path = require('path');
 
 export interface RuleConfig {
-  // The directory where things should be built to.
+  // The path where code in this repository should be built in.
   devBuildPath :string;
+  // The path from where third party libraries should be copied. e.g. as used by
+  // sample apps.
   thirdPartyBuildPath :string;
+  // The path to copy modules from this repository into. e.g. as used by sample
+  // apps.
   localLibsDestPath :string;
 }
 
@@ -107,20 +111,41 @@ export class Rule {
 
   // Copies libs from npm, local libraries, and third party libraries to the
   // destination folder.
-  public copyLibs(npmLibNames: string[],
-      localLibs:string[], thirdPartyLibs:string[],
-      destName:string) : CopyRule {
+  public copyLibs(copyInfo:{
+    // The npm libraries to be copied.
+    npmLibNames ?:string[]
+    // Paths within this repository's build directory to be copied.
+    pathsFromDevBuild ?:string[]
+    // Paths within third party to be copied.
+    pathsFromthirdPartyBuild ?:string[]
+    // A relative (to devBuildPath) destination to copy files to.
+    localDestPath:string; }) : CopyRule {
 
-    var destPath = path.join(this.config.devBuildPath, destName);
-    var localLibsDestPath = path.join(this.config.devBuildPath,
-        destName, this.config.localLibsDestPath);
+    // Default to empty list of dependencies.
+    copyInfo.npmLibNames = copyInfo.npmLibNames || [];
+    copyInfo.pathsFromDevBuild = copyInfo.pathsFromDevBuild || [];
+    copyInfo.pathsFromthirdPartyBuild = copyInfo.pathsFromthirdPartyBuild || [];
 
-    var filesForlibPaths :CopyFilesDescription[] = [];
+    var destPath = path.join(this.config.devBuildPath, copyInfo.localDestPath);
+    var destPathForLibs = path.join(destPath, this.config.localLibsDestPath);
 
-    // Provide a file-set to be copied for each local module that is listed in
-    // |localLibs|
-    localLibs.map((libPath) => {
-      filesForlibPaths.push({
+    var allFilesForlibPaths :CopyFilesDescription[] = [];
+
+    // The file-set for npm module files (or npm module output) from each of
+    // |npmLibNames| to the destination path.
+    copyInfo.npmLibNames.map((npmName) => {
+      var npmName = require.resolve(npmName);
+      allFilesForlibPaths.push({
+          nonull: true,
+          src: [npmName],
+          dest: destPath,
+          onlyIf: 'modified'
+        });
+    });
+
+    // The file-set for all relevant files in pathsFromDevBuild.
+    copyInfo.pathsFromDevBuild.map((libPath) => {
+      allFilesForlibPaths.push({
         expand: true,
         cwd: this.config.devBuildPath,
         src: [
@@ -129,15 +154,15 @@ export class Rule {
           '!' + libPath + '/**/*.spec.js',
           '!' + libPath + '/**/SpecRunner.html'
         ],
-        dest: localLibsDestPath,
+        dest: destPathForLibs,
         onlyIf: 'modified'
       });
     });
 
     // Provide a file-set to be copied for each local third_party module that is
-    // listed in |thirdPartyLibs|
-    thirdPartyLibs.map((libPath) => {
-      filesForlibPaths.push({
+    // listed in |pathsFromthirdPartyBuild|.
+    copyInfo.pathsFromthirdPartyBuild.map((libPath) => {
+      allFilesForlibPaths.push({
         expand: true,
         cwd: this.config.thirdPartyBuildPath,
         src: [
@@ -151,19 +176,7 @@ export class Rule {
       });
     });
 
-    // Copy the main javascript runtime specified in
-    // |npmLibName|.
-    npmLibNames.map((npmLibName) => {
-      var npmPath = require.resolve(npmLibName);
-      filesForlibPaths.push({
-          nonull: true,
-          src: [npmPath],
-          dest: path.join(destPath,path.basename(npmPath)),
-          onlyIf: 'modified'
-        });
-    });
-
-    return { files: filesForlibPaths };
+    return { files: allFilesForlibPaths };
   }
 
 }  // class Rule
