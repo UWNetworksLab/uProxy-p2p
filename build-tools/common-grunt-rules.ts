@@ -6,8 +6,8 @@ import path = require('path');
 
 export interface RuleConfig {
   // The directory where things should be built to.
-  devBuildDir :string;
-  thirdPartyBuildDir :string;
+  devBuildPath :string;
+  thirdPartyBuildPath :string;
   localLibsDestPath :string;
 }
 
@@ -56,23 +56,23 @@ export class Rule {
                   'dist/promise-1.0.0.js')
       ].concat(morefiles),
       options: {
-        specs: [ path.join(this.config.devBuildDir, name, '/**/*.spec.static.js') ],
-        outfile: path.join(this.config.devBuildDir, name, '/SpecRunner.html'),
+        specs: [ path.join(this.config.devBuildPath, name, '/**/*.spec.static.js') ],
+        outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
         keepRunner: true,
         template: require('grunt-template-jasmine-istanbul'),
         templateOptions: {
           files: ['**/*', '!node_modules/**'],
           // Output location for coverage results
-          coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
+          coverage: path.join(this.config.devBuildPath, name, 'coverage/results.json'),
           report: [
             { type: 'html',
               options: {
-                dir: path.join(this.config.devBuildDir, name, 'coverage')
+                dir: path.join(this.config.devBuildPath, name, 'coverage')
               }
             },
             { type: 'lcov',
               options: {
-                dir: path.join(this.config.devBuildDir, name, 'coverage')
+                dir: path.join(this.config.devBuildPath, name, 'coverage')
               }
             }
           ]
@@ -84,8 +84,8 @@ export class Rule {
   // Grunt browserify target creator
   public browserify(filepath:string) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildDir, filepath + '.js')],
-      dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
+      src: [ path.join(this.config.devBuildPath, filepath + '.js')],
+      dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: {
         debug: false,
       }
@@ -95,8 +95,8 @@ export class Rule {
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildDir, filepath + '.spec.js') ],
-      dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
+      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
+      dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: {
         debug: true,
         transform: [['browserify-istanbul',
@@ -105,14 +105,14 @@ export class Rule {
     };
   }
 
-  // Grunt copy target creator: copies freedom libraries and the freedomjs file
-  // to the destination path.
+  // Copies libs from npm, local libraries, and third party libraries to the
+  // destination folder.
   public copyLibs(npmLibNames: string[],
       localLibs:string[], thirdPartyLibs:string[],
       destName:string) : CopyRule {
 
-    var destPath = path.join(this.config.devBuildDir, destName);
-    var localLibsDestPath = path.join(this.config.devBuildDir,
+    var destPath = path.join(this.config.devBuildPath, destName);
+    var localLibsDestPath = path.join(this.config.devBuildPath,
         destName, this.config.localLibsDestPath);
 
     var filesForlibPaths :CopyFilesDescription[] = [];
@@ -122,7 +122,7 @@ export class Rule {
     localLibs.map((libPath) => {
       filesForlibPaths.push({
         expand: true,
-        cwd: this.config.devBuildDir,
+        cwd: this.config.devBuildPath,
         src: [
           libPath + '/**/*',
           '!' + libPath + '/**/*.ts',
@@ -139,7 +139,7 @@ export class Rule {
     thirdPartyLibs.map((libPath) => {
       filesForlibPaths.push({
         expand: true,
-        cwd: this.config.thirdPartyBuildDir,
+        cwd: this.config.thirdPartyBuildPath,
         src: [
           libPath + '/**/*',
           '!' + libPath + '/**/*.ts',
