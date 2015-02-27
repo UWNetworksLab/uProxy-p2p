@@ -52,7 +52,7 @@
     <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
     <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
 
-    <!-- Shown if we're waiting for contacts to load or if there are no contacts -->
+    <!-- Shown if there are no contacts found so far -->
     <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
       <img src='../icons/contact-default.png'>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
