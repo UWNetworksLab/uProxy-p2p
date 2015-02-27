@@ -143,9 +143,12 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
       spyOn(network, 'error');
-      network.login(false).catch(() => {
-        expect(network['error']).toHaveBeenCalledWith('Could not login.');
-      }).then(done);
+      network.login(false).then(
+        () => { return Promise.reject(); },  // login should not fulfill.
+        () => {
+          expect(network['error']).toHaveBeenCalledWith('Could not login.');
+          done()
+        });;
       // We need to tick a clock in order promises to be resolved.
       jasmine.clock().tick(1);
     });
