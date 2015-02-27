@@ -639,8 +639,6 @@ module.exports = (grunt) ->
     # 'shell:extract_chrome_tests'
   ]
 
-  # The Chrome App and the Chrome Extension cannot be built separately. They
-  # share dependencies, which implies a directory structure.
   taskManager.add 'build_chrome', [
     'build_chrome_app'
     'build_chrome_ext'
