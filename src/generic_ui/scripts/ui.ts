@@ -555,7 +555,8 @@ module UI {
         model.onlineNetwork = {
           name:   network.name,
           userId: network.userId,
-          roster: {}
+          roster: {},
+          hasContacts: false
         };
       }
     }
@@ -598,6 +599,7 @@ module UI {
         // New user.
         user = new UI.User(profile.userId, model.onlineNetwork);
         model.onlineNetwork.roster[profile.userId] = user;
+        model.onlineNetwork.hasContacts = true;
       } else {
         // Existing user, get the category before modifying any properties.
         oldUserCategories = user.getCategories();

@@ -53,7 +53,7 @@
     <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
 
     <!-- Shown if we're waiting for contacts to load or if there are no contacts -->
-    <div id='loadContacts' hidden?='{{ !loadingContacts && (onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
+    <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
       <img src='../icons/contact-default.png'>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         Loading uProxy friends
@@ -62,7 +62,7 @@
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
     </div>
 
-    <div hidden?='{{ loadingContacts || !(onlineTrustedUproxyContacts.length > 0 || offlineTrustedUproxyContacts.length > 0 || onlinePending.length > 0 || offlinePending.length > 0 || onlineUntrustedUproxyContacts.length > 0 || offlineUntrustedUproxyContacts.length > 0) }}'>
+    <div hidden?='{{ !model.onlineNetwork.hasContacts }}'>
       <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
