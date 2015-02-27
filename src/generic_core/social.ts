@@ -195,30 +195,6 @@ module Social {
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
-    /**
-     * Sends our instance handshake to a list of clients, returning a promise
-     * that all handshake messages have been sent.
-     *
-     * Intended to be protected, but TypeScript has no 'protected' modifier.
-     */
-    public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
-      if (!this.myInstance) {
-        // TODO: consider waiting until myInstance is constructing
-        // instead of dropping this message.
-        // Currently we will keep receiving INSTANCE_REQUEST until instance
-        // handshake is sent to the peer.
-        console.error('Not ready to send handshake');
-        return;
-      }
-      var instanceHandshake = {
-        type: uProxy.MessageType.INSTANCE,
-        data: {
-         handshake: this.myInstance.getInstanceHandshake(),
-         consent: consent
-        }
-      };
-      return this.send(clientId, instanceHandshake);
-    }
 
     /**
      * Intended to be protected, but TypeScript has no 'protected' modifier.
@@ -250,7 +226,8 @@ module Social {
     public flushQueuedInstanceMessages = () : void => {
       throw new Error('Operation not implemented');
     }
-    public send = (recipientClientId :string,
+    public send = (user :Core.User,
+                   recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
@@ -277,8 +254,6 @@ module Social {
 
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
-
-    private mapClientIdToUserId_ :{ [clientId :string] :string } = {};
 
     private fulfillLogout_ : () => void;
     private onceLoggedOut_ : Promise<void>;
@@ -390,7 +365,6 @@ module Social {
         // Ignore clients that aren't using uProxy.
         return;
       }
-      this.mapClientIdToUserId_[client.clientId] = client.userId;
 
       if (client.userId == this.myInstance.userId) {
         // Log out if it's our own client id.
@@ -530,19 +504,12 @@ module Social {
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
      */
-    public send = (clientId :string,
+    public send = (user :Core.User,
+                   clientId :string,
                    message :uProxy.Message) : Promise<void> => {
-      var userId = this.mapClientIdToUserId_[clientId];
-      if (!userId) {
-        return Promise.reject('userId not found for clientId ' + clientId);
-      }
-      var user = this.roster[userId];
-      if (!user) {
-        return Promise.reject('user not found for userId ' + userId);
-      }
       var messageString = JSON.stringify(message);
       console.log(
-          'sending message to userId: ' + userId +
+          'sending message to userId: ' + user.userId +
           ', clientId: ' + clientId +
           // Instance may be undefined if we are making an instance request,
           // i.e. we know that a client is ONLINE with uProxy, but don't
@@ -624,7 +591,8 @@ module Social {
       return Promise.resolve<void>();
     }
 
-    public send = (recipientClientId :string,
+    public send = (user :Core.User,
+                   recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       this.log('Manual network sending message; recipientClientId=[' +
                recipientClientId + '], message=' + JSON.stringify(message));

@@ -8,7 +8,6 @@ describe('Core.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
-      'sendInstanceHandshake',
       'getStorePath',
       'notifyUI'
   ]);
@@ -69,6 +68,7 @@ describe('Core.User', () => {
   });
 
   it('sends an instance message to newly ONLINE clients', () => {
+    spyOn(user, 'sendInstanceHandshake');
     var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
@@ -76,12 +76,12 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
+    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
   it('does not re-send instance messages to the same client', () => {
-    network.sendInstanceHandshake.calls.reset();
+    spyOn(user, 'sendInstanceHandshake');
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
     var clientState :UProxyClient.State = {
       userId: 'fakeuser',
@@ -90,7 +90,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).not.toHaveBeenCalled();
+    expect(user.sendInstanceHandshake).not.toHaveBeenCalled();
   });
 
   it('does not add clients that are ONLINE_WITH_OTHER_APP', () => {
@@ -116,6 +116,7 @@ describe('Core.User', () => {
   });
 
   it('re-adds an re-sends instance message to new ONLINE clients', () => {
+    spyOn(user, 'sendInstanceHandshake');
     var clientState :UProxyClient.State = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
@@ -123,7 +124,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(network.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
+    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -258,4 +259,23 @@ describe('Core.User', () => {
     });
 
   });  // describe client <---> instance
+
+  it('sends instance handshake', (done) => {
+    var network = user.network;
+    network['myInstance'] = {getInstanceHandshake: function() {}};
+    spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
+      'fake-instance-handshake');
+    spyOn(network, 'send').and.returnValue(Promise.resolve());
+    user.sendInstanceHandshake('fakeclient', null).then(() => {
+      expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
+      expect(network.send).toHaveBeenCalledWith(user, 'fakeclient', {
+          type: uProxy.MessageType.INSTANCE,
+          data: {
+            handshake: 'fake-instance-handshake',
+            consent: null
+          }
+      });
+    }).then(done);
+  });
+
 });  // uProxy.User

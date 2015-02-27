@@ -110,7 +110,7 @@ module Core {
             console.error('Could not find clientId for instance', this);
             return;
           }
-          this.user.network.send(clientId, data);
+          this.user.network.send(this.user, clientId, data);
           break;
         case uProxy.Update.STOP_GIVING:
           ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
@@ -256,8 +256,9 @@ module Core {
     public sendConsent = () => {
       this.onceLoaded.then(() => {
         if (this.user.isInstanceOnline(this.instanceId)) {
-          this.user.network.sendInstanceHandshake(
-              this.user.instanceToClient(this.instanceId), this.getConsentBits());
+          this.user.sendInstanceHandshake(
+              this.user.instanceToClient(this.instanceId),
+              this.getConsentBits());
         }
       });
     }

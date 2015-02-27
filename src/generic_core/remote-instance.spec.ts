@@ -16,11 +16,12 @@ describe('Core.RemoteInstance', () => {
   var user = <Core.User><any>jasmine.createSpyObj('user', [
       'send',
       'notifyUI',
-      'instanceToClient'
+      'instanceToClient',
+      'sendInstanceHandshake'
   ]);
 
   user.network = <Social.Network><any>jasmine.createSpyObj(
-      'network', ['sendInstanceHandshake']);
+      'network', ['getUser']);
 
   user['getLocalInstanceId'] = function() {
       return 'localInstanceId';
@@ -387,7 +388,7 @@ describe('Core.RemoteInstance', () => {
       description: 'alice peer',
     });
 
-    (<any>user.network.sendInstanceHandshake).and.callFake((clientId, consent) => {
+    (<any>user.sendInstanceHandshake).and.callFake((clientId, consent) => {
       if (clientId === 'instanceId-alice') {
         bob.updateConsent(consent);
       } else if (clientId === 'instanceId-bob') {

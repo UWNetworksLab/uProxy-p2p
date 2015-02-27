@@ -147,7 +147,7 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(client.clientId,
+            this.sendInstanceHandshake(client.clientId,
                 this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
@@ -202,7 +202,7 @@ module Core {
 
         case uProxy.MessageType.INSTANCE_REQUEST:
           console.log('got instance request from ' + clientId);
-          this.network.sendInstanceHandshake(
+          this.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
           return;
 
@@ -381,7 +381,7 @@ module Core {
         type: uProxy.MessageType.INSTANCE_REQUEST,
         data: {}
       };
-      this.network.send(clientId, instanceRequest);
+      this.network.send(this, clientId, instanceRequest);
     }
 
     public isInstanceOnline = (instanceId :string) : boolean => {
@@ -443,10 +443,29 @@ module Core {
       }
     }
 
+    public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
+      if (!this.network.myInstance) {
+        // TODO: consider waiting until myInstance is constructing
+        // instead of dropping this message.
+        // Currently we will keep receiving INSTANCE_REQUEST until instance
+        // handshake is sent to the peer.
+        console.error('Not ready to send handshake');
+        return;
+      }
+      var instanceHandshake = {
+        type: uProxy.MessageType.INSTANCE,
+        data: {
+         handshake: this.network.myInstance.getInstanceHandshake(),
+         consent: consent
+        }
+      };
+      return this.network.send(this, clientId, instanceHandshake);
+    }
+
     public resendInstanceHandshakes = () : void => {
       for (var instanceId in this.instanceToClientMap_) {
         var clientId = this.instanceToClientMap_[instanceId];
-        this.network.sendInstanceHandshake(
+        this.sendInstanceHandshake(
             clientId, this.getConsentForClient_(clientId));
       }
     }

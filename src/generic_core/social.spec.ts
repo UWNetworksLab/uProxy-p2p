@@ -84,7 +84,6 @@ describe('Social.FreedomNetwork', () => {
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
-      spyOn(network, 'sendInstanceHandshake');
 
       var fulfillStorage;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
@@ -144,7 +143,7 @@ describe('Social.FreedomNetwork', () => {
           Promise.reject(new Error('mock failure')));
       spyOn(network, 'error');
       network.login(false).then(
-        () => { return Promise.reject(); },  // login should not fulfill.
+        () => { return Promise.reject('error'); },  // login should not fulfill.
         () => {
           expect(network['error']).toHaveBeenCalledWith('Could not login.');
           done()
@@ -314,34 +313,9 @@ describe('Social.FreedomNetwork', () => {
     it('calls the social provider sendMessage', () => {
       network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
       var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
-      network.send('fakeclient', msg);
+      network.send(network.getUser('mockuser'), 'fakeclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
         'fakeclient', JSON.stringify(msg));
-    });
-
-    it('send rejects for unknown clientId', (done) => {
-      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
-      var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
-      network.send('unknownclient', msg).then(() => {}, (e) => {
-        expect(network['freedomApi_'].sendMessage).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('sends instance handshake', (done) => {
-      spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
-        'fake-instance-handshake');
-      spyOn(network, 'send').and.returnValue(Promise.resolve());
-      network.sendInstanceHandshake('fakeclient', null).then(() => {
-        expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
-        expect(network.send).toHaveBeenCalledWith('fakeclient', {
-            type: uProxy.MessageType.INSTANCE,
-            data: {
-              handshake: 'fake-instance-handshake',
-              consent: null
-            }
-        });
-      }).then(done);
     });
 
   });
@@ -370,7 +344,7 @@ describe('Social.FreedomNetwork', () => {
       }
     };
     spyOn(JSON, 'stringify').and.callThrough();
-    network.send('fakeclient', outMsg)
+    network.send(network.getUser('mockuser'), 'fakeclient', outMsg)
     expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
     done();
   });
@@ -417,7 +391,7 @@ describe('Social.ManualNetwork', () => {
         birds: 'do not'
       }
     };
-    network.send('dummyClientId', message);
+    network.send(network.getUser('mockuser'), 'dummyClientId', message);
     expect(ui.update).toHaveBeenCalledWith(
         uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
   });
