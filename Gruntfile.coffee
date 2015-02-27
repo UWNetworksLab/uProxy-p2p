@@ -61,14 +61,6 @@ Rule.typescriptSpecDeclLenient = (name) =>
   rule = Rule.typescriptSpecDecl name
   rule.options.noImplicitAny = false
   rule
-# fast = 'never' refers to recompiling even if .tscache suggests that the
-# same files were already compiled. Needed to recompile generic_ui
-# between Chrome/FF builds in case polymer/ contents have changes.
-Rule.typescriptSrcLenientNeverFast = (name) =>
-  rule = Rule.typescriptSrc name
-  rule.options.noImplicitAny = false
-  rule.options.fast = 'never'
-  rule
 
 # TODO: Move more file lists here.
 FILES =
