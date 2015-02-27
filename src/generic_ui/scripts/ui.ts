@@ -104,7 +104,8 @@ module UI {
     userId :string;
     imageData ?:string;
     userName ?:string;
-    roster :{ [userId:string] :User }
+    roster :{ [userId:string] :User };
+    hasContacts ?:boolean;
   }
 
   /**
