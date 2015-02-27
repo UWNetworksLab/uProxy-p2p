@@ -112,19 +112,22 @@ export class Rule {
   // Copies libs from npm, local libraries, and third party libraries to the
   // destination folder.
   public copyLibs(copyInfo:{
-    // The npm libraries to be copied.
+    // The names of npm libraries who's package exports should be copied (a
+    // single JS file, see: https://docs.npmjs.com/files/package.json#main), or
+    // the names of individual files from npm modules, using the require.resolve
+    // nameing style, see: https://github.com/substack/node-resolve
     npmLibNames ?:string[]
     // Paths within this repository's build directory to be copied.
     pathsFromDevBuild ?:string[]
     // Paths within third party to be copied.
-    pathsFromthirdPartyBuild ?:string[]
+    pathsFromThirdPartyBuild ?:string[]
     // A relative (to devBuildPath) destination to copy files to.
     localDestPath:string; }) : CopyRule {
 
     // Default to empty list of dependencies.
     copyInfo.npmLibNames = copyInfo.npmLibNames || [];
     copyInfo.pathsFromDevBuild = copyInfo.pathsFromDevBuild || [];
-    copyInfo.pathsFromthirdPartyBuild = copyInfo.pathsFromthirdPartyBuild || [];
+    copyInfo.pathsFromThirdPartyBuild = copyInfo.pathsFromThirdPartyBuild || [];
 
     var destPath = path.join(this.config.devBuildPath, copyInfo.localDestPath);
     var destPathForLibs = path.join(destPath, this.config.localLibsDestPath);
@@ -134,11 +137,12 @@ export class Rule {
     // The file-set for npm module files (or npm module output) from each of
     // |npmLibNames| to the destination path.
     copyInfo.npmLibNames.map((npmName) => {
-      var npmName = require.resolve(npmName);
+      var absoluteNpmFilePath = require.resolve(npmName);
       allFilesForlibPaths.push({
+          expand: false,
           nonull: true,
-          src: [npmName],
-          dest: destPath,
+          src: [absoluteNpmFilePath],
+          dest: path.join(destPath,path.basename(absoluteNpmFilePath)),
           onlyIf: 'modified'
         });
     });
@@ -161,7 +165,7 @@ export class Rule {
 
     // Provide a file-set to be copied for each local third_party module that is
     // listed in |pathsFromthirdPartyBuild|.
-    copyInfo.pathsFromthirdPartyBuild.map((libPath) => {
+    copyInfo.pathsFromThirdPartyBuild.map((libPath) => {
       allFilesForlibPaths.push({
         expand: true,
         cwd: this.config.thirdPartyBuildPath,
