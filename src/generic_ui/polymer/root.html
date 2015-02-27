@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -13,7 +14,7 @@
 <link rel="import" href="../lib/paper-tabs/paper-tabs.html">
 >>>>>>> origin/dev
 
-<polymer-element name='uproxy-root' attributes='model'>
+<polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}'>
 
   <template>
     <style>

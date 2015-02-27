@@ -2,16 +2,11 @@
 
 Polymer({
   model: model,
+  loadingContacts: false,
+  searchQuery: '',
   ready: function() {
     console.log('initializing roster');
-    // this.contacts.push({
-      // name: 'alice',
-      // description: 'just some laptop'
-    // });
-    // this.contacts.push({ name: 'bob' });
-    // this.contacts.push({ name: 'charlie' });
-    // this.contacts.push({ name: 'dave' });
-    // this.contacts.push({ name: 'eve' });
+
     this.ui = ui;
     this.UI = UI;
 
@@ -25,5 +20,12 @@ Polymer({
     this.onlineUntrustedUproxyContacts = this.contacts.onlineUntrustedUproxy;
     this.offlineUntrustedUproxyContacts = this.contacts.offlineUntrustedUproxy;
   },
-  searchQuery: ''
+  loadContacts: function() {
+    // If no contacts have loaded, show the animation for a total of 5 seconds,
+    // and then display the "no online friends" message.
+    if (!model.onlineNetwork.hasContacts) {
+      this.loadingContacts = true;
+      setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
+    }
+  }
 });
