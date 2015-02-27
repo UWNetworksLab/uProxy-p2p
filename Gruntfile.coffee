@@ -61,14 +61,6 @@ Rule.typescriptSpecDeclLenient = (name) =>
   rule = Rule.typescriptSpecDecl name
   rule.options.noImplicitAny = false
   rule
-# fast = 'never' refers to recompiling even if .tscache suggests that the
-# same files were already compiled. Needed to recompile generic_ui
-# between Chrome/FF builds in case polymer/ contents have changes.
-Rule.typescriptSrcLenientNeverFast = (name) =>
-  rule = Rule.typescriptSrc name
-  rule.options.noImplicitAny = false
-  rule.options.fast = 'never'
-  rule
 
 # TODO: Move more file lists here.
 FILES =
@@ -133,13 +125,17 @@ module.exports = (grunt) ->
 
       uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
 
-      genericPolymerElements: Rule.symlink(Path.join(getNodePath('.'), 'src/generic_ui/polymer'), 'generic_ui/polymer')
-      chromeBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/chrome/extension/polymer'), 'generic_ui/polymer')
-      firefoxBrowserElements: Rule.symlink(Path.join(getNodePath('.'), 'src/firefox/data/polymer'), 'generic_ui/polymer')
-
-      polymerLib:
+      polymerLibToChromeExt:
         src: 'third_party/lib'
-        dest: 'build/compile-src/generic_ui/lib'
+        dest: 'build/compile-src/chrome/extension/lib'
+
+      polymerLibToChromeApp:
+        src: 'third_party/lib'
+        dest: 'build/compile-src/chrome/app/lib'
+
+      polymerLibToFirefox:
+        src: 'third_party/lib'
+        dest: 'build/compile-src/firefox/data/lib'
 
 
     shell: {
@@ -196,6 +192,24 @@ module.exports = (grunt) ->
           onlyIf: 'modified'
         } ] }
 
+      # Copy compiled generic Polymer to Chrome so it can be vulcanized.
+      generic_ui_to_chrome:
+        nonull: true
+        files: [ {
+          expand: true, cwd: 'build/compile-src/generic_ui/polymer'
+          src: ['*.js', '*.html']
+          dest: 'build/compile-src/chrome/extension/polymer'
+        } ]
+
+      # Copy compiled generic Polymer to Firefox so it can be vulcanized.
+      generic_ui_to_firefox:
+        nonull: true
+        files: [ {
+          expand: true, cwd: 'build/compile-src/generic_ui/polymer'
+          src: ['*.js', '*.html']
+          dest: 'build/compile-src/firefox/data/polymer'
+        } ]
+
       chrome_extension:
         nonull: true
         files: [ {
@@ -204,15 +218,10 @@ module.exports = (grunt) ->
           src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
           dest: chromeExtDevPath
         }, {
-          # generic_ui HTML and non-typescript assets.
-          expand: true, cwd: 'src/generic_ui',
-          src: ['styles/**']
-          dest: chromeExtDevPath
-        }, {
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
           expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
+          src: ['scripts/**', '*.html', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
           # Icons and fonts
@@ -230,6 +239,12 @@ module.exports = (grunt) ->
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
+        }, {
+          # Copy vulcanized files containing compiled Polymer
+          # code.
+          expand: true, cwd: 'build/compile-src/chrome/extension'
+          src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
+          dest: chromeExtDevPath
         } ]
 
       chrome_app:
@@ -329,11 +344,6 @@ module.exports = (grunt) ->
           src: ['**'],
           dest: firefoxDevPath + 'data/core/'
         }, {
-          # generic_ui HTML and non-typescript assets.
-          expand: true, cwd: 'src/generic_ui',
-          src: ['styles/**']
-          dest: firefoxDevPath + 'data/'
-        }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/compile-src/generic_ui'
           src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
@@ -376,6 +386,12 @@ module.exports = (grunt) ->
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: firefoxDevPath + 'data/lib'
+        }, {
+          # Copy vulcanized files containing compiled Polymer
+          # code.
+          expand: true, cwd: 'build/compile-src/firefox/data'
+          src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
+          dest: firefoxDevPath
         } ]
 
     }  # copy
@@ -385,7 +401,7 @@ module.exports = (grunt) ->
     ts: {
 
       # uProxy UI without any platform dependencies
-      generic_ui: Rule.typescriptSrcLenientNeverFast 'compile-src/generic_ui'
+      generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
 
       # Core uProxy without any platform dependencies
@@ -408,11 +424,7 @@ module.exports = (grunt) ->
       # In the ideal world, there shouldn't be an App/Extension split.
       # The shell:extract_chrome_tests will pull the specs outside of the
       # actual distribution directory.
-      # Only need to compile extension/scripts because extension/polymer is copied
-      # into generic_ui to be compiled.
-      chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/scripts'
-      # For the app we compile app/scripts and app/polymer because the app's
-      # polymer is used separately from generic_ui.
+      chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/'
       chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/'
       chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
 
@@ -527,33 +539,39 @@ module.exports = (grunt) ->
         dest: '.'
 
     vulcanize:
-      inline:
+      chromeExtInline:
         options:
           inline: true
         files:
-          'build/compile-src/generic_ui/polymer/vulcanized-inline.html': 'build/compile-src/generic_ui/polymer/root.html'
-      csp:
+          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/root.html'
+      chromeExtCsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/generic_ui/polymer/vulcanized.html': 'build/compile-src/generic_ui/polymer/vulcanized-inline.html'
-      chromeappinline:
+          'build/compile-src/chrome/extension/polymer/vulcanized.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
+      chromeAppInline:
         options:
           inline: true
         files:
           'build/compile-src/chrome/app/polymer/vulcanized-inline.html': 'build/compile-src/chrome/app/polymer/ext-missing.html'
-      chromeappcsp:
+      chromeAppCsp:
         options:
           csp: true
           strip: true
         files:
           'build/compile-src/chrome/app/polymer/vulcanized.html': 'build/compile-src/chrome/app/polymer/vulcanized-inline.html'
-
-    remove:
-      allPolymerElements:
-        fileList: ['**']
-        dirList: ['build/compile-src/generic_ui/polymer/']
+      firefoxInline:
+        options:
+          inline: true
+        files:
+          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/browser-elements.html'
+      firefoxCsp:
+        options:
+          csp: true
+          strip: true
+        files:
+          'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
     clean: ['build/**', '.tscache']
 
@@ -566,7 +584,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
-  grunt.loadNpmTasks 'grunt-remove'
   grunt.loadNpmTasks 'grunt-shell'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
@@ -585,7 +602,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
-    'symlink:polymerLib'
+    #'symlink:polymerLib'
   ]
 
   # --- Build tasks ---
@@ -600,37 +617,42 @@ module.exports = (grunt) ->
     'ts:generic_ui'
   ]
 
-  taskManager.add 'build_ui_and_vulcanize', [
-    'ts:generic_ui'
-    'vulcanize:inline'
-    'vulcanize:csp'
+  taskManager.add 'build_chrome_app', [
+    'build_generic_core'
+    'build_generic_ui'
+    'ts:chrome_app'
+    'symlink:polymerLibToChromeApp'
+    'vulcanize:chromeAppInline'
+    'vulcanize:chromeAppCsp'
+    'copy:chrome_app'
   ]
 
-  # The Chrome App and the Chrome Extension cannot be built separately. They
-  # share dependencies, which implies a directory structure.
-  taskManager.add 'build_chrome', [
+  taskManager.add 'build_chrome_ext', [
     'build_generic_core'
-    'remove:allPolymerElements'
-    'symlink:genericPolymerElements'
-    'symlink:chromeBrowserElements'
-    'build_ui_and_vulcanize'
-    'ts:chrome_app'
+    'build_generic_ui'
+    'copy:generic_ui_to_chrome'
     'ts:chrome_ext'
-    'vulcanize:chromeappinline'
-    'vulcanize:chromeappcsp'
-    'copy:chrome_app'
+    'symlink:polymerLibToChromeExt'
+    'vulcanize:chromeExtInline'
+    'vulcanize:chromeExtCsp'
     'copy:chrome_extension'
     # 'shell:extract_chrome_tests'
+  ]
+
+  taskManager.add 'build_chrome', [
+    'build_chrome_app'
+    'build_chrome_ext'
   ]
 
   # Firefox build tasks.
   taskManager.add 'build_firefox', [
     'build_generic_core'
-    'remove:allPolymerElements'
-    'symlink:genericPolymerElements'
-    'symlink:firefoxBrowserElements'
-    'build_ui_and_vulcanize'
+    'build_generic_ui'
+    'copy:generic_ui_to_firefox'
     'ts:firefox'
+    'symlink:polymerLibToFirefox'
+    'vulcanize:firefoxInline'
+    'vulcanize:firefoxCsp'
     'copy:firefox'
     'concat:firefox_uproxy'
     'concat:firefox_dependencies'
@@ -671,26 +693,22 @@ module.exports = (grunt) ->
     'test'
   ]
 
+  # This is the target run by Travis. Targets in here should run locally
+  # and on Travis/Sauce Labs.
+  taskManager.add 'test', [
+    'test_core'
+    'test_ui'
+    'test_chrome'
+  ]
+
+  taskManager.add 'build', [
+    'build_chrome'
+    'build_firefox'
+  ]
+
   taskManager.add 'default', [
     'build'
   ]
-
-  # Register 'build' and 'test' without the task manager because we do not
-  # want the subtasks to be 'flattened'. E.g. Chrome and Firefox share tasks
-  # that need to be run during each browser's build process, and we want
-  # the tests to be independent of each other.
-  grunt.registerTask('build', [
-    'build_chrome',
-    'build_firefox'
-  ]);
-
-  # This is the target run by Travis. Targets in here should run locally
-  # and on Travis/Sauce Labs.
-  grunt.registerTask('test', [
-    'test_core',
-    'test_ui',
-    'test_chrome'
-  ]);
 
   #-------------------------------------------------------------------------
   # Register the tasks

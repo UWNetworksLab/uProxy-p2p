@@ -1,6 +1,4 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-
-declare var openDownloadAppPage :Function;
+/// <reference path='../../../interfaces/ui-polymer.d.ts' />
 
 Polymer({
   downloadApp: function() {
