@@ -114,30 +114,6 @@ module Core {
     }
 
     /**
-     * Send a message to an Instance belonging to this user.
-     * Warns if instanceId does not exist on this user.
-     * If the instanceId does exist, but is currently offline (i.e. has no
-     * client associated), then it delays the send until the next time that
-     * instance becomes online using promises.
-     *
-     * Returns a promise that the message was sent to the instanceId, fulfilled
-     * with the clientId of the recipient.
-     */
-    public send = (instanceId :string, payload :uProxy.Message)
-        : Promise<string> => {
-      if (!(instanceId in this.instances_)) {
-        console.warn('Cannot send message to non-existing instance ' +
-                     instanceId);
-        return Promise.reject(new Error(
-            'Cannot send to invalid instance ' + instanceId));
-      }
-      var clientId = this.instanceToClientMap_[instanceId];
-      return this.network.send(clientId, payload).then(() => {
-        return clientId;
-      });
-    }
-
-    /**
      * Handle 'onClientState' events from the social provider, which indicate
      * changes in status such as becoming online, offline.
      *  - Only adds uProxy clients to the clients table.
@@ -314,7 +290,7 @@ module Core {
       return this.clientToInstanceMap_[clientId];
     }
 
-    public instanceToClient= (instanceId :string) : string => {
+    public instanceToClient = (instanceId :string) : string => {
       return this.instanceToClientMap_[instanceId];
     }
 
@@ -401,11 +377,11 @@ module Core {
 
     private requestInstance_ = (clientId) : void => {
       this.log('requesting instance');
-      var instanceRequestMsg :uProxy.Message = {
+      var instanceRequest :uProxy.Message = {
         type: uProxy.MessageType.INSTANCE_REQUEST,
         data: {}
       };
-      this.network.send(clientId, instanceRequestMsg);
+      this.network.send(clientId, instanceRequest);
     }
 
     public isInstanceOnline = (instanceId :string) : boolean => {

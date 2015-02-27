@@ -85,7 +85,7 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
       spyOn(ui, 'showNotification');
       spyOn(network, 'sendInstanceHandshake');
-      
+
       var fulfillStorage;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
       var restoreFunc = network.restoreFromStorage.bind(network);
@@ -146,6 +146,8 @@ describe('Social.FreedomNetwork', () => {
       network.login(false).catch(() => {
         expect(network['error']).toHaveBeenCalledWith('Could not login.');
       }).then(done);
+      // We need to tick a clock in order promises to be resolved.
+      jasmine.clock().tick(1);
     });
 
     it('can log out', (done) => {
@@ -165,6 +167,8 @@ describe('Social.FreedomNetwork', () => {
         expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
       }).then(done);
+      // We need to tick a clock in order promises to be resolved.
+      jasmine.clock().tick(1);
     });
 
   });  // describe login & logout
@@ -306,15 +310,18 @@ describe('Social.FreedomNetwork', () => {
 
     it('calls the social provider sendMessage', () => {
       network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
-      var msg = {
-        type: uProxy.MessageType.INSTANCE,
-        data: {
-          'doge': 'wows'
-        }
-      };
-      network.send('someclient', msg);
+      var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
+      network.send('fakeclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'someclient', '{"type":' + uProxy.MessageType.INSTANCE + ',"data":{"doge":"wows"}}');
+        'fakeclient',
+        '{"type":' + uProxy.MessageType.INSTANCE + ',"data":{"doge":"wows"}}');
+    });
+
+    it('send rejects for unknown clientId', (done) => {
+      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
+      var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
+      network.send('unknownclient', msg).then(() => {}, (e) => { done(); });
+      expect(network['freedomApi_'].sendMessage).not.toHaveBeenCalled();
     });
 
     it('sends instance handshake', (done) => {

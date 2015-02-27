@@ -140,11 +140,10 @@ describe('Core.RemoteInstance', () => {
     expect(instance.sendConsent).toHaveBeenCalled();
   });
 
-  it('warns about invalid UserAction to modify consent', () => {
+  it('does not send consent for invalid modification', () => {
     spyOn(instance, 'sendConsent');
     instance.modifyConsent(<Consent.UserAction>-1);
     expect(instance.sendConsent).not.toHaveBeenCalled();
-    expect(console.warn).toHaveBeenCalledWith('Invalid Consent.UserAction! -1');
   });
 
   describe('local consent towards remote proxy', () => {
@@ -528,7 +527,7 @@ describe('Core.RemoteInstance', () => {
       data: 'really fake candidate'
     };
 
-    beforeEach(() => {
+    beforeEach((done) => {
       alice = new Core.RemoteInstance(user, 'instance-alice', {
         instanceId: 'instance-alice',
         keyHash:    'fake-hash-alice',
@@ -538,17 +537,20 @@ describe('Core.RemoteInstance', () => {
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       spyOn(RtcToNet, 'RtcToNet').and.returnValue(fakeRtcToNet);
-      alice.consent.localGrantsAccessToRemote = true;
+      alice.onceLoaded.then(() => {
+        alice.consent.localGrantsAccessToRemote = true;
+        done();
+      });
     });
 
     it('ignores CANDIDATE signal from client peer as server without OFFER', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate);
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
     });
 
     it('handles OFFER signal from client peer as server', () => {
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeOffer)
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeOffer);
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeOffer);
     });
@@ -556,7 +558,7 @@ describe('Core.RemoteInstance', () => {
     it('handles signal from server peer as client', (done) => {
       alice.consent.remoteGrantsAccessToLocal = true;
       alice.start().then(() => {
-        alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeCandidate)
+        alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER, fakeCandidate);
         expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeCandidate);
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
@@ -564,19 +566,36 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('rejects invalid signals', () => {
-      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeCandidate)
+      alice.handleSignal(uProxy.MessageType.INSTANCE, fakeCandidate);
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalled();
     });
 
     it('rejects message from client if consent has not been granted', () => {
       alice.consent.localGrantsAccessToRemote = false;
-      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate)
+      alice.handleSignal(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate);
       expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
       expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalled();
     });
 
-  });  // describe signalling
+    it('does not send private consent variables to UI', () => {
+      var state = alice.currentStateForUi();
+      expect(Object.keys(state.consent)).toEqual(
+          ['localGrantsAccessToRemote', 'localRequestsAccessFromRemote',
+           'remoteGrantsAccessToLocal', 'remoteRequestsAccessFromLocal',
+           'ignoringRemoteUserRequest', 'ignoringRemoteUserOffer']);
+    });
+
+    it('does not write private consent variables to storage', (done) => {
+      alice['saveToStorage']().then(() => {
+        storage.load<RemoteInstanceState>(alice.getStorePath()).then((state) => {
+          expect(Object.keys(state.consent)).toEqual(
+              ['localGrantsAccessToRemote', 'localRequestsAccessFromRemote',
+               'remoteGrantsAccessToLocal', 'remoteRequestsAccessFromLocal',
+               'ignoringRemoteUserRequest', 'ignoringRemoteUserOffer']);
+          done();
+        });
+      });
+    });
+  });
 });

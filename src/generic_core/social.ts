@@ -210,16 +210,14 @@ module Social {
         console.error('Not ready to send handshake');
         return;
       }
-      var handshake = {
+      var instanceHandshake = {
         type: uProxy.MessageType.INSTANCE,
         data: {
          handshake: this.myInstance.getInstanceHandshake(),
          consent: consent
         }
       };
-      return this.send(clientId, handshake).then(() => {
-        this.log('Sent instance handshake to ' + clientId);
-      });
+      return this.send(clientId, instanceHandshake);
     }
 
     /**
@@ -279,6 +277,8 @@ module Social {
 
     // ID returned by setInterval call for monitoring.
     private monitorIntervalId_ :number = null;
+
+    private mapClientIdToUserId_ :{ [clientId :string] :string } = {};
 
     private fulfillLogout_ : () => void;
     private onceLoggedOut_ : Promise<void>;
@@ -390,6 +390,7 @@ module Social {
         // Ignore clients that aren't using uProxy.
         return;
       }
+      this.mapClientIdToUserId_[client.clientId] = client.userId;
 
       if (client.userId == this.myInstance.userId) {
         // Log out if it's our own client id.
@@ -422,7 +423,6 @@ module Social {
       }
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
-      this.log('received <------ ' + incoming.message);
 
       var client :UProxyClient.State =
           freedomClientToUproxyClient(incoming.from);
@@ -436,6 +436,15 @@ module Social {
         // Add client.
         user.handleClient(client);
       }
+
+      console.log(
+          'received message from userId: ' + user.userId +
+          ', clientId: ' + client.clientId +
+          // Instance may be undefined if we have not yet created an instance
+          // for this client, e.g. if this is the first instance message we
+          // are receiving from them.  This is not an error.
+          ', instanceId: ' + user.clientToInstance(client.clientId) +
+          ', message: ' + JSON.stringify(msg));
       user.handleMessage(client.clientId, msg);
     }
 
@@ -495,6 +504,9 @@ module Social {
               }
               ui.showNotification('You have been logged out of ' + this.name);
               Social.removeNetwork(this.name, this.myInstance.userId);
+              console.log('Fulfilling onceLoggedOut_');
+            }).catch((e) => {
+              console.error('Error fulfilling onceLoggedOut_', e);
             });
             this.restoreFromStorage();
           })
@@ -508,19 +520,36 @@ module Social {
 
     public logout = () : Promise<void> => {
       return this.freedomApi_.logout().then(() => {
-        this.log('logged out.');
         this.fulfillLogout_();
+      }).catch((e) => {
+        console.error('error in this.freedomApi_.logout', e);
+        return Promise.reject(e);
       });
     }
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
      */
-    public send = (recipientClientId :string,
+    public send = (clientId :string,
                    message :uProxy.Message) : Promise<void> => {
+      var userId = this.mapClientIdToUserId_[clientId];
+      if (!userId) {
+        return Promise.reject('userId not found for clientId ' + clientId);
+      }
+      var user = this.roster[userId];
+      if (!user) {
+        return Promise.reject('user not found for userId ' + userId);
+      }
       var messageString = JSON.stringify(message);
-      this.log('sending ------> ' + messageString);
-      return this.freedomApi_.sendMessage(recipientClientId, messageString);
+      console.log(
+          'sending message to userId: ' + userId +
+          ', clientId: ' + clientId +
+          // Instance may be undefined if we are making an instance request,
+          // i.e. we know that a client is ONLINE with uProxy, but don't
+          // yet have their instance info.  This is not an error.
+          ', instanceId: ' + user.clientToInstance(clientId) +
+          ', message: ' + messageString);
+      return this.freedomApi_.sendMessage(clientId, messageString);
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate

@@ -258,39 +258,4 @@ describe('Core.User', () => {
     });
 
   });  // describe client <---> instance
-
-  describe('instance sending promises', () => {
-
-    var msg :uProxy.Message = {
-      type: uProxy.MessageType.INSTANCE,
-      data: 'foo'
-    };
-    var reconnect = null;
-    var reconnected = false;
-
-    beforeEach(() => {
-      // Pretend that Social.Network.send always returns a successful promise.
-      spyOn(network, 'send').and.returnValue(Promise.resolve());
-      if (instance) {
-        spyOn(instance, 'update');
-        spyOn(instance, 'send');
-      }
-    })
-
-    it('sending message to online instanceId fulfills promise with clientId',
-        (done) => {
-      instance = user.getInstance('fakeinstance');
-      user.send('fakeinstance', msg).then((clientId) => {
-        expect(clientId).toEqual('fakeclient');
-      }).then(done);
-    });
-
-    it('sending message to invalid instanceId throws error', (done) => {
-      instance = user.getInstance('fakeinstance');
-      user.send('nobody', msg).catch((e) => {
-        expect(e.message).toEqual('Cannot send to invalid instance nobody');
-      }).then(done);
-    });
-
-  });  // describe instance sending promises
 });  // uProxy.User

@@ -21,7 +21,7 @@
     h1 {
       font-size: 1.4em;
       color: #009688;  /* dark green */
-      margin-bottom: 2em;
+      margin-bottom: 1.5em;
     }
     #proxy-pic {
       opacity: 0.3;
@@ -44,12 +44,15 @@
       width: 150px;
     }
     uproxy-network {
-      padding-bottom: 32px;
+      padding: 1em;
     }
     #nextWrapper {
       margin-top: 50px;
       left: 0;
       width: 100%;
+    }
+    #oneTimeConnection {
+      margin-bottom: 1.5em;
     }
     uproxy-faq-link {
       position: absolute;
@@ -63,9 +66,6 @@
     }
     .uproxy-logo {
       margin-bottom: 1em;
-    }
-    p {
-      margin-top: 1em;
     }
     .prevArrow {
       position: absolute;
@@ -104,8 +104,10 @@
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
-        <a href='#' on-tap='{{ copypaste }}'>Set up a one time connection</a>
-        <p style="margin-top: 0">
+        <p id='oneTimeConnection'>
+          <a href='#' on-tap='{{ copypaste }}'>Set up a one time connection</a>
+        </p>
+        <p>
           We won't share your data or post publicly without your consent
         </p>
       </div>
