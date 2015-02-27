@@ -313,15 +313,16 @@ describe('Social.FreedomNetwork', () => {
       var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
       network.send('fakeclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'fakeclient',
-        '{"type":' + uProxy.MessageType.INSTANCE + ',"data":{"doge":"wows"}}');
+        'fakeclient', JSON.stringify(msg));
     });
 
     it('send rejects for unknown clientId', (done) => {
       network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
       var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
-      network.send('unknownclient', msg).then(() => {}, (e) => { done(); });
-      expect(network['freedomApi_'].sendMessage).not.toHaveBeenCalled();
+      network.send('unknownclient', msg).then(() => {}, (e) => {
+        expect(network['freedomApi_'].sendMessage).not.toHaveBeenCalled();
+        done();
+      });
     });
 
     it('sends instance handshake', (done) => {

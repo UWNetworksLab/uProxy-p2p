@@ -79,8 +79,8 @@ declare module Social {
      *
      * Assumes that |clientId| is valid. Implementations of Social.Network do
      * not manually manage lists of clients or instances. (That is handled in
-     * user.ts, which calls Network.send after doing the validation
-     * checks itself.)
+     * user.ts, which calls Network.send after doing the validation checks
+     * itself.)
      *
      * Still, it is expected that if there is a problem, such as the clientId
      * being invalid / offline, the promise returned from the social provider

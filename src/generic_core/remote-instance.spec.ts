@@ -588,7 +588,7 @@ describe('Core.RemoteInstance', () => {
 
     it('does not write private consent variables to storage', (done) => {
       alice['saveToStorage']().then(() => {
-        storage.load<RemoteInstanceState>(alice.getStorePath()).then((state) => {
+        storage.load<Core.RemoteInstanceState>(alice.getStorePath()).then((state) => {
           expect(Object.keys(state.consent)).toEqual(
               ['localGrantsAccessToRemote', 'localRequestsAccessFromRemote',
                'remoteGrantsAccessToLocal', 'remoteRequestsAccessFromLocal',
