@@ -352,11 +352,6 @@ module.exports = (grunt) ->
           src: ['**'],
           dest: firefoxDevPath + 'data/core/'
         }, {
-          # generic_ui HTML and non-typescript assets.
-          expand: true, cwd: 'src/generic_ui',
-          src: ['styles/**']
-          dest: firefoxDevPath + 'data/'
-        }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/compile-src/generic_ui'
           src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
