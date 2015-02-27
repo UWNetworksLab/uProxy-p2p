@@ -5,6 +5,9 @@
 <link rel="import" href='overlay.html'>
 <link rel="import" href='confirm.html'>
 <link rel='import' href='copypaste.html'>
+<link rel="import" href="../lib/core-toolbar/core-toolbar.html">
+<link rel="import" href="../lib/core-icon-button/core-icon-button.html">
+<link rel="import" href="../lib/paper-tabs/paper-tabs.html">
 
 <polymer-element name='uproxy-root' attributes='model'>
 
@@ -29,29 +32,39 @@
         top: 0;
         z-index: 1;
         width: 100%;
+        color: white;
+      }
+      #toolbar paper-tab {
+        font-size: 1.2em;
+        text-transform: uppercase;
+      }
+      #toolbar paper-tabs::shadow #selectionBar {
+        /*
+         * we are seeing an issue with the bar when initially loading it where
+         * the width will be set to 0 since the actual buttons are not rendered
+         * yet, this will cause the default to be 50% instead of 0
+         */
+        width: 50%;
+        background-color: #20F1DE;
+      }
+      #toolbar paper-tab::shadow #ink {
+        color: #20F1DE;
+      }
+      #toolbar paper-tab {
+        opacity: .6;
+        cursor: pointer;
       }
       #btnSettings {
-        position: absolute;
-        left: 20px;
-        top: 20px;
         opacity: 0.6;
-        cursor: pointer;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
         transition: all 0.23s !important;
       }
+      #toolbar paper-tab.core-selected, #btnSettings:hover {
+        opacity: 1;
+      }
       #title {
         font-size: 1.75em;
-        color: white;
-        position: absolute;
-        left: 55px;
-        margin-top: 0.5em;
-      }
-      #btnSettings:hover {
-        opacity: 1.0;
       }
       #settings {
         top: 0;
@@ -69,26 +82,6 @@
         position: relative;
         overflow-y: auto;
         display: block;
-      }
-      .getShareTab {
-        position: absolute;
-        top: 65px;
-        width: 32%;
-        margin-left: 9%;  /* (50% - width) / 2 */
-        text-align: center;
-        color: white;
-        font-size: 1.2em;
-        cursor: pointer;
-        text-transform: uppercase;
-        opacity: 0.6;
-      }
-      .getShareTab.active {
-        opacity: 1.0;
-        border-bottom: 3px solid #20F1DE;  /* teal */
-        padding-bottom: 12px;  /* normal padding-bottom - border size */
-      }
-      #shareTab {
-        left: 50%;
       }
       #status {
         position: fixed;
@@ -116,11 +109,6 @@
       }
       .clickable {
         cursor: pointer;
-      }
-      .sharingEnabled {
-        position: absolute;
-        right: 20px;
-        top: 20px;
       }
       #sharingEnabledInfo {
         position: absolute;
@@ -170,7 +158,7 @@
     </uproxy-splash>
 
     <div id='logged-in-controls'
-        hidden?='{{ UI.View.SPLASH==ui.view || !model.onlineNetwork }}'>
+        hidden?='{{ ui.view !== UI.View.ROSTER && ui.view !== UI.View.SETTINGS }}'>
 
       <uproxy-overlay id='welcomeOverlay'
            hidden?='{{model.globalSettings.hasSeenWelcome}}'
@@ -205,25 +193,20 @@
         </div>
       </uproxy-overlay>
 
-      <div id='toolbar'>
-        <img src='../icons/hamburger.png' id='btnSettings'
-          on-tap='{{ settingsView }}'>
-        <h1 id='title'>uProxy</h1>
-        <img src='../icons/sharing-enabled-toolbar.png'
-          class='sharingEnabled clickable'
+      <core-toolbar id='toolbar'>
+        <core-icon-button id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon-button>
+        <div id='title' flex>uProxy</div>
+        <core-icon-button src='../icons/sharing-enabled-toolbar.png'
           hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
-          on-tap='{{setShareMode}}'>
-        <div id='getTab'
-            class='getShareTab {{ui.mode==UI.Mode.GET ? "active" : ""}}'
-            on-tap='{{setGetMode}}'>
-          Get Access
+          on-tap='{{ setShareMode }}'></core-icon-button>
+
+        <div class='bottom fit'>
+          <paper-tabs selected='{{ ui.mode }}'>
+            <paper-tab>Get Access</paper-tab>
+            <paper-tab>Share Access</paper-tab>
+          </paper-tabs>
         </div>
-        <div id='shareTab'
-            class='getShareTab {{ui.mode==UI.Mode.SHARE ? "active" : ""}}'
-            on-tap='{{setShareMode}}'>
-          Share Access
-        </div>
-      </div>
+      </core-toolbar>
 
       <div id='roster-panel'>
         <uproxy-roster id='get-roster' class='roster'

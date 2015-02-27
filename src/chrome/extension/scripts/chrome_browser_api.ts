@@ -89,6 +89,8 @@ class ChromeBrowserApi implements BrowserAPI {
             this.preUproxyConfig_ = details.value;
           } else {
             this.preUproxyConfig_ = {mode: "system"};
+            console.warn('Current proxy settings undefined. Received error: ' +
+              chrome.runtime.lastError.message);
           }
           chrome.proxy.settings.set({
               value: this.uproxyConfig_,
