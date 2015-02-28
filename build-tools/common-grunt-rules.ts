@@ -45,7 +45,6 @@ export interface CopyRule {
   files :CopyFilesDescription[];
 }
 
-
 export class Rule {
   constructor(public config :RuleConfig) {}
 
@@ -142,7 +141,9 @@ export class Rule {
           expand: false,
           nonull: true,
           src: [absoluteNpmFilePath],
-          dest: path.join(destPath,path.basename(absoluteNpmFilePath)),
+          dest: path.join(destPath,
+                          path.dirname(npmName),
+                          path.basename(absoluteNpmFilePath)),
           onlyIf: 'modified'
         });
     });
