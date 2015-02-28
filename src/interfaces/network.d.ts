@@ -52,24 +52,6 @@ declare module Social {
     getUser :(userId :string) => Core.User;
 
     /**
-     * Notifies a remote uProxy installation that we are also a uProxy
-     * installation.
-     *
-     * Sends this network's instance handshake to a target clientId.
-     * Assumes that clientId is ONLINE.
-     *
-     * NOTE: This is one of the few cases where we send a Message directly to a
-     * |clientId| rather than |instanceId|. This is because there is not yet a
-     * known instanceId, and also because this is internal to
-     * Social.FreedomNetwork mechanics.
-     *
-     * TODO: Clarify terminology. "Handshake" implies participation and
-     * agreement of two parties, but here "handshake" is something that can be
-     * unilaterally sent.
-     */
-    sendInstanceHandshake :(clientId:string, consent :Consent.WireState) => Promise<void>;
-
-    /**
       * Resends the instance handeshake to all uProxy instances.
       */
     resendInstanceHandshakes :() => void;
@@ -86,7 +68,8 @@ declare module Social {
      * being invalid / offline, the promise returned from the social provider
      * will reject.
      */
-    send :(clientId:string, msg:uProxy.Message) => Promise<void>;
+    send :(user :Core.User, clientId:string, msg:uProxy.Message)
+        => Promise<void>;
   }
 
 }  // module Social

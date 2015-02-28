@@ -195,32 +195,6 @@ module Social {
     public getUser = (userId :string) : Core.User => {
       return this.roster[userId];
     }
-    /**
-     * Sends our instance handshake to a list of clients, returning a promise
-     * that all handshake messages have been sent.
-     *
-     * Intended to be protected, but TypeScript has no 'protected' modifier.
-     */
-    public sendInstanceHandshake = (clientId :string, consent :Consent.WireState) : Promise<void> => {
-      if (!this.myInstance) {
-        // TODO: consider waiting until myInstance is constructing
-        // instead of dropping this message.
-        // Currently we will keep receiving INSTANCE_REQUEST until instance
-        // handshake is sent to the peer.
-        console.error('Not ready to send handshake');
-        return;
-      }
-      var handshake = {
-        type: uProxy.MessageType.INSTANCE,
-        data: {
-         handshake: this.myInstance.getInstanceHandshake(),
-         consent: consent
-        }
-      };
-      return this.send(clientId, handshake).then(() => {
-        this.log('Sent instance handshake to ' + clientId);
-      });
-    }
 
     /**
      * Intended to be protected, but TypeScript has no 'protected' modifier.
@@ -252,7 +226,8 @@ module Social {
     public flushQueuedInstanceMessages = () : void => {
       throw new Error('Operation not implemented');
     }
-    public send = (recipientClientId :string,
+    public send = (user :Core.User,
+                   recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
@@ -422,7 +397,6 @@ module Social {
       }
       var userId = incoming.from.userId;
       var msg :uProxy.Message = JSON.parse(incoming.message);
-      this.log('received <------ ' + incoming.message);
 
       var client :UProxyClient.State =
           freedomClientToUproxyClient(incoming.from);
@@ -436,6 +410,15 @@ module Social {
         // Add client.
         user.handleClient(client);
       }
+
+      console.log(
+          'received message from userId: ' + user.userId +
+          ', clientId: ' + client.clientId +
+          // Instance may be undefined if we have not yet created an instance
+          // for this client, e.g. if this is the first instance message we
+          // are receiving from them.  This is not an error.
+          ', instanceId: ' + user.clientToInstance(client.clientId) +
+          ', message: ' + JSON.stringify(msg));
       user.handleMessage(client.clientId, msg);
     }
 
@@ -495,6 +478,9 @@ module Social {
               }
               ui.showNotification('You have been logged out of ' + this.name);
               Social.removeNetwork(this.name, this.myInstance.userId);
+              console.log('Fulfilling onceLoggedOut_');
+            }).catch((e) => {
+              console.error('Error fulfilling onceLoggedOut_', e);
             });
             this.restoreFromStorage();
           })
@@ -508,19 +494,29 @@ module Social {
 
     public logout = () : Promise<void> => {
       return this.freedomApi_.logout().then(() => {
-        this.log('logged out.');
         this.fulfillLogout_();
+      }).catch((e) => {
+        console.error('error in this.freedomApi_.logout', e);
+        return Promise.reject(e);
       });
     }
 
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
      */
-    public send = (recipientClientId :string,
+    public send = (user :Core.User,
+                   clientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);
-      this.log('sending ------> ' + messageString);
-      return this.freedomApi_.sendMessage(recipientClientId, messageString);
+      console.log(
+          'sending message to userId: ' + user.userId +
+          ', clientId: ' + clientId +
+          // Instance may be undefined if we are making an instance request,
+          // i.e. we know that a client is ONLINE with uProxy, but don't
+          // yet have their instance info.  This is not an error.
+          ', instanceId: ' + user.clientToInstance(clientId) +
+          ', message: ' + messageString);
+      return this.freedomApi_.sendMessage(clientId, messageString);
     }
 
     // TODO: We should make a class for monitors or generally to encapsulate
@@ -595,7 +591,8 @@ module Social {
       return Promise.resolve<void>();
     }
 
-    public send = (recipientClientId :string,
+    public send = (user :Core.User,
+                   recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       this.log('Manual network sending message; recipientClientId=[' +
                recipientClientId + '], message=' + JSON.stringify(message));
