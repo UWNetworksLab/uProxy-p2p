@@ -1,12 +1,18 @@
 // common-grunt-rules
 
-/// <reference path='../../build/third_party/typings/node/node.d.ts' />
+/// <reference path='../../../third_party/typings/node/node.d.ts' />
 
 import path = require('path');
 
 export interface RuleConfig {
-  // The directory where things should be built to.
-  devBuildDir :string;
+  // The path where code in this repository should be built in.
+  devBuildPath :string;
+  // The path from where third party libraries should be copied. e.g. as used by
+  // sample apps.
+  thirdPartyBuildPath :string;
+  // The path to copy modules from this repository into. e.g. as used by sample
+  // apps.
+  localLibsDestPath :string;
 }
 
 export interface JasmineRule {
@@ -54,23 +60,23 @@ export class Rule {
                   'dist/promise-1.0.0.js')
       ].concat(morefiles),
       options: {
-        specs: [ path.join(this.config.devBuildDir, name, '/**/*.spec.static.js') ],
-        outfile: path.join(this.config.devBuildDir, name, '/SpecRunner.html'),
+        specs: [ path.join(this.config.devBuildPath, name, '/**/*.spec.static.js') ],
+        outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
         keepRunner: true,
         template: require('grunt-template-jasmine-istanbul'),
         templateOptions: {
           files: ['**/*', '!node_modules/**'],
           // Output location for coverage results
-          coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
+          coverage: path.join(this.config.devBuildPath, name, 'coverage/results.json'),
           report: [
             { type: 'html',
               options: {
-                dir: path.join(this.config.devBuildDir, name, 'coverage')
+                dir: path.join(this.config.devBuildPath, name, 'coverage')
               }
             },
             { type: 'lcov',
               options: {
-                dir: path.join(this.config.devBuildDir, name, 'coverage')
+                dir: path.join(this.config.devBuildPath, name, 'coverage')
               }
             }
           ]
@@ -82,8 +88,8 @@ export class Rule {
   // Grunt browserify target creator
   public browserify(filepath:string) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildDir, filepath + '.js')],
-      dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
+      src: [ path.join(this.config.devBuildPath, filepath + '.js')],
+      dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: {
         debug: false,
       }
@@ -93,8 +99,8 @@ export class Rule {
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildDir, filepath + '.spec.js') ],
-      dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
+      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
+      dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: {
         debug: true,
         transform: [['browserify-istanbul',
@@ -103,18 +109,66 @@ export class Rule {
     };
   }
 
-  // Grunt copy target creator: copies freedom libraries and the freedomjs file
-  // to the destination path.
-  public copyFreedomLibs(freedomRuntimeName: string,
-      freedomLibPaths:string[], destName:string) : CopyRule {
-    var destPath = path.join(this.config.devBuildDir, destName, 'lib');
-    // Provide a file-set to be copied for each freedom module that is lised in
-    // |freedomLibPaths|
-    var filesForlibPaths :CopyFilesDescription[] = freedomLibPaths.map(
-          (libPath) => {
-      return {
+  // Copies libs from npm, local libraries, and third party libraries to the
+  // destination folder.
+  public copyLibs(copyInfo:{
+    // The names of npm libraries who's package exports should be copied (a
+    // single JS file, see: https://docs.npmjs.com/files/package.json#main), or
+    // the names of individual files from npm modules, using the require.resolve
+    // nameing style, see: https://github.com/substack/node-resolve
+    npmLibNames ?:string[]
+    // Paths within this repository's build directory to be copied.
+    pathsFromDevBuild ?:string[]
+    // Paths within third party to be copied.
+    pathsFromThirdPartyBuild ?:string[]
+    // A relative (to devBuildPath) destination to copy files to.
+    localDestPath:string; }) : CopyRule {
+
+    // Default to empty list of dependencies.
+    copyInfo.npmLibNames = copyInfo.npmLibNames || [];
+    copyInfo.pathsFromDevBuild = copyInfo.pathsFromDevBuild || [];
+    copyInfo.pathsFromThirdPartyBuild = copyInfo.pathsFromThirdPartyBuild || [];
+
+    var destPath = path.join(this.config.devBuildPath, copyInfo.localDestPath);
+    var destPathForLibs = path.join(destPath, this.config.localLibsDestPath);
+
+    var allFilesForlibPaths :CopyFilesDescription[] = [];
+
+    // The file-set for npm module files (or npm module output) from each of
+    // |npmLibNames| to the destination path.
+    copyInfo.npmLibNames.map((npmName) => {
+      var absoluteNpmFilePath = require.resolve(npmName);
+      allFilesForlibPaths.push({
+          expand: false,
+          nonull: true,
+          src: [absoluteNpmFilePath],
+          dest: path.join(destPath,path.basename(absoluteNpmFilePath)),
+          onlyIf: 'modified'
+        });
+    });
+
+    // The file-set for all relevant files in pathsFromDevBuild.
+    copyInfo.pathsFromDevBuild.map((libPath) => {
+      allFilesForlibPaths.push({
         expand: true,
-        cwd: this.config.devBuildDir,
+        cwd: this.config.devBuildPath,
+        src: [
+          libPath + '/**/*',
+          '!' + libPath + '/**/*.ts',
+          '!' + libPath + '/**/*.spec.js',
+          '!' + libPath + '/**/SpecRunner.html'
+        ],
+        dest: destPathForLibs,
+        onlyIf: 'modified'
+      });
+    });
+
+    // Provide a file-set to be copied for each local third_party module that is
+    // listed in |pathsFromthirdPartyBuild|.
+    copyInfo.pathsFromThirdPartyBuild.map((libPath) => {
+      allFilesForlibPaths.push({
+        expand: true,
+        cwd: this.config.thirdPartyBuildPath,
         src: [
           libPath + '/**/*',
           '!' + libPath + '/**/*.ts',
@@ -123,18 +177,10 @@ export class Rule {
         ],
         dest: destPath,
         onlyIf: 'modified'
-      }
-    });
-    // Copy the main freedom javascript runtime specified in
-    // |freedomRuntimeName|.
-    var freedomjsPath = require.resolve(freedomRuntimeName);
-    filesForlibPaths.push({
-        nonull: true,
-        src: [freedomjsPath],
-        dest: path.join(destPath,path.basename(freedomjsPath)),
-        onlyIf: 'modified'
       });
-    return { files: filesForlibPaths };
+    });
+
+    return { files: allFilesForlibPaths };
   }
 
 }  // class Rule

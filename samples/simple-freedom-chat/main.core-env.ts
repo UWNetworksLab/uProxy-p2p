@@ -1,5 +1,5 @@
-/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../build/third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 
 import Message = require('./message.types');
 
@@ -12,7 +12,7 @@ var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
 freedom('freedom-module.json', {
-    'logger': 'lib/loggingprovider/freedom-module.json',
+    'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
   }).then(
     (simpleChatFactory:() => freedom.OnAndEmit<any,any>) => {

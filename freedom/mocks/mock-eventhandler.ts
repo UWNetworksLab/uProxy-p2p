@@ -1,4 +1,4 @@
-/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
 
 import freedomTypes = require('freedom.types');
 

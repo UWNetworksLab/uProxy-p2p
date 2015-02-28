@@ -1,6 +1,6 @@
-/// <reference path='../../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../build/third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import RTCConfiguration = freedom_RTCPeerConnection.RTCConfiguration;
 import RTCDataChannelInit = freedom_RTCPeerConnection.RTCDataChannelInit;
