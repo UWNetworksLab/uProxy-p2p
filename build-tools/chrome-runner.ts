@@ -46,7 +46,7 @@ function pickFirstExistingPath(paths:string[]) : string {
   return null;
 }
 
-interface NodeChildProcessOptions
+export interface NodeChildProcessOptions
   { cwd?: string; stdio?: any; custom?: any; env?: any; detached?: boolean; };
 
 // Run the chrome binary.
