@@ -46,14 +46,6 @@ export interface CopyRule {
   files :CopyFilesDescription[];
 }
 
-function assertFileExists(filePath:string, info:string = '') {
-  if (!fs.existsSync(filePath)) throw new Error(info + '\nMissing file: ' + filePath);
-}
-
-function assertFilesExist(filePaths:string[], info?:string) {
-  filePaths.forEach((p) => { assertFileExists(p, info); });
-}
-
 export class Rule {
   constructor(public config :RuleConfig) {}
 
@@ -96,7 +88,6 @@ export class Rule {
   // Grunt browserify target creator
   public browserify(filepath:string) : BrowserifyRule {
     var file = path.join(this.config.devBuildPath, filepath + '.js');
-    assertFileExists(file, 'browserify:' + filepath);
     return {
       src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
@@ -109,7 +100,6 @@ export class Rule {
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string) : BrowserifyRule {
     var file = path.join(this.config.devBuildPath, filepath + '.spec.js');
-    assertFileExists(file, 'browserifySpec:' + filepath);
     return {
       src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
