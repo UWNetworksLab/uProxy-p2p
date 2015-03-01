@@ -101,7 +101,7 @@ export class Rule {
       src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: {
-        debug: true,
+        debug: false,
         transform: [['browserify-istanbul',
                     { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
       }
@@ -136,13 +136,22 @@ export class Rule {
     // The file-set for npm module files (or npm module output) from each of
     // |npmLibNames| to the destination path.
     copyInfo.npmLibNames.map((npmName) => {
+      var npmModuleDirName :string;
+      if (path.dirname(npmName) === '.') {
+        // Note: |path.dirname(npmName)| gives '.' when |npmName| is just the
+        // npm module name.
+        npmModuleDirName = npmName;
+      } else {
+        npmModuleDirName = path.dirname(npmName);
+      }
+
       var absoluteNpmFilePath = require.resolve(npmName);
       allFilesForlibPaths.push({
           expand: false,
           nonull: true,
           src: [absoluteNpmFilePath],
           dest: path.join(destPath,
-                          path.dirname(npmName),
+                          npmModuleDirName,
                           path.basename(absoluteNpmFilePath)),
           onlyIf: 'modified'
         });
