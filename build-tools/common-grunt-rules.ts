@@ -3,6 +3,7 @@
 /// <reference path='../../../third_party/typings/node/node.d.ts' />
 
 import path = require('path');
+import fs = require('fs');
 
 export interface RuleConfig {
   // The path where code in this repository should be built in.
@@ -43,6 +44,14 @@ export interface CopyFilesDescription {
 
 export interface CopyRule {
   files :CopyFilesDescription[];
+}
+
+function assertFileExists(filePath:string, info:string = '') {
+  if (!fs.existsSync(filePath)) throw new Error(info + '\nMissing file: ' + filePath);
+}
+
+function assertFilesExist(filePaths:string[], info?:string) {
+  filePaths.forEach((p) => { assertFileExists(p, info); });
 }
 
 export class Rule {
@@ -86,8 +95,10 @@ export class Rule {
 
   // Grunt browserify target creator
   public browserify(filepath:string) : BrowserifyRule {
+    var file = path.join(this.config.devBuildPath, filepath + '.js');
+    assertFileExists(file, 'browserify:' + filepath);
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.js')],
+      src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: {
         debug: false,
@@ -97,8 +108,10 @@ export class Rule {
 
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string) : BrowserifyRule {
+    var file = path.join(this.config.devBuildPath, filepath + '.spec.js');
+    assertFileExists(file, 'browserifySpec:' + filepath);
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
+      src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: {
         debug: false,
