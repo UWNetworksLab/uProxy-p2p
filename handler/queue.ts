@@ -35,8 +35,8 @@ export interface QueueFeeder<Feed,Result> {
 // The |QueueHandler| is the abstraction for the stream of functions that
 // handles events.
 export interface QueueHandler<Feed,Result> {
-  // Clears the queue, and rejects promises for handle that added the entry to
-  // the queue.
+  // Clears the queue, and rejects promises for |handle| callers that added
+  // entries in the queue.
   clear() : void;
   // Number of things in the queue to be handled.
   getLength() : number;
@@ -91,7 +91,7 @@ class PendingPromiseHandler<T,T2> {
 
   public reject = (e:Error) : void => {
     if (this.completed_) {
-      console.error('handleWith must not be called on a completed promise.');
+      console.error('reject must not be called on a completed promise.');
       return;
     }
     this.completed_ = true;
