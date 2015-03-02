@@ -75,6 +75,18 @@ module Consent {
     }
   }
 
+  // Return an object with only public consent fields, and no "_" fields.
+  export function serialize(consent :Consent.State) {
+    return {
+      localGrantsAccessToRemote: consent.localGrantsAccessToRemote,
+      localRequestsAccessFromRemote: consent.localRequestsAccessFromRemote,
+      remoteGrantsAccessToLocal: consent.remoteGrantsAccessToLocal,
+      remoteRequestsAccessFromLocal: consent.remoteRequestsAccessFromLocal,
+      ignoringRemoteUserRequest: consent.ignoringRemoteUserRequest,
+      ignoringRemoteUserOffer: consent.ignoringRemoteUserOffer
+    };
+  }
+
   export function updateStateFromRemoteState(state :State, remoteState :WireState) {
     state.remoteRequestsAccessFromLocal = remoteState.isRequesting;
     state.remoteGrantsAccessToLocal = remoteState.isOffering;

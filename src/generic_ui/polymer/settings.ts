@@ -12,8 +12,11 @@ Polymer({
   logOut: function() {
     core.logout({name: model.onlineNetwork.name,
                  userId: model.onlineNetwork.userId}).then(() => {
-      ui.view = UI.View.SPLASH;
-      ui.setOfflineIcon();
+      // Nothing to do here - the UI should receive a NETWORK update
+      // saying that the network is offline, and will update the display
+      // as result of that.
+    }).catch((e) => {
+      console.error('logout returned error: ', e);
     });
   },
   restart: function() {

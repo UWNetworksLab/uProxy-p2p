@@ -105,7 +105,12 @@ module Core {
     private handleConnectionUpdate_ = (update :uProxy.Update, data?:any) => {
       switch (update) {
         case uProxy.Update.SIGNALLING_MESSAGE:
-          this.send(data);
+          var clientId = this.user.instanceToClient(this.instanceId);
+          if (!clientId) {
+            console.error('Could not find clientId for instance', this);
+            return;
+          }
+          this.user.network.send(this.user, clientId, data);
           break;
         case uProxy.Update.STOP_GIVING:
           ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
@@ -140,10 +145,6 @@ module Core {
      */
     public getStorePath = () => {
       return this.user.getLocalInstanceId() + '/' + this.instanceId;
-    }
-
-    public send = (msg :uProxy.Message) => {
-      this.user.send(this.instanceId, msg);
     }
 
     /**
@@ -255,8 +256,9 @@ module Core {
     public sendConsent = () => {
       this.onceLoaded.then(() => {
         if (this.user.isInstanceOnline(this.instanceId)) {
-          this.user.network.sendInstanceHandshake(
-              this.user.instanceToClient(this.instanceId), this.getConsentBits());
+          this.user.sendInstanceHandshake(
+              this.user.instanceToClient(this.instanceId),
+              this.getConsentBits());
         }
       });
     }
@@ -335,9 +337,9 @@ module Core {
     }
 
     private saveToStorage = () => {
-      this.onceLoaded.then(() => {
+      return this.onceLoaded.then(() => {
         var state = this.currentState();
-        storage.save<RemoteInstanceState>(this.getStorePath(), state)
+        return storage.save<RemoteInstanceState>(this.getStorePath(), state)
             .then((old) => {
           console.log('Saved instance ' + this.instanceId + ' to storage.');
         });
@@ -350,7 +352,7 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     this.consent,
+        consent:     Consent.serialize(this.consent),
         description: this.description,
         keyHash:     this.keyHash
       });
@@ -376,7 +378,7 @@ module Core {
         instanceId:             this.instanceId,
         description:            this.description,
         keyHash:                this.keyHash,
-        consent:                this.consent,
+        consent:                Consent.serialize(this.consent),
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
