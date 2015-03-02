@@ -90,7 +90,7 @@ export class Rule {
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.js'); ],
+      src: [ path.join(this.config.devBuildPath, filepath + '.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: options
     };
@@ -103,7 +103,7 @@ export class Rule {
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js'); ],
+      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: options
     };
