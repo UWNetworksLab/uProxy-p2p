@@ -1,4 +1,8 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/core-signals/core-signals.html">
+<link rel="import" href="../lib/core-toolbar/core-toolbar.html">
+<link rel="import" href="../lib/core-icon-button/core-icon-button.html">
+<link rel="import" href="../lib/paper-tabs/paper-tabs.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -8,8 +12,9 @@
 <link rel="import" href="../lib/core-toolbar/core-toolbar.html">
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel="import" href="../lib/paper-tabs/paper-tabs.html">
+<link rel='import' href='browser-elements.html'>
 
-<polymer-element name='uproxy-root' attributes='model'>
+<polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}'>
 
   <template>
     <style>
@@ -49,6 +54,7 @@
       }
       #toolbar paper-tab::shadow #ink {
         color: #20F1DE;
+        opacity: .4;
       }
       #toolbar paper-tab {
         opacity: .6;
@@ -128,6 +134,8 @@
         border-bottom-color: firebrick;
       }
     </style>
+
+    <div id='browserElementContainer' hidden?='{{UI.View.BROWSER_ERROR !== ui.view}}'></div>
 
     <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
