@@ -21,27 +21,21 @@ module Consent {
   // User-level consent state w.r.t. a remote instance. This state is stored
   // in local storage for each instance ID we know of.
   export class State {
-    // Local user's relationship with remote instance. These are
-    // managed by getters and setters to maintain the invariant
-    // relationship with the corresponding ignoring* fields below.
-    private localGrantsAccessToRemote_ :boolean;
-    private localRequestsAccessFromRemote_ :boolean;
+    // Local user's relationship with remote instance.
+    localGrantsAccessToRemote :boolean;
+    localRequestsAccessFromRemote :boolean;
 
     // Cached values from remote user's instance sent over signalling channel.
     remoteGrantsAccessToLocal :boolean;
     remoteRequestsAccessFromLocal :boolean;
 
     // Local user's UI controls for remote requests and offers.
-    // Invariants: If localGrantsAccessToRemote is true,
-    // ignoringRemoteUserRequest must be false. If
-    // localRequestsAccessFromRemote is true, ignoringRemoteUserOffer
-    // must be false.
     ignoringRemoteUserRequest :boolean;
     ignoringRemoteUserOffer :boolean;
 
     constructor() {
-      this.localGrantsAccessToRemote_ = false;
-      this.localRequestsAccessFromRemote_ = false;
+      this.localGrantsAccessToRemote = false;
+      this.localRequestsAccessFromRemote = false;
       this.remoteGrantsAccessToLocal = false;
       this.remoteRequestsAccessFromLocal = false;
       this.ignoringRemoteUserRequest = false;
@@ -53,26 +47,6 @@ module Consent {
     // - set the local* val to false
     // - ignore attempt to set ignoring* val
     // - allow ignoring* to be true when local* is true
-
-    // setters to guarantee invariants
-    public get localGrantsAccessToRemote() :boolean {
-      return this.localGrantsAccessToRemote_;
-    }
-    public set localGrantsAccessToRemote(granted :boolean) {
-      this.localGrantsAccessToRemote_ = granted;
-      if (granted) {
-        this.ignoringRemoteUserRequest = false;
-      }
-    }
-    public get localRequestsAccessFromRemote() :boolean {
-      return this.localRequestsAccessFromRemote_;
-    }
-    public set localRequestsAccessFromRemote(requested :boolean) {
-      this.localRequestsAccessFromRemote_ = requested;
-      if (requested) {
-        this.ignoringRemoteUserOffer = false;
-      }
-    }
   }
 
   export function updateStateFromRemoteState(state :State, remoteState :WireState) {
@@ -85,6 +59,7 @@ module Consent {
     switch(action) {
       case UserAction.OFFER:
         state.localGrantsAccessToRemote = true;
+        state.ignoringRemoteUserRequest = false;
         break;
       case UserAction.CANCEL_OFFER:
         state.localGrantsAccessToRemote = false;
@@ -97,6 +72,7 @@ module Consent {
         break;
       case UserAction.REQUEST:
         state.localRequestsAccessFromRemote = true;
+        state.ignoringRemoteUserOffer = false;
         break;
       case UserAction.CANCEL_REQUEST:
         state.localRequestsAccessFromRemote = false;

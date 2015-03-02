@@ -27,6 +27,14 @@ Polymer({
   setShareMode: function() {
     ui.mode = UI.Mode.SHARE;
   },
+  closedWelcome: function() {
+    model.globalSettings.hasSeenWelcome = true;
+    core.updateGlobalSettings(model.globalSettings);
+  },
+  closedSharing: function() {
+    model.globalSettings.hasSeenSharingEnabledScreen = true;
+    core.updateGlobalSettings(model.globalSettings);
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
