@@ -5,3 +5,5 @@ import logging_provider = require('./loggingprovider');
 
 freedom().provideSynchronous(logging_provider.Log);
 freedom['loggingcontroller']().provideSynchronous(logging_provider.LoggingController);
+
+export = logging_provider;

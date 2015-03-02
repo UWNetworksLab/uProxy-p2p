@@ -5,25 +5,25 @@
 import logging = require('loggingprovider.types');
 
 // The freedom console provider.
-var freedomConsole :freedom_Console.Console = freedom['core.console']();
+export var freedomConsole :freedom_Console.Console = freedom['core.console']();
 
 // Besides output to console, log can also be buffered for later retrieval
 // through "getLogs". This is the maximum number of buffered log before it is
 // trimmed. Assuming average log length is 80, the whole buffer size is about
 // 80k. That should be easy to send through email, not much memory usage, and
 // still enough to capture most issues.
-var MAX_BUFFERED_LOG = 1000;
+export var MAX_BUFFERED_LOG = 1000;
 
 // Logs waiting for the logger to exist.
-var logBuffer: logging.Message[] = [];
+export var logBuffer: logging.Message[] = [];
 
 // TODO: we probably will change it to false as default.
-var enabled = true;
+export var enabled = true;
 
 // This represents a possible destination for log messages.  To make use of
 // this, the class should be inherited from and the log_ method reimplemented
 // to record the message in whichever way is best for that transport.
-class AbstractLoggingDestination {
+export class AbstractLoggingDestination {
   // These filters control what is displayed/saved for the different log types.
   // Entries for each type should be of the form:
   //   'tag': LEVEL
@@ -66,7 +66,7 @@ class AbstractLoggingDestination {
 }
 
 // A logging destination for printing the message directly to the console
-class ConsoleLoggingDestination extends AbstractLoggingDestination {
+export class ConsoleLoggingDestination extends AbstractLoggingDestination {
   constructor() {
     super({'*': 'D'});
   }
@@ -84,7 +84,7 @@ class ConsoleLoggingDestination extends AbstractLoggingDestination {
   }
 }
 
-class BufferedLoggingDestination extends AbstractLoggingDestination {
+export class BufferedLoggingDestination extends AbstractLoggingDestination {
   constructor() {
     super({'*': 'E'});
   }
@@ -97,7 +97,7 @@ class BufferedLoggingDestination extends AbstractLoggingDestination {
   }
 }
 
-var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {};
+export var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {};
 var logDestination = {
   CONSOLE: 'console',
   BUFFERED: 'buffered'
