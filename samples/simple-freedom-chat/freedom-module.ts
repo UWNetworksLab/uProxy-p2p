@@ -11,6 +11,8 @@ import Data = peerconnection.Data;
 
 import Message = require('./message.types');
 
+freedom['loggingcontroller']().setConsoleFilter(['*:D']);
+
 var log :Logging.Log = new Logging.Log('freedomchat');
 
 var parentFreedomModule = freedom();
@@ -49,6 +51,8 @@ function makePeerConnection(name:string) {
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
     log.info(name + ' connected');
+  }, (e:Error) => {
+    log.error('%1 failed to connect: %2', name, e.message);
   });
   pc.onceDisconnected.then(() => {
     log.info(name + ': onceDisconnected');

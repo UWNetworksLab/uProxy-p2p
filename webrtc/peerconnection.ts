@@ -209,6 +209,8 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     // Once connected, add to global listing. Helpful for debugging.
     this.onceConnected.then(() => {
       PeerConnectionClass.peerConnections[this.peerName_] = this;
+    }, (e:Error) => {
+      // No-op: this is just to avoid uncaught promise warnings.
     });
     // Once disconnected, remove from global listing.
     this.onceDisconnected.then(() => {
