@@ -73,7 +73,6 @@ FILES =
   # Files which are required at run-time everywhere.
   uproxy_common: [
     'uproxy.js'
-    'generic_core/consent.js'
     'generic_core/util.js'
   ]
 
@@ -513,7 +512,6 @@ module.exports = (grunt) ->
       generic_ui:
         src: FILES.jasmine_helpers
             .concat [
-              'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
             ]
