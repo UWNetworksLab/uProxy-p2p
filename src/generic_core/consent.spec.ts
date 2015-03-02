@@ -13,7 +13,7 @@
 describe('Consent', () => {
 
   it('all Enums are defined in js', () => {
-    expect(uProxy.UserAction).toBeDefined();
+    expect(uProxy.ConsentUserAction).toBeDefined();
   });
 
   it('all functions are defined', () => {

@@ -32,42 +32,42 @@ module Consent {
     // - allow ignoring* to be true when local* is true
   }
 
-  export function updateStateFromRemoteState(state :State, remoteState :uProxy.WireState) {
+  export function updateStateFromRemoteState(state :State, remoteState :uProxy.ConsentWireState) {
     state.remoteRequestsAccessFromLocal = remoteState.isRequesting;
     state.remoteGrantsAccessToLocal = remoteState.isOffering;
   }
 
   // Returns false on invalid actions.
-  export function handleUserAction(state :State, action :uProxy.UserAction) :boolean {
+  export function handleUserAction(state :State, action :uProxy.ConsentUserAction) :boolean {
     switch(action) {
-      case uProxy.UserAction.OFFER:
+      case uProxy.ConsentUserAction.OFFER:
         state.localGrantsAccessToRemote = true;
         state.ignoringRemoteUserRequest = false;
         break;
-      case uProxy.UserAction.CANCEL_OFFER:
+      case uProxy.ConsentUserAction.CANCEL_OFFER:
         state.localGrantsAccessToRemote = false;
         break;
-      case uProxy.UserAction.IGNORE_REQUEST:
+      case uProxy.ConsentUserAction.IGNORE_REQUEST:
         state.ignoringRemoteUserRequest = true;
         break;
-      case uProxy.UserAction.UNIGNORE_REQUEST:
+      case uProxy.ConsentUserAction.UNIGNORE_REQUEST:
         state.ignoringRemoteUserRequest = false;
         break;
-      case uProxy.UserAction.REQUEST:
+      case uProxy.ConsentUserAction.REQUEST:
         state.localRequestsAccessFromRemote = true;
         state.ignoringRemoteUserOffer = false;
         break;
-      case uProxy.UserAction.CANCEL_REQUEST:
+      case uProxy.ConsentUserAction.CANCEL_REQUEST:
         state.localRequestsAccessFromRemote = false;
         break;
-      case uProxy.UserAction.IGNORE_OFFER:
+      case uProxy.ConsentUserAction.IGNORE_OFFER:
         state.ignoringRemoteUserOffer = true;
         break;
-      case uProxy.UserAction.UNIGNORE_OFFER:
+      case uProxy.ConsentUserAction.UNIGNORE_OFFER:
         state.ignoringRemoteUserOffer = false;
         break;
       default:
-        console.warn('Invalid uProxy.UserAction! ' + action);
+        console.warn('Invalid uProxy.ConsentUserAction! ' + action);
         return false;
     }
     return true;

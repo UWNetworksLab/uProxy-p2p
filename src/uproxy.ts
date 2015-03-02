@@ -105,7 +105,7 @@ module uProxy {
 
   // The different states that uProxy consent can be in w.r.t. a peer. These
   // are the values that get sent or received on the wire.
-  export interface WireState {
+  export interface ConsentWireState {
     isRequesting :boolean;
     isOffering   :boolean;
   }
@@ -123,7 +123,7 @@ module uProxy {
   // Action taken by the user. These values are not on the wire. They are passed
   // in messages from the UI to the core. They correspond to the different
   // buttons that the user may be clicking on.
-  export enum UserAction {
+  export enum ConsentUserAction {
     // Actions made by user w.r.t. remote as a proxy
     REQUEST = 5000, CANCEL_REQUEST, IGNORE_OFFER, UNIGNORE_OFFER,
     // Actions made by user w.r.t. remote as a client
@@ -138,7 +138,7 @@ module uProxy {
    */
   export interface ConsentCommand {
     path       :InstancePath;
-    action     :uProxy.UserAction;
+    action     :uProxy.ConsentUserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a

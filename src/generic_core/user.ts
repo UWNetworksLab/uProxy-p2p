@@ -212,7 +212,7 @@ module Core {
       }
     }
 
-    private getConsentForClient_ = (clientId :string) :uProxy.WireState => {
+    private getConsentForClient_ = (clientId :string) :uProxy.ConsentWireState => {
       var instanceId = this.clientToInstanceMap_[clientId];
       if (typeof instanceId === 'undefined') {
         return null;
@@ -443,7 +443,7 @@ module Core {
       }
     }
 
-    public sendInstanceHandshake = (clientId :string, consent :uProxy.WireState) : Promise<void> => {
+    public sendInstanceHandshake = (clientId :string, consent :uProxy.ConsentWireState) : Promise<void> => {
       if (!this.network.myInstance) {
         // TODO: consider waiting until myInstance is constructing
         // instead of dropping this message.

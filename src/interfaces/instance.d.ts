@@ -15,7 +15,7 @@
 
 interface ConsentMessage {
   instanceId :string;
-  consent    :uProxy.WireState;
+  consent    :uProxy.ConsentWireState;
 }
 
 interface NetworkInfo {
@@ -63,5 +63,5 @@ interface InstanceHandshake {
 
 interface InstanceMessage {
   handshake :InstanceHandshake;
-  consent   :uProxy.WireState
+  consent   :uProxy.ConsentWireState
 }

@@ -230,14 +230,14 @@ module Core {
      * the consent buttons in the UI.) Sends updated consent bits to the
      * remote instance afterwards.
      */
-    public modifyConsent = (action :uProxy.UserAction) => {
+    public modifyConsent = (action :uProxy.ConsentUserAction) => {
       if (!Consent.handleUserAction(this.consent, action)) {
         console.warn('Invalid user action on consent!', this.consent, action);
         return;
       }
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
-      if (uProxy.UserAction.CANCEL_OFFER === action &&
+      if (uProxy.ConsentUserAction.CANCEL_OFFER === action &&
           this.localSharingWithRemote == SharingState.SHARING_ACCESS) {
         this.connection_.stopShare();
       }
@@ -267,13 +267,13 @@ module Core {
      * Receive consent bits from the remote, and update consent values
      * accordingly.
      */
-    public updateConsent = (bits :uProxy.WireState) => {
+    public updateConsent = (bits :uProxy.ConsentWireState) => {
       this.onceLoaded.then(() => {
         this.updateConsent_(bits);
       });
     }
 
-    public updateConsent_ = (bits: uProxy.WireState) => {
+    public updateConsent_ = (bits: uProxy.ConsentWireState) => {
 
       var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
       var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
@@ -329,7 +329,7 @@ module Core {
      * consent status, from the user's point of view. These bits will be sent on
      * the wire.
      */
-    public getConsentBits = () :uProxy.WireState => {
+    public getConsentBits = () :uProxy.ConsentWireState => {
       return {
         isRequesting: this.consent.localRequestsAccessFromRemote,
         isOffering: this.consent.localGrantsAccessToRemote
