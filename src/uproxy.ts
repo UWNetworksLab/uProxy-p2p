@@ -104,6 +104,16 @@ module uProxy {
     data :Object;
   }
 
+  // the state for consent between two instances
+  export interface ConsentState {
+    localGrantsAccessToRemote :boolean;
+    localRequestsAccessFromRemote :boolean;
+    remoteGrantsAccessToLocal :boolean;
+    remoteRequestsAccessFromLocal :boolean;
+    ignoringRemoteUserRequest :boolean;
+    ignoringRemoteUserOffer :boolean;
+  }
+
   /**
    * ConsentCommands are sent from the UI to the Core, to modify the consent of
    * a :RemoteInstance in the local client. (This is not sent on the wire to

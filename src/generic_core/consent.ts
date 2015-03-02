@@ -20,7 +20,7 @@ module Consent {
 
   // User-level consent state w.r.t. a remote instance. This state is stored
   // in local storage for each instance ID we know of.
-  export class State {
+  export class State implements uProxy.ConsentState {
     // Local user's relationship with remote instance.
     localGrantsAccessToRemote :boolean;
     localRequestsAccessFromRemote :boolean;
