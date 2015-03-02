@@ -86,28 +86,28 @@ export class Rule {
   }
 
   // Grunt browserify target creator
-  public browserify(filepath:string) : BrowserifyRule {
+  public browserify(filepath:string, options = {
+        browserifyOptions: { standalone: 'browserified_exports' }
+      }) : BrowserifyRule {
     var file = path.join(this.config.devBuildPath, filepath + '.js');
     return {
       src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
-      options: {
-        debug: false,
-      }
+      options: options
     };
   }
 
   // Grunt browserify target creator, instrumented for istanbul
-  public browserifySpec(filepath:string) : BrowserifyRule {
+  public browserifySpec(filepath:string, options = {
+        transform: [['browserify-istanbul',
+                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]],
+        browserifyOptions: { standalone: 'browserified_exports' }
+      }) : BrowserifyRule {
     var file = path.join(this.config.devBuildPath, filepath + '.spec.js');
     return {
       src: [ file ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
-      options: {
-        debug: false,
-        transform: [['browserify-istanbul',
-                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
-      }
+      options: options
     };
   }
 
