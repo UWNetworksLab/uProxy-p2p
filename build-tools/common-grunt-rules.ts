@@ -89,9 +89,8 @@ export class Rule {
   public browserify(filepath:string, options = {
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
-    var file = path.join(this.config.devBuildPath, filepath + '.js');
     return {
-      src: [ file ],
+      src: [ path.join(this.config.devBuildPath, filepath + '.js'); ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: options
     };
@@ -103,9 +102,8 @@ export class Rule {
                     { ignore: ['**/mocks/**', '**/*.spec.js'] }]],
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
-    var file = path.join(this.config.devBuildPath, filepath + '.spec.js');
     return {
-      src: [ file ],
+      src: [ path.join(this.config.devBuildPath, filepath + '.spec.js'); ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
       options: options
     };
