@@ -10,11 +10,18 @@ describe('UI.User', () => {
     spyOn(console, 'log');
   });
 
-  function getInstance(id :string, description :string) {
+  function getInstance(id :string, description :string) :UI.Instance {
     return {
       instanceId: id,
       description: description,
-      consent: new Consent.State(),
+      consent: {
+        localGrantsAccessToRemote: false,
+        localRequestsAccessFromRemote: false,
+        remoteGrantsAccessToLocal: false,
+        remoteRequestsAccessFromLocal: false,
+        ignoringRemoteUserRequest: false,
+        ignoringRemoteUserOffer: false
+      },
       localSharingWithRemote: SharingState.NONE,
       localGettingFromRemote: GettingState.NONE,
       isOnline: true,

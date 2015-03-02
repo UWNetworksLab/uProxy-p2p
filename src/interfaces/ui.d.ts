@@ -50,7 +50,7 @@ declare module UI {
   export interface Instance {
     instanceId             :string;
     description            :string;
-    consent                :Consent.State;
+    consent                :uProxy.ConsentState;
     localGettingFromRemote :GettingState;
     localSharingWithRemote :SharingState;
     isOnline               :boolean;

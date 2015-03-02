@@ -1,5 +1,4 @@
 /// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../../generic_core/consent.ts' />
 /// <reference path='ui.ts' />
 
 describe('UI.UserInterface', () => {
@@ -7,6 +6,26 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
+
+  function getInstance(instanceId :string, description :string) :UI.Instance {
+    return {
+      instanceId: instanceId,
+      description: description,
+      consent: {
+        localGrantsAccessToRemote: false,
+        localRequestsAccessFromRemote: false,
+        remoteGrantsAccessToLocal: false,
+        remoteRequestsAccessFromLocal: false,
+        ignoringRemoteUserRequest: false,
+        ignoringRemoteUserOffer: false
+      },
+      localSharingWithRemote: SharingState.NONE,
+      localGettingFromRemote: GettingState.NONE,
+      isOnline: true,
+      bytesSent: 0,
+      bytesReceived: 0
+    }
+  }
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -35,16 +54,9 @@ describe('UI.UserInterface', () => {
         name: userName,
         imageData: 'testImageData'
       },
-      instances: [{
-        instanceId: instanceId,
-        description: 'description1',
-        consent: new Consent.State(),
-        localSharingWithRemote: SharingState.NONE,
-        localGettingFromRemote: GettingState.NONE,
-        isOnline: true,
-        bytesSent: 0,
-        bytesReceived: 0
-      }]
+      instances: [
+        getInstance(instanceId, 'description1')
+      ]
     };
     ui.syncUser(payload);
   }
@@ -64,16 +76,9 @@ describe('UI.UserInterface', () => {
           name: 'Alice',
           imageData: 'testImageData'
         },
-        instances: [{
-          instanceId: 'instance1',
-          description: 'description1',
-          consent: new Consent.State(),
-          localSharingWithRemote: SharingState.NONE,
-          localGettingFromRemote: GettingState.NONE,
-          isOnline: true,
-          bytesSent: 0,
-          bytesReceived: 0
-        }]
+        instances: [
+          getInstance('instance1', 'description1')
+        ]
       };
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
@@ -94,30 +99,14 @@ describe('UI.UserInterface', () => {
                      userId: 'fakeUser',
                      online: true,
                      roster: {}});
-      var clientInstance :UI.Instance = {
-        instanceId: 'instance1',
-        description: 'description1',
-        consent: new Consent.State(),
-        localSharingWithRemote: SharingState.NONE,
-        localGettingFromRemote: GettingState.NONE,
-        isOnline: true,
-        bytesSent: 0,
-        bytesReceived: 0
-      };
+      var clientInstance = getInstance('instance1', 'description1');
       clientInstance.consent.localRequestsAccessFromRemote = true;
       clientInstance.consent.remoteGrantsAccessToLocal = true;
-      var serverInstance :UI.Instance = {
-        instanceId: 'instance2',
-        description: 'description2',
-        consent: new Consent.State(),
-        localSharingWithRemote: SharingState.NONE,
-        localGettingFromRemote: GettingState.NONE,
-        isOnline: true,
-        bytesSent: 0,
-        bytesReceived: 0
-      };
+
+      var serverInstance = getInstance('instance2', 'description2');
       serverInstance.consent.localGrantsAccessToRemote = true;
       serverInstance.consent.remoteRequestsAccessFromLocal = true;
+
       var payload :UI.UserMessage = {
         network: 'testNetwork',
         user: {
