@@ -58,6 +58,12 @@ uproxy-tip::shadow #arrow {
       top: 0;
       right: 0;
     }
+    #actions {
+      text-align: right;
+    }
+    #done {
+      background-color: #222;
+    }
     </style>
 
     <div id='container'>
@@ -69,7 +75,9 @@ uproxy-tip::shadow #arrow {
 
           <content></content>
 
-          <paper-button id='done' on-tap='{{ close }}'>Done</paper-button>
+          <div id='actions'>
+            <paper-button id='done' on-tap='{{ close }}'>Done</paper-button>
+          </div>
         </div>
       </div>
     </div>
