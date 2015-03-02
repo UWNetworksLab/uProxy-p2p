@@ -35,6 +35,9 @@ Polymer({
     model.globalSettings.hasSeenSharingEnabledScreen = true;
     core.updateGlobalSettings(model.globalSettings);
   },
+  dismissCopyPasteError: function() {
+    ui.copyPasteUrlError = false;
+  },
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
