@@ -7,7 +7,6 @@
  */
 
 // TODO: Move the notifications somewhere better.
-/// <reference path='generic_core/consent.ts' />
 /// <reference path='interfaces/ui.d.ts' />
 /// <reference path='interfaces/persistent.d.ts' />
 /// <reference path='networking-typings/communications.d.ts' />
@@ -104,6 +103,33 @@ module uProxy {
     data :Object;
   }
 
+  // The different states that uProxy consent can be in w.r.t. a peer. These
+  // are the values that get sent or received on the wire.
+  export interface WireState {
+    isRequesting :boolean;
+    isOffering   :boolean;
+  }
+
+  // the state for consent between two instances
+  export interface ConsentState {
+    localGrantsAccessToRemote :boolean;
+    localRequestsAccessFromRemote :boolean;
+    remoteGrantsAccessToLocal :boolean;
+    remoteRequestsAccessFromLocal :boolean;
+    ignoringRemoteUserRequest :boolean;
+    ignoringRemoteUserOffer :boolean;
+  }
+
+  // Action taken by the user. These values are not on the wire. They are passed
+  // in messages from the UI to the core. They correspond to the different
+  // buttons that the user may be clicking on.
+  export enum UserAction {
+    // Actions made by user w.r.t. remote as a proxy
+    REQUEST = 5000, CANCEL_REQUEST, IGNORE_OFFER, UNIGNORE_OFFER,
+    // Actions made by user w.r.t. remote as a client
+    OFFER = 5100, CANCEL_OFFER, IGNORE_REQUEST, UNIGNORE_REQUEST,
+  }
+
   /**
    * ConsentCommands are sent from the UI to the Core, to modify the consent of
    * a :RemoteInstance in the local client. (This is not sent on the wire to
@@ -112,7 +138,7 @@ module uProxy {
    */
   export interface ConsentCommand {
     path       :InstancePath;
-    action     :Consent.UserAction;
+    action     :uProxy.UserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a

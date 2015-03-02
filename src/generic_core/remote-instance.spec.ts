@@ -73,7 +73,7 @@ describe('Core.RemoteInstance', () => {
       };
       spyOn(instance0, 'sendConsent');
       instance0.update(handshake);
-      instance0.modifyConsent(Consent.UserAction.REQUEST);
+      instance0.modifyConsent(uProxy.UserAction.REQUEST);
 
       instance0.onceLoaded.then(() => {
         expect(saved).toBeDefined();
@@ -104,7 +104,7 @@ describe('Core.RemoteInstance', () => {
         description: 'new description'
       };
       var instance2 = new Core.RemoteInstance(user, 'instanceId', handshake);
-      var consent :Consent.WireState = {
+      var consent :uProxy.WireState = {
         isRequesting: true,
         isOffering: true,
       };
@@ -137,13 +137,13 @@ describe('Core.RemoteInstance', () => {
 
   it('modifying consent locally also sends consent bits to remote', () => {
     spyOn(instance, 'sendConsent');
-    instance.modifyConsent(Consent.UserAction.REQUEST);
+    instance.modifyConsent(uProxy.UserAction.REQUEST);
     expect(instance.sendConsent).toHaveBeenCalled();
   });
 
   it('does not send consent for invalid modification', () => {
     spyOn(instance, 'sendConsent');
-    instance.modifyConsent(<Consent.UserAction>-1);
+    instance.modifyConsent(<uProxy.UserAction>-1);
     expect(instance.sendConsent).not.toHaveBeenCalled();
   });
 
@@ -154,41 +154,41 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('can request access, and cancel that request', () => {
-      instance.modifyConsent(Consent.UserAction.REQUEST);
+      instance.modifyConsent(uProxy.UserAction.REQUEST);
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(true);
-      instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_REQUEST);
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(false);
     });
 
     it('accepts offer from remote', () => {
       instance.consent.remoteGrantsAccessToLocal = true;
-      instance.modifyConsent(Consent.UserAction.REQUEST);
+      instance.modifyConsent(uProxy.UserAction.REQUEST);
       expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(true);
     });
 
     it('ignores offer from remote', () => {
       instance.consent.remoteGrantsAccessToLocal = true;
-      instance.modifyConsent(Consent.UserAction.IGNORE_OFFER);
+      instance.modifyConsent(uProxy.UserAction.IGNORE_OFFER);
       expect(instance.consent.ignoringRemoteUserOffer).toEqual(true);
     });
 
     it('can re-accept even after ignoring', () => {
-      instance.modifyConsent(Consent.UserAction.REQUEST);
+      instance.modifyConsent(uProxy.UserAction.REQUEST);
       expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(true);
     });
 
     it('cancelling after granted still keeps remote offer', () => {
-      instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_REQUEST);
       expect(instance.consent.remoteGrantsAccessToLocal).toEqual(true);
     });
 
     it('ignore-offers bit reset after requesting', () => {
       instance.consent.localRequestsAccessFromRemote = false;
-      instance.modifyConsent(Consent.UserAction.IGNORE_OFFER);
+      instance.modifyConsent(uProxy.UserAction.IGNORE_OFFER);
       expect(instance.consent.ignoringRemoteUserOffer).toEqual(true);
-      instance.modifyConsent(Consent.UserAction.REQUEST);
+      instance.modifyConsent(uProxy.UserAction.REQUEST);
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(true);
       expect(instance.consent.ignoringRemoteUserOffer).toEqual(false);
     });
@@ -201,9 +201,9 @@ describe('Core.RemoteInstance', () => {
       var emptyConsent = new Consent.State();
 
       instance.consent = new Consent.State();
-      instance.modifyConsent(Consent.UserAction.CANCEL_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_REQUEST);
       expect(instance.consent).toEqual(emptyConsent);
-      instance.modifyConsent(Consent.UserAction.UNIGNORE_OFFER);
+      instance.modifyConsent(uProxy.UserAction.UNIGNORE_OFFER);
       expect(instance.consent).toEqual(emptyConsent);
       // proxy consent modifications did not touch client consent
       expect(instance.consent.localRequestsAccessFromRemote).toEqual(false);
@@ -217,42 +217,42 @@ describe('Core.RemoteInstance', () => {
     });
 
     it('can offer access, and cancel that offer', () => {
-      instance.modifyConsent(Consent.UserAction.OFFER);
+      instance.modifyConsent(uProxy.UserAction.OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(true);
-      instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(false);
     });
 
     it('allows request from remote', () => {
       instance.consent.localGrantsAccessToRemote = false;
-      instance.modifyConsent(Consent.UserAction.OFFER);
+      instance.modifyConsent(uProxy.UserAction.OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(true);
     });
 
     it('ignores request from remote', () => {
       instance.consent.remoteRequestsAccessFromLocal = true;
       instance.consent.ignoringRemoteUserRequest = false;
-      instance.modifyConsent(Consent.UserAction.IGNORE_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.IGNORE_REQUEST);
       expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
       expect(instance.consent.ignoringRemoteUserRequest).toEqual(true);
     });
 
     it('can re-accept even after ignoring', () => {
-      instance.modifyConsent(Consent.UserAction.OFFER);
+      instance.modifyConsent(uProxy.UserAction.OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(true);
     });
 
     it('cancelling after granted returns to remote offer', () => {
-      instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(false);
       expect(instance.consent.remoteRequestsAccessFromLocal).toEqual(true);
     });
 
     it('ignore-requests bit reset after granting', () => {
       instance.consent.localGrantsAccessToRemote = false;
-      instance.modifyConsent(Consent.UserAction.IGNORE_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.IGNORE_REQUEST);
       expect(instance.consent.ignoringRemoteUserRequest).toEqual(true);
-      instance.modifyConsent(Consent.UserAction.OFFER);
+      instance.modifyConsent(uProxy.UserAction.OFFER);
       expect(instance.consent.localGrantsAccessToRemote).toEqual(true);
       expect(instance.consent.ignoringRemoteUserRequest).toEqual(false);
     });
@@ -265,9 +265,9 @@ describe('Core.RemoteInstance', () => {
       var emptyConsent = new Consent.State();
 
       instance.consent = new Consent.State();
-      instance.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+      instance.modifyConsent(uProxy.UserAction.CANCEL_OFFER);
       expect(instance.consent).toEqual(emptyConsent);
-      instance.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST);
+      instance.modifyConsent(uProxy.UserAction.UNIGNORE_REQUEST);
       expect(instance.consent).toEqual(emptyConsent);
 
       // Client consent modifications did not touch proxy consent
@@ -397,14 +397,14 @@ describe('Core.RemoteInstance', () => {
     });
 
     // Alice wants to proxy through Bob.
-    alice.modifyConsent(Consent.UserAction.REQUEST);
+    alice.modifyConsent(uProxy.UserAction.REQUEST);
     Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
       expect(alice.consent.localRequestsAccessFromRemote).toEqual(true);
       expect(alice.consent.remoteGrantsAccessToLocal).toEqual(false);
       expect(bob.consent.remoteRequestsAccessFromLocal).toEqual(true);
       expect(bob.consent.localGrantsAccessToRemote).toEqual(false);
       // Bob accepts / offers
-      bob.modifyConsent(Consent.UserAction.OFFER);
+      bob.modifyConsent(uProxy.UserAction.OFFER);
       Promise.all([alice.onceLoaded, bob.onceLoaded]).then(() => {
         expect(alice.consent.remoteGrantsAccessToLocal).toEqual(true);
         expect(bob.consent.localGrantsAccessToRemote).toEqual(true);

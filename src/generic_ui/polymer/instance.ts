@@ -33,8 +33,8 @@ Polymer({
     core.stop();
   },
 
-  // |action| is the string end for a Consent.UserAction
-  modifyConsent: function(action :Consent.UserAction) {
+  // |action| is the string end for a uProxy.UserAction
+  modifyConsent: function(action :uProxy.UserAction) {
     var command = <uProxy.ConsentCommand>{
       path: this.path,
       action: action
@@ -44,21 +44,21 @@ Polymer({
   },
 
   // Proxy UserActions.
-  request: function() { this.modifyConsent(Consent.UserAction.REQUEST) },
+  request: function() { this.modifyConsent(uProxy.UserAction.REQUEST) },
   cancelRequest: function() {
-    this.modifyConsent(Consent.UserAction.CANCEL_REQUEST)
+    this.modifyConsent(uProxy.UserAction.CANCEL_REQUEST)
   },
-  ignoreOffer: function() { this.modifyConsent(Consent.UserAction.IGNORE_OFFER) },
-  unignoreOffer: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_OFFER) },
+  ignoreOffer: function() { this.modifyConsent(uProxy.UserAction.IGNORE_OFFER) },
+  unignoreOffer: function() { this.modifyConsent(uProxy.UserAction.UNIGNORE_OFFER) },
 
   // Client UserActions
-  offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
+  offer: function() { this.modifyConsent(uProxy.UserAction.OFFER) },
   cancelOffer: function() {
     this.ui.stopGivingInUi();
-    this.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+    this.modifyConsent(uProxy.UserAction.CANCEL_OFFER);
   },
-  ignoreRequest: function() { this.modifyConsent(Consent.UserAction.IGNORE_REQUEST) },
-  unignoreRequest: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST) },
+  ignoreRequest: function() { this.modifyConsent(uProxy.UserAction.IGNORE_REQUEST) },
+  unignoreRequest: function() { this.modifyConsent(uProxy.UserAction.UNIGNORE_REQUEST) },
 
   getConsentState: function() : string {
     return this.instance.consent;

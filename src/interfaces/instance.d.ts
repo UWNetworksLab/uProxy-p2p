@@ -10,14 +10,12 @@
  * about their current status and consent level.
  */
 
-/// <reference path='../generic_core/consent.ts' />
-
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
 interface ConsentMessage {
   instanceId :string;
-  consent    :Consent.WireState;
+  consent    :uProxy.WireState;
 }
 
 interface NetworkInfo {
@@ -48,7 +46,7 @@ interface LocalPeerId {
 interface Instance {
   instanceId  :string;
   keyHash     :string;
-  consent     ?:Consent.State;
+  consent     ?:uProxy.ConsentState;
   status      ?:string; // Status on social network e.g. online or offline.
   notify      ?:boolean;   // TODO: replace with better notications
 }
@@ -65,5 +63,5 @@ interface InstanceHandshake {
 
 interface InstanceMessage {
   handshake :InstanceHandshake;
-  consent :Consent.WireState
+  consent   :uProxy.WireState
 }
