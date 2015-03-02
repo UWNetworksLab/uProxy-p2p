@@ -132,7 +132,13 @@ function initUI() : UI.UserInterface {
       // to allow a url to be pasted twice if there has been at least a second
       // delay in order to allow users to try connecting again.
       if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        ui.handleUrlData(url);
+        // we want to delay actually calling the handleUrlData function until
+        // this function returns so that its behaviour of bringing the uProxy
+        // window to the front does not get undone by this function redirecting
+        // the tab and setting the focus back to the main browser window
+        setTimeout(() => {
+          ui.handleUrlData(url);
+        }, 0);
       } else {
         console.warn('Received duplicate url events', url);
       }
