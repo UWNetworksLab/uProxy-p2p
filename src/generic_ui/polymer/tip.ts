@@ -1,7 +1,6 @@
 Polymer({
   close: function() {
     this.fire('closed');
-    this.remove();
   },
   doReposition: function() {
     // TODO The below code is in place to deal with the fact that nearly all
