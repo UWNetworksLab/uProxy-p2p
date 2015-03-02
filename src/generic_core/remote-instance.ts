@@ -352,7 +352,7 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     Consent.serialize(this.consent),
+        consent:     this.consent,
         description: this.description,
         keyHash:     this.keyHash
       });
@@ -378,7 +378,7 @@ module Core {
         instanceId:             this.instanceId,
         description:            this.description,
         keyHash:                this.keyHash,
-        consent:                Consent.serialize(this.consent),
+        consent:                this.consent,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),

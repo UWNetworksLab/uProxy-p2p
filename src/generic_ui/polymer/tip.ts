@@ -33,8 +33,10 @@ Polymer({
     this.style.top = (prev.offsetHeight + prev.offsetTop) + 'px';
 
     /* width should be half of the parent width, between min and max */
-    if (parentWidth < 400) {
-      this.style.width = '200px';
+    if (parentWidth < 340) {
+      this.style.width = (parentWidth - 40) + 'px';
+    } else if (parentWidth < 600) {
+      this.style.width = '300px';
     } else if (parentWidth < 800) {
       this.style.width = (parentWidth / 2) + 'px';
     } else {
