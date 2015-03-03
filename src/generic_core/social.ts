@@ -311,7 +311,7 @@ module Social {
       if (userId == this.myInstance.userId) {
         // TODO: we may want to verify that our status is ONLINE before
         // sending out any instance messages.
-        log.debug('Received own XMPP profile', profile);
+        log.info('Received own XMPP profile', profile);
 
         // Update UI with own information.
         var userProfileMessage :UI.UserProfileMessage = {
@@ -401,7 +401,7 @@ module Social {
         user.handleClient(client);
       }
 
-      log.debug('received message', {
+      log.info('received message', {
         userFrom: user.userId,
         clientFrom: client.clientId,
         instanceFrom: user.clientToInstance(client.clientId),
@@ -498,7 +498,7 @@ module Social {
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);
 
-      log.debug('sending message', {
+      log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,
         // Instance may be undefined if we are making an instance request,
