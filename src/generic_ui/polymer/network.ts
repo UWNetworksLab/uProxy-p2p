@@ -13,7 +13,7 @@ Polymer({
       this.fire('update-view', {view: UI.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e) => {
-      console.warn('Did not log in ');
+      console.warn('Did not log in ', e);
     });
   },
   ready: function() {},
