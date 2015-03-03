@@ -106,6 +106,9 @@ module.exports = (grunt) ->
     pkglib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
     pkgnet: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
     pkgfreedom: grunt.file.readJSON('node_modules/freedom/package.json')
+    pkgfreedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
+    pkgfreedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
+    pkgfreedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
 
     # Decrease log output for noisy things like symlink.
     verbosity:
@@ -413,6 +416,9 @@ module.exports = (grunt) ->
               'uproxy-lib': '<%= pkglib.version %>'
               'uproxy-networking': '<%= pkgnet.version %>'
               freedom: '<%= pkgfreedom.version %>'
+              'freedom-for-chrome': '<%= pkgfreedomchrome.version %>'
+              'freedom-for-firefox': '<%= pkgfreedomfirefox.version %>'
+              'freedom-social-xmpp': '<%= pkgfreedomxmpp.version %>'
           }]
 
     #-------------------------------------------------------------------------
