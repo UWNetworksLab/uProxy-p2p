@@ -10,11 +10,11 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
-    .input-label {
+    .inputLabel {
       font-weight: bold;
       margin: 0;
     }
-    #title-container {
+    #titleContainer {
       height: 70px;
       width: 100%;
       background: #009688;
@@ -22,7 +22,7 @@
       display: table;
       text-align: left;
     }
-    #feedback-notice {
+    #feedbackNotice {
       color: grey;
     }
     #form {
@@ -30,16 +30,16 @@
       text-align: left;
       color: #009688;
     }
-    #log-checkbox-label {
+    #logCheckboxLabel {
       display: table-cell;
       vertical-align: middle;
       padding: 10px;
     }
-    #log-checkbox-container {
+    #logCheckboxContainer {
       display: table;
       height: 25px;
     }
-    #log-checkbox {
+    #logCheckbox {
       display: table-cell;
       vertical-align: middle;
     }
@@ -47,6 +47,13 @@
       color: white;
       cursor: pointer;
       margin: 25px;
+      opacity: 0.6;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    core-icon[icon="arrow-back"]:hover{
+      opacity: 1;
     }
     .title {
       display: table-cell;
@@ -77,7 +84,7 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
-    #send-feedback {
+    #sendFeedback {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -87,30 +94,31 @@
       border-top: 1px solid rgb(221, 221, 221);
       color: #009688;
       font-weight: bold;
+      cursor: pointer;
     }
     </style>
-    <div id='title-container'>
+    <div id='titleContainer'>
       <div class='title'>
         <core-icon icon="arrow-back" on-tap='{{ backToSettings }}'></core-icon>
         Submit feedback
       </div>
     </div>
     <div id='form'>
-      <p class='input-label'>Email (optional)</p>
+      <p class='inputLabel'>Email (optional)</p>
       <paper-input-decorator label="Email address">
         <input is="core-input" value='{{ email }}' on-blur='{{update}}'>
       </paper-input-decorator>
-      <p class='input-label'>Enter your feedback below</p>
+      <p class='inputLabel'>Enter your feedback below</p>
       <paper-input-decorator label="Write your feedback">
         <input is="core-input" value='{{ feedback }}' on-blur='{{update}}'>
       </paper-input-decorator>
-      <div id='log-checkbox-container'>
-        <paper-checkbox id='log-checkbox'></paper-checkbox>
-        <div id='log-checkbox-label'>Include logs</div>
+      <div id='logCheckboxContainer'>
+        <paper-checkbox id='logCheckbox'></paper-checkbox>
+        <div id='logCheckboxLabel'>Include logs</div>
       </div>
-      <p id='feedback-notice'>Your feedback and email address will be sent to uProxy.org</p>
+      <p id='feedbackNotice'>Your feedback and email address will be sent to uProxy.org</p>
     </div>
-    <div id='send-feedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK<div>
+    <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK<div>
 
   </template>
   <script src='feedback.js'></script>
