@@ -141,14 +141,7 @@ describe('Social.FreedomNetwork', () => {
       // Pretend the social API's login failed.
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           Promise.reject(new Error('mock failure')));
-      spyOn(network, 'error');
-      network.login(false).then(
-        () => { return Promise.reject('error'); },  // login should not fulfill.
-        () => {
-          expect(network['error']).toHaveBeenCalledWith('Could not login.');
-          done()
-        });
-      // We need to tick a clock in order promises to be resolved.
+      network.login(false).catch(done);
       jasmine.clock().tick(1);
     });
 

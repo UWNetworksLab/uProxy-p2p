@@ -90,7 +90,6 @@ describe('Core', () => {
 
   it('login fails for invalid network', (done) => {
     core.login('nothing').catch(() => {
-      expect(console.warn).toHaveBeenCalled();
       done();
     });
   });
