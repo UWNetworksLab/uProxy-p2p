@@ -113,6 +113,9 @@
         Device description
         <uproxy-description></uproxy-description>
       </div>
+      <uproxy-link class='actionLink' on-tap='{{ openFeedbackForm }}' role='button'>
+        Submit Feedback
+      </uproxy-link>
       <uproxy-link class='actionLink' on-tap='{{ toggleAdvancedSettings }}' role='button'>
         Advanced Settings
         <core-icon icon="expand-more" hidden?='{{displayAdvancedSettings}}'></core-icon>
