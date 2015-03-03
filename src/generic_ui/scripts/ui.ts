@@ -116,7 +116,8 @@ module UI {
     COPYPASTE,
     ROSTER,
     SETTINGS,
-    BROWSER_ERROR
+    BROWSER_ERROR,
+    FEEDBACK
   }
 
   /**
