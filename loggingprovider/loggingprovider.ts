@@ -75,7 +75,7 @@ export class ConsoleLoggingDestination extends AbstractLoggingDestination {
     if (level === 'D') {
       freedomConsole.debug(tag, formatMessage(message));
     } else if (level === 'I') {
-      freedomConsole.log(tag, formatMessage(message));
+      freedomConsole.info(tag, formatMessage(message));
     } else if (level === 'W') {
       freedomConsole.warn(tag, formatMessage(message));
     } else {
