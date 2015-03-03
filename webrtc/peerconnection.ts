@@ -207,14 +207,15 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
       });
 
     // Once connected, add to global listing. Helpful for debugging.
+    // Once disconnected, remove from global listing.
     this.onceConnected.then(() => {
       PeerConnectionClass.peerConnections[this.peerName_] = this;
+      this.onceDisconnected.then(() => {
+        delete PeerConnectionClass.peerConnections[this.peerName_];
+      });
     }, (e:Error) => {
-      // No-op: this is just to avoid uncaught promise warnings.
-    });
-    // Once disconnected, remove from global listing.
-    this.onceDisconnected.then(() => {
-      delete PeerConnectionClass.peerConnections[this.peerName_];
+      log.debug('%1: failed to connect, not available for ' +
+          ' debugging in peerConnections', this.peerName_);
     });
 
     // New data channels from the peer.
