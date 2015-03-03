@@ -17,6 +17,8 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Firewall {
+  var log :Logging.Log = new Logging.Log('firewall');
+
   export enum Severity {
     // Incorrect input.  No claims on intent.
     MalformedInput,
@@ -33,8 +35,10 @@ module Firewall {
 
   export class DefaultResponsePolicy implements ResponsePolicy {
     public onValidationFailure(s :string, level :Severity) {
-      console.warn("DROPPING MESSAGE ON VALIDATION FAILURE.  Severity: " +
-                   level + ", text: " + s);
+      log.warn('Message validation failure', {
+        severity: level,
+        text: s
+      });
     }
   }
 

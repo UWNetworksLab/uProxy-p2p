@@ -6,7 +6,8 @@
     "paper-elements": "Polymer/paper-elements#~0.5.1",
     "core-input": "Polymer/core-input#^0.5.0",
     "core-style": "Polymer/core-style#^0.5.0",
-    "core-icons": "Polymer/core-icons#~0.5.1"
+    "core-icons": "Polymer/core-icons#~0.5.1",
+    "core-signals": "Polymer/core-signals#~0.5.5"
   },
   "devDependencies": {}
 }

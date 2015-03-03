@@ -36,8 +36,7 @@ describe('core-connector', () => {
     'syncUser',
     'showNotification']);
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
-    ['updatePopupUrl',
-     'bringUproxyToFront']);
+    ['bringUproxyToFront']);
 
   var chromeCoreConnector :ChromeCoreConnector;
   chromeCoreConnector = new ChromeCoreConnector();

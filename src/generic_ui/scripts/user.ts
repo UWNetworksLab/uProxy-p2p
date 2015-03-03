@@ -4,7 +4,6 @@
  * This is the UI-specific representation of a User.
  */
 /// <reference path='../../freedom/typings/social.d.ts' />
-/// <reference path='../../generic_core/consent.ts' />
 /// <reference path='../../interfaces/user.d.ts' />
 
 module UI {

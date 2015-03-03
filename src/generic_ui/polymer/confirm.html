@@ -4,7 +4,8 @@
   <template>
     <style>
       #errorBox {
-        max-width: 540px;
+        text-align: center;
+        max-width: 650px;
         min-width: 200px;
         max-height:  250px;
         min-height:  150px;
@@ -13,28 +14,53 @@
         margin-right: auto;
         padding: 30px;
         background-color: #FFFFFF;
-        text-align: center;
         font-family: Roboto, sans-serif;
-        font-size: 12px;
+        font-size: 13px;
       }
-      .detail {
-        font-family: Roboto, sans-serif;
+      #errorText {
+        text-align: left;
+        line-height: 1.5em;
+        margin: 2em;
+      }
+      paper-button {
+        width: 100px;
+        background: #009688;  /* dark green */
+        color: white;
+      }
+      paper-button:disabled {
+        background: #f1f1f1;
+        color: rgb(112, 112, 112);
+      }
+      img, h1, h2 {
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      #proxyReverted {
         color: #dd1144;
-        font-size: 10px;
       }
     </style>
 
     <div id='errorBox'>
-      <img src='../icons/38_online.gif'><img><br><br>
-      Your uProxy connection was disrupted and you are no longer accessing the internet through your friend. You can try to browse the internet with your local connection, but proceed with caution if you are worried about your connection's security. Before clicking Confirm, close any tabs you do not want to access with your local connection.
-      <br><br>
+      <img src='../icons/128_error.png'>
+      <div id='errorText'>
+        <h1>You are no longer browsing with uProxy</h1>
+        <h2>Try reconnecting with your friend to resolve.</h2>
+        <p>
+          If you wish to continue browsing with your local connection, proceed
+          with caution.  You will no longer be under the security and protection
+          of your friend. Before clicking Confirm, close any tabs you do not
+          want to access with your local connection.
+        </p>
+      </div> <!-- end of errorText -->
 
-      <button id='confirmButton' on-click='{{ undoProxyConfig }}'>Confirm</button>
-      <br><br>
+      <paper-button raised id='confirmButton' on-tap='{{ undoProxyConfig }}'>
+        Confirm
+      </paper-button>
 
-      <div id='proxyReverted' class='detail' hidden>Proxy settings reverted. You are now using your local internet connection.</div>
-
-    </div>
+      <h2 id='proxyReverted' hidden>
+        Proxy settings reverted. You are now using your local Internet connection.
+      </h2>
+    </div>  <!-- end of errorBox -->
   </template>
   <script src='confirm.js'></script>
 </polymer-element>

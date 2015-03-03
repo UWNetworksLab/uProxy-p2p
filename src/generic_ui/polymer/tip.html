@@ -1,0 +1,88 @@
+<link rel='import' href='../lib/paper-icon-button/paper-icon-button.html'>
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+
+<!--
+uproxy-tip will appear immediately below the previous element in the DOM.
+
+It will have both an X button in the top right as well as a done button in the
+bottom.  If either of these buttons are clicked, the element will be removed
+from the DOM and the "closed" event will be fired.  Listen to it by adding
+an "on-closed" attribute to the uproxy-tip element.
+
+To change the color of the box:
+uproxy-tip::shadow #box {
+  background: red;
+}
+uproxy-tip::shadow #arrow {
+  border-bottom-color: red;
+}
+-->
+
+<polymer-element name='uproxy-tip'>
+  <template>
+    <style>
+    :host {
+      position: fixed;
+
+      min-width: 300px;
+      max-width: 400px;
+      min-height: 100px;
+
+      margin-top: 15px;
+
+      color: white;
+      opacity: .8;
+    }
+    #container {
+      position: relative;
+    }
+    #arrow {
+      position: absolute;
+      top: -20px;
+
+      width: 0;
+      height: 0;
+
+      border: 10px solid transparent;
+      border-bottom-color: black;
+    }
+    #box {
+      position: relative;
+      background-color: black;
+    }
+    #content {
+      padding: 10px;
+    }
+    #close {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    #actions {
+      text-align: right;
+    }
+    #done {
+      background-color: #222;
+    }
+    </style>
+
+    <div id='container'>
+      <div id='arrow'></div>
+
+      <div id='box'>
+        <div id='content'>
+          <paper-icon-button id='close' icon='clear' role='button' on-tap='{{ close }}'></paper-icon-button>
+
+          <content></content>
+
+          <div id='actions'>
+            <paper-button id='done' on-tap='{{ close }}'>Done</paper-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </template>
+
+  <script src='tip.js'></script>
+</polymer-element>

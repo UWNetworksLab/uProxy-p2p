@@ -18,9 +18,9 @@
   ],
   "devDependencies": {
     "es6-promise": "^0.1.1",
-    "freedom-social-xmpp": "~0.3.6",
     "freedom-for-chrome": "~0.4.11",
     "freedom-for-firefox": "~0.6.7",
+    "freedom-social-xmpp": "~0.3.6",
     "fs-extra": "^0.12.0",
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
@@ -29,12 +29,15 @@
     "grunt-contrib-connect": "~0.7.1",
     "grunt-contrib-copy": "~0.4.1",
     "grunt-contrib-jasmine": "~0.6.1",
-    "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-contrib-symlink": "~0.3.0",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-yuidoc": "~0.4.0",
+    "grunt-gitinfo": "^0.1.7",
+    "grunt-remove": "^0.1.0",
     "grunt-shell": "~0.3.1",
+    "grunt-string-replace": "^1.0.0",
+    "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-ts": "^1.11",
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
@@ -43,7 +46,7 @@
     "uproxy-lib": "^19.0.0",
     "uproxy-networking": "^5.2.0"
   },
-  "peerDependencies" : {
+  "peerDependencies": {
     "freedom": "~0.6.18"
   },
   "private": true

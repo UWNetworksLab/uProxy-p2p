@@ -29,6 +29,8 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
+  var log :Logging.Log = new Logging.Log('user');
+
   /**
    * Core.User
    *
@@ -75,7 +77,7 @@ module Core {
      */
     constructor(public network :Social.Network,
                 public userId  :string) {
-      console.log('New user: ' + userId);
+      log.debug('New user', userId);
       this.name = 'pending';
       this.profile = {
         userId: this.userId,
@@ -108,33 +110,9 @@ module Core {
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
-      this.log('Updating...');
+      log.debug('Updating user', this.userId);
       this.saveToStorage();
       this.notifyUI();
-    }
-
-    /**
-     * Send a message to an Instance belonging to this user.
-     * Warns if instanceId does not exist on this user.
-     * If the instanceId does exist, but is currently offline (i.e. has no
-     * client associated), then it delays the send until the next time that
-     * instance becomes online using promises.
-     *
-     * Returns a promise that the message was sent to the instanceId, fulfilled
-     * with the clientId of the recipient.
-     */
-    public send = (instanceId :string, payload :uProxy.Message)
-        : Promise<string> => {
-      if (!(instanceId in this.instances_)) {
-        console.warn('Cannot send message to non-existing instance ' +
-                     instanceId);
-        return Promise.reject(new Error(
-            'Cannot send to invalid instance ' + instanceId));
-      }
-      var clientId = this.instanceToClientMap_[instanceId];
-      return this.network.send(clientId, payload).then(() => {
-        return clientId;
-      });
     }
 
     /**
@@ -146,22 +124,23 @@ module Core {
      */
     public handleClient = (client :UProxyClient.State) : void => {
       if (client.userId != this.userId) {
-        console.error(this.userId +
-            'received client with unexpected userId: ' + client.userId);
+        log.error('received client with unexpected userId', {
+          clientUserId: this.userId,
+          userId: client.userId
+        });
         return;
-      }
-      else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      } else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
         // Ignore non-uproxy contacts
         return;
       }
 
-      this.log('received client' + JSON.stringify(client));
+      log.debug('received client', client);
       if (client.clientId in this.clientIdToStatusMap &&
           this.clientIdToStatusMap[client.clientId] == client.status) {
         // Client is already in mapping and its status has not changed, skip.
         // This is done to skip onClientState events we get for each message
         // when only the timestamp has been updated.
-        console.log('Client already in memory and is unchanged');
+        log.debug('Client already in memory and is unchanged', client.clientId);
         return;
       }
 
@@ -171,7 +150,7 @@ module Core {
           if (!(client.clientId in this.clientIdToStatusMap) ||
               this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
-            this.network.sendInstanceHandshake(client.clientId,
+            this.sendInstanceHandshake(client.clientId,
                 this.getConsentForClient_(client.clientId));
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
@@ -183,8 +162,8 @@ module Core {
           this.removeClient_(client.clientId);
           break;
         default:
-          console.warn('Received client ' + client.clientId +
-              ' with invalid status: (' + client.status + ')');
+          log.warn('Received client %1 with invalid status %2',
+                   client.clientId, client.status);
           break;
       }
       this.notifyUI();
@@ -198,9 +177,8 @@ module Core {
      */
     public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
-        var errorStr = this.userId +
-            ' received message for non-existing client: ' + clientId;
-        console.error(errorStr);
+        log.error('%1 received message for non-existing client %2',
+                  this.userId, clientId);
         return;
       }
       var msgType :uProxy.MessageType = msg.type;
@@ -218,30 +196,32 @@ module Core {
             // recieved and instance message, and the peer tries to start
             // proxying.  We should fix this somehow.
             // issues: https://github.com/uProxy/uproxy/pull/732
-            console.error('failed to get instance for clientId ' + clientId);
+            log.error('failed to get instance', clientId);
             return;
           }
           instance.handleSignal(msg.type, msg.data);
           return;
 
         case uProxy.MessageType.INSTANCE_REQUEST:
-          console.log('got instance request from ' + clientId);
-          this.network.sendInstanceHandshake(
+          log.debug('received instance request', clientId);
+          this.sendInstanceHandshake(
               clientId, this.getConsentForClient_(clientId));
           return;
 
         default:
-          var errorStr = this.userId + ' received invalid message.' + msg;
-          console.error(errorStr);
+          log.error('received invalid message', {
+            userId: this.userId,
+            msg: msg
+          });
       }
     }
 
-    private getConsentForClient_ = (clientId :string) : Consent.WireState => {
+    private getConsentForClient_ = (clientId :string) :uProxy.ConsentWireState => {
       var instanceId = this.clientToInstanceMap_[clientId];
       if (typeof instanceId === 'undefined') {
         return null;
       }
-      return (this.instances_[instanceId]).getConsentBits();;
+      return (this.instances_[instanceId]).getConsentBits();
     }
 
     public getInstance = (instanceId:string) : Core.RemoteInstance => {
@@ -272,11 +252,11 @@ module Core {
       // https://github.com/uProxy/uproxy/issues/734
       var instance : InstanceHandshake = data.handshake;
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
-        console.error('Received an Instance Handshake from a non-uProxy client! '
-                     + clientId);
+        log.error('Received an instance handshake from a non-uProxy client',
+                  clientId);
         return;
       }
-      this.log('received instance' + JSON.stringify(data));
+      log.info('received instance', data);
       var instanceId = instance.instanceId;
       var oldClientId = this.instanceToClientMap_[instance.instanceId];
       if (oldClientId) {
@@ -314,7 +294,7 @@ module Core {
       return this.clientToInstanceMap_[clientId];
     }
 
-    public instanceToClient= (instanceId :string) : string => {
+    public instanceToClient = (instanceId :string) : string => {
       return this.instanceToClientMap_[instanceId];
     }
 
@@ -337,7 +317,7 @@ module Core {
      */
     public notifyUI = () : void => {
       if ('pending' == this.name) {
-        this.log('Not showing UI without profile.');
+        log.warn('Not showing UI without profile');
         return;
       }
 
@@ -375,16 +355,6 @@ module Core {
         },
         instances: instanceStatesForUi
       })
-      this.log('Sent myself to UI. \n' +
-          JSON.stringify(this.clientToInstanceMap_) + ' with ' +
-          JSON.stringify(instanceStatesForUi));
-    }
-
-    /**
-     * Helper which logs messages clearly belonging to this Core.User.
-     */
-    private log = (msg:string) : void => {
-      console.log('[User ' + this.name + '] ' + msg);
     }
 
     public monitor = () : void => {
@@ -393,19 +363,19 @@ module Core {
             (this.clientIdToStatusMap[clientId] == UProxyClient.Status.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
         if (isMissingInstance) {
-          console.warn('monitor found no instance for clientId ' + clientId);
+          log.warn('monitor could not find instance for clientId', clientId);
           this.requestInstance_(clientId);
         }
       }
     }
 
     private requestInstance_ = (clientId) : void => {
-      this.log('requesting instance');
-      var instanceRequestMsg :uProxy.Message = {
+      log.debug('requesting instance', clientId);
+      var instanceRequest :uProxy.Message = {
         type: uProxy.MessageType.INSTANCE_REQUEST,
         data: {}
       };
-      this.network.send(clientId, instanceRequestMsg);
+      this.network.send(this, clientId, instanceRequest);
     }
 
     public isInstanceOnline = (instanceId :string) : boolean => {
@@ -427,7 +397,9 @@ module Core {
     public saveToStorage = () : void => {
       this.onceLoaded.then(() => {
         var state = this.currentState();
-        storage.save<UserState>(this.getStorePath(), state).then((old) => {});
+        storage.save<UserState>(this.getStorePath(), state).catch(() => {
+          log.error('Could not save user to storage');
+        });
       });
     }
 
@@ -467,10 +439,29 @@ module Core {
       }
     }
 
+    public sendInstanceHandshake = (clientId :string, consent :uProxy.ConsentWireState) : Promise<void> => {
+      if (!this.network.myInstance) {
+        // TODO: consider waiting until myInstance is constructing
+        // instead of dropping this message.
+        // Currently we will keep receiving INSTANCE_REQUEST until instance
+        // handshake is sent to the peer.
+        log.error('Attempting to send instance handshake before ready');
+        return;
+      }
+      var instanceHandshake = {
+        type: uProxy.MessageType.INSTANCE,
+        data: {
+         handshake: this.network.myInstance.getInstanceHandshake(),
+         consent: consent
+        }
+      };
+      return this.network.send(this, clientId, instanceHandshake);
+    }
+
     public resendInstanceHandshakes = () : void => {
       for (var instanceId in this.instanceToClientMap_) {
         var clientId = this.instanceToClientMap_[instanceId];
-        this.network.sendInstanceHandshake(
+        this.sendInstanceHandshake(
             clientId, this.getConsentForClient_(clientId));
       }
     }

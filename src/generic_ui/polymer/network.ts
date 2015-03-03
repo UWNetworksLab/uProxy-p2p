@@ -9,10 +9,11 @@ Polymer({
   connect: function() {
     core.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
-      ui.view = UI.View.ROSTER;
+      // Fire an update-view event, which root.ts listens for.
+      this.fire('update-view', {view: UI.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e) => {
-      console.warn('Did not log in ');
+      console.warn('Did not log in ', e);
     });
   },
   ready: function() {},
