@@ -1,6 +1,8 @@
 /// <reference path='util.ts' />
 
 module Consent {
+  var log :Logging.Log = new Logging.Log('consent');
+
   // User-level consent state w.r.t. a remote instance. This state is stored
   // in local storage for each instance ID we know of.
   export class State implements uProxy.ConsentState {
@@ -67,7 +69,7 @@ module Consent {
         state.ignoringRemoteUserOffer = false;
         break;
       default:
-        console.warn('Invalid uProxy.ConsentUserAction! ' + action);
+        log.warn('Invalid uProxy.ConsentUserAction', action);
         return false;
     }
     return true;

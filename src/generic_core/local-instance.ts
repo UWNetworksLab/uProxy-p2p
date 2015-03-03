@@ -10,6 +10,7 @@
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 
 module Core {
+  var log :Logging.Log = new Logging.Log('local-instance');
 
   // Small convenience wrapper for random Uint8.
   //
@@ -70,7 +71,7 @@ module Core {
      */
     public getInstanceHandshake = () : InstanceHandshake => {
       if (!this.keyHash) {
-        console.warn('Local keyhash not ready!');
+        log.warn('Local keyhash not ready');
       }
       return {
         instanceId:  this.instanceId,
