@@ -25,6 +25,7 @@
 freedom['loggingprovider']().setConsoleFilter(['*:I']);
 
 var log :Logging.Log = new Logging.Log('core');
+log.info('Loading core', 'VERSION');
 
 var storage = new Core.Storage();
 

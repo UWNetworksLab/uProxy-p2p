@@ -103,6 +103,9 @@ FILES =
 module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
+    pkglib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
+    pkgnet: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
+    pkgfreedom: grunt.file.readJSON('node_modules/freedom/package.json')
 
     # Decrease log output for noisy things like symlink.
     verbosity:
@@ -395,6 +398,23 @@ module.exports = (grunt) ->
 
     }  # copy
 
+    'string-replace':
+      version:
+        files: [{
+          src: 'build/compile-src/generic_core/core.js'
+          dest: 'build/compile-src/generic_core/core.js'
+        }]
+        options:
+          replacements: [{
+            pattern: /VERSION/g
+            replacement: JSON.stringify
+              version: '<%= pkg.version %>'
+              gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
+              'uproxy-lib': '<%= pkglib.version %>'
+              'uproxy-networking': '<%= pkgnet.version %>'
+              freedom: '<%= pkgfreedom.version %>'
+          }]
+
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
     ts: {
@@ -582,7 +602,9 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
+  grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-shell'
+  grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
@@ -593,6 +615,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'base', [
     'verbosity:diminished'
+    'gitinfo'
     'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
@@ -607,6 +630,7 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_core', [
     'base'
     'ts:generic_core'
+    'string-replace:version'
     # 'copy:core_libs'
   ]
 
