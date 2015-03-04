@@ -11,6 +11,7 @@ interface BrowserAPI {
   openFaq(pageAnchor :string) : void;
   bringUproxyToFront() : void;
   browserSpecificElement : string;
+  showNotification(notificationTest :string) :void;
 }
 
 declare var Notification : {
