@@ -38,7 +38,7 @@ module UI {
         console.error('Unexpected userId: ' + profile.userId);
       }
       this.name = profile.name;
-      this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
+      this.imageData = profile.imageData || Constants.DEFAULT_USER_IMG;
     }
 
     // Returns two strings, where each matches an array name in model.contacts.

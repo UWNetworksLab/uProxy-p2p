@@ -94,12 +94,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         console.log('Connecting listener for', JSON.stringify(payload));
         this.send(payload);
       }
-      var ready :uProxy.Payload = {
-        cmd: 'emit',
-        type: uProxy.Command.GET_INITIAL_STATE,
-        promiseId: 0
-      }
-      this.send(ready);
+      core.getInitialState();
     });
   }
 
@@ -139,11 +134,10 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show it's start page.
-        //ui.view = UI.View.SPLASH;
         chrome.browserAction.setIcon({
           path: {
-            "19": "icons/19_" + UI.LOGGED_OUT_ICON,
-            "38": "icons/38_" + UI.LOGGED_OUT_ICON
+            "19": "icons/19_" + Constants.LOGGED_OUT_ICON,
+            "38": "icons/38_" + Constants.LOGGED_OUT_ICON
           }
         });
         this.fulfillConnect_();
@@ -169,7 +163,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, we should show the browser specific page
     // that shows the "app missing" message.
-    ui.view = UI.View.BROWSER_ERROR;
+    //ui.view = UI.View.BROWSER_ERROR;
 
 
     if (this.status.connected) {

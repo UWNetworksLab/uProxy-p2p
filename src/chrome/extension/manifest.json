@@ -12,6 +12,7 @@
     "persistent": true,
     "scripts": [
       "scripts/uproxy.js",
+      "scripts/constants.js",
       "scripts/chrome_browser_api.js",
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",

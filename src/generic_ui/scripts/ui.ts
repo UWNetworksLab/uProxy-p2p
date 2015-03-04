@@ -4,6 +4,7 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
+/// <reference path='constants.ts' />
 /// <reference path='user.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
@@ -53,16 +54,6 @@ module UI {
   // 2) These are only the suffixes of the icon names. Because we have
   // different sizes of icons, the actual filenames have the dimension
   // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
-
-  // Icons for browser bar, also used for notifications.
-  export var DEFAULT_ICON :string = 'online.gif';
-  export var LOGGED_OUT_ICON :string = 'offline.gif';
-  export var SHARING_ICON :string = 'sharing.gif';
-  export var GETTING_ICON :string = 'getting.gif';
-  export var ERROR_ICON :string = 'error.gif';
-  export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
-
-  export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
   export interface Contacts {
     getAccessContacts : {
@@ -136,7 +127,6 @@ module UI {
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
   export class UserInterface implements uProxy.UIAPI {
-    public DEBUG = false;  // Set to true to show the model in the UI.
 
     public view :View;  // Appearance.
 
@@ -433,7 +423,7 @@ module UI {
     public showNotification = (notificationText :string) => {
       var notification =
           new Notification('uProxy', { body: notificationText,
-                           icon: 'icons/38_' + UI.DEFAULT_ICON});
+                           icon: 'icons/38_' + Constants.DEFAULT_ICON});
       setTimeout(function() {
         notification.close();
       }, 5000);
@@ -453,11 +443,11 @@ module UI {
       // icon that means "configured to proxy, but not proxying"
       // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon(UI.SHARING_ICON);
+        this.browserApi.setIcon(Constants.SHARING_ICON);
       } else if (askUser) {
-        this.browserApi.setIcon(UI.ERROR_ICON);
+        this.browserApi.setIcon(Constants.ERROR_ICON);
       } else if (model.onlineNetwork) {
-        this.browserApi.setIcon(UI.DEFAULT_ICON);
+        this.browserApi.setIcon(Constants.DEFAULT_ICON);
       } else {
         this.setOfflineIcon();
       }
@@ -473,9 +463,9 @@ module UI {
 
     public startGettingInUi = () => {
       if (this.isGivingAccess()) {
-        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
+        this.browserApi.setIcon(Constants.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon(UI.GETTING_ICON);
+        this.browserApi.setIcon(Constants.GETTING_ICON);
       }
     }
 
@@ -500,9 +490,9 @@ module UI {
       */
     public startGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon(UI.GETTING_SHARING_ICON);
+        this.browserApi.setIcon(Constants.GETTING_SHARING_ICON);
       } else {
-        this.browserApi.setIcon(UI.SHARING_ICON);
+        this.browserApi.setIcon(Constants.SHARING_ICON);
       }
     }
 
@@ -511,16 +501,16 @@ module UI {
       */
     public stopGivingInUi = () => {
       if (this.isGettingAccess()) {
-        this.browserApi.setIcon(UI.GETTING_ICON);
+        this.browserApi.setIcon(Constants.GETTING_ICON);
       } else if (model.onlineNetwork) {
-        this.browserApi.setIcon(UI.DEFAULT_ICON);
+        this.browserApi.setIcon(Constants.DEFAULT_ICON);
       } else {
         this.setOfflineIcon();
       }
     }
 
     public setOfflineIcon = () => {
-      this.browserApi.setIcon(UI.LOGGED_OUT_ICON);
+      this.browserApi.setIcon(Constants.LOGGED_OUT_ICON);
     }
 
     public isGettingAccess = () => {
@@ -543,7 +533,7 @@ module UI {
       // previously offline, show the default (logo) icon.
       if (network.online && network.name != 'Manual'
           && model.onlineNetwork == null) {
-        this.browserApi.setIcon(UI.DEFAULT_ICON);
+        this.browserApi.setIcon(Constants.DEFAULT_ICON);
       }
 
       if (model.onlineNetwork &&

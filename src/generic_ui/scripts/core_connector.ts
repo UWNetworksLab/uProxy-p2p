@@ -58,6 +58,10 @@ class CoreConnector implements uProxy.CoreAPI {
     this.browserConnector_.send(payload);
   }
 
+  public getInitialState = () => {
+    this.sendCommand(uProxy.Command.GET_INITIAL_STATE);
+  }
+
   /**
    * Send a Command from the UI to the Core, as a result of some user
    * interaction.  Command returns a promise that fulfills/rejects upon
