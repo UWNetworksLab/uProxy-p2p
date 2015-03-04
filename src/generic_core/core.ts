@@ -14,7 +14,6 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../freedom/typings/freedom.d.ts' />
@@ -106,6 +105,8 @@ class uProxyCore implements uProxy.CoreAPI {
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false};
   public loadGlobalSettings :Promise<void> = null;
+
+  private uiState_ :uProxy.UiState;
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -420,6 +421,10 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
+
+  public updateView = (uiState :uProxy.UiState) : void => {
+    this.uiState_ = uiState;
+  }
 }  // class uProxyCore
 
 
@@ -477,6 +482,8 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
+
+core.onCommand(uProxy.Command.SEND_UI_STATE, core.updateView);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -7,6 +7,13 @@
 /// <reference path='../../interfaces/user.d.ts' />
 
 module UI {
+  /**
+   * Data about a currently proxying server or client.
+   */
+  export interface CurrentProxy {
+    instance :UI.Instance;
+    user :UI.User;
+  }
 
   /**
    * UI-specific user.

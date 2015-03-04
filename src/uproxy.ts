@@ -40,7 +40,8 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_GLOBAL_SETTINGS
+    UPDATE_GLOBAL_SETTINGS,
+    SEND_UI_STATE
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -251,6 +252,30 @@ module uProxy {
     promiseId :number;  // Values <= 1 means success/error should be returned.
   }
 
+  /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    COPYPASTE,
+    ROSTER,
+    SETTINGS,
+    BROWSER_ERROR
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
+  }
+
+  export interface UiState {
+    view : View;
+    mode : Mode;
+  }
+
 }  // module uProxy
 
 module Social {
@@ -317,3 +342,4 @@ module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
 }
+

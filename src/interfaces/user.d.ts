@@ -3,8 +3,6 @@
  * interface to be extended as classes specific to particular components.
  */
 
-/// <reference path='../uproxy.ts' />
-
 interface BaseUser {
   userId :string;
   name :string;

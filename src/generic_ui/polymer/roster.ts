@@ -8,7 +8,7 @@ Polymer({
     console.log('initializing roster');
 
     this.ui = ui;
-    this.UI = UI;
+    this.uProxy = uProxy;
 
     // Initialize roster here.
     // this.contacts contains either all the contact groups for the get tab
