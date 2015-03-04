@@ -10,7 +10,7 @@ Polymer({
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
+    if (detail.view == uProxy.View.ROSTER && ui.uiState.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
     }
     ui.view = detail.view;
