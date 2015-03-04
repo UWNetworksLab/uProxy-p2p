@@ -12,7 +12,6 @@
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
 /// <reference path='social.ts' />
-/// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
@@ -24,8 +23,10 @@
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 freedom['loggingprovider']().setConsoleFilter(['*:I']);
 
+declare var UPROXY_VERSION;
+
 var log :Logging.Log = new Logging.Log('core');
-log.info('Loading core', 'VERSION');
+log.info('Loading core', UPROXY_VERSION);
 
 var storage = new Core.Storage();
 

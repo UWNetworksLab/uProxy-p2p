@@ -18,7 +18,8 @@
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",
       "scripts/chrome_core_connector.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/version.js"
     ]
   },
   "browser_action": {
