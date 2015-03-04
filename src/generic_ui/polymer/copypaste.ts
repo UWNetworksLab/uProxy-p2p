@@ -40,5 +40,9 @@ Polymer({
   stopSharing: function() {
     core.stopCopyPasteShare();
   },
+  select: function(e, d, sender) {
+    sender.focus();
+    sender.select();
+  },
   ready: function() {}
 });
