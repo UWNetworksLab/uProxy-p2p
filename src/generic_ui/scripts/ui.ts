@@ -120,7 +120,7 @@ module UI {
   export class UserInterface implements uProxy.UIAPI {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    private uiState_ :uProxy.UiState = {
+    public uiState :uProxy.UiState = {
       mode: uProxy.Mode.GET,
       view: uProxy.View.SPLASH
     }
@@ -646,21 +646,14 @@ module UI {
       this.browserApi.bringUproxyToFront();
     }
 
-    public get view() : uProxy.View {
-      return this.uiState_.view;
-    }
-
     public set view(view :uProxy.View) {
-      this.uiState_.view = view;
-      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState_);
+      this.uiState.view = view;
+      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState);
     }
 
-    public get mode() : uProxy.Mode {
-      return this.uiState_.mode;
-    }
     public set mode(mode :uProxy.Mode) {
-      this.uiState_.mode = mode;
-      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState_);
+      this.uiState.mode = mode;
+      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState);
     }
 
   }  // class UserInterface

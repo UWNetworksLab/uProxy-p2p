@@ -62,9 +62,9 @@
         <img class='avatar' src='{{ contact.imageData }}' />
         <span class='name'>{{ contact.name }}</span>
         <img src='../icons/getting_animated.gif' class='accessIcon'
-            hidden?='{{ ui.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>
+            hidden?='{{ ui.uiState.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>
         <img src='../icons/sharing_animated.gif' class='accessIcon'
-            hidden?='{{ ui.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
+            hidden?='{{ ui.uiState.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
       </div>
 
       <div class='instances' hidden?='{{!contact.expanded}}'>
