@@ -396,7 +396,7 @@ module.exports = (grunt) ->
           # code.
           expand: true, cwd: 'build/compile-src/firefox/data'
           src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
-          dest: firefoxDevPath
+          dest: firefoxDevPath + 'data'
         } ]
 
     }  # copy
@@ -589,7 +589,7 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/browser-elements.html'
+          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/root.html'
       firefoxCsp:
         options:
           csp: true
