@@ -79,7 +79,7 @@ var Helper = {
 };  // end of Helper
 
 describe('uproxy core', function() {
-  //jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
   var uProxyFreedom = 'scripts/build/compile-src/integration/scripts/freedom-module.json';
   var alice;
   var bob;
@@ -203,7 +203,34 @@ describe('uproxy core', function() {
     alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
   });
 
+  function startProxying(getter, giver) {
+    getter.emit('' + uProxy.Command.START_PROXYING,
+               {data: bobPath, promiseId: ++promiseId});
+    var getterStarted = new Promise(function(fulfill, reject) {
+      getter.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
+        expect(data.promiseId).toEqual(promiseId);
+        testConnection(data.argsForCallback).then((proxying) => {
+          expect(proxying).toEqual(true);
+          fulfill();
+        });
+      });
+      getter.once('' + uProxy.Update.COMMAND_REJECTED, (data) => {
+        console.error('command rejected ');
+        reject();
+      });
+    });
+
+    var giverStarted = new Promise(function(fulfill, reject) {
+      giver.once('' + uProxy.Update.START_GIVING_TO_FRIEND, (data) => {
+        expect(data).toEqual(ALICE.INSTANCE_ID);
+        fulfill();
+      });
+    });
+    return Promise.all([getterStarted, giverStarted]);
+  }
+
   it('start proxying', (done) => {
+    /*
     alice.emit('' + uProxy.Command.START_PROXYING,
                {data: bobPath, promiseId: ++promiseId});
     var aliceStarted = new Promise(function(fulfill, reject) {
@@ -222,8 +249,12 @@ describe('uproxy core', function() {
         fulfill();
       });
     });
+    */
 
-    Promise.all([aliceStarted, bobStarted]).then(done);
+    startProxying(alice, bob).then(done).catch(() => {
+      console.error('rejected first time try it again');
+      startProxying(alice, bob).then(done);
+    });
   });
 
   it('stop proxying', (done) => {
