@@ -45,6 +45,7 @@
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",
-    "core.udpsocket"
+    "core.udpsocket",
+    "core.xhr"
   ]
 }

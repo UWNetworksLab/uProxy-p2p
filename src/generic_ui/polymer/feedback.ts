@@ -2,13 +2,23 @@
 Polymer({
   model: model,
   ui: ui,
+  email: '',
+  feedback: '',
+  logs: '',
   backToSettings: function() {
     ui.view = UI.View.SETTINGS;
   },
   sendFeedback: function() {
-    console.log(this.email);
-    console.log(this.feedback);
-    console.log(this.$.logCheckbox.checked);
+    if (this.$.logCheckbox.checked) {
+      this.logs = 'placeholder';
+    } else {
+      this.logs = 'none'
+    }
+    core.sendFeedback({
+      email: this.email,
+      feedback: this.feedback,
+      logs: this.logs
+    });
   },
   ready: function() {}
 });

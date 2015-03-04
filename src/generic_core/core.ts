@@ -411,6 +411,19 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
+
+  public sendFeedback = (feedback :UserFeedback) : void => {
+    console.log('received feedback: ' + JSON.stringify(feedback));
+    var xhr = freedom["core.xhr"]();
+    var postRequest =
+      'https://1-0-3-post-feedback-dot-uproxysite.appspot.com/submit-feedback?'
+    postRequest += 'email=' + feedback.email + '&';
+    postRequest += 'feedback=' + feedback.feedback + '&';
+    postRequest += 'logs=' + feedback.logs;
+    console.log(postRequest);
+    xhr.open('POST', postRequest, true);
+    xhr.send();
+  }
 }  // class uProxyCore
 
 
@@ -468,6 +481,7 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
+core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
