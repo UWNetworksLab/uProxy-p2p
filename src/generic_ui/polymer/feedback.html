@@ -2,6 +2,7 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 <link rel='import' href='../lib/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
+<link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -22,8 +23,9 @@
       display: table;
       text-align: left;
     }
-    #feedbackNotice {
+    .moreInfo {
       color: grey;
+      font-size: ;
     }
     #form {
       margin: 30px;
@@ -54,6 +56,9 @@
     }
     core-icon[icon="arrow-back"]:hover{
       opacity: 1;
+    }
+    core-icon[icon="help"]{
+      height: 15px;
     }
     .title {
       display: table-cell;
@@ -116,7 +121,12 @@
         <paper-checkbox id='logCheckbox'></paper-checkbox>
         <div id='logCheckboxLabel'>Include logs</div>
       </div>
-      <p id='feedbackNotice'>Your feedback and email address will be sent to uProxy.org.</p>
+      <p class='moreInfo'>
+        Your feedback and email address will be sent to uProxy.org. Your logs and email may be personally identifiable information.
+        <uproxy-faq-link>
+          <core-icon icon="help" anchor='feedbackLogs'></core-icon>
+        </uproxy-faq-link>
+      </p>
     </div>
     <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK<div>
 
