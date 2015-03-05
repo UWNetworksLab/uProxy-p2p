@@ -228,8 +228,6 @@ module uProxy {
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
-
-    showNotification(notificationText :string) : void;
   }
 
   interface ICoreOptions {

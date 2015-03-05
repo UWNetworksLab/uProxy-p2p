@@ -50,4 +50,8 @@ class FirefoxBrowserApi implements BrowserAPI {
   public bringUproxyToFront = () => {
     port.emit('showPanel');
   }
+
+  public showNotification = (notificationText :string) => {
+    // TODO implement!
+  }
 }
