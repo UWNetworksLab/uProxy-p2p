@@ -131,7 +131,6 @@ module uProxy {
     logs      :string;
   }
 
-
   // --- Core <--> UI Interfaces ---
 
   /**

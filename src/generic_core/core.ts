@@ -413,14 +413,12 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public sendFeedback = (feedback :UserFeedback) : void => {
-    console.log('received feedback: ' + JSON.stringify(feedback));
     var xhr = freedom["core.xhr"]();
     var postRequest =
       'https://1-0-3-post-feedback-dot-uproxysite.appspot.com/submit-feedback?'
-    postRequest += 'email=' + feedback.email + '&';
-    postRequest += 'feedback=' + feedback.feedback + '&';
-    postRequest += 'logs=' + feedback.logs;
-    console.log(postRequest);
+    postRequest += 'email=' + encodeURIComponent(feedback.email) + '&';
+    postRequest += 'feedback=' + encodeURIComponent(feedback.feedback) + '&';
+    postRequest += 'logs=' + encodeURIComponent(feedback.logs);
     xhr.open('POST', postRequest, true);
     xhr.send();
   }
