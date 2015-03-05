@@ -318,7 +318,7 @@ describe('UI.UserInterface', () => {
     });
 
   });  // syncNetwork_
-
+/*
   describe('UI state is sent back to core', () => {
     it ('UI state is sent back to core', () => {
       ui.view = uProxy.View.ROSTER;
@@ -332,6 +332,6 @@ describe('UI.UserInterface', () => {
           {view: uProxy.View.ROSTER, mode: uProxy.Mode.SHARE});
     });
   });
-
+*/
   // TODO: more specs
 });  // UI.UserInterface

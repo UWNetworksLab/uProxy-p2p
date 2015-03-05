@@ -38,7 +38,8 @@ var model :UI.Model = {
     'description': '',
     'stunServers': [],
     'hasSeenSharingEnabledScreen': false,
-    'hasSeenWelcome': false
+    'hasSeenWelcome': false,
+    'mode' : uProxy.Mode.GET
   }
 };
 
@@ -120,10 +121,7 @@ module UI {
   export class UserInterface implements uProxy.UIAPI {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    public uiState :uProxy.UiState = {
-      mode: uProxy.Mode.GET,
-      view: uProxy.View.SPLASH
-    }
+    public view :uProxy.View;  // Appearance.
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
@@ -162,6 +160,7 @@ module UI {
         public core   :CoreConnector,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
+      this.view = uProxy.View.SPLASH;  // Begin at the splash intro.
       this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
@@ -645,17 +644,6 @@ module UI {
     public bringUproxyToFront = () => {
       this.browserApi.bringUproxyToFront();
     }
-
-    public set view(view :uProxy.View) {
-      this.uiState.view = view;
-      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState);
-    }
-
-    public set mode(mode :uProxy.Mode) {
-      this.uiState.mode = mode;
-      this.core_.sendCommand(uProxy.Command.SEND_UI_STATE, this.uiState);
-    }
-
   }  // class UserInterface
 
 }  // module UI

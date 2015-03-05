@@ -10,7 +10,7 @@ Polymer({
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == uProxy.View.ROSTER && ui.uiState.view == uProxy.View.SPLASH) {
+    if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
     }
     ui.view = detail.view;
@@ -23,10 +23,12 @@ Polymer({
     ui.view = uProxy.View.ROSTER;
   },
   setGetMode: function() {
-    ui.mode = uProxy.Mode.GET;
+    model.globalSettings.mode = uProxy.Mode.GET;
+    core.updateGlobalSettings(model.globalSettings);
   },
   setShareMode: function() {
-    ui.mode = uProxy.Mode.SHARE;
+    model.globalSettings.mode = uProxy.Mode.SHARE;
+    core.updateGlobalSettings(model.globalSettings);
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;

@@ -103,10 +103,9 @@ class uProxyCore implements uProxy.CoreAPI {
       = {description: '',
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
-         hasSeenWelcome: false};
+         hasSeenWelcome: false,
+         mode: uProxy.Mode.GET};
   public loadGlobalSettings :Promise<void> = null;
-
-  private uiState_ :uProxy.UiState;
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -421,10 +420,6 @@ class uProxyCore implements uProxy.CoreAPI {
     }
     return user.getInstance(path.instanceId);
   }
-
-  public updateView = (uiState :uProxy.UiState) : void => {
-    this.uiState_ = uiState;
-  }
 }  // class uProxyCore
 
 
@@ -482,8 +477,6 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
-
-core.onCommand(uProxy.Command.SEND_UI_STATE, core.updateView);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

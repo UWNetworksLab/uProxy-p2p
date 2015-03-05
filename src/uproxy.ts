@@ -40,8 +40,7 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_GLOBAL_SETTINGS,
-    SEND_UI_STATE
+    UPDATE_GLOBAL_SETTINGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -270,12 +269,6 @@ module uProxy {
     GET = 0,
     SHARE
   }
-
-  export interface UiState {
-    view : View;
-    mode : Mode;
-  }
-
 }  // module uProxy
 
 module Social {
@@ -342,4 +335,3 @@ module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
 }
-

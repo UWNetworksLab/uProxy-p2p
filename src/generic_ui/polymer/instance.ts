@@ -15,6 +15,7 @@ Polymer({
     // hidden? watch for the get/give toggle to actually update.
     this.ui = ui;
     this.uProxy = uProxy;
+    this.globalSettings = model.globalSettings
   },
 
   start: function() {
