@@ -130,6 +130,9 @@ class uProxyCore implements uProxy.CoreAPI {
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
           }
+          if (typeof this.globalSettings.mode == 'undefined') {
+            this.globalSettings.mode = uProxy.Mode.GET;
+          }
         }).catch((e) => {
           log.info('No global settings loaded', e.message);
         });
