@@ -415,7 +415,7 @@ class uProxyCore implements uProxy.CoreAPI {
   public sendFeedback = (feedback :UserFeedback) : void => {
     var xhr = freedom["core.xhr"]();
     var postRequest =
-      'https://1-0-3-post-feedback-dot-uproxysite.appspot.com/submit-feedback?'
+      'https://www.uproxy.org/submit-feedback?'
     postRequest += 'email=' + encodeURIComponent(feedback.email) + '&';
     postRequest += 'feedback=' + encodeURIComponent(feedback.feedback) + '&';
     postRequest += 'logs=' + encodeURIComponent(feedback.logs);
