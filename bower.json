@@ -9,5 +9,7 @@
     "core-icons": "Polymer/core-icons#~0.5.1",
     "core-signals": "Polymer/core-signals#~0.5.5"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "paper-dialog": "Polymer/paper-dialog#~0.5.5"
+  }
 }
