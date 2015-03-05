@@ -335,3 +335,4 @@ module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
 }
+
