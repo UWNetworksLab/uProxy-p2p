@@ -172,8 +172,7 @@ export class Queue<Feed,Result>
   private stats_  = new HandlerQueueStats;
 
   // CONSIDER: allow queue to be size-bounded? Reject on too much stuff?
-  constructor() {
-  }
+  constructor() {}
 
   public getLength = () : number => {
     return this.queue_.length;
