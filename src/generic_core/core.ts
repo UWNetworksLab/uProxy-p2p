@@ -300,6 +300,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.mode = newSettings.mode;
   }
 
   /**
