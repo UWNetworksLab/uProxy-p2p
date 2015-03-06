@@ -412,7 +412,7 @@ class uProxyCore implements uProxy.CoreAPI {
     return user.getInstance(path.instanceId);
   }
 
-  public sendFeedback = (feedback :UserFeedback) : void => {
+  public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
     var xhr = freedom["core.xhr"]();
     var postRequest =
       'https://www.uproxy.org/submit-feedback?'
