@@ -32,6 +32,34 @@ export interface QueueFeeder<Feed,Result> {
   handle(x:Feed) : Promise<Result>;
 }
 
+// The |HandlerQueueStats| class contains increment-only counters
+// characterizing the state and history of a |QueueHandler|.
+export class HandlerQueueStats {
+  // Ever-queued-events
+  queued_events : number;
+  // Ever-handled-evetns
+  handled_events : number;
+  // Events queued after a handler was ever assigned (e.g., a handler
+  // was unset and an event was queued in the mean time.
+  following_queued_events : number;
+  // Number of events dropped in a queue clear.
+  dropped_events : number;
+
+  // Number of times a handler was set on this queue.
+  num_handlers_set : number;
+  // Number of times a handler was un-set on this queue.
+  num_handlers_cleared : number;
+
+  constructor() {
+    this.queued_events = 0;
+    this.handled_events = 0;
+    this.following_queued_events = 0;
+    this.dropped_events = 0;
+    this.num_handlers_set = 0;
+    this.num_handlers_cleared = 0;
+  }
+}
+
 // The |QueueHandler| is the abstraction for the stream of functions that
 // handles events.
 export interface QueueHandler<Feed,Result> {
@@ -62,6 +90,8 @@ export interface QueueHandler<Feed,Result> {
   // are queued. If |setSyncNextHandler| or |setAsyncNextHandler| has been
   // called, then its return promise is rejected.
   stopHandling() : void;
+  // Get statistics on queue handler.
+  getStats() : HandlerQueueStats;
 }
 
 // Internal helper class. Holds an object called |thing| of type |T| and
@@ -138,8 +168,12 @@ export class Queue<Feed,Result>
   // it is no longer attached.
   private rejectFn_ : (e:Error) => void = null;
 
+  // Handler statistics.
+  private stats_  = new HandlerQueueStats;
+
   // CONSIDER: allow queue to be size-bounded? Reject on too much stuff?
-  constructor() {}
+  constructor() {
+  }
 
   public getLength = () : number => {
     return this.queue_.length;
@@ -149,13 +183,22 @@ export class Queue<Feed,Result>
     return this.handler_ !== null;
   }
 
+  public getStats = () : HandlerQueueStats => {
+    return this.stats_;
+  }
+
   // handle or queue the given thing.
   public handle = (x:Feed) : Promise<Result> => {
     if(this.handler_) {
+      this.stats_.handled_events++;
       return this.handler_(x);
+    } else if (this.stats_.num_handlers_set > 0) {
+      this.stats_.following_queued_events++;
     }
+
     var pendingThing = new PendingPromiseHandler(x);
     this.queue_.push(pendingThing);
+    this.stats_.queued_events++;
     return pendingThing.promise;
   }
 
@@ -164,6 +207,7 @@ export class Queue<Feed,Result>
   // should pause proccessing of the queue.
   private processQueue_ = () : void => {
     while(this.handler_ && this.queue_.length > 0) {
+      this.stats_.handled_events++;
       this.queue_.shift().handleWith(this.handler_);
     }
   }
@@ -172,6 +216,7 @@ export class Queue<Feed,Result>
   public clear = () : void => {
     while(this.queue_.length > 0) {
       var pendingThing = this.queue_.shift();
+      this.stats_.dropped_events++;
       pendingThing.reject(new Error('Cleared by Handler'));
     }
   }
@@ -186,6 +231,7 @@ export class Queue<Feed,Result>
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
       this.rejectFn_ = null;
     }
+    this.stats_.num_handlers_set++;
     this.handler_ = handler;
     this.processQueue_();
   }
@@ -203,6 +249,7 @@ export class Queue<Feed,Result>
       this.rejectFn_ = null;
     }
     this.handler_ = null;
+    this.stats_.num_handlers_cleared++;
   }
 
   // A convenience function that takes a T => Promise<Result> function and sets
@@ -214,12 +261,14 @@ export class Queue<Feed,Result>
   // something to handle.
   public setNextHandler = (handler:(x:Feed) => Promise<Result>)
       : Promise<Result> => {
+    this.stats_.num_handlers_set++;
     return new Promise((F,R) => {
       this.setHandler((x:Feed) : Promise<Result> => {
         // Note: we don't call stopHandling() within this handler because that
         // would reject the promise we're about to fulfill.
         this.handler_ = null;
         this.rejectFn_ = null;
+        this.stats_.num_handlers_cleared++;
         var resultPromise = handler(x);
         resultPromise.then(F);
         return resultPromise;
