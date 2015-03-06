@@ -318,20 +318,5 @@ describe('UI.UserInterface', () => {
     });
 
   });  // syncNetwork_
-/*
-  describe('UI state is sent back to core', () => {
-    it ('UI state is sent back to core', () => {
-      ui.view = uProxy.View.ROSTER;
-      expect(mockCore.sendCommand).toHaveBeenCalledWith(
-          uProxy.Command.SEND_UI_STATE,
-          {view: uProxy.View.ROSTER, mode: uProxy.Mode.GET});
-
-      ui.mode = uProxy.Mode.SHARE;
-      expect(mockCore.sendCommand).toHaveBeenCalledWith(
-          uProxy.Command.SEND_UI_STATE,
-          {view: uProxy.View.ROSTER, mode: uProxy.Mode.SHARE});
-    });
-  });
-*/
   // TODO: more specs
 });  // UI.UserInterface

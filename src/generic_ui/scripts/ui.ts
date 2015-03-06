@@ -17,29 +17,29 @@ var model :UI.Model = {
   networkNames: [],
   onlineNetwork: null,
   contacts: {
-    'getAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    getAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     },
-    'shareAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    shareAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     }
   },
   globalSettings: {
-    'description': '',
-    'stunServers': [],
-    'hasSeenSharingEnabledScreen': false,
-    'hasSeenWelcome': false,
-    'mode' : uProxy.Mode.GET
+    description: '',
+    stunServers: [],
+    hasSeenSharingEnabledScreen: false,
+    hasSeenWelcome: false,
+    mode : uProxy.Mode.GET
   }
 };
 

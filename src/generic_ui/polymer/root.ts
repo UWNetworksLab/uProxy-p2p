@@ -12,6 +12,7 @@ Polymer({
     // this event.
     if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
+      this.$.shareGetTab.updateBar();
     }
     ui.view = detail.view;
   },
@@ -24,11 +25,9 @@ Polymer({
   },
   setGetMode: function() {
     model.globalSettings.mode = uProxy.Mode.GET;
-    core.updateGlobalSettings(model.globalSettings);
   },
   setShareMode: function() {
     model.globalSettings.mode = uProxy.Mode.SHARE;
-    core.updateGlobalSettings(model.globalSettings);
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;
@@ -51,5 +50,12 @@ Polymer({
       div.innerHTML = browserCustomElement.outerHTML;
       this.$.browserElementContainer.appendChild(div.childNodes[0]);
     }
+  },
+
+  observe: {
+    'model.globalSettings.mode': 'modeChange'
+  },
+  modeChange: function() {
+    core.updateGlobalSettings(model.globalSettings);
   }
 });
