@@ -2,6 +2,7 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 <link rel='import' href='../lib/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='faq-link.html'>
 
@@ -34,6 +35,9 @@
       font-weight: bold;
       margin: 0;
     }
+    #emailInput {
+      margin: 0;
+    }
     #logCheckboxLabel {
       display: table-cell;
       vertical-align: middle;
@@ -49,7 +53,7 @@
     }
     #moreInfo {
       color: grey;
-      font-size: ;
+      margin-top: 0.25em;
     }
     core-icon[icon="arrow-back"] {
       color: white;
@@ -66,17 +70,37 @@
     core-icon[icon="help"]{
       height: 15px;
     }
-    paper-button {
-      color: #009688;
+    core-icon[icon="launch"]{
+      height: 15px;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
     }
-    paper-input-decorator /deep/ .unfocused-underline,
-    paper-input-decorator /deep/ .focused-underline,
+    core-icon[icon="launch"]:hover{
+      opacity: 1;
+    }
+    paper-button {
+      background-color: #009688; /* teal */
+      color: white;
+      margin-bottom: 3px;
+    }
+    paper-input-decorator[id=emailDecorator] /deep/ .unfocused-underline,
+    paper-input-decorator[id=emailDecorator] /deep/ .focused-underline,
     paper-input-decorator /deep/ .cursor {
-        background-color: #009688;
+      background-color: #009688;
+    }
+    paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
+    paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
+      height: 0px;
+    }
+    paper-input-decorator[id=feedbackDecorator] /deep/ .textarea-container {
+      padding: 0.25em;
+      background-color: rgb(240,240,240);
     }
     paper-input-decorator {
-      padding-bottom: 1.5em;
-      padding-top: 0;
       font-size: 1.4em;
     }
     paper-checkbox::shadow #ink[checked] {
@@ -102,6 +126,13 @@
       cursor: pointer;
       text-align: center;
     }
+    #feedbackDecorator {
+      height: 190px;
+    }
+     #feedbackPaperTextarea {
+      height: 190px;
+      margin: 0em;
+    }
     </style>
     <div id='titleContainer'>
       <div id='title'>
@@ -112,28 +143,35 @@
 
     <div id='formContainer'>
       <p class='inputLabel'>Email (optional)</p>
-      <paper-input-decorator label="Email address">
+      <paper-input-decorator id='emailDecorator' label="Email address">
         <input id="emailInput"
                is="core-input"
-               value='{{ email }}'
-               placeholder="Email address">
+               value='{{ email }}'>
       </paper-input-decorator>
 
       <p class='inputLabel'>Enter your feedback below</p>
-      <paper-input-decorator label="Write your feedback">
-        <input id="feedbackInput"
-               is="core-input"
-               value='{{ feedback }}'
-               placeholder="Write your feedback">
-      </paper-input-decorator>
+
+        <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
+          <paper-autogrow-textarea id="feedbackPaperTextarea">
+            <textarea id="feedbackInput"
+                   value='{{ feedback }}'>
+            </textarea>
+          </paper-autogrow-textarea>
+        </paper-input-decorator>
+
 
       <div id='logCheckboxContainer'>
         <paper-checkbox id='logCheckbox'></paper-checkbox>
-        <div id='logCheckboxLabel'>Include logs</div>
+        <div id='logCheckboxLabel'>
+          <span>Include logs</span>
+          <uproxy-link on-tap='{{ viewLogs }}'>
+            <core-icon icon="launch"></core-icon>
+          </uproxy-link>
+        </div>
       </div>
 
       <p id='moreInfo'>
-        Your feedback and email address will be sent to uProxy.org. Your logs and email may be personally identifiable information.
+        Your feedback and email address will be sent to uProxy.org. Your logs and email may include personally identifiable information.
         <uproxy-faq-link>
           <core-icon icon="help" anchor='feedbackLogs'></core-icon>
         </uproxy-faq-link>
@@ -145,7 +183,7 @@
       <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
       <paper-action-dialog backdrop layered="false" heading="Thank you!" id="confirmation">
         <p>Your feedback has been submitted to the uProxy development team.</p>
-        <paper-button affirmative on-tap='{{ backToRoster }}'>Back to Roster</paper-button>
+        <paper-button affirmative on-tap='{{ backToRoster }}'>Done</paper-button>
       </paper-action-dialog>
     </div>
 

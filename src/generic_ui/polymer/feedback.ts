@@ -32,5 +32,9 @@ Polymer({
     this.feedback = '';
     this.$.logCheckbox.checked = false;
   },
+  viewLogs: function() {
+    // TODO: Implement this function.
+    console.log('Launch logs in tab.');
+  },
   ready: function() {}
 });
