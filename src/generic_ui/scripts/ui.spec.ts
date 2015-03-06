@@ -20,7 +20,7 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
+        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
     spyOn(ui, 'showNotification');

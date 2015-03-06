@@ -656,8 +656,8 @@ module UI {
       }
     }
 
-    public openFaq = (pageAnchor ?:string) => {
-      this.browserApi.openFaq(pageAnchor);
+    public openTab = (url :string) => {
+      this.browserApi.openTab(url);
     }
 
     public bringUproxyToFront = () => {

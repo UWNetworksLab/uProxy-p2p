@@ -33,8 +33,9 @@ Polymer({
     this.$.logCheckbox.checked = false;
   },
   viewLogs: function() {
-    // TODO: Implement this function.
-    console.log('Launch logs in tab.');
+    var url = 'data:text/html;charset=UTF-8,'
+        + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + this.logs + '</pre></html>');
+    this.ui.openTab(url);
   },
   ready: function() {}
 });

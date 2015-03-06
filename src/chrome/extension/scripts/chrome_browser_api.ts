@@ -123,18 +123,11 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  // For FAQ.
-
-  public openFaq = (pageAnchor ?:string) => {
-    var faqUrl = "../faq.html";
-    if (pageAnchor) {
-      chrome.tabs.create({url: faqUrl + '#' + pageAnchor});
-    } else {
-      chrome.tabs.create({url: faqUrl});
-    }
-  }
-
   // Other.
+
+  public openTab = (url :string) => {
+    chrome.tabs.create({url: url});
+  }
 
   /**
     * Launch a tab with the url if no existing tab is open with that url.
