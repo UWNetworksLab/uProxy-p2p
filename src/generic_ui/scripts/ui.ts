@@ -121,7 +121,7 @@ module UI {
   export class UserInterface implements uProxy.UIAPI {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    public view :uProxy.View;  // Appearance.
+    public view :uProxy.View;
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
