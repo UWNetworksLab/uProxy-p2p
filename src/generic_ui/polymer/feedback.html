@@ -5,6 +5,7 @@
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
+<link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
 <link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
@@ -164,9 +165,11 @@
           <paper-checkbox for id='logCheckbox'></paper-checkbox>
           Include logs
         </core-label>
-        <uproxy-link on-tap='{{ viewLogs }}'>
-          <core-icon icon="launch"></core-icon>
-        </uproxy-link>
+        <core-tooltip id='logsTooltip' label='View your logs' position='right'>
+          <uproxy-link on-tap='{{ viewLogs }}'>
+            <core-icon icon="launch"></core-icon>
+          </uproxy-link>
+        </core-tooltip>
       </div>
 
       <p id='moreInfo'>
