@@ -4,6 +4,7 @@
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
+<link rel='import' href='../lib/core-label/core-label.html'>
 <link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
@@ -38,22 +39,33 @@
     #emailInput {
       margin: 0;
     }
-    #logCheckboxLabel {
-      display: table-cell;
-      vertical-align: middle;
-      padding: 10px;
-    }
     #logCheckboxContainer {
-      display: table;
-      height: 25px;
+      margin: 0.5em;
+    }
+    #logCheckboxLabel {
+      display: inline-table;
     }
     #logCheckbox {
       display: table-cell;
+      padding-right:10px;
       vertical-align: middle;
     }
     #moreInfo {
       color: grey;
       margin-top: 0.25em;
+    }
+    #sendFeedback {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding-top: 1.5em;
+      padding-bottom: 1.5em;
+      border-top: 1px solid rgb(221, 221, 221);
+      color: #009688;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
     }
     core-icon[icon="arrow-back"] {
       color: white;
@@ -94,6 +106,7 @@
     }
     paper-input-decorator[id=feedbackDecorator] /deep/ .unfocused-underline,
     paper-input-decorator[id=feedbackDecorator] /deep/ .focused-underline {
+      /* Remove the underline from the Feedback textbox. */
       height: 0px;
     }
     paper-input-decorator[id=feedbackDecorator] /deep/ .textarea-container {
@@ -113,23 +126,10 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
-    #sendFeedback {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding-top: 1.5em;
-      padding-bottom: 1.5em;
-      border-top: 1px solid rgb(221, 221, 221);
-      color: #009688;
-      font-weight: bold;
-      cursor: pointer;
-      text-align: center;
-    }
     #feedbackDecorator {
       height: 190px;
     }
-     #feedbackPaperTextarea {
+    #feedbackPaperTextarea {
       height: 190px;
       margin: 0em;
     }
@@ -159,15 +159,14 @@
           </paper-autogrow-textarea>
         </paper-input-decorator>
 
-
       <div id='logCheckboxContainer'>
-        <paper-checkbox id='logCheckbox'></paper-checkbox>
-        <div id='logCheckboxLabel'>
-          <span>Include logs</span>
-          <uproxy-link on-tap='{{ viewLogs }}'>
-            <core-icon icon="launch"></core-icon>
-          </uproxy-link>
-        </div>
+        <core-label id='logCheckboxLabel' horizontal layout>
+          <paper-checkbox for id='logCheckbox'></paper-checkbox>
+          Include logs
+        </core-label>
+        <uproxy-link on-tap='{{ viewLogs }}'>
+          <core-icon icon="launch"></core-icon>
+        </uproxy-link>
       </div>
 
       <p id='moreInfo'>
