@@ -94,6 +94,16 @@ module Social {
     return networks[networkName][userId];
   }
 
+  export function getOnlineNetwork() : NetworkState {
+    for (var network in Social.networks) {
+      if (Object.keys(Social.networks[network]).length > 0) {
+        var userId = Object.keys(Social.networks[network])[0];
+        return Social.networks[network][userId].getNetworkState();
+      }
+    }
+    return null;
+  }
+
   export function notifyUI(networkName :string) {
     var userId = '';
     var online = false;
@@ -221,6 +231,10 @@ module Social {
       throw new Error('Operation not implemented');
     }
 
+    public getNetworkState = () : NetworkState => {
+      throw new Error('Operation not implemented');
+    }
+
   }  // class AbstractNetwork
 
 
@@ -322,6 +336,8 @@ module Social {
           network: this.name,
           user:    userProfileMessage
         });
+
+        this.myInstance.updateProfile(userProfileMessage);
 
         return;
       }
@@ -547,6 +563,22 @@ module Social {
       for (var userId in this.roster) {
         this.roster[userId].resendInstanceHandshakes();
       }
+    }
+
+    public getNetworkState = () : NetworkState => {
+      var rosterState : {[userId :string] :UI.UserMessage} = {};
+      for (var userId in this.roster) {
+        var userState = this.roster[userId].currentStateForUI()
+        if (userState !== null) {
+          rosterState[userId] = userState;
+        }
+      }
+
+      return {
+        name: this.name,
+        profile: this.myInstance.getUserProfile(),
+        roster: rosterState
+      };
     }
 
   }  // class Social.FreedomNetwork

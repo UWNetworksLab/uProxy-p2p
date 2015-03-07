@@ -311,14 +311,10 @@ module Core {
       delete this.clientToInstanceMap_[clientId];
     }
 
-    /**
-     * Send the latest full state about everything in this user to the UI.
-     * Only sends to UI if the user is ready to be visible. (has UserProfile)
-     */
-    public notifyUI = () : void => {
+    public currentStateForUI = () : UI.UserMessage => {
       if ('pending' == this.name) {
         log.warn('Not showing UI without profile');
-        return;
+        return  null;
       }
 
       // TODO: there is a bug where sometimes this.profile.name is not set,
@@ -341,12 +337,12 @@ module Core {
         // or ClientState from the social provider that isn't
         // ONLINE_WITH_OTHER_APP.  For now this is necessary because we don't
         // yet load instances from storage until User objects are created.
-        return;
+        return null;
       }
 
       // TODO: There is a bug in here somewhere. The UI message doesn't make it,
       // sometimes.
-      ui.syncUser(<UI.UserMessage>{
+      return {
         network: this.network.name,
         user: {
           userId: this.profile.userId,
@@ -354,7 +350,17 @@ module Core {
           imageData: this.profile.imageData
         },
         instances: instanceStatesForUi
-      })
+      };
+    }
+    /**
+     * Send the latest full state about everything in this user to the UI.
+     * Only sends to UI if the user is ready to be visible. (has UserProfile)
+     */
+    public notifyUI = () : void => {
+      var state = this.currentStateForUI();
+      if (state) {
+        ui.syncUser(state);
+      }
     }
 
     public monitor = () : void => {
