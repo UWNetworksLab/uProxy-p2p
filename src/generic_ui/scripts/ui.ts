@@ -216,11 +216,11 @@ module UI {
       });
       core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
         console.warn('uProxy.Update.ERROR: ' + errorText);
-        this.showNotification(errorText);
+        this.browserApi.showNotification(errorText);
       });
       core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
-        this.showNotification(notificationText);
+        this.browserApi.showNotification(notificationText);
       });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
@@ -317,7 +317,8 @@ module UI {
 
         var user = this.mapInstanceIdToUser_[instanceId];
         user.isGettingFromMe = true;
-        this.showNotification(user.name + ' started proxying through you');
+        this.browserApi.showNotification(
+            user.name + ' started proxying through you');
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -327,7 +328,8 @@ module UI {
 
         // only show a notification if we knew we were prokying
         if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-          this.showNotification(user.name + ' stopped proxying through you');
+          this.browserApi.showNotification(
+              user.name + ' stopped proxying through you');
         }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
@@ -382,11 +384,12 @@ module UI {
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
-        // TODO propogate this to chrome tab page (blocking on #955
         console.log('Ignoring URL since we have an active network');
+        this.copyPasteUrlError = true;
         return;
       }
 
+      this.browserApi.bringUproxyToFront();
       this.view = UI.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
@@ -428,15 +431,6 @@ module UI {
       for (var i in payload) {
         this.core_.sendCopyPasteSignal(payload[i]);
       }
-    }
-
-    public showNotification = (notificationText :string) => {
-      var notification =
-          new Notification('uProxy', { body: notificationText,
-                           icon: 'icons/38_' + UI.DEFAULT_ICON});
-      setTimeout(function() {
-        notification.close();
-      }, 5000);
     }
 
     /**

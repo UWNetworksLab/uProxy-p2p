@@ -31,7 +31,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['**/*.ts', '**/*.html'],
+    src: ['**/*.ts', '**/*.html', '**/*.js'],
     dest: 'build/compile-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -73,8 +73,7 @@ FILES =
   # Files which are required at run-time everywhere.
   uproxy_common: [
     'uproxy.js'
-    'generic_core/consent.js'
-    'generic_core/util.js'
+    'generic/version.js'
   ]
 
   uproxy_networking_common: [
@@ -104,6 +103,12 @@ FILES =
 module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
+    pkglib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
+    pkgnet: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
+    pkgfreedom: grunt.file.readJSON('node_modules/freedom/package.json')
+    pkgfreedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
+    pkgfreedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
+    pkgfreedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
 
     # Decrease log output for noisy things like symlink.
     verbosity:
@@ -260,12 +265,12 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Copy compiled typescript (no .spec) to build/dev/chrome/app/scripts
           expand: true, cwd: 'build/compile-src/', flatten: true
-          src: [
-            'uproxy.js'
-            'chrome/app/scripts/*.js'
-            'generic_core/**/*.js'
-            '!**/*.spec.js'
-          ]
+          src: FILES.uproxy_common
+            .concat [
+              'chrome/app/scripts/*.js'
+              'generic_core/**/*.js'
+              '!**/*.spec.js'
+            ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
           expand: true, cwd: 'node_modules/freedom-for-chrome/'
@@ -391,15 +396,34 @@ module.exports = (grunt) ->
           # code.
           expand: true, cwd: 'build/compile-src/firefox/data'
           src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
-          dest: firefoxDevPath
+          dest: firefoxDevPath + 'data'
         } ]
 
     }  # copy
 
+    'string-replace':
+      version:
+        files: [{
+          src: 'build/compile-src/generic/version-template.js'
+          dest: 'build/compile-src/generic/version.js'
+        }]
+        options:
+          replacements: [{
+            pattern: /VERSION_REPLACE/g
+            replacement: JSON.stringify
+              version: '<%= pkg.version %>'
+              gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
+              'uproxy-lib': '<%= pkglib.version %>'
+              'uproxy-networking': '<%= pkgnet.version %>'
+              freedom: '<%= pkgfreedom.version %>'
+              'freedom-for-chrome': '<%= pkgfreedomchrome.version %>'
+              'freedom-for-firefox': '<%= pkgfreedomfirefox.version %>'
+              'freedom-social-xmpp': '<%= pkgfreedomxmpp.version %>'
+          }]
+
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
     ts: {
-
       # uProxy UI without any platform dependencies
       generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
@@ -435,11 +459,11 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
-
-      chrome_extension:
+      chrome_extension: {
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/uproxy.js'
+              'build/compile-src/generic/version.js'
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
@@ -456,8 +480,9 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/chrome_extension'
+      }
 
-      chrome_app:
+      chrome_app: {
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/uproxy.js'
@@ -473,9 +498,11 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/chrome_app'
+      }
 
-      generic_core:
+      generic_core: {
         src: FILES.jasmine_helpers
+            .concat FILES.uproxy_common
             .concat [
               'build/compile-src/mocks/freedom-mocks.js'
               'build/compile-src/logging/logging.js'
@@ -483,6 +510,7 @@ module.exports = (grunt) ->
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
+              'build/compile-src/generic/version.js'
               'build/compile-src/generic_core/util.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
@@ -509,11 +537,11 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_core'
+      }
 
-      generic_ui:
+      generic_ui: {
         src: FILES.jasmine_helpers
             .concat [
-              'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
             ]
@@ -526,7 +554,7 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_ui'
-
+      }
 
     compress:
       main:
@@ -565,7 +593,7 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/browser-elements.html'
+          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/root.html'
       firefoxCsp:
         options:
           csp: true
@@ -584,7 +612,9 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
+  grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-shell'
+  grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
@@ -595,6 +625,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'base', [
     'verbosity:diminished'
+    'gitinfo'
     'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
     'symlink:uproxyNetworkingTypescriptSrc'
     'symlink:uproxyLibThirdPartyTypescriptSrc'
@@ -602,6 +633,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
+    'string-replace:version'
     #'symlink:polymerLib'
   ]
 

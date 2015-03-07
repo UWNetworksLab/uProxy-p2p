@@ -33,8 +33,10 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-yuidoc": "~0.4.0",
+    "grunt-gitinfo": "^0.1.7",
     "grunt-remove": "^0.1.0",
     "grunt-shell": "~0.3.1",
+    "grunt-string-replace": "^1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-ts": "^1.11",
     "grunt-verbosity": "^0.2.2",
@@ -42,7 +44,7 @@
     "typescript": "^1.0.1",
     "uproxy-churn": "^0.0.5",
     "uproxy-lib": "^19.0.0",
-    "uproxy-networking": "^5.2.0"
+    "uproxy-networking": "^6.0.0"
   },
   "peerDependencies": {
     "freedom": "~0.6.18"

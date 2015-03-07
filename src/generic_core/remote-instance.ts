@@ -14,8 +14,8 @@
 /// <reference path='social.ts' />
 /// <reference path='util.ts' />
 
-
 module Core {
+  var log :Logging.Log = new Logging.Log('remote-instance');
 
   /**
    * RemoteInstance - represents a remote uProxy installation.
@@ -97,7 +97,7 @@ module Core {
           }).catch((e) => {
             // Instance not found in storage - we should fulfill the create
             // promise anyway as this is not an error.
-            console.log('No stored state for instance ' + instanceId);
+            log.info('No stored state for instance', instanceId);
             this.fulfillStorageLoad_();
           });
     }
@@ -107,7 +107,7 @@ module Core {
         case uProxy.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
-            console.error('Could not find clientId for instance', this);
+            log.error('Could not find clientId for instance', this);
             return;
           }
           this.user.network.send(this.user, clientId, data);
@@ -134,8 +134,10 @@ module Core {
           this.user.notifyUI();
           break;
         default:
-          console.warn('Received unexpected update from remote connection',
-                       update, data);
+          log.warn('Received unexpected update from remote connection', {
+            update: update,
+            data: data
+          });
       }
     }
 
@@ -159,7 +161,7 @@ module Core {
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.consent.localGrantsAccessToRemote) {
-          console.warn('Remote side attempted access without permission');
+          log.warn('Remote side attempted access without permission');
           return;
         }
 
@@ -181,13 +183,13 @@ module Core {
      */
     public start = () :Promise<Net.Endpoint> => {
       if (!this.consent.remoteGrantsAccessToLocal) {
-        console.warn('Lacking permission to proxy!');
-        return Promise.reject('Lacking permission to proxy!');
+        log.warn('Lacking permission to proxy');
+        return Promise.reject(Error('Lacking permission to proxy'));
       }
 
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startupTimeout_ = setTimeout(() => {
-        console.warn('Timing out socksToRtc_ connection');
+        log.warn('Timing out socksToRtc_ connection');
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
@@ -230,14 +232,17 @@ module Core {
      * the consent buttons in the UI.) Sends updated consent bits to the
      * remote instance afterwards.
      */
-    public modifyConsent = (action :Consent.UserAction) => {
+    public modifyConsent = (action :uProxy.ConsentUserAction) => {
       if (!Consent.handleUserAction(this.consent, action)) {
-        console.warn('Invalid user action on consent!', this.consent, action);
+        log.warn('Invalid user action on consent', {
+          consent: this.consent,
+          action: action
+        });
         return;
       }
       // If remote is currently an active client, but user revokes access, also
       // stop the proxy session.
-      if (Consent.UserAction.CANCEL_OFFER === action &&
+      if (uProxy.ConsentUserAction.CANCEL_OFFER === action &&
           this.localSharingWithRemote == SharingState.SHARING_ACCESS) {
         this.connection_.stopShare();
       }
@@ -267,13 +272,13 @@ module Core {
      * Receive consent bits from the remote, and update consent values
      * accordingly.
      */
-    public updateConsent = (bits:Consent.WireState) => {
+    public updateConsent = (bits :uProxy.ConsentWireState) => {
       this.onceLoaded.then(() => {
         this.updateConsent_(bits);
       });
     }
 
-    public updateConsent_ = (bits:Consent.WireState) => {
+    public updateConsent_ = (bits: uProxy.ConsentWireState) => {
 
       var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
       var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
@@ -329,7 +334,7 @@ module Core {
      * consent status, from the user's point of view. These bits will be sent on
      * the wire.
      */
-    public getConsentBits = () :Consent.WireState => {
+    public getConsentBits = () :uProxy.ConsentWireState => {
       return {
         isRequesting: this.consent.localRequestsAccessFromRemote,
         isOffering: this.consent.localGrantsAccessToRemote
@@ -340,8 +345,10 @@ module Core {
       return this.onceLoaded.then(() => {
         var state = this.currentState();
         return storage.save<RemoteInstanceState>(this.getStorePath(), state)
-            .then((old) => {
-          console.log('Saved instance ' + this.instanceId + ' to storage.');
+        .then((old) => {
+          log.debug('Saved instance to storage', this.instanceId);
+        }).catch((e) => {
+          log.error('Failed saving instance to storage', this.instanceId, e.stack);
         });
       });
     }
@@ -389,12 +396,12 @@ module Core {
 
     public handleLogout = () => {
       if (this.connection_.localSharingWithRemote !== SharingState.NONE) {
-        console.log('Closing rtcToNet_ for logout');
+        log.info('Closing rtcToNet_ for logout');
         this.connection_.stopShare();
       }
 
       if (this.connection_.localGettingFromRemote !== GettingState.NONE) {
-        console.log('Stopping socksToRtc_ for logout');
+        log.info('Stopping socksToRtc_ for logout');
         this.connection_.stopGet();
       }
     }

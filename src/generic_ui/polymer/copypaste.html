@@ -60,11 +60,11 @@
       navigating to the link again or asking your friend for a new link.
     </div>
 
-    <div id='geting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>
+    <div id='getting-link' hidden?='{{ GettingState.TRYING_TO_GET_ACCESS !== ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS === ui.copyPasteSharingState }}'>
       <p>Copy and paste this URL to your friend over a secure channel.</p>
 
       <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'
-        class='message'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
+        class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
 
       <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>Loading...</span>
 
@@ -92,7 +92,7 @@
       </p>
 
       <textarea readonly hidden?='{{ !ui.copyPasteSharingMessage.length }}'
-        class='message'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
+        class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
 
       <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>Loading...</span>
 

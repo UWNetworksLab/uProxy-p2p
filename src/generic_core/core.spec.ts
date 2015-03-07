@@ -54,13 +54,13 @@ describe('Core', () => {
         userId: 'user-alice',
         instanceId: 'instance-alice'
       },
-      action: Consent.UserAction.REQUEST
+      action: uProxy.ConsentUserAction.REQUEST
     };
     core.modifyConsent(command);
     expect(Social.getNetwork).toHaveBeenCalledWith('fake-network', 'fake-login');
     expect(network.getUser).toHaveBeenCalledWith('user-alice');
     expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
-    expect(alice.modifyConsent).toHaveBeenCalledWith(Consent.UserAction.REQUEST);
+    expect(alice.modifyConsent).toHaveBeenCalledWith(uProxy.ConsentUserAction.REQUEST);
   });
 
   it('relays incoming manual network messages to the manual network', () => {
@@ -90,7 +90,6 @@ describe('Core', () => {
 
   it('login fails for invalid network', (done) => {
     core.login('nothing').catch(() => {
-      expect(console.warn).toHaveBeenCalled();
       done();
     });
   });

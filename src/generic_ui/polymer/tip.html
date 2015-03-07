@@ -16,6 +16,9 @@ uproxy-tip::shadow #box {
 uproxy-tip::shadow #arrow {
   border-bottom-color: red;
 }
+uproxy-tip::shadow #done {
+  background: (some off-shade);
+}
 -->
 
 <polymer-element name='uproxy-tip'>
@@ -54,9 +57,7 @@ uproxy-tip::shadow #arrow {
       padding: 10px;
     }
     #close {
-      position: absolute;
-      top: 0;
-      right: 0;
+      float: right;
     }
     #actions {
       text-align: right;

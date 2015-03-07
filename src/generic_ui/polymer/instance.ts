@@ -24,7 +24,7 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
-      ui.showNotification('Unable to get access from ' + this.user.name);
+      ui.browserApi.showNotification('Unable to get access from ' + this.user.name);
       console.error('Unable to start proxying ', e);
     });
   },
@@ -33,8 +33,8 @@ Polymer({
     core.stop();
   },
 
-  // |action| is the string end for a Consent.UserAction
-  modifyConsent: function(action :Consent.UserAction) {
+  // |action| is the string end for a uProxy.ConsentUserAction
+  modifyConsent: function(action :uProxy.ConsentUserAction) {
     var command = <uProxy.ConsentCommand>{
       path: this.path,
       action: action
@@ -44,21 +44,21 @@ Polymer({
   },
 
   // Proxy UserActions.
-  request: function() { this.modifyConsent(Consent.UserAction.REQUEST) },
+  request: function() { this.modifyConsent(uProxy.ConsentUserAction.REQUEST) },
   cancelRequest: function() {
-    this.modifyConsent(Consent.UserAction.CANCEL_REQUEST)
+    this.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST)
   },
-  ignoreOffer: function() { this.modifyConsent(Consent.UserAction.IGNORE_OFFER) },
-  unignoreOffer: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_OFFER) },
+  ignoreOffer: function() { this.modifyConsent(uProxy.ConsentUserAction.IGNORE_OFFER) },
+  unignoreOffer: function() { this.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER) },
 
   // Client UserActions
-  offer: function() { this.modifyConsent(Consent.UserAction.OFFER) },
+  offer: function() { this.modifyConsent(uProxy.ConsentUserAction.OFFER) },
   cancelOffer: function() {
     this.ui.stopGivingInUi();
-    this.modifyConsent(Consent.UserAction.CANCEL_OFFER);
+    this.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER);
   },
-  ignoreRequest: function() { this.modifyConsent(Consent.UserAction.IGNORE_REQUEST) },
-  unignoreRequest: function() { this.modifyConsent(Consent.UserAction.UNIGNORE_REQUEST) },
+  ignoreRequest: function() { this.modifyConsent(uProxy.ConsentUserAction.IGNORE_REQUEST) },
+  unignoreRequest: function() { this.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_REQUEST) },
 
   getConsentState: function() : string {
     return this.instance.consent;

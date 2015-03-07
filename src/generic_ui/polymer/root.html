@@ -129,6 +129,15 @@
         z-index: 1;
         font-size: 13px; /* reset to normal, core-toolbar interferes with font sizes */
       }
+      uproxy-tip.error {
+        opacity: 1;
+      }
+      uproxy-tip.error::shadow #box {
+        background: firebrick;
+      }
+      uproxy-tip.error::shadow #arrow {
+        border-bottom-color: firebrick;
+      }
     </style>
 
     <div id='browserElementContainer' hidden?='{{UI.View.BROWSER_ERROR !== ui.view}}'></div>
@@ -145,7 +154,19 @@
         hidden?='{{ ui.view !== UI.View.ROSTER && ui.view !== UI.View.SETTINGS }}'>
 
       <core-toolbar id='toolbar'>
+
         <core-icon id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon>
+
+        <uproxy-tip class='error' hidden?='{{ !ui.copyPasteUrlError }}' on-closed='{{ dismissCopyPasteError }}'>
+          <h3>Cannot open manual connection</h3>
+          <p>
+            It is not currently possible to open a manual connection at the
+            same time as being signed in to a social network.  To launch a
+            manual connection, please log out through the settings menu and
+            re-paste the link.
+          </p>
+        </uproxy-tip>
+
         <div id='title' flex>uProxy</div>
         <core-icon-button src='../icons/sharing-enabled-toolbar.png'
           hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
@@ -185,10 +206,10 @@
 
       <div id='status'>
         <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-          <div class='statusText'><img src='../icons/GettingAccess_UI_40.gif'>{{ui.gettingStatus}}</div>
+          <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
         </div>
         <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-          <div class='statusText'><img src='../icons/SharingAccess_UI_40.gif'>{{ui.sharingStatus}}</div>
+          <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
         </div>
       </div>
 
