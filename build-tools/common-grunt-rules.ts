@@ -21,6 +21,17 @@ export interface JasmineRule {
     specs :string[];
     outfile ?:string;
     keepRunner ?:boolean;
+    template ?:string;
+    templateOptions ?:{
+      files    : string[];
+      coverage : string;
+      report   : {
+          type :string;
+          options :{
+            dir: string;
+          };
+        }[];
+    };
   };
 }
 
@@ -48,38 +59,36 @@ export interface CopyRule {
 export class Rule {
   constructor(public config :RuleConfig) {}
 
+  public addCoverageToSpec(spec:JasmineRule) :JasmineRule {
+    var basePath = path.dirname(spec.options.outfile);
+
+    spec.options.template = require('grunt-template-jasmine-istanbul');
+    spec.options.templateOptions = {
+      files: ['**/*', '!node_modules/**'],
+      // Output location for coverage results
+      coverage: path.join(basePath, 'coverage/results.json'),
+      report: [
+        { type: 'html', options: { dir: path.join(basePath, 'coverage') } },
+        { type: 'lcov', options: { dir: path.join(basePath, 'coverage') } }
+      ]
+    };
+    return spec;
+  }
+
   // Grunt Jasmine target creator
   // Assumes that the each spec file is a fully browserified js file.
-  public jasmineSpec(name:string, morefiles?:string[]) : JasmineRule {
+  public jasmineSpec(name:string, morefiles?:string[]) :JasmineRule {
     if (!morefiles) { morefiles = []; }
     return {
       src: [
         require.resolve('arraybuffer-slice'),
-        path.join(path.dirname(require.resolve('es6-promise/package.json')),
-                  'dist/promise-1.0.0.js')
+        require.resolve('es6-promise'),
+        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
       ].concat(morefiles),
       options: {
         specs: [ path.join(this.config.devBuildPath, name, '/**/*.spec.static.js') ],
         outfile: path.join(this.config.devBuildPath, name, '/SpecRunner.html'),
-        keepRunner: true,
-        template: require('grunt-template-jasmine-istanbul'),
-        templateOptions: {
-          files: ['**/*', '!node_modules/**'],
-          // Output location for coverage results
-          coverage: path.join(this.config.devBuildPath, name, 'coverage/results.json'),
-          report: [
-            { type: 'html',
-              options: {
-                dir: path.join(this.config.devBuildPath, name, 'coverage')
-              }
-            },
-            { type: 'lcov',
-              options: {
-                dir: path.join(this.config.devBuildPath, name, 'coverage')
-              }
-            }
-          ]
-        }
+        keepRunner: true
       }
     }
   }
@@ -121,7 +130,7 @@ export class Rule {
     // Paths within third party to be copied.
     pathsFromThirdPartyBuild ?:string[]
     // A relative (to devBuildPath) destination to copy files to.
-    localDestPath:string; }) : CopyRule {
+    localDestPath:string; }) :CopyRule {
 
     // Default to empty list of dependencies.
     copyInfo.npmLibNames = copyInfo.npmLibNames || [];

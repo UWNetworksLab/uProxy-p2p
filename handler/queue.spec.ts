@@ -48,9 +48,9 @@ describe('Handler Queue', function() {
   });
 
   it('3 events and then clearing makes length = 0', function() {
-    queue.handle('A');
-    queue.handle('BB');
-    queue.handle('CCC');
+    queue.handle('A').catch(() => {});
+    queue.handle('BB').catch(() => {});
+    queue.handle('CCC').catch(() => {});
     queue.clear();
     expect(queue.getLength()).toBe(0);
   });
