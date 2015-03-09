@@ -8,9 +8,10 @@ interface BrowserAPI {
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) : void;
   // Open a new tab with the uProxy FAQ.
-  openFaq(pageAnchor :string) : void;
+  openTab(url :string) : void;
   bringUproxyToFront() : void;
   browserSpecificElement : string;
+  showNotification(notificationTest :string) :void;
 }
 
 declare var Notification : {

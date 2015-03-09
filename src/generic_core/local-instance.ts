@@ -21,6 +21,8 @@ module Core {
     public instanceId  :string;
     public keyHash     :string;
     public clientId    :string;
+    private imageData_ :string;
+    private name_      :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -77,6 +79,19 @@ module Core {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
         description: core.globalSettings.description
+      };
+    }
+
+    public updateProfile = (profile :UI.UserProfileMessage) : void => {
+      this.name_ = profile.name;
+      this.imageData_ = profile.imageData;
+    }
+
+    public getUserProfile = () : UI.UserProfileMessage => {
+      return {
+        userId: this.userId,
+        name: this.name_,
+        imageData: this.imageData_
       };
     }
 

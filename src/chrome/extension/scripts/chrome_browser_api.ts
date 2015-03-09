@@ -123,18 +123,16 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  // For FAQ.
+  // Other.
 
-  public openFaq = (pageAnchor ?:string) => {
-    var faqUrl = "../faq.html";
-    if (pageAnchor) {
-      chrome.tabs.create({url: faqUrl + '#' + pageAnchor});
+  public openTab = (url :string) => {
+    if (url.indexOf(':') < 0) {
+      // We've been passed a relative URL. Get the full URL with getURL.
+      chrome.tabs.create({url: chrome.extension.getURL(url)});
     } else {
-      chrome.tabs.create({url: faqUrl});
+      chrome.tabs.create({url: url});
     }
   }
-
-  // Other.
 
   /**
     * Launch a tab with the url if no existing tab is open with that url.
@@ -201,5 +199,14 @@ class ChromeBrowserApi implements BrowserAPI {
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
+  }
+
+  public showNotification = (notificationText :string) => {
+    var notification =
+        new Notification('uProxy', { body: notificationText,
+                         icon: 'icons/38_' + UI.DEFAULT_ICON});
+    setTimeout(function() {
+      notification.close();
+    }, 5000);
   }
 }

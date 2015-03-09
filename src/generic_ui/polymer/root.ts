@@ -5,6 +5,18 @@ declare var ui :UI.UserInterface;
 
 Polymer({
   model: model,
+  dialog: {
+    message: '',
+    heading: '',
+    affirmative: {
+      text: '',
+      signal: ''
+    },
+    dismissive: {
+      text: '',
+      signal: ''
+    }
+  },
   updateView: function(e, detail, sender) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -37,6 +49,39 @@ Polymer({
   },
   dismissCopyPasteError: function() {
     ui.copyPasteUrlError = false;
+  },
+  openDialog: function(e, detail, sender) {
+    /* 'detail' parameter holds the data that was passed when the open-dialog
+     * signal was fired. It should be of the form:
+     *
+     * { heading: 'title for the dialog',
+     *   message: 'main message for the dialog',
+     *   affirmative: {
+     *     text: 'button text, e.g. Done',
+     *     signal: 'core-signal to fire when button is clicked'
+     *   },
+     *   dismissive: {
+     *     text: 'button text, e.g. Cancel',
+     *     signal: 'core-signal to fire when button is clicked'
+     *   }
+     *  }
+     *
+     * If text == '', the button is not shown.
+     * If signal == '', no core-signal is fired.
+     */
+
+    this.dialog = detail.dialog;
+    this.$.dialog.toggle();
+  },
+  affirmativeButtonClick: function() {
+    if (this.dialog.affirmative.signal != '') {
+      this.fire('core-signal', {name: this.dialog.affirmative.signal});
+    }
+  },
+  dismissiveButtonClick: function() {
+    if (this.dialog.dismissive.signal != '') {
+      this.fire('core-signal', {name: this.dialog.dismissive.signal});
+    }
   },
   ready: function() {
     // Expose global ui object and UI module in this context.

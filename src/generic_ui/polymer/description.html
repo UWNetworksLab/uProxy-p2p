@@ -3,8 +3,16 @@
 
 <polymer-element name='uproxy-description' attributes=''>
   <template>
+    <style>
+      paper-input-decorator /deep/ .unfocused-underline,
+      paper-input-decorator /deep/ .focused-underline,
+      paper-input-decorator /deep/ .cursor {
+          background-color: #009688;
+      }
+    </style>
+
     <paper-input-decorator label="Description">
-      <input is="core-input" value='{{model.globalSettings.description}}' on-blur='{{update}}' />
+      <input is="core-input" value='{{model.globalSettings.description}}' on-blur='{{update}}'>
     </paper-input-decorator>
   </template>
   <script src='description.js'></script>

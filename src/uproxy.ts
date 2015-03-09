@@ -40,7 +40,8 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_GLOBAL_SETTINGS
+    UPDATE_GLOBAL_SETTINGS,
+    SEND_FEEDBACK
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -150,6 +151,12 @@ module uProxy {
     message         :uProxy.Message;
   }
 
+  export interface UserFeedback {
+    email     :string;
+    feedback  :string;
+    logs      :string;
+  }
+
   // --- Core <--> UI Interfaces ---
 
   /**
@@ -191,6 +198,7 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
+    sendFeedback(feedback :UserFeedback) : void;
   }
 
   /**
@@ -228,8 +236,6 @@ module uProxy {
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
-
-    showNotification(notificationText :string) : void;
   }
 
   interface ICoreOptions {

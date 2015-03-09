@@ -39,10 +39,9 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
+        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
-    spyOn(ui, 'showNotification');
   });
 
   function syncUserAndInstance(
@@ -245,7 +244,7 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.showNotification).not.toHaveBeenCalled();
+      expect(mockBrowserApi.showNotification).not.toHaveBeenCalled();
     });
 
     it('Notification when you stop sharing', () => {
@@ -254,7 +253,7 @@ describe('UI.UserInterface', () => {
           .call(ui, 'testInstanceId');
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.showNotification).toHaveBeenCalled();
+      expect(mockBrowserApi.showNotification).toHaveBeenCalled();
     });
 
     it('Getting status updates when you start and stop getting', () => {
