@@ -3,8 +3,8 @@ declare module Social {
 
   interface NetworkState {
     name     :string;
-    remember :boolean;    // TODO: Remember what?
-    userIds  :string[];
+    profile :UI.UserProfileMessage;
+    roster : {[userId :string] : UI.UserMessage};
   }
 
   /**
@@ -70,6 +70,8 @@ declare module Social {
      */
     send :(user :Core.User, clientId:string, msg:uProxy.Message)
         => Promise<void>;
+
+    getNetworkState : () => NetworkState;
   }
 
 }  // module Social

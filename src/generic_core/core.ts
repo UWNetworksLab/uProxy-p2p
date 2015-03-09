@@ -67,7 +67,8 @@ class UIConnector implements uProxy.UIAPI {
           uProxy.Update.INITIAL_STATE,
           {
             networkNames: Object.keys(Social.networks),
-            globalSettings: core.globalSettings
+            globalSettings: core.globalSettings,
+            onlineNetwork: Social.getOnlineNetwork()
           });
     });
   }
