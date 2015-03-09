@@ -126,7 +126,12 @@ class ChromeBrowserApi implements BrowserAPI {
   // Other.
 
   public openTab = (url :string) => {
-    chrome.tabs.create({url: url});
+    if (url.indexOf(':') < 0) {
+      // We've been passed a relative URL. Get the full URL with getURL.
+      chrome.tabs.create({url: chrome.extension.getURL(url)});
+    } else {
+      chrome.tabs.create({url: url});
+    }
   }
 
   /**

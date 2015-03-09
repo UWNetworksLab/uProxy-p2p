@@ -1,6 +1,6 @@
 Polymer({
   openFaq: function() {
-    this.ui.openTab('../faq.html#' + this.anchor);
+    this.ui.openTab('faq.html#' + this.anchor);
   },
   ready: function() {
     this.ui = ui;

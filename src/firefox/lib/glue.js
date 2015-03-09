@@ -9,7 +9,8 @@ var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uProxy = require('uproxy.js').uProxy;
-var { Ci, Cr } = require("chrome");
+var { Ci, Cc, Cr } = require("chrome");
+var self = require("sdk/self");
 var events = require("sdk/system/events");
 
 // TODO: rename freedom to uProxyFreedomModule
@@ -49,6 +50,16 @@ function setUpConnection(freedom, panel, button) {
 
   panel.port.on('showPanel', function() {
     panel.show();
+  });
+
+  panel.port.on('openURL', function(url) {
+    var win = Cc['@mozilla.org/appshell/window-mediator;1']
+        .getService(Ci.nsIWindowMediator)
+        .getMostRecentWindow('navigator:browser');
+    if (url.indexOf(':') < 0) {
+      url = self.data.url(url);
+    }
+    win.gBrowser.selectedTab = win.gBrowser.addTab(url);
   });
 }
 

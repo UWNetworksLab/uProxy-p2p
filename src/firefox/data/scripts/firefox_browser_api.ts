@@ -32,7 +32,9 @@ class FirefoxBrowserApi implements BrowserAPI {
         });
   }
 
-  public openTab = (url :string) => {}
+  public openTab = (url ?:string) => {
+    port.emit('openURL', url);
+  }
 
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
