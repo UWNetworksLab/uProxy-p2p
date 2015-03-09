@@ -426,9 +426,9 @@ class uProxyCore implements uProxy.CoreAPI {
     var xhr = freedom["core.xhr"]();
     var postRequest =
       'https://www.uproxy.org/submit-feedback?'
-    postRequest += 'email=' + encodeURIComponent(feedback.email) + '&';
-    postRequest += 'feedback=' + encodeURIComponent(feedback.feedback) + '&';
-    postRequest += 'logs=' + encodeURIComponent(feedback.logs);
+        + 'email=' + encodeURIComponent(feedback.email) + '&'
+        + 'feedback=' + encodeURIComponent(feedback.feedback) + '&'
+        + 'logs=' + encodeURIComponent(feedback.logs);
     xhr.open('POST', postRequest, true);
     xhr.send();
   }

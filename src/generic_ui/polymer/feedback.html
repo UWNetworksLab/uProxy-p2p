@@ -3,7 +3,6 @@
 <link rel='import' href='../lib/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
-<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
 <link rel='import' href='faq-link.html'>
@@ -180,13 +179,6 @@
       </p>
 
       <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
-
-      <!-- Dialog is opened when .toggle() is called in sendFeedback -->
-      <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-      <paper-action-dialog backdrop layered="false" heading="Thank you!" id="confirmation">
-        <p>Your feedback has been submitted to the uProxy development team.</p>
-        <paper-button affirmative on-tap='{{ backToRoster }}'>Done</paper-button>
-      </paper-action-dialog>
     </div>
 
   </template>

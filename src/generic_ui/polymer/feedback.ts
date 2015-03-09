@@ -7,9 +7,6 @@ Polymer({
   backToSettings: function() {
     ui.view = UI.View.SETTINGS;
   },
-  backToRoster: function() {
-    ui.view = UI.View.ROSTER;
-  },
   sendFeedback: function() {
     // TODO: Get and send real logs.
     if (this.$.logCheckbox.checked) {
@@ -22,7 +19,6 @@ Polymer({
       feedback: this.feedback,
       logs: this.logs
     });
-    this.$.confirmation.toggle();
     // Reset the placeholders, which seem to be cleared after the
     // user types input in the input fields.
     this.$.emailInput.placeholder = 'Email address';
@@ -31,6 +27,24 @@ Polymer({
     this.email = '';
     this.feedback = '';
     this.$.logCheckbox.checked = false;
+
+    // root.ts listens for open-dialog signals and shows a popup
+    // when it receives these events.
+    this.fire('open-dialog',
+      { dialog:
+        { heading: 'Thank you!',
+          message: 'Your feedback has been submitted to the uProxy development team.',
+          affirmative: {
+            text: 'Done',
+            signal: ''
+          },
+          dismissive: {
+            text: '',
+            signal: ''
+          }
+        }
+      });
+    ui.view = UI.View.ROSTER;
   },
   viewLogs: function() {
     var url = 'data:text/html;charset=UTF-8,'
