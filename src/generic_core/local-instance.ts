@@ -22,7 +22,7 @@ module Core {
     public keyHash     :string;
     public clientId    :string;
     private imageData_ :string;
-    private name_
+    private name_      :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
