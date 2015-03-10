@@ -509,6 +509,8 @@ module.exports = (grunt) ->
             .concat FILES.uproxy_common
             .concat [
               'build/compile-src/mocks/freedom-mocks.js'
+              'build/compile-src/mocks/socks-to-rtc.js'
+              'build/compile-src/mocks/rtc-to-net.js'
               'build/compile-src/logging/logging.js'
               'build/compile-src/webrtc/peerconnection.js'
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
@@ -527,6 +529,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
               'build/compile-src/generic_core/core.js'
+              'node_modules/uproxy-lib/dist/handler/queue.js'
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
