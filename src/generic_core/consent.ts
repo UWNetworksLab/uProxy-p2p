@@ -1,5 +1,3 @@
-/// <reference path='util.ts' />
-
 module Consent {
   var log :Logging.Log = new Logging.Log('consent');
 

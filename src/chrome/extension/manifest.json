@@ -18,7 +18,8 @@
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",
       "scripts/chrome_core_connector.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/version.js"
     ]
   },
   "browser_action": {
@@ -28,7 +29,6 @@
     },
     "default_title": "__MSG_extTitle__"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "tabs",
     "proxy",
@@ -38,6 +38,9 @@
     "https://uproxy.org/request/*",
     "https://uproxy.org/offer/*",
     "webRequestBlocking"
+  ],
+  "web_accessible_resources": [
+    "copypaste.html"
   ],
   "options_page": "index.html",
   "externally_connectable": {

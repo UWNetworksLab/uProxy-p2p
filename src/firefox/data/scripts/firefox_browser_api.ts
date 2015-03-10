@@ -32,9 +32,9 @@ class FirefoxBrowserApi implements BrowserAPI {
         });
   }
 
-  // For FAQ.
-
-  public openFaq = (pageAnchor ?:string) => {}
+  public openTab = (url ?:string) => {
+    port.emit('openURL', url);
+  }
 
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
@@ -49,5 +49,9 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public bringUproxyToFront = () => {
     port.emit('showPanel');
+  }
+
+  public showNotification = (notificationText :string) => {
+    // TODO implement!
   }
 }

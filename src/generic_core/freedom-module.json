@@ -15,6 +15,7 @@
       "uproxy-networking/rtc-to-net/rtc-to-net.js",
       "uproxy.js",
       "util.js",
+      "version.js",
       "consent.js",
       "firewall.js",
       "storage.js",
@@ -45,6 +46,7 @@
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",
-    "core.udpsocket"
+    "core.udpsocket",
+    "core.xhr"
   ]
 }
