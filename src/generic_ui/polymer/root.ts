@@ -12,7 +12,7 @@ Polymer({
     // this event.
     if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      this.$.shareGetTab.updateBar();
+      this.$.modeTabs.updateBar();
     }
     ui.view = detail.view;
   },
