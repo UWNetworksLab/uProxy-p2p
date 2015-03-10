@@ -58,7 +58,7 @@
 
       <!-- TODO(jetpack): replace these state-dependent buttons with
       simpler UI, exposing state bits directly. -->
-      <div id='getControls' hidden?='{{ui.mode!=UI.Mode.GET}}'>
+      <div id='getControls' hidden?='{{globalSettings.mode!=uProxy.Mode.GET}}'>
 
         <!-- controls visible when permissioned for access -->
         <div hidden?='{{ !( getConsentState().localRequestsAccessFromRemote && getConsentState().remoteGrantsAccessToLocal ) }}'>
@@ -116,7 +116,7 @@
       </div> <!-- end of getControls -->
 
 
-      <div id='shareControls' hidden?='{{ui.mode!=UI.Mode.SHARE}}'>
+      <div id='shareControls' hidden?='{{globalSettings.mode!=uProxy.Mode.SHARE}}'>
 
         <div hidden?='{{ !( getConsentState().localGrantsAccessToRemote && getConsentState().remoteRequestsAccessFromLocal ) }}'>
           <p class='preButtonText'>You've given them access.</p>

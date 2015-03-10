@@ -38,6 +38,9 @@
     "https://uproxy.org/offer/*",
     "webRequestBlocking"
   ],
+  "web_accessible_resources": [
+    "copypaste.html"
+  ],
   "options_page": "index.html",
   "externally_connectable": {
     "ids" : ["fmdppkkepalnkeommjadgbhiohihdhii"],

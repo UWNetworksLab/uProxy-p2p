@@ -6,6 +6,7 @@
  */
 /// <reference path='constants.ts' />
 /// <reference path='user.ts' />
+/// <reference path='core_connector.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -17,28 +18,29 @@ var model :UI.Model = {
   networkNames: [],
   onlineNetwork: null,
   contacts: {
-    'getAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    getAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     },
-    'shareAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    shareAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     }
   },
   globalSettings: {
-    'description': '',
-    'stunServers': [],
-    'hasSeenSharingEnabledScreen': false,
-    'hasSeenWelcome': false
+    description: '',
+    stunServers: [],
+    hasSeenSharingEnabledScreen: false,
+    hasSeenWelcome: false,
+    mode : uProxy.Mode.GET
   }
 };
 
@@ -99,25 +101,6 @@ module UI {
     hasContacts ?:boolean;
   }
 
-  /**
-   * Enumeration of mutually-exclusive view states.
-   */
-  export enum View {
-    SPLASH = 0,
-    COPYPASTE,
-    ROSTER,
-    SETTINGS,
-    BROWSER_ERROR,
-    FEEDBACK
-  }
-
-  /**
-   * Enumeration of mutually-exclusive UI modes.
-   */
-  export enum Mode {
-    GET = 0,
-    SHARE
-  }
 
   /**
    * The User Interface class.
@@ -129,7 +112,7 @@ module UI {
    */
   export class UserInterface implements uProxy.UIAPI {
 
-    public view :View;  // Appearance.
+    public view :uProxy.View;
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
@@ -142,8 +125,6 @@ module UI {
     // The instances you are giving access to.
     // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
-
-    public mode :Mode = Mode.GET;
 
     private mapInstanceIdToUser_ :{[instanceId :string] :UI.User} = {};
 
@@ -160,17 +141,17 @@ module UI {
     public copyPasteSharingMessage :string = '';
 
     // TODO not needed, exists to handle typescript errors
-    private core_ :uProxy.CoreAPI = null;
+    private core_ :CoreConnector = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
      */
     constructor(
-        public core   :uProxy.CoreAPI,
+        public core   :CoreConnector,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
-      this.view = View.SPLASH;  // Begin at the splash intro.
+      this.view = uProxy.View.SPLASH;  // Begin at the splash intro.
       this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
@@ -254,8 +235,8 @@ module UI {
       core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
 
-        if (UI.View.COPYPASTE === this.view) {
-          this.view = UI.View.SPLASH;
+        if (uProxy.View.COPYPASTE === this.view) {
+          this.view = uProxy.View.SPLASH;
         }
       });
 
@@ -267,8 +248,8 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
         if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
-          if (UI.View.COPYPASTE === this.view) {
-            this.view = UI.View.SPLASH;
+          if (uProxy.View.COPYPASTE === this.view) {
+            this.view = uProxy.View.SPLASH;
           }
         }
 
@@ -380,7 +361,7 @@ module UI {
       }
 
       this.browserApi.bringUproxyToFront();
-      this.view = UI.View.COPYPASTE;
+      this.view = uProxy.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
@@ -544,7 +525,7 @@ module UI {
               userCategories.shareTab, null);
         }
         this.setOfflineIcon();
-        this.view = UI.View.SPLASH;
+        this.view = uProxy.View.SPLASH;
         model.onlineNetwork = null;
       }
 

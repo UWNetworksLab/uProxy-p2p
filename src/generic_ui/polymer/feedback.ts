@@ -5,7 +5,7 @@ Polymer({
   feedback: '',
   logs: '',
   backToSettings: function() {
-    ui.view = UI.View.SETTINGS;
+    ui.view = uProxy.View.SETTINGS;
   },
   sendFeedback: function() {
     // TODO: Get and send real logs.
@@ -44,7 +44,7 @@ Polymer({
           }
         }
       });
-    ui.view = UI.View.ROSTER;
+    ui.view = uProxy.View.ROSTER;
   },
   viewLogs: function() {
     var url = 'data:text/html;charset=UTF-8,'

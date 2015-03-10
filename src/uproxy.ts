@@ -257,6 +257,25 @@ module uProxy {
     promiseId :number;  // Values <= 1 means success/error should be returned.
   }
 
+  /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    COPYPASTE,
+    ROSTER,
+    SETTINGS,
+    BROWSER_ERROR,
+    FEEDBACK
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
+  }
 }  // module uProxy
 
 module Social {
@@ -323,3 +342,4 @@ module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
 }
+

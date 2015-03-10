@@ -19,7 +19,7 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
-    this.UI = UI;
+    this.uProxy = uProxy;
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
     }

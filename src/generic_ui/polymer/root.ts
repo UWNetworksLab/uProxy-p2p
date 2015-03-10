@@ -1,5 +1,6 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 /// <reference path='../scripts/ui.ts' />
+/// <reference path='../../uproxy.ts' />
 
 declare var ui :UI.UserInterface;
 
@@ -21,23 +22,24 @@ Polymer({
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == UI.View.ROSTER && ui.view == UI.View.SPLASH) {
+    if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
+      this.$.modeTabs.updateBar();
     }
     ui.view = detail.view;
   },
   settingsView: function() {
-    ui.view = UI.View.SETTINGS;
+    ui.view = uProxy.View.SETTINGS;
   },
   rosterView: function() {
     console.log('rosterView called');
-    ui.view = UI.View.ROSTER;
+    ui.view = uProxy.View.ROSTER;
   },
   setGetMode: function() {
-    ui.mode = UI.Mode.GET;
+    model.globalSettings.mode = uProxy.Mode.GET;
   },
   setShareMode: function() {
-    ui.mode = UI.Mode.SHARE;
+    model.globalSettings.mode = uProxy.Mode.SHARE;
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;
@@ -86,12 +88,19 @@ Polymer({
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
-    this.UI = UI;
+    this.uProxy = uProxy;
     if(ui.browserApi.browserSpecificElement){
       var div = document.createElement("div");
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       div.innerHTML = browserCustomElement.outerHTML;
       this.$.browserElementContainer.appendChild(div.childNodes[0]);
     }
+  },
+
+  observe: {
+    'model.globalSettings.mode': 'modeChange'
+  },
+  modeChange: function() {
+    core.updateGlobalSettings(model.globalSettings);
   }
 });
