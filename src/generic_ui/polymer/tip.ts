@@ -12,8 +12,8 @@ Polymer({
     // removed once that happens.
 
     var prev = this.previousSibling;
-    if (prev.offsetLeft === 0 && prev.offsetTop === 0 && prev.offsetWidth === 0
-        && prev.offsetHeight === 0) {
+    if (window.getComputedStyle(prev).display === 'none' ||
+        window.getComputedStyle(this).display === 'none') {
       this.async(this.doReposition, null, 500);
       return;
     }
@@ -28,7 +28,11 @@ Polymer({
     }
 
     var prevCntr = prev.offsetLeft + prev.offsetWidth / 2;
-    var parentWidth = this.parentElement.offsetWidth;
+    // use width of target if the parent is not an element
+    var parentWidth = prev.offsetWidth;
+    if (this.parentElement) {
+      parentWidth = this.parentElement.offsetWidth;
+    }
 
     this.style.top = (prev.offsetHeight + prev.offsetTop) + 'px';
 
