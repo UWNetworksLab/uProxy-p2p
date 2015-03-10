@@ -11,7 +11,8 @@ import Data = peerconnection.Data;
 
 import Message = require('./message.types');
 
-freedom['loggingcontroller']().setConsoleFilter(['*:D']);
+export var loggingController = freedom['loggingcontroller']();
+loggingController.setConsoleFilter(['*:D']);
 
 var log :Logging.Log = new Logging.Log('freedomchat');
 
