@@ -527,6 +527,8 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
               'build/compile-src/generic_core/core.js'
+              'build/compile-src/generic_core/mocks/socks-to-rtc.js'
+              'build/compile-src/generic_core/mocks/rtc-to-net.js'
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
