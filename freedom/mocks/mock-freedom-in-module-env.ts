@@ -71,6 +71,8 @@ export function makeMockFreedomInModuleEnv(
   var freedomFn = () => { return freeedomParentModuleThing_; }
   freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
 
+  freedom['THIS_IS_A_MOCK'] = makeMockFreedomModuleFactory(() => {});
+
   var core_ = new MockFreedomCore();
   freedom['core'] = makeMockFreedomModuleFactory<freedomTypes.Core>(
       () => { return core_; });
