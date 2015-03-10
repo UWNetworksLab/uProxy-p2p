@@ -6,7 +6,7 @@
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
-/// <reference path='../../../interfaces/ui.d.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 
 var port :ContentScriptPort;
 

@@ -6,6 +6,7 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
+  var mockCore;
 
   function getInstance(instanceId :string, description :string) :UI.Instance {
     return {
@@ -29,7 +30,9 @@ describe('UI.UserInterface', () => {
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
-    var mockCore = jasmine.createSpyObj('core', ['reset', 'onUpdate']);
+    mockCore = jasmine.createSpyObj(
+        'core',
+        ['reset', 'onUpdate', 'sendCommand']);
 
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
@@ -314,6 +317,5 @@ describe('UI.UserInterface', () => {
     });
 
   });  // syncNetwork_
-
   // TODO: more specs
 });  // UI.UserInterface

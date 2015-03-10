@@ -262,7 +262,7 @@ describe('Core.User', () => {
 
   it('sends instance handshake', (done) => {
     var network = user.network;
-    network['myInstance'] = {getInstanceHandshake: function() {}};
+    network['myInstance'] = new Core.LocalInstance(network, 'fakeId');
     spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
       'fake-instance-handshake');
     spyOn(network, 'send').and.returnValue(Promise.resolve());

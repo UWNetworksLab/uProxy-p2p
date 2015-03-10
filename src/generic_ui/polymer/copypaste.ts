@@ -6,7 +6,7 @@
  */
 
 function initCopyPaste() {
-  ui.view = UI.View.COPYPASTE;
+  ui.view = uProxy.View.COPYPASTE;
 
   if (GettingState.NONE === ui.copyPasteGettingState) {
     ui.copyPasteGettingMessage = '';
@@ -32,7 +32,7 @@ Polymer({
       return;
     }
 
-    ui.view = UI.View.SPLASH;
+    ui.view = uProxy.View.SPLASH;
   },
   stopGetting: function() {
     core.stopCopyPasteGet();

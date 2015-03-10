@@ -6,7 +6,6 @@
  * contain attributes / functionality not relevant to the UI.)
  */
 /// <reference path='user.d.ts' />
-/// <reference path='../generic_ui/scripts/ui.ts' />
 /// <reference path='instance.d.ts' />
 
 declare module UI {
@@ -57,13 +56,4 @@ declare module UI {
     bytesSent              :number;
     bytesReceived          :number;
   }
-
-  /**
-   * Data about a currently proxying server or client.
-   */
-  export interface CurrentProxy {
-    instance :Instance;
-    user :UI.User;
-  }
-
 }  // module UI

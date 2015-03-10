@@ -14,7 +14,8 @@ Polymer({
     // Expose global ui object and UI module in this context. This allows the
     // hidden? watch for the get/give toggle to actually update.
     this.ui = ui;
-    this.UI = UI;
+    this.uProxy = uProxy;
+    this.globalSettings = model.globalSettings
   },
 
   start: function() {

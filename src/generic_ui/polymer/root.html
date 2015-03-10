@@ -150,18 +150,17 @@
       }
     </style>
 
-    <div id='browserElementContainer' hidden?='{{UI.View.BROWSER_ERROR !== ui.view}}'></div>
+    <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
-    <uproxy-copypaste hidden?='{{ UI.View.COPYPASTE !== ui.view }}'>
+    <uproxy-copypaste hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback hidden?='{{ UI.View.FEEDBACK !== ui.view }}'></uproxy-feedback>
-
-    <uproxy-splash id='splash' hidden?='{{UI.View.SPLASH!=ui.view}}'>
+    <uproxy-feedback hidden?='{{ uProxy.View.FEEDBACK !== ui.view }}'></uproxy-feedback>
+    <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
     <div id='logged-in-controls'
-        hidden?='{{ ui.view !== UI.View.ROSTER && ui.view !== UI.View.SETTINGS }}'>
+        hidden?='{{ ui.view !== uProxy.View.ROSTER && ui.view !== uProxy.View.SETTINGS }}'>
 
       <core-toolbar id='toolbar'>
 
@@ -188,7 +187,7 @@
         </uproxy-tip>
 
         <div class='bottom fit'>
-          <paper-tabs selected='{{ ui.mode }}'>
+          <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}'>
             <paper-tab>Get Access</paper-tab>
             <paper-tab>Share Access</paper-tab>
           </paper-tabs>
@@ -205,11 +204,11 @@
 
       <div id='roster-panel'>
         <uproxy-roster id='get-roster' class='roster'
-            hidden?='{{ui.mode!=UI.Mode.GET}}'
+            hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
             contacts='{{model.contacts.getAccessContacts}}'>
         </uproxy-roster>
         <uproxy-roster id='share-roster' class='roster'
-            hidden?='{{ui.mode!=UI.Mode.SHARE}}'
+            hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
             contacts='{{model.contacts.shareAccessContacts}}'>
         </uproxy-roster>
       </div>
@@ -226,11 +225,11 @@
     </div>
 
     <uproxy-settings id='settings'
-      class='{{ { active:(UI.View.SETTINGS==ui.view) } | tokenList }}'>
+      class='{{ { active:(uProxy.View.SETTINGS==ui.view) } | tokenList }}'>
     </uproxy-settings>
 
     <!-- Dark mask displayed on top of roster when settings is visible -->
-    <div id='darkMask' hidden?='{{UI.View.SETTINGS!=ui.view}}'
+    <div id='darkMask' hidden?='{{uProxy.View.SETTINGS!=ui.view}}'
         on-tap='{{ rosterView }}'></div>
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->

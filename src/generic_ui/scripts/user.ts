@@ -7,7 +7,6 @@
 /// <reference path='../../interfaces/user.d.ts' />
 
 module UI {
-
   /**
    * UI-specific user.
    */
