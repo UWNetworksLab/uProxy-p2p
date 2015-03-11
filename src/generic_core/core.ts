@@ -441,7 +441,6 @@ class uProxyCore implements uProxy.CoreAPI {
 
   public getLogs = () : Promise<string[]> => {
     return freedom['loggingprovider']().getLogs().then((logs) => {
-      console.log(logs);
       return logs;
     });
   }
