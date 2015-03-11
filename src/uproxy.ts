@@ -41,7 +41,8 @@ module uProxy {
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
     UPDATE_GLOBAL_SETTINGS,
-    SEND_FEEDBACK
+    SEND_FEEDBACK,
+    GET_LOGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
