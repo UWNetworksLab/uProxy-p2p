@@ -12,6 +12,7 @@ var uProxy = require('uproxy.js').uProxy;
 var { Ci, Cc, Cr } = require("chrome");
 var self = require("sdk/self");
 var events = require("sdk/system/events");
+var notifications = require('sdk/notifications')
 
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
@@ -60,6 +61,10 @@ function setUpConnection(freedom, panel, button) {
       url = self.data.url(url);
     }
     win.gBrowser.selectedTab = win.gBrowser.addTab(url);
+  });
+
+  panel.port.on('showNotification', function(notification) {
+    notifications.notify(notification);
   });
 }
 
