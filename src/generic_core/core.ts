@@ -53,10 +53,18 @@ class UIConnector implements uProxy.UIAPI {
    */
   public update = (type:uProxy.Update, data?:any) => {
     var printableType :string = uProxy.Update[type];
-    log.debug('sending message to UI', {
-      type: printableType,
-      data: data
-    });
+    if (type == uProxy.Update.COMMAND_FULFILLED
+      && data['command'] == uProxy.Command.GET_LOGS){
+      log.debug('sending logs to UI', {
+        type: printableType,
+        data: 'logs not printed to prevent duplication if logs are sent again.'
+      });
+    } else {
+      log.debug('sending message to UI', {
+        type: printableType,
+        data: data
+      });
+    }
     bgAppPageChannel.emit('' + type, data);
   }
 
@@ -177,7 +185,8 @@ class uProxyCore implements uProxy.CoreAPI {
       handler(args.data).then(
         (argsForCallback ?:any) => {
           ui.update(uProxy.Update.COMMAND_FULFILLED,
-              { promiseId: args.promiseId,
+              { command: cmd,
+                promiseId: args.promiseId,
                 argsForCallback: argsForCallback });
         },
         (errorForCallback :Error) => {
