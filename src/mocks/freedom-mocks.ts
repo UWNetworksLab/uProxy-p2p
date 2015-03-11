@@ -107,6 +107,7 @@ class MockSocial {
 
 class MockLoggingProvider {
   public setConsoleFilter = (filter:string) : void => {}
+  public setBufferedLogFilter = (filter:string) : void => {}
 }  // class MockLoggingProvider
 
 var freedom = MockChannel;
