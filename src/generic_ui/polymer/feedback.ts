@@ -47,9 +47,15 @@ Polymer({
     ui.view = uProxy.View.ROSTER;
   },
   viewLogs: function() {
-    var url = 'data:text/html;charset=UTF-8,'
-        + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + this.logs + '</pre></html>');
-    this.ui.openTab(url);
+    core.getLogs().then((logs) => {
+      this.logs = '';
+      for (var i = 0; i < logs.length; i++) {
+        this.logs += logs[i] + '\n';
+      }
+      var url = 'data:text/html;charset=UTF-8,'
+          + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + this.logs + '</pre></html>');
+      this.ui.openTab(url);
+    });
   },
   ready: function() {}
 });

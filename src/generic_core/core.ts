@@ -21,6 +21,7 @@
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 freedom['loggingprovider']().setConsoleFilter(['*:I']);
+freedom['loggingprovider']().setBufferedLogFilter(['*:D']);
 
 declare var UPROXY_VERSION;
 
@@ -433,9 +434,16 @@ class uProxyCore implements uProxy.CoreAPI {
       'https://www.uproxy.org/submit-feedback?'
         + 'email=' + encodeURIComponent(feedback.email) + '&'
         + 'feedback=' + encodeURIComponent(feedback.feedback) + '&'
-        + 'logs=' + encodeURIComponent(feedback.logs);
+        + 'logs=' + encodeURIComponent('logsPlaceholder');
     xhr.open('POST', postRequest, true);
     xhr.send();
+  }
+
+  public getLogs = () : Promise<string[]> => {
+    return freedom['loggingprovider']().getLogs().then((logs) => {
+      console.log(logs);
+      return logs;
+    });
   }
 }  // class uProxyCore
 
@@ -495,6 +503,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogs);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
