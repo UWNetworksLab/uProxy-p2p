@@ -54,7 +54,7 @@ class UIConnector implements uProxy.UIAPI {
   public update = (type:uProxy.Update, data?:any) => {
     var printableType :string = uProxy.Update[type];
     if (type == uProxy.Update.COMMAND_FULFILLED
-      && data['command'] == uProxy.Command.GET_LOGS){
+        && data['command'] == uProxy.Command.GET_LOGS){
       log.debug('sending logs to UI', {
         type: printableType,
         data: 'logs not printed to prevent duplication if logs are sent again.'
