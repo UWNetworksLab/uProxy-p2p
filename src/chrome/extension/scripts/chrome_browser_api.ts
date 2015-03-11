@@ -204,7 +204,7 @@ class ChromeBrowserApi implements BrowserAPI {
   public showNotification = (notificationText :string) => {
     var notification =
         new Notification('uProxy', { body: notificationText,
-                         icon: 'icons/38_' + UI.DEFAULT_ICON});
+                         icon: 'icons/38_' + Constants.DEFAULT_ICON});
     setTimeout(function() {
       notification.close();
     }, 5000);

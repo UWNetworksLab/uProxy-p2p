@@ -469,6 +469,7 @@ module.exports = (grunt) ->
               'build/compile-src/uproxy.js'
               'build/compile-src/generic/version.js'
               'build/compile-src/mocks/chrome_mocks.js'
+              'build/compile-src/generic_ui/scripts/constants.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
               'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
@@ -547,6 +548,7 @@ module.exports = (grunt) ->
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/uproxy.js'
+              'build/compile-src/generic_ui/scripts/constants.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
             ]
