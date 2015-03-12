@@ -65,6 +65,20 @@ uproxy-bubble::shadow #done {
     #done {
       background-color: #222;
     }
+
+    /* styling for any bubble with error class */
+    :host(.error) {
+      opacity: 1;
+    }
+    :host(.error) #box {
+      background: firebrick;
+    }
+    :host(.error) #arrow {
+      border-bottom-color: firebrick;
+    }
+    :host(.error) #done {
+      background: #CC2727;
+    }
     </style>
 
     <div id='container'>
