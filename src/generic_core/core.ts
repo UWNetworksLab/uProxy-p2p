@@ -438,19 +438,34 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
-    var xhr = freedom["core.xhr"]();
-    var postRequest =
-      'https://www.uproxy.org/submit-feedback?'
-        + 'email=' + encodeURIComponent(feedback.email) + '&'
-        + 'feedback=' + encodeURIComponent(feedback.feedback) + '&'
-        + 'logs=' + encodeURIComponent('logsPlaceholder');
-    xhr.open('POST', postRequest, true);
-    xhr.send();
+    var sendXhr = (logs) : void => {
+      var xhr = freedom["core.xhr"]();
+      var params = JSON.stringify(
+        {'email' : feedback.email,
+         'feedback' : feedback.feedback,
+          'logs' : logs});
+      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
+      xhr.send({'string': params});
+    }
+    if (feedback.logs) {
+      this.getLogs().then((formattedLogs) => {
+        sendXhr(formattedLogs);
+      });
+    } else {
+      sendXhr('');
+    }
   }
 
-  public getLogs = () : Promise<string[]> => {
+  public getLogs = () : Promise<string> => {
     return freedom['loggingprovider']().getLogs().then((logs) => {
-      return logs;
+      var formattedLogs = '';
+      for (var i = 0; i < logs.length; i++) {
+        formattedLogs += logs[i] + '\n';
+      }
+      return formattedLogs;
     });
   }
 }  // class uProxyCore
