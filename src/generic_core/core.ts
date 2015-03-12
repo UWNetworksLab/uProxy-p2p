@@ -454,6 +454,9 @@ class uProxyCore implements uProxy.CoreAPI {
          'feedback' : feedback.feedback,
           'logs' : ''});
       xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
       xhr.send({'string': params});
     }
   }
