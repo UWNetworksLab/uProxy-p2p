@@ -9,15 +9,10 @@ Polymer({
   },
   sendFeedback: function() {
     // TODO: Get and send real logs.
-    if (this.$.logCheckbox.checked) {
-      this.logs = 'placeholder';
-    } else {
-      this.logs = 'none'
-    }
     core.sendFeedback({
       email: this.email,
       feedback: this.feedback,
-      logs: this.logs
+      logs: this.$.logCheckbox.checked
     });
     // Reset the placeholders, which seem to be cleared after the
     // user types input in the input fields.
@@ -48,12 +43,8 @@ Polymer({
   },
   viewLogs: function() {
     core.getLogs().then((logs) => {
-      this.logs = '';
-      for (var i = 0; i < logs.length; i++) {
-        this.logs += logs[i] + '\n';
-      }
       var url = 'data:text/html;charset=UTF-8,'
-          + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + this.logs + '</pre></html>');
+          + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + logs + '</pre></html>');
       this.ui.openTab(url);
     });
   },
