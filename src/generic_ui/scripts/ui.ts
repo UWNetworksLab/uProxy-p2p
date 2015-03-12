@@ -161,6 +161,23 @@ module UI {
         console.log('Received uProxy.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
         model.globalSettings = state['globalSettings'];
+        if (state['onlineNetwork'] == null) {
+          return;
+        }
+
+        model.onlineNetwork = {
+          name:   state['onlineNetwork'].name,
+          userId: state['onlineNetwork'].profile.userId,
+          userName: state['onlineNetwork'].profile.name,
+          imageData: state['onlineNetwork'].profile.imageData,
+          roster: {},
+          hasContacts: false
+        };
+        ui.view = uProxy.View.ROSTER;
+
+        for (var userId in state['onlineNetwork'].roster) {
+          this.syncUser(state['onlineNetwork'].roster[userId]);
+        }
       });
 
       // Add or update the online status of a network.
