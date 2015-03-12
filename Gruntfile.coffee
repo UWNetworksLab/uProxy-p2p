@@ -561,15 +561,17 @@ module.exports = (grunt) ->
                 dir: 'build/coverage/generic_ui'
       }
 
-    compress:
-      main:
+    'mozilla-addon-sdk':
+      'latest':
         options:
-          mode: 'zip'
-          archive: 'dist/uproxy.xpi'
-        expand: true
-        cwd: 'build/dev/firefox'
-        src: ['**']
-        dest: '.'
+          dest_dir: '.mozilla_addon_sdk/'
+
+    'mozilla-cfx-xpi':
+      'dist':
+        options:
+          'mozilla-addon-sdk': 'latest'
+          extension_dir: 'build/dev/firefox'
+          dist_dir: 'dist/'
 
     vulcanize:
       chromeExtInline:
@@ -606,16 +608,16 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
-    clean: ['build/**', '.tscache']
+    clean: ['build/', 'dist/', '.tscache']
 
  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-compress'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-shell'
@@ -697,7 +699,8 @@ module.exports = (grunt) ->
 
   taskManager.add 'build_firefox_xpi', [
     'build_firefox'
-    'compress:main'
+    'mozilla-addon-sdk'
+    'mozilla-cfx-xpi:dist'
   ]
 
   # --- Testing tasks ---
