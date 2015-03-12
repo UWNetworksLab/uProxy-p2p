@@ -445,7 +445,7 @@ class uProxyCore implements uProxy.CoreAPI {
           {'email' : feedback.email,
            'feedback' : feedback.feedback,
             'logs' : formattedLogs});
-        xhr.open('POST', 'https://1-0-3-post-feedback-dot-uproxysite.appspot.com/submit-feedback', true);
+        xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
         xhr.send({'string': params});
       });
     } else {
@@ -453,7 +453,7 @@ class uProxyCore implements uProxy.CoreAPI {
         {'email' : feedback.email,
          'feedback' : feedback.feedback,
           'logs' : ''});
-      xhr.open('POST', 'https://1-0-3-post-feedback-dot-uproxysite.appspot.com/submit-feedback', true);
+      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
       xhr.send({'string': params});
     }
   }
