@@ -157,7 +157,7 @@
 
         <core-icon id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon>
 
-        <uproxy-bubble class='error' hidden?='{{ !ui.copyPasteUrlError }}' on-closed='{{ dismissCopyPasteError }}'>
+        <uproxy-bubble class='error' active='{{ ui.copyPasteUrlError }}' on-closed='{{ dismissCopyPasteError }}'>
           <h3>Cannot open manual connection</h3>
           <p>
             It is not currently possible to open a manual connection at the
@@ -172,7 +172,8 @@
           hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
           on-tap='{{ setShareMode }}'></core-icon-button>
 
-        <uproxy-bubble on-closed='{{ closedSharing }}' hidden?='{{ (model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0) || model.globalSettings.hasSeenSharingEnabledScreen }}'>
+
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
           <h3>Sharing Enabled</h3>
           <p>This icon means you're available for sharing access with friends you've offered access to.</p>
         </uproxy-bubble>
@@ -185,7 +186,7 @@
         </div>
       </core-toolbar>
 
-      <uproxy-bubble on-closed='{{ closedWelcome }}' hidden?='{{ model.globalSettings.hasSeenWelcome }}'>
+      <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
         <h3>Welcome to uProxy!</h3>
         <p>
           To get started, choose "Get access" or "Share access" and then click
