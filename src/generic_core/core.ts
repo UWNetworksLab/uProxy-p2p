@@ -438,26 +438,24 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
-    var xhr = freedom["core.xhr"]();
-    if (feedback.logs) {
-      this.getLogs().then((formattedLogs) => {
-        var params = JSON.stringify(
-          {'email' : feedback.email,
-           'feedback' : feedback.feedback,
-            'logs' : formattedLogs});
-        xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
-        xhr.send({'string': params});
-      });
-    } else {
+    var sendXhr = (logs) : void => {
+      var xhr = freedom["core.xhr"]();
       var params = JSON.stringify(
         {'email' : feedback.email,
          'feedback' : feedback.feedback,
-          'logs' : ''});
+          'logs' : logs});
       xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
       // core.xhr requires the parameters to be tagged as either a
       // string or array buffer in the format below.
       // This is roughly equivalent to standard xhr.send(params).
       xhr.send({'string': params});
+    }
+    if (feedback.logs) {
+      this.getLogs().then((formattedLogs) => {
+        sendXhr(formattedLogs);
+      });
+    } else {
+      sendXhr('');
     }
   }
 
