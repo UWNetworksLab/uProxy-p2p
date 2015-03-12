@@ -90,10 +90,8 @@ Polymer({
     this.ui = ui;
     this.uProxy = uProxy;
     if(ui.browserApi.browserSpecificElement){
-      var div = document.createElement("div");
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
-      div.innerHTML = browserCustomElement.outerHTML;
-      this.$.browserElementContainer.appendChild(div.childNodes[0]);
+      this.$.browserElementContainer.appendChild(browserCustomElement);
     }
   },
 
