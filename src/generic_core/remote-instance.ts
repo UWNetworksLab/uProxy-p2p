@@ -41,8 +41,6 @@ module Core {
     public localGettingFromRemote = GettingState.NONE;
     public localSharingWithRemote = SharingState.NONE;
 
-    // TODO: save/load this from storage...  Or just set it from the instance
-    // message?
     public wireConsentFromRemote :uProxy.ConsentWireState = {
       isRequesting: false,
       isOffering: false
