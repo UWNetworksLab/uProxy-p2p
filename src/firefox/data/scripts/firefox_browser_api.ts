@@ -52,6 +52,9 @@ class FirefoxBrowserApi implements BrowserAPI {
   }
 
   public showNotification = (notificationText :string) => {
-    // TODO implement!
+    port.emit('showNotification', {
+      text: notificationText,
+      iconURL: './icons/128_online.png'
+    });
   }
 }
