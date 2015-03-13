@@ -9,16 +9,19 @@ import SignallingMessage = peerconnection.SignallingMessage;
 import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
-var log :logging.Log = new logging.Log('copypaste-socks');
+export var loggingController = freedom['loggingcontroller']();
+loggingController.setConsoleFilter(['*:D']);
+
+export var log :logging.Log = new logging.Log('copypaste-socks');
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                  {urls: ['stun:stun1.l.google.com:19302']}]
 };
 
-var parentModule = freedom();
+export var parentModule = freedom();
 
-function connectDataChannel(d:DataChannel) {
+export function connectDataChannel(d:DataChannel) {
   d.dataFromPeerQueue.setSyncHandler((data:Data) => {
     parentModule.emit('messageFromPeer', data.str);
   });
@@ -30,7 +33,7 @@ function connectDataChannel(d:DataChannel) {
   });
 }
 
-function makePeerConnection() : PeerConnection<SignallingMessage> {
+export function makePeerConnection() : PeerConnection<SignallingMessage> {
   var pc :PeerConnection<SignallingMessage> =
       peerconnection.createPeerConnection(pcConfig);
 
@@ -57,7 +60,7 @@ function makePeerConnection() : PeerConnection<SignallingMessage> {
   return pc;
 }
 
-var pc :PeerConnection<SignallingMessage>;
+export var pc :PeerConnection<SignallingMessage>;
 
 parentModule.on('start', () => {
   pc = makePeerConnection();

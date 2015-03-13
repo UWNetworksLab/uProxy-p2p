@@ -6,6 +6,12 @@
       "freedom-module.static.js"
     ]
   },
+  "dependencies": {
+    "loggingcontroller": {
+      "url": "uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    }
+  },
   "permissions": [
     "core.rtcdatachannel",
     "core.rtcpeerconnection"
