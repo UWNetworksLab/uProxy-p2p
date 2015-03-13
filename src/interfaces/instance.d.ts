@@ -13,20 +13,16 @@
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
-interface ConsentMessage {
-  instanceId :string;
-  consent    :uProxy.ConsentWireState;
-}
-
 interface NetworkInfo {
   name :string;
   userId :string;
 }
+
 /**
  * InstancePath is required to retrieve Instance objects.
  */
 interface InstancePath {
-  network :NetworkInfo
+  network :NetworkInfo;
   userId :string;
   instanceId :string;
 }
@@ -46,7 +42,6 @@ interface LocalPeerId {
 interface Instance {
   instanceId  :string;
   keyHash     :string;
-  consent     ?:uProxy.ConsentState;
   status      ?:string; // Status on social network e.g. online or offline.
   notify      ?:boolean;   // TODO: replace with better notications
 }
@@ -58,10 +53,6 @@ interface Instance {
 interface InstanceHandshake {
   instanceId  :string;
   keyHash     :string;
+  consent    :uProxy.ConsentWireState;
   description ?:string;  // TODO: Determine if description is actually optional.
-}
-
-interface InstanceMessage {
-  handshake :InstanceHandshake;
-  consent   :uProxy.ConsentWireState
 }

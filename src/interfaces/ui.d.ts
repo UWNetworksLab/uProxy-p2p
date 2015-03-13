@@ -26,10 +26,10 @@ declare module UI {
   export interface UserMessage {
     network   :string;
     user      :UserProfileMessage;
-    instances :UI.Instance[];
+    userConsent  :uProxy.UserConsentState;
+    offeringInstances ?:UI.Instance[];
+    allInstanceIds ?:string[];
   }
-
-
 
   /**
    * Proxy-state message is sent from the Core to the UI to indicate changes in
@@ -49,7 +49,6 @@ declare module UI {
   export interface Instance {
     instanceId             :string;
     description            :string;
-    consent                :uProxy.ConsentState;
     localGettingFromRemote :GettingState;
     localSharingWithRemote :SharingState;
     isOnline               :boolean;

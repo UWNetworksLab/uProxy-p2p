@@ -1,70 +1,60 @@
 module Consent {
   var log :Logging.Log = new Logging.Log('consent');
 
-  // User-level consent state w.r.t. a remote instance. This state is stored
-  // in local storage for each instance ID we know of.
-  export class State implements uProxy.ConsentState {
-    // Local user's relationship with remote instance.
-    localGrantsAccessToRemote :boolean;
+  export class UserState implements uProxy.UserConsentState {
+    // Requesting get access is per user.
+    // If the user is requesting, this should remain true even after we have
+    // been granted access to some remote-instances so that we automatically
+    // request from new remote instances of the same user.
     localRequestsAccessFromRemote :boolean;
 
-    // Cached values from remote user's instance sent over signalling channel.
-    remoteGrantsAccessToLocal :boolean;
-    remoteRequestsAccessFromLocal :boolean;
-
-    // Local user's UI controls for remote requests and offers.
-    ignoringRemoteUserRequest :boolean;
+    // When I ignore an offer from Bob, I will ignore it for all instances.
+    // This mirrors request access, where requesting from Bob is for all of
+    // Bob's instances.
     ignoringRemoteUserOffer :boolean;
 
+    // All sharing actions are per user.
+    localGrantsAccessToRemote :boolean;
+    remoteRequestsAccessFromLocal :boolean;
+    ignoringRemoteUserRequest :boolean;
+
     constructor() {
-      this.localGrantsAccessToRemote = false;
       this.localRequestsAccessFromRemote = false;
-      this.remoteGrantsAccessToLocal = false;
+      this.ignoringRemoteUserOffer = false;
+      this.localGrantsAccessToRemote = false;
       this.remoteRequestsAccessFromLocal = false;
       this.ignoringRemoteUserRequest = false;
-      this.ignoringRemoteUserOffer = false;
     }
-
-    // TODO(jetpack): what about setting ignoring* vals to true when
-    // corresponding local* vals are already true? we could:
-    // - set the local* val to false
-    // - ignore attempt to set ignoring* val
-    // - allow ignoring* to be true when local* is true
-  }
-
-  export function updateStateFromRemoteState(state :State, remoteState :uProxy.ConsentWireState) {
-    state.remoteRequestsAccessFromLocal = remoteState.isRequesting;
-    state.remoteGrantsAccessToLocal = remoteState.isOffering;
   }
 
   // Returns false on invalid actions.
-  export function handleUserAction(state :State, action :uProxy.ConsentUserAction) :boolean {
+  export function handleUserAction(userState :UserState, action :uProxy.ConsentUserAction) :boolean {
     switch(action) {
       case uProxy.ConsentUserAction.OFFER:
-        state.localGrantsAccessToRemote = true;
-        state.ignoringRemoteUserRequest = false;
+        userState.localGrantsAccessToRemote = true;
+        userState.ignoringRemoteUserRequest = false;
         break;
       case uProxy.ConsentUserAction.CANCEL_OFFER:
-        state.localGrantsAccessToRemote = false;
+        userState.localGrantsAccessToRemote = false;
         break;
       case uProxy.ConsentUserAction.IGNORE_REQUEST:
-        state.ignoringRemoteUserRequest = true;
+        userState.ignoringRemoteUserRequest = true;
         break;
       case uProxy.ConsentUserAction.UNIGNORE_REQUEST:
-        state.ignoringRemoteUserRequest = false;
+        userState.ignoringRemoteUserRequest = false;
         break;
       case uProxy.ConsentUserAction.REQUEST:
-        state.localRequestsAccessFromRemote = true;
-        state.ignoringRemoteUserOffer = false;
+        userState.localRequestsAccessFromRemote = true;
+        userState.ignoringRemoteUserOffer = false;
         break;
       case uProxy.ConsentUserAction.CANCEL_REQUEST:
-        state.localRequestsAccessFromRemote = false;
+        userState.localRequestsAccessFromRemote = false;
         break;
       case uProxy.ConsentUserAction.IGNORE_OFFER:
-        state.ignoringRemoteUserOffer = true;
+        userState.ignoringRemoteUserOffer = true;
         break;
       case uProxy.ConsentUserAction.UNIGNORE_OFFER:
-        state.ignoringRemoteUserOffer = false;
+        userState.ignoringRemoteUserOffer = false;
         break;
       default:
         log.warn('Invalid uProxy.ConsentUserAction', action);

@@ -12,13 +12,16 @@ module UI {
    */
   export class User implements BaseUser {
 
-    public name            :string;
-    public imageData       :string;
-    public isGettingFromMe :boolean = false;
-    public isSharingWithMe :boolean = false;
+    public name              :string;
+    public imageData         :string;
+    public isGettingFromMe   :boolean = false;
+    public isSharingWithMe   :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
-    public instances       :UI.Instance[];
+    public offeringInstances :UI.Instance[];
+    public allInstanceIds :string[];
+
+    public userConsent  :uProxy.UserConsentState;
 
     /**
      * Initialize the user to an 'empty' default.
@@ -26,7 +29,7 @@ module UI {
     constructor(public userId :string, public network :UI.Network) {
       console.log('new user: ' + this.userId);
       this.name = '';
-      this.instances = [];
+      this.offeringInstances = [];
     }
 
     /**
@@ -46,34 +49,38 @@ module UI {
     // CONSIDER: Avoid strings for values and string-param dependencies
     // https://github.com/uProxy/uproxy/issues/769
     public getCategories = () : UI.UserCategories => {
+      // TODO: we can't just search offeringInstances for isOnline
+      // it should probably be something sent from the app as part of the user
       var isOnline = false;
+      for (var i = 0; i < this.offeringInstances.length; ++i) {
+        if (this.offeringInstances[i].isOnline) {
+          isOnline = true;
+          break;
+        }
+      }
+
       var isTrustedForSharing = false;
       var isTrustedForGetting = false;
       var isPendingForSharing = false;
       var isPendingForGetting = false;
-      for (var i = 0; i < this.instances.length; ++i) {
-        var instance = this.instances[i];
-        if (instance.isOnline) {
-          isOnline = true;
-        }
-        // Share tab.
-        if (instance.consent.remoteRequestsAccessFromLocal &&
-            !instance.consent.ignoringRemoteUserRequest &&
-            !instance.consent.localGrantsAccessToRemote) {
-          isPendingForSharing = true;
-        }
-        if (instance.consent.localGrantsAccessToRemote) {
-          isTrustedForSharing = true;
-        }
-        // Get tab.
-        if (instance.consent.remoteGrantsAccessToLocal &&
-            !instance.consent.ignoringRemoteUserOffer &&
-            !instance.consent.localRequestsAccessFromRemote) {
-          isPendingForGetting = true;
-        }
-        if (instance.consent.localRequestsAccessFromRemote) {
-          isTrustedForGetting = true;
-        }
+
+      // Share tab.
+      if (this.userConsent.remoteRequestsAccessFromLocal &&
+          !this.userConsent.ignoringRemoteUserRequest &&
+          !this.userConsent.localGrantsAccessToRemote) {
+        isPendingForSharing = true;
+      }
+      if (this.userConsent.localGrantsAccessToRemote) {
+        isTrustedForSharing = true;
+      }
+      // Get tab.
+      if (this.offeringInstances.length > 0 &&
+          !this.userConsent.ignoringRemoteUserOffer &&
+          !this.userConsent.localRequestsAccessFromRemote) {
+        isPendingForGetting = true;
+      }
+      if (this.userConsent.localRequestsAccessFromRemote) {
+        isTrustedForGetting = true;
       }
 
       // Convert booleans into strings.
@@ -98,12 +105,12 @@ module UI {
     }
 
     public updateInstanceDescriptions = () => {
-      if (this.instances.length <= 1) {
+      if (this.offeringInstances.length <= 1) {
         // Leave descriptions unchanged if there are 0 or 1 instances.
         return;
       }
-      for (var i = 0; i < this.instances.length; ++i) {
-        var instance = this.instances[i];
+      for (var i = 0; i < this.offeringInstances.length; ++i) {
+        var instance = this.offeringInstances[i];
         if (!instance.description) {
           // Set description to "Computer 1", "Computer 2", etc.
           instance.description = 'Computer ' + (i + 1);
