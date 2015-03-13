@@ -50,7 +50,7 @@
     </style>
     <div id='cptoolbar'>
       <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
-        <core-icon icon="arrow-back" on-tap='{{prev}}' />
+        <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection

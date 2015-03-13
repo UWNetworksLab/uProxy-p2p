@@ -93,10 +93,10 @@ FILES =
     'webrtc/peerconnection.js'
   ]
   thirdPartyUi: [
-    'lodash/**',
-    'platform/**',
-    'polymer/**',
-    'webcomponentsjs/**'
+    'platform/platform.js',
+    'polymer/polymer.html',
+    'polymer/polymer.js',
+    'webcomponentsjs/**.min.js'
   ]
 
 
@@ -183,20 +183,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
-      # Copy any JavaScript from the third_party directory
-      thirdPartyJavaScript: { files: [ {
-          expand: true,
-          src: [
-            'third_party/freedom-ts-hacks/*.js',
-            'third_party/lib/core-component-page/**/*.js',
-            'third_party/lib/platform/**/*.js',
-            'third_party/lib/polymer/**/*.js',
-            'third_party/lib/webcomponentsjs/**/*.js'
-            ]
-          dest: 'build/'
-          onlyIf: 'modified'
-        } ] }
-
       # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
         nonull: true
@@ -241,6 +227,7 @@ module.exports = (grunt) ->
             ]
           dest: chromeExtDevPath + 'scripts/'
         }, {
+          # Copy third party UI files required for polymer.
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
