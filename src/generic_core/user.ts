@@ -519,7 +519,6 @@ module Core {
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
         if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
-          // TODO: test this
           for (var instanceId in this.instances_) {
             if (this.instances_[instanceId].localSharingWithRemote ==
                 SharingState.SHARING_ACCESS) {
