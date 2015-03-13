@@ -589,13 +589,10 @@ module UI {
         oldUserCategories = user.getCategories();
       }
 
-      user.update(profile);
-      user.userConsent = payload.userConsent;
-      user.offeringInstances = payload.offeringInstances;
-      user.allInstanceIds = payload.allInstanceIds;
-      user.updateInstanceDescriptions();
-      for (var i = 0; i < user.allInstanceIds.length; ++i) {
-        this.mapInstanceIdToUser_[user.allInstanceIds[i]] = user;
+      user.update(payload);
+
+      for (var i = 0; i < payload.allInstanceIds.length; ++i) {
+        this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
       }
 
       var newUserCategories = user.getCategories();

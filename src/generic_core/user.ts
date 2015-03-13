@@ -278,15 +278,16 @@ module Core {
 
       // Create or update the Instance object.
       var instance = this.instances_[instanceId];
-      if (instance) {
-        instance.update(instanceHandshake);
-      } else {
+      if (!instance) {
         // Create a new instance.
-        instance = new Core.RemoteInstance(this, instanceId, instanceHandshake);
+        instance = new Core.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
       }
-      this.saveToStorage();
-      this.notifyUI();
+      instance.onceLoaded.then(() => {
+        instance.update(instanceHandshake);
+        this.saveToStorage();
+        this.notifyUI();
+      });
     }
 
     /**
@@ -326,6 +327,7 @@ module Core {
         this.profile.name = this.name;
       }
 
+      var isOnline = false;
       var offeringInstanceStatesForUi = [];
       var allInstanceIds = [];
       var totalInstanceCount = 0;
@@ -335,6 +337,9 @@ module Core {
         var instance = this.instances_[instanceId];
         if (instance.wireConsentFromRemote.isOffering) {
           offeringInstanceStatesForUi.push(instance.currentStateForUi());
+        }
+        if (!isOnline && this.isInstanceOnline(instanceId)) {
+          isOnline = true;
         }
       }
       if (totalInstanceCount === 0) {
@@ -359,7 +364,8 @@ module Core {
         },
         userConsent: this.userConsent,
         offeringInstances: offeringInstanceStatesForUi,
-        allInstanceIds: allInstanceIds
+        allInstanceIds: allInstanceIds,
+        isOnline: isOnline
       };
     }
     /**
@@ -436,8 +442,16 @@ module Core {
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
-          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId, null);
+          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId);
         }
+      }
+
+      if (state.userConsent) {
+        this.userConsent = state.userConsent;
+      } else {
+        log.error(
+            'Error loading consent from storage for user ' + this.userId,
+            state);
       }
     }
 
@@ -445,7 +459,8 @@ module Core {
       return cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
-        instanceIds: Object.keys(this.instances_)
+        instanceIds: Object.keys(this.instances_),
+        userConsent: this.userConsent
       });
     }
 
@@ -493,36 +508,38 @@ module Core {
      * remote instance afterwards.
      */
     public modifyConsent = (action :uProxy.ConsentUserAction) => {
-      if (!Consent.handleUserAction(this.userConsent, action)) {
-        log.warn('Invalid user action on consent', {
-          userConsent: this.userConsent,
-          action: action
-        });
-        return;
-      }
-      // If remote is currently an active client, but user revokes access, also
-      // stop the proxy session.
-      if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
-        // TODO: test this
-        for (var instanceId in this.instances_) {
-          if (this.instances_[instanceId].localSharingWithRemote ==
-              SharingState.SHARING_ACCESS) {
-            this.instances_[instanceId].connection.stopShare();
+      this.onceLoaded.then(() => {
+        if (!Consent.handleUserAction(this.userConsent, action)) {
+          log.warn('Invalid user action on consent', {
+            userConsent: this.userConsent,
+            action: action
+          });
+          return;
+        }
+        // If remote is currently an active client, but user revokes access, also
+        // stop the proxy session.
+        if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
+          // TODO: test this
+          for (var instanceId in this.instances_) {
+            if (this.instances_[instanceId].localSharingWithRemote ==
+                SharingState.SHARING_ACCESS) {
+              this.instances_[instanceId].connection.stopShare();
+            }
           }
         }
-      }
 
-      // Send new consent bits to all remote clients, and save to storage.
-      for (var instanceId in this.instances_) {
-        if (this.isInstanceOnline(instanceId)) {
-          this.onceLoaded.then(() => {
-            this.sendInstanceHandshake(this.instanceToClient(instanceId));
-          });
+        // Send new consent bits to all remote clients, and save to storage.
+        for (var instanceId in this.instances_) {
+          if (this.isInstanceOnline(instanceId)) {
+            this.onceLoaded.then(function (instanceId) {
+              this.sendInstanceHandshake(this.instanceToClient(instanceId));
+            }.bind(this, instanceId));
+          }
         }
-      }
-      this.saveToStorage();
-      // Send an update to the UI.
-      this.notifyUI();
+        this.saveToStorage();
+        // Send an update to the UI.
+        this.notifyUI();
+      });
     }
 
     public updateRemoteRequestsAccessFromLocal = () => {
@@ -545,6 +562,7 @@ module Core {
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
+    userConsent :Consent.UserState;
   }
 
 }  // module uProxy

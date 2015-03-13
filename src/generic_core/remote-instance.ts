@@ -81,19 +81,8 @@ module Core {
     constructor(
         // The User which this instance belongs to.
         public user :Core.User,
-        public instanceId :string,
-        // The last instance handshake from the peer.  This data may be fresh
-        // (over the wire) or recovered from disk (and stored in a
-        // RemoteInstanceState, which subclasses InstanceHandshake).
-        data        :InstanceHandshake) {
+        public instanceId :string) {
       this.connection = new Core.RemoteConnection(this.handleConnectionUpdate_);
-
-      // Load consent state if it exists.  The consent state does not exist when
-      // processing an initial instance handshake, only when restoring one from
-      // storage.
-      if (data) {
-        this.update(data);
-      }
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
@@ -224,12 +213,10 @@ module Core {
      * Assumes that |data| actually belongs to this instance.
      */
     public update = (data :InstanceHandshake) => {
-      this.onceLoaded.then(() => {
-        this.keyHash = data.keyHash;
-        this.description = data.description;
-        this.updateConsent_(data.consent);
-        this.saveToStorage();
-      });
+      this.keyHash = data.keyHash;
+      this.description = data.description;
+      this.updateConsent_(data.consent);
+      this.saveToStorage();
     }
 
     public updateConsent_ = (bits: uProxy.ConsentWireState) => {

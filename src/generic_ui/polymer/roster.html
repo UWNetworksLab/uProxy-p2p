@@ -67,7 +67,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ui.mode==UI.Mode.GET ? "Offers" : "Requests"}}'
+          groupTitle='{{globalSettings.mode==uProxy.Mode.GET ? "Offers" : "Requests"}}'
           onlineContacts='{{ onlinePending }}'
           offlineContacts='{{ offlinePending }}'
           searchQuery='{{ searchQuery }}'

@@ -6,14 +6,7 @@ Polymer({
     expanded: false
   },
   toggle: function() {
-    console.log('this.contact.offeringInstances: ', this.contact.offeringInstances);
-    console.log('this.contact.offeringInstances.length: ', this.contact.offeringInstances.length);
-    if (this.contact.offeringInstances.length == 0) {
-      this.contact.expanded = false;
-    } else {
-      this.contact.expanded = !this.contact.expanded;
-    }
-    console.log('toggle', this.contact.expanded);
+    this.contact.expanded = !this.contact.expanded;
   },
   collapse: function() {
     this.contact.expanded = false;
@@ -23,6 +16,8 @@ Polymer({
     this.ui = ui;
     this.uProxy = uProxy;
     this.globalSettings = model.globalSettings;
+    this.GettingConsentState = UI.GettingConsentState;
+    this.SharingConsentState = UI.SharingConsentState;
     if (!this.contact.pic) {
       this.contact.pic = '../icons/contact-default.png';
     }

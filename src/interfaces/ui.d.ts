@@ -29,6 +29,7 @@ declare module UI {
     userConsent  :uProxy.UserConsentState;
     offeringInstances ?:UI.Instance[];
     allInstanceIds ?:string[];
+    isOnline  :boolean;
   }
 
   /**
