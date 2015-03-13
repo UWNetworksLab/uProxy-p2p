@@ -10,9 +10,11 @@ import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setConsoleFilter(['*:D']);
+loggingController.setConsoleFilter(['*:I']);
+loggingController.setBufferedLogFilter(['*:D']);
 
-export var log :logging.Log = new logging.Log('copypaste-socks');
+export var moduleName = 'copypaste-socks';
+export var log :logging.Log = new logging.Log(moduleName);
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
@@ -42,9 +44,9 @@ export function makePeerConnection() : PeerConnection<SignallingMessage> {
   });
 
   pc.onceConnected.then(() => {
-    log.info(name + ' connected');
+    log.info(moduleName + ' connected');
   }, (e:Error) => {
-    log.error('%1 failed to connect: %2', name, e.message);
+    log.error('%1 failed to connect: %2', moduleName, e.message);
   });
 
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
