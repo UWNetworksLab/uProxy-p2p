@@ -571,7 +571,7 @@ module.exports = (grunt) ->
         options:
           'mozilla-addon-sdk': 'latest'
           extension_dir: 'build/dev/firefox'
-          dist_dir: 'dist/'
+          dist_dir: 'build/dist/'
 
     vulcanize:
       chromeExtInline:
@@ -608,7 +608,7 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
-    clean: ['build/', 'dist/', '.tscache']
+    clean: ['build/', '.tscache']
 
  # grunt.initConfig
 
