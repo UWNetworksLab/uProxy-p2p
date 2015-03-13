@@ -220,7 +220,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
+          src: ['**', '!**/*.md', '!**/*.ts', '!polymer/*.html']
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.

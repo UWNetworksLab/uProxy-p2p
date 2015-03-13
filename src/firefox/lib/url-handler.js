@@ -15,6 +15,7 @@ exports.setup = function(panel) {
       }
 
       panel.port.emit('handleUrlData', url);
+      panel.port.emit('showPanel');
 
       subject.cancel(Cr.NS_BINDING_ABORTED);
     }
