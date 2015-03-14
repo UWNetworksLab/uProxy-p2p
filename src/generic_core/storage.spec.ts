@@ -9,12 +9,12 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    jasmine.clock().install();
+    // jasmine.clock().install();
   });
 
-  afterEach(() => {
-    jasmine.clock().uninstall();
-  })
+  // afterEach(() => {
+  //   jasmine.clock().uninstall();
+  // })
 
   it('starts with empty storage', (done) => {
     // Delay first test for 1 second, so that writes from previous tests have
@@ -31,11 +31,8 @@ describe('Core.Storage', () => {
         storage.keys().then((keys) => {
           expect(keys).toEqual([]);
         }).then(done);
-        jasmine.clock().tick(1);
       });
-      jasmine.clock().tick(1);
     }, 1000);
-    jasmine.clock().tick(1000);
   });
 
   it('saves and loads to storage', (done) => {
@@ -49,11 +46,8 @@ describe('Core.Storage', () => {
         storage.keys().then((keys) => {
           expect(keys).toEqual(['birds']);
         }).then(done);
-        jasmine.clock().tick(1);
       });
-      jasmine.clock().tick(1);
     });
-    jasmine.clock().tick(1);
   });
 
   it('overrides old keys', (done) => {
