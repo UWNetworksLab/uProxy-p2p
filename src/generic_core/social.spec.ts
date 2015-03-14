@@ -103,12 +103,10 @@ describe('Social.FreedomNetwork', () => {
           'dummy-instance-id/roster/somefriend', ''));
 
       Promise.all(promises).then(() => {
-        console.error('0');  // TODO: remove
         var loginPromise = network.login(false);
         jasmine.clock().tick(1);
         return loginPromise;
       }).then(() => {
-        console.error('1');  // TODO: remove
         expect(network.myInstance).toBeDefined();
         expect(network['myInstance'].userId).toEqual(
             fakeFreedomClient.userId);

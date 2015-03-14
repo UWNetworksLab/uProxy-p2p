@@ -11,13 +11,8 @@ describe('Core.User', () => {
       'getStorePath',
       'notifyUI'
   ]);
-  network['getLocalInstance'] = function() {
-    return { instanceId: 'dummyInstanceId' };
-  };
-  network['send'] = () => {
-    console.error('in spy network send');
-    return Promise.resolve();
-  };
+  network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
+  network['send'] = () => { return Promise.resolve(); };
 
   var user :Core.User;
   var instance :Core.RemoteInstance;
@@ -190,7 +185,6 @@ describe('Core.User', () => {
       var realStorage = new Core.Storage;
       var saved;
       storage.save = function(key, value) {
-        console.error('in storage.save');
         saved = realStorage.save(key, value);
         return saved;
       };
@@ -343,7 +337,7 @@ describe('Core.User', () => {
       });
     });
 
-    it('ignore-requests bit reset after granting', () => {
+    it('ignore-requests bit reset after granting', (done) => {
       user.consent.localGrantsAccessToRemote = false;
       user.consent.ignoringRemoteUserRequest = true;
       user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
@@ -353,17 +347,20 @@ describe('Core.User', () => {
       });
     });
 
-    it('invalid client transitions do not modify consent', () => {
+    it('invalid client transitions do not modify consent', (done) => {
       var emptyConsent = new Consent.State();
 
       user.consent = new Consent.State();
-      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER);
-      expect(user.consent).toEqual(emptyConsent);
-      user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_REQUEST);
-      expect(user.consent).toEqual(emptyConsent);
-
-      // Client consent modifications did not touch proxy consent
-      expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+        expect(user.consent).toEqual(emptyConsent);
+        user.modifyConsent(
+            uProxy.ConsentUserAction.UNIGNORE_REQUEST).then(() => {
+          expect(user.consent).toEqual(emptyConsent);
+          // Client consent modifications did not touch proxy consent
+          expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+          done();
+        });
+      });
     });
   });
 

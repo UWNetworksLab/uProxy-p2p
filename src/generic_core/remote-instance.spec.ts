@@ -18,6 +18,7 @@ describe('Core.RemoteInstance', () => {
       'notifyUI',
       'instanceToClient',
       'sendInstanceHandshake',
+      'updateRemoteRequestsAccessFromLocal'
   ]);
   user.consent = new Consent.State;
 
@@ -65,38 +66,101 @@ describe('Core.RemoteInstance', () => {
       });
     });
 
-   // TODO: make this pass
-    // it ('update waits for loading to complete', (done) => {
-    //   // storage.load = function(key) {
-    //   //   var delay = new Promise((F, R) => {
-    //   //     fulfill = F;
-    //   //   });
-    //   //   return delay.then(() => {
-    //   //     return realStorage.load(instance0.getStorePath());
-    //   //   });
-    //   // }
-    //   // var instance2 = new Core.RemoteInstance(user, 'newInstanceId');
-    //   instance0.update({
-    //     instanceId : 'newInstanceId', keyHash : 'key', description: 'desc',
-    //     consent: {isRequesting: true, isOffering: true}
-    //   }).then(() => {
-    //     console.error('11111');
-    //     expect(instance0.keyHash).toEqual('key');
-    //     expect(instance0.description).toEqual('desc');
-    //     expect(instance0.wireConsentFromRemote.isOffering).toEqual(true);
-    //     expect(instance0.wireConsentFromRemote.isRequesting).toEqual(true);
-    //     // storage = new Core.Storage;
-    //   }).then(done);
-    //   expect(instance0.keyHash).not.toBeDefined();
-    //   expect(instance0.description).not.toBeDefined();
-    //   expect(instance0.wireConsentFromRemote.isOffering).toEqual(false);
-    //   expect(instance0.wireConsentFromRemote.isRequesting).toEqual(false);
-    //   // instance2['fulfillStorageLoad_']();
-    // })
+    it ('update waits for loading to complete', (done) => {
+      instance0.update({
+        instanceId : 'newInstanceId', keyHash : 'key', description: 'desc',
+        consent: {isRequesting: true, isOffering: true}
+      }).then(() => {
+        expect(instance0.keyHash).toEqual('key');
+        expect(instance0.description).toEqual('desc');
+        expect(instance0.wireConsentFromRemote.isOffering).toEqual(true);
+        expect(instance0.wireConsentFromRemote.isRequesting).toEqual(true);
+      }).then(done);
+      expect(instance0.keyHash).not.toBeDefined();
+      expect(instance0.description).not.toBeDefined();
+      expect(instance0.wireConsentFromRemote.isOffering).toEqual(false);
+      expect(instance0.wireConsentFromRemote.isRequesting).toEqual(false);
+    })
   });
 
-  describe('updating consent', () => {
-    // TODO(dborkan): add tests here
+  describe('updating consent from instance handshake', () => {
+    var instance :Core.RemoteInstance;
+
+    beforeEach((done) => {
+      storage = new Core.Storage;
+      storage.reset().then(() => {
+        var network = <Social.Network><any>jasmine.createSpyObj(
+            'network', ['getUser']);
+        network['getStorePath'] = function() { return 'networkPath'; };
+        network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
+        var user = new Core.User(network, 'testUser');
+        user.update({userId: 'testUser', name: 'Alice'});
+        instance = new Core.RemoteInstance(user, 'instanceId1');
+        user['instances_']['instanceId1'] = instance;
+        Promise.all([user.onceLoaded, instance.onceLoaded]).then(done);
+      });
+    });
+
+    it('copies consent from wire', (done) => {
+      expect(instance.wireConsentFromRemote.isOffering).toEqual(false);
+      expect(instance.wireConsentFromRemote.isRequesting).toEqual(false);
+      instance.update({
+        instanceId: 'instanceId1', description: '', keyHash: '',
+        consent: {isOffering: true, isRequesting: true}
+      }).then(() => {
+        expect(instance.wireConsentFromRemote.isOffering).toEqual(true);
+        expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
+        done();
+      });
+    });
+
+    it('notifies UI if isOffering changes when not ignoring', (done) => {
+      spyOn(ui, 'showNotification');
+      instance.update({
+        instanceId: 'instanceId1', description: '', keyHash: '',
+        consent: {isOffering: true, isRequesting: false}
+      }).then(() => {
+        expect(ui.showNotification).toHaveBeenCalledWith(
+            instance.user.name + ' offered you access.')
+        done();
+      });
+    });
+
+    it('does not notify UI if isOffering changes when ignoring', (done) => {
+      instance.user.consent.ignoringRemoteUserOffer = true;
+      spyOn(ui, 'showNotification');
+      instance.update({
+        instanceId: 'instanceId1', description: '', keyHash: '',
+        consent: {isOffering: true, isRequesting: false}
+      }).then(() => {
+        expect(ui.showNotification).not.toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('notifies UI if isRequesting changes when not ignoring', (done) => {
+      spyOn(ui, 'showNotification');
+      instance.update({
+        instanceId: 'instanceId1', description: '', keyHash: '',
+        consent: {isOffering: false, isRequesting: true}
+      }).then(() => {
+        expect(ui.showNotification).toHaveBeenCalledWith(
+            instance.user.name + ' is requesting access.')
+        done();
+      });
+    });
+
+    it('does not notify UI if isRequesting changes when ignoring', (done) => {
+      instance.user.consent.ignoringRemoteUserRequest = true;
+      spyOn(ui, 'showNotification');
+      instance.update({
+        instanceId: 'instanceId1', description: '', keyHash: '',
+        consent: {isOffering: false, isRequesting: true}
+      }).then(() => {
+        expect(ui.showNotification).not.toHaveBeenCalled();
+        done();
+      });
+    });
   });
 
   describe('proxying', () => {

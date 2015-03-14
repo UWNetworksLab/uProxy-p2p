@@ -201,8 +201,8 @@ module Social {
              !(userId in this.roster);
     }
 
-    public getLocalInstance = () : Core.LocalInstance => {
-      return this.myInstance;
+    public getLocalInstanceId = () : string => {
+      return this.myInstance.instanceId;
     }
 
     public getUser = (userId :string) : Core.User => {
@@ -512,7 +512,6 @@ module Social {
                    clientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);
-      console.error('in FreedomNetwork.send');
       log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,

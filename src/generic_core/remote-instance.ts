@@ -214,13 +214,13 @@ module Core {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
-        this.updateConsent_(data.consent);
+        this.updateConsentFromWire_(data.consent);
         this.saveToStorage();
       });
     }
 
-    private updateConsent_ = (bits: uProxy.ConsentWireState) => {
-      var consent = this.user.consent;
+    private updateConsentFromWire_ = (bits: uProxy.ConsentWireState) => {
+      var userConsent = this.user.consent;
 
       // Get old values before updating this.wireConsentFromRemote
       // so we can see what changed.
@@ -230,21 +230,21 @@ module Core {
       // Update this remoteInstance.
       this.wireConsentFromRemote = bits;
 
-      // Requesting access is part of consent, however we may need to
-      // update that based on the new bits.
-      var oldIsRequesting = consent.remoteRequestsAccessFromLocal;
+      // Requesting access is part of consent from the user, however we may
+      // need to update that based on the new bits.
+      var oldIsRequesting = userConsent.remoteRequestsAccessFromLocal;
       this.user.updateRemoteRequestsAccessFromLocal();
-      var newIsRequesting = consent.remoteRequestsAccessFromLocal;
+      var newIsRequesting = userConsent.remoteRequestsAccessFromLocal;
 
       // Fire a notification on the UI, if a state is different.
       // TODO: Determine if we should attach the instance id / decription to the
       // user name as part of the notification text.
       var note = null;
       if (newIsOffering !== oldIsOffering &&
-          !consent.ignoringRemoteUserOffer) {
+          !userConsent.ignoringRemoteUserOffer) {
         if (newIsOffering) {
           // newly granted access
-          note = consent.localRequestsAccessFromRemote ?
+          note = userConsent.localRequestsAccessFromRemote ?
               ' granted you access.' : ' offered you access.';
         } else {
           // newly revoked access
@@ -253,9 +253,9 @@ module Core {
       }
 
       if (newIsRequesting && !oldIsRequesting &&
-          !consent.ignoringRemoteUserRequest) {
+          !userConsent.ignoringRemoteUserRequest) {
         // newly requested/accepted access
-        note = consent.localGrantsAccessToRemote ?
+        note = userConsent.localGrantsAccessToRemote ?
             ' has accepted your offer of access.' : ' is requesting access.';
       }
 

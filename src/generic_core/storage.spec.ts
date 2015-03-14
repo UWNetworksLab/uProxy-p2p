@@ -42,14 +42,11 @@ describe('Core.Storage', () => {
     storage.save('birds', {
       'can': 'chirp'
     }).then(() => {
-      console.error('storage.load is: ' + storage.load);  // TODO: remove
       storage.load('birds').then((result) => {
-        console.error('222');  // TODO: remove
         expect(result).toEqual({
           'can': 'chirp'
         });
         storage.keys().then((keys) => {
-          console.error('333');  // TODO: remove
           expect(keys).toEqual(['birds']);
         }).then(done);
         jasmine.clock().tick(1);

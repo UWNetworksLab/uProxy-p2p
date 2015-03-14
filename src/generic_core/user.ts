@@ -239,7 +239,7 @@ module Core {
      * user running uProxy.  We should clean this up somehow.
      */
     public getLocalInstanceId = () : string => {
-      return this.network.getLocalInstance().instanceId;
+      return this.network.getLocalInstanceId();
     }
 
     /**
@@ -280,13 +280,10 @@ module Core {
 
       // Create or update the Instance object.
       var instance = this.instances_[instanceId];
-      console.error('1111');  // TODO: remove
       if (!instance) {
-        console.error('222');  // TODO: remove
         // Create a new instance.
         instance = new Core.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
-        console.error('3333' + instance);  // TODO: remove
       }
       return instance.update(instanceHandshake).then(() => {
         this.saveToStorage();
@@ -486,7 +483,6 @@ module Core {
       }
       // Ensure that the user is loaded so that we have correct consent bits.
       return this.onceLoaded.then(() => {
-        console.error('in sendInstanceHandshake onceLoaded: ' + this.network.send);
         var instanceMessage = {
           type: uProxy.MessageType.INSTANCE,
           data: {

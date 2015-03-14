@@ -85,13 +85,8 @@ describe('util', () => {
           def: 456
         }
       };
-      console.error('before cloneDeep');
       var clone = cloneDeep(foo);
-      console.error('after cloneDeep');
-      console.error('clone: ' + JSON.stringify(clone));
-      console.error('foo: ' + JSON.stringify(foo));
       expect(clone).toEqual(foo);
-      console.error('after expect');
 
       // Check that array- and object-valued properties are deep copies.
       foo.d[0] = 100;
