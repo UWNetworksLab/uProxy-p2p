@@ -9,7 +9,6 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-    // jasmine.clock().install();
   });
 
   // afterEach(() => {
