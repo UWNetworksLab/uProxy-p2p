@@ -9,6 +9,11 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
+    jasmine.clock().install();
+  });
+
+  afterEach(() => {
+    jasmine.clock().uninstall();
   })
 
   it('starts with empty storage', (done) => {
@@ -26,23 +31,32 @@ describe('Core.Storage', () => {
         storage.keys().then((keys) => {
           expect(keys).toEqual([]);
         }).then(done);
+        jasmine.clock().tick(1);
       });
+      jasmine.clock().tick(1);
     }, 1000);
+    jasmine.clock().tick(1000);
   });
 
   it('saves and loads to storage', (done) => {
     storage.save('birds', {
       'can': 'chirp'
     }).then(() => {
+      console.error('storage.load is: ' + storage.load);  // TODO: remove
       storage.load('birds').then((result) => {
+        console.error('222');  // TODO: remove
         expect(result).toEqual({
           'can': 'chirp'
         });
         storage.keys().then((keys) => {
+          console.error('333');  // TODO: remove
           expect(keys).toEqual(['birds']);
         }).then(done);
+        jasmine.clock().tick(1);
       });
+      jasmine.clock().tick(1);
     });
+    jasmine.clock().tick(1);
   });
 
   it('overrides old keys', (done) => {

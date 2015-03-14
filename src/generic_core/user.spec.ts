@@ -14,7 +14,10 @@ describe('Core.User', () => {
   network['getLocalInstance'] = function() {
     return { instanceId: 'dummyInstanceId' };
   };
-  network['send'] = () => {};
+  network['send'] = () => {
+    console.error('in spy network send');
+    return Promise.resolve();
+  };
 
   var user :Core.User;
   var instance :Core.RemoteInstance;
@@ -76,7 +79,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
+    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -124,7 +127,7 @@ describe('Core.User', () => {
       timestamp: 12345
     };
     user.handleClient(clientState);
-    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient', null);
+    expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
     expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
   });
 
@@ -164,28 +167,6 @@ describe('Core.User', () => {
       expect(instance.handleSignal).toHaveBeenCalled();
     });
 
-    it('errors when receiving a message with invalid MessageType', () => {
-      spyOn(console, 'error');
-      user.handleMessage('fakeclient', {
-        type: <uProxy.MessageType>0,
-        data: {
-          'baz': 3
-        }
-      });
-      // TODO: check return value for error (there should be one)
-    });
-
-    // TODO: Determine if we care about non-existing clients, or if we should
-    // queue and wait for the client to exist.
-    it('errors when receiving a message with non-existing client', () => {
-      spyOn(console, 'error');
-      user.handleMessage('REALLYfakeclient', {
-        type: uProxy.MessageType.INSTANCE,
-        data: 'meow'
-      });
-      // TODO: check return value for error (there should be one)
-    });
-
   });  // describe communications
 
   var instanceData :Instance = {
@@ -193,40 +174,36 @@ describe('Core.User', () => {
     keyHash: null,
     status: null,
     description: 'fake instance',
+    consent: {isRequesting: false, isOffering: false}
   };
 
   var instanceHandshake = {
-    handshake :instanceData,
-    consent :null
+    instanceId: 'fakeinstance',
+    keyHash: null,
+    description: null,
+    consent: {isRequesting: false, isOffering: false}
   }
 
   describe('client <---> instance', () => {
-
-    beforeEach(() => {
-      if (instance) {
-        spyOn(instance, 'update');
-      }
-      // Don't test reconnection promises in this sub-suite.
-    });
 
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
       var saved;
       storage.save = function(key, value) {
+        console.error('in storage.save');
         saved = realStorage.save(key, value);
         return saved;
       };
-        expect(user.instanceToClient('fakeinstance')).toBeUndefined();
-        expect(user.clientToInstance('fakeclient')).toBeUndefined();
-        user.syncInstance_('fakeclient', instanceHandshake);
+      expect(user.instanceToClient('fakeinstance')).toBeUndefined();
+      expect(user.clientToInstance('fakeclient')).toBeUndefined();
+      user.syncInstance_('fakeclient', instanceHandshake).then(() => {
         expect(user.instanceToClient('fakeinstance')).toEqual('fakeclient');
         expect(user.clientToInstance('fakeclient')).toEqual('fakeinstance');
         instance = user.getInstance('fakeinstance');
         expect(instance).toBeDefined();
-        user.onceLoaded.then(() => {
-          expect(saved).toBeDefined();
-          done();
-        });
+        expect(saved).toBeDefined();
+        done();
+      });
     });
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
@@ -246,36 +223,157 @@ describe('Core.User', () => {
       expect(user.clientToInstance('fakeclient2')).toEqual('fakeinstance');
     });
 
-    it('sends consent message if Instance already exists', () => {
-      instanceHandshake.consent = null;
-      expect(instance).toBeDefined();
-      spyOn(instance, 'sendConsent');
-      user.syncInstance_('fakeclient', instanceHandshake);
-      expect(instance.sendConsent).toHaveBeenCalled();
-    });
-
     it('syncs UI after updating instance', () => {
       user.syncInstance_('fakeclient', instanceHandshake);
     });
 
   });  // describe client <---> instance
 
-  it('sends instance handshake', (done) => {
-    var network = user.network;
-    network['myInstance'] = new Core.LocalInstance(network, 'fakeId');
-    spyOn(network['myInstance'], 'getInstanceHandshake').and.returnValue(
-      'fake-instance-handshake');
-    spyOn(network, 'send').and.returnValue(Promise.resolve());
-    user.sendInstanceHandshake('fakeclient', null).then(() => {
-      expect(network['myInstance']['getInstanceHandshake']).toHaveBeenCalled();
-      expect(network.send).toHaveBeenCalledWith(user, 'fakeclient', {
-          type: uProxy.MessageType.INSTANCE,
-          data: {
-            handshake: 'fake-instance-handshake',
-            consent: null
-          }
+  describe('local consent towards remote proxy', () => {
+
+    var user = new Core.User(network, 'fakeuser2');
+
+    it('can request access, and cancel that request', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
+        expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
+        user.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST).then(() => {
+          expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
+          done();
+        });
       });
-    }).then(done);
+    });
+
+    it('accepts offer from remote', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
+        expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
+        done();
+      });
+    });
+
+    it('ignores offer from remote', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_OFFER).then(() => {
+        expect(user.consent.ignoringRemoteUserOffer).toEqual(true);
+        done();
+      });
+    });
+
+    it('un-ignore cancels ignore setting', (done) => {
+      user.consent.ignoringRemoteUserOffer = true;
+      user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER).then(() => {
+        expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
+        done();
+      });
+    });
+
+    it('ignore-offers bit reset after requesting', (done) => {
+      user.consent.localRequestsAccessFromRemote = false;
+      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_OFFER).then(() => {
+        expect(user.consent.ignoringRemoteUserOffer).toEqual(true);
+        user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
+          expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
+          expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
+          done();
+        });
+      });
+    });
+
+    it('invalid proxy transitions do not modify consent', (done) => {
+      var emptyConsent = new Consent.State();
+
+      user.consent = new Consent.State();
+      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST).then(() => {
+        expect(user.consent).toEqual(emptyConsent);
+        user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER).then(() => {
+          expect(user.consent).toEqual(emptyConsent);
+          // proxy consent modifications did not touch client consent
+          expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('local consent towards remote client', () => {
+
+    it('can offer access', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+        done();
+      });
+    });
+
+    it('can cancel access', (done) => {
+      user.consent.localGrantsAccessToRemote = true;
+      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+        done();
+      });
+    });
+
+    it('allows request from remote', (done) => {
+      user.consent.localGrantsAccessToRemote = false;
+      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+        done();
+      });
+    });
+
+    it('ignores request from remote', (done) => {
+      user.consent.remoteRequestsAccessFromLocal = true;
+      user.consent.ignoringRemoteUserRequest = false;
+      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_REQUEST).then(() => {
+        expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        expect(user.consent.ignoringRemoteUserRequest).toEqual(true);
+        done();
+      });
+    });
+
+    it('can re-accept even after ignoring', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+        done();
+      });
+    });
+
+    it('cancelling after granted returns to remote offer', (done) => {
+      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+        expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
+        done();
+      });
+    });
+
+    it('ignore-requests bit reset after granting', () => {
+      user.consent.localGrantsAccessToRemote = false;
+      user.consent.ignoringRemoteUserRequest = true;
+      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+        expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+        expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
+        done();
+      });
+    });
+
+    it('invalid client transitions do not modify consent', () => {
+      var emptyConsent = new Consent.State();
+
+      user.consent = new Consent.State();
+      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER);
+      expect(user.consent).toEqual(emptyConsent);
+      user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_REQUEST);
+      expect(user.consent).toEqual(emptyConsent);
+
+      // Client consent modifications did not touch proxy consent
+      expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+    });
+  });
+
+  describe('preparing consent bits to send over the wire', () => {
+    it('initial consent state does not offer or request', () => {
+      var user = new Core.User(network, 'fakeuser3');
+      user.consent = new Consent.State();
+      expect(user.getConsentBits().isRequesting).toEqual(false);
+      expect(user.getConsentBits().isOffering).toEqual(false);
+    });
   });
 
 });  // uProxy.User

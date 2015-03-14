@@ -1,22 +1,23 @@
 module Consent {
   var log :Logging.Log = new Logging.Log('consent');
 
-  export class UserState implements uProxy.UserConsentState {
-    // Requesting get access is per user.
-    // If the user is requesting, this should remain true even after we have
-    // been granted access to some remote-instances so that we automatically
-    // request from new remote instances of the same user.
+  export class State implements uProxy.ConsentState {
+    // Whether I am requesting access from my friend or not.  This should
+    // remain true even after my friend grants me access (to indicate that
+    // I've accepted their access-grant, and that I should automatically
+    // request access from new instances)
     localRequestsAccessFromRemote :boolean;
 
-    // When I ignore an offer from Bob, I will ignore it for all instances.
-    // This mirrors request access, where requesting from Bob is for all of
-    // Bob's instances.
-    ignoringRemoteUserOffer :boolean;
-
-    // All sharing actions are per user.
+    // Whether I am granting access to my friend (granting access permissions
+    // all of there instances).
     localGrantsAccessToRemote :boolean;
+
+    // Whether my friend is requesting access through me.
     remoteRequestsAccessFromLocal :boolean;
+
+    // Used by the UI to ignore requests and offers.
     ignoringRemoteUserRequest :boolean;
+    ignoringRemoteUserOffer :boolean;
 
     constructor() {
       this.localRequestsAccessFromRemote = false;
@@ -28,33 +29,34 @@ module Consent {
   }
 
   // Returns false on invalid actions.
-  export function handleUserAction(userState :UserState, action :uProxy.ConsentUserAction) :boolean {
+  export function handleUserAction(
+      state :State, action :uProxy.ConsentUserAction) :boolean {
     switch(action) {
       case uProxy.ConsentUserAction.OFFER:
-        userState.localGrantsAccessToRemote = true;
-        userState.ignoringRemoteUserRequest = false;
+        state.localGrantsAccessToRemote = true;
+        state.ignoringRemoteUserRequest = false;
         break;
       case uProxy.ConsentUserAction.CANCEL_OFFER:
-        userState.localGrantsAccessToRemote = false;
+        state.localGrantsAccessToRemote = false;
         break;
       case uProxy.ConsentUserAction.IGNORE_REQUEST:
-        userState.ignoringRemoteUserRequest = true;
+        state.ignoringRemoteUserRequest = true;
         break;
       case uProxy.ConsentUserAction.UNIGNORE_REQUEST:
-        userState.ignoringRemoteUserRequest = false;
+        state.ignoringRemoteUserRequest = false;
         break;
       case uProxy.ConsentUserAction.REQUEST:
-        userState.localRequestsAccessFromRemote = true;
-        userState.ignoringRemoteUserOffer = false;
+        state.localRequestsAccessFromRemote = true;
+        state.ignoringRemoteUserOffer = false;
         break;
       case uProxy.ConsentUserAction.CANCEL_REQUEST:
-        userState.localRequestsAccessFromRemote = false;
+        state.localRequestsAccessFromRemote = false;
         break;
       case uProxy.ConsentUserAction.IGNORE_OFFER:
-        userState.ignoringRemoteUserOffer = true;
+        state.ignoringRemoteUserOffer = true;
         break;
       case uProxy.ConsentUserAction.UNIGNORE_OFFER:
-        userState.ignoringRemoteUserOffer = false;
+        state.ignoringRemoteUserOffer = false;
         break;
       default:
         log.warn('Invalid uProxy.ConsentUserAction', action);

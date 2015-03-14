@@ -26,7 +26,7 @@ declare module UI {
   export interface UserMessage {
     network   :string;
     user      :UserProfileMessage;
-    userConsent  :uProxy.UserConsentState;
+    consent  :uProxy.ConsentState;
     offeringInstances ?:UI.Instance[];
     allInstanceIds ?:string[];
     isOnline  :boolean;

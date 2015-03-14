@@ -35,10 +35,10 @@ module UI {
     public isSharingWithMe   :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
-    public offeringInstances :UI.Instance[];
-    public allInstanceIds :string[];
+    public offeringInstances :UI.Instance[] = [];
+    public allInstanceIds :string[] = [];
 
-    private userConsent_ :uProxy.UserConsentState;
+    private consent_ :uProxy.ConsentState;
     public gettingConsentState :UI.GettingConsentState =
         GettingConsentState.NO_OFFER_OR_REQUEST;
     public sharingConsentState :UI.SharingConsentState =
@@ -68,15 +68,15 @@ module UI {
       this.offeringInstances = payload.offeringInstances;
       this.allInstanceIds = payload.allInstanceIds;
       this.updateInstanceDescriptions();
-      this.userConsent_ = payload.userConsent;
+      this.consent_ = payload.consent;
       this.isOnline_ = payload.isOnline;
 
       // Update gettingConsentState, used to display correct getting buttons.
       if (this.offeringInstances.length > 0) {
-        if (this.userConsent_.localRequestsAccessFromRemote) {
+        if (this.consent_.localRequestsAccessFromRemote) {
           this.gettingConsentState =
               GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED;
-        } else if (this.userConsent_.ignoringRemoteUserOffer) {
+        } else if (this.consent_.ignoringRemoteUserOffer) {
           this.gettingConsentState =
               GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED;
         } else {
@@ -84,7 +84,7 @@ module UI {
               GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION;
         }
       } else {
-        if (this.userConsent_.localRequestsAccessFromRemote) {
+        if (this.consent_.localRequestsAccessFromRemote) {
           this.gettingConsentState =
               GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION;
         } else {
@@ -93,11 +93,11 @@ module UI {
       }
 
       // Update sharingConsentState, used to display correct sharing buttons.
-      if (this.userConsent_.remoteRequestsAccessFromLocal) {
-        if (this.userConsent_.localGrantsAccessToRemote) {
+      if (this.consent_.remoteRequestsAccessFromLocal) {
+        if (this.consent_.localGrantsAccessToRemote) {
           this.sharingConsentState =
               SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED;
-        } else if (this.userConsent_.ignoringRemoteUserRequest) {
+        } else if (this.consent_.ignoringRemoteUserRequest) {
           this.sharingConsentState =
               SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED;
         } else {
@@ -105,7 +105,7 @@ module UI {
               SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION;
         }
       } else {
-        if (this.userConsent_.localGrantsAccessToRemote) {
+        if (this.consent_.localGrantsAccessToRemote) {
           this.sharingConsentState =
               SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION;
         } else {
@@ -126,21 +126,21 @@ module UI {
       var isPendingForGetting = false;
 
       // Share tab.
-      if (this.userConsent_.remoteRequestsAccessFromLocal &&
-          !this.userConsent_.ignoringRemoteUserRequest &&
-          !this.userConsent_.localGrantsAccessToRemote) {
+      if (this.consent_.remoteRequestsAccessFromLocal &&
+          !this.consent_.ignoringRemoteUserRequest &&
+          !this.consent_.localGrantsAccessToRemote) {
         isPendingForSharing = true;
       }
-      if (this.userConsent_.localGrantsAccessToRemote) {
+      if (this.consent_.localGrantsAccessToRemote) {
         isTrustedForSharing = true;
       }
       // Get tab.
       if (this.offeringInstances.length > 0 &&
-          !this.userConsent_.ignoringRemoteUserOffer &&
-          !this.userConsent_.localRequestsAccessFromRemote) {
+          !this.consent_.ignoringRemoteUserOffer &&
+          !this.consent_.localRequestsAccessFromRemote) {
         isPendingForGetting = true;
       }
-      if (this.userConsent_.localRequestsAccessFromRemote) {
+      if (this.consent_.localRequestsAccessFromRemote) {
         isTrustedForGetting = true;
       }
 

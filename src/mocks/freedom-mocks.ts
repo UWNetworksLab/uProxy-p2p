@@ -55,10 +55,12 @@ class MockStorage implements freedom_Storage {
   }
 
   public keys = () => {
+    console.error('MockStorage keys called');  // TODO: remove
     return Promise.resolve(Object.keys(this.store_));
   }
 
   public get = (key) => {
+    console.error('MockStorage get called');  // TODO: remove
     var v = this.store_[key];
     console.log('[MockStorage] get ' + key);
     if (v) {
@@ -68,6 +70,7 @@ class MockStorage implements freedom_Storage {
   }
 
   public set = (key, value) => {
+    console.error('MockStorage set called');  // TODO: remove
     var prev = this.store_[key];
     this.store_[key] = value;
     console.log('[MockStorage] set ' + key + ' : ' + value);
@@ -75,6 +78,7 @@ class MockStorage implements freedom_Storage {
   }
 
   public remove = (key) => {
+    console.error('MockStorage remove called');  // TODO: remove
     //console.log("\n  public remove(" + key + ").");
     var prev = this.store_[key];
     delete this.store_[key];
@@ -82,7 +86,9 @@ class MockStorage implements freedom_Storage {
   }
 
   public clear = () => {
+    console.error('MockStorage clear called');  // TODO: remove
     this.store_ = {};
+    console.error('reset this.store_');
     return Promise.resolve<void>();
   }
 

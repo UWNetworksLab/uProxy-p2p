@@ -53,6 +53,6 @@ interface Instance {
 interface InstanceHandshake {
   instanceId  :string;
   keyHash     :string;
-  consent    :uProxy.ConsentWireState;
-  description ?:string;  // TODO: Determine if description is actually optional.
+  consent     :uProxy.ConsentWireState;
+  description ?:string;
 }

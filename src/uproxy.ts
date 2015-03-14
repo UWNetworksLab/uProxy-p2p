@@ -111,7 +111,7 @@ module uProxy {
     isOffering   :boolean;
   }
 
-  export interface UserConsentState {
+  export interface ConsentState {
     localGrantsAccessToRemote :boolean;
     localRequestsAccessFromRemote :boolean;
     remoteRequestsAccessFromLocal :boolean;

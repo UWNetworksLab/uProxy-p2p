@@ -31,7 +31,7 @@ module Core {
    */
   export class RemoteInstance implements Instance, Core.Persistent {
 
-    public keyHash     :string
+    public keyHash     :string;
     public description :string;
 
     public bytesSent   :number = 0;
@@ -152,7 +152,7 @@ module Core {
                            signalFromRemote:Object) => {
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
-        if (!this.user.userConsent.localGrantsAccessToRemote) {
+        if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
           return;
         }
@@ -210,15 +210,17 @@ module Core {
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :InstanceHandshake) => {
-      this.keyHash = data.keyHash;
-      this.description = data.description;
-      this.updateConsent_(data.consent);
-      this.saveToStorage();
+    public update = (data :InstanceHandshake) : Promise<void> => {
+      return this.onceLoaded.then(() => {
+        this.keyHash = data.keyHash;
+        this.description = data.description;
+        this.updateConsent_(data.consent);
+        this.saveToStorage();
+      });
     }
 
-    public updateConsent_ = (bits: uProxy.ConsentWireState) => {
-      var userConsent = this.user.userConsent;
+    private updateConsent_ = (bits: uProxy.ConsentWireState) => {
+      var consent = this.user.consent;
 
       // Get old values before updating this.wireConsentFromRemote
       // so we can see what changed.
@@ -228,21 +230,21 @@ module Core {
       // Update this remoteInstance.
       this.wireConsentFromRemote = bits;
 
-      // Requesting access is part of userConsent, however we may need to
+      // Requesting access is part of consent, however we may need to
       // update that based on the new bits.
-      var oldIsRequesting = userConsent.remoteRequestsAccessFromLocal;
+      var oldIsRequesting = consent.remoteRequestsAccessFromLocal;
       this.user.updateRemoteRequestsAccessFromLocal();
-      var newIsRequesting = userConsent.remoteRequestsAccessFromLocal;
+      var newIsRequesting = consent.remoteRequestsAccessFromLocal;
 
       // Fire a notification on the UI, if a state is different.
       // TODO: Determine if we should attach the instance id / decription to the
       // user name as part of the notification text.
       var note = null;
       if (newIsOffering !== oldIsOffering &&
-          !userConsent.ignoringRemoteUserOffer) {
+          !consent.ignoringRemoteUserOffer) {
         if (newIsOffering) {
           // newly granted access
-          note = userConsent.localRequestsAccessFromRemote ?
+          note = consent.localRequestsAccessFromRemote ?
               ' granted you access.' : ' offered you access.';
         } else {
           // newly revoked access
@@ -251,9 +253,9 @@ module Core {
       }
 
       if (newIsRequesting && !oldIsRequesting &&
-          !userConsent.ignoringRemoteUserRequest) {
+          !consent.ignoringRemoteUserRequest) {
         // newly requested/accepted access
-        note = userConsent.localGrantsAccessToRemote ?
+        note = consent.localGrantsAccessToRemote ?
             ' has accepted your offer of access.' : ' is requesting access.';
       }
 

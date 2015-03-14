@@ -48,7 +48,7 @@ module Core {
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
-    public userConsent :Consent.UserState = new Consent.UserState();
+    public consent :Consent.State = new Consent.State();
 
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :Core.RemoteInstance };
@@ -221,10 +221,10 @@ module Core {
      * consent status, from the user's point of view. These bits will be sent on
      * the wire.
      */
-    private getConsentBits_ = () :uProxy.ConsentWireState => {
+    public getConsentBits = () :uProxy.ConsentWireState => {
       return {
-        isRequesting: this.userConsent.localRequestsAccessFromRemote,
-        isOffering: this.userConsent.localGrantsAccessToRemote
+        isRequesting: this.consent.localRequestsAccessFromRemote,
+        isOffering: this.consent.localGrantsAccessToRemote
       };
     }
 
@@ -250,22 +250,24 @@ module Core {
      * In no case will this function fail to generate or update an entry of
      * this user's instance table.
      */
-    public syncInstance_ = (clientId :string,
-                            instanceHandshake :InstanceHandshake) : void => {
+    public syncInstance_ = (
+        clientId :string,
+        instanceHandshake :InstanceHandshake) : Promise<void> => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         log.error('Received an instance handshake from a non-uProxy client',
                   clientId);
-        return;
+        return Promise.reject(
+            'Received an instance handshake from a non-uProxy client');
       }
       log.info('received instance', instanceHandshake);
       if (!instanceHandshake.consent) {
         // This indicates that a user was running an old version of uProxy
         // (prior to moving consent to user).
         log.warn('No consent received with instance', instanceHandshake);
-        return;
+        return Promise.reject('No consent received with instance');
       }
       var instanceId = instanceHandshake.instanceId;
       var oldClientId = this.instanceToClientMap_[instanceId];
@@ -278,13 +280,15 @@ module Core {
 
       // Create or update the Instance object.
       var instance = this.instances_[instanceId];
+      console.error('1111');  // TODO: remove
       if (!instance) {
+        console.error('222');  // TODO: remove
         // Create a new instance.
         instance = new Core.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
+        console.error('3333' + instance);  // TODO: remove
       }
-      instance.onceLoaded.then(() => {
-        instance.update(instanceHandshake);
+      return instance.update(instanceHandshake).then(() => {
         this.saveToStorage();
         this.notifyUI();
       });
@@ -362,7 +366,7 @@ module Core {
           name: this.profile.name,
           imageData: this.profile.imageData
         },
-        userConsent: this.userConsent,
+        consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
         allInstanceIds: allInstanceIds,
         isOnline: isOnline
@@ -446,8 +450,8 @@ module Core {
         }
       }
 
-      if (state.userConsent) {
-        this.userConsent = state.userConsent;
+      if (state.consent) {
+        this.consent = state.consent;
       } else {
         log.error(
             'Error loading consent from storage for user ' + this.userId,
@@ -460,7 +464,7 @@ module Core {
         name : this.name,
         imageData: this.profile.imageData,
         instanceIds: Object.keys(this.instances_),
-        userConsent: this.userConsent
+        consent: this.consent
       });
     }
 
@@ -482,13 +486,14 @@ module Core {
       }
       // Ensure that the user is loaded so that we have correct consent bits.
       return this.onceLoaded.then(() => {
+        console.error('in sendInstanceHandshake onceLoaded: ' + this.network.send);
         var instanceMessage = {
           type: uProxy.MessageType.INSTANCE,
           data: {
             instanceId: myInstance.instanceId,
             keyHash: myInstance.keyHash,
             description: core.globalSettings.description,
-            consent: this.getConsentBits_(),
+            consent: this.getConsentBits(),
           }
         };
         return this.network.send(this, clientId, instanceMessage);
@@ -507,11 +512,11 @@ module Core {
      * the consent buttons in the UI.) Sends updated consent bits to the
      * remote instance afterwards.
      */
-    public modifyConsent = (action :uProxy.ConsentUserAction) => {
-      this.onceLoaded.then(() => {
-        if (!Consent.handleUserAction(this.userConsent, action)) {
+    public modifyConsent = (action :uProxy.ConsentUserAction) : Promise<void> => {
+      return this.onceLoaded.then(() => {
+        if (!Consent.handleUserAction(this.consent, action)) {
           log.warn('Invalid user action on consent', {
-            userConsent: this.userConsent,
+            consent: this.consent,
             action: action
           });
           return;
@@ -535,6 +540,7 @@ module Core {
             }.bind(this, instanceId));
           }
         }
+
         this.saveToStorage();
         // Send an update to the UI.
         this.notifyUI();
@@ -542,15 +548,15 @@ module Core {
     }
 
     public updateRemoteRequestsAccessFromLocal = () => {
-      // Set this.userConsent.remoteRequestsAccessFromLocal based on if any
+      // Set this.consent.remoteRequestsAccessFromLocal based on if any
       // instances are currently requesting access
       for (var instanceId in this.instances_) {
         if (this.instances_[instanceId].wireConsentFromRemote.isRequesting) {
-          this.userConsent.remoteRequestsAccessFromLocal = true;
+          this.consent.remoteRequestsAccessFromLocal = true;
           return;
         }
       }
-      this.userConsent.remoteRequestsAccessFromLocal = false;
+      this.consent.remoteRequestsAccessFromLocal = false;
     }
 
   }  // class User
@@ -561,7 +567,7 @@ module Core {
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
-    userConsent :Consent.UserState;
+    consent :Consent.State;
   }
 
 }  // module uProxy

@@ -512,7 +512,7 @@ module Social {
                    clientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);
-
+      console.error('in FreedomNetwork.send');
       log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,

@@ -29,7 +29,9 @@ module Core {
      * Resets state, and clears local storage.
      */
     public reset = () : Promise<void> => {
+      console.error('storage reset called');  // TODO: remove
       return fStorage.clear().then(() => {
+        console.error('storage cleared all keys');  // TODO: remove
         log.info('Cleared all keys from storage');
         // TODO: Determine if we actually need any 'initial' state.
       });
@@ -48,8 +50,10 @@ module Core {
      * TODO: Really reject the promise!
      */
     public load = <T>(key :string) : Promise<T> => {
+      console.error('in storage.load');  // TODO: remove
       log.debug('loading', key);
       return fStorage.get(key).then((result :string) => {
+        console.error('get returned');  // TODO: remove
         if (typeof result === 'undefined' || result === null) {
           return Promise.reject('non-existing key');
         }
@@ -69,13 +73,16 @@ module Core {
         newVal: val
       });
       return fStorage.set(key, JSON.stringify(val)).then((prev:string) => {
+        console.error('set returned');  // TODO: remove
         log.debug('Successfully saved to storage', {
           key: key,
           oldVal: prev
         });
         if (!prev) {
+          console.error('save returning undefined');  // TODO: remove
           return undefined;
         }
+        console.error('save returning json parse');  // TODO: remove
         return <T>JSON.parse(prev);
       }).catch((e) => {
         log.error('Save operation failed', e.message);

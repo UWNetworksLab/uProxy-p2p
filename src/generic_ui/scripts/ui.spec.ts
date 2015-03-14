@@ -12,14 +12,6 @@ describe('UI.UserInterface', () => {
     return {
       instanceId: instanceId,
       description: description,
-      consent: {
-        localGrantsAccessToRemote: false,
-        localRequestsAccessFromRemote: false,
-        remoteGrantsAccessToLocal: false,
-        remoteRequestsAccessFromLocal: false,
-        ignoringRemoteUserRequest: false,
-        ignoringRemoteUserOffer: false
-      },
       localSharingWithRemote: SharingState.NONE,
       localGettingFromRemote: GettingState.NONE,
       isOnline: true,
@@ -54,11 +46,19 @@ describe('UI.UserInterface', () => {
       user: {
         userId: userId,
         name: userName,
-        imageData: 'testImageData'
+        imageData: 'testImageData',
+        isOnline: true
       },
-      instances: [
-        getInstance(instanceId, 'description1')
-      ]
+      allInstanceIds: [instanceId],
+      offeringInstances: [],
+      consent: {
+        localGrantsAccessToRemote: false,
+        localRequestsAccessFromRemote: false,
+        remoteRequestsAccessFromLocal: false,
+        ignoringRemoteUserRequest: false,
+        ignoringRemoteUserOffer: false
+      },
+      isOnline: true
     };
     ui.syncUser(payload);
   }
@@ -78,9 +78,16 @@ describe('UI.UserInterface', () => {
           name: 'Alice',
           imageData: 'testImageData'
         },
-        instances: [
-          getInstance('instance1', 'description1')
-        ]
+        allInstanceIds: ['instance1'],
+        offeringInstances: [],
+        consent: {
+          localGrantsAccessToRemote: false,
+          localRequestsAccessFromRemote: false,
+          remoteRequestsAccessFromLocal: false,
+          ignoringRemoteUserRequest: false,
+          ignoringRemoteUserOffer: false
+        },
+        isOnline: true
       };
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
@@ -101,13 +108,6 @@ describe('UI.UserInterface', () => {
                      userId: 'fakeUser',
                      online: true,
                      roster: {}});
-      var clientInstance = getInstance('instance1', 'description1');
-      clientInstance.consent.localRequestsAccessFromRemote = true;
-      clientInstance.consent.remoteGrantsAccessToLocal = true;
-
-      var serverInstance = getInstance('instance2', 'description2');
-      serverInstance.consent.localGrantsAccessToRemote = true;
-      serverInstance.consent.remoteRequestsAccessFromLocal = true;
 
       var payload :UI.UserMessage = {
         network: 'testNetwork',
@@ -116,7 +116,16 @@ describe('UI.UserInterface', () => {
           name: 'Alice',
           imageData: 'testImageData'
         },
-        instances: [clientInstance, serverInstance]
+        offeringInstances: [],
+        allInstanceIds: ['instance1', 'instance2'],
+        isOnline: true,
+        consent: {
+          localGrantsAccessToRemote: false,
+          localRequestsAccessFromRemote: false,
+          remoteRequestsAccessFromLocal: false,
+          ignoringRemoteUserRequest: false,
+          ignoringRemoteUserOffer: false
+        }
       };
       ui.syncUser(payload);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
