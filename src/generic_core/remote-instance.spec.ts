@@ -166,13 +166,12 @@ describe('Core.RemoteInstance', () => {
   describe('proxying', () => {
 
     var alice = new Core.RemoteInstance(user, 'instance-alice');
-    // TODO: test that this doesn't have async issues
-    alice.update({
-      instanceId: 'instance-alice',
-      keyHash:    'fake-hash-alice',
-      description: 'alice peer',
-      consent: {isOffering: false, isRequesting: false}
-    });
+    // alice.update({
+    //   instanceId: 'instance-alice',
+    //   keyHash:    'fake-hash-alice',
+    //   description: 'alice peer',
+    //   consent: {isOffering: false, isRequesting: false}
+    // });
 
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
     // TODO once using uproxy-lib v20+, move to real mocks (examples:

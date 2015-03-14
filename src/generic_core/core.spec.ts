@@ -27,8 +27,7 @@ describe('Core', () => {
   var alice = new Core.RemoteInstance(user, 'instance-alice');
 
   beforeEach(() => {
-    // spyOn(console, 'log');
-    // spyOn(console, 'warn');
+    spyOn(console, 'log');
   });
 
   it('passes modifyConsent to the correct user', () => {
