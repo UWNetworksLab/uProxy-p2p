@@ -11,10 +11,6 @@ describe('Core.Storage', () => {
     spyOn(console, 'log');
   });
 
-  // afterEach(() => {
-  //   jasmine.clock().uninstall();
-  // })
-
   it('starts with empty storage', (done) => {
     // Delay first test for 1 second, so that writes from previous tests have
     // time to complete, before we reset.  Without this, test cases from
