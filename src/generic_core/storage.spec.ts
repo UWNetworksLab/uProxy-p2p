@@ -9,7 +9,7 @@ describe('Core.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');
-  });
+  })
 
   it('starts with empty storage', (done) => {
     // Delay first test for 1 second, so that writes from previous tests have
