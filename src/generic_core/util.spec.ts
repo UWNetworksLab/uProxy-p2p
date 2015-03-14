@@ -86,6 +86,7 @@ describe('util', () => {
         }
       };
       var clone = cloneDeep(foo);
+
       expect(clone).toEqual(foo);
 
       // Check that array- and object-valued properties are deep copies.
