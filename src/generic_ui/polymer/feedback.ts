@@ -26,17 +26,15 @@ Polymer({
     // root.ts listens for open-dialog signals and shows a popup
     // when it receives these events.
     this.fire('open-dialog',
-      { dialog:
-        { heading: 'Thank you!',
-          message: 'Your feedback has been submitted to the uProxy development team.',
-          affirmative: {
-            text: 'Done',
-            signal: ''
-          },
-          dismissive: {
-            text: '',
-            signal: ''
-          }
+      { heading: 'Thank you!',
+        message: 'Your feedback has been submitted to the uProxy development team.',
+        affirmative: {
+          text: 'Done',
+          signal: ''
+        },
+        dismissive: {
+          text: '',
+          signal: ''
         }
       });
     ui.view = uProxy.View.ROSTER;

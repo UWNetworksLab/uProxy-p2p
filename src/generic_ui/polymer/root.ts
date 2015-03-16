@@ -72,7 +72,7 @@ Polymer({
      * If signal == '', no core-signal is fired.
      */
 
-    this.dialog = detail.dialog;
+    this.dialog = detail;
     this.$.dialog.toggle();
   },
   affirmativeButtonClick: function() {
