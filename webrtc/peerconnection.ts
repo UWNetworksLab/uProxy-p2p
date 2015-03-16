@@ -238,13 +238,14 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     // Add basic event handlers.
     this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if(candidate.candidate) {
-        this.signalForPeerQueue.handle({
+        this.emitSignalForPeer_({
           type: SignalType.CANDIDATE,
           candidate: candidate.candidate
         });
       } else {
-        this.signalForPeerQueue.handle(
-            {type: SignalType.NO_MORE_CANDIDATES});
+        this.emitSignalForPeer_({
+          type: SignalType.NO_MORE_CANDIDATES
+        });
       }
     });
     this.pc_.on('onnegotiationneeded', () => {
@@ -398,7 +399,7 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
             // we may emit ICE candidate signals before the offer, confusing
             // some clients:
             //   https://github.com/uProxy/uproxy/issues/784
-            this.signalForPeerQueue.handle({
+            this.emitSignalForPeer_({
               type: SignalType.OFFER,
               description: {type: d.type, sdp: d.sdp}
             });
@@ -447,9 +448,13 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
         // As with the offer, we must emit the signal before
         // setting the local description to ensure that we send the
         // ANSWER before any ICE candidates.
-        this.signalForPeerQueue.handle(
-            {type: SignalType.ANSWER,
-             description: {type: d.type, sdp: d.sdp} });
+        this.emitSignalForPeer_({
+          type: SignalType.ANSWER,
+          description: {
+            type: d.type,
+            sdp: d.sdp
+          }
+        });
         this.pc_.setLocalDescription(d);
       })
       .then(() => {
@@ -485,6 +490,14 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
         JSON.stringify(candidate) + ' (' + typeof(candidate) +
         '); Error: ' + e.toString());
     }
+  }
+
+  // Adds a signalling message to this.signalForPeerQueue.
+  private emitSignalForPeer_ = (signal:SignallingMessage) : void => {
+    log.debug('%1: signalForPeer: %2',
+        this.peerName_,
+        JSON.stringify(signal));
+    this.signalForPeerQueue.handle(signal);
   }
 
   // Handle a signalling message from the remote peer.
