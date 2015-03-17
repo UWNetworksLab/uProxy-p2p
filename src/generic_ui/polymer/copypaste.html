@@ -54,6 +54,9 @@
       color: #009688;
     }
     </style>
+
+    <core-signals on-core-signal-copypaste-back='{{ doBack }}'></core-signals>
+
     <div id='cptoolbar'>
       <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
         <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
@@ -103,10 +106,6 @@
           class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
 
         <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>Loading...</span>
-
-        <div>
-          <paper-button on-tap='{{ startGetting }}'>Get a new URL</paper-button>
-        </div>
 
         <p>
           To finish setting up the connection, your friend needs to click on the

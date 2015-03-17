@@ -16,7 +16,7 @@ function initCopyPaste() {
 function startCopyPasteGetting() {
   var doneStopping :Promise<void>;
   if (ui.copyPasteGettingState !== GettingState.NONE) {
-    console.log('aborting previous copy+paste getting connection');
+    console.warn('aborting previous copy+paste getting connection');
     doneStopping = core.stopCopyPasteGet();
   } else {
     doneStopping = Promise.resolve<void>();
@@ -55,7 +55,23 @@ Polymer({
       return;
     }
 
-    ui.view = uProxy.View.SPLASH;
+    if (ui.copyPasteGettingState === GettingState.NONE &&
+        ui.copyPasteSharingState === SharingState.NONE) {
+      ui.view = uProxy.View.SPLASH;
+      return;
+    }
+
+    this.fire('open-dialog', {
+      heading: 'Go back?',
+      message: 'Are you sure you want to end this one-time connection?',
+      buttons: [{
+        text: 'Yes',
+        signal: 'copypaste-back'
+      }, {
+        text: 'No',
+        dismissive: true
+      }]
+    });
   },
   startGetting: function() {
     startCopyPasteGetting();
@@ -79,5 +95,28 @@ Polymer({
   },
   dismissError: function() {
     ui.copyPasteError = UI.CopyPasteError.NONE;
+  },
+  doBack: function() {
+    // if we are currently in the middle of setting up a connection, end it
+    var doneStopping :Promise<void>;
+    if (ui.copyPasteGettingState !== GettingState.NONE) {
+      doneStopping = core.stopCopyPasteGet()
+    } else {
+      doneStopping = Promise.resolve<void>();
+    }
+
+    doneStopping.catch((e) => {
+      console.warn('Error while closing getting connection', e);
+    }).then(() => {
+      if (ui.copyPasteSharingState !== SharingState.NONE) {
+        return core.stopCopyPasteShare();
+      }
+    }).catch((e) => {
+      console.warn('Error while closing sharing connection', e);
+    }).then(() => {
+      // go back to the previous view regardless of whether we successfully
+      // stopped the connection
+      ui.view = uProxy.View.SPLASH;
+    })
   }
 });
