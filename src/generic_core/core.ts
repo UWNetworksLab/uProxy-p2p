@@ -342,16 +342,16 @@ class uProxyCore implements uProxy.CoreAPI {
     return copyPasteConnection.startGet();
   }
 
-  public stopCopyPasteGet = () => {
-    copyPasteConnection.stopGet();
+  public stopCopyPasteGet = () :Promise<void> => {
+    return copyPasteConnection.stopGet();
   }
 
   public startCopyPasteShare = () => {
     copyPasteConnection.startShare();
   }
 
-  public stopCopyPasteShare = () => {
-    copyPasteConnection.stopShare();
+  public stopCopyPasteShare = () :Promise<void> => {
+    return copyPasteConnection.stopShare();
   }
 
   public sendCopyPasteSignal = (signal :uProxy.Message) => {
@@ -497,14 +497,14 @@ core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
 core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
                       core.startCopyPasteGet);
 
-core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
-               core.stopCopyPasteGet);
+core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+                      core.stopCopyPasteGet);
 
 core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
                core.startCopyPasteShare);
 
-core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
-               core.stopCopyPasteShare);
+core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+                      core.stopCopyPasteShare);
 
 core.onCommand(uProxy.Command.COPYPASTE_SIGNALLING_MESSAGE,
                core.sendCopyPasteSignal);
