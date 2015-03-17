@@ -56,9 +56,10 @@
     </style>
 
     <core-signals on-core-signal-copypaste-back='{{ doBack }}'></core-signals>
+    <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <div id='cptoolbar'>
-      <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
+      <div class='prevArrow {{ { disabled: (ui.copyPasteGettingState === GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
         <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
@@ -117,9 +118,22 @@
       <div class='connected' hidden?='{{ ui.copyPasteGettingState !== GettingState.GETTING_ACCESS }}'>
         <p>Success!  A one time connection has been established.</p>
 
-        <p>To stop getting access from your friend, click the button below.</p>
+        <p>
+          To
+          <span hidden?='{{ ui.copyPastePendingEndpoint === null}}'>start</span>
+          <span hidden?='{{ ui.copyPastePendingEndpoint !== null}}'>stop</span>
+          getting access from your friend, click the button below.
+        </p>
 
-        <paper-button raised class='stop' on-tap='{{ stopGetting }}'>Stop getting access</paper-button>
+        <paper-button raised on-tap='{{ startProxying }}'
+            hidden?='{{ ui.copyPastePendingEndpoint === null }}'>
+          Start getting access
+        </paper-button>
+
+        <paper-button raised class='stop' on-tap='{{ stopGetting }}'
+            hidden?='{{ ui.copyPastePendingEndpoint !== null }}'>
+          Stop getting access
+        </paper-button>
 
         <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
           <p>You are currently getting access.</p>

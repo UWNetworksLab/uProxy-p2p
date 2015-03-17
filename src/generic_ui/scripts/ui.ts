@@ -158,6 +158,8 @@ module UI {
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
+    public copyPastePendingEndpoint :Net.Endpoint = null;
+
     // TODO not needed, exists to handle typescript errors
     private core_ :CoreConnector = null;
 
