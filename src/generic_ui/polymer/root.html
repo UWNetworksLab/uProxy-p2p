@@ -228,12 +228,13 @@
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
     <paper-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
       <p>{{ dialog.message }}</p>
-      <paper-button class='dialogButton' affirmative
-        on-tap='{{ affirmativeButtonClick }}'
-        hidden?='{{ dialog.affirmative.text == "" }}'>{{ dialog.affirmative.text }}</paper-button>
-      <paper-button class='dialogButton' dismissive
-        on-tap='{{ dismissiveButtonClick }}'
-        hidden?='{{ dialog.dismissive.text == "" }}'>{{ dialog.dismissive.text }}</paper-button>
+      <template repeat='{{ button in dialog.buttons }}'>
+        <paper-button
+          affirmative?='{{ !button.dismissive }}' dismissive?='{{ button.dismissive }}'
+          class='dialogButton' on-tap='{{ dialogButtonClick }}' data-signal='{{ button.signal }}'>
+          {{button.text}}
+        </paper-button>
+      </template>
     </paper-action-dialog>
 
   </template>
