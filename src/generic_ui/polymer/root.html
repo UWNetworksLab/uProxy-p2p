@@ -143,7 +143,7 @@
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
-    <uproxy-copypaste hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
+    <uproxy-copypaste id='copypaste' hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
     <uproxy-feedback hidden?='{{ uProxy.View.FEEDBACK !== ui.view }}'></uproxy-feedback>
@@ -157,7 +157,7 @@
 
         <core-icon id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon>
 
-        <uproxy-bubble class='error' active='{{ ui.copyPasteUrlError }}' on-closed='{{ dismissCopyPasteError }}'>
+        <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.WRONGMODE }}' on-closed='{{ dismissCopyPasteError }}'>
           <h3>Cannot open manual connection</h3>
           <p>
             It is not currently possible to open a manual connection at the

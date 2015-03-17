@@ -111,6 +111,14 @@ module UI {
   }
 
 
+  export enum CopyPasteError {
+    NONE = 0,
+    BADURL, // url is somehow invalid
+    LOGGEDIN, // trying to copy+paste while logged in to a network
+    UNEXPECTED, // received a url at an invalid time
+    FAILED // something about the connection failed
+  }
+
   /**
    * The User Interface class.
    *
@@ -146,7 +154,7 @@ module UI {
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
-    public copyPasteUrlError :boolean = false;
+    public copyPasteError :CopyPasteError = CopyPasteError.NONE;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
@@ -244,10 +252,6 @@ module UI {
 
       core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
-
-        if (uProxy.View.COPYPASTE === this.view) {
-          this.view = uProxy.View.SPLASH;
-        }
       });
 
       core.onUpdate(uProxy.Update.START_GIVING, () => {
@@ -257,12 +261,6 @@ module UI {
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
-        if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
-          if (uProxy.View.COPYPASTE === this.view) {
-            this.view = uProxy.View.SPLASH;
-          }
-        }
-
         this.copyPasteSharingState = SharingState.NONE;
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
@@ -361,12 +359,13 @@ module UI {
     }
 
     public handleUrlData = (url :string) => {
-      var payload;
+      var payload :uProxy.Message[];
+      var expectedType :uProxy.MessageType;
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
         console.log('Ignoring URL since we have an active network');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.LOGGEDIN;
         return;
       }
 
@@ -375,33 +374,37 @@ module UI {
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BADURL;
         return;
       }
 
-      this.copyPasteUrlError = false;
+      this.copyPasteError = CopyPasteError.NONE;
       try {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BADURL;
+        return;
+      }
+
+      if (SharingState.NONE !== this.copyPasteSharingState) {
+        console.info('should not be processing a URL while in the middle of sharing');
+        this.copyPasteError = CopyPasteError.UNEXPECTED;
         return;
       }
 
       // at this point, we assume everything is good, so let's check state
       switch (match[1]) {
         case 'request':
-          if (SharingState.NONE !== this.copyPasteSharingState) {
-            console.warn('previous sharing connection already existed, restarting');
-            this.core_.stopCopyPasteShare();
-          }
-
+          expectedType = uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER;
           this.copyPasteSharingMessage = '';
           this.core_.startCopyPasteShare();
           break;
         case 'offer':
+          expectedType = uProxy.MessageType.SIGNAL_FROM_SERVER_PEER;
           if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
+            this.copyPasteError = CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -409,6 +412,11 @@ module UI {
 
       console.log('Sending messages from url to app');
       for (var i in payload) {
+        if (payload[i].type !== expectedType) {
+          this.copyPasteError = CopyPasteError.BADURL;
+          return;
+        }
+
         this.core_.sendCopyPasteSignal(payload[i]);
       }
     }
