@@ -104,7 +104,6 @@ describe('Social.FreedomNetwork', () => {
 
       Promise.all(promises).then(() => {
         var loginPromise = network.login(false);
-        jasmine.clock().tick(1);
         return loginPromise;
       }).then(() => {
         expect(network.myInstance).toBeDefined();

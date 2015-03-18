@@ -3,7 +3,6 @@ Polymer({
   GettingState: GettingState,
 
   ready: function() {
-    console.log('in instance ready');
     this.path = <InstancePath>{
       network : {
        name: this.network.name,

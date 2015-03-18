@@ -4,7 +4,6 @@
 
 
 describe('Core.User', () => {
-
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
@@ -43,7 +42,6 @@ describe('Core.User', () => {
   });
 
   describe('profile updates', () => {
-
     it('updates name', () => {
       user.update({
         name: 'Alice',
@@ -139,7 +137,6 @@ describe('Core.User', () => {
   });
 
   describe('handlers', () => {
-
     it('handles an INSTANCE message', () => {
       spyOn(user, 'syncInstance_');
       user.handleMessage('fakeclient', {
@@ -173,14 +170,13 @@ describe('Core.User', () => {
   };
 
   var instanceHandshake = {
-    instanceId: 'fakeinstance',
-    keyHash: null,
-    description: null,
+    instanceId: instanceData.instanceId,
+    keyHash: instanceData.keyHash,
+    description: instanceData.description,
     consent: {isRequesting: false, isOffering: false}
   }
 
   describe('client <---> instance', () => {
-
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
       var saved;
@@ -224,7 +220,6 @@ describe('Core.User', () => {
   });  // describe client <---> instance
 
   describe('local consent towards remote proxy', () => {
-
     var user = new Core.User(network, 'fakeuser2');
 
     it('can request access, and cancel that request', (done) => {
@@ -234,13 +229,6 @@ describe('Core.User', () => {
           expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
           done();
         });
-      });
-    });
-
-    it('accepts offer from remote', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
-        expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
-        done();
       });
     });
 
@@ -288,7 +276,6 @@ describe('Core.User', () => {
   });
 
   describe('local consent towards remote client', () => {
-
     it('can offer access', (done) => {
       user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
@@ -312,7 +299,8 @@ describe('Core.User', () => {
       });
     });
 
-    it('ignores request from remote', (done) => {
+    it('ignoring request does not change remoteRequestsAccessFromLocal',
+        (done) => {
       user.consent.remoteRequestsAccessFromLocal = true;
       user.consent.ignoringRemoteUserRequest = false;
       user.modifyConsent(uProxy.ConsentUserAction.IGNORE_REQUEST).then(() => {

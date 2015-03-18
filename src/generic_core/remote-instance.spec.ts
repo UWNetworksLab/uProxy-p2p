@@ -20,7 +20,7 @@ describe('Core.RemoteInstance', () => {
       'sendInstanceHandshake',
       'updateRemoteRequestsAccessFromLocal'
   ]);
-  user.consent = new Consent.State;
+  user.consent = new Consent.State();
 
   user.network = <Social.Network><any>jasmine.createSpyObj(
       'network', ['getUser']);
@@ -193,7 +193,6 @@ describe('Core.RemoteInstance', () => {
       alice.wireConsentFromRemote.isOffering = true;
       // The module & constructor of SocksToRtc may change in the near future.
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
-      console.log(JSON.stringify(SocksToRtc));
       alice.start().then(() => {
         expect(alice.localGettingFromRemote)
             .toEqual(GettingState.GETTING_ACCESS);

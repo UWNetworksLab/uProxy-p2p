@@ -345,3 +345,7 @@ interface UserPath {
   network :NetworkInfo;
   userId :string;
 }
+
+interface InstancePath extends UserPath {
+  instanceId :string;
+}

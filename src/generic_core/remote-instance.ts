@@ -298,7 +298,12 @@ module Core {
     public restoreState = (state :RemoteInstanceState) => {
       this.description = state.description;
       this.keyHash = state.keyHash;
-      this.wireConsentFromRemote = state.wireConsentFromRemote;
+      if (state.wireConsentFromRemote) {
+        this.wireConsentFromRemote = state.wireConsentFromRemote
+      } else {
+        logging.error('Failed to load wireConsentFromRemote for instance ' +
+            this.instanceId);
+      }
     }
 
     /**

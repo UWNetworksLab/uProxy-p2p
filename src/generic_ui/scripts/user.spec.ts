@@ -25,6 +25,8 @@ describe('UI.User', () => {
   it('creates with the correct userId', () => {
     user = new UI.User('fakeuser', null);
     expect(user.userId).toEqual('fakeuser');
+    expect(user.offeringInstances).toEqual([]);
+    expect(user.allInstanceIds).toEqual([]);
   });
 
   it('updates with a profile', () => {
