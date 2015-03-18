@@ -16,9 +16,9 @@ describe('Core.User', () => {
   var user :Core.User;
   var instance :Core.RemoteInstance;
 
-  beforeEach(() => {
-    spyOn(console, 'log');
-  });
+  // beforeEach(() => {
+  //   spyOn(console, 'log');
+  // });
 
   it('creates with the correct userId', (done) => {
     user = new Core.User(network, 'fakeuser');
@@ -138,11 +138,12 @@ describe('Core.User', () => {
 
   describe('handlers', () => {
     it('handles an INSTANCE message', () => {
-      spyOn(user, 'syncInstance_');
+      spyOn(user, 'syncInstance_').and.returnValue(Promise.resolve());
       user.handleMessage('fakeclient', {
         type: uProxy.MessageType.INSTANCE,
         data: {
-          'foo': 1
+          instanceId: 'instanceId', description: '', keyHash: '',
+          consent: {isOffering: false, isRequesting: false}
         }
       });
       expect(user.syncInstance_).toHaveBeenCalled();
@@ -165,14 +166,13 @@ describe('Core.User', () => {
     instanceId: 'fakeinstance',
     keyHash: null,
     status: null,
-    description: 'fake instance',
     consent: {isRequesting: false, isOffering: false}
   };
 
   var instanceHandshake = {
     instanceId: instanceData.instanceId,
     keyHash: instanceData.keyHash,
-    description: instanceData.description,
+    description: 'fake instance',
     consent: {isRequesting: false, isOffering: false}
   }
 
@@ -349,15 +349,6 @@ describe('Core.User', () => {
           done();
         });
       });
-    });
-  });
-
-  describe('preparing consent bits to send over the wire', () => {
-    it('initial consent state does not offer or request', () => {
-      var user = new Core.User(network, 'fakeuser3');
-      user.consent = new Consent.State();
-      expect(user.getConsentBits().isRequesting).toEqual(false);
-      expect(user.getConsentBits().isOffering).toEqual(false);
     });
   });
 

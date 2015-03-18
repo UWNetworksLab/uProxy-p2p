@@ -85,6 +85,7 @@ describe('Core.RemoteInstance', () => {
 
   describe('updating consent from instance handshake', () => {
     var instance :Core.RemoteInstance;
+    var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
       storage = new Core.Storage;
@@ -95,29 +96,33 @@ describe('Core.RemoteInstance', () => {
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
         var user = new Core.User(network, 'testUser');
         user.update({userId: 'testUser', name: 'Alice'});
-        instance = new Core.RemoteInstance(user, 'instanceId1');
-        user['instances_']['instanceId1'] = instance;
+        instance = new Core.RemoteInstance(user, INSTANCE_ID);
+        user['instances_'][INSTANCE_ID] = instance;
         Promise.all([user.onceLoaded, instance.onceLoaded]).then(done);
       });
     });
 
-    it('copies consent from wire', (done) => {
+    it('copies consent from wire, updates user.remoteRequestsAccessFromLocal',
+        (done) => {
+      var userConsent = instance.user.consent;
       expect(instance.wireConsentFromRemote.isOffering).toEqual(false);
       expect(instance.wireConsentFromRemote.isRequesting).toEqual(false);
+      expect(userConsent.remoteRequestsAccessFromLocal).toEqual(false);
       instance.update({
-        instanceId: 'instanceId1', description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', keyHash: '',
         consent: {isOffering: true, isRequesting: true}
       }).then(() => {
         expect(instance.wireConsentFromRemote.isOffering).toEqual(true);
         expect(instance.wireConsentFromRemote.isRequesting).toEqual(true);
+        expect(userConsent.remoteRequestsAccessFromLocal).toEqual(true);
         done();
       });
     });
 
-    it('notifies UI if isOffering changes when not ignoring', (done) => {
+    it('shows notificaion if isOffering changes when not ignoring', (done) => {
       spyOn(ui, 'showNotification');
       instance.update({
-        instanceId: 'instanceId1', description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', keyHash: '',
         consent: {isOffering: true, isRequesting: false}
       }).then(() => {
         expect(ui.showNotification).toHaveBeenCalledWith(
@@ -126,11 +131,11 @@ describe('Core.RemoteInstance', () => {
       });
     });
 
-    it('does not notify UI if isOffering changes when ignoring', (done) => {
+    it('does not show notification if isOffering changes when ignoring', (done) => {
       instance.user.consent.ignoringRemoteUserOffer = true;
       spyOn(ui, 'showNotification');
       instance.update({
-        instanceId: 'instanceId1', description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', keyHash: '',
         consent: {isOffering: true, isRequesting: false}
       }).then(() => {
         expect(ui.showNotification).not.toHaveBeenCalled();
@@ -138,10 +143,10 @@ describe('Core.RemoteInstance', () => {
       });
     });
 
-    it('notifies UI if isRequesting changes when not ignoring', (done) => {
+    it('shows notificaion if isRequesting changes when not ignoring', (done) => {
       spyOn(ui, 'showNotification');
       instance.update({
-        instanceId: 'instanceId1', description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', keyHash: '',
         consent: {isOffering: false, isRequesting: true}
       }).then(() => {
         expect(ui.showNotification).toHaveBeenCalledWith(
@@ -150,11 +155,11 @@ describe('Core.RemoteInstance', () => {
       });
     });
 
-    it('does not notify UI if isRequesting changes when ignoring', (done) => {
+    it('does not show notification if isRequesting changes when ignoring', (done) => {
       instance.user.consent.ignoringRemoteUserRequest = true;
       spyOn(ui, 'showNotification');
       instance.update({
-        instanceId: 'instanceId1', description: '', keyHash: '',
+        instanceId: INSTANCE_ID, description: '', keyHash: '',
         consent: {isOffering: false, isRequesting: true}
       }).then(() => {
         expect(ui.showNotification).not.toHaveBeenCalled();

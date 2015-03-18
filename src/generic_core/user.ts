@@ -185,7 +185,10 @@ module Core {
       var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
         case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceHandshake>msg.data);
+          this.syncInstance_(clientId, <InstanceHandshake>msg.data)
+              .catch((e) => {
+            log.error('syncInstance_ failed for ', msg.data);
+          });
           return;
 
         case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
@@ -214,18 +217,6 @@ module Core {
             msg: msg
           });
       }
-    }
-
-    /**
-     * Return the pair of boolean consent bits indicating client and proxy
-     * consent status, from the user's point of view. These bits will be sent on
-     * the wire.
-     */
-    public getConsentBits = () :uProxy.ConsentWireState => {
-      return {
-        isRequesting: this.consent.localRequestsAccessFromRemote,
-        isOffering: this.consent.localGrantsAccessToRemote
-      };
     }
 
     public getInstance = (instanceId:string) : Core.RemoteInstance => {
@@ -259,8 +250,8 @@ module Core {
       if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         log.error('Received an instance handshake from a non-uProxy client',
                   clientId);
-        return Promise.reject(
-            'Received an instance handshake from a non-uProxy client');
+        return Promise.reject(new Error(
+            'Received an instance handshake from a non-uProxy client'));
       }
       log.info('received instance', instanceHandshake);
       if (!instanceHandshake.consent) {
@@ -331,9 +322,7 @@ module Core {
       var isOnline = false;
       var offeringInstanceStatesForUi = [];
       var allInstanceIds = [];
-      var totalInstanceCount = 0;
       for (var instanceId in this.instances_) {
-        ++totalInstanceCount;
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
         if (instance.wireConsentFromRemote.isOffering) {
@@ -343,7 +332,7 @@ module Core {
           isOnline = true;
         }
       }
-      if (totalInstanceCount === 0) {
+      if (allInstanceIds.length === 0) {
         // Don't send users to UI if they don't have any instances (i.e. are not
         // uProxy users).
         // TODO: ideally we should not have User objects for users without
@@ -489,7 +478,10 @@ module Core {
             instanceId: myInstance.instanceId,
             keyHash: myInstance.keyHash,
             description: core.globalSettings.description,
-            consent: this.getConsentBits(),
+            consent: {
+              isRequesting: this.consent.localRequestsAccessFromRemote,
+              isOffering: this.consent.localGrantsAccessToRemote
+            }
           }
         };
         return this.network.send(this, clientId, instanceMessage);
@@ -506,24 +498,33 @@ module Core {
     /**
      * Modify the consent for this instance, *locally*. (User clicked on one of
      * the consent buttons in the UI.) Sends updated consent bits to the
-     * remote instance afterwards.
+     * remote instance afterwards.  Returns a Promise which fulfills once
+     * the consent has been modified.
      */
     public modifyConsent = (action :uProxy.ConsentUserAction) : Promise<void> => {
-      return this.onceLoaded.then(() => {
+      var consentModified = this.onceLoaded.then(() => {
         if (!Consent.handleUserAction(this.consent, action)) {
-          log.warn('Invalid user action on consent', {
-            consent: this.consent,
-            action: action
-          });
-          return;
+          return Promise.reject(new Error(
+              'Invalid user action on consent ' +
+              JSON.stringify({
+                consent: this.consent,
+                action: action
+              })));
         }
+      });
+
+      // After consent has been modified, cancel connection if needed,
+      // send new instance handshakes, save to storage, and update the UI.
+      // We don't need callers to block on any of this, so we can just
+      // return consentModified.
+      consentModified.then(() => {
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
         if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
           for (var instanceId in this.instances_) {
             if (this.instances_[instanceId].localSharingWithRemote ==
                 SharingState.SHARING_ACCESS) {
-              this.instances_[instanceId].connection.stopShare();
+              this.instances_[instanceId].stopShare();
             }
           }
         }
@@ -531,9 +532,7 @@ module Core {
         // Send new consent bits to all remote clients, and save to storage.
         for (var instanceId in this.instances_) {
           if (this.isInstanceOnline(instanceId)) {
-            this.onceLoaded.then(function (instanceId) {
-              this.sendInstanceHandshake(this.instanceToClient(instanceId));
-            }.bind(this, instanceId));
+            this.sendInstanceHandshake(this.instanceToClient(instanceId));
           }
         }
 
@@ -541,6 +540,8 @@ module Core {
         // Send an update to the UI.
         this.notifyUI();
       });
+
+      return consentModified;
     }
 
     public updateRemoteRequestsAccessFromLocal = () => {
