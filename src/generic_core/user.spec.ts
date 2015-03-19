@@ -16,10 +16,6 @@ describe('Core.User', () => {
   var user :Core.User;
   var instance :Core.RemoteInstance;
 
-  // beforeEach(() => {
-  //   spyOn(console, 'log');
-  // });
-
   it('creates with the correct userId', (done) => {
     user = new Core.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
