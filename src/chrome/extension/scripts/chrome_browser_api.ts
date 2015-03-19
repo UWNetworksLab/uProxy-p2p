@@ -102,12 +102,8 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  public stopUsingProxy = (askUser :boolean) => {
-    if (askUser && this.running_ == true) {
-      // Create a tab which prompts the user to decide if they want
-      // to reset their proxy config.
-      this.launchTabIfNotOpen("disconnected.html");
-    } else if (!askUser && this.running_ == true) {
+  public stopUsingProxy = () => {
+    if (this.running_) {
       this.revertProxySettings_();
     }
   };

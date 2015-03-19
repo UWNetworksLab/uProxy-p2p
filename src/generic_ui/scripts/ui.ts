@@ -423,9 +423,6 @@ module UI {
       var instanceId = this.instanceGettingAccessFrom_;
       this.instanceGettingAccessFrom_ = null;
 
-      // TODO (lucyhe): if askUser is true we might want a different
-      // icon that means "configured to proxy, but not proxying"
-      // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
         this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
@@ -442,7 +439,12 @@ module UI {
         this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
       }
 
-      this.browserApi.stopUsingProxy(askUser);
+      if (askUser) {
+        this.browserApi.launchTabIfNotOpen('disconnected.html');
+        return;
+      }
+
+      this.browserApi.stopUsingProxy();
     }
 
     public startGettingInUi = () => {
