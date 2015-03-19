@@ -32,6 +32,7 @@
       padding-top: 50px;
       opacity: 1;
       z-index: 100;
+      overflow: scroll;
     }
     .view[hidden] {
       display: block !important;
@@ -55,9 +56,6 @@
       margin-bottom: 1.5em;
     }
     uproxy-faq-link {
-      position: absolute;
-      bottom: 0;
-      left: 0;
       width: 100%;
       padding-top: 1em;
       padding-bottom: 1em;
@@ -73,13 +71,16 @@
       top: 8px;
       cursor: pointer;
     }
+    #intro1, #networks {
+      height: 100%;
+    }
     </style>
 
     <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
         hidden?='{{SPLASH_STATES.INTRO==ui.splashState}}'></core-icon>
 
-    <div id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
-      <div class='view'>
+    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
+      <div class='view' flex>
         <img class='uproxy-logo' src='../icons/smiley.png'>
         <h1>uProxy</h1>
         <p>
@@ -97,8 +98,8 @@
       </uproxy-faq-link>
     </div>
 
-    <div id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
-      <div class='view'>
+    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
+      <div class='view' flex>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>

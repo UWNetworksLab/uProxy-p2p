@@ -94,15 +94,19 @@
         position: absolute;
         z-index: 1001;
       }
+      #rosterContainer {
+        height: 100%;
+      }
       .roster {
         position: relative;
         overflow-y: auto;
         display: block;
       }
+      #roster-panel {
+        overflow: scroll;
+      }
       #status {
-        position: fixed;
         width: 100%;
-        bottom: 0px;
       }
       .statusRow {
         height: 3em;
@@ -191,24 +195,25 @@
             on a friend to connect.
           </p>
         </uproxy-bubble>
-
-        <div id='roster-panel'>
-          <uproxy-roster id='get-roster' class='roster'
-              hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
-              contacts='{{model.contacts.getAccessContacts}}'>
-          </uproxy-roster>
-          <uproxy-roster id='share-roster' class='roster'
-              hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
-              contacts='{{model.contacts.shareAccessContacts}}'>
-          </uproxy-roster>
-        </div>
-
-        <div id='status'>
-          <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-            <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+        <div id='rosterContainer' vertical layout>
+          <div id='roster-panel' flex>
+            <uproxy-roster id='get-roster' class='roster'
+                hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+                contacts='{{model.contacts.getAccessContacts}}'>
+            </uproxy-roster>
+            <uproxy-roster id='share-roster' class='roster'
+                hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+                contacts='{{model.contacts.shareAccessContacts}}'>
+            </uproxy-roster>
           </div>
-          <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-            <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+
+          <div id='status'>
+            <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
+              <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+            </div>
+            <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
+              <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+            </div>
           </div>
         </div>
       </div>
