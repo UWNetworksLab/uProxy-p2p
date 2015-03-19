@@ -69,6 +69,7 @@
     </div>
 
     <div hidden?='{{ !model.onlineNetwork.hasContacts }}'>
+      <!-- Intentionally hiding search box. May decide to readd it later. -->
       <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
