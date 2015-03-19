@@ -18,7 +18,7 @@ proxyConfig.startUsingProxy = function(endpoint) {
     this.proxy_type_ = prefsvc.get("network.proxy.type");
 
     prefsvc.set("network.proxy.socks", endpoint.address);
-    prefsvc.set("network.proxy.http_port", endpoint.port);
+    prefsvc.set("network.proxy.socks_port", endpoint.port);
     prefsvc.set("network.proxy.type", 1);
   }
 };
@@ -28,8 +28,8 @@ proxyConfig.stopUsingProxy = function(askUser) {
     this.running_ = false;
     // Restore initial proxy state.
     prefsvc.set("network.proxy.socks", this.socks_server_);
-    prefsvc.set("network.proxy.http_port", this.socks_port_);
-    prefsvc.set("network.proxy.type", this.proxy_type);
+    prefsvc.set("network.proxy.socks_port", this.socks_port_);
+    prefsvc.set("network.proxy.type", this.proxy_type_);
   }
 
 };
