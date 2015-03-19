@@ -1,5 +1,6 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href="../lib/core-signals/core-signals.html">
+<link rel="import" href="../lib/core-header-panel/core-header-panel.html">
 <link rel="import" href="../lib/core-toolbar/core-toolbar.html">
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
@@ -18,31 +19,14 @@
   <template>
     <style>
       :host {
-        left: 0;
-        top: 0;
-        display: block;
-        border: none; margin: auto;
+        font-family: Roboto, sans-serif;
         text-align: left;
-        background-color: white;
         color: rgb(112, 112, 112);
       }
-      #logged-in-controls {
-        margin-top: 100px;
+      paper-tab {
+        cursor: pointer;
       }
-      #toolbar {
-        height: 100px;
-        background-color: #009688;
-        position: fixed;
-        top: 0;
-        z-index: 1;
-        width: 100%;
-        color: white;
-      }
-      #toolbar paper-tab {
-        font-size: 1.2em;
-        text-transform: uppercase;
-      }
-      #toolbar paper-tabs::shadow #selectionBar {
+      paper-tabs::shadow #selectionBar {
         /*
          * we are seeing an issue with the bar when initially loading it where
          * the width will be set to 0 since the actual buttons are not rendered
@@ -51,29 +35,52 @@
         width: 50%;
         background-color: #20F1DE;
       }
-      #toolbar paper-tab::shadow #ink {
+      paper-tab::shadow #ink {
         color: #20F1DE;
         opacity: .4;
       }
-      #toolbar paper-tab {
-        opacity: .6;
-        cursor: pointer;
+      paper-tab::shadow .tab-content{
+        font-size: 14px;
+        text-transform: uppercase;
       }
-      #toolbar paper-tab.core-selected {
-        opacity: 1;
+      core-header-panel {
+        height: 100%;
       }
-      #btnSettings {
+      core-header-panel::shadow #dropShadow {
+        box-shadow: inset 0px 5px 6px -3px rgba(0,0,0,0.13);
+      }
+      core-toolbar {
+        height: 105px;
+        background-color: #009688;
+        z-index: 1;
+        width: 100%;
+        color: #FFFFFF;
+      }
+      core-toolbar::shadow #topBar {
+        padding: 0px;
+        height: 60px;
+      }
+      core-icon[icon="menu"] {
+        margin: 0px 0px 0px 16px;
         opacity: 0.6;
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
         transition: all 0.23s !important;
       }
-      #btnSettings:hover {
+      core-icon[icon="menu"]:hover {
         opacity: 1;
         cursor: pointer;
       }
       #title {
-        font-size: 1.75em;
+        font-size: 20px;
+        margin: 0px 0px 0px 36px;
+      }
+      #sharingEnabledIcon {
+        margin: 0px 15px 0px  0px;
+        padding: 0px;
+        height: 20px;
+        width: 20px;
+        cursor: pointer;
       }
       #settings {
         top: 0;
@@ -87,15 +94,19 @@
         position: absolute;
         z-index: 1001;
       }
+      #rosterContainer {
+        height: 100%;
+      }
       .roster {
         position: relative;
         overflow-y: auto;
         display: block;
       }
+      #roster-panel {
+        overflow: scroll;
+      }
       #status {
-        position: fixed;
         width: 100%;
-        bottom: 0px;
       }
       .statusRow {
         height: 3em;
@@ -115,16 +126,6 @@
         padding-right: 1em;
         width: 20px;
         height: 20px;
-      }
-      .clickable {
-        cursor: pointer;
-      }
-      .sharingEnabled {
-        position: absolute;
-        right: 20px;
-        top: 20px;
-        width: 19px;
-        height: 19px;
       }
       uproxy-bubble {
         z-index: 1;
@@ -150,12 +151,13 @@
     <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
-    <div id='logged-in-controls'
+    <core-header-panel
         hidden?='{{ ui.view !== uProxy.View.ROSTER && ui.view !== uProxy.View.SETTINGS }}'>
 
-      <core-toolbar id='toolbar'>
+      <core-toolbar>
 
-        <core-icon id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon>
+        <core-icon icon="menu" on-tap="{{ settingsView }}"></core-icon>
+        <div id='title' flex>uProxy</div>
 
         <uproxy-bubble class='error' active='{{ ui.copyPasteUrlError }}' on-closed='{{ dismissCopyPasteError }}'>
           <h3>Cannot open manual connection</h3>
@@ -167,10 +169,9 @@
           </p>
         </uproxy-bubble>
 
-        <div id='title' flex>uProxy</div>
-        <core-icon-button src='../icons/sharing-enabled-toolbar.png'
+        <img id='sharingEnabledIcon' src='../icons/sharing-enabled-toolbar.png'
           hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
-          on-tap='{{ setShareMode }}'></core-icon-button>
+          on-tap='{{ setShareMode }}'></img>
 
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
@@ -186,35 +187,37 @@
         </div>
       </core-toolbar>
 
-      <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
-        <h3>Welcome to uProxy!</h3>
-        <p>
-          To get started, choose "Get access" or "Share access" and then click
-          on a friend to connect.
-        </p>
-      </uproxy-bubble>
+      <div class='content' fit>
+        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+          <h3>Welcome to uProxy!</h3>
+          <p>
+            To get started, choose "Get access" or "Share access" and then click
+            on a friend to connect.
+          </p>
+        </uproxy-bubble>
+        <div id='rosterContainer' vertical layout>
+          <div id='roster-panel' flex>
+            <uproxy-roster id='get-roster' class='roster'
+                hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+                contacts='{{model.contacts.getAccessContacts}}'>
+            </uproxy-roster>
+            <uproxy-roster id='share-roster' class='roster'
+                hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+                contacts='{{model.contacts.shareAccessContacts}}'>
+            </uproxy-roster>
+          </div>
 
-      <div id='roster-panel'>
-        <uproxy-roster id='get-roster' class='roster'
-            hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
-            contacts='{{model.contacts.getAccessContacts}}'>
-        </uproxy-roster>
-        <uproxy-roster id='share-roster' class='roster'
-            hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
-            contacts='{{model.contacts.shareAccessContacts}}'>
-        </uproxy-roster>
-      </div>
-
-      <div id='status'>
-        <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-          <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+          <div id='status'>
+            <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
+              <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+            </div>
+            <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
+              <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+            </div>
+          </div>
         </div>
-        <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-          <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
-        </div>
       </div>
-
-    </div>
+    </core-header-panel>
 
     <uproxy-settings id='settings'
       class='{{ { active:(uProxy.View.SETTINGS==ui.view) } | tokenList }}'>

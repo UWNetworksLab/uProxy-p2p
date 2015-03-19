@@ -10,6 +10,7 @@
     "core-signals": "Polymer/core-signals#~0.5.5",
     "paper-dialog": "Polymer/paper-dialog#~0.5.5",
     "core-label": "Polymer/core-label#~0.5.5",
-    "core-tooltip": "Polymer/core-tooltip#~0.5.5"
+    "core-tooltip": "Polymer/core-tooltip#~0.5.5",
+    "core-header-panel": "Polymer/core-header-panel#~0.5.5"
   }
 }
