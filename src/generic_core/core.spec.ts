@@ -18,49 +18,38 @@ describe('Core', () => {
   // Set up a fake network -> roster -> user -> instance chain.
   var network = <Social.Network><any>jasmine.createSpy('network');
   network.getUser = null;
+  network.getStorePath = function() { return 'network-store-path'; };
   network['login'] = (remember:boolean) => { return Promise.resolve<void>() };
-  var user = <Core.User><any>jasmine.createSpy('user');
+  var user = new Core.User(network, 'fake-login');
   user.getInstance = null;
   user.notifyUI = () => {};
   user.getLocalInstanceId = () => { return 'fake/userpath'; };
-  var alice = new Core.RemoteInstance(user, 'instance-alice', {
-    instanceId: 'instance-alice',
-    keyHash:    'fake-hash-alice',
-    description: 'alice peer',
-  });
+  var alice = new Core.RemoteInstance(user, 'instance-alice');
 
   beforeEach(() => {
     spyOn(console, 'log');
-    spyOn(console, 'warn');
   });
 
-  it('passes modifyConsent to the correct instance', () => {
+  it('passes modifyConsent to the correct user', () => {
     spyOn(Social, 'getNetwork').and.callFake(() => {
       return network;
     });
     spyOn(network, 'getUser').and.callFake(() => {
       return user;
     });
-    spyOn(user, 'getInstance').and.callFake(() => {
-      return alice;
-    });
-    spyOn(alice, 'modifyConsent');
+    spyOn(user, 'modifyConsent');
     var command :uProxy.ConsentCommand = {
       path: {
         network: {
           name: 'fake-network',
           userId: 'fake-login'
         },
-        userId: 'user-alice',
-        instanceId: 'instance-alice'
+        userId: 'user-alice'
       },
       action: uProxy.ConsentUserAction.REQUEST
     };
     core.modifyConsent(command);
-    expect(Social.getNetwork).toHaveBeenCalledWith('fake-network', 'fake-login');
-    expect(network.getUser).toHaveBeenCalledWith('user-alice');
-    expect(user.getInstance).toHaveBeenCalledWith('instance-alice');
-    expect(alice.modifyConsent).toHaveBeenCalledWith(uProxy.ConsentUserAction.REQUEST);
+    expect(user.modifyConsent).toHaveBeenCalledWith(uProxy.ConsentUserAction.REQUEST);
   });
 
   it('relays incoming manual network messages to the manual network', () => {

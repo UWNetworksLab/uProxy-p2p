@@ -18,7 +18,6 @@ describe('Consent', () => {
 
   it('all functions are defined', () => {
     expect(Consent.handleUserAction).toBeDefined();
-    expect(Consent.updateStateFromRemoteState).toBeDefined();
   });
 
 });  // consent

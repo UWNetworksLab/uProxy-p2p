@@ -112,11 +112,9 @@ module uProxy {
     isOffering   :boolean;
   }
 
-  // the state for consent between two instances
   export interface ConsentState {
     localGrantsAccessToRemote :boolean;
     localRequestsAccessFromRemote :boolean;
-    remoteGrantsAccessToLocal :boolean;
     remoteRequestsAccessFromLocal :boolean;
     ignoringRemoteUserRequest :boolean;
     ignoringRemoteUserOffer :boolean;
@@ -139,8 +137,8 @@ module uProxy {
    * command.
    */
   export interface ConsentCommand {
-    path       :InstancePath;
-    action     :uProxy.ConsentUserAction;
+    path    :UserPath;
+    action  :uProxy.ConsentUserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -344,3 +342,11 @@ module ChromeMessage {
   export var ACK :string = 'ack';
 }
 
+interface UserPath {
+  network :NetworkInfo;
+  userId :string;
+}
+
+interface InstancePath extends UserPath {
+  instanceId :string;
+}

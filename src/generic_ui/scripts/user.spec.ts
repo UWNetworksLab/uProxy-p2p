@@ -14,14 +14,6 @@ describe('UI.User', () => {
     return {
       instanceId: id,
       description: description,
-      consent: {
-        localGrantsAccessToRemote: false,
-        localRequestsAccessFromRemote: false,
-        remoteGrantsAccessToLocal: false,
-        remoteRequestsAccessFromLocal: false,
-        ignoringRemoteUserRequest: false,
-        ignoringRemoteUserOffer: false
-      },
       localSharingWithRemote: SharingState.NONE,
       localGettingFromRemote: GettingState.NONE,
       isOnline: true,
@@ -33,36 +25,50 @@ describe('UI.User', () => {
   it('creates with the correct userId', () => {
     user = new UI.User('fakeuser', null);
     expect(user.userId).toEqual('fakeuser');
-    expect(user.instances).toBeDefined();
+    expect(user.offeringInstances).toEqual([]);
+    expect(user.allInstanceIds).toEqual([]);
   });
 
   it('updates with a profile', () => {
     user.update({
-      userId: 'fakeuser',
-      name: 'fakename',
-      imageData: 'fakeimage.uri',
-      timestamp: Date.now()
+      network: 'testNetwork',
+      user: {
+        userId: 'fakeuser',
+        name: 'fakename',
+        imageData: 'fakeimage.uri',
+        timestamp: Date.now()
+      },
+      offeringInstances: [],
+      allInstanceIds: [],
+      isOnline: true,
+      consent: {
+        localGrantsAccessToRemote: false,
+        localRequestsAccessFromRemote: false,
+        remoteRequestsAccessFromLocal: false,
+        ignoringRemoteUserRequest: false,
+        ignoringRemoteUserOffer: false
+      }
     });
     expect(user.name).toEqual('fakename');
     expect(user.imageData).toEqual('fakeimage.uri');
   });
 
   it('does not change description if only 1 instance', () => {
-    user.instances = [getInstance('instance1', '')];
+    user.offeringInstances = [getInstance('instance1', '')];
     user.updateInstanceDescriptions();
-    expect(user.instances[0].description).toEqual('');
+    expect(user.offeringInstances[0].description).toEqual('');
   });
 
   it('updates empty descriptions when multiple instances', () => {
-    user.instances = [
+    user.offeringInstances = [
       getInstance('instance1', ''),
       getInstance('instance2', 'laptop'),
       getInstance('instance3', '')
     ];
     user.updateInstanceDescriptions();
-    expect(user.instances[0].description).toEqual('Computer 1');
-    expect(user.instances[1].description).toEqual('laptop');
-    expect(user.instances[2].description).toEqual('Computer 3');
+    expect(user.offeringInstances[0].description).toEqual('Computer 1');
+    expect(user.offeringInstances[1].description).toEqual('laptop');
+    expect(user.offeringInstances[2].description).toEqual('Computer 3');
   });
 
   // TODO: more specs
