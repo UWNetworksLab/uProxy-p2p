@@ -1,15 +1,16 @@
 /// <reference path='../scripts/ui.ts' />
 declare var ui :UI.UserInterface;
 
+declare var stopProxying :() => void;
+
 Polymer({
   undoProxyConfig: function() {
-    this.ui.stopGettingInUiAndConfig(false);
+
+    stopProxying();
     this.$.confirmButton.disabled = true;
     this.$.proxyReverted.hidden = false;
   },
   ready: function() {
     // Expose global ui object in this context.
-    this.ui = ui;
-    this.globalSettings = model.globalSettings
   }
 });

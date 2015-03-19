@@ -13,6 +13,7 @@ var { Ci, Cc, Cr } = require("chrome");
 var self = require("sdk/self");
 var events = require("sdk/system/events");
 var notifications = require('sdk/notifications')
+var pagemod = require('sdk/page-mod');
 
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
@@ -65,6 +66,21 @@ function setUpConnection(freedom, panel, button) {
 
   panel.port.on('showNotification', function(notification) {
     notifications.notify(notification);
+  });
+
+  /* Allow any pages in the addon to send messages to the UI or the core */
+  pagemod.PageMod({
+    include: self.data.url('*'),
+    contentScriptFile: self.data.url('scripts/content-proxy.js'),
+    onAttach: function(worker) {
+      worker.port.on('update', function(data) {
+        panel.port.emit(uProxy.Update[data.update], data.data);
+      });
+
+      worker.port.on('command', function(data) {
+        freedom.emit(uProxy.Command[data.command], data.data);
+      });
+    }
   });
 }
 
