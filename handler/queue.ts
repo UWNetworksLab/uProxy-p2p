@@ -32,6 +32,39 @@ export interface QueueFeeder<Feed,Result> {
   handle(x:Feed) : Promise<Result>;
 }
 
+// The |HandlerQueueStats| class contains increment-only counters
+// characterizing the state and history of a |QueueHandler|.
+export class HandlerQueueStats {
+  // Total events ever input by the HandlerQueue.  Intent:
+  //
+  // queued_events + immediately_handled_events + rejected_events =
+  //   total_events.
+  //
+  // queued_events - queued_handled_events - rejected_events = number
+  //   of events in queue right now.
+  total_events : number;
+  // Ever-queued-events
+  queued_events : number;
+  // Events that were immediately handled (b/c there was a handler set).
+  immediately_handled_events : number;
+  // Events that were handled after going through the queue.
+  queued_handled_events : number;
+  // Number of events rejected in a queue clear.
+  rejected_events : number;
+  // Number of times a handler was set on this queue (the handler was
+  // previously null).
+  handler_set_count : number;
+  // Number of times a handler was changed on this queue (the handler
+  // was previously non-null).
+  handler_change_count : number;
+  // Number of times a handler was un-set on this queue (when then
+  // handler previously non-null).
+  handler_clear_count : number;
+  // Number of times we set a new handler while we have an existing
+  // promise, causing a rejection of that promise.
+  handler_rejections : number;
+}
+
 // The |QueueHandler| is the abstraction for the stream of functions that
 // handles events.
 export interface QueueHandler<Feed,Result> {
@@ -62,6 +95,8 @@ export interface QueueHandler<Feed,Result> {
   // are queued. If |setSyncNextHandler| or |setAsyncNextHandler| has been
   // called, then its return promise is rejected.
   stopHandling() : void;
+  // Get statistics on queue handler.
+  getStats() : HandlerQueueStats;
 }
 
 // Internal helper class. Holds an object called |thing| of type |T| and
@@ -138,6 +173,9 @@ export class Queue<Feed,Result>
   // it is no longer attached.
   private rejectFn_ : (e:Error) => void = null;
 
+  // Handler statistics.
+  private stats_  = new HandlerQueueStats();
+
   // CONSIDER: allow queue to be size-bounded? Reject on too much stuff?
   constructor() {}
 
@@ -149,13 +187,22 @@ export class Queue<Feed,Result>
     return this.handler_ !== null;
   }
 
+  public getStats = () : HandlerQueueStats => {
+    return this.stats_;
+  }
+
   // handle or queue the given thing.
   public handle = (x:Feed) : Promise<Result> => {
-    if(this.handler_) {
+    this.stats_.total_events++;
+
+    if (this.handler_) {
+      this.stats_.immediately_handled_events++;
       return this.handler_(x);
     }
+
     var pendingThing = new PendingPromiseHandler(x);
     this.queue_.push(pendingThing);
+    this.stats_.queued_events++;
     return pendingThing.promise;
   }
 
@@ -163,15 +210,17 @@ export class Queue<Feed,Result>
   // null. Note: a handler may itself setHandler to being null, doing so
   // should pause proccessing of the queue.
   private processQueue_ = () : void => {
-    while(this.handler_ && this.queue_.length > 0) {
+    while (this.handler_ && this.queue_.length > 0) {
+      this.stats_.queued_handled_events++;
       this.queue_.shift().handleWith(this.handler_);
     }
   }
 
   // Clears the queue, and rejects all promises to handle things on the queue.
   public clear = () : void => {
-    while(this.queue_.length > 0) {
+    while (this.queue_.length > 0) {
       var pendingThing = this.queue_.shift();
+      this.stats_.rejected_events++;
       pendingThing.reject(new Error('Cleared by Handler'));
     }
   }
@@ -183,8 +232,14 @@ export class Queue<Feed,Result>
   // promise.
   public setHandler = (handler:(x:Feed) => Promise<Result>) : void => {
     if (this.rejectFn_) {
+      this.stats_.handler_rejections++;
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
       this.rejectFn_ = null;
+    }
+    if (this.handler_ === null) {
+      this.stats_.handler_set_count++;
+    } else {
+      this.stats_.handler_change_count++;
     }
     this.handler_ = handler;
     this.processQueue_();
@@ -199,10 +254,14 @@ export class Queue<Feed,Result>
   // Reject the previous promise handler if it exists and stop handling stuff.
   public stopHandling = () => {
     if (this.rejectFn_) {
+      this.stats_.handler_rejections++;
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
       this.rejectFn_ = null;
     }
-    this.handler_ = null;
+    if (this.handler_) {
+      this.handler_ = null;
+      this.stats_.handler_clear_count++;
+    }
   }
 
   // A convenience function that takes a T => Promise<Result> function and sets
@@ -214,12 +273,15 @@ export class Queue<Feed,Result>
   // something to handle.
   public setNextHandler = (handler:(x:Feed) => Promise<Result>)
       : Promise<Result> => {
+    this.stats_.handler_set_count++;
+
     return new Promise((F,R) => {
       this.setHandler((x:Feed) : Promise<Result> => {
         // Note: we don't call stopHandling() within this handler because that
         // would reject the promise we're about to fulfill.
         this.handler_ = null;
         this.rejectFn_ = null;
+        this.stats_.handler_clear_count++;
         var resultPromise = handler(x);
         resultPromise.then(F);
         return resultPromise;
