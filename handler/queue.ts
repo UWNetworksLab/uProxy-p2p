@@ -36,18 +36,29 @@ export interface QueueFeeder<Feed,Result> {
 // characterizing the state and history of a |QueueHandler|.
 export class HandlerQueueStats {
   // Total events ever input by the HandlerQueue.  Intent:
-  // queued_events + handled_events + rejected_events = total_events.
+  //
+  // queued_events + immediately_handled_events + rejected_events =
+  //   total_events.
+  //
+  // queued_events - queued_handled_events - rejected_events = number
+  //   of events in queue right now.
   total_events : number;
   // Ever-queued-events
   queued_events : number;
-  // Ever-handled-evetns
-  handled_events : number;
+  // Events that were immediately handled (b/c there was a handler set).
+  immediately_handled_events : number;
+  // Events that were handled after going through the queue.
+  queued_handled_events : number;
   // Number of events rejected in a queue clear.
   rejected_events : number;
-  // Number of times a handler was set on this queue.
+  // Number of times a handler was set on this queue (the handler was
+  // previously null).
   handler_set_count : number;
-  // Number of times a handler was un-set on this queue.
-  // handler_clear_count <= handler_set_count
+  // Number of times a handler was changed on this queue (the handler
+  // was previously non-null).
+  handler_change_count : number;
+  // Number of times a handler was un-set on this queue (when then
+  // handler previously non-null).
   handler_clear_count : number;
   // Number of times we set a new handler while we have an existing
   // promise, causing a rejection of that promise.
@@ -185,7 +196,7 @@ export class Queue<Feed,Result>
     this.stats_.total_events++;
 
     if (this.handler_) {
-      this.stats_.handled_events++;
+      this.stats_.immediately_handled_events++;
       return this.handler_(x);
     }
 
@@ -200,7 +211,7 @@ export class Queue<Feed,Result>
   // should pause proccessing of the queue.
   private processQueue_ = () : void => {
     while (this.handler_ && this.queue_.length > 0) {
-      this.stats_.handled_events++;
+      this.stats_.queued_handled_events++;
       this.queue_.shift().handleWith(this.handler_);
     }
   }
@@ -225,7 +236,11 @@ export class Queue<Feed,Result>
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
       this.rejectFn_ = null;
     }
-    this.stats_.handler_set_count++;
+    if (this.handler_ === null) {
+      this.stats_.handler_set_count++;
+    } else {
+      this.stats_.handler_change_count++;
+    }
     this.handler_ = handler;
     this.processQueue_();
   }
@@ -243,8 +258,10 @@ export class Queue<Feed,Result>
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
       this.rejectFn_ = null;
     }
-    this.handler_ = null;
-    this.stats_.handler_clear_count++;
+    if (this.handler_) {
+      this.handler_ = null;
+      this.stats_.handler_clear_count++;
+    }
   }
 
   // A convenience function that takes a T => Promise<Result> function and sets
