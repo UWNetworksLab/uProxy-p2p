@@ -4,8 +4,10 @@
 declare var core :CoreConnector;
 
 Polymer({
-  model: model,
   update: function() {
     core.updateGlobalSettings(model.globalSettings);
+  },
+  ready: function() {
+    this.model = model;
   }
 });

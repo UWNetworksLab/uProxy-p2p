@@ -1,7 +1,4 @@
 Polymer({
-  // Make GettingState enum available to polymer
-  GettingState: GettingState,
-
   ready: function() {
     this.path = <InstancePath>{
       network : {
@@ -16,6 +13,7 @@ Polymer({
     this.ui = ui;
     this.uProxy = uProxy;
     this.globalSettings = model.globalSettings;
+    this.GettingState = GettingState;
   },
 
   start: function() {

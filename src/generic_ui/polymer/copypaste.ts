@@ -21,10 +21,6 @@ function initCopyPaste() {
 }
 
 Polymer({
-  GettingState: GettingState,
-  SharingState: SharingState,
-  model: model,
-  ui: ui,
   prev: function() {
     // do not let the user navigate away from this view if copypaste is active
     if (ui.copyPasteGettingState === GettingState.GETTING_ACCESS ||
@@ -44,5 +40,10 @@ Polymer({
     sender.focus();
     sender.select();
   },
-  ready: function() {}
+  ready: function() {
+    this.ui = ui;
+    this.model = model;
+    this.GettingState = GettingState;
+    this.SharingState = SharingState;
+  }
 });

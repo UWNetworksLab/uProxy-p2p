@@ -1,16 +1,23 @@
 /// <reference path='../../interfaces/ui-polymer.d.ts' />
 
 Polymer({
-  model: model,
   loadingContacts: false,
   searchQuery: '',
+  onlinePending: [],
+  offlinePending: [],
+  onlineTrustedUproxyContacts: [],
+  offlineTrustedUproxyContacts: [],
+  onlineUntrustedUproxyContacts: [],
+  offlineUntrustedUproxyContacts: [],
   ready: function() {
     console.log('initializing roster');
 
     this.ui = ui;
     this.uProxy = uProxy;
     this.globalSettings = model.globalSettings;
-
+    this.model = model;
+  },
+  contactsChanged: function() {
     // Initialize roster here.
     // this.contacts contains either all the contact groups for the get tab
     // or all the contact groups for the share tab.
