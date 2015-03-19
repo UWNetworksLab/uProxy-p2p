@@ -103,7 +103,8 @@ describe('Social.FreedomNetwork', () => {
           'dummy-instance-id/roster/somefriend', ''));
 
       Promise.all(promises).then(() => {
-        return network.login(false);
+        var loginPromise = network.login(false);
+        return loginPromise;
       }).then(() => {
         expect(network.myInstance).toBeDefined();
         expect(network['myInstance'].userId).toEqual(
@@ -123,6 +124,7 @@ describe('Social.FreedomNetwork', () => {
           network.handleClientState(freedomClientState);
           expect(Object.keys(network.roster).length).toEqual(2);
           var friend = network.getUser('fakeuser');
+          expect(friend).toBeDefined();
           spyOn(friend, 'monitor');
           // Advance clock 5 seconds and make sure monitoring was called.
           jasmine.clock().tick(5000);
@@ -151,6 +153,7 @@ describe('Social.FreedomNetwork', () => {
       spyOn(network['freedomApi_'], 'logout').and.returnValue(Promise.resolve());
 
       var friend = network.getUser('fakeuser');
+      expect(friend).toBeDefined();
       spyOn(friend, 'monitor');
       // Monitoring is still running.
       jasmine.clock().tick(5000);

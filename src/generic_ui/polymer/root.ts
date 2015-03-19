@@ -9,14 +9,7 @@ Polymer({
   dialog: {
     message: '',
     heading: '',
-    affirmative: {
-      text: '',
-      signal: ''
-    },
-    dismissive: {
-      text: '',
-      signal: ''
-    }
+    buttons: []
   },
   updateView: function(e, detail, sender) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
@@ -58,31 +51,21 @@ Polymer({
      *
      * { heading: 'title for the dialog',
      *   message: 'main message for the dialog',
-     *   affirmative: {
+     *   buttons: [{
      *     text: 'button text, e.g. Done',
-     *     signal: 'core-signal to fire when button is clicked'
-     *   },
-     *   dismissive: {
-     *     text: 'button text, e.g. Cancel',
-     *     signal: 'core-signal to fire when button is clicked'
-     *   }
-     *  }
-     *
-     * If text == '', the button is not shown.
-     * If signal == '', no core-signal is fired.
+     *     signal: 'core-signal to fire when button is clicked (optional)',
+     *     dismissive: boolean, whether button is dismissive (optional)
+     *   }]
+     * }
      */
 
-    this.dialog = detail.dialog;
+    this.dialog = detail;
     this.$.dialog.toggle();
   },
-  affirmativeButtonClick: function() {
-    if (this.dialog.affirmative.signal != '') {
-      this.fire('core-signal', {name: this.dialog.affirmative.signal});
-    }
-  },
-  dismissiveButtonClick: function() {
-    if (this.dialog.dismissive.signal != '') {
-      this.fire('core-signal', {name: this.dialog.dismissive.signal});
+  dialogButtonClick: function(event, detail, target) {
+    var signal = target.getAttribute('data-signal');
+    if (signal) {
+      this.fire('core-signal', { name: signal });
     }
   },
   ready: function() {
@@ -90,10 +73,8 @@ Polymer({
     this.ui = ui;
     this.uProxy = uProxy;
     if(ui.browserApi.browserSpecificElement){
-      var div = document.createElement("div");
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
-      div.innerHTML = browserCustomElement.outerHTML;
-      this.$.browserElementContainer.appendChild(div.childNodes[0]);
+      this.$.browserElementContainer.appendChild(browserCustomElement);
     }
   },
 

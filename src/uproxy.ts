@@ -41,7 +41,8 @@ module uProxy {
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
     UPDATE_GLOBAL_SETTINGS,
-    SEND_FEEDBACK
+    SEND_FEEDBACK,
+    GET_LOGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -111,11 +112,9 @@ module uProxy {
     isOffering   :boolean;
   }
 
-  // the state for consent between two instances
   export interface ConsentState {
     localGrantsAccessToRemote :boolean;
     localRequestsAccessFromRemote :boolean;
-    remoteGrantsAccessToLocal :boolean;
     remoteRequestsAccessFromLocal :boolean;
     ignoringRemoteUserRequest :boolean;
     ignoringRemoteUserOffer :boolean;
@@ -138,8 +137,8 @@ module uProxy {
    * command.
    */
   export interface ConsentCommand {
-    path       :InstancePath;
-    action     :uProxy.ConsentUserAction;
+    path    :UserPath;
+    action  :uProxy.ConsentUserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -343,3 +342,11 @@ module ChromeMessage {
   export var ACK :string = 'ack';
 }
 
+interface UserPath {
+  network :NetworkInfo;
+  userId :string;
+}
+
+interface InstancePath extends UserPath {
+  instanceId :string;
+}

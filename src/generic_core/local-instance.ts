@@ -67,21 +67,6 @@ module Core {
       return id;
     }
 
-    /**
-     * This method prepares the local instance's handshake, to be sent to all
-     * peers, notifying them that we are a uProxy installation.
-     */
-    public getInstanceHandshake = () : InstanceHandshake => {
-      if (!this.keyHash) {
-        log.warn('Local keyhash not ready');
-      }
-      return {
-        instanceId:  this.instanceId,
-        keyHash:     this.keyHash,
-        description: core.globalSettings.description
-      };
-    }
-
     public updateProfile = (profile :UI.UserProfileMessage) : void => {
       this.name_ = profile.name;
       this.imageData_ = profile.imageData;

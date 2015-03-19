@@ -14,15 +14,23 @@
     #cptoolbar * {
       line-height: 50px;
     }
-    .prevArrow {
-      float: left;
-    }
-    .prevArrow img {
+    core-icon[icon="arrow-back"] {
+      color: white;
       cursor: pointer;
       height: 24px;
       width: 24px;
       margin: 8px;
       vertical-align: middle;
+      opacity: 0.6;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    core-icon[icon="arrow-back"]:hover{
+      opacity: 1;
+    }
+    .prevArrow {
+      float: left;
     }
     .error {
       color: red;
@@ -42,7 +50,7 @@
     </style>
     <div id='cptoolbar'>
       <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
-        <img src='../icons/arrow-left.png' on-tap='{{prev}}' />
+        <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection

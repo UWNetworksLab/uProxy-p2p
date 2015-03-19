@@ -33,15 +33,23 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessageExternal.addListener(
-    function(request, sender, sendResponse) {
-        // Reply to pings from the uproxy website that are checking if the
-        // extension is installed.
-        if (request) {
-          sendResponse({message: "Extension installed."});
-        }
-        return true;
-    });
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // handle requests from other pages (i.e. copypaste.html) to bring the
+  // chrome popup to the front
+  if (request && request.openWindow) {
+    chromeBrowserApi.bringUproxyToFront();
+    sendResponse({ message: 'done' });
+  }
+});
+
+chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+  // Reply to pings from the uproxy website that are checking if the
+  // extension is installed.
+  if (request) {
+    sendResponse({ message: 'Extension installed.' });
+  }
+  return true;
+});
 
 // Launch the Chrome webstore page for the uProxy app,
 // or activate the user's tab open to uproxy.org/chrome-install
@@ -80,14 +88,15 @@ chromeBrowserApi = new ChromeBrowserApi();
 // are adding the listener after the event is fired.
 chrome.runtime.onInstalled.addListener(() => {
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-      // Do not open the extension when it's installed if the user is
-      // going through the inline install flow.
-      if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
-          (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
-        chromeBrowserApi.bringUproxyToFront();
-      }
+    // Do not open the extension when it's installed if the user is
+    // going through the inline install flow.
+    if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
+        (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
+      chromeBrowserApi.bringUproxyToFront();
+    }
   });
 });
+
 chrome.browserAction.onClicked.addListener((tab) => {
   // When the extension icon is clicked, open uProxy.
   mainWindowId = tab.windowId;

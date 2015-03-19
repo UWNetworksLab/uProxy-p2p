@@ -21,6 +21,7 @@
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 freedom['loggingprovider']().setConsoleFilter(['*:I']);
+freedom['loggingprovider']().setBufferedLogFilter(['*:D']);
 
 declare var UPROXY_VERSION;
 
@@ -52,10 +53,18 @@ class UIConnector implements uProxy.UIAPI {
    */
   public update = (type:uProxy.Update, data?:any) => {
     var printableType :string = uProxy.Update[type];
-    log.debug('sending message to UI', {
-      type: printableType,
-      data: data
-    });
+    if (type == uProxy.Update.COMMAND_FULFILLED
+        && data['command'] == uProxy.Command.GET_LOGS){
+      log.debug('sending logs to UI', {
+        type: printableType,
+        data: 'logs not printed to prevent duplication if logs are sent again.'
+      });
+    } else {
+      log.debug('sending message to UI', {
+        type: printableType,
+        data: data
+      });
+    }
     bgAppPageChannel.emit('' + type, data);
   }
 
@@ -176,7 +185,8 @@ class uProxyCore implements uProxy.CoreAPI {
       handler(args.data).then(
         (argsForCallback ?:any) => {
           ui.update(uProxy.Update.COMMAND_FULFILLED,
-              { promiseId: args.promiseId,
+              { command: cmd,
+                promiseId: args.promiseId,
                 argsForCallback: argsForCallback });
         },
         (errorForCallback :Error) => {
@@ -312,14 +322,14 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public modifyConsent = (command:uProxy.ConsentCommand) => {
     // Determine which Network, User, and Instance...
-    var instance = this.getInstance(command.path);
-    if (!instance) {  // Error msg emitted above.
-      log.error('Cannot modify consent for non-existing instance');
+    var user = this.getUser(command.path);
+    if (!user) {  // Error msg emitted above.
+      log.error('Cannot modify consent for non-existing user', command.path);
       return;
     }
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
-    instance.modifyConsent(command.action);
+    user.modifyConsent(command.action);
   }
 
   public startCopyPasteGet = () : Promise<Net.Endpoint> => {
@@ -414,12 +424,7 @@ class uProxyCore implements uProxy.CoreAPI {
    * Obtain the RemoteInstance corresponding to an instance path.
    */
   public getInstance = (path :InstancePath) : Core.RemoteInstance => {
-    var network = Social.getNetwork(path.network.name, path.network.userId);
-    if (!network) {
-      log.error('No network', path.network.name);
-      return;
-    }
-    var user = network.getUser(path.userId);
+    var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);
       return;
@@ -427,15 +432,45 @@ class uProxyCore implements uProxy.CoreAPI {
     return user.getInstance(path.instanceId);
   }
 
+  public getUser = (path :UserPath) : Core.User => {
+    var network = Social.getNetwork(path.network.name, path.network.userId);
+    if (!network) {
+      log.error('No network', path.network.name);
+      return;
+    }
+    return network.getUser(path.userId);
+  }
+
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
-    var xhr = freedom["core.xhr"]();
-    var postRequest =
-      'https://www.uproxy.org/submit-feedback?'
-        + 'email=' + encodeURIComponent(feedback.email) + '&'
-        + 'feedback=' + encodeURIComponent(feedback.feedback) + '&'
-        + 'logs=' + encodeURIComponent(feedback.logs);
-    xhr.open('POST', postRequest, true);
-    xhr.send();
+    var sendXhr = (logs) : void => {
+      var xhr = freedom["core.xhr"]();
+      var params = JSON.stringify(
+        {'email' : feedback.email,
+         'feedback' : feedback.feedback,
+          'logs' : logs});
+      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
+      xhr.send({'string': params});
+    }
+    if (feedback.logs) {
+      this.getLogs().then((formattedLogs) => {
+        sendXhr(formattedLogs);
+      });
+    } else {
+      sendXhr('');
+    }
+  }
+
+  public getLogs = () : Promise<string> => {
+    return freedom['loggingprovider']().getLogs().then((logs) => {
+      var formattedLogs = '';
+      for (var i = 0; i < logs.length; i++) {
+        formattedLogs += logs[i] + '\n';
+      }
+      return formattedLogs;
+    });
   }
 }  // class uProxyCore
 
@@ -495,6 +530,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogs);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
