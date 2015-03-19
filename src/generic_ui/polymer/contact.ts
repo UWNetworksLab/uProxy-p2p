@@ -3,14 +3,15 @@ Polymer({
     // Must adhere to the typescript interface UI.User.
     name: 'unknown',
     pic: undefined,
-    expanded: false
+    shareExpanded: false,
+    getExpanded: false
   },
   toggle: function() {
-    this.contact.expanded = !this.contact.expanded;
-  },
-  collapse: function() {
-    this.contact.expanded = false;
-    console.log('collapse', this.contact.expanded);
+    if (this.globalSettings.mode == uProxy.Mode.SHARE) {
+      this.contact.shareExpanded = !this.contact.shareExpanded;
+    } else if (this.globalSettings.mode == uProxy.Mode.GET) {
+      this.contact.getExpanded = !this.contact.getExpanded;
+    }
   },
   ready: function() {
     this.ui = ui;
