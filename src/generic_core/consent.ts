@@ -8,8 +8,10 @@ module Consent {
     // request access from new instances)
     localRequestsAccessFromRemote :boolean;
 
-    // Whether I am granting access to my friend (granting access permissions
-    // all of there instances).
+    // Whether I am granting access to my friend from this local instance.
+    // Granting permission to remote user gives access to every instance for
+    // that user, but only to this local instance (the local user does not
+    // sync consent between their own instances).
     localGrantsAccessToRemote :boolean;
 
     // Whether my friend is requesting access through me.

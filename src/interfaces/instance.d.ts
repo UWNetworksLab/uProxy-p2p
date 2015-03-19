@@ -19,15 +19,6 @@ interface NetworkInfo {
 }
 
 /**
- * InstancePath is required to retrieve Instance objects.
- */
-interface InstancePath {
-  network :NetworkInfo;
-  userId :string;
-  instanceId :string;
-}
-
-/**
  * LocalPeerId can contain the full instance paths so that we can easily
  * look up instance objects.
  */

@@ -370,7 +370,6 @@ module UI {
         return;
       }
 
-      this.browserApi.bringUproxyToFront();
       this.view = uProxy.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)

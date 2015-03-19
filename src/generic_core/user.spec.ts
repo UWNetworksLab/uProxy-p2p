@@ -4,7 +4,6 @@
 
 
 describe('Core.User', () => {
-
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
@@ -16,10 +15,6 @@ describe('Core.User', () => {
 
   var user :Core.User;
   var instance :Core.RemoteInstance;
-
-  beforeEach(() => {
-    spyOn(console, 'log');
-  });
 
   it('creates with the correct userId', (done) => {
     user = new Core.User(network, 'fakeuser');
@@ -43,7 +38,6 @@ describe('Core.User', () => {
   });
 
   describe('profile updates', () => {
-
     it('updates name', () => {
       user.update({
         name: 'Alice',
@@ -139,13 +133,13 @@ describe('Core.User', () => {
   });
 
   describe('handlers', () => {
-
     it('handles an INSTANCE message', () => {
-      spyOn(user, 'syncInstance_');
+      spyOn(user, 'syncInstance_').and.returnValue(Promise.resolve());
       user.handleMessage('fakeclient', {
         type: uProxy.MessageType.INSTANCE,
         data: {
-          'foo': 1
+          instanceId: 'instanceId', description: '', keyHash: '',
+          consent: {isOffering: false, isRequesting: false}
         }
       });
       expect(user.syncInstance_).toHaveBeenCalled();
@@ -168,19 +162,17 @@ describe('Core.User', () => {
     instanceId: 'fakeinstance',
     keyHash: null,
     status: null,
-    description: 'fake instance',
     consent: {isRequesting: false, isOffering: false}
   };
 
   var instanceHandshake = {
-    instanceId: 'fakeinstance',
-    keyHash: null,
-    description: null,
+    instanceId: instanceData.instanceId,
+    keyHash: instanceData.keyHash,
+    description: 'fake instance',
     consent: {isRequesting: false, isOffering: false}
   }
 
   describe('client <---> instance', () => {
-
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
       var saved;
@@ -224,7 +216,6 @@ describe('Core.User', () => {
   });  // describe client <---> instance
 
   describe('local consent towards remote proxy', () => {
-
     var user = new Core.User(network, 'fakeuser2');
 
     it('can request access, and cancel that request', (done) => {
@@ -234,13 +225,6 @@ describe('Core.User', () => {
           expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
           done();
         });
-      });
-    });
-
-    it('accepts offer from remote', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
-        expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
-        done();
       });
     });
 
@@ -288,7 +272,6 @@ describe('Core.User', () => {
   });
 
   describe('local consent towards remote client', () => {
-
     it('can offer access', (done) => {
       user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
@@ -312,7 +295,8 @@ describe('Core.User', () => {
       });
     });
 
-    it('ignores request from remote', (done) => {
+    it('ignoring request does not change remoteRequestsAccessFromLocal',
+        (done) => {
       user.consent.remoteRequestsAccessFromLocal = true;
       user.consent.ignoringRemoteUserRequest = false;
       user.modifyConsent(uProxy.ConsentUserAction.IGNORE_REQUEST).then(() => {
@@ -361,15 +345,6 @@ describe('Core.User', () => {
           done();
         });
       });
-    });
-  });
-
-  describe('preparing consent bits to send over the wire', () => {
-    it('initial consent state does not offer or request', () => {
-      var user = new Core.User(network, 'fakeuser3');
-      user.consent = new Consent.State();
-      expect(user.getConsentBits().isRequesting).toEqual(false);
-      expect(user.getConsentBits().isOffering).toEqual(false);
     });
   });
 

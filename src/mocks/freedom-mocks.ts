@@ -60,7 +60,6 @@ class MockStorage implements freedom_Storage {
 
   public get = (key) => {
     var v = this.store_[key];
-    console.log('[MockStorage] get ' + key);
     if (v) {
       return Promise.resolve(v);
     }
@@ -70,7 +69,6 @@ class MockStorage implements freedom_Storage {
   public set = (key, value) => {
     var prev = this.store_[key];
     this.store_[key] = value;
-    console.log('[MockStorage] set ' + key + ' : ' + value);
     return Promise.resolve(prev);
   }
 
@@ -107,6 +105,7 @@ class MockSocial {
 
 class MockLoggingProvider {
   public setConsoleFilter = (filter:string) : void => {}
+  public setBufferedLogFilter = (filter:string) : void => {}
 }  // class MockLoggingProvider
 
 var freedom = MockChannel;

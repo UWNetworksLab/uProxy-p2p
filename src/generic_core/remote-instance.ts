@@ -66,7 +66,7 @@ module Core {
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
     private startupTimeout_ = null;
 
-    public connection :Core.RemoteConnection = null;
+    private connection_ :Core.RemoteConnection = null;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -80,7 +80,7 @@ module Core {
         // The User which this instance belongs to.
         public user :Core.User,
         public instanceId :string) {
-      this.connection = new Core.RemoteConnection(this.handleConnectionUpdate_);
+      this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
@@ -159,11 +159,11 @@ module Core {
 
         // Create a new rtcToNet object everytime there is an OFFER signal
         if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          this.connection.startShare();
+          this.connection_.startShare();
         }
       }
 
-      this.connection.handleSignal({
+      this.connection_.handleSignal({
         type: type,
         data: signalFromRemote
       });
@@ -182,10 +182,10 @@ module Core {
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
       this.startupTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
-        this.connection.stopGet();
+        this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection.startGet().then((endpoints :Net.Endpoint) => {
+      return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
         this.clearTimeout_();
         return endpoints;
       });
@@ -202,7 +202,7 @@ module Core {
      * Stop using this remote instance as a proxy server.
      */
     public stop = () : void => {
-      this.connection.stopGet();
+      this.connection_.stopGet();
     }
 
     /**
@@ -298,7 +298,12 @@ module Core {
     public restoreState = (state :RemoteInstanceState) => {
       this.description = state.description;
       this.keyHash = state.keyHash;
-      this.wireConsentFromRemote = state.wireConsentFromRemote;
+      if (state.wireConsentFromRemote) {
+        this.wireConsentFromRemote = state.wireConsentFromRemote
+      } else {
+        log.error('Failed to load wireConsentFromRemote for instance ' +
+            this.instanceId);
+      }
     }
 
     /**
@@ -319,15 +324,19 @@ module Core {
     }
 
     public handleLogout = () => {
-      if (this.connection.localSharingWithRemote !== SharingState.NONE) {
+      if (this.connection_.localSharingWithRemote !== SharingState.NONE) {
         log.info('Closing rtcToNet_ for logout');
-        this.connection.stopShare();
+        this.connection_.stopShare();
       }
 
-      if (this.connection.localGettingFromRemote !== GettingState.NONE) {
+      if (this.connection_.localGettingFromRemote !== GettingState.NONE) {
         log.info('Stopping socksToRtc_ for logout');
-        this.connection.stopGet();
+        this.connection_.stopGet();
       }
+    }
+
+    public stopShare = () => {
+      this.connection_.stopShare();
     }
 
   }  // class Core.RemoteInstance

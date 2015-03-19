@@ -93,10 +93,10 @@ FILES =
     'webrtc/peerconnection.js'
   ]
   thirdPartyUi: [
-    'lodash/**',
-    'platform/**',
-    'polymer/**',
-    'webcomponentsjs/**'
+    'platform/platform.js',
+    'polymer/polymer.html',
+    'polymer/polymer.js',
+    'webcomponentsjs/**.min.js'
   ]
 
 
@@ -183,20 +183,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
-      # Copy any JavaScript from the third_party directory
-      thirdPartyJavaScript: { files: [ {
-          expand: true,
-          src: [
-            'third_party/freedom-ts-hacks/*.js',
-            'third_party/lib/core-component-page/**/*.js',
-            'third_party/lib/platform/**/*.js',
-            'third_party/lib/polymer/**/*.js',
-            'third_party/lib/webcomponentsjs/**/*.js'
-            ]
-          dest: 'build/'
-          onlyIf: 'modified'
-        } ] }
-
       # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
         nonull: true
@@ -220,7 +206,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
+          src: ['**', '!**/*.md', '!**/*.ts', '!polymer/*.html']
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.
@@ -241,6 +227,7 @@ module.exports = (grunt) ->
             ]
           dest: chromeExtDevPath + 'scripts/'
         }, {
+          # Copy third party UI files required for polymer.
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
@@ -509,6 +496,8 @@ module.exports = (grunt) ->
             .concat FILES.uproxy_common
             .concat [
               'build/compile-src/mocks/freedom-mocks.js'
+              'build/compile-src/mocks/socks-to-rtc.js'
+              'build/compile-src/mocks/rtc-to-net.js'
               'build/compile-src/logging/logging.js'
               'build/compile-src/webrtc/peerconnection.js'
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
@@ -527,6 +516,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
               'build/compile-src/generic_core/core.js'
+              'node_modules/uproxy-lib/dist/handler/queue.js'
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
@@ -561,15 +551,17 @@ module.exports = (grunt) ->
                 dir: 'build/coverage/generic_ui'
       }
 
-    compress:
-      main:
+    'mozilla-addon-sdk':
+      'latest':
         options:
-          mode: 'zip'
-          archive: 'dist/uproxy.xpi'
-        expand: true
-        cwd: 'build/dev/firefox'
-        src: ['**']
-        dest: '.'
+          dest_dir: '.mozilla_addon_sdk/'
+
+    'mozilla-cfx-xpi':
+      'dist':
+        options:
+          'mozilla-addon-sdk': 'latest'
+          extension_dir: 'build/dev/firefox'
+          dist_dir: 'build/dist/'
 
     vulcanize:
       chromeExtInline:
@@ -606,16 +598,16 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
-    clean: ['build/**', '.tscache']
+    clean: ['build/', '.tscache']
 
  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-compress'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-shell'
@@ -697,7 +689,8 @@ module.exports = (grunt) ->
 
   taskManager.add 'build_firefox_xpi', [
     'build_firefox'
-    'compress:main'
+    'mozilla-addon-sdk'
+    'mozilla-cfx-xpi:dist'
   ]
 
   # --- Testing tasks ---

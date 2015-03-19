@@ -34,15 +34,23 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessageExternal.addListener(
-    function(request, sender, sendResponse) {
-        // Reply to pings from the uproxy website that are checking if the
-        // extension is installed.
-        if (request) {
-          sendResponse({message: "Extension installed."});
-        }
-        return true;
-    });
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // handle requests from other pages (i.e. copypaste.html) to bring the
+  // chrome popup to the front
+  if (request && request.openWindow) {
+    chromeBrowserApi.bringUproxyToFront();
+    sendResponse({ message: 'done' });
+  }
+});
+
+chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+  // Reply to pings from the uproxy website that are checking if the
+  // extension is installed.
+  if (request) {
+    sendResponse({ message: 'Extension installed.' });
+  }
+  return true;
+});
 
 // Launch the Chrome webstore page for the uProxy app,
 // or activate the user's tab open to uproxy.org/chrome-install
@@ -132,13 +140,7 @@ function initUI() : UI.UserInterface {
       // to allow a url to be pasted twice if there has been at least a second
       // delay in order to allow users to try connecting again.
       if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        // we want to delay actually calling the handleUrlData function until
-        // this function returns so that its behaviour of bringing the uProxy
-        // window to the front does not get undone by this function redirecting
-        // the tab and setting the focus back to the main browser window
-        setTimeout(() => {
-          ui.handleUrlData(url);
-        }, 0);
+        ui.handleUrlData(url);
       } else {
         console.warn('Received duplicate url events', url);
       }

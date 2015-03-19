@@ -2,26 +2,26 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 
 <!--
-uproxy-tip will appear immediately below the previous element in the DOM.
+uproxy-bubble will appear immediately below the previous element in the DOM.
 
 It will have both an X button in the top right as well as a done button in the
 bottom.  If either of these buttons are clicked, the element will be removed
 from the DOM and the "closed" event will be fired.  Listen to it by adding
-an "on-closed" attribute to the uproxy-tip element.
+an "on-closed" attribute to the uproxy-bubble element.
 
 To change the color of the box:
-uproxy-tip::shadow #box {
+uproxy-bubble::shadow #box {
   background: red;
 }
-uproxy-tip::shadow #arrow {
+uproxy-bubble::shadow #arrow {
   border-bottom-color: red;
 }
-uproxy-tip::shadow #done {
+uproxy-bubble::shadow #done {
   background: (some off-shade);
 }
 -->
 
-<polymer-element name='uproxy-tip'>
+<polymer-element name='uproxy-bubble' attributes='active' hidden>
   <template>
     <style>
     :host {
@@ -31,7 +31,7 @@ uproxy-tip::shadow #done {
       max-width: 400px;
       min-height: 100px;
 
-      margin-top: 15px;
+      margin: 15px 0 0 !important;
 
       color: white;
       opacity: .8;
@@ -65,6 +65,20 @@ uproxy-tip::shadow #done {
     #done {
       background-color: #222;
     }
+
+    /* styling for any bubble with error class */
+    :host(.error) {
+      opacity: 1;
+    }
+    :host(.error) #box {
+      background: firebrick;
+    }
+    :host(.error) #arrow {
+      border-bottom-color: firebrick;
+    }
+    :host(.error) #done {
+      background: #CC2727;
+    }
     </style>
 
     <div id='container'>
@@ -85,5 +99,5 @@ uproxy-tip::shadow #done {
 
   </template>
 
-  <script src='tip.js'></script>
+  <script src='bubble.js'></script>
 </polymer-element>

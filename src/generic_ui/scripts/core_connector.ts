@@ -191,4 +191,8 @@ class CoreConnector implements uProxy.CoreAPI {
   restart = () => {
     this.browserConnector_.restart();
   }
+
+  getLogs = () : Promise<string> => {
+    return this.promiseCommand(uProxy.Command.GET_LOGS);
+  }
 }  // class CoreConnector
