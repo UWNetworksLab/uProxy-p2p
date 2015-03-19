@@ -11,7 +11,6 @@
     "paper-dialog": "Polymer/paper-dialog#~0.5.5",
     "core-label": "Polymer/core-label#~0.5.5",
     "core-tooltip": "Polymer/core-tooltip#~0.5.5",
-    "core-menu": "Polymer/core-menu#~0.5.5",
     "core-collapse": "Polymer/core-collapse#~0.5.5"
   }
 }
