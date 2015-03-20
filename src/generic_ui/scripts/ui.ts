@@ -327,8 +327,8 @@ module UI {
         }
 
         // Update user.isGettingFromMe
-        for (var i = 0; i < user.instances.length; ++i) {
-          if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
+        for (var i = 0; i < user.allInstanceIds.length; ++i) {
+          if (this.instancesGivingAccessTo[user.allInstanceIds[i]]) {
             isGettingFromMe = true;
             break;
           }
@@ -583,10 +583,6 @@ module UI {
         // this case the user should already have been removed from the roster
         // in the UI and stay removed.
         return;
-      } else if (payload.instances.length === 0) {
-        // Core should not send the UI any Users without instances.
-        console.error('Received User with no instances', payload);
-        return;
       }
 
       // Construct a UI-specific user object.
@@ -611,12 +607,10 @@ module UI {
         oldUserCategories = user.getCategories();
       }
 
-      user.update(profile);
-      user.instances = payload.instances;
-      user.updateInstanceDescriptions();
-      for (var i = 0; i < user.instances.length; ++i) {
-        var instanceId = user.instances[i].instanceId;
-        this.mapInstanceIdToUser_[instanceId] = user;
+      user.update(payload);
+
+      for (var i = 0; i < payload.allInstanceIds.length; ++i) {
+        this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
       }
 
       var newUserCategories = user.getCategories();

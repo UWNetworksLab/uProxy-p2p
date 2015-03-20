@@ -47,6 +47,12 @@
     paper-progress {
       margin-bottom: 1em;
     }
+    hr {
+      border: 0;
+      margin-top: 32px;
+      border-bottom: solid 1px;
+      border-color: rgb(238, 238, 238);
+    }
     </style>
 
     <!-- Listen for the 'login-success' event from root.ts; once logged in, show the loading contacts animation. -->
@@ -63,11 +69,12 @@
     </div>
 
     <div hidden?='{{ !model.onlineNetwork.hasContacts }}'>
-      <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}'></input>
+      <!-- Intentionally hiding search box. May decide to readd it later. -->
+      <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{ui.mode==UI.Mode.GET ? "Offers" : "Requests"}}'
+          groupTitle='{{globalSettings.mode==uProxy.Mode.GET ? "Offers" : "Requests"}}'
           onlineContacts='{{ onlinePending }}'
           offlineContacts='{{ offlinePending }}'
           searchQuery='{{ searchQuery }}'

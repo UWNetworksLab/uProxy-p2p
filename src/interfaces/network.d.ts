@@ -44,7 +44,7 @@ declare module Social {
     /**
      * Returns true iff a login is pending (e.g. waiting on user's password).
      */
-    getLocalInstance :() => Core.LocalInstance;
+    getLocalInstanceId :() => string;
 
     /**
      * Returns the User corresponding to |userId|.

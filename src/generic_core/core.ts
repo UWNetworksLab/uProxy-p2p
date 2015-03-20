@@ -322,14 +322,14 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public modifyConsent = (command:uProxy.ConsentCommand) => {
     // Determine which Network, User, and Instance...
-    var instance = this.getInstance(command.path);
-    if (!instance) {  // Error msg emitted above.
-      log.error('Cannot modify consent for non-existing instance');
+    var user = this.getUser(command.path);
+    if (!user) {  // Error msg emitted above.
+      log.error('Cannot modify consent for non-existing user', command.path);
       return;
     }
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
-    instance.modifyConsent(command.action);
+    user.modifyConsent(command.action);
   }
 
   public startCopyPasteGet = () : Promise<Net.Endpoint> => {
@@ -424,17 +424,21 @@ class uProxyCore implements uProxy.CoreAPI {
    * Obtain the RemoteInstance corresponding to an instance path.
    */
   public getInstance = (path :InstancePath) : Core.RemoteInstance => {
-    var network = Social.getNetwork(path.network.name, path.network.userId);
-    if (!network) {
-      log.error('No network', path.network.name);
-      return;
-    }
-    var user = network.getUser(path.userId);
+    var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);
       return;
     }
     return user.getInstance(path.instanceId);
+  }
+
+  public getUser = (path :UserPath) : Core.User => {
+    var network = Social.getNetwork(path.network.name, path.network.userId);
+    if (!network) {
+      log.error('No network', path.network.name);
+      return;
+    }
+    return network.getUser(path.userId);
   }
 
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {

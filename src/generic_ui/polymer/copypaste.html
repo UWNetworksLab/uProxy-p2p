@@ -1,41 +1,12 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 <link rel='import' href='bubble.html'>
+<link rel='import' href='app-bar.html'>
 
 <polymer-element name='uproxy-copypaste' attributes=''>
   <template>
     <style>
     :host {
       text-align: center;
-    }
-    #cptoolbar {
-      height: 50px;
-      background: grey;
-      color: white;
-    }
-    #cptoolbar * {
-      line-height: 50px;
-    }
-    core-icon[icon="arrow-back"] {
-      color: white;
-      cursor: pointer;
-      height: 24px;
-      width: 24px;
-      margin: 8px;
-      vertical-align: middle;
-      opacity: 0.6;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    core-icon[icon="arrow-back"]:hover{
-      opacity: 1;
-    }
-    .prevArrow {
-      float: left;
-    }
-    .prevArrow.disabled img {
-      cursor: not-allowed;
-      opacity: .4;
     }
     textarea.message {
       width: 80%;
@@ -58,10 +29,7 @@
     <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
-    <div id='cptoolbar'>
-      <div class='prevArrow {{ { disabled: (ui.copyPasteGettingState === GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
-        <core-icon icon="arrow-back" on-tap='{{ handleBackClick }}'></core-icon>
-      </div>
+    <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection
       </span>
@@ -71,7 +39,7 @@
       <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>
         Manual Connection
       </span>
-    </div>
+    </uproxy-app-bar>
 
     <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
       There was an error parsing the uproxy connection link, please try
