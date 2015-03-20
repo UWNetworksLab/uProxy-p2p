@@ -55,12 +55,12 @@
     }
     </style>
 
-    <core-signals on-core-signal-copypaste-back='{{ doBack }}'></core-signals>
+    <core-signals on-core-signal-copypaste-back='{{ exitMode }}'></core-signals>
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <div id='cptoolbar'>
       <div class='prevArrow {{ { disabled: (ui.copyPasteGettingState === GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
-        <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
+        <core-icon icon="arrow-back" on-tap='{{ handleBackClick }}'></core-icon>
       </div>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection
@@ -73,7 +73,7 @@
       </span>
     </div>
 
-    <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BADURL }}' on-closed='{{ dismissError }}' class='error'>
+    <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
       There was an error parsing the uproxy connection link, please try
       navigating to the link again or asking your friend for a new link.
     </uproxy-bubble>

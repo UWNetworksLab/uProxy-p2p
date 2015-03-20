@@ -113,8 +113,8 @@ module UI {
 
   export enum CopyPasteError {
     NONE = 0,
-    BADURL, // url is somehow invalid
-    LOGGEDIN, // trying to copy+paste while logged in to a network
+    BAD_URL, // url is somehow invalid
+    LOGGED_IN, // trying to copy+paste while logged in to a network
     UNEXPECTED, // received a url at an invalid time
     FAILED // something about the connection failed
   }
@@ -158,6 +158,11 @@ module UI {
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
+    /*
+     * This is used to store the information for setting up a copy+paste
+     * connection between establishing the connection and the user confirming
+     * the start of proxying
+     */
     public copyPastePendingEndpoint :Net.Endpoint = null;
 
     // TODO not needed, exists to handle typescript errors
@@ -252,16 +257,19 @@ module UI {
         }
       });
 
+      // indicates the current getting connection has ended
       core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
       });
 
+      // indicates we just started offering access through copy+paste
       core.onUpdate(uProxy.Update.START_GIVING, () => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
       });
 
+      // indicates we just stopped offering access through copy+paste
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
         this.copyPasteSharingState = SharingState.NONE;
         if (!this.isGivingAccess()) {
@@ -269,6 +277,7 @@ module UI {
         }
       });
 
+      // status of the current copy+paste connection
       core.onUpdate(uProxy.Update.STATE, (state) => {
         this.copyPasteGettingState = state.localGettingFromRemote;
         this.copyPasteSharingState = state.localSharingWithRemote;
@@ -367,7 +376,7 @@ module UI {
 
       if (model.onlineNetwork) {
         console.log('Ignoring URL since we have an active network');
-        this.copyPasteError = CopyPasteError.LOGGEDIN;
+        this.copyPasteError = CopyPasteError.LOGGED_IN;
         return;
       }
 
@@ -376,7 +385,7 @@ module UI {
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
-        this.copyPasteError = CopyPasteError.BADURL;
+        this.copyPasteError = CopyPasteError.BAD_URL;
         return;
       }
 
@@ -385,7 +394,7 @@ module UI {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
-        this.copyPasteError = CopyPasteError.BADURL;
+        this.copyPasteError = CopyPasteError.BAD_URL;
         return;
       }
 
@@ -415,7 +424,7 @@ module UI {
       console.log('Sending messages from url to app');
       for (var i in payload) {
         if (payload[i].type !== expectedType) {
-          this.copyPasteError = CopyPasteError.BADURL;
+          this.copyPasteError = CopyPasteError.BAD_URL;
           return;
         }
 

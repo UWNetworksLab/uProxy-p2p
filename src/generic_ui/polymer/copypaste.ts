@@ -47,7 +47,7 @@ Polymer({
       ui.copyPasteError = UI.CopyPasteError.FAILED;
     });
   },
-  prev: function() {
+  handleBackClick: function() {
     // do not let the user navigate away from this view if copypaste is active
     if ((ui.copyPasteGettingState === GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
         ui.copyPasteSharingState === SharingState.SHARING_ACCESS) {
@@ -110,7 +110,7 @@ Polymer({
   dismissError: function() {
     ui.copyPasteError = UI.CopyPasteError.NONE;
   },
-  doBack: function() {
+  exitMode: function() {
     // if we are currently in the middle of setting up a connection, end it
     var doneStopping :Promise<void>;
     if (ui.copyPasteGettingState !== GettingState.NONE) {

@@ -157,7 +157,7 @@
 
         <core-icon id='btnSettings' icon="menu" on-tap="{{ settingsView }}"></core-icon>
 
-        <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.WRONGMODE }}' on-closed='{{ dismissCopyPasteError }}'>
+        <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
           <h3>Cannot open manual connection</h3>
           <p>
             It is not currently possible to open a manual connection at the
