@@ -9,7 +9,6 @@ Polymer({
 
     this.ui = ui;
     this.uProxy = uProxy;
-    this.globalSettings = model.globalSettings;
 
     // Initialize roster here.
     // this.contacts contains either all the contact groups for the get tab

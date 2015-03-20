@@ -10,6 +10,5 @@ Polymer({
   ready: function() {
     // Expose global ui object in this context.
     this.ui = ui;
-    this.globalSettings = model.globalSettings
   }
 });

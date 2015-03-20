@@ -74,7 +74,7 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{globalSettings.mode==uProxy.Mode.GET ? "Offers" : "Requests"}}'
+          groupTitle='{{model.globalSettings.mode==uProxy.Mode.GET ? "Offers" : "Requests"}}'
           onlineContacts='{{ onlinePending }}'
           offlineContacts='{{ offlinePending }}'
           searchQuery='{{ searchQuery }}'
@@ -86,18 +86,18 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='Trusted uProxy Friends'
+          groupTitle='{{model.globalSettings.mode==uProxy.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
           onlineContacts='{{ onlineTrustedUproxyContacts }}'
           offlineContacts='{{ offlineTrustedUproxyContacts }}'
           searchQuery='{{ searchQuery }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
       <hr color="#eee"
-          hidden?='{{ (onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) || ((onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) && (onlinePending.length == 0 && offlinePending.length == 0)) }}'></hr>
+          hidden?='{{ (onlineUntrustedUproxyContacts.length == 0 && offlineUntrustedUproxyContacts.length == 0) || ((onlineTrustedUproxyContacts.length == 0 && offlineTrustedUproxyContacts.length == 0) && (onlinePending.length == 0 && offlinePending.length == 0)) }}'></hr>
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='All uProxy Contacts'
+          groupTitle='Other friends running uProxy'
           onlineContacts='{{ onlineUntrustedUproxyContacts }}'
           offlineContacts='{{ offlineUntrustedUproxyContacts }}'
           searchQuery='{{ searchQuery }}'></uproxy-roster-group>
