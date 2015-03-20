@@ -61,7 +61,7 @@
       margin-top: 0px; /* line details closer to bottom of contact name */
       color: rgba(0,0,0,0.54);
     }
-    .offline .nameRow {
+    .offline {
       opacity: 0.5;
     }
     paper-button {
@@ -99,8 +99,8 @@
     }
     </style>
 
-    <div class='nameRow' on-click='{{ toggle }}' tabindex='-1'
-        class='frame {{ isOnline ? "online" : "offline" }}'
+    <div on-click='{{ toggle }}' tabindex='-1'
+        class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
       <img class='avatar' src='{{ contact.imageData }}' />
       <div flex class='name'>{{ contact.name }}</div>

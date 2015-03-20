@@ -62,7 +62,7 @@
     <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
       <img src='../icons/contact-default.png'>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        Loading uProxy friends
+        Loading uProxy friends<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>

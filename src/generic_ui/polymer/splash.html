@@ -18,6 +18,9 @@
       z-index: 100;
       line-height: 24px;
     }
+    ::-webkit-scrollbar {
+      display: none;
+    }
     h1 {
       font-size: 1.4em;
       color: #009688;  /* dark green */
@@ -28,7 +31,8 @@
     }
     .view {
       width: 80%;
-      margin-left: 10%;
+      padding-left: 10%;
+      padding-right: 10%;
       padding-top: 50px;
       opacity: 1;
       z-index: 100;
@@ -70,6 +74,7 @@
       left: 8px;
       top: 8px;
       cursor: pointer;
+      z-index: 101; /* Must be greater than z-index of .view */
     }
     #intro1, #networks {
       height: 100%;
