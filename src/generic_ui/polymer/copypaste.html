@@ -1,36 +1,11 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='app-bar.html'>
 
 <polymer-element name='uproxy-copypaste' attributes=''>
   <template>
     <style>
     :host {
       text-align: center;
-    }
-    #cptoolbar {
-      height: 50px;
-      background: grey;
-      color: white;
-    }
-    #cptoolbar * {
-      line-height: 50px;
-    }
-    core-icon[icon="arrow-back"] {
-      color: white;
-      cursor: pointer;
-      height: 24px;
-      width: 24px;
-      margin: 8px;
-      vertical-align: middle;
-      opacity: 0.6;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    core-icon[icon="arrow-back"]:hover{
-      opacity: 1;
-    }
-    .prevArrow {
-      float: left;
     }
     .error {
       color: red;
@@ -48,10 +23,8 @@
       color: white;
     }
     </style>
-    <div id='cptoolbar'>
-      <div class='prevArrow {{ { disabled: ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS } | tokenList }}'>
-        <core-icon icon="arrow-back" on-tap='{{prev}}'></core-icon>
-      </div>
+
+    <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ prev }}'>
       <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>
         Request a one time connection
       </span>
@@ -61,7 +34,7 @@
       <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>
         Manual Connection
       </span>
-    </div>
+    </uproxy-app-bar>
 
     <div class='error' hidden?='{{ !ui.copyPasteUrlError }}'>
       There was an error parsing the uproxy connection link, please try

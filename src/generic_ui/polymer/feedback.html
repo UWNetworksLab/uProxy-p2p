@@ -14,19 +14,6 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
-    #titleContainer {
-      height: 70px;
-      width: 100%;
-      background: #009688;
-      color: white;
-      display: table;
-      text-align: left;
-    }
-    #title {
-      display: table-cell;
-      vertical-align: middle;
-      font-size: 1.25em;
-    }
     #formContainer {
       margin: 30px;
       text-align: left;
@@ -66,18 +53,6 @@
       font-weight: bold;
       cursor: pointer;
       text-align: center;
-    }
-    core-icon[icon="arrow-back"] {
-      color: white;
-      cursor: pointer;
-      margin: 25px;
-      opacity: 0.6;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    core-icon[icon="arrow-back"]:hover{
-      opacity: 1;
     }
     core-icon[icon="help"]{
       height: 15px;
@@ -134,12 +109,10 @@
       margin: 0em;
     }
     </style>
-    <div id='titleContainer'>
-      <div id='title'>
-        <core-icon icon="arrow-back" on-tap='{{ backToSettings }}'></core-icon>
-        Submit feedback
-      </div>
-    </div>
+
+    <uproxy-app-bar on-go-back='{{ backToSettings }}'>
+      Submit feedback
+    </uproxy-app-bar>
 
     <div id='formContainer'>
       <p class='inputLabel'>Email (optional)</p>
