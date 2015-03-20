@@ -30,7 +30,7 @@ Polymer({
     // not created until we want to show them, this chunk of code can be
     // removed once that happens.
     var prev = this.previousSibling;
-    if (this.isHidden(prev)) {
+    if (!prev || this.isHidden(prev)) {
       // This handles the case where the bubble is active (should be displayed)
       // but it would actually not be shown since its target is not visible.
       // We will get a callback to this function once from the element becoming

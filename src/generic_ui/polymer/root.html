@@ -194,14 +194,16 @@
         </div>
       </core-toolbar>
 
+      <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+        <h3>Welcome to uProxy!</h3>
+        <p>
+          To get started, choose "Get access" or "Share access" and then click
+          on a friend to connect.
+        </p>
+      </uproxy-bubble>
+
       <div class='content' fit>
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
-          <h3>Welcome to uProxy!</h3>
-          <p>
-            To get started, choose "Get access" or "Share access" and then click
-            on a friend to connect.
-          </p>
-        </uproxy-bubble>
+
         <div id='rosterContainer' vertical layout>
           <div id='roster-panel' flex>
             <uproxy-roster id='get-roster' class='roster'
