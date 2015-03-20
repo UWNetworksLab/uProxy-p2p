@@ -7,16 +7,16 @@ Polymer({
     getExpanded: false
   },
   toggle: function() {
-    if (this.globalSettings.mode == uProxy.Mode.SHARE) {
+    if (this.model.globalSettings.mode == uProxy.Mode.SHARE) {
       this.contact.shareExpanded = !this.contact.shareExpanded;
-    } else if (this.globalSettings.mode == uProxy.Mode.GET) {
+    } else if (this.model.globalSettings.mode == uProxy.Mode.GET) {
       this.contact.getExpanded = !this.contact.getExpanded;
     }
   },
   ready: function() {
     this.ui = ui;
     this.uProxy = uProxy;
-    this.globalSettings = model.globalSettings;
+    this.model = model;
     this.GettingConsentState = UI.GettingConsentState;
     this.SharingConsentState = UI.SharingConsentState;
     if (!this.contact.pic) {
