@@ -62,7 +62,7 @@
     <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
       <img src='../icons/contact-default.png'>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
-        Loading uProxy friends
+        Loading uProxy friends<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
@@ -86,7 +86,7 @@
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{model.globalSettings.mode==uProxy.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
+          groupTitle='{{model.globalSettings.mode==uProxy.Mode.GET ? "Friends you trust" : "Friends who can get access from you"}}'
           onlineContacts='{{ onlineTrustedUproxyContacts }}'
           offlineContacts='{{ offlineTrustedUproxyContacts }}'
           searchQuery='{{ searchQuery }}'></uproxy-roster-group>
