@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/core-icons/core-icons.html'>
 <link rel="import" href="../lib/paper-button/paper-button.html">
 
 <polymer-element name='uproxy-instance' attributes='user, instance, network'>
@@ -11,7 +12,7 @@
       background: rgb(221, 221, 221);
       color: rgb(112, 112, 112);
       font-size: 1em;
-      margin-left: 0px;
+      margin: 14px 5px 5px 2px;
       padding-left: 1em;
       padding-right: 1em;
     }
@@ -19,20 +20,26 @@
       background: #009688;  /* dark green */
       color: white;
     }
-    p.preButtonText {
-      margin-top: 0;
-      color: #888;
+    .preButtonText {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(0,0,0,0.54);
     }
     #description {
       color: #333;
+      margin-bottom: 0;
     }
-    img.clock {
-      vertical-align: bottom;
+    core-icon[icon=query-builder] {
+      height: 16px;
+      width: 16px;
+      color: rgba(0,0,0,0.54);
+      margin-top: 2px;
+      margin-right: 2px;
     }
     </style>
 
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
-         hidden?='{{globalSettings.mode!=uProxy.Mode.GET}}'>
+         hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
         {{ instance.description }}
@@ -50,9 +57,12 @@
 
       <!-- trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
-        <p class='preButtonText'>
-          <img src='../icons/clock.png' class='clock'> Trying to get access from {{user.name || user.userId }}
-        </p>
+        <div horizontal layout>
+          <core-icon icon='query-builder'></core-icon>
+          <p class='preButtonText' flex>
+            Trying to get access from {{user.name || user.userId }}
+          </p>
+        </div>
         <paper-button raised on-tap='{{ stop }}'>
           Cancel
         </paper-button>

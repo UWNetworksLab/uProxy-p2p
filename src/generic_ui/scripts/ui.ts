@@ -102,6 +102,14 @@ module UI {
   }
 
 
+  export enum CopyPasteError {
+    NONE = 0,
+    BAD_URL, // url is somehow invalid
+    LOGGED_IN, // trying to copy+paste while logged in to a network
+    UNEXPECTED, // received a url at an invalid time
+    FAILED // something about the connection failed
+  }
+
   /**
    * The User Interface class.
    *
@@ -136,9 +144,16 @@ module UI {
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
-    public copyPasteUrlError :boolean = false;
+    public copyPasteError :CopyPasteError = CopyPasteError.NONE;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
+
+    /*
+     * This is used to store the information for setting up a copy+paste
+     * connection between establishing the connection and the user confirming
+     * the start of proxying
+     */
+    public copyPastePendingEndpoint :Net.Endpoint = null;
 
     // TODO not needed, exists to handle typescript errors
     private core_ :CoreConnector = null;
@@ -160,6 +175,12 @@ module UI {
       core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
         console.log('Received uProxy.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
+        // TODO: Do not allow reassignment of globalSettings. Instead
+        // write a 'syncGlobalSettings' function that iterates through
+        // the values in state[globalSettings] and assigns the
+        // individual values to model.globalSettings. This is required
+        // because Polymer elements bound to globalSettings' values can
+        // only react to updates to globalSettings and not reassignments.
         model.globalSettings = state['globalSettings'];
         if (state['onlineNetwork'] == null) {
           return;
@@ -250,33 +271,27 @@ module UI {
         }
       });
 
+      // indicates the current getting connection has ended
       core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
-
-        if (uProxy.View.COPYPASTE === this.view) {
-          this.view = uProxy.View.SPLASH;
-        }
       });
 
+      // indicates we just started offering access through copy+paste
       core.onUpdate(uProxy.Update.START_GIVING, () => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
       });
 
+      // indicates we just stopped offering access through copy+paste
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
-        if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
-          if (uProxy.View.COPYPASTE === this.view) {
-            this.view = uProxy.View.SPLASH;
-          }
-        }
-
         this.copyPasteSharingState = SharingState.NONE;
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
       });
 
+      // status of the current copy+paste connection
       core.onUpdate(uProxy.Update.STATE, (state) => {
         this.copyPasteGettingState = state.localGettingFromRemote;
         this.copyPasteSharingState = state.localSharingWithRemote;
@@ -369,12 +384,13 @@ module UI {
     }
 
     public handleUrlData = (url :string) => {
-      var payload;
+      var payload :uProxy.Message[];
+      var expectedType :uProxy.MessageType;
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
         console.log('Ignoring URL since we have an active network');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.LOGGED_IN;
         return;
       }
 
@@ -383,33 +399,37 @@ module UI {
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BAD_URL;
         return;
       }
 
-      this.copyPasteUrlError = false;
+      this.copyPasteError = CopyPasteError.NONE;
       try {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BAD_URL;
+        return;
+      }
+
+      if (SharingState.NONE !== this.copyPasteSharingState) {
+        console.info('should not be processing a URL while in the middle of sharing');
+        this.copyPasteError = CopyPasteError.UNEXPECTED;
         return;
       }
 
       // at this point, we assume everything is good, so let's check state
       switch (match[1]) {
         case 'request':
-          if (SharingState.NONE !== this.copyPasteSharingState) {
-            console.warn('previous sharing connection already existed, restarting');
-            this.core_.stopCopyPasteShare();
-          }
-
+          expectedType = uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER;
           this.copyPasteSharingMessage = '';
           this.core_.startCopyPasteShare();
           break;
         case 'offer':
+          expectedType = uProxy.MessageType.SIGNAL_FROM_SERVER_PEER;
           if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
+            this.copyPasteError = CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -417,6 +437,11 @@ module UI {
 
       console.log('Sending messages from url to app');
       for (var i in payload) {
+        if (payload[i].type !== expectedType) {
+          this.copyPasteError = CopyPasteError.BAD_URL;
+          return;
+        }
+
         this.core_.sendCopyPasteSignal(payload[i]);
       }
     }

@@ -104,15 +104,15 @@ module Core {
       });
     }
 
-    public stopShare = () => {
+    public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === SharingState.NONE) {
         log.warn('Cannot stop when not proxying');
         return;
       }
 
       this.localSharingWithRemote = SharingState.NONE;
-      this.rtcToNet_.close();
       this.stateRefresh_();
+      return this.rtcToNet_.close();
     }
 
     public startGet = () :Promise<Net.Endpoint> => {
@@ -178,15 +178,15 @@ module Core {
       });
     }
 
-    public stopGet = () : void => {
+    public stopGet = () :Promise<void> => {
       if (this.localGettingFromRemote === GettingState.NONE) {
         log.warn('Cannot stop proxying when not proxying');
         return;
       }
 
       this.localGettingFromRemote = GettingState.NONE;
-      this.socksToRtc_.stop();
       this.stateRefresh_();
+      return this.socksToRtc_.stop();
     }
 
     /*

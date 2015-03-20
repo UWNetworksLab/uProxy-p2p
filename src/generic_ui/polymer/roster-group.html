@@ -7,14 +7,14 @@
   <template>
     <style>
     .header {
-      font-size: 14px;
-      margin: 0.5em;
+      font-size: 13px;
+      margin: 24px 0px 6px 24px;
+      color: rgba(0,0,0,0.34);
     }
     </style>
 
     <div class='header'
-        hidden?='{{ onlineContacts.length == 0 && offlineContacts.length == 0 }}'
-        style='color: {{ pending ? "#009688" : "#888"}}'>
+        hidden?='{{ onlineContacts.length == 0 && offlineContacts.length == 0 }}'>
         {{ groupTitle }}
     </div>
 
