@@ -7,19 +7,19 @@ Polymer({
     NETWORKS: 1
   },
   model: model,
-  ui: ui,
   setState: function(state) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
       console.error('Invalid call to setState: ' + state);
       return;
     }
-    ui.splashState = state;
+    model.globalSettings.splashState = state;
+    core.updateGlobalSettings(model.globalSettings);
   },
   next: function() {
-    this.setState(ui.splashState + 1);
+    this.setState(model.globalSettings.splashState + 1);
   },
   prev: function() {
-    this.setState(ui.splashState - 1);
+    this.setState(model.globalSettings.splashState - 1);
   },
   copypaste: function() {
     this.fire('core-signal', { name: 'copypaste-init' });

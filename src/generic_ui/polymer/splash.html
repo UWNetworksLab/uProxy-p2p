@@ -82,9 +82,9 @@
     </style>
 
     <core-icon icon='arrow-back' on-tap='{{prev}}' class='prevArrow'
-        hidden?='{{SPLASH_STATES.INTRO==ui.splashState}}'></core-icon>
+        hidden?='{{SPLASH_STATES.INTRO==model.globalSettings.splashState}}'></core-icon>
 
-    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
+    <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==model.globalSettings.splashState}}'>
       <div class='view' flex>
         <img class='uproxy-logo' src='../icons/smiley.png'>
         <h1>uProxy</h1>
@@ -103,7 +103,7 @@
       </uproxy-faq-link>
     </div>
 
-    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
+    <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==model.globalSettings.splashState}}'>
       <div class='view' flex>
         <h1>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>

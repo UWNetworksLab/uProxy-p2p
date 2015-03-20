@@ -60,5 +60,6 @@ declare module Core {
     hasSeenSharingEnabledScreen :boolean;
     hasSeenWelcome :boolean;
     mode : uProxy.Mode;
+    splashState : number;
   }
 }  // module Core

@@ -40,7 +40,8 @@ var model :UI.Model = {
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
-    mode : uProxy.Mode.GET
+    mode : uProxy.Mode.GET,
+    splashState : 0
   }
 };
 
@@ -121,10 +122,6 @@ module UI {
   export class UserInterface implements uProxy.UIAPI {
 
     public view :uProxy.View;
-
-    // Current state within the splash (onboarding).  Needs to be part
-    // of the ui object so it can be saved/restored when popup closes and opens.
-    public splashState :number = 0;
 
     // Instance you are getting access from.
     // Null if you are not getting access.
