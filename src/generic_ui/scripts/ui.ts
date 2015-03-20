@@ -164,15 +164,16 @@ module UI {
         if (state['onlineNetwork'] == null) {
           return;
         }
-
-        model.onlineNetwork = {
-          name:   state['onlineNetwork'].name,
-          userId: state['onlineNetwork'].profile.userId,
-          userName: state['onlineNetwork'].profile.name,
-          imageData: state['onlineNetwork'].profile.imageData,
-          roster: {},
-          hasContacts: false
-        };
+        if (model.onlineNetwork === null) {
+          model.onlineNetwork = {
+            name:   state['onlineNetwork'].name,
+            userId: state['onlineNetwork'].profile.userId,
+            userName: state['onlineNetwork'].profile.name,
+            imageData: state['onlineNetwork'].profile.imageData,
+            roster: {},
+            hasContacts: false
+          };
+        }
         this.view = uProxy.View.ROSTER;
 
         for (var userId in state['onlineNetwork'].roster) {
