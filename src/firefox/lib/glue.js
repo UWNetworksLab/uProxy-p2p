@@ -50,7 +50,9 @@ function setUpConnection(freedom, panel, button) {
   });
 
   panel.port.on('showPanel', function() {
-    panel.show();
+    panel.show({
+      position: button
+    });
   });
 
   panel.port.on('openURL', function(url) {

@@ -1,6 +1,6 @@
 var { Cc, Ci, Cr } = require('chrome');
 
-exports.setup = function(panel) {
+exports.setup = function(panel, button) {
   var observer = {
     observe: function (subject, topic, data) {
       if ('http-on-modify-request' !== topic) {
@@ -15,7 +15,9 @@ exports.setup = function(panel) {
       }
 
       panel.port.emit('handleUrlData', url);
-      panel.show();
+      panel.show({
+        position: button
+      });
 
       subject.cancel(Cr.NS_BINDING_ABORTED);
     }
