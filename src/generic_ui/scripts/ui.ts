@@ -197,6 +197,7 @@ module UI {
         for (var userId in state['onlineNetwork'].roster) {
           this.syncUser(state['onlineNetwork'].roster[userId]);
         }
+        this.updateSharingStatusBar_();
       });
 
       // Add or update the online status of a network.
@@ -623,6 +624,21 @@ module UI {
       for (var i = 0; i < payload.allInstanceIds.length; ++i) {
         this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
       }
+
+     for (var i = 0; i < payload.offeringInstances.length; i++) {
+        if (payload.offeringInstances[i].localGettingFromRemote ===
+            GettingState.GETTING_ACCESS) {
+          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+          user.isSharingWithMe = true;
+          this.updateGettingStatusBar_();
+          break;
+        }
+     }
+
+     for (var i = 0; i < payload.gettingInstances.length; i++) {
+        this.instancesGivingAccessTo[payload.gettingInstances[i]] = true;
+        user.isGettingFromMe = true;
+     }
 
       var newUserCategories = user.getCategories();
       // Update the user's category in both get and share tabs.

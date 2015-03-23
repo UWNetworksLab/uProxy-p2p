@@ -141,6 +141,10 @@ module Core {
       return this.user.getLocalInstanceId() + '/' + this.instanceId;
     }
 
+    public isSharing = () => {
+      return this.localSharingWithRemote === SharingState.SHARING_ACCESS;
+    }
+
     /**
      * Handle signals sent along the signalling channel from the remote
      * instance, and pass it along to the relevant socks-rtc module.
