@@ -18,9 +18,6 @@
       z-index: 100;
       line-height: 24px;
     }
-    ::-webkit-scrollbar {
-      display: none;
-    }
     h1 {
       font-size: 1.4em;
       color: #009688;  /* dark green */
@@ -36,7 +33,7 @@
       padding-top: 50px;
       opacity: 1;
       z-index: 100;
-      overflow: scroll;
+      overflow: auto;
     }
     .view[hidden] {
       display: block !important;
@@ -53,8 +50,7 @@
     }
     #nextWrapper {
       margin-top: 50px;
-      left: 0;
-      width: 100%;
+      margin-bottom: 15px;
     }
     #oneTimeConnection {
       margin-bottom: 1.5em;
