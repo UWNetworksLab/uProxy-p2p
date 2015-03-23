@@ -28,11 +28,12 @@
     }
     .view {
       width: 80%;
-      margin-left: 10%;
+      padding-left: 10%;
+      padding-right: 10%;
       padding-top: 50px;
       opacity: 1;
       z-index: 100;
-      overflow: scroll;
+      overflow: auto;
     }
     .view[hidden] {
       display: block !important;
@@ -49,8 +50,7 @@
     }
     #nextWrapper {
       margin-top: 50px;
-      left: 0;
-      width: 100%;
+      margin-bottom: 15px;
     }
     #oneTimeConnection {
       margin-bottom: 1.5em;
@@ -70,6 +70,7 @@
       left: 8px;
       top: 8px;
       cursor: pointer;
+      z-index: 101; /* Must be greater than z-index of .view */
     }
     #intro1, #networks {
       height: 100%;

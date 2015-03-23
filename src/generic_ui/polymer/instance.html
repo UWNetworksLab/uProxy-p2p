@@ -27,6 +27,7 @@
     }
     #description {
       color: #333;
+      margin-bottom: 0;
     }
     core-icon[icon=query-builder] {
       height: 16px;
@@ -38,7 +39,7 @@
     </style>
 
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
-         hidden?='{{globalSettings.mode!=uProxy.Mode.GET}}'>
+         hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
         {{ instance.description }}

@@ -8,7 +8,7 @@ Cu.import(self.data.url('freedom-for-firefox.jsm'));
 // Main uProxy button.
 var button = buttons.ActionButton({
   id: "uProxy-button",
-  label: "uProxy-button",
+  label: "uProxy",
   icon: {
     "18": "./icons/19_offline.gif",
     "36": "./icons/38_offline.gif"
@@ -34,7 +34,7 @@ freedom(manifest, {
 
   // Set up connection between freedom and content script.
   require('glue.js').setUpConnection(new uproxy(), panel, button);
-  require('url-handler.js').setup(panel);
+  require('url-handler.js').setup(panel, button);
 });
 
 

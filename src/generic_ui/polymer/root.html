@@ -5,6 +5,7 @@
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel="import" href="../lib/paper-tabs/paper-tabs.html">
+<link rel="import" href="../lib/core-tooltip/core-tooltip.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -103,7 +104,7 @@
         display: block;
       }
       #roster-panel {
-        overflow: scroll;
+        overflow: auto;
       }
       #status {
         width: 100%;
@@ -170,10 +171,12 @@
           </p>
         </uproxy-bubble>
 
-        <img id='sharingEnabledIcon' src='../icons/sharing-enabled-toolbar.png'
-          hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
-          on-tap='{{ setShareMode }}'></img>
-
+        <core-tooltip label='You are available for sharing.' position='left'>
+          <img id='sharingEnabledIcon'
+            src='../icons/sharing-enabled-toolbar.png'
+            hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+            on-tap='{{ setShareMode }}'></img>
+        </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
           <h3>Sharing Enabled</h3>
@@ -188,14 +191,16 @@
         </div>
       </core-toolbar>
 
+      <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+        <h3>Welcome to uProxy!</h3>
+        <p>
+          To get started, choose "Get access" or "Share access" and then click
+          on a friend to connect.
+        </p>
+      </uproxy-bubble>
+
       <div class='content' fit>
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
-          <h3>Welcome to uProxy!</h3>
-          <p>
-            To get started, choose "Get access" or "Share access" and then click
-            on a friend to connect.
-          </p>
-        </uproxy-bubble>
+
         <div id='rosterContainer' vertical layout>
           <div id='roster-panel' flex>
             <uproxy-roster id='get-roster' class='roster'

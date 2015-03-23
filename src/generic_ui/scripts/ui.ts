@@ -185,6 +185,12 @@ module UI {
       core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
         console.log('Received uProxy.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
+        // TODO: Do not allow reassignment of globalSettings. Instead
+        // write a 'syncGlobalSettings' function that iterates through
+        // the values in state[globalSettings] and assigns the
+        // individual values to model.globalSettings. This is required
+        // because Polymer elements bound to globalSettings' values can
+        // only react to updates to globalSettings and not reassignments.
         model.globalSettings = state['globalSettings'];
       });
 
