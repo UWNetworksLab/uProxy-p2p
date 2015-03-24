@@ -4,21 +4,22 @@
   <link href='fonts/Roboto.css' rel='stylesheet' type='text/css'>
   <style type='text/css'>
     body {
-        margin: 200px;
+        width: 60%;
+        margin: 200px auto;
         font-family: Roboto, sans-serif;
     }
     @font-face {
         font-family: Quicksand;
         src: url(fonts/Quicksand-Regular.ttf);
-        font-weight:400;
     }
     @font-face {
-        font-family: Lato
+        font-family: Lato;
         src: url(fonts/Lato-Light.ttf);
         font-weight:300;
     }
     h2 {
       font-family: "Quicksand", sans-serif;
+      font-weight:400;
       color: #191818;
       width: 70%;
       margin: 0 auto;
@@ -29,7 +30,7 @@
       padding: 0 0 30px;
     }
     h4 {
-      text-align: left;
+      text-align: center;
       color: #909090;
       font-size: 15px;
       line-height: 25px;
@@ -50,10 +51,23 @@
     }
     a {
       color: #2a2a2a;
-      border-bottom: none;
+      text-decoration: none;
+    }
+    a:hover {
+      color: #00AC9B
     }
     h4 a {
+      font-size: 12px;
       border-bottom: 1px dotted #ccc;
+      text-transform: uppercase;
+      color: #8080AB;
+      text-decoration: none;
+    }
+    h4 a:hover {
+      color: #333332;
+    }
+    section {
+      padding-top: 100px;
     }
   </style>
   </head>
@@ -72,7 +86,7 @@
     <a href="#whyIsItImportant">Why is it important that I trust the people I am connecting to?</a><br>
     <a href="#doesUproxyGiveMe">Does uProxy give me anonymity online?</a><br>
     <a href="#whatIsntProxied">What isn't proxied, and can uProxy leak information about the sites I visit?</a><br>
-    <a href="#whyIsUproxyLaunched">Why is uProxy launched for trusted testers only to start?</a>
+    <a href="#whyIsUproxyLaunched">Why is uProxy launched for trusted testers only to start?</a><br>
     <a href="#whoMadeUproxy">Who made uProxy?</a><br>
   </p>
 
