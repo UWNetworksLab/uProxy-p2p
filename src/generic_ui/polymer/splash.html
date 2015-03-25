@@ -58,6 +58,11 @@
     #oneTimeConnection {
       margin-bottom: 1.5em;
     }
+    #submitFeedback {
+      text-decoration: underline;
+      margin-top: 130px;
+      cursor: pointer;
+    }
     uproxy-faq-link {
       width: 100%;
       padding-top: 1em;
@@ -114,6 +119,9 @@
         </p>
         <p>
           We won't share your data or post publicly without your consent
+        </p>
+        <p id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
+          Submit Feedback
         </p>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>

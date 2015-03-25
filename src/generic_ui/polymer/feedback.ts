@@ -5,7 +5,11 @@ Polymer({
   feedback: '',
   logs: '',
   backToSettings: function() {
-    ui.view = uProxy.View.SETTINGS;
+    if (this.model.onlineNetwork) {
+      ui.view = uProxy.View.SETTINGS;
+    } else {
+      ui.view = uProxy.View.SPLASH;
+    }
   },
   sendFeedback: function() {
     // TODO: Get and send real logs.
@@ -32,7 +36,11 @@ Polymer({
         text: 'Done'
       }]
     });
-    ui.view = uProxy.View.ROSTER;
+    if (this.model.onlineNetwork) {
+      ui.view = uProxy.View.ROSTER;
+    } else {
+      ui.view = uProxy.View.SPLASH;
+    }
   },
   viewLogs: function() {
     core.getLogs().then((logs) => {
