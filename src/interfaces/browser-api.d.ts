@@ -11,7 +11,7 @@ interface BrowserAPI {
   openTab(url :string) : void;
   bringUproxyToFront() : void;
   browserSpecificElement : string;
-  showNotification(notificationTest :string) :void;
+  showNotification(text :string, tag :string) :void;
 }
 
 declare var Notification : {
