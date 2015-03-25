@@ -38,6 +38,9 @@ module UI {
     public offeringInstances :UI.Instance[] = [];
     public allInstanceIds :string[] = [];
 
+    public getExpanded :boolean = false;
+    public shareExpanded :boolean = false;
+
     private consent_ :uProxy.ConsentState;
     public gettingConsentState :UI.GettingConsentState =
         GettingConsentState.NO_OFFER_OR_REQUEST;
