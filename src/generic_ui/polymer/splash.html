@@ -23,6 +23,9 @@
       color: #009688;  /* dark green */
       margin-bottom: 1.5em;
     }
+    h1.sub {
+      font-weight: normal;
+    }
     #proxy-pic {
       opacity: 0.3;
     }
@@ -101,7 +104,7 @@
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
       <div class='view' flex>
-        <h1>Where can you find your contacts the quickest?</h1>
+        <h1 class='sub'>Where can you find your contacts the quickest?</h1>
         <p>Sign into a network to load your friends</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
