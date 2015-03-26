@@ -20,7 +20,7 @@ Polymer({
     this.setState(ui.splashState - 1);
   },
   copypaste: function() {
-    initCopyPaste();
+    this.fire('core-signal', { name: 'copypaste-init' });
   },
   ready: function() {
     this.ui = ui;

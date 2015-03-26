@@ -14,7 +14,6 @@ Polymer({
 
     this.ui = ui;
     this.uProxy = uProxy;
-    this.globalSettings = model.globalSettings;
     this.model = model;
   },
   contactsChanged: function() {

@@ -42,7 +42,7 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   dismissCopyPasteError: function() {
-    ui.copyPasteUrlError = false;
+    ui.copyPasteError = UI.CopyPasteError.NONE;
   },
   openDialog: function(e, detail, sender) {
     /* 'detail' parameter holds the data that was passed when the open-dialog

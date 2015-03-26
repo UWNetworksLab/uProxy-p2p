@@ -9,8 +9,5 @@ Polymer({
     stopProxying();
     this.$.confirmButton.disabled = true;
     this.$.proxyReverted.hidden = false;
-  },
-  ready: function() {
-    // Expose global ui object in this context.
   }
 });

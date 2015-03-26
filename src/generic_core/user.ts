@@ -408,10 +408,12 @@ module Core {
 
     public saveToStorage = () : void => {
       this.onceLoaded.then(() => {
-        var state = this.currentState();
-        storage.save<UserState>(this.getStorePath(), state).catch(() => {
-          log.error('Could not save user to storage');
-        });
+        if (Object.keys(this.instances_).length > 0) {
+          var state = this.currentState();
+          storage.save<UserState>(this.getStorePath(), state).catch(() => {
+            log.error('Could not save user to storage');
+          });
+        }
       });
     }
 

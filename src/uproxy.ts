@@ -175,12 +175,28 @@ module uProxy {
     modifyConsent(command :ConsentCommand) : void;
 
     // CopyPaste interactions
-    startCopyPasteGet() : Promise<Net.Endpoint>;
-    stopCopyPasteGet() : void;
-    startCopyPasteShare() : void;
-    stopCopyPasteShare() : void;
 
-    sendCopyPasteSignal(signal :uProxy.Message) : void;
+    /*
+     * The promise fulfills with an endpoint that can be used to proxy through
+     * if sucessfully started or rejects otherwise
+     */
+    startCopyPasteGet() :Promise<Net.Endpoint>;
+
+    /*
+     * The promise fulfills when the connection is fully closed and state has
+     * been cleaned up
+     */
+    stopCopyPasteGet() :Promise<void>;
+
+    startCopyPasteShare() :void;
+
+    /*
+     * The promise fulfills when the connection is fully closed and state has
+     * been cleaned up
+     */
+    stopCopyPasteShare() :Promise<void>;
+
+    sendCopyPasteSignal(signal :uProxy.Message) :void;
 
     // Using peer as a proxy.
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
