@@ -104,12 +104,6 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public stopUsingProxy = () => {
     if (this.running_) {
-      this.revertProxySettings_();
-    }
-  };
-
-  private revertProxySettings_ = () => {
-    if (this.running_ == true) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;
       chrome.proxy.settings.set({
