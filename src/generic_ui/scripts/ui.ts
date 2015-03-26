@@ -179,6 +179,17 @@ module UI {
         // because Polymer elements bound to globalSettings' values can
         // only react to updates to globalSettings and not reassignments.
         model.globalSettings = state['globalSettings'];
+
+        this.copyPasteGettingState = state['copyPasteState'].localGettingFromRemote;
+        this.copyPasteSharingState = state['copyPasteState'].localSharingWithRemote;
+        this.copyPasteBytesSent = state['copyPasteState'].bytesSent;
+        this.copyPasteBytesReceived = state['copyPasteState'].bytesReceived;
+        this.copyPastePendingEndpoint = state['copyPastePendingEndpoint'];
+        if (this.copyPasteGettingState !== GettingState.NONE ||
+            this.copyPasteSharingState !== SharingState.NONE) {
+          this.view = uProxy.View.COPYPASTE;
+        }
+
         if (state['onlineNetwork'] == null) {
           return;
         }
@@ -349,6 +360,8 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
+
+      core.handleUrlData = this.handleUrlData.bind(this);
     }
 
     private updateGettingStatusBar_ = () => {

@@ -76,7 +76,9 @@ class UIConnector implements uProxy.UIAPI {
           {
             networkNames: Object.keys(Social.networks),
             globalSettings: core.globalSettings,
-            onlineNetwork: Social.getOnlineNetwork()
+            onlineNetwork: Social.getOnlineNetwork(),
+            copyPasteState: copyPasteConnection.currentStateForUI(),
+            copyPastePendingEndpoint: copyPasteConnection.endpoint
           });
     });
   }

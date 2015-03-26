@@ -26,6 +26,8 @@ module Core {
     // TODO: set up a better type for this
     private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
 
+    public endpoint = null;
+
     constructor(
       sendUpdate :(x :uProxy.Update, data?:Object) => void
     ) {
@@ -170,6 +172,7 @@ module Core {
       ).then((endpoint :Net.Endpoint) => {
         this.localGettingFromRemote = GettingState.GETTING_ACCESS;
         this.stateRefresh_();
+        this.endpoint = endpoint;
         return endpoint;
       }).catch((e :Error) => {
         this.localGettingFromRemote = GettingState.NONE;
@@ -186,6 +189,7 @@ module Core {
 
       this.localGettingFromRemote = GettingState.NONE;
       this.stateRefresh_();
+      this.endpoint = null;
       return this.socksToRtc_.stop();
     }
 
@@ -216,12 +220,16 @@ module Core {
     }
 
     private stateRefresh_ = () => {
-      this.sendUpdate_(uProxy.Update.STATE, cloneDeep({
+      this.sendUpdate_(uProxy.Update.STATE, this.currentStateForUI());
+    }
+
+    public currentStateForUI = () => {
+      return cloneDeep({
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote
-      }));
+      });
     }
   }
 }

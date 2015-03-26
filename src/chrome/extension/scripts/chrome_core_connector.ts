@@ -41,7 +41,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
   // TODO: Replace with Core -> UI specified update API.
-  private listeners_ :{[type :string] : Function[]};
+  private listeners_ :{[type :string] : Function};
 
   // Whether waiting for app installation is blocking the extension-app
   // connection. If this is true, the uProxy popup should automatically
@@ -192,16 +192,16 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
    */
   public onUpdate = (update :uProxy.Update, handler :Function) => {
     var type = '' + update;
-    if (!(type in this.listeners_)) {
-      this.listeners_[type] = [];
-    }
-    this.listeners_[type].push(handler);
+    var alreadyHooked = typeof this.listeners_[type] !== 'undefined';
+    this.listeners_[type] = handler;
     var payload = {
       cmd: 'on',
       type: update
     };
-    console.log('UI onUpdate for', JSON.stringify(payload));
-    this.send(payload, true);
+    if (!alreadyHooked) {
+      console.log('UI onUpdate for', JSON.stringify(payload));
+      this.send(payload, true);
+    }
   }
 
   /**
@@ -232,8 +232,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
    */
   private receive_ = (msg :{type :string; data :any}) => {
     if (msg.type in this.listeners_) {
-      var handlers :Function[] = this.listeners_[msg.type].slice(0);
-      handlers.forEach((handler) => { handler(msg.data); });
+      this.listeners_[msg.type](msg.data);
       // TODO: Fire a DOM update? Decide if this should happen here or during a
       // ui.sync call.
     }
