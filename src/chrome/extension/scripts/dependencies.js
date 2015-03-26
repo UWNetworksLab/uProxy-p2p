@@ -9,7 +9,7 @@ var browser = 'chrome';
 
 // Functions used by app-missing.ts which need access to the background page.
 var openDownloadAppPage = chrome.extension.getBackgroundPage().openDownloadAppPage;
-
+core.ui = ui;
 core.getInitialState();
 
 console.log('Loaded dependencies for Chrome Extension.');

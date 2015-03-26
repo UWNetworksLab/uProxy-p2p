@@ -360,8 +360,6 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
-
-      core.handleUrlData = this.handleUrlData.bind(this);
     }
 
     private updateGettingStatusBar_ = () => {
