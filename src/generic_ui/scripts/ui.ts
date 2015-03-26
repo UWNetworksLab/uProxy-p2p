@@ -221,14 +221,6 @@ module UI {
         console.log('uProxy.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
       });
-      core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
-        console.warn('uProxy.Update.ERROR: ' + errorText);
-        this.showNotification(errorText);
-      });
-      core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
-        console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
-        this.showNotification(notificationText);
-      });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
                     (message :uProxy.Message) => {
@@ -318,7 +310,8 @@ module UI {
 
         var user = this.mapInstanceIdToUser_[instanceId];
         user.isGettingFromMe = true;
-        this.showNotification(user.name + ' started proxying through you');
+        this.showNotification(user.name + ' started proxying through you',
+            { mode: 'share', user: user.userId });
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -328,7 +321,8 @@ module UI {
 
         // only show a notification if we knew we were prokying
         if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-          this.showNotification(user.name + ' stopped proxying through you');
+          this.showNotification(user.name + ' stopped proxying through you',
+              { mode: 'share', user: user.userId });
         }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
@@ -605,6 +599,7 @@ module UI {
           this.categorizeUser_(user, model.contacts.shareAccessContacts,
               userCategories.shareTab, null);
         }
+        this.showNotification('You have been logged out of ' + model.onlineNetwork.name);
         this.setOfflineIcon();
         this.view = uProxy.View.SPLASH;
         model.onlineNetwork = null;
@@ -646,13 +641,9 @@ module UI {
       user = model.onlineNetwork.roster[profile.userId];
       var oldUserCategories = {getTab: null, shareTab: null};
 
-      // CONSIDER: we might want to check if this user has been our proxy
-      // server and if so stop the proxying if they are no longer proxying
-      // for us (e.g. they were disconnected).  Currently we are sending an
-      // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId, model.onlineNetwork);
+        user = new UI.User(profile.userId, model.onlineNetwork, this);
         model.onlineNetwork.roster[profile.userId] = user;
         model.onlineNetwork.hasContacts = true;
       } else {

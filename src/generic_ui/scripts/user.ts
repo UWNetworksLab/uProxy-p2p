@@ -52,7 +52,8 @@ module UI {
     /**
      * Initialize the user to an 'empty' default.
      */
-    constructor(public userId :string, public network :UI.Network) {
+    constructor(public userId :string, public network :UI.Network,
+        private ui_ :UserInterface) {
       console.log('new user: ' + this.userId);
       this.name = '';
       this.offeringInstances = [];
@@ -66,6 +67,36 @@ module UI {
       if (this.userId !== profile.userId) {
         console.error('Unexpected userId: ' + profile.userId);
       }
+
+      // if we do not have stored state, no use in checking for changes
+      if (this.consent_) {
+        // notifications for get mode
+        if (!payload.consent.ignoringRemoteUserOffer) {
+          if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
+            if (payload.consent.localRequestsAccessFromRemote) {
+              this.ui_.showNotification(profile.name + ' granted you access',
+                           { mode: 'get', user: this.userId });
+            } else {
+              this.ui_.showNotification(profile.name + ' offered you access',
+                           { mode: 'get', user: this.userId });
+            }
+          }
+        }
+
+        // notifications for share mode
+        if (!payload.consent.ignoringRemoteUserRequest) {
+          if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
+            if (payload.consent.localGrantsAccessToRemote) {
+              this.ui_.showNotification(profile.name + ' has accepted your offer for access',
+                           { mode: 'share', user: this.userId });
+            } else {
+              this.ui_.showNotification(profile.name + ' is requesting access',
+                           { mode: 'share', user: this.userId });
+            }
+          }
+        }
+      }
+
       this.name = profile.name;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
       this.offeringInstances = payload.offeringInstances;
