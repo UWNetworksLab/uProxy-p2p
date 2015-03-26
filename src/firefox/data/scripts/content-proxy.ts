@@ -1,5 +1,5 @@
 interface Window {
-  port :any
+  port :{ emit :(eventType :string, eventData :Object) => void; };
 }
 
 window.addEventListener('message', function(event) {

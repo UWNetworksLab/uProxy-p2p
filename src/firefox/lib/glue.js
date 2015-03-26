@@ -69,7 +69,7 @@ function setUpConnection(freedom, panel, button) {
   });
 
   panel.port.on('launchTabIfNotOpen', function(url) {
-    //TODO https://github.com/uProxy/uproxy/issues/1124
+    // TODO: only launch if not open (https://github.com/uProxy/uproxy/issues/1124)
     openURL(url);
   });
 
