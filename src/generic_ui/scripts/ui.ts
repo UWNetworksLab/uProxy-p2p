@@ -110,6 +110,11 @@ module UI {
     hasContacts ?:boolean;
   }
 
+  export interface NotificationData {
+    mode :string;
+    user :string;
+    unique ?:string;
+  }
 
   export enum CopyPasteError {
     NONE = 0,
@@ -218,11 +223,11 @@ module UI {
       });
       core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
         console.warn('uProxy.Update.ERROR: ' + errorText);
-        this.browserApi.showNotification(errorText);
+        this.showNotification(errorText);
       });
       core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
         console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
-        this.browserApi.showNotification(notificationText);
+        this.showNotification(notificationText);
       });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
@@ -313,8 +318,7 @@ module UI {
 
         var user = this.mapInstanceIdToUser_[instanceId];
         user.isGettingFromMe = true;
-        this.browserApi.showNotification(
-            user.name + ' started proxying through you');
+        this.showNotification(user.name + ' started proxying through you');
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -324,8 +328,7 @@ module UI {
 
         // only show a notification if we knew we were prokying
         if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-          this.browserApi.showNotification(
-              user.name + ' stopped proxying through you');
+          this.showNotification(user.name + ' stopped proxying through you');
         }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
@@ -343,6 +346,50 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
+    }
+
+    public showNotification = (text :string, data ?:NotificationData) => {
+      data = data ? data : { mode: '', user: '' };
+      // non-uniqu but existing tags prevent the notification from displaying in some cases
+      data.unique = Math.floor(Math.random() * 1E10).toString();
+
+      try {
+        var tag = JSON.stringify(data);
+      } catch (e) {
+        console.error('Could not encode data to tag');
+        tag = data.unique;
+      }
+
+      this.browserApi.showNotification(text, tag);
+    }
+
+    public handleNotificationClick = (tag :string) => {
+      // we want to bring uProxy to the front regardless of the info
+      this.browserApi.bringUproxyToFront();
+
+      try {
+        var data = JSON.parse(tag);
+
+        if (data.user) {
+          var contact = model.onlineNetwork.roster[data.user];
+        }
+
+        if (data.mode === 'get') {
+          model.globalSettings.mode = uProxy.Mode.GET;
+          this.core_.updateGlobalSettings(model.globalSettings);
+          if (contact) {
+            contact.getExpanded = true;
+          }
+        } else if (data.mode === 'share') {
+          model.globalSettings.mode = uProxy.Mode.SHARE;
+          this.core_.updateGlobalSettings(model.globalSettings);
+          if (contact) {
+            contact.shareExpanded = true;
+          }
+        }
+      } catch (e) {
+        console.warn('error getting information from notification tag');
+      }
     }
 
     private updateGettingStatusBar_ = () => {
