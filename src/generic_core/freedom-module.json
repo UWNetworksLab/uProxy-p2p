@@ -32,6 +32,10 @@
       "url": "../lib/freedom-social-xmpp/social.google.json",
       "api": "social"
     },
+    "SOCIAL-Facebook": {
+      "url": "../lib/freedom-social-firebase/social.firebase-facebook.json",
+      "api": "social"
+    },
     "storage": {
       "url": "../lib/storage/storage.shared.json",
       "api": "storage"

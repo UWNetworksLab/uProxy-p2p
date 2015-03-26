@@ -30,6 +30,21 @@
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 module Social {
+  var NETWORK_OPTIONS = {
+    'Google': {
+      isFirebase: false,
+      enableMonitoring: true
+    },
+    'Facebook': {
+      isFirebase: true,
+      enableMonitoring: true
+    },
+    'Google+': {
+      isFirebase: true,
+      enableMonitoring: true
+    }
+  }
+
   var log :Logging.Log = new Logging.Log('social');
 
   var LOGIN_TIMEOUT :number = 5000;  // ms
@@ -37,7 +52,7 @@ module Social {
 
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
-  var PREFIX:string = 'SOCIAL-';
+  var PREFIX :string = 'SOCIAL-';
   // Global mapping of social network names (without prefix) to actual Network
   // instances that interact with that social network.
   //
@@ -138,7 +153,7 @@ module Social {
      * from storage, or create a new one if this is the first time this uProxy
      * installation has interacted with this network.
      */
-    public prepareLocalInstance = (userId :string) : Promise<void> => {
+    protected prepareLocalInstance_ = (userId :string) : Promise<void> => {
       var key = this.name + userId;
       return storage.load<Instance>(key).then((result :Instance) => {
         this.myInstance = new Core.LocalInstance(this, userId, result);
@@ -429,19 +444,45 @@ module Social {
     //===================== Social.Network implementation ====================//
 
     public login = (remember :boolean) : Promise<void> => {
-      var request :freedom_Social.LoginRequest = {
-        agent: 'uproxy',
-        version: '0.1',
-        url: 'https://github.com/uProxy/uProxy',
-        interactive: true,
-        rememberLogin: remember
-      };
+      var request :freedom_Social.LoginRequest = null;
+      if (this.isFirebase_()) {
+        // Firebase enforces only 1 login per agent per userId at a time.
+        // TODO: ideally we should use the instanceId for the agent string,
+        // that way the clientId we get will just be in the form
+        // userId/instanceId and can eliminate the 1st round of instance
+        // messages.  However we don't know the instanceId until after we login,
+        // because each instanceId is generated or loaded from storage based
+        // on the userId.  Some possibilities:
+        // - modify the freedom API to set our agent after login (once we
+        //   know our userId)
+        // - change the way we generate the instanceId to not depend on what
+        //   userId is logged in.
+        // If we change agent to use instanceId, we also should modify
+        // Firebase code to change disconnected clients to OFFLINE, rather
+        // than removing them.
+        var agent = 'uproxy' + Math.random().toString().substr(2,10);
+        request = {
+          agent: agent,
+          version: '0.1',
+          url: 'https://popping-heat-4874.firebaseio.com/',
+          interactive: true,
+          rememberLogin: remember
+        };
+      } else {
+        request = {
+          agent: 'uproxy',
+          version: '0.1',
+          url: 'https://github.com/uProxy/uProxy',
+          interactive: true,
+          rememberLogin: remember
+        };
+      }
       this.onceLoggedIn_ = this.freedomApi_.login(request)
           .then((freedomClient :freedom_Social.ClientState) => {
             // Upon successful login, save local client information.
             this.startMonitor_();
             log.info('logged into network', this.name);
-            return this.prepareLocalInstance(freedomClient.userId).then(() => {
+            return this.prepareLocalInstance_(freedomClient.userId).then(() => {
               this.myInstance.clientId = freedomClient.clientId;
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
@@ -518,9 +559,7 @@ module Social {
         // clear any existing monitor
         log.error('startMonitor_ called with monitor already running');
         this.stopMonitor_();
-      } else if (this.name == 'Facebook') {
-        // Don't monitor (send INSTANCE_REQUEST messages) for Facebook,
-        // to minimize spam.
+      } else if (!this.isMonitoringEnabled_()) {
         return;
       }
 
@@ -548,6 +587,18 @@ module Social {
       for (var userId in this.roster) {
         this.roster[userId].resendInstanceHandshakes();
       }
+    }
+
+    private isFirebase_ = () : boolean => {
+      // Default to false.
+      var options = NETWORK_OPTIONS[this.name];
+      return options ? options.isFirebase === true : false;
+    }
+
+    private isMonitoringEnabled_ = () : boolean => {
+      // Default to true.
+      var options = NETWORK_OPTIONS[this.name];
+      return options ? options.enableMonitoring === true : true;
     }
 
   }  // class Social.FreedomNetwork
