@@ -40,7 +40,9 @@ module uProxy {
     // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
-    UPDATE_GLOBAL_SETTINGS
+    UPDATE_GLOBAL_SETTINGS,
+    SEND_FEEDBACK,
+    GET_LOGS
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -110,11 +112,9 @@ module uProxy {
     isOffering   :boolean;
   }
 
-  // the state for consent between two instances
   export interface ConsentState {
     localGrantsAccessToRemote :boolean;
     localRequestsAccessFromRemote :boolean;
-    remoteGrantsAccessToLocal :boolean;
     remoteRequestsAccessFromLocal :boolean;
     ignoringRemoteUserRequest :boolean;
     ignoringRemoteUserOffer :boolean;
@@ -137,8 +137,8 @@ module uProxy {
    * command.
    */
   export interface ConsentCommand {
-    path       :InstancePath;
-    action     :uProxy.ConsentUserAction;
+    path    :UserPath;
+    action  :uProxy.ConsentUserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -148,6 +148,12 @@ module uProxy {
   export interface HandleManualNetworkInboundMessageCommand {
     senderClientId  :string;
     message         :uProxy.Message;
+  }
+
+  export interface UserFeedback {
+    email     :string;
+    feedback  :string;
+    logs      :string;
   }
 
   // --- Core <--> UI Interfaces ---
@@ -169,12 +175,28 @@ module uProxy {
     modifyConsent(command :ConsentCommand) : void;
 
     // CopyPaste interactions
-    startCopyPasteGet() : Promise<Net.Endpoint>;
-    stopCopyPasteGet() : void;
-    startCopyPasteShare() : void;
-    stopCopyPasteShare() : void;
 
-    sendCopyPasteSignal(signal :uProxy.Message) : void;
+    /*
+     * The promise fulfills with an endpoint that can be used to proxy through
+     * if sucessfully started or rejects otherwise
+     */
+    startCopyPasteGet() :Promise<Net.Endpoint>;
+
+    /*
+     * The promise fulfills when the connection is fully closed and state has
+     * been cleaned up
+     */
+    stopCopyPasteGet() :Promise<void>;
+
+    startCopyPasteShare() :void;
+
+    /*
+     * The promise fulfills when the connection is fully closed and state has
+     * been cleaned up
+     */
+    stopCopyPasteShare() :Promise<void>;
+
+    sendCopyPasteSignal(signal :uProxy.Message) :void;
 
     // Using peer as a proxy.
     start(instancePath :InstancePath) : Promise<Net.Endpoint>;
@@ -191,6 +213,7 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
+    sendFeedback(feedback :UserFeedback) : void;
   }
 
   /**
@@ -228,8 +251,6 @@ module uProxy {
     // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
     // the below)...
     // updateAll(data:Object) : void;
-
-    showNotification(notificationText :string) : void;
   }
 
   interface ICoreOptions {
@@ -251,6 +272,25 @@ module uProxy {
     promiseId :number;  // Values <= 1 means success/error should be returned.
   }
 
+  /**
+   * Enumeration of mutually-exclusive view states.
+   */
+  export enum View {
+    SPLASH = 0,
+    COPYPASTE,
+    ROSTER,
+    SETTINGS,
+    BROWSER_ERROR,
+    FEEDBACK
+  }
+
+  /**
+   * Enumeration of mutually-exclusive UI modes.
+   */
+  export enum Mode {
+    GET = 0,
+    SHARE
+  }
 }  // module uProxy
 
 module Social {
@@ -316,4 +356,13 @@ enum SharingState {
 module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
+}
+
+interface UserPath {
+  network :NetworkInfo;
+  userId :string;
+}
+
+interface InstancePath extends UserPath {
+  instanceId :string;
 }

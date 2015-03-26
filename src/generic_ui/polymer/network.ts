@@ -10,7 +10,7 @@ Polymer({
     core.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // Fire an update-view event, which root.ts listens for.
-      this.fire('update-view', {view: UI.View.ROSTER});
+      this.fire('update-view', {view: uProxy.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e) => {
       console.warn('Did not log in ', e);

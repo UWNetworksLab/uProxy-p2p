@@ -6,30 +6,13 @@ describe('UI.UserInterface', () => {
   var ui :UI.UserInterface;
   var mockBrowserApi;
   var updateToHandlerMap = {};
-
-  function getInstance(instanceId :string, description :string) :UI.Instance {
-    return {
-      instanceId: instanceId,
-      description: description,
-      consent: {
-        localGrantsAccessToRemote: false,
-        localRequestsAccessFromRemote: false,
-        remoteGrantsAccessToLocal: false,
-        remoteRequestsAccessFromLocal: false,
-        ignoringRemoteUserRequest: false,
-        ignoringRemoteUserOffer: false
-      },
-      localSharingWithRemote: SharingState.NONE,
-      localGettingFromRemote: GettingState.NONE,
-      isOnline: true,
-      bytesSent: 0,
-      bytesReceived: 0
-    }
-  }
+  var mockCore;
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
-    var mockCore = jasmine.createSpyObj('core', ['reset', 'onUpdate']);
+    mockCore = jasmine.createSpyObj(
+        'core',
+        ['reset', 'onUpdate', 'sendCommand']);
 
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
@@ -39,26 +22,37 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openFaq']);
+        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification']);
     ui = new UI.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
-    spyOn(ui, 'showNotification');
   });
 
-  function syncUserAndInstance(
-      userId :string, userName :string, instanceId :string) {
-    var payload :UI.UserMessage = {
+  function getUserAndInstance(
+      userId :string, userName :string, instanceId :string) : UI.UserMessage {
+    return {
       network: 'testNetwork',
       user: {
         userId: userId,
         name: userName,
-        imageData: 'testImageData'
+        imageData: 'testImageData',
+        isOnline: true
       },
-      instances: [
-        getInstance(instanceId, 'description1')
-      ]
+      allInstanceIds: [instanceId],
+      offeringInstances: [],
+      consent: {
+        localGrantsAccessToRemote: false,
+        localRequestsAccessFromRemote: false,
+        remoteRequestsAccessFromLocal: false,
+        ignoringRemoteUserRequest: false,
+        ignoringRemoteUserOffer: false
+      },
+      isOnline: true
     };
-    ui.syncUser(payload);
+  }
+
+  function syncUserAndInstance(
+      userId :string, userName :string, instanceId :string) {
+    ui.syncUser(getUserAndInstance(userId, userName, instanceId));
   }
 
   describe('syncUser', () => {
@@ -69,18 +63,7 @@ describe('UI.UserInterface', () => {
                      userId: 'fakeUser',
                      online: true,
                      roster: {}});
-      var payload :UI.UserMessage = {
-        network: 'testNetwork',
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData'
-        },
-        instances: [
-          getInstance('instance1', 'description1')
-        ]
-      };
-      ui.syncUser(payload);
+      ui.syncUser(getUserAndInstance('testUserId', 'Alice', 'instance1'));
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
       expect(model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
@@ -99,24 +82,9 @@ describe('UI.UserInterface', () => {
                      userId: 'fakeUser',
                      online: true,
                      roster: {}});
-      var clientInstance = getInstance('instance1', 'description1');
-      clientInstance.consent.localRequestsAccessFromRemote = true;
-      clientInstance.consent.remoteGrantsAccessToLocal = true;
-
-      var serverInstance = getInstance('instance2', 'description2');
-      serverInstance.consent.localGrantsAccessToRemote = true;
-      serverInstance.consent.remoteRequestsAccessFromLocal = true;
-
-      var payload :UI.UserMessage = {
-        network: 'testNetwork',
-        user: {
-          userId: 'testUserId',
-          name: 'Alice',
-          imageData: 'testImageData'
-        },
-        instances: [clientInstance, serverInstance]
-      };
-      ui.syncUser(payload);
+      var userMessage = getUserAndInstance('testUserId', 'Alice', 'instance1');
+      userMessage.allInstanceIds.push('instance2');
+      ui.syncUser(userMessage);
       var user :UI.User = model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
       expect(ui['mapInstanceIdToUser_']['instance1'].name).toEqual('Alice');
@@ -245,7 +213,7 @@ describe('UI.UserInterface', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.showNotification).not.toHaveBeenCalled();
+      expect(mockBrowserApi.showNotification).not.toHaveBeenCalled();
     });
 
     it('Notification when you stop sharing', () => {
@@ -254,7 +222,7 @@ describe('UI.UserInterface', () => {
           .call(ui, 'testInstanceId');
       updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      expect(ui.showNotification).toHaveBeenCalled();
+      expect(mockBrowserApi.showNotification).toHaveBeenCalled();
     });
 
     it('Getting status updates when you start and stop getting', () => {
@@ -315,6 +283,5 @@ describe('UI.UserInterface', () => {
     });
 
   });  // syncNetwork_
-
   // TODO: more specs
 });  // UI.UserInterface

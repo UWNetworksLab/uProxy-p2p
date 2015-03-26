@@ -31,7 +31,7 @@ module Core {
    */
   export class RemoteInstance implements Instance, Core.Persistent {
 
-    public keyHash     :string
+    public keyHash     :string;
     public description :string;
 
     public bytesSent   :number = 0;
@@ -40,6 +40,11 @@ module Core {
     // local instance of uProxy.
     public localGettingFromRemote = GettingState.NONE;
     public localSharingWithRemote = SharingState.NONE;
+
+    public wireConsentFromRemote :uProxy.ConsentWireState = {
+      isRequesting: false,
+      isOffering: false
+    };
 
     // Used to prevent saving state while we have not yet loaded the state
     // from storage.
@@ -51,8 +56,6 @@ module Core {
       this.user.notifyUI();
     });
 
-
-    public consent     :Consent.State = new Consent.State();
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
     // scheduled to run in the next second.
     // Used by SocksToRtc & RtcToNet Handlers to make sure bytes sent and
@@ -76,19 +79,8 @@ module Core {
     constructor(
         // The User which this instance belongs to.
         public user :Core.User,
-        public instanceId :string,
-        // The last instance handshake from the peer.  This data may be fresh
-        // (over the wire) or recovered from disk (and stored in a
-        // RemoteInstanceState, which subclasses InstanceHandshake).
-        data        :InstanceHandshake) {
+        public instanceId :string) {
       this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
-
-      // Load consent state if it exists.  The consent state does not exist when
-      // processing an initial instance handshake, only when restoring one from
-      // storage.
-      if (data) {
-        this.update(data);
-      }
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
@@ -160,7 +152,7 @@ module Core {
                            signalFromRemote:Object) => {
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
-        if (!this.consent.localGrantsAccessToRemote) {
+        if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
           return;
         }
@@ -182,7 +174,7 @@ module Core {
      * currently granted.
      */
     public start = () :Promise<Net.Endpoint> => {
-      if (!this.consent.remoteGrantsAccessToLocal) {
+      if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
       }
@@ -218,108 +210,53 @@ module Core {
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :InstanceHandshake) => {
-      // WARNING: |data| is UNTRUSTED, because it is often provided directly by
-      // the remote peer.  Therefore, we MUST NOT make use of any consent
-      // information that might be present.
-      this.keyHash = data.keyHash;
-      this.description = data.description;
-      this.saveToStorage();
-    }
-
-    /**
-     * Modify the consent for this instance, *locally*. (User clicked on one of
-     * the consent buttons in the UI.) Sends updated consent bits to the
-     * remote instance afterwards.
-     */
-    public modifyConsent = (action :uProxy.ConsentUserAction) => {
-      if (!Consent.handleUserAction(this.consent, action)) {
-        log.warn('Invalid user action on consent', {
-          consent: this.consent,
-          action: action
-        });
-        return;
-      }
-      // If remote is currently an active client, but user revokes access, also
-      // stop the proxy session.
-      if (uProxy.ConsentUserAction.CANCEL_OFFER === action &&
-          this.localSharingWithRemote == SharingState.SHARING_ACCESS) {
-        this.connection_.stopShare();
-      }
-      // Send new consent bits to the remote client, and save to storage.
-      this.sendConsent();
-      this.saveToStorage();
-      // Send an update to the UI.
-      this.user.notifyUI();
-    }
-
-    /**
-     * Send consent bits to re-synchronize consent with remote |instance|.
-     * This is expected *after* receiving an instance notification for an
-     * already existing instance.
-     */
-    public sendConsent = () => {
-      this.onceLoaded.then(() => {
-        if (this.user.isInstanceOnline(this.instanceId)) {
-          this.user.sendInstanceHandshake(
-              this.user.instanceToClient(this.instanceId),
-              this.getConsentBits());
-        }
+    public update = (data :InstanceHandshake) : Promise<void> => {
+      return this.onceLoaded.then(() => {
+        this.keyHash = data.keyHash;
+        this.description = data.description;
+        this.updateConsentFromWire_(data.consent);
+        this.saveToStorage();
       });
     }
 
-    /**
-     * Receive consent bits from the remote, and update consent values
-     * accordingly.
-     */
-    public updateConsent = (bits :uProxy.ConsentWireState) => {
-      this.onceLoaded.then(() => {
-        this.updateConsent_(bits);
-      });
-    }
+    private updateConsentFromWire_ = (bits: uProxy.ConsentWireState) => {
+      var userConsent = this.user.consent;
 
-    public updateConsent_ = (bits: uProxy.ConsentWireState) => {
+      // Get old values before updating this.wireConsentFromRemote
+      // so we can see what changed.
+      var oldIsOffering = this.wireConsentFromRemote.isOffering;
+      var newIsOffering = bits.isOffering;
 
-      var remoteWasGrantingAccess = this.consent.remoteGrantsAccessToLocal;
-      var remoteWasRequestingAccess = this.consent.remoteRequestsAccessFromLocal;
-      Consent.updateStateFromRemoteState(this.consent, bits);
-      this.saveToStorage();
-      // TODO: Make the UI update granular for just the consent, instead of the
-      // entire parent User for this instance.
-      this.user.notifyUI();
+      // Update this remoteInstance.
+      this.wireConsentFromRemote = bits;
+
+      // Requesting access is part of consent from the user, however we may
+      // need to update that based on the new bits.
+      var oldIsRequesting = userConsent.remoteRequestsAccessFromLocal;
+      this.user.updateRemoteRequestsAccessFromLocal();
+      var newIsRequesting = userConsent.remoteRequestsAccessFromLocal;
 
       // Fire a notification on the UI, if a state is different.
       // TODO: Determine if we should attach the instance id / decription to the
       // user name as part of the notification text.
       var note = null;
-      if (this.consent.remoteGrantsAccessToLocal !== remoteWasGrantingAccess) {
-        if (this.consent.remoteGrantsAccessToLocal
-            && !this.consent.ignoringRemoteUserOffer) {
+      if (newIsOffering !== oldIsOffering &&
+          !userConsent.ignoringRemoteUserOffer) {
+        if (newIsOffering) {
           // newly granted access
-          if (this.consent.localRequestsAccessFromRemote) {
-            note = ' granted you access.';
-          } else {
-            note = ' offered you access.';
-          }
+          note = userConsent.localRequestsAccessFromRemote ?
+              ' granted you access.' : ' offered you access.';
         } else {
           // newly revoked access
-          if (!this.consent.ignoringRemoteUserOffer) {
-            note = ' revoked your access.';
-          }
+          note = ' revoked your access.';
         }
       }
 
-      if (this.consent.remoteRequestsAccessFromLocal !== remoteWasRequestingAccess) {
-        if (this.consent.remoteRequestsAccessFromLocal
-            && !this.consent.ignoringRemoteUserRequest) {
-          // newly requested/accepted access
-          if (this.consent.localGrantsAccessToRemote) {
-            note = ' has accepted your offer of access.';
-          } else {
-            note = ' is requesting access.';
-          }
-        }
-        // No notification for cancelled requests.
+      if (newIsRequesting && !oldIsRequesting &&
+          !userConsent.ignoringRemoteUserRequest) {
+        // newly requested/accepted access
+        note = userConsent.localGrantsAccessToRemote ?
+            ' has accepted your offer of access.' : ' is requesting access.';
       }
 
       if (note) {
@@ -327,18 +264,6 @@ module Core {
           ui.showNotification(name + note);
         });
       }
-    }
-
-    /**
-     * Return the pair of boolean consent bits indicating client and proxy
-     * consent status, from the user's point of view. These bits will be sent on
-     * the wire.
-     */
-    public getConsentBits = () :uProxy.ConsentWireState => {
-      return {
-        isRequesting: this.consent.localRequestsAccessFromRemote,
-        isOffering: this.consent.localGrantsAccessToRemote
-      };
     }
 
     private saveToStorage = () => {
@@ -359,9 +284,9 @@ module Core {
      */
     public currentState = () :RemoteInstanceState => {
       return cloneDeep({
-        consent:     this.consent,
-        description: this.description,
-        keyHash:     this.keyHash
+        wireConsentFromRemote: this.wireConsentFromRemote,
+        description:           this.description,
+        keyHash:               this.keyHash
       });
     }
 
@@ -373,7 +298,12 @@ module Core {
     public restoreState = (state :RemoteInstanceState) => {
       this.description = state.description;
       this.keyHash = state.keyHash;
-      this.consent = state.consent;
+      if (state.wireConsentFromRemote) {
+        this.wireConsentFromRemote = state.wireConsentFromRemote
+      } else {
+        log.error('Failed to load wireConsentFromRemote for instance ' +
+            this.instanceId);
+      }
     }
 
     /**
@@ -385,7 +315,6 @@ module Core {
         instanceId:             this.instanceId,
         description:            this.description,
         keyHash:                this.keyHash,
-        consent:                this.consent,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote,
         isOnline:               this.user.isInstanceOnline(this.instanceId),
@@ -406,12 +335,16 @@ module Core {
       }
     }
 
+    public stopShare = () => {
+      this.connection_.stopShare();
+    }
+
   }  // class Core.RemoteInstance
 
   export interface RemoteInstanceState {
-    consent     :Consent.State;
-    description :string;
-    keyHash     :string;
+    wireConsentFromRemote :uProxy.ConsentWireState;
+    description           :string;
+    keyHash               :string;
   }
 
   // TODO: Implement obfuscation.

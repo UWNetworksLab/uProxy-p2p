@@ -31,7 +31,7 @@ Rule.symlink = (dir, dest='') =>
     expand: true,
     overwrite: true,
     cwd: dir,
-    src: ['**/*.ts', '**/*.html'],
+    src: ['**/*.ts', '**/*.html', '**/*.js'],
     dest: 'build/compile-src/' + dest} ] }
 
 # Use symlinkSrc with the name of the module, and it will automatically symlink
@@ -73,7 +73,7 @@ FILES =
   # Files which are required at run-time everywhere.
   uproxy_common: [
     'uproxy.js'
-    'generic_core/util.js'
+    'generic/version.js'
   ]
 
   uproxy_networking_common: [
@@ -93,10 +93,10 @@ FILES =
     'webrtc/peerconnection.js'
   ]
   thirdPartyUi: [
-    'lodash/**',
-    'platform/**',
-    'polymer/**',
-    'webcomponentsjs/**'
+    'platform/platform.js',
+    'polymer/polymer.html',
+    'polymer/polymer.js',
+    'webcomponentsjs/**.min.js'
   ]
 
 
@@ -184,20 +184,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
-      # Copy any JavaScript from the third_party directory
-      thirdPartyJavaScript: { files: [ {
-          expand: true,
-          src: [
-            'third_party/freedom-ts-hacks/*.js',
-            'third_party/lib/core-component-page/**/*.js',
-            'third_party/lib/platform/**/*.js',
-            'third_party/lib/polymer/**/*.js',
-            'third_party/lib/webcomponentsjs/**/*.js'
-            ]
-          dest: 'build/'
-          onlyIf: 'modified'
-        } ] }
-
       # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
         nonull: true
@@ -221,7 +207,7 @@ module.exports = (grunt) ->
         files: [ {
           # The platform specific non-compiled stuff, and...
           expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts', '!**/*.html']
+          src: ['**', '!**/*.md', '!**/*.ts', '!polymer/*.html']
           dest: chromeExtDevPath
         }, {
           # generic_ui compiled source.
@@ -242,6 +228,7 @@ module.exports = (grunt) ->
             ]
           dest: chromeExtDevPath + 'scripts/'
         }, {
+          # Copy third party UI files required for polymer.
           expand: true, cwd: 'third_party/lib'
           src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
@@ -266,12 +253,12 @@ module.exports = (grunt) ->
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Copy compiled typescript (no .spec) to build/dev/chrome/app/scripts
           expand: true, cwd: 'build/compile-src/', flatten: true
-          src: [
-            'uproxy.js'
-            'chrome/app/scripts/*.js'
-            'generic_core/**/*.js'
-            '!**/*.spec.js'
-          ]
+          src: FILES.uproxy_common
+            .concat [
+              'chrome/app/scripts/*.js'
+              'generic_core/**/*.js'
+              '!**/*.spec.js'
+            ]
           dest: chromeAppDevPath + 'scripts/'
         }, {  # Freedom
           expand: true, cwd: 'node_modules/freedom-for-chrome/'
@@ -356,6 +343,10 @@ module.exports = (grunt) ->
           src: ['**'],
           dest: firefoxDevPath + 'data/core/'
         }, {
+          expand: true, cwd: 'build/compile-src/generic'
+          src: ['**'],
+          dest: firefoxDevPath + 'data/core/'
+        }, {
         # ... the generic UI stuff
           expand: true, cwd: 'build/compile-src/generic_ui'
           src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
@@ -407,7 +398,7 @@ module.exports = (grunt) ->
           # code.
           expand: true, cwd: 'build/compile-src/firefox/data'
           src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
-          dest: firefoxDevPath
+          dest: firefoxDevPath + 'data'
         } ]
 
     }  # copy
@@ -415,12 +406,12 @@ module.exports = (grunt) ->
     'string-replace':
       version:
         files: [{
-          src: 'build/compile-src/generic_core/core.js'
-          dest: 'build/compile-src/generic_core/core.js'
+          src: 'build/compile-src/generic/version-template.js'
+          dest: 'build/compile-src/generic/version.js'
         }]
         options:
           replacements: [{
-            pattern: /VERSION/g
+            pattern: /VERSION_REPLACE/g
             replacement: JSON.stringify
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
@@ -436,7 +427,6 @@ module.exports = (grunt) ->
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
     ts: {
-
       # uProxy UI without any platform dependencies
       generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
@@ -472,11 +462,11 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
-
-      chrome_extension:
+      chrome_extension: {
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/uproxy.js'
+              'build/compile-src/generic/version.js'
               'build/compile-src/mocks/chrome_mocks.js'
               'build/compile-src/generic_ui/scripts/core_connector.js'
               'build/compile-src/generic_ui/scripts/ui.js'
@@ -493,8 +483,9 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/chrome_extension'
+      }
 
-      chrome_app:
+      chrome_app: {
         src: FILES.jasmine_helpers
             .concat [
               'build/compile-src/uproxy.js'
@@ -510,16 +501,21 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/chrome_app'
+      }
 
-      generic_core:
+      generic_core: {
         src: FILES.jasmine_helpers
+            .concat FILES.uproxy_common
             .concat [
               'build/compile-src/mocks/freedom-mocks.js'
+              'build/compile-src/mocks/socks-to-rtc.js'
+              'build/compile-src/mocks/rtc-to-net.js'
               'build/compile-src/logging/logging.js'
               'build/compile-src/webrtc/peerconnection.js'
               'build/compile-src/socks-to-rtc/socks-to-rtc.js'
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
+              'build/compile-src/generic/version.js'
               'build/compile-src/generic_core/util.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
@@ -532,6 +528,7 @@ module.exports = (grunt) ->
               'build/compile-src/generic_core/storage.js'
               'build/compile-src/generic_core/social.js'
               'build/compile-src/generic_core/core.js'
+              'node_modules/uproxy-lib/dist/handler/queue.js'
             ]
         options:
           specs: 'build/compile-src/generic_core/**/*.spec.js'
@@ -546,10 +543,12 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_core'
+      }
 
-      generic_ui:
+      generic_ui: {
         src: FILES.jasmine_helpers
             .concat [
+              'build/compile-src/uproxy.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
             ]
@@ -562,17 +561,19 @@ module.exports = (grunt) ->
               type: 'html'
               options:
                 dir: 'build/coverage/generic_ui'
+      }
 
-
-    compress:
-      main:
+    'mozilla-addon-sdk':
+      'latest':
         options:
-          mode: 'zip'
-          archive: 'dist/uproxy.xpi'
-        expand: true
-        cwd: 'build/dev/firefox'
-        src: ['**']
-        dest: '.'
+          dest_dir: '.mozilla_addon_sdk/'
+
+    'mozilla-cfx-xpi':
+      'dist':
+        options:
+          'mozilla-addon-sdk': 'latest'
+          extension_dir: 'build/dev/firefox'
+          dist_dir: 'build/dist/'
 
     vulcanize:
       chromeExtInline:
@@ -601,7 +602,7 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/browser-elements.html'
+          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/root.html'
       firefoxCsp:
         options:
           csp: true
@@ -609,16 +610,16 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
-    clean: ['build/**', '.tscache']
+    clean: ['build/', '.tscache']
 
  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-compress'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
+  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-gitinfo'
   grunt.loadNpmTasks 'grunt-shell'
@@ -641,6 +642,7 @@ module.exports = (grunt) ->
     'symlink:uproxyChurnTypescriptSrc'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
+    'string-replace:version'
     #'symlink:polymerLib'
   ]
 
@@ -648,7 +650,6 @@ module.exports = (grunt) ->
   taskManager.add 'build_generic_core', [
     'base'
     'ts:generic_core'
-    'string-replace:version'
     # 'copy:core_libs'
   ]
 
@@ -700,7 +701,8 @@ module.exports = (grunt) ->
 
   taskManager.add 'build_firefox_xpi', [
     'build_firefox'
-    'compress:main'
+    'mozilla-addon-sdk'
+    'mozilla-cfx-xpi:dist'
   ]
 
   # --- Testing tasks ---

@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2267",
@@ -18,17 +18,17 @@
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",
       "scripts/chrome_core_connector.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/version.js"
     ]
   },
   "browser_action": {
     "default_icon": {
-      "19": "icons/19_error.png",
-      "38": "icons/19_error.png"
+      "19": "icons/19_offline.gif",
+      "38": "icons/19_offline.gif"
     },
     "default_title": "__MSG_extTitle__"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "tabs",
     "proxy",
@@ -38,6 +38,9 @@
     "https://uproxy.org/request/*",
     "https://uproxy.org/offer/*",
     "webRequestBlocking"
+  ],
+  "web_accessible_resources": [
+    "copypaste.html"
   ],
   "options_page": "index.html",
   "externally_connectable": {

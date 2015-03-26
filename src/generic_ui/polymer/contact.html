@@ -1,4 +1,6 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
+<link rel='import' href='../lib/core-icons/core-icons.html'>
+<link rel='import' href='../lib/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
 
 <polymer-element name='uproxy-contact' attributes='contact, isOnline'>
@@ -24,60 +26,185 @@
     }
     .nameRow {
       white-space: nowrap;
-      overflow: hidden;
       text-overflow: ellipsis;
-      margin-right: 40px; /* room for accessIcon */
+      margin: 18px 0px 0px 24px;
       cursor: pointer;
     }
+    .nameRow core-icon {
+      opacity: 0.6;
+      margin: 0px 18px 0px 0px;
+      float: right;
+    }
+    .nameRow:hover core-icon {
+      opacity: 1;
+    }
     .avatar {
-      width: 36px; height: 36px;
-      margin: 8px; border: none; border-radius: 50%;
+      width: 40px; height: 40px;
+      border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: middle;
+      box-shadow: inset 0px 1px 3px 0px rgba(0,0,0,0.12);
     }
     .name {
       font-size: 16px;
+      color: rgba(0,0,0,0.87);
+      padding-left: 18px;
     }
     .accessIcon {
-      position: absolute;
-      right: 0;
-      margin-top: 1em; /* line up with text (hacky) */
-      padding-right: 15px;
+      padding-right: 18px;
       width: 20px;
       height: 20px;
     }
-    .instances {
-      padding-top: 8px;
-      margin-left: 52px; /* line up with right bound of contact picture */
-      margin-right: 40px; /* line up with end of name div (before accessIcon) */
+    core-collapse {
+      margin-left: 80px; /* line up with left bound of contact name */
+      margin-right: 48px;
+      margin-top: 0px; /* line details closer to bottom of contact name */
+      color: rgba(0,0,0,0.54);
     }
-    .offline .nameRow {
+    .offline {
       opacity: 0.5;
+    }
+    paper-button {
+      background: rgb(221, 221, 221);
+      color: rgb(112, 112, 112);
+      font-size: 1em;
+      margin: 14px 5px 5px 2px;
+      padding-left: 1em;
+      padding-right: 1em;
+    }
+    core-icon[icon=query-builder],
+    core-icon[icon=mail],
+    core-icon[icon=check] {
+      height: 16px;
+      width: 16px;
+      color: rgba(0,0,0,0.54);
+      margin-top: 2px;
+      margin-right: 2px;
+    }
+    core-icon[icon=check] {
+      color: #009688;
+    }
+    .highlightedButton {
+      background: #009688;  /* dark green */
+      color: white;
+    }
+    p.preButtonDetailedText {
+      margin: 18px 0px 0px 0px;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    p.preButtonText {
+      margin: 0;
+      font-size: 14px;
     }
     </style>
 
-    <div tabindex='-1' class='frame
-        {{ contact.expanded ? "expanded" : "" }} {{ isOnline ? "online" : "offline" }}'>
-      <div on-tap='{{ toggle}}' class='nameRow'>
-        <img class='avatar' src='{{ contact.imageData }}' />
-        <span class='name'>{{ contact.name }}</span>
-        <img src='../icons/getting_animated.gif' class='accessIcon'
-            hidden?='{{ ui.mode!=UI.Mode.GET || !contact.isSharingWithMe }}'>
-        <img src='../icons/sharing_animated.gif' class='accessIcon'
-            hidden?='{{ ui.mode!=UI.Mode.SHARE || !contact.isGettingFromMe }}'>
-      </div>
+    <div on-click='{{ toggle }}' tabindex='-1'
+        class='nameRow frame {{ isOnline ? "online" : "offline" }}'
+        center horizontal layout>
+      <img class='avatar' src='{{ contact.imageData }}' />
+      <div flex class='name'>{{ contact.name }}</div>
+      <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
+      <img src='../icons/getting_animated.gif' class='accessIcon'
+          hidden?='{{ model.globalSettings.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>
+      <img src='../icons/sharing_animated.gif' class='accessIcon'
+          hidden?='{{ model.globalSettings.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
+      <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
+      <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
+      <core-icon icon="expand-more"
+        hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
+      </core-icon>
+      <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
+      <core-icon icon="expand-less"
+        hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
+      </core-icon>
+    </div> <!-- end of #nameRow -->
 
-      <div class='instances' hidden?='{{!contact.expanded}}'>
-        <template repeat='{{ i in contact.instances }}' vertical layout>
+    <core-collapse id='getControls' class='expandedControls'
+      hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+      opened='{{ contact.getExpanded }}'>
+
+      <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
+        <div horizontal layout>
+          <core-icon icon='check'></core-icon>
+          <p class='preButtonText' flex>
+            {{contact.name || contact.userId }} has granted you access
+          </p>
+        </div>
+        <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>
           <uproxy-instance
               user='{{ contact }}'
-              instance='{{ i }}'
+              instance='{{ instance }}'
               network='{{contact.network}}'>
           </uproxy-instance>
         </template>
       </div>
 
-    </div>
+      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION }}'>
+        <div horizontal layout>
+          <core-icon icon='query-builder'></core-icon>
+          <p class='preButtonText' flex>
+            Asking for access
+          </p>
+        </div>
+        <p class='preButtonDetailedText'>You will be able to get access when {{ contact.name }} accepts.</p>
+        <paper-button raised on-tap='{{ cancelRequest }}'>Cancel Request</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
+        <p class='preButtonText'>They've offered you access.</p>
+        <paper-button class='highlightedButton' raised on-tap='{{ request }}'>Accept Offer</paper-button>
+        <paper-button class='highlightedButton' raised on-tap='{{ ignoreOffer }}'>Ignore</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
+        <p class='preButtonText'>They've offered you access.</p>
+        <paper-button raised on-tap='{{ unignoreOffer }}'>Stop ignoring offers</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
+        <paper-button raised class='highlightedButton' on-tap='{{ request }}'>
+          Ask for access
+        </paper-button>
+      </div>
+
+    </core-collapse> <!-- end of getControls -->
+
+    <core-collapse id='shareControls' class='expandedControls'
+      hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+      opened='{{ contact.shareExpanded }}'>
+
+      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
+        <p class='preButtonText'>You've given them access.</p>
+        <paper-button raised on-tap='{{ cancelOffer }}'>Revoke Access</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
+        <paper-button raised on-tap='{{ cancelOffer }}'>Cancel Offer</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
+        <div horizontal layout>
+          <core-icon icon='mail'></core-icon>
+          <p class='preButtonText' flex>
+            {{ contact.name }} requests access from you.
+          </p>
+        </div>
+        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Grant</paper-button>
+        <paper-button raised class='highlightedButton' on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
+        <p class='preButtonText'>They requested access through you.</p>
+        <paper-button raised on-tap='{{ unignoreRequest }}'>Stop ignoring requests</paper-button>
+      </div>
+
+      <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
+        <p class='preButtonText'>You have not granted them access.</p>
+        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Offer Access</paper-button>
+      </div>
+    </core-collapse> <!-- end of shareControls -->
+
   </template>
 
   <script src='contact.js'></script>

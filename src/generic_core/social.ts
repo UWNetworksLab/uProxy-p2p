@@ -20,7 +20,6 @@
 /// <reference path='firewall.ts' />
 /// <reference path='local-instance.ts' />
 /// <reference path='user.ts' />
-/// <reference path='util.ts' />
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/network.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
@@ -108,6 +107,16 @@ module Social {
       return null;
     }
     return networks[networkName][userId];
+  }
+
+  export function getOnlineNetwork() : NetworkState {
+    for (var network in Social.networks) {
+      if (Object.keys(Social.networks[network]).length > 0) {
+        var userId = Object.keys(Social.networks[network])[0];
+        return Social.networks[network][userId].getNetworkState();
+      }
+    }
+    return null;
   }
 
   export function notifyUI(networkName :string) {
@@ -207,8 +216,8 @@ module Social {
              !(userId in this.roster);
     }
 
-    public getLocalInstance = () : Core.LocalInstance => {
-      return this.myInstance;
+    public getLocalInstanceId = () : string => {
+      return this.myInstance.instanceId;
     }
 
     public getUser = (userId :string) : Core.User => {
@@ -234,6 +243,10 @@ module Social {
     public send = (user :Core.User,
                    recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
+      throw new Error('Operation not implemented');
+    }
+
+    public getNetworkState = () : NetworkState => {
       throw new Error('Operation not implemented');
     }
 
@@ -338,6 +351,8 @@ module Social {
           network: this.name,
           user:    userProfileMessage
         });
+
+        this.myInstance.updateProfile(userProfileMessage);
 
         return;
       }
@@ -538,7 +553,6 @@ module Social {
                    clientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify(message);
-
       log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,
@@ -599,6 +613,22 @@ module Social {
       // Default to true.
       var options = NETWORK_OPTIONS[this.name];
       return options ? options.enableMonitoring === true : true;
+    }
+
+    public getNetworkState = () : NetworkState => {
+      var rosterState : {[userId :string] :UI.UserMessage} = {};
+      for (var userId in this.roster) {
+        var userState = this.roster[userId].currentStateForUI()
+        if (userState !== null) {
+          rosterState[userId] = userState;
+        }
+      }
+
+      return {
+        name: this.name,
+        profile: this.myInstance.getUserProfile(),
+        roster: rosterState
+      };
     }
 
   }  // class Social.FreedomNetwork

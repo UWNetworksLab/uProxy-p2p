@@ -12,9 +12,7 @@
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
 /// <reference path='social.ts' />
-/// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/ui.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
 /// <reference path='../freedom/typings/freedom.d.ts' />
@@ -23,9 +21,12 @@
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 freedom['loggingprovider']().setConsoleFilter(['*:I']);
+freedom['loggingprovider']().setBufferedLogFilter(['*:D']);
+
+declare var UPROXY_VERSION;
 
 var log :Logging.Log = new Logging.Log('core');
-log.info('Loading core', 'VERSION');
+log.info('Loading core', UPROXY_VERSION);
 
 var storage = new Core.Storage();
 
@@ -52,10 +53,18 @@ class UIConnector implements uProxy.UIAPI {
    */
   public update = (type:uProxy.Update, data?:any) => {
     var printableType :string = uProxy.Update[type];
-    log.debug('sending message to UI', {
-      type: printableType,
-      data: data
-    });
+    if (type == uProxy.Update.COMMAND_FULFILLED
+        && data['command'] == uProxy.Command.GET_LOGS){
+      log.debug('sending logs to UI', {
+        type: printableType,
+        data: 'logs not printed to prevent duplication if logs are sent again.'
+      });
+    } else {
+      log.debug('sending message to UI', {
+        type: printableType,
+        data: data
+      });
+    }
     bgAppPageChannel.emit('' + type, data);
   }
 
@@ -66,7 +75,8 @@ class UIConnector implements uProxy.UIAPI {
           uProxy.Update.INITIAL_STATE,
           {
             networkNames: Object.keys(Social.networks),
-            globalSettings: core.globalSettings
+            globalSettings: core.globalSettings,
+            onlineNetwork: Social.getOnlineNetwork()
           });
     });
   }
@@ -104,7 +114,8 @@ class uProxyCore implements uProxy.CoreAPI {
       = {description: '',
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
-         hasSeenWelcome: false};
+         hasSeenWelcome: false,
+         mode: uProxy.Mode.GET};
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
@@ -129,6 +140,9 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
+          }
+          if (typeof this.globalSettings.mode == 'undefined') {
+            this.globalSettings.mode = uProxy.Mode.GET;
           }
         }).catch((e) => {
           log.info('No global settings loaded', e.message);
@@ -171,7 +185,8 @@ class uProxyCore implements uProxy.CoreAPI {
       handler(args.data).then(
         (argsForCallback ?:any) => {
           ui.update(uProxy.Update.COMMAND_FULFILLED,
-              { promiseId: args.promiseId,
+              { command: cmd,
+                promiseId: args.promiseId,
                 argsForCallback: argsForCallback });
         },
         (errorForCallback :Error) => {
@@ -297,6 +312,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.mode = newSettings.mode;
   }
 
   /**
@@ -306,14 +322,14 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public modifyConsent = (command:uProxy.ConsentCommand) => {
     // Determine which Network, User, and Instance...
-    var instance = this.getInstance(command.path);
-    if (!instance) {  // Error msg emitted above.
-      log.error('Cannot modify consent for non-existing instance');
+    var user = this.getUser(command.path);
+    if (!user) {  // Error msg emitted above.
+      log.error('Cannot modify consent for non-existing user', command.path);
       return;
     }
     // Set the instance's new consent levels. It will take care of sending new
     // consent bits over the wire and re-syncing with the UI.
-    instance.modifyConsent(command.action);
+    user.modifyConsent(command.action);
   }
 
   public startCopyPasteGet = () : Promise<Net.Endpoint> => {
@@ -326,16 +342,16 @@ class uProxyCore implements uProxy.CoreAPI {
     return copyPasteConnection.startGet();
   }
 
-  public stopCopyPasteGet = () => {
-    copyPasteConnection.stopGet();
+  public stopCopyPasteGet = () :Promise<void> => {
+    return copyPasteConnection.stopGet();
   }
 
   public startCopyPasteShare = () => {
     copyPasteConnection.startShare();
   }
 
-  public stopCopyPasteShare = () => {
-    copyPasteConnection.stopShare();
+  public stopCopyPasteShare = () :Promise<void> => {
+    return copyPasteConnection.stopShare();
   }
 
   public sendCopyPasteSignal = (signal :uProxy.Message) => {
@@ -408,17 +424,53 @@ class uProxyCore implements uProxy.CoreAPI {
    * Obtain the RemoteInstance corresponding to an instance path.
    */
   public getInstance = (path :InstancePath) : Core.RemoteInstance => {
-    var network = Social.getNetwork(path.network.name, path.network.userId);
-    if (!network) {
-      log.error('No network', path.network.name);
-      return;
-    }
-    var user = network.getUser(path.userId);
+    var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);
       return;
     }
     return user.getInstance(path.instanceId);
+  }
+
+  public getUser = (path :UserPath) : Core.User => {
+    var network = Social.getNetwork(path.network.name, path.network.userId);
+    if (!network) {
+      log.error('No network', path.network.name);
+      return;
+    }
+    return network.getUser(path.userId);
+  }
+
+  public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
+    var sendXhr = (logs) : void => {
+      var xhr = freedom["core.xhr"]();
+      var params = JSON.stringify(
+        {'email' : feedback.email,
+         'feedback' : feedback.feedback,
+          'logs' : logs});
+      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
+      xhr.send({'string': params});
+    }
+    if (feedback.logs) {
+      this.getLogs().then((formattedLogs) => {
+        sendXhr(formattedLogs);
+      });
+    } else {
+      sendXhr('');
+    }
+  }
+
+  public getLogs = () : Promise<string> => {
+    return freedom['loggingprovider']().getLogs().then((logs) => {
+      var formattedLogs = '';
+      for (var i = 0; i < logs.length; i++) {
+        formattedLogs += logs[i] + '\n';
+      }
+      return formattedLogs;
+    });
   }
 }  // class uProxyCore
 
@@ -449,14 +501,14 @@ core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
 core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
                       core.startCopyPasteGet);
 
-core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
-               core.stopCopyPasteGet);
+core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+                      core.stopCopyPasteGet);
 
 core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
                core.startCopyPasteShare);
 
-core.onCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
-               core.stopCopyPasteShare);
+core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+                      core.stopCopyPasteShare);
 
 core.onCommand(uProxy.Command.COPYPASTE_SIGNALLING_MESSAGE,
                core.sendCopyPasteSignal);
@@ -477,6 +529,8 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
+core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogs);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

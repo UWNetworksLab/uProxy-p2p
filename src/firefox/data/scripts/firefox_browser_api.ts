@@ -6,7 +6,7 @@
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
-/// <reference path='../../../interfaces/ui.d.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 
 var port :ContentScriptPort;
 
@@ -32,9 +32,9 @@ class FirefoxBrowserApi implements BrowserAPI {
         });
   }
 
-  // For FAQ.
-
-  public openFaq = (pageAnchor ?:string) => {}
+  public openTab = (url ?:string) => {
+    port.emit('openURL', url);
+  }
 
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
@@ -49,5 +49,12 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public bringUproxyToFront = () => {
     port.emit('showPanel');
+  }
+
+  public showNotification = (notificationText :string) => {
+    port.emit('showNotification', {
+      text: notificationText,
+      iconURL: './icons/128_online.png'
+    });
   }
 }
