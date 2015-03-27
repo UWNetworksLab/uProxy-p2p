@@ -154,6 +154,7 @@ module uProxy {
     email     :string;
     feedback  :string;
     logs      :string;
+    browserInfo :string;
   }
 
   // --- Core <--> UI Interfaces ---

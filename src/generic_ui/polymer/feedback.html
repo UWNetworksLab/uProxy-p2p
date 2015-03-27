@@ -135,9 +135,9 @@
       <div id='logCheckboxContainer'>
         <core-label id='logCheckboxLabel' horizontal layout>
           <paper-checkbox for id='logCheckbox'></paper-checkbox>
-          Include logs
+          Include logs and diagnostic network data
         </core-label>
-        <core-tooltip id='logsTooltip' label='View your logs' position='right'>
+        <core-tooltip id='logsTooltip' label='Preview' position='right'>
           <uproxy-link on-tap='{{ viewLogs }}'>
             <core-icon icon="launch"></core-icon>
           </uproxy-link>
@@ -145,7 +145,7 @@
       </div>
 
       <p id='moreInfo'>
-        Your feedback and email address will be sent to uProxy.org. Your logs and email may include personally identifiable information.
+        Your feedback and email address will be sent to uProxy.org. Your logs, diagnostic network data and email may include personally identifiable information.
         <uproxy-faq-link anchor='doesUproxyLogData'>
           <core-icon icon="help"></core-icon>
         </uproxy-faq-link>

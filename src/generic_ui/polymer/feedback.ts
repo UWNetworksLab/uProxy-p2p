@@ -3,7 +3,6 @@ Polymer({
   ui: ui,
   email: '',
   feedback: '',
-  logs: '',
   backToSettings: function() {
     ui.view = uProxy.View.SETTINGS;
   },
@@ -12,7 +11,8 @@ Polymer({
     core.sendFeedback({
       email: this.email,
       feedback: this.feedback,
-      logs: this.$.logCheckbox.checked
+      logs: this.$.logCheckbox.checked,
+      browserInfo: navigator.userAgent
     });
     // Reset the placeholders, which seem to be cleared after the
     // user types input in the input fields.
@@ -35,11 +35,12 @@ Polymer({
     ui.view = uProxy.View.ROSTER;
   },
   viewLogs: function() {
-    core.getLogs().then((logs) => {
-      var url = 'data:text/html;charset=UTF-8,'
-          + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + logs + '</pre></html>');
-      this.ui.openTab(url);
-    });
+    this.ui.openTab('view-logs.html');
+    // core.getLogs().then((logs) => {
+    //   logs = 'Browser Info: ' + navigator.userAgent + '\n' + logs;
+    //   var url = 'data:text/html;charset=UTF-8,'
+    //       + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + logs + '</pre></html>');
+    // });
   },
   ready: function() {}
 });

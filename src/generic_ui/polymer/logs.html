@@ -1,0 +1,72 @@
+<link rel="import" href="../lib/polymer/polymer.html">
+<link rel='import' href='../lib/paper-progress/paper-progress.html'>
+
+<polymer-element name='uproxy-logs'>
+  <template>
+    <style>
+      :host {
+        background-color: #FFFFFF;
+        font-family: Roboto, sans-serif;
+        font-size: 13px;
+      }
+      #container {
+        margin: 50px;
+      }
+      paper-button {
+        width: 100px;
+        background: #009688;  /* dark green */
+        color: white;
+      }
+      paper-button:disabled {
+        background: #f1f1f1;
+        color: rgb(112, 112, 112);
+      }
+      paper-progress::shadow #progressContainer {
+        background-color: #ffffff;
+        opacity: 0.5;
+      }
+      paper-progress::shadow #activeProgress {
+        background-color: #009688;
+      }
+      paper-progress {
+        margin-bottom: 1em;
+        width: 275px;
+      }
+      #loadingLogs {
+        font-family: Roboto, sans-serif;
+        text-align: center;
+      }
+      #logs {
+        font-family: monospace;
+        font-size: 14px;
+        word-wrap: break-word;
+        text-align: left;
+        padding: 10px;
+        background: lightgray;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 1em;
+      }
+    </style>
+
+    <div id='container'>
+      <h1>Logs & Network Diagnostics</h1>
+
+      <!--
+      <paper-button raised id='diagnose' on-tap='{{ getNetworkInfo }}'>
+        Diagnose Network
+      </paper-button>
+      -->
+
+      <div id='logs'>
+        <div id='loadingLogs' hidden?='{{ !loadingLogs }}'>
+          <p>Retrieving logs and diagnosing your network...</p>
+          <paper-progress indeterminate='true'></paper-progress>
+        </div>
+        <pre>{{ logs }}</pre>
+      </div> <!-- end of errorText -->
+    </div>
+  </template>
+  <script src='logs.js'></script>
+</polymer-element>

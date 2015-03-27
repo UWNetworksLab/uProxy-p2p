@@ -25,6 +25,8 @@
       "user.js",
       "social-enum.js",
       "social.js",
+      "messages.js",
+      "diagnose.js",
       "core.js"
     ]
   },

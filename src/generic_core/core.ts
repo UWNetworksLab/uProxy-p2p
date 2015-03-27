@@ -12,6 +12,7 @@
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
 /// <reference path='social.ts' />
+/// <reference path='diagnose.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
@@ -20,8 +21,9 @@
 /// <reference path='../networking-typings/communications.d.ts' />
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
-freedom['loggingprovider']().setConsoleFilter(['*:I']);
-freedom['loggingprovider']().setBufferedLogFilter(['*:D']);
+var loggingProvider = freedom['loggingprovider']();
+loggingProvider.setConsoleFilter(['*:I']);
+loggingProvider.setBufferedLogFilter(['*:D']);
 
 declare var UPROXY_VERSION;
 
@@ -454,23 +456,35 @@ class uProxyCore implements uProxy.CoreAPI {
       // This is roughly equivalent to standard xhr.send(params).
       xhr.send({'string': params});
     }
-    if (feedback.logs) {
-      this.getLogs().then((formattedLogs) => {
-        sendXhr(formattedLogs);
-      });
-    } else {
-      sendXhr('');
-    }
+
+    Diagnose.doNatProvoking().then((natType: String) => {
+      var header = 'NAT Type: ' + natType + '\n';
+      header += 'Version: ' + UPROXY_VERSION + '\n';
+      header += 'Browser Info: ' + feedback.browserInfo + '\n';
+
+      if (feedback.logs) {
+        this.getLogs().then((formattedLogs) => {
+          sendXhr(header + formattedLogs);
+        });
+      } else {
+        sendXhr(header);
+      }
+    });
   }
 
   public getLogs = () : Promise<string> => {
-    return freedom['loggingprovider']().getLogs().then((logs) => {
-      var formattedLogs = '';
-      for (var i = 0; i < logs.length; i++) {
-        formattedLogs += logs[i] + '\n';
-      }
-      return formattedLogs;
-    });
+    return Promise.all([
+        loggingProvider.getLogs(),
+        Diagnose.doNatProvoking()
+      ]).then((logsAndNat) => {
+        var header = 'NAT Type: ' + logsAndNat[1] + '\n';
+        header += 'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n';
+        var formattedLogs = header;
+        for (var i = 0; i < logsAndNat[0].length; i++) {
+          formattedLogs += logsAndNat[0][i] + '\n';
+        }
+        return formattedLogs;
+      });
   }
 }  // class uProxyCore
 
@@ -478,7 +492,6 @@ class uProxyCore implements uProxy.CoreAPI {
 // Prepare all the social providers from the manifest.
 Social.initializeNetworks();
 var core = new uProxyCore();
-
 
 function _validateKeyHash(keyHash:string) {
   log.warn('keyHash validation not yet implemented');
