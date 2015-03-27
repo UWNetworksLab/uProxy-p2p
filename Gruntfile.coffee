@@ -109,6 +109,7 @@ module.exports = (grunt) ->
     pkgfreedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
     pkgfreedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
     pkgfreedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
+    pkgfreedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
     # Decrease log output for noisy things like symlink.
     verbosity:
@@ -272,6 +273,12 @@ module.exports = (grunt) ->
           ]
           dest: chromeAppDevPath + 'lib/freedom-social-xmpp'
         }, {
+          expand: true, cwd: 'node_modules/freedom-social-firebase', flatten: true
+          src: [
+            'dist/**'
+          ]
+          dest: chromeAppDevPath + 'lib/freedom-social-firebase'
+        }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage', flatten: true
           src: [
             'shared/**'
@@ -371,6 +378,10 @@ module.exports = (grunt) ->
           src: ['**']
           dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
         }, {
+          expand: true, cwd: 'node_modules/freedom-social-firebase/dist/'
+          src: ['**']
+          dest: firefoxDevPath + 'data/lib/freedom-social-firebase'
+        }, {
           expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
           src: ['**']
           dest: firefoxDevPath + 'data/lib/storage'
@@ -410,6 +421,7 @@ module.exports = (grunt) ->
               'freedom-for-chrome': '<%= pkgfreedomchrome.version %>'
               'freedom-for-firefox': '<%= pkgfreedomfirefox.version %>'
               'freedom-social-xmpp': '<%= pkgfreedomxmpp.version %>'
+              'freedom-social-firebase': '<%= pkgfreedomfirebase.version %>'
           }]
 
     #-------------------------------------------------------------------------
