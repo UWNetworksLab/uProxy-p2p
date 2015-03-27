@@ -83,7 +83,6 @@ describe('Social.FreedomNetwork', () => {
       var fulfillFunc;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
-      spyOn(ui, 'showNotification');
 
       var fulfillStorage;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });

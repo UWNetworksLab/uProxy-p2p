@@ -512,8 +512,6 @@ module Social {
           });
       return this.onceLoggedIn_
           .then(() => {
-            ui.showNotification('You successfully signed on to ' + this.name +
-                                ' as ' + this.myInstance.userId);
             this.onceLoggedOut_ = new Promise((F, R) => {
               this.fulfillLogout_ = F;
             }).then(() => {
@@ -521,7 +519,6 @@ module Social {
               for (var userId in this.roster) {
                 this.roster[userId].handleLogout();
               }
-              ui.showNotification('You have been logged out of ' + this.name);
               Social.removeNetwork(this.name, this.myInstance.userId);
               log.debug('Fulfilling onceLoggedOut_');
             }).catch((e) => {
@@ -531,8 +528,6 @@ module Social {
           })
           .catch((e) => {
             log.error('Could not login to network');
-            ui.sendError('There was a problem signing in to ' + this.name +
-                         '. Please try again. ');
             throw Error('Could not login');
           });
     }
