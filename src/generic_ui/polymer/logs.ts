@@ -12,6 +12,8 @@ Polymer({
     core.getLogs().then((logs) => {
       this.loadingLogs = false;
       this.logs = logs;
+      // Add browser info to logs.
+      this.logs = 'Browser Info: ' + navigator.userAgent + '\n\n' + this.logs;
     });
   }
 });

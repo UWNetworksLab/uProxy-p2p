@@ -119,6 +119,7 @@ class uProxyCore implements uProxy.CoreAPI {
          hasSeenWelcome: false,
          mode: uProxy.Mode.GET};
   public loadGlobalSettings :Promise<void> = null;
+  private natType_ = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -457,34 +458,86 @@ class uProxyCore implements uProxy.CoreAPI {
       xhr.send({'string': params});
     }
 
-    Diagnose.doNatProvoking().then((natType: String) => {
-      var header = 'NAT Type: ' + natType + '\n';
-      header += 'Version: ' + UPROXY_VERSION + '\n';
-      header += 'Browser Info: ' + feedback.browserInfo + '\n';
+    var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
 
-      if (feedback.logs) {
-        this.getLogs().then((formattedLogs) => {
-          sendXhr(header + formattedLogs);
-        });
-      } else {
-        sendXhr(header);
-      }
+    if (feedback.logs) {
+      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+        sendXhr(browserInfo + logsWithNetworkInfo);
+      });
+    } else {
+      sendXhr('');
+    }
+
+    /*
+    TODO: Allow users to submit just network info or just logs.
+    The new logic should be like below.
+
+    if (feedback.logs && feedback.networkInfo) {
+      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+        sendXhr(browserInfo + logsWithNetworkInfo);
+      });
+    } else if (feedback.logs) {
+      this.getLogs().then((logs) => {
+        sendXhr(browserInfo + logs);
+      });
+    } else if (feedback.networkInfo) {
+      this.getNetworkInfo().then((networkInfo) => {
+        sendXhr(networkInfo);
+      });
+    } else (feedback.logs) {
+      sendXhr('');
+    }
+    */
+  }
+
+  public getNatType = () : Promise<string> => {
+    if (this.natType_ === '') {
+      return Diagnose.doNatProvoking().then((natType) => {
+        this.natType_ = natType;
+        // Store NAT type for five minutes. This way, if the
+        // user previews their logs, and then submits them
+        // shortly after, we do not need to determine the NAT
+        // type once for the preview, and once for submission
+        // to our backend.
+        setTimeout(() => {this.natType_ = '';}, 300000);
+        return this.natType_;
+      });
+    } else {
+      return Promise.resolve(this.natType_);
+    }
+  }
+
+  public getNetworkInfo = () : Promise<string> => {
+    return this.getNatType().then((natType) => {
+      return 'NAT Type: ' + natType + '\n';
     });
   }
 
   public getLogs = () : Promise<string> => {
-    return Promise.all([
-        loggingProvider.getLogs(),
-        Diagnose.doNatProvoking()
-      ]).then((logsAndNat) => {
-        var header = 'NAT Type: ' + logsAndNat[1] + '\n';
-        header += 'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n';
-        var formattedLogs = header;
-        for (var i = 0; i < logsAndNat[0].length; i++) {
-          formattedLogs += logsAndNat[0][i] + '\n';
-        }
-        return formattedLogs;
+    return loggingProvider.getLogs().then((rawLogs) => {
+        var formattedLogsWithVersionInfo =
+            'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n\n';
+        formattedLogsWithVersionInfo += this.formatLogs_(rawLogs);
+        return formattedLogsWithVersionInfo;
       });
+  }
+
+  public getLogsAndNetworkInfo = () : Promise<string> => {
+    return Promise.all([this.getNetworkInfo(),
+                        this.getLogs()])
+      .then((natAndLogs) => {
+        // natAndLogs is an array of returned values corresponding to the
+        // array of Promises in Promise.all.
+        return natAndLogs[0] + '\n' + natAndLogs[1];
+      });
+  }
+
+  private formatLogs_ = (rawLogs) : string => {
+    var formattedLogs = '';
+    for (var i = 0; i < rawLogs.length; i++) {
+      formattedLogs += rawLogs[i] + '\n';
+    }
+    return formattedLogs;
   }
 }  // class uProxyCore
 
@@ -543,7 +596,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
-core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogs);
+core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
