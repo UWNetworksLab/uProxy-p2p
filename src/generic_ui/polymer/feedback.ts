@@ -7,7 +7,8 @@ Polymer({
     ui.view = uProxy.View.SETTINGS;
   },
   sendFeedback: function() {
-    // TODO: Get and send real logs.
+    // TODO: update sendFeedback to a promise, and deal
+    // with the error case appropriately.
     core.sendFeedback({
       email: this.email,
       feedback: this.feedback,
