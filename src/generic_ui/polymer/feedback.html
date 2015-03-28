@@ -142,9 +142,9 @@
         <div id='logCheckboxContainer'>
           <core-label id='logCheckboxLabel' horizontal layout>
             <paper-checkbox id='logCheckbox' on-change='{{ logsToggled }}'></paper-checkbox>
-            Include logs and diagnostic network data
+            Include logs and network diagnostics
           </core-label>
-          <core-tooltip id='logsTooltip' label='Preview' position='top'>
+          <core-tooltip id='logsTooltip' label='View logs and network diagnostics' position='top'>
             <uproxy-link on-tap='{{ confirmViewLogs }}'>
               <core-icon icon="launch"></core-icon>
             </uproxy-link>
