@@ -61,8 +61,6 @@ module uProxy {
     STOP_GETTING_FROM_FRIEND,
     START_GIVING_TO_FRIEND,
     STOP_GIVING_TO_FRIEND,
-    ERROR,
-    NOTIFICATION,
     // Payload should be a uProxy.Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
