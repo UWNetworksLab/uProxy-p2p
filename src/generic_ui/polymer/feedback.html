@@ -72,6 +72,11 @@
     core-icon[icon="launch"]:hover{
       opacity: 1;
     }
+    core-tooltip::shadow #tooltip {
+      /* Without this, the first time you view the
+         tooltip, it appears off center. */
+      left: -67.5px !important;
+    }
     paper-button {
       background-color: #009688; /* teal */
       color: white;
@@ -144,7 +149,7 @@
             <paper-checkbox id='logCheckbox' on-change='{{ logsToggled }}'></paper-checkbox>
             Include logs and network diagnostics
           </core-label>
-          <core-tooltip id='logsTooltip' label='View logs and network diagnostics' position='top'>
+          <core-tooltip unresolved id='logsTooltip' label='View logs & network diagnostics' position='top'>
             <uproxy-link on-tap='{{ confirmViewLogs }}'>
               <core-icon icon="launch"></core-icon>
             </uproxy-link>
@@ -152,7 +157,7 @@
         </div>
 
         <p id='moreInfo'>
-          Your feedback and email address will be sent to uProxy.org. Your logs, diagnostic network data and email may include personally identifiable information.
+          Your feedback and email address will be sent to uProxy.org. Your logs, network diagnostics and email may include personally identifiable information.
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link>
