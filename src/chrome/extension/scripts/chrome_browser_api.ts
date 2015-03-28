@@ -201,10 +201,16 @@ class ChromeBrowserApi implements BrowserAPI {
     this.popupState_ = PopupState.LAUNCHED;
   }
 
-  public showNotification = (notificationText :string) => {
+  public showNotification = (text :string, tag :string) => {
     var notification =
-        new Notification('uProxy', { body: notificationText,
-                         icon: 'icons/38_' + UI.DEFAULT_ICON});
+        new Notification('uProxy', {
+          body: text,
+          icon: 'icons/38_' + UI.DEFAULT_ICON,
+          tag: tag
+        });
+    notification.onclick = function() {
+      ui.handleNotificationClick(this.tag);
+    };
     setTimeout(function() {
       notification.close();
     }, 5000);

@@ -118,54 +118,6 @@ describe('Core.RemoteInstance', () => {
         done();
       });
     });
-
-    it('shows notificaion if isOffering changes when not ignoring', (done) => {
-      spyOn(ui, 'showNotification');
-      instance.update({
-        instanceId: INSTANCE_ID, description: '', keyHash: '',
-        consent: {isOffering: true, isRequesting: false}
-      }).then(() => {
-        expect(ui.showNotification).toHaveBeenCalledWith(
-            instance.user.name + ' offered you access.')
-        done();
-      });
-    });
-
-    it('does not show notification if isOffering changes when ignoring', (done) => {
-      instance.user.consent.ignoringRemoteUserOffer = true;
-      spyOn(ui, 'showNotification');
-      instance.update({
-        instanceId: INSTANCE_ID, description: '', keyHash: '',
-        consent: {isOffering: true, isRequesting: false}
-      }).then(() => {
-        expect(ui.showNotification).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
-    it('shows notificaion if isRequesting changes when not ignoring', (done) => {
-      spyOn(ui, 'showNotification');
-      instance.update({
-        instanceId: INSTANCE_ID, description: '', keyHash: '',
-        consent: {isOffering: false, isRequesting: true}
-      }).then(() => {
-        expect(ui.showNotification).toHaveBeenCalledWith(
-            instance.user.name + ' is requesting access.')
-        done();
-      });
-    });
-
-    it('does not show notification if isRequesting changes when ignoring', (done) => {
-      instance.user.consent.ignoringRemoteUserRequest = true;
-      spyOn(ui, 'showNotification');
-      instance.update({
-        instanceId: INSTANCE_ID, description: '', keyHash: '',
-        consent: {isOffering: false, isRequesting: true}
-      }).then(() => {
-        expect(ui.showNotification).not.toHaveBeenCalled();
-        done();
-      });
-    });
   });
 
   describe('proxying', () => {

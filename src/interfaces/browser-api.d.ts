@@ -11,7 +11,13 @@ interface BrowserAPI {
   openTab(url :string) : void;
   bringUproxyToFront() : void;
   browserSpecificElement : string;
-  showNotification(notificationTest :string) :void;
+
+  /*
+   * tag is used to uniquely identify notifications.  If it is a json-encoded
+   * object with information on the notification, it should be used to
+   * determine how to handle clicks to the notification
+   */
+  showNotification(text :string, tag :string) :void;
 }
 
 declare var Notification : {
