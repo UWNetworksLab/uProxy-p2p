@@ -108,7 +108,8 @@ export interface QueueHandler<Feed,Result> {
 //
 // Assumes fulfill/reject are called exclusively and only once.
 class PendingPromiseHandler<T,T2> {
-  public promise   :Promise<T2>
+  public promise   :Promise<T2>;
+  public next :PendingPromiseHandler<T,T2>;
   private fulfill_ :(x:T2) => void;
   private reject_  :(e:Error) => void;
   private completed_ :boolean;
@@ -160,7 +161,9 @@ class PendingPromiseHandler<T,T2> {
 export class Queue<Feed,Result>
     implements QueueFeeder<Feed,Result>, QueueHandler<Feed,Result> {
   // The queue of things to handle.
-  private queue_ :PendingPromiseHandler<Feed, Result>[] = [];
+  private back_ :PendingPromiseHandler<Feed, Result>;
+  private front_ :PendingPromiseHandler<Feed, Result>;
+  private length_ :number = 0;
 
   // Handler function for things on the queue. When null, things queue up.
   // When non-null, gets called on the thing to handle. When set, called on
@@ -180,7 +183,7 @@ export class Queue<Feed,Result>
   constructor() {}
 
   public getLength = () : number => {
-    return this.queue_.length;
+    return this.length_;
   }
 
   public isHandling = () : boolean => {
@@ -201,27 +204,44 @@ export class Queue<Feed,Result>
     }
 
     var pendingThing = new PendingPromiseHandler(x);
-    this.queue_.push(pendingThing);
+    if (this.length_ > 0) {
+      this.back_.next = pendingThing;
+    } else {
+      this.front_ = pendingThing;
+    }
+    this.back_ = pendingThing;
+    this.length_++;
     this.stats_.queued_events++;
     return pendingThing.promise;
+  }
+
+  // Remove and return the next element.
+  private dequeue_ = () : PendingPromiseHandler<Feed, Result> => {
+    var dequeued = this.front_;
+    this.front_ = dequeued.next;
+    dequeued.next = null;  // Just to help the garbage collector.
+    this.length_--;
+    if (this.length_ == 0) {
+      this.back_ = null;
+    }
+    return dequeued;
   }
 
   // Run the handler function on the queue until queue is empty or handler is
   // null. Note: a handler may itself setHandler to being null, doing so
   // should pause proccessing of the queue.
   private processQueue_ = () : void => {
-    while (this.handler_ && this.queue_.length > 0) {
+    while (this.handler_ && this.length_ > 0) {
       this.stats_.queued_handled_events++;
-      this.queue_.shift().handleWith(this.handler_);
+      this.dequeue_().handleWith(this.handler_);
     }
   }
 
   // Clears the queue, and rejects all promises to handle things on the queue.
   public clear = () : void => {
-    while (this.queue_.length > 0) {
-      var pendingThing = this.queue_.shift();
+    while (this.length_ > 0) {
       this.stats_.rejected_events++;
-      pendingThing.reject(new Error('Cleared by Handler'));
+      this.dequeue_().reject(new Error('Cleared by Handler'));
     }
   }
 
