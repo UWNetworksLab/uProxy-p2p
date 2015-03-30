@@ -25,7 +25,7 @@ Polymer({
     this.fire('core-signal', { name: 'copypaste-init' });
   },
   openFeedbackForm: function() {
-    ui.view = uProxy.View.FEEDBACK;
+    this.fire('core-signal', {name: "open-feedback"});
   },
   ready: function() {}
 });

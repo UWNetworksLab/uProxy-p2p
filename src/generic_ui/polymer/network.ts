@@ -13,6 +13,7 @@ Polymer({
       this.fire('update-view', {view: uProxy.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e) => {
+      ui.showNotification('There was a problem signing in to ' + this.networkName + '.  Please try again.');
       console.warn('Did not log in ', e);
     });
   },

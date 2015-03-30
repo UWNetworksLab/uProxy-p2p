@@ -14,44 +14,19 @@
       position: absolute;
       display: inline-block;
       box-sizing: border-box;
-      height: 100%; width: 100%;
       -webkit-transition: all 0.23s !important;
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
-      left: -100%;
-      z-index: 2000;  /* appear on top of toolbar */
-      position: absolute;
-      width: 300px;
+      min-width: 300px;
       height: 100%;
       background-color: #ffffff;
-      z-index: 2001;
       font-size: 14px;
-      visibility: hidden;
-    }
-    :host(.active) {
-      left: 0;
-      overflow: hidden;
-      visibility: visible;
     }
     .userInfo {
       background-color: #009688;  /* dark green */
-      width: 100%;
       color: white;
-      margin-bottom: 32px;
-      padding: 32px;
+      padding: 28px;
       line-height: 24px;
-    }
-    .actionLink {
-      cursor: pointer;
-      padding-left: 32px;
-      line-height: 32px;
-      color: rgb(112, 112, 112);
-      display: block;
-    }
-    #descriptionWrapper {
-      padding-left: 32px;
-      padding-right: 32px;
-      color: rgb(112, 112, 112);
     }
     .userInfoName, .userInfoIDWithoutName {
       font-size: 16px;
@@ -70,31 +45,61 @@
       border-radius: 50%;
       margin-left: -6px;
     }
-    paper-button {
-      background: #009688;  /* dark green */
-      color: white;
-      width: 70px;
+    #settingsLinks {
+      padding: 24px 28px;
+      color: rgb(112, 112, 112);
+      background-color: #fff;
+    }
+    uproxy-link,
+    uproxy-faq-link {
+      display: block;
+      padding: 10px 0px;
+    }
+    #descriptionWrapper {
+      font-size: 12px;
+      padding: 0;
+      color: rgb(180, 180, 180);
+    }
+    paper-input-decorator {
+      padding: 0;
+      margin-bottom: 5px;
     }
     paper-input-decorator /deep/ .unfocused-underline,
     paper-input-decorator /deep/ .focused-underline,
     paper-input-decorator /deep/ .cursor {
         background-color: #009688;
     }
-    core-icon {
-      height: 12px;
+    paper-button {
+      background: #009688;  /* dark green */
+      color: white;
+      width: 70px;
+      margin-left: 0px;
+      margin-right: 5px;
+      font-size: 10px;
     }
-    #advancedSettings {
-      padding-left: 32px;
-      padding-right: 32px;
+    core-icon[icon=announcement],
+    core-icon[icon=help],
+    core-icon[icon=settings],
+    core-icon[icon=refresh],
+    core-icon[icon=settings-power] {
+      height: 20px;
+      width: 20px;
+      margin-right: 5px;
     }
     .advancedSettingsText {
       font-size: 12px;
+      padding-top: 0px;
       color: rgb(112, 112, 112);
     }
-
+    hr {
+      border: 0;
+      margin: 20px -28px;
+      border-bottom: solid 1px;
+      border-color: rgb(238, 238, 238);
+    }
     </style>
 
-    <div hidden?='{{model.onlineNetwork==null}}'>
+    <div hidden?='{{model.onlineNetwork==null}}' vertical layout>
       <div class='userInfo'>
         <img class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
             src='{{model.onlineNetwork.imageData}}'>
@@ -109,36 +114,51 @@
           <div class='userInfoIDWithoutName'>{{model.onlineNetwork.userId}}</div>
         </div>
       </div>
-      <div id='descriptionWrapper'>
-        Device description
-        <uproxy-description></uproxy-description>
-      </div>
-      <uproxy-link class='actionLink' on-tap='{{ openFeedbackForm }}' role='button'>
-        Submit Feedback
-      </uproxy-link>
-      <uproxy-link class='actionLink' on-tap='{{ toggleAdvancedSettings }}' role='button'>
-        Advanced Settings
-        <core-icon icon="expand-more" hidden?='{{displayAdvancedSettings}}'></core-icon>
-        <core-icon icon="expand-less" hidden?='{{!displayAdvancedSettings}}'></core-icon>
-      </uproxy-link>
-      <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
-        <paper-input-decorator label="Custom STUN server">
-          <input is="core-input" value='{{stunServer}}'>
-        </paper-input-decorator>
-        <paper-button raised on-tap="{{setStunServer}}">Update</paper-button>
-        <paper-button raised on-tap="{{resetStunServers}}">Reset</paper-button>
-        <br><br>
-        <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
-        <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
-      </div>
 
-      <uproxy-faq-link class='actionLink'>Get Help</uproxy-faq-link>
-      <uproxy-link class='actionLink' on-tap='{{ logOut }}' role='button'>
-        Log-out of uProxy
-      </uproxy-link>
-      <uproxy-link class='actionLink' on-tap='{{ restart }}' hidden?='{{ browser !== "chrome" }}' role='button'>
-        Restart
-      </uproxy-link>
+      <div id='settingsLinks'>
+        <div id='descriptionWrapper'>
+          Device description
+          <uproxy-description></uproxy-description>
+        </div>
+
+        <hr>
+
+        <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
+          <core-icon icon="announcement"></core-icon>
+          Submit Feedback
+        </uproxy-link>
+
+        <uproxy-faq-link>
+          <core-icon icon="help"></core-icon>
+          Get Help
+        </uproxy-faq-link>
+
+        <uproxy-link on-tap='{{ toggleAdvancedSettings }}' role='button'>
+          <core-icon icon="settings"></core-icon>
+          Advanced Settings
+        </uproxy-link>
+        <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
+          <paper-input-decorator label="Custom STUN server">
+            <input is="core-input" value='{{stunServer}}'>
+          </paper-input-decorator>
+          <paper-button raised on-tap="{{setStunServer}}">Update</paper-button>
+          <paper-button raised on-tap="{{resetStunServers}}">Reset</paper-button>
+          <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
+          <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
+        </div>
+
+        <hr>
+
+        <uproxy-link on-tap='{{ restart }}' hidden?='{{ browser !== "chrome" }}' role='button'>
+          <core-icon icon="refresh"></core-icon>
+          Restart
+        </uproxy-link>
+
+        <uproxy-link on-tap='{{ logOut }}' role='button'>
+          <core-icon icon="settings-power"></core-icon>
+          Log-out of uProxy
+        </uproxy-link>
+      </div>
     </div>
 
   </template>

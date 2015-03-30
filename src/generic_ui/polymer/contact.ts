@@ -1,10 +1,7 @@
 Polymer({
   contact: {
     // Must adhere to the typescript interface UI.User.
-    name: 'unknown',
-    pic: undefined,
-    shareExpanded: false,
-    getExpanded: false
+    name: 'unknown'
   },
   toggle: function() {
     if (this.model.globalSettings.mode == uProxy.Mode.SHARE) {
@@ -19,9 +16,6 @@ Polymer({
     this.model = model;
     this.GettingConsentState = UI.GettingConsentState;
     this.SharingConsentState = UI.SharingConsentState;
-    if (!this.contact.pic) {
-      this.contact.pic = '../icons/contact-default.png';
-    }
   },
 
   // |action| is the string end for a uProxy.ConsentUserAction

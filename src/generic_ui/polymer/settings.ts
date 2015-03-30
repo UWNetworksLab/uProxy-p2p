@@ -48,7 +48,7 @@ Polymer({
     this.$.confirmResetServers.hidden = false;
   },
   openFeedbackForm: function() {
-    ui.view = uProxy.View.FEEDBACK;
+    this.fire('core-signal', {name: "open-feedback"});
   },
   ready: function() {
     this.ui = ui;

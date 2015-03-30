@@ -25,7 +25,8 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
-      ui.browserApi.showNotification('Unable to get access from ' + this.user.name);
+      ui.showNotification('Unable to get access from ' + this.user.name,
+                          { mode: 'get', user: this.user.userId });
       console.error('Unable to start proxying ', e);
     });
   },

@@ -4,12 +4,11 @@ Polymer({
   email: '',
   feedback: '',
   logs: '',
-  backToSettings: function() {
-    if (this.model.onlineNetwork) {
-      ui.view = uProxy.View.SETTINGS;
-    } else {
-      ui.view = uProxy.View.SPLASH;
-    }
+  close: function() {
+    this.$.feedbackPanel.close();
+  },
+  open: function() {
+    this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
     // TODO: Get and send real logs.
@@ -33,14 +32,11 @@ Polymer({
       heading: 'Thank you!',
       message: 'Your feedback has been submitted to the uProxy development team.',
       buttons: [{
-        text: 'Done'
+        text: 'Done',
+        signal: 'close-settings'
       }]
     });
-    if (this.model.onlineNetwork) {
-      ui.view = uProxy.View.ROSTER;
-    } else {
-      ui.view = uProxy.View.SPLASH;
-    }
+    this.close();
   },
   viewLogs: function() {
     core.getLogs().then((logs) => {

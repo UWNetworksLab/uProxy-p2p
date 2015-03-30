@@ -5,6 +5,8 @@
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../lib/core-overlay/core-overlay.html'>
+<link rel='import' href='../lib/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
@@ -13,6 +15,11 @@
     :host {
       text-align: center;
       font-color: #009688;  /* dark green */
+    }
+    #feedbackPanel {
+      height: 100%;
+      width: 100%;
+      background-color: white;
     }
     #formContainer {
       margin: 30px;
@@ -110,50 +117,54 @@
     }
     </style>
 
-    <uproxy-app-bar on-go-back='{{ backToSettings }}'>
-      Submit feedback
-    </uproxy-app-bar>
+    <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
+    <core-signals on-core-signal-open-feedback="{{ open }}"></core-signals>
 
-    <div id='formContainer'>
-      <p class='inputLabel'>Email (optional)</p>
-      <paper-input-decorator id='emailDecorator' label="Email address">
-        <input id="emailInput"
-               is="core-input"
-               value='{{ email }}'>
-      </paper-input-decorator>
+    <core-overlay id='feedbackPanel'>
+      <uproxy-app-bar on-go-back='{{ close }}'>
+        Submit feedback
+      </uproxy-app-bar>
 
-      <p class='inputLabel'>Enter your feedback below</p>
-
-        <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
-          <paper-autogrow-textarea id="feedbackPaperTextarea">
-            <textarea id="feedbackInput"
-                   value='{{ feedback }}'>
-            </textarea>
-          </paper-autogrow-textarea>
+      <div id='formContainer'>
+        <p class='inputLabel'>Email (optional)</p>
+        <paper-input-decorator id='emailDecorator' label="Email address">
+          <input id="emailInput"
+                 is="core-input"
+                 value='{{ email }}'>
         </paper-input-decorator>
 
-      <div id='logCheckboxContainer'>
-        <core-label id='logCheckboxLabel' horizontal layout>
-          <paper-checkbox for id='logCheckbox'></paper-checkbox>
-          Include logs
-        </core-label>
-        <core-tooltip id='logsTooltip' label='View your logs' position='right'>
-          <uproxy-link on-tap='{{ viewLogs }}'>
-            <core-icon icon="launch"></core-icon>
-          </uproxy-link>
-        </core-tooltip>
+        <p class='inputLabel'>Enter your feedback below</p>
+
+          <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
+            <paper-autogrow-textarea id="feedbackPaperTextarea">
+              <textarea id="feedbackInput"
+                     value='{{ feedback }}'>
+              </textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
+
+        <div id='logCheckboxContainer'>
+          <core-label id='logCheckboxLabel' horizontal layout>
+            <paper-checkbox for id='logCheckbox'></paper-checkbox>
+            Include logs
+          </core-label>
+          <core-tooltip id='logsTooltip' label='View your logs' position='right'>
+            <uproxy-link on-tap='{{ viewLogs }}'>
+              <core-icon icon="launch"></core-icon>
+            </uproxy-link>
+          </core-tooltip>
+        </div>
+
+        <p id='moreInfo'>
+          Your feedback and email address will be sent to uProxy.org. Your logs and email may include personally identifiable information.
+          <uproxy-faq-link anchor='doesUproxyLogData'>
+            <core-icon icon="help"></core-icon>
+          </uproxy-faq-link>
+        </p>
+
+        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
       </div>
-
-      <p id='moreInfo'>
-        Your feedback and email address will be sent to uProxy.org. Your logs and email may include personally identifiable information.
-        <uproxy-faq-link anchor='doesUproxyLogData'>
-          <core-icon icon="help"></core-icon>
-        </uproxy-faq-link>
-      </p>
-
-      <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
-    </div>
-
+    </core-overlay>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>
