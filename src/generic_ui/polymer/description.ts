@@ -4,21 +4,21 @@
 declare var core :CoreConnector;
 
 Polymer({
-  model: model,
-  editing: false,
-  lastSavedDescription: model.globalSettings.description,
   editDescription: function() {
-    this.lastSavedDescription = this.model.globalSettings.description;
+    this.descriptionInput = this.model.globalSettings.description;
     this.editing = true;
   },
   saveDescription: function() {
+    this.model.globalSettings.description = this.descriptionInput;
     this.editing = false;
+    core.updateGlobalSettings(model.globalSettings);
   },
   cancelEditing: function() {
-    this.model.globalSettings.description = this.lastSavedDescription;
     this.editing = false;
   },
-  update: function() {
-    core.updateGlobalSettings(model.globalSettings);
+  ready: function() {
+    this.model = model;
+    this.editing = false;
+    this.descriptionInput = '';
   }
 });

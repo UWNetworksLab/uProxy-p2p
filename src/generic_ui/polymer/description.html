@@ -44,13 +44,13 @@
 
     <div id='editingDescription' hidden?='{{ !editing }}'>
       <paper-input-decorator label="Description">
-        <input is="core-input" value='{{model.globalSettings.description}}' on-blur='{{update}}'>
+        <input is="core-input" value='{{ descriptionInput }}'>
       </paper-input-decorator>
       <paper-button raised on-tap="{{ saveDescription }}">Save</paper-button>
       <paper-button raised on-tap="{{ cancelEditing }}">Cancel</paper-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}'>
-      {{model.globalSettings.description}}
+      {{ model.globalSettings.description }}
       <core-icon icon='create' on-tap='{{ editDescription }}'></core-icon>
     </div>
   </template>
