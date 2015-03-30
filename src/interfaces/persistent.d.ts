@@ -59,6 +59,10 @@ declare module Core {
     stunServers :freedom_RTCPeerConnection.RTCIceServer[];
     hasSeenSharingEnabledScreen :boolean;
     hasSeenWelcome :boolean;
+<<<<<<< HEAD
     allowNonUnicast: boolean;
+=======
+    mode : uProxy.Mode;
+>>>>>>> 053a1fefeaeda5355f2d4fa0a39b2cf4ef2a0fe9
   }
 }  // module Core

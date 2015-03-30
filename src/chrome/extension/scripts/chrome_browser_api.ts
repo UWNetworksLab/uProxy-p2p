@@ -16,6 +16,8 @@ enum PopupState {
 
 class ChromeBrowserApi implements BrowserAPI {
 
+  public browserSpecificElement = "uproxy-app-missing";
+
   // For browser action.
 
   public ICON_DIR :string = 'icons/';
@@ -40,7 +42,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private popupUrl_ = "app-missing.html";
+  private POPUP_URL = "index.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -100,18 +102,8 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  public stopUsingProxy = (askUser :boolean) => {
-    if (askUser && this.running_ == true) {
-      // Create a tab which prompts the user to decide if they want
-      // to reset their proxy config.
-      this.launchTabIfNotOpen("disconnected.html");
-    } else if (!askUser && this.running_ == true) {
-      this.revertProxySettings_();
-    }
-  };
-
-  private revertProxySettings_ = () => {
-    if (this.running_ == true) {
+  public stopUsingProxy = () => {
+    if (this.running_) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;
       chrome.proxy.settings.set({
@@ -121,18 +113,16 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  // For FAQ.
+  // Other.
 
-  public openFaq = (pageAnchor ?:string) => {
-    var faqUrl = "../faq.html";
-    if (pageAnchor) {
-      chrome.tabs.create({url: faqUrl + '#' + pageAnchor});
+  public openTab = (url :string) => {
+    if (url.indexOf(':') < 0) {
+      // We've been passed a relative URL. Get the full URL with getURL.
+      chrome.tabs.create({url: chrome.extension.getURL(url)});
     } else {
-      chrome.tabs.create({url: faqUrl});
+      chrome.tabs.create({url: url});
     }
   }
-
-  // Other.
 
   /**
     * Launch a tab with the url if no existing tab is open with that url.
@@ -159,7 +149,7 @@ class ChromeBrowserApi implements BrowserAPI {
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
       // after webstore installation), then allow the popup to open at a default
       // location.
-      chrome.windows.create({url: this.popupUrl_,
+      chrome.windows.create({url: this.POPUP_URL,
                      type: "popup",
                      width: 371,
                      height: 600}, this.newPopupCreated_);
@@ -175,7 +165,7 @@ class ChromeBrowserApi implements BrowserAPI {
           // TODO (lucyhe): test this positioning in Firefox & Windows.
           var popupTop = windowThatLaunchedUproxy.top + 70;
           var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: this.popupUrl_,
+          chrome.windows.create({url: this.POPUP_URL,
                                  type: "popup",
                                  width: 371,
                                  height: 600,
@@ -199,28 +189,20 @@ class ChromeBrowserApi implements BrowserAPI {
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
-    // If the url of the newly created tab no longer matches the
-    // expected popup URL, update the tab.
-    if (popup.tabs[0].url != chrome.extension.getURL(this.popupUrl_)) {
-      chrome.tabs.update(popup.tabs[0].id, {url: this.popupUrl_});
-    }
   }
 
-  /**
-    * Set the URL of the uProxy popup.
-    */
-  public updatePopupUrl = (url) => {
-    if (this.popupUrl_ == url) {
-      return;
-    }
-
-    this.popupUrl_ = url;
-    // If an existing popup exists, update the page shown in the existing
-    // popup.
-    if (this.popupWindowId_ != chrome.windows.WINDOW_ID_NONE) {
-      chrome.windows.get(this.popupWindowId_, {populate: true}, (popupWindow) => {
-        chrome.tabs.update(popupWindow.tabs[0].id, {url: this.popupUrl_});
-      });
-    }
+  public showNotification = (text :string, tag :string) => {
+    var notification =
+        new Notification('uProxy', {
+          body: text,
+          icon: 'icons/38_' + UI.DEFAULT_ICON,
+          tag: tag
+        });
+    notification.onclick = function() {
+      ui.handleNotificationClick(this.tag);
+    };
+    setTimeout(function() {
+      notification.close();
+    }, 5000);
   }
 }

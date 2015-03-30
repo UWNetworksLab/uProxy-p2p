@@ -138,16 +138,16 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET);
   }
 
-  stopCopyPasteGet = () => {
-    this.sendCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET);
+  stopCopyPasteGet = () :Promise<void> => {
+    return this.promiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET);
   }
 
   startCopyPasteShare = ()  => {
     this.sendCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE);
   }
 
-  stopCopyPasteShare = () => {
-    this.sendCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE);
+  stopCopyPasteShare = () :Promise<void> => {
+    return this.promiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE);
   }
 
   sendCopyPasteSignal = (signal :uProxy.Message) => {
@@ -184,7 +184,15 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 
+  sendFeedback = (feedback :uProxy.UserFeedback) : void => {
+    return this.sendCommand(uProxy.Command.SEND_FEEDBACK, feedback);
+  }
+
   restart = () => {
     this.browserConnector_.restart();
+  }
+
+  getLogs = () : Promise<string> => {
+    return this.promiseCommand(uProxy.Command.GET_LOGS);
   }
 }  // class CoreConnector

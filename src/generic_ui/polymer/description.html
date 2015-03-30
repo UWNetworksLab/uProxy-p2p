@@ -1,11 +1,58 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='../lib/core-icons/core-icons.html'>
 
 <polymer-element name='uproxy-description' attributes=''>
   <template>
-    <paper-input-decorator label="Description">
-      <input is="core-input" value='{{model.globalSettings.description}}' on-blur='{{update}}' />
-    </paper-input-decorator>
+    <style>
+      paper-input-decorator /deep/ .unfocused-underline,
+      paper-input-decorator /deep/ .focused-underline,
+      paper-input-decorator /deep/ .cursor {
+          background-color: #009688;
+      }
+      paper-input-decorator {
+        font-size: 14px;
+        padding: 0;
+        margin-bottom: 5px;
+        color: rgb(112, 112, 112);
+      }
+      paper-button {
+        background: #009688;  /* dark green */
+        color: white;
+        width: 70px;
+        margin-left: 0px;
+        margin-right: 5px;
+        font-size: 10px;
+      }
+      #savedDescription {
+        font-size: 14px;
+        color: rgb(112, 112, 112);
+        padding-top: 7px;
+      }
+      core-icon[icon=create] {
+        height: 16px;
+        width: 16px;
+        margin: 0px 0px 4px 3px;
+        opacity: 0.6;
+        float: right;
+      }
+      core-icon[icon=create]:hover{
+        opacity: 1;
+      }
+    </style>
+
+    <div id='editingDescription' hidden?='{{ !editing }}'>
+      <paper-input-decorator label="Description">
+        <input is="core-input" value='{{ descriptionInput }}'>
+      </paper-input-decorator>
+      <paper-button raised on-tap="{{ saveDescription }}">Save</paper-button>
+      <paper-button raised on-tap="{{ cancelEditing }}">Cancel</paper-button>
+    </div>
+    <div id='savedDescription' hidden?='{{ editing }}'>
+      {{ model.globalSettings.description || 'Name this device' }}
+      <core-icon icon='create' on-tap='{{ editDescription }}'></core-icon>
+    </div>
   </template>
   <script src='description.js'></script>
 </polymer-element>

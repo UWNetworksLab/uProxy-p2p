@@ -6,7 +6,7 @@
  */
 /// <reference path='../../../interfaces/browser-api.d.ts' />
 /// <reference path='../../../interfaces/firefox.d.ts' />
-/// <reference path='../../../interfaces/ui.d.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 
 var port :ContentScriptPort;
 
@@ -14,9 +14,15 @@ declare var ui :UI.UserInterface;
 
 class FirefoxBrowserApi implements BrowserAPI {
 
+  public browserSpecificElement;
+
   constructor() {
     port.on('handleUrlData', function(url :string) {
       ui.handleUrlData(url);
+    });
+
+    port.on('notificationClicked', function(tag :string) {
+      ui.handleNotificationClick(tag);
     });
   }
 
@@ -30,9 +36,13 @@ class FirefoxBrowserApi implements BrowserAPI {
         });
   }
 
-  // For FAQ.
+  public openTab = (url :string) => {
+    port.emit('openURL', url);
+  }
 
-  public openFaq = (pageAnchor ?:string) => {}
+  public launchTabIfNotOpen = (url :string) => {
+    port.emit('launchTabIfNotOpen', url);
+  }
 
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
@@ -41,11 +51,15 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('startUsingProxy', endpoint);
   }
 
-  public stopUsingProxy = (askUser :boolean) => {
-    port.emit('stopUsingProxy', askUser);
+  public stopUsingProxy = () => {
+    port.emit('stopUsingProxy');
   }
 
   public bringUproxyToFront = () => {
     port.emit('showPanel');
+  }
+
+  public showNotification = (text :string, tag :string) => {
+    port.emit('showNotification', { text: text, tag: tag });
   }
 }

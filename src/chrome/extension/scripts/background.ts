@@ -34,15 +34,27 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessageExternal.addListener(
-    function(request, sender, sendResponse) {
-        // Reply to pings from the uproxy website that are checking if the
-        // extension is installed.
-        if (request) {
-          sendResponse({message: "Extension installed."});
-        }
-        return true;
-    });
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // handle requests from other pages (i.e. copypaste.html) to bring the
+  // chrome popup to the front
+  if (request && request.openWindow) {
+    chromeBrowserApi.bringUproxyToFront();
+  }
+
+  // handle requests to stop proxying
+  if (request && request.stopProxying) {
+    ui.stopGettingInUiAndConfig(false);
+  }
+});
+
+chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+  // Reply to pings from the uproxy website that are checking if the
+  // extension is installed.
+  if (request) {
+    sendResponse({ message: 'Extension installed.' });
+  }
+  return true;
+});
 
 // Launch the Chrome webstore page for the uProxy app,
 // or activate the user's tab open to uproxy.org/chrome-install
@@ -74,19 +86,6 @@ function openDownloadAppPage() : void {
     // After the app is installed via the webstore, open up uProxy.
     chromeCoreConnector.onceConnected.then(chromeBrowserApi.bringUproxyToFront);
   });
-}
-
-// If the app is installed but the "App Missing" page is open, make sure to advance
-// them to the Splash page.
-function showSplashIfAppNotMissing() : void {
-  if (chromeCoreConnector.status.connected) {
-    // If the user hit "Back" to get to the app-missing page, chromeBrowserApi
-    // still thinks that we are on index.html, and will not refresh if we try to
-    // update to the same URL. So we have to update to the app-missing page before
-    // updating to index.html
-    chromeBrowserApi.updatePopupUrl("app-missing.html");
-    chromeBrowserApi.updatePopupUrl("index.html");
-  }
 }
 
 /**
@@ -125,6 +124,7 @@ function initUI() : UI.UserInterface {
 
   // used for de-duplicating urls caught by the listeners
   var lastUrl = '';
+  var lastUrlTime = 0;
 
   chrome.webRequest.onBeforeRequest.addListener(
     function() {
@@ -140,16 +140,19 @@ function initUI() : UI.UserInterface {
 
       // Chome seems to sometimes send the same url to us twice, we never
       // should be receiving the exact same data twice so de-dupe any url
-      // with the last one we received before processing it
-      if (lastUrl !== url) {
+      // with the last one we received before processing it.  We also want
+      // to allow a url to be pasted twice if there has been at least a second
+      // delay in order to allow users to try connecting again.
+      if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
         ui.handleUrlData(url);
       } else {
         console.warn('Received duplicate url events', url);
       }
       lastUrl = url;
+      lastUrlTime = Date.now();
 
       return {
-        redirectUrl: chrome.extension.getURL('index.html')
+        redirectUrl: chrome.extension.getURL('copypaste.html')
       };
     },
     { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },

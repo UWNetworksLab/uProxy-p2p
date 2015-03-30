@@ -5,6 +5,7 @@
  * TODO: firefox bindings.
  */
 /// <reference path='user.ts' />
+/// <reference path='core_connector.ts' />
 /// <reference path='../../uproxy.ts'/>
 /// <reference path='../../interfaces/ui.d.ts'/>
 /// <reference path='../../interfaces/persistent.d.ts'/>
@@ -16,29 +17,30 @@ var model :UI.Model = {
   networkNames: [],
   onlineNetwork: null,
   contacts: {
-    'getAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    getAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     },
-    'shareAccessContacts': {
-      'onlinePending': [],
-      'offlinePending': [],
-      'onlineTrustedUproxy': [],
-      'offlineTrustedUproxy': [],
-      'onlineUntrustedUproxy': [],
-      'offlineUntrustedUproxy': []
+    shareAccessContacts: {
+      onlinePending: [],
+      offlinePending: [],
+      onlineTrustedUproxy: [],
+      offlineTrustedUproxy: [],
+      onlineUntrustedUproxy: [],
+      offlineUntrustedUproxy: []
     }
   },
   globalSettings: {
-    'description': '',
-    'stunServers': [],
-    'hasSeenSharingEnabledScreen': false,
-    'hasSeenWelcome': false,
-    'allowNonUnicast': false
+    description: '',
+    stunServers: [],
+    hasSeenSharingEnabledScreen: false,
+    hasSeenWelcome: false,
+    mode : uProxy.Mode.GET
+    allowNonUnicast: false
   }
 };
 
@@ -105,25 +107,22 @@ module UI {
     userId :string;
     imageData ?:string;
     userName ?:string;
-    roster :{ [userId:string] :User }
+    roster :{ [userId:string] :User };
+    hasContacts ?:boolean;
   }
 
-  /**
-   * Enumeration of mutually-exclusive view states.
-   */
-  export enum View {
-    SPLASH = 0,
-    COPYPASTE,
-    ROSTER,
-    SETTINGS,
+  export interface NotificationData {
+    mode :string;
+    user :string;
+    unique ?:string;
   }
 
-  /**
-   * Enumeration of mutually-exclusive UI modes.
-   */
-  export enum Mode {
-    GET = 0,
-    SHARE
+  export enum CopyPasteError {
+    NONE = 0,
+    BAD_URL, // url is somehow invalid
+    LOGGED_IN, // trying to copy+paste while logged in to a network
+    UNEXPECTED, // received a url at an invalid time
+    FAILED // something about the connection failed
   }
 
   /**
@@ -137,7 +136,7 @@ module UI {
   export class UserInterface implements uProxy.UIAPI {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    public view :View;  // Appearance.
+    public view :uProxy.View;
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
@@ -151,8 +150,6 @@ module UI {
     // Remote instances to add to this set are received in messages from Core.
     public instancesGivingAccessTo = {};
 
-    public mode :Mode = Mode.GET;
-
     private mapInstanceIdToUser_ :{[instanceId :string] :UI.User} = {};
 
     public gettingStatus :string = null;
@@ -163,22 +160,29 @@ module UI {
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
-    public copyPasteUrlError :boolean = false;
+    public copyPasteError :CopyPasteError = CopyPasteError.NONE;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
+    /*
+     * This is used to store the information for setting up a copy+paste
+     * connection between establishing the connection and the user confirming
+     * the start of proxying
+     */
+    public copyPastePendingEndpoint :Net.Endpoint = null;
+
     // TODO not needed, exists to handle typescript errors
-    private core_ :uProxy.CoreAPI = null;
+    private core_ :CoreConnector = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
      */
     constructor(
-        public core   :uProxy.CoreAPI,
+        public core   :CoreConnector,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
-      this.view = View.SPLASH;  // Begin at the splash intro.
+      this.view = uProxy.View.SPLASH;  // Begin at the splash intro.
       this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
@@ -187,6 +191,12 @@ module UI {
       core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
         console.log('Received uProxy.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
+        // TODO: Do not allow reassignment of globalSettings. Instead
+        // write a 'syncGlobalSettings' function that iterates through
+        // the values in state[globalSettings] and assigns the
+        // individual values to model.globalSettings. This is required
+        // because Polymer elements bound to globalSettings' values can
+        // only react to updates to globalSettings and not reassignments.
         model.globalSettings = state['globalSettings'];
       });
 
@@ -211,14 +221,6 @@ module UI {
       core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
-      });
-      core.onUpdate(uProxy.Update.ERROR, (errorText :string) => {
-        console.warn('uProxy.Update.ERROR: ' + errorText);
-        this.showNotification(errorText);
-      });
-      core.onUpdate(uProxy.Update.NOTIFICATION, (notificationText :string) => {
-        console.warn('uProxy.Update.NOTIFICATION: ' + notificationText);
-        this.showNotification(notificationText);
       });
 
       core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
@@ -259,33 +261,27 @@ module UI {
         }
       });
 
+      // indicates the current getting connection has ended
       core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
-
-        if (UI.View.COPYPASTE === this.view) {
-          this.view = UI.View.SPLASH;
-        }
       });
 
+      // indicates we just started offering access through copy+paste
       core.onUpdate(uProxy.Update.START_GIVING, () => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
       });
 
+      // indicates we just stopped offering access through copy+paste
       core.onUpdate(uProxy.Update.STOP_GIVING, () => {
-        if (this.copyPasteSharingState === SharingState.SHARING_ACCESS) {
-          if (UI.View.COPYPASTE === this.view) {
-            this.view = UI.View.SPLASH;
-          }
-        }
-
         this.copyPasteSharingState = SharingState.NONE;
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
       });
 
+      // status of the current copy+paste connection
       core.onUpdate(uProxy.Update.STATE, (state) => {
         this.copyPasteGettingState = state.localGettingFromRemote;
         this.copyPasteSharingState = state.localSharingWithRemote;
@@ -315,7 +311,8 @@ module UI {
 
         var user = this.mapInstanceIdToUser_[instanceId];
         user.isGettingFromMe = true;
-        this.showNotification(user.name + ' started proxying through you');
+        this.showNotification(user.name + ' started proxying through you',
+            { mode: 'share', user: user.userId });
       });
 
       core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
@@ -325,7 +322,8 @@ module UI {
 
         // only show a notification if we knew we were prokying
         if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-          this.showNotification(user.name + ' stopped proxying through you');
+          this.showNotification(user.name + ' stopped proxying through you',
+              { mode: 'share', user: user.userId });
         }
         delete this.instancesGivingAccessTo[instanceId];
         if (!this.isGivingAccess()) {
@@ -333,8 +331,8 @@ module UI {
         }
 
         // Update user.isGettingFromMe
-        for (var i = 0; i < user.instances.length; ++i) {
-          if (this.instancesGivingAccessTo[user.instances[i].instanceId]) {
+        for (var i = 0; i < user.allInstanceIds.length; ++i) {
+          if (this.instancesGivingAccessTo[user.allInstanceIds[i]]) {
             isGettingFromMe = true;
             break;
           }
@@ -343,6 +341,50 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
+    }
+
+    public showNotification = (text :string, data ?:NotificationData) => {
+      data = data ? data : { mode: '', user: '' };
+      // non-uniqu but existing tags prevent the notification from displaying in some cases
+      data.unique = Math.floor(Math.random() * 1E10).toString();
+
+      try {
+        var tag = JSON.stringify(data);
+      } catch (e) {
+        console.error('Could not encode data to tag');
+        tag = data.unique;
+      }
+
+      this.browserApi.showNotification(text, tag);
+    }
+
+    public handleNotificationClick = (tag :string) => {
+      // we want to bring uProxy to the front regardless of the info
+      this.browserApi.bringUproxyToFront();
+
+      try {
+        var data = JSON.parse(tag);
+
+        if (data.user) {
+          var contact = model.onlineNetwork.roster[data.user];
+        }
+
+        if (data.mode === 'get') {
+          model.globalSettings.mode = uProxy.Mode.GET;
+          this.core_.updateGlobalSettings(model.globalSettings);
+          if (contact) {
+            contact.getExpanded = true;
+          }
+        } else if (data.mode === 'share') {
+          model.globalSettings.mode = uProxy.Mode.SHARE;
+          this.core_.updateGlobalSettings(model.globalSettings);
+          if (contact) {
+            contact.shareExpanded = true;
+          }
+        }
+      } catch (e) {
+        console.warn('error getting information from notification tag');
+      }
     }
 
     private updateGettingStatusBar_ = () => {
@@ -376,47 +418,52 @@ module UI {
     }
 
     public handleUrlData = (url :string) => {
-      var payload;
+      var payload :uProxy.Message[];
+      var expectedType :uProxy.MessageType;
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
-        // TODO propogate this to chrome tab page (blocking on #955
         console.log('Ignoring URL since we have an active network');
+        this.copyPasteError = CopyPasteError.LOGGED_IN;
         return;
       }
 
-      this.view = UI.View.COPYPASTE;
+      this.view = uProxy.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BAD_URL;
         return;
       }
 
-      this.copyPasteUrlError = false;
+      this.copyPasteError = CopyPasteError.NONE;
       try {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
-        this.copyPasteUrlError = true;
+        this.copyPasteError = CopyPasteError.BAD_URL;
+        return;
+      }
+
+      if (SharingState.NONE !== this.copyPasteSharingState) {
+        console.info('should not be processing a URL while in the middle of sharing');
+        this.copyPasteError = CopyPasteError.UNEXPECTED;
         return;
       }
 
       // at this point, we assume everything is good, so let's check state
       switch (match[1]) {
         case 'request':
-          if (SharingState.NONE !== this.copyPasteSharingState) {
-            console.warn('previous sharing connection already existed, restarting');
-            this.core_.stopCopyPasteShare();
-          }
-
+          expectedType = uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER;
           this.copyPasteSharingMessage = '';
           this.core_.startCopyPasteShare();
           break;
         case 'offer':
+          expectedType = uProxy.MessageType.SIGNAL_FROM_SERVER_PEER;
           if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
+            this.copyPasteError = CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -424,17 +471,13 @@ module UI {
 
       console.log('Sending messages from url to app');
       for (var i in payload) {
+        if (payload[i].type !== expectedType) {
+          this.copyPasteError = CopyPasteError.BAD_URL;
+          return;
+        }
+
         this.core_.sendCopyPasteSignal(payload[i]);
       }
-    }
-
-    public showNotification = (notificationText :string) => {
-      var notification =
-          new Notification('uProxy', { body: notificationText,
-                           icon: 'icons/38_' + UI.DEFAULT_ICON});
-      setTimeout(function() {
-        notification.close();
-      }, 5000);
     }
 
     /**
@@ -447,9 +490,6 @@ module UI {
       var instanceId = this.instanceGettingAccessFrom_;
       this.instanceGettingAccessFrom_ = null;
 
-      // TODO (lucyhe): if askUser is true we might want a different
-      // icon that means "configured to proxy, but not proxying"
-      // instead of immediately going back to the "not proxying" icon.
       if (this.isGivingAccess()) {
         this.browserApi.setIcon(UI.SHARING_ICON);
       } else if (askUser) {
@@ -466,7 +506,12 @@ module UI {
         this.mapInstanceIdToUser_[instanceId].isSharingWithMe = false;
       }
 
-      this.browserApi.stopUsingProxy(askUser);
+      if (askUser) {
+        this.browserApi.launchTabIfNotOpen('disconnected.html');
+        return;
+      }
+
+      this.browserApi.stopUsingProxy();
     }
 
     public startGettingInUi = () => {
@@ -557,8 +602,9 @@ module UI {
           this.categorizeUser_(user, model.contacts.shareAccessContacts,
               userCategories.shareTab, null);
         }
+        this.showNotification('You have been logged out of ' + model.onlineNetwork.name);
         this.setOfflineIcon();
-        this.view = UI.View.SPLASH;
+        this.view = uProxy.View.SPLASH;
         model.onlineNetwork = null;
       }
 
@@ -566,7 +612,8 @@ module UI {
         model.onlineNetwork = {
           name:   network.name,
           userId: network.userId,
-          roster: {}
+          roster: {},
+          hasContacts: false
         };
       }
     }
@@ -587,10 +634,6 @@ module UI {
         // this case the user should already have been removed from the roster
         // in the UI and stay removed.
         return;
-      } else if (payload.instances.length === 0) {
-        // Core should not send the UI any Users without instances.
-        console.error('Received User with no instances', payload);
-        return;
       }
 
       // Construct a UI-specific user object.
@@ -601,25 +644,20 @@ module UI {
       user = model.onlineNetwork.roster[profile.userId];
       var oldUserCategories = {getTab: null, shareTab: null};
 
-      // CONSIDER: we might want to check if this user has been our proxy
-      // server and if so stop the proxying if they are no longer proxying
-      // for us (e.g. they were disconnected).  Currently we are sending an
-      // explicit stop proxy message from the app to stop proxying.
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId, model.onlineNetwork);
+        user = new UI.User(profile.userId, model.onlineNetwork, this);
         model.onlineNetwork.roster[profile.userId] = user;
+        model.onlineNetwork.hasContacts = true;
       } else {
         // Existing user, get the category before modifying any properties.
         oldUserCategories = user.getCategories();
       }
 
-      user.update(profile);
-      user.instances = payload.instances;
-      user.updateInstanceDescriptions();
-      for (var i = 0; i < user.instances.length; ++i) {
-        var instanceId = user.instances[i].instanceId;
-        this.mapInstanceIdToUser_[instanceId] = user;
+      user.update(payload);
+
+      for (var i = 0; i < payload.allInstanceIds.length; ++i) {
+        this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
       }
 
       var newUserCategories = user.getCategories();
@@ -652,8 +690,8 @@ module UI {
       }
     }
 
-    public openFaq = (pageAnchor ?:string) => {
-      this.browserApi.openFaq(pageAnchor);
+    public openTab = (url :string) => {
+      this.browserApi.openTab(url);
     }
 
     public bringUproxyToFront = () => {

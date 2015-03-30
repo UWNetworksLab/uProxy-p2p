@@ -1,7 +1,6 @@
 declare var browser :string;
+
 Polymer({
-  model: model,
-  browser: browser,
   DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
                          {urls: ['stun:stun1.l.google.com:19302']},
                          {urls: ['stun:stun2.l.google.com:19302']},
@@ -11,8 +10,11 @@ Polymer({
   logOut: function() {
     core.logout({name: model.onlineNetwork.name,
                  userId: model.onlineNetwork.userId}).then(() => {
-      ui.view = UI.View.SPLASH;
-      ui.setOfflineIcon();
+      // Nothing to do here - the UI should receive a NETWORK update
+      // saying that the network is offline, and will update the display
+      // as result of that.
+    }).catch((e) => {
+      console.error('logout returned error: ', e);
     });
   },
   restart: function() {
@@ -43,7 +45,12 @@ Polymer({
     }
     this.$.confirmResetServers.hidden = false;
   },
+  openFeedbackForm: function() {
+    this.fire('core-signal', {name: 'open-feedback'});
+  },
   ready: function() {
     this.ui = ui;
+    this.model = model;
+    this.browser = browser;
   }
 });

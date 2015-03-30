@@ -15,6 +15,7 @@
       "uproxy-networking/rtc-to-net/rtc-to-net.js",
       "uproxy.js",
       "util.js",
+      "version.js",
       "consent.js",
       "firewall.js",
       "storage.js",
@@ -24,12 +25,18 @@
       "user.js",
       "social-enum.js",
       "social.js",
+      "messages.js",
+      "diagnose.js",
       "core.js"
     ]
   },
   "dependencies": {
     "SOCIAL-Google": {
       "url": "../lib/freedom-social-xmpp/social.google.json",
+      "api": "social"
+    },
+    "SOCIAL-Facebook": {
+      "url": "../lib/freedom-social-firebase/social.firebase-facebook.json",
       "api": "social"
     },
     "storage": {
@@ -45,6 +52,7 @@
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
     "core.tcpsocket",
-    "core.udpsocket"
+    "core.udpsocket",
+    "core.xhr"
   ]
 }

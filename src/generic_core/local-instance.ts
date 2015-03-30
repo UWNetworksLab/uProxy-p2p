@@ -10,6 +10,7 @@
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 
 module Core {
+  var log :Logging.Log = new Logging.Log('local-instance');
 
   // Small convenience wrapper for random Uint8.
   //
@@ -20,6 +21,8 @@ module Core {
     public instanceId  :string;
     public keyHash     :string;
     public clientId    :string;
+    private imageData_ :string;
+    private name_      :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -64,18 +67,16 @@ module Core {
       return id;
     }
 
-    /**
-     * This method prepares the local instance's handshake, to be sent to all
-     * peers, notifying them that we are a uProxy installation.
-     */
-    public getInstanceHandshake = () : InstanceHandshake => {
-      if (!this.keyHash) {
-        console.warn('Local keyhash not ready!');
-      }
+    public updateProfile = (profile :UI.UserProfileMessage) : void => {
+      this.name_ = profile.name;
+      this.imageData_ = profile.imageData;
+    }
+
+    public getUserProfile = () : UI.UserProfileMessage => {
       return {
-        instanceId:  this.instanceId,
-        keyHash:     this.keyHash,
-        description: core.globalSettings.description
+        userId: this.userId,
+        name: this.name_,
+        imageData: this.imageData_
       };
     }
 

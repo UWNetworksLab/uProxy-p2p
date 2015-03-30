@@ -16,12 +16,6 @@ describe('Core.LocalInstance', () => {
     expect(instance.keyHash).toBeDefined();
   });
 
-  it('provides an instance handshake', () => {
-    var id = instance['instanceId'];
-    var handshake = instance.getInstanceHandshake();
-    expect(handshake.instanceId).toEqual(id);
-  });
-
   // TODO: more specs.
 
 });

@@ -7,8 +7,9 @@
 /// <reference path='../rtc-to-net/rtc-to-net.ts' />
 /// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
 
-
 module Core {
+  var log :Logging.Log = new Logging.Log('remote-connection');
+
   export class RemoteConnection {
 
     public localGettingFromRemote = GettingState.NONE;
@@ -22,7 +23,7 @@ module Core {
 
     private isUpdatePending_ = false;
 
-    //TODO set up a better type for this
+    // TODO: set up a better type for this
     private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
 
     constructor(
@@ -40,6 +41,7 @@ module Core {
       }
     }
 
+    // TODO: should probably either return something or throw errors
     public handleSignal = (message :uProxy.Message) => {
       var target :any = null; //this will either be rtcToNet_ or socksToRtc_
       var msg;
@@ -48,13 +50,15 @@ module Core {
       } else if (uProxy.MessageType.SIGNAL_FROM_SERVER_PEER === message.type) {
         target = this.socksToRtc_;
       } else {
-        console.warn('Invalid signal! ' + uProxy.MessageType[message.type]);
+        log.warn('Invalid signal', uProxy.MessageType[message.type]);
         return;
       }
 
       if (!target) {
-        console.warn('Received unexpected ' + uProxy.MessageType[message.type],
-                     message);
+        log.warn('Received unexpected signal', {
+          type: uProxy.MessageType[message.type],
+          message: message
+        });
         return;
       }
 
@@ -100,15 +104,15 @@ module Core {
       });
     }
 
-    public stopShare = () => {
+    public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === SharingState.NONE) {
-        console.warn('Cannot stop when not proxying.');
+        log.warn('Cannot stop when not proxying');
         return;
       }
 
       this.localSharingWithRemote = SharingState.NONE;
-      this.rtcToNet_.close();
       this.stateRefresh_();
+      return this.rtcToNet_.close();
     }
 
     public startGet = () :Promise<Net.Endpoint> => {
@@ -174,15 +178,15 @@ module Core {
       });
     }
 
-    public stopGet = () : void => {
+    public stopGet = () :Promise<void> => {
       if (this.localGettingFromRemote === GettingState.NONE) {
-        console.warn('Cannot stop proxying when not proxying.');
+        log.warn('Cannot stop proxying when not proxying');
         return;
       }
 
       this.localGettingFromRemote = GettingState.NONE;
-      this.socksToRtc_.stop();
       this.stateRefresh_();
+      return this.socksToRtc_.stop();
     }
 
     /*

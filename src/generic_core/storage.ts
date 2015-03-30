@@ -11,8 +11,8 @@
 /// <reference path='../freedom/typings/storage.d.ts' />
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
-
 module Core {
+  var log :Logging.Log = new Logging.Log('storage');
 
   // Platform-independent storage provider.
   var fStorage :freedom_Storage = freedom['storage']();
@@ -30,7 +30,7 @@ module Core {
      */
     public reset = () : Promise<void> => {
       return fStorage.clear().then(() => {
-        dbg('Cleared all keys from storage.');
+        log.info('Cleared all keys from storage');
         // TODO: Determine if we actually need any 'initial' state.
       });
     }
@@ -48,17 +48,13 @@ module Core {
      * TODO: Really reject the promise!
      */
     public load = <T>(key :string) : Promise<T> => {
-      this.log('loading ' + key);
+      log.debug('loading', key);
       return fStorage.get(key).then((result :string) => {
         if (typeof result === 'undefined' || result === null) {
           return Promise.reject('non-existing key');
         }
-        this.log('Loaded [' + key + '] : ' + result);
+        log.debug('Loaded [%1]: %2', key, result);
         return <T>JSON.parse(result);
-      }, (e) => {
-        this.log(e.message);
-        return Promise.reject('storage lookup failed');
-        // return <T>{};
       });
     }
 
@@ -68,15 +64,21 @@ module Core {
      */
     // TODO: should not return a value in the promise. Should be Promise<void>
     public save = <T>(key :string, val :T) : Promise<T> => {
-      this.log('Saving ' + key + ': ' + val);
+      log.debug('Saving to storage', {
+        key: key,
+        newVal: val
+      });
       return fStorage.set(key, JSON.stringify(val)).then((prev:string) => {
-        this.log('Saved to storage[' + key + ']. old val=' + prev);
+        log.debug('Successfully saved to storage', {
+          key: key,
+          oldVal: prev
+        });
         if (!prev) {
           return undefined;
         }
         return <T>JSON.parse(prev);
       }).catch((e) => {
-        this.log(e.message);
+        log.error('Save operation failed', e.message);
         return <T>{};
       });
     }
@@ -105,26 +107,5 @@ module Core {
       });
     }
     */
-
-    private log = (msg:string) => {
-      if (DEBUG_STATESTORAGE) {
-        console.log('[Storage] ' + msg);
-      }
-    }
   }  // class Storage
-
-
-  // TODO: Make logging better.
-  var modulePrefix_ = '[Storage] ';
-  var dbg = (...args:any[]) => { dbg_(console.log, args); }
-  var dbgWarn = (...args:any[]) => { dbg_(console.warn); }
-  var dbgErr = (...args:any[]) => { dbg(console.error); }
-  var dbg_ = (logger, ...args:any[]) => {
-    if (!DEBUG_STATESTORAGE) {
-     return;
-    }
-    logger.apply(Core, [modulePrefix_].concat(args));
-  }
-
-
 }  // module Core

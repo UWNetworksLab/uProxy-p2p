@@ -9,10 +9,12 @@ Polymer({
   connect: function() {
     core.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
-      ui.view = UI.View.ROSTER;
+      // Fire an update-view event, which root.ts listens for.
+      this.fire('update-view', {view: uProxy.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e) => {
-      console.warn('Did not log in ');
+      ui.showNotification('There was a problem signing in to ' + this.networkName + '.  Please try again.');
+      console.warn('Did not log in ', e);
     });
   },
   ready: function() {},

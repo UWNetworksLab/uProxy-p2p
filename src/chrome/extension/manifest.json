@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2267",
@@ -18,17 +18,17 @@
       "scripts/core_connector.js",
       "scripts/chrome_tab_auth.js",
       "scripts/chrome_core_connector.js",
-      "scripts/background.js"
+      "scripts/background.js",
+      "scripts/version.js"
     ]
   },
   "browser_action": {
     "default_icon": {
       "19": "icons/19_offline.gif",
-      "38": "icons/38_offline.gif"
+      "38": "icons/19_offline.gif"
     },
     "default_title": "__MSG_extTitle__"
   },
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "tabs",
     "proxy",
@@ -39,10 +39,13 @@
     "https://uproxy.org/offer/*",
     "webRequestBlocking"
   ],
+  "web_accessible_resources": [
+    "copypaste.html"
+  ],
   "options_page": "index.html",
   "externally_connectable": {
     "ids" : ["fmdppkkepalnkeommjadgbhiohihdhii"],
-    "matches" : ["*://*.uproxy.org/*", "*://1-0-2-inline-install-dot-uproxysite.appspot.com/*"]
+    "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArOOsgNK52HYy9483rhgsofyHTp/NbmXkpHNLoarN027kqKVPS3U36/L2XyPJOAtvy+DDR+kCro1JmdFWBwPAk5AqvSKvfLzuXkO+98T/3ZhqfAl4KIqc0C+PsWIYsANTAbKkXlP4bATEK6O5Mq0aItAHGLSmKoNrAAVrtxmETXaumcrq78amOpAZz7XrPdJVhrHd6uQbR90WeFEe8LBOqdnA4iKeuMI9IQdDLKGSizhYFZP78HKSk0ZY2uYeJFpya0iXAvbcuHRGY9/c7pP5UDo+FExdyrgJnIt7H1W5LWfy/mAMnR77dvCSfGX1vCD7faWntYvzZO4FlISh+h21+QIDAQAB"
 }
