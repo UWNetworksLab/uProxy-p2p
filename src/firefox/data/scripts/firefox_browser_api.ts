@@ -20,6 +20,10 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.on('handleUrlData', function(url :string) {
       ui.handleUrlData(url);
     });
+
+    port.on('notificationClicked', function(tag :string) {
+      ui.handleNotificationClick(tag);
+    });
   }
 
   // For browser icon.
@@ -55,10 +59,7 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showPanel');
   }
 
-  public showNotification = (notificationText :string) => {
-    port.emit('showNotification', {
-      text: notificationText,
-      iconURL: './icons/128_online.png'
-    });
+  public showNotification = (text :string, tag :string) => {
+    port.emit('showNotification', { text: text, tag: tag });
   }
 }

@@ -222,48 +222,9 @@ module Core {
     private updateConsentFromWire_ = (bits: uProxy.ConsentWireState) => {
       var userConsent = this.user.consent;
 
-      // Get old values before updating this.wireConsentFromRemote
-      // so we can see what changed.
-      var oldIsOffering = this.wireConsentFromRemote.isOffering;
-      var newIsOffering = bits.isOffering;
-
       // Update this remoteInstance.
       this.wireConsentFromRemote = bits;
-
-      // Requesting access is part of consent from the user, however we may
-      // need to update that based on the new bits.
-      var oldIsRequesting = userConsent.remoteRequestsAccessFromLocal;
       this.user.updateRemoteRequestsAccessFromLocal();
-      var newIsRequesting = userConsent.remoteRequestsAccessFromLocal;
-
-      // Fire a notification on the UI, if a state is different.
-      // TODO: Determine if we should attach the instance id / decription to the
-      // user name as part of the notification text.
-      var note = null;
-      if (newIsOffering !== oldIsOffering &&
-          !userConsent.ignoringRemoteUserOffer) {
-        if (newIsOffering) {
-          // newly granted access
-          note = userConsent.localRequestsAccessFromRemote ?
-              ' granted you access.' : ' offered you access.';
-        } else {
-          // newly revoked access
-          note = ' revoked your access.';
-        }
-      }
-
-      if (newIsRequesting && !oldIsRequesting &&
-          !userConsent.ignoringRemoteUserRequest) {
-        // newly requested/accepted access
-        note = userConsent.localGrantsAccessToRemote ?
-            ' has accepted your offer of access.' : ' is requesting access.';
-      }
-
-      if (note) {
-        this.user.onceNameReceived.then((name :string) => {
-          ui.showNotification(name + note);
-        });
-      }
     }
 
     private saveToStorage = () => {

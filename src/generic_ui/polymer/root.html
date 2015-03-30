@@ -1,6 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel="import" href="../lib/core-header-panel/core-header-panel.html">
+<link rel="import" href="../lib/core-drawer-panel/core-drawer-panel.html">
 <link rel="import" href="../lib/core-toolbar/core-toolbar.html">
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
@@ -44,6 +45,9 @@
         font-size: 14px;
         text-transform: uppercase;
       }
+      core-drawer-panel {
+        overflow: auto;
+      }
       core-header-panel {
         height: 100%;
       }
@@ -53,7 +57,6 @@
       core-toolbar {
         height: 105px;
         background-color: #009688;
-        z-index: 1;
         width: 100%;
         color: #FFFFFF;
       }
@@ -85,15 +88,6 @@
       }
       #settings {
         top: 0;
-      }
-      #darkMask {
-        background-color: rgba(0, 0, 0, 0.5);
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        position: absolute;
-        z-index: 1001;
       }
       #rosterContainer {
         height: 100%;
@@ -153,85 +147,85 @@
     <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
-    <core-header-panel
-        hidden?='{{ ui.view !== uProxy.View.ROSTER && ui.view !== uProxy.View.SETTINGS }}'>
+    <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
+        hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
+      <core-header-panel drawer>
+        <div class='content' fit>
+          <uproxy-settings id='settings'></uproxy-settings>
+        </div>
+      </core-header-panel>
+      <core-header-panel main
+          hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
 
-      <core-toolbar>
+        <core-toolbar>
 
-        <core-icon icon="menu" on-tap="{{ settingsView }}"></core-icon>
-        <div id='title' flex>uProxy</div>
+          <core-icon icon="menu" core-drawer-toggle></core-icon>
+          <div id='title' flex>uProxy</div>
 
-        <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-          <h3>Cannot open manual connection</h3>
+          <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
+            <h3>Cannot open manual connection</h3>
+            <p>
+              It is not currently possible to open a manual connection at the
+              same time as being signed in to a social network.  To launch a
+              manual connection, please log out through the settings menu and
+              re-paste the link.
+            </p>
+          </uproxy-bubble>
+
+          <core-tooltip label='You are available for sharing.' position='left'>
+            <img id='sharingEnabledIcon'
+              src='../icons/sharing-enabled-toolbar.png'
+              hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+              on-tap='{{ setShareMode }}'></img>
+          </core-tooltip>
+
+            <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
+            <h3>Sharing Enabled</h3>
+            <p>This icon means you're available for sharing access with friends you've offered access to.</p>
+          </uproxy-bubble>
+
+          <div class='bottom fit'>
+            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}'>
+              <paper-tab>Get Access</paper-tab>
+              <paper-tab>Share Access</paper-tab>
+            </paper-tabs>
+          </div>
+        </core-toolbar>
+
+        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+          <h3>Welcome to uProxy!</h3>
           <p>
-            It is not currently possible to open a manual connection at the
-            same time as being signed in to a social network.  To launch a
-            manual connection, please log out through the settings menu and
-            re-paste the link.
+            To get started, choose "Get access" or "Share access" and then click
+            on a friend to connect.
           </p>
         </uproxy-bubble>
 
-        <core-tooltip label='You are available for sharing.' position='left'>
-          <img id='sharingEnabledIcon'
-            src='../icons/sharing-enabled-toolbar.png'
-            hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
-            on-tap='{{ setShareMode }}'></img>
-        </core-tooltip>
+        <div class='content' fit>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
-          <h3>Sharing Enabled</h3>
-          <p>This icon means you're available for sharing access with friends you've offered access to.</p>
-        </uproxy-bubble>
-
-        <div class='bottom fit'>
-          <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}'>
-            <paper-tab>Get Access</paper-tab>
-            <paper-tab>Share Access</paper-tab>
-          </paper-tabs>
-        </div>
-      </core-toolbar>
-
-      <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
-        <h3>Welcome to uProxy!</h3>
-        <p>
-          To get started, choose "Get access" or "Share access" and then click
-          on a friend to connect.
-        </p>
-      </uproxy-bubble>
-
-      <div class='content' fit>
-
-        <div id='rosterContainer' vertical layout>
-          <div id='roster-panel' flex>
-            <uproxy-roster id='get-roster' class='roster'
-                hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
-                contacts='{{model.contacts.getAccessContacts}}'>
-            </uproxy-roster>
-            <uproxy-roster id='share-roster' class='roster'
-                hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
-                contacts='{{model.contacts.shareAccessContacts}}'>
-            </uproxy-roster>
-          </div>
-
-          <div id='status'>
-            <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-              <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+          <div id='rosterContainer' vertical layout>
+            <div id='roster-panel' flex>
+              <uproxy-roster id='get-roster' class='roster'
+                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+                  contacts='{{model.contacts.getAccessContacts}}'>
+              </uproxy-roster>
+              <uproxy-roster id='share-roster' class='roster'
+                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+                  contacts='{{model.contacts.shareAccessContacts}}'>
+              </uproxy-roster>
             </div>
-            <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-              <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+
+            <div id='status'>
+              <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
+                <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+              </div>
+              <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
+                <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </core-header-panel>
-
-    <uproxy-settings id='settings'
-      class='{{ { active:(uProxy.View.SETTINGS==ui.view) } | tokenList }}'>
-    </uproxy-settings>
-
-    <!-- Dark mask displayed on top of roster when settings is visible -->
-    <div id='darkMask' hidden?='{{uProxy.View.SETTINGS!=ui.view}}'
-        on-tap='{{ rosterView }}'></div>
+      </core-header-panel>
+    </core-drawer-panel>
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->

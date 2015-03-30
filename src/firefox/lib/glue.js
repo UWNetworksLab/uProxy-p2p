@@ -76,7 +76,14 @@ function setUpConnection(freedom, panel, button) {
   });
 
   panel.port.on('showNotification', function(notification) {
-    notifications.notify(notification);
+    notifications.notify({
+      text: notification.text,
+      iconURL: './icons/128_online.png',
+      data: notification.tag,
+      onClick: function(data) {
+        panel.port.emit('notificationClicked', data);
+      }
+    });
   });
 
   /* Allow any pages in the addon to send messages to the UI or the core */
