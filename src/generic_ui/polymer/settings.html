@@ -60,15 +60,14 @@
       padding: 0;
       color: rgb(180, 180, 180);
     }
-    uproxy-description::shadow paper-input-decorator {
-      font-size: 14px;
-      padding: 0;
-      margin: 0;
-      color: rgb(112, 112, 112);
-    }
-    #advancedSettings paper-input-decorator {
+    paper-input-decorator {
       padding: 0;
       margin-bottom: 5px;
+    }
+    paper-input-decorator /deep/ .unfocused-underline,
+    paper-input-decorator /deep/ .focused-underline,
+    paper-input-decorator /deep/ .cursor {
+        background-color: #009688;
     }
     paper-button {
       background: #009688;  /* dark green */
@@ -78,11 +77,6 @@
       margin-right: 5px;
       font-size: 10px;
     }
-    paper-input-decorator /deep/ .unfocused-underline,
-    paper-input-decorator /deep/ .focused-underline,
-    paper-input-decorator /deep/ .cursor {
-        background-color: #009688;
-    }
     core-icon[icon=announcement],
     core-icon[icon=help],
     core-icon[icon=settings],
@@ -91,10 +85,6 @@
       height: 20px;
       width: 20px;
       margin-right: 5px;
-    }
-    #advancedSettings {
-      padding-left: 28px;
-      padding-right: 28px;
     }
     .advancedSettingsText {
       font-size: 12px;
