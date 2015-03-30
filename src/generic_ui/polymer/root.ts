@@ -5,7 +5,6 @@
 declare var ui :UI.UserInterface;
 
 Polymer({
-  model: model,
   dialog: {
     message: '',
     heading: '',
@@ -78,6 +77,7 @@ Polymer({
     // Expose global ui object and UI module in this context.
     this.ui = ui;
     this.uProxy = uProxy;
+    this.model = model;
     if(ui.browserApi.browserSpecificElement){
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);

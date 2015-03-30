@@ -36,8 +36,12 @@ class FirefoxBrowserApi implements BrowserAPI {
         });
   }
 
-  public openTab = (url ?:string) => {
+  public openTab = (url :string) => {
     port.emit('openURL', url);
+  }
+
+  public launchTabIfNotOpen = (url :string) => {
+    port.emit('launchTabIfNotOpen', url);
   }
 
   // For proxy configuration.
@@ -47,8 +51,8 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('startUsingProxy', endpoint);
   }
 
-  public stopUsingProxy = (askUser :boolean) => {
-    port.emit('stopUsingProxy', askUser);
+  public stopUsingProxy = () => {
+    port.emit('stopUsingProxy');
   }
 
   public bringUproxyToFront = () => {

@@ -1,8 +1,6 @@
 declare var browser :string;
 
 Polymer({
-  model: model,
-  browser: browser,
   DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
                          {urls: ['stun:stun1.l.google.com:19302']},
                          {urls: ['stun:stun2.l.google.com:19302']},
@@ -52,5 +50,7 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
+    this.model = model;
+    this.browser = browser;
   }
 });

@@ -4,10 +4,12 @@
 interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
   startUsingProxy(endpoint:Net.Endpoint) : void;
-  stopUsingProxy(askUser:boolean) : void;
+  stopUsingProxy() : void;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) : void;
-  // Open a new tab with the uProxy FAQ.
+  // Open a new tab if it is not already open
+  launchTabIfNotOpen(url :string) :void;
+  // Open a new tab
   openTab(url :string) : void;
   bringUproxyToFront() : void;
   browserSpecificElement : string;

@@ -39,7 +39,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // chrome popup to the front
   if (request && request.openWindow) {
     chromeBrowserApi.bringUproxyToFront();
-    sendResponse({ message: 'done' });
+  }
+
+  // handle requests to stop proxying
+  if (request && request.stopProxying) {
+    ui.stopGettingInUiAndConfig(false);
   }
 });
 

@@ -1,7 +1,4 @@
 Polymer({
-  // Make GettingState enum available to polymer
-  GettingState: GettingState,
-
   ready: function() {
     this.path = <InstancePath>{
       network : {
@@ -15,6 +12,7 @@ Polymer({
     // hidden? watch for the get/give toggle to actually update.
     this.ui = ui;
     this.uProxy = uProxy;
+    this.GettingState = GettingState;
     this.model = model;
   },
 

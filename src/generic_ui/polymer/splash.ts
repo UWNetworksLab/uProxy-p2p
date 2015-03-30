@@ -6,8 +6,6 @@ Polymer({
     INTRO: 0,
     NETWORKS: 1
   },
-  model: model,
-  ui: ui,
   setState: function(state) {
     if (state < 0 || state > Object.keys(this.SPLASH_STATES).length) {
       console.error('Invalid call to setState: ' + state);
@@ -27,5 +25,8 @@ Polymer({
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
   },
-  ready: function() {}
+  ready: function() {
+    this.ui = ui;
+    this.model = model;
+  }
 });
