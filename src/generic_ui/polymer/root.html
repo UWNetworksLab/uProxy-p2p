@@ -133,18 +133,24 @@
         color: white;
         margin-bottom: 3px;
       }
-      #dialog {
+      paper-action-dialog {
         top: 20%;
-        left: 0px;
+        z-index: 1002; /* Must be greater than core-overlay-backdrop */
+      }
+      .core-overlay-backdrop {
+        z-index: 1001;
       }
     </style>
+
+    <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
     <uproxy-copypaste id='copypaste' hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback hidden?='{{ uProxy.View.FEEDBACK !== ui.view }}'></uproxy-feedback>
+    <uproxy-feedback></uproxy-feedback>
+
     <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 

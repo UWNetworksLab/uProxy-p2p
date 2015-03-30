@@ -16,10 +16,13 @@ Polymer({
     // this event.
     if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      this.$.mainPanel.closeDrawer();
+      this.closeSettings();
       this.$.modeTabs.updateBar();
     }
     ui.view = detail.view;
+  },
+  closeSettings: function() {
+    this.$.mainPanel.closeDrawer();
   },
   rosterView: function() {
     console.log('rosterView called');
@@ -57,7 +60,12 @@ Polymer({
      */
 
     this.dialog = detail;
-    this.$.dialog.toggle();
+    // Using async() allows the contents of the dialog to update before
+    // it's opened. Opening the dialog too early causes it to be positioned
+    // incorrectly (i.e. off center).
+    this.async(() => {
+      this.$.dialog.open();
+    });
   },
   dialogButtonClick: function(event, detail, target) {
     var signal = target.getAttribute('data-signal');

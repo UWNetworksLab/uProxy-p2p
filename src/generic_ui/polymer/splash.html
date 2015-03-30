@@ -15,7 +15,6 @@
       font-size: 1.1em;
       right: -100%;
       right: 0px;
-      z-index: 100;
       line-height: 24px;
     }
     h1 {
@@ -35,7 +34,7 @@
       padding-right: 10%;
       padding-top: 50px;
       opacity: 1;
-      z-index: 100;
+      z-index: 10;
       overflow: auto;
     }
     .view[hidden] {
@@ -58,6 +57,10 @@
     #oneTimeConnection {
       margin-bottom: 1.5em;
     }
+    #submitFeedback {
+      text-decoration: underline;
+      cursor: pointer;
+    }
     uproxy-faq-link {
       width: 100%;
       padding-top: 1em;
@@ -73,7 +76,7 @@
       left: 8px;
       top: 8px;
       cursor: pointer;
-      z-index: 101; /* Must be greater than z-index of .view */
+      z-index: 11; /* Must be greater than z-index of .view */
     }
     #intro1, #networks {
       height: 100%;
@@ -114,6 +117,9 @@
         </p>
         <p>
           We won't share your data or post publicly without your consent
+        </p>
+        <p id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
+          Submit Feedback
         </p>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>

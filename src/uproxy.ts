@@ -278,8 +278,7 @@ module uProxy {
     SPLASH = 0,
     COPYPASTE,
     ROSTER,
-    BROWSER_ERROR,
-    FEEDBACK
+    BROWSER_ERROR
   }
 
   /**

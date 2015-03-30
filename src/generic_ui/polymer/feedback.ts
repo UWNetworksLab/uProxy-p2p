@@ -1,10 +1,12 @@
 Polymer({
   email: '',
   feedback: '',
-  backToSettings: function() {
-    // The settings panel will still be open in the roster
-    // if the user navigated to feedback from settings.
-    ui.view = uProxy.View.ROSTER;
+  logs: '',
+  close: function() {
+    this.$.feedbackPanel.close();
+  },
+  open: function() {
+    this.$.feedbackPanel.open();
   },
   sendFeedback: function() {
     // TODO: update sendFeedback to a promise, and deal
@@ -30,10 +32,11 @@ Polymer({
       heading: 'Thank you!',
       message: 'Your feedback has been submitted to the uProxy development team.',
       buttons: [{
-        text: 'Done'
+        text: 'Done',
+        signal: 'close-settings'
       }]
     });
-    ui.view = uProxy.View.ROSTER;
+    this.close();
   },
   viewLogs: function() {
     this.ui.openTab('view-logs.html');

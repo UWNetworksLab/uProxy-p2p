@@ -22,6 +22,9 @@ Polymer({
   copypaste: function() {
     this.fire('core-signal', { name: 'copypaste-init' });
   },
+  openFeedbackForm: function() {
+    this.fire('core-signal', {name: 'open-feedback'});
+  },
   ready: function() {
     this.ui = ui;
     this.model = model;
