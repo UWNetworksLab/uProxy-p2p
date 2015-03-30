@@ -440,22 +440,6 @@ class uProxyCore implements uProxy.CoreAPI {
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
     var sendXhr = (logs) : void => {
       var xhr = freedom["core.xhr"]();
-
-      /*
-      TODO: check if POST fails by registering onreadystatechange
-            callback.
-      xhr.on('onreadystatechange', () => {
-        Promise.all([xhr.getReadyState(), xhr.getStatus()])
-          .then((stateAndStatus) => {
-            log.info('getReadyState: ' + stateAndStatus[0]);
-            log.info('getStatus: ' + stateAndStatus[1]);
-            if (stateAndStatus[0] === 4 && stateAndStatus[1] != 200) {
-              // Reject the promise.
-            }
-          });
-      });
-      */
-
       var params = JSON.stringify(
         {'email' : feedback.email,
          'feedback' : feedback.feedback,
@@ -476,27 +460,6 @@ class uProxyCore implements uProxy.CoreAPI {
     } else {
       sendXhr('');
     }
-
-    /*
-    TODO: Allow users to submit just network info or just logs.
-    The new logic should be like below.
-
-    if (feedback.logs && feedback.networkInfo) {
-      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-        sendXhr(browserInfo + logsWithNetworkInfo);
-      });
-    } else if (feedback.logs) {
-      this.getLogs().then((logs) => {
-        sendXhr(browserInfo + logs);
-      });
-    } else if (feedback.networkInfo) {
-      this.getNetworkInfo().then((networkInfo) => {
-        sendXhr(networkInfo);
-      });
-    } else {
-      sendXhr('');
-    }
-    */
   }
 
   public getNatType = () : Promise<string> => {
