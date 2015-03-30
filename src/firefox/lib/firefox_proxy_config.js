@@ -23,7 +23,7 @@ proxyConfig.startUsingProxy = function(endpoint) {
   }
 };
 
-proxyConfig.stopUsingProxy = function(askUser) {
+proxyConfig.stopUsingProxy = function() {
   if (this.running_) {
     this.running_ = false;
     // Restore initial proxy state.

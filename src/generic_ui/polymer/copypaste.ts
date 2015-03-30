@@ -132,5 +132,11 @@ Polymer({
       // stopped the connection
       ui.view = uProxy.View.SPLASH;
     })
+  },
+  ready: function() {
+    this.ui = ui;
+    this.model = model;
+    this.GettingState = GettingState;
+    this.SharingState = SharingState;
   }
 });

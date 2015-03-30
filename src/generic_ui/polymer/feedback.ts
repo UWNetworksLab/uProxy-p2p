@@ -1,6 +1,4 @@
 Polymer({
-  model: model,
-  ui: ui,
   email: '',
   feedback: '',
   backToSettings: function() {
@@ -39,5 +37,9 @@ Polymer({
   },
   viewLogs: function() {
     this.ui.openTab('view-logs.html');
+  },
+  ready: function() {
+    this.ui = ui;
+    this.model = model;
   }
 });
