@@ -5,7 +5,9 @@ Polymer({
   feedback: '',
   logs: '',
   backToSettings: function() {
-    ui.view = uProxy.View.SETTINGS;
+    // The settings panel will still be open in the roster
+    // if the user navigated to feedback from settings.
+    ui.view = uProxy.View.ROSTER;
   },
   sendFeedback: function() {
     // TODO: Get and send real logs.
