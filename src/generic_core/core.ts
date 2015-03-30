@@ -12,6 +12,7 @@
 /// <reference path='../uproxy.ts'/>
 /// <reference path='storage.ts' />
 /// <reference path='social.ts' />
+/// <reference path='diagnose.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
@@ -20,8 +21,9 @@
 /// <reference path='../networking-typings/communications.d.ts' />
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
-freedom['loggingprovider']().setConsoleFilter(['*:I']);
-freedom['loggingprovider']().setBufferedLogFilter(['*:D']);
+var loggingProvider = freedom['loggingprovider']();
+loggingProvider.setConsoleFilter(['*:I']);
+loggingProvider.setBufferedLogFilter(['*:D']);
 
 declare var UPROXY_VERSION;
 
@@ -108,6 +110,7 @@ class uProxyCore implements uProxy.CoreAPI {
          hasSeenWelcome: false,
          mode: uProxy.Mode.GET};
   public loadGlobalSettings :Promise<void> = null;
+  private natType_ = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -432,6 +435,8 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
+  // TODO: make this return a promise, if it fails, the POST was not
+  // was not successful.
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
     var sendXhr = (logs) : void => {
       var xhr = freedom["core.xhr"]();
@@ -445,23 +450,68 @@ class uProxyCore implements uProxy.CoreAPI {
       // This is roughly equivalent to standard xhr.send(params).
       xhr.send({'string': params});
     }
+
+    var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+
     if (feedback.logs) {
-      this.getLogs().then((formattedLogs) => {
-        sendXhr(formattedLogs);
+      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+        sendXhr(browserInfo + logsWithNetworkInfo);
       });
     } else {
       sendXhr('');
     }
   }
 
-  public getLogs = () : Promise<string> => {
-    return freedom['loggingprovider']().getLogs().then((logs) => {
-      var formattedLogs = '';
-      for (var i = 0; i < logs.length; i++) {
-        formattedLogs += logs[i] + '\n';
-      }
-      return formattedLogs;
+  public getNatType = () : Promise<string> => {
+    if (this.natType_ === '') {
+      return Diagnose.doNatProvoking().then((natType) => {
+        this.natType_ = natType;
+        // Store NAT type for five minutes. This way, if the user previews
+        // their logs, and then submits them shortly after, we do not need
+        // to determine the NAT type once for the preview, and once for
+        // submission to our backend.
+        // If we expect users to check NAT type frequently (e.g. if they
+        // switch between networks while troubleshooting), then we might want
+        // to remove caching.
+        setTimeout(() => {this.natType_ = '';}, 300000);
+        return this.natType_;
+      });
+    } else {
+      return Promise.resolve(this.natType_);
+    }
+  }
+
+  public getNetworkInfo = () : Promise<string> => {
+    return this.getNatType().then((natType) => {
+      return 'NAT Type: ' + natType + '\n';
     });
+  }
+
+  public getLogs = () : Promise<string> => {
+    return loggingProvider.getLogs().then((rawLogs) => {
+        var formattedLogsWithVersionInfo =
+            'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n\n';
+        formattedLogsWithVersionInfo += this.formatLogs_(rawLogs);
+        return formattedLogsWithVersionInfo;
+      });
+  }
+
+  public getLogsAndNetworkInfo = () : Promise<string> => {
+    return Promise.all([this.getNetworkInfo(),
+                        this.getLogs()])
+      .then((natAndLogs) => {
+        // natAndLogs is an array of returned values corresponding to the
+        // array of Promises in Promise.all.
+        return natAndLogs[0] + '\n' + natAndLogs[1];
+      });
+  }
+
+  private formatLogs_ = (rawLogs) : string => {
+    var formattedLogs = '';
+    for (var i = 0; i < rawLogs.length; i++) {
+      formattedLogs += rawLogs[i] + '\n';
+    }
+    return formattedLogs;
   }
 }  // class uProxyCore
 
@@ -469,7 +519,6 @@ class uProxyCore implements uProxy.CoreAPI {
 // Prepare all the social providers from the manifest.
 Social.initializeNetworks();
 var core = new uProxyCore();
-
 
 function _validateKeyHash(keyHash:string) {
   log.warn('keyHash validation not yet implemented');
@@ -521,7 +570,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
-core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogs);
+core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
