@@ -79,7 +79,7 @@ var Helper = {
 };  // end of Helper
 
 describe('uproxy core', function() {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 10000;
   var uProxyFreedom = 'scripts/build/compile-src/integration/scripts/freedom-module.json';
   var alice;
   var bob;
