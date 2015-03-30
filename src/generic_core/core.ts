@@ -466,11 +466,13 @@ class uProxyCore implements uProxy.CoreAPI {
     if (this.natType_ === '') {
       return Diagnose.doNatProvoking().then((natType) => {
         this.natType_ = natType;
-        // Store NAT type for five minutes. This way, if the
-        // user previews their logs, and then submits them
-        // shortly after, we do not need to determine the NAT
-        // type once for the preview, and once for submission
-        // to our backend.
+        // Store NAT type for five minutes. This way, if the user previews
+        // their logs, and then submits them shortly after, we do not need
+        // to determine the NAT type once for the preview, and once for
+        // submission to our backend.
+        // If we expect users to check NAT type frequently (e.g. if they
+        // switch between networks while troubleshooting), then we might want
+        // to remove caching.
         setTimeout(() => {this.natType_ = '';}, 300000);
         return this.natType_;
       });
