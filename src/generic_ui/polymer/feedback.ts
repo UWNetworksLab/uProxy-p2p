@@ -37,9 +37,5 @@ Polymer({
   },
   viewLogs: function() {
     this.ui.openTab('view-logs.html');
-  },
-  ready: function() {
-    this.$.logsTooltip.setAttribute('resolved', '');
-    this.$.logsTooltip.removeAttribute('unresolved');
   }
 });

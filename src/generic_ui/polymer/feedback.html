@@ -5,7 +5,6 @@
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
-<link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel='import' href='faq-link.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
@@ -148,7 +147,7 @@
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link>
-          <core-tooltip unresolved id='logsTooltip' label='Analyze network and view logs' position='top'>
+          <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
             <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
           </core-tooltip>
         </div>

@@ -440,17 +440,22 @@ class uProxyCore implements uProxy.CoreAPI {
   public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
     var sendXhr = (logs) : void => {
       var xhr = freedom["core.xhr"]();
+
+      /*
+      TODO: check if POST fails by registering onreadystatechange
+            callback.
       xhr.on('onreadystatechange', () => {
         Promise.all([xhr.getReadyState(), xhr.getStatus()])
           .then((stateAndStatus) => {
             log.info('getReadyState: ' + stateAndStatus[0]);
             log.info('getStatus: ' + stateAndStatus[1]);
-
             if (stateAndStatus[0] === 4 && stateAndStatus[1] != 200) {
-              // TODO: reject the promise.
+              // Reject the promise.
             }
           });
       });
+      */
+
       var params = JSON.stringify(
         {'email' : feedback.email,
          'feedback' : feedback.feedback,

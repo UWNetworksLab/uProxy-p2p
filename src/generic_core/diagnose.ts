@@ -13,15 +13,6 @@ module Diagnose {
 
   var log :Logging.Log = new Logging.Log('Diagnose');
 
-  // Logging.setBufferedLogFilter(['*:I']);
-  // freedom().on('getLogs', function() {
-  //   var strs :string[] = Logging.getLogs();
-  //   for (var i = 0; i < strs.length; i++) {
-  //     freedom().emit('print', strs[i]);
-  //   }
-  //   Logging.clearLogs();
-  // });
-
   freedom().on('command', function(m :string) {
     log.debug('received command %1', [m]);
     if (m == 'send_udp') {
