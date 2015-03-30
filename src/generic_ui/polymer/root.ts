@@ -62,7 +62,7 @@ Polymer({
 
     this.dialog = detail;
     // Using async() allows the contents of the dialog to update before
-    // it's opened. Openly the dialog too early causes it to be positioned
+    // it's opened. Opening the dialog too early causes it to be positioned
     // incorrectly (i.e. off center).
     this.async(() => {
       this.$.dialog.open();
