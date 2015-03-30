@@ -1,18 +1,19 @@
 Polymer({
   email: '',
   feedback: '',
-  logs: '',
   backToSettings: function() {
     // The settings panel will still be open in the roster
     // if the user navigated to feedback from settings.
     ui.view = uProxy.View.ROSTER;
   },
   sendFeedback: function() {
-    // TODO: Get and send real logs.
+    // TODO: update sendFeedback to a promise, and deal
+    // with the error case appropriately.
     core.sendFeedback({
       email: this.email,
       feedback: this.feedback,
-      logs: this.$.logCheckbox.checked
+      logs: this.$.logCheckbox.checked,
+      browserInfo: navigator.userAgent
     });
     // Reset the placeholders, which seem to be cleared after the
     // user types input in the input fields.
@@ -35,11 +36,7 @@ Polymer({
     ui.view = uProxy.View.ROSTER;
   },
   viewLogs: function() {
-    core.getLogs().then((logs) => {
-      var url = 'data:text/html;charset=UTF-8,'
-          + encodeURIComponent('<html><h2>Diagnostic Logs</h2><pre>' + logs + '</pre></html>');
-      this.ui.openTab(url);
-    });
+    this.ui.openTab('view-logs.html');
   },
   ready: function() {
     this.ui = ui;
