@@ -57,10 +57,8 @@
       text-align: center;
       background-color: #ffffff;
     }
+    core-icon[icon="launch"],
     core-icon[icon="help"]{
-      height: 15px;
-    }
-    core-icon[icon="launch"]{
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -69,13 +67,14 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    core-icon[icon="launch"]:hover{
+    core-icon[icon="launch"]:hover,
+    core-icon[icon="help"]:hover{
       opacity: 1;
     }
     core-tooltip::shadow #tooltip {
       /* Without this, the first time you view the
          tooltip, it appears off center. */
-      left: -67.5px !important;
+      left: -64px !important;
     }
     paper-button {
       background-color: #009688; /* teal */
@@ -118,9 +117,6 @@
     }
     </style>
 
-    <core-signals on-core-signal-more-about-logging='{{ moreAboutLogging }}'></core-signals>
-    <core-signals on-core-signal-view-logs='{{ viewLogs }}'></core-signals>
-
     <div id='container' vertical layout>
       <uproxy-app-bar on-go-back='{{ backToSettings }}'>
         Submit feedback
@@ -147,17 +143,18 @@
         <div id='logCheckboxContainer'>
           <core-label id='logCheckboxLabel' horizontal layout>
             <paper-checkbox id='logCheckbox' on-change='{{ logsToggled }}'></paper-checkbox>
-            Include logs and network diagnostics
+            Analyze network and include logs
           </core-label>
-          <core-tooltip unresolved id='logsTooltip' label='View logs & network diagnostics' position='top'>
-            <uproxy-link on-tap='{{ confirmViewLogs }}'>
-              <core-icon icon="launch"></core-icon>
-            </uproxy-link>
+          <uproxy-faq-link anchor='doesUproxyLogData'>
+            <core-icon icon="help"></core-icon>
+          </uproxy-faq-link>
+          <core-tooltip unresolved id='logsTooltip' label='Analyze network and view logs' position='top'>
+            <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
           </core-tooltip>
         </div>
 
         <p id='moreInfo'>
-          Your feedback and email address will be sent to uProxy.org. Your logs, network diagnostics and email may include personally identifiable information.
+          Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link>

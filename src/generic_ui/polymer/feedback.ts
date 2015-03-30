@@ -35,39 +35,6 @@ Polymer({
     });
     ui.view = uProxy.View.ROSTER;
   },
-  logsToggled: function() {
-    if (this.$.logCheckbox.checked) {
-      this.fire('open-dialog', {
-        message: 'uProxy will run network diagnostics when you submit your feedback, if you\'ve elected to include logs and network data. If you\'d like to preview your logs and network data, network diagnostics will be run before submission.',
-        buttons: [{
-          text: 'Got it'
-        }, {
-          text: 'More info',
-          signal: 'more-about-logging',
-          dismissive: true
-        }]
-      });
-    }
-  },
-  moreAboutLogging: function() {
-    this.ui.openTab('faq.html#doesUproxyLogData');
-  },
-  confirmViewLogs: function() {
-    this.fire('open-dialog', {
-      message: 'uProxy will run network diagnostics when you submit your feedback, if you\'ve elected to include logs and network data. If you\'d like to preview your logs and network data, network diagnostics will be run now. Would you like to preview logs and network data that will be sent to uProxy?',
-      buttons: [{
-        text: 'Yes',
-        signal: 'view-logs'
-      }, {
-        text: 'No',
-        dismissive: true
-      }, {
-        text: 'More info',
-        signal: 'more-about-logging',
-        dismissive: true
-      }]
-    });
-  },
   viewLogs: function() {
     this.ui.openTab('view-logs.html');
   },
