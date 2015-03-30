@@ -1,6 +1,4 @@
 Polymer({
-  model: model,
-  ui: ui,
   email: '',
   feedback: '',
   logs: '',
@@ -43,5 +41,8 @@ Polymer({
       this.ui.openTab(url);
     });
   },
-  ready: function() {}
+  ready: function() {
+    this.ui = ui;
+    this.model = model;
+  }
 });
