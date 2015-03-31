@@ -42,10 +42,9 @@
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      display: inline-table;
+      cursor: pointer;
     }
     #logCheckbox {
-      display: table-cell;
       padding-right:10px;
       vertical-align: middle;
     }
@@ -160,16 +159,16 @@
               </paper-autogrow-textarea>
             </paper-input-decorator>
             <div id='logCheckboxContainer'>
-              <core-label id='logCheckboxLabel' horizontal layout>
-                <paper-checkbox id='logCheckbox'></paper-checkbox>
+              <paper-checkbox for id='logCheckbox'></paper-checkbox>
+              <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
                 Analyze network and include logs
-              </core-label>
+              </span>
               <uproxy-faq-link anchor='doesUproxyLogData'>
                 <core-icon icon="help"></core-icon>
               </uproxy-faq-link>
-              <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
+<!--               <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
                 <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
-              </core-tooltip>
+              </core-tooltip> -->
             </div>
             <p id='moreInfo'>
               Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.

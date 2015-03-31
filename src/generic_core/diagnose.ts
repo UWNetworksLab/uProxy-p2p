@@ -20,7 +20,7 @@ module Diagnose {
     } else if (m == 'stun_access') {
       doStunAccessTest();
     } else if (m == 'nat_provoking') {
-      doNatProvoking().then((natType: String) => {
+      doNatProvoking().then((natType: string) => {
         log.debug('!!! natType =' + natType);
         freedom().emit('print', 'NAT type is ' + natType);
       });
@@ -155,7 +155,7 @@ module Diagnose {
   // The following code needs the help from a server to do its job. The server
   // code can be found jsonserv.py in the same repository. One instance is
   // running in EC2.
-  export function doNatProvoking() : Promise<String> {
+  export function doNatProvoking() : Promise<string> {
     return new Promise((F, R) => {
       log.info('perform NAT provoking');
       var socket: freedom_UdpSocket.Socket = freedom['core.udpsocket']();

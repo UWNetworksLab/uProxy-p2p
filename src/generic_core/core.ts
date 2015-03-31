@@ -490,18 +490,35 @@ class uProxyCore implements uProxy.CoreAPI {
 
   public getNatType = () : Promise<string> => {
     if (this.natType_ === '') {
-      return Diagnose.doNatProvoking().then((natType) => {
-        this.natType_ = natType;
-        // Store NAT type for five minutes. This way, if the user previews
-        // their logs, and then submits them shortly after, we do not need
-        // to determine the NAT type once for the preview, and once for
-        // submission to our backend.
-        // If we expect users to check NAT type frequently (e.g. if they
-        // switch between networks while troubleshooting), then we might want
-        // to remove caching.
-        setTimeout(() => {this.natType_ = '';}, 300000);
-        return this.natType_;
-      });
+      // Function that returns a promise which fulfills
+      // in a given time.
+      var countdown = (time) : Promise<void> => {
+        return new Promise<void>((F, R) => {
+          setTimeout(F, time);
+        });
+      }
+
+      // Return the first Promise that fulfills in the 'race'
+      // between a countdown and NAT provoking.
+      // i.e., if NAT provoking takes longer than 30s, the countdown
+      // will return first, and a time out message is returned.
+      return Promise.race(
+        [ countdown(30000).then(() => {
+            return 'NAT classification timed out.';
+          }),
+          Diagnose.doNatProvoking().then((natType) => {
+            this.natType_ = natType;
+            // Store NAT type for five minutes. This way, if the user previews
+            // their logs, and then submits them shortly after, we do not need
+            // to determine the NAT type once for the preview, and once for
+            // submission to our backend.
+            // If we expect users to check NAT type frequently (e.g. if they
+            // switch between networks while troubleshooting), then we might want
+            // to remove caching.
+            setTimeout(() => {this.natType_ = '';}, 300000);
+            return this.natType_;
+          })
+        ]);
     } else {
       return Promise.resolve(this.natType_);
     }

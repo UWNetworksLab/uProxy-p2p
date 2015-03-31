@@ -12,8 +12,11 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
-    core-icon[icon="help"] {
-      height: 15px;
+    h1 {
+      font-size: 1.5em;
+    }
+    core-icon[icon="help"],
+    core-icon[icon="close"] {
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
@@ -21,8 +24,16 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    core-icon[icon="help"]:hover {
+    core-icon[icon="help"]:hover,
+    core-icon[icon="close"]:hover {
       opacity: 1;
+    }
+    core-icon[icon="help"] {
+      height: 15px;
+      width: 15px;
+    }
+    core-icon[icon="close"] {
+      float: right;
     }
     paper-button {
       background-color: #009688; /* teal */
@@ -51,9 +62,12 @@
     </style>
 
     <!-- Listen for the 'open-troubleshoot' event, which the user can trigger after proxying fails. -->
-    <core-signals on-core-signal-open-troubleshoot="{{ open }}"></core-signals>
+    <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
 
-    <paper-action-dialog backdrop layered="false" id='troubleshootDialog' heading='Unable to proxy'>
+    <paper-action-dialog backdrop layered="false" id='troubleshootDialog'>
+      <h1>
+        Unable to proxy <core-icon icon="close" on-tap='{{ close }}'></core-icon>
+      </h1>
       <div hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
           Something went wrong. Would you like uProxy to diagnose your network?
