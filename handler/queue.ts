@@ -160,7 +160,7 @@ class PendingPromiseHandler<T,T2> {
 // extended/generalized.
 export class Queue<Feed,Result>
     implements QueueFeeder<Feed,Result>, QueueHandler<Feed,Result> {
-  // The queue of things to handle.
+  // back_, front_, and length_ together represent the queue of things to handle.
   private back_ :PendingPromiseHandler<Feed, Result>;
   private front_ :PendingPromiseHandler<Feed, Result>;
   private length_ :number = 0;
@@ -205,8 +205,10 @@ export class Queue<Feed,Result>
 
     var pendingThing = new PendingPromiseHandler(x);
     if (this.length_ > 0) {
+      // Put pendingThing on the back of the queue.
       this.back_.next = pendingThing;
     } else {
+      // The queue was empty, so set both pointers.
       this.front_ = pendingThing;
     }
     this.back_ = pendingThing;
@@ -218,10 +220,11 @@ export class Queue<Feed,Result>
   // Remove and return the next element.
   private dequeue_ = () : PendingPromiseHandler<Feed, Result> => {
     var dequeued = this.front_;
+    // If this.front_ is this.back_, then dequeued.next is undefined.
     this.front_ = dequeued.next;
     dequeued.next = null;  // Just to help the garbage collector.
     this.length_--;
-    if (this.length_ == 0) {
+    if (this.length_ === 0) {
       this.back_ = null;
     }
     return dequeued;
