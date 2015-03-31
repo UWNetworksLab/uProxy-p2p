@@ -43,7 +43,7 @@ module uProxy {
     UPDATE_GLOBAL_SETTINGS,
     SEND_FEEDBACK,
     GET_LOGS,
-    GET_NAT
+    GET_NAT_TYPE
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
@@ -152,8 +152,9 @@ module uProxy {
   export interface UserFeedback {
     email     :string;
     feedback  :string;
-    logs      :string;
+    logs      :boolean;
     browserInfo :string;
+    networkInfo :boolean;
   }
 
   // --- Core <--> UI Interfaces ---

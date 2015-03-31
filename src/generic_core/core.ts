@@ -469,9 +469,13 @@ class uProxyCore implements uProxy.CoreAPI {
 
     var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
 
-    if (feedback.logs) {
+    if (feedback.logs && feedback.networkInfo) {
       this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
         sendXhr(browserInfo + logsWithNetworkInfo);
+      });
+    } else if (feedback.networkInfo) {
+      this.getNetworkInfo().then((networkInfo) => {
+        sendXhr(networkInfo);
       });
     } else {
       sendXhr('');
@@ -482,27 +486,6 @@ class uProxyCore implements uProxy.CoreAPI {
       this.rejectFeedbackSent_ = R;
     });
     return this.feedbackSent_;
-
-    /*
-    TODO: Allow users to submit just network info or just logs.
-    The new logic should be like below.
-
-    if (feedback.logs && feedback.networkInfo) {
-      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-        sendXhr(browserInfo + logsWithNetworkInfo);
-      });
-    } else if (feedback.logs) {
-      this.getLogs().then((logs) => {
-        sendXhr(browserInfo + logs);
-      });
-    } else if (feedback.networkInfo) {
-      this.getNetworkInfo().then((networkInfo) => {
-        sendXhr(networkInfo);
-      });
-    } else {
-      sendXhr('');
-    }
-    */
   }
 
   public getNatType = () : Promise<string> => {
@@ -614,7 +597,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
-core.onPromiseCommand(uProxy.Command.GET_NAT, core.getNatType);
+core.onPromiseCommand(uProxy.Command.GET_NAT_TYPE, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

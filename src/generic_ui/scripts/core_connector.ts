@@ -196,7 +196,7 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.GET_LOGS);
   }
 
-  getNat = () : Promise<string> => {
-    return this.promiseCommand(uProxy.Command.GET_NAT);
+  getNatType = () : Promise<string> => {
+    return this.promiseCommand(uProxy.Command.GET_NAT_TYPE);
   }
 }  // class CoreConnector
