@@ -23,8 +23,16 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
-      ui.showNotification('Unable to get access from ' + this.user.name,
-                          { mode: 'get', user: this.user.userId });
+      this.fire('open-dialog', {
+        heading: 'Oh no!',
+        message: 'Unable to get access from ' + this.user.name + '. Would you like uProxy to diagnose your network?',
+        buttons: [{
+          text: 'Yes',
+          signal: 'analyze-network'
+        }]
+      });
+      // ui.showNotification('Unable to get access from ' + this.user.name,
+      //                    { mode: 'get', user: this.user.userId });
       console.error('Unable to start proxying ', e);
     });
   },
