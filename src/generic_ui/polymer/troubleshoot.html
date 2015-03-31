@@ -12,8 +12,7 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
-    core-icon[icon="launch"],
-    core-icon[icon="help"]{
+    core-icon[icon="help"] {
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -22,36 +21,32 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    core-icon[icon="launch"]:hover,
-    core-icon[icon="help"]:hover{
+    core-icon[icon="help"]:hover {
       opacity: 1;
-    }
-    core-tooltip::shadow #tooltip {
-      /* Without this, the first time you view the
-         tooltip, it appears off center. */
-      left: -64px !important;
     }
     paper-button {
       background-color: #009688; /* teal */
       color: white;
       margin-bottom: 3px;
+      margin-top: 10px;
     }
     paper-action-dialog {
       top: 20%;
+      min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
-    }
-    .core-overlay-backdrop {
-      z-index: 1001;
     }
     #analyzeNetwork {
       text-align: center;
       font-size: 14px;
     }
+    #analyzedNetwork {
+      text-align: left;
+    }
     paper-progress::shadow #activeProgress {
       background-color: #009688;
     }
-    #dontSendButton {
-      float: left;
+    #confirmSendButton {
+      float: right;
     }
     </style>
 
@@ -75,16 +70,17 @@
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        NAT type detected: {{ natType }} <br>
-        This NAT type is {{ natDescription }} restricting your ability to use uProxy.
+        NAT type detected: <b>{{ natType }}</b> <br>
+        This NAT type is <b>{{ natDescription }}</b> restricting your ability to use uProxy.
         <uproxy-faq-link anchor='doesUproxyLogData'>
           <core-icon icon="help"></core-icon>
-        </uproxy-faq-link><br>
+        </uproxy-faq-link><br><br>
         Would you like to report your NAT type to uProxy developers?
-        <paper-button dismissive id='dontSendButton'>
+        <br>
+        <paper-button dismissive>
           No
         </paper-button>
-        <paper-button affirmative on-tap='{{ sendNetworkInfo }}'>
+        <paper-button affirmative on-tap='{{ sendNetworkInfo }}' id='confirmSendButton'>
           Yes
         </paper-button>
       </div>

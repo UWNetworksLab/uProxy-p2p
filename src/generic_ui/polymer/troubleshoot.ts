@@ -18,7 +18,7 @@ Polymer({
       // when it receives these events.
       this.fire('open-dialog', {
         heading: 'Thank you!',
-        message: 'Your feedback has been submitted to the uProxy development team.',
+        message: 'Your NAT type has been submitted to the uProxy development team.',
         buttons: [{
           text: 'Done',
           signal: 'close-settings'
@@ -27,8 +27,11 @@ Polymer({
     }).catch((e) => {
       this.close();
       this.fire('open-dialog', {
-        heading: 'Email info instead?',
-        message: 'Oops! We were unable to submit your info to uproxy.org. Please copy and paste your NAT type in an email to info@uproxy.org.',
+        heading: 'Email instead?',
+        message:
+          'Oops! We were unable to submit your NAT type to uproxy.org. Please send your NAT type ('
+          + this.natType
+          + ') in an email to info@uproxy.org.',
         buttons: [{
           text: 'OK'
         }]
