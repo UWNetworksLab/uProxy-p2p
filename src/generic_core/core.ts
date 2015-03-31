@@ -450,6 +450,8 @@ class uProxyCore implements uProxy.CoreAPI {
             if (stateAndStatus[0] === 4 && stateAndStatus[1] === 200) {
               this.fulfillFeedbackSent_();
             } else if (stateAndStatus[0] === 4 && stateAndStatus[1] != 200) {
+              // TODO: Once we have non-AppEngine links we can send feedback to, try
+              // multiple URLs before rejecting the sendFeedback promise.
               this.rejectFeedbackSent_('POST to uproxy.org failed.');
             }
           });
@@ -612,6 +614,7 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
+core.onPromiseCommand(uProxy.Command.GET_NAT, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

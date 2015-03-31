@@ -42,7 +42,8 @@ module uProxy {
     SEND_CREDENTIALS,
     UPDATE_GLOBAL_SETTINGS,
     SEND_FEEDBACK,
-    GET_LOGS
+    GET_LOGS,
+    GET_NAT
   }
 
   // Updates are sent from the Core to the UI, to update state that the UI must
