@@ -435,16 +435,30 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
-  // TODO: make this return a promise, if it fails, the POST was not
-  // was not successful.
-  public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
+  private fulfillFeedbackSent_ :Function;
+  private rejectFeedbackSent_ :Function;
+  private feedbackSent_ :Promise<void>;
+
+  public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
     var sendXhr = (logs) : void => {
       var xhr = freedom["core.xhr"]();
+      xhr.on('onreadystatechange', () => {
+        Promise.all([xhr.getReadyState(), xhr.getStatus()])
+          .then((stateAndStatus) => {
+            log.info('getReadyState: ' + stateAndStatus[0]);
+            log.info('getStatus: ' + stateAndStatus[1]);
+            if (stateAndStatus[0] === 4 && stateAndStatus[1] === 200) {
+              this.fulfillFeedbackSent_();
+            } else if (stateAndStatus[0] === 4 && stateAndStatus[1] != 200) {
+              this.rejectFeedbackSent_('POST to uproxy.org failed.');
+            }
+          });
+      });
       var params = JSON.stringify(
         {'email' : feedback.email,
          'feedback' : feedback.feedback,
           'logs' : logs});
-      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
+      xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
       // core.xhr requires the parameters to be tagged as either a
       // string or array buffer in the format below.
       // This is roughly equivalent to standard xhr.send(params).
@@ -460,6 +474,33 @@ class uProxyCore implements uProxy.CoreAPI {
     } else {
       sendXhr('');
     }
+
+    this.feedbackSent_ = new Promise<void>((F, R) => {
+      this.fulfillFeedbackSent_ = F;
+      this.rejectFeedbackSent_ = R;
+    });
+    return this.feedbackSent_;
+
+    /*
+    TODO: Allow users to submit just network info or just logs.
+    The new logic should be like below.
+
+    if (feedback.logs && feedback.networkInfo) {
+      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+        sendXhr(browserInfo + logsWithNetworkInfo);
+      });
+    } else if (feedback.logs) {
+      this.getLogs().then((logs) => {
+        sendXhr(browserInfo + logs);
+      });
+    } else if (feedback.networkInfo) {
+      this.getNetworkInfo().then((networkInfo) => {
+        sendXhr(networkInfo);
+      });
+    } else {
+      sendXhr('');
+    }
+    */
   }
 
   public getNatType = () : Promise<string> => {
@@ -569,8 +610,9 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
-core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
+//core.onPromiseCommand(uProxy.Command.GET_NAT, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

@@ -4,6 +4,7 @@
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
+<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../lib/core-overlay/core-overlay.html'>
 <link rel='import' href='../lib/core-signals/core-signals.html'>
@@ -114,6 +115,20 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
+    paper-action-dialog {
+      top: 30%;
+      z-index: 1002; /* Must be greater than core-overlay-backdrop */
+    }
+    .core-overlay-backdrop {
+      z-index: 1001;
+    }
+    #sendingFeedback {
+      text-align: center;
+      font-size: 16px;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
     #feedbackDecorator {
       height: 190px;
     }
@@ -131,17 +146,15 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           Submit feedback
         </uproxy-app-bar>
-
         <div id='formContainer' flex>
-          <p class='inputLabel'>Email (optional)</p>
-          <paper-input-decorator id='emailDecorator' label="Email address">
-            <input id="emailInput"
-                   is="core-input"
-                   value='{{ email }}'>
-          </paper-input-decorator>
-
-          <p class='inputLabel'>Enter your feedback below</p>
-
+          <div>
+            <p class='inputLabel'>Email (optional)</p>
+            <paper-input-decorator id='emailDecorator' label="Email address">
+              <input id="emailInput"
+                     is="core-input"
+                     value='{{ email }}'>
+            </paper-input-decorator>
+            <p class='inputLabel'>Enter your feedback below</p>
             <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
               <paper-autogrow-textarea id="feedbackPaperTextarea">
                 <textarea id="feedbackInput"
@@ -149,30 +162,35 @@
                 </textarea>
               </paper-autogrow-textarea>
             </paper-input-decorator>
-
-          <div id='logCheckboxContainer'>
-            <core-label id='logCheckboxLabel' horizontal layout>
-              <paper-checkbox id='logCheckbox'></paper-checkbox>
-              Analyze network and include logs
-            </core-label>
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
-            <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
-              <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
-            </core-tooltip>
-          </div>
-
-          <p id='moreInfo'>
-            Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
-            <uproxy-faq-link anchor='doesUproxyLogData'>
-              <core-icon icon="help"></core-icon>
-            </uproxy-faq-link>
-          </p>
-        </div>
+            <div id='logCheckboxContainer'>
+              <core-label id='logCheckboxLabel' horizontal layout>
+                <paper-checkbox id='logCheckbox'></paper-checkbox>
+                Analyze network and include logs
+              </core-label>
+              <uproxy-faq-link anchor='doesUproxyLogData'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+              <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
+                <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
+              </core-tooltip>
+            </div>
+            <p id='moreInfo'>
+              Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
+              <uproxy-faq-link anchor='doesUproxyLogData'>
+                <core-icon icon="help"></core-icon>
+              </uproxy-faq-link>
+            </p>
+          </div> <!-- end of feedback form -->
+        </div> <!-- end of form container -->
         <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
       </div>
     </core-overlay>
+    <paper-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+      <div id='sendingFeedback'>
+        Sending feedback<br>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+    </paper-action-dialog>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>
