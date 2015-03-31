@@ -30,9 +30,9 @@
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
-      <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>Request a one time connection</span>
-      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a one time connection</span>
-      <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>Manual Connection</span>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>Request a </span>
+      <span>One Time Connection</span>
     </uproxy-app-bar>
 
     <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
