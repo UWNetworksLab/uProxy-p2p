@@ -3,35 +3,42 @@
  * TODO(salomegeo): rewrite it in typescript
  */
 
+var { Cc, Ci } = require("chrome");
 var prefsvc = require("sdk/preferences/service");
 
-var proxyConfig = function() {
-  this.running_ = false;
-};
+var running = false;
 
-proxyConfig.startUsingProxy = function(endpoint) {
-  if (!this.running_) {
-    this.running_ = true;
-    // Store initial proxy state.
-    this.socks_server_ = prefsvc.get("network.proxy.socks");
-    this.socks_port_ = prefsvc.get("network.proxy.socks_port");
-    this.proxy_type_ = prefsvc.get("network.proxy.type");
+var pps = Cc['@mozilla.org/network/protocol-proxy-service;1']
+            .getService(Ci.nsIProtocolProxyService);
 
-    prefsvc.set("network.proxy.socks", endpoint.address);
-    prefsvc.set("network.proxy.socks_port", endpoint.port);
-    prefsvc.set("network.proxy.type", 1);
+var proxyinfo = null;
+
+var filter = {
+  applyFilter: function(aProxyService, aURI, aProxy) {
+    if (!proxyinfo) {
+      // something went wrong.  For now, just fail by doing nothing.
+      return aProxy;
+    }
+
+    return proxyinfo;
   }
-};
+}
 
-proxyConfig.stopUsingProxy = function() {
-  if (this.running_) {
-    this.running_ = false;
-    // Restore initial proxy state.
-    prefsvc.set("network.proxy.socks", this.socks_server_);
-    prefsvc.set("network.proxy.socks_port", this.socks_port_);
-    prefsvc.set("network.proxy.type", this.proxy_type_);
+var proxyConfig = {
+  startUsingProxy: function(endpoint) {
+    if (!running) {
+      running = true;
+      proxyinfo = pps.newProxyInfo('socks', endpoint.address, endpoint.port, 0, 0, null);
+      pps.registerFilter(filter, 0);
+    }
+  },
+  stopUsingProxy: function() {
+    if (running) {
+      running = false;
+      pps.unregisterFilter(filter);
+      proxyinfo = null;
+    }
   }
-
 };
 
 exports.proxyConfig = proxyConfig
