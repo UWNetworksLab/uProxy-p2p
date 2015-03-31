@@ -612,7 +612,6 @@ core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
 core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
-//core.onPromiseCommand(uProxy.Command.GET_NAT, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
