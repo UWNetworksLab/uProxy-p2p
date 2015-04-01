@@ -1,6 +1,6 @@
 <link rel='import' href='../lib/polymer/polymer.html'>
 <link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
+<link rel='import' href='../lib/paper-dialog/paper-dialog.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../lib/core-icons/core-icons.html'>
 <link rel='import' href='../lib/core-signals/core-signals.html'>
@@ -43,7 +43,7 @@
       margin: 10px 2px 3px 2px;
       font-size: 12px;
     }
-    paper-action-dialog {
+    paper-dialog {
       top: 20%;
       min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
@@ -56,7 +56,7 @@
     <!-- Listen for the 'open-troubleshoot' event, which the user can trigger after proxying fails. -->
     <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
 
-    <paper-action-dialog backdrop layered="false" id='troubleshootDialog'>
+    <paper-dialog backdrop layered='false' id='troubleshootDialog'>
       <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
       <h1>Unable to proxy</h1>
       <div>
@@ -73,7 +73,7 @@
           Submit Feedback
         </paper-button>
       </div>
-    </paper-action-dialog>
+    </paper-dialog>
 
   </template>
   <script src='troubleshoot.js'></script>

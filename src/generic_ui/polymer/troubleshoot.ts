@@ -17,5 +17,6 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = model;
+    this.analyzedNetwork = false;
   }
 });
