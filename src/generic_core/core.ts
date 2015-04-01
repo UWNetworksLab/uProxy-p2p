@@ -435,58 +435,52 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
-  private fulfillFeedbackSent_ :Function;
-  private rejectFeedbackSent_ :Function;
-  private feedbackSent_ :Promise<void>;
-
   public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
-    var sendXhr = (logs) : void => {
-      var xhr = freedom["core.xhr"]();
-      xhr.on('onreadystatechange', () => {
-        Promise.all([xhr.getReadyState(), xhr.getStatus()])
-          .then((stateAndStatus) => {
-            log.info('getReadyState: ' + stateAndStatus[0]);
-            log.info('getStatus: ' + stateAndStatus[1]);
-            if (stateAndStatus[0] === 4 && stateAndStatus[1] === 200) {
-              this.fulfillFeedbackSent_();
-            } else if (stateAndStatus[0] === 4 && stateAndStatus[1] != 200) {
-              // TODO: Once we have non-AppEngine links we can send feedback to, try
-              // multiple URLs before rejecting the sendFeedback promise.
-              this.rejectFeedbackSent_('POST to uproxy.org failed.');
-            }
-          });
-      });
-      var params = JSON.stringify(
-        {'email' : feedback.email,
-         'feedback' : feedback.feedback,
-          'logs' : logs});
-      xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
-      // core.xhr requires the parameters to be tagged as either a
-      // string or array buffer in the format below.
-      // This is roughly equivalent to standard xhr.send(params).
-      xhr.send({'string': params});
-    }
+    return new Promise<void>((F, R) => {
+      var sendXhr = (logs) : void => {
+        var xhr = freedom["core.xhr"]();
+        xhr.on('onreadystatechange', () => {
+          Promise.all([xhr.getReadyState(), xhr.getStatus()])
+            .then((stateAndStatus) => {
+              // 200 is the HTTP result code for a successful request.
+              if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] === 200) {
+                F();
+              } else if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] != 200) {
+                // TODO: Once we have non-AppEngine links we can send feedback to, try
+                // multiple URLs before rejecting the sendFeedback promise.
+                // https://github.com/uProxy/uproxy/issues/1191
+                R('POST to uproxy.org failed.');
+              }
+            });
+        });
+        var params = JSON.stringify(
+          {'email' : feedback.email,
+           'feedback' : feedback.feedback,
+            'logs' : logs});
+        xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
+        // core.xhr requires the parameters to be tagged as either a
+        // string or array buffer in the format below.
+        // This is roughly equivalent to standard xhr.send(params).
+        xhr.send({'string': params});
+      }
 
-    var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+      var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
 
-    if (feedback.logs && feedback.networkInfo) {
-      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-        sendXhr(browserInfo + logsWithNetworkInfo);
-      });
-    } else if (feedback.networkInfo) {
-      this.getNetworkInfo().then((networkInfo) => {
-        sendXhr(networkInfo);
-      });
-    } else {
-      sendXhr('');
-    }
-
-    this.feedbackSent_ = new Promise<void>((F, R) => {
-      this.fulfillFeedbackSent_ = F;
-      this.rejectFeedbackSent_ = R;
+      if (feedback.logs) {
+        this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+          sendXhr(browserInfo + logsWithNetworkInfo);
+        });
+      } else {
+        sendXhr('');
+      }
     });
-    return this.feedbackSent_;
   }
+
+  // If the user requests the NAT type while another NAT request is pending,
+  // the then() block of doNatProvoking ends up being called twice.
+  // We keep track of the timeout that resets the NAT type to make sure
+  // there is at most one timeout at a time.
+  private natResetTimeout_ :number;
 
   public getNatType = () : Promise<string> => {
     if (this.natType_ === '') {
@@ -515,7 +509,8 @@ class uProxyCore implements uProxy.CoreAPI {
             // If we expect users to check NAT type frequently (e.g. if they
             // switch between networks while troubleshooting), then we might want
             // to remove caching.
-            setTimeout(() => {this.natType_ = '';}, 300000);
+            clearTimeout(this.natResetTimeout_);
+            this.natResetTimeout_ = setTimeout(() => {this.natType_ = '';}, 300000);
             return this.natType_;
           })
         ]);

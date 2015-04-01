@@ -143,40 +143,35 @@
           Submit feedback
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <div>
-            <p class='inputLabel'>Email (optional)</p>
-            <paper-input-decorator id='emailDecorator' label="Email address">
-              <input id="emailInput"
-                     is="core-input"
-                     value='{{ email }}'>
-            </paper-input-decorator>
-            <p class='inputLabel'>Enter your feedback below</p>
-            <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
-              <paper-autogrow-textarea id="feedbackPaperTextarea">
-                <textarea id="feedbackInput"
-                       value='{{ feedback }}'>
-                </textarea>
-              </paper-autogrow-textarea>
-            </paper-input-decorator>
-            <div id='logCheckboxContainer'>
-              <paper-checkbox for id='logCheckbox'></paper-checkbox>
-              <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
-                Analyze network and include logs
-              </span>
-              <uproxy-faq-link anchor='doesUproxyLogData'>
-                <core-icon icon="help"></core-icon>
-              </uproxy-faq-link>
-<!--               <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
-                <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
-              </core-tooltip> -->
-            </div>
-            <p id='moreInfo'>
-              Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
-              <uproxy-faq-link anchor='doesUproxyLogData'>
-                <core-icon icon="help"></core-icon>
-              </uproxy-faq-link>
-            </p>
-          </div> <!-- end of feedback form -->
+          <p class='inputLabel'>Email (optional)</p>
+          <paper-input-decorator id='emailDecorator' label="Email address">
+            <input id="emailInput"
+                   is="core-input"
+                   value='{{ email }}'>
+          </paper-input-decorator>
+          <p class='inputLabel'>Enter your feedback below</p>
+          <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
+            <paper-autogrow-textarea id="feedbackPaperTextarea">
+              <textarea id="feedbackInput"
+                     value='{{ feedback }}'>
+              </textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
+          <div id='logCheckboxContainer'>
+            <paper-checkbox for id='logCheckbox'></paper-checkbox>
+            <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
+              Analyze network and include logs
+            </span>
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </div>
+          <p id='moreInfo'>
+            Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </p>
         </div> <!-- end of form container -->
         <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SUBMIT FEEDBACK</div>
       </div>
