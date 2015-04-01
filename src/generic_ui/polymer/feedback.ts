@@ -5,7 +5,10 @@ Polymer({
   close: function() {
     this.$.feedbackPanel.close();
   },
-  open: function() {
+  open: function(e, detail, signal) {
+    if (detail && detail.includeLogs) {
+      this.$.logCheckbox.checked = true;
+    }
     this.$.feedbackPanel.open();
   },
   sendFeedback: function() {

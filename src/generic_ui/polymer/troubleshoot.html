@@ -2,6 +2,7 @@
 <link rel='import' href='../lib/paper-button/paper-button.html'>
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../lib/core-icons/core-icons.html'>
 <link rel='import' href='../lib/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
 
@@ -14,9 +15,21 @@
     }
     h1 {
       font-size: 1.5em;
+      margin-top: 1.4em;
+    }
+    core-icon[icon="check"] {
+      height: 15px;
+      width: 15px;
+    }
+    core-icon[icon="clear"] {
+      float: right;
+    }
+    core-icon[icon="help"] {
+      height: 15px;
+      width: 15px;
     }
     core-icon[icon="help"],
-    core-icon[icon="close"] {
+    core-icon[icon="clear"] {
       color: grey;
       opacity: 0.6;
       margin-bottom: 2px;
@@ -25,39 +38,22 @@
       transition: all 0.23s !important;
     }
     core-icon[icon="help"]:hover,
-    core-icon[icon="close"]:hover {
+    core-icon[icon="clear"]:hover {
       opacity: 1;
-    }
-    core-icon[icon="help"] {
-      height: 15px;
-      width: 15px;
-    }
-    core-icon[icon="close"] {
-      float: right;
     }
     paper-button {
       background-color: #009688; /* teal */
       color: white;
-      margin-bottom: 3px;
-      margin-top: 10px;
+      margin: 10px 2px 3px 2px;
+      font-size: 12px;
     }
     paper-action-dialog {
       top: 20%;
       min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
-    #analyzeNetwork {
-      text-align: center;
-      font-size: 14px;
-    }
-    #analyzedNetwork {
-      text-align: left;
-    }
-    paper-progress::shadow #activeProgress {
-      background-color: #009688;
-    }
-    #confirmSendButton {
-      float: right;
+    paper-action-dialog::shadow #scroller {
+      padding: 18px 20px 0px 20px;
     }
     </style>
 
@@ -65,37 +61,23 @@
     <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
 
     <paper-action-dialog backdrop layered="false" id='troubleshootDialog'>
-      <h1>
-        Unable to proxy <core-icon icon="close" on-tap='{{ close }}'></core-icon>
-      </h1>
-      <div hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
+      <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
+      <h1>Unable to proxy</h1>
+      <div>
         <p>
           Something went wrong. Would you like uProxy to diagnose your network?
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
-        <paper-button on-tap='{{ getNatType }}'>
+        <paper-button on-tap='{{ analyzeNetworkAndViewLogs }}' hidden?='{{ analyzedNetwork }}'>
           Analyze Network
         </paper-button>
-      </div>
-      <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
-        Analyzing network<br>
-        <paper-progress indeterminate='true'></paper-progress>
-      </div>
-      <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        NAT type detected: <b>{{ natType }}</b> <br>
-        This NAT type is <b>{{ natDescription }}</b> restricting your ability to use uProxy.
-        <uproxy-faq-link anchor='doesUproxyLogData'>
-          <core-icon icon="help"></core-icon>
-        </uproxy-faq-link><br><br>
-        Would you like to report your NAT type to uProxy developers?
-        <br>
-        <paper-button dismissive>
-          No
-        </paper-button>
-        <paper-button affirmative on-tap='{{ sendNetworkInfo }}' id='confirmSendButton'>
-          Yes
+        <paper-button id='analyzedButton' disabled hidden?='{{ !analyzedNetwork }}'>
+          <core-icon icon='check'></core-icon> Analyzed
+        </paper-button><br>
+        <paper-button on-tap='{{ submitFeedback }}'>
+          Submit Feedback
         </paper-button>
       </div>
     </paper-action-dialog>

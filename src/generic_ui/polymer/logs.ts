@@ -4,7 +4,8 @@ declare var ui :UI.UserInterface;
 Polymer({
   logs: '',
   loadingLogs: true,
-  getNetworkInfo: function() {
+  openUproxy: function() {
+    ui.bringUproxyToFront();
   },
   ready: function() {
     // Expose global ui object in this context.

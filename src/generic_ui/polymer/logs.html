@@ -1,4 +1,5 @@
 <link rel="import" href="../lib/polymer/polymer.html">
+<link rel="import" href="../lib/core-signals/core-signals.html">
 <link rel='import' href='../lib/paper-progress/paper-progress.html'>
 
 <polymer-element name='uproxy-logs'>
@@ -10,16 +11,13 @@
         font-size: 13px;
       }
       #container {
+        text-align: center;
         margin: 50px;
       }
-      paper-button {
-        width: 100px;
-        background: #009688;  /* dark green */
-        color: white;
-      }
-      paper-button:disabled {
-        background: #f1f1f1;
-        color: rgb(112, 112, 112);
+      #openUproxy {
+        color: #009688;
+        cursor: pointer;
+        text-decoration: underline;
       }
       paper-progress::shadow #progressContainer {
         background-color: #ffffff;
@@ -45,13 +43,13 @@
         background: lightgray;
       }
       h1 {
-        text-align: center;
         margin-bottom: 1em;
       }
     </style>
 
     <div id='container'>
       <h1>Logs & Network Analysis</h1>
+      <p>To send your logs to the uProxy team for help, <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy</span> and click 'Submit Feedback'</p>
       <div id='logs'>
         <div id='loadingLogs' hidden?='{{ !loadingLogs }}'>
           <p>Retrieving logs and analyzing your network...</p>

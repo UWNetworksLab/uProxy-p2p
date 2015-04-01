@@ -24,8 +24,7 @@ Polymer({
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
       this.fire('core-signal', {name: 'open-troubleshoot'});
-      ui.showNotification('Unable to get access from ' + this.user.name,
-                         { mode: 'get', user: this.user.userId });
+      ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
     });
   },
