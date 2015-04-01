@@ -39,7 +39,7 @@ var model :UI.Model = {
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
-    mode : uProxy.Mode.GET
+    mode : uProxy.Mode.GET,
     allowNonUnicast: false
   }
 };

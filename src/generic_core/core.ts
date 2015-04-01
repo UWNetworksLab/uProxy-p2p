@@ -111,7 +111,7 @@ class uProxyCore implements uProxy.CoreAPI {
          allowNonUnicast: false,
          mode: uProxy.Mode.GET};
   public loadGlobalSettings :Promise<void> = null;
-  private natType_ = '';
+  private natType_ :String = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -310,11 +310,8 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
-<<<<<<< HEAD
     this.globalSettings.allowNonUnicast = newSettings.allowNonUnicast;
-=======
     this.globalSettings.mode = newSettings.mode;
->>>>>>> 053a1fefeaeda5355f2d4fa0a39b2cf4ef2a0fe9
   }
 
   /**
