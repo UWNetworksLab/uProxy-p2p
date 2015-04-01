@@ -22,17 +22,14 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
-      this.openTroubleshoot();
+      // TODO: the querySelector should be replaced with the line below, which
+      // for some reason does not work. GitHub issue:
+      // https://github.com/uProxy/uproxy/issues/1199
+      // this.fire('core-signal', {name: 'open-troubleshoot'});
+      document.querySelector('html /deep/ #troubleshootDialog').open();
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
     });
-  },
-  openTroubleshoot: function() {
-    document.querySelector('html /deep/ #troubleshootDialog').open();
-    // TODO: this function should really contain the line below, which
-    // for some reason does not work. GitHub issue:
-    // https://github.com/uProxy/uproxy/issues/1199
-    // this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   stop: function() {
     console.log('[polymer] calling core.stop()');
