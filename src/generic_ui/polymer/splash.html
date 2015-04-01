@@ -60,6 +60,8 @@
     #submitFeedback {
       text-decoration: underline;
       cursor: pointer;
+      display: inline-block;
+      margin-top: 50px;
     }
     uproxy-faq-link {
       width: 100%;
@@ -118,9 +120,9 @@
         <p>
           We won't share your data or post publicly without your consent
         </p>
-        <p id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
+        <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
           Submit Feedback
-        </p>
+        </span>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
         Learn more about social networks

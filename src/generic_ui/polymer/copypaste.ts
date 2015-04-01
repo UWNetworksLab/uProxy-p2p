@@ -6,11 +6,6 @@
  */
 
 Polymer({
-  GettingState: GettingState,
-  SharingState: SharingState,
-  model: model,
-  ui: ui,
-  UI: UI,
   init: function() {
     /* bring copyPaste to the front in get mode */
     ui.view = uProxy.View.COPYPASTE;
@@ -89,7 +84,7 @@ Polymer({
       return;
     }
 
-    this.ui.startGettingInUi();
+    ui.startGettingInUi();
     ui.browserApi.startUsingProxy(ui.copyPastePendingEndpoint);
     ui.copyPastePendingEndpoint = null;
   },
@@ -135,6 +130,7 @@ Polymer({
   },
   ready: function() {
     this.ui = ui;
+    this.UI = UI;
     this.model = model;
     this.GettingState = GettingState;
     this.SharingState = SharingState;

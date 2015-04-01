@@ -184,8 +184,8 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 
-  sendFeedback = (feedback :uProxy.UserFeedback) : void => {
-    return this.sendCommand(uProxy.Command.SEND_FEEDBACK, feedback);
+  sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
+    return this.promiseCommand(uProxy.Command.SEND_FEEDBACK, feedback);
   }
 
   restart = () => {
@@ -194,5 +194,9 @@ class CoreConnector implements uProxy.CoreAPI {
 
   getLogs = () : Promise<string> => {
     return this.promiseCommand(uProxy.Command.GET_LOGS);
+  }
+
+  getNatType = () : Promise<string> => {
+    return this.promiseCommand(uProxy.Command.GET_NAT_TYPE);
   }
 }  // class CoreConnector

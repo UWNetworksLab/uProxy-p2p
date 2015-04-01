@@ -4,6 +4,7 @@
 <link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../lib/core-label/core-label.html'>
+<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../lib/core-overlay/core-overlay.html'>
 <link rel='import' href='../lib/core-signals/core-signals.html'>
@@ -41,10 +42,9 @@
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      display: inline-table;
+      cursor: pointer;
     }
     #logCheckbox {
-      display: table-cell;
       padding-right:10px;
       vertical-align: middle;
     }
@@ -114,6 +114,17 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
+    paper-action-dialog {
+      top: 30%;
+      z-index: 1002; /* Must be greater than core-overlay-backdrop */
+    }
+    #sendingFeedback {
+      text-align: center;
+      font-size: 16px;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
     #feedbackDecorator {
       height: 190px;
     }
@@ -131,7 +142,6 @@
         <uproxy-app-bar on-go-back='{{ close }}'>
           Submit feedback
         </uproxy-app-bar>
-
         <div id='formContainer' flex>
           <p class='inputLabel'>Email (optional)</p>
           <paper-input-decorator id='emailDecorator' label="Email address">
@@ -139,40 +149,39 @@
                    is="core-input"
                    value='{{ email }}'>
           </paper-input-decorator>
-
           <p class='inputLabel'>Enter your feedback below</p>
-
-            <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
-              <paper-autogrow-textarea id="feedbackPaperTextarea">
-                <textarea id="feedbackInput"
-                       value='{{ feedback }}'>
-                </textarea>
-              </paper-autogrow-textarea>
-            </paper-input-decorator>
-
+          <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
+            <paper-autogrow-textarea id="feedbackPaperTextarea">
+              <textarea id="feedbackInput"
+                     value='{{ feedback }}'>
+              </textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
           <div id='logCheckboxContainer'>
-            <core-label id='logCheckboxLabel' horizontal layout>
-              <paper-checkbox id='logCheckbox'></paper-checkbox>
+            <paper-checkbox for id='logCheckbox'></paper-checkbox>
+            <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
               Analyze network and include logs
-            </core-label>
+            </span>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
-            <core-tooltip id='logsTooltip' label='Analyze network and view logs' position='top'>
-              <core-icon icon='launch' on-tap='{{ viewLogs }}'></core-icon>
-            </core-tooltip>
           </div>
-
           <p id='moreInfo'>
             Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
           </p>
-        </div>
-        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
+        </div> <!-- end of form container -->
+        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SUBMIT FEEDBACK</div>
       </div>
     </core-overlay>
+    <paper-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+      <div id='sendingFeedback'>
+        Sending feedback<br>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+    </paper-action-dialog>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>
