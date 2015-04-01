@@ -15,7 +15,6 @@ Polymer({
     this.GettingState = GettingState;
     this.model = model;
   },
-
   start: function() {
     console.log('[polymer] calling core.start(', this.path, ')');
     core.start(this.path).then((endpoint) => {
@@ -23,7 +22,11 @@ Polymer({
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
     }).catch((e) => {
-      this.fire('core-signal', {name: 'open-troubleshoot'});
+      // TODO: the querySelector should be replaced with the line below, which
+      // for some reason does not work. GitHub issue:
+      // https://github.com/uProxy/uproxy/issues/1199
+      // this.fire('core-signal', {name: 'open-troubleshoot'});
+      document.querySelector('html /deep/ #troubleshootDialog').open();
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
     });
