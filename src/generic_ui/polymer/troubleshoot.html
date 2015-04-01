@@ -17,10 +17,6 @@
       font-size: 1.5em;
       margin-top: 1.4em;
     }
-    core-icon[icon="check"] {
-      height: 15px;
-      width: 15px;
-    }
     core-icon[icon="clear"] {
       float: right;
     }
@@ -70,11 +66,8 @@
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
-        <paper-button on-tap='{{ analyzeNetworkAndViewLogs }}' hidden?='{{ analyzedNetwork }}'>
+        <paper-button on-tap='{{ analyzeNetworkAndViewLogs }}'>
           Analyze Network
-        </paper-button>
-        <paper-button id='analyzedButton' disabled hidden?='{{ !analyzedNetwork }}'>
-          <core-icon icon='check'></core-icon> Analyzed
         </paper-button><br>
         <paper-button on-tap='{{ submitFeedback }}'>
           Submit Feedback
