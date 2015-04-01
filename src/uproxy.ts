@@ -154,7 +154,6 @@ module uProxy {
     feedback  :string;
     logs      :boolean;
     browserInfo :string;
-    networkInfo :boolean;
   }
 
   // --- Core <--> UI Interfaces ---

@@ -17,8 +17,7 @@ Polymer({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
-      browserInfo: navigator.userAgent,
-      networkInfo: this.$.logCheckbox.checked
+      browserInfo: navigator.userAgent
     }).then(() => {
       // Reset the placeholders, which seem to be cleared after the
       // user types input in the input fields.
