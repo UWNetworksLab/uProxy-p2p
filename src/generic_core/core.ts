@@ -436,7 +436,7 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
-    return new Promise<void>((F, R) => {
+    return new Promise<void>((fulfill, reject) => {
       var sendXhr = (logs) : void => {
         var xhr = freedom["core.xhr"]();
         xhr.on('onreadystatechange', () => {
@@ -444,12 +444,12 @@ class uProxyCore implements uProxy.CoreAPI {
             .then((stateAndStatus) => {
               // 200 is the HTTP result code for a successful request.
               if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] === 200) {
-                F();
+                fulfill();
               } else if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] != 200) {
                 // TODO: Once we have non-AppEngine links we can send feedback to, try
                 // multiple URLs before rejecting the sendFeedback promise.
                 // https://github.com/uProxy/uproxy/issues/1191
-                R('POST to uproxy.org failed.');
+                reject('POST to uproxy.org failed.');
               }
             });
         });
