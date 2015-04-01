@@ -435,47 +435,85 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
-  // TODO: make this return a promise, if it fails, the POST was not
-  // was not successful.
-  public sendFeedback = (feedback :uProxy.UserFeedback) : void => {
-    var sendXhr = (logs) : void => {
-      var xhr = freedom["core.xhr"]();
-      var params = JSON.stringify(
-        {'email' : feedback.email,
-         'feedback' : feedback.feedback,
-          'logs' : logs});
-      xhr.open('POST', 'https://www.uproxy.org/submit-feedback', true);
-      // core.xhr requires the parameters to be tagged as either a
-      // string or array buffer in the format below.
-      // This is roughly equivalent to standard xhr.send(params).
-      xhr.send({'string': params});
-    }
+  public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
+    return new Promise<void>((fulfill, reject) => {
+      var sendXhr = (logs) : void => {
+        var xhr = freedom["core.xhr"]();
+        xhr.on('onreadystatechange', () => {
+          Promise.all([xhr.getReadyState(), xhr.getStatus()])
+            .then((stateAndStatus) => {
+              // 200 is the HTTP result code for a successful request.
+              if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] === 200) {
+                fulfill();
+              } else if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] != 200) {
+                // TODO: Once we have non-AppEngine links we can send feedback to, try
+                // multiple URLs before rejecting the sendFeedback promise.
+                // https://github.com/uProxy/uproxy/issues/1191
+                reject('POST to uproxy.org failed.');
+              }
+            });
+        });
+        var params = JSON.stringify(
+          {'email' : feedback.email,
+           'feedback' : feedback.feedback,
+            'logs' : logs});
+        xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
+        // core.xhr requires the parameters to be tagged as either a
+        // string or array buffer in the format below.
+        // This is roughly equivalent to standard xhr.send(params).
+        xhr.send({'string': params});
+      }
 
-    var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+      var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
 
-    if (feedback.logs) {
-      this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-        sendXhr(browserInfo + logsWithNetworkInfo);
-      });
-    } else {
-      sendXhr('');
-    }
+      if (feedback.logs) {
+        this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
+          sendXhr(browserInfo + logsWithNetworkInfo);
+        });
+      } else {
+        sendXhr('');
+      }
+    });
   }
+
+  // If the user requests the NAT type while another NAT request is pending,
+  // the then() block of doNatProvoking ends up being called twice.
+  // We keep track of the timeout that resets the NAT type to make sure
+  // there is at most one timeout at a time.
+  private natResetTimeout_ :number;
 
   public getNatType = () : Promise<string> => {
     if (this.natType_ === '') {
-      return Diagnose.doNatProvoking().then((natType) => {
-        this.natType_ = natType;
-        // Store NAT type for five minutes. This way, if the user previews
-        // their logs, and then submits them shortly after, we do not need
-        // to determine the NAT type once for the preview, and once for
-        // submission to our backend.
-        // If we expect users to check NAT type frequently (e.g. if they
-        // switch between networks while troubleshooting), then we might want
-        // to remove caching.
-        setTimeout(() => {this.natType_ = '';}, 300000);
-        return this.natType_;
-      });
+      // Function that returns a promise which fulfills
+      // in a given time.
+      var countdown = (time) : Promise<void> => {
+        return new Promise<void>((F, R) => {
+          setTimeout(F, time);
+        });
+      }
+
+      // Return the first Promise that fulfills in the 'race'
+      // between a countdown and NAT provoking.
+      // i.e., if NAT provoking takes longer than 30s, the countdown
+      // will return first, and a time out message is returned.
+      return Promise.race(
+        [ countdown(30000).then(() => {
+            return 'NAT classification timed out.';
+          }),
+          Diagnose.doNatProvoking().then((natType) => {
+            this.natType_ = natType;
+            // Store NAT type for five minutes. This way, if the user previews
+            // their logs, and then submits them shortly after, we do not need
+            // to determine the NAT type once for the preview, and once for
+            // submission to our backend.
+            // If we expect users to check NAT type frequently (e.g. if they
+            // switch between networks while troubleshooting), then we might want
+            // to remove caching.
+            clearTimeout(this.natResetTimeout_);
+            this.natResetTimeout_ = setTimeout(() => {this.natType_ = '';}, 300000);
+            return this.natType_;
+          })
+        ]);
     } else {
       return Promise.resolve(this.natType_);
     }
@@ -569,8 +607,9 @@ core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
 core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
 core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
-core.onCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
 core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
+core.onPromiseCommand(uProxy.Command.GET_NAT_TYPE, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.
