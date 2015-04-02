@@ -1,6 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel='import' href='../lib/paper-progress/paper-progress.html'>
 <link rel="import" href="../lib/core-signals/core-signals.html">
+<link rel="import" href="../lib/core-icons/social-icons.html">
 <link rel='import' href='roster-group.html'>
 
 <polymer-element name='uproxy-roster' attributes='contacts'>
@@ -35,6 +36,11 @@
     #loadContacts div {
       font-size: 17px;
     }
+    .no-friends {
+      width: 150px;
+      height: 150px;
+      color: #cbcbcb;
+    }
     #noContactsFound {
       margin-top: 2em;
     }
@@ -60,7 +66,7 @@
 
     <!-- Shown if there are no contacts found so far -->
     <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
-      <img src='../icons/contact-default.png'>
+      <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         Loading uProxy friends<br>
         <paper-progress indeterminate='true'></paper-progress>
