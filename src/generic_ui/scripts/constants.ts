@@ -9,5 +9,3 @@ module Constants {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 }
-
-

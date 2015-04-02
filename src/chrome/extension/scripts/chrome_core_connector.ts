@@ -134,6 +134,8 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show its start page.
+        // When extension is loaded initially, this is called but
+        // ui might not be loaded yet.
         if (typeof core.ui !== 'undefined') {
           core.ui.view = uProxy.View.SPLASH;
         }

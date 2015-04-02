@@ -190,7 +190,7 @@ module UI {
           this.view = uProxy.View.COPYPASTE;
         }
 
-        if (state['onlineNetwork'] == null) {
+        if (state['onlineNetwork'] === null) {
           return;
         }
         if (model.onlineNetwork === null) {
@@ -202,6 +202,11 @@ module UI {
             roster: {},
             hasContacts: false
           };
+        }
+
+        if (this.view === uProxy.View.COPYPASTE) {
+          console.error(
+              'User cannot be online while having a copy-paste connection');
         }
         this.view = uProxy.View.ROSTER;
 
@@ -637,17 +642,17 @@ module UI {
       }
 
      for (var i = 0; i < payload.offeringInstances.length; i++) {
-        if (payload.offeringInstances[i].localGettingFromRemote ===
-            GettingState.GETTING_ACCESS) {
-          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
-          user.isSharingWithMe = true;
-          this.updateGettingStatusBar_();
-          break;
-        }
+       if (payload.offeringInstances[i].localGettingFromRemote ===
+           GettingState.GETTING_ACCESS) {
+         this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+         user.isSharingWithMe = true;
+         this.updateGettingStatusBar_();
+         break;
+       }
      }
 
-     for (var i = 0; i < payload.gettingInstances.length; i++) {
-        this.instancesGivingAccessTo[payload.gettingInstances[i]] = true;
+     for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
+        this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
         user.isGettingFromMe = true;
      }
 

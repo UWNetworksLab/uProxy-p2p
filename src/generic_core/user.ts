@@ -322,7 +322,7 @@ module Core {
       var isOnline = false;
       var offeringInstanceStatesForUi = [];
       var allInstanceIds = [];
-      var gettingInstances = [];
+      var gettingInstanceIds = [];
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
@@ -333,7 +333,7 @@ module Core {
           isOnline = true;
         }
         if (instance.isSharing()) {
-          gettingInstances.push(instanceId);
+          gettingInstanceIds.push(instanceId);
         }
       }
       if (allInstanceIds.length === 0) {
@@ -358,7 +358,7 @@ module Core {
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
-        gettingInstances: gettingInstances,
+        gettingInstanceIds: gettingInstanceIds,
         allInstanceIds: allInstanceIds,
         isOnline: isOnline
       };

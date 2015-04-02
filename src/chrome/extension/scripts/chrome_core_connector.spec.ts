@@ -24,7 +24,7 @@ var mockAppPort = () => {
 // Mock UI.
 var ui :UI.UserInterface;
 var chromeBrowserApi :ChromeBrowserApi;
-var chromeCoreConnector :ChromeCoreConnector = new ChromeCoreConnector();
+var chromeCoreConnector = new ChromeCoreConnector();
 var core = new CoreConnector(chromeCoreConnector);
 
 // The ordering of the specs matter, as they provide a connect / disconnect
@@ -39,6 +39,7 @@ describe('core-connector', () => {
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
     'showNotification']);
+  core.ui = ui;
 
 
 
@@ -142,7 +143,7 @@ describe('core-connector', () => {
     disconnect();
     expect(chromeCoreConnector.status.connected).toEqual(false);
     expect(chromeCoreConnector['appPort_']).toBeNull();
-    //expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
+    expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
   });
 
   it('send queues message while disconnected.', () => {

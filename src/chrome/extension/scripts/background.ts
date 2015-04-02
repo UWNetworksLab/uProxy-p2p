@@ -88,63 +88,68 @@ function openDownloadAppPage() : void {
  * updates from the Chrome App side propogate to the UI.
  */
 
-  chromeBrowserApi = new ChromeBrowserApi();
-  // TODO (lucyhe): Make sure that the "install" event isn't missed if we
-  // are adding the listener after the event is fired.
-  chrome.runtime.onInstalled.addListener(() => {
-    chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-        // Do not open the extension when it's installed if the user is
-        // going through the inline install flow.
-        if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
-            (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
-          chromeBrowserApi.bringUproxyToFront();
-        }
-    });
+chromeBrowserApi = new ChromeBrowserApi();
+// TODO (lucyhe): Make sure that the "install" event isn't missed if we
+// are adding the listener after the event is fired.
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+      // Do not open the extension when it's installed if the user is
+      // going through the inline install flow.
+      if ((tabs[0].url.indexOf("uproxysite.appspot.com/chrome-install") == -1) &&
+          (tabs[0].url.indexOf("uproxy.org/chrome-install") == -1)) {
+        chromeBrowserApi.bringUproxyToFront();
+      }
   });
-  chrome.browserAction.onClicked.addListener((tab) => {
-    // When the extension icon is clicked, open uProxy.
-    mainWindowId = tab.windowId;
-    chromeBrowserApi.bringUproxyToFront();
-  });
+});
+chrome.browserAction.onClicked.addListener((tab) => {
+  // When the extension icon is clicked, open uProxy.
+  mainWindowId = tab.windowId;
+  chromeBrowserApi.bringUproxyToFront();
+});
 
-  chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  chromeCoreConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
-                           chromeBrowserApi.bringUproxyToFront);
-  chromeCoreConnector.connect();
+chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+chromeCoreConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
+                         chromeBrowserApi.bringUproxyToFront);
+chromeCoreConnector.connect();
 
-  core = new CoreConnector(chromeCoreConnector);
-  var oAuth = new ChromeTabAuth();
-  chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
-                           oAuth.login.bind(oAuth));
-
-  // used for de-duplicating urls caught by the listeners
-  var lastUrl = '';
-  var lastUrlTime = 0;
+core = new CoreConnector(chromeCoreConnector);
+var oAuth = new ChromeTabAuth();
+chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
+                         oAuth.login.bind(oAuth));
 
 // used for de-duplicating urls caught by the listeners
 var lastUrl = '';
+var lastUrlTime = 0;
 
-  chrome.webRequest.onBeforeRequest.addListener(
-    function(details) {
-      var url = details.url;
+chrome.webRequest.onBeforeRequest.addListener(
+  function() {
+    return {cancel: true};
+  },
+  {urls: ['https://www.uproxy.org/oauth-redirect-uri*']},
+  ['blocking']
+);
 
-      // Chome seems to sometimes send the same url to us twice, we never
-      // should be receiving the exact same data twice so de-dupe any url
-      // with the last one we received before processing it.  We also want
-      // to allow a url to be pasted twice if there has been at least a second
-      // delay in order to allow users to try connecting again.
-      if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        core.ui.handleUrlData(url);
-      } else {
-        console.warn('Received duplicate url events', url);
-      }
-      lastUrl = url;
-      lastUrlTime = Date.now();
+chrome.webRequest.onBeforeRequest.addListener(
+  function(details) {
+    var url = details.url;
 
-      return {
-        redirectUrl: chrome.extension.getURL('copypaste.html')
-      };
-    },
-    { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
-    ['blocking']
-  );
+    // Chome seems to sometimes send the same url to us twice, we never
+    // should be receiving the exact same data twice so de-dupe any url
+    // with the last one we received before processing it.  We also want
+    // to allow a url to be pasted twice if there has been at least a second
+    // delay in order to allow users to try connecting again.
+    if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
+      core.ui.handleUrlData(url);
+    } else {
+      console.warn('Received duplicate url events', url);
+    }
+    lastUrl = url;
+    lastUrlTime = Date.now();
+
+    return {
+      redirectUrl: chrome.extension.getURL('copypaste.html')
+    };
+  },
+  { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
+  ['blocking']
+);

@@ -46,7 +46,8 @@ describe('UI.UserInterface', () => {
         ignoringRemoteUserRequest: false,
         ignoringRemoteUserOffer: false
       },
-      isOnline: true
+      isOnline: true,
+      gettingInstanceIds: []
     };
   }
 
