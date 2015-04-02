@@ -84,5 +84,10 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
+  },
+  tabSelected: function(e) {
+    // setting the value is taken care of in the polymer binding, we just need
+    // to sync the value to core
+    core.updateGlobalSettings(model.globalSettings);
   }
 });

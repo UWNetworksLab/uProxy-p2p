@@ -193,7 +193,7 @@
           </uproxy-bubble>
 
           <div class='bottom fit'>
-            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}'>
+            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>Get Access</paper-tab>
               <paper-tab>Share Access</paper-tab>
             </paper-tabs>
