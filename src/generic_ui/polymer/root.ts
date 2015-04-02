@@ -30,9 +30,11 @@ Polymer({
   },
   setGetMode: function() {
     model.globalSettings.mode = uProxy.Mode.GET;
+    core.updateGlobalSettings(model.globalSettings);
   },
   setShareMode: function() {
     model.globalSettings.mode = uProxy.Mode.SHARE;
+    core.updateGlobalSettings(model.globalSettings);
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;
@@ -82,12 +84,5 @@ Polymer({
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-  },
-
-  observe: {
-    'model.globalSettings.mode': 'modeChange'
-  },
-  modeChange: function() {
-    core.updateGlobalSettings(model.globalSettings);
   }
 });
