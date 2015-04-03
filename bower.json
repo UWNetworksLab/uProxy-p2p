@@ -14,6 +14,7 @@
     "core-collapse": "Polymer/core-collapse#~0.5.5",
     "core-header-panel": "Polymer/core-header-panel#~0.5.5",
     "core-drawer-panel": "Polymer/core-drawer-panel#~0.5.5",
-    "core-overlay": "Polymer/core-overlay#~0.5.5"
+    "core-overlay": "Polymer/core-overlay#~0.5.5",
+    "lodash": "~3.6.0"
   }
 }
