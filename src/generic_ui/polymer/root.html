@@ -187,13 +187,13 @@
               on-tap='{{ setShareMode }}'></img>
           </core-tooltip>
 
-            <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
             <h3>Sharing Enabled</h3>
             <p>This icon means you're available for sharing access with friends you've offered access to.</p>
           </uproxy-bubble>
 
           <div class='bottom fit'>
-            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}'>
+            <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>Get Access</paper-tab>
               <paper-tab>Share Access</paper-tab>
             </paper-tabs>
