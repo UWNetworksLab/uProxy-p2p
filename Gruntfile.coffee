@@ -517,7 +517,6 @@ module.exports = (grunt) ->
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
               'build/compile-src/generic/version.js'
-              'build/compile-src/generic_core/util.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_core/social-enum.js'

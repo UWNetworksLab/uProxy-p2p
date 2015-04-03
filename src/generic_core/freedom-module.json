@@ -15,7 +15,6 @@
       "uproxy-networking/rtc-to-net/rtc-to-net.js",
       "lodash.min.js",
       "uproxy.js",
-      "util.js",
       "version.js",
       "consent.js",
       "firewall.js",
