@@ -87,7 +87,6 @@ class MockStorage implements freedom_Storage {
 }  // class MockStorage
 
 class MockChannel {
-
   public on = (eventTypeString, callback) => {
     return null;
   }
@@ -108,7 +107,9 @@ class MockLoggingProvider {
   public setBufferedLogFilter = (filter:string) : void => {}
 }  // class MockLoggingProvider
 
-var freedom = MockChannel;
+var freedom = () => {
+  return new MockChannel();
+}
 freedom['storage'] = () => { return new MockStorage({}); };
 var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
