@@ -44,6 +44,8 @@
       height: 54px;
       border-radius: 50%;
       margin-left: -6px;
+      background-size: 100%;
+      background-repeat: no-repeat;
     }
     #settingsLinks {
       padding: 24px 28px;
@@ -101,8 +103,9 @@
 
     <div hidden?='{{model.onlineNetwork==null}}' vertical layout>
       <div class='userInfo'>
-        <img class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
-            src='{{model.onlineNetwork.imageData}}'>
+        <div class='userImage' hidden?='{{model.onlineNetwork.imageData==null}}'
+          style='background-image: url({{model.onlineNetwork.imageData}});'
+          ></div>
         <div class='networkName'>Connected with {{model.onlineNetwork.name}}</div>
         <!-- show userName and userId if both are available -->
         <div hidden?='{{!model.onlineNetwork.userName}}'>
