@@ -106,6 +106,10 @@
         center horizontal layout>
       <img class='avatar' src='{{ contact.imageData }}' />
       <div flex class='name'>{{ contact.name }}</div>
+
+      <core-icon icon="link" hidden?="{{ !contact.url }}"
+          title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
+
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
       <img src='../icons/getting_animated.gif' class='accessIcon'
           hidden?='{{ model.globalSettings.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>

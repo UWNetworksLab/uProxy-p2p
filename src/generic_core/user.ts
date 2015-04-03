@@ -350,7 +350,8 @@ module Core {
         user: {
           userId: this.profile.userId,
           name: this.profile.name,
-          imageData: this.profile.imageData
+          imageData: this.profile.imageData,
+          url: this.profile.url
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,

@@ -17,6 +17,9 @@ Polymer({
     this.GettingConsentState = UI.GettingConsentState;
     this.SharingConsentState = UI.SharingConsentState;
   },
+  openLink: function() {
+    this.ui.browserApi.openTab(this.contact.url);
+  },
 
   // |action| is the string end for a uProxy.ConsentUserAction
   modifyConsent: function(action :uProxy.ConsentUserAction) {
