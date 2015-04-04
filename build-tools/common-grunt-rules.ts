@@ -39,6 +39,7 @@ export interface BrowserifyRule {
   src :string[];
   dest :string;
   options ?:{
+    transform ?:Object[][];
     debug ?:boolean;
   };
 }
@@ -59,6 +60,7 @@ export interface CopyRule {
 export class Rule {
   constructor(public config :RuleConfig) {}
 
+  // Note: argument is modified (and returned for conveniece);
   public addCoverageToSpec(spec:JasmineRule) :JasmineRule {
     var basePath = path.dirname(spec.options.outfile);
 
@@ -96,7 +98,7 @@ export class Rule {
   // Grunt browserify target creator
   public browserify(filepath:string, options = {
         browserifyOptions: { standalone: 'browserified_exports' }
-      }) : BrowserifyRule {
+      }) :BrowserifyRule {
     return {
       src: [ path.join(this.config.devBuildPath, filepath + '.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
@@ -104,10 +106,18 @@ export class Rule {
     };
   }
 
+  // Note: argument is modified (and returned for conveniece);
+  public addCoverageToBrowserify(rule:BrowserifyRule) :BrowserifyRule {
+    if(!rule.options.transform) {
+      rule.options.transform = [];
+    }
+    rule.options.transform.push(
+      ['browserify-istanbul', { ignore: ['**/mocks/**', '**/*.spec.js'] }]);
+    return rule
+  }
+
   // Grunt browserify target creator, instrumented for istanbul
   public browserifySpec(filepath:string, options = {
-        transform: [['browserify-istanbul',
-                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]],
         browserifyOptions: { standalone: 'browserified_exports' }
       }) : BrowserifyRule {
     return {
