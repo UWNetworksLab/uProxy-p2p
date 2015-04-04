@@ -14,8 +14,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'rtcdatachannel': () => { return new MockFreedomRtcDataChannel(); }
 });
 
-import PeerConnection = require('./peerconnection');
-import PeerConnectionClass = PeerConnection.PeerConnectionClass;
+import signal = require('./signal');
+import peerconnection = require('./peerconnection');
 
 describe('WebRtc / PeerConnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
@@ -56,12 +56,13 @@ describe('WebRtc / PeerConnection', function() {
     var setLocalDescriptionSpy =
       spyOn(mockRtcPeerConnection, 'setLocalDescription');
 
-    var pc = new PeerConnectionClass(mockRtcPeerConnection, 'test');
+    var pc = new peerconnection.PeerConnectionClass(
+        mockRtcPeerConnection, 'test');
     pc.negotiateConnection();
 
     pc.signalForPeerQueue.setSyncNextHandler(
-        (signal:PeerConnection.SignallingMessage) => {
-      expect(signal.type).toEqual(PeerConnection.SignalType.OFFER);
+        (s:signal.Message) => {
+      expect(s.type).toEqual(signal.Type.OFFER);
       expect(mockRtcPeerConnection.setLocalDescription).not.toHaveBeenCalled();
       done();
     });

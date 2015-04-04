@@ -3,9 +3,9 @@
 
 import logging = require('../../logging/logging');
 
+import signal = require('../../webrtc/signal');
 import peerconnection = require('../../webrtc/peerconnection');
 import PeerConnection = peerconnection.PeerConnection;
-import SignallingMessage = peerconnection.SignallingMessage;
 import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
@@ -49,7 +49,7 @@ function makePeerConnection(name:string) {
       urls: ['stun:stun.l.google.com:19302']},
       {urls: ['stun:stun1.l.google.com:19302']}]
   };
-  var pc :PeerConnection<SignallingMessage> =
+  var pc :PeerConnection<signal.Message> =
     peerconnection.createPeerConnection(pcConfig, name);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
@@ -68,16 +68,16 @@ function makePeerConnection(name:string) {
   return pc;
 }
 
-var a :PeerConnection<SignallingMessage> = makePeerConnection('A');
-var b :PeerConnection<SignallingMessage> = makePeerConnection('B')
+var a :PeerConnection<signal.Message> = makePeerConnection('A');
+var b :PeerConnection<signal.Message> = makePeerConnection('B')
 
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
-a.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
+a.signalForPeerQueue.setSyncHandler((signal:signal.Message) => {
   log.info('a: sending signal to b.');
   b.handleSignalMessage(signal);
 });
-b.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
+b.signalForPeerQueue.setSyncHandler((signal:signal.Message) => {
   log.info('b: sending signal to a.');
   a.handleSignalMessage(signal);
 });
