@@ -435,44 +435,76 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
-  public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
+  private FeedbackUrls_ = [
+    'https://beta-dot-uproxysite.appspot.com/submit-feedback',
+    'https://www.uproxy.org/submit-feedback'
+  ]
+
+  private post_ = (url :string, data :Object) :Promise<void> => {
     return new Promise<void>((fulfill, reject) => {
-      var sendXhr = (logs) : void => {
-        var xhr = freedom["core.xhr"]();
-        xhr.on('onreadystatechange', () => {
-          Promise.all([xhr.getReadyState(), xhr.getStatus()])
-            .then((stateAndStatus) => {
-              // 200 is the HTTP result code for a successful request.
-              if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] === 200) {
-                fulfill();
-              } else if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] != 200) {
-                // TODO: Once we have non-AppEngine links we can send feedback to, try
-                // multiple URLs before rejecting the sendFeedback promise.
-                // https://github.com/uProxy/uproxy/issues/1191
-                reject('POST to uproxy.org failed.');
-              }
-            });
+      var xhr = freedom['core.xhr']();
+
+      xhr.on('onreadystatechange', () => {
+        Promise.all([xhr.getReadyState(), xhr.getStatus()])
+        .then((stateAndStatus) => {
+          // 200 is the HTTP result code for a successful request.
+          if (stateAndStatus[0] === XMLHttpRequest.DONE) {
+            if (stateAndStatus[1] === 200) {
+              fulfill();
+            } else {
+              reject(new Error('POST failed with HTTP code ' + stateAndStatus[1]));
+            }
+          }
         });
-        var params = JSON.stringify(
-          {'email' : feedback.email,
-           'feedback' : feedback.feedback,
-            'logs' : logs});
-        xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
-        // core.xhr requires the parameters to be tagged as either a
-        // string or array buffer in the format below.
-        // This is roughly equivalent to standard xhr.send(params).
-        xhr.send({'string': params});
+      });
+      var params = JSON.stringify(data);
+
+      xhr.open('POST', url, true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
+      xhr.send({'string': params});
+    });
+  }
+
+  public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
+    if (!maxAttempts || maxAttempts > this.FeedbackUrls_.length) {
+      // default to trying every possible URL
+      maxAttempts = this.FeedbackUrls_.length;
+    }
+
+    var logs :Promise<string>;
+
+    if (feedback.logs) {
+      logs = this.getLogsAndNetworkInfo().then((logs) => {
+        var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+        return browserInfo + logs;
+      });
+    } else {
+      logs = Promise.resolve('');
+    }
+
+    return logs.then((logs) => {
+      var attempts = 0;
+
+      var payload = {
+        email: feedback.email,
+        feedback: feedback.feedback,
+        logs: logs
+      };
+
+      var doAttempts = (error?:Error) => {
+        if (attempts < maxAttempts) {
+          // we want to keep trying this until we either run out of urls to
+          // send to or one of the requests succeeds.  We set this up by
+          // creating a lambda to call the post with failures set up to recurse
+          return this.post_(this.FeedbackUrls_[attempts++], payload).catch(doAttempts);
+        }
+
+        throw error;
       }
 
-      var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
-
-      if (feedback.logs) {
-        this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-          sendXhr(browserInfo + logsWithNetworkInfo);
-        });
-      } else {
-        sendXhr('');
-      }
+      return doAttempts();
     });
   }
 
