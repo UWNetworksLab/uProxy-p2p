@@ -4,7 +4,6 @@
  * This file defines the local uProxy Instance class. This represents the local
  * installation.
  */
-/// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 /// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
@@ -84,10 +83,10 @@ module Core {
      * TODO: Come up with a better typing for this.
      */
     public currentState = () : Instance => {
-      return cloneDeep({
+      return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
-      });
+      };
     }
     public restoreState = (state) => {
       this.instanceId = state.instanceId;

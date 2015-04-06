@@ -3,7 +3,6 @@
  *
  * Provides a promise-based interface to the storage provider.
  */
-/// <reference path='util.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
 /// <reference path='../interfaces/persistent.d.ts' />
 
