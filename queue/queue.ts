@@ -5,12 +5,7 @@
 // Private helper class.
 class Cell<T> {
   public next :Cell<T> = null;
-
-  constructor(private item_:T) {}
-
-  public getItem() {
-    return this.item_;
-  }
+  constructor(public item:T) {}
 }
 
 export class Queue<T> {
@@ -43,6 +38,6 @@ export class Queue<T> {
     if (this.length === 0) {
       this.back_ = null;
     }
-    return dequeued.getItem();
+    return dequeued.item;
   }
 }  // class Queue
