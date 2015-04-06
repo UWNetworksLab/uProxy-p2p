@@ -13,6 +13,7 @@
       "uproxy-networking/socks-common/socks-headers.js",
       "uproxy-networking/socks-to-rtc/socks-to-rtc.js",
       "uproxy-networking/rtc-to-net/rtc-to-net.js",
+      "lodash.min.js",
       "uproxy.js",
       "util.js",
       "version.js",
