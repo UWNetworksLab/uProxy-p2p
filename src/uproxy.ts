@@ -289,6 +289,9 @@ module uProxy {
     GET = 0,
     SHARE
   }
+
+  export var STORAGE_VERSION = 1;
+  export var MESSAGE_VERSION = 1;
 }  // module uProxy
 
 module Social {

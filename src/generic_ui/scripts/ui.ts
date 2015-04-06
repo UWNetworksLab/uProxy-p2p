@@ -35,6 +35,7 @@ var model :UI.Model = {
     }
   },
   globalSettings: {
+    version: uProxy.STORAGE_VERSION,
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
