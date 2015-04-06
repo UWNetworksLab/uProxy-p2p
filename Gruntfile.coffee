@@ -1,20 +1,10 @@
 ###
 Gruntfile for uProxy
-
-This is the build file for all of uProxy.
-
-TODO: This is currently not fully functional, due to many things being in flux
-as we change much of the repo.
-TODO: Remove all of the separate repositories and make everything one repository
-again.
 ###
 
-TaskManager = require 'uproxy-lib/tools/taskmanager'
-Rule = require 'uproxy-lib/tools/common-grunt-rules'
+TaskManager = require 'uproxy-lib/build/tools/taskmanager'
+Rule = require 'uproxy-lib/build/tools/common-grunt-rules'
 Path = require 'path'
-
-fs = require 'fs'
-path = require 'path'
 
 getNodePath = (module) =>
   Path.dirname(require.resolve(module + '/package.json'))
@@ -110,39 +100,6 @@ module.exports = (grunt) ->
     pkgfreedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
     pkgfreedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
     pkgfreedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
-
-    # Decrease log output for noisy things like symlink.
-    verbosity:
-      diminished:
-        options: { mode: 'oneline' }
-        tasks: ['symlink']
-
-    symlink:
-      # Symlink all module directories in `src` into compile-src, and
-      # merge `third_party` from different places as well.
-      typescriptSrc: Rule.symlinkSrc '.'
-      thirdPartyTypescriptSrc: Rule.symlinkThirdParty '.'
-
-      uproxyNetworkingThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-networking'
-      uproxyNetworkingTypescriptSrc: Rule.symlinkSrc 'uproxy-networking'
-
-      uproxyLibThirdPartyTypescriptSrc: Rule.symlinkThirdParty 'uproxy-lib'
-      uproxyLibTypescriptSrc: Rule.symlinkSrc 'uproxy-lib'
-
-      uproxyChurnTypescriptSrc: Rule.symlinkSrc 'uproxy-churn'
-
-      polymerLibToChromeExt:
-        src: 'third_party/lib'
-        dest: 'build/compile-src/chrome/extension/lib'
-
-      polymerLibToChromeApp:
-        src: 'third_party/lib'
-        dest: 'build/compile-src/chrome/app/lib'
-
-      polymerLibToFirefox:
-        src: 'third_party/lib'
-        dest: 'build/compile-src/firefox/data/lib'
-
 
     shell: {
 
