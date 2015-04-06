@@ -108,7 +108,8 @@ class uProxyCore implements uProxy.CoreAPI {
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false,
-         mode: uProxy.Mode.GET};
+         mode: uProxy.Mode.GET,
+         version: uProxy.STORAGE_VERSION};
   public loadGlobalSettings :Promise<void> = null;
   private natType_ = '';
 
@@ -279,7 +280,8 @@ class uProxyCore implements uProxy.CoreAPI {
    * instances.
    */
 
-  public updateGlobalSettings = (newSettings:Core.GlobalSettings) => {
+  public updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
+    newSettings.version = uProxy.STORAGE_VERSION;
     storage.save<Core.GlobalSettings>('globalSettings', newSettings).catch((e) => {
       log.error('Could not save globalSettings to storage', e.stack);
     });
