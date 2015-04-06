@@ -37,6 +37,9 @@
     core-icon[icon="clear"]:hover {
       opacity: 1;
     }
+    core-icon.button {
+      cursor: pointer;
+    }
     paper-button {
       background-color: #009688; /* teal */
       color: white;
@@ -57,7 +60,7 @@
     <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
 
     <paper-dialog backdrop layered='false' id='troubleshootDialog'>
-      <core-icon icon="clear" on-tap='{{ close }}'></core-icon>
+      <core-icon class="button" icon="clear" on-tap='{{ close }}'></core-icon>
       <h1>Unable to proxy</h1>
       <div>
         <p>
