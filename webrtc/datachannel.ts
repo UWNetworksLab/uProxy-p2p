@@ -67,7 +67,7 @@ export interface DataChannel {
 
   // Registers a function that will be called whenever the browser buffer
   // overflows into the javascript buffer, and whenever the overflow is
-  // cleared.  There can only be one listener at a time.
+  // cleared.  There can only be one listener at a time.  Pass null to unset.
   setOverflowListener(listener:(overflow:boolean) => void) : void;
 
   // Closes this data channel.
@@ -113,7 +113,7 @@ export class DataChannelClass implements DataChannel {
   private rejectOpened_  :(e:Error) => void;
 
   private overflow_ :boolean = false;
-  private overflowListener_ = (overflow:boolean) => {};
+  private overflowListener_ :(overflow:boolean) => void = null;
 
   public getLabel = () : string => { return this.label_; }
 
@@ -240,6 +240,10 @@ export class DataChannelClass implements DataChannel {
       promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
     });
 
+    // This check is logically redundant with the check in
+    // conjestionControlSendHandler, but it triggers much sooner (synchronously
+    // during the call to send), which is valuable to reduce overshoot,
+    // especially in fast flows that create web worker scheduling anomalies.
     if (this.toPeerDataBytes_ + this.lastBrowserBufferedAmount_
         > PC_QUEUE_LIMIT) {
       this.setOverflow_(true);
@@ -276,7 +280,7 @@ export class DataChannelClass implements DataChannel {
 
   // Sets the overflow state, and calls the listener if it has changed.
   private setOverflow_ = (overflow:boolean) => {
-    if (this.overflow_ !== overflow) {
+    if (this.overflowListener_ && this.overflow_ !== overflow) {
       this.overflowListener_(overflow);
     }
     this.overflow_ = overflow;
@@ -297,7 +301,7 @@ export class DataChannelClass implements DataChannel {
         this.setOverflow_(true);
         setTimeout(this.conjestionControlSendHandler, 20);
       } else {
-        if (this.toPeerDataQueue_.getLength() == 0) {
+        if (this.toPeerDataQueue_.getLength() === 0) {
           this.setOverflow_(false);
         }
         // This processes one block from the queue, which (in Chrome) is
