@@ -87,7 +87,7 @@ export interface PeerConnection<TSignallingMessage> {
   // Closing the peer connection will close all associated data channels
   // and set |pcState| to |DISCONNECTED| (and hence fulfills
   // |onceDisconnected|)
-  close: () => void;
+  close: () => Promise<void>;
 }
 
 export interface SignallingMessage {
@@ -260,13 +260,8 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
   }
 
   // Close the peer connection. This function is idempotent.
-  public close = () : void => {
+  public close = () : Promise<void> => {
     log.info(this.peerName_ + ': ' + 'close');
-
-    // This may happen because calling close will invoke pc_.close, which
-    // may call |onSignallingStateChange_| with |this.pc_.signalingState ===
-    // 'closed'|.
-    if (this.pcState === State.DISCONNECTED) { return; }
 
     if (this.pcState === State.CONNECTING) {
       this.rejectConnected_(new Error('close was called while connecting.'));
@@ -275,10 +270,10 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     this.pcState = State.DISCONNECTED;
     this.fulfillDisconnected_();
 
-    this.pc_.getSignalingState().then((state:string) => {
+    return this.pc_.getSignalingState().then((state:string) => {
       if (state !== 'closed') {
         // Note is expected to invoke |onSignallingStateChange_|
-        this.pc_.close();
+        return this.pc_.close();
       }
     });
   }
