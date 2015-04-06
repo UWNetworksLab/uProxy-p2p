@@ -310,7 +310,10 @@ describe('Social.FreedomNetwork', () => {
       var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
       network.send(network.getUser('mockuser'), 'fakeclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'fakeclient', JSON.stringify(msg));
+        'fakeclient',
+        JSON.stringify({
+          type: msg.type, data: msg.data, version: uProxy.MESSAGE_VERSION
+        }));
     });
 
   });
@@ -340,7 +343,8 @@ describe('Social.FreedomNetwork', () => {
     };
     spyOn(JSON, 'stringify').and.callThrough();
     network.send(network.getUser('mockuser'), 'fakeclient', outMsg)
-    expect(JSON.stringify).toHaveBeenCalledWith(outMsg);
+    expect(JSON.stringify).toHaveBeenCalledWith(
+      {type: outMsg.type, data: outMsg.data, version: uProxy.MESSAGE_VERSION});
     done();
   });
 

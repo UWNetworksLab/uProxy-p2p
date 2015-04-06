@@ -12,7 +12,7 @@
 /// <reference path='core.ts' />
 /// <reference path='remote-connection.ts' />
 /// <reference path='social.ts' />
-/// <reference path='util.ts' />
+/// <reference path='../third_party/typings/lodash/lodash.d.ts' />
 
 module Core {
   var log :Logging.Log = new Logging.Log('remote-instance');
@@ -244,7 +244,7 @@ module Core {
      * to storage.
      */
     public currentState = () :RemoteInstanceState => {
-      return cloneDeep({
+      return _.cloneDeep({
         wireConsentFromRemote: this.wireConsentFromRemote,
         description:           this.description,
         keyHash:               this.keyHash
@@ -272,7 +272,7 @@ module Core {
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
     public currentStateForUi = () :UI.Instance => {
-      return cloneDeep({
+      return {
         instanceId:             this.instanceId,
         description:            this.description,
         keyHash:                this.keyHash,
@@ -281,7 +281,7 @@ module Core {
         isOnline:               this.user.isInstanceOnline(this.instanceId),
         bytesSent:              this.bytesSent,
         bytesReceived:          this.bytesReceived
-      });
+      };
     }
 
     public handleLogout = () => {

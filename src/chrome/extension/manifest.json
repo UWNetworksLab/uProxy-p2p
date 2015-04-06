@@ -19,7 +19,8 @@
       "scripts/chrome_tab_auth.js",
       "scripts/chrome_core_connector.js",
       "scripts/background.js",
-      "scripts/version.js"
+      "scripts/version.js",
+      "scripts/lodash.min.js"
     ]
   },
   "browser_action": {
