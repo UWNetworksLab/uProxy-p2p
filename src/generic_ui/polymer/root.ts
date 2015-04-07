@@ -97,6 +97,6 @@ Polymer({
     }
   },
   observe: {
-    'ui.signalToFire' : 'signalToFireChanged';
+    'ui.signalToFire' : 'signalToFireChanged'
   },
 });
