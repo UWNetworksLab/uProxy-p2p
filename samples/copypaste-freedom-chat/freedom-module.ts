@@ -3,7 +3,7 @@
 
 import logging = require('../../logging/logging');
 
-import signal = require('../../webrtc/signal');
+import signals = require('../../webrtc/signals');
 import peerconnection = require('../../webrtc/peerconnection');
 import PeerConnection = peerconnection.PeerConnection;
 import DataChannel = peerconnection.DataChannel;
@@ -35,11 +35,11 @@ export function connectDataChannel(d:DataChannel) {
   });
 }
 
-export function makePeerConnection() : PeerConnection<signal.Message> {
-  var pc :PeerConnection<signal.Message> =
+export function makePeerConnection() : PeerConnection<signals.Message> {
+  var pc :PeerConnection<signals.Message> =
       peerconnection.createPeerConnection(pcConfig);
 
-  pc.signalForPeerQueue.setSyncHandler((signal:signal.Message) => {
+  pc.signalForPeerQueue.setSyncHandler((signal:signals.Message) => {
     parentModule.emit('signalForPeer', signal);
   });
 
@@ -62,7 +62,7 @@ export function makePeerConnection() : PeerConnection<signal.Message> {
   return pc;
 }
 
-export var pc :PeerConnection<signal.Message>;
+export var pc :PeerConnection<signals.Message>;
 
 parentModule.on('start', () => {
   pc = makePeerConnection();
@@ -82,7 +82,7 @@ parentModule.on('start', () => {
 // Receive signalling channel messages from the UI.
 // If pc doesn't exist yet then we are responding to the remote
 // peer's initiation.
-parentModule.on('signalFromPeer', (signal:signal.Message) => {
+parentModule.on('signalFromPeer', (signal:signals.Message) => {
   if (pc === undefined) {
     pc = makePeerConnection();
   }

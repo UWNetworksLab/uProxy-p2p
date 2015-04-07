@@ -5,7 +5,7 @@
 import djb2 = require('../crypto/djb2hash');
 import handler = require('../handler/queue');
 import datachannel = require('./datachannel');
-import signal = require('./signal');
+import signals = require('./signals');
 
 import logging = require('../logging/logging');
 var log :logging.Log = new logging.Log('PeerConnection');
@@ -102,11 +102,11 @@ export interface PeerConnection<TSignallingMessage> {
 //   2. *[external] -> handleSignalMessage -> pc_.addIceCandidate
 //   3. (callback) -> controlDataChannel_.onceOpened
 //      3.1. completeConnection_ -> [Fulfill onceConnected]
-export class PeerConnectionClass implements PeerConnection<signal.Message> {
+export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Global listing of active peer connections. Helpful for debugging when you
   // are in Freedom.
-  public static peerConnections :{ [name:string] : PeerConnection<signal.Message> } = {};
+  public static peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
 
   // All WebRtc data channels associated with this data peer.
   public dataChannels     :{[channelLabel:string] : DataChannel};
@@ -128,7 +128,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
   public peerOpenedChannelQueue :handler.Queue<DataChannel,void>;
 
   // Signals to be send to the remote peer by this peer.
-  public signalForPeerQueue :handler.Queue<signal.Message,void>;
+  public signalForPeerQueue :handler.Queue<signals.Message,void>;
   public fromPeerCandidateQueue :
       handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
 
@@ -191,7 +191,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
     this.peerOpenedChannelQueue = new handler.Queue<DataChannel,void>();
 
     // Messages to send to the peer.
-    this.signalForPeerQueue = new handler.Queue<signal.Message,void>();
+    this.signalForPeerQueue = new handler.Queue<signals.Message,void>();
 
     // candidates form the peer; need to be queued until after remote
     // descrption has been set.
@@ -208,12 +208,12 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
     this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if(candidate.candidate) {
         this.emitSignalForPeer_({
-          type: signal.Type.CANDIDATE,
+          type: signals.Type.CANDIDATE,
           candidate: candidate.candidate
         });
       } else {
         this.emitSignalForPeer_({
-          type: signal.Type.NO_MORE_CANDIDATES
+          type: signals.Type.NO_MORE_CANDIDATES
         });
       }
     });
@@ -294,8 +294,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
       if (this.pcState !== State.CONNECTING &&
           this.pcState !== State.CONNECTED) {
         // Something unexpected happened, better close down properly.
-        this.closeWithError_(this.peerName_ + ': ' +
-            'Unexpected onSignallingStateChange in state: ' +
+        this.closeWithError_('Unexpected onSignallingStateChange in state: ' +
             State[this.pcState]);
         return;
       }
@@ -369,7 +368,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
             // some clients:
             //   https://github.com/uProxy/uproxy/issues/784
             this.emitSignalForPeer_({
-              type: signal.Type.OFFER,
+              type: signals.Type.OFFER,
               description: {type: d.type, sdp: d.sdp}
             });
             this.pc_.setLocalDescription(d);
@@ -384,11 +383,14 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
 
   // Fulfills if it is OK to proceed with setting this remote offer, or
   // rejects if there is a local offer with higher hash-precedence.
-  private breakOfferTie_ = (remoteOffer:freedom_RTCPeerConnection.RTCSessionDescription) : Promise<void> => {
+  private breakOfferTie_ = (remoteOffer:freedom_RTCPeerConnection.RTCSessionDescription)
+      : Promise<void> => {
     return this.pc_.getSignalingState().then((state:string) => {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
             (localOffer:freedom_RTCPeerConnection.RTCSessionDescription) => {
+          // TODO: either specify a functional call requirement that the sdp
+          // fields are valid JSON, so add a try-catch.
           if (djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
               djb2.stringHash(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
@@ -418,7 +420,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
         // setting the local description to ensure that we send the
         // ANSWER before any ICE candidates.
         this.emitSignalForPeer_({
-          type: signal.Type.ANSWER,
+          type: signals.Type.ANSWER,
           description: {
             type: d.type,
             sdp: d.sdp
@@ -442,9 +444,14 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
         this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
       })
       .catch((e) => {
-        this.closeWithError_('Failed to set remote description: ' +
-            ': ' +  JSON.stringify(description) + ' (' +
-            typeof(description) + '); Error: ' + e.toString());
+        var descriptionString :string
+        try {
+          descriptionString = JSON.stringify(description)
+        } catch(e) {
+          descriptionString = "[unstringifiable object]"
+        }
+        this.closeWithError_('Failed to set remote description: ' + descriptionString
+          + '; Error: ' + e.toString());
       });
   }
 
@@ -455,25 +462,20 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
     try {
       this.fromPeerCandidateQueue.handle(candidate);
     } catch(e) {
-      log.error(this.peerName_ + ': ' + 'addIceCandidate: ' +
-        JSON.stringify(candidate) + ' (' + typeof(candidate) +
-        '); Error: ' + e.toString());
+      log.error('%1: addIceCandidate: %2; Error: %3', this.peerName_, candidate,
+        e.toString());
     }
   }
 
   // Adds a signalling message to this.signalForPeerQueue.
-  private emitSignalForPeer_ = (s:signal.Message) : void => {
-    log.debug('%1: signalForPeer: %2',
-        this.peerName_,
-        JSON.stringify(s));
+  private emitSignalForPeer_ = (s:signals.Message) : void => {
+    log.debug('%1: signalForPeer: %2', this.peerName_, s);
     this.signalForPeerQueue.handle(s);
   }
 
   // Handle a signalling message from the remote peer.
-  public handleSignalMessage = (s:signal.Message) : void => {
-    log.debug('%1: handleSignalMessage: %2',
-        this.peerName_,
-        JSON.stringify(s));
+  public handleSignalMessage = (s:signals.Message) : void => {
+    log.debug('%1: handleSignalMessage: %2', this.peerName_, s);
     // If we are offering and they are also offering at the same time, pick
     // the one who has the lower hash value for their description: this is
     // equivalent to having a special random id, but voids the need for an
@@ -481,18 +483,18 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
     // TODO: Instead of hash, we could use the IP/port candidate list which
     //       is guaranteed to be unique for 2 peers.
     switch(s.type) {
-      case signal.Type.OFFER:
+      case signals.Type.OFFER:
         this.handleOfferSignalMessage_(s.description);
         break;
       // Answer to an offer we sent
-      case signal.Type.ANSWER:
+      case signals.Type.ANSWER:
         this.handleAnswerSignalMessage_(s.description);
         break;
       // Add remote ice candidate.
-      case signal.Type.CANDIDATE:
+      case signals.Type.CANDIDATE:
         this.handleCandidateSignalMessage_(s.candidate);
         break;
-      case signal.Type.NO_MORE_CANDIDATES:
+      case signals.Type.NO_MORE_CANDIDATES:
         break;
     default:
       log.error('%1: unexpected signalling message type %2',
@@ -505,7 +507,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
                             options?:freedom_RTCPeerConnection.RTCDataChannelInit)
       : Promise<DataChannel> => {
     log.debug(this.peerName_ + ': ' + 'openDataChannel: ' + channelLabel +
-        '; options=' + JSON.stringify(options));
+        '; options=' + options);
 
     // Only the control data channel can have an empty channel label.
     if (this.controlDataChannel_ != null && channelLabel === '') {
@@ -577,7 +579,7 @@ export class PeerConnectionClass implements PeerConnection<signal.Message> {
 
 export function createPeerConnection(
     config:freedom_RTCPeerConnection.RTCConfiguration, debugPcName?:string)
-    : PeerConnection<signal.Message> {
+    : PeerConnection<signals.Message> {
   var freedomRtcPc = freedom['core.rtcpeerconnection'](config);
   // Note: |peerConnection| will take responsibility for freeing memory and
   // closing down of |freedomRtcPc| once the underlying peer connection is
