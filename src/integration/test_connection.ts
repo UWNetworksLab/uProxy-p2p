@@ -104,10 +104,6 @@ class ProxyTester {
   }
 }
 
-interface Freedom {
-  //providesPromises: (a:new (f:any) => ProxyTester) => void;
-};
-
 if (typeof freedom !== 'undefined') {
   freedom().providePromises(ProxyTester);
 }

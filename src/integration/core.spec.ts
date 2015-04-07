@@ -86,6 +86,7 @@ describe('uproxy core', function() {
   var alicePath;
   var bobPath;
   var promiseId = 0;
+
   it('loads uproxy', (done) => {
     // Ensure that aliceSocialInterface and bobSocialInterface are set.
     var AliceOAuthView = function() {};
@@ -180,29 +181,26 @@ describe('uproxy core', function() {
 
     alice.emit('' + uProxy.Command.MODIFY_CONSENT,
                      {data: {path: bobPath, action:uProxy.ConsentUserAction.REQUEST}});
-    var bobFriend = function(data) {
+    var bobHandleFriend = function(data) {
       if (data.user.userId === ALICE.ANONYMIZED_ID
           && data.consent.remoteRequestsAccessFromLocal
           && !data.consent.localGrantsAccessToRemote) {
-        console.log(data);
-        bob.off('' + uProxy.Update.USER_FRIEND, bobFriend);
+        bob.off('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
         bob.emit('' + uProxy.Command.MODIFY_CONSENT,
                          {data: {path: alicePath, action:uProxy.ConsentUserAction.OFFER}});
       }
     }
-    bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
+    bob.on('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
 
-    var aliceFriend = function(data) {
-      console.log(data);
+    var aliceHandleFriend = function(data) {
       if (data.user.userId === BOB.ANONYMIZED_ID
           && data.offeringInstances.length > 0
           && data.offeringInstances[0].instanceId === BOB.INSTANCE_ID) {
-        console.log(data);
-        alice.off('' + uProxy.Update.USER_FRIEND, aliceFriend);
+        alice.off('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
         done();
       }
     };
-    alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+    alice.on('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
   });
 
   it('start proxying', (done) => {
@@ -211,6 +209,7 @@ describe('uproxy core', function() {
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
         expect(data.promiseId).toEqual(promiseId);
+        // data.argsForCallback should be endpoints here.
         testConnection(data.argsForCallback).then((proxying) => {
           expect(proxying).toEqual(true);
           fulfill();
@@ -278,7 +277,7 @@ describe('uproxy core', function() {
     // alice not proxying
     var bobStopped = new Promise(function(fulfill, reject) {
       bob.once('' + uProxy.Update.STOP_GIVING_TO_FRIEND, (data) => {
-        //expect(data).toEqual(ALICE.INSTANCE_ID);
+        expect(data).toEqual(ALICE.INSTANCE_ID);
         fulfill();
       });
     });
@@ -293,7 +292,7 @@ describe('uproxy core', function() {
     Promise.all([aliceStopped, bobStopped]).then(done);
   });
 
-  it('log out', (done) => {
+  it('log out and modify permissions for offline user', (done) => {
     alice.emit('' + uProxy.Command.LOGOUT,
                {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: ++promiseId});
 
@@ -317,7 +316,7 @@ describe('uproxy core', function() {
         }
       });
     });
-    var aliceFriend = function(data) {
+    var aliceHandleFriend = function(data) {
       aliceLoggedIn.then(() => {
         if (data.user.userId === BOB.ANONYMIZED_ID
             && data.offeringInstances.length > 0
@@ -325,26 +324,26 @@ describe('uproxy core', function() {
             && !data.consent.localGrantsAccessToRemote) {
           alice.emit('' + uProxy.Command.MODIFY_CONSENT,
                            {data: {path: bobPath, action:uProxy.ConsentUserAction.OFFER}});
-          alice.off('' + uProxy.Update.USER_FRIEND, aliceFriend);
+          alice.off('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
           bob.emit('' + uProxy.Command.LOGIN,
                    {data: 'Google', promiseId: ++promiseId});
-          var bobFriend = function(data) {
+          var bobHandleFriend = function(data) {
             if (data.user.userId === ALICE.ANONYMIZED_ID
                 && data.offeringInstances.length > 0
                 && data.offeringInstances[0].instanceId === ALICE.INSTANCE_ID
                 && data.consent.remoteRequestsAccessFromLocal
                 && !data.consent.localGrantsAccessToRemote) {
-              bob.off('' + uProxy.Update.USER_FRIEND, bobFriend);
+              bob.off('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
               done();
             }
           };
-          bob.on('' + uProxy.Update.USER_FRIEND, bobFriend);
+          bob.on('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
         }
       });
     };
     alice.on('' + uProxy.Update.NETWORK, (data) => {
       if (data.online) {
-        alice.on('' + uProxy.Update.USER_FRIEND, aliceFriend);
+        alice.on('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
       }
     });
   });
