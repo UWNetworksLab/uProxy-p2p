@@ -498,6 +498,11 @@ module UI {
      * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
+      if (!this.isGettingAccess()) {
+        // Not getting access, no action required.
+        return;
+      }
+
       var instanceId = this.instanceGettingAccessFrom_;
       this.instanceGettingAccessFrom_ = null;
 
