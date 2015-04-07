@@ -473,18 +473,18 @@ class uProxyCore implements uProxy.CoreAPI {
       maxAttempts = this.FeedbackUrls_.length;
     }
 
-    var logs :Promise<string>;
+    var logsPromise :Promise<string>;
 
     if (feedback.logs) {
-      logs = this.getLogsAndNetworkInfo().then((logs) => {
+      logsPromise = this.getLogsAndNetworkInfo().then((logs) => {
         var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
         return browserInfo + logs;
       });
     } else {
-      logs = Promise.resolve('');
+      logsPromise = Promise.resolve('');
     }
 
-    return logs.then((logs) => {
+    return logsPromise.then((logs) => {
       var attempts = 0;
 
       var payload = {
