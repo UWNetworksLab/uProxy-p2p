@@ -593,7 +593,7 @@ module.exports = (grunt) ->
                   'build/compile-src/integration/core.spec.js'
           ],
           # Uncomment this for debugging
-          # keepRunner: true,
+          keepRunner: true,
         }
       }
     }

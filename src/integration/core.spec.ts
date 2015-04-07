@@ -202,8 +202,7 @@ describe('uproxy core', function() {
     };
     alice.on('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
   });
-
-  it('start proxying', (done) => {
+  var startProxying = function() {
     alice.emit('' + uProxy.Command.START_PROXYING,
                {data: bobPath, promiseId: ++promiseId});
     var aliceStarted = new Promise(function(fulfill, reject) {
@@ -224,72 +223,44 @@ describe('uproxy core', function() {
       });
     });
 
-    Promise.all([aliceStarted, bobStarted]).then(done);
+    return Promise.all([aliceStarted, bobStarted]);
+  }
+
+  var stopProxying = function() {
+     alice.emit('' + uProxy.Command.STOP_PROXYING,
+               {data: bobPath});
+    // alice not proxying
+    var bobStopped = new Promise(function(fulfill, reject) {
+      bob.once('' + uProxy.Update.STOP_GIVING_TO_FRIEND, (data) => {
+        expect(data).toEqual(ALICE.INSTANCE_ID);
+        fulfill();
+      });
+    });
+
+    var aliceStopped = new Promise(function(fulfill, reject) {
+      alice.once('' + uProxy.Update.STOP_GETTING_FROM_FRIEND, (data) => {
+        expect(data).toEqual({instanceId: BOB.INSTANCE_ID, error: false});
+        fulfill();
+      });
+    });
+
+    return Promise.all([aliceStopped, bobStopped]);
+  }
+
+  it('start proxying', (done) => {
+    startProxying().then(done);
   });
 
   it('stop proxying', (done) => {
-    alice.emit('' + uProxy.Command.STOP_PROXYING,
-               {data: bobPath});
-    // alice not proxying
-    var bobStopped = new Promise(function(fulfill, reject) {
-      bob.once('' + uProxy.Update.STOP_GIVING_TO_FRIEND, (data) => {
-        expect(data).toEqual(ALICE.INSTANCE_ID);
-        fulfill();
-      });
-    });
-
-    var aliceStopped = new Promise(function(fulfill, reject) {
-      alice.once('' + uProxy.Update.STOP_GETTING_FROM_FRIEND, (data) => {
-        expect(data).toEqual({instanceId: BOB.INSTANCE_ID, error: false});
-        fulfill();
-      });
-    });
-
-    Promise.all([aliceStopped, bobStopped]).then(done);
+    stopProxying().then(done);
   });
 
   it('start proxying again', (done) => {
-    alice.emit('' + uProxy.Command.START_PROXYING,
-               {data: bobPath, promiseId: ++promiseId});
-    var aliceStarted = new Promise(function(fulfill, reject) {
-      alice.once('' + uProxy.Update.COMMAND_FULFILLED, (data) => {
-        expect(data.promiseId).toEqual(promiseId);
-        testConnection(data.argsForCallback).then((proxying) => {
-          expect(proxying).toEqual(true);
-          fulfill();
-        });
-      });
-    });
-
-    var bobStarted = new Promise(function(fulfill, reject) {
-      bob.once('' + uProxy.Update.START_GIVING_TO_FRIEND, (data) => {
-        expect(data).toEqual(ALICE.INSTANCE_ID);
-        fulfill();
-      });
-    });
-
-    Promise.all([aliceStarted, bobStarted]).then(done);
+    startProxying().then(done);
   });
 
   it('stop proxying again', (done) => {
-    alice.emit('' + uProxy.Command.STOP_PROXYING,
-               {data: bobPath});
-    // alice not proxying
-    var bobStopped = new Promise(function(fulfill, reject) {
-      bob.once('' + uProxy.Update.STOP_GIVING_TO_FRIEND, (data) => {
-        expect(data).toEqual(ALICE.INSTANCE_ID);
-        fulfill();
-      });
-    });
-
-    var aliceStopped = new Promise(function(fulfill, reject) {
-      alice.once('' + uProxy.Update.STOP_GETTING_FROM_FRIEND, (data) => {
-        expect(data).toEqual({instanceId: BOB.INSTANCE_ID, error: false});
-        fulfill();
-      });
-    });
-
-    Promise.all([aliceStopped, bobStopped]).then(done);
+    stopProxying().then(done);
   });
 
   it('log out and modify permissions for offline user', (done) => {
