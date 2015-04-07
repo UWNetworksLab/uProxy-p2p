@@ -173,10 +173,12 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
 
 
     if (this.status.connected) {
-      // Ensure that proxying has stopped and update this.status.
-      // TODO: display a notification to the user when we have a good way to
-      // check if they are currently getting or giving access.
-      ui.stopGettingInUiAndConfig(true);
+      // TODO: Consider displaying a notification if the user was giving access.
+      // Ensure that proxying has stopped.
+      if (ui.isGettingAccess()) {
+        ui.stopGettingInUiAndConfig(true);
+      }
+      // Update this.status.
       this.status.connected = false;
       this.onceConnected = new Promise<void>((F, R) => { this.fulfillConnect_ = F; });
     }
