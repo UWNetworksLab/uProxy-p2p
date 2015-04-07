@@ -498,18 +498,11 @@ module UI {
      * unexpected reason, user should be asked before reverting proxy settings.
      */
     public stopGettingInUiAndConfig = (askUser :boolean) => {
-      if (!this.isGettingAccess()) {
-        // Not getting access, no action required.
-        return;
-      }
-
       var instanceId = this.instanceGettingAccessFrom_;
       this.instanceGettingAccessFrom_ = null;
 
       if (this.isGivingAccess()) {
         this.browserApi.setIcon(UI.SHARING_ICON);
-      } else if (askUser) {
-        this.browserApi.setIcon(UI.ERROR_ICON);
       } else if (model.onlineNetwork) {
         this.browserApi.setIcon(UI.DEFAULT_ICON);
       } else {
@@ -523,6 +516,7 @@ module UI {
       }
 
       if (askUser) {
+        this.browserApi.setIcon(UI.ERROR_ICON);
         this.browserApi.launchTabIfNotOpen('disconnected.html');
         return;
       }

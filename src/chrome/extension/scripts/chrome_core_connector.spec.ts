@@ -23,17 +23,23 @@ var mockAppPort = () => {
 
 // Mock UI.
 var ui :UI.UserInterface;
+_.defaults(ui,
+  {
+    stopGettingInUiAndConfig: (askUser :boolean) => {},
+    isGettingAccess: () => { return true; },
+    syncUser: (payload :UI.UserMessage) => {}
+  });
 var chromeBrowserApi :ChromeBrowserApi;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the chromeCoreConnector object.
 describe('core-connector', () => {
 
-  ui = jasmine.createSpyObj('UI.UserInterface',
+  /*ui = jasmine.createSpyObj('UI.UserInterface',
     ['stopGettingInUiAndConfig',
     'sync',
     'update',
-    'syncUser']);
+    'syncUser']);*/
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
     'showNotification']);
@@ -139,9 +145,11 @@ describe('core-connector', () => {
     // is called with the expected params.
     expect(disconnect).not.toBeNull();
     spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); })
+    // Test the case where user was proxying.
     disconnect();
     expect(chromeCoreConnector.status.connected).toEqual(false);
     expect(chromeCoreConnector['appPort_']).toBeNull();
+    spyOn(ui, 'stopGettingInUiAndConfig');
     expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
   });
 

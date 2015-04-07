@@ -1,3 +1,3 @@
 function stopProxying() {
-  window.postMessage('stopUsingProxy', '*');
+  window.postMessage({ update: 'STOP_GETTING', data: false }, '*');
 }

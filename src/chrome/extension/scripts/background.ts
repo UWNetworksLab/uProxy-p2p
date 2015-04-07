@@ -43,7 +43,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // handle requests to stop proxying
   if (request && request.stopProxying) {
-    chromeBrowserApi.stopUsingProxy();
+    ui.stopGettingInUiAndConfig(false);
   }
 });
 

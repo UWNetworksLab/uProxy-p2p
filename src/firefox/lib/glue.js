@@ -99,8 +99,6 @@ function setUpConnection(freedom, panel, button) {
       worker.port.on('command', function(data) {
         freedom.emit(uProxy.Command[data.command], data.data);
       });
-
-      worker.port.on('stopUsingProxy', proxyConfig.stopUsingProxy);
     }
   });
 }
