@@ -288,6 +288,9 @@ describe('uproxy core', function() {
       });
     });
     var aliceHandleFriend = function(data) {
+      // Initially Alice doesn't know that bob has canceled the offer
+      // because they haven't both been online so they haven't synced
+      // the consent state yet.
       aliceLoggedIn.then(() => {
         if (data.user.userId === BOB.ANONYMIZED_ID
             && data.offeringInstances.length > 0
@@ -298,17 +301,31 @@ describe('uproxy core', function() {
           alice.off('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
           bob.emit('' + uProxy.Command.LOGIN,
                    {data: 'Google', promiseId: ++promiseId});
-          var bobHandleFriend = function(data) {
-            if (data.user.userId === ALICE.ANONYMIZED_ID
-                && data.offeringInstances.length > 0
-                && data.offeringInstances[0].instanceId === ALICE.INSTANCE_ID
-                && data.consent.remoteRequestsAccessFromLocal
-                && !data.consent.localGrantsAccessToRemote) {
-              bob.off('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
-              done();
+          // After bob logs in, consent state is restored from storage correctly.
+          var aliceReceivedConsent = new Promise(function(fulfill, reject) {
+            aliceHandleFriend = function(data) {
+              if (data.user.userId = BOB.ANONYMIZED_ID
+                && data.offeringInstances.length === 0) {
+                alice.off('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
+                fulfill();
+              }
             }
-          };
-          bob.on('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
+            alice.on('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
+          });
+          var bobReceivedConsent = new Promise(function(fulfill, reject) {
+            var bobHandleFriend = function(data) {
+              if (data.user.userId === ALICE.ANONYMIZED_ID
+                  && data.offeringInstances.length > 0
+                  && data.offeringInstances[0].instanceId === ALICE.INSTANCE_ID
+                  && data.consent.remoteRequestsAccessFromLocal
+                  && !data.consent.localGrantsAccessToRemote) {
+                bob.off('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
+                fulfill();
+              }
+            };
+            bob.on('' + uProxy.Update.USER_FRIEND, bobHandleFriend);
+          });
+          Promise.all([aliceReceivedConsent, bobReceivedConsent]).then(done);
         }
       });
     };
