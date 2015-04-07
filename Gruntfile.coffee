@@ -3,54 +3,38 @@ Gruntfile for uProxy
 ###
 
 TaskManager = require 'uproxy-lib/build/tools/taskmanager'
-Rule = require 'uproxy-lib/build/tools/common-grunt-rules'
-Path = require 'path'
+path = require 'path'
 
-getNodePath = (module) =>
-  Path.dirname(require.resolve(module + '/package.json'))
+#-------------------------------------------------------------------------
+rules = require './build/tools/common-grunt-rules'
 
-chromeExtDevPath = 'build/dev/chrome/extension/'
-chromeAppDevPath = 'build/dev/chrome/app/'
-firefoxDevPath = 'build/dev/firefox/'
+# Location of where src is copied into and compiled.
+devBuildPath = 'build/dev/uproxy'
+# Location of where to copy/build third_party source/libs.
+thirdPartyBuildPath = 'build/third_party'
+# This is used for the copying of uproxy libraries into the target directory.
+localLibsDestPath = 'lib'
 
-# TODO: Move this into common-grunt-rules in uproxy-lib.
-# We need *.ts files for typescript compilation
-# and *.html files for polymer vulcanize compilation
-Rule.symlink = (dir, dest='') =>
-  { files: [ {
-    expand: true,
-    overwrite: true,
-    cwd: dir,
-    src: ['**/*.ts', '**/*.html', '**/*.js'],
-    dest: 'build/compile-src/' + dest} ] }
+# Setup our build rules/tools
+Rule = new rules.Rule({
+  # The path where code in this repository should be built in.
+  devBuildPath: devBuildPath,
+  # The path from where third party libraries should be copied. e.g. as used by
+  # sample apps.
+  thirdPartyBuildPath: thirdPartyBuildPath,
+  # The path to copy modules from this repository into. e.g. as used by sample
+  # apps.
+  localLibsDestPath: localLibsDestPath
+});
 
-# Use symlinkSrc with the name of the module, and it will automatically symlink
-# the path to its src/ directory.
-Rule.symlinkSrc = (module) => Rule.symlink Path.join(getNodePath(module), 'src')
-Rule.symlinkThirdParty = (module) =>
-  Rule.symlink(Path.join(getNodePath(module), 'third_party'), 'third_party')
+browserifyIntegrationTest = (path) ->
+  Rule.browserifySpec(path, {
+    browserifyOptions: { standalone: 'browserified_exports' }
+  });
 
-
-# # TODO: When we make the 'distribution' build which uglifies all js and removes
-# # the specs, make a corresponding rule which makes everything go into
-# # 'build/dist'.
-# Rule.typescriptSrcDev = (name) =>
-#   rule = Rule.typescriptSrc name
-#   rule.dest = 'build/dev/'
-#   rule
-
-# Temporary wrappers which allow implicit any.
-# TODO: Remove once implicit anys are fixed. (This is actually happening in some
-# of the DefinitelyTyped definitions - i.e. MediaStream.d.ts, and many other
-# places)
-Rule.typescriptSrcLenient = (name) =>
-  rule = Rule.typescriptSrc name
-  rule.options.noImplicitAny = false
-  rule
-Rule.typescriptSpecDeclLenient = (name) =>
-  rule = Rule.typescriptSpecDecl name
-  rule.options.noImplicitAny = false
-  rule
+chromeExtDevPath = 'build/dev/uproxy/chrome/extension/'
+chromeAppDevPath = 'build/dev/uproxy/chrome/app/'
+firefoxDevPath = 'build/dev/uproxy/firefox/'
 
 # TODO: Move more file lists here.
 FILES =
