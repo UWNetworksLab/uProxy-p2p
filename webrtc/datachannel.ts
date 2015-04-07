@@ -162,7 +162,7 @@ export class DataChannelClass implements DataChannel {
     } else if (message.buffer instanceof ArrayBuffer) {
       this.dataFromPeerQueue.handle({buffer: message.buffer});
     } else {
-      log.error('Unexpected data from peer: ' + JSON.stringify(message));
+      log.error('Unexpected data from peer: %1', message);
     }
   }
 
