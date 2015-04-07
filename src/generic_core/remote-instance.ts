@@ -64,6 +64,10 @@ module Core {
 
     // Number of milliseconds before timing out socksToRtc_.start
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+    // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
+    // trying to connect) by timing out RtcToNet 15 seconds later than
+    // SocksToRtc.
+    public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     private startupTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
@@ -159,13 +163,29 @@ module Core {
 
         // Create a new rtcToNet object everytime there is an OFFER signal
         if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          this.connection_.startShare();
+          this.startShare_();
         }
       }
 
       this.connection_.handleSignal({
         type: type,
         data: signalFromRemote
+      });
+    }
+
+    /**
+      * When our peer sends us a signal that they'd like to be a client,
+      * we should try to start sharing.
+      */
+    private startShare_ = () => {
+      // Cancel rtcToNet_ connection if start hasn't completed in 45 seconds.
+      this.startupTimeout_ = setTimeout(() => {
+        log.warn('Timing out rtcToNet_ connection');
+        this.connection_.stopShare();
+        ui.update(uProxy.Update.FRIEND_FAILED_TO_GET);
+      }, this.RTC_TO_NET_TIMEOUT);
+      this.connection_.startShare().then(() => {
+        this.clearTimeout_();
       });
     }
 

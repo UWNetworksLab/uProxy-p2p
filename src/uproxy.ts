@@ -74,7 +74,8 @@ module uProxy {
     STOP_GETTING,
     START_GIVING,
     STOP_GIVING,
-    STATE
+    STATE,
+    FRIEND_FAILED_TO_GET
   }
 
   /**

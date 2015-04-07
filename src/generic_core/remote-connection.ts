@@ -67,7 +67,7 @@ module Core {
       target.handleSignalFromPeer(msg);
     };
 
-    public startShare = () => {
+    public startShare = () :Promise<void> => {
       this.rtcToNet_ = new RtcToNet.RtcToNet(
         <freedom_RTCPeerConnection.RTCConfiguration> {
           iceServers: core.globalSettings.stunServers
@@ -102,6 +102,7 @@ module Core {
         this.stateRefresh_();
         this.rtcToNet_ = null;
       });
+      return this.rtcToNet_.onceReady;
     }
 
     public stopShare = () :Promise<void> => {

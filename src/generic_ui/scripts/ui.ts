@@ -345,6 +345,10 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
+
+      core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, () => {
+        this.fireSignal('open-troubleshoot');
+      });
     }
 
     // Because of an observer (in root.ts) watching the value of
