@@ -216,12 +216,12 @@ module Core {
     }
 
     private stateRefresh_ = () => {
-      this.sendUpdate_(uProxy.Update.STATE, cloneDeep({
+      this.sendUpdate_(uProxy.Update.STATE, {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
         localGettingFromRemote: this.localGettingFromRemote,
         localSharingWithRemote: this.localSharingWithRemote
-      }));
+      });
     }
   }
 }

@@ -55,6 +55,7 @@ declare module Core {
 
   // Object containing description so it can be saved to storage.
   export interface GlobalSettings {
+    version :number;
     description :string;
     stunServers :freedom_RTCPeerConnection.RTCIceServer[];
     hasSeenSharingEnabledScreen :boolean;

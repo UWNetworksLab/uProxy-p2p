@@ -35,6 +35,7 @@ var model :UI.Model = {
     }
   },
   globalSettings: {
+    version: uProxy.STORAGE_VERSION,
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
@@ -163,6 +164,10 @@ module UI {
     public copyPasteError :CopyPasteError = CopyPasteError.NONE;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
+
+    // Changing this causes root.ts to fire a core-signal
+    // with the new value.
+    public signalToFire :string = '';
 
     /*
      * This is used to store the information for setting up a copy+paste
@@ -341,6 +346,13 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
+    }
+
+    // Because of an observer (in root.ts) watching the value of
+    // signalToFire, this function simulates firing a core-signal
+    // from the background page.
+    public fireSignal = (signal :string) => {
+      this.signalToFire = signal;
     }
 
     public showNotification = (text :string, data ?:NotificationData) => {

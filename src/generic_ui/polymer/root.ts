@@ -30,9 +30,11 @@ Polymer({
   },
   setGetMode: function() {
     model.globalSettings.mode = uProxy.Mode.GET;
+    core.updateGlobalSettings(model.globalSettings);
   },
   setShareMode: function() {
     model.globalSettings.mode = uProxy.Mode.SHARE;
+    core.updateGlobalSettings(model.globalSettings);
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;
@@ -83,11 +85,18 @@ Polymer({
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
   },
-
-  observe: {
-    'model.globalSettings.mode': 'modeChange'
-  },
-  modeChange: function() {
+  tabSelected: function(e) {
+    // setting the value is taken care of in the polymer binding, we just need
+    // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
+  },
+  signalToFireChanged: function() {
+    if (this.ui.signalToFire != '') {
+      this.fire('core-signal', {name: this.ui.signalToFire});
+      this.ui.signalToFire = '';
+    }
+  },
+  observe: {
+    'ui.signalToFire' : 'signalToFireChanged'
   }
 });

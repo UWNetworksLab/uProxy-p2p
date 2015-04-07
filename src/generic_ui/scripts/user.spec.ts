@@ -28,40 +28,25 @@ describe('UI.User', () => {
   function makeUpdateMessage(update :Object) {
     var result :UI.UserMessage = <UI.UserMessage>update;
 
-    if (!('network' in result)) {
-      result.network = 'testNetwork';
-    }
-
-    if (!('user' in result)) {
-      result.user = {
+    _.defaults(result, {
+      network: 'testNetwork',
+      user: {
         userId: 'fakeuser',
         name: 'fakename',
         imageData: 'fakeimage.uri',
         timestamp: Date.now()
-      };
-    }
-
-    if (!('offeringInstances' in result)) {
-      result.offeringInstances = [];
-    }
-
-    if (!('allInstanceIds' in result)) {
-      result.allInstanceIds = [];
-    }
-
-    if (!('isOnline' in result)) {
-      result.isOnline = true;
-    }
-
-    if (!('consent' in result)) {
-      result.consent = {
+      },
+      offeringInstances: [],
+      allInstanceIds: [],
+      isOnline: true,
+      consent: {
         localGrantsAccessToRemote: false,
         localRequestsAccessFromRemote: false,
         remoteRequestsAccessFromLocal: false,
         ignoringRemoteUserRequest: false,
         ignoringRemoteUserOffer: false
-      };
-    }
+      }
+    });
 
     return result;
   }
@@ -163,5 +148,33 @@ describe('UI.User', () => {
     }));
     expect(ui.showNotification).not.toHaveBeenCalled();
   });
+
+  it('does not replace instances', () => {
+    user.update(makeUpdateMessage({
+      allInstanceIds: [
+        '1',
+        '2'
+      ],
+      offeringInstances: [
+        getInstance('1', ''),
+        getInstance('2', '')
+      ]
+    }));
+
+    var second = user.offeringInstances[1];
+    expect(second.instanceId).toEqual('2');
+
+    user.update(makeUpdateMessage({
+      allInstanceIds: [
+        '2'
+      ],
+      offeringInstances: [
+        getInstance('2', '')
+      ]
+    }));
+
+    expect(user.offeringInstances[0]).toBe(second);
+  });
+
   // TODO: more specs
 });  // UI.User
