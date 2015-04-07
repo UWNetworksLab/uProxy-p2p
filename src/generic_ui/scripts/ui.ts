@@ -345,8 +345,6 @@ module UI {
 
         this.updateSharingStatusBar_();
       });
-
-      core.onUpdate(uProxy.Update.FIRE_SIGNAL, this.fireSignal);
     }
 
     // Because of an observer (in root.ts) watching the value of

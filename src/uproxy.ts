@@ -74,8 +74,7 @@ module uProxy {
     STOP_GETTING,
     START_GIVING,
     STOP_GIVING,
-    STATE,
-    FIRE_SIGNAL
+    STATE
   }
 
   /**
