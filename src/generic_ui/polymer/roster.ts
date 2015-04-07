@@ -3,12 +3,6 @@
 Polymer({
   loadingContacts: false,
   searchQuery: '',
-  onlinePending: [],
-  offlinePending: [],
-  onlineTrustedUproxyContacts: [],
-  offlineTrustedUproxyContacts: [],
-  onlineUntrustedUproxyContacts: [],
-  offlineUntrustedUproxyContacts: [],
   ready: function() {
     console.log('initializing roster');
 
