@@ -305,7 +305,8 @@ describe('uproxy core', function() {
           var aliceReceivedConsent = new Promise(function(fulfill, reject) {
             aliceHandleFriend = function(data) {
               if (data.user.userId = BOB.ANONYMIZED_ID
-                && data.offeringInstances.length === 0) {
+                && data.offeringInstances.length === 0
+                && data.consent.localGrantsAccessToRemote) {
                 alice.off('' + uProxy.Update.USER_FRIEND, aliceHandleFriend);
                 fulfill();
               }
