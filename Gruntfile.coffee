@@ -662,7 +662,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
-  grunt.loadNpmTasks 'grunt-jasmine-node2'
 
   #-------------------------------------------------------------------------
   # Define the tasks
