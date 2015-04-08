@@ -468,37 +468,37 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   // Adds a signalling message to this.signalForPeerQueue.
-  private emitSignalForPeer_ = (s:signals.Message) : void => {
-    log.debug('%1: signalForPeer: %2', this.peerName_, s);
-    this.signalForPeerQueue.handle(s);
+  private emitSignalForPeer_ = (message:signals.Message) : void => {
+    log.debug('%1: signalForPeer: %2', this.peerName_, message);
+    this.signalForPeerQueue.handle(message);
   }
 
   // Handle a signalling message from the remote peer.
-  public handleSignalMessage = (s:signals.Message) : void => {
-    log.debug('%1: handleSignalMessage: %2', this.peerName_, s);
+  public handleSignalMessage = (message:signals.Message) : void => {
+    log.debug('%1: handleSignalMessage: %2', this.peerName_, message);
     // If we are offering and they are also offering at the same time, pick
     // the one who has the lower hash value for their description: this is
     // equivalent to having a special random id, but voids the need for an
     // extra random number.
     // TODO: Instead of hash, we could use the IP/port candidate list which
     //       is guaranteed to be unique for 2 peers.
-    switch(s.type) {
+    switch(message.type) {
       case signals.Type.OFFER:
-        this.handleOfferSignalMessage_(s.description);
+        this.handleOfferSignalMessage_(message.description);
         break;
       // Answer to an offer we sent
       case signals.Type.ANSWER:
-        this.handleAnswerSignalMessage_(s.description);
+        this.handleAnswerSignalMessage_(message.description);
         break;
       // Add remote ice candidate.
       case signals.Type.CANDIDATE:
-        this.handleCandidateSignalMessage_(s.candidate);
+        this.handleCandidateSignalMessage_(message.candidate);
         break;
       case signals.Type.NO_MORE_CANDIDATES:
         break;
     default:
       log.error('%1: unexpected signalling message type %2',
-          this.peerName_, s.type);
+          this.peerName_, message.type);
     }
   }
 

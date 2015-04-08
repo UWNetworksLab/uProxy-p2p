@@ -61,8 +61,8 @@ describe('WebRtc / PeerConnection', function() {
     pc.negotiateConnection();
 
     pc.signalForPeerQueue.setSyncNextHandler(
-        (s:signals.Message) => {
-      expect(s.type).toEqual(signals.Type.OFFER);
+        (message:signals.Message) => {
+      expect(message.type).toEqual(signals.Type.OFFER);
       expect(mockRtcPeerConnection.setLocalDescription).not.toHaveBeenCalled();
       done();
     });

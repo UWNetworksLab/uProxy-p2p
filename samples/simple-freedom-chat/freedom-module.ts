@@ -73,13 +73,13 @@ var b :PeerConnection<signals.Message> = makePeerConnection('B')
 
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
-a.signalForPeerQueue.setSyncHandler((signal:signals.Message) => {
-  log.info('a: sending signal to b.');
-  b.handleSignalMessage(signal);
+a.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+  log.info('a: sending signal message to b.');
+  b.handleSignalMessage(message);
 });
-b.signalForPeerQueue.setSyncHandler((signal:signals.Message) => {
-  log.info('b: sending signal to a.');
-  a.handleSignalMessage(signal);
+b.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+  log.info('b: sending signal message to a.');
+  a.handleSignalMessage(message);
 });
 
 // Negotiate a peerconnection. Once negotiated, enable the UI and add
