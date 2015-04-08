@@ -207,7 +207,8 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       cmd: 'on',
       type: update
     };
-    console.log('UI onUpdate for', JSON.stringify(payload));
+    // This log floods the console during testing. Uncomment for debugging.
+    // console.log('UI onUpdate for', JSON.stringify(payload));
     this.send(payload, true);
   }
 
