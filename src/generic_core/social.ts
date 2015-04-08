@@ -547,7 +547,11 @@ module Social {
     public send = (user :Core.User,
                    clientId :string,
                    message :uProxy.Message) : Promise<void> => {
-      var messageString = JSON.stringify(message);
+      var messageString = JSON.stringify({
+        type: message.type,
+        data: message.data,
+        version: uProxy.MESSAGE_VERSION
+      });
       log.info('sending message', {
         userTo: user.userId,
         clientTo: clientId,

@@ -5,6 +5,7 @@
  */
 /// <reference path='../../freedom/typings/social.d.ts' />
 /// <reference path='../../interfaces/user.d.ts' />
+/// <reference path='../../third_party/typings/lodash/lodash.d.ts' />
 
 module UI {
 
@@ -101,7 +102,27 @@ module UI {
       this.name = profile.name;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
       this.url = profile.url;
-      this.offeringInstances = payload.offeringInstances;
+
+      // iterate backwards to allow removing elements
+      var i = this.offeringInstances.length;
+      while (i--) {
+        var found = _.findIndex(payload.offeringInstances, (obj) => {
+          return obj.instanceId === this.offeringInstances[i].instanceId;
+        });
+
+        if (found !== -1) {
+          _.merge(this.offeringInstances[i], payload.offeringInstances[found]);
+          payload.offeringInstances.splice(found, 1);
+        } else {
+          this.offeringInstances.splice(i, 1);
+        }
+      }
+
+      for (var j in payload.offeringInstances) {
+        this.offeringInstances.push(payload.offeringInstances[j]);
+      }
+
+      //this.offeringInstances = payload.offeringInstances;
       this.allInstanceIds = payload.allInstanceIds;
       this.updateInstanceDescriptions();
       this.consent_ = payload.consent;

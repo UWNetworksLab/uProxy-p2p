@@ -21,7 +21,6 @@
  * client, but with the 'uProxy' non-human client.
  */
 /// <reference path='remote-instance.ts' />
-/// <reference path='util.ts' />
 
 /// <reference path='../uproxy.ts' />
 /// <reference path='../interfaces/instance.d.ts' />
@@ -453,7 +452,7 @@ module Core {
     }
 
     public currentState = () :UserState => {
-      return cloneDeep({
+      return _.cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
         url: this.profile.url,
