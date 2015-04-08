@@ -1,5 +1,6 @@
 /// <reference path='chrome_core_connector.ts' />
 /// <reference path='../../../generic_ui/scripts/core_connector.ts' />
+/// <reference path='../../../generic_ui/scripts/ui.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 
