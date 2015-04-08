@@ -191,14 +191,16 @@ module UI {
       if (this.consent_.localGrantsAccessToRemote) {
         isTrustedForSharing = true;
       }
+
       // Get tab.
-      if (this.offeringInstances.length > 0 &&
-          !this.consent_.ignoringRemoteUserOffer &&
-          !this.consent_.localRequestsAccessFromRemote) {
-        isPendingForGetting = true;
-      }
-      if (this.consent_.localRequestsAccessFromRemote) {
-        isTrustedForGetting = true;
+      if (this.offeringInstances.length > 0) {
+        if (this.consent_.localRequestsAccessFromRemote) {
+          // we have asked for and received access
+          isTrustedForGetting = true;
+        } else if (!this.consent_.ignoringRemoteUserOffer) {
+          // we have been offered access and have taken no action
+          isPendingForGetting = true;
+        }
       }
 
       // Convert booleans into strings.
