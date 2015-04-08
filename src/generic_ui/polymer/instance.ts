@@ -17,6 +17,16 @@ Polymer({
     this.model = model;
   },
   start: function() {
+    if (!this.instance.isOnline) {
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          text: this.user.name + ' is offline'
+        }
+      });
+      return;
+    }
+
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
