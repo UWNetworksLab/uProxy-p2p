@@ -33,7 +33,8 @@
     .nameRow core-icon {
       opacity: 0.6;
       margin: 0px 18px 0px 0px;
-      float: right;
+    }
+    .nameRow core-icon.expand {
       min-width: 25px;
     }
     .nameRow .iconWrapper {
@@ -41,13 +42,10 @@
       margin-left: 5px;
     }
     .nameRow .iconWrapper core-icon[icon=open-in-new] {
-      float: left;
       width: 17px;
-      min-width: 17px;
       height: 17px;
     }
-    .nameRow:hover core-icon[icon=expand-more],
-    .nameRow:hover core-icon[icon=expand-less] {
+    .nameRow:hover core-icon.expand {
       opacity: 1;
     }
     .avatar {
@@ -134,11 +132,11 @@
           hidden?='{{ model.globalSettings.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
       <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
       <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
-      <core-icon icon="expand-more"
+      <core-icon icon="expand-more" class="expand"
         hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
       <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
-      <core-icon icon="expand-less"
+      <core-icon icon="expand-less" class="expand"
         hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->

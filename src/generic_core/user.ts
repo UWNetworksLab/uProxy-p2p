@@ -431,6 +431,10 @@ module Core {
         this.profile.imageData = state.imageData;
       }
 
+      if (typeof this.profile.url === 'undefined') {
+        this.profile.url = state.url;
+      }
+
       // Restore all instances.
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
@@ -452,6 +456,7 @@ module Core {
       return cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
+        url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
         consent: this.consent
       });
