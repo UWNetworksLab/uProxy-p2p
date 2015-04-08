@@ -58,7 +58,7 @@ export interface PeerConnection<TSignallingMessage> {
 
   // The |handleSignalMessage| function should be called with signalling
   // messages from the remote peer.
-  handleSignalMessage :(s:TSignallingMessage) => void;
+  handleSignalMessage :(message:TSignallingMessage) => void;
   // The underlying handler that holds/handles signals intended to go to the
   // remote peer. A handler should be set that sends messages to the remote
   // peer.

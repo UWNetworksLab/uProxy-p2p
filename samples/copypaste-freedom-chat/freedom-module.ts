@@ -39,8 +39,8 @@ export function makePeerConnection() : PeerConnection<signals.Message> {
   var pc :PeerConnection<signals.Message> =
       peerconnection.createPeerConnection(pcConfig);
 
-  pc.signalForPeerQueue.setSyncHandler((signal:signals.Message) => {
-    parentModule.emit('signalForPeer', signal);
+  pc.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+    parentModule.emit('signalForPeer', message);
   });
 
   pc.onceConnected.then(() => {
@@ -82,9 +82,9 @@ parentModule.on('start', () => {
 // Receive signalling channel messages from the UI.
 // If pc doesn't exist yet then we are responding to the remote
 // peer's initiation.
-parentModule.on('signalFromPeer', (signal:signals.Message) => {
+parentModule.on('signalFromPeer', (message:signals.Message) => {
   if (pc === undefined) {
     pc = makePeerConnection();
   }
-  pc.handleSignalMessage(signal);
+  pc.handleSignalMessage(message);
 });
