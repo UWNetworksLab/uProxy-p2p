@@ -15,22 +15,23 @@ var events = require("sdk/system/events");
 var notifications = require('sdk/notifications')
 var pagemod = require('sdk/page-mod');
 
-function openURL(url) {
-  var win = Cc['@mozilla.org/appshell/window-mediator;1']
-      .getService(Ci.nsIWindowMediator)
-      .getMostRecentWindow('navigator:browser');
-  if (url.indexOf(':') < 0) {
-    url = self.data.url(url);
-  }
-  win.gBrowser.selectedTab = win.gBrowser.addTab(url);
-}
-
 // TODO: rename freedom to uProxyFreedomModule
 function setUpConnection(freedom, panel, button) {
   function connect(command, from, to) {
     from.on(command, function(data) {
       to.emit(command, data);
     })
+  }
+
+  function openURL(url) {
+    var win = Cc['@mozilla.org/appshell/window-mediator;1']
+        .getService(Ci.nsIWindowMediator)
+        .getMostRecentWindow('navigator:browser');
+    if (url.indexOf(':') < 0) {
+      url = self.data.url(url);
+    }
+    win.gBrowser.selectedTab = win.gBrowser.addTab(url);
+    panel.hide();
   }
 
   // Set up listeners between core and ui.

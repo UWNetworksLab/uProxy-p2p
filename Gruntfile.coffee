@@ -74,6 +74,7 @@ FILES =
   uproxy_common: [
     'uproxy.js'
     'generic/version.js'
+    'third_party/lib/lodash/lodash.min.js'
   ]
 
   uproxy_networking_common: [
@@ -176,7 +177,8 @@ module.exports = (grunt) ->
                 firefoxDevPath + 'data/scripts/firefox_browser_api.js'
                 firefoxDevPath + 'data/scripts/firefox_connector.js'
                 firefoxDevPath + 'data/scripts/core_connector.js'
-                firefoxDevPath + 'data/scripts/background.js']
+                firefoxDevPath + 'data/scripts/background.js'
+                firefoxDevPath + 'data/scripts/lodash.min.js']
           dest: firefoxDevPath + 'data/scripts/dependencies.js'
         }]
       }
@@ -334,16 +336,12 @@ module.exports = (grunt) ->
           ]
           dest: firefoxDevPath + 'data/core/'
          }, {
-           expand: true, cwd: 'build/compile-src'
-           src: ['uproxy.js']
+           expand: true, cwd: 'build/compile-src', flatten: true
+           src: FILES.uproxy_common
            dest: firefoxDevPath + 'data/core/'
         # ... the generic core stuff
         }, {
           expand: true, cwd: 'build/compile-src/generic_core'
-          src: ['**'],
-          dest: firefoxDevPath + 'data/core/'
-        }, {
-          expand: true, cwd: 'build/compile-src/generic'
           src: ['**'],
           dest: firefoxDevPath + 'data/core/'
         }, {
@@ -358,7 +356,10 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data/'
         }, {
           expand: true, cwd: 'build/compile-src', flatten: true
-          src: ['uproxy.js', 'firefox/data/scripts/*.js'],
+          src: FILES.uproxy_common
+              .concat [
+                'firefox/data/scripts/*.js'
+              ]
           dest: firefoxDevPath + 'data/scripts'
         # freedom for firefox
         }, {
@@ -516,7 +517,6 @@ module.exports = (grunt) ->
               'build/compile-src/rtc-to-net/rtc-to-net.js'
               'build/compile-src/uproxy.js'
               'build/compile-src/generic/version.js'
-              'build/compile-src/generic_core/util.js'
               'build/compile-src/generic_core/constants.js'
               'build/compile-src/generic_core/consent.js'
               'build/compile-src/generic_core/social-enum.js'
@@ -547,8 +547,8 @@ module.exports = (grunt) ->
 
       generic_ui: {
         src: FILES.jasmine_helpers
+            .concat FILES.uproxy_common.map((s) -> 'build/compile-src/' + s)
             .concat [
-              'build/compile-src/uproxy.js'
               'build/compile-src/generic_ui/scripts/user.js'
               'build/compile-src/generic_ui/scripts/ui.js'
             ]

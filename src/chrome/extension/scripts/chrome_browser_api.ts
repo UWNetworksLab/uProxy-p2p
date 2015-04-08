@@ -85,15 +85,7 @@ class ChromeBrowserApi implements BrowserAPI {
       this.running_ = true;
       chrome.proxy.settings.get({incognito:false},
         (details) => {
-          // TODO (lucyhe): Remove this if statement when Chrome issue 448172
-          // is resolved and we can safely assume that details is defined.
-          if (details) {
-            this.preUproxyConfig_ = details.value;
-          } else {
-            this.preUproxyConfig_ = {mode: "system"};
-            console.warn('Current proxy settings undefined. Received error: ' +
-              chrome.runtime.lastError.message);
-          }
+          this.preUproxyConfig_ = details.value;
           chrome.proxy.settings.set({
               value: this.uproxyConfig_,
               scope: 'regular'
