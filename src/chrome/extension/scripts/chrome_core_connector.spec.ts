@@ -23,7 +23,6 @@ var mockAppPort = () => {
 
 // Mock UI.
 var ui :UI.UserInterface;
-
 var chromeBrowserApi :ChromeBrowserApi;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
