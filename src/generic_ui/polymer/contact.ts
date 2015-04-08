@@ -17,8 +17,9 @@ Polymer({
     this.GettingConsentState = UI.GettingConsentState;
     this.SharingConsentState = UI.SharingConsentState;
   },
-  openLink: function() {
+  openLink: function(event) {
     this.ui.browserApi.openTab(this.contact.url);
+    event.stopPropagation();  // Don't toggle when link is clicked.
   },
 
   // |action| is the string end for a uProxy.ConsentUserAction

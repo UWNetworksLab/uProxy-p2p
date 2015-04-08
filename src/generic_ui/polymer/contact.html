@@ -34,12 +34,25 @@
       opacity: 0.6;
       margin: 0px 18px 0px 0px;
       float: right;
+      min-width: 25px;
     }
-    .nameRow:hover core-icon {
+    .nameRow .iconWrapper {
+      min-width: 30px;
+      margin-left: 5px;
+    }
+    .nameRow .iconWrapper core-icon[icon=open-in-new] {
+      float: left;
+      width: 17px;
+      min-width: 17px;
+      height: 17px;
+    }
+    .nameRow:hover core-icon[icon=expand-more],
+    .nameRow:hover core-icon[icon=expand-less] {
       opacity: 1;
     }
     .avatar {
       width: 40px; height: 40px;
+      min-width: 40px;
       border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: middle;
@@ -55,6 +68,7 @@
     .accessIcon {
       padding-right: 18px;
       width: 20px;
+      min-width: 20px;
       height: 20px;
     }
     core-collapse {
@@ -101,14 +115,17 @@
     }
     </style>
 
-    <div on-click='{{ toggle }}' tabindex='-1'
+    <div on-tap='{{ toggle }}' tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
       <img class='avatar' src='{{ contact.imageData }}' />
-      <div flex class='name'>{{ contact.name }}</div>
+      <div class='name'>{{ contact.name }}</div>
 
-      <core-icon icon="link" hidden?="{{ !contact.url }}"
-          title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
+      <div flex class="iconWrapper">
+        <core-icon icon="open-in-new"
+            hidden?="{{ !contact.url || (model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded) }}"
+            title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
+      </div>
 
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
       <img src='../icons/getting_animated.gif' class='accessIcon'
