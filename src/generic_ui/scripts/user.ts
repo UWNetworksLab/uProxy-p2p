@@ -32,6 +32,7 @@ module UI {
 
     public name              :string;
     public imageData         :string;
+    public url               :string;
     public isGettingFromMe   :boolean = false;
     public isSharingWithMe   :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
@@ -100,6 +101,7 @@ module UI {
 
       this.name = profile.name;
       this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
+      this.url = profile.url;
 
       // iterate backwards to allow removing elements
       var i = this.offeringInstances.length;
@@ -189,14 +191,16 @@ module UI {
       if (this.consent_.localGrantsAccessToRemote) {
         isTrustedForSharing = true;
       }
+
       // Get tab.
-      if (this.offeringInstances.length > 0 &&
-          !this.consent_.ignoringRemoteUserOffer &&
-          !this.consent_.localRequestsAccessFromRemote) {
-        isPendingForGetting = true;
-      }
-      if (this.consent_.localRequestsAccessFromRemote) {
-        isTrustedForGetting = true;
+      if (this.offeringInstances.length > 0) {
+        if (this.consent_.localRequestsAccessFromRemote) {
+          // we have asked for and received access
+          isTrustedForGetting = true;
+        } else if (!this.consent_.ignoringRemoteUserOffer) {
+          // we have been offered access and have taken no action
+          isPendingForGetting = true;
+        }
       }
 
       // Convert booleans into strings.

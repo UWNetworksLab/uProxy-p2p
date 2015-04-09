@@ -577,7 +577,6 @@ module Social {
       }
 
       var monitorCallback = () => {
-        log.debug('running monitor');
         // TODO: if too many instances are missing, we may send more messages
         // than our XMPP server will allow and be throttled.  We should change
         // monitoring to limit the number of XMPP messages it sends on each
