@@ -89,5 +89,14 @@ Polymer({
     // setting the value is taken care of in the polymer binding, we just need
     // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
-  }
+  },
+  signalToFireChanged: function() {
+    if (this.ui.signalToFire != '') {
+      this.fire('core-signal', {name: this.ui.signalToFire});
+      this.ui.signalToFire = '';
+    }
+  },
+  observe: {
+    'ui.signalToFire' : 'signalToFireChanged'
+  },
 });
