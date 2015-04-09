@@ -567,7 +567,8 @@ module Core {
 
   export interface UserState {
     name        :string;
-    imageData     :string;
+    imageData   :string;
+    url         :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
