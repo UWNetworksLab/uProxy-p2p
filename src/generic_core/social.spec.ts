@@ -126,7 +126,7 @@ describe('Social.FreedomNetwork', () => {
           expect(friend).toBeDefined();
           spyOn(friend, 'monitor');
           // Advance clock 5 seconds and make sure monitoring was called.
-          jasmine.clock().tick(5000);
+          jasmine.clock().tick(60000);
           expect(friend.monitor).toHaveBeenCalled();
           done();
         });
@@ -155,12 +155,12 @@ describe('Social.FreedomNetwork', () => {
       expect(friend).toBeDefined();
       spyOn(friend, 'monitor');
       // Monitoring is still running.
-      jasmine.clock().tick(5000);
+      jasmine.clock().tick(60000);
       expect(friend.monitor).toHaveBeenCalled();
 
       network.logout().then(() => {
         (<any>friend.monitor).calls.reset();
-        jasmine.clock().tick(5000);
+        jasmine.clock().tick(60000);
         expect(friend.monitor).not.toHaveBeenCalled();
         jasmine.clock().uninstall();
       }).then(done);

@@ -585,7 +585,7 @@ module Social {
           this.getUser(userId).monitor();
         }
       };
-      this.monitorIntervalId_ = setInterval(monitorCallback, 5000);
+      this.monitorIntervalId_ = setInterval(monitorCallback, 60000);
     }
 
     private stopMonitor_ = () : void => {
