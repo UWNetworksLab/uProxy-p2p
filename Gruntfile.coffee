@@ -477,6 +477,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/chrome/extension/**/*.spec.js'
+          outfile: 'build/compile-src/chrome/extension/SpecRunner.html'
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:
             coverage: 'build/coverage/chrome_extension/coverage.json'
@@ -495,6 +496,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/chrome/app/**/*.spec.js'
+          outfile: 'build/compile-src/chrome/app/SpecRunner.html'
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:
             coverage: 'build/coverage/chrome_app/coverage.json'
@@ -555,6 +557,7 @@ module.exports = (grunt) ->
         options:
           specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
           template: require('grunt-template-jasmine-istanbul')
+          outfile: 'build/compile-src/generic_ui/SpecRunner.html'
           templateOptions:
             coverage: 'build/coverage/generic_ui/coverage.json'
             report:
