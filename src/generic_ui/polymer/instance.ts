@@ -17,6 +17,16 @@ Polymer({
     this.model = model;
   },
   start: function() {
+    if (!this.instance.isOnline) {
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          text: this.user.name + ' is offline'
+        }
+      });
+      return;
+    }
+
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
@@ -29,10 +39,13 @@ Polymer({
         // if the failure is because of a user action, do nothing
         return;
       }
-
-      this.fire('core-signal', {name: 'open-troubleshoot'});
-      this.fire('core-signal', {name: 'show-toast',
-                                data: {text: 'Unable to get access from ' + this.user.name}});
+      ui.failedToGet = true;
+      this.fire('core-signal', {
+        name: 'show-toast',
+        data: {
+          text: 'Unable to get access from ' + this.user.name
+        }
+      });
 
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);

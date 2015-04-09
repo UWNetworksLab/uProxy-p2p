@@ -268,7 +268,8 @@
     <uproxy-troubleshoot></uproxy-troubleshoot>
 
     <paper-toast id='toast' style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;' responsiveWidth='320px' duration='30000'>
-      <core-icon icon='launch' style='color: #009688;' on-tap='{{ setGetMode }}'>
+      <core-icon icon='launch' on-tap='{{ troubleshootForGetter }}' hidden?='{{ !ui.failedToGet }}'></core-icon>
+      <core-icon icon='launch' on-tap='{{ troubleshootForSharer }}' hidden?='{{ !ui.failedToShare }}'></core-icon>
     </paper-toast>
 
   </template>

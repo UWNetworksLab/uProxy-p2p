@@ -80,6 +80,9 @@ Polymer({
     this.ui = ui;
     this.uProxy = uProxy;
     this.model = model;
+    this.failedToShare = false;
+    this.failedToGet = false;
+    this.
     if(ui.browserApi.browserSpecificElement){
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
@@ -90,14 +93,25 @@ Polymer({
     // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
   },
+  troubleshootForGetter: function() {
+    this.fire('core-signal', {name: 'open-troubleshoot'});
+  },
+  troubleshootForSharer: function() {
+    this.fire('core-signal', {name: 'open-troubleshoot'});
+  },
   showToast: function(e, data) {
     this.$.toast.setAttribute('text', data.text);
-    if (data.sharingError) {
-      this.sharingError = true;
-    } else if (data.gettingError) {
-      this.gettingError = true;
-    }
     this.$.toast.show();
+    this.$.toast.addEventListener('core-overlay-close-completed', () => {
+      this.ui.failedToGet = false;
+      this.ui.failedToShare = false;
+    });
+  },
+  signalToFireChanged: function() {
+    if (this.ui.signalToFire != '') {
+      this.fire('core-signal', {name: this.ui.signalToFire});
+      this.ui.signalToFire = '';
+    }
   },
   topOfStatuses: function(gettingStatus, sharingStatus) {
     if (gettingStatus && sharingStatus) {

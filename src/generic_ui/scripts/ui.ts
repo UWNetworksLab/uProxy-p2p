@@ -168,6 +168,9 @@ module UI {
     // with the new value.
     public signalToFire :string = '';
 
+    public failedToShare :boolean = false;
+    public failedToGet :boolean = false;
+
     /*
      * This is used to store the information for setting up a copy+paste
      * connection between establishing the connection and the user confirming
@@ -347,7 +350,9 @@ module UI {
       });
 
       core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, () => {
-        this.fireSignal('open-troubleshoot');
+        // Setting this variable will toggle a paper-toast (in root.html)
+        // to open.
+        this.failedToShare = true;
       });
     }
 
