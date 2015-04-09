@@ -361,30 +361,35 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<Net.Endpoint> => {
     // Disable any previous proxying session.
+    var stoppedGetting :Promise<void>[] = [];
     if (remoteProxyInstance) {
       log.warn('Existing proxying session, terminating');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      remoteProxyInstance.stop();
+      stoppedGetting.push(remoteProxyInstance.stop());
       remoteProxyInstance = null;
-    }
-    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      copyPasteConnection.stopGet();
     }
 
-    var remote = this.getInstance(path);
-    if (!remote) {
-      log.error('Instance does not exist for proxying', path.instanceId);
-      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      log.warn('Existing proxying session, terminating');
+      stoppedGetting.push(copyPasteConnection.stopGet());
     }
-    // Remember this instance as our proxy.  Set this before start fulfills
-    // in case the user decides to cancel the proxy before it begins.
-    remoteProxyInstance = remote;
-    return remote.start().then((endpoint:Net.Endpoint) => {
-      // remote.start will send an update to the UI.
-      return endpoint;
+
+    return Promise.all(stoppedGetting).catch((e) => {
+      // if there was an error stopping the old connection we still want to
+      // connect with the new one, do not propogate this error
+      log.error('Could not clean up old connections', e);
+    }).then(() => {
+      var remote = this.getInstance(path);
+      if (!remote) {
+        log.error('Instance does not exist for proxying', path.instanceId);
+        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+      }
+      // Remember this instance as our proxy.  Set this before start fulfills
+      // in case the user decides to cancel the proxy before it begins.
+      remoteProxyInstance = remote;
+      return remote.start();
     }).catch((e) => {
-      remoteProxyInstance = null;
+      remoteProxyInstance = null; // make sure to clean up any state
       log.error('Could not start remote proxying session', e.stack);
       return Promise.reject(e);
     });

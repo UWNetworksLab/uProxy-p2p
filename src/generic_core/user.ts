@@ -349,7 +349,8 @@ module Core {
         user: {
           userId: this.profile.userId,
           name: this.profile.name,
-          imageData: this.profile.imageData
+          imageData: this.profile.imageData,
+          url: this.profile.url
         },
         consent: this.consent,
         offeringInstances: offeringInstanceStatesForUi,
@@ -429,6 +430,10 @@ module Core {
         this.profile.imageData = state.imageData;
       }
 
+      if (typeof this.profile.url === 'undefined') {
+        this.profile.url = state.url;
+      }
+
       // Restore all instances.
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
@@ -450,6 +455,7 @@ module Core {
       return _.cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
+        url: this.profile.url,
         instanceIds: Object.keys(this.instances_),
         consent: this.consent
       });
@@ -561,7 +567,8 @@ module Core {
 
   export interface UserState {
     name        :string;
-    imageData     :string;
+    imageData   :string;
+    url         :string;
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];

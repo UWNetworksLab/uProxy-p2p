@@ -6,6 +6,7 @@
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel="import" href="../lib/paper-tabs/paper-tabs.html">
+<link rel="import" href="../lib/paper-toast/paper-toast.html">
 <link rel="import" href="../lib/core-tooltip/core-tooltip.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
@@ -145,6 +146,7 @@
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
+    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -250,8 +252,8 @@
     </paper-action-dialog>
 
     <uproxy-troubleshoot></uproxy-troubleshoot>
-
     <uproxy-reconnect></uproxy-reconnect>
+    <paper-toast id="toast"></paper-toast>
 
   </template>
 

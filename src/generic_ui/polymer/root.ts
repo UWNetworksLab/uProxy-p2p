@@ -90,6 +90,10 @@ Polymer({
     // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
   },
+  showToast: function(e, data) {
+    this.$.toast.setAttribute('text', data.text);
+    this.$.toast.show();
+  },
   signalToFireChanged: function() {
     if (this.ui.signalToFire != '') {
       this.fire('core-signal', {name: this.ui.signalToFire});
@@ -98,5 +102,5 @@ Polymer({
   },
   observe: {
     'ui.signalToFire' : 'signalToFireChanged'
-  },
+  }
 });
