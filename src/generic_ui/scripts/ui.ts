@@ -757,19 +757,25 @@ module UI {
         });
       }
 
+      var loginCalled = false;
       var attemptReconnect = () => {
-        console.log('pinging');
         ping().then(() => {
-          console.log('ping succeeded');
-          this.core.login(network).then(() => {
-            // Successfully reconnected, stop additional reconnect attempts.
-            this.stopReconnect();
-          }).catch((e) => {
-            // Login with last oauth token failed, give up on reconnect.
-            this.stopReconnect();
-            this.showNotification('You have been logged out of ' + network);
-            this.view = uProxy.View.SPLASH;
-          });
+          // Ensure that we only call login once.  This is needed in case
+          // either login or the ping takes too long and we accidentally
+          // call login twice.  Doing so would cause one of the login
+          // calls to fail, resulting in the user seeing the splash page.
+          if (!loginCalled) {
+            loginCalled = true;
+            this.core.login(network).then(() => {
+              // Successfully reconnected, stop additional reconnect attempts.
+              this.stopReconnect();
+            }).catch((e) => {
+              // Login with last oauth token failed, give up on reconnect.
+              this.stopReconnect();
+              this.showNotification('You have been logged out of ' + network);
+              this.view = uProxy.View.SPLASH;
+            });
+          }
         }).catch((e) => {
           // Ping failed, we will try again on the next interval.
         });
