@@ -17,7 +17,7 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 import PeerConnection = require('./peerconnection');
 import PeerConnectionClass = PeerConnection.PeerConnectionClass;
 
-describe('WebRtc / PeerConnection', function() {
+describe('PeerConnection', function() {
   var mockRtcPeerConnection :MockFreedomRtcPeerConnection;
 
   beforeEach(function() {
