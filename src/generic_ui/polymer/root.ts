@@ -75,14 +75,24 @@ Polymer({
       this.fire('core-signal', { name: signal });
     }
   },
+  closeToast: function() {
+    this.ui.toastMessage = null;
+  },
+  messageNotNull: function(toastMessage) {
+    if (toastMessage) {
+      clearTimeout(this.clearToastTimeout);
+      this.clearToastTimeout = setTimeout(this.closeToast, 10000);
+      return true;
+    }
+    return false;
+  }
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
+    this.UI = UI;
     this.uProxy = uProxy;
     this.model = model;
-    this.failedToShare = false;
-    this.failedToGet = false;
-    this.
+    this.closeToastTimeout = null;
     if(ui.browserApi.browserSpecificElement){
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
@@ -94,18 +104,21 @@ Polymer({
     core.updateGlobalSettings(model.globalSettings);
   },
   troubleshootForGetter: function() {
+    this.closeToast();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   troubleshootForSharer: function() {
+    this.closeToast();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   showToast: function(e, data) {
-    this.$.toast.setAttribute('text', data.text);
-    this.$.toast.show();
-    this.$.toast.addEventListener('core-overlay-close-completed', () => {
-      this.ui.failedToGet = false;
-      this.ui.failedToShare = false;
-    });
+    this.ui.toastMessage = data.text;
+  },
+  messageMatchesFailure: function(toastMessage, failureMsgConstant) {
+    if (toastMessage) {
+      return toastMessage.indexOf(failureMsgConstant) > -1;
+    }
+    return false;
   },
   signalToFireChanged: function() {
     if (this.ui.signalToFire != '') {

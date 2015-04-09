@@ -144,6 +144,10 @@
         right: 12px;
         background-color: #283230;
         padding: 16px 16px 12px 20px;
+        position: fixed;
+      }
+      .toastHelpLink {
+        color: #47B5AA;
       }
       core-icon[icon="launch"] {
         margin-bottom: 6px;
@@ -267,9 +271,15 @@
 
     <uproxy-troubleshoot></uproxy-troubleshoot>
 
-    <paper-toast id='toast' style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;' responsiveWidth='320px' duration='30000'>
-      <core-icon icon='launch' on-tap='{{ troubleshootForGetter }}' hidden?='{{ !ui.failedToGet }}'></core-icon>
-      <core-icon icon='launch' on-tap='{{ troubleshootForSharer }}' hidden?='{{ !ui.failedToShare }}'></core-icon>
+    <paper-toast id='toast'
+        opened='{{ messageNotNull(ui.toastMessage) }}'
+        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'
+        text='{{ ui.toastMessage }}'
+        responsiveWidth='320px'>
+      <div class='toastHelpLink' on-tap="{{ troubleshootForGetter }}"
+          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) }}'>HELP</div>
+      <div class='toastHelpLink' on-tap="{{ troubleshootForSharer }}"
+          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>HELP</div>
     </paper-toast>
 
   </template>

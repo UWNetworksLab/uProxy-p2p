@@ -182,7 +182,7 @@ module Core {
       this.startupTimeout_ = setTimeout(() => {
         log.warn('Timing out rtcToNet_ connection');
         this.connection_.stopShare();
-        ui.update(uProxy.Update.FRIEND_FAILED_TO_GET);
+        ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
       }, this.RTC_TO_NET_TIMEOUT);
       this.connection_.startShare().then(() => {
         this.clearTimeout_();

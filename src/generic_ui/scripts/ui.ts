@@ -67,6 +67,9 @@ module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
+  export var SHARE_FAILED_MSG :string = 'Unable to share access with ';
+  export var GET_FAILED_MSG :string = 'Unable to get access from ';
+
   export interface Contacts {
     getAccessContacts : {
       onlinePending :UI.User[];
@@ -168,8 +171,7 @@ module UI {
     // with the new value.
     public signalToFire :string = '';
 
-    public failedToShare :boolean = false;
-    public failedToGet :boolean = false;
+    public toastMessage :string = null;
 
     /*
      * This is used to store the information for setting up a copy+paste
@@ -349,10 +351,10 @@ module UI {
         this.updateSharingStatusBar_();
       });
 
-      core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, () => {
+      core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, (nameOfFriend) => {
         // Setting this variable will toggle a paper-toast (in root.html)
         // to open.
-        this.failedToShare = true;
+        this.toastMessage = UI.SHARE_FAILED_MSG + nameOfFriend;
       });
     }
 
