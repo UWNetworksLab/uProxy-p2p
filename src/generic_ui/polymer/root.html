@@ -140,11 +140,12 @@
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
       paper-toast {
+        position: fixed;
         left: 12px;
         right: 12px;
         background-color: #283230;
         padding: 16px 16px 12px 20px;
-        position: fixed;
+        font-size: 12px;
       }
       .toastHelpLink {
         color: #47B5AA;
@@ -277,9 +278,9 @@
         text='{{ ui.toastMessage }}'
         responsiveWidth='320px'>
       <div class='toastHelpLink' on-tap="{{ troubleshootForGetter }}"
-          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) }}'>HELP</div>
+          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) }}'>GET HELP</div>
       <div class='toastHelpLink' on-tap="{{ troubleshootForSharer }}"
-          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>HELP</div>
+          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP</div>
     </paper-toast>
 
   </template>
