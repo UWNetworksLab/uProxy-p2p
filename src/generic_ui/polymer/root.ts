@@ -90,13 +90,21 @@ Polymer({
     // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
   },
-  signalToFireChanged: function() {
-    if (this.ui.signalToFire != '') {
-      this.fire('core-signal', {name: this.ui.signalToFire});
-      this.ui.signalToFire = '';
+  showToast: function(e, data) {
+    this.$.toast.setAttribute('text', data.text);
+    if (data.sharingError) {
+      this.sharingError = true;
+    } else if (data.gettingError) {
+      this.gettingError = true;
     }
+    this.$.toast.show();
   },
-  observe: {
-    'ui.signalToFire' : 'signalToFireChanged'
+  topOfStatuses: function(gettingStatus, sharingStatus) {
+    if (gettingStatus && sharingStatus) {
+      return 126;
+    } else if (gettingStatus || sharingStatus) {
+      return 68;
+    }
+    return 10;
   }
 });

@@ -6,6 +6,7 @@
 <link rel="import" href="../lib/core-icon-button/core-icon-button.html">
 <link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
 <link rel="import" href="../lib/paper-tabs/paper-tabs.html">
+<link rel="import" href="../lib/paper-toast/paper-toast.html">
 <link rel="import" href="../lib/core-tooltip/core-tooltip.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
@@ -138,12 +139,28 @@
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      paper-toast {
+        left: 12px;
+        right: 12px;
+        background-color: #283230;
+        padding: 16px 16px 12px 20px;
+      }
+      core-icon[icon="launch"] {
+        margin-bottom: 6px;
+        height: 18px;
+        width: 18px;
+        color: #47B5AA;
+        -webkit-transition: all 0.23s !important;
+        -moz-transition: all 0.23s !important;
+        transition: all 0.23s !important;
+      }
       .core-overlay-backdrop {
         z-index: 1001;
       }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
+    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -249,6 +266,10 @@
     </paper-action-dialog>
 
     <uproxy-troubleshoot></uproxy-troubleshoot>
+
+    <paper-toast id='toast' style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;' responsiveWidth='320px' duration='30000'>
+      <core-icon icon='launch' style='color: #009688;' on-tap='{{ setGetMode }}'>
+    </paper-toast>
 
   </template>
 

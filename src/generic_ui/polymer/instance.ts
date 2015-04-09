@@ -31,6 +31,9 @@ Polymer({
       }
 
       this.fire('core-signal', {name: 'open-troubleshoot'});
+      this.fire('core-signal', {name: 'show-toast',
+                                data: {text: 'Unable to get access from ' + this.user.name}});
+
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
     });
