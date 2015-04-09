@@ -7,7 +7,7 @@
   "constraints": {
     "isolation": "never"
   },
-  "provides": ["console", "loggingcontroller"],
+  "provides": ["console", "loggingcontroller", "logginglistener"],
   "default": "console",
   "permissions": [
     "core.console"
@@ -19,8 +19,13 @@
       "clearLogs": {"type": "method", "value": []},
       "enable" : {"type": "method", "value": []},
       "disable" : {"type": "method", "value": []},
-      "setConsoleFilter": {"type": "method", "value": [["array", "string"]]},
-      "setBufferedLogFilter": {"type": "method", "value": [["array", "string"]]}
+      "setDefaultFilter": {"type": "method", "value": ["number", "number"]},
+      "setModuleFilters": {"type": "method", "value": ["number", "object"]},
+      "clearFilters": {"type": "method", "value": ["number"]}
+    },
+    "logginglistener": {
+      "constructor": { "value": ["string"] },
+      "levelchange": { "type": "event", "value": "number" }
     }
   }
 }

@@ -9,3 +9,4 @@ export var moduleName = 'loggingprovider'
 // |freedom-module.json| freedom manifest.
 freedom().provideSynchronous(logging_provider.Log);
 freedom['loggingcontroller']().provideSynchronous(logging_provider.LoggingController);
+freedom['logginglistener']().provideSynchronous(logging_provider.LoggingListener);

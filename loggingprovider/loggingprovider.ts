@@ -2,7 +2,7 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import logging = require('loggingprovider.types');
+import logging = require('./loggingprovider.types');
 
 // The freedom console provider.
 export var freedomConsole :freedom_Console.Console = freedom['core.console']();
@@ -17,7 +17,6 @@ export var MAX_BUFFERED_LOG = 1000;
 // Logs waiting for the logger to exist.
 export var logBuffer: logging.Message[] = [];
 
-// TODO: we probably will change it to false as default.
 export var enabled = true;
 
 // This represents a possible destination for log messages.  To make use of
@@ -30,53 +29,89 @@ export class AbstractLoggingDestination {
   // where LEVEL is the minimum level of log that will be processed for the
   // module 'tag'.  '*' is a wildcard tag that applies to any message that is not
   // specifically specified
-  private filters_ :{[tag :string] :string} = {};
+  private filters_ :{[tag :string] :logging.Level} = {};
 
-  constructor(filters :{[tag :string] :string}) {
-    this.filters_ = filters;
+  constructor(private default_ :logging.Level) {}
+
+  // This retrieves the minimum level that will cause some action on the part
+  // of the logger for a given tag
+  public getLevelForTag = (tag :string) :logging.Level => {
+    return (tag in this.filters_) ? this.filters_[tag] : this.default_;
   }
 
-  private checkFilter_ = (level :string, tag :string) => {
-    if (tag in this.filters_) {
-      return isLevelAllowed_(level, this.filters_[tag]);
-    }
-
-    return '*' in this.filters_ && isLevelAllowed_(level, this.filters_['*']);
+  private checkFilter_ = (level :logging.Level, tag :string) => {
+    return level >= this.getLevelForTag(tag);
   }
 
-  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
+  protected log_ = (level :logging.Level, tag :string, message :logging.Message) :void => {
     throw Error('not implemented');
   }
 
-  public log = (level :string, tag :string, message :logging.Message) :void => {
+  public log = (level :logging.Level, tag :string, message :logging.Message) :void => {
     if (this.checkFilter_(level, tag)) {
       this.log_(level, tag, message);
     }
   }
 
-  public setFilter = (args :string[]) => {
-    this.filters_ = {};
-    var parts :string[];
+  public setDefaultFilter = (level :logging.Level) => {
+    var oldLevels :{[tag :string] :logging.Level} = {};
 
-    for (var i in args) {
-      parts = args[i].split(':');
-      this.filters_[parts[0]] = parts[1];
+    // Modifying the default log level has the potential to trigger an update
+    // for any tag.  To make sure that we send all the necessary changes (and
+    // do not send any unnecessary events), store the current level for each
+    // tag that has a listener.
+    for (var tag in listeners) {
+      oldLevels[tag] = getMinLevel(tag);
     }
+
+    this.default_ = level;
+
+    for (var tag in oldLevels) {
+      if (oldLevels[tag] !== getMinLevel(tag)) {
+        updateTag(tag);
+      }
+    }
+  }
+
+  public setModuleFilters = (filters :{[tag :string] :logging.Level}) => {
+    for (var tag in filters) {
+      var oldLevel = getMinLevel(tag);
+
+      if (filters[tag] === logging.Level.default) {
+        delete filters[tag];
+      } else {
+        this.filters_[tag] = filters[tag];
+      }
+
+      if (getMinLevel(tag) !== oldLevel) {
+        updateTag(tag);
+      }
+    }
+  }
+
+  public clearFilters = () => {
+    // construct an object specifying that all levels should be cleared
+    var setObj :{[tag :string] :logging.Level} = {};
+    for (var tag in this.filters_) {
+      setObj[tag] = logging.Level.default;
+    }
+
+    this.setModuleFilters(setObj);
   }
 }
 
 // A logging destination for printing the message directly to the console
 export class ConsoleLoggingDestination extends AbstractLoggingDestination {
   constructor() {
-    super({'*': 'D'});
+    super(logging.Level.debug);
   }
 
-  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
-    if (level === 'D') {
+  protected log_ = (level :logging.Level, tag :string, message :logging.Message) :void => {
+    if (level === logging.Level.debug) {
       freedomConsole.debug(tag, formatMessage(message));
-    } else if (level === 'I') {
+    } else if (level === logging.Level.info) {
       freedomConsole.info(tag, formatMessage(message));
-    } else if (level === 'W') {
+    } else if (level === logging.Level.warn) {
       freedomConsole.warn(tag, formatMessage(message));
     } else {
       freedomConsole.error(tag, formatMessage(message));
@@ -86,10 +121,10 @@ export class ConsoleLoggingDestination extends AbstractLoggingDestination {
 
 export class BufferedLoggingDestination extends AbstractLoggingDestination {
   constructor() {
-    super({'*': 'E'});
+    super(logging.Level.error);
   }
 
-  protected log_ = (level :string, tag :string, message :logging.Message) :void => {
+  protected log_ = (level :logging.Level, tag :string, message :logging.Message) :void => {
     if (logBuffer.length > MAX_BUFFERED_LOG) {
       logBuffer.splice(0, MAX_BUFFERED_LOG / 10);
     }
@@ -97,20 +132,11 @@ export class BufferedLoggingDestination extends AbstractLoggingDestination {
   }
 }
 
-export var loggingDestinations :{[name :string] :AbstractLoggingDestination} = {};
-var logDestination = {
-  CONSOLE: 'console',
-  BUFFERED: 'buffered'
-};
-loggingDestinations[logDestination.BUFFERED] =
-  new BufferedLoggingDestination();
-loggingDestinations[logDestination.CONSOLE] =
+var loggingDestinations :{[name :number] :AbstractLoggingDestination} = {};
+loggingDestinations[logging.Destination.console] =
   new ConsoleLoggingDestination();
-
-// The filter API uses letter to select log level, D for debug, I for info,
-// W for warn, and E for error. This string is used to convert from letter
-// to level number.
-var LEVEL_CHARS = 'DIWE';
+loggingDestinations[logging.Destination.buffered] =
+  new BufferedLoggingDestination();
 
 var MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -124,56 +150,71 @@ function dateToString_(d:Date) : string {
       d.getMilliseconds();
 }
 
-function isLevelAllowed_(request:string, permitted:string) : boolean {
-  return LEVEL_CHARS.indexOf(request) >= LEVEL_CHARS.indexOf(permitted);
-}
-
-export function formatMessage(l:logging.Message) : string {
-  return l.level + ' [' + dateToString_(l.timestamp) + '] ' + l.message;
-}
-
-export function makeMessage(level:string, tag:string, msg:string)
-    : logging.Message {
-  return {
-    timestamp: new Date(),
-    level: level,
-    tag: tag,
-    message: msg
-  };
-}
-
-// Function that actally adds things to the log and does the console output.
-export function doRealLog(level:string, tag:string, msg:string)
-    : void {
-  if (!enabled) { return; }
-  var message :logging.Message = makeMessage(level, tag, msg);
-
-  for (var i in loggingDestinations) {
-    loggingDestinations[i].log(level, tag, message);
-  }
+function formatMessage(l:logging.Message) : string {
+  return logging.Level[l.level][0].toUpperCase() + ' [' +
+         dateToString_(l.timestamp) + '] ' + l.message;
 }
 
 // Interface for accumulating log messages.
 export class Log implements logging.Log {
+  private log_ = (level :logging.Level, tag :string, msg :string) :void => {
+    if (!enabled) {
+      return;
+    }
+
+    var message :logging.Message = {
+      timestamp: new Date(),
+      level: level,
+      tag: tag,
+      message: msg
+    }
+
+    for (var i in loggingDestinations) {
+      loggingDestinations[i].log(level, tag, message);
+    }
+  }
 
   // Logs message in debug level.
   public debug = (source:string, msg: string) : void => {
-    doRealLog('D', source, msg);
+    this.log_(logging.Level.debug, source, msg);
   }
   // Logs message in info level.
   public info = (source:string, msg: string) : void => {
-    doRealLog('I', source, msg);
+    this.log_(logging.Level.info, source, msg);
   }
   public log = (source:string, msg: string) : void => {
-    doRealLog('I', source, msg);
+    this.log_(logging.Level.info, source, msg);
   }
   // Logs message in warn level.
   public warn = (source:string, msg: string) : void => {
-    doRealLog('W', source, msg);
+    this.log_(logging.Level.warn, source, msg);
   }
   // Logs message in error level.
   public error = (source:string, msg: string) : void => {
-    doRealLog('E', source, msg);
+    this.log_(logging.Level.error, source, msg);
+  }
+}
+
+var listeners :{[tag :string] :LoggingListener[]} = {};
+
+function getMinLevel(tag :string) {
+  var min = logging.Level.error;
+  for (var i in loggingDestinations) {
+    var level = loggingDestinations[i].getLevelForTag(tag);
+    if (level < min) {
+      min = level;
+    }
+  }
+  return min;
+}
+
+function updateTag(tag :string) {
+  if (!listeners[tag]) {
+    return;
+  }
+
+  for (var i in listeners[tag]) {
+    listeners[tag][i].update();
   }
 }
 
@@ -219,20 +260,32 @@ export class LoggingController implements logging.Controller  {
     enabled = false;
   }
 
-  // Sets the log filter for console output. Caller can specify logs of
-  // desired tags and levels for console output.
-  // Usage example: setConsoleFilter("*:E", "network:D")
-  // It means: output message in Error level for any module
-  //           output message in debug level and above for "network" module.
-  public setConsoleFilter = (args: string[]) : void => {
-    loggingDestinations[logDestination.CONSOLE].setFilter(args);
+  public setDefaultFilter = (destination :logging.Destination, level :logging.Level) => {
+    loggingDestinations[destination].setDefaultFilter(level);
   }
 
-  // Sets the log filter for buffered log.
-  // Usage example: setBufferedLogFilter("*:E", "network:D")
-  // It means: buffer message in Error level for any module
-  //           buffer message in debug level and above for "network" module.
-  public setBufferedLogFilter = (args: string[]) : void => {
-    loggingDestinations[logDestination.BUFFERED].setFilter(args);
+  public setModuleFilters = (destination :logging.Destination,
+                             filters :{ [tag :string] :logging.Level }) => {
+    loggingDestinations[destination].setModuleFilters(filters);
+  }
+
+  public clearFilters = (destination :logging.Destination) => {
+    loggingDestinations[destination].clearFilters();
+  }
+}
+
+// TODO - handle unbinding the listener if there is a disconnect event
+export class LoggingListener implements logging.Listener {
+  constructor(private dispatchEvent_ :(name :string, data :Object) => void,
+              private tag_ :string) {
+    if (!listeners[tag_]) {
+      listeners[tag_] = [];
+    }
+    listeners[tag_].push(this);
+    this.update();
+  }
+
+  public update = () => {
+    this.dispatchEvent_('levelchange', getMinLevel(this.tag_));
   }
 }

@@ -2,6 +2,7 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import freedomTypes = require('freedom.types');
+import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
@@ -39,11 +40,34 @@ function formatStringMessageWithArgs_(args :Object[])
 
 export class Log {
   private logger :Promise<freedomTypes.Logger>;
+
+  // the minimum level at which we will issue IPCs for logging statements
+  private minLevel :loggingProviderTypes.Level = loggingProviderTypes.Level.debug;
+
   constructor(private tag_:string) {
     this.logger = freedom.core().getLogger(this.tag_);
+
+    if (freedom['logginglistener']) {
+      freedom['logginglistener'](this.tag_).on('levelchange', this.setMinLevel_);
+    } else {
+      this.warn('Freedom module logginglistener is not available, IPCs will ' +
+                'be issued for all logging statements');
+    }
   }
 
-  private log_ = (level :string, arg :Object, args :Object[]) :void => {
+  private setMinLevel_ = (level :loggingProviderTypes.Level) => {
+    this.minLevel = level;
+  }
+
+  private shouldLog_ = (level :loggingProviderTypes.Level) => {
+    return level >= this.minLevel;
+  }
+
+  private log_ = (level :loggingProviderTypes.Level, arg :Object, args :Object[]) :void => {
+    if (!this.shouldLog_(level)) {
+      return;
+    }
+
     // arg exists to make sure at least one argument is given, we want to treat
     // all the arguments as a single array however
     args.unshift(arg);
@@ -57,15 +81,15 @@ export class Log {
     var message = formatStringMessageWithArgs_(args);
 
     this.logger.then((logger :freedomTypes.Logger) => {
-      // essentially do logger[level](message) minus the type warning
+      // essentially do logger[loggingProviderTypes.Level[level]](message) minus the type warning
       switch (level) {
-        case 'debug':
+        case loggingProviderTypes.Level.debug:
           return logger.debug(message);
-        case 'info':
+        case loggingProviderTypes.Level.info:
           return logger.info(message);
-        case 'warn':
+        case loggingProviderTypes.Level.warn:
           return logger.warn(message);
-        case 'error':
+        case loggingProviderTypes.Level.error:
           return logger.error(message);
       }
     });
@@ -73,18 +97,18 @@ export class Log {
 
   // Logs message in debug level.
   public debug = (arg :Object, ...args :Object[]) :void => {
-    this.log_('debug', arg, args);
+    this.log_(loggingProviderTypes.Level.debug, arg, args);
   }
   // Logs message in info level.
   public info = (arg :Object, ...args :Object[]) :void => {
-    this.log_('info', arg, args);
+    this.log_(loggingProviderTypes.Level.info, arg, args);
   }
   // Logs message in warn level.
   public warn = (arg :Object, ...args :Object[]) :void => {
-    this.log_('warn', arg, args);
+    this.log_(loggingProviderTypes.Level.warn, arg, args);
   }
   // Logs message in error level.
   public error = (arg :Object, ...args :Object[]) :void => {
-    this.log_('error', arg, args);
+    this.log_(loggingProviderTypes.Level.error, arg, args);
   }
 }

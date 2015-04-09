@@ -1,6 +1,6 @@
 export interface Message {
   timestamp :Date; // the timestamp the log was called (in core runtime).
-  level :string; // one of D=Debug, I=Info, W=Warning, E=Error
+  level :Level;
   tag :string; // any string, used for viewing specific module logs.
   message :string; // the actual log message.
 }
@@ -37,16 +37,26 @@ export interface Controller {
   // Enables/Disables log facility.
   disable() : void;
 
-  // Sets the log filter for console output. Caller can specify logs of
-  // desired tags and levels for console output.
-  // Usage example: setConsoleFilter("*:E", "network:D")
-  // It means: output message in Error level for any module
-  //           output message in debug level and above for "network" module.
-  setConsoleFilter(args: string[]) : void;
+  setDefaultFilter(destination :Destination, level :Level) :void;
 
-  // Sets the log filter for buffered log.
-  // Usage example: setBufferedLogFilter("*:E", "network:D")
-  // It means: buffer message in Error level for any module
-  //           buffer message in debug level and above for "network" module.
-  setBufferedLogFilter(args: string[]) : void;
+  setModuleFilters(destination :Destination,
+                   filters :{[tag :string] :Level}) :void;
+
+  clearFilters(destination :Destination) :void;
+}
+
+export interface Listener {
+}
+
+export enum Level {
+  default,
+  debug,
+  info,
+  warn,
+  error
+}
+
+export enum Destination {
+  console,
+  buffered
 }
