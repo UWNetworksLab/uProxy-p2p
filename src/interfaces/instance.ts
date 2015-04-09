@@ -1,6 +1,4 @@
 /**
- * instance.d.ts
- *
  * Definitions for Instances. Instances define information about a single uProxy
  * installation on a single device. The |instanceId| is the unique identifier
  * for an instance.
@@ -10,10 +8,12 @@
  * about their current status and consent level.
  */
 
+import uproxy_types = require('../uproxy');
+
 // TODO: Maybe wrap these in a module for everyting to do with Instances that
 // needs to be accessible both in core and UI.
 
-interface NetworkInfo {
+export interface NetworkInfo {
   name :string;
   userId :string;
 }
@@ -22,15 +22,15 @@ interface NetworkInfo {
  * LocalPeerId can contain the full instance paths so that we can easily
  * look up instance objects.
  */
-interface LocalPeerId {
-  clientInstancePath :InstancePath;
-  serverInstancePath :InstancePath;
+export interface LocalPeerId {
+  clientInstancePath :uproxy_types.InstancePath;
+  serverInstancePath :uproxy_types.InstancePath;
 }
 
 /**
  * Base interface for all Instances.
  */
-interface Instance {
+export interface Instance {
   instanceId  :string;
   keyHash     :string;
   status      ?:string; // Status on social network e.g. online or offline.
@@ -41,9 +41,9 @@ interface Instance {
  * Instance Handshakes are sent between uProxy installations to notify each
  * other about existence.
  */
-interface InstanceHandshake {
+export interface InstanceHandshake {
   instanceId  :string;
   keyHash     :string;
-  consent     :uProxy.ConsentWireState;
+  consent     :uproxy_types.ConsentWireState;
   description ?:string;
 }

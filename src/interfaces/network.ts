@@ -1,10 +1,8 @@
 
-declare module Social {
-
-  interface NetworkState {
+  export interface NetworkState {
     name     :string;
-    profile :UI.UserProfileMessage;
-    roster : {[userId :string] : UI.UserMessage};
+    profile  :UI.UserProfileMessage;
+    roster   :{[userId :string] :UI.UserMessage};
   }
 
   /**
@@ -19,7 +17,7 @@ declare module Social {
    * with the clientIds. This is because instanceIds occur at the User level, as
    * the User manages the instance <--> client mappings (see 'user.ts').
    */
-  interface Network {
+  export interface Network {
     name       :string;
     // TODO: Review visibility of these attributes and the interface.
     roster     :{[userId:string]:Core.User};
@@ -73,5 +71,3 @@ declare module Social {
 
     getNetworkState : () => NetworkState;
   }
-
-}  // module Social

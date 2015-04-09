@@ -1,4 +1,4 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../scripts/ui.ts' />
 /// <reference path='../../uproxy.ts' />
 

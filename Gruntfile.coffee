@@ -3,10 +3,124 @@ Gruntfile for uProxy
 ###
 
 TaskManager = require 'uproxy-lib/build/tools/taskmanager'
-path = require 'path'
+
+#-------------------------------------------------------------------------
+# Define the tasks
+taskManager = new TaskManager.Manager();
+
+taskManager.add 'base', [
+  'gitinfo'
+#  'ts'
+]
+
+# --- Build tasks ---
+taskManager.add 'build_generic_core', [
+  'base'
+#  'ts:generic_core'
+  # 'copy:core_libs'
+]
+
+taskManager.add 'build_generic_ui', [
+  'base'
+  #'ts:generic_ui'
+]
+
+taskManager.add 'build_chrome_app', [
+  'build_generic_core'
+  'build_generic_ui'
+  #'ts:chrome_app'
+  #'symlink:polymerLibToChromeApp'
+  'vulcanize:chromeAppInline'
+  'vulcanize:chromeAppCsp'
+  'copy:chrome_app'
+]
+
+taskManager.add 'build_chrome_ext', [
+  'build_generic_core'
+  'build_generic_ui'
+  'copy:generic_ui_to_chrome'
+  #'ts:chrome_ext'
+  #'symlink:polymerLibToChromeExt'
+  'vulcanize:chromeExtInline'
+  'vulcanize:chromeExtCsp'
+  'copy:chrome_extension'
+  # 'shell:extract_chrome_tests'
+]
+
+taskManager.add 'build_chrome', [
+  'build_chrome_app'
+  'build_chrome_ext'
+]
+
+# Firefox build tasks.
+taskManager.add 'build_firefox', [
+  'build_generic_core'
+  'build_generic_ui'
+  'copy:generic_ui_to_firefox'
+  #'ts:firefox'
+  #'symlink:polymerLibToFirefox'
+  'vulcanize:firefoxInline'
+  'vulcanize:firefoxCsp'
+  'copy:firefox'
+  'concat:firefox_uproxy'
+  'concat:firefox_dependencies'
+]
+
+taskManager.add 'build_firefox_xpi', [
+  'build_firefox'
+  'mozilla-addon-sdk'
+  'mozilla-cfx-xpi:dist'
+]
+
+# --- Testing tasks ---
+taskManager.add 'test_core', [
+  'build_generic_core'
+  #'ts:logging'
+  #'ts:webrtc'
+  #'ts:generic_core_specs'
+  #'ts:mocks'
+  'jasmine:generic_core'
+]
+
+taskManager.add 'test_ui', [
+  'build_generic_ui'
+  #'ts:generic_ui_specs'
+  'jasmine:generic_ui'
+]
+
+taskManager.add 'test_chrome', [
+  'build_chrome'
+  #'ts:chrome_specs'
+  #'ts:mocks'
+  'jasmine:chrome_extension'
+  'jasmine:chrome_app'
+]
+
+taskManager.add 'everything', [
+  'build'
+  'test'
+]
+
+# This is the target run by Travis. Targets in here should run locally
+# and on Travis/Sauce Labs.
+taskManager.add 'test', [
+  'test_core'
+  'test_ui'
+  'test_chrome'
+]
+
+taskManager.add 'build', [
+  'build_chrome'
+  'build_firefox'
+]
+
+taskManager.add 'default', [
+  'build'
+]
 
 #-------------------------------------------------------------------------
 rules = require './build/tools/common-grunt-rules'
+path = require 'path'
 
 # Location of where src is copied into and compiled.
 devBuildPath = 'build/dev/uproxy'
@@ -27,15 +141,34 @@ Rule = new rules.Rule({
   localLibsDestPath: localLibsDestPath
 });
 
+#-------------------------------------------------------------------------
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
     browserifyOptions: { standalone: 'browserified_exports' }
   });
 
+#-------------------------------------------------------------------------
+freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
+uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
+uproxyNetworkingPath = path.dirname(require.resolve('uproxy-networking/package.json'))
+
+console.log(uproxyNetworkingPath);
+
+#ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
+# TODO(ldixon): update utransformers package to uproxy-obfuscators
+# uproxyObfuscatorsPath = path.dirname(require.resolve('uproxy-obfuscators/package.json'))
+# uproxyObfuscatorsPath = path.dirname(require.resolve('utransformers/package.json'))
+# regex2dfaPath = path.dirname(require.resolve('regex2dfa/package.json'))
+# Cordova testing
+# ccaPath = path.dirname(require.resolve('cca/package.json'))
+# pgpPath = path.dirname(require.resolve('freedom-pgp-e2e/package.json'))
+
+#-------------------------------------------------------------------------
 chromeExtDevPath = 'build/dev/uproxy/chrome/extension/'
 chromeAppDevPath = 'build/dev/uproxy/chrome/app/'
 firefoxDevPath = 'build/dev/uproxy/firefox/'
 
+#-------------------------------------------------------------------------
 # TODO: Move more file lists here.
 FILES =
   jasmine_helpers: [
@@ -74,30 +207,18 @@ FILES =
     'webcomponentsjs/**.min.js'
   ]
 
-
+#------------------------------------------------------------------------------
 module.exports = (grunt) ->
-  grunt.initConfig
+  grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
-    pkglib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
-    pkgnet: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
-    pkgfreedom: grunt.file.readJSON('node_modules/freedom/package.json')
-    pkgfreedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
-    pkgfreedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
-    pkgfreedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
-    pkgfreedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
-
-    shell: {
-
-      # Once compiled, take all .spec files out of the chrome extension and app
-      # directories and into the chrome/test directory, to keep a clean distro.
-      # TODO: Change to have a separate task that creates a distribution, and
-      # remove this hacky test extraction.
-      extract_chrome_tests: {
-        command: 'mkdir -p test; mv extension/scripts/*.spec.js test/',
-        options: { failOnError: true, execOptions: {cwd: 'build/chrome/' }}
-      }
-
-    }  # shell
+    pkgs:
+      lib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
+      net: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
+      freedom: grunt.file.readJSON('node_modules/freedom/package.json')
+      freedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
+      freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
+      freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
+      freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
     concat: {
 
@@ -127,6 +248,53 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     copy: {
+      # Copy all needed third party libraries to appropriate locations.
+      thirdParty:
+        files: [
+          # Copy local |third_party| files into dev: so that the third_party
+          # dependencies are always in the common |build/third_party| location.
+          # This allows path to reference typescript definitions for ambient
+          # contexts to always be found, even in generated `.d.ts` files..
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'third_party'
+              src: ['**/*'],
+              dest: thirdPartyBuildPath,
+          }
+          # Copy distribution directory of uproxy-lib so all paths can always
+          # find their dependencies. Note that this also requires uproxy-lib
+          # references to find those in |build/third_party/|. These paths
+          # are delicate.
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(uproxyLibPath, 'build/dist'),
+              src: ['**/*'],
+              dest: path.join(thirdPartyBuildPath, 'uproxy-lib/'),
+          },
+          # Use the third_party definitions from uproxy-lib. Copied to the same
+          # location relative to their compiled location in uproxy-lib so they
+          # have the same relative path to the created `.d.ts` files from
+          # |build/dev|.
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(uproxyLibPath, 'build/third_party'),
+              src: ['freedom-typings/**/*', 'promise-polyfill.js'],
+              dest: thirdPartyBuildPath
+          },
+          #
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(uproxyNetworkingPath, 'build/dist'),
+              src: ['uproxy-networking/**/*'],
+              dest: thirdPartyBuildPath
+          },
+        ]
+
+
       # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
         nonull: true
@@ -345,6 +513,7 @@ module.exports = (grunt) ->
 
     }  # copy
 
+    #-------------------------------------------------------------------------
     'string-replace':
       version:
         files: [{
@@ -357,50 +526,18 @@ module.exports = (grunt) ->
             replacement: JSON.stringify
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
-              'uproxy-lib': '<%= pkglib.version %>'
-              'uproxy-networking': '<%= pkgnet.version %>'
-              freedom: '<%= pkgfreedom.version %>'
-              'freedom-for-chrome': '<%= pkgfreedomchrome.version %>'
-              'freedom-for-firefox': '<%= pkgfreedomfirefox.version %>'
-              'freedom-social-xmpp': '<%= pkgfreedomxmpp.version %>'
-              'freedom-social-firebase': '<%= pkgfreedomfirebase.version %>'
+              'uproxy-lib': '<%= pkg.lib.version %>'
+              'uproxy-networking': '<%= pkg.net.version %>'
+              freedom: '<%= pkg.freedom.version %>'
+              'freedom-for-chrome': '<%= pkg.freedomchrome.version %>'
+              'freedom-for-firefox': '<%= pkg.freedomfirefox.version %>'
+              'freedom-social-xmpp': '<%= pkg.freedomxmpp.version %>'
+              'freedom-social-firebase': '<%= pkg.freedomfirebase.version %>'
           }]
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
-    ts: {
-      # uProxy UI without any platform dependencies
-      generic_ui: Rule.typescriptSrcLenient 'compile-src/generic_ui'
-      generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
-
-      # Core uProxy without any platform dependencies
-      generic_core: Rule.typescriptSrcLenient 'compile-src/generic_core'
-      generic_core_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_core'
-
-      logging: Rule.typescriptSrcLenient 'compile-src/logging'
-      webrtc: Rule.typescriptSrcLenient 'compile-src/webrtc'
-
-      # TODO: Remove uistatic / make it the same as uipolymer once polymer is
-      # fully integrated.
-      uipolymer: Rule.typescriptSrcLenient 'compile-src/generic_ui/polymer'
-
-      # Mocks to help jasmine along. These typescript files must be compiled
-      # independently from the rest of the code, because otherwise there will
-      # be many 'duplicate identifiers' and similar typescript conflicts.
-      mocks: Rule.typescriptSrcLenient 'compile-src/mocks'
-
-      # Compile typescript for all chrome components.
-      # In the ideal world, there shouldn't be an App/Extension split.
-      # The shell:extract_chrome_tests will pull the specs outside of the
-      # actual distribution directory.
-      chrome_ext: Rule.typescriptSrcLenient 'compile-src/chrome/extension/'
-      chrome_app: Rule.typescriptSrcLenient 'compile-src/chrome/app/'
-      chrome_specs: Rule.typescriptSpecDeclLenient 'compile-src/chrome'
-
-      # uProxy firefox specific typescript
-      firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
-
-    }  # typescript
+    ts: {}
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -551,147 +688,19 @@ module.exports = (grunt) ->
         files:
           'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
 
-    clean: ['build/', '.tscache']
-
- # grunt.initConfig
+    clean: ['build/dev', '.tscache']
+  }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
-  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
-  grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-gitinfo'
-  grunt.loadNpmTasks 'grunt-shell'
+  grunt.loadNpmTasks 'grunt-mozilla-addon-sdk'
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
-  grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
-
-  #-------------------------------------------------------------------------
-  # Define the tasks
-  taskManager = new TaskManager.Manager();
-
-  taskManager.add 'base', [
-    'verbosity:diminished'
-    'gitinfo'
-    'symlink:uproxyNetworkingThirdPartyTypescriptSrc'
-    'symlink:uproxyNetworkingTypescriptSrc'
-    'symlink:uproxyLibThirdPartyTypescriptSrc'
-    'symlink:uproxyLibTypescriptSrc'
-    'symlink:uproxyChurnTypescriptSrc'
-    'symlink:thirdPartyTypescriptSrc'
-    'symlink:typescriptSrc'
-    'string-replace:version'
-    #'symlink:polymerLib'
-  ]
-
-  # --- Build tasks ---
-  taskManager.add 'build_generic_core', [
-    'base'
-    'ts:generic_core'
-    # 'copy:core_libs'
-  ]
-
-  taskManager.add 'build_generic_ui', [
-    'base'
-    'ts:generic_ui'
-  ]
-
-  taskManager.add 'build_chrome_app', [
-    'build_generic_core'
-    'build_generic_ui'
-    'ts:chrome_app'
-    'symlink:polymerLibToChromeApp'
-    'vulcanize:chromeAppInline'
-    'vulcanize:chromeAppCsp'
-    'copy:chrome_app'
-  ]
-
-  taskManager.add 'build_chrome_ext', [
-    'build_generic_core'
-    'build_generic_ui'
-    'copy:generic_ui_to_chrome'
-    'ts:chrome_ext'
-    'symlink:polymerLibToChromeExt'
-    'vulcanize:chromeExtInline'
-    'vulcanize:chromeExtCsp'
-    'copy:chrome_extension'
-    # 'shell:extract_chrome_tests'
-  ]
-
-  taskManager.add 'build_chrome', [
-    'build_chrome_app'
-    'build_chrome_ext'
-  ]
-
-  # Firefox build tasks.
-  taskManager.add 'build_firefox', [
-    'build_generic_core'
-    'build_generic_ui'
-    'copy:generic_ui_to_firefox'
-    'ts:firefox'
-    'symlink:polymerLibToFirefox'
-    'vulcanize:firefoxInline'
-    'vulcanize:firefoxCsp'
-    'copy:firefox'
-    'concat:firefox_uproxy'
-    'concat:firefox_dependencies'
-  ]
-
-  taskManager.add 'build_firefox_xpi', [
-    'build_firefox'
-    'mozilla-addon-sdk'
-    'mozilla-cfx-xpi:dist'
-  ]
-
-  # --- Testing tasks ---
-  taskManager.add 'test_core', [
-    'build_generic_core'
-    'ts:logging'
-    'ts:webrtc'
-    'ts:generic_core_specs'
-    'ts:mocks'
-    'jasmine:generic_core'
-  ]
-
-  taskManager.add 'test_ui', [
-    'build_generic_ui'
-    'ts:generic_ui_specs'
-    'jasmine:generic_ui'
-  ]
-
-  taskManager.add 'test_chrome', [
-    'build_chrome'
-    'ts:chrome_specs'
-    'ts:mocks'
-    'jasmine:chrome_extension'
-    'jasmine:chrome_app'
-  ]
-
-  taskManager.add 'everything', [
-    'tsd:refresh'
-    'build'
-    'test'
-  ]
-
-  # This is the target run by Travis. Targets in here should run locally
-  # and on Travis/Sauce Labs.
-  taskManager.add 'test', [
-    'test_core'
-    'test_ui'
-    'test_chrome'
-  ]
-
-  taskManager.add 'build', [
-    'build_chrome'
-    'build_firefox'
-  ]
-
-  taskManager.add 'default', [
-    'build'
-  ]
 
   #-------------------------------------------------------------------------
   # Register the tasks

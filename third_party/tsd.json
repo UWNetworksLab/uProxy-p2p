@@ -1,0 +1,45 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "../build/third_party/typings",
+  "bundle": "../build/third_party/typings/tsd.d.ts",
+  "installed": {
+    "es6-promise/es6-promise.d.ts": {
+      "commit": "31370adcb0d0941b3b6a27d3cbec04e94b0f95d9"
+    },
+    "jasmine/jasmine.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "webcrypto/WebCrypto.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "form-data/form-data.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "node/node.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "request/request.d.ts": {
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
+    },
+    "filewriter/filewriter.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "filesystem/filesystem.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "chrome/chrome-app.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "webrtc/MediaStream.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "chrome/chrome.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "437e1f1f2e0d229a94ee766d128f8550f462274b"
+    }
+  }
+}

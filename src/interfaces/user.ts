@@ -7,3 +7,5 @@ interface BaseUser {
   userId :string;
   name :string;
 }
+
+export = BaseUser;

@@ -1,7 +1,5 @@
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
 
-declare module Core {
-
   /**
    * Represents an entity whose state can be captured and restored, such as
    * with storage in a repository and subsequent retrieval.
@@ -62,4 +60,3 @@ declare module Core {
     hasSeenWelcome :boolean;
     mode : uProxy.Mode;
   }
-}  // module Core
