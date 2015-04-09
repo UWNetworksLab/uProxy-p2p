@@ -201,8 +201,8 @@ module Core {
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : void => {
-      this.connection_.stopGet();
+    public stop = () : Promise<void> => {
+      return this.connection_.stopGet();
     }
 
     /**
