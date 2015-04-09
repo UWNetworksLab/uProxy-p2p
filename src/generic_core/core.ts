@@ -108,10 +108,11 @@ class uProxyCore implements uProxy.CoreAPI {
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false,
+         allowNonUnicast: false,
          mode: uProxy.Mode.GET,
          version: uProxy.STORAGE_VERSION};
   public loadGlobalSettings :Promise<void> = null;
-  private natType_ = '';
+  private natType_ :String = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -135,6 +136,9 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
+          }
+          if (this.globalSettings.allowNonUnicast == null) {
+            this.globalSettings.allowNonUnicast = false;
           }
           if (typeof this.globalSettings.mode == 'undefined') {
             this.globalSettings.mode = uProxy.Mode.GET;
@@ -308,6 +312,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.allowNonUnicast = newSettings.allowNonUnicast;
     this.globalSettings.mode = newSettings.mode;
   }
 

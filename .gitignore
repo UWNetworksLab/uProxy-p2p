@@ -19,6 +19,7 @@
 *.vtg
 *~
 build
+.build
 distr
 .mozilla_addon_sdk
 npm-debug.log

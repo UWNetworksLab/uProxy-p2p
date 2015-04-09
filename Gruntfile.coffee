@@ -402,6 +402,17 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data'
         } ]
 
+      integration:
+        files: [ {
+          # Copy compiled Chrome App code, required for integration tests
+          expand: true, cwd: chromeAppDevPath
+          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: 'build/compile-src/integration'
+        }, {
+          expand: true, cwd: 'src/integration/'
+          src: ['gtalk_credentials.js', 'integration.json']
+          dest: 'build/compile-src/integration'
+        }]
     }  # copy
 
     'string-replace':
@@ -458,6 +469,9 @@ module.exports = (grunt) ->
 
       # uProxy firefox specific typescript
       firefox: Rule.typescriptSrcLenient 'compile-src/firefox'
+
+      integration_specs: Rule.typescriptSpecDeclLenient 'compile-src/integration'
+      integration: Rule.typescriptSrcLenient 'compile-src/integration'
 
     }  # typescript
 
@@ -563,6 +577,26 @@ module.exports = (grunt) ->
                 dir: 'build/coverage/generic_ui'
       }
 
+    jasmine_chromeapp: {
+      all: {
+        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+              'build/compile-src/integration/scripts/uproxy.js',
+              'build/compile-src/integration/gtalk_credentials.js',
+              'build/compile-src/integration/**/*.js',
+              'build/compile-src/integration/**/*.json',
+              'build/compile-src/integration/core.spec.js']
+        options: {
+          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+                  'build/compile-src/integration/scripts/uproxy.js',
+                  'build/compile-src/integration/scripts/uproxy-lib/arraybuffers/arraybuffers.js',
+                  'build/compile-src/integration/gtalk_credentials.js',
+                  'build/compile-src/integration/core.spec.js'
+          ],
+          # Uncomment this for debugging
+          # keepRunner: true,
+        }
+      }
+    }
     'mozilla-addon-sdk':
       'latest':
         options:
@@ -627,6 +661,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-verbosity'
   grunt.loadNpmTasks 'grunt-vulcanize'
+  grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -727,6 +762,14 @@ module.exports = (grunt) ->
     'ts:mocks'
     'jasmine:chrome_extension'
     'jasmine:chrome_app'
+  ]
+
+  taskManager.add 'integration_test', [
+    'build_chrome'
+    'copy:integration'
+    'ts:integration'
+    'ts:integration_specs'
+    'jasmine_chromeapp'
   ]
 
   taskManager.add 'everything', [
