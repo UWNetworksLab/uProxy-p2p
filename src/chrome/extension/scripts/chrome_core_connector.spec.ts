@@ -21,19 +21,11 @@ var mockAppPort = () => {
   };
 };
 
-// Mock UI.
-var ui :UI.UserInterface;
 var chromeBrowserApi :ChromeBrowserApi;
 
 // The ordering of the specs matter, as they provide a connect / disconnect
 // sequence on the chromeCoreConnector object.
 describe('core-connector', () => {
-
-  ui = jasmine.createSpyObj('UI.UserInterface',
-    ['stopGettingInUiAndConfig',
-    'sync',
-    'update',
-    'syncUser']);
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
     'showNotification']);
@@ -46,6 +38,7 @@ describe('core-connector', () => {
   var connectPromise :Promise<void>;
 
   beforeEach(() => {
+    ui = new UI.UserInterface(core, chromeBrowserApi);
     spyOn(console, 'log');
   });
 
@@ -79,6 +72,28 @@ describe('core-connector', () => {
 
   var port = mockAppPort();
   var disconnect :Function = null;
+
+  var connectToApp = () : Promise<void> => {
+    // Does not contain expect statements since the testing of this
+    // behaviour is done in the next test.
+    var acker = null;
+    spyOn(chrome.runtime, 'connect').and.returnValue(port);
+    spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
+      if (null !== acker) {
+        return;
+      }
+      acker = handler;
+    });
+    spyOn(port, 'postMessage').and.callFake((msg) => {
+      if (acker) {
+        acker(ChromeMessage.ACK);
+      }
+    });
+    spyOn(port.onDisconnect, 'addListener').and.callFake((f) => {
+      disconnect = f;
+    });
+    return chromeCoreConnector.connect();
+  };
 
   it('connects to App when present.', (done) => {
     var acker = null;
@@ -142,7 +157,28 @@ describe('core-connector', () => {
     disconnect();
     expect(chromeCoreConnector.status.connected).toEqual(false);
     expect(chromeCoreConnector['appPort_']).toBeNull();
-    expect(ui.stopGettingInUiAndConfig).toHaveBeenCalled();
+  });
+
+  it('show disconnect.html if user was proxying when app disconnects.', (done) => {
+    var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
+    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    connectToApp().then(() => {
+      spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
+      uiIsGettingAccessSpy.and.callFake(() => { return true; });
+      disconnect();
+      expect(uiStopGettingInUiAndConfigSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('do not show disconnect.html if user was not proxying when app disconnects.', (done) => {
+    var uiIsGettingAccessSpy = spyOn(ui, 'isGettingAccess');
+    var uiStopGettingInUiAndConfigSpy = spyOn(ui, 'stopGettingInUiAndConfig');
+    connectToApp().then(() => {
+      spyOn(chromeCoreConnector, 'connect').and.callFake(() => { done(); });
+      uiIsGettingAccessSpy.and.callFake(() => { return false; });
+      disconnect();
+      expect(uiStopGettingInUiAndConfigSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('send queues message while disconnected.', () => {
