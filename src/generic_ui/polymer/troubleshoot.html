@@ -11,7 +11,6 @@
     <style>
     :host {
       text-align: center;
-      font-color: #009688;  /* dark green */
     }
     h1 {
       font-size: 1.5em;
@@ -83,6 +82,8 @@
     <paper-dialog backdrop layered='false' id='troubleshootDialog'>
       <core-icon class="button" icon="clear" on-tap='{{ close }}'></core-icon>
       <h1>{{ titleText }}</h1>
+
+      <!-- First screen in the dialog asks user if they want to diagnose their network. -->
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
           It could be that your network's NAT type is incompatible with uProxy. Would you like to uProxy to analyze your network?
@@ -98,14 +99,16 @@
         </paper-button>
       </div>
 
+      <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
       <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
         Analyzing network<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
+
+      <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
         It looks like you are on a <b>{{ natType }}</b>, which is <b>{{ natDescription }}</b> interfering with your ability to connect to friends.
         <uproxy-faq-link anchor='doesUproxyLogData'>More info</uproxy-faq-link><br><br>
-          <!-- <core-icon icon="help"></core-icon> -->
         Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?
         <uproxy-faq-link anchor='doesUproxyLogData'>Privacy policy</uproxy-faq-link>
         <br>
