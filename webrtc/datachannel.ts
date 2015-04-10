@@ -211,6 +211,10 @@ export class DataChannelClass implements DataChannel {
               (data.buffer instanceof ArrayBuffer) + ')'));
     }
 
+    if (this.draining_) {
+      return Promise.reject(new Error('send was called after close'));
+    }
+
     var byteLength :number;
     if (typeof data.str === 'string') {
       // This calculation is based on the idea that JS strings are utf-16,
@@ -312,9 +316,6 @@ export class DataChannelClass implements DataChannel {
       } else {
         if (this.toPeerDataQueue_.getLength() === 0) {
           this.setOverflow_(false);
-          if (this.draining_) {
-            this.fulfillDrained_();
-          }
         }
         // This processes one block from the queue, which (in Chrome) is
         // expected to be no larger than 4 KB.  We will then go through the
@@ -329,16 +330,50 @@ export class DataChannelClass implements DataChannel {
   }
 
   public close = () : Promise<void> => {
-    log.debug('close requested (%1 messages to send)',
-        this.toPeerDataQueue_.getLength());
+    log.debug('close requested (%1 messages and %2 bytes to send)',
+              this.toPeerDataQueue_.getLength(),
+              this.lastBrowserBufferedAmount_);
 
-    this.draining_ = true;
+    var javascriptBufferDrained = new Promise((F, R) => {
+      if (this.getJavascriptBufferedAmount() > 0) {
+        this.setOverflowListener((overflow:boolean) => {
+          if (!overflow) {
+            F();
+          }
+        });
+      } else {
+        F();
+      }
+      this.draining_ = true;
+    });
 
-    if (this.toPeerDataQueue_.getLength() === 0) {
-      this.fulfillDrained_();
-    }
+    javascriptBufferDrained.then(this.waitForBrowserToDrain_).then(
+      this.fulfillDrained_);
 
     return this.onceClosed;
+  }
+
+  private waitForBrowserToDrain_ = () : Promise<void> => {
+    var drained :() => void;
+    var ret :Promise<void> = new Promise<void>((F, R) => {
+      drained = F;
+    });
+
+    var loop = () : void => {
+      this.getBrowserBufferedAmount().then((amount:number) => {
+        if (amount === 0) {
+          drained();
+        } else if (this.opennedSuccessfully_) {
+          setTimeout(loop, 20);
+        } else {
+          log.warn('Data channel was closed remotely with %1 bytes buffered',
+                   amount);
+        }
+      });
+    };
+
+    loop();
+    return ret;
   }
 
   public getBrowserBufferedAmount = () : Promise<number> => {
@@ -354,6 +389,10 @@ export class DataChannelClass implements DataChannel {
   }
 
   public setOverflowListener = (listener:(overflow:boolean) => void) => {
+    if (this.draining_) {
+      throw new Error('Can\'t set overflow listener after close');
+    }
+
     this.overflowListener_ = listener;
   }
 
