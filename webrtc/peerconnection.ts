@@ -389,8 +389,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
             (localOffer:freedom_RTCPeerConnection.RTCSessionDescription) => {
-          // TODO: either specify a functional call requirement that the sdp
-          // fields are valid JSON, so add a try-catch.
           if (djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
               djb2.stringHash(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
@@ -444,14 +442,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
       })
       .catch((e) => {
-        var descriptionString :string
-        try {
-          descriptionString = JSON.stringify(description)
-        } catch(e) {
-          descriptionString = "[unstringifiable object]"
-        }
-        this.closeWithError_('Failed to set remote description: ' + descriptionString
-          + '; Error: ' + e.toString());
+        this.closeWithError_('Failed to set remote description: ' +
+          JSON.stringify(description) + '; Error: ' + e.toString());
       });
   }
 
