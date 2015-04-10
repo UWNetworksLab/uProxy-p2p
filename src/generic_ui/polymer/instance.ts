@@ -17,7 +17,6 @@ Polymer({
     this.model = model;
   },
   start: function() {
-    this.fire('set-trying-to-get', {isTryingToGet: true});
     if (!this.instance.isOnline) {
       this.fire('core-signal', {
         name: 'show-toast',
@@ -28,6 +27,7 @@ Polymer({
       return;
     }
 
+    this.fire('set-trying-to-get', {isTryingToGet: true});
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
