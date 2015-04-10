@@ -17,6 +17,7 @@ Polymer({
     this.model = model;
   },
   start: function() {
+    this.fire('set-instance-trying-to-get', {isInstanceTryingToGet: true});
     if (!this.instance.isOnline) {
       this.fire('core-signal', {
         name: 'show-toast',
@@ -34,6 +35,7 @@ Polymer({
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
+      this.fire('set-instance-trying-to-get', {isInstanceTryingToGet: false});
     }).catch((e) => {
       if (this.aborted) {
         // if the failure is because of a user action, do nothing
@@ -43,9 +45,11 @@ Polymer({
       this.fire('core-signal', {name: 'open-troubleshoot'});
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
+      this.fire('set-instance-trying-to-get', {isInstanceTryingToGet: false});
     });
   },
   stop: function() {
+    this.fire('set-instance-trying-to-get', {isInstanceTryingToGet: false});
     this.aborted = true;
     console.log('[polymer] calling core.stop()');
     core.stop();

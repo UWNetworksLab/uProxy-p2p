@@ -8,6 +8,13 @@
     :host {
       text-align: center;
     }
+    p {
+      text-align: left;
+      margin: 0 0 24px 0;
+    }
+    textarea {
+      margin-bottom: 24px;
+    }
     textarea.message {
       width: 80%;
       height: 10em;
@@ -20,9 +27,15 @@
       background: rgb(221, 221, 221);
       color: rgb(112, 112, 112);
     }
+    #getting, #sharing {
+      margin: 24px;
+    }
     a {
       font-weight: bold;
       color: #009688;
+    }
+    uproxy-app-bar::shadow span {
+      font-size: 18px;
     }
     </style>
 
@@ -32,7 +45,7 @@
     <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
       <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a </span>
       <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>Request a </span>
-      <span>One Time Connection</span>
+      <span>one-time connection</span>
     </uproxy-app-bar>
 
     <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
@@ -78,7 +91,7 @@
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteGettingState !== GettingState.GETTING_ACCESS }}'>
-        <p>Success!  A one time connection has been established.</p>
+        <p>Success!  A one-time connection has been established.</p>
 
         <p>
           To
@@ -132,7 +145,7 @@
 
             <p>
               If you would like to start a one-time connection with someone
-              else, press the "Back" button and then "Start a one time
+              else, press the "Back" button and then "Start a one-time
               connection" to start a new session.
             </p>
           </uproxy-bubble>
@@ -141,7 +154,7 @@
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteSharingState !== SharingState.SHARING_ACCESS }}'>
-        <p>Success!  A one time connection has been established.</p>
+        <p>Success!  A one-time connection has been established.</p>
 
         <paper-button raised class='stop' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
 
