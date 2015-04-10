@@ -57,12 +57,6 @@
 
       <!-- trying to get access -->
       <div hidden?='{{ instance.localGettingFromRemote != GettingState.TRYING_TO_GET_ACCESS }}'>
-        <div horizontal layout>
-          <core-icon icon='query-builder'></core-icon>
-          <p class='preButtonText' flex>
-            Trying to get access from {{user.name || user.userId }}
-          </p>
-        </div>
         <paper-button raised on-tap='{{ stop }}'>
           Cancel
         </paper-button>

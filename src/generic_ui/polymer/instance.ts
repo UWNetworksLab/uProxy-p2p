@@ -27,6 +27,7 @@ Polymer({
       return;
     }
 
+    this.fire('set-trying-to-get', {isTryingToGet: true});
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
@@ -34,6 +35,7 @@ Polymer({
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
+      this.fire('set-trying-to-get', {isTryingToGet: false});
     }).catch((e) => {
       if (this.aborted) {
         // if the failure is because of a user action, do nothing
@@ -43,9 +45,11 @@ Polymer({
       this.fire('core-signal', {name: 'open-troubleshoot'});
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
+      this.fire('set-trying-to-get', {isTryingToGet: false});
     });
   },
   stop: function() {
+    this.fire('set-trying-to-get', {isTryingToGet: false});
     this.aborted = true;
     console.log('[polymer] calling core.stop()');
     core.stop();

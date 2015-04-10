@@ -67,7 +67,6 @@ module Core {
     private startupTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized

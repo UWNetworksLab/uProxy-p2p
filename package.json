@@ -33,6 +33,7 @@
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-yuidoc": "~0.4.0",
+    "grunt-jasmine-chromeapp": "1.6.0",
     "grunt-gitinfo": "^0.1.7",
     "grunt-mozilla-addon-sdk": "^0.4.0",
     "grunt-remove": "^0.1.0",
