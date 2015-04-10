@@ -75,17 +75,6 @@ Polymer({
       this.fire('core-signal', { name: signal });
     }
   },
-  closeToast: function() {
-    this.ui.toastMessage = null;
-  },
-  messageNotNull: function(toastMessage) {
-    if (toastMessage) {
-      clearTimeout(this.clearToastTimeout);
-      this.clearToastTimeout = setTimeout(this.closeToast, 10000);
-      return true;
-    }
-    return false;
-  }
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = ui;
@@ -103,6 +92,30 @@ Polymer({
     // to sync the value to core
     core.updateGlobalSettings(model.globalSettings);
   },
+  signalToFireChanged: function() {
+    if (this.ui.signalToFire != '') {
+      this.fire('core-signal', {name: this.ui.signalToFire});
+      this.ui.signalToFire = '';
+    }
+  },
+  /* All functions below help manage paper-toast behaviour. */
+  showToast: function(e, data) {
+    this.ui.toastMessage = data.text;
+  },
+  closeToast: function() {
+    this.ui.toastMessage = null;
+  },
+  messageNotNull: function(toastMessage) {
+    // Whether the toast is shown is controlled by if ui.toastMessage
+    // is null. This function returns whether ui.toastMessage == null,
+    // and also sets a timeout to close the toast.
+    if (toastMessage) {
+      clearTimeout(this.clearToastTimeout);
+      this.clearToastTimeout = setTimeout(this.closeToast, 10000);
+      return true;
+    }
+    return false;
+  },
   troubleshootForGetter: function() {
     this.closeToast();
     this.troubleshootTitle = "Unable to get access";
@@ -113,27 +126,27 @@ Polymer({
     this.troubleshootTitle = "Unable to share access";
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
-  showToast: function(e, data) {
-    this.ui.toastMessage = data.text;
-  },
   messageMatchesFailure: function(toastMessage, failureMsgConstant) {
+    // Determine if the error in the toast is a getter or sharer error
+    // by comparing the error string to getter/sharer error constants.
     if (toastMessage) {
       return toastMessage.indexOf(failureMsgConstant) > -1;
     }
     return false;
   },
-  signalToFireChanged: function() {
-    if (this.ui.signalToFire != '') {
-      this.fire('core-signal', {name: this.ui.signalToFire});
-      this.ui.signalToFire = '';
-    }
-  },
   topOfStatuses: function(gettingStatus, sharingStatus) {
+    // Returns number of pixels from the bottom of the window a toast
+    // can be positioned without interfering with the getting or sharing
+    // status bars.
+    var padding = 10;
+    var statusRowHeight = 58; // From style of the statusRow divs.
     if (gettingStatus && sharingStatus) {
-      return 126;
+      return 2 * statusRowHeight + padding;
     } else if (gettingStatus || sharingStatus) {
-      return 68;
+      return statusRowHeight + padding;
     }
-    return 10;
+    // If there are no status bars, toasts should still 'float' a little
+    // above the bottom of the window.
+    return padding;
   }
 });
