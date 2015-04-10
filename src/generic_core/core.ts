@@ -108,10 +108,11 @@ class uProxyCore implements uProxy.CoreAPI {
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false,
+         allowNonUnicast: false,
          mode: uProxy.Mode.GET,
          version: uProxy.STORAGE_VERSION};
   public loadGlobalSettings :Promise<void> = null;
-  private natType_ = '';
+  private natType_ :String = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -135,6 +136,9 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
+          }
+          if (this.globalSettings.allowNonUnicast == null) {
+            this.globalSettings.allowNonUnicast = false;
           }
           if (typeof this.globalSettings.mode == 'undefined') {
             this.globalSettings.mode = uProxy.Mode.GET;
@@ -308,6 +312,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.allowNonUnicast = newSettings.allowNonUnicast;
     this.globalSettings.mode = newSettings.mode;
   }
 
@@ -361,30 +366,35 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<Net.Endpoint> => {
     // Disable any previous proxying session.
+    var stoppedGetting :Promise<void>[] = [];
     if (remoteProxyInstance) {
       log.warn('Existing proxying session, terminating');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      remoteProxyInstance.stop();
+      stoppedGetting.push(remoteProxyInstance.stop());
       remoteProxyInstance = null;
-    }
-    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      copyPasteConnection.stopGet();
     }
 
-    var remote = this.getInstance(path);
-    if (!remote) {
-      log.error('Instance does not exist for proxying', path.instanceId);
-      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      log.warn('Existing proxying session, terminating');
+      stoppedGetting.push(copyPasteConnection.stopGet());
     }
-    // Remember this instance as our proxy.  Set this before start fulfills
-    // in case the user decides to cancel the proxy before it begins.
-    remoteProxyInstance = remote;
-    return remote.start().then((endpoint:Net.Endpoint) => {
-      // remote.start will send an update to the UI.
-      return endpoint;
+
+    return Promise.all(stoppedGetting).catch((e) => {
+      // if there was an error stopping the old connection we still want to
+      // connect with the new one, do not propogate this error
+      log.error('Could not clean up old connections', e);
+    }).then(() => {
+      var remote = this.getInstance(path);
+      if (!remote) {
+        log.error('Instance does not exist for proxying', path.instanceId);
+        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+      }
+      // Remember this instance as our proxy.  Set this before start fulfills
+      // in case the user decides to cancel the proxy before it begins.
+      remoteProxyInstance = remote;
+      return remote.start();
     }).catch((e) => {
-      remoteProxyInstance = null;
+      remoteProxyInstance = null; // make sure to clean up any state
       log.error('Could not start remote proxying session', e.stack);
       return Promise.reject(e);
     });

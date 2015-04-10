@@ -40,7 +40,8 @@ var model :UI.Model = {
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
-    mode : uProxy.Mode.GET
+    mode : uProxy.Mode.GET,
+    allowNonUnicast: false
   }
 };
 
@@ -514,8 +515,6 @@ module UI {
 
       if (this.isGivingAccess()) {
         this.browserApi.setIcon(UI.SHARING_ICON);
-      } else if (askUser) {
-        this.browserApi.setIcon(UI.ERROR_ICON);
       } else if (model.onlineNetwork) {
         this.browserApi.setIcon(UI.DEFAULT_ICON);
       } else {
@@ -529,6 +528,7 @@ module UI {
       }
 
       if (askUser) {
+        this.browserApi.setIcon(UI.ERROR_ICON);
         this.browserApi.launchTabIfNotOpen('disconnected.html');
         return;
       }

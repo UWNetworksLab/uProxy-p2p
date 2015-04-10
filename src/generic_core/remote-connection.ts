@@ -73,7 +73,7 @@ module Core {
           iceServers: core.globalSettings.stunServers
         },
         <RtcToNet.ProxyConfig> {
-          allowNonUnicast: false
+          allowNonUnicast: core.globalSettings.allowNonUnicast
         }
       );
 

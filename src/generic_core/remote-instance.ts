@@ -71,7 +71,6 @@ module Core {
     private startupTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -221,8 +220,8 @@ module Core {
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : void => {
-      this.connection_.stopGet();
+    public stop = () : Promise<void> => {
+      return this.connection_.stopGet();
     }
 
     /**
