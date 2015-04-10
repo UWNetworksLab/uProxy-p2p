@@ -53,18 +53,17 @@ export class AbstractLoggingDestination {
     }
   }
 
-  public setDefaultFilter = (level :logging.Level) => {
+  // This method handles sending updates for the tags that have changed (and
+  // only the tags that have changed) after calling the specified function
+  // to do the change.
+  private doFilterChanges_ = (doChange :Function) => {
     var oldLevels :{[tag :string] :logging.Level} = {};
 
-    // Modifying the default log level has the potential to trigger an update
-    // for any tag.  To make sure that we send all the necessary changes (and
-    // do not send any unnecessary events), store the current level for each
-    // tag that has a listener.
     for (var tag in listeners) {
       oldLevels[tag] = getMinLevel(tag);
     }
 
-    this.default_ = level;
+    doChange();
 
     for (var tag in oldLevels) {
       if (oldLevels[tag] !== getMinLevel(tag)) {
@@ -73,30 +72,32 @@ export class AbstractLoggingDestination {
     }
   }
 
-  public setModuleFilters = (filters :{[tag :string] :logging.Level}) => {
-    for (var tag in filters) {
-      var oldLevel = getMinLevel(tag);
-
-      if (filters[tag] === logging.Level.default) {
-        delete filters[tag];
-      } else {
-        this.filters_[tag] = filters[tag];
-      }
-
-      if (getMinLevel(tag) !== oldLevel) {
-        updateTag(tag);
-      }
-    }
+  public setDefaultFilter = (level :logging.Level) => {
+    this.doFilterChanges_(() => {
+      this.default_ = level;
+    });
   }
 
-  public clearFilters = () => {
-    // construct an object specifying that all levels should be cleared
-    var setObj :{[tag :string] :logging.Level} = {};
-    for (var tag in this.filters_) {
-      setObj[tag] = logging.Level.default;
+  public setFilters = (filters :{[tag :string] :logging.Level}) => {
+    // while it would be possible to limit the scope of what tags should be
+    // checked for changes, it's easier to just check all of them
+    this.doFilterChanges_(() => {
+      this.filters_ = filters;
+    });
+  }
+
+  public setFilter = (tag :string, level?:logging.Level) => {
+    var oldLevel = getMinLevel(tag);
+
+    if (typeof(level) === 'undefined' || level === null) {
+      delete this.filters_[tag];
+    } else {
+      this.filters_[tag] = level;
     }
 
-    this.setModuleFilters(setObj);
+    if (getMinLevel(tag) !== oldLevel) {
+      updateTag(tag);
+    }
   }
 }
 
@@ -264,13 +265,14 @@ export class LoggingController implements logging.Controller  {
     loggingDestinations[destination].setDefaultFilter(level);
   }
 
-  public setModuleFilters = (destination :logging.Destination,
+  public setFilters = (destination :logging.Destination,
                              filters :{ [tag :string] :logging.Level }) => {
-    loggingDestinations[destination].setModuleFilters(filters);
+    loggingDestinations[destination].setFilters(filters);
   }
 
-  public clearFilters = (destination :logging.Destination) => {
-    loggingDestinations[destination].clearFilters();
+  public setFilter = (destination :logging.Destination, tag :string,
+                      level?:logging.Level) => {
+    loggingDestinations[destination].setFilter(tag, level);
   }
 }
 

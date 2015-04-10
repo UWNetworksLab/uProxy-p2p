@@ -39,17 +39,16 @@ export interface Controller {
 
   setDefaultFilter(destination :Destination, level :Level) :void;
 
-  setModuleFilters(destination :Destination,
+  setFilters(destination :Destination,
                    filters :{[tag :string] :Level}) :void;
 
-  clearFilters(destination :Destination) :void;
+  setFilter(destination :Destination, tag :string, level?:Level) :void;
 }
 
 export interface Listener {
 }
 
 export enum Level {
-  default,
   debug,
   info,
   warn,

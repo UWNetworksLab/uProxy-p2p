@@ -35,7 +35,7 @@ describe("Logging Provider", () => {
   beforeEach(() => {
     logger = new LoggingProvider.Log();
     loggingControl = new LoggingProvider.LoggingController();
-    loggingControl.clearFilters(logging.Destination.buffered);
+    loggingControl.setFilters(logging.Destination.buffered, {});
     loggingControl.setDefaultFilter(logging.Destination.buffered,
                                     logging.Level.error);
     loggingControl.clearLogs();
@@ -80,8 +80,9 @@ describe("Logging Provider", () => {
     loggingControl.clearLogs();
     loggingControl.setDefaultFilter(logging.Destination.buffered,
                                     logging.Level.debug);
-    loggingControl.setModuleFilters(logging.Destination.buffered,
-                                    { 'tag2': logging.Level.info });
+    loggingControl.setFilters(logging.Destination.buffered, {
+                                'tag2': logging.Level.info
+                              });
     logger.debug('tag1', 'first string');
     logger.debug('tag2', 'second string');
     logger.info('tag3', 'third string');

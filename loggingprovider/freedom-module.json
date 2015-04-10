@@ -20,8 +20,8 @@
       "enable" : {"type": "method", "value": []},
       "disable" : {"type": "method", "value": []},
       "setDefaultFilter": {"type": "method", "value": ["number", "number"]},
-      "setModuleFilters": {"type": "method", "value": ["number", "object"]},
-      "clearFilters": {"type": "method", "value": ["number"]}
+      "setFilters": {"type": "method", "value": ["number", "object"]},
+      "setFilter": {"type": "method", "value": ["number", "string", "number"]}
     },
     "logginglistener": {
       "constructor": { "value": ["string"] },
