@@ -35,7 +35,6 @@ describe('DataChannel', function() {
     // This will cause DataChannel to buffer sends.
     var getBufferedAmountSpy = spyOn(mockRtcDataChannel, 'getBufferedAmount');
     getBufferedAmountSpy.and.callFake(() => {
-      // getBufferedAmountSpy.and.returnValue(Promise.resolve(0));
       return Promise.resolve(datachannel.PC_QUEUE_LIMIT);
     });
 
