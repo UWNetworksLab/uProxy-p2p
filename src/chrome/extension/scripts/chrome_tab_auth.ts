@@ -3,10 +3,7 @@
 /// <reference path='../../../uproxy.ts' />
 
 declare var core :CoreConnector;
-
-// If set to true, ChromeTabAuth will re-use the last OAuth credentials,
-// rather than launch a new OAuth tab.
-var reuseLastOAuthCredentials = false;
+declare var model :UI.Model;
 
 // TODO: write a similar class for Firefox that will implement a common
 // interface as Chrome
@@ -25,7 +22,7 @@ class ChromeTabAuth {
   }
 
   public login = (oauthInfo :OAuthInfo) : void => {
-    if (reuseLastOAuthCredentials && this.lastOAuthURL_) {
+    if (model.reconnecting && this.lastOAuthURL_) {
       this.sendCredentials_(this.lastOAuthURL_);
     } else {
       this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);

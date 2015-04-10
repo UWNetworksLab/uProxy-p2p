@@ -13,7 +13,6 @@ Polymer({
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
-      console.warn('!!! core.logout completed !!!');  // TODO: remove
     }).catch((e) => {
       console.error('logout returned error: ', e);
     });

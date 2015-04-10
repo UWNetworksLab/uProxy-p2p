@@ -12,8 +12,6 @@
 /// <reference path='../../interfaces/browser-api.d.ts'/>
 /// <reference path='../../networking-typings/communications.d.ts' />
 
-declare var reuseLastOAuthCredentials :boolean;
-
 // Singleton model for data bindings.
 var model :UI.Model = {
   networkNames: [],
@@ -740,7 +738,7 @@ module UI {
       // 1. It only attempts to re-use the last access_token, and doesn't
       //    use refresh_tokens to get a new access_token when they expire.
       // 2. It only works for Chrome, as only Chrome has a custom OAuth provider
-      //    that supports the reuseLastOAuthCredentials variable
+      //    that supports the model.reconnecting variable
       // See https://docs.google.com/document/d/1COT5YcXWg-jUnD59v0JHcYepMdQCIanKO_xfuq2bY48
       // for a proposed design on making this better
       model.reconnecting = true;
@@ -781,10 +779,6 @@ module UI {
         });
       };
 
-      // First attempt to login again re-using the previous OAuth token,
-      // so that the user doesn't see an OAuth tab.
-      reuseLastOAuthCredentials = true;
-
       // Call attemptReconnect immediately and every 10 seconds afterwards
       // until it is successful.
       this.reconnectInterval_ = setInterval(attemptReconnect, 10000);
@@ -793,7 +787,6 @@ module UI {
 
     public stopReconnect = () => {
       model.reconnecting = false;
-      reuseLastOAuthCredentials = false;  // Reset for next login attempt.
       if (this.reconnectInterval_) {
         clearInterval(this.reconnectInterval_);
         this.reconnectInterval_ = null;
