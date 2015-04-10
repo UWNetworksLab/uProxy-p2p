@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import logging = require('../../logging/logging');
+import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 
 import peerconnection = require('../../webrtc/peerconnection');
 import PeerConnection = peerconnection.PeerConnection;
@@ -10,8 +11,9 @@ import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setConsoleFilter(['*:I']);
-loggingController.setBufferedLogFilter(['*:D']);
+loggingController.setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
+loggingController.setDefaultFilter(loggingTypes.Destination.buffered, loggingTypes.Level.debug);
+
 
 export var moduleName = 'copypaste-socks';
 export var log :logging.Log = new logging.Log(moduleName);
