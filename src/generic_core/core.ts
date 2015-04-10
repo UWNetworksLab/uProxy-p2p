@@ -588,12 +588,39 @@ class uProxyCore implements uProxy.CoreAPI {
       });
   }
 
-  private formatLogs_ = (rawLogs) : string => {
-    var formattedLogs = '';
-    for (var i = 0; i < rawLogs.length; i++) {
-      formattedLogs += rawLogs[i] + '\n';
+  private formatLogs_ = (logs :string[]) : string => {
+    // replace the emails with consistent tags throughout the logs
+    var emails :string[] = [];
+    var names :string[] = [];
+
+    var emailReplacer = (email :string) :string => {
+      var id = _.indexOf(emails, email);
+      if (id === -1) {
+        id = emails.length;
+        emails.push(email);
+      }
+
+      return 'EMAIL_' + id;
     }
-    return formattedLogs;
+
+    var nameReplacer = (match :string, pre :string, name :string, post :string):string => {
+      var id = _.indexOf(names, name);
+      if (id === -1) {
+        id = names.length;
+        names.push(name);
+      }
+
+      return pre + 'NAME_' + id + post;
+    }
+
+    var text = logs.join('\n');
+
+    // email regex taken from regular-expressions.info
+    text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
+                        emailReplacer);
+    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
+    text = text.replace(/("name":")([^"]*)(")/g, nameReplacer);
+    return text;
   }
 }  // class uProxyCore
 
