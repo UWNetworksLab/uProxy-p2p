@@ -105,10 +105,12 @@ Polymer({
   },
   troubleshootForGetter: function() {
     this.closeToast();
+    this.troubleshootTitle = "Unable to get access";
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   troubleshootForSharer: function() {
     this.closeToast();
+    this.troubleshootTitle = "Unable to share access";
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   showToast: function(e, data) {

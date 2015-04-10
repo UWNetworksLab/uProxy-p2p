@@ -270,13 +270,12 @@
       </template>
     </paper-action-dialog>
 
-    <uproxy-troubleshoot></uproxy-troubleshoot>
+    <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
     <paper-toast id='toast'
         opened='{{ messageNotNull(ui.toastMessage) }}'
-        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'
-        text='{{ ui.toastMessage }}'
-        responsiveWidth='320px'>
+        text='{{ ui.toastMessage }}' responsiveWidth='320px'
+        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
       <div class='toastHelpLink' on-tap="{{ troubleshootForGetter }}"
           hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) }}'>GET HELP</div>
       <div class='toastHelpLink' on-tap="{{ troubleshootForSharer }}"
