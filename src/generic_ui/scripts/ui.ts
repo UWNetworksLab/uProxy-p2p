@@ -176,6 +176,9 @@ module UI {
     private isLogoutExpected_ :boolean = false;
     private reconnectInterval_ :number;
 
+    // is a proxy currently set
+    private proxySet_ :boolean = false;
+
     /*
      * This is used to store the information for setting up a copy+paste
      * connection between establishing the connection and the user confirming
@@ -529,6 +532,7 @@ module UI {
         return;
       }
 
+      this.proxySet_ = false;
       this.browserApi.stopUsingProxy();
     }
 
@@ -545,14 +549,22 @@ module UI {
       */
     public startGettingInUiAndConfig =
         (instanceId :string, endpoint :Net.Endpoint) => {
-      this.instanceGettingAccessFrom_ = instanceId;
+      if (instanceId) {
+        this.instanceGettingAccessFrom_ = instanceId;
+        this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+      }
 
       this.startGettingInUi();
 
       this.updateGettingStatusBar_();
 
-      this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;
+      if (this.proxySet_) {
+        // this handles the case where the user starts proxying again before
+        // confirming the disconnect
+        this.stopGettingInUiAndConfig(false);
+      }
 
+      this.proxySet_ = true;
       this.browserApi.startUsingProxy(endpoint);
     }
 
