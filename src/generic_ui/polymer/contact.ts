@@ -16,14 +16,14 @@ Polymer({
     this.model = model;
     this.GettingConsentState = UI.GettingConsentState;
     this.SharingConsentState = UI.SharingConsentState;
-    this.instanceTryingToGet = false;
+    this.isTryingToGet = false;
   },
   openLink: function(event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
   },
-  setInstanceTryingToGet: function(e, data, sender) {
-    this.instanceTryingToGet = data.isInstanceTryingToGet;
+  setIsTryingToGet: function(e, data, sender) {
+    this.isTryingToGet = data.isTryingToGet;
   },
   // |action| is the string end for a uProxy.ConsentUserAction
   modifyConsent: function(action :uProxy.ConsentUserAction) {

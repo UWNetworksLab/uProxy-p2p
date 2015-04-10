@@ -3,7 +3,7 @@
 <link rel='import' href='../lib/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
 
-<polymer-element name='uproxy-contact' attributes='contact, isOnline' on-set-instance-trying-to-get='{{ setInstanceTryingToGet }}'>
+<polymer-element name='uproxy-contact' attributes='contact, isOnline' on-set-trying-to-get='{{ setIsTryingToGet }}'>
 
   <template>
     <style>
@@ -146,13 +146,13 @@
       opened='{{ contact.getExpanded }}'>
 
       <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-        <div horizontal layout hidden?='{{ instanceTryingToGet }}'>
+        <div horizontal layout hidden?='{{ isTryingToGet }}'>
           <core-icon icon='check'></core-icon>
           <p class='preButtonText' flex>
             {{ contact.name || contact.userId }} has granted you access
           </p>
         </div>
-        <div horizontal layout hidden?='{{ !instanceTryingToGet }}'>
+        <div horizontal layout hidden?='{{ !isTryingToGet }}'>
           <core-icon icon='query-builder'></core-icon>
           <p class='preButtonText' flex>
             Trying to connect to {{ contact.name || contact.userId }}
