@@ -116,14 +116,13 @@ Polymer({
     }
     return false;
   },
-  troubleshootForGetter: function() {
+  openTroubleshoot: function() {
+    if (this.messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG)) {
+      this.troubleshootTitle = "Unable to get access";
+    } else {
+      this.troubleshootTitle = "Unable to share access";
+    }
     this.closeToast();
-    this.troubleshootTitle = "Unable to get access";
-    this.fire('core-signal', {name: 'open-troubleshoot'});
-  },
-  troubleshootForSharer: function() {
-    this.closeToast();
-    this.troubleshootTitle = "Unable to share access";
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   messageMatchesFailure: function(toastMessage, failureMsgConstant) {
