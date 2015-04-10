@@ -25,7 +25,7 @@ var CHUNK_SIZE = 1024 * 15;
 // the 16MB for Chrome 37+ and "100 messages" of previous versions mentioned):
 //   https://code.google.com/p/webrtc/issues/detail?id=2866
 // CONSIDER: make it 0. There is no size in the spec.
-var PC_QUEUE_LIMIT = 1024 * 250;
+export var PC_QUEUE_LIMIT = 1024 * 250;
 // Javascript has trouble representing integers larger than 2^53. So we simply
 // don't support trying to send array's bigger than that.
 var MAX_MESSAGE_SIZE = Math.pow(2, 53);
@@ -62,9 +62,17 @@ export interface DataChannel {
   // which have not yet been handed off to the browser.
   getJavascriptBufferedAmount() : number;
 
-  // Closes this data channel.
+  // Returns whether the send buffer is currently in an overflow state.
+  isInOverflow() : boolean;
+
+  // Registers a function that will be called whenever the browser buffer
+  // overflows into the javascript buffer, and whenever the overflow is
+  // cleared.  There can only be one listener at a time.  Pass null to unset.
+  setOverflowListener(listener:(overflow:boolean) => void) : void;
+
+  // Closes this data channel once all outgoing messages have been sent.
   // A channel cannot be re-opened once this has been called.
-  close() : void;
+  close() : Promise<void>;
 
   toString() : string;
 }
@@ -96,24 +104,34 @@ export class DataChannelClass implements DataChannel {
   // toPeerDataQueue_.
   // TODO: Count bytes in strings as well.
   private toPeerDataBytes_        :number;
+  private lastBrowserBufferedAmount_ :number;
 
   public onceOpened      :Promise<void>;
   public onceClosed      :Promise<void>;
 
+  // True iff close() has been called.
+  private draining_ = false;
+  private fulfillDrained_ :() => void;
+  private onceDrained_ = new Promise((F, R) => {
+    this.fulfillDrained_ = F;
+  });
+
   private opennedSuccessfully_ :boolean;
   private rejectOpened_  :(e:Error) => void;
+
+  private overflow_ :boolean = false;
+  private overflowListener_ :(overflow:boolean) => void = null;
 
   public getLabel = () : string => { return this.label_; }
 
   // |rtcDataChannel_| is the freedom rtc data channel.
   // |label_| is the rtcDataChannel_.getLabel() result
-  // |id| is the Freedom GUID for the underlying browser object.
   constructor(private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel,
-              private label_:string,
-              id:string) {
+              private label_:string) {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
     this.toPeerDataBytes_ = 0;
+    this.lastBrowserBufferedAmount_ = 0;
 
     this.onceOpened = new Promise<void>((F,R) => {
       this.rejectOpened_ = R;
@@ -140,7 +158,7 @@ export class DataChannelClass implements DataChannel {
     });
     this.onceOpened.then(() => {
       this.opennedSuccessfully_ = true;
-      this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
+      this.conjestionControlSendHandler();
     });
     this.onceClosed.then(() => {
         if(!this.opennedSuccessfully_) {
@@ -151,6 +169,10 @@ export class DataChannelClass implements DataChannel {
         }
         this.opennedSuccessfully_ = false;
       });
+    this.onceDrained_.then(() => {
+      log.debug('all messages sent, closing');
+      this.rtcDataChannel_.close();
+    });
   }
 
 
@@ -226,6 +248,16 @@ export class DataChannelClass implements DataChannel {
       this.toPeerDataBytes_ += chunk.byteLength;
       promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
     });
+
+    // This check is logically redundant with the check in
+    // conjestionControlSendHandler, but it triggers much sooner (synchronously
+    // during the call to send), which is valuable to reduce overshoot,
+    // especially in fast flows that create web worker scheduling anomalies.
+    if (this.toPeerDataBytes_ + this.lastBrowserBufferedAmount_
+        > PC_QUEUE_LIMIT) {
+      this.setOverflow_(true);
+    }
+
     // CONSIDER: can we change the interface to support not having the dummy
     // extra return at the end?
     return Promise.all(promises).then(() => { return; });
@@ -255,19 +287,35 @@ export class DataChannelClass implements DataChannel {
     return Promise.resolve<void>();
   }
 
+  // Sets the overflow state, and calls the listener if it has changed.
+  private setOverflow_ = (overflow:boolean) => {
+    if (this.overflowListener_ && this.overflow_ !== overflow) {
+      this.overflowListener_(overflow);
+    }
+    this.overflow_ = overflow;
+  }
+
   // TODO: make this timeout adaptive so that we keep the buffer as full as we
   // can without wasting timeout callbacks. When DataChannels correctly has a
   // callback for buffering, we don't need to do this anymore.
   private conjestionControlSendHandler = () : void => {
     this.rtcDataChannel_.getBufferedAmount().then((bufferedAmount:number) => {
+      this.lastBrowserBufferedAmount_ = bufferedAmount;
       if(this.toPeerDataQueue_.isHandling()) {
         log.error('Last packet handler should not still be present');
         this.close();
       }
 
       if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
+        this.setOverflow_(true);
         setTimeout(this.conjestionControlSendHandler, 20);
       } else {
+        if (this.toPeerDataQueue_.getLength() === 0) {
+          this.setOverflow_(false);
+          if (this.draining_) {
+            this.fulfillDrained_();
+          }
+        }
         // This processes one block from the queue, which (in Chrome) is
         // expected to be no larger than 4 KB.  We will then go through the
         // whole loop again, including checking the buffered amount, before
@@ -280,8 +328,17 @@ export class DataChannelClass implements DataChannel {
     });
   }
 
-  public close = () : void => {
-    this.rtcDataChannel_.close();
+  public close = () : Promise<void> => {
+    log.debug('close requested (%1 messages to send)',
+        this.toPeerDataQueue_.getLength());
+
+    this.draining_ = true;
+
+    if (this.toPeerDataQueue_.getLength() === 0) {
+      this.fulfillDrained_();
+    }
+
+    return this.onceClosed;
   }
 
   public getBrowserBufferedAmount = () : Promise<number> => {
@@ -292,6 +349,14 @@ export class DataChannelClass implements DataChannel {
     return this.toPeerDataBytes_;
   }
 
+  public isInOverflow = () : boolean => {
+    return this.overflow_;
+  }
+
+  public setOverflowListener = (listener:(overflow:boolean) => void) => {
+    this.overflowListener_ = listener;
+  }
+
   public toString = () : string => {
     var s = this.getLabel() + ': opennedSuccessfully_=' +
       this.opennedSuccessfully_;
@@ -299,15 +364,19 @@ export class DataChannelClass implements DataChannel {
   }
 }  // class DataChannelClass
 
-
-// Static, async constructor that returns a DataChannel ready for use.
-// |id| is the GUID generated by Freedom to identify the underlying
-//     browser object.
+// Static constructor which constructs a core.rtcdatachannel instance
+// given a core.rtcdatachannel GUID.
 export function createFromFreedomId(id:string) : Promise<DataChannel> {
-  var rtcDataChannel = freedom['core.rtcdatachannel'](id);
+  return createFromRtcDataChannel(freedom['core.rtcdatachannel'](id));
+}
+
+// Static constructor which constructs a core.rtcdatachannel instance
+// given a core.rtcdatachannel instance.
+export function createFromRtcDataChannel(
+    rtcDataChannel:freedom_RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
   return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
     return rtcDataChannel.getLabel().then((label:string) => {
-      return new DataChannelClass(rtcDataChannel, label, id);
+      return new DataChannelClass(rtcDataChannel, label);
     });
   });
 }

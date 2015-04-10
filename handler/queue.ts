@@ -23,6 +23,8 @@
 // CONSIDER: This is kind of similar to functional parsing. May be good to
 // formalize the relationship in comments here.
 
+import baseQueue = require('../queue/queue');
+
 // The |QueueFeeder| is the abstraction for events to be handled.
 export interface QueueFeeder<Feed,Result> {
   // Number of things in the queue to be handled.
@@ -160,7 +162,7 @@ class PendingPromiseHandler<T,T2> {
 export class Queue<Feed,Result>
     implements QueueFeeder<Feed,Result>, QueueHandler<Feed,Result> {
   // The queue of things to handle.
-  private queue_ :PendingPromiseHandler<Feed, Result>[] = [];
+  private queue_ = new baseQueue.Queue<PendingPromiseHandler<Feed, Result>>();
 
   // Handler function for things on the queue. When null, things queue up.
   // When non-null, gets called on the thing to handle. When set, called on
