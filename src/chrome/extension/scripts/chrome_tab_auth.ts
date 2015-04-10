@@ -3,6 +3,7 @@
 /// <reference path='../../../uproxy.ts' />
 
 declare var core :CoreConnector;
+declare var model :UI.Model;
 
 // TODO: write a similar class for Firefox that will implement a common
 // interface as Chrome
@@ -14,11 +15,18 @@ declare var core :CoreConnector;
 //   success.
 class ChromeTabAuth {
 
+  // last OAuth reponse URL.
+  private lastOAuthURL_ :string;
+
   constructor() {
   }
 
   public login = (oauthInfo :OAuthInfo) : void => {
-    this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
+    if (model.reconnecting && this.lastOAuthURL_) {
+      this.sendCredentials_(this.lastOAuthURL_);
+    } else {
+      this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
+    }
   }
 
 
@@ -27,6 +35,7 @@ class ChromeTabAuth {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
+        this.lastOAuthURL_ = tab.url;
         this.sendCredentials_(tab.url);
       }
     };

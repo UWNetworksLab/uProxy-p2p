@@ -7,7 +7,7 @@ declare var core :CoreConnector;
 
 Polymer({
   connect: function() {
-    core.login(this.networkName).then(() => {
+    ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', {view: uProxy.View.ROSTER});

@@ -42,7 +42,8 @@ var model :UI.Model = {
     hasSeenWelcome: false,
     mode : uProxy.Mode.GET,
     allowNonUnicast: false
-  }
+  },
+  reconnecting: false
 };
 
 // TODO: currently we have a UI object (typescript module, i.e. namespace)
@@ -90,8 +91,9 @@ module UI {
   export interface Model {
     networkNames :string[];
     onlineNetwork :UI.Network;
-    contacts : Contacts;
-    globalSettings : Core.GlobalSettings;
+    contacts :Contacts;
+    globalSettings :Core.GlobalSettings;
+    reconnecting :boolean;
   }
 
    export interface UserCategories {
@@ -165,9 +167,14 @@ module UI {
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
+    public browser :string = '';
+
     // Changing this causes root.ts to fire a core-signal
     // with the new value.
     public signalToFire :string = '';
+
+    private isLogoutExpected_ :boolean = false;
+    private reconnectInterval_ :number;
 
     /*
      * This is used to store the information for setting up a copy+paste
@@ -613,10 +620,17 @@ module UI {
           this.categorizeUser_(user, model.contacts.shareAccessContacts,
               userCategories.shareTab, null);
         }
-        this.showNotification('You have been logged out of ' + model.onlineNetwork.name);
         this.setOfflineIcon();
-        this.view = uProxy.View.SPLASH;
         model.onlineNetwork = null;
+
+        if (!this.isLogoutExpected_ && !network.online &&
+            this.browser == 'chrome') {
+          console.warn('Unexpected logout, reconnecting to ' + network.name);
+          this.reconnect(network.name);
+        } else {
+          this.showNotification('You have been logged out of ' + network.name);
+          this.view = uProxy.View.SPLASH;
+        }
       }
 
       if (network.online && !model.onlineNetwork) {
@@ -707,6 +721,76 @@ module UI {
 
     public bringUproxyToFront = () => {
       this.browserApi.bringUproxyToFront();
+    }
+
+    public login = (network :string) : Promise<void> => {
+      this.isLogoutExpected_ = false;
+      return this.core.login(network);
+    }
+
+    public logout = (networkInfo :NetworkInfo) : Promise<void> => {
+      this.isLogoutExpected_ = true;
+      return this.core.logout(networkInfo);
+    }
+
+    public reconnect = (network :string) => {
+      // TODO: this reconnect logic has some issues:
+      // 1. It only attempts to re-use the last access_token, and doesn't
+      //    use refresh_tokens to get a new access_token when they expire.
+      // 2. It only works for Chrome, as only Chrome has a custom OAuth provider
+      //    that supports the model.reconnecting variable
+      // See https://docs.google.com/document/d/1COT5YcXWg-jUnD59v0JHcYepMdQCIanKO_xfuq2bY48
+      // for a proposed design on making this better
+      model.reconnecting = true;
+
+      var ping = () : Promise<void> => {
+        var pingUrl = network == 'Facebook'
+            ? 'https://graph.facebook.com' : 'https://www.googleapis.com';
+        return new Promise<void>(function(F, R) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', pingUrl);
+          xhr.onload = function() { F(); };
+          xhr.onerror = function() { R(new Error('Ping failed')); };
+          xhr.send();
+        });
+      }
+
+      var loginCalled = false;
+      var attemptReconnect = () => {
+        ping().then(() => {
+          // Ensure that we only call login once.  This is needed in case
+          // either login or the ping takes too long and we accidentally
+          // call login twice.  Doing so would cause one of the login
+          // calls to fail, resulting in the user seeing the splash page.
+          if (!loginCalled) {
+            loginCalled = true;
+            this.core.login(network).then(() => {
+              // Successfully reconnected, stop additional reconnect attempts.
+              this.stopReconnect();
+            }).catch((e) => {
+              // Login with last oauth token failed, give up on reconnect.
+              this.stopReconnect();
+              this.showNotification('You have been logged out of ' + network);
+              this.view = uProxy.View.SPLASH;
+            });
+          }
+        }).catch((e) => {
+          // Ping failed, we will try again on the next interval.
+        });
+      };
+
+      // Call attemptReconnect immediately and every 10 seconds afterwards
+      // until it is successful.
+      this.reconnectInterval_ = setInterval(attemptReconnect, 10000);
+      attemptReconnect();
+    }
+
+    public stopReconnect = () => {
+      model.reconnecting = false;
+      if (this.reconnectInterval_) {
+        clearInterval(this.reconnectInterval_);
+        this.reconnectInterval_ = null;
+      }
     }
   }  // class UserInterface
 
