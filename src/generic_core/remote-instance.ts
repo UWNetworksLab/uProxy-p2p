@@ -177,6 +177,9 @@ module Core {
       * we should try to start sharing.
       */
     private startShare_ = () => {
+      // Clear pending timeout, if one exists, so that we are only concerned
+      // with the most recent click to startShare.
+      this.clearTimeout_();
       // Cancel rtcToNet_ connection if start hasn't completed in 45 seconds.
       this.startupTimeout_ = setTimeout(() => {
         log.warn('Timing out rtcToNet_ connection');

@@ -16,11 +16,11 @@ Polymer({
     core.getNatType().then((natType) => {
       this.natType = natType;
       if (natType === 'SymmetricNAT') {
-        this.natDescription = 'very likely';
+        this.natImpact = 'very likely';
       } else if (natType === 'PortRestrictedCone') {
-        this.natDescription = 'possibly'
+        this.natImpact = 'possibly'
       } else {
-        this.natDescription = 'unlikely'
+        this.natImpact = 'unlikely'
       }
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;
@@ -31,5 +31,7 @@ Polymer({
     this.model = model;
     this.analyzingNetwork = false;
     this.analyzedNetwork = false;
+    this.natType = '';
+    this.natImpact = '';
   }
 });

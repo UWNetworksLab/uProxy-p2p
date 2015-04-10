@@ -70,7 +70,7 @@
     paper-progress::shadow #activeProgress {
       background-color: #009688;
     }
-    uproxy-faq-link /deep/ #linkText {
+    uproxy-faq-link .linkText {
       text-decoration: underline;
       color: rgba(0,0,0,0.40);
     }
@@ -107,10 +107,14 @@
 
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        It looks like you are on a <b>{{ natType }}</b>, which is <b>{{ natDescription }}</b> interfering with your ability to connect to friends.
-        <uproxy-faq-link anchor='doesUproxyLogData'>More info</uproxy-faq-link><br><br>
+        It looks like you are on a <strong>{{ natType }}</strong>, which is <strong>{{ natImpact }}</strong> interfering with your ability to connect to friends.
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>More info</span>
+        </uproxy-faq-link><br><br>
         Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?
-        <uproxy-faq-link anchor='doesUproxyLogData'>Privacy policy</uproxy-faq-link>
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>Privacy policy</span>
+        </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <paper-button on-tap='{{ submitFeedback }}'>
@@ -127,4 +131,3 @@
   </template>
   <script src='troubleshoot.js'></script>
 </polymer-element>
-
