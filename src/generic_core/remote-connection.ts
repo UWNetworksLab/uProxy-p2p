@@ -101,7 +101,7 @@ module Core {
         this.bytesSent_ = 0;
         this.bytesReceived_ = 0;
         this.stateRefresh_();
-        return new Promise<void>((F, R) => {F();});
+        return Promise.resolve<void>();
       });
 
       this.localSharingWithRemote = SharingState.TRYING_TO_SHARE_ACCESS;
@@ -126,9 +126,9 @@ module Core {
     }
 
     public stopShare = () :Promise<void> => {
-      if (this.localSharingWithRemote !== SharingState.NONE) {
+      if (this.localSharingWithRemote === SharingState.NONE) {
         log.warn('Cannot stop sharing when not sharing');
-        return new Promise<void>((F, R) => {F();});
+        return Promise.resolve<void>();
       }
 
       this.localSharingWithRemote = SharingState.NONE;
