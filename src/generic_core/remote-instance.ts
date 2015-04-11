@@ -193,6 +193,7 @@ module Core {
         TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
         trying to connect. Something like:
         https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
+        Issue: https://github.com/uProxy/uproxy/issues/1256
 
         } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
           this.stopShare();
