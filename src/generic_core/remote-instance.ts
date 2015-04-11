@@ -162,19 +162,20 @@ module Core {
           return;
         }
 
-        // Create a new rtcToNet object everytime there is an OFFER signal
+        // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
           this.connection_.resetRtcToNetCreated();
           this.startShare_();
         }
-
-          this.connection_.rtcToNetCreated.then(() => {
-            this.connection_.handleSignal({
-              type: type,
-              data: signalFromRemote
-            });
+        // Wait for the new rtcToNet instance to be created before you handle
+        // additional messages from a client peer.
+        this.connection_.rtcToNetCreated.then(() => {
+          this.connection_.handleSignal({
+            type: type,
+            data: signalFromRemote
           });
-          return;
+        });
+        return;
 
         /*
         TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
@@ -184,7 +185,8 @@ module Core {
         } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
           this.stopShare();
           return;
-        }*/
+        }
+        */
       }
 
       this.connection_.handleSignal({

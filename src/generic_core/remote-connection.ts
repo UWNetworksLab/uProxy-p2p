@@ -119,6 +119,9 @@ module Core {
       return this.rtcToNet_.onceReady;
     }
 
+    // This must be called as soon as you receive an OFFER signal from your peer.
+    // Otherwise, CANDIDATE signals can be dropped or handled by old rtcToNet_
+    // instances.
     public resetRtcToNetCreated = () :void => {
       this.rtcToNetCreated = new Promise<void>((F, R) => {
         this.fulfillRtcToNetCreated_ = F;
