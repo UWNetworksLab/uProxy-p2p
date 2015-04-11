@@ -68,7 +68,8 @@ module Core {
     // trying to connect) by timing out RtcToNet 15 seconds later than
     // SocksToRtc.
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
-    private startupTimeout_ = null;
+    private startSocksToRtcTimeout_ = null;
+    private startRtcToNetTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
     /**
@@ -114,7 +115,7 @@ module Core {
           ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
         case uProxy.Update.STOP_GETTING:
-          this.clearTimeout_();
+          this.clearTimeout_(this.startSocksToRtcTimeout_);
           ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
@@ -161,9 +162,36 @@ module Core {
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal
-        if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          this.startShare_();
+        if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+          this.connection_.resetRtcToNetCreated();
+          this.stopShare().then(this.startShare_);
         }
+
+          this.connection_.rtcToNetCreated.then(() => {
+            this.connection_.handleSignal({
+              type: type,
+              data: signalFromRemote
+            });
+          });
+          return;
+
+        /*
+        TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
+        trying to connect. Something like:
+        https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
+        */
+/*        else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+          this.stopShare();
+          return;
+        } else {
+          this.connection_.connectionReady.then(() => {
+            this.connection_.handleSignal({
+              type: type,
+              data: signalFromRemote
+            });
+          });
+          return;
+        }*/
       }
 
       this.connection_.handleSignal({
@@ -176,19 +204,33 @@ module Core {
       * When our peer sends us a signal that they'd like to be a client,
       * we should try to start sharing.
       */
-    private startShare_ = () => {
-      // Clear pending timeout, if one exists, so that we are only concerned
-      // with the most recent click to startShare.
-      this.clearTimeout_();
-      // Cancel rtcToNet_ connection if start hasn't completed in 45 seconds.
-      this.startupTimeout_ = setTimeout(() => {
-        log.warn('Timing out rtcToNet_ connection');
-        this.connection_.stopShare();
-        ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
-      }, this.RTC_TO_NET_TIMEOUT);
-      this.connection_.startShare().then(() => {
-        this.clearTimeout_();
+    private startShare_ = () : void => {
+      //this.stopShare().then(() => {
+        // Cancel rtcToNet_ connection if start hasn't completed in 45 seconds.
+        this.startRtcToNetTimeout_ = setTimeout(() => {
+          log.warn('Timing out rtcToNet_ connection');
+          ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          this.stopShare();
+        }, this.RTC_TO_NET_TIMEOUT);
+
+        this.connection_.startShare().then(() => {
+          this.clearTimeout_(this.startRtcToNetTimeout_);
+        }).catch(() => {
+          log.warn('inner startStare failed');
+        //});
+      }).catch(() => {
+        log.warn('START SHARE FAILED BC COULD NOT STOP');
       });
+    }
+
+    public stopShare = () :Promise<void> => {
+      if (this.localSharingWithRemote === SharingState.NONE) {
+        return Promise.resolve<void>();
+      }
+      if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
+        this.clearTimeout_(this.startRtcToNetTimeout_);
+      }
+      return this.connection_.stopShare();
     }
 
     /**
@@ -202,21 +244,21 @@ module Core {
       }
 
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
-      this.startupTimeout_ = setTimeout(() => {
+      this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
       return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
-        this.clearTimeout_();
+        this.clearTimeout_(this.startSocksToRtcTimeout_);
         return endpoints;
       });
     }
 
-    private clearTimeout_ = () => {
-      if (this.startupTimeout_) {
-        clearTimeout(this.startupTimeout_);
-        this.startupTimeout_ = null;
+    private clearTimeout_ = (timeout) => {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
       }
     }
 
@@ -316,10 +358,6 @@ module Core {
         log.info('Stopping socksToRtc_ for logout');
         this.connection_.stopGet();
       }
-    }
-
-    public stopShare = () => {
-      this.connection_.stopShare();
     }
 
   }  // class Core.RemoteInstance
