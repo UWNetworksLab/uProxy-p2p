@@ -26,8 +26,10 @@ module Core {
     // Resolve this promise when rtcToNet is created and therefore not null.
     // Used to help determine when to call handleSignal (which relies
     // on rtcToNet or socksToRtc being not null).
-    // The promise is defined in resetRtcToNetCreated().
-    public rtcToNetCreated :Promise<void> = null;
+    // The promise is reset in resetRtcToNetCreated().
+    public rtcToNetCreated :Promise<void> = new Promise<void>((F, R) => {
+      this.fulfillRtcToNetCreated_ = F;
+    });
     // Helper function used to fulfill rtcToNetCreated.
     private fulfillRtcToNetCreated_ :Function;
     private sharingReseted_ :Promise<void> = null;

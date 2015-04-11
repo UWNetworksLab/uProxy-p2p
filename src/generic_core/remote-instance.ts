@@ -73,6 +73,15 @@ module Core {
     private startRtcToNetTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
+
+    // By default, or when a successful connection is closed, this promise will
+    // reject to indicate the remote connection is not ready to accept signals.
+    // Only if the peer sent an OFFER signal and an rtcToNet instance is created
+    // will this fulfill.
+    private onceConnectionReadyForOffer_ :Promise<void> =
+      Promise.reject(new Error('Ignoring signal from client without ' +
+                               'rtcToNet ready to handle OFFER first.'));
+
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -154,28 +163,31 @@ module Core {
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:uProxy.MessageType,
-                           signalFromRemote:Object) => {
+                           signalFromRemote:Object) :Promise<void> => {
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
-          return;
+          return Promise.resolve<void>();
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
           this.connection_.resetRtcToNetCreated();
+          this.onceConnectionReadyForOffer_ = this.connection_.rtcToNetCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        this.connection_.rtcToNetCreated.then(() => {
+        return this.onceConnectionReadyForOffer_.then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
           });
+        }).catch((e) => {
+          log.info(e + ' Received signal ' + signalFromRemote['type']);
+          return Promise.resolve<void>();
         });
-        return;
 
         /*
         TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
@@ -193,6 +205,7 @@ module Core {
         type: type,
         data: signalFromRemote
       });
+      return Promise.resolve<void>();
     }
 
     /**
@@ -225,6 +238,12 @@ module Core {
       }
       if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
         this.clearTimeout_(this.startRtcToNetTimeout_);
+      } else if (this.localSharingWithRemote === SharingState.SHARING_ACCESS) {
+        // Reset this promise so that handleSignal no longer forwards messages
+        // to the remote connection until we receive another OFFER.
+        this.onceConnectionReadyForOffer_ =
+          Promise.reject(new Error('Ignoring signal from client without ' +
+                                   'rtcToNet ready to handle OFFER first.'));
       }
       return this.connection_.stopShare();
     }
