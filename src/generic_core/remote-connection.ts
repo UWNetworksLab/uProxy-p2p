@@ -127,10 +127,9 @@ module Core {
 
     public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === SharingState.NONE) {
-        log.warn('Cannot stop sharing when not sharing');
+        log.warn('Cannot stop sharing when neither sharing nor trying to share.');
         return Promise.resolve<void>();
       }
-
       this.localSharingWithRemote = SharingState.NONE;
       this.stateRefresh_();
       this.rtcToNet_.close();

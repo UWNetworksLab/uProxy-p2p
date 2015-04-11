@@ -65,9 +65,10 @@ module Core {
     // Number of milliseconds before timing out socksToRtc_.start
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
     // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
-    // trying to connect) by timing out RtcToNet 15 seconds later than
-    // SocksToRtc.
+    // trying to connect) by timing out rtcToNet_.start 15 seconds later than
+    // socksToRtc_.start
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
+    // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     private startSocksToRtcTimeout_ = null;
     private startRtcToNetTimeout_ = null;
 
@@ -164,7 +165,7 @@ module Core {
         // Create a new rtcToNet object everytime there is an OFFER signal
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
           this.connection_.resetRtcToNetCreated();
-          this.stopShare().then(this.startShare_);
+          this.startShare_();
         }
 
           this.connection_.rtcToNetCreated.then(() => {
@@ -179,17 +180,9 @@ module Core {
         TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
         trying to connect. Something like:
         https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
-        */
-/*        else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+
+        } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
           this.stopShare();
-          return;
-        } else {
-          this.connection_.connectionReady.then(() => {
-            this.connection_.handleSignal({
-              type: type,
-              data: signalFromRemote
-            });
-          });
           return;
         }*/
       }
@@ -205,8 +198,11 @@ module Core {
       * we should try to start sharing.
       */
     private startShare_ = () : void => {
-      //this.stopShare().then(() => {
-        // Cancel rtcToNet_ connection if start hasn't completed in 45 seconds.
+      // Stop any existing sharing attempts with this instance.
+      this.stopShare().then(() => {
+        // Set timeout to close rtcToNet_ if start() takes too long.
+        // Calling stopShare() at the end of the timeout makes the
+        // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
           ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
@@ -216,10 +212,8 @@ module Core {
         this.connection_.startShare().then(() => {
           this.clearTimeout_(this.startRtcToNetTimeout_);
         }).catch(() => {
-          log.warn('inner startStare failed');
-        //});
-      }).catch(() => {
-        log.warn('START SHARE FAILED BC COULD NOT STOP');
+          this.clearTimeout_(this.startRtcToNetTimeout_);
+        });
       });
     }
 
