@@ -8,8 +8,8 @@ Polymer({
                          {urls: ['stun:stun4.l.google.com:19302']}],
   displayAdvancedSettings: false,
   logOut: function() {
-    core.logout({name: model.onlineNetwork.name,
-                 userId: model.onlineNetwork.userId}).then(() => {
+    ui.logout({name: model.onlineNetwork.name,
+               userId: model.onlineNetwork.userId}).then(() => {
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
@@ -51,6 +51,5 @@ Polymer({
   ready: function() {
     this.ui = ui;
     this.model = model;
-    this.browser = browser;
   }
 });

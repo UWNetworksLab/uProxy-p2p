@@ -71,7 +71,7 @@
       text-decoration: underline;
       cursor: pointer;
       display: inline-block;
-      margin-top: 50px;
+      margin-top: 30px;
     }
     uproxy-faq-link {
       width: 100%;
@@ -120,12 +120,12 @@
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
       <div class='view' flex>
         <h1 class='sub'>Where can you find your contacts the quickest?</h1>
-        <p>Sign into a network to load your friends</p>
+        <p>uProxy uses social networks to help you set up connections with your friends</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p id='oneTimeConnection'>
-          <a href='#' on-tap='{{ copypaste }}'>Set up a one time connection</a>
+          <a href='#' on-tap='{{ copypaste }}'>Set up a one-time connection</a>
         </p>
         <p>
           We won't share your data or post publicly without your consent

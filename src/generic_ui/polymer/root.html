@@ -16,6 +16,7 @@
 <link rel='import' href='copypaste.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='feedback.html'>
+<link rel='import' href='reconnect.html'>
 <link rel='import' href='troubleshoot.html'>
 <link rel='import' href='browser-elements.html'>
 
@@ -280,6 +281,8 @@
           hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) && !messageMatchesFailure(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
       </div>
     </paper-toast>
+
+    <uproxy-reconnect></uproxy-reconnect>
 
   </template>
 

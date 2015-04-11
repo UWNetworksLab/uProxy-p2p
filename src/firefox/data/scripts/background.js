@@ -15,4 +15,4 @@ if (undefined === ui) {
     ui = initUI();
 }
 
-var browser = 'firefox';
+ui.browser = 'firefox';
