@@ -117,7 +117,7 @@ Polymer({
     return false;
   },
   openTroubleshoot: function() {
-    if (this.messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG)) {
+    if (this.stringMatches(ui.toastMessage, UI.GET_FAILED_MSG)) {
       this.troubleshootTitle = "Unable to get access";
     } else {
       this.troubleshootTitle = "Unable to share access";
@@ -125,7 +125,7 @@ Polymer({
     this.closeToast();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
-  messageMatchesFailure: function(toastMessage, failureMsgConstant) {
+  stringMatches: function(toastMessage, failureMsgConstant) {
     // Determine if the error in the toast is a getter or sharer error
     // by comparing the error string to getter/sharer error constants.
     if (toastMessage) {

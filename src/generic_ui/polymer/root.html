@@ -278,7 +278,7 @@
         text='{{ ui.toastMessage }}' responsiveWidth='320px'
         style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !messageMatchesFailure(ui.toastMessage, UI.GET_FAILED_MSG) && !messageMatchesFailure(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !stringMatches(ui.toastMessage, UI.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
       </div>
     </paper-toast>
 
