@@ -15,11 +15,6 @@ module Core {
     public localGettingFromRemote = GettingState.NONE;
     public localSharingWithRemote = SharingState.NONE;
 
-
-    public rtcToNetCreated :Promise<void> = new Promise<void>((F, R) => { this.fulfillRtc_ = F; });
-    public fulfillRtc_ :Function;
-
-
     private bytesSent_ :number = 0;
     private bytesReceived_ :number = 0;
 
@@ -28,7 +23,14 @@ module Core {
 
     private isUpdatePending_ = false;
 
-    private onceRtcToNetClosedCallback_ :Promise<void> = null;
+    // Resolve this promise when rtcToNet is created and therefore not null.
+    // Used to help determine when to call handleSignal (which relies
+    // on rtcToNet or socksToRtc being not null).
+    // The promise is defined in resetRtcToNetCreated().
+    public rtcToNetCreated :Promise<void> = null;
+    // Helper function used to fulfill rtcToNetCreated.
+    private fulfillRtcToNetCreated_ :Function;
+    private sharingReseted_ :Promise<void> = null;
 
     // TODO: set up a better type for this
     private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
@@ -92,10 +94,10 @@ module Core {
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
-      this.onceRtcToNetClosedCallback_ = this.rtcToNet_.onceClosed.then(() => {
+      this.sharingReseted_ = this.rtcToNet_.onceClosed.then(() => {
         this.localSharingWithRemote = SharingState.NONE;
         this.sendUpdate_(uProxy.Update.STOP_GIVING);
-        //this.rtcToNet_ = null;
+        this.rtcToNet_ = null;
         this.bytesSent_ = 0;
         this.bytesReceived_ = 0;
         this.stateRefresh_();
@@ -104,28 +106,27 @@ module Core {
 
       this.localSharingWithRemote = SharingState.TRYING_TO_SHARE_ACCESS;
       this.stateRefresh_();
-      this.fulfillRtc_();
+      this.fulfillRtcToNetCreated_();
 
       this.rtcToNet_.onceReady.then(() => {
         this.localSharingWithRemote = SharingState.SHARING_ACCESS;
         this.sendUpdate_(uProxy.Update.START_GIVING);
         this.stateRefresh_();
       }).catch((e) => {
-        //this.stopShare();
-        // this.localSharingWithRemote = SharingState.NONE;
-        // this.stateRefresh_();
-        // this.rtcToNet_ = null;
+        this.stopShare();
       });
 
       return this.rtcToNet_.onceReady;
     }
 
     public resetRtcToNetCreated = () :void => {
-      this.rtcToNetCreated = new Promise<void>((F, R) => { this.fulfillRtc_ = F; });
+      this.rtcToNetCreated = new Promise<void>((F, R) => {
+        this.fulfillRtcToNetCreated_ = F;
+      });
     }
 
     public stopShare = () :Promise<void> => {
-      if (!this.rtcToNet_){  //(this.localSharingWithRemote !== SharingState.NONE) {
+      if (this.localSharingWithRemote !== SharingState.NONE) {
         log.warn('Cannot stop sharing when not sharing');
         return new Promise<void>((F, R) => {F();});
       }
@@ -133,7 +134,7 @@ module Core {
       this.localSharingWithRemote = SharingState.NONE;
       this.stateRefresh_();
       this.rtcToNet_.close();
-      return this.onceRtcToNetClosedCallback_;
+      return this.sharingReseted_;
     }
 
     public startGet = () :Promise<Net.Endpoint> => {
