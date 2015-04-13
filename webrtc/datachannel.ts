@@ -116,6 +116,7 @@ export class DataChannelClass implements DataChannel {
     this.fulfillDrained_ = F;
   });
 
+  // True between onceOpened and onceClosed
   private opennedSuccessfully_ :boolean;
   private rejectOpened_  :(e:Error) => void;
 
@@ -312,6 +313,11 @@ export class DataChannelClass implements DataChannel {
 
       if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
         this.setOverflow_(true);
+        if (!this.opennedSuccessfully_) {
+          // The remote peer has closed the channel, so we should stop
+          // trying to drain the send buffer.
+          return;
+        }
         setTimeout(this.conjestionControlSendHandler, 20);
       } else {
         if (this.toPeerDataQueue_.getLength() === 0) {
@@ -329,12 +335,13 @@ export class DataChannelClass implements DataChannel {
     });
   }
 
+  // Closes asynchronously, after waiting for all outgoing messages.
   public close = () : Promise<void> => {
     log.debug('close requested (%1 messages and %2 bytes to send)',
-              this.toPeerDataQueue_.getLength(),
-              this.lastBrowserBufferedAmount_);
+        this.toPeerDataQueue_.getLength(),
+        this.lastBrowserBufferedAmount_);
 
-    var javascriptBufferDrained = new Promise((F, R) => {
+    var onceJavascriptBufferDrained = new Promise((F, R) => {
       if (this.getJavascriptBufferedAmount() > 0) {
         this.setOverflowListener((overflow:boolean) => {
           if (!overflow) {
@@ -347,7 +354,7 @@ export class DataChannelClass implements DataChannel {
       this.draining_ = true;
     });
 
-    javascriptBufferDrained.then(this.waitForBrowserToDrain_).then(
+    onceJavascriptBufferDrained.then(this.waitForBrowserToDrain_).then(
       this.fulfillDrained_);
 
     return this.onceClosed;
@@ -355,7 +362,8 @@ export class DataChannelClass implements DataChannel {
 
   private waitForBrowserToDrain_ = () : Promise<void> => {
     var drained :() => void;
-    var ret :Promise<void> = new Promise<void>((F, R) => {
+    var onceBrowserBufferDrained :Promise<void> =
+        new Promise<void>((F, R) => {
       drained = F;
     });
 
@@ -373,7 +381,7 @@ export class DataChannelClass implements DataChannel {
     };
 
     loop();
-    return ret;
+    return onceBrowserBufferDrained;
   }
 
   public getBrowserBufferedAmount = () : Promise<number> => {
