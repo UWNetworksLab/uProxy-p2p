@@ -35,8 +35,8 @@
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^21.0.0",
-    "uproxy-networking": "^7.0.0"
+    "uproxy-lib": "^23.0.0",
+    "uproxy-networking": "^8.0.0"
   },
   "peerDependencies": {
     "freedom": "^0.6.18"

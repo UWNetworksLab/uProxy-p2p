@@ -9,8 +9,16 @@ TaskManager = require 'uproxy-lib/build/tools/taskmanager'
 taskManager = new TaskManager.Manager();
 
 taskManager.add 'base', [
+  'copy:dev'
+  'version_file'
+  #'ts:devInModuleEnv'
+  'ts:devInCoreEnv'
+]
+
+#
+taskManager.add 'version_file', [
   'gitinfo'
-#  'ts'
+  'string-replace:version'
 ]
 
 # --- Build tasks ---
@@ -152,8 +160,6 @@ freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
 uproxyNetworkingPath = path.dirname(require.resolve('uproxy-networking/package.json'))
 
-console.log(uproxyNetworkingPath);
-
 #ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
 # TODO(ldixon): update utransformers package to uproxy-obfuscators
 # uproxyObfuscatorsPath = path.dirname(require.resolve('uproxy-obfuscators/package.json'))
@@ -280,8 +286,19 @@ module.exports = (grunt) ->
           {
               nonull: true,
               expand: true,
-              cwd: path.join(uproxyLibPath, 'build/third_party'),
+              cwd: path.join(uproxyLibPath, 'third_party'),
               src: ['freedom-typings/**/*', 'promise-polyfill.js'],
+              dest: thirdPartyBuildPath
+          },
+          # Use the third_party definitions from uproxy-networking. Copied to
+          # the same location relative to their compiled location in uproxy-
+          # networking so they have the same relative path to the created
+          # `.d.ts` files from |build/dev|.
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(uproxyNetworkingPath, 'build/third_party'),
+              src: ['**/*', '!tsd.*'],
               dest: thirdPartyBuildPath
           },
           #
@@ -289,11 +306,39 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: path.join(uproxyNetworkingPath, 'build/dist'),
-              src: ['uproxy-networking/**/*'],
-              dest: thirdPartyBuildPath
+              src: ['**/*'],
+              dest: path.join(thirdPartyBuildPath, 'uproxy-networking/'),
           },
         ]
 
+      # Copy releveant non-typescript src files to dev build.
+      dev:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/',
+              src: ['**/*'],
+              dest: devBuildPath,
+              onlyIf: 'modified'
+          }
+        ]
+
+      # Copy releveant files for distribution.
+      dist:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              cwd: devBuildPath,
+              src: ['**/*',
+                    '!**/*.spec.js',
+                    '!**/*.spec.*.js',
+                    '!samples/**/*',],
+              dest: 'build/dist/',
+              onlyIf: 'modified'
+          }
+        ]
 
       # Copy compiled generic Polymer to Chrome so it can be vulcanized.
       generic_ui_to_chrome:
@@ -517,8 +562,8 @@ module.exports = (grunt) ->
     'string-replace':
       version:
         files: [{
-          src: 'build/compile-src/generic/version-template.js'
-          dest: 'build/compile-src/generic/version.js'
+          src: 'build/dev/uproxy/generic/version-template.js'
+          dest: 'build/dev/uproxy/generic/version.js'
         }]
         options:
           replacements: [{
@@ -526,18 +571,51 @@ module.exports = (grunt) ->
             replacement: JSON.stringify
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
-              'uproxy-lib': '<%= pkg.lib.version %>'
-              'uproxy-networking': '<%= pkg.net.version %>'
-              freedom: '<%= pkg.freedom.version %>'
-              'freedom-for-chrome': '<%= pkg.freedomchrome.version %>'
-              'freedom-for-firefox': '<%= pkg.freedomfirefox.version %>'
-              'freedom-social-xmpp': '<%= pkg.freedomxmpp.version %>'
-              'freedom-social-firebase': '<%= pkg.freedomfirebase.version %>'
+              'uproxy-lib': '<%= pkgs.lib.version %>'
+              'uproxy-networking': '<%= pkgs.net.version %>'
+              freedom: '<%= pkgs.freedom.version %>'
+              'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
+              'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
+              'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
+              'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
           }]
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
-    ts: {}
+
+    # Typescript compilation rules
+    ts:
+      # Compile all non-sample typescript code into the development build
+      # directory.
+      devInModuleEnv:
+        src: [
+          '!' + devBuildPath + '/**/*.d.ts'
+          '!' + devBuildPath + '/**/*.core-env.ts'
+          '!' + devBuildPath + '/**/*.core-env.spec.ts'
+        ]
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: true
+          module: 'commonjs'
+          fast: 'always'
+
+      devInCoreEnv:
+        src: [
+          devBuildPath + '/chrome/app/**/*.ts'
+          devBuildPath + '/**/*.core-env.spec.ts'
+          devBuildPath + '/**/*.core-env.ts'
+        ]
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: true
+          module: 'commonjs'
+          fast: 'always'
 
     #-------------------------------------------------------------------------
     jasmine:

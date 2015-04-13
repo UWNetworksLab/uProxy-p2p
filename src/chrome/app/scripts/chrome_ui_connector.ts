@@ -1,16 +1,21 @@
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../../third_party/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/chrome/chrome-app.d.ts'/>
+
+import freedom_types = require('freedom.types');
+import uproxy_types = require('../../../uproxy.types');
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var installedFreedomHooks = [];
-declare var uProxyAppChannel :OnAndEmit<any,any>;
+var installedFreedomHooks :string[];
+
+declare var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
-  private onCredentials_ :(Object) => void;
+  private onCredentials_ :(credentials:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
 
   // Launch a popup instructing the user to install the extension.
@@ -107,7 +112,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?:any) => {
+  public sendToUI = (type :uProxy.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
@@ -115,8 +120,9 @@ class ChromeUIConnector {
     });
   }
 
-  public setOnCredentials = (onCredentials :(Object) => void) => {
+  public setOnCredentials = (onCredentials:(credentials:Object) => void) => {
     this.onCredentials_ = onCredentials;
   }
 }
 
+export = ChromeUIConnector;
