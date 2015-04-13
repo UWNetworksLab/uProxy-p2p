@@ -6,6 +6,8 @@
    * the Core and the UI.
    */
 
+/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+
   // TODO: Move the notifications somewhere better.
   // /// <reference path='interfaces/ui.d.ts' />
   // /// <reference path='interfaces/persistent.d.ts' />
@@ -208,7 +210,7 @@ import net = require('../../../third_party/uproxy-networking/net/net.types');
     // changeOption(option :string) : void;
 
     login(network :string) : Promise<void>;
-    logout(networkInfo :NetworkInfo) : Promise<void>;
+    logout(networkInfo :SocialNetworkInfo) : Promise<void>;
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
@@ -358,7 +360,7 @@ export module ChromeMessage {
 }
 
 export interface UserPath {
-  network :NetworkInfo;
+  network :SocialNetworkInfo;
   userId :string;
 }
 
@@ -437,7 +439,7 @@ export interface UserProfileMessage {
  * UI-specific Instance.
  * TODO: Maybe turn this into an actual class. We'll see.
  */
-export interface Instance {
+export interface UiInstance {
   instanceId             :string;
   description            :string;
   localGettingFromRemote :GettingState;
@@ -476,4 +478,43 @@ export interface GlobalSettings {
   hasSeenWelcome   :boolean;
   allowNonUnicast  :boolean;
   mode             :Mode;
+}
+
+
+// TODO: Maybe wrap these in a module for everyting to do with Instances that
+// needs to be accessible both in core and UI.
+
+export interface SocialNetworkInfo {
+  name :string;
+  userId :string;
+}
+
+/**
+ * LocalPeerId can contain the full instance paths so that we can easily
+ * look up instance objects.
+ */
+export interface LocalPeerId {
+  clientInstancePath :InstancePath;
+  serverInstancePath :InstancePath;
+}
+
+/**
+ * Base interface for all Instances.
+ */
+export interface Instance {
+  instanceId  :string;
+  keyHash     :string;
+  status      ?:string; // Status on social network e.g. online or offline.
+  notify      ?:boolean;   // TODO: replace with better notications
+}
+
+/**
+ * Instance Handshakes are sent between uProxy installations to notify each
+ * other about existence.
+ */
+export interface InstanceHandshake {
+  instanceId  :string;
+  keyHash     :string;
+  consent     :ConsentWireState;
+  description ?:string;
 }
