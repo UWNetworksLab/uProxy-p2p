@@ -172,6 +172,8 @@ module Core {
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+          // TODO: Move the logic for resetting the rtcToNetCreated promise inside
+          // remote-connection.ts.
           this.connection_.resetRtcToNetCreated();
           this.onceSharerReadyForOffer_ = this.connection_.rtcToNetCreated;
           this.startShare_();
