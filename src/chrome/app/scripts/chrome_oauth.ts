@@ -2,7 +2,7 @@
  * Chrome oauth provider
  **/
 
-import uproxy_types = require('../../../uproxy.types');
+import uproxy_types = require('../../../interfaces/uproxy.types');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
 // TODO: review oauth freedom API design: having to depend on global vars is

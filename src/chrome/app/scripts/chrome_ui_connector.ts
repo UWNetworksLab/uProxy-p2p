@@ -1,14 +1,14 @@
 /// <reference path='../../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../../third_party/chrome/chrome.d.ts'/>
-/// <reference path='../../../../../third_party/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 import freedom_types = require('freedom.types');
-import uproxy_types = require('../../../uproxy.types');
+import uproxy_types = require('../../../interfaces/uproxy.types');
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var installedFreedomHooks :string[];
+var installedFreedomHooks :number[];
 
 declare var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 
@@ -37,7 +37,7 @@ class ChromeUIConnector {
   private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
-        type: uProxy.Update.LAUNCH_UPROXY,
+        type: uproxy_types.Update.LAUNCH_UPROXY,
         data: ''
     });
   }
@@ -67,7 +67,7 @@ class ChromeUIConnector {
     // Because there is no callback when you call runtime.connect and it
     // sucessfully connects, the extension depends on a message received from
     // this app, so it knows the connection was successful.
-    this.extPort_.postMessage(ChromeMessage.ACK);
+    this.extPort_.postMessage(uproxy_types.ChromeMessage.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
 
     // Once the extension is connected, we know that installation of uProxy
@@ -84,19 +84,19 @@ class ChromeUIConnector {
 
   // Receive a message from the extension.
   // This usually installs freedom handlers.
-  private onExtMsg_ = (msg :uProxy.Payload) => {
+  private onExtMsg_ = (msg :uproxy_types.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
-    // Pass 'emit's from the UI to Core. These are uProxy.Commands.
+    // Pass 'emit's from the UI to Core. These are uproxy_types.Commands.
     if ('emit' == msg.cmd) {
-      if (msg.type == uProxy.Command.SEND_CREDENTIALS) {
+      if (msg.type == uproxy_types.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
       }
-      if (msg.type == uProxy.Command.RESTART) {
+      if (msg.type == uproxy_types.Command.RESTART) {
         chrome.runtime.reload();
       }
       uProxyAppChannel.emit(msgType,
-                            <uProxy.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
+                            <uproxy_types.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
@@ -112,7 +112,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data?:Object) => {
+  public sendToUI = (type :uproxy_types.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,

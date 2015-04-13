@@ -8,7 +8,7 @@
 /// <reference path='../../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
-import uproxy_types = require('../../../uproxy.types');
+import uproxy_types = require('../../../interfaces/uproxy.types');
 import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');
@@ -34,7 +34,8 @@ freedom('scripts/freedom-module.json', {
 // Reply to pings from the uproxy website that are checking if the
 // application is installed.
 chrome.runtime.onMessageExternal.addListener(
-    (request, sender, sendResponse) => {
+    (request:Object, sender:Object,
+     sendResponse:(r:{message:string}) => void) => {
         if (request) {
           sendResponse({message: "Application installed."});
         }

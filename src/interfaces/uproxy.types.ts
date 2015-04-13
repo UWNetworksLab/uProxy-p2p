@@ -11,6 +11,8 @@
 // /// <reference path='interfaces/persistent.d.ts' />
 // /// <reference path='networking-typings/communications.d.ts' />
 
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+
 // --- Communications ---
 
 // Commands are sent from the UI to the Core due to a user interaction.
@@ -35,7 +37,7 @@ export enum Command {
   STOP_PROXYING_COPYPASTE_SHARE,
   COPYPASTE_SIGNALLING_MESSAGE,
 
-  // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
+  // Payload should be a HandleManualNetworkInboundMessageCommand.
   HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
   SEND_CREDENTIALS,
   UPDATE_GLOBAL_SETTINGS,
@@ -60,7 +62,7 @@ export enum Update {
   STOP_GETTING_FROM_FRIEND,
   START_GIVING_TO_FRIEND,
   STOP_GIVING_TO_FRIEND,
-  // Payload should be a uProxy.Message.
+  // Payload should be a Message.
   MANUAL_NETWORK_OUTBOUND_MESSAGE,
   // TODO: "Get credentials" is a command, not an "update". Consider
   // renaming the "Update" enum.
@@ -83,7 +85,7 @@ export enum Update {
 // TODO: rename to PeerMessageType & PeerMessage.
 // TODO: consider every message having every field, and that MessageType is
 // no longer needed. This would use fewer larger messages.
-export enum MessageType {
+export enum PeerMessageType {
   INSTANCE = 3000,  // Instance messages notify the user about instances.
   // These are for the signalling-channel. The payloads are arbitrary, and
   // could be specified from uProxy, or could also be SDP headers forwarded
@@ -95,8 +97,8 @@ export enum MessageType {
 }
 
 // Messages to the peer form the boundary for JSON parse / stringify.
-export interface Message {
-  type :MessageType;
+export interface PeerMessage {
+  type :PeerMessageType;
   // TODO: Add a comment to explain the types that data can take and their
   // relationship to MessageType.
   data :Object;
@@ -135,7 +137,7 @@ export enum ConsentUserAction {
  */
 export interface ConsentCommand {
   path    :UserPath;
-  action  :uProxy.ConsentUserAction;
+  action  :ConsentUserAction;
 }
 
 // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -144,7 +146,7 @@ export interface ConsentCommand {
 // manual network the client ID uniquely identifies the user.
 export interface HandleManualNetworkInboundMessageCommand {
   senderClientId  :string;
-  message         :uProxy.Message;
+  message         :PeerMessage;
 }
 
 export interface UserFeedback {
@@ -177,7 +179,7 @@ export interface CoreAPI {
    * The promise fulfills with an endpoint that can be used to proxy through
    * if sucessfully started or rejects otherwise
    */
-  startCopyPasteGet() :Promise<Net.Endpoint>;
+  startCopyPasteGet() :Promise<net.Endpoint>;
 
   /*
    * The promise fulfills when the connection is fully closed and state has
@@ -193,13 +195,13 @@ export interface CoreAPI {
    */
   stopCopyPasteShare() :Promise<void>;
 
-  sendCopyPasteSignal(signal :uProxy.Message) :void;
+  sendCopyPasteSignal(signal :PeerMessage) :void;
 
   // Using peer as a proxy.
-  start(instancePath :InstancePath) : Promise<Net.Endpoint>;
+  start(instancePath :InstancePath) : Promise<net.Endpoint>;
   stop () : void;
 
-  updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
+  updateGlobalSettings(newSettings :GlobalSettings) : void;
   // TODO: rename toggle-option and/or replace with real configuration system.
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
