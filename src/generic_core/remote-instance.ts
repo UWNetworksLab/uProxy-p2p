@@ -78,6 +78,9 @@ module Core {
     // reject to indicate the remote connection is not ready to accept signals.
     // Only if the peer sent an OFFER signal and an rtcToNet instance is created
     // will this fulfill.
+    // TODO: to make it clearer what this promise is waiting for, change to
+    // something like:
+    // Promise.all([this.receivedOffer_, this.connection_.onceRtcToNetCreated])
     private onceSharerReadyForOffer_ :Promise<void>;
 
     /**
@@ -172,10 +175,10 @@ module Core {
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          // TODO: Move the logic for resetting the rtcToNetCreated promise inside
+          // TODO: Move the logic for resetting the onceRtcToNetCreated promise inside
           // remote-connection.ts.
           this.connection_.resetRtcToNetCreated();
-          this.onceSharerReadyForOffer_ = this.connection_.rtcToNetCreated;
+          this.onceSharerReadyForOffer_ = this.connection_.onceRtcToNetCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle

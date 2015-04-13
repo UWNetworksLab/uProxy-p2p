@@ -27,8 +27,8 @@ module Core {
     // Used to help determine when to call handleSignal (which relies
     // on rtcToNet or socksToRtc being not null).
     // The promise is reset in resetRtcToNetCreated().
-    public rtcToNetCreated :Promise<void> = null;
-    // Helper function used to fulfill rtcToNetCreated.
+    public onceRtcToNetCreated :Promise<void> = null;
+    // Helper function used to fulfill onceRtcToNetCreated.
     private fulfillRtcToNetCreated_ :Function;
     private sharingReset_ :Promise<void> = null;
 
@@ -125,7 +125,7 @@ module Core {
     // for a new rtcToNet_ instance to be created. Otherwise, CANDIDATE signals can be
     // dropped or handled by old rtcToNet_ instances.
     public resetRtcToNetCreated = () :void => {
-      this.rtcToNetCreated = new Promise<void>((F, R) => {
+      this.onceRtcToNetCreated = new Promise<void>((F, R) => {
         this.fulfillRtcToNetCreated_ = F;
       });
     }
