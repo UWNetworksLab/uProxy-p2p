@@ -19,12 +19,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.fire('core-signal', {
-        name: 'show-toast',
-        data: {
-          text: this.user.name + ' is offline'
-        }
-      });
+      this.ui.toastMessage = this.user.name + ' is offline';
       return;
     }
 

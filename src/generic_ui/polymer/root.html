@@ -151,22 +151,12 @@
       #toastHelpLink {
         color: #47B5AA;
       }
-      core-icon[icon="launch"] {
-        margin-bottom: 6px;
-        height: 18px;
-        width: 18px;
-        color: #47B5AA;
-        -webkit-transition: all 0.23s !important;
-        -moz-transition: all 0.23s !important;
-        transition: all 0.23s !important;
-      }
       .core-overlay-backdrop {
         z-index: 1001;
       }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
-    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 

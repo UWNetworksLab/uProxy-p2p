@@ -99,9 +99,6 @@ Polymer({
     }
   },
   /* All functions below help manage paper-toast behaviour. */
-  showToast: function(e, data) {
-    this.ui.toastMessage = data.text;
-  },
   closeToast: function() {
     this.ui.toastMessage = null;
   },
