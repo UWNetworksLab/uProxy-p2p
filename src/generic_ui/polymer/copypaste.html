@@ -22,12 +22,13 @@
     paper-button {
       background: #009688;  /* dark green */
       color: white;
+      margin-bottom: 24px;
     }
     paper-button.stop {
       background: rgb(221, 221, 221);
       color: rgb(112, 112, 112);
     }
-    #getting, #sharing {
+    #getting, #sharing, #nothing {
       margin: 24px;
     }
     a {
@@ -45,6 +46,7 @@
     <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
       <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a </span>
       <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>Request a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState) }}'>Start a </span>
       <span>one-time connection</span>
     </uproxy-app-bar>
 
