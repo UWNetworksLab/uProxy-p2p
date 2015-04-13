@@ -64,7 +64,7 @@ module Firewall {
 
   export function isPredefinedOnObject(s :string) : boolean {
     // Returns whether 's' is predefined on Object, which is just a little fishy.
-    var tester = {};
+    var tester :any = {};
     return (typeof(tester[s]) != 'undefined');
   }
 
@@ -95,7 +95,7 @@ module Firewall {
     'lastSeen' : '?number'
   };
 
-  function checkSchema(object, schema) : boolean {
+  function checkSchema(object :any, schema :any) : boolean {
     if (object === null || typeof object !== 'object') {
       return false;
     }

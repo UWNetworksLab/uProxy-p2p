@@ -17,7 +17,7 @@ class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public handleSignalFromPeer = () => {
   }
 
-  public on = (name :string, fn) => {
+  public on = (name :string, fn :(...args :Object[]) => void) => {
     this.events[name] = fn;
   }
 }

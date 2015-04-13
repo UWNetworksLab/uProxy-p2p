@@ -11,7 +11,7 @@ class MockSocial {
 }
 
 // Valid message that won't have side effects on network/user/instance objects.
-var VALID_MESSAGE = {
+var VALID_MESSAGE :uProxy.Message = {
   type: uProxy.MessageType.INSTANCE_REQUEST,
   data: null
 };
@@ -80,11 +80,11 @@ describe('Social.FreedomNetwork', () => {
     it('can log in', (done) => {
       jasmine.clock().install();
       var storage = new Core.Storage;
-      var fulfillFunc;
+      var fulfillFunc :Function;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
 
-      var fulfillStorage;
+      var fulfillStorage :Function;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
       var restoreFunc = network.restoreFromStorage.bind(network);
       spyOn(network, 'restoreFromStorage').and.callFake(() => {

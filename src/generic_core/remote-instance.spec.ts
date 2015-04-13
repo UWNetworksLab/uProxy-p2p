@@ -50,13 +50,11 @@ describe('Core.RemoteInstance', () => {
   });
   describe('storage', () => {
     var realStorage = new Core.Storage;
-    var saved;
-    var instance0;
+    var instance0 :Core.RemoteInstance;
 
    it('fresh instance has no state', (done) => {
-      storage.save = function(key, value) {
-        saved = realStorage.save(key, value);
-        return saved;
+      storage.save = function(key :string, value :any) {
+        return realStorage.save(key, value);
       };
       instance0 = new Core.RemoteInstance(user, 'instanceId');
       instance0.onceLoaded.then(() => {
@@ -130,7 +128,7 @@ describe('Core.RemoteInstance', () => {
     // https://github.com/uProxy/uproxy-lib/blob/dev/src/webrtc/peerconnection.spec.ts
     // )
     var fakeSocksToRtc = {
-      handlers: {},
+      handlers: <{[name :string] :Function}>{},
       'start':
           (endpoint:Net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
          return Promise.resolve(endpoint);

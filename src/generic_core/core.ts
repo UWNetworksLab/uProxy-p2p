@@ -25,7 +25,7 @@ var loggingProvider = freedom['loggingprovider']();
 loggingProvider.setConsoleFilter(['*:I']);
 loggingProvider.setBufferedLogFilter(['*:D']);
 
-declare var UPROXY_VERSION;
+declare var UPROXY_VERSION :Object;
 
 var log :Logging.Log = new Logging.Log('core');
 log.info('Loading core', UPROXY_VERSION);
@@ -274,16 +274,12 @@ class uProxyCore implements uProxy.CoreAPI {
     // store.saveMeToStorage();
   }
 
-  // onUpdate not needed in the real core.
-  onUpdate = (update, handler) => {}
-
   /**
    * Updates user's description of their current device. This applies to all
    * local instances for every network the user is currently logged onto. Those
    * local instances will then propogate their description update to all
    * instances.
    */
-
   public updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
     newSettings.version = uProxy.STORAGE_VERSION;
     storage.save<Core.GlobalSettings>('globalSettings', newSettings).catch((e) => {
@@ -505,7 +501,7 @@ class uProxyCore implements uProxy.CoreAPI {
         logs: logs
       };
 
-      var doAttempts = (error?:Error) => {
+      var doAttempts = (error?:Error) :Promise<void> => {
         if (attempts < maxAttempts) {
           // we want to keep trying this until we either run out of urls to
           // send to or one of the requests succeeds.  We set this up by
@@ -530,7 +526,7 @@ class uProxyCore implements uProxy.CoreAPI {
     if (this.natType_ === '') {
       // Function that returns a promise which fulfills
       // in a given time.
-      var countdown = (time) : Promise<void> => {
+      var countdown = (time :number) : Promise<void> => {
         return new Promise<void>((F, R) => {
           setTimeout(F, time);
         });
@@ -570,7 +566,7 @@ class uProxyCore implements uProxy.CoreAPI {
   }
 
   public getLogs = () : Promise<string> => {
-    return loggingProvider.getLogs().then((rawLogs) => {
+    return loggingProvider.getLogs().then((rawLogs :string[]) => {
         var formattedLogsWithVersionInfo =
             'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n\n';
         formattedLogsWithVersionInfo += this.formatLogs_(rawLogs);

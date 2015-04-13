@@ -54,7 +54,6 @@ module Core {
     // TODO: should probably either return something or throw errors
     public handleSignal = (message :uProxy.Message) => {
       var target :any = null; //this will either be rtcToNet_ or socksToRtc_
-      var msg;
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === message.type) {
         target = this.rtcToNet_;
       } else if (uProxy.MessageType.SIGNAL_FROM_SERVER_PEER === message.type) {
@@ -72,9 +71,7 @@ module Core {
         return;
       }
 
-      msg = <WebRtc.SignallingMessage> message.data;
-
-      target.handleSignalFromPeer(msg);
+      target.handleSignalFromPeer(message.data);
     };
 
     public startShare = () :Promise<void> => {

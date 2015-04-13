@@ -444,8 +444,8 @@ module.exports = (grunt) ->
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
 
       # Core uProxy without any platform dependencies
-      generic_core: Rule.typescriptSrcLenient 'compile-src/generic_core'
-      generic_core_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_core'
+      generic_core: Rule.typescriptSrc 'compile-src/generic_core'
+      generic_core_specs: Rule.typescriptSpecDecl 'compile-src/generic_core'
 
       logging: Rule.typescriptSrc 'compile-src/logging'
       webrtc: Rule.typescriptSrc 'compile-src/webrtc'
