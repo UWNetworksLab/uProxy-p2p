@@ -37,11 +37,11 @@ export interface DataChannel {
   // Guarenteed to be invarient for the life of the data channel.
   getLabel : () => string;
 
-  // Promise for when the data channel has been openned.
+  // Promise for when the data channel has been opened.
   onceOpened : Promise<void>;
 
   // Promise for when the data channel has been closed (only fulfilled after
-  // the data channel has been openned).
+  // the data channel has been opened).
   // NOTE: There exists a bug in Chrome prior to version 37 which prevents
   //       this from fulfilling on the remote peer.
   onceClosed : Promise<void>;
@@ -117,7 +117,7 @@ export class DataChannelClass implements DataChannel {
   });
 
   // True between onceOpened and onceClosed
-  private opennedSuccessfully_ :boolean;
+  private isOpen_ :boolean;
   private rejectOpened_  :(e:Error) => void;
 
   private overflow_ :boolean = false;
@@ -158,17 +158,17 @@ export class DataChannelClass implements DataChannel {
       log.error('rtcDataChannel_.onerror: ' + e.toString);
     });
     this.onceOpened.then(() => {
-      this.opennedSuccessfully_ = true;
+      this.isOpen_ = true;
       this.conjestionControlSendHandler();
     });
     this.onceClosed.then(() => {
-        if(!this.opennedSuccessfully_) {
+        if(!this.isOpen_) {
           // Make sure to reject the onceOpened promise if state went from
           // |connecting| to |close|.
           this.rejectOpened_(new Error(
               'Failed to open; closed while trying to open.'));
         }
-        this.opennedSuccessfully_ = false;
+        this.isOpen_ = false;
       });
     this.onceDrained_.then(() => {
       log.debug('all messages sent, closing');
@@ -313,7 +313,7 @@ export class DataChannelClass implements DataChannel {
 
       if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
         this.setOverflow_(true);
-        if (!this.opennedSuccessfully_) {
+        if (!this.isOpen_) {
           // The remote peer has closed the channel, so we should stop
           // trying to drain the send buffer.
           return;
@@ -371,7 +371,7 @@ export class DataChannelClass implements DataChannel {
       this.getBrowserBufferedAmount().then((amount:number) => {
         if (amount === 0) {
           drained();
-        } else if (this.opennedSuccessfully_) {
+        } else if (this.isOpen_) {
           setTimeout(loop, 20);
         } else {
           log.warn('Data channel was closed remotely with %1 bytes buffered',
@@ -405,8 +405,7 @@ export class DataChannelClass implements DataChannel {
   }
 
   public toString = () : string => {
-    var s = this.getLabel() + ': opennedSuccessfully_=' +
-      this.opennedSuccessfully_;
+    var s = this.getLabel() + ': isOpen_=' + this.isOpen_;
     return s;
   }
 }  // class DataChannelClass
