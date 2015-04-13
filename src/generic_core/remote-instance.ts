@@ -78,9 +78,7 @@ module Core {
     // reject to indicate the remote connection is not ready to accept signals.
     // Only if the peer sent an OFFER signal and an rtcToNet instance is created
     // will this fulfill.
-    private onceConnectionReadyForOffer_ :Promise<void> =
-      Promise.reject(new Error('Ignoring signal from client without ' +
-                               'rtcToNet ready to handle OFFER first.'));
+    private onceSharerReadyForOffer_ :Promise<void>;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -95,6 +93,7 @@ module Core {
         public user :Core.User,
         public instanceId :string) {
       this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
+      this.setSharerToNotReady_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
@@ -125,7 +124,7 @@ module Core {
           ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
         case uProxy.Update.STOP_GETTING:
-          this.clearTimeout_(this.startSocksToRtcTimeout_);
+          clearTimeout(this.startSocksToRtcTimeout_);
           ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
@@ -168,18 +167,18 @@ module Core {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
-          return Promise.resolve<void>();
+          return;
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
           this.connection_.resetRtcToNetCreated();
-          this.onceConnectionReadyForOffer_ = this.connection_.rtcToNetCreated;
+          this.onceSharerReadyForOffer_ = this.connection_.rtcToNetCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        return this.onceConnectionReadyForOffer_.then(() => {
+        return this.onceSharerReadyForOffer_.then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
@@ -214,8 +213,16 @@ module Core {
       * we should try to start sharing.
       */
     private startShare_ = () : void => {
-      // Stop any existing sharing attempts with this instance.
-      this.stopShare().then(() => {
+      var sharingStopped :Promise<void>;
+      if (this.localSharingWithRemote === SharingState.NONE) {
+        // Stop any existing sharing attempts with this instance.
+        sharingStopped = Promise.resolve<void>();
+      } else {
+        sharingStopped = this.stopShare();
+      }
+
+      // Start sharing only after an existing connection is stopped.
+      sharingStopped.then(() => {
         // Set timeout to close rtcToNet_ if start() takes too long.
         // Calling stopShare() at the end of the timeout makes the
         // assumption that our peer failed to start getting access.
@@ -226,27 +233,36 @@ module Core {
         }, this.RTC_TO_NET_TIMEOUT);
 
         this.connection_.startShare().then(() => {
-          this.clearTimeout_(this.startRtcToNetTimeout_);
-        }).catch(() => {
-          this.clearTimeout_(this.startRtcToNetTimeout_);
+          clearTimeout(this.startRtcToNetTimeout_);
+        }, () => {
+          log.warn('Could not start sharing.');
+          clearTimeout(this.startRtcToNetTimeout_);
         });
       });
     }
 
     public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === SharingState.NONE) {
+        log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
       }
+
       if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
-        this.clearTimeout_(this.startRtcToNetTimeout_);
+        clearTimeout(this.startRtcToNetTimeout_);
       } else if (this.localSharingWithRemote === SharingState.SHARING_ACCESS) {
-        // Reset this promise so that handleSignal no longer forwards messages
-        // to the remote connection until we receive another OFFER.
-        this.onceConnectionReadyForOffer_ =
-          Promise.reject(new Error('Ignoring signal from client without ' +
-                                   'rtcToNet ready to handle OFFER first.'));
+        // Stop forwarding messages to the remote connection until we receive
+        // another OFFER.
+        this.setSharerToNotReady_();
       }
       return this.connection_.stopShare();
+    }
+
+    // When a sharer remote-instance is first created, or after a sharer closes
+    // a connection, we set that they are not ready to handle an incoming offer.
+    private setSharerToNotReady_ = () => {
+      this.onceSharerReadyForOffer_ =
+          Promise.reject(new Error('Ignoring signal from client without ' +
+                                   'rtcToNet ready to handle OFFER first.'));
     }
 
     /**
@@ -266,16 +282,9 @@ module Core {
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
       return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
-        this.clearTimeout_(this.startSocksToRtcTimeout_);
+        clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });
-    }
-
-    private clearTimeout_ = (timeout) => {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
-      }
     }
 
     /**
