@@ -136,6 +136,8 @@ module UI {
     public gettingStatus :string = null;
     public sharingStatus :string = null;
 
+    // TODO: refactor this to make fields on copy paste state
+    // or something like that.
     public copyPasteGettingState :GettingState = GettingState.NONE;
     public copyPasteSharingState :SharingState = SharingState.NONE;
     public copyPasteBytesSent :number = 0;
@@ -641,20 +643,20 @@ module UI {
         this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
       }
 
-     for (var i = 0; i < payload.offeringInstances.length; i++) {
-       if (payload.offeringInstances[i].localGettingFromRemote ===
-           GettingState.GETTING_ACCESS) {
-         this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
-         user.isSharingWithMe = true;
-         this.updateGettingStatusBar_();
-         break;
-       }
-     }
+      for (var i = 0; i < payload.offeringInstances.length; i++) {
+        if (payload.offeringInstances[i].localGettingFromRemote ===
+            GettingState.GETTING_ACCESS) {
+          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+          user.isSharingWithMe = true;
+          this.updateGettingStatusBar_();
+          break;
+        }
+      }
 
-     for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
+      for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
         this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
         user.isGettingFromMe = true;
-     }
+      }
 
       var newUserCategories = user.getCategories();
       // Update the user's category in both get and share tabs.

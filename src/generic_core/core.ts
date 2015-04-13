@@ -78,7 +78,7 @@ class UIConnector implements uProxy.UIAPI {
             globalSettings: core.globalSettings,
             onlineNetwork: Social.getOnlineNetwork(),
             copyPasteState: copyPasteConnection.currentStateForUI(),
-            copyPastePendingEndpoint: copyPasteConnection.activeEndpoints
+            copyPastePendingEndpoint: copyPasteConnection.activeEndpoint
           });
     });
   }
@@ -112,13 +112,14 @@ class uProxyCore implements uProxy.CoreAPI {
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
-  public globalSettings :Core.GlobalSettings
-      = {description: '',
-         stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
-         hasSeenSharingEnabledScreen: false,
-         hasSeenWelcome: false,
-         mode: uProxy.Mode.GET,
-         splashState: 0};
+  public globalSettings :Core.GlobalSettings = {
+     description: '',
+     stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
+     hasSeenSharingEnabledScreen: false,
+     hasSeenWelcome: false,
+     mode: uProxy.Mode.GET,
+     splashState: 0
+  };
   public loadGlobalSettings :Promise<void> = null;
 
   constructor() {
