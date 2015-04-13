@@ -20,6 +20,7 @@ describe('DataChannel', function() {
 
   // Ensure that close() waits for all outgoing unsent messages to be sent:
   //   https://github.com/uProxy/uproxy/issues/1218
+  //   https://github.com/uProxy/uproxy/issues/1113
   it('close waits for all data to be sent', (done) => {
     // The core.rtcdatachannel is initially open.
     spyOn(mockRtcDataChannel, 'getReadyState').and.returnValue(
