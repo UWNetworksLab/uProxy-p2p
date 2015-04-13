@@ -23,6 +23,15 @@ module Core {
 
     private isUpdatePending_ = false;
 
+    // Resolve this promise when rtcToNet is created and therefore not null.
+    // Used to help determine when to call handleSignal (which relies
+    // on rtcToNet or socksToRtc being not null).
+    // The promise is reset in resetSharerCreated().
+    public onceSharerCreated :Promise<void> = null;
+    // Helper function used to fulfill onceSharerCreated.
+    private fulfillRtcToNetCreated_ :Function;
+    private sharingReset_ :Promise<void> = null;
+
     // TODO: set up a better type for this
     private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
 
@@ -30,6 +39,7 @@ module Core {
       sendUpdate :(x :uProxy.Update, data?:Object) => void
     ) {
       this.sendUpdate_ = sendUpdate;
+      this.resetSharerCreated();
     }
 
     private createSender_ = (type :uProxy.MessageType) => {
@@ -67,13 +77,17 @@ module Core {
       target.handleSignalFromPeer(msg);
     };
 
-    public startShare = () => {
+    public startShare = () :Promise<void> => {
+      if (this.rtcToNet_) {
+        throw new Error('rtcToNet_ already exists');
+      }
+
       this.rtcToNet_ = new RtcToNet.RtcToNet(
         <freedom_RTCPeerConnection.RTCConfiguration> {
           iceServers: core.globalSettings.stunServers
         },
         <RtcToNet.ProxyConfig> {
-          allowNonUnicast: false
+          allowNonUnicast: core.globalSettings.allowNonUnicast
         }
       );
 
@@ -81,7 +95,7 @@ module Core {
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
-      this.rtcToNet_.onceClosed.then(() => {
+      this.sharingReset_ = this.rtcToNet_.onceClosed.then(() => {
         this.localSharingWithRemote = SharingState.NONE;
         this.sendUpdate_(uProxy.Update.STOP_GIVING);
         this.rtcToNet_ = null;
@@ -92,27 +106,40 @@ module Core {
 
       this.localSharingWithRemote = SharingState.TRYING_TO_SHARE_ACCESS;
       this.stateRefresh_();
+      this.fulfillRtcToNetCreated_();
 
       this.rtcToNet_.onceReady.then(() => {
         this.localSharingWithRemote = SharingState.SHARING_ACCESS;
         this.sendUpdate_(uProxy.Update.START_GIVING);
         this.stateRefresh_();
       }).catch((e) => {
-        this.localSharingWithRemote = SharingState.NONE;
-        this.stateRefresh_();
-        this.rtcToNet_ = null;
+        this.stopShare();
+      });
+
+      return this.rtcToNet_.onceReady;
+    }
+
+    // This *must* be called if you receive an OFFER signal while there is an existing
+    // rtcToNet_ instance. Right before you stop the existing instance, make a call to
+    // this function so that CANDIDATEs received after the new OFFER will know to wait
+    // for a new rtcToNet_ instance to be created. Otherwise, CANDIDATE signals can be
+    // dropped or handled by old rtcToNet_ instances.
+    public resetSharerCreated = () :void => {
+      this.onceSharerCreated = new Promise<void>((F, R) => {
+        this.fulfillRtcToNetCreated_ = F;
       });
     }
 
     public stopShare = () :Promise<void> => {
       if (this.localSharingWithRemote === SharingState.NONE) {
-        log.warn('Cannot stop when not proxying');
-        return;
+        log.warn('Cannot stop sharing when neither sharing nor trying to share.');
+        return Promise.resolve<void>();
       }
 
       this.localSharingWithRemote = SharingState.NONE;
       this.stateRefresh_();
-      return this.rtcToNet_.close();
+      this.rtcToNet_.close();
+      return this.sharingReset_;
     }
 
     public startGet = () :Promise<Net.Endpoint> => {
@@ -180,7 +207,7 @@ module Core {
 
     public stopGet = () :Promise<void> => {
       if (this.localGettingFromRemote === GettingState.NONE) {
-        log.warn('Cannot stop proxying when not proxying');
+        log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
 

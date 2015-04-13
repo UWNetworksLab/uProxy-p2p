@@ -3,7 +3,7 @@
 <link rel='import' href='../lib/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
 
-<polymer-element name='uproxy-contact' attributes='contact, isOnline'>
+<polymer-element name='uproxy-contact' attributes='contact, isOnline' on-set-trying-to-get='{{ setIsTryingToGet }}'>
 
   <template>
     <style>
@@ -33,13 +33,24 @@
     .nameRow core-icon {
       opacity: 0.6;
       margin: 0px 18px 0px 0px;
-      float: right;
     }
-    .nameRow:hover core-icon {
+    .nameRow core-icon.expand {
+      min-width: 25px;
+    }
+    .nameRow .iconWrapper {
+      min-width: 30px;
+      margin-left: 5px;
+    }
+    .nameRow .iconWrapper core-icon[icon=open-in-new] {
+      width: 17px;
+      height: 17px;
+    }
+    .nameRow:hover core-icon.expand {
       opacity: 1;
     }
     .avatar {
       width: 40px; height: 40px;
+      min-width: 40px;
       border: none; border-radius: 50%;
       background-color: #eee;
       vertical-align: middle;
@@ -55,6 +66,7 @@
     .accessIcon {
       padding-right: 18px;
       width: 20px;
+      min-width: 20px;
       height: 20px;
     }
     core-collapse {
@@ -101,11 +113,18 @@
     }
     </style>
 
-    <div on-click='{{ toggle }}' tabindex='-1'
+    <div on-tap='{{ toggle }}' tabindex='-1'
         class='nameRow frame {{ isOnline ? "online" : "offline" }}'
         center horizontal layout>
       <img class='avatar' src='{{ contact.imageData }}' />
-      <div flex class='name'>{{ contact.name }}</div>
+      <div class='name'>{{ contact.name }}</div>
+
+      <div flex class="iconWrapper">
+        <core-icon icon="open-in-new"
+            hidden?="{{ !contact.url || (model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded) }}"
+            title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
+      </div>
+
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
       <img src='../icons/getting_animated.gif' class='accessIcon'
           hidden?='{{ model.globalSettings.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>
@@ -113,11 +132,11 @@
           hidden?='{{ model.globalSettings.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
       <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
       <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
-      <core-icon icon="expand-more"
+      <core-icon icon="expand-more" class="expand"
         hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
       <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
-      <core-icon icon="expand-less"
+      <core-icon icon="expand-less" class="expand"
         hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->
@@ -127,10 +146,16 @@
       opened='{{ contact.getExpanded }}'>
 
       <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
-        <div horizontal layout>
+        <div horizontal layout hidden?='{{ isTryingToGet }}'>
           <core-icon icon='check'></core-icon>
           <p class='preButtonText' flex>
-            {{contact.name || contact.userId }} has granted you access
+            {{ contact.name || contact.userId }} has granted you access
+          </p>
+        </div>
+        <div horizontal layout hidden?='{{ !isTryingToGet }}'>
+          <core-icon icon='query-builder'></core-icon>
+          <p class='preButtonText' flex>
+            Trying to connect to {{ contact.name || contact.userId }}
           </p>
         </div>
         <template repeat='{{ instance in contact.offeringInstances }}' vertical layout>

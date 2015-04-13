@@ -64,9 +64,24 @@ module Core {
 
     // Number of milliseconds before timing out socksToRtc_.start
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
-    private startupTimeout_ = null;
+    // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
+    // trying to connect) by timing out rtcToNet_.start 15 seconds later than
+    // socksToRtc_.start
+    public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
+    // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
+    private startSocksToRtcTimeout_ = null;
+    private startRtcToNetTimeout_ = null;
 
     private connection_ :Core.RemoteConnection = null;
+
+    // By default, or when a successful connection is closed, this promise will
+    // reject to indicate the remote connection is not ready to accept signals.
+    // Only if the peer sent an OFFER signal and an rtcToNet instance is created
+    // will this fulfill.
+    // TODO: to make it clearer what this promise is waiting for, change to
+    // something like:
+    // Promise.all([this.receivedOffer_, this.connection_.onceSharerCreated])
+    private onceSharerReadyForOffer_ :Promise<void>;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -81,6 +96,7 @@ module Core {
         public user :Core.User,
         public instanceId :string) {
       this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
+      this.setSharerToNotReady_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state) => {
@@ -111,7 +127,7 @@ module Core {
           ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
         case uProxy.Update.STOP_GETTING:
-          this.clearTimeout_();
+          clearTimeout(this.startSocksToRtcTimeout_);
           ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
@@ -149,24 +165,109 @@ module Core {
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:uProxy.MessageType,
-                           signalFromRemote:Object) => {
+                           signalFromRemote:Object) :Promise<void> => {
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
-          return;
+          return Promise.resolve<void>();
         }
 
-        // Create a new rtcToNet object everytime there is an OFFER signal
-        if(signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          this.connection_.startShare();
+        // Create a new rtcToNet object everytime there is an OFFER signal.
+        if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+          // TODO: Move the logic for resetting the onceSharerCreated promise inside
+          // remote-connection.ts.
+          this.connection_.resetSharerCreated();
+          this.onceSharerReadyForOffer_ = this.connection_.onceSharerCreated;
+          this.startShare_();
         }
+        // Wait for the new rtcToNet instance to be created before you handle
+        // additional messages from a client peer.
+        return this.onceSharerReadyForOffer_.then(() => {
+          this.connection_.handleSignal({
+            type: type,
+            data: signalFromRemote
+          });
+        }).catch((e) => {
+          log.info(e + ' Received signal ' + signalFromRemote['type']);
+          return Promise.resolve<void>();
+        });
+
+        /*
+        TODO: Uncomment when getter sends a cancel signal if socksToRtc closes while
+        trying to connect. Something like:
+        https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
+        Issue: https://github.com/uProxy/uproxy/issues/1256
+
+        } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+          this.stopShare();
+          return;
+        }
+        */
       }
 
       this.connection_.handleSignal({
         type: type,
         data: signalFromRemote
       });
+      return Promise.resolve<void>();
+    }
+
+    /**
+      * When our peer sends us a signal that they'd like to be a client,
+      * we should try to start sharing.
+      */
+    private startShare_ = () : void => {
+      var sharingStopped :Promise<void>;
+      if (this.localSharingWithRemote === SharingState.NONE) {
+        // Stop any existing sharing attempts with this instance.
+        sharingStopped = Promise.resolve<void>();
+      } else {
+        sharingStopped = this.stopShare();
+      }
+
+      // Start sharing only after an existing connection is stopped.
+      sharingStopped.then(() => {
+        // Set timeout to close rtcToNet_ if start() takes too long.
+        // Calling stopShare() at the end of the timeout makes the
+        // assumption that our peer failed to start getting access.
+        this.startRtcToNetTimeout_ = setTimeout(() => {
+          log.warn('Timing out rtcToNet_ connection');
+          ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          this.stopShare();
+        }, this.RTC_TO_NET_TIMEOUT);
+
+        this.connection_.startShare().then(() => {
+          clearTimeout(this.startRtcToNetTimeout_);
+        }, () => {
+          log.warn('Could not start sharing.');
+          clearTimeout(this.startRtcToNetTimeout_);
+        });
+      });
+    }
+
+    public stopShare = () :Promise<void> => {
+      if (this.localSharingWithRemote === SharingState.NONE) {
+        log.warn('Cannot stop sharing while currently not sharing.');
+        return Promise.resolve<void>();
+      }
+
+      if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
+        clearTimeout(this.startRtcToNetTimeout_);
+      } else if (this.localSharingWithRemote === SharingState.SHARING_ACCESS) {
+        // Stop forwarding messages to the remote connection until we receive
+        // another OFFER.
+        this.setSharerToNotReady_();
+      }
+      return this.connection_.stopShare();
+    }
+
+    // When a sharer remote-instance is first created, or after a sharer closes
+    // a connection, we set that they are not ready to handle an incoming offer.
+    private setSharerToNotReady_ = () => {
+      this.onceSharerReadyForOffer_ =
+          Promise.reject(new Error('Ignoring signal from client without ' +
+                                   'rtcToNet ready to handle OFFER first.'));
     }
 
     /**
@@ -180,29 +281,22 @@ module Core {
       }
 
       // Cancel socksToRtc_ connection if start hasn't completed in 30 seconds.
-      this.startupTimeout_ = setTimeout(() => {
+      this.startSocksToRtcTimeout_ = setTimeout(() => {
         log.warn('Timing out socksToRtc_ connection');
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
       return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
-        this.clearTimeout_();
+        clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });
-    }
-
-    private clearTimeout_ = () => {
-      if (this.startupTimeout_) {
-        clearTimeout(this.startupTimeout_);
-        this.startupTimeout_ = null;
-      }
     }
 
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : void => {
-      this.connection_.stopGet();
+    public stop = () : Promise<void> => {
+      return this.connection_.stopGet();
     }
 
     /**
@@ -294,10 +388,6 @@ module Core {
         log.info('Stopping socksToRtc_ for logout');
         this.connection_.stopGet();
       }
-    }
-
-    public stopShare = () => {
-      this.connection_.stopShare();
     }
 
   }  // class Core.RemoteInstance

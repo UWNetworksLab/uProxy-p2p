@@ -556,6 +556,17 @@ module.exports = (grunt) ->
           dest: firefoxDevPath + 'data'
         } ]
 
+      integration:
+        files: [ {
+          # Copy compiled Chrome App code, required for integration tests
+          expand: true, cwd: chromeAppDevPath
+          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
+          dest: 'build/compile-src/integration'
+        }, {
+          expand: true, cwd: 'src/integration/'
+          src: ['gtalk_credentials.js', 'integration.json']
+          dest: 'build/compile-src/integration'
+        }]
     }  # copy
 
     #-------------------------------------------------------------------------
@@ -582,7 +593,6 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
-
     # Typescript compilation rules
     ts:
       # Compile all non-sample typescript code into the development build
@@ -633,6 +643,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/chrome/extension/**/*.spec.js'
+          outfile: 'build/compile-src/chrome/extension/SpecRunner.html'
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:
             coverage: 'build/coverage/chrome_extension/coverage.json'
@@ -651,6 +662,7 @@ module.exports = (grunt) ->
             ]
         options:
           specs: 'build/compile-src/chrome/app/**/*.spec.js'
+          outfile: 'build/compile-src/chrome/app/SpecRunner.html'
           template: require('grunt-template-jasmine-istanbul')
           templateOptions:
             coverage: 'build/coverage/chrome_app/coverage.json'
@@ -711,6 +723,7 @@ module.exports = (grunt) ->
         options:
           specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
           template: require('grunt-template-jasmine-istanbul')
+          outfile: 'build/compile-src/generic_ui/SpecRunner.html'
           templateOptions:
             coverage: 'build/coverage/generic_ui/coverage.json'
             report:
@@ -719,6 +732,26 @@ module.exports = (grunt) ->
                 dir: 'build/coverage/generic_ui'
       }
 
+    jasmine_chromeapp: {
+      all: {
+        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+              'build/compile-src/integration/scripts/uproxy.js',
+              'build/compile-src/integration/gtalk_credentials.js',
+              'build/compile-src/integration/**/*.js',
+              'build/compile-src/integration/**/*.json',
+              'build/compile-src/integration/core.spec.js']
+        options: {
+          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
+                  'build/compile-src/integration/scripts/uproxy.js',
+                  'build/compile-src/integration/scripts/uproxy-lib/arraybuffers/arraybuffers.js',
+                  'build/compile-src/integration/gtalk_credentials.js',
+                  'build/compile-src/integration/core.spec.js'
+          ],
+          # Uncomment this for debugging
+          # keepRunner: true,
+        }
+      }
+    }
     'mozilla-addon-sdk':
       'latest':
         options:
@@ -779,6 +812,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-string-replace'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
+  grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
 
   #-------------------------------------------------------------------------
   # Register the tasks

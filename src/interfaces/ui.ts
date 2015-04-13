@@ -19,6 +19,7 @@ import uproxy_types = require('../uproxy');
     userId       :string;
     name         ?:string;
     imageData    ?:string; // Image URI (e.g. data:image/png;base64,adkwe329...)
+    url          ?:string;
   }
 
   /**

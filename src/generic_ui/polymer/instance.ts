@@ -12,11 +12,18 @@ Polymer({
     // Expose global ui object and UI module in this context. This allows the
     // hidden? watch for the get/give toggle to actually update.
     this.ui = ui;
+    this.UI = UI;
     this.uProxy = uProxy;
     this.GettingState = GettingState;
     this.model = model;
   },
   start: function() {
+    if (!this.instance.isOnline) {
+      this.ui.toastMessage = this.user.name + ' is offline';
+      return;
+    }
+
+    this.fire('set-trying-to-get', {isTryingToGet: true});
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
@@ -24,18 +31,20 @@ Polymer({
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
+      this.fire('set-trying-to-get', {isTryingToGet: false});
     }).catch((e) => {
       if (this.aborted) {
         // if the failure is because of a user action, do nothing
         return;
       }
-
-      this.fire('core-signal', {name: 'open-troubleshoot'});
+      ui.toastMessage = UI.GET_FAILED_MSG + this.user.name;
       ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
+      this.fire('set-trying-to-get', {isTryingToGet: false});
     });
   },
   stop: function() {
+    this.fire('set-trying-to-get', {isTryingToGet: false});
     this.aborted = true;
     console.log('[polymer] calling core.stop()');
     core.stop();

@@ -108,10 +108,11 @@ class uProxyCore implements uProxy.CoreAPI {
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false,
+         allowNonUnicast: false,
          mode: uProxy.Mode.GET,
          version: uProxy.STORAGE_VERSION};
   public loadGlobalSettings :Promise<void> = null;
-  private natType_ = '';
+  private natType_ :String = '';
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -135,6 +136,9 @@ class uProxyCore implements uProxy.CoreAPI {
           }
           if (this.globalSettings.hasSeenWelcome == null) {
             this.globalSettings.hasSeenWelcome = false;
+          }
+          if (this.globalSettings.allowNonUnicast == null) {
+            this.globalSettings.allowNonUnicast = false;
           }
           if (typeof this.globalSettings.mode == 'undefined') {
             this.globalSettings.mode = uProxy.Mode.GET;
@@ -308,6 +312,7 @@ class uProxyCore implements uProxy.CoreAPI {
     this.globalSettings.hasSeenSharingEnabledScreen =
         newSettings.hasSeenSharingEnabledScreen;
     this.globalSettings.hasSeenWelcome = newSettings.hasSeenWelcome;
+    this.globalSettings.allowNonUnicast = newSettings.allowNonUnicast;
     this.globalSettings.mode = newSettings.mode;
   }
 
@@ -361,30 +366,35 @@ class uProxyCore implements uProxy.CoreAPI {
    */
   public start = (path :InstancePath) : Promise<Net.Endpoint> => {
     // Disable any previous proxying session.
+    var stoppedGetting :Promise<void>[] = [];
     if (remoteProxyInstance) {
       log.warn('Existing proxying session, terminating');
       // Stop proxy, don't notify UI since UI request a new proxy.
-      remoteProxyInstance.stop();
+      stoppedGetting.push(remoteProxyInstance.stop());
       remoteProxyInstance = null;
-    }
-    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
-      log.warn('Existing proxying session, terminating');
-      copyPasteConnection.stopGet();
     }
 
-    var remote = this.getInstance(path);
-    if (!remote) {
-      log.error('Instance does not exist for proxying', path.instanceId);
-      return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+      log.warn('Existing proxying session, terminating');
+      stoppedGetting.push(copyPasteConnection.stopGet());
     }
-    // Remember this instance as our proxy.  Set this before start fulfills
-    // in case the user decides to cancel the proxy before it begins.
-    remoteProxyInstance = remote;
-    return remote.start().then((endpoint:Net.Endpoint) => {
-      // remote.start will send an update to the UI.
-      return endpoint;
+
+    return Promise.all(stoppedGetting).catch((e) => {
+      // if there was an error stopping the old connection we still want to
+      // connect with the new one, do not propogate this error
+      log.error('Could not clean up old connections', e);
+    }).then(() => {
+      var remote = this.getInstance(path);
+      if (!remote) {
+        log.error('Instance does not exist for proxying', path.instanceId);
+        return Promise.reject(new Error('Instance does not exist for proxying (' + path.instanceId + ')'));
+      }
+      // Remember this instance as our proxy.  Set this before start fulfills
+      // in case the user decides to cancel the proxy before it begins.
+      remoteProxyInstance = remote;
+      return remote.start();
     }).catch((e) => {
-      remoteProxyInstance = null;
+      remoteProxyInstance = null; // make sure to clean up any state
       log.error('Could not start remote proxying session', e.stack);
       return Promise.reject(e);
     });
@@ -437,44 +447,76 @@ class uProxyCore implements uProxy.CoreAPI {
     return network.getUser(path.userId);
   }
 
-  public sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
+  private FeedbackUrls_ = [
+    'https://beta-dot-uproxysite.appspot.com/submit-feedback',
+    'https://www.uproxy.org/submit-feedback'
+  ]
+
+  private post_ = (url :string, data :Object) :Promise<void> => {
     return new Promise<void>((fulfill, reject) => {
-      var sendXhr = (logs) : void => {
-        var xhr = freedom["core.xhr"]();
-        xhr.on('onreadystatechange', () => {
-          Promise.all([xhr.getReadyState(), xhr.getStatus()])
-            .then((stateAndStatus) => {
-              // 200 is the HTTP result code for a successful request.
-              if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] === 200) {
-                fulfill();
-              } else if (stateAndStatus[0] === XMLHttpRequest.DONE && stateAndStatus[1] != 200) {
-                // TODO: Once we have non-AppEngine links we can send feedback to, try
-                // multiple URLs before rejecting the sendFeedback promise.
-                // https://github.com/uProxy/uproxy/issues/1191
-                reject('POST to uproxy.org failed.');
-              }
-            });
+      var xhr = freedom['core.xhr']();
+
+      xhr.on('onreadystatechange', () => {
+        Promise.all([xhr.getReadyState(), xhr.getStatus()])
+        .then((stateAndStatus) => {
+          // 200 is the HTTP result code for a successful request.
+          if (stateAndStatus[0] === XMLHttpRequest.DONE) {
+            if (stateAndStatus[1] === 200) {
+              fulfill();
+            } else {
+              reject(new Error('POST failed with HTTP code ' + stateAndStatus[1]));
+            }
+          }
         });
-        var params = JSON.stringify(
-          {'email' : feedback.email,
-           'feedback' : feedback.feedback,
-            'logs' : logs});
-        xhr.open('POST', 'https://beta-dot-uproxysite.appspot.com/submit-feedback', true);
-        // core.xhr requires the parameters to be tagged as either a
-        // string or array buffer in the format below.
-        // This is roughly equivalent to standard xhr.send(params).
-        xhr.send({'string': params});
+      });
+      var params = JSON.stringify(data);
+
+      xhr.open('POST', url, true);
+      // core.xhr requires the parameters to be tagged as either a
+      // string or array buffer in the format below.
+      // This is roughly equivalent to standard xhr.send(params).
+      xhr.send({'string': params});
+    });
+  }
+
+  public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
+    if (!maxAttempts || maxAttempts > this.FeedbackUrls_.length) {
+      // default to trying every possible URL
+      maxAttempts = this.FeedbackUrls_.length;
+    }
+
+    var logsPromise :Promise<string>;
+
+    if (feedback.logs) {
+      logsPromise = this.getLogsAndNetworkInfo().then((logs) => {
+        var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+        return browserInfo + logs;
+      });
+    } else {
+      logsPromise = Promise.resolve('');
+    }
+
+    return logsPromise.then((logs) => {
+      var attempts = 0;
+
+      var payload = {
+        email: feedback.email,
+        feedback: feedback.feedback,
+        logs: logs
+      };
+
+      var doAttempts = (error?:Error) => {
+        if (attempts < maxAttempts) {
+          // we want to keep trying this until we either run out of urls to
+          // send to or one of the requests succeeds.  We set this up by
+          // creating a lambda to call the post with failures set up to recurse
+          return this.post_(this.FeedbackUrls_[attempts++], payload).catch(doAttempts);
+        }
+
+        throw error;
       }
 
-      var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
-
-      if (feedback.logs) {
-        this.getLogsAndNetworkInfo().then((logsWithNetworkInfo) => {
-          sendXhr(browserInfo + logsWithNetworkInfo);
-        });
-      } else {
-        sendXhr('');
-      }
+      return doAttempts();
     });
   }
 
@@ -546,12 +588,39 @@ class uProxyCore implements uProxy.CoreAPI {
       });
   }
 
-  private formatLogs_ = (rawLogs) : string => {
-    var formattedLogs = '';
-    for (var i = 0; i < rawLogs.length; i++) {
-      formattedLogs += rawLogs[i] + '\n';
+  private formatLogs_ = (logs :string[]) : string => {
+    // replace the emails with consistent tags throughout the logs
+    var emails :string[] = [];
+    var names :string[] = [];
+
+    var emailReplacer = (email :string) :string => {
+      var id = _.indexOf(emails, email);
+      if (id === -1) {
+        id = emails.length;
+        emails.push(email);
+      }
+
+      return 'EMAIL_' + id;
     }
-    return formattedLogs;
+
+    var nameReplacer = (match :string, pre :string, name :string, post :string):string => {
+      var id = _.indexOf(names, name);
+      if (id === -1) {
+        id = names.length;
+        names.push(name);
+      }
+
+      return pre + 'NAME_' + id + post;
+    }
+
+    var text = logs.join('\n');
+
+    // email regex taken from regular-expressions.info
+    text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
+                        emailReplacer);
+    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
+    text = text.replace(/("name":")([^"]*)(")/g, nameReplacer);
+    return text;
   }
 }  // class uProxyCore
 

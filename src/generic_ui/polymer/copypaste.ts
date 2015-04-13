@@ -84,8 +84,7 @@ Polymer({
       return;
     }
 
-    ui.startGettingInUi();
-    ui.browserApi.startUsingProxy(ui.copyPastePendingEndpoint);
+    ui.startGettingInUiAndConfig(null, ui.copyPastePendingEndpoint);
     ui.copyPastePendingEndpoint = null;
   },
   switchToGetting: function() {
