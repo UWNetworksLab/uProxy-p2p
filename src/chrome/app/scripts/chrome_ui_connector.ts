@@ -3,7 +3,7 @@
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
 import freedom_types = require('freedom.types');
-import uproxy_types = require('../../../interfaces/uproxy.types');
+import uproxy_types = require('../../../interfaces/uproxy');
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
