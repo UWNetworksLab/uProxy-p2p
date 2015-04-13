@@ -6,12 +6,11 @@
 <link rel='import' href='../lib/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
 
-<polymer-element name='uproxy-troubleshoot'>
+<polymer-element name='uproxy-troubleshoot' attributes='titleText'>
   <template>
     <style>
     :host {
       text-align: center;
-      font-color: #009688;  /* dark green */
     }
     h1 {
       font-size: 1.5em;
@@ -51,8 +50,29 @@
       min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
-    paper-action-dialog::shadow #scroller {
-      padding: 18px 20px 0px 20px;
+    paper-dialog::shadow #scroller {
+      padding: 12px;
+    }
+    #askToAnalyze, #analyzeNetwork, #analyzedNetwork {
+      padding: 0px 15px 15px;
+      color: rgba(0,0,0,0.55);
+    }
+    #analyzeNetwork {
+      text-align: center;
+      font-size: 14px;
+    }
+    #analyzedNetwork {
+      text-align: left;
+    }
+    #analyzedNetworkButtons {
+      text-align: center;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
+    uproxy-faq-link .linkText {
+      text-decoration: underline;
+      color: rgba(0,0,0,0.40);
     }
     </style>
 
@@ -61,21 +81,51 @@
 
     <paper-dialog backdrop layered='false' id='troubleshootDialog'>
       <core-icon class="button" icon="clear" on-tap='{{ close }}'></core-icon>
-      <h1>Unable to proxy</h1>
-      <div>
+      <h1>{{ titleText }}</h1>
+
+      <!-- First screen in the dialog asks user if they want to diagnose their network. -->
+      <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
-          Something went wrong. Would you like uProxy to diagnose your network?
+          It could be that your network's NAT type is incompatible with uProxy. Would you like to uProxy to analyze your network?
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
-        <paper-button on-tap='{{ analyzeNetworkAndViewLogs }}'>
-          Analyze Network
-        </paper-button><br>
-        <paper-button on-tap='{{ submitFeedback }}'>
-          Submit Feedback
+        <paper-button on-tap='{{ getNatType }}'>
+          Yes
+        </paper-button>
+        <paper-button on-tap='{{ close }}'>
+          No
         </paper-button>
       </div>
+
+      <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
+      <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
+        Analyzing network<br>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+
+      <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
+      <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
+        It looks like you are on a <strong>{{ natType }}</strong>, which is <strong>{{ natImpact }}</strong> interfering with your ability to connect to friends.
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>More info</span>
+        </uproxy-faq-link><br><br>
+        Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>Privacy policy</span>
+        </uproxy-faq-link>
+        <br>
+        <div id='analyzedNetworkButtons'>
+          <paper-button on-tap='{{ submitFeedback }}'>
+            Yes
+          </paper-button>
+          <paper-button on-tap='{{ close }}'>
+            No
+          </paper-button>
+        </div>
+      </div>
+
     </paper-dialog>
 
   </template>

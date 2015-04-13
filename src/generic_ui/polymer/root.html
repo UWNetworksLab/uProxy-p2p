@@ -140,13 +140,23 @@
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      paper-toast {
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        background-color: #283230;
+        padding: 16px 16px 12px 20px;
+        font-size: 12px;
+      }
+      #toastHelpLink {
+        color: #47B5AA;
+      }
       .core-overlay-backdrop {
         z-index: 1001;
       }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
-    <core-signals on-core-signal-show-toast="{{ showToast }}"></core-signals>
 
     <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
 
@@ -251,9 +261,18 @@
       </template>
     </paper-action-dialog>
 
-    <uproxy-troubleshoot></uproxy-troubleshoot>
+    <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
+
+    <paper-toast id='toast'
+        opened='{{ messageNotNull(ui.toastMessage) }}'
+        text='{{ ui.toastMessage }}' responsiveWidth='320px'
+        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
+      <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
+          hidden?='{{ !stringMatches(ui.toastMessage, UI.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
+      </div>
+    </paper-toast>
+
     <uproxy-reconnect></uproxy-reconnect>
-    <paper-toast id="toast"></paper-toast>
 
   </template>
 

@@ -69,6 +69,9 @@ module UI {
 
   export var DEFAULT_USER_IMG = '../icons/contact-default.png';
 
+  export var SHARE_FAILED_MSG :string = 'Unable to share access with ';
+  export var GET_FAILED_MSG :string = 'Unable to get access from ';
+
   export interface Contacts {
     getAccessContacts : {
       onlinePending :UI.User[];
@@ -172,6 +175,8 @@ module UI {
     // Changing this causes root.ts to fire a core-signal
     // with the new value.
     public signalToFire :string = '';
+
+    public toastMessage :string = null;
 
     private isLogoutExpected_ :boolean = false;
     private reconnectInterval_ :number;
@@ -355,6 +360,12 @@ module UI {
         user.isGettingFromMe = isGettingFromMe;
 
         this.updateSharingStatusBar_();
+      });
+
+      core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, (nameOfFriend) => {
+        // Setting this variable will toggle a paper-toast (in root.html)
+        // to open.
+        this.toastMessage = UI.SHARE_FAILED_MSG + nameOfFriend;
       });
     }
 
