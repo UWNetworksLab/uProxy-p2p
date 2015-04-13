@@ -80,7 +80,7 @@ module Core {
     // will this fulfill.
     // TODO: to make it clearer what this promise is waiting for, change to
     // something like:
-    // Promise.all([this.receivedOffer_, this.connection_.onceRtcToNetCreated])
+    // Promise.all([this.receivedOffer_, this.connection_.onceSharerCreated])
     private onceSharerReadyForOffer_ :Promise<void>;
 
     /**
@@ -175,10 +175,10 @@ module Core {
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
         if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
-          // TODO: Move the logic for resetting the onceRtcToNetCreated promise inside
+          // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
-          this.connection_.resetRtcToNetCreated();
-          this.onceSharerReadyForOffer_ = this.connection_.onceRtcToNetCreated;
+          this.connection_.resetSharerCreated();
+          this.onceSharerReadyForOffer_ = this.connection_.onceSharerCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle

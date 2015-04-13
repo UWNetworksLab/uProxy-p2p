@@ -26,9 +26,9 @@ module Core {
     // Resolve this promise when rtcToNet is created and therefore not null.
     // Used to help determine when to call handleSignal (which relies
     // on rtcToNet or socksToRtc being not null).
-    // The promise is reset in resetRtcToNetCreated().
-    public onceRtcToNetCreated :Promise<void> = null;
-    // Helper function used to fulfill onceRtcToNetCreated.
+    // The promise is reset in resetSharerCreated().
+    public onceSharerCreated :Promise<void> = null;
+    // Helper function used to fulfill onceSharerCreated.
     private fulfillRtcToNetCreated_ :Function;
     private sharingReset_ :Promise<void> = null;
 
@@ -39,7 +39,7 @@ module Core {
       sendUpdate :(x :uProxy.Update, data?:Object) => void
     ) {
       this.sendUpdate_ = sendUpdate;
-      this.resetRtcToNetCreated();
+      this.resetSharerCreated();
     }
 
     private createSender_ = (type :uProxy.MessageType) => {
@@ -124,8 +124,8 @@ module Core {
     // this function so that CANDIDATEs received after the new OFFER will know to wait
     // for a new rtcToNet_ instance to be created. Otherwise, CANDIDATE signals can be
     // dropped or handled by old rtcToNet_ instances.
-    public resetRtcToNetCreated = () :void => {
-      this.onceRtcToNetCreated = new Promise<void>((F, R) => {
+    public resetSharerCreated = () :void => {
+      this.onceSharerCreated = new Promise<void>((F, R) => {
         this.fulfillRtcToNetCreated_ = F;
       });
     }
