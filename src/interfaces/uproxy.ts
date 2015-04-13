@@ -1,17 +1,17 @@
-/**
- * uproxy.ts
- *
- * This file defines the base uProxy module. It contains Enums and interfaces
- * which are relevant to all parts of uProxy, notably for communication between
- * the Core and the UI.
- */
+  /**
+   * uproxy.ts
+   *
+   * This file defines the base uProxy module. It contains Enums and interfaces
+   * which are relevant to all parts of uProxy, notably for communication between
+   * the Core and the UI.
+   */
 
-// TODO: Move the notifications somewhere better.
-/// <reference path='interfaces/ui.d.ts' />
-/// <reference path='interfaces/persistent.d.ts' />
-/// <reference path='networking-typings/communications.d.ts' />
+  // TODO: Move the notifications somewhere better.
+  // /// <reference path='interfaces/ui.d.ts' />
+  // /// <reference path='interfaces/persistent.d.ts' />
+  // /// <reference path='networking-typings/communications.d.ts' />
 
-module uProxy {
+  import net = require('../../../third_party/uproxy-networking/net/net.types');
 
   // --- Communications ---
 
@@ -37,7 +37,7 @@ module uProxy {
     STOP_PROXYING_COPYPASTE_SHARE,
     COPYPASTE_SIGNALLING_MESSAGE,
 
-    // Payload should be a uProxy.HandleManualNetworkInboundMessageCommand.
+    // Payload should be a HandleManualNetworkInboundMessageCommand.
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
     UPDATE_GLOBAL_SETTINGS,
@@ -62,7 +62,7 @@ module uProxy {
     STOP_GETTING_FROM_FRIEND,
     START_GIVING_TO_FRIEND,
     STOP_GIVING_TO_FRIEND,
-    // Payload should be a uProxy.Message.
+    // Payload should be a Message.
     MANUAL_NETWORK_OUTBOUND_MESSAGE,
     // TODO: "Get credentials" is a command, not an "update". Consider
     // renaming the "Update" enum.
@@ -86,7 +86,7 @@ module uProxy {
   // TODO: rename to PeerMessageType & PeerMessage.
   // TODO: consider every message having every field, and that MessageType is
   // no longer needed. This would use fewer larger messages.
-  export enum MessageType {
+  export enum PeerMessageType {
     INSTANCE = 3000,  // Instance messages notify the user about instances.
     // These are for the signalling-channel. The payloads are arbitrary, and
     // could be specified from uProxy, or could also be SDP headers forwarded
@@ -98,8 +98,8 @@ module uProxy {
   }
 
   // Messages to the peer form the boundary for JSON parse / stringify.
-  export interface Message {
-    type :MessageType;
+  export interface PeerMessage {
+    type :PeerMessageType;
     // TODO: Add a comment to explain the types that data can take and their
     // relationship to MessageType.
     data :Object;
@@ -138,7 +138,7 @@ module uProxy {
    */
   export interface ConsentCommand {
     path    :UserPath;
-    action  :uProxy.ConsentUserAction;
+    action  :ConsentUserAction;
   }
 
   // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -147,7 +147,7 @@ module uProxy {
   // manual network the client ID uniquely identifies the user.
   export interface HandleManualNetworkInboundMessageCommand {
     senderClientId  :string;
-    message         :uProxy.Message;
+    message         :PeerMessage;
   }
 
   export interface UserFeedback {
@@ -168,7 +168,6 @@ module uProxy {
    */
   // TODO: Rename CoreApi.
   export interface CoreAPI {
-
     // Send your own instanceId to target clientId.
     // TODO: Implement this or remove it.
     // sendInstanceHandshakeMessage(clientId :string) : void;
@@ -181,7 +180,7 @@ module uProxy {
      * The promise fulfills with an endpoint that can be used to proxy through
      * if sucessfully started or rejects otherwise
      */
-    startCopyPasteGet() :Promise<Net.Endpoint>;
+    startCopyPasteGet() :Promise<net.Endpoint>;
 
     /*
      * The promise fulfills when the connection is fully closed and state has
@@ -197,13 +196,13 @@ module uProxy {
      */
     stopCopyPasteShare() :Promise<void>;
 
-    sendCopyPasteSignal(signal :uProxy.Message) :void;
+    sendCopyPasteSignal(signal :PeerMessage) :void;
 
     // Using peer as a proxy.
-    start(instancePath :InstancePath) : Promise<Net.Endpoint>;
+    start(instancePath :InstancePath) : Promise<net.Endpoint>;
     stop () : void;
 
-    updateGlobalSettings(newSettings :Core.GlobalSettings) : void;
+    updateGlobalSettings(newSettings :GlobalSettings) : void;
     // TODO: rename toggle-option and/or replace with real configuration system.
     // TODO: Implement this or remove it.
     // changeOption(option :string) : void;
@@ -293,15 +292,14 @@ module uProxy {
 
   export var STORAGE_VERSION = 1;
   export var MESSAGE_VERSION = 1;
-}  // module uProxy
 
-module Social {
+export module Social {
   export var MANUAL_NETWORK_ID = 'Manual';
 }
 
 // We use this to map Freedom's untyped social network structures into a real
 // type-script enum & interface.
-module UProxyClient {
+export module UProxyClient {
   // Status of a client; used for both this client (in which case it will be
   // either ONLINE or OFFLINE)
   export enum Status {
@@ -327,24 +325,23 @@ module UProxyClient {
 // angular. connected = true iff connected to the app which is running
 // freedom.
 // TODO: this is chrome-specific. Move to the right place.
-interface StatusObject {
+export interface StatusObject {
   connected :boolean;
 }
 
-interface OAuthInfo {
+export interface OAuthInfo {
   url :string;
   redirect :string
 }
 
-
 // Describing whether or not a remote instance is currently accessing or not,
 // assuming consent is GRANTED for that particular pathway.
-enum GettingState {
+export enum GettingState {
   NONE = 100,
   TRYING_TO_GET_ACCESS,
   GETTING_ACCESS
 };
-enum SharingState {
+export enum SharingState {
   NONE = 200,
   TRYING_TO_SHARE_ACCESS,
   SHARING_ACCESS
@@ -355,16 +352,16 @@ enum SharingState {
 //
 // TODO: Eliminate this someday, when we can make uProxy in chrome not be split
 // between an app and an extension.
-module ChromeMessage {
+export module ChromeMessage {
   export var CONNECT :string = 'connect';
   export var ACK :string = 'ack';
 }
 
-interface UserPath {
+export interface UserPath {
   network :NetworkInfo;
   userId :string;
 }
 
-interface InstancePath extends UserPath {
+export interface InstancePath extends UserPath {
   instanceId :string;
 }
