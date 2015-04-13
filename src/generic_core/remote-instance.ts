@@ -170,7 +170,7 @@ module Core {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
-          return;
+          return Promise.resolve<void>();
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
