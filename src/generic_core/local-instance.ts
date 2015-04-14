@@ -17,8 +17,7 @@ module Core {
   //
   // TODO: gather up uses of random and put them into a common directory in
   // uproxy-lib, or directly use end-to-end implementation.
-  export class LocalInstance
-      implements social.InstanceData, Persistent {
+  export class LocalInstance implements social.BaseInstance, Persistent {
 
     public instanceId  :string;
     public keyHash     :string;
@@ -34,9 +33,9 @@ module Core {
      * or without any available instance data, for one particular social
      * network.
      */
-    public constructor(public network :social_types.Network,
+    public constructor(public network :social.Network,
                        public userId :string,
-                       load ?:social.InstanceData) {
+                       load ?:social.BaseInstance) {
       if (load) {
         this.restoreState(load);
         return;
@@ -71,12 +70,12 @@ module Core {
       return id;
     }
 
-    public updateProfile = (profile :uproxy_types.UserProfileMessage) :void => {
+    public updateProfile = (profile :social.UserProfileMessage) :void => {
       this.name_ = profile.name;
       this.imageData_ = profile.imageData;
     }
 
-    public getUserProfile = () :uproxy_types.UserProfileMessage => {
+    public getUserProfile = () :social.UserProfileMessage => {
       return {
         userId: this.userId,
         name: this.name_,
@@ -87,13 +86,13 @@ module Core {
     /**
      * TODO: Come up with a better typing for this.
      */
-    public currentState = () :social.InstanceData => {
+    public currentState = () :social.BaseInstance => {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
       };
     }
-    public restoreState = (state:social.InstanceData) :void => {
+    public restoreState = (state:social.BaseInstance) :void => {
       this.instanceId = state.instanceId;
       this.keyHash = state.keyHash;
     }

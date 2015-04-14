@@ -1,9 +1,8 @@
 /// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import net = require('../../../third_party/uproxy-networking/net/net.types');
-import uproxy_types = require('./uproxy');
 import social = require('./social');
-import user = require('./user');
+import ui = require('./ui');
 
 // --- Core <--> UI Interfaces ---
 
@@ -22,7 +21,7 @@ export interface GlobalSettings {
   hasSeenSharingEnabledScreen :boolean;
   hasSeenWelcome   :boolean;
   allowNonUnicast  :boolean;
-  mode             :Mode;
+  mode             :ui.Mode;
 }
 
 // --- Communications ---
@@ -107,7 +106,7 @@ export enum ConsentUserAction {
  * command.
  */
 export interface ConsentCommand {
-  path    :UserPath;
+  path    :social.UserPath;
   action  :ConsentUserAction;
 }
 /**
@@ -150,7 +149,7 @@ export interface CoreApi {
   sendCopyPasteSignal(signal :social.PeerMessage) :void;
 
   // Using peer as a proxy.
-  start(instancePath :user.InstancePath) : Promise<net.Endpoint>;
+  start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
   stop () : void;
 
   updateGlobalSettings(newSettings :GlobalSettings) : void;
@@ -159,7 +158,7 @@ export interface CoreApi {
   // changeOption(option :string) : void;
 
   login(network :string) : Promise<void>;
-  logout(networkInfo :user.SocialNetworkInfo) : Promise<void>;
+  logout(networkInfo :social.SocialNetworkInfo) : Promise<void>;
 
   // TODO: use Event instead of attaching manual handler. This allows event
   // removal, etc.

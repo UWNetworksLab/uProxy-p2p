@@ -9,10 +9,11 @@
 
 // Renamings:
 //   Instance => user.BaseInstance
-//   Core.Persistent => Persistent [ = require('interface/persistent'); ]
+//   Core.Persistent => Persistent   [ = require('interface/persistent'); ]
 //   UI.UserProfileMessage => social.UserProfileData
 //   UI.Instance => social.InstanceData
 //   UI.UserMessage => social.UserData
+
 
 export var STORAGE_VERSION = 1;
 export var MESSAGE_VERSION = 1;

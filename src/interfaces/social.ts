@@ -1,8 +1,3 @@
-import uproxy_types = require('./uproxy');
-import user = require('./user');
-import social = require('./social');
-import ui = require('./ui');
-
 /**
  * The 'User' type is used both in uProxy's core and UI, so there will be a base
  * interface to be extended as classes specific to particular components.
@@ -74,7 +69,7 @@ export interface UserData {
   consent             :ConsentState;
   isOnline            :boolean;
   network             :string;
-  offeringInstances   ?:InstanceUiData[];
+  offeringInstances   ?:InstanceData[];
   user                :UserProfileMessage;
 }
 
@@ -181,7 +176,7 @@ export module UProxyClient {
 }
 
 /**
- * Social.Network - represents a single network and the local uProxy client's
+ * The |Network| class represents a single network and the local uProxy client's
  * interaction as a user on the network.
  *
  * NOTE: All JSON stringify / parse happens automatically through the
@@ -198,7 +193,7 @@ export interface Network {
   roster     :{[userId:string]:BaseUser};
   // TODO: Make this private. Have other objects use getLocalInstance
   // instead.
-  myInstance :Core.LocalInstance;
+  myInstance :InstanceData;
 
   /**
    * Logs in to the network. Updates the local client information, as

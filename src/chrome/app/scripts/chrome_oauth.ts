@@ -2,10 +2,10 @@
  * Chrome oauth provider
  **/
 
-import uproxy_types = require('../../../interfaces/uproxy');
+import uproxy_module_api = require('../../../interfaces/uproxy-module');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
-// TODO: review oauth freedom API design: having to depend on global vars is
+// TODO: review oauth freedo API design: having to depend on global vars is
 // bad. There should be some way to specify constructor arguments. Also: better
 // to use a promise style for async functions.
 declare var connector :ChromeUIConnector;
@@ -48,7 +48,7 @@ class Chrome_oauth {
       stateObj:{redirect:string},
       continuation:(credentials:Object)=> void) {
     this.connector_.sendToUI(
-        uproxy_types.Update.GET_CREDENTIALS,
+        uproxy_module_api.Update.GET_CREDENTIALS,
         {url :authUrl, redirect :stateObj.redirect});
     this.connector_.setOnCredentials(continuation);
   }

@@ -1,3 +1,4 @@
+import social = require('./social');
 
 /**
  * Enumeration of mutually-exclusive view states.
@@ -24,7 +25,7 @@ export enum Mode {
 // TODO: rename UiApi.
 export interface UiApi {
 
-  syncUser(UserMessage:UserMessage) : void;
+  syncUser(UserMessage:social.UserData) : void;
   // TODO: Enforce these types of granular updates. (Doesn't have to be exactly
   // the below)...
   // updateAll(data:Object) : void;

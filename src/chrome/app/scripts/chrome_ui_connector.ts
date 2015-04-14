@@ -2,8 +2,10 @@
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
+import browser_connector = require('../../../interfaces/browser-connector');
 import freedom_types = require('freedom.types');
-import uproxy_types = require('../../../interfaces/uproxy');
+import uproxy_module_api = require('../../../interfaces/uproxy-module');
+import uproxy_chrome = require('../../../interfaces/chrome');
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
@@ -37,7 +39,7 @@ class ChromeUIConnector {
   private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
-        type: uproxy_types.Update.LAUNCH_UPROXY,
+        type: uproxy_module_api.Update.LAUNCH_UPROXY,
         data: ''
     });
   }
@@ -67,7 +69,7 @@ class ChromeUIConnector {
     // Because there is no callback when you call runtime.connect and it
     // sucessfully connects, the extension depends on a message received from
     // this app, so it knows the connection was successful.
-    this.extPort_.postMessage(uproxy_types.ChromeMessage.ACK);
+    this.extPort_.postMessage(uproxy_chrome.ChromeMessage.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
 
     // Once the extension is connected, we know that installation of uProxy
@@ -84,19 +86,19 @@ class ChromeUIConnector {
 
   // Receive a message from the extension.
   // This usually installs freedom handlers.
-  private onExtMsg_ = (msg :uproxy_types.Payload) => {
+  private onExtMsg_ = (msg :browser_connector.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core. These are uproxy_types.Commands.
     if ('emit' == msg.cmd) {
-      if (msg.type == uproxy_types.Command.SEND_CREDENTIALS) {
+      if (msg.type == uproxy_module_api.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
       }
-      if (msg.type == uproxy_types.Command.RESTART) {
+      if (msg.type == uproxy_module_api.Command.RESTART) {
         chrome.runtime.reload();
       }
       uProxyAppChannel.emit(msgType,
-                            <uproxy_types.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
+                            <browser_connector.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
@@ -112,7 +114,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uproxy_types.Update, data?:Object) => {
+  public sendToUI = (type :uproxy_module_api.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
