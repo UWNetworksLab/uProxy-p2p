@@ -34,7 +34,7 @@ interface StringData { str :string; }
 interface BufferData { buffer :ArrayBuffer; }
 
 export interface DataChannel {
-  // Guarenteed to be invarient for the life of the data channel.
+  // Guaranteed to be invariant for the life of the data channel.
   getLabel : () => string;
 
   // Promise for when the data channel has been opened.
@@ -128,7 +128,7 @@ export class DataChannelClass implements DataChannel {
   // |rtcDataChannel_| is the freedom rtc data channel.
   // |label_| is the rtcDataChannel_.getLabel() result
   constructor(private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel,
-              private label_:string) {
+              private label_ = '') {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
     this.toPeerDataBytes_ = 0;
@@ -408,6 +408,16 @@ export class DataChannelClass implements DataChannel {
     var s = this.getLabel() + ': isOpen_=' + this.isOpen_;
     return s;
   }
+
+  // This setter is not part of the DataChannel interface, and is only for
+  // use by the static constructor.
+  public setLabel = (label:string) => {
+    if (this.label_ !== '') {
+      throw new Error('Data Channel label was set twice, to '
+          + this.label_ + ' and ' + label);
+    }
+    this.label_ = label;
+  }
 }  // class DataChannelClass
 
 // Static constructor which constructs a core.rtcdatachannel instance
@@ -420,9 +430,13 @@ export function createFromFreedomId(id:string) : Promise<DataChannel> {
 // given a core.rtcdatachannel instance.
 export function createFromRtcDataChannel(
     rtcDataChannel:freedom_RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
+  // We need to construct the data channel synchronously to avoid missing any
+  // early 'onmessage' events.
+  var dc = new DataChannelClass(rtcDataChannel);
   return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
     return rtcDataChannel.getLabel().then((label:string) => {
-      return new DataChannelClass(rtcDataChannel, label);
+      dc.setLabel(label);
+      return dc;
     });
   });
 }
