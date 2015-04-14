@@ -1,5 +1,3 @@
-
-
 /**
  * Represents an entity whose state can be captured and restored, such as
  * with storage in a repository and subsequent retrieval.
@@ -7,7 +5,7 @@
  * The interface represents state as an object, not as JSON text. JSON
  * serialization, if appropriate, occurs outside of this interface.
  */
-export interface Persistent {
+interface Persistent {
 
   /**
    * Returns the prefix string for saving / loading the object from storage.
@@ -51,4 +49,4 @@ export interface Persistent {
 
 }  // interface Core.Persistent
 
-
+export = Persistent;

@@ -305,7 +305,7 @@ module Core {
       delete this.clientToInstanceMap_[clientId];
     }
 
-    public currentStateForUI = () : UI.UserMessage => {
+    public currentStateForUI = () : social.UserData => {
       if ('pending' == this.name) {
         log.warn('Not showing UI without profile');
         return  null;

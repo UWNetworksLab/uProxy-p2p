@@ -28,7 +28,7 @@ describe('UI.UserInterface', () => {
   });
 
   function getUserAndInstance(
-      userId :string, userName :string, instanceId :string) : UI.UserMessage {
+      userId :string, userName :string, instanceId :string) : social.UserData {
     return {
       network: 'testNetwork',
       user: {

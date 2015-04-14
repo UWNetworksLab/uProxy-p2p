@@ -224,7 +224,7 @@ module UI {
       core.onUpdate(uProxy.Update.NETWORK, this.syncNetwork_);
 
       // Attach handlers for USER updates.
-      core.onUpdate(uProxy.Update.USER_SELF, (payload :UI.UserMessage) => {
+      core.onUpdate(uProxy.Update.USER_SELF, (payload :social.UserData) => {
         // Instead of adding to the roster, update the local user information.
         console.log('uProxy.Update.USER_SELF:', payload);
         if (!model.onlineNetwork ||
@@ -238,7 +238,7 @@ module UI {
         model.onlineNetwork.imageData = profile.imageData;
         model.onlineNetwork.userName = profile.name;
       });
-      core.onUpdate(uProxy.Update.USER_FRIEND, (payload :UI.UserMessage) => {
+      core.onUpdate(uProxy.Update.USER_FRIEND, (payload :social.UserData) => {
         console.log('uProxy.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
       });
@@ -672,7 +672,7 @@ module UI {
     /**
      * Synchronize data about some friend.
      */
-    public syncUser = (payload :UI.UserMessage) => {
+    public syncUser = (payload :social.UserData) => {
       if (!model.onlineNetwork || model.onlineNetwork.name != payload.network) {
         // Ignore all user updates when the network is offline.
         // These user updates may come in asynchrously after logging out of a

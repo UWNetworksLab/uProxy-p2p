@@ -165,7 +165,7 @@ import user = require('./user');
      */
     protected prepareLocalInstance_ = (userId :string) : Promise<void> => {
       var key = this.name + userId;
-      return storage.load<Instance>(key).then((result :Instance) => {
+      return storage.load<social.InstanceData>(key).then((result :social.InstanceData) => {
         this.myInstance = new Core.LocalInstance(this, userId, result);
         log.info('loaded local instance from storage',
                  result, this.myInstance.instanceId);
@@ -173,7 +173,7 @@ import user = require('./user');
         this.myInstance = new Core.LocalInstance(this, userId);
         log.info('generating new local instance',
                  this.myInstance.instanceId);
-        return storage.save<Instance>(key, this.myInstance.currentState()).catch((e) => {
+        return storage.save<social.InstanceData>(key, this.myInstance.currentState()).catch((e) => {
           log.error('Could not save new LocalInstance', this.myInstance.instanceId, e.stack);
         });
       });
@@ -348,7 +348,7 @@ import user = require('./user');
           name: profile.name,
           imageData: profile.imageData
         };
-        ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
+        ui.update(uProxy.Update.USER_SELF, <social.UserData>{
           network: this.name,
           user:    userProfileMessage
         });
@@ -615,7 +615,7 @@ import user = require('./user');
     }
 
     public getNetworkState = () : NetworkState => {
-      var rosterState : {[userId :string] :UI.UserMessage} = {};
+      var rosterState : {[userId :string] :social.UserData} = {};
       for (var userId in this.roster) {
         var userState = this.roster[userId].currentStateForUI()
         if (userState !== null) {

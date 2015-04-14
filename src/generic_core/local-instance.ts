@@ -6,8 +6,9 @@
  */
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import social_types = require('../interfaces/social');
-import uproxy_types = require('../interfaces/uproxy');
+import social = require('../interfaces/social');
+
+import Persistent = require('../interfaces/persistent');
 
 module Core {
   var log :logging.Log = new logging.Log('local-instance');
@@ -17,7 +18,7 @@ module Core {
   // TODO: gather up uses of random and put them into a common directory in
   // uproxy-lib, or directly use end-to-end implementation.
   export class LocalInstance
-      implements uproxy_types.Instance, uproxy_types.Persistent {
+      implements social.InstanceData, Persistent {
 
     public instanceId  :string;
     public keyHash     :string;
@@ -35,7 +36,7 @@ module Core {
      */
     public constructor(public network :social_types.Network,
                        public userId :string,
-                       load ?:uproxy_types.Instance) {
+                       load ?:social.InstanceData) {
       if (load) {
         this.restoreState(load);
         return;
@@ -86,13 +87,13 @@ module Core {
     /**
      * TODO: Come up with a better typing for this.
      */
-    public currentState = () :uproxy_types.Instance => {
+    public currentState = () :social.InstanceData => {
       return {
         instanceId:  this.instanceId,
         keyHash:     this.keyHash,
       };
     }
-    public restoreState = (state:uproxy_types.Instance) :void => {
+    public restoreState = (state:social.InstanceData) :void => {
       this.instanceId = state.instanceId;
       this.keyHash = state.keyHash;
     }

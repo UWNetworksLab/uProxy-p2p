@@ -366,8 +366,8 @@ module Core {
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
     // TODO: bad smell: remote-instance should not need to know the structure of
-    // UI message data.
-    public currentStateForUi = () :InstanceUiData => {
+    // UI message data. Maybe rename to |getInstanceData|?
+    public currentStateForUi = () :InstanceData => {
       return {
         instanceId:             this.instanceId,
         description:            this.description,

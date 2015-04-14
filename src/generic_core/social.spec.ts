@@ -94,7 +94,7 @@ describe('Social.FreedomNetwork', () => {
       });
 
       var promises :Promise<void>[] = [];
-      promises.push(<any>storage.save<Instance>('mockmockmyself', {
+      promises.push(<any>storage.save<social.InstanceData>('mockmockmyself', {
           instanceId: 'dummy-instance-id',
           keyHash: ''
       }));

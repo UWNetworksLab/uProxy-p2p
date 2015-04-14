@@ -8,11 +8,11 @@
 
 
 // Renamings:
-//   uProxy.* => uproxy_types.*    // from uproxy.d.ts
-//   Instance => uproxy_types.Instance
-//   Core.Persistent => uproxy_types.Persistent
-//   UI.UserProfileMessage => uproxy_types.UserProfileMessage
-
+//   Instance => user.BaseInstance
+//   Core.Persistent => Persistent [ = require('interface/persistent'); ]
+//   UI.UserProfileMessage => social.UserProfileData
+//   UI.Instance => social.InstanceData
+//   UI.UserMessage => social.UserData
 
 export var STORAGE_VERSION = 1;
 export var MESSAGE_VERSION = 1;

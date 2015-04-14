@@ -158,7 +158,7 @@ describe('Core.User', () => {
 
   });  // describe communications
 
-  var instanceData :Instance = {
+  var instanceData = {
     instanceId: 'fakeinstance',
     keyHash: null,
     status: null,

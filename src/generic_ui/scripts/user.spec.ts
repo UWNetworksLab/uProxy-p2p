@@ -12,9 +12,8 @@ describe('UI.User', () => {
     user.update(makeUpdateMessage({}));
   });
 
-  // TODO: bad smell: tests for a user should not depend on shape of UI specific
-  // data.
-  function getInstance(id :string, description :string) :InstanceUiData {
+  // TODO: rename to getInstanceData?
+  function getInstance(id :string, description :string) :InstanceData {
     return {
       instanceId: id,
       description: description,
@@ -28,7 +27,7 @@ describe('UI.User', () => {
 
   // adds any missing fields to an object to make it a valid update message
   function makeUpdateMessage(update :Object) {
-    var result :UI.UserMessage = <UI.UserMessage>update;
+    var result :social.UserData = <social.UserData>update;
 
     _.defaults(result, {
       network: 'testNetwork',
