@@ -600,10 +600,7 @@ module.exports = (grunt) ->
       devInModuleEnv:
         src: [
           devBuildPath + '/interfaces/*.ts'
-          devBuildPath + '/generic_core/consent.ts'
-          devBuildPath + '/generic_core/diagnose.ts'
-          devBuildPath + '/generic_core/firewall.ts'
-          devBuildPath + '/generic_core/local-instance.ts'
+          devBuildPath + '/generic_core/*.ts'
           #devBuildPath + '/generic_core/**/*.ts'
           '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'

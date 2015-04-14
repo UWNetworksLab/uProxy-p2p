@@ -8,7 +8,7 @@
 /// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
 
 module Core {
-  var log :Logging.Log = new Logging.Log('remote-connection');
+  var log :logging.Log = new logging.Log('remote-connection');
 
   export class RemoteConnection {
 

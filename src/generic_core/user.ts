@@ -28,7 +28,7 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 
 module Core {
-  var log :Logging.Log = new Logging.Log('user');
+  var log :logging.Log = new logging.Log('user');
 
   /**
    * Core.User

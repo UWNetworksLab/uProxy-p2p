@@ -20,6 +20,9 @@
 /// <reference path='../freedom/typings/social.d.ts' />
 /// <reference path='../networking-typings/communications.d.ts' />
 
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+
+
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 var loggingProvider = freedom['loggingprovider']();
 loggingProvider.setConsoleFilter(['*:I']);
@@ -27,7 +30,7 @@ loggingProvider.setBufferedLogFilter(['*:D']);
 
 declare var UPROXY_VERSION;
 
-var log :Logging.Log = new Logging.Log('core');
+var log :logging.Log = new logging.Log('core');
 log.info('Loading core', UPROXY_VERSION);
 
 var storage = new Core.Storage();

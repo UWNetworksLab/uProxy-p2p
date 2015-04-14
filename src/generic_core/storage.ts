@@ -11,7 +11,7 @@
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 module Core {
-  var log :Logging.Log = new Logging.Log('storage');
+  var log :logging.Log = new logging.Log('storage');
 
   // Platform-independent storage provider.
   var fStorage :freedom_Storage = freedom['storage']();

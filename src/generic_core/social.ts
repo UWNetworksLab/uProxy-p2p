@@ -44,7 +44,7 @@ import user = require('./user');
     }
   }
 
-  var log :Logging.Log = new Logging.Log('social');
+  var log :logging.Log = new logging.Log('social');
 
   var LOGIN_TIMEOUT :number = 5000;  // ms
 

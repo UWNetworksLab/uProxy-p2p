@@ -15,7 +15,7 @@
 /// <reference path='../third_party/typings/lodash/lodash.d.ts' />
 
 module Core {
-  var log :Logging.Log = new Logging.Log('remote-instance');
+  var log :logging.Log = new logging.Log('remote-instance');
 
   /**
    * RemoteInstance - represents a remote uProxy installation.
