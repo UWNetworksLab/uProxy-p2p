@@ -139,7 +139,7 @@ module UI {
    * for UI interaction.
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
-  export class UserInterface implements uProxy.UIAPI {
+  export class UserInterface implements uProxy.UiApi {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
     public view :uProxy.View;
@@ -233,7 +233,7 @@ module UI {
               payload.network);
           return;
         }
-        var profile :UI.UserProfileMessage = payload.user;
+        var profile :uproxy_types.UserProfileMessage = payload.user;
         model.onlineNetwork.userId = profile.userId;
         model.onlineNetwork.imageData = profile.imageData;
         model.onlineNetwork.userName = profile.name;

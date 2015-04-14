@@ -21,8 +21,8 @@
 
 var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreAPI
-var core :CoreConnector;  // way for ui to speak to a uProxy.CoreAPI
+var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
+var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
 var chromeBrowserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked

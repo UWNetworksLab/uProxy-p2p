@@ -365,7 +365,9 @@ module Core {
      * Returns a snapshot of a RemoteInstance's state for the UI. This includes
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public currentStateForUi = () :UI.Instance => {
+    // TODO: bad smell: remote-instance should not need to know the structure of
+    // UI message data.
+    public currentStateForUi = () :InstanceUiData => {
       return {
         instanceId:             this.instanceId,
         description:            this.description,

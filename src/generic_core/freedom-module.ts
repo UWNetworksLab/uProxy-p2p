@@ -47,11 +47,11 @@ var remoteProxyInstance : Core.RemoteInstance = null;
 var copyPasteConnection : Core.RemoteConnection = null;
 
 // Entry-point into the UI.
-class UIConnector implements uProxy.UIAPI {
+class UIConnector implements uProxy.UiApi {
 
   /**
    * Send an Update message to the UI.
-   * TODO: Turn this private and make outside accesses directly based on UIAPI.
+   * TODO: Turn this private and make outside accesses directly based on UiApi.
    */
   public update = (type:uProxy.Update, data?:any) => {
     var printableType :string = uProxy.Update[type];
@@ -93,7 +93,7 @@ var ui = new UIConnector();
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
  */
-class uProxyCore implements uProxy.CoreAPI {
+class uProxyCore implements uProxy.CoreApi {
   private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
                                 {urls: ['stun:stun1.l.google.com:19302']},
                                 {urls: ['stun:stun2.l.google.com:19302']},

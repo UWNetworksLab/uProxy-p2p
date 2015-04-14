@@ -14,10 +14,12 @@
  *    visual trickery.  See http://www.unicode.org/reports/tr36/#visual_spoofing
  */
 
-/// <reference path='../freedom/typings/social.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
 
 module Firewall {
-  var log :Logging.Log = new Logging.Log('firewall');
+  var log :logging.Log = new logging.Log('firewall');
 
   export enum Severity {
     // Incorrect input.  No claims on intent.
@@ -64,7 +66,7 @@ module Firewall {
 
   export function isPredefinedOnObject(s :string) : boolean {
     // Returns whether 's' is predefined on Object, which is just a little fishy.
-    var tester = {};
+    var tester :any = {};
     return (typeof(tester[s]) != 'undefined');
   }
 
@@ -85,7 +87,11 @@ module Firewall {
     }
   }
 
-  var USER_PROFILE_SCHEMA = {
+  interface Schema {
+    [attr:string]:string;
+  }
+
+  var USER_PROFILE_SCHEMA :Schema = {
     'userId' : 'string',
     'timestamp' : '?number',
     'name' : '?string',
@@ -95,7 +101,7 @@ module Firewall {
     'lastSeen' : '?number'
   };
 
-  function checkSchema(object, schema) : boolean {
+  function checkSchema(object:any, schema:Schema) :boolean {
     if (object === null || typeof object !== 'object') {
       return false;
     }
@@ -165,7 +171,7 @@ module Firewall {
     return true;
   }
 
-  var CLIENT_STATE_SCHEMA = {
+  var CLIENT_STATE_SCHEMA :Schema = {
     'userId' : 'string',
     'clientId' : 'string',
     'status' : 'string',
@@ -213,7 +219,7 @@ module Firewall {
     return true;
   }
 
-  var INCOMING_MESSAGE_SCHEMA = {
+  var INCOMING_MESSAGE_SCHEMA :Schema = {
     'from' : 'object',
     'message' : 'string'
   };

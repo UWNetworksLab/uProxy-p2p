@@ -17,18 +17,19 @@
  *    },
  *    ...
  */
-/// <reference path='firewall.ts' />
-/// <reference path='local-instance.ts' />
-/// <reference path='user.ts' />
-/// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/network.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
 
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/social.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
 
-module Social {
+import firewall = require('./firewall');
+import local_instance = require('./local-instance');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import social_types = require('../interfaces/social');
+import uproxy_types = require('../interfaces/uproxy');
+import user = require('./user');
+
+
   var NETWORK_OPTIONS = {
     'Google': {
       isFirebase: false,
@@ -342,7 +343,7 @@ module Social {
         log.info('Received own XMPP profile', profile);
 
         // Update UI with own information.
-        var userProfileMessage :UI.UserProfileMessage = {
+        var userProfileMessage :uproxy_types.UserProfileMessage = {
           userId: profile.userId,
           name: profile.name,
           imageData: profile.imageData
@@ -692,7 +693,6 @@ module Social {
 
   }  // class ManualNetwork
 
-}  // module Social
 
 function freedomClientToUproxyClient(
   freedomClientState :freedom_Social.ClientState) : UProxyClient.State {

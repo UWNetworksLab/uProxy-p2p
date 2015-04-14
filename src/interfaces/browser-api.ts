@@ -1,9 +1,11 @@
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+
 // Describes the interface for functions that have different implications
 // for different browsers.
 
 export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
-  startUsingProxy(endpoint:Net.Endpoint) :void;
+  startUsingProxy(endpoint:net.Endpoint) :void;
   stopUsingProxy() :void;
   // Set the browser icon for the extension/add-on.
   setIcon(iconFile :string) :void;
@@ -12,6 +14,7 @@ export interface BrowserAPI {
   // Open a new tab
   openTab(url :string) :void;
   bringUproxyToFront() :void;
+  // TODO: write comment to explain what browserSpecificElement is.
   browserSpecificElement :string;
 
   /*

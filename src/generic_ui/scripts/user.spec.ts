@@ -1,5 +1,5 @@
 /// <reference path='user.ts' />
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 describe('UI.User', () => {
   var user :UI.User;
@@ -12,7 +12,9 @@ describe('UI.User', () => {
     user.update(makeUpdateMessage({}));
   });
 
-  function getInstance(id :string, description :string) :UI.Instance {
+  // TODO: bad smell: tests for a user should not depend on shape of UI specific
+  // data.
+  function getInstance(id :string, description :string) :InstanceUiData {
     return {
       instanceId: id,
       description: description,

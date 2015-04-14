@@ -20,7 +20,7 @@ interface FullfillAndReject {
  *    Core --[ UPDATES  ]--> UI
  *    UI   --[ COMMANDS ]--> Core
  */
-class CoreConnector implements uProxy.CoreAPI {
+class CoreConnector implements uProxy.CoreApi {
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
@@ -120,7 +120,7 @@ class CoreConnector implements uProxy.CoreAPI {
     }
   }
 
-  // --- CoreAPI interface requirements (sending COMMANDS) ---
+  // --- CoreApi interface requirements (sending COMMANDS) ---
 
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.

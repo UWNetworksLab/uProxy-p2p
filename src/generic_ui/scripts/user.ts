@@ -37,7 +37,10 @@ module UI {
     public isSharingWithMe   :boolean = false;
     // 'filter'-related flags which indicate whether the user should be
     // currently visible in the UI.
-    public offeringInstances :UI.Instance[] = [];
+    //
+    // TODO: bad smell: user object should not have to know about the shape of
+    // data for the UI, let alone be storing data for the UI.
+    public offeringInstances :InstanceUiData[] = [];
     public allInstanceIds :string[] = [];
 
     public getExpanded :boolean = false;
@@ -65,7 +68,7 @@ module UI {
      * Update user details.
      */
     public update = (payload :UI.UserMessage) => {
-      var profile :UI.UserProfileMessage = payload.user;
+      var profile :uproxy_types.UserProfileMessage = payload.user;
       if (this.userId !== profile.userId) {
         console.error('Unexpected userId: ' + profile.userId);
       }
