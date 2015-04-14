@@ -16,23 +16,33 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/social.d.ts' />
 
-import diagnose = require('./diagnote-nat');
+import diagnose = require('./diagnose-nat');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-networking/net/net');
-import social = require('./social');
-import storage = require('./storage');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import social = require('../interfaces/social');
+import social_network = require('./social');
+import local_storage = require('./storage');
+import remote_instance = require('./remote-instance');
+import remote_connection = require('./remote-connection');
+import user_interface = require('../interfaces/ui');
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 var loggingProvider = freedom['loggingprovider']();
 loggingProvider.setConsoleFilter(['*:I']);
 loggingProvider.setBufferedLogFilter(['*:D']);
 
-declare var UPROXY_VERSION;
+declare var UPROXY_VERSION :Object;
 
 var log :logging.Log = new logging.Log('core');
 log.info('Loading core', UPROXY_VERSION);
 
-var storage = new Core.Storage();
+var storage = new local_storage.Storage();
+var core = new uProxyCore();
+var ui = new UIConnector();
+
+// Prepare all the social providers from the manifest.
+social_network.initializeNetworks();
 
 // This is the channel to speak to the UI component of uProxy.
 // The UI is running from the privileged part of freedom, so we can just set
@@ -41,15 +51,15 @@ var bgAppPageChannel = freedom();
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-var remoteProxyInstance : remote_instance.RemoteInstance = null;
+var remoteProxyInstance :remote_instance.RemoteInstance = null;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
 // without an instance)
-var copyPasteConnection : Core.RemoteConnection = null;
+var copyPasteConnection :remote_connection.RemoteConnection = null;
 
 // Entry-point into the UI.
-class UIConnector implements uProxy.UiApi {
+class UIConnector implements user_interface.UiApi {
 
   /**
    * Send an Update message to the UI.
@@ -58,7 +68,7 @@ class UIConnector implements uProxy.UiApi {
   public update = (type:uproxy_core_api.Update, data?:any) => {
     var printableType :string = uproxy_core_api.Update[type];
     if (type == uproxy_core_api.Update.COMMAND_FULFILLED
-        && data['command'] == uProxy.Command.GET_LOGS){
+        && data['command'] == uproxy_core_api.Command.GET_LOGS){
       log.debug('sending logs to UI', {
         type: printableType,
         data: 'logs not printed to prevent duplication if logs are sent again.'
@@ -89,7 +99,6 @@ class UIConnector implements uProxy.UiApi {
     this.update(uproxy_core_api.Update.USER_FRIEND, payload);
   }
 }
-var ui = new UIConnector();
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
@@ -105,7 +114,7 @@ class uProxyCore implements uProxy.CoreApi {
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
   // variable can modify DEFAULT_STUN_SERVERS_ as well.
-  public globalSettings :Core.GlobalSettings
+  public globalSettings :uproxy_core_api.GlobalSettings
       = {description: '',
          stunServers: this.DEFAULT_STUN_SERVERS_.slice(0),
          hasSeenSharingEnabledScreen: false,
@@ -118,10 +127,10 @@ class uProxyCore implements uProxy.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
-    copyPasteConnection = new Core.RemoteConnection(ui.update);
+    copyPasteConnection = new remote_connection.RemoteConnection(ui.update);
 
-    this.loadGlobalSettings = storage.load<Core.GlobalSettings>('globalSettings')
-        .then((globalSettingsObj :Core.GlobalSettings) => {
+    this.loadGlobalSettings = storage.load<uproxy_core_api.GlobalSettings>('globalSettings')
+        .then((globalSettingsObj :uproxy_core_api.GlobalSettings) => {
           log.info('Loaded global settings', globalSettingsObj);
           this.globalSettings = globalSettingsObj;
           // If no custom STUN servers were found in storage, use the default
@@ -158,7 +167,7 @@ class uProxyCore implements uProxy.CoreApi {
   /**
    * Install a handler for commands received from the UI.
    */
-  public onCommand = (cmd :uProxy.Command, handler:any) => {
+  public onCommand = (cmd :uproxy_core_api.Command, handler:any) => {
     bgAppPageChannel.on('' + cmd,
       (args :uProxy.PromiseCommand) => {
         // Call handler with args.data and ignore other fields in args
@@ -171,7 +180,7 @@ class uProxyCore implements uProxy.CoreApi {
    * Install a handler for promise commands received from the UI.
    * Promise commands return an ack or error to the UI.
    */
-  public onPromiseCommand = (cmd :uProxy.Command,
+  public onPromiseCommand = (cmd :uproxy_core_api.Command,
                              handler :(data ?:any) => Promise<any>) => {
     var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
       // Ensure promiseId is set for all requests
@@ -286,9 +295,9 @@ class uProxyCore implements uProxy.CoreApi {
    * instances.
    */
 
-  public updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
+  public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
     newSettings.version = uProxy.STORAGE_VERSION;
-    storage.save<Core.GlobalSettings>('globalSettings', newSettings).catch((e) => {
+    storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings).catch((e) => {
       log.error('Could not save globalSettings to storage', e.stack);
     });
 
@@ -440,7 +449,7 @@ class uProxyCore implements uProxy.CoreApi {
     return user.getInstance(path.instanceId);
   }
 
-  public getUser = (path :UserPath) : Core.User => {
+  public getUser = (path :UserPath) : social.User => {
     var network = Social.getNetwork(path.network.name, path.network.userId);
     if (!network) {
       log.error('No network', path.network.name);
@@ -626,63 +635,53 @@ class uProxyCore implements uProxy.CoreApi {
   }
 }  // class uProxyCore
 
-
-// Prepare all the social providers from the manifest.
-Social.initializeNetworks();
-var core = new uProxyCore();
-
-function _validateKeyHash(keyHash:string) {
-  log.warn('keyHash validation not yet implemented');
-  return true;
-}
-
 // --------------------------------------------------------------------------
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
-core.onCommand(uProxy.Command.GET_INITIAL_STATE, ui.sendInitialState);
+core.onCommand(uproxy_core_api.Command.GET_INITIAL_STATE, ui.sendInitialState);
 // When the login message is sent from the extension, assume it's explicit.
-core.onPromiseCommand(uProxy.Command.LOGIN, core.login);
-core.onPromiseCommand(uProxy.Command.LOGOUT, core.logout)
+core.onPromiseCommand(uproxy_core_api.Command.LOGIN, core.login);
+core.onPromiseCommand(uproxy_core_api.Command.LOGOUT, core.logout)
 
 // TODO: UI-initiated Instance Handshakes need to be made specific to a network.
-// core.onCommand(uProxy.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
+// core.onCommand(uproxy_core_api.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE,
 //                core.sendInstanceHandshakeMessage);
-core.onCommand(uProxy.Command.MODIFY_CONSENT, core.modifyConsent);
+core.onCommand(uproxy_core_api.Command.MODIFY_CONSENT, core.modifyConsent);
 
-core.onPromiseCommand(uProxy.Command.START_PROXYING_COPYPASTE_GET,
+core.onPromiseCommand(uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET,
                       core.startCopyPasteGet);
 
-core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_GET,
+core.onPromiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_GET,
                       core.stopCopyPasteGet);
 
-core.onCommand(uProxy.Command.START_PROXYING_COPYPASTE_SHARE,
+core.onCommand(uproxy_core_api.Command.START_PROXYING_COPYPASTE_SHARE,
                core.startCopyPasteShare);
 
-core.onPromiseCommand(uProxy.Command.STOP_PROXYING_COPYPASTE_SHARE,
+core.onPromiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE,
                       core.stopCopyPasteShare);
 
-core.onCommand(uProxy.Command.COPYPASTE_SIGNALLING_MESSAGE,
+core.onCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE,
                core.sendCopyPasteSignal);
 
-core.onPromiseCommand(uProxy.Command.START_PROXYING, core.start);
-core.onCommand(uProxy.Command.STOP_PROXYING, core.stop);
+core.onPromiseCommand(uproxy_core_api.Command.START_PROXYING, core.start);
+core.onCommand(uproxy_core_api.Command.STOP_PROXYING, core.stop);
 
 // TODO: Implement this or remove it.
-// core.onCommand(uProxy.Command.CHANGE_OPTION, (data) => {
+// core.onCommand(uproxy_core_api.Command.CHANGE_OPTION, (data) => {
 //   log.warn('CHANGE_OPTION yet to be implemented');
 //   // TODO: Handle changes that might affect proxying.
 // });
 
 // TODO: make the invite mechanism an actual process.
-// core.onCommand(uProxy.Command.INVITE, (userId:string) => {
+// core.onCommand(uproxy_core_api.Command.INVITE, (userId:string) => {
 // });
 
-core.onCommand(uProxy.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
+core.onCommand(uproxy_core_api.Command.HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
                core.handleManualNetworkInboundMessage);
-core.onCommand(uProxy.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
-core.onPromiseCommand(uProxy.Command.SEND_FEEDBACK, core.sendFeedback);
-core.onPromiseCommand(uProxy.Command.GET_LOGS, core.getLogsAndNetworkInfo);
-core.onPromiseCommand(uProxy.Command.GET_NAT_TYPE, core.getNatType);
+core.onCommand(uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS, core.updateGlobalSettings);
+core.onPromiseCommand(uproxy_core_api.Command.SEND_FEEDBACK, core.sendFeedback);
+core.onPromiseCommand(uproxy_core_api.Command.GET_LOGS, core.getLogsAndNetworkInfo);
+core.onPromiseCommand(uproxy_core_api.Command.GET_NAT_TYPE, core.getNatType);
 
 // Now that this module has got itself setup, it sends a 'ready' message to the
 // freedom background page.

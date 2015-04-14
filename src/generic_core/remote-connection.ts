@@ -10,7 +10,7 @@ import net = require('../../../third_party/uproxy-networking/net/net');
 import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_rtc/socks_to_rtc');
 
-module Core {
+// module Core {
   var log :logging.Log = new logging.Log('remote-connection');
 
   export class RemoteConnection {
@@ -254,4 +254,4 @@ module Core {
       });
     }
   }
-}
+// }

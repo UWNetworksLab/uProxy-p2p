@@ -11,8 +11,8 @@
 /// <reference path='../mocks/rtc-to-net.ts' />
 /// <reference path='../mocks/socks-to-rtc.ts' />
 
-describe('Core.RemoteConnection', () => {
-  var connection :Core.RemoteConnection;
+describe('remote_connection.RemoteConnection', () => {
+  var connection :remote_connection.RemoteConnection;
   var socksToRtc :SocksToRtcMock
   var rtcToNet :RtcToNetMock;
   var updateSpy :(x :uproxy_core_api.Update, data?:Object) => void;
@@ -34,7 +34,7 @@ describe('Core.RemoteConnection', () => {
     spyOn(RtcToNet, 'RtcToNet').and.returnValue(rtcToNet);
 
     updateSpy = jasmine.createSpy('updateSpy');
-    connection = new Core.RemoteConnection(updateSpy);
+    connection = new remote_connection.RemoteConnection(updateSpy);
   });
 
   describe('client setup', () => {

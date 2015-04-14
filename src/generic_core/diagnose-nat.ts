@@ -1,5 +1,6 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
+/// <reference path='../../../third_party/sha1/sha1.d.ts' />
 
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');

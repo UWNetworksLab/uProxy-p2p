@@ -96,7 +96,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       }
       var ready :uProxy.Payload = {
         cmd: 'emit',
-        type: uProxy.Command.GET_INITIAL_STATE,
+        type: uproxy_core_api.Command.GET_INITIAL_STATE,
         promiseId: 0
       }
       this.send(ready);
@@ -267,7 +267,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   public restart() {
     var restart :uProxy.Payload = {
       cmd: 'emit',
-      type: uProxy.Command.RESTART,
+      type: uproxy_core_api.Command.RESTART,
       promiseId: 0
     }
     this.send(restart);

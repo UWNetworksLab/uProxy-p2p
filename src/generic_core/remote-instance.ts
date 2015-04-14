@@ -17,7 +17,7 @@ import consent = require('./consent');
 import Persistent = require('../interfaces/persistent');
 
 
-module Core {
+// module Core {
   var log :logging.Log = new logging.Log('remote-instance');
 
   /**
@@ -75,7 +75,7 @@ module Core {
     private startSocksToRtcTimeout_ = null;
     private startRtcToNetTimeout_ = null;
 
-    private connection_ :Core.RemoteConnection = null;
+    private connection_ :remote_connection.RemoteConnection = null;
 
     // By default, or when a successful connection is closed, this promise will
     // reject to indicate the remote connection is not ready to accept signals.
@@ -98,7 +98,7 @@ module Core {
         // The User which this instance belongs to.
         public user :Core.User,
         public instanceId :string) {
-      this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
+      this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
       this.setSharerToNotReady_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
@@ -406,4 +406,4 @@ module Core {
   // TODO: Implement obfuscation.
   export enum ObfuscationType {NONE, RANDOM1 }
 
-}  // module Core
+// }  // module Core

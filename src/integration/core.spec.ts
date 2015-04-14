@@ -110,14 +110,14 @@ describe('uproxy core', function() {
 
   it('logs in', (done) => {
     var promises = [];
-    alice.emit('' + uProxy.Command.LOGIN,
+    alice.emit('' + uproxy_core_api.Command.LOGIN,
                      <uProxy.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
     promises.push(new Promise(function(fulfill, reject) {
       alice.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
         fulfill();
       });
     }));
-    bob.emit('' + uProxy.Command.LOGIN,
+    bob.emit('' + uproxy_core_api.Command.LOGIN,
                      <uProxy.PromiseCommand>{data: 'Google', promiseId: ++promiseId});
     promises.push(new Promise(function(fulfill, reject) {
       bob.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
@@ -153,9 +153,9 @@ describe('uproxy core', function() {
         hasSeenWelcome: false,
         allowNonUnicast: true
       };
-      alice.emit('' + uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+      alice.emit('' + uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
                  {data: globalSettings});
-      bob.emit('' + uProxy.Command.UPDATE_GLOBAL_SETTINGS,
+      bob.emit('' + uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
                {data: globalSettings});
       done();
     });
@@ -179,14 +179,14 @@ describe('uproxy core', function() {
       instanceId: BOB.INSTANCE_ID
     };
 
-    alice.emit('' + uProxy.Command.MODIFY_CONSENT,
+    alice.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                      {data: {path: bobPath, action:uProxy.ConsentUserAction.REQUEST}});
     var bobHandleFriend = function(data) {
       if (data.user.userId === ALICE.ANONYMIZED_ID
           && data.consent.remoteRequestsAccessFromLocal
           && !data.consent.localGrantsAccessToRemote) {
         bob.off('' + uproxy_core_api.Update.USER_FRIEND, bobHandleFriend);
-        bob.emit('' + uProxy.Command.MODIFY_CONSENT,
+        bob.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                          {data: {path: alicePath, action:uProxy.ConsentUserAction.OFFER}});
       }
     }
@@ -203,7 +203,7 @@ describe('uproxy core', function() {
     alice.on('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
   });
   var startProxying = function() {
-    alice.emit('' + uProxy.Command.START_PROXYING,
+    alice.emit('' + uproxy_core_api.Command.START_PROXYING,
                {data: bobPath, promiseId: ++promiseId});
     var aliceStarted = new Promise(function(fulfill, reject) {
       alice.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
@@ -227,7 +227,7 @@ describe('uproxy core', function() {
   }
 
   var stopProxying = function() {
-     alice.emit('' + uProxy.Command.STOP_PROXYING,
+     alice.emit('' + uproxy_core_api.Command.STOP_PROXYING,
                {data: bobPath});
     // alice not proxying
     var bobStopped = new Promise(function(fulfill, reject) {
@@ -264,21 +264,21 @@ describe('uproxy core', function() {
   });
 
   it('log out and modify permissions for offline user', (done) => {
-    alice.emit('' + uProxy.Command.LOGOUT,
+    alice.emit('' + uproxy_core_api.Command.LOGOUT,
                {data: {name: 'Google', userId: ALICE.EMAIL}, promiseId: ++promiseId});
 
     alice.once('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
       expect(data.promiseId).toEqual(promiseId);
-      bob.emit('' + uProxy.Command.MODIFY_CONSENT,
+      bob.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                        {data: {path: alicePath, action:uProxy.ConsentUserAction.CANCEL_OFFER}});
-      bob.emit('' + uProxy.Command.LOGOUT,
+      bob.emit('' + uproxy_core_api.Command.LOGOUT,
                  {data: {name: 'Google', userId: BOB.EMAIL}, promiseId: ++promiseId});
       done();
     });
   });
 
   it('log back in and check permissions', (done) => {
-    alice.emit('' + uProxy.Command.LOGIN,
+    alice.emit('' + uproxy_core_api.Command.LOGIN,
                {data: 'Google', promiseId: ++promiseId});
     var aliceLoggedIn = new Promise((F, R) => {
       alice.on('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
@@ -296,10 +296,10 @@ describe('uproxy core', function() {
             && data.offeringInstances.length > 0
             && data.offeringInstances[0].instanceId === BOB.INSTANCE_ID
             && !data.consent.localGrantsAccessToRemote) {
-          alice.emit('' + uProxy.Command.MODIFY_CONSENT,
+          alice.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                            {data: {path: bobPath, action:uProxy.ConsentUserAction.OFFER}});
           alice.off('' + uproxy_core_api.Update.USER_FRIEND, aliceHandleFriend);
-          bob.emit('' + uProxy.Command.LOGIN,
+          bob.emit('' + uproxy_core_api.Command.LOGIN,
                    {data: 'Google', promiseId: ++promiseId});
           // After bob logs in, consent state is restored from storage correctly.
           var aliceReceivedConsent = new Promise(function(fulfill, reject) {
@@ -338,9 +338,9 @@ describe('uproxy core', function() {
   });
 
   it('try proxying again', (done) => {
-    bob.emit('' + uProxy.Command.MODIFY_CONSENT,
+    bob.emit('' + uproxy_core_api.Command.MODIFY_CONSENT,
                      {data: {path: alicePath, action:uProxy.ConsentUserAction.REQUEST}});
-    bob.emit('' + uProxy.Command.START_PROXYING,
+    bob.emit('' + uproxy_core_api.Command.START_PROXYING,
                {data: alicePath, promiseId: ++promiseId});
     bob.on('' + uproxy_core_api.Update.COMMAND_FULFILLED, (data) => {
       if (data.promiseId === 6) {

@@ -48,10 +48,10 @@ class ChromeTabAuth {
   }
 
   private onError_ = (errorText :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, errorText);
+    core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
   }
 
   private sendCredentials_ = (url :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, url);
+    core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
