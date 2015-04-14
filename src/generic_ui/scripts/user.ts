@@ -65,7 +65,7 @@ module UI {
      * Update user details.
      */
     public update = (payload :social.UserData) => {
-      var profile :uproxy_types.UserProfileMessage = payload.user;
+      var profile :social.UserProfileMessage = payload.user;
       if (this.userId !== profile.userId) {
         console.error('Unexpected userId: ' + profile.userId);
       }

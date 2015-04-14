@@ -25,8 +25,7 @@
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import social_types = require('../interfaces/social');
-import uproxy_types = require('../interfaces/uproxy');
+import social = require('../interfaces/social');
 import user = require('./user');
 
 
@@ -134,7 +133,7 @@ import user = require('./user');
       online: online,
       userId: userId
     };
-    ui.update(uProxy.Update.NETWORK, payload);
+    ui.update(uproxy_core_api.Update.NETWORK, payload);
   }
 
   // Implements those portions of the Network interface for which the logic is
@@ -343,12 +342,12 @@ import user = require('./user');
         log.info('Received own XMPP profile', profile);
 
         // Update UI with own information.
-        var userProfileMessage :uproxy_types.UserProfileMessage = {
+        var userProfileMessage :social.UserProfileMessage = {
           userId: profile.userId,
           name: profile.name,
           imageData: profile.imageData
         };
-        ui.update(uProxy.Update.USER_SELF, <social.UserData>{
+        ui.update(uproxy_core_api.Update.USER_SELF, <social.UserData>{
           network: this.name,
           user:    userProfileMessage
         });
@@ -508,7 +507,7 @@ import user = require('./user');
                 online: true,
                 userId: freedomClient.userId
               };
-              ui.update(uProxy.Update.NETWORK, payload);
+              ui.update(uproxy_core_api.Update.NETWORK, payload);
             });
           });
       return this.onceLoggedIn_
@@ -667,7 +666,7 @@ import user = require('./user');
                    message :uProxy.Message) : Promise<void> => {
       // TODO: Batch messages.
       // Relay the message to the UI for display to the user.
-      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
+      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
 
       return Promise.resolve<void>();
     }

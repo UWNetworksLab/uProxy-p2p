@@ -2,7 +2,7 @@
  * Chrome oauth provider
  **/
 
-import uproxy_module_api = require('../../../interfaces/uproxy-module');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
 // TODO: review oauth freedo API design: having to depend on global vars is
@@ -48,7 +48,7 @@ class Chrome_oauth {
       stateObj:{redirect:string},
       continuation:(credentials:Object)=> void) {
     this.connector_.sendToUI(
-        uproxy_module_api.Update.GET_CREDENTIALS,
+        uproxy_core_api.Update.GET_CREDENTIALS,
         {url :authUrl, redirect :stateObj.redirect});
     this.connector_.setOnCredentials(continuation);
   }

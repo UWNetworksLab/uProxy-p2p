@@ -15,7 +15,7 @@ describe('Core.RemoteConnection', () => {
   var connection :Core.RemoteConnection;
   var socksToRtc :SocksToRtcMock
   var rtcToNet :RtcToNetMock;
-  var updateSpy :(x :uProxy.Update, data?:Object) => void;
+  var updateSpy :(x :uproxy_core_api.Update, data?:Object) => void;
 
   // TODO replace with jasmine's builtin fail function once
   // grunt-contrib-jasmine includes the latest jasmine version
@@ -131,14 +131,14 @@ describe('Core.RemoteConnection', () => {
 
         // updateSpy should not get called immediately for byte updates
         jasmine.clock().tick(1);
-        expect(updateSpy).not.toHaveBeenCalledWith(uProxy.Update.STATE, jasmine.objectContaining({
+        expect(updateSpy).not.toHaveBeenCalledWith(uproxy_core_api.Update.STATE, jasmine.objectContaining({
           bytesSent: 4321,
           bytesReceived: 1234
         }));
 
         // byte updates should be batched and sent every second
         jasmine.clock().tick(1000);
-        expect(updateSpy).toHaveBeenCalledWith(uProxy.Update.STATE, jasmine.objectContaining({
+        expect(updateSpy).toHaveBeenCalledWith(uproxy_core_api.Update.STATE, jasmine.objectContaining({
           bytesSent: 4321,
           bytesReceived: 1234
         }));

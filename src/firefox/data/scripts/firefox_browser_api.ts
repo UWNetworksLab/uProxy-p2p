@@ -8,7 +8,6 @@
 /// <reference path='../../../third_party/firefox/firefox.d.ts' />
 
 import browser_api =  require('../../../interfaces/browser-api');
-import uproxy_types = require('../../../interfaces/uproxy');
 import user_interface = require('../../../generic_ui/scripts/ui');
 
 var port :ContentScriptPort;

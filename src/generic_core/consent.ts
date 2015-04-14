@@ -1,6 +1,6 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social = require('../interfaces/social');
-import uproxy_module_api = require('../interfaces/uproxy-module');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 module Consent {
   var log :logging.Log = new logging.Log('consent');
@@ -36,32 +36,32 @@ module Consent {
 
   // Returns false on invalid actions.
   export function handleUserAction(
-      state :State, action :uproxy_module_api.ConsentUserAction) :boolean {
+      state :State, action :uproxy_core_api.ConsentUserAction) :boolean {
     switch(action) {
-      case uproxy_module_api.ConsentUserAction.OFFER:
+      case uproxy_core_api.ConsentUserAction.OFFER:
         state.localGrantsAccessToRemote = true;
         state.ignoringRemoteUserRequest = false;
         break;
-      case uproxy_module_api.ConsentUserAction.CANCEL_OFFER:
+      case uproxy_core_api.ConsentUserAction.CANCEL_OFFER:
         state.localGrantsAccessToRemote = false;
         break;
-      case uproxy_module_api.ConsentUserAction.IGNORE_REQUEST:
+      case uproxy_core_api.ConsentUserAction.IGNORE_REQUEST:
         state.ignoringRemoteUserRequest = true;
         break;
-      case uproxy_module_api.ConsentUserAction.UNIGNORE_REQUEST:
+      case uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST:
         state.ignoringRemoteUserRequest = false;
         break;
-      case uproxy_module_api.ConsentUserAction.REQUEST:
+      case uproxy_core_api.ConsentUserAction.REQUEST:
         state.localRequestsAccessFromRemote = true;
         state.ignoringRemoteUserOffer = false;
         break;
-      case uproxy_module_api.ConsentUserAction.CANCEL_REQUEST:
+      case uproxy_core_api.ConsentUserAction.CANCEL_REQUEST:
         state.localRequestsAccessFromRemote = false;
         break;
-      case uproxy_module_api.ConsentUserAction.IGNORE_OFFER:
+      case uproxy_core_api.ConsentUserAction.IGNORE_OFFER:
         state.ignoringRemoteUserOffer = true;
         break;
-      case uproxy_module_api.ConsentUserAction.UNIGNORE_OFFER:
+      case uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER:
         state.ignoringRemoteUserOffer = false;
         break;
       default:

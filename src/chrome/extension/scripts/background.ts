@@ -113,13 +113,13 @@ function initUI() : UI.UserInterface {
   });
 
   chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-  chromeCoreConnector.onUpdate(uProxy.Update.LAUNCH_UPROXY,
+  chromeCoreConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                            chromeBrowserApi.bringUproxyToFront);
   chromeCoreConnector.connect();
 
   core = new CoreConnector(chromeCoreConnector);
   var oAuth = new ChromeTabAuth();
-  chromeCoreConnector.onUpdate(uProxy.Update.GET_CREDENTIALS,
+  chromeCoreConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                            oAuth.login.bind(oAuth));
 
   // used for de-duplicating urls caught by the listeners

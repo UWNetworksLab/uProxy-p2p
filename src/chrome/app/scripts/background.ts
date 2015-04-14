@@ -8,7 +8,6 @@
 /// <reference path='../../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
-import uproxy_types = require('../../../interfaces/uproxy');
 import freedom_types = require('freedom.types');
 
 import Chrome_oauth = require('./chrome_oauth');

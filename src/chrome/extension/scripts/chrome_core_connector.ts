@@ -85,7 +85,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       // in order to prevent duplicate requests, and will need to be re-sent
       // after each successful reconnection to the app.
       for (var type in this.listeners_) {
-        // Convert type from string back to number (uProxy.Update enum) for
+        // Convert type from string back to number (uproxy_core_api.Update enum) for
         // payload to app.
         var payload = {
           cmd: 'on',
@@ -197,7 +197,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
    * These handlers persist through disconnections and reconnections, and may be
    * installed whether or not the Extension is currently connected to the App.
    */
-  public onUpdate = (update :uProxy.Update, handler :Function) => {
+  public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     var type = '' + update;
     if (!(type in this.listeners_)) {
       this.listeners_[type] = [];
@@ -236,7 +236,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
 
   /**
    * Receive messages from the chrome.runtime.Port.
-   * These *must* some form of uProxy.Update.
+   * These *must* some form of uproxy_core_api.Update.
    */
   private receive_ = (msg :{type :string; data :any}) => {
     if (msg.type in this.listeners_) {

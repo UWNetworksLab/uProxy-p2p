@@ -1,4 +1,4 @@
-import uproxy_module_api = require('uproxy-module');
+import uproxy_core_api = require('./uproxy_core_api');
 
 // Status object for connected. This is an object so it can be bound in
 // angular. connected = true iff connected to the app which is running
@@ -38,7 +38,7 @@ export interface PromiseCommand {
 export interface CoreBrowserConnector {
   send(payload :Payload, skipQueue ?:Boolean) : void;
 
-  onUpdate(update :uproxy_module_api.Update, handler :Function) : void;
+  onUpdate(update :uproxy_core_api.Update, handler :Function) : void;
 
   restart() : void;
 

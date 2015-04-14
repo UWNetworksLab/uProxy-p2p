@@ -58,7 +58,7 @@ describe('UI.UserInterface', () => {
   describe('syncUser', () => {
 
     it('Adds users to roster and contacts list', () => {
-      updateToHandlerMap[uProxy.Update.NETWORK]
+      updateToHandlerMap[uproxy_core_api.Update.NETWORK]
           .call(ui, {name: 'testNetwork',
                      userId: 'fakeUser',
                      online: true,
@@ -77,7 +77,7 @@ describe('UI.UserInterface', () => {
     });
 
     it('Sets correct flags for uProxy users', () => {
-      updateToHandlerMap[uProxy.Update.NETWORK]
+      updateToHandlerMap[uproxy_core_api.Update.NETWORK]
           .call(ui, {name: 'testNetwork',
                      userId: 'fakeUser',
                      online: true,
@@ -100,12 +100,12 @@ describe('UI.UserInterface', () => {
     it('isGivingAccess updates when you start and stop giving', () => {
       syncUserAndInstance('userId', 'userName', 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(false);
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(true);
       expect(ui['mapInstanceIdToUser_']['testGetterId'].isGettingFromMe)
           .toEqual(true);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(ui.isGivingAccess()).toEqual(false);
       expect(ui['mapInstanceIdToUser_']['testGetterId'].isGettingFromMe)
@@ -125,7 +125,7 @@ describe('UI.UserInterface', () => {
 
     it('Extension icon changes when you start giving access', () => {
       syncUserAndInstance('userId', 'userName', 'testGetterId');
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.SHARING_ICON);
@@ -135,17 +135,17 @@ describe('UI.UserInterface', () => {
         'getters', () => {
       syncUserAndInstance('userId', 'userName', 'testGetterId');
       syncUserAndInstance('userId', 'userName', 'testGetterId2');
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.SHARING_ICON);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
           .not.toHaveBeenCalledWith(UI.DEFAULT_ICON);
@@ -155,19 +155,19 @@ describe('UI.UserInterface', () => {
         () => {
       syncUserAndInstance('userId', 'userName', 'testGetterId');
       syncUserAndInstance('userId', 'userName', 'testGetterId2');
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.SHARING_ICON);
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
       expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.DEFAULT_ICON);
@@ -193,7 +193,7 @@ describe('UI.UserInterface', () => {
       ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.GETTING_ICON);
-      updateToHandlerMap[uProxy.Update.STOP_GETTING_FROM_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND]
           .call(ui, {instanceId: 'testGiverId', error: false});
       expect(mockBrowserApi.setIcon)
           .toHaveBeenCalledWith(UI.DEFAULT_ICON);
@@ -201,26 +201,26 @@ describe('UI.UserInterface', () => {
 
     it('Sharing status updates when you start and stop sharing', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual('Sharing access with Alice');
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(ui.sharingStatus).toEqual(null);
     });
 
     it('No notification when you stop sharing and are not already proxying', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(mockBrowserApi.showNotification).not.toHaveBeenCalled();
     });
 
     it('Notification when you stop sharing', () => {
       syncUserAndInstance('userId', 'Alice', 'testInstanceId');
-      updateToHandlerMap[uProxy.Update.START_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
-      updateToHandlerMap[uProxy.Update.STOP_GIVING_TO_FRIEND]
+      updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testInstanceId');
       expect(mockBrowserApi.showNotification).toHaveBeenCalled();
     });
@@ -263,7 +263,7 @@ describe('UI.UserInterface', () => {
       ui['syncNetwork_'](networkMessage);
 
       // Simulate a USER_SELF update to set name and imageData
-      updateToHandlerMap[uProxy.Update.USER_SELF]
+      updateToHandlerMap[uproxy_core_api.Update.USER_SELF]
           .call(ui,
                 {
                   network: 'Facebook',

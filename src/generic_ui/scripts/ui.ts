@@ -208,8 +208,8 @@ module UI {
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uProxy.Update.INITIAL_STATE, (state :Object) => {
-        console.log('Received uProxy.Update.INITIAL_STATE:', state);
+      core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :Object) => {
+        console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
         model.networkNames = state['networkNames'];
         // TODO: Do not allow reassignment of globalSettings. Instead
         // write a 'syncGlobalSettings' function that iterates through
@@ -221,36 +221,36 @@ module UI {
       });
 
       // Add or update the online status of a network.
-      core.onUpdate(uProxy.Update.NETWORK, this.syncNetwork_);
+      core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
 
       // Attach handlers for USER updates.
-      core.onUpdate(uProxy.Update.USER_SELF, (payload :social.UserData) => {
+      core.onUpdate(uproxy_core_api.Update.USER_SELF, (payload :social.UserData) => {
         // Instead of adding to the roster, update the local user information.
-        console.log('uProxy.Update.USER_SELF:', payload);
+        console.log('uproxy_core_api.Update.USER_SELF:', payload);
         if (!model.onlineNetwork ||
             payload.network != model.onlineNetwork.name) {
-          console.error('uProxy.Update.USER_SELF message for invalid network',
+          console.error('uproxy_core_api.Update.USER_SELF message for invalid network',
               payload.network);
           return;
         }
-        var profile :uproxy_types.UserProfileMessage = payload.user;
+        var profile :social.UserProfileMessage = payload.user;
         model.onlineNetwork.userId = profile.userId;
         model.onlineNetwork.imageData = profile.imageData;
         model.onlineNetwork.userName = profile.name;
       });
-      core.onUpdate(uProxy.Update.USER_FRIEND, (payload :social.UserData) => {
-        console.log('uProxy.Update.USER_FRIEND:', payload);
+      core.onUpdate(uproxy_core_api.Update.USER_FRIEND, (payload :social.UserData) => {
+        console.log('uproxy_core_api.Update.USER_FRIEND:', payload);
         this.syncUser(payload);
       });
 
-      core.onUpdate(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
+      core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
                     (message :uProxy.Message) => {
         console.log('Manual network outbound message: ' +
                     JSON.stringify(message));
         // TODO: Display the message in the 'manual network' UI.
       });
 
-      core.onUpdate(uProxy.Update.SIGNALLING_MESSAGE, (message :uProxy.Message) => {
+      core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :uProxy.Message) => {
         var data :uProxy.Message[] = [], str = '';
 
         switch (message.type) {
@@ -282,19 +282,19 @@ module UI {
       });
 
       // indicates the current getting connection has ended
-      core.onUpdate(uProxy.Update.STOP_GETTING, (error :boolean) => {
+      core.onUpdate(uproxy_core_api.Update.STOP_GETTING, (error :boolean) => {
         this.stopGettingInUiAndConfig(error);
       });
 
       // indicates we just started offering access through copy+paste
-      core.onUpdate(uProxy.Update.START_GIVING, () => {
+      core.onUpdate(uproxy_core_api.Update.START_GIVING, () => {
         if (!this.isGivingAccess()) {
           this.startGivingInUi();
         }
       });
 
       // indicates we just stopped offering access through copy+paste
-      core.onUpdate(uProxy.Update.STOP_GIVING, () => {
+      core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
         this.copyPasteSharingState = SharingState.NONE;
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
@@ -302,14 +302,14 @@ module UI {
       });
 
       // status of the current copy+paste connection
-      core.onUpdate(uProxy.Update.STATE, (state) => {
+      core.onUpdate(uproxy_core_api.Update.STATE, (state) => {
         this.copyPasteGettingState = state.localGettingFromRemote;
         this.copyPasteSharingState = state.localSharingWithRemote;
         this.copyPasteBytesSent = state.bytesSent;
         this.copyPasteBytesReceived = state.bytesReceived;
       });
 
-      core.onUpdate(uProxy.Update.STOP_GETTING_FROM_FRIEND,
+      core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
           (data :any) => {
         if (data.instanceId === this.instanceGettingAccessFrom_) {
           this.stopGettingInUiAndConfig(data.error);
@@ -319,7 +319,7 @@ module UI {
         }
       });
 
-      core.onUpdate(uProxy.Update.START_GIVING_TO_FRIEND,
+      core.onUpdate(uproxy_core_api.Update.START_GIVING_TO_FRIEND,
           (instanceId :string) => {
         // TODO (lucyhe): Update instancesGivingAccessTo before calling
         // startGivingInUi so that isGiving() is updated as early as possible.
@@ -335,7 +335,7 @@ module UI {
             { mode: 'share', user: user.userId });
       });
 
-      core.onUpdate(uProxy.Update.STOP_GIVING_TO_FRIEND,
+      core.onUpdate(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND,
           (instanceId :string) => {
         var isGettingFromMe = false;
         var user = this.mapInstanceIdToUser_[instanceId];
@@ -362,7 +362,7 @@ module UI {
         this.updateSharingStatusBar_();
       });
 
-      core.onUpdate(uProxy.Update.FRIEND_FAILED_TO_GET, (nameOfFriend) => {
+      core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend) => {
         // Setting this variable will toggle a paper-toast (in root.html)
         // to open.
         this.toastMessage = UI.SHARE_FAILED_MSG + nameOfFriend;
@@ -620,7 +620,7 @@ module UI {
      * Synchronize a new network to be visible on this UI.
      */
     private syncNetwork_ = (network :UI.NetworkMessage) => {
-      console.log('uProxy.Update.NETWORK', network);
+      console.log('uproxy_core_api.Update.NETWORK', network);
       console.log('model: ', model);
 
       // If you are now online (on a non-manual network), and were

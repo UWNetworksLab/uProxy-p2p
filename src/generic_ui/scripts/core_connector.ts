@@ -28,9 +28,9 @@ class CoreConnector implements uProxy.CoreApi {
       {};
 
   constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
-    this.browserConnector_.onUpdate(uProxy.Update.COMMAND_FULFILLED,
+    this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);
-    this.browserConnector_.onUpdate(uProxy.Update.COMMAND_REJECTED,
+    this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_REJECTED,
                                     this.handleRequestRejected_);
   }
 
@@ -38,7 +38,7 @@ class CoreConnector implements uProxy.CoreApi {
     return this.browserConnector_.status.connected;
   }
 
-  public onUpdate = (update :uProxy.Update, handler :Function) => {
+  public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     this.browserConnector_.onUpdate(update, handler);
   }
 

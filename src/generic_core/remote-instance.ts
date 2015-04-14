@@ -110,9 +110,9 @@ module Core {
           });
     }
 
-    private handleConnectionUpdate_ = (update :uProxy.Update, data?:any) => {
+    private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
       switch (update) {
-        case uProxy.Update.SIGNALLING_MESSAGE:
+        case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
             log.error('Could not find clientId for instance', this);
@@ -120,21 +120,21 @@ module Core {
           }
           this.user.network.send(this.user, clientId, data);
           break;
-        case uProxy.Update.STOP_GIVING:
-          ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
+        case uproxy_core_api.Update.STOP_GIVING:
+          ui.update(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
           break;
-        case uProxy.Update.START_GIVING:
-          ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
+        case uproxy_core_api.Update.START_GIVING:
+          ui.update(uproxy_core_api.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
-        case uProxy.Update.STOP_GETTING:
+        case uproxy_core_api.Update.STOP_GETTING:
           clearTimeout(this.startSocksToRtcTimeout_);
-          ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
+          ui.update(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
           });
           remoteProxyInstance = null;
           break;
-        case uProxy.Update.STATE:
+        case uproxy_core_api.Update.STATE:
           this.bytesSent = data.bytesSent;
           this.bytesReceived = data.bytesReceived;
           this.localGettingFromRemote = data.localGettingFromRemote;
@@ -233,7 +233,7 @@ module Core {
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, this.user.name);
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 

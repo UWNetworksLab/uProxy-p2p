@@ -130,10 +130,10 @@ describe('core-connector', () => {
       expect(chromeCoreConnector.status.connected).toEqual(true);
       // Check that onUpdate callbacks were successfully sent to app.
       expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
-        cmd: 'on', type: uProxy.Update.COMMAND_FULFILLED
+        cmd: 'on', type: uproxy_core_api.Update.COMMAND_FULFILLED
       });
       expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
-        cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
+        cmd: 'on', type: uproxy_core_api.Update.COMMAND_REJECTED
       });
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
         {
@@ -244,12 +244,12 @@ describe('core-connector', () => {
 
   it('onUpdate calls send.', () => {
     spyOn(chromeCoreConnector, 'send');
-    // TODO: Cannot use the uProxy.Update enum until the 'common' communications
-    // chromeCoreConnector.onUpdate(uProxy.Update.ALL, () => {});
+    // TODO: Cannot use the uproxy_core_api.Update enum until the 'common' communications
+    // chromeCoreConnector.onUpdate(uproxy_core_api.Update.ALL, () => {});
     // typescript file is ready.
     // expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
       // cmd: 'on',
-      // type: uProxy.Update.ALL
+      // type: uproxy_core_api.Update.ALL
     // });
   });
 

@@ -2,9 +2,9 @@
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 /// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
 
-import browser_connector = require('../../../interfaces/browser-connector');
+import browser_connector = require('../../../interfaces/browser_connector');
 import freedom_types = require('freedom.types');
-import uproxy_module_api = require('../../../interfaces/uproxy-module');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import uproxy_chrome = require('../../../interfaces/chrome');
 
 // See the ChromeCoreConnector, which communicates to this class.
@@ -39,7 +39,7 @@ class ChromeUIConnector {
   private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
-        type: uproxy_module_api.Update.LAUNCH_UPROXY,
+        type: uproxy_core_api.Update.LAUNCH_UPROXY,
         data: ''
     });
   }
@@ -89,12 +89,12 @@ class ChromeUIConnector {
   private onExtMsg_ = (msg :browser_connector.Payload) => {
     console.log('extension message: ', msg);
     var msgType = '' + msg.type;
-    // Pass 'emit's from the UI to Core. These are uproxy_types.Commands.
+    // Pass 'emit's from the UI to Core.
     if ('emit' == msg.cmd) {
-      if (msg.type == uproxy_module_api.Command.SEND_CREDENTIALS) {
+      if (msg.type == uproxy_core_api.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
       }
-      if (msg.type == uproxy_module_api.Command.RESTART) {
+      if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
       uProxyAppChannel.emit(msgType,
@@ -114,7 +114,7 @@ class ChromeUIConnector {
     }
   }
 
-  public sendToUI = (type :uproxy_module_api.Update, data?:Object) => {
+  public sendToUI = (type :uproxy_core_api.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,

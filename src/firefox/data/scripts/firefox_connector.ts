@@ -7,22 +7,23 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/firefox/firefox.d.ts' />
 
-import uproxy_types = require('../../../interfaces/uproxy');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import browser_connector = require('../../../interfaces/browser_connector');
 
 var port :ContentScriptPort;
 
 /**
  * Firefox-specific uProxy CoreBrowserConnector implementation.
  */
-class FirefoxConnector implements uproxy_types.CoreBrowserConnector {
+class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   public status :StatusObject;
 
   constructor() {
     this.status = { connected: true };
-    var ready :uproxy_types.Payload = {
+    var ready :browser_connector.Payload = {
       cmd: 'emit',
-      type: uproxy_types.Command.GET_INITIAL_STATE,
+      type: uproxy_core_api.Command.GET_INITIAL_STATE,
       promiseId: 0
     }
     this.send(ready);
@@ -32,14 +33,14 @@ class FirefoxConnector implements uproxy_types.CoreBrowserConnector {
   /**
    * Attach handlers for updates emitted from the uProxy Core.
    */
-  public onUpdate = (update :uproxy_types.Update, handler :Function) => {
+  public onUpdate = (update :browser_connector.Update, handler :Function) => {
     port.on('' + update, handler);
   }
 
   /**
    * Send a payload to the uProxyCore
    */
-  public send = (payload :uproxy_types.Payload,
+  public send = (payload :browser_connector.Payload,
                  skipQueue :Boolean = false) => {
     port.emit('' + payload.type, {data: payload.data, promiseId: payload.promiseId});
   }

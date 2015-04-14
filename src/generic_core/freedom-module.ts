@@ -53,9 +53,9 @@ class UIConnector implements uProxy.UiApi {
    * Send an Update message to the UI.
    * TODO: Turn this private and make outside accesses directly based on UiApi.
    */
-  public update = (type:uProxy.Update, data?:any) => {
-    var printableType :string = uProxy.Update[type];
-    if (type == uProxy.Update.COMMAND_FULFILLED
+  public update = (type:uproxy_core_api.Update, data?:any) => {
+    var printableType :string = uproxy_core_api.Update[type];
+    if (type == uproxy_core_api.Update.COMMAND_FULFILLED
         && data['command'] == uProxy.Command.GET_LOGS){
       log.debug('sending logs to UI', {
         type: printableType,
@@ -74,7 +74,7 @@ class UIConnector implements uProxy.UiApi {
     // Only send update to UI when global settings have loaded.
     core.loadGlobalSettings.then(() => {
       this.update(
-          uProxy.Update.INITIAL_STATE,
+          uproxy_core_api.Update.INITIAL_STATE,
           {
             networkNames: Object.keys(Social.networks),
             globalSettings: core.globalSettings,
@@ -84,7 +84,7 @@ class UIConnector implements uProxy.UiApi {
   }
 
   public syncUser = (payload:social.UserData) => {
-    this.update(uProxy.Update.USER_FRIEND, payload);
+    this.update(uproxy_core_api.Update.USER_FRIEND, payload);
   }
 }
 var ui = new UIConnector();
@@ -183,7 +183,7 @@ class uProxyCore implements uProxy.CoreApi {
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
         (argsForCallback ?:any) => {
-          ui.update(uProxy.Update.COMMAND_FULFILLED,
+          ui.update(uproxy_core_api.Update.COMMAND_FULFILLED,
               { command: cmd,
                 promiseId: args.promiseId,
                 argsForCallback: argsForCallback });
@@ -193,7 +193,7 @@ class uProxyCore implements uProxy.CoreApi {
             promiseId: args.promiseId,
             errorForCallback: errorForCallback.toString()
           };
-          ui.update(uProxy.Update.COMMAND_REJECTED, rejectionData);
+          ui.update(uproxy_core_api.Update.COMMAND_REJECTED, rejectionData);
         }
       );
     };

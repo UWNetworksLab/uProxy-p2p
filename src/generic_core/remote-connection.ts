@@ -33,10 +33,10 @@ module Core {
     private sharingReset_ :Promise<void> = null;
 
     // TODO: set up a better type for this
-    private sendUpdate_ :(x :uProxy.Update, data?:Object) => void;
+    private sendUpdate_ :(x :uproxy_core_api.Update, data?:Object) => void;
 
     constructor(
-      sendUpdate :(x :uProxy.Update, data?:Object) => void
+      sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void
     ) {
       this.sendUpdate_ = sendUpdate;
       this.resetSharerCreated();
@@ -44,7 +44,7 @@ module Core {
 
     private createSender_ = (type :uProxy.MessageType) => {
       return (signal :WebRtc.SignallingMessage) => {
-        this.sendUpdate_(uProxy.Update.SIGNALLING_MESSAGE, {
+        this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
           data: signal
         });
@@ -97,7 +97,7 @@ module Core {
 
       this.sharingReset_ = this.rtcToNet_.onceClosed.then(() => {
         this.localSharingWithRemote = SharingState.NONE;
-        this.sendUpdate_(uProxy.Update.STOP_GIVING);
+        this.sendUpdate_(uproxy_core_api.Update.STOP_GIVING);
         this.rtcToNet_ = null;
         this.bytesSent_ = 0;
         this.bytesReceived_ = 0;
@@ -110,7 +110,7 @@ module Core {
 
       this.rtcToNet_.onceReady.then(() => {
         this.localSharingWithRemote = SharingState.SHARING_ACCESS;
-        this.sendUpdate_(uProxy.Update.START_GIVING);
+        this.sendUpdate_(uproxy_core_api.Update.START_GIVING);
         this.stateRefresh_();
       }).catch((e) => {
         this.stopShare();
@@ -174,7 +174,7 @@ module Core {
         // whether the browser's proxy was set).
 
         var isError = GettingState.GETTING_ACCESS === this.localGettingFromRemote;
-        this.sendUpdate_(uProxy.Update.STOP_GETTING, isError);
+        this.sendUpdate_(uproxy_core_api.Update.STOP_GETTING, isError);
 
         this.localGettingFromRemote = GettingState.NONE;
         this.bytesSent_ = 0;
@@ -243,7 +243,7 @@ module Core {
     }
 
     private stateRefresh_ = () => {
-      this.sendUpdate_(uProxy.Update.STATE, {
+      this.sendUpdate_(uproxy_core_api.Update.STATE, {
         bytesSent: this.bytesSent_,
         bytesReceived: this.bytesReceived_,
         localGettingFromRemote: this.localGettingFromRemote,
