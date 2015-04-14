@@ -1,9 +1,8 @@
 // TODO(salomegeo): rewrite it in typescript.
 
 
-var ui :UI.UserInterface;
-
-var core;
+var ui   :UI.UserInterface;
+var core :;
 
 function initUI() {
     var firefoxConnector = new FirefoxConnector();
