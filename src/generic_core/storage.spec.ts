@@ -1,5 +1,5 @@
 /// <reference path='storage.ts' />
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 declare var storage :Core.Storage;
 Core.DEBUG_STATESTORAGE = false;

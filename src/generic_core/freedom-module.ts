@@ -9,19 +9,18 @@
  *  - Roster, which is a list of contacts, always synced with XMPP friend lists.
  *  - Instances, which is a list of active uProxy installs.
  */
-/// <reference path='../uproxy.ts'/>
-/// <reference path='storage.ts' />
-/// <reference path='social.ts' />
-/// <reference path='diagnose.ts' />
-/// <reference path='../interfaces/instance.d.ts' />
+
 // TODO: Create a copy rule which automatically moves all third_party
 // typescript declarations to a nicer path.
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/social.d.ts' />
-/// <reference path='../networking-typings/communications.d.ts' />
 
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
+
+import diagnose = require('./diagnote-nat');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-
+import net = require('../../../third_party/uproxy-networking/net/net');
+import social = require('./social');
+import storage = require('./storage');
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 var loggingProvider = freedom['loggingprovider']();

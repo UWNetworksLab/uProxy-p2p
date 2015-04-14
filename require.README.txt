@@ -1,0 +1,10 @@
+All references to:
+```
+/// <reference path='../uproxy.ts'/>
+/// <reference path='../interfaces/*.ts'/>
+```
+
+now become:
+```
+import SOME_NAME = require('../interfaces/SOME_NAME.ts');
+```

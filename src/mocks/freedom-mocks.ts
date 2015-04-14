@@ -7,7 +7,7 @@
  */
 
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../freedom/typings/storage.d.ts' />
 
 

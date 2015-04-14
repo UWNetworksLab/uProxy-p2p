@@ -1,4 +1,4 @@
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../uproxy.ts' />
 /// <reference path='../arraybuffers/arraybuffers.ts' />
 

@@ -5,7 +5,7 @@
  * to a remote uproxy client is correct in addition to handling of events
  * after that connection is established
  */
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../webrtc/peerconnection.d.ts' />
 /// <reference path='remote-connection.ts' />
 /// <reference path='../mocks/rtc-to-net.ts' />
