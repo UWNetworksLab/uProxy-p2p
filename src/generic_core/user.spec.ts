@@ -175,8 +175,8 @@ describe('Core.User', () => {
   describe('client <---> instance', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
       var realStorage = new Core.Storage;
-      var saved;
-      storage.save = function(key, value) {
+      var saved :any;
+      storage.save = function(key :string, value :any) {
         saved = realStorage.save(key, value);
         return saved;
       };

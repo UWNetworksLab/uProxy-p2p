@@ -64,13 +64,15 @@ module Core {
 
     // Number of milliseconds before timing out socksToRtc_.start
     public SOCKS_TO_RTC_TIMEOUT :number = 30000;
+
     // Ensure RtcToNet is only closed after SocksToRtc times out (i.e. finishes
     // trying to connect) by timing out rtcToNet_.start 15 seconds later than
     // socksToRtc_.start
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
+
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
-    private startSocksToRtcTimeout_ = null;
-    private startRtcToNetTimeout_ = null;
+    private startSocksToRtcTimeout_ :number = null;
+    private startRtcToNetTimeout_ :number = null;
 
     private connection_ :Core.RemoteConnection = null;
 
@@ -166,6 +168,7 @@ module Core {
      */
     public handleSignal = (type:uProxy.MessageType,
                            signalFromRemote:Object) :Promise<void> => {
+      var signal = <WebRtc.SignallingMessage> signalFromRemote;
       if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -174,7 +177,7 @@ module Core {
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
-        if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+        if (signal.type == WebRtc.SignalType.OFFER) {
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
@@ -186,10 +189,10 @@ module Core {
         return this.onceSharerReadyForOffer_.then(() => {
           this.connection_.handleSignal({
             type: type,
-            data: signalFromRemote
+            data: signal
           });
         }).catch((e) => {
-          log.info(e + ' Received signal ' + signalFromRemote['type']);
+          log.info(e + ' Received signal ' + signal.type);
           return Promise.resolve<void>();
         });
 
@@ -199,7 +202,7 @@ module Core {
         https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
         Issue: https://github.com/uProxy/uproxy/issues/1256
 
-        } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+        } else if (signal.type == WebRtc.SignalType.CANCEL_OFFER) {
           this.stopShare();
           return;
         }
@@ -208,7 +211,7 @@ module Core {
 
       this.connection_.handleSignal({
         type: type,
-        data: signalFromRemote
+        data: signal
       });
       return Promise.resolve<void>();
     }

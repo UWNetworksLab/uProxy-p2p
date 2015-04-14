@@ -61,7 +61,7 @@ module Core {
       this.notifyUI();
     });
 
-    private fulfillNameReceived_ : (string) => void;
+    private fulfillNameReceived_ : (name :string) => void;
     public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
       this.fulfillNameReceived_ = F;
     });
@@ -319,8 +319,8 @@ module Core {
       }
 
       var isOnline = false;
-      var offeringInstanceStatesForUi = [];
-      var allInstanceIds = [];
+      var offeringInstanceStatesForUi :UI.Instance[] = [];
+      var allInstanceIds :string[] = [];
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
@@ -381,7 +381,7 @@ module Core {
       }
     }
 
-    private requestInstance_ = (clientId) : void => {
+    private requestInstance_ = (clientId :string) : void => {
       log.debug('requesting instance', clientId);
       var instanceRequest :uProxy.Message = {
         type: uProxy.MessageType.INSTANCE_REQUEST,

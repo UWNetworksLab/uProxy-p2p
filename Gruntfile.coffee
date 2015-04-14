@@ -444,11 +444,11 @@ module.exports = (grunt) ->
       generic_ui_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_ui'
 
       # Core uProxy without any platform dependencies
-      generic_core: Rule.typescriptSrcLenient 'compile-src/generic_core'
-      generic_core_specs: Rule.typescriptSpecDeclLenient 'compile-src/generic_core'
+      generic_core: Rule.typescriptSrc 'compile-src/generic_core'
+      generic_core_specs: Rule.typescriptSpecDecl 'compile-src/generic_core'
 
-      logging: Rule.typescriptSrcLenient 'compile-src/logging'
-      webrtc: Rule.typescriptSrcLenient 'compile-src/webrtc'
+      logging: Rule.typescriptSrc 'compile-src/logging'
+      webrtc: Rule.typescriptSrc 'compile-src/webrtc'
 
       # TODO: Remove uistatic / make it the same as uipolymer once polymer is
       # fully integrated.
@@ -457,7 +457,7 @@ module.exports = (grunt) ->
       # Mocks to help jasmine along. These typescript files must be compiled
       # independently from the rest of the code, because otherwise there will
       # be many 'duplicate identifiers' and similar typescript conflicts.
-      mocks: Rule.typescriptSrcLenient 'compile-src/mocks'
+      mocks: Rule.typescriptSrc 'compile-src/mocks'
 
       # Compile typescript for all chrome components.
       # In the ideal world, there shouldn't be an App/Extension split.

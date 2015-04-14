@@ -213,7 +213,6 @@ module uProxy {
 
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
-    onUpdate(update :Update, handler :Function) : void;
     sendFeedback(feedback :UserFeedback) : void;
   }
 

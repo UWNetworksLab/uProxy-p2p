@@ -54,13 +54,13 @@ module Core {
      * Just generate 20 random 8-bit numbers, print them out in hex.
      */
     public static generateInstanceID = () : string => {
-      var hex, id = '';
+      var id = '';
 
       // TODO: check use of randomness: why not one big random number that is
       // serialised?
       for (var i = 0; i < 20; i++) {
         // 20 bytes for the instance ID.  This we can keep.
-        hex = Math.floor(Math.random() * 256).toString(16);
+        var hex = Math.floor(Math.random() * 256).toString(16);
         id += ('00'.substr(0, 2 - hex.length) + hex);
       }
       return id;
@@ -88,7 +88,7 @@ module Core {
         keyHash:     this.keyHash,
       };
     }
-    public restoreState = (state) => {
+    public restoreState = (state :Instance) => {
       this.instanceId = state.instanceId;
       this.keyHash = state.keyHash;
     }

@@ -29,7 +29,12 @@
 /// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
 
 module Social {
-  var NETWORK_OPTIONS = {
+  interface NetworkInfo {
+    isFirebase: boolean;
+    enableMonitoring: boolean;
+  }
+
+  var NETWORK_OPTIONS :{[network :string] :NetworkInfo}  = {
     'Google': {
       isFirebase: false,
       enableMonitoring: true
@@ -702,7 +707,7 @@ function freedomClientToUproxyClient(
   return {
     userId:    freedomClientState.userId,
     clientId:  freedomClientState.clientId,
-    status:    UProxyClient.Status[freedomClientState.status],
+    status:    (<any>UProxyClient.Status)[freedomClientState.status],
     timestamp: freedomClientState.timestamp
   };
 }
