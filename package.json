@@ -17,6 +17,7 @@
     }
   ],
   "devDependencies": {
+    "bower": "^1.4.1",
     "es6-promise": "^0.1.1",
     "freedom-for-chrome": "~0.4.11",
     "freedom-for-firefox": "~0.6.7",
@@ -50,6 +51,9 @@
   },
   "peerDependencies": {
     "freedom": "~0.6.18"
+  },
+  "scripts": {
+    "install": "./node_modules/.bin/bower install"
   },
   "private": true
 }
