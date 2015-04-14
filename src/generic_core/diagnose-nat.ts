@@ -300,293 +300,293 @@ module Turn {
 
     return bytes;
   }
-}  // Turn
 
-/**
- * As formatStunMessage() but appends a MESSAGE-INTEGRITY attribute.
- * Normally, this is the function you should call; the exceptions are tests
- * and send/data indications (which do not require a checksum).
- */
-export function formatStunMessageWithIntegrity(message:Turn.StunMessage) : Uint8Array {
-  // Append the attribute and obtain the bytes...
-  message.attributes.push({
-    type: Turn.MessageAttribute.MESSAGE_INTEGRITY,
-    value: new Uint8Array(20)
-  });
-  var bytes = formatStunMessage(message);
+  /**
+   * As formatStunMessage() but appends a MESSAGE-INTEGRITY attribute.
+   * Normally, this is the function you should call; the exceptions are tests
+   * and send/data indications (which do not require a checksum).
+   */
+  export function formatStunMessageWithIntegrity(message:Turn.StunMessage) : Uint8Array {
+    // Append the attribute and obtain the bytes...
+    message.attributes.push({
+      type: Turn.MessageAttribute.MESSAGE_INTEGRITY,
+      value: new Uint8Array(20)
+    });
+    var bytes = formatStunMessage(message);
 
-  // ...and compute the checksum, and copy it into the bytes.
-  // MESSAGE-INTEGRITY hashes are always 20 bytes in length.
-  var hashBytes = computeHash(bytes);
-  bytes.set(hashBytes, bytes.length - 20);
+    // ...and compute the checksum, and copy it into the bytes.
+    // MESSAGE-INTEGRITY hashes are always 20 bytes in length.
+    var hashBytes = computeHash(bytes);
+    bytes.set(hashBytes, bytes.length - 20);
 
-  return bytes;
-}
-
-/**
- * Computes the hash for the MESSAGE-INTEGRITY attribute:
- *   http://tools.ietf.org/html/rfc5389#section-15.4
- *
- * From the RFC:
- *   "The text used as input to HMAC is the STUN message, including
- *   the header, up to and including the attribute preceding the
- *   MESSAGE-INTEGRITY attribute."
- *
- * The supplied bytes should be a STUN message, including a MESSAGE-INTEGRITY
- * attribute (which must be the final attribute), with length including that
- * attribute.
- *
- * Callers of this method should copy the computed hash into the
- * supplied byte array.
- */
-export function computeHash(bytes:Uint8Array) : Uint8Array {
-  var keyAsString = arraybuffers.arrayBufferToString(HMAC_KEY.buffer);
-  // MESSAGE-INTEGRITY attributes are always 24 bytes long:
-  // 4 bytes header + 20 bytes hash
-  var bytesToBeHashed = bytes.subarray(0, bytes.byteLength - 24);
-  // Think of the next few lines as uint8ArrayToString().
-  // This is necessary because, depending on how b is constructed,
-  // b.buffer is not guaranteed to equal a, where b is a Uint8Array
-  // view on an ArrayBuffer a (in particular, views created with
-  // subarray will share the same parent ArrayBuffer).
-  // TODO: add uint8ArrayToString to uproxy-build-tools
-  var a :string[] = [];
-  for (var i = 0; i < bytesToBeHashed.length; ++i) {
-    a.push(String.fromCharCode(bytes[i]));
-  }
-  var bytesToBeHashedAsString = a.join('');
-
-  var hashAsString = sha1.str_hmac_sha1(keyAsString,
-      bytesToBeHashedAsString);
-  return new Uint8Array(arraybuffers.stringToArrayBuffer(hashAsString));
-}
-
-/**
- * Converts the supplied attribute to bytes, placing the result in the
- * supplied byte array. Throws an error if the byte array is too small
- * to contain the attribute but otherwise ignores any trailing bytes.
- */
-export function formatStunAttribute(
-    attr:Turn.StunAttribute,
-    bytes:Uint8Array) : number {
-  var paddedLength = calculatePadding(attr.value ? attr.value.length : 0, 4);
-  if (bytes.length < 4 + paddedLength) {
-    throw new Error('too few bytes');
+    return bytes;
   }
 
-  // Type.
-  bytes[0] = attr.type >> 8;
-  bytes[1] = attr.type & 0xff;
-
-  // Length.
-  var length = attr.value ? attr.value.length : 0;
-  bytes[2] = length >> 8;
-  bytes[3] = length & 0xff;
-
-  // Value.
-  if (attr.value) {
-    bytes.set(attr.value, 4);
-    // Padding.
-    for (var i = attr.value.length; i < paddedLength; i++) {
-      bytes[4 + i] = 0;
+  /**
+   * Computes the hash for the MESSAGE-INTEGRITY attribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15.4
+   *
+   * From the RFC:
+   *   "The text used as input to HMAC is the STUN message, including
+   *   the header, up to and including the attribute preceding the
+   *   MESSAGE-INTEGRITY attribute."
+   *
+   * The supplied bytes should be a STUN message, including a MESSAGE-INTEGRITY
+   * attribute (which must be the final attribute), with length including that
+   * attribute.
+   *
+   * Callers of this method should copy the computed hash into the
+   * supplied byte array.
+   */
+  export function computeHash(bytes:Uint8Array) : Uint8Array {
+    var keyAsString = arraybuffers.arrayBufferToString(HMAC_KEY.buffer);
+    // MESSAGE-INTEGRITY attributes are always 24 bytes long:
+    // 4 bytes header + 20 bytes hash
+    var bytesToBeHashed = bytes.subarray(0, bytes.byteLength - 24);
+    // Think of the next few lines as uint8ArrayToString().
+    // This is necessary because, depending on how b is constructed,
+    // b.buffer is not guaranteed to equal a, where b is a Uint8Array
+    // view on an ArrayBuffer a (in particular, views created with
+    // subarray will share the same parent ArrayBuffer).
+    // TODO: add uint8ArrayToString to uproxy-build-tools
+    var a :string[] = [];
+    for (var i = 0; i < bytesToBeHashed.length; ++i) {
+      a.push(String.fromCharCode(bytes[i]));
     }
+    var bytesToBeHashedAsString = a.join('');
+
+    var hashAsString = sha1.str_hmac_sha1(keyAsString,
+        bytesToBeHashedAsString);
+    return new Uint8Array(arraybuffers.stringToArrayBuffer(hashAsString));
   }
 
-  return 4 + paddedLength;
-}
-
-/**
- * Parses a STUN attribute:
- *   http://tools.ietf.org/html/rfc5389#section-15
- */
-export function parseStunAttribute(bytes:Uint8Array) : Turn.StunAttribute {
-  // Fail if the number of bytes is too small.
-  if (bytes.length < 4) {
-    throw new Error('too few bytes');
-  }
-
-  var type = bytes[0] << 8 | bytes[1];
-  var length = bytes[2] << 8 | bytes[3];
-  var value :Uint8Array;
-  if (length > 0) {
-    value = bytes.subarray(4, 4 + length);
-  }
-
-  return {
-    type : type,
-    value : value
-  };
-}
-
-/**
- * Returns bytes suitable for use in a ERROR_CODE-typed StunAttribute:
- *   http://tools.ietf.org/html/rfc5389#section-15.6
- */
-export function formatErrorCodeAttribute(
-    code:number,
-    reason:string) : Uint8Array {
-  // TODO: check reason length is <128 characters
-  var length = 4 + reason.length;
-  var buffer = new ArrayBuffer(length);
-  var bytes = new Uint8Array(buffer);
-  // Reserved bits.
-  bytes[0] = bytes[1] = bytes[2] = 0;
-  // Class (hundreds digit of code).
-  var clazz = code / 100;
-  if (clazz < 3 || clazz > 6) {
-    throw new Error('class must be between 3 and 6');
-  }
-  bytes[2] = clazz;
-  // Number (code modulo 100).
-  bytes[3] = code % 100;
-  // Reason.
-  var reasonBuffer = arraybuffers.stringToArrayBuffer(reason);
-  bytes.set(new Uint8Array(reasonBuffer), 4);
-  return bytes;
-}
-
-/**
- * Returns bytes suitable for use in a MAPPED-ADDRESS attribute:
- *   http://tools.ietf.org/html/rfc5389#section-15.1
- * Although we never send MAPPED-ADDRESS attributes, this function is
- * useful for testing and formatting XOR-MAPPED-ADDRESS attributes.
- * TODO: support IPv6 (assumes IPv4)
- */
-export function formatMappedAddressAttribute(
-    address:string,
-    port:number) : Uint8Array {
-  var buffer = new ArrayBuffer(8);
-  var bytes = new Uint8Array(buffer);
-
-  bytes[0] = 0; // reserved
-  bytes[1] = 0x01; // IPv4
-
-  // Port.
-  bytes[2] = port >> 8;
-  bytes[3] = port & 0xff;
-
-  // Address.
-  var s = address.split('.');
-  if (s.length != 4) {
-    throw new Error('cannot parse address ' + address);
-  }
-  for (var i = 0; i < 4; i++) {
-    bytes[4 + i] = parseInt(s[i]);
-  }
-
-  return bytes;
-}
-
-/**
- * Parses a MAPPED-ADDRESS attribute:
- *   http://tools.ietf.org/html/rfc5389#section-15.1
- * Again, although we never parse MAPPED-ADDRESS attributes, this function is
- * useful for testing and for parsing XOR-MAPPED-ADDRESS attributes.
- * TODO: support IPv6 (assumes IPv4)
- */
-export function parseMappedAddressAttribute(bytes:Uint8Array) : Turn.Endpoint {
-  if (bytes.length < 8) {
-    throw new Error('attribute too short');
-  }
-
-  if (bytes[0]) {
-    throw new Error('first byte must be zero');
-  }
-
-  if (bytes[1] != 0x01) {
-    throw new Error('only ipv4 supported');
-  }
-
-  // Port.
-  var port = (bytes[2] << 8) | bytes[3];
-
-  // Address.
-  var quadrants = [bytes[4], bytes[5], bytes[6], bytes[7]];
-  var address = quadrants.join('.');
-
-  return {
-    address: address,
-    port: port
-  };
-}
-
-/**
- * Parses an XOR-MAPPED-ADDRESS attribute:
- *   http://tools.ietf.org/html/rfc5389#section-15.2
- * TODO: support IPv6 (assumes IPv4)
- */
-export function parseXorMappedAddressAttribute(bytes:Uint8Array) : Turn.Endpoint {
-  if (bytes.length < 8) {
-    throw new Error('attribute too short');
-  }
-
-  // Port.
-  var magicCookieBytes = getMagicCookieBytes();
-  bytes[2] ^= magicCookieBytes[0]; // most significant byte
-  bytes[3] ^= magicCookieBytes[1]; // least significant byte
-
-  // Address.
-  for (var i = 0; i < 4; i++) {
-    bytes[4 + i] ^= magicCookieBytes[i];
-  }
-  return parseMappedAddressAttribute(bytes);
-}
-
-/**
- * Returns bytes suitable for use in XOR-MAPPED-ADDRESS and
- * XOR-RELAYED-ADDRESS attributes:
- *   http://tools.ietf.org/html/rfc5389#section-15.2
- * TODO: support IPv6 (assumes IPv4)
- */
-export function formatXorMappedAddressAttribute(
-    address:string,
-    port:number) : Uint8Array {
-  var bytes = formatMappedAddressAttribute(address, port);
-
-  // From the RFC:
-  //   "X-Port is computed by taking the mapped port in host byte order,
-  //   XOR'ing it with the most significant 16 bits of the magic cookie,
-  //   and then the converting the result to network byte order."
-  // It's not clear why you would XOR the host byte ordered-representation
-  // so we just XOR the network byte representation. Examining the network
-  // traffic with Wireshark indicates that this is correct.
-
-  var magicCookie = getMagicCookieBytes();
-  bytes[2] ^= magicCookie[0];
-  bytes[3] ^= magicCookie[1];
-
-  // Address.
-  for (var i = 0; i < 4; i++) {
-    bytes[4 + i] ^= magicCookie[i];
-  }
-
-  return bytes;
-}
-
-/**
- * Returns the first attribute in the supplied array having the
- * specified type. Raises an error if the attribute is not found.
- */
-export function findFirstAttributeWithType(
-  type:Turn.MessageAttribute,
-  attributes:Turn.StunAttribute[]) : Turn.StunAttribute {
-  for (var i = 0; i < attributes.length; i++) {
-    var attribute = attributes[i];
-    if (attribute.type === type) {
-      return attribute;
+  /**
+   * Converts the supplied attribute to bytes, placing the result in the
+   * supplied byte array. Throws an error if the byte array is too small
+   * to contain the attribute but otherwise ignores any trailing bytes.
+   */
+  export function formatStunAttribute(
+      attr:Turn.StunAttribute,
+      bytes:Uint8Array) : number {
+    var paddedLength = calculatePadding(attr.value ? attr.value.length : 0, 4);
+    if (bytes.length < 4 + paddedLength) {
+      throw new Error('too few bytes');
     }
-  }
-  throw new Error('attribute not found');
-}
 
-/** Rounds x up to the nearest b, e.g. calculatePadding(5, 4) == 8. */
-export function calculatePadding(x:number, b:number) : number {
-  var t = Math.floor(x / b);
-  if ((x % b) > 0) {
-    t++;
+    // Type.
+    bytes[0] = attr.type >> 8;
+    bytes[1] = attr.type & 0xff;
+
+    // Length.
+    var length = attr.value ? attr.value.length : 0;
+    bytes[2] = length >> 8;
+    bytes[3] = length & 0xff;
+
+    // Value.
+    if (attr.value) {
+      bytes.set(attr.value, 4);
+      // Padding.
+      for (var i = attr.value.length; i < paddedLength; i++) {
+        bytes[4 + i] = 0;
+      }
+    }
+
+    return 4 + paddedLength;
   }
-  return t * b;
-}
+
+  /**
+   * Parses a STUN attribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15
+   */
+  export function parseStunAttribute(bytes:Uint8Array) : Turn.StunAttribute {
+    // Fail if the number of bytes is too small.
+    if (bytes.length < 4) {
+      throw new Error('too few bytes');
+    }
+
+    var type = bytes[0] << 8 | bytes[1];
+    var length = bytes[2] << 8 | bytes[3];
+    var value :Uint8Array;
+    if (length > 0) {
+      value = bytes.subarray(4, 4 + length);
+    }
+
+    return {
+      type : type,
+      value : value
+    };
+  }
+
+  /**
+   * Returns bytes suitable for use in a ERROR_CODE-typed StunAttribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15.6
+   */
+  export function formatErrorCodeAttribute(
+      code:number,
+      reason:string) : Uint8Array {
+    // TODO: check reason length is <128 characters
+    var length = 4 + reason.length;
+    var buffer = new ArrayBuffer(length);
+    var bytes = new Uint8Array(buffer);
+    // Reserved bits.
+    bytes[0] = bytes[1] = bytes[2] = 0;
+    // Class (hundreds digit of code).
+    var clazz = code / 100;
+    if (clazz < 3 || clazz > 6) {
+      throw new Error('class must be between 3 and 6');
+    }
+    bytes[2] = clazz;
+    // Number (code modulo 100).
+    bytes[3] = code % 100;
+    // Reason.
+    var reasonBuffer = arraybuffers.stringToArrayBuffer(reason);
+    bytes.set(new Uint8Array(reasonBuffer), 4);
+    return bytes;
+  }
+
+  /**
+   * Returns bytes suitable for use in a MAPPED-ADDRESS attribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15.1
+   * Although we never send MAPPED-ADDRESS attributes, this function is
+   * useful for testing and formatting XOR-MAPPED-ADDRESS attributes.
+   * TODO: support IPv6 (assumes IPv4)
+   */
+  export function formatMappedAddressAttribute(
+      address:string,
+      port:number) : Uint8Array {
+    var buffer = new ArrayBuffer(8);
+    var bytes = new Uint8Array(buffer);
+
+    bytes[0] = 0; // reserved
+    bytes[1] = 0x01; // IPv4
+
+    // Port.
+    bytes[2] = port >> 8;
+    bytes[3] = port & 0xff;
+
+    // Address.
+    var s = address.split('.');
+    if (s.length != 4) {
+      throw new Error('cannot parse address ' + address);
+    }
+    for (var i = 0; i < 4; i++) {
+      bytes[4 + i] = parseInt(s[i]);
+    }
+
+    return bytes;
+  }
+
+  /**
+   * Parses a MAPPED-ADDRESS attribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15.1
+   * Again, although we never parse MAPPED-ADDRESS attributes, this function is
+   * useful for testing and for parsing XOR-MAPPED-ADDRESS attributes.
+   * TODO: support IPv6 (assumes IPv4)
+   */
+  export function parseMappedAddressAttribute(bytes:Uint8Array) : Turn.Endpoint {
+    if (bytes.length < 8) {
+      throw new Error('attribute too short');
+    }
+
+    if (bytes[0]) {
+      throw new Error('first byte must be zero');
+    }
+
+    if (bytes[1] != 0x01) {
+      throw new Error('only ipv4 supported');
+    }
+
+    // Port.
+    var port = (bytes[2] << 8) | bytes[3];
+
+    // Address.
+    var quadrants = [bytes[4], bytes[5], bytes[6], bytes[7]];
+    var address = quadrants.join('.');
+
+    return {
+      address: address,
+      port: port
+    };
+  }
+
+  /**
+   * Parses an XOR-MAPPED-ADDRESS attribute:
+   *   http://tools.ietf.org/html/rfc5389#section-15.2
+   * TODO: support IPv6 (assumes IPv4)
+   */
+  export function parseXorMappedAddressAttribute(bytes:Uint8Array) : Turn.Endpoint {
+    if (bytes.length < 8) {
+      throw new Error('attribute too short');
+    }
+
+    // Port.
+    var magicCookieBytes = getMagicCookieBytes();
+    bytes[2] ^= magicCookieBytes[0]; // most significant byte
+    bytes[3] ^= magicCookieBytes[1]; // least significant byte
+
+    // Address.
+    for (var i = 0; i < 4; i++) {
+      bytes[4 + i] ^= magicCookieBytes[i];
+    }
+    return parseMappedAddressAttribute(bytes);
+  }
+
+  /**
+   * Returns bytes suitable for use in XOR-MAPPED-ADDRESS and
+   * XOR-RELAYED-ADDRESS attributes:
+   *   http://tools.ietf.org/html/rfc5389#section-15.2
+   * TODO: support IPv6 (assumes IPv4)
+   */
+  export function formatXorMappedAddressAttribute(
+      address:string,
+      port:number) : Uint8Array {
+    var bytes = formatMappedAddressAttribute(address, port);
+
+    // From the RFC:
+    //   "X-Port is computed by taking the mapped port in host byte order,
+    //   XOR'ing it with the most significant 16 bits of the magic cookie,
+    //   and then the converting the result to network byte order."
+    // It's not clear why you would XOR the host byte ordered-representation
+    // so we just XOR the network byte representation. Examining the network
+    // traffic with Wireshark indicates that this is correct.
+
+    var magicCookie = getMagicCookieBytes();
+    bytes[2] ^= magicCookie[0];
+    bytes[3] ^= magicCookie[1];
+
+    // Address.
+    for (var i = 0; i < 4; i++) {
+      bytes[4 + i] ^= magicCookie[i];
+    }
+
+    return bytes;
+  }
+
+  /**
+   * Returns the first attribute in the supplied array having the
+   * specified type. Raises an error if the attribute is not found.
+   */
+  export function findFirstAttributeWithType(
+    type:Turn.MessageAttribute,
+    attributes:Turn.StunAttribute[]) : Turn.StunAttribute {
+    for (var i = 0; i < attributes.length; i++) {
+      var attribute = attributes[i];
+      if (attribute.type === type) {
+        return attribute;
+      }
+    }
+    throw new Error('attribute not found');
+  }
+
+  /** Rounds x up to the nearest b, e.g. calculatePadding(5, 4) == 8. */
+  export function calculatePadding(x:number, b:number) : number {
+    var t = Math.floor(x / b);
+    if ((x % b) > 0) {
+      t++;
+    }
+    return t * b;
+  }
+}  // module Turn
 
 export function doUdpTest() {
   log.info('perform udp test');
