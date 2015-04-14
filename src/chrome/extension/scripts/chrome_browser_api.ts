@@ -14,6 +14,10 @@ enum PopupState {
     LAUNCHED
 }
 
+declare var Notification : {
+  new (title :string, options ?:any) : any;
+}
+
 class ChromeBrowserApi implements BrowserAPI {
 
   public browserSpecificElement = "uproxy-app-missing";

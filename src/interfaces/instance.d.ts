@@ -19,15 +19,6 @@ interface NetworkInfo {
 }
 
 /**
- * LocalPeerId can contain the full instance paths so that we can easily
- * look up instance objects.
- */
-interface LocalPeerId {
-  clientInstancePath :InstancePath;
-  serverInstancePath :InstancePath;
-}
-
-/**
  * Base interface for all Instances.
  */
 interface Instance {
