@@ -20,14 +20,13 @@
  * The tricky bit is that the Instance is associated not with the 'human' chat
  * client, but with the 'uProxy' non-human client.
  */
-/// <reference path='remote-instance.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-/// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/user.d.ts' />
-/// <reference path='../freedom/typings/social.d.ts' />
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import remote_instance = require('./remote_instance');
+import social = require('../interfaces/social');
+import consent = require('../consent');
 
-module Core {
   var log :logging.Log = new logging.Log('user');
 
   /**
@@ -40,17 +39,17 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser, Core.Persistent {
+  export class User implements BaseUser, Persistent {
 
     // Name of the user as provided by the social network.
     public name :string;
     public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
-    public consent :Consent.State = new Consent.State();
+    public consent :consent.State = new consent.State();
 
     // Each instance is a user and social network pair.
-    private instances_ :{ [instanceId :string] :Core.RemoteInstance };
+    private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
@@ -218,7 +217,7 @@ module Core {
       }
     }
 
-    public getInstance = (instanceId:string) : Core.RemoteInstance => {
+    public getInstance = (instanceId:string) : remote_instance.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
@@ -272,7 +271,7 @@ module Core {
       var instance = this.instances_[instanceId];
       if (!instance) {
         // Create a new instance.
-        instance = new Core.RemoteInstance(this, instanceId);
+        instance = new remote_instance.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
       }
       return instance.update(instanceHandshake).then(() => {
@@ -438,7 +437,7 @@ module Core {
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
-          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId);
+          this.instances_[instanceId] = new remote_instance.RemoteInstance(this, instanceId);
         }
       }
 
@@ -510,7 +509,7 @@ module Core {
      */
     public modifyConsent = (action :uProxy.ConsentUserAction) : Promise<void> => {
       var consentModified = this.onceLoaded.then(() => {
-        if (!Consent.handleUserAction(this.consent, action)) {
+        if (!consent.handleUserAction(this.consent, action)) {
           return Promise.reject(new Error(
               'Invalid user action on consent ' +
               JSON.stringify({
@@ -572,7 +571,5 @@ module Core {
     // Only save and load the instanceIDs. The actual RemoteInstances will
     // be saved and loaded separately.
     instanceIds :string[];
-    consent :Consent.State;
+    consent :consent.State;
   }
-
-}  // module uProxy

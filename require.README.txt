@@ -8,3 +8,7 @@ now become:
 ```
 import SOME_NAME = require('../interfaces/SOME_NAME.ts');
 ```
+
+Consent.State => consent.State
+
+Core.RemoteInstance => remote_instance.RemoteInstance

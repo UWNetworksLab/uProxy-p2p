@@ -14,7 +14,7 @@ describe('Core.User', () => {
   network['send'] = () => { return Promise.resolve(); };
 
   var user :Core.User;
-  var instance :Core.RemoteInstance;
+  var instance :remote_instance.RemoteInstance;
 
   it('creates with the correct userId', (done) => {
     user = new Core.User(network, 'fakeuser');
@@ -256,9 +256,9 @@ describe('Core.User', () => {
     });
 
     it('invalid proxy transitions do not modify consent', (done) => {
-      var emptyConsent = new Consent.State();
+      var emptyConsent = new consent.State();
 
-      user.consent = new Consent.State();
+      user.consent = new consent.State();
       user.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER).then(() => {
@@ -332,9 +332,9 @@ describe('Core.User', () => {
     });
 
     it('invalid client transitions do not modify consent', (done) => {
-      var emptyConsent = new Consent.State();
+      var emptyConsent = new consent.State();
 
-      user.consent = new Consent.State();
+      user.consent = new consent.State();
       user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(

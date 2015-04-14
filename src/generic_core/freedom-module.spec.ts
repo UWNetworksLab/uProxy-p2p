@@ -24,7 +24,7 @@ describe('Core', () => {
   user.getInstance = null;
   user.notifyUI = () => {};
   user.getLocalInstanceId = () => { return 'fake/userpath'; };
-  var alice = new Core.RemoteInstance(user, 'instance-alice');
+  var alice = new remote_instance.RemoteInstance(user, 'instance-alice');
 
   beforeEach(() => {
     spyOn(console, 'log');

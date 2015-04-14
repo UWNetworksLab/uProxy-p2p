@@ -5,14 +5,17 @@
  * allows any pair of uProxy installations to speak to one another regarding
  * consent, proxying status, and any other signalling information.
  */
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
-/// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='consent.ts' />
-/// <reference path='core.ts' />
-/// <reference path='remote-connection.ts' />
-/// <reference path='social.ts' />
-/// <reference path='../third_party/typings/lodash/lodash.d.ts' />
+
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import remote_connection = require('./remote-connection');
+import social_types = require('../interfaces/social');
+import social = require('./social');
+import consent = require('./consent');
+
+import Persistent = require('../interfaces/persistent');
+
 
 module Core {
   var log :logging.Log = new logging.Log('remote-instance');
@@ -29,7 +32,7 @@ module Core {
    * - Locally, via a user command from the UI.
    * - Remotely, via consent bits sent over the wire by a friend.
    */
-  export class RemoteInstance implements Instance, Core.Persistent {
+  export class RemoteInstance implements social.BaseInstance, Persistent {
 
     public keyHash     :string;
     public description :string;
@@ -392,7 +395,7 @@ module Core {
       }
     }
 
-  }  // class Core.RemoteInstance
+  }  // class remote_instance.RemoteInstance
 
   export interface RemoteInstanceState {
     wireConsentFromRemote :uProxy.ConsentWireState;

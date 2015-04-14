@@ -47,6 +47,6 @@ interface Persistent {
    */
   restoreState :(state :Object) => void;
 
-}  // interface Core.Persistent
+}  // interface Persistent
 
 export = Persistent;

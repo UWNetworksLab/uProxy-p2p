@@ -41,7 +41,7 @@ var bgAppPageChannel = freedom();
 
 // Keep track of the current remote instance who is acting as a proxy server
 // for us.
-var remoteProxyInstance : Core.RemoteInstance = null;
+var remoteProxyInstance : remote_instance.RemoteInstance = null;
 
 // This is a global instance of RemoteConnection that is currently used for
 // either sharing or using a proxy through the copy+paste interface (i.e.
@@ -431,7 +431,7 @@ class uProxyCore implements uProxy.CoreApi {
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
-  public getInstance = (path :InstancePath) : Core.RemoteInstance => {
+  public getInstance = (path :InstancePath) : remote_instance.RemoteInstance => {
     var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);

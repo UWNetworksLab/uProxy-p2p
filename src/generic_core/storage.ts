@@ -3,14 +3,12 @@
  *
  * Provides a promise-based interface to the storage provider.
  */
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/storage.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+import Persistent = require('../interfaces/persistent');
 
-module Core {
   var log :logging.Log = new logging.Log('storage');
 
   // Platform-independent storage provider.
@@ -107,4 +105,3 @@ module Core {
     }
     */
   }  // class Storage
-}  // module Core

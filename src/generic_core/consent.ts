@@ -2,7 +2,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
-module Consent {
+//module Consent {
   var log :logging.Log = new logging.Log('consent');
 
   export class State implements social.ConsentState {
@@ -70,4 +70,4 @@ module Consent {
     }
     return true;
   }
-}
+//}

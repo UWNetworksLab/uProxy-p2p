@@ -10,7 +10,7 @@
 /// <reference path='../webrtc/peerconnection.d.ts' />
 /// <reference path='remote-instance.ts' />
 
-describe('Core.RemoteInstance', () => {
+describe('remote_instance.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
   var user = <Core.User><any>jasmine.createSpyObj('user', [
@@ -20,7 +20,7 @@ describe('Core.RemoteInstance', () => {
       'sendInstanceHandshake',
       'updateRemoteRequestsAccessFromLocal'
   ]);
-  user.consent = new Consent.State();
+  user.consent = new consent.State();
 
   user.network = <Social.Network><any>jasmine.createSpyObj(
       'network', ['getUser']);
@@ -38,7 +38,7 @@ describe('Core.RemoteInstance', () => {
       <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
           'onceReady'
       ]);
-  var instance :Core.RemoteInstance;
+  var instance :remote_instance.RemoteInstance;
   var localPeerId = {
     clientInstancePath: 'clientInstancePath',
     serverInstancePath: 'serverInstancePath'
@@ -58,7 +58,7 @@ describe('Core.RemoteInstance', () => {
         saved = realStorage.save(key, value);
         return saved;
       };
-      instance0 = new Core.RemoteInstance(user, 'instanceId');
+      instance0 = new remote_instance.RemoteInstance(user, 'instanceId');
       instance0.onceLoaded.then(() => {
         expect(instance0.description).not.toBeDefined();
         expect(instance0.keyHash).not.toBeDefined();
@@ -84,7 +84,7 @@ describe('Core.RemoteInstance', () => {
   });
 
   describe('updating consent from instance handshake', () => {
-    var instance :Core.RemoteInstance;
+    var instance :remote_instance.RemoteInstance;
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
@@ -96,7 +96,7 @@ describe('Core.RemoteInstance', () => {
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
         var user = new Core.User(network, 'testUser');
         user.update({userId: 'testUser', name: 'Alice'});
-        instance = new Core.RemoteInstance(user, INSTANCE_ID);
+        instance = new remote_instance.RemoteInstance(user, INSTANCE_ID);
         user['instances_'][INSTANCE_ID] = instance;
         Promise.all([user.onceLoaded, instance.onceLoaded]).then(done);
       });
@@ -122,7 +122,7 @@ describe('Core.RemoteInstance', () => {
 
   describe('proxying', () => {
 
-    var alice = new Core.RemoteInstance(user, 'instance-alice');
+    var alice = new remote_instance.RemoteInstance(user, 'instance-alice');
 
     // Bare-minimum functions to fake the current version methods of SocksToRtc.
     // TODO once using uproxy-lib v20+, move to real mocks (examples:
@@ -200,7 +200,7 @@ describe('Core.RemoteInstance', () => {
   describe('signalling', () => {
 
     // Build a mock Alice with fake signals and networking hooks.
-    var alice :Core.RemoteInstance;  // Reset before each test in beforeEach
+    var alice :remote_instance.RemoteInstance;  // Reset before each test in beforeEach
     var fakeSocksToRtc = {
       'handleSignalFromPeer': () => {},
       'on': () => {},
@@ -225,7 +225,7 @@ describe('Core.RemoteInstance', () => {
     };
 
     beforeEach(() => {
-      alice = new Core.RemoteInstance(user, 'instance-alice');
+      alice = new remote_instance.RemoteInstance(user, 'instance-alice');
       user.consent.localGrantsAccessToRemote = true;
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');

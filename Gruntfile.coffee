@@ -602,6 +602,7 @@ module.exports = (grunt) ->
           devBuildPath + '/interfaces/*.ts'
           devBuildPath + '/generic_core/*.ts'
           #devBuildPath + '/generic_core/**/*.ts'
+          '!'  + devBuildPath + '/**/*.spec.ts'
           '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'

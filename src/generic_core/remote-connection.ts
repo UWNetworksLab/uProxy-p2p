@@ -4,8 +4,11 @@
  * This file defines a class for a direct remote connection to another machine.
  * It handles the signaling channel between two peers, regardless of permission.
  */
-/// <reference path='../rtc-to-net/rtc-to-net.ts' />
-/// <reference path='../socks-to-rtc/socks-to-rtc.ts' />
+
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import net = require('../../../third_party/uproxy-networking/net/net');
+import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_rtc/socks_to_rtc');
 
 module Core {
   var log :logging.Log = new logging.Log('remote-connection');
