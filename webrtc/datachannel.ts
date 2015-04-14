@@ -34,7 +34,7 @@ interface StringData { str :string; }
 interface BufferData { buffer :ArrayBuffer; }
 
 export interface DataChannel {
-  // Guarenteed to be invarient for the life of the data channel.
+  // Guaranteed to be invariant for the life of the data channel.
   getLabel : () => string;
 
   // Promise for when the data channel has been openned.
@@ -132,12 +132,6 @@ export class DataChannelClass implements DataChannel {
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
     this.toPeerDataBytes_ = 0;
     this.lastBrowserBufferedAmount_ = 0;
-
-    if (this.label_.length === 0) {
-      this.rtcDataChannel_.getLabel().then((label:string) => {
-        this.label_ = label;
-      });
-    }
 
     this.onceOpened = new Promise<void>((F,R) => {
       this.rejectOpened_ = R;
@@ -368,6 +362,16 @@ export class DataChannelClass implements DataChannel {
       this.opennedSuccessfully_;
     return s;
   }
+
+  // This setter is not part of the DataChannel interface, and is only for
+  // use by the static constructor.
+  public setLabel = (label:string) => {
+    if (this.label_ !== '') {
+      throw new Error('Data Channel label was set twice, to '
+          + this.label_ + ' and ' + label);
+    }
+    this.label_ = label;
+  }
 }  // class DataChannelClass
 
 // Static constructor which constructs a core.rtcdatachannel instance
@@ -384,6 +388,9 @@ export function createFromRtcDataChannel(
   // early 'onmessage' events.
   var dc = new DataChannelClass(rtcDataChannel);
   return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
-    return dc;
+    return rtcDataChannel.getLabel().then((label:string) => {
+      dc.setLabel(label);
+      return dc;
+    });
   });
 }
