@@ -127,11 +127,17 @@ export class DataChannelClass implements DataChannel {
   // |rtcDataChannel_| is the freedom rtc data channel.
   // |label_| is the rtcDataChannel_.getLabel() result
   constructor(private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel,
-              private label_:string) {
+              private label_ = '') {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
     this.toPeerDataBytes_ = 0;
     this.lastBrowserBufferedAmount_ = 0;
+
+    if (this.label_.length === 0) {
+      this.rtcDataChannel_.getLabel().then((label:string) => {
+        this.label_ = label;
+      });
+    }
 
     this.onceOpened = new Promise<void>((F,R) => {
       this.rejectOpened_ = R;
@@ -374,9 +380,10 @@ export function createFromFreedomId(id:string) : Promise<DataChannel> {
 // given a core.rtcdatachannel instance.
 export function createFromRtcDataChannel(
     rtcDataChannel:freedom_RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
+  // We need to construct the data channel synchronously to avoid missing any
+  // early 'onmessage' events.
+  var dc = new DataChannelClass(rtcDataChannel);
   return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
-    return rtcDataChannel.getLabel().then((label:string) => {
-      return new DataChannelClass(rtcDataChannel, label);
-    });
+    return dc;
   });
 }
