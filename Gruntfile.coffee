@@ -11,7 +11,7 @@ taskManager = new TaskManager.Manager();
 taskManager.add 'base', [
   'copy:dev'
   'version_file'
-  #'ts:devInModuleEnv'
+  'ts:devInModuleEnv'
   'ts:devInCoreEnv'
 ]
 
@@ -599,6 +599,9 @@ module.exports = (grunt) ->
       # directory.
       devInModuleEnv:
         src: [
+          devBuildPath + '/generic_core/consent.ts'
+          devBuildPath + '/generic_core/diagnose.ts'
+          #devBuildPath + '/generic_core/**/*.ts'
           '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'

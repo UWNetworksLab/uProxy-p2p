@@ -4,13 +4,16 @@
  * Firefox-specific implementation of the Browser API.
  * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
-/// <reference path='../../../interfaces/browser-api.d.ts' />
-/// <reference path='../../../interfaces/firefox.d.ts' />
-/// <reference path='../../../generic_ui/scripts/ui.ts' />
+
+/// <reference path='../../../third_party/firefox/firefox.d.ts' />
+
+import browser_api =  require('../../../interfaces/browser-api');
+import uproxy_types = require('../../../interfaces/uproxy');
+import user_interface = require('../../../generic_ui/scripts/ui');
 
 var port :ContentScriptPort;
 
-declare var ui :UI.UserInterface;
+declare var ui :user_interface.UserInterface;
 
 class FirefoxBrowserApi implements BrowserAPI {
 

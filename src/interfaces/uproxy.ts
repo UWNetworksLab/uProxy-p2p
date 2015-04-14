@@ -1,17 +1,12 @@
   /**
    * uproxy.ts
    *
-   * This file defines the base uProxy module. It contains Enums and interfaces
-   * which are relevant to all parts of uProxy, notably for communication between
-   * the Core and the UI.
+   * This file defines the base uProxy module types. It contains Enums and
+   * interfaces which are relevant to all parts of uProxy, notably for
+   * communication between the Core and the UI.
    */
 
 /// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
-
-  // TODO: Move the notifications somewhere better.
-  // /// <reference path='interfaces/ui.d.ts' />
-  // /// <reference path='interfaces/persistent.d.ts' />
-  // /// <reference path='networking-typings/communications.d.ts' />
 
 import net = require('../../../third_party/uproxy-networking/net/net.types');
 

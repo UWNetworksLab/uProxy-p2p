@@ -1,5 +1,7 @@
 // TODO(salomegeo): rewrite it in typescript.
-var ui;
+
+
+var ui :UI.UserInterface;
 
 var core;
 
