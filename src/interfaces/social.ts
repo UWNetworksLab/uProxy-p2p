@@ -107,10 +107,6 @@ export interface PeerMessage {
   data :Object;
 }
 
-export module Social {
-  export var MANUAL_NETWORK_ID = 'Manual';
-}
-
 // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
 // client ID for the sender but no user ID because in the manual network
 // there is no concept of a single user having multiple clients; in the

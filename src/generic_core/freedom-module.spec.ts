@@ -61,13 +61,13 @@ describe('Core', () => {
 
     var senderClientId = 'dummy_sender';
     var message :uProxy.Message = {
-      type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+      type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
       data: {
         elephants: 'have trunks',
         birds: 'do not'
       }
     };
-    var command :uProxy.HandleManualNetworkInboundMessageCommand = {
+    var command :social.HandleManualNetworkInboundMessageCommand = {
       senderClientId: senderClientId,
       message: message
     };

@@ -9,6 +9,14 @@ now become:
 import SOME_NAME = require('../interfaces/SOME_NAME.ts');
 ```
 
-Consent.State => consent.State
+// Renamings:
 
+Consent.State => consent.State
 Core.RemoteInstance => remote_instance.RemoteInstance
+Instance => user.BaseInstance
+Persistent => Persistent   [ = require('interface/persistent'); ]
+UI.Instance => social.InstanceData
+UI.UserMessage => social.UserData
+UI.UserProfileMessage => social.UserProfileData
+uproxy.MessageType => social.PeerMessageType
+Net.Endpoint => net.endpoint

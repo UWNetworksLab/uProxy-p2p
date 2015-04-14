@@ -10,7 +10,7 @@ import social = require('../interfaces/social');
 
 import Persistent = require('../interfaces/persistent');
 
-module Core {
+// module Core {
   var log :logging.Log = new logging.Log('local-instance');
 
   // Small convenience wrapper for random Uint8.
@@ -99,4 +99,4 @@ module Core {
 
   }  // class Core.LocalInstance
 
-}  // module Core
+// }  // module Core

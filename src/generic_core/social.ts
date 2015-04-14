@@ -28,7 +28,6 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social = require('../interfaces/social');
 import user = require('./user');
 
-
   var NETWORK_OPTIONS = {
     'Google': {
       isFirebase: false,
@@ -48,6 +47,7 @@ import user = require('./user');
 
   var LOGIN_TIMEOUT :number = 5000;  // ms
 
+  export var MANUAL_NETWORK_ID = 'Manual';
 
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
@@ -110,10 +110,10 @@ import user = require('./user');
   }
 
   export function getOnlineNetwork() : NetworkState {
-    for (var network in Social.networks) {
-      if (Object.keys(Social.networks[network]).length > 0) {
-        var userId = Object.keys(Social.networks[network])[0];
-        return Social.networks[network][userId].getNetworkState();
+    for (var network in networks) {
+      if (Object.keys(networks[network]).length > 0) {
+        var userId = Object.keys(networks[network])[0];
+        return networks[network][userId].getNetworkState();
       }
     }
     return null;
@@ -140,10 +140,10 @@ import user = require('./user');
   // common to multiple Network implementations. Essentially an abstract base
   // class for Network implementations, except that TypeScript does not allow
   // abstract classes.
-  export class AbstractNetwork implements Network {
+  export class AbstractNetwork implements social.Network {
 
-    public roster     :{[userId: string] :Core.User};
-    public myInstance :Core.LocalInstance;
+    public roster     :{[userId: string] :social.User};
+    public myInstance :local_instance.LocalInstance;
 
     private SaveKeys = {
       ME: 'me'

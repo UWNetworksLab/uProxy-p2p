@@ -156,7 +156,7 @@ describe('remote_connection.RemoteConnection', () => {
       spyOn(socksToRtc, 'handleSignalFromPeer');
 
       connection.handleSignal({
-        type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
         data: {}
       });
 
@@ -169,7 +169,7 @@ describe('remote_connection.RemoteConnection', () => {
       spyOn(socksToRtc, 'handleSignalFromPeer');
 
       connection.handleSignal({
-        type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
         data: {}
       });
 

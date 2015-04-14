@@ -26,6 +26,8 @@ import local_storage = require('./storage');
 import remote_instance = require('./remote-instance');
 import remote_connection = require('./remote-connection');
 import user_interface = require('../interfaces/ui');
+import version = require('../interfaces/version');
+import browser_connector = require('../interfaces/browser_connector');
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 var loggingProvider = freedom['loggingprovider']();
@@ -88,9 +90,9 @@ class UIConnector implements user_interface.UiApi {
       this.update(
           uproxy_core_api.Update.INITIAL_STATE,
           {
-            networkNames: Object.keys(Social.networks),
+            networkNames: Object.keys(social_network.networks),
             globalSettings: core.globalSettings,
-            onlineNetwork: Social.getOnlineNetwork()
+            onlineNetwork: social_network.getOnlineNetwork()
           });
     });
   }
@@ -104,7 +106,7 @@ class UIConnector implements user_interface.UiApi {
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
  */
-class uProxyCore implements uProxy.CoreApi {
+class uProxyCore implements uproxy_core_api.CoreApi {
   private DEFAULT_STUN_SERVERS_ = [{urls: ['stun:stun.l.google.com:19302']},
                                 {urls: ['stun:stun1.l.google.com:19302']},
                                 {urls: ['stun:stun2.l.google.com:19302']},
@@ -120,8 +122,8 @@ class uProxyCore implements uProxy.CoreApi {
          hasSeenSharingEnabledScreen: false,
          hasSeenWelcome: false,
          allowNonUnicast: false,
-         mode: uProxy.Mode.GET,
-         version: uProxy.STORAGE_VERSION};
+         mode: user_interface.Mode.GET,
+         version: version.STORAGE_VERSION};
   public loadGlobalSettings :Promise<void> = null;
   private natType_ :String = '';
 
@@ -152,7 +154,7 @@ class uProxyCore implements uProxy.CoreApi {
             this.globalSettings.allowNonUnicast = false;
           }
           if (typeof this.globalSettings.mode == 'undefined') {
-            this.globalSettings.mode = uProxy.Mode.GET;
+            this.globalSettings.mode = user_interface.Mode.GET;
           }
         }).catch((e) => {
           log.info('No global settings loaded', e.message);
@@ -169,7 +171,7 @@ class uProxyCore implements uProxy.CoreApi {
    */
   public onCommand = (cmd :uproxy_core_api.Command, handler:any) => {
     bgAppPageChannel.on('' + cmd,
-      (args :uProxy.PromiseCommand) => {
+      (args :browser_connector.PromiseCommand) => {
         // Call handler with args.data and ignore other fields in args
         // like promiseId.
         handler(args.data);
@@ -182,7 +184,7 @@ class uProxyCore implements uProxy.CoreApi {
    */
   public onPromiseCommand = (cmd :uproxy_core_api.Command,
                              handler :(data ?:any) => Promise<any>) => {
-    var promiseCommandHandler = (args :uProxy.PromiseCommand) => {
+    var promiseCommandHandler = (args :browser_connector.PromiseCommand) => {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
         var err = 'onPromiseCommand called for cmd ' + cmd +
@@ -215,7 +217,7 @@ class uProxyCore implements uProxy.CoreApi {
     // TODO: implement options.
   }
 
-  dismissNotification = (instancePath :InstancePath) => {
+  dismissNotification = (instancePath :social.InstancePath) => {
     // TODO: implement options.
   }
 
@@ -224,42 +226,42 @@ class uProxyCore implements uProxy.CoreApi {
    * Access various social networks using the Social API.
    */
   public login = (networkName :string) : Promise<void> => {
-    if (networkName === Social.MANUAL_NETWORK_ID) {
-      var network = Social.getNetwork(networkName, '');
+    if (networkName === social_network.MANUAL_NETWORK_ID) {
+      var network = social_network.getNetwork(networkName, '');
       var loginPromise = network.login(true);
       loginPromise.then(() => {
-        Social.notifyUI(networkName);
+        social_network.notifyUI(networkName);
         log.info('Logged in to manual network');
       });
       return loginPromise;
     }
 
-    if (!(networkName in Social.networks)) {
+    if (!(networkName in social_network.networks)) {
       log.warn('Network does not exist', networkName);
       return Promise.reject(new Error('Network does not exist (' + networkName + ')'));
     }
-    var network = Social.pendingNetworks[networkName];
+    var network = social_network.pendingNetworks[networkName];
     if (typeof network === 'undefined') {
-      network = new Social.FreedomNetwork(networkName);
-      Social.pendingNetworks[networkName] = network;
+      network = new social_network.FreedomNetwork(networkName);
+      social_network.pendingNetworks[networkName] = network;
     }
     var loginPromise = network.login(true);
     loginPromise.then(() => {
-      var userId = network.myInstance.userId;
-      if (userId in Social.networks[networkName]) {
+      var userId :string = network.myInstance.userId;
+      if (userId in social_network.networks[networkName]) {
         // If user is already logged in with the same (network, userId)
         // log out from existing network before replacing it.
-        Social.networks[networkName][userId].logout();
+        social_network.networks[networkName][userId].logout();
       }
-      Social.networks[networkName][userId] = network;
-      delete Social.pendingNetworks[networkName];
+      social_network.networks[networkName][userId] = network;
+      delete social_network.pendingNetworks[networkName];
       log.info('Successfully logged in to network', {
         network: networkName,
         userId: userId
       });
     }).catch((e) => {
       log.error('Could not log in to network', e.stack);
-      delete Social.pendingNetworks[networkName];
+      delete social_network.pendingNetworks[networkName];
     });
 
     // TODO: save the auto-login default.
@@ -273,7 +275,7 @@ class uProxyCore implements uProxy.CoreApi {
   public logout = (networkInfo :NetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     var userId = networkInfo.userId;
-    var network = Social.getNetwork(networkName, userId);
+    var network = social_network.getNetwork(networkName, userId);
     if (null === network) {
       log.warn('Could not logout of network', networkName);
       return;
@@ -296,7 +298,7 @@ class uProxyCore implements uProxy.CoreApi {
    */
 
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
-    newSettings.version = uProxy.STORAGE_VERSION;
+    newSettings.version = version.STORAGE_VERSION;
     storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings).catch((e) => {
       log.error('Could not save globalSettings to storage', e.stack);
     });
@@ -313,9 +315,9 @@ class uProxyCore implements uProxy.CoreApi {
     if (newSettings.description != this.globalSettings.description) {
       this.globalSettings.description = newSettings.description;
       // Resend instance info to update description for logged in networks.
-      for (var networkName in Social.networks) {
-        for (var userId in Social.networks[networkName]) {
-          Social.networks[networkName][userId].resendInstanceHandshakes();
+      for (var networkName in social_network.networks) {
+        for (var userId in social_network.networks[networkName]) {
+          social_network.networks[networkName][userId].resendInstanceHandshakes();
         }
       }
     }
@@ -330,9 +332,9 @@ class uProxyCore implements uProxy.CoreApi {
   /**
    * Modifies the local consent value as the result of a local user action.
    * This is a distinct pathway from receiving consent bits over the wire, which
-   * is handled directly inside the relevant Social.Network.
+   * is handled directly inside the relevant social.Network.
    */
-  public modifyConsent = (command:uProxy.ConsentCommand) => {
+  public modifyConsent = (command:uproxy_core_api.ConsentCommand) => {
     // Determine which Network, User, and Instance...
     var user = this.getUser(command.path);
     if (!user) {  // Error msg emitted above.
@@ -344,7 +346,7 @@ class uProxyCore implements uProxy.CoreApi {
     user.modifyConsent(command.action);
   }
 
-  public startCopyPasteGet = () : Promise<Net.Endpoint> => {
+  public startCopyPasteGet = () : Promise<net.Endpoint> => {
     if (remoteProxyInstance) {
       log.warn('Existing proxying session, terminating');
       remoteProxyInstance.stop();
@@ -366,7 +368,7 @@ class uProxyCore implements uProxy.CoreApi {
     return copyPasteConnection.stopShare();
   }
 
-  public sendCopyPasteSignal = (signal :uProxy.Message) => {
+  public sendCopyPasteSignal = (signal :social.PeerMessage) => {
     copyPasteConnection.handleSignal(signal);
   }
 
@@ -375,7 +377,7 @@ class uProxyCore implements uProxy.CoreApi {
    * Starts SDP negotiations with a remote peer. Assumes |path| to the
    * RemoteInstance exists.
    */
-  public start = (path :InstancePath) : Promise<Net.Endpoint> => {
+  public start = (path :social.InstancePath) : Promise<net.Endpoint> => {
     // Disable any previous proxying session.
     var stoppedGetting :Promise<void>[] = [];
     if (remoteProxyInstance) {
@@ -425,9 +427,9 @@ class uProxyCore implements uProxy.CoreApi {
   }
 
   public handleManualNetworkInboundMessage =
-      (command :uProxy.HandleManualNetworkInboundMessageCommand) => {
-    var manualNetwork :Social.ManualNetwork =
-        <Social.ManualNetwork> Social.getNetwork(Social.MANUAL_NETWORK_ID, '');
+      (command :social.HandleManualNetworkInboundMessageCommand) => {
+    var manualNetwork :social_network.ManualNetwork =
+        <social_network.ManualNetwork> social_network.getNetwork(social.MANUAL_NETWORK_ID, '');
     if (!manualNetwork) {
       log.error('Manual network does not exist, discanding inbound message',
                 command);
@@ -440,7 +442,7 @@ class uProxyCore implements uProxy.CoreApi {
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
-  public getInstance = (path :InstancePath) : remote_instance.RemoteInstance => {
+  public getInstance = (path :social.InstancePath) : remote_instance.RemoteInstance => {
     var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);
@@ -450,7 +452,7 @@ class uProxyCore implements uProxy.CoreApi {
   }
 
   public getUser = (path :UserPath) : social.User => {
-    var network = Social.getNetwork(path.network.name, path.network.userId);
+    var network = social_network.getNetwork(path.network.name, path.network.userId);
     if (!network) {
       log.error('No network', path.network.name);
       return;
@@ -490,7 +492,7 @@ class uProxyCore implements uProxy.CoreApi {
     });
   }
 
-  public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
+  public sendFeedback = (feedback :uproxy_core_api.UserFeedback, maxAttempts?:number) : Promise<void> => {
     if (!maxAttempts || maxAttempts > this.FeedbackUrls_.length) {
       // default to trying every possible URL
       maxAttempts = this.FeedbackUrls_.length;

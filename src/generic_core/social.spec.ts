@@ -12,7 +12,7 @@ class MockSocial {
 
 // Valid message that won't have side effects on network/user/instance objects.
 var VALID_MESSAGE = {
-  type: uProxy.MessageType.INSTANCE_REQUEST,
+  type: social.PeerMessageType.INSTANCE_REQUEST,
   data: null
 };
 
@@ -307,7 +307,7 @@ describe('Social.FreedomNetwork', () => {
 
     it('calls the social provider sendMessage', () => {
       network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
-      var msg = {type: uProxy.MessageType.INSTANCE, data: {'doge': 'wows'}};
+      var msg = {type: social.PeerMessageType.INSTANCE, data: {'doge': 'wows'}};
       network.send(network.getUser('mockuser'), 'fakeclient', msg);
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
         'fakeclient',
@@ -336,7 +336,7 @@ describe('Social.FreedomNetwork', () => {
     network.handleMessage(inMsg);
     expect(JSON.parse).toHaveBeenCalledWith('{"elephants":"have trunks"}');
     var outMsg = {
-      type: uProxy.MessageType.INSTANCE,
+      type: social.PeerMessageType.INSTANCE,
       data: {
         'tigers': 'are also cats'
       }
@@ -384,7 +384,7 @@ describe('Social.ManualNetwork', () => {
     spyOn(ui, 'update');
 
     var message :uProxy.Message = {
-      type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+      type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
       data: {
         elephants: 'have trunks',
         birds: 'do not'

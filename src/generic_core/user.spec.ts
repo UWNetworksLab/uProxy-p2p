@@ -136,7 +136,7 @@ describe('Core.User', () => {
     it('handles an INSTANCE message', () => {
       spyOn(user, 'syncInstance_').and.returnValue(Promise.resolve());
       user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.INSTANCE,
+        type: social.PeerMessageType.INSTANCE,
         data: {
           instanceId: 'instanceId', description: '', keyHash: '',
           consent: {isOffering: false, isRequesting: false}
@@ -150,7 +150,7 @@ describe('Core.User', () => {
       spyOn(user, 'clientToInstance');
       spyOn(user, 'getInstance').and.returnValue(instance);
       user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
         data: {}
       });
       expect(instance.handleSignal).toHaveBeenCalled();

@@ -254,10 +254,10 @@ module UI {
         var data :uProxy.Message[] = [], str = '';
 
         switch (message.type) {
-          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
             str = this.copyPasteGettingMessage;
             break;
-          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
             str = this.copyPasteSharingMessage;
             break;
         }
@@ -272,10 +272,10 @@ module UI {
 
         // reverse of above switch (since I can't just use a reference)
         switch (message.type) {
-          case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
+          case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
             this.copyPasteGettingMessage = str;
             break;
-          case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+          case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
             this.copyPasteSharingMessage = str;
             break;
         }
@@ -452,7 +452,7 @@ module UI {
 
     public handleUrlData = (url :string) => {
       var payload :uProxy.Message[];
-      var expectedType :uProxy.MessageType;
+      var expectedType :social.PeerMessageType;
       console.log('received url data from browser');
 
       if (model.onlineNetwork) {
@@ -488,12 +488,12 @@ module UI {
       // at this point, we assume everything is good, so let's check state
       switch (match[1]) {
         case 'request':
-          expectedType = uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER;
+          expectedType = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
           this.copyPasteSharingMessage = '';
           this.core_.startCopyPasteShare();
           break;
         case 'offer':
-          expectedType = uProxy.MessageType.SIGNAL_FROM_SERVER_PEER;
+          expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
           if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
             this.copyPasteError = CopyPasteError.UNEXPECTED;

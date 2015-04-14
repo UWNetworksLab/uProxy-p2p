@@ -180,17 +180,17 @@ import consent = require('../consent');
                   this.userId, clientId);
         return;
       }
-      var msgType :uProxy.MessageType = msg.type;
+      var msgType :social.PeerMessageType = msg.type;
       switch (msg.type) {
-        case uProxy.MessageType.INSTANCE:
+        case social.PeerMessageType.INSTANCE:
           this.syncInstance_(clientId, <InstanceHandshake>msg.data)
               .catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
           });
           return;
 
-        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
-        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
           if (!instance) {
             // TODO: this may occur due to a race condition where uProxy has
@@ -204,7 +204,7 @@ import consent = require('../consent');
           instance.handleSignal(msg.type, msg.data);
           return;
 
-        case uProxy.MessageType.INSTANCE_REQUEST:
+        case social.PeerMessageType.INSTANCE_REQUEST:
           log.debug('received instance request', clientId);
           this.sendInstanceHandshake(clientId);
           return;
@@ -383,7 +383,7 @@ import consent = require('../consent');
     private requestInstance_ = (clientId) : void => {
       log.debug('requesting instance', clientId);
       var instanceRequest :uProxy.Message = {
-        type: uProxy.MessageType.INSTANCE_REQUEST,
+        type: social.PeerMessageType.INSTANCE_REQUEST,
         data: {}
       };
       this.network.send(this, clientId, instanceRequest);
@@ -479,7 +479,7 @@ import consent = require('../consent');
       // Ensure that the user is loaded so that we have correct consent bits.
       return this.onceLoaded.then(() => {
         var instanceMessage = {
-          type: uProxy.MessageType.INSTANCE,
+          type: social.PeerMessageType.INSTANCE,
           data: {
             instanceId: myInstance.instanceId,
             keyHash: myInstance.keyHash,

@@ -6,23 +6,25 @@
  */
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-networking/net/net');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
 import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_rtc/socks_to_rtc');
+import social = require('../interfaces/social');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-connection');
 
   export class RemoteConnection {
 
-    public localGettingFromRemote = GettingState.NONE;
-    public localSharingWithRemote = SharingState.NONE;
+    public localGettingFromRemote = social.GettingState.NONE;
+    public localSharingWithRemote = social.SharingState.NONE;
 
     private bytesSent_ :number = 0;
     private bytesReceived_ :number = 0;
 
-    private socksToRtc_ :SocksToRtc.SocksToRtc = null;
-    private rtcToNet_ :RtcToNet.RtcToNet = null;
+    private socksToRtc_ :socks_to_rtc.SocksToRtc = null;
+    private rtcToNet_ :rtc_to_net.RtcToNet = null;
 
     private isUpdatePending_ = false;
 
@@ -45,7 +47,7 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
       this.resetSharerCreated();
     }
 
-    private createSender_ = (type :uProxy.MessageType) => {
+    private createSender_ = (type :social.PeerMessageType) => {
       return (signal :WebRtc.SignallingMessage) => {
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
@@ -55,21 +57,21 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
     }
 
     // TODO: should probably either return something or throw errors
-    public handleSignal = (message :uProxy.Message) => {
+    public handleSignal = (message :social.PeerMessage) => {
       var target :any = null; //this will either be rtcToNet_ or socksToRtc_
       var msg;
-      if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === message.type) {
+      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === message.type) {
         target = this.rtcToNet_;
-      } else if (uProxy.MessageType.SIGNAL_FROM_SERVER_PEER === message.type) {
+      } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === message.type) {
         target = this.socksToRtc_;
       } else {
-        log.warn('Invalid signal', uProxy.MessageType[message.type]);
+        log.warn('Invalid signal', social.PeerMessageType[message.type]);
         return;
       }
 
       if (!target) {
         log.warn('Received unexpected signal', {
-          type: uProxy.MessageType[message.type],
+          type: social.PeerMessageType[message.type],
           message: message
         });
         return;
@@ -94,7 +96,7 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
         }
       );
 
-      this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(uProxy.MessageType.SIGNAL_FROM_SERVER_PEER));
+      this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
       this.rtcToNet_.bytesSentToPeer.setSyncHandler(this.handleBytesSent_);
 
@@ -146,7 +148,7 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
     }
 
     public startGet = () :Promise<Net.Endpoint> => {
-      if (GettingState.NONE !== this.localGettingFromRemote) {
+      if (this.localGettingFromRemote !== social.GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         throw new Error('Currently have a connection open');
@@ -158,10 +160,10 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
         throw new Error('socksToRtc_ already exists');
       }
 
-      this.socksToRtc_ = new SocksToRtc.SocksToRtc();
+      this.socksToRtc_ = new socks_to_rtc.SocksToRtc();
 
       // set up basic handlers
-      this.socksToRtc_.on('signalForPeer', this.createSender_(uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER));
+      this.socksToRtc_.on('signalForPeer', this.createSender_(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER));
       this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
       this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
 
@@ -176,17 +178,17 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
         // or not (based on whether they clicked stop/logout, or based on
         // whether the browser's proxy was set).
 
-        var isError = GettingState.GETTING_ACCESS === this.localGettingFromRemote;
+        var isError = social.GettingState.GETTING_ACCESS === this.localGettingFromRemote;
         this.sendUpdate_(uproxy_core_api.Update.STOP_GETTING, isError);
 
-        this.localGettingFromRemote = GettingState.NONE;
+        this.localGettingFromRemote = social.GettingState.NONE;
         this.bytesSent_ = 0;
         this.bytesReceived_ = 0;
         this.stateRefresh_();
         this.socksToRtc_ = null;
       });
 
-      this.localGettingFromRemote = GettingState.TRYING_TO_GET_ACCESS;
+      this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
       this.stateRefresh_();
 
       return this.socksToRtc_.start(
@@ -198,23 +200,23 @@ import socks_to_rtc = require('../../../third_party/uproxy-networking/socks_to_r
             iceServers: core.globalSettings.stunServers
           }
       ).then((endpoint :Net.Endpoint) => {
-        this.localGettingFromRemote = GettingState.GETTING_ACCESS;
+        this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
         this.stateRefresh_();
         return endpoint;
       }).catch((e :Error) => {
-        this.localGettingFromRemote = GettingState.NONE;
+        this.localGettingFromRemote = social.GettingState.NONE;
         this.stateRefresh_();
         return Promise.reject(Error('Could not start proxy'));
       });
     }
 
     public stopGet = () :Promise<void> => {
-      if (this.localGettingFromRemote === GettingState.NONE) {
+      if (this.localGettingFromRemote === social.GettingState.NONE) {
         log.warn('Cannot stop proxying when neither proxying nor trying to proxy.');
         return;
       }
 
-      this.localGettingFromRemote = GettingState.NONE;
+      this.localGettingFromRemote = social.GettingState.NONE;
       this.stateRefresh_();
       return this.socksToRtc_.stop();
     }

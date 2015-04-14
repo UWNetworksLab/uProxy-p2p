@@ -167,9 +167,9 @@ import Persistent = require('../interfaces/persistent');
      * TODO: assuming that signal is valid, should we remove signal?
      * TODO: return a boolean on success/failure
      */
-    public handleSignal = (type:uProxy.MessageType,
+    public handleSignal = (type:social.PeerMessageType,
                            signalFromRemote:Object) :Promise<void> => {
-      if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
+      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
