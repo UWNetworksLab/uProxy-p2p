@@ -367,6 +367,9 @@ module UI {
         // to open.
         this.toastMessage = UI.SHARE_FAILED_MSG + nameOfFriend;
       });
+
+      browserApi.on('urlData', this.handleUrlData);
+      browserApi.on('notificationClicked', this.notificationClicked);
     }
 
     // Because of an observer (in root.ts) watching the value of

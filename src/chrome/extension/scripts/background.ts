@@ -144,7 +144,7 @@ function initUI() : UI.UserInterface {
       // to allow a url to be pasted twice if there has been at least a second
       // delay in order to allow users to try connecting again.
       if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        ui.handleUrlData(url);
+        chromeBrowserApi.trigger('urlData', url);
       } else {
         console.warn('Received duplicate url events', url);
       }

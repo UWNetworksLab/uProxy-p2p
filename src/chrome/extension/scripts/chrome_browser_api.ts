@@ -191,10 +191,24 @@ class ChromeBrowserApi implements BrowserAPI {
           tag: tag
         });
     notification.onclick = function() {
-      ui.handleNotificationClick(this.tag);
+      this.trigger('notificationClicked', this.tag);
     };
     setTimeout(function() {
       notification.close();
     }, 5000);
+  }
+
+  private events_ :{[name :string] :Function} = {};
+
+  public on = (name :string, callback :Function) => {
+    this.events_[name] = callback;
+  }
+
+  public trigger = (name :string, ...args :Object[]) => {
+    if (name in this.events_) {
+      this.events_[name].apply(null, args);
+    } else {
+      console.error('Attempted to trigger an unknown event', name);
+    }
   }
 }

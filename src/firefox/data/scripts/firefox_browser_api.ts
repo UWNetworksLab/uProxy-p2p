@@ -18,18 +18,6 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement;
 
-  constructor() {
-    port.on('handleUrlData', function(url :string) {
-      ui.handleUrlData(url);
-    });
-
-    port.on('notificationClicked', function(tag :string) {
-      ui.handleNotificationClick(tag);
-    });
-  }
-
-  // For browser icon.
-
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
         {
@@ -46,9 +34,6 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('launchTabIfNotOpen', url);
   }
 
-  // For proxy configuration.
-  // Sends message back to add-on environment, which handles proxy settings.
-
   public startUsingProxy = (endpoint:net.Endpoint) => {
     port.emit('startUsingProxy', endpoint);
   }
@@ -63,5 +48,9 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public showNotification = (text :string, tag :string) => {
     port.emit('showNotification', { text: text, tag: tag });
+  }
+
+  public on(name :string, callback :Function) => {
+    port.on(name, callback);
   }
 }
