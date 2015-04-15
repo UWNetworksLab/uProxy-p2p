@@ -46,10 +46,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     ui.stopGettingInUiAndConfig(false);
   }
 
-  // handle requests to stop proxying
+  // handle requests to get logs
   if (request && request.getLogs) {
     core.getLogs().then((logs) => {
-      //this.loadingLogs = false;
       // Add browser info to logs.
       var logsAndBrowserInfo = 'Browser Info: ' + navigator.userAgent + '\n\n' + logs;
       sendResponse({ logs: logsAndBrowserInfo });

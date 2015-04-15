@@ -100,10 +100,15 @@ function setUpConnection(freedom, panel, button) {
         freedom.emit(uProxy.Command[data.command], data.data);
       });
 
+      // If we receive a getLogs message from a webpage (specifically
+      // view-logs.html), make a call to get logs from the core, and intercept
+      // the returned value when it is being passed to the UI with a
+      // COMMAND_FULFILLED update.
       worker.port.on('getLogs', function(data) {
         freedom.emit(uProxy.Command.GET_LOGS, {data: data.data, promiseId: -1});
         var forwardLogsToContentScript = function(data) {
           if (data['command'] == uProxy.Command.GET_LOGS) {
+            // Forward logs to content-proxy.js
             worker.port.emit('logs', data.argsForCallback);
             panel.port.off(uProxy.Update.COMMAND_FULFILLED,
               forwardLogsToContentScript);

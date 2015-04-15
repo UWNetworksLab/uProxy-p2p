@@ -3,11 +3,16 @@ interface Window {
           on :(eventType :string, handler :Function) => void; };
 }
 
+// self.port listens for messages from glue.js, which can communicate with
+// the core and UI, and forwards them to pages with this content script
+// loaded.
 self.port.on('logs', function(logs) {
   window.postMessage({ logs : logs, data: false }, '*');
 });
 
 
+// Listen for messages from pages where the content script is injected
+// (e.g. disconnected.js and get_logs.js)
 window.addEventListener('message', function(event) {
   if (event.data.update) {
     self.port.emit('update', event.data);
