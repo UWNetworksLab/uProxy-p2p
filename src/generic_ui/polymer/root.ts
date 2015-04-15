@@ -2,8 +2,6 @@
 /// <reference path='../scripts/ui.ts' />
 /// <reference path='../../uproxy.ts' />
 
-declare var ui :UI.UserInterface;
-
 Polymer({
   dialog: {
     message: '',

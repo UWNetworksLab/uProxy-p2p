@@ -1,7 +1,5 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-/// <reference path='../scripts/core_connector.ts' />
-
-declare var core :CoreConnector;
+import context = require('../scripts/context');
 
 Polymer({
   editDescription: function() {
@@ -11,7 +9,7 @@ Polymer({
   saveDescription: function() {
     this.model.globalSettings.description = this.descriptionInput;
     this.editing = false;
-    core.updateGlobalSettings(model.globalSettings);
+    context.core.updateGlobalSettings(model.globalSettings);
   },
   cancelEditing: function() {
     this.editing = false;

@@ -7,13 +7,14 @@
 // Assumes that core_stub.ts has been loaded.
 // UserInterface is defined in 'generic_ui/scripts/ui.ts'.
 
-/// <reference path='chrome_browser_api.ts' />
-/// <reference path='chrome_core_connector.ts' />
-/// <reference path='chrome_tab_auth.ts' />
+import ChromeBrowserApi = require('./chrome_browser_api');
+import ChromeCoreConnector = require('./chrome_core_connector');
+import ChromeTabAuth = require('./chrome_tab_auth');
 
-/// <reference path='../../../interfaces/ui.d.ts' />
-/// <reference path='../../../generic_ui/scripts/ui.ts' />
-/// <reference path='../../../generic_ui/scripts/core_connector.ts' />
+import UiApi = require('../../../interfaces/ui');
+import UI = require('../../../generic_ui/scripts/ui');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
@@ -27,14 +28,12 @@ var chromeBrowserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
 // or the window where the user is completing the install flow.
-var mainWindowId = chrome.windows.WINDOW_ID_CURRENT;
-
 chrome.runtime.onSuspend.addListener(() => {
   console.log('onSuspend');
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request :any) => {
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
   if (request && request.openWindow) {
@@ -47,7 +46,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runtime.MessageSender, sendResponse :Function) => {
   // Reply to pings from the uproxy website that are checking if the
   // extension is installed.
   if (request) {
@@ -55,38 +54,6 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
   }
   return true;
 });
-
-// Launch the Chrome webstore page for the uProxy app,
-// or activate the user's tab open to uproxy.org/chrome-install
-function openDownloadAppPage() : void {
-  chrome.windows.get(mainWindowId, {populate: true}, (windowThatLaunchedUproxy) => {
-    if (windowThatLaunchedUproxy) {
-      for (var i = 0; i < windowThatLaunchedUproxy.tabs.length; i++) {
-        // If the user is installing via the inline install flow,
-        // instead of sending them to the webstore to install the app,
-        // bring them back to uproxy.org/chrome-install
-        if ((windowThatLaunchedUproxy.tabs[i].url.indexOf("uproxysite.appspot.com/chrome-install") > -1) ||
-            (windowThatLaunchedUproxy.tabs[i].url.indexOf("uproxy.org/chrome-install") > -1)) {
-          chrome.tabs.update(windowThatLaunchedUproxy.tabs[i].id, {active:true});
-          chrome.windows.update(mainWindowId, {focused: true});
-          return;
-        }
-      }
-    }
-    // Only reached if the user didn't have uproxy.org/chrome-install open,
-    // allowing us to assume the user is completeing the webstore install flow.
-    // For consistency, we direct them to the app download page in the webstore
-    // instead of uproxy.org.
-    chrome.tabs.create(
-        {url: 'https://chrome.google.com/webstore/detail/uproxyapp/fmdppkkepalnkeommjadgbhiohihdhii'},
-        (tab) => {
-          // Focus on the new Chrome Webstore tab.
-          chrome.windows.update(tab.windowId, {focused: true});
-        });
-    // After the app is installed via the webstore, open up uProxy.
-    chromeCoreConnector.onceConnected.then(chromeBrowserApi.bringUproxyToFront);
-  });
-}
 
 /**
  * Primary initialization of the Chrome Extension. Installs hooks so that
@@ -108,7 +75,6 @@ function initUI() : UI.UserInterface {
   });
   chrome.browserAction.onClicked.addListener((tab) => {
     // When the extension icon is clicked, open uProxy.
-    mainWindowId = tab.windowId;
     chromeBrowserApi.bringUproxyToFront();
   });
 
@@ -144,7 +110,7 @@ function initUI() : UI.UserInterface {
       // to allow a url to be pasted twice if there has been at least a second
       // delay in order to allow users to try connecting again.
       if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        ui.handleUrlData(url);
+        chromeBrowserApi.trigger('urlData', url);
       } else {
         console.warn('Received duplicate url events', url);
       }

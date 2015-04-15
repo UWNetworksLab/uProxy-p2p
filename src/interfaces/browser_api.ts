@@ -23,4 +23,8 @@ export interface BrowserAPI {
    * determine how to handle clicks to the notification
    */
   showNotification(text :string, tag :string) :void;
+
+  on(name :string, callback :Function) :void;
+  on(name :'urlData', callback :(url :string) => void) :void;
+  on(name :'notificationClicked', callback :(tag :string) => void) :void;
 }

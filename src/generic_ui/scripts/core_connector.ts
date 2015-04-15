@@ -3,9 +3,12 @@
  *
  * Handles all connection and communication with the uProxy core.
  */
-/// <reference path='../../uproxy.ts'/>
-/// <reference path='../../interfaces/persistent.d.ts' />
-/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import browser_connector = require('../../interfaces/browser_connector');
+import social = require('../../interfaces/social');
+import net = require('../../../../third_party/uproxy-networking/net/net.types');
 
 interface FullfillAndReject {
   fulfill :Function;
@@ -20,14 +23,14 @@ interface FullfillAndReject {
  *    Core --[ UPDATES  ]--> UI
  *    UI   --[ COMMANDS ]--> Core
  */
-class CoreConnector implements uProxy.CoreApi {
+class CoreConnector implements uproxy_core_api.CoreApi {
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
 
-  constructor(private browserConnector_ :uProxy.CoreBrowserConnector) {
+  constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
                                     this.handleRequestFulfilled_);
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_REJECTED,
@@ -47,7 +50,7 @@ class CoreConnector implements uProxy.CoreApi {
    * interaction.
    */
   public sendCommand = (command :uproxy_core_api.Command, data ?:any) => {
-    var payload :uProxy.Payload = {
+    var payload :browser_connector.Payload = {
       cmd: 'emit',
       type: command,
       data: data,
@@ -66,7 +69,7 @@ class CoreConnector implements uProxy.CoreApi {
   public promiseCommand = (command :uproxy_core_api.Command, data ?:any)
       : Promise<any> => {
     var promiseId :number = ++(this.promiseId_);
-    var payload :uProxy.Payload = {
+    var payload :browser_connector.Payload = {
       cmd: 'emit',
       type: command,
       data: data,
@@ -124,11 +127,11 @@ class CoreConnector implements uProxy.CoreApi {
 
   // TODO: Reconnect this hook, which while we're testing, sends a new instance
   // message anytime we click on the user in the UI.
-  sendInstance = (clientId) => {
+  sendInstance = (clientId :string) => {
     this.sendCommand(uproxy_core_api.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE, clientId);
   }
 
-  modifyConsent = (command:uProxy.ConsentCommand) => {
+  modifyConsent = (command:uproxy_core_api.ConsentCommand) => {
     console.log('Modifying consent.', command);
     this.sendCommand(uproxy_core_api.Command.MODIFY_CONSENT, command);
   }
@@ -154,7 +157,7 @@ class CoreConnector implements uProxy.CoreApi {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 
-  start = (path :InstancePath) : Promise<net.Endpoint> => {
+  start = (path :social.InstancePath) : Promise<net.Endpoint> => {
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
   }
@@ -164,7 +167,7 @@ class CoreConnector implements uProxy.CoreApi {
     this.sendCommand(uproxy_core_api.Command.STOP_PROXYING);
   }
 
-  updateGlobalSettings = (newSettings :Core.GlobalSettings) => {
+  updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
     console.log('Updating global settings to ' + JSON.stringify(newSettings));
     this.sendCommand(uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
                      newSettings);
@@ -180,11 +183,11 @@ class CoreConnector implements uProxy.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.LOGIN, network);
   }
 
-  logout = (networkInfo :NetworkInfo) : Promise<void> => {
+  logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.LOGOUT, networkInfo);
   }
 
-  sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
+  sendFeedback = (feedback :uproxy_core_api.UserFeedback) : Promise<void> => {
     return this.promiseCommand(uproxy_core_api.Command.SEND_FEEDBACK, feedback);
   }
 
@@ -200,3 +203,5 @@ class CoreConnector implements uProxy.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.GET_NAT_TYPE);
   }
 }  // class CoreConnector
+
+export = CoreConnector;
