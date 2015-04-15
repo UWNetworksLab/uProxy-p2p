@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-import ArrayBuffers = require('./arraybuffers');
+import arraybuffers = require('./arraybuffers');
 
 var uint8Array1 = new Uint8Array([12,118,101,114,105,115]);
 var array1 = uint8Array1.buffer;
