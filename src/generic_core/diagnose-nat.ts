@@ -713,7 +713,7 @@ function pingStunServer(serverAddr: string) {
 // The following code needs the help from a server to do its job. The server
 // code can be found jsonserv.py in the same repository. One instance is
 // running in EC2.
-export function doNatProvoking() : Promise<string> {
+export function doNatProvoking() :Promise<string> {
   return new Promise((F, R) => {
     log.info('perform NAT provoking');
     var socket: freedom_UdpSocket.Socket = freedom['core.udpsocket']();

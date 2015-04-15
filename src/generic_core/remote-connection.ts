@@ -14,13 +14,6 @@ import social = require('../interfaces/social');
 import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
-
-// This is a global instance of RemoteConnection that is currently used for
-// either sharing or using a proxy through the copy+paste interface (i.e.
-// without an instance)
-export var copyPasteConnection :RemoteConnection = null;
-
-
 // module Core {
   var log :logging.Log = new logging.Log('remote-connection');
 

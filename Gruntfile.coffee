@@ -600,7 +600,11 @@ module.exports = (grunt) ->
       devInModuleEnv:
         src: [
           devBuildPath + '/interfaces/*.ts'
-          # devBuildPath + '/generic_core/*.ts'
+          #devBuildPath + '/generic_core/*.ts'
+          #'!' + devBuildPath + '/**/*.spec.ts'
+          devBuildPath + '/generic_core/diagnose-nat.ts'
+          devBuildPath + '/generic_core/firewall.ts'
+          devBuildPath + '/generic_core/freedom-module.ts'
           devBuildPath + '/generic_core/globals.ts'
           devBuildPath + '/generic_core/local-instance.ts'
           devBuildPath + '/generic_core/remote-connection.spec.ts'
@@ -608,6 +612,9 @@ module.exports = (grunt) ->
           devBuildPath + '/generic_core/remote-user.ts'
           devBuildPath + '/generic_core/remote-user.ts'
           devBuildPath + '/generic_core/social.ts'
+          devBuildPath + '/generic_core/storage.ts'
+          devBuildPath + '/generic_core/ui_connector.ts'
+          devBuildPath + '/generic_core/uproxy_core.ts'
           #devBuildPath + '/generic_core/**/*.ts'
           '!' + devBuildPath + '/generic_core/**/freedom-module.ts'
           '!' + devBuildPath + '/**/*.d.ts'

@@ -312,7 +312,7 @@ export var remoteProxyInstance :RemoteInstance = null;
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : Promise<void> => {
+    public stop = () :Promise<void> => {
       return this.connection_.stopGet();
     }
 
@@ -321,7 +321,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :social.InstanceHandshake) : Promise<void> => {
+    public update = (data :social.InstanceHandshake) :Promise<void> => {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
@@ -330,7 +330,7 @@ export var remoteProxyInstance :RemoteInstance = null;
       });
     }
 
-    private updateConsentFromWire_ = (bits: social.ConsentWireState) => {
+    private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
       var userConsent = this.user.consent;
 
       // Update this remoteInstance.
