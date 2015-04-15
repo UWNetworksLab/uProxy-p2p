@@ -242,7 +242,7 @@ import user = require('./remote-user');
     }
     public send = (user :remote_user.User,
                    recipientClientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
@@ -416,7 +416,7 @@ import user = require('./remote-user');
         return;
       }
       var userId = incoming.from.userId;
-      var msg :uProxy.Message = JSON.parse(incoming.message);
+      var msg :social.PeerMessage = JSON.parse(incoming.message);
 
       var client :UProxyClient.State =
           freedomClientToUproxyClient(incoming.from);
@@ -546,7 +546,7 @@ import user = require('./remote-user');
      */
     public send = (user :remote_user.User,
                    clientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       var messageString = JSON.stringify({
         type: message.type,
         data: message.data,
@@ -663,7 +663,7 @@ import user = require('./remote-user');
 
     public send = (user :remote_user.User,
                    recipientClientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       // TODO: Batch messages.
       // Relay the message to the UI for display to the user.
       ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
@@ -674,7 +674,7 @@ import user = require('./remote-user');
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :uProxy.Message) : void => {
+                      message :social.PeerMessage) : void => {
       log.debug('Received incoming manual message from %1: %2',
                 senderClientId, message);
 

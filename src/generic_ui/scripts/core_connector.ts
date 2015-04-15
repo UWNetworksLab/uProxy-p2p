@@ -150,7 +150,7 @@ class CoreConnector implements uProxy.CoreApi {
     return this.promiseCommand(uproxy_core_api.Command.STOP_PROXYING_COPYPASTE_SHARE);
   }
 
-  sendCopyPasteSignal = (signal :uProxy.Message) => {
+  sendCopyPasteSignal = (signal :social.PeerMessage) => {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 

@@ -60,7 +60,7 @@ describe('Core', () => {
     spyOn(manualNetwork, 'receive');
 
     var senderClientId = 'dummy_sender';
-    var message :uProxy.Message = {
+    var message :social.PeerMessage = {
       type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
       data: {
         elephants: 'have trunks',

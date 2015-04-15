@@ -383,7 +383,7 @@ describe('Social.ManualNetwork', () => {
   it('can send messages to the UI', () => {
     spyOn(ui, 'update');
 
-    var message :uProxy.Message = {
+    var message :social.PeerMessage = {
       type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
       data: {
         elephants: 'have trunks',

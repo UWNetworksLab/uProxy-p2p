@@ -182,7 +182,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:{type:signals.Type}) :Promise<void> => {
+                           signalFromRemote:signals.Message) :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {

@@ -25,8 +25,11 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import consent = require('./consent');
 import globals = require('./globals');
+import ui = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 import storage = globals.storage;
 
@@ -93,7 +96,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
 
-      storage.load<social.UserState>(this.getStorePath()).then((state:social.UserState) => {
+      storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
         this.fulfillStorageLoad_();
       }).catch((e) => {
@@ -179,16 +182,15 @@ var log :logging.Log = new logging.Log('remote-user');
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
+    public handleMessage = (clientId :string, msg :social.PeerMessage) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         log.error('%1 received message for non-existing client %2',
                   this.userId, clientId);
         return;
       }
-      var msgType :social.PeerMessageType = msg.type;
       switch (msg.type) {
         case social.PeerMessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceHandshake>msg.data)
+          this.syncInstance_(clientId, <social.InstanceHandshake>msg.data)
               .catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
           });
@@ -206,7 +208,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, msg.data);
+          instance.handleSignal(msg.type, <signals.Message>msg.data);
           return;
 
         case social.PeerMessageType.INSTANCE_REQUEST:
@@ -246,11 +248,11 @@ var log :logging.Log = new logging.Log('remote-user');
      */
     public syncInstance_ = (
         clientId :string,
-        instanceHandshake :InstanceHandshake) : Promise<void> => {
+        instanceHandshake :social.InstanceHandshake) : Promise<void> => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
-      if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
+      if (social.UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
         log.error('Received an instance handshake from a non-uProxy client',
                   clientId);
         return Promise.reject(new Error(
@@ -323,8 +325,9 @@ var log :logging.Log = new logging.Log('remote-user');
       }
 
       var isOnline = false;
-      var offeringInstanceStatesForUi = [];
-      var allInstanceIds = [];
+      var offeringInstanceStatesForUi :social.InstanceData[] = [];
+      var allInstanceIds :string[] = [];
+
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
@@ -369,14 +372,14 @@ var log :logging.Log = new logging.Log('remote-user');
     public notifyUI = () : void => {
       var state = this.currentStateForUI();
       if (state) {
-        ui.syncUser(state);
+        ui.connector.syncUser(state);
       }
     }
 
     public monitor = () : void => {
       for (var clientId in this.clientIdToStatusMap) {
         var isMissingInstance =
-            (this.clientIdToStatusMap[clientId] == UProxyClient.Status.ONLINE) &&
+            (this.clientIdToStatusMap[clientId] == social.UProxyClient.Status.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
         if (isMissingInstance) {
           log.warn('monitor could not find instance for clientId', clientId);
@@ -385,9 +388,9 @@ var log :logging.Log = new logging.Log('remote-user');
       }
     }
 
-    private requestInstance_ = (clientId) : void => {
+    private requestInstance_ = (clientId:string) : void => {
       log.debug('requesting instance', clientId);
-      var instanceRequest :uProxy.Message = {
+      var instanceRequest :social.PeerMessage = {
         type: social.PeerMessageType.INSTANCE_REQUEST,
         data: {}
       };
@@ -400,7 +403,7 @@ var log :logging.Log = new logging.Log('remote-user');
         return false;
       }
       var status = this.clientIdToStatusMap[clientId];
-      if (status == UProxyClient.Status.ONLINE) {
+      if (status == social.UProxyClient.Status.ONLINE) {
         return true;
       }
       return false;
@@ -414,7 +417,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.onceLoaded.then(() => {
         if (Object.keys(this.instances_).length > 0) {
           var state = this.currentState();
-          storage.save<UserState>(this.getStorePath(), state).catch(() => {
+          storage.save<social.UserState>(this.getStorePath(), state).catch(() => {
             log.error('Could not save user to storage');
           });
         }
@@ -455,7 +458,7 @@ var log :logging.Log = new logging.Log('remote-user');
       }
     }
 
-    public currentState = () :UserState => {
+    public currentState = () :social.UserState => {
       return _.cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
@@ -487,7 +490,6 @@ var log :logging.Log = new logging.Log('remote-user');
           type: social.PeerMessageType.INSTANCE,
           data: {
             instanceId: myInstance.instanceId,
-            keyHash: myInstance.keyHash,
             description: globals.settings.description,
             consent: {
               isRequesting: this.consent.localRequestsAccessFromRemote,
@@ -512,7 +514,7 @@ var log :logging.Log = new logging.Log('remote-user');
      * remote instance afterwards.  Returns a Promise which fulfills once
      * the consent has been modified.
      */
-    public modifyConsent = (action :uProxy.ConsentUserAction) : Promise<void> => {
+    public modifyConsent = (action :uproxy_core_api.ConsentUserAction) : Promise<void> => {
       var consentModified = this.onceLoaded.then(() => {
         if (!consent.handleUserAction(this.consent, action)) {
           return Promise.reject(new Error(
@@ -531,10 +533,10 @@ var log :logging.Log = new logging.Log('remote-user');
       consentModified.then(() => {
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
-        if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
+        if (uproxy_core_api.ConsentUserAction.CANCEL_OFFER === action) {
           for (var instanceId in this.instances_) {
             if (this.instances_[instanceId].localSharingWithRemote ==
-                SharingState.SHARING_ACCESS) {
+                social.SharingState.SHARING_ACCESS) {
               this.instances_[instanceId].stopShare();
             }
           }
@@ -568,13 +570,3 @@ var log :logging.Log = new logging.Log('remote-user');
     }
 
   }  // class User
-
-  export interface UserState {
-    name        :string;
-    imageData   :string;
-    url         :string;
-    // Only save and load the instanceIDs. The actual RemoteInstances will
-    // be saved and loaded separately.
-    instanceIds :string[];
-    consent :consent.State;
-  }

@@ -244,14 +244,14 @@ module UI {
       });
 
       core.onUpdate(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE,
-                    (message :uProxy.Message) => {
+                    (message :social.PeerMessage) => {
         console.log('Manual network outbound message: ' +
                     JSON.stringify(message));
         // TODO: Display the message in the 'manual network' UI.
       });
 
-      core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :uProxy.Message) => {
-        var data :uProxy.Message[] = [], str = '';
+      core.onUpdate(uproxy_core_api.Update.SIGNALLING_MESSAGE, (message :social.PeerMessage) => {
+        var data :social.PeerMessage[] = [], str = '';
 
         switch (message.type) {
           case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
@@ -451,7 +451,7 @@ module UI {
     }
 
     public handleUrlData = (url :string) => {
-      var payload :uProxy.Message[];
+      var payload :social.PeerMessage[];
       var expectedType :social.PeerMessageType;
       console.log('received url data from browser');
 

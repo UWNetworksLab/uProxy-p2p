@@ -3,6 +3,9 @@
  * interface to be extended as classes specific to particular components.
  */
 
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+
+
 export interface UserPath {
   network :SocialNetworkInfo;
   userId :string;
@@ -104,7 +107,7 @@ export interface PeerMessage {
   type :PeerMessageType;
   // TODO: Add a comment to explain the types that data can take and their
   // relationship to MessageType.
-  data :Object;
+  data : InstanceHandshake | signals.Message | {};
 }
 
 // The payload of a HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE command. There is a
@@ -170,6 +173,18 @@ export module UProxyClient {
     timestamp :number;
   }
 }
+
+
+export interface UserState {
+  name        :string;
+  imageData   :string;
+  url         :string;
+  // Only save and load the instanceIDs. The actual RemoteInstances will
+  // be saved and loaded separately.
+  instanceIds :string[];
+  consent     :ConsentState;
+}
+
 
 /**
  * The |Network| class represents a single network and the local uProxy client's
