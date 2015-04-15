@@ -44,6 +44,14 @@ chrome.runtime.onMessage.addListener((request :any) => {
   if (request && request.stopProxying) {
     ui.stopGettingInUiAndConfig(false);
   }
+
+  // handle requests to get logs
+  if (request && request.getLogs) {
+    core.getLogs().then((logs) => {
+      sendResponse({ logs: logs });
+    });
+    return true;
+  }
 });
 
 chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runtime.MessageSender, sendResponse :Function) => {

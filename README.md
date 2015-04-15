@@ -46,8 +46,6 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - If you install npm things globally, you'll need to do so as the
       appropriate super-user.
 
-- [bower](http://bower.io/) 1.0 or later: Install globally with `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
-
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
 
@@ -58,8 +56,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
  1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
  1. In the root uProxy directory, run:
-   * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).
-   * `bower install` - this will install the static content dependencies (mostly Polymer components).
+   * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).  This will also install the static content dependencies (mostly Polymer components).
    * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
