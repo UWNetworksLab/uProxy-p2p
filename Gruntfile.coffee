@@ -623,6 +623,7 @@ module.exports = (grunt) ->
       devInCoreEnv:
         src: [
           devBuildPath + '/chrome/app/**/*.ts'
+          devBuildPath + '/chrome/extension/**/*.ts'
           devBuildPath + '/**/*.core-env.spec.ts'
           devBuildPath + '/**/*.core-env.ts'
         ]

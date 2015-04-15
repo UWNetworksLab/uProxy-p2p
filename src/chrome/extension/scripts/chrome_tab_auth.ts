@@ -1,6 +1,10 @@
-/// <reference path='../../../generic_ui/scripts/core_connector.ts'/>
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../uproxy.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+
+import core_connector = require('../../../generic_ui/scripts/core_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import UI = require('../../../generic_ui/scripts/ui');
+import chromeInterface = require('../../../interfaces/chrome');
 
 declare var core :CoreConnector;
 declare var model :UI.Model;
@@ -21,7 +25,7 @@ class ChromeTabAuth {
   constructor() {
   }
 
-  public login = (oauthInfo :OAuthInfo) : void => {
+  public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
     if (model.reconnecting && this.lastOAuthURL_) {
       this.sendCredentials_(this.lastOAuthURL_);
     } else {
@@ -31,7 +35,7 @@ class ChromeTabAuth {
 
 
   private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
-    var onTabChange = (tabId, changeInfo, tab) => {
+    var onTabChange = (tabId :number, changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
@@ -55,3 +59,5 @@ class ChromeTabAuth {
     core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
+
+export = ChromeTabAuth;

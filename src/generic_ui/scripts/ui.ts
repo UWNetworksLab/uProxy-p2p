@@ -4,13 +4,17 @@
  * Common User Interface state holder and changer.
  * TODO: firefox bindings.
  */
-/// <reference path='user.ts' />
-/// <reference path='core_connector.ts' />
-/// <reference path='../../uproxy.ts'/>
-/// <reference path='../../interfaces/ui.d.ts'/>
-/// <reference path='../../interfaces/persistent.d.ts'/>
-/// <reference path='../../interfaces/browser-api.d.ts'/>
-/// <reference path='../../networking-typings/communications.d.ts' />
+
+import user_interface = require('../../interfaces/ui');
+import Persistent = require('../../interfaces/persistent');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import browser_api = require('../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import net = require('../../../../third_party/uproxy-networking/net/net.types');
+import CoreConnector = require('./core_connector');
+import user = require('./user');
+import User = user.User;
+import social = require('../../interfaces/social');
 
 // Singleton model for data bindings.
 var model :UI.Model = {
@@ -35,12 +39,12 @@ var model :UI.Model = {
     }
   },
   globalSettings: {
-    version: uProxy.STORAGE_VERSION,
+    version: 0,
     description: '',
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
-    mode : uProxy.Mode.GET,
+    mode : user_interface.Mode.GET,
     allowNonUnicast: false
   },
   reconnecting: false
@@ -72,30 +76,26 @@ module UI {
   export var SHARE_FAILED_MSG :string = 'Unable to share access with ';
   export var GET_FAILED_MSG :string = 'Unable to get access from ';
 
+  export interface ContactCategory {
+    [type :string] :User[];
+    onlinePending :User[];
+    offlinePending :User[];
+    onlineTrustedUproxy :User[];
+    offlineTrustedUproxy :User[];
+    onlineUntrustedUproxy :User[];
+    offlineUntrustedUproxy :User[];
+  }
+
   export interface Contacts {
-    getAccessContacts : {
-      onlinePending :UI.User[];
-      offlinePending :UI.User[];
-      onlineTrustedUproxy :UI.User[];
-      offlineTrustedUproxy :UI.User[];
-      onlineUntrustedUproxy :UI.User[];
-      offlineUntrustedUproxy :UI.User[];
-    };
-    shareAccessContacts : {
-      onlinePending :UI.User[];
-      offlinePending :UI.User[];
-      onlineTrustedUproxy :UI.User[];
-      offlineTrustedUproxy :UI.User[];
-      onlineUntrustedUproxy :UI.User[];
-      offlineUntrustedUproxy :UI.User[];
-    }
+    getAccessContacts :ContactCategory;
+    shareAccessContacts :ContactCategory;
   }
 
   export interface Model {
     networkNames :string[];
     onlineNetwork :UI.Network;
     contacts :Contacts;
-    globalSettings :Core.GlobalSettings;
+    globalSettings :uproxy_core_api.GlobalSettings;
     reconnecting :boolean;
   }
 
@@ -139,10 +139,10 @@ module UI {
    * for UI interaction.
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
-  export class UserInterface implements uProxy.UiApi {
+  export class UserInterface implements user_interface.UiApi {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    public view :uProxy.View;
+    public view :user_interface.View;
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
@@ -150,19 +150,19 @@ module UI {
 
     // Instance you are getting access from.
     // Null if you are not getting access.
-    private instanceGettingAccessFrom_ = null;
+    private instanceGettingAccessFrom_ :string = null;
 
     // The instances you are giving access to.
     // Remote instances to add to this set are received in messages from Core.
-    public instancesGivingAccessTo = {};
+    public instancesGivingAccessTo :{[instanceId :string] :boolean} = {};
 
-    private mapInstanceIdToUser_ :{[instanceId :string] :UI.User} = {};
+    private mapInstanceIdToUser_ :{[instanceId :string] :User} = {};
 
     public gettingStatus :string = null;
     public sharingStatus :string = null;
 
-    public copyPasteGettingState :GettingState = GettingState.NONE;
-    public copyPasteSharingState :SharingState = SharingState.NONE;
+    public copyPasteGettingState :social.GettingState = social.GettingState.NONE;
+    public copyPasteSharingState :social.SharingState = social.SharingState.NONE;
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
@@ -191,7 +191,6 @@ module UI {
      */
     public copyPastePendingEndpoint :net.Endpoint = null;
 
-    // TODO not needed, exists to handle typescript errors
     private core_ :CoreConnector = null;
 
     /**
@@ -202,22 +201,22 @@ module UI {
         public core   :CoreConnector,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
-      this.view = uProxy.View.SPLASH;  // Begin at the splash intro.
+      this.view = user_interface.View.SPLASH;  // Begin at the splash intro.
       this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
       // (We begin with the simplest, total state update, above.)
-      core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :Object) => {
+      core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :uproxy_core_api.InitialState) => {
         console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-        model.networkNames = state['networkNames'];
+        model.networkNames = state.networkNames;
         // TODO: Do not allow reassignment of globalSettings. Instead
         // write a 'syncGlobalSettings' function that iterates through
         // the values in state[globalSettings] and assigns the
         // individual values to model.globalSettings. This is required
         // because Polymer elements bound to globalSettings' values can
         // only react to updates to globalSettings and not reassignments.
-        model.globalSettings = state['globalSettings'];
+        model.globalSettings = state.globalSettings;
       });
 
       // Add or update the online status of a network.
@@ -295,14 +294,14 @@ module UI {
 
       // indicates we just stopped offering access through copy+paste
       core.onUpdate(uproxy_core_api.Update.STOP_GIVING, () => {
-        this.copyPasteSharingState = SharingState.NONE;
+        this.copyPasteSharingState = social.SharingState.NONE;
         if (!this.isGivingAccess()) {
           this.stopGivingInUi();
         }
       });
 
       // status of the current copy+paste connection
-      core.onUpdate(uproxy_core_api.Update.STATE, (state) => {
+      core.onUpdate(uproxy_core_api.Update.STATE, (state :uproxy_core_api.ConnectionState) => {
         this.copyPasteGettingState = state.localGettingFromRemote;
         this.copyPasteSharingState = state.localSharingWithRemote;
         this.copyPasteBytesSent = state.bytesSent;
@@ -310,7 +309,7 @@ module UI {
       });
 
       core.onUpdate(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND,
-          (data :any) => {
+          (data :any) => { // TODO better type
         if (data.instanceId === this.instanceGettingAccessFrom_) {
           this.stopGettingInUiAndConfig(data.error);
         } else {
@@ -362,14 +361,14 @@ module UI {
         this.updateSharingStatusBar_();
       });
 
-      core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend) => {
+      core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend :string) => {
         // Setting this variable will toggle a paper-toast (in root.html)
         // to open.
         this.toastMessage = UI.SHARE_FAILED_MSG + nameOfFriend;
       });
 
       browserApi.on('urlData', this.handleUrlData);
-      browserApi.on('notificationClicked', this.notificationClicked);
+      browserApi.on('notificationClicked', this.handleNotificationClick);
     }
 
     // Because of an observer (in root.ts) watching the value of
@@ -406,13 +405,13 @@ module UI {
         }
 
         if (data.mode === 'get') {
-          model.globalSettings.mode = uProxy.Mode.GET;
+          model.globalSettings.mode = user_interface.Mode.GET;
           this.core_.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.getExpanded = true;
           }
         } else if (data.mode === 'share') {
-          model.globalSettings.mode = uProxy.Mode.SHARE;
+          model.globalSettings.mode = user_interface.Mode.SHARE;
           this.core_.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.shareExpanded = true;
@@ -464,7 +463,7 @@ module UI {
         return;
       }
 
-      this.view = uProxy.View.COPYPASTE;
+      this.view = user_interface.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
@@ -482,7 +481,7 @@ module UI {
         return;
       }
 
-      if (SharingState.NONE !== this.copyPasteSharingState) {
+      if (social.SharingState.NONE !== this.copyPasteSharingState) {
         console.info('should not be processing a URL while in the middle of sharing');
         this.copyPasteError = CopyPasteError.UNEXPECTED;
         return;
@@ -497,7 +496,7 @@ module UI {
           break;
         case 'offer':
           expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
-          if (GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
+          if (social.GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
             this.copyPasteError = CopyPasteError.UNEXPECTED;
             return;
@@ -616,13 +615,13 @@ module UI {
 
     public isGivingAccess = () => {
       return Object.keys(this.instancesGivingAccessTo).length > 0 ||
-             this.copyPasteSharingState === SharingState.SHARING_ACCESS;
+             this.copyPasteSharingState === social.SharingState.SHARING_ACCESS;
     }
 
     /**
      * Synchronize a new network to be visible on this UI.
      */
-    private syncNetwork_ = (network :UI.NetworkMessage) => {
+    private syncNetwork_ = (network :social.NetworkMessage) => {
       console.log('uproxy_core_api.Update.NETWORK', network);
       console.log('model: ', model);
 
@@ -655,7 +654,7 @@ module UI {
           this.reconnect(network.name);
         } else {
           this.showNotification('You have been logged out of ' + network.name);
-          this.view = uProxy.View.SPLASH;
+          this.view = user_interface.View.SPLASH;
         }
       }
 
@@ -691,13 +690,16 @@ module UI {
       var profile = payload.user;
       // Update / create if necessary a user, both in the network-specific
       // roster and the global roster.
-      var user :UI.User;
+      var user :User;
       user = model.onlineNetwork.roster[profile.userId];
-      var oldUserCategories = {getTab: null, shareTab: null};
+      var oldUserCategories :UserCategories = {
+        getTab: null,
+        shareTab: null
+      };
 
       if (!user) {
         // New user.
-        user = new UI.User(profile.userId, model.onlineNetwork, this);
+        user = new User(profile.userId, model.onlineNetwork, this);
         model.onlineNetwork.roster[profile.userId] = user;
         model.onlineNetwork.hasContacts = true;
       } else {
@@ -721,7 +723,7 @@ module UI {
       console.log('Synchronized user.', user);
     };
 
-    private categorizeUser_ = (user, contacts, oldCategory, newCategory) => {
+    private categorizeUser_ = (user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) => {
       if (oldCategory == null) {
         // User hasn't yet been categorized.
         contacts[newCategory].push(user);
@@ -754,7 +756,7 @@ module UI {
       return this.core.login(network);
     }
 
-    public logout = (networkInfo :NetworkInfo) : Promise<void> => {
+    public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
       this.isLogoutExpected_ = true;
       return this.core.logout(networkInfo);
     }
@@ -797,7 +799,7 @@ module UI {
               // Login with last oauth token failed, give up on reconnect.
               this.stopReconnect();
               this.showNotification('You have been logged out of ' + network);
-              this.view = uProxy.View.SPLASH;
+              this.view = user_interface.View.SPLASH;
             });
           }
         }).catch((e) => {
@@ -821,3 +823,5 @@ module UI {
   }  // class UserInterface
 
 }  // module UI
+
+export = UI;

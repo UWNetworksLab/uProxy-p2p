@@ -3,16 +3,22 @@
  *
  * Chrome-specific implementation of the Browser API.
  */
-/// <reference path='../../../interfaces/browser-api.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../networking-typings/communications.d.ts' />
 
+import browser_api = require('../../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import UI = require('../../../generic_ui/scripts/ui');
+
+/// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
     LAUNCHING,
     LAUNCHED
 }
+
+declare var Notification :any; //TODO remove this
 
 class ChromeBrowserApi implements BrowserAPI {
 
@@ -63,7 +69,8 @@ class ChromeBrowserApi implements BrowserAPI {
 
     // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
     // is why we employ a hacky thing here.
-    chrome.proxy.settings['clear']({scope: 'regular'});
+    // https://github.com/uProxy/uproxy/issues/374
+    (<any>chrome.proxy.settings).clear({scope: 'regular'});
 
     chrome.windows.onRemoved.addListener((closedWindowId) => {
       // If either the window launching uProxy, or the popup with uProxy
@@ -71,8 +78,6 @@ class ChromeBrowserApi implements BrowserAPI {
       if (closedWindowId == this.popupWindowId_) {
         this.popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
         this.popupState_ = PopupState.NOT_LAUNCHED;
-      } else if (closedWindowId == mainWindowId) {
-        mainWindowId = chrome.windows.WINDOW_ID_NONE;
       }
     });
   }
@@ -134,8 +139,7 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
+    if (this.popupState_ == PopupState.NOT_LAUNCHED) {
       this.popupState_ = PopupState.LAUNCHING;
       this.popupCreationStartTime_ = Date.now();
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
@@ -146,25 +150,6 @@ class ChromeBrowserApi implements BrowserAPI {
                      width: 371,
                      height: 600}, this.newPopupCreated_);
 
-    } else if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
-      this.popupState_ = PopupState.LAUNCHING;
-      this.popupCreationStartTime_ = Date.now();
-      // If the popup is not open, but uProxy is being launched from a Chrome
-      // window, open the popup under the extension icon in that window.
-      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
-        if (windowThatLaunchedUproxy) {
-          // TODO (lucyhe): test this positioning in Firefox & Windows.
-          var popupTop = windowThatLaunchedUproxy.top + 70;
-          var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: this.POPUP_URL,
-                                 type: "popup",
-                                 width: 371,
-                                 height: 600,
-                                 top: popupTop,
-                                 left: popupLeft}, this.newPopupCreated_);
-        }
-      });
     } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
@@ -176,7 +161,7 @@ class ChromeBrowserApi implements BrowserAPI {
   /**
     * Callback passed to chrome.windows.create.
     */
-  private newPopupCreated_ = (popup) => {
+  private newPopupCreated_ = (popup :chrome.windows.Window) => {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
@@ -212,3 +197,5 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   }
 }
+
+export = ChromeBrowserApi;

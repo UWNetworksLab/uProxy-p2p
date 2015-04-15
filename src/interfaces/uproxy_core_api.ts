@@ -24,6 +24,19 @@ export interface GlobalSettings {
   mode             :ui.Mode;
 }
 
+export interface InitialState {
+  networkNames :string[];
+  globalSettings :GlobalSettings;
+  onlineNetwork: social.NetworkState;
+}
+
+export interface ConnectionState {
+  localGettingFromRemote :social.GettingState;
+  localSharingWithRemote :social.SharingState;
+  bytesSent :number;
+  bytesReceived :number;
+}
+
 // --- Communications ---
 
 // Commands are sent from the UI to the Core due to a user interaction.
