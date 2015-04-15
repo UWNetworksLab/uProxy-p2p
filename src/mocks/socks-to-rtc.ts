@@ -20,4 +20,6 @@ class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public on = (name :string, fn) => {
     this.events[name] = fn;
   }
+
+  private onceStopping_ = new Promise(() => {}, () => {});
 }
