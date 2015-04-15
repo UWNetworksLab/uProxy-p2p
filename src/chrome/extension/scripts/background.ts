@@ -49,9 +49,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // handle requests to get logs
   if (request && request.getLogs) {
     core.getLogs().then((logs) => {
-      // Add browser info to logs.
-      var logsAndBrowserInfo = 'Browser Info: ' + navigator.userAgent + '\n\n' + logs;
-      sendResponse({ logs: logsAndBrowserInfo });
+      sendResponse({ logs: logs });
     });
     return true;
   }

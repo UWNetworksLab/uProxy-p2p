@@ -10,7 +10,6 @@ function getLogs() {
   chrome.runtime.sendMessage(extension_id,
       { getLogs: true },
       function (reply) {
-        console.log('got message response!');
         if (reply) {
           fulfillGetLogs(reply.logs);
         } else {

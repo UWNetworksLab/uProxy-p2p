@@ -109,8 +109,11 @@ function setUpConnection(freedom, panel, button) {
         var forwardLogsToContentScript = function(data) {
           if (data['command'] == uProxy.Command.GET_LOGS) {
             // Forward logs to content-proxy.js
-            worker.port.emit('logs', data.argsForCallback);
-            panel.port.off(uProxy.Update.COMMAND_FULFILLED,
+            worker.port.emit('message', {
+              logs: true,
+              data: data.argsForCallback
+            });
+            freedom.off(uProxy.Update.COMMAND_FULFILLED,
               forwardLogsToContentScript);
           }
         };
@@ -122,8 +125,6 @@ function setUpConnection(freedom, panel, button) {
           position: button
         });
       });
-
-
     }
   });
 }

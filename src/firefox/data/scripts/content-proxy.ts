@@ -6,8 +6,10 @@ interface Window {
 // self.port listens for messages from glue.js, which can communicate with
 // the core and UI, and forwards them to pages with this content script
 // loaded.
-self.port.on('logs', function(logs) {
-  window.postMessage({ logs : logs, data: false }, '*');
+self.port.on('message', function(message) {
+  if (message.logs) {
+    window.postMessage({ logs : message.data, data: false }, '*');
+  }
 });
 
 
