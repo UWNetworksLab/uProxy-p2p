@@ -1,4 +1,10 @@
 var extension_id = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
+var fulfillGetLogs;
+var rejectGetLogs;
+var getLogsPromise = new Promise(function (resolve, reject) {
+  fulfillGetLogs = resolve;
+  rejectGetLogs = reject;
+});
 
 function getLogs() {
   chrome.runtime.sendMessage(extension_id,
@@ -6,12 +12,13 @@ function getLogs() {
       function (reply) {
         console.log('got message response!');
         if (reply) {
-          document.querySelector('html /deep/ uproxy-logs').setAttribute('logs', reply.logs);
+          fulfillGetLogs(reply.logs);
         } else {
-          document.querySelector('html /deep/ uproxy-logs').setAttribute('logs', 'Could not get logs');
+          rejectGetLogs('Could not get logs');
         }
       }
   );
+  return getLogsPromise;
 }
 
 function bringUproxyToFront() {

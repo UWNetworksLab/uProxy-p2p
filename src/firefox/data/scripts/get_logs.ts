@@ -1,6 +1,14 @@
+var fulfillGetLogs;
+var rejectGetLogs;
+var getLogsPromise = new Promise(function (resolve, reject) {
+  fulfillGetLogs = resolve;
+  rejectGetLogs = reject;
+});
+
 // Post messages to the content script, content-proxy.ts
 function getLogs() {
   window.postMessage({ getLogs: true, data: false }, '*');
+  return getLogsPromise;
 }
 
 function bringUproxyToFront() {
@@ -10,7 +18,7 @@ function bringUproxyToFront() {
 // Listen for messages from the content script
 window.addEventListener('message', function(event) {
   if (event.data.logs) {
-    var logsAndBrowserInfo = 'Browser Info: ' + navigator.userAgent + '\n\n' + event.data.logs;
-    document.querySelector('html /deep/ uproxy-logs').setAttribute('logs', logsAndBrowserInfo);
+    fulfillGetLogs(event.data.logs);
   }
+  // TODO: add timeout for when to reject getLogs promise.
 }, false);
