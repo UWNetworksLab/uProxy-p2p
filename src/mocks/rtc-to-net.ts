@@ -1,5 +1,5 @@
-class RtcToNetMock { // TODO implements RtcToNet.RtcToNet {
-  public signalsForPeer = new Handler.Queue<WebRtc.SignallingMessage, void>();
+class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
+  public signalsForPeer = new Handler.Queue<signals.Message, void>();
   public bytesReceivedFromPeer = new Handler.Queue<number, void>();
   public bytesSentToPeer = new Handler.Queue<number, void>();
 

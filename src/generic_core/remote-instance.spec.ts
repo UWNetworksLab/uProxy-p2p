@@ -13,7 +13,7 @@
 describe('remote_instance.RemoteInstance', () => {
 
   // Prepare a fake Social.Network object to construct User on top of.
-  var user = <Core.User><any>jasmine.createSpyObj('user', [
+  var user = <remote_user.User><any>jasmine.createSpyObj('user', [
       'send',
       'notifyUI',
       'instanceToClient',
@@ -94,7 +94,7 @@ describe('remote_instance.RemoteInstance', () => {
             'network', ['getUser']);
         network['getStorePath'] = function() { return 'networkPath'; };
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
-        var user = new Core.User(network, 'testUser');
+        var user = new remote_user.User(network, 'testUser');
         user.update({userId: 'testUser', name: 'Alice'});
         instance = new remote_instance.RemoteInstance(user, INSTANCE_ID);
         user['instances_'][INSTANCE_ID] = instance;
@@ -132,7 +132,7 @@ describe('remote_instance.RemoteInstance', () => {
     var fakeSocksToRtc = {
       handlers: {},
       'start':
-          (endpoint:Net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
+          (endpoint:net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
          return Promise.resolve(endpoint);
       },
       'on': (t:string, f:Function) => { fakeSocksToRtc.handlers[t] = f; },
@@ -181,7 +181,7 @@ describe('remote_instance.RemoteInstance', () => {
       // Mock socksToRtc to not fulfill start promise
       spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
         'start':
-            (endpoint:Net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
+            (endpoint:net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
            return new Promise((F, R) => {});
         },
         'on': (t:string, f:Function) => {},

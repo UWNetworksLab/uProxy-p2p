@@ -7,9 +7,11 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+
 import Persistent = require('../interfaces/persistent');
 
-  var log :logging.Log = new logging.Log('storage');
+var log :logging.Log = new logging.Log('storage');
 
   // Platform-independent storage provider.
   var fStorage :freedom_Storage = freedom['storage']();

@@ -26,7 +26,7 @@ import firewall = require('./firewall');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import social = require('../interfaces/social');
-import user = require('./user');
+import user = require('./remote-user');
 
   var NETWORK_OPTIONS = {
     'Google': {
@@ -184,12 +184,12 @@ import user = require('./user');
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) : Core.User => {
+    protected addUser_ = (userId :string) : remote_user.User => {
       if (!this.isNewFriend_(userId)) {
         log.error('Cannot add already existing user', userId);
       }
       log.debug('added user to roster', userId);
-      var newUser = new Core.User(this, userId);
+      var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
       return newUser;
     }
@@ -199,7 +199,7 @@ import user = require('./user');
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
      */
-    protected getOrAddUser_ = (userId :string) : Core.User => {
+    protected getOrAddUser_ = (userId :string) : remote_user.User => {
       if (this.isNewFriend_(userId)) {
         return this.addUser_(userId);
       }
@@ -220,7 +220,7 @@ import user = require('./user');
       return this.myInstance.instanceId;
     }
 
-    public getUser = (userId :string) : Core.User => {
+    public getUser = (userId :string) : remote_user.User => {
       return this.roster[userId];
     }
 
@@ -240,7 +240,7 @@ import user = require('./user');
     public flushQueuedInstanceMessages = () : void => {
       throw new Error('Operation not implemented');
     }
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       throw new Error('Operation not implemented');
@@ -544,7 +544,7 @@ import user = require('./user');
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
      */
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    clientId :string,
                    message :uProxy.Message) : Promise<void> => {
       var messageString = JSON.stringify({
@@ -661,7 +661,7 @@ import user = require('./user');
       return Promise.resolve<void>();
     }
 
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    recipientClientId :string,
                    message :uProxy.Message) : Promise<void> => {
       // TODO: Batch messages.

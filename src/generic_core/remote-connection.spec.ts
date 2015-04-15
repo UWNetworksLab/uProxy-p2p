@@ -75,7 +75,7 @@ describe('remote_connection.RemoteConnection', () => {
     it('basic setup', () => {
       connection.startShare();
 
-      expect(RtcToNet.RtcToNet).toHaveBeenCalled();
+      expect(rtc_to_net.RtcToNet).toHaveBeenCalled();
       expect(connection.localSharingWithRemote).toEqual(SharingState.TRYING_TO_SHARE_ACCESS);
     });
 

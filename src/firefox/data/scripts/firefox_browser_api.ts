@@ -49,7 +49,7 @@ class FirefoxBrowserApi implements BrowserAPI {
   // For proxy configuration.
   // Sends message back to add-on environment, which handles proxy settings.
 
-  public startUsingProxy = (endpoint:Net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint) => {
     port.emit('startUsingProxy', endpoint);
   }
 

@@ -3,7 +3,7 @@
 /// <reference path='social.ts' />
 
 
-describe('Core.User', () => {
+describe('remote_user.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
@@ -13,11 +13,11 @@ describe('Core.User', () => {
   network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
   network['send'] = () => { return Promise.resolve(); };
 
-  var user :Core.User;
+  var user :remote_user.User;
   var instance :remote_instance.RemoteInstance;
 
   it('creates with the correct userId', (done) => {
-    user = new Core.User(network, 'fakeuser');
+    user = new remote_user.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
     expect(user['network']).toEqual(network);
     storage.load(user.getStorePath()).catch((e) => {
@@ -216,7 +216,7 @@ describe('Core.User', () => {
   });  // describe client <---> instance
 
   describe('local consent towards remote proxy', () => {
-    var user = new Core.User(network, 'fakeuser2');
+    var user = new remote_user.User(network, 'fakeuser2');
 
     it('can request access, and cancel that request', (done) => {
       user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {

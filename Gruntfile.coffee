@@ -601,6 +601,8 @@ module.exports = (grunt) ->
         src: [
           devBuildPath + '/interfaces/*.ts'
           # devBuildPath + '/generic_core/*.ts'
+          devBuildPath + '/generic_core/globals.ts'
+          devBuildPath + '/generic_core/remote-user.ts'
           devBuildPath + '/generic_core/remote-connection.ts'
           #devBuildPath + '/generic_core/**/*.ts'
           '!' + devBuildPath + '/generic_core/**/freedom-module.ts'

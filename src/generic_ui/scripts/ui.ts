@@ -189,7 +189,7 @@ module UI {
      * connection between establishing the connection and the user confirming
      * the start of proxying
      */
-    public copyPastePendingEndpoint :Net.Endpoint = null;
+    public copyPastePendingEndpoint :net.Endpoint = null;
 
     // TODO not needed, exists to handle typescript errors
     private core_ :CoreConnector = null;
@@ -559,7 +559,7 @@ module UI {
       * Sets extension icon to default and undoes proxy configuration.
       */
     public startGettingInUiAndConfig =
-        (instanceId :string, endpoint :Net.Endpoint) => {
+        (instanceId :string, endpoint :net.Endpoint) => {
       if (instanceId) {
         this.instanceGettingAccessFrom_ = instanceId;
         this.mapInstanceIdToUser_[instanceId].isSharingWithMe = true;

@@ -2,7 +2,7 @@
 /// <reference path='../uproxy.ts' />
 /// <reference path='../arraybuffers/arraybuffers.ts' />
 
-var testConnection = (socksEndpoint :Net.Endpoint) : Promise<Boolean> => {
+var testConnection = (socksEndpoint :net.Endpoint) : Promise<Boolean> => {
   return freedom('scripts/build/compile-src/integration/integration.json', {debug:'log'}).then((interface :any) => {
     var testModule = new interface();
     var input = ArrayBuffers.stringToArrayBuffer('arbitrary test string');

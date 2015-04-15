@@ -5,7 +5,7 @@ class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public rejectStart :(v :Object) => void;
 
   public start = () => {
-    return new Promise<Net.Endpoint>((resolve, reject) => {
+    return new Promise<net.Endpoint>((resolve, reject) => {
       this.resolveStart = resolve;
       this.rejectStart = reject;
     });

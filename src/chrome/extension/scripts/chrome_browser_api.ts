@@ -77,7 +77,7 @@ class ChromeBrowserApi implements BrowserAPI {
     });
   }
 
-  public startUsingProxy = (endpoint:Net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint) => {
     if (this.running_ == false) {
       this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
       this.uproxyConfig_.rules.singleProxy.port = endpoint.port;

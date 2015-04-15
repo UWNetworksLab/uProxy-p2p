@@ -133,7 +133,7 @@ class CoreConnector implements uProxy.CoreApi {
     this.sendCommand(uproxy_core_api.Command.MODIFY_CONSENT, command);
   }
 
-  startCopyPasteGet = () : Promise<Net.Endpoint> => {
+  startCopyPasteGet = () : Promise<net.Endpoint> => {
     console.log('Starting to proxy for CopyPaste');
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING_COPYPASTE_GET);
   }
@@ -154,7 +154,7 @@ class CoreConnector implements uProxy.CoreApi {
     this.sendCommand(uproxy_core_api.Command.COPYPASTE_SIGNALLING_MESSAGE, signal);
   }
 
-  start = (path :InstancePath) : Promise<Net.Endpoint> => {
+  start = (path :InstancePath) : Promise<net.Endpoint> => {
     console.log('Starting to proxy through ' + path);
     return this.promiseCommand(uproxy_core_api.Command.START_PROXYING, path);
   }

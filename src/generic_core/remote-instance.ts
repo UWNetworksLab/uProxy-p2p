@@ -11,11 +11,15 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_connection = require('./remote-connection');
 import social_types = require('../interfaces/social');
-import social = require('./social');
+import social = require('../interfaces/social');
 import consent = require('./consent');
+import remote_user = require('./remote-user');
 
 import Persistent = require('../interfaces/persistent');
 
+// Keep track of the current remote instance who is acting as a proxy server
+// for us.
+export var remoteProxyInstance :RemoteInstance = null;
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-instance');
@@ -41,10 +45,10 @@ import Persistent = require('../interfaces/persistent');
     public bytesReceived    :number = 0;
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
-    public localGettingFromRemote = GettingState.NONE;
-    public localSharingWithRemote = SharingState.NONE;
+    public localGettingFromRemote = social.GettingState.NONE;
+    public localSharingWithRemote = social.SharingState.NONE;
 
-    public wireConsentFromRemote :uProxy.ConsentWireState = {
+    public wireConsentFromRemote :social.ConsentWireState = {
       isRequesting: false,
       isOffering: false
     };
@@ -72,8 +76,9 @@ import Persistent = require('../interfaces/persistent');
     // socksToRtc_.start
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
-    private startSocksToRtcTimeout_ = null;
-    private startRtcToNetTimeout_ = null;
+    // TODO: why are these not in remote-connection?
+    private startSocksToRtcTimeout_ :Object = null;
+    private startRtcToNetTimeout_ :Object = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
@@ -96,7 +101,7 @@ import Persistent = require('../interfaces/persistent');
      */
     constructor(
         // The User which this instance belongs to.
-        public user :Core.User,
+        public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
       this.setSharerToNotReady_();
@@ -277,7 +282,7 @@ import Persistent = require('../interfaces/persistent');
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () :Promise<Net.Endpoint> => {
+    public start = () :Promise<net.Endpoint> => {
       if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
@@ -289,7 +294,7 @@ import Persistent = require('../interfaces/persistent');
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
+      return this.connection_.startGet().then((endpoints :net.Endpoint) => {
         clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });
@@ -316,7 +321,7 @@ import Persistent = require('../interfaces/persistent');
       });
     }
 
-    private updateConsentFromWire_ = (bits: uProxy.ConsentWireState) => {
+    private updateConsentFromWire_ = (bits: social.ConsentWireState) => {
       var userConsent = this.user.consent;
 
       // Update this remoteInstance.
@@ -398,7 +403,7 @@ import Persistent = require('../interfaces/persistent');
   }  // class remote_instance.RemoteInstance
 
   export interface RemoteInstanceState {
-    wireConsentFromRemote :uProxy.ConsentWireState;
+    wireConsentFromRemote :social.ConsentWireState;
     description           :string;
     keyHash               :string;
   }

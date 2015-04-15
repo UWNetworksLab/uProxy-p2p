@@ -23,14 +23,16 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import remote_instance = require('./remote_instance');
+import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
-import consent = require('../consent');
+import consent = require('./consent');
 
-  var log :logging.Log = new logging.Log('user');
+import Persistent = require('../interfaces/persistent');
+
+var log :logging.Log = new logging.Log('remote-user');
 
   /**
-   * Core.User
+   * remote_user.User
    *
    * Builts upon a freedom.Social.UserProfile.
    * Maintains a mapping between a User's clientIds and instanceIds, while
@@ -39,7 +41,7 @@ import consent = require('../consent');
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser, Persistent {
+  export class User implements social.BaseUser, Persistent {
 
     // Name of the user as provided by the social network.
     public name :string;
@@ -483,7 +485,7 @@ import consent = require('../consent');
           data: {
             instanceId: myInstance.instanceId,
             keyHash: myInstance.keyHash,
-            description: core.globalSettings.description,
+            description: globals.settings.description,
             consent: {
               isRequesting: this.consent.localRequestsAccessFromRemote,
               isOffering: this.consent.localGrantsAccessToRemote
