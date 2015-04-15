@@ -44,7 +44,7 @@ export class Accumulator {
     var accumulatedSize :number = this.currentSize_;
     this.clear();
     this.onBigEnoughBuffer(
-        ArrayBuffers.concat(buffers, accumulatedSize));
+        arraybuffers.concat(buffers, accumulatedSize));
     return accumulatedSize;
   }
 
