@@ -1,11 +1,14 @@
-/// <reference path='storage.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-declare var storage :Core.Storage;
-Core.DEBUG_STATESTORAGE = false;
+
+import local_storage = require('./storage');
+import globals = require('./globals');
+import storage = globals.storage;
+
+local_storage.DEBUG_STATESTORAGE = false;
 
 // Depends on the MockStorage that executes everything synchronously.
-describe('Core.Storage', () => {
+describe('local_storage.Storage', () => {
 
   beforeEach(() => {
     spyOn(console, 'log');

@@ -702,7 +702,7 @@ import ui = ui_connector.connector;
   }  // class ManualNetwork
 
 
-function freedomClientToUproxyClient(
+export function freedomClientToUproxyClient(
   freedomClientState :freedom_Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',

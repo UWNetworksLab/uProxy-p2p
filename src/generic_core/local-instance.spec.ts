@@ -1,10 +1,12 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='local-instance.ts' />
+
+import local_instance = require('./local-instance');
+import social = require('../interfaces/social');
 
 describe('local_instance.LocalInstance', () => {
 
   var instance :local_instance.LocalInstance;
-  var network = <Social.Network><any>jasmine.createSpy('network');
+  var network = <social.Network><any>jasmine.createSpy('network');
 
   beforeEach(() => {
     spyOn(console, 'log');

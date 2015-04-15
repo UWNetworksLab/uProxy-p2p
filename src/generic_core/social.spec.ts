@@ -1,5 +1,16 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='social.ts' />
+
+
+import social = require('../interfaces/social');
+
+import social_network = require('./social');
+import local_storage = require('./storage');
+import local_instance = require('./local-instance');
+import globals = require('./globals');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+
+import ui_connector = require('./ui_connector');
+import ui = ui_connector.connector;
 
 class MockSocial {
   public on = () => {}
@@ -13,7 +24,7 @@ class MockSocial {
 // Valid message that won't have side effects on network/user/instance objects.
 var VALID_MESSAGE = {
   type: social.PeerMessageType.INSTANCE_REQUEST,
-  data: null
+  data: <any>null
 };
 
 describe('freedomClientToUproxyClient', () => {
@@ -27,7 +38,7 @@ describe('freedomClientToUproxyClient', () => {
     status: 'ONLINE',
     timestamp: 12345
   };
-  var uproxyClient = freedomClientToUproxyClient(freedomClient);
+  var uproxyClient = social_network.freedomClientToUproxyClient(freedomClient);
 
   it('converts status to enum', () => {
     expect(uproxyClient.status).toEqual(UProxyClient.Status.ONLINE);
@@ -40,9 +51,9 @@ describe('freedomClientToUproxyClient', () => {
   });
 });
 
-describe('Social.FreedomNetwork', () => {
+describe('social_network.FreedomNetwork', () => {
 
-  var network :Social.FreedomNetwork;
+  var network :social_network.FreedomNetwork;
   // Mock social providers.
   freedom['SOCIAL-badmock'] = () => { return new MockSocial(); };
   freedom['SOCIAL-mock'] = () => { return new MockSocial(); };
@@ -62,15 +73,15 @@ describe('Social.FreedomNetwork', () => {
   });
 
   it('initialize networks', () => {
-    Social.initializeNetworks();
-    expect(Social.networks['badmock']).not.toBeDefined();
-    expect(Social.networks['mock']).toBeDefined();
-    expect(Social.networks['mock']).toEqual({});
+    social_network.initializeNetworks();
+    expect(social_network.networks['badmock']).not.toBeDefined();
+    expect(social_network.networks['mock']).toBeDefined();
+    expect(social_network.networks['mock']).toEqual({});
   });
 
 
   it('begins with empty roster', () => {
-    network = new Social.FreedomNetwork('mock');
+    network = new social_network.FreedomNetwork('mock');
     expect(network.roster).toEqual({});
   });
 
@@ -79,12 +90,12 @@ describe('Social.FreedomNetwork', () => {
 
     it('can log in', (done) => {
       jasmine.clock().install();
-      var storage = new Core.Storage;
-      var fulfillFunc;
+      var storage = new local_storage.Storage;
+      var fulfillFunc :Function;
       var onceLoggedIn = new Promise((F, R) => { fulfillFunc = F; });
       spyOn(network['freedomApi_'], 'login').and.returnValue(onceLoggedIn);
 
-      var fulfillStorage;
+      var fulfillStorage :Function;
       var onceStorageDone =  new Promise((F, R) => { fulfillStorage = F; });
       var restoreFunc = network.restoreFromStorage.bind(network);
       spyOn(network, 'restoreFromStorage').and.callFake(() => {
@@ -181,7 +192,7 @@ describe('Social.FreedomNetwork', () => {
     // var delayed :Function;
 
     it('delays handler until login', () => {
-      network = new Social.FreedomNetwork('mock');
+      network = new social_network.FreedomNetwork('mock');
       spyOn(network['freedomApi_'], 'login').and.returnValue(
           new Promise((F, R) => {
             fakeLoginFulfill = F;
@@ -205,7 +216,7 @@ describe('Social.FreedomNetwork', () => {
   describe('incoming events', () => {
 
     it('adds a new user for |onUserProfile|', (done) => {
-      network = new Social.FreedomNetwork('mock');
+      network = new social_network.FreedomNetwork('mock');
       network.myInstance = new local_instance.LocalInstance(network, 'fakeId');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
@@ -246,7 +257,7 @@ describe('Social.FreedomNetwork', () => {
       };
       network.handleClientState(freedomClientState);
       expect(user.handleClient).toHaveBeenCalledWith(
-        freedomClientToUproxyClient(freedomClientState));
+        social_network.freedomClientToUproxyClient(freedomClientState));
       done();
     });
 
@@ -312,7 +323,7 @@ describe('Social.FreedomNetwork', () => {
       expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
         'fakeclient',
         JSON.stringify({
-          type: msg.type, data: msg.data, version: uProxy.MESSAGE_VERSION
+          type: msg.type, data: msg.data, version: globals.MESSAGE_VERSION
         }));
     });
 
@@ -344,14 +355,14 @@ describe('Social.FreedomNetwork', () => {
     spyOn(JSON, 'stringify').and.callThrough();
     network.send(network.getUser('mockuser'), 'fakeclient', outMsg)
     expect(JSON.stringify).toHaveBeenCalledWith(
-      {type: outMsg.type, data: outMsg.data, version: uProxy.MESSAGE_VERSION});
+      {type: outMsg.type, data: outMsg.data, version: globals.MESSAGE_VERSION});
     done();
   });
 
   // TODO: get this unit test to pass.
   /*
   it('Can restore a state that has multiple users', (done) => {
-    var networkState :Social.NetworkState = {
+    var networkState :social.NetworkState = {
       name: 'mock',
       remember: false,
       userIds: ['userA', 'userB', 'userC']
@@ -368,10 +379,10 @@ describe('Social.FreedomNetwork', () => {
 });
 
 
-describe('Social.ManualNetwork', () => {
+describe('social_network.ManualNetwork', () => {
 
-  var network :Social.ManualNetwork =
-      new Social.ManualNetwork('Manual');
+  var network :social_network.ManualNetwork =
+      new social_network.ManualNetwork('Manual');
 
   var loginPromise :Promise<void>;
 
