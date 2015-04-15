@@ -142,6 +142,8 @@ describe('Core.RemoteInstance', () => {
         }
         return Promise.resolve();
       },
+      // TODO: remove onceStopping_ when
+      // https://github.com/uProxy/uproxy/issues/1264 is resolved.
       'onceStopping_': new Promise((F, R) => {})
     };
 
@@ -211,6 +213,8 @@ describe('Core.RemoteInstance', () => {
       'on': () => {},
       'start': () => { return Promise.resolve(); },
       'stop': () => { return Promise.resolve(); },
+      // TODO: remove onceStopping_ when
+      // https://github.com/uProxy/uproxy/issues/1264 is resolved.
       'onceStopping_': new Promise((F, R) => {})
     };
     var fakeRtcToNet = {

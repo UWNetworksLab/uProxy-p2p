@@ -21,5 +21,7 @@ class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
     this.events[name] = fn;
   }
 
+  // TODO: remove onceStopping_ when
+  // https://github.com/uProxy/uproxy/issues/1264 is resolved.
   private onceStopping_ = new Promise(() => {}, () => {});
 }

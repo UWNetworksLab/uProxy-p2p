@@ -169,7 +169,6 @@ module Core {
       // onceStopping_, unlike 'stopped', gets fired as soon as stopping begins
       // and doesn't wait for all cleanup to finish
       this.socksToRtc_['onceStopping_'].then(() => {
-        console.error('inside onceStopping_!!!');  // TODO: remove
         // Stopped event is only considered an error if the user had been
         // getting access and we hadn't called this.socksToRtc_.stop
         // If there is an error when trying to start proxying, and a stopped
