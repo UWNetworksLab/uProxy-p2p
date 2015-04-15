@@ -6,15 +6,19 @@
  * after that connection is established
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='remote-connection.ts' />
-/// <reference path='../mocks/rtc-to-net.ts' />
-/// <reference path='../mocks/socks-to-rtc.ts' />
+
+import remote_connection = require('./remote-connection');
+import social = require('../interfaces/social');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import rtc_to_net_mock = require('../mocks/rtc-to-net');
+import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
 
 describe('remote_connection.RemoteConnection', () => {
   var connection :remote_connection.RemoteConnection;
-  var socksToRtc :SocksToRtcMock
-  var rtcToNet :RtcToNetMock;
+  var socksToRtc :socks_to_rtc_mock.SocksToRtcMock
+  var rtcToNet :rtc_to_net_mock.RtcToNetMock;
   var updateSpy :(x :uproxy_core_api.Update, data?:Object) => void;
 
   // TODO replace with jasmine's builtin fail function once
@@ -25,13 +29,13 @@ describe('remote_connection.RemoteConnection', () => {
 
   beforeEach(() => {
     // always use spy objects for RtcToNet and SocksToRtc
-    socksToRtc = new SocksToRtcMock();
-    rtcToNet = new RtcToNetMock();
+    socksToRtc = new socks_to_rtc_mock.SocksToRtcMock();
+    rtcToNet = new rtc_to_net_mock.RtcToNetMock();
 
     // TODO RemoteConnection should eventually be modified to take
     // implementations for the stream connectors as constructor arguments
-    spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(socksToRtc);
-    spyOn(RtcToNet, 'RtcToNet').and.returnValue(rtcToNet);
+    spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(socksToRtc);
+    spyOn(rtc_to_net, 'RtcToNet').and.returnValue(rtcToNet);
 
     updateSpy = jasmine.createSpy('updateSpy');
     connection = new remote_connection.RemoteConnection(updateSpy);
@@ -44,7 +48,7 @@ describe('remote_connection.RemoteConnection', () => {
       connection.startGet();
 
       expect(socksToRtc.start).toHaveBeenCalled();
-      expect(connection.localGettingFromRemote).toEqual(GettingState.TRYING_TO_GET_ACCESS);
+      expect(connection.localGettingFromRemote).toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('starting get twice fails', () => {
@@ -57,7 +61,7 @@ describe('remote_connection.RemoteConnection', () => {
       socksToRtc.resolveStart(null);
 
       start.then(() => {
-        expect(connection.localGettingFromRemote).toEqual(GettingState.GETTING_ACCESS);
+        expect(connection.localGettingFromRemote).toEqual(social.GettingState.GETTING_ACCESS);
         done();
       }).catch(failTest);
     });
@@ -76,7 +80,7 @@ describe('remote_connection.RemoteConnection', () => {
       connection.startShare();
 
       expect(rtc_to_net.RtcToNet).toHaveBeenCalled();
-      expect(connection.localSharingWithRemote).toEqual(SharingState.TRYING_TO_SHARE_ACCESS);
+      expect(connection.localSharingWithRemote).toEqual(social.SharingState.TRYING_TO_SHARE_ACCESS);
     });
 
     it('sharing access after success', (done) => {
@@ -85,7 +89,7 @@ describe('remote_connection.RemoteConnection', () => {
       rtcToNet.resolveReady();
 
       rtcToNet.onceReady.then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.SHARING_ACCESS);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
         done();
       }).catch(failTest);
     });
@@ -97,7 +101,7 @@ describe('remote_connection.RemoteConnection', () => {
 
       rtcToNet.onceReady.then(failTest)
       .catch(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.NONE);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.NONE);
         done();
       });
     });
@@ -107,11 +111,11 @@ describe('remote_connection.RemoteConnection', () => {
 
       rtcToNet.resolveReady();
       rtcToNet.onceReady.then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.SHARING_ACCESS);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
         rtcToNet.resolveClosed();
         return rtcToNet.onceClosed;
       }).then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.NONE);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.NONE);
         done();
       }).catch(failTest);
     });

@@ -1,7 +1,10 @@
-class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
-  public signalsForPeer = new Handler.Queue<signals.Message, void>();
-  public bytesReceivedFromPeer = new Handler.Queue<number, void>();
-  public bytesSentToPeer = new Handler.Queue<number, void>();
+import handler_queue = require('../../../third_party/uproxy-lib/handler/queue');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+
+export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
+  public signalsForPeer = new handler_queue.Queue<signals.Message, void>();
+  public bytesReceivedFromPeer = new handler_queue.Queue<number, void>();
+  public bytesSentToPeer = new handler_queue.Queue<number, void>();
 
   public resolveReady :() => void;
   public rejectReady :(v :Object) => void;

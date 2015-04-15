@@ -1,4 +1,6 @@
-class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+
+export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public events :{ [event :string] :(...args :Object[]) => void } = {};
 
   public resolveStart :(v :Object) => void;
@@ -17,7 +19,7 @@ class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public handleSignalFromPeer = () => {
   }
 
-  public on = (name :string, fn) => {
+  public on = (name :string, fn :(...args :Object[]) => void) => {
     this.events[name] = fn;
   }
 }
