@@ -59,8 +59,8 @@ import user = require('./remote-user');
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
   // TODO(salomegeo): Change structure of network
-  export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
-  export var pendingNetworks:{[networkName:string]:Network} = {};
+  export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
+  export var pendingNetworks:{[networkName:string]:social.Network} = {};
 
   export function removeNetwork(networkName :string, userId :string) {
     if (networkName !== MANUAL_NETWORK_ID) {
