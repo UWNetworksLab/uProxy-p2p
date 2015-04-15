@@ -7,12 +7,23 @@
  * correct consent values between remote instances.
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='remote-instance.ts' />
+
+import remote_user = require('./remote-user');
+import consent = require('./consent');
+import remote_instance = require('./remote-instance');
+import social = require('../interfaces/social');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import globals = require('./globals');
+import storage = globals.storage;
+import local_storage = require('./storage');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+
 
 describe('remote_instance.RemoteInstance', () => {
 
-  // Prepare a fake Social.Network object to construct User on top of.
+  // Prepare a fake social.Network object to construct User on top of.
   var user = <remote_user.User><any>jasmine.createSpyObj('user', [
       'send',
       'notifyUI',
@@ -22,7 +33,7 @@ describe('remote_instance.RemoteInstance', () => {
   ]);
   user.consent = new consent.State();
 
-  user.network = <Social.Network><any>jasmine.createSpyObj(
+  user.network = <social.Network><any>jasmine.createSpyObj(
       'network', ['getUser']);
 
   user['getLocalInstanceId'] = function() {
@@ -35,7 +46,7 @@ describe('remote_instance.RemoteInstance', () => {
   user.onceNameReceived = Promise.resolve<string>("name");
 
   var socksToRtc =
-      <SocksToRtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
+      <socks_to_rtc.SocksToRtc><any>jasmine.createSpyObj('socksToRtc', [
           'onceReady'
       ]);
   var instance :remote_instance.RemoteInstance;
@@ -49,12 +60,12 @@ describe('remote_instance.RemoteInstance', () => {
     spyOn(console, 'warn');
   });
   describe('storage', () => {
-    var realStorage = new Core.Storage;
-    var saved;
-    var instance0;
+    var realStorage = new local_storage.Storage;
+    var saved :Promise<Object>;
+    var instance0 :remote_instance.RemoteInstance;
 
    it('fresh instance has no state', (done) => {
-      storage.save = function(key, value) {
+      storage.save = function(key :string, value :Object) {
         saved = realStorage.save(key, value);
         return saved;
       };
@@ -88,9 +99,9 @@ describe('remote_instance.RemoteInstance', () => {
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
-      storage = new Core.Storage;
+      storage = new local_storage.Storage();
       storage.reset().then(() => {
-        var network = <Social.Network><any>jasmine.createSpyObj(
+        var network = <social.Network><any>jasmine.createSpyObj(
             'network', ['getUser']);
         network['getStorePath'] = function() { return 'networkPath'; };
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
@@ -145,41 +156,41 @@ describe('remote_instance.RemoteInstance', () => {
     };
 
     it('can start proxying', (done) => {
-      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
       alice.user.consent.localRequestsAccessFromRemote = true;
       alice.wireConsentFromRemote.isOffering = true;
       // The module & constructor of SocksToRtc may change in the near future.
-      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.start().then(() => {
         expect(alice.localGettingFromRemote)
-            .toEqual(GettingState.GETTING_ACCESS);
+            .toEqual(social.GettingState.GETTING_ACCESS);
         done();
       });
-      expect(SocksToRtc.SocksToRtc).toHaveBeenCalled();
+      expect(socks_to_rtc.SocksToRtc).toHaveBeenCalled();
       expect(alice.localGettingFromRemote)
-          .toEqual(GettingState.TRYING_TO_GET_ACCESS);
+          .toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('can stop proxying', () => {
       alice.stop();
-      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
     });
 
     it('refuses to start proxy without permission', () => {
-      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
       alice.wireConsentFromRemote.isOffering = false;
-      alice.localGettingFromRemote = GettingState.NONE;
+      alice.localGettingFromRemote = social.GettingState.NONE;
       alice.start();
-      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
     });
 
     it('stops socksToRtc if start does not complete', (done) => {
       jasmine.clock().install();
-      expect(alice.localGettingFromRemote).toEqual(GettingState.NONE);
+      expect(alice.localGettingFromRemote).toEqual(social.GettingState.NONE);
       alice.user.consent.localRequestsAccessFromRemote = true;
       alice.wireConsentFromRemote.isOffering = true;
       // Mock socksToRtc to not fulfill start promise
-      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue({
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue({
         'start':
             (endpoint:net.Endpoint, pcConfig:freedom_RTCPeerConnection.RTCConfiguration) => {
            return new Promise((F, R) => {});
@@ -215,11 +226,11 @@ describe('remote_instance.RemoteInstance', () => {
       'bytesSentToPeer': {setSyncHandler: () => {}},
       'onceReady': new Promise((F, R) => {})  // return unresolved promise
     };
-    var fakeOffer :Object = {
+    var fakeOffer :signals.Message = {
       type: signals.Type.OFFER,
       data: 'really fake offer'
     };
-    var fakeCandidate :Object = {
+    var fakeCandidate :signals.Message = {
       type: signals.Type.CANDIDATE,
       data: 'really fake candidate'
     };
@@ -229,8 +240,8 @@ describe('remote_instance.RemoteInstance', () => {
       user.consent.localGrantsAccessToRemote = true;
       spyOn(fakeSocksToRtc, 'handleSignalFromPeer');
       spyOn(fakeRtcToNet, 'handleSignalFromPeer');
-      spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
-      spyOn(RtcToNet, 'RtcToNet').and.returnValue(fakeRtcToNet);
+      spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(fakeSocksToRtc);
+      spyOn(rtc_to_net, 'RtcToNet').and.returnValue(fakeRtcToNet);
     });
 
     it('ignores CANDIDATE signal from client peer as server without OFFER', (done) => {

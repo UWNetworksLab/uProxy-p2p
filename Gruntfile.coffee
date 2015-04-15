@@ -605,6 +605,8 @@ module.exports = (grunt) ->
           devBuildPath + '/generic_core/local-instance.ts'
           devBuildPath + '/generic_core/remote-connection.spec.ts'
           devBuildPath + '/generic_core/remote-connection.ts'
+          devBuildPath + '/generic_core/remote-instance.spec.ts'
+          devBuildPath + '/generic_core/remote-instance.ts'
           devBuildPath + '/generic_core/remote-user.ts'
           devBuildPath + '/generic_core/remote-user.ts'
           devBuildPath + '/generic_core/social.ts'

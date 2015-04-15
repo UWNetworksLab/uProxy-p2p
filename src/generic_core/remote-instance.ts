@@ -16,7 +16,6 @@ import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
-import social_types = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
