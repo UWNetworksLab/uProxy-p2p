@@ -14,7 +14,7 @@ exports.setup = function(panel, button) {
         return;
       }
 
-      panel.port.emit('handleUrlData', url);
+      panel.port.emit('urlData', url);
       panel.show({
         position: button
       });
