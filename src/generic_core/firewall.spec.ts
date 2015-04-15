@@ -1,5 +1,6 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='firewall.ts' />
+
+import firewall = require('./firewall');
 class MockPolicy implements firewall.ResponsePolicy {
   failures : number = 0;
   onValidationFailure(s :string, level :firewall.Severity) {

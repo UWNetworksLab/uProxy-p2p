@@ -41,7 +41,7 @@ describe('freedomClientToUproxyClient', () => {
   var uproxyClient = social_network.freedomClientToUproxyClient(freedomClient);
 
   it('converts status to enum', () => {
-    expect(uproxyClient.status).toEqual(UProxyClient.Status.ONLINE);
+    expect(uproxyClient.status).toEqual(social.ClientStatus.ONLINE);
   });
 
   it('copies non-status fields unchanged', () => {
