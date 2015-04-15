@@ -33,7 +33,7 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessage.addListener((request :any) => {
+chrome.runtime.onMessage.addListener((request :any, sendResponse :Function) => {
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
   if (request && request.openWindow) {
@@ -43,6 +43,14 @@ chrome.runtime.onMessage.addListener((request :any) => {
   // handle requests to stop proxying
   if (request && request.stopProxying) {
     ui.stopGettingInUiAndConfig(false);
+  }
+
+  // handle requests to get logs
+  if (request && request.getLogs) {
+    core.getLogs().then((logs) => {
+      sendResponse({ logs: logs });
+    });
+    return true;
   }
 });
 

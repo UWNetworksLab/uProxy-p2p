@@ -161,7 +161,13 @@ export var copyPasteConnection :RemoteConnection = null;
       this.socksToRtc_.on('bytesReceivedFromPeer', this.handleBytesReceived_);
       this.socksToRtc_.on('bytesSentToPeer', this.handleBytesSent_);
 
-      this.socksToRtc_.on('stopped', () => {
+      // TODO: Change this back to listening to the 'stopped' callback
+      // once https://github.com/uProxy/uproxy/issues/1264 is resolved.
+      // Currently socksToRtc's 'stopped' callback does not get called on
+      // Firefox, possibly due to issues cleaning up sockets.
+      // onceStopping_, unlike 'stopped', gets fired as soon as stopping begins
+      // and doesn't wait for all cleanup to finish
+      this.socksToRtc_['onceStopping_'].then(() => {
         // Stopped event is only considered an error if the user had been
         // getting access and we hadn't called this.socksToRtc_.stop
         // If there is an error when trying to start proxying, and a stopped
