@@ -45,6 +45,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request && request.stopProxying) {
     ui.stopGettingInUiAndConfig(false);
   }
+
+  // handle requests to stop proxying
+  if (request && request.getLogs) {
+    core.getLogs().then((logs) => {
+      //this.loadingLogs = false;
+      // Add browser info to logs.
+      var logsAndBrowserInfo = 'Browser Info: ' + navigator.userAgent + '\n\n' + logs;
+      sendResponse({ logs: logsAndBrowserInfo });
+    });
+    return true;
+  }
 });
 
 chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {

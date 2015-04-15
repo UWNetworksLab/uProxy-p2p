@@ -1,7 +1,7 @@
 <link rel="import" href="../lib/polymer/polymer.html">
 <link rel='import' href='../lib/paper-progress/paper-progress.html'>
 
-<polymer-element name='uproxy-logs'>
+<polymer-element name='uproxy-logs' attributes="logs">
   <template>
     <style>
       :host {
@@ -50,7 +50,7 @@
       <h1>Logs & Network Analysis</h1>
       <p>To send your logs to the uProxy team for help, <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy</span> and click 'Submit Feedback'</p>
       <div id='logs'>
-        <div id='loadingLogs' hidden?='{{ !loadingLogs }}'>
+        <div id="loadingLogs" hidden?="{{ logs === '' }}">
           <p>Retrieving logs and analyzing your network...</p>
           <paper-progress indeterminate='true'></paper-progress>
         </div>

@@ -99,6 +99,29 @@ function setUpConnection(freedom, panel, button) {
       worker.port.on('command', function(data) {
         freedom.emit(uProxy.Command[data.command], data.data);
       });
+
+      worker.port.on('getLogs', function(data) {
+        console.log('calling get logs');
+        freedom.emit(uProxy.Command.GET_LOGS, {data: data.data, promiseId: 999999999});
+        var forwardLogsToContentScript = function(data) {
+          if (data['command'] == uProxy.Command.GET_LOGS) {
+
+            console.log('got logs !!!' + data.argsForCallback);
+            worker.port.emit('logs', data.argsForCallback);
+            panel.port.off(uProxy.Update.COMMAND_FULFILLED,
+              forwardLogsToContentScript);
+          }
+        };
+        freedom.on(uProxy.Update.COMMAND_FULFILLED, forwardLogsToContentScript);
+      });
+
+      worker.port.on('showPanel', function(data) {
+        panel.show({
+          position: button
+        });
+      });
+
+
     }
   });
 }
