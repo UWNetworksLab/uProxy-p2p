@@ -1,7 +1,7 @@
 var extension_id = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var fulfillGetLogs;
-var rejectGetLogs;
-var getLogsPromise = new Promise(function (resolve, reject) {
+var fulfillGetLogs :Function;
+var rejectGetLogs :Function;
+var getLogsPromise :Promise<string> = new Promise<string>((resolve, reject) => {
   fulfillGetLogs = resolve;
   rejectGetLogs = reject;
 });
