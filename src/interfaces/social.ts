@@ -3,8 +3,9 @@
  * interface to be extended as classes specific to particular components.
  */
 
+import net = require('../../../third_party/uproxy-networking/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
-
+import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
   network :SocialNetworkInfo;
@@ -189,6 +190,25 @@ export interface UserState {
   consent     :ConsentState;
 }
 
+/**
+ *
+ */
+export interface LocalUserInstance extends BaseInstance {
+  userId :string;
+}
+
+export interface RemoteUserInstance extends BaseInstance {
+  start() :Promise<net.Endpoint>;
+  stop() :Promise<void>;
+}
+
+/**
+ *
+ */
+export interface RemoteUser {
+  modifyConsent(action:uproxy_core_api.ConsentUserAction) : Promise<void>;
+  getInstance(instanceId:string) :RemoteUserInstance;
+}
 
 /**
  * The |Network| class represents a single network and the local uProxy client's
@@ -205,10 +225,10 @@ export interface UserState {
 export interface Network {
   name       :string;
   // TODO: Review visibility of these attributes and the interface.
-  roster     :{[userId:string]:BaseUser};
+  roster     :{[userId:string]:RemoteUser};
   // TODO: Make this private. Have other objects use getLocalInstance
   // instead.
-  myInstance :BaseInstance;
+  myInstance :LocalUserInstance;
 
   /**
    * Logs in to the network. Updates the local client information, as
@@ -232,7 +252,7 @@ export interface Network {
   /**
    * Returns the User corresponding to |userId|.
    */
-  getUser :(userId :string) => BaseUser;
+  getUser :(userId :string) => RemoteUser;
 
   /**
     * Resends the instance handeshake to all uProxy instances.

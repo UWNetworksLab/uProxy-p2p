@@ -36,6 +36,7 @@ import storage = globals.storage;
 import ui = ui_connector.connector;
 
 
+
   var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
@@ -70,7 +71,7 @@ import ui = ui_connector.connector;
   export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
   export var pendingNetworks:{[networkName:string]:social.Network} = {};
 
-  export function removeNetwork(networkName :string, userId :string) {
+  export function removeNetwork(networkName :string, userId :string) :void {
     if (networkName !== MANUAL_NETWORK_ID) {
       delete networks[networkName][userId];
     }
@@ -80,7 +81,7 @@ import ui = ui_connector.connector;
   /**
    * Goes through network names and gets a reference to each social provider.
    */
-  export function initializeNetworks() {
+  export function initializeNetworks() :void {
     for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||

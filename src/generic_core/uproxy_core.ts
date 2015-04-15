@@ -1,10 +1,38 @@
 import globals = require('./globals');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+import social = require('../interfaces/social');
+import social_network = require('./social');
+import storage = globals.storage;
+import ui_connector = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import user = require('./remote-user');
+import remote_connection = require('./remote-connection');
+import remote_instance = require('./remote-instance');
+import diagnose_nat = require('./diagnose-nat');
+import version = require('../generic/version');
+
+import ui = ui_connector.connector;
+
+var log :logging.Log = new logging.Log('social');
+
+// Note that the proxy runs extremely slowly in debug ('*:D') mode.
+var loggingProvider = freedom['loggingprovider']();
+loggingProvider.setConsoleFilter(['*:I']);
+loggingProvider.setBufferedLogFilter(['*:D']);
+
+export var remoteProxyInstance :social.RemoteUserInstance = null;
+
+// This is a global instance of RemoteConnection that is currently used for
+// either sharing or using a proxy through the copy+paste interface (i.e.
+// without an instance)
+export var copyPasteConnection :remote_connection.RemoteConnection = null;
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
  * sends updates to the UI, and handles commands from the UI.
  */
-class uProxyCore implements uproxy_core_api.CoreApi {
+export class uProxyCore implements uproxy_core_api.CoreApi {
 
   constructor() {
     log.debug('Preparing uProxy Core');
@@ -27,7 +55,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Access various social networks using the Social API.
    */
-  public login = (networkName :string) : Promise<void> => {
+  public login = (networkName :string) :Promise<void> => {
     if (networkName === social_network.MANUAL_NETWORK_ID) {
       var network = social_network.getNetwork(networkName, '');
       var loginPromise = network.login(true);
@@ -74,7 +102,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
    * Log-out of |networkName|.
    * TODO: write a test for this.
    */
-  public logout = (networkInfo :NetworkInfo) : Promise<void> => {
+  public logout = (networkInfo :social.SocialNetworkInfo) : Promise<void> => {
     var networkName = networkInfo.name;
     var userId = networkInfo.userId;
     var network = social_network.getNetwork(networkName, userId);
@@ -90,7 +118,9 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   // onUpdate not needed in the real core.
-  onUpdate = (update, handler) => {}
+  onUpdate = (update:uproxy_core_api.Update, handler:Function) => {
+    throw "uproxy_core onUpdate not implemented.";
+  }
 
   /**
    * Updates user's description of their current device. This applies to all
@@ -99,7 +129,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
    * instances.
    */
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
-    newSettings.version = version.STORAGE_VERSION;
+    newSettings.version = globals.STORAGE_VERSION;
     globals.storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
@@ -189,7 +219,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
       remoteProxyInstance = null;
     }
 
-    if (GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
+    if (social.GettingState.NONE !== copyPasteConnection.localGettingFromRemote) {
       log.warn('Existing proxying session, terminating');
       stoppedGetting.push(copyPasteConnection.stopGet());
     }
@@ -231,7 +261,8 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   public handleManualNetworkInboundMessage =
       (command :social.HandleManualNetworkInboundMessageCommand) => {
     var manualNetwork :social_network.ManualNetwork =
-        <social_network.ManualNetwork> social_network.getNetwork(social.MANUAL_NETWORK_ID, '');
+        <social_network.ManualNetwork> social_network.getNetwork(
+            social_network.MANUAL_NETWORK_ID, '');
     if (!manualNetwork) {
       log.error('Manual network does not exist, discanding inbound message',
                 command);
@@ -244,7 +275,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   /**
    * Obtain the RemoteInstance corresponding to an instance path.
    */
-  public getInstance = (path :social.InstancePath) : remote_instance.RemoteInstance => {
+  public getInstance = (path :social.InstancePath) :social.RemoteUserInstance => {
     var user = this.getUser(path);
     if (!user) {
       log.error('No user', path.userId);
@@ -253,7 +284,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
     return user.getInstance(path.instanceId);
   }
 
-  public getUser = (path :UserPath) : social.User => {
+  public getUser = (path :social.UserPath) :social.RemoteUser => {
     var network = social_network.getNetwork(path.network.name, path.network.userId);
     if (!network) {
       log.error('No network', path.network.name);
@@ -320,7 +351,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
         logs: logs
       };
 
-      var doAttempts = (error?:Error) => {
+      var doAttempts = (error?:Error) :Promise<void> => {
         if (attempts < maxAttempts) {
           // we want to keep trying this until we either run out of urls to
           // send to or one of the requests succeeds.  We set this up by
@@ -342,10 +373,10 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   private natResetTimeout_ :number;
 
   public getNatType = () : Promise<string> => {
-    if (this.natType_ === '') {
+    if (globals.natType === '') {
       // Function that returns a promise which fulfills
       // in a given time.
-      var countdown = (time) : Promise<void> => {
+      var countdown = (time:number) : Promise<void> => {
         return new Promise<void>((F, R) => {
           setTimeout(F, time);
         });
@@ -359,8 +390,8 @@ class uProxyCore implements uproxy_core_api.CoreApi {
         [ countdown(30000).then(() => {
             return 'NAT classification timed out.';
           }),
-          Diagnose.doNatProvoking().then((natType) => {
-            this.natType_ = natType;
+          diagnose_nat.doNatProvoking().then((natType:string) => {
+            globals.natType = natType;
             // Store NAT type for five minutes. This way, if the user previews
             // their logs, and then submits them shortly after, we do not need
             // to determine the NAT type once for the preview, and once for
@@ -369,12 +400,12 @@ class uProxyCore implements uproxy_core_api.CoreApi {
             // switch between networks while troubleshooting), then we might want
             // to remove caching.
             clearTimeout(this.natResetTimeout_);
-            this.natResetTimeout_ = setTimeout(() => {this.natType_ = '';}, 300000);
-            return this.natType_;
+            this.natResetTimeout_ = setTimeout(() => {globals.natType = '';}, 300000);
+            return globals.natType;
           })
         ]);
     } else {
-      return Promise.resolve(this.natType_);
+      return Promise.resolve(globals.natType);
     }
   }
 
@@ -385,9 +416,9 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public getLogs = () : Promise<string> => {
-    return loggingProvider.getLogs().then((rawLogs) => {
+    return loggingProvider.getLogs().then((rawLogs:string[]) => {
         var formattedLogsWithVersionInfo =
-            'Version: ' + JSON.stringify(UPROXY_VERSION) + '\n\n';
+            'Version: ' + JSON.stringify(version.UPROXY_VERSION) + '\n\n';
         formattedLogsWithVersionInfo += this.formatLogs_(rawLogs);
         return formattedLogsWithVersionInfo;
       });
@@ -403,7 +434,7 @@ class uProxyCore implements uproxy_core_api.CoreApi {
       });
   }
 
-  private formatLogs_ = (logs :string[]) : string => {
+  private formatLogs_ = (logs :string[]) :string => {
     // replace the emails with consistent tags throughout the logs
     var emails :string[] = [];
     var names :string[] = [];

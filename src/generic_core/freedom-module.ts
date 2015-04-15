@@ -31,13 +31,6 @@ import version = require('../interfaces/version');
 import browser_connector = require('../interfaces/browser_connector');
 import ui = require('./ui_connector');
 
-// Note that the proxy runs extremely slowly in debug ('*:D') mode.
-var loggingProvider = freedom['loggingprovider']();
-loggingProvider.setConsoleFilter(['*:I']);
-loggingProvider.setBufferedLogFilter(['*:D']);
-
-declare var UPROXY_VERSION :Object;
-
 var log :logging.Log = new logging.Log('core');
 log.info('Loading core', UPROXY_VERSION);
 
