@@ -99,7 +99,7 @@ describe('remote_instance.RemoteInstance', () => {
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
-      storage = new local_storage.Storage();
+      storage = new local_storage.Storage;
       storage.reset().then(() => {
         var network = <social.Network><any>jasmine.createSpyObj(
             'network', ['getUser']);
@@ -141,7 +141,7 @@ describe('remote_instance.RemoteInstance', () => {
     // https://github.com/uProxy/uproxy-lib/blob/dev/src/webrtc/peerconnection.spec.ts
     // )
     var fakeSocksToRtc = {
-      handlers: {},
+      handlers: <{[key :string] :Function}>{},
       'start':
           (endpoint:net.Endpoint, pcConfig: freedom_RTCPeerConnection.RTCConfiguration) => {
          return Promise.resolve(endpoint);

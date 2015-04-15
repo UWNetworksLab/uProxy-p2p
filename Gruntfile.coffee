@@ -601,8 +601,6 @@ module.exports = (grunt) ->
         src: [
           devBuildPath + '/interfaces/*.ts'
           devBuildPath + '/generic_core/*.ts'
-          '!' + devBuildPath + '/**/social.spec.ts'
-          '!' + devBuildPath + '/**/remote-instance.spec.ts'
           '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'

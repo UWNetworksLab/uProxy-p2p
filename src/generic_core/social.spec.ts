@@ -107,7 +107,13 @@ describe('social_network.FreedomNetwork', () => {
       var promises :Promise<void>[] = [];
       promises.push(<any>storage.save<social.InstanceData>('mockmockmyself', {
           instanceId: 'dummy-instance-id',
-          keyHash: ''
+          keyHash: '',
+          bytesReceived: 0,
+          bytesSent: 0,
+          description: 'my computer',
+          isOnline: false,
+          localGettingFromRemote: social.GettingState.NONE,
+          localSharingWithRemote: social.SharingState.NONE
       }));
       promises.push(<any>storage.save<string>(
           'dummy-instance-id/roster/somefriend', ''));
