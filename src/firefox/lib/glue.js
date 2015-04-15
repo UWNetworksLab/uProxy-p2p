@@ -101,7 +101,7 @@ function setUpConnection(freedom, panel, button) {
       });
 
       worker.port.on('getLogs', function(data) {
-        freedom.emit(uProxy.Command.GET_LOGS, {data: data.data, promiseId: 999999999});
+        freedom.emit(uProxy.Command.GET_LOGS, {data: data.data, promiseId: -1});
         var forwardLogsToContentScript = function(data) {
           if (data['command'] == uProxy.Command.GET_LOGS) {
             worker.port.emit('logs', data.argsForCallback);
