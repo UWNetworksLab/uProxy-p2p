@@ -18,7 +18,6 @@
 
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 
-module Firewall {
   var log :logging.Log = new logging.Log('firewall');
 
   export enum Severity {
@@ -248,4 +247,3 @@ module Firewall {
 
     return true;
   }
-}  // module Firewall

@@ -97,6 +97,6 @@ import Persistent = require('../interfaces/persistent');
       this.keyHash = state.keyHash;
     }
 
-  }  // class Core.LocalInstance
+  }  // class local_instance.LocalInstance
 
 // }  // module Core

@@ -25,10 +25,18 @@
 import firewall = require('./firewall');
 import local_instance = require('./local-instance');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import remote_user = require('./remote-user');
 import social = require('../interfaces/social');
+import ui_connector = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
+import globals = require('./globals');
+import storage = globals.storage;
 
-  var NETWORK_OPTIONS = {
+import ui = ui_connector.connector;
+
+
+  var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
       enableMonitoring: true
@@ -93,7 +101,7 @@ import user = require('./remote-user');
   /**
    * Retrieves reference to the network |networkName|.
    */
-  export function getNetwork(networkName :string, userId :string) : Network {
+  export function getNetwork(networkName :string, userId :string) :social.Network {
     if (!(networkName in networks)) {
       log.warn('Network does not exist', networkName);
       return null;
@@ -109,7 +117,7 @@ import user = require('./remote-user');
     return networks[networkName][userId];
   }
 
-  export function getOnlineNetwork() : NetworkState {
+  export function getOnlineNetwork() :social.NetworkState {
     for (var network in networks) {
       if (Object.keys(networks[network]).length > 0) {
         var userId = Object.keys(networks[network])[0];
@@ -128,7 +136,7 @@ import user = require('./remote-user');
       // we'll change this.
       userId = (Object.keys(networks[networkName]))[0];
     };
-    var payload :UI.NetworkMessage = {
+    var payload :social.NetworkMessage = {
       name: networkName,
       online: online,
       userId: userId
@@ -142,7 +150,7 @@ import user = require('./remote-user');
   // abstract classes.
   export class AbstractNetwork implements social.Network {
 
-    public roster     :{[userId: string] :social.User};
+    public roster     :{[userId:string] :remote_user.User};
     public myInstance :local_instance.LocalInstance;
 
     private SaveKeys = {
@@ -153,7 +161,7 @@ import user = require('./remote-user');
       this.roster = {};
     }
 
-    public getStorePath = () : string => {
+    public getStorePath = () :string => {
       return this.myInstance.instanceId + '/roster/';
     }
 
@@ -162,18 +170,19 @@ import user = require('./remote-user');
      * from storage, or create a new one if this is the first time this uProxy
      * installation has interacted with this network.
      */
-    protected prepareLocalInstance_ = (userId :string) : Promise<void> => {
+    protected prepareLocalInstance_ = (userId :string) :Promise<void> => {
       var key = this.name + userId;
-      return storage.load<social.InstanceData>(key).then((result :social.InstanceData) => {
-        this.myInstance = new Core.LocalInstance(this, userId, result);
+      return storage.load<social.BaseInstance>(key).then((result) => {
+        this.myInstance = new local_instance.LocalInstance(this, userId, result);
         log.info('loaded local instance from storage',
                  result, this.myInstance.instanceId);
       }, (e) => {
-        this.myInstance = new Core.LocalInstance(this, userId);
-        log.info('generating new local instance',
-                 this.myInstance.instanceId);
-        return storage.save<social.InstanceData>(key, this.myInstance.currentState()).catch((e) => {
-          log.error('Could not save new LocalInstance', this.myInstance.instanceId, e.stack);
+        this.myInstance = new local_instance.LocalInstance(this, userId);
+        log.info('generating new local instance', this.myInstance.instanceId);
+        return storage.save<social.BaseInstance>(key, this.myInstance.currentState())
+            .catch((e:Error) => {
+          log.error('Could not save new LocalInstance: ',
+              this.myInstance.instanceId, e.toString());
         });
       });
     }
@@ -184,7 +193,7 @@ import user = require('./remote-user');
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) : remote_user.User => {
+    protected addUser_ = (userId :string) :remote_user.User => {
       if (!this.isNewFriend_(userId)) {
         log.error('Cannot add already existing user', userId);
       }
@@ -199,7 +208,7 @@ import user = require('./remote-user');
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
      */
-    protected getOrAddUser_ = (userId :string) : remote_user.User => {
+    protected getOrAddUser_ = (userId :string) :remote_user.User => {
       if (this.isNewFriend_(userId)) {
         return this.addUser_(userId);
       }
@@ -211,7 +220,7 @@ import user = require('./remote-user');
      * roster, and also isn't just our own userId, since we can receive XMPP
      * messages for ourself too.
      */
-    protected isNewFriend_ = (userId :string) : boolean => {
+    protected isNewFriend_ = (userId :string) :boolean => {
       return !(this.myInstance && this.myInstance.userId == userId) &&
              !(userId in this.roster);
     }
@@ -220,24 +229,24 @@ import user = require('./remote-user');
       return this.myInstance.instanceId;
     }
 
-    public getUser = (userId :string) : remote_user.User => {
+    public getUser = (userId :string) :remote_user.User => {
       return this.roster[userId];
     }
 
-    public resendInstanceHandshakes = () : void => {
+    public resendInstanceHandshakes = () :void => {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (remember :boolean) : Promise<void> => {
+    public login = (remember :boolean) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
       throw new Error('Operation not implemented');
     }
-    public flushQueuedInstanceMessages = () : void => {
+    public flushQueuedInstanceMessages = () :void => {
       throw new Error('Operation not implemented');
     }
     public send = (user :remote_user.User,
@@ -246,7 +255,7 @@ import user = require('./remote-user');
       throw new Error('Operation not implemented');
     }
 
-    public getNetworkState = () : NetworkState => {
+    public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
     }
 
@@ -331,7 +340,7 @@ import user = require('./remote-user');
      */
     public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
       var userId = profile.userId;
-      if (!Firewall.isValidUserProfile(profile, null)) {
+      if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
         return;
       }
@@ -375,13 +384,13 @@ import user = require('./remote-user');
      * Public to permit testing.
      */
     public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
-      if (!Firewall.isValidClientState(freedomClient, null)) {
+      if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
       }
-      var client :UProxyClient.State =
+      var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
-      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
         return;
       }
@@ -390,7 +399,7 @@ import user = require('./remote-user');
         // Log out if it's our own client id.
         // TODO: Consider adding myself to the roster.
         if (client.clientId === this.myInstance.clientId &&
-            client.status === UProxyClient.Status.OFFLINE) {
+            client.status === social.ClientStatus.OFFLINE) {
           this.fulfillLogout_();
         }
         log.info('received own ClientState', client);
@@ -411,16 +420,16 @@ import user = require('./remote-user');
      * Public to permit testing.
      */
     public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
-      if (!Firewall.isValidIncomingMessage(incoming, null)) {
+      if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
       }
       var userId = incoming.from.userId;
       var msg :social.PeerMessage = JSON.parse(incoming.message);
 
-      var client :UProxyClient.State =
+      var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
-      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
         return;
       }
@@ -502,7 +511,7 @@ import user = require('./remote-user');
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
               // that the network is online before we send user updates.
-              var payload :UI.NetworkMessage = {
+              var payload :social.NetworkMessage = {
                 name: this.name,
                 online: true,
                 userId: freedomClient.userId
@@ -519,7 +528,7 @@ import user = require('./remote-user');
               for (var userId in this.roster) {
                 this.roster[userId].handleLogout();
               }
-              Social.removeNetwork(this.name, this.myInstance.userId);
+              removeNetwork(this.name, this.myInstance.userId);
               log.debug('Fulfilling onceLoggedOut_');
             }).catch((e) => {
               log.error('Error fulfilling onceLoggedOut_', e.message);
@@ -550,7 +559,7 @@ import user = require('./remote-user');
       var messageString = JSON.stringify({
         type: message.type,
         data: message.data,
-        version: uProxy.MESSAGE_VERSION
+        version: globals.MESSAGE_VERSION
       });
       log.info('sending message', {
         userTo: user.userId,
@@ -603,17 +612,17 @@ import user = require('./remote-user');
 
     private isFirebase_ = () : boolean => {
       // Default to false.
-      var options = NETWORK_OPTIONS[this.name];
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.isFirebase === true : false;
     }
 
     private isMonitoringEnabled_ = () : boolean => {
       // Default to true.
-      var options = NETWORK_OPTIONS[this.name];
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.enableMonitoring === true : true;
     }
 
-    public getNetworkState = () : NetworkState => {
+    public getNetworkState = () : social.NetworkState => {
       var rosterState : {[userId :string] :social.UserData} = {};
       for (var userId in this.roster) {
         var userState = this.roster[userId].currentStateForUI()
@@ -686,7 +695,7 @@ import user = require('./remote-user');
       // Hack so that handleMessage treats this client as online and doesn't
       // reject.
       // TODO: refactor manual network to have its own client messages.
-      user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
+      user.clientIdToStatusMap[senderClientId] = social.ClientStatus.ONLINE;
       user.handleMessage(senderUserId, message);
     }
 
@@ -694,14 +703,15 @@ import user = require('./remote-user');
 
 
 function freedomClientToUproxyClient(
-  freedomClientState :freedom_Social.ClientState) : UProxyClient.State {
+  freedomClientState :freedom_Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.
-  return {
+  var state :social.ClientState = {
     userId:    freedomClientState.userId,
     clientId:  freedomClientState.clientId,
-    status:    UProxyClient.Status[freedomClientState.status],
+    status:    (<any>social.ClientStatus)[freedomClientState.status],
     timestamp: freedomClientState.timestamp
   };
+  return state;
 }

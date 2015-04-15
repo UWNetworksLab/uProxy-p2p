@@ -1,9 +1,9 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='local-instance.ts' />
 
-describe('Core.LocalInstance', () => {
+describe('local_instance.LocalInstance', () => {
 
-  var instance :Core.LocalInstance;
+  var instance :local_instance.LocalInstance;
   var network = <Social.Network><any>jasmine.createSpy('network');
 
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe('Core.LocalInstance', () => {
   });
 
   it('initializes with valid id and keyhash', () => {
-    instance = new Core.LocalInstance(network, 'fakeId');
+    instance = new local_instance.LocalInstance(network, 'fakeId');
     expect(instance.instanceId).toBeDefined();
     expect(instance.keyHash).toBeDefined();
   });

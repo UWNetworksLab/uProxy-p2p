@@ -242,7 +242,7 @@ describe('UI.UserInterface', () => {
   describe('syncNetwork_', () => {
 
     it('Updates onlineNetwork', () => {
-      var networkMessage :UI.NetworkMessage = {
+      var networkMessage :social.NetworkMessage = {
         name:   'Facebook',
         userId: '1234',
         online: true
@@ -255,7 +255,7 @@ describe('UI.UserInterface', () => {
 
     it('Clears fields when network goes offline', () => {
       // Login
-      var networkMessage :UI.NetworkMessage = {
+      var networkMessage :social.NetworkMessage = {
         name:   'Facebook',
         userId: '1234',
         online: true

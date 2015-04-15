@@ -206,7 +206,7 @@ describe('Social.FreedomNetwork', () => {
 
     it('adds a new user for |onUserProfile|', (done) => {
       network = new Social.FreedomNetwork('mock');
-      network.myInstance = new Core.LocalInstance(network, 'fakeId');
+      network.myInstance = new local_instance.LocalInstance(network, 'fakeId');
       expect(Object.keys(network.roster).length).toEqual(0);
       network.handleUserProfile({
         userId: 'mockuser',
