@@ -33,7 +33,7 @@ chrome.runtime.onSuspend.addListener(() => {
   //proxyConfig.stopUsingProxy();
 });
 
-chrome.runtime.onMessage.addListener((request :any) => {
+chrome.runtime.onMessage.addListener((request :any, sendResponse :Function) => {
   // handle requests from other pages (i.e. copypaste.html) to bring the
   // chrome popup to the front
   if (request && request.openWindow) {
