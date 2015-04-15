@@ -86,7 +86,7 @@ describe('Core', () => {
   it('login continues to call login on correct network', (done) => {
     Social.networks['mockNetwork'] = {};
     spyOn(Social, 'FreedomNetwork').and.callFake(() => {
-      network.myInstance = new Core.LocalInstance(network, 'fakeUser');
+      network.myInstance = new local_instance.LocalInstance(network, 'fakeUser');
       return network;
     });
     expect(Object.keys(Social.pendingNetworks).length).toEqual(0);

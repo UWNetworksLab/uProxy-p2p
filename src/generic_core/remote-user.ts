@@ -51,7 +51,7 @@ var log :logging.Log = new logging.Log('remote-user');
 
     // Name of the user as provided by the social network.
     public name :string;
-    public clientIdToStatusMap :{ [clientId :string] :social.UProxyClient.Status };
+    public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
     public profile :freedom_Social.UserProfile;
 
     public consent :consent.State = new consent.State();
@@ -130,14 +130,14 @@ var log :logging.Log = new logging.Log('remote-user');
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :social.UProxyClient.State) : void => {
+    public handleClient = (client :social.ClientState) : void => {
       if (client.userId != this.userId) {
         log.error('received client with unexpected userId', {
           clientUserId: this.userId,
           userId: client.userId
         });
         return;
-      } else if (client.status == social.UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      } else if (client.status == social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore non-uproxy contacts
         return;
       }
@@ -154,15 +154,15 @@ var log :logging.Log = new logging.Log('remote-user');
 
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
-        case social.UProxyClient.Status.ONLINE:
+        case social.ClientStatus.ONLINE:
           if (!(client.clientId in this.clientIdToStatusMap) ||
-              this.clientIdToStatusMap[client.clientId] != social.UProxyClient.Status.ONLINE) {
+              this.clientIdToStatusMap[client.clientId] != social.ClientStatus.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.sendInstanceHandshake(client.clientId);
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
-        case social.UProxyClient.Status.OFFLINE:
+        case social.ClientStatus.OFFLINE:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
@@ -252,7 +252,7 @@ var log :logging.Log = new logging.Log('remote-user');
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
-      if (social.UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
+      if (social.ClientStatus.ONLINE !== this.clientIdToStatusMap[clientId]) {
         log.error('Received an instance handshake from a non-uProxy client',
                   clientId);
         return Promise.reject(new Error(
@@ -379,7 +379,7 @@ var log :logging.Log = new logging.Log('remote-user');
     public monitor = () : void => {
       for (var clientId in this.clientIdToStatusMap) {
         var isMissingInstance =
-            (this.clientIdToStatusMap[clientId] == social.UProxyClient.Status.ONLINE) &&
+            (this.clientIdToStatusMap[clientId] == social.ClientStatus.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
         if (isMissingInstance) {
           log.warn('monitor could not find instance for clientId', clientId);
@@ -403,7 +403,7 @@ var log :logging.Log = new logging.Log('remote-user');
         return false;
       }
       var status = this.clientIdToStatusMap[clientId];
-      if (status == social.UProxyClient.Status.ONLINE) {
+      if (status == social.ClientStatus.ONLINE) {
         return true;
       }
       return false;

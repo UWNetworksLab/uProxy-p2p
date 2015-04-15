@@ -83,6 +83,11 @@ export interface NetworkState {
   roster   :{[userId :string] :UserData };
 }
 
+export interface NetworkOptions {
+  isFirebase :boolean;
+  enableMonitoring :boolean;
+}
+
 /**
  * Messages are sent from Core to a remote Core - they are peer communications
  * between uProxy users. This enum describes the possible Message types.
@@ -153,25 +158,24 @@ export enum SharingState {
 
 // We use this to map Freedom's untyped social network structures into a real
 // type-script enum & interface.
-export module UProxyClient {
-  // Status of a client; used for both this client (in which case it will be
-  // either ONLINE or OFFLINE)
-  export enum Status {
-    OFFLINE,
-    // This client runs the same freedom.js app as you and is online
-    ONLINE,
-    // This client is online, but not with the same application/agent type
-    // (i.e. can be useful to invite others to your freedom.js app)
-    ONLINE_WITH_OTHER_APP,
-  }
 
-  // Status of a client connected to a social network.
-  export interface State {
-    userId    :string;
-    clientId  :string;
-    status    :Status;
-    timestamp :number;
-  }
+// Status of a client; used for both this client (in which case it will be
+// either ONLINE or OFFLINE)
+export enum ClientStatus {
+  OFFLINE,
+  // This client runs the same freedom.js app as you and is online
+  ONLINE,
+  // This client is online, but not with the same application/agent type
+  // (i.e. can be useful to invite others to your freedom.js app)
+  ONLINE_WITH_OTHER_APP,
+}
+
+// Status of a client connected to a social network.
+export interface ClientState {
+  userId    :string;
+  clientId  :string;
+  status    :ClientStatus;
+  timestamp :number;
 }
 
 
@@ -204,7 +208,7 @@ export interface Network {
   roster     :{[userId:string]:BaseUser};
   // TODO: Make this private. Have other objects use getLocalInstance
   // instead.
-  myInstance :InstanceData;
+  myInstance :BaseInstance;
 
   /**
    * Logs in to the network. Updates the local client information, as

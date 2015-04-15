@@ -1,0 +1,1 @@
+export var UPROXY_VERSION = "___VERSION_REPLACE___";
