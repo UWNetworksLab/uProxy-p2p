@@ -34,14 +34,14 @@ interface StringData { str :string; }
 interface BufferData { buffer :ArrayBuffer; }
 
 export interface DataChannel {
-  // Guarenteed to be invarient for the life of the data channel.
+  // Guaranteed to be invariant for the life of the data channel.
   getLabel : () => string;
 
-  // Promise for when the data channel has been openned.
+  // Promise for when the data channel has been opened.
   onceOpened : Promise<void>;
 
   // Promise for when the data channel has been closed (only fulfilled after
-  // the data channel has been openned).
+  // the data channel has been opened).
   // NOTE: There exists a bug in Chrome prior to version 37 which prevents
   //       this from fulfilling on the remote peer.
   onceClosed : Promise<void>;
@@ -116,7 +116,8 @@ export class DataChannelClass implements DataChannel {
     this.fulfillDrained_ = F;
   });
 
-  private opennedSuccessfully_ :boolean;
+  // True between onceOpened and onceClosed
+  private isOpen_ :boolean;
   private rejectOpened_  :(e:Error) => void;
 
   private overflow_ :boolean = false;
@@ -127,7 +128,7 @@ export class DataChannelClass implements DataChannel {
   // |rtcDataChannel_| is the freedom rtc data channel.
   // |label_| is the rtcDataChannel_.getLabel() result
   constructor(private rtcDataChannel_:freedom_RTCDataChannel.RTCDataChannel,
-              private label_:string) {
+              private label_ = '') {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
     this.toPeerDataBytes_ = 0;
@@ -157,17 +158,17 @@ export class DataChannelClass implements DataChannel {
       log.error('rtcDataChannel_.onerror: ' + e.toString);
     });
     this.onceOpened.then(() => {
-      this.opennedSuccessfully_ = true;
+      this.isOpen_ = true;
       this.conjestionControlSendHandler();
     });
     this.onceClosed.then(() => {
-        if(!this.opennedSuccessfully_) {
+        if(!this.isOpen_) {
           // Make sure to reject the onceOpened promise if state went from
           // |connecting| to |close|.
           this.rejectOpened_(new Error(
               'Failed to open; closed while trying to open.'));
         }
-        this.opennedSuccessfully_ = false;
+        this.isOpen_ = false;
       });
     this.onceDrained_.then(() => {
       log.debug('all messages sent, closing');
@@ -209,6 +210,10 @@ export class DataChannelClass implements DataChannel {
               typeof data.buffer +
               '; data.buffer instanceof ArrayBuffer === ' +
               (data.buffer instanceof ArrayBuffer) + ')'));
+    }
+
+    if (this.draining_) {
+      return Promise.reject(new Error('send was called after close'));
     }
 
     var byteLength :number;
@@ -308,13 +313,15 @@ export class DataChannelClass implements DataChannel {
 
       if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
         this.setOverflow_(true);
+        if (!this.isOpen_) {
+          // The remote peer has closed the channel, so we should stop
+          // trying to drain the send buffer.
+          return;
+        }
         setTimeout(this.conjestionControlSendHandler, 20);
       } else {
         if (this.toPeerDataQueue_.getLength() === 0) {
           this.setOverflow_(false);
-          if (this.draining_) {
-            this.fulfillDrained_();
-          }
         }
         // This processes one block from the queue, which (in Chrome) is
         // expected to be no larger than 4 KB.  We will then go through the
@@ -328,17 +335,53 @@ export class DataChannelClass implements DataChannel {
     });
   }
 
+  // Closes asynchronously, after waiting for all outgoing messages.
   public close = () : Promise<void> => {
-    log.debug('close requested (%1 messages to send)',
-        this.toPeerDataQueue_.getLength());
+    log.debug('close requested (%1 messages and %2 bytes to send)',
+        this.toPeerDataQueue_.getLength(),
+        this.lastBrowserBufferedAmount_);
 
-    this.draining_ = true;
+    var onceJavascriptBufferDrained = new Promise((F, R) => {
+      if (this.getJavascriptBufferedAmount() > 0) {
+        this.setOverflowListener((overflow:boolean) => {
+          if (!overflow) {
+            F();
+          }
+        });
+      } else {
+        F();
+      }
+      this.draining_ = true;
+    });
 
-    if (this.toPeerDataQueue_.getLength() === 0) {
-      this.fulfillDrained_();
-    }
+    onceJavascriptBufferDrained.then(this.waitForBrowserToDrain_).then(
+      this.fulfillDrained_);
 
     return this.onceClosed;
+  }
+
+  private waitForBrowserToDrain_ = () : Promise<void> => {
+    var drained :() => void;
+    var onceBrowserBufferDrained :Promise<void> =
+        new Promise<void>((F, R) => {
+      drained = F;
+    });
+
+    var loop = () : void => {
+      this.getBrowserBufferedAmount().then((amount:number) => {
+        if (amount === 0) {
+          drained();
+        } else if (this.isOpen_) {
+          setTimeout(loop, 20);
+        } else {
+          log.warn('Data channel was closed remotely with %1 bytes buffered',
+                   amount);
+        }
+      });
+    };
+
+    loop();
+    return onceBrowserBufferDrained;
   }
 
   public getBrowserBufferedAmount = () : Promise<number> => {
@@ -354,13 +397,26 @@ export class DataChannelClass implements DataChannel {
   }
 
   public setOverflowListener = (listener:(overflow:boolean) => void) => {
+    if (this.draining_) {
+      throw new Error('Can\'t set overflow listener after close');
+    }
+
     this.overflowListener_ = listener;
   }
 
   public toString = () : string => {
-    var s = this.getLabel() + ': opennedSuccessfully_=' +
-      this.opennedSuccessfully_;
+    var s = this.getLabel() + ': isOpen_=' + this.isOpen_;
     return s;
+  }
+
+  // This setter is not part of the DataChannel interface, and is only for
+  // use by the static constructor.
+  public setLabel = (label:string) => {
+    if (this.label_ !== '') {
+      throw new Error('Data Channel label was set twice, to '
+          + this.label_ + ' and ' + label);
+    }
+    this.label_ = label;
   }
 }  // class DataChannelClass
 
@@ -374,9 +430,13 @@ export function createFromFreedomId(id:string) : Promise<DataChannel> {
 // given a core.rtcdatachannel instance.
 export function createFromRtcDataChannel(
     rtcDataChannel:freedom_RTCDataChannel.RTCDataChannel) : Promise<DataChannel> {
+  // We need to construct the data channel synchronously to avoid missing any
+  // early 'onmessage' events.
+  var dc = new DataChannelClass(rtcDataChannel);
   return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
     return rtcDataChannel.getLabel().then((label:string) => {
-      return new DataChannelClass(rtcDataChannel, label);
+      dc.setLabel(label);
+      return dc;
     });
   });
 }

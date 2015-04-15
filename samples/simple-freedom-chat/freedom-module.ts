@@ -2,6 +2,7 @@
 /// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import logging = require('../../logging/logging');
+import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 
 import signals = require('../../webrtc/signals');
 import peerconnection = require('../../webrtc/peerconnection');
@@ -12,8 +13,8 @@ import Data = peerconnection.Data;
 import Message = require('./message.types');
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setConsoleFilter(['*:I']);
-loggingController.setBufferedLogFilter(['*:D']);
+loggingController.setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
+loggingController.setDefaultFilter(loggingTypes.Destination.buffered, loggingTypes.Level.debug);
 
 export var moduleName = 'freedom-chat';
 export var log :logging.Log = new logging.Log(moduleName);
@@ -98,7 +99,7 @@ a.negotiateConnection()
     // Change logging tolerance once connected. This is to demo how to use the
     // logging controller. TODO: cleanup provider to show that we are supposed
     // to do that.
-    freedom['loggingcontroller']().setConsoleFilter("*:I");
+    freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
   })
   .catch((e:any) => {
     log.error('error while opening datachannel: ' + e.message);

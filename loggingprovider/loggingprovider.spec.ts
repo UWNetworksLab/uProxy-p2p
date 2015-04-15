@@ -25,34 +25,20 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   }
 });
 
-import logging = require('loggingprovider.types');
+import logging = require('./loggingprovider.types');
 import LoggingProvider = require('./loggingprovider');
 
 describe("Logging Provider", () => {
   var logger :logging.Log;
   var loggingControl :logging.Controller;
 
-  var message1 = LoggingProvider.makeMessage('D', 'tag', 'simple string');
-  var message3 = LoggingProvider.makeMessage('I', 'test-module', 'second string');
-  var message4 = LoggingProvider.makeMessage('W', 'test', 'Bob pinged Alice with id=123456');
-  var message5 = LoggingProvider.makeMessage('E', 'test', 'Bob pinged Alice with id=123456');
-
   beforeEach(() => {
     logger = new LoggingProvider.Log();
     loggingControl = new LoggingProvider.LoggingController();
-    loggingControl.setBufferedLogFilter(['*:E']);
+    loggingControl.setFilters(logging.Destination.buffered, {});
+    loggingControl.setDefaultFilter(logging.Destination.buffered,
+                                    logging.Level.error);
     loggingControl.clearLogs();
-  });
-
-  it('Logging provider static format functions', () => {
-    expect(LoggingProvider.formatMessage(message1))
-        .toMatch(/D \[.*\] simple string/);
-    expect(LoggingProvider.formatMessage(message3))
-        .toMatch(/I \[.*\] second string/);
-    expect(LoggingProvider.formatMessage(message4))
-        .toMatch(/W \[.*\] Bob pinged Alice with id=123456/);
-    expect(LoggingProvider.formatMessage(message5))
-        .toMatch(/E \[.*\] Bob pinged Alice with id=123456/);
   });
 
   it('Log calls result in logs in the logging provider', () => {
@@ -61,31 +47,42 @@ describe("Logging Provider", () => {
     logger.info('tag1', 'second string');
     logger.error('tag1', 'third string');
     expect(loggingControl.getLogs().join('\n')).toMatch(
-      /E \[.*\] third string/);
+      /third string/);
+    expect(loggingControl.getLogs().join('\n')).not.toMatch(
+      /second string/);
 
     // set to log all messages.
     loggingControl.clearLogs();
-    loggingControl.setBufferedLogFilter(['*:D']);
+    loggingControl.setDefaultFilter(logging.Destination.buffered,
+                                    logging.Level.debug);
     logger.debug('tag1', 'simple string');
     logger.info('tag1', 'second string');
     logger.error('tag1', 'third string');
     expect(loggingControl.getLogs().join('\n')).toMatch(
-      /D \[.*\] simple string\nI \[.*\] second string\nE \[.*\] third string/);
+      /simple string\n.*second string\n.*third string/);
 
      // set to log messages with level >= info.
     loggingControl.clearLogs();
-    loggingControl.setBufferedLogFilter(['*:I']);
+    loggingControl.setDefaultFilter(logging.Destination.buffered,
+                                    logging.Level.info);
     logger.debug('tag1', 'simple string');
     logger.info('tag2', 'second string');
     logger.error('tag3', 'third string');
     expect(loggingControl.getLogs().join('\n')).toMatch(
-      /I \[.*\] second string\nE \[.*\] third string/);
+      /second string\n.*third string/);
+    expect(loggingControl.getLogs().join('\n')).not.toMatch(
+      /simple string/);
+
   });
 
-  it('Specific filtering level for tag overrides *', () => {
+  it('Specific filtering level for tag overrides default', () => {
     var logs :string;
     loggingControl.clearLogs();
-    loggingControl.setBufferedLogFilter(['*:D', 'tag2:I']);
+    loggingControl.setDefaultFilter(logging.Destination.buffered,
+                                    logging.Level.debug);
+    loggingControl.setFilters(logging.Destination.buffered, {
+                                'tag2': logging.Level.info
+                              });
     logger.debug('tag1', 'first string');
     logger.debug('tag2', 'second string');
     logger.info('tag3', 'third string');
