@@ -216,11 +216,11 @@ describe('remote_instance.RemoteInstance', () => {
       'onceReady': new Promise((F, R) => {})  // return unresolved promise
     };
     var fakeOffer :Object = {
-      type: WebRtc.SignalType.OFFER,
+      type: signals.Type.OFFER,
       data: 'really fake offer'
     };
     var fakeCandidate :Object = {
-      type: WebRtc.SignalType.CANDIDATE,
+      type: signals.Type.CANDIDATE,
       data: 'really fake candidate'
     };
 

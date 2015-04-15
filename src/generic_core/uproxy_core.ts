@@ -16,53 +16,6 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   //   // UI-initiated instance handshakes.
   // }
 
-  /**
-   * Install a handler for commands received from the UI.
-   */
-  public onCommand = (cmd :uproxy_core_api.Command, handler:any) => {
-    bgAppPageChannel.on('' + cmd,
-      (args :browser_connector.PromiseCommand) => {
-        // Call handler with args.data and ignore other fields in args
-        // like promiseId.
-        handler(args.data);
-      });
-  }
-
-  /**
-   * Install a handler for promise commands received from the UI.
-   * Promise commands return an ack or error to the UI.
-   */
-  public onPromiseCommand = (cmd :uproxy_core_api.Command,
-                             handler :(data ?:any) => Promise<any>) => {
-    var promiseCommandHandler = (args :browser_connector.PromiseCommand) => {
-      // Ensure promiseId is set for all requests
-      if (!args.promiseId) {
-        var err = 'onPromiseCommand called for cmd ' + cmd +
-                  'with promiseId undefined';
-        log.error(err);
-        return Promise.reject(new Error(err));
-      }
-
-      // Call handler function, then return success or failure to UI.
-      handler(args.data).then(
-        (argsForCallback ?:any) => {
-          ui.update(uproxy_core_api.Update.COMMAND_FULFILLED,
-              { command: cmd,
-                promiseId: args.promiseId,
-                argsForCallback: argsForCallback });
-        },
-        (errorForCallback :Error) => {
-          var rejectionData = {
-            promiseId: args.promiseId,
-            errorForCallback: errorForCallback.toString()
-          };
-          ui.update(uproxy_core_api.Update.COMMAND_REJECTED, rejectionData);
-        }
-      );
-    };
-    bgAppPageChannel.on('' + cmd, promiseCommandHandler);
-  }
-
   changeOption = (option :string) => {
     // TODO: implement options.
   }
@@ -70,7 +23,6 @@ class uProxyCore implements uproxy_core_api.CoreApi {
   dismissNotification = (instancePath :social.InstancePath) => {
     // TODO: implement options.
   }
-
 
   /**
    * Access various social networks using the Social API.

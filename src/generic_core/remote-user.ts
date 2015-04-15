@@ -26,6 +26,9 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
 import consent = require('./consent');
+import globals = require('./globals');
+
+import storage = globals.storage;
 
 import Persistent = require('../interfaces/persistent');
 
@@ -45,7 +48,7 @@ var log :logging.Log = new logging.Log('remote-user');
 
     // Name of the user as provided by the social network.
     public name :string;
-    public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
+    public clientIdToStatusMap :{ [clientId :string] :social.UProxyClient.Status };
     public profile :freedom_Social.UserProfile;
 
     public consent :consent.State = new consent.State();
@@ -62,7 +65,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.notifyUI();
     });
 
-    private fulfillNameReceived_ : (string) => void;
+    private fulfillNameReceived_ :(name:string) => void;
     public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
       this.fulfillNameReceived_ = F;
     });
@@ -77,7 +80,7 @@ var log :logging.Log = new logging.Log('remote-user');
      * not appear in the UI until actually receiving and being updated with a
      * full UserProfile.
      */
-    constructor(public network :Social.Network,
+    constructor(public network :social.Network,
                 public userId  :string) {
       log.debug('New user', userId);
       this.name = 'pending';
@@ -90,7 +93,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
 
-      storage.load<UserState>(this.getStorePath()).then((state) => {
+      storage.load<social.UserState>(this.getStorePath()).then((state:social.UserState) => {
         this.restoreState(state);
         this.fulfillStorageLoad_();
       }).catch((e) => {
@@ -124,14 +127,14 @@ var log :logging.Log = new logging.Log('remote-user');
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :UProxyClient.State) : void => {
+    public handleClient = (client :social.UProxyClient.State) : void => {
       if (client.userId != this.userId) {
         log.error('received client with unexpected userId', {
           clientUserId: this.userId,
           userId: client.userId
         });
         return;
-      } else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      } else if (client.status == social.UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
         // Ignore non-uproxy contacts
         return;
       }
@@ -148,15 +151,15 @@ var log :logging.Log = new logging.Log('remote-user');
 
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
-        case UProxyClient.Status.ONLINE:
+        case social.UProxyClient.Status.ONLINE:
           if (!(client.clientId in this.clientIdToStatusMap) ||
-              this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
+              this.clientIdToStatusMap[client.clientId] != social.UProxyClient.Status.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.sendInstanceHandshake(client.clientId);
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
-        case UProxyClient.Status.OFFLINE:
+        case social.UProxyClient.Status.OFFLINE:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
@@ -418,7 +421,7 @@ var log :logging.Log = new logging.Log('remote-user');
       });
     }
 
-    public restoreState = (state :UserState) : void => {
+    public restoreState = (state :social.UserState) : void => {
       if (this.name === 'pending') {
         this.name = state.name;
       }

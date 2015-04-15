@@ -46,7 +46,7 @@ var log :logging.Log = new logging.Log('storage');
      * TODO: Consider using a storage provider that works with JSON.
      * TODO: Really reject the promise!
      */
-    public load = <T>(key :string) : Promise<T> => {
+    public load<T>(key :string) : Promise<T> {
       log.debug('loading', key);
       return fStorage.get(key).then((result :string) => {
         if (typeof result === 'undefined' || result === null) {
@@ -62,7 +62,7 @@ var log :logging.Log = new logging.Log('storage');
      * value of |key| if it existed (according to the freedom interface.)
      */
     // TODO: should not return a value in the promise. Should be Promise<void>
-    public save = <T>(key :string, val :T) : Promise<T> => {
+    public save<T>(key :string, val :T) : Promise<T> {
       log.debug('Saving to storage', {
         key: key,
         newVal: val

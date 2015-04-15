@@ -8,12 +8,21 @@
 
 /// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
-import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import remote_connection = require('./remote-connection');
-import social_types = require('../interfaces/social');
-import social = require('../interfaces/social');
 import consent = require('./consent');
+import globals = require('./globals');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import social = require('../interfaces/social');
+import social_types = require('../interfaces/social');
+import ui_connector = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import user_interface = require('../interfaces/ui');
+
+import storage = globals.storage;
+import ui = ui_connector.connector;
 
 import Persistent = require('../interfaces/persistent');
 
@@ -77,8 +86,8 @@ export var remoteProxyInstance :RemoteInstance = null;
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
     // TODO: why are these not in remote-connection?
-    private startSocksToRtcTimeout_ :Object = null;
-    private startRtcToNetTimeout_ :Object = null;
+    private startSocksToRtcTimeout_ :number = null;
+    private startRtcToNetTimeout_ :number = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
@@ -107,10 +116,10 @@ export var remoteProxyInstance :RemoteInstance = null;
       this.setSharerToNotReady_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
-          .then((state) => {
+          .then((state:RemoteInstanceState) => {
             this.restoreState(state);
             this.fulfillStorageLoad_();
-          }).catch((e) => {
+          }).catch((e:Error) => {
             // Instance not found in storage - we should fulfill the create
             // promise anyway as this is not an error.
             log.info('No stored state for instance', instanceId);
@@ -173,7 +182,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:Object) :Promise<void> => {
+                           signalFromRemote:{type:signals.Type}) :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -182,7 +191,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
-        if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+        if (signalFromRemote.type == signals.Type.OFFER) {
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
@@ -197,7 +206,7 @@ export var remoteProxyInstance :RemoteInstance = null;
             data: signalFromRemote
           });
         }).catch((e) => {
-          log.info(e + ' Received signal ' + signalFromRemote['type']);
+          log.info(e + ' Received signal ' + signalFromRemote.type);
           return Promise.resolve<void>();
         });
 
@@ -207,7 +216,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
         Issue: https://github.com/uProxy/uproxy/issues/1256
 
-        } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+        } else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
           this.stopShare();
           return;
         }
@@ -227,7 +236,7 @@ export var remoteProxyInstance :RemoteInstance = null;
       */
     private startShare_ = () : void => {
       var sharingStopped :Promise<void>;
-      if (this.localSharingWithRemote === SharingState.NONE) {
+      if (this.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
       } else {
@@ -255,14 +264,14 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     public stopShare = () :Promise<void> => {
-      if (this.localSharingWithRemote === SharingState.NONE) {
+      if (this.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
       }
 
-      if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
+      if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
-      } else if (this.localSharingWithRemote === SharingState.SHARING_ACCESS) {
+      } else if (this.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
         // Stop forwarding messages to the remote connection until we receive
         // another OFFER.
         this.setSharerToNotReady_();
@@ -312,7 +321,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :InstanceHandshake) : Promise<void> => {
+    public update = (data :social.InstanceHandshake) : Promise<void> => {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
@@ -375,7 +384,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      */
     // TODO: bad smell: remote-instance should not need to know the structure of
     // UI message data. Maybe rename to |getInstanceData|?
-    public currentStateForUi = () :InstanceData => {
+    public currentStateForUi = () :social.InstanceData => {
       return {
         instanceId:             this.instanceId,
         description:            this.description,
@@ -389,12 +398,12 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     public handleLogout = () => {
-      if (this.connection_.localSharingWithRemote !== SharingState.NONE) {
+      if (this.connection_.localSharingWithRemote !== social.SharingState.NONE) {
         log.info('Closing rtcToNet_ for logout');
         this.connection_.stopShare();
       }
 
-      if (this.connection_.localGettingFromRemote !== GettingState.NONE) {
+      if (this.connection_.localGettingFromRemote !== social.GettingState.NONE) {
         log.info('Stopping socksToRtc_ for logout');
         this.connection_.stopGet();
       }
