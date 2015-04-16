@@ -815,6 +815,51 @@ module UI {
         this.reconnectInterval_ = null;
       }
     }
+
+    private FeedbackUrls_ = [
+      "https://d1wtwocg4wx1ih.cloudfront.net/submit-feedback"
+    ]
+
+    public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
+      if (!maxAttempts || maxAttempts > this.FeedbackUrls_.length) {
+        // default to trying every possible URL
+        maxAttempts = this.FeedbackUrls_.length;
+      }
+
+      var logsPromise :Promise<string>;
+
+      if (feedback.logs) {
+        logsPromise = this.getLogsAndNetworkInfo().then((logs) => {
+          var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+          return browserInfo + logs;
+        });
+      } else {
+        logsPromise = Promise.resolve('');
+      }
+
+      return logsPromise.then((logs) => {
+        var attempts = 0;
+
+        var payload = {
+          email: feedback.email,
+          feedback: feedback.feedback,
+          logs: logs
+        };
+
+        var doAttempts = (error?:Error) => {
+          if (attempts < maxAttempts) {
+            // we want to keep trying this until we either run out of urls to
+            // send to or one of the requests succeeds.  We set this up by
+            // creating a lambda to call the post with failures set up to recurse
+            return this.browserApi.httpPost(this.FeedbackUrls_[attempts++], payload, true).catch(doAttempts);
+          }
+
+          throw error;
+        }
+
+        return doAttempts();
+      });
+    }
   }  // class UserInterface
 
 }  // module UI
