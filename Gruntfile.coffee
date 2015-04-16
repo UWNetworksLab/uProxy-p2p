@@ -87,12 +87,22 @@ taskManager.add 'test_core', [
   #'ts:webrtc'
   #'ts:generic_core_specs'
   #'ts:mocks'
+  'browserify:firewall'
+  'browserify:freedomModule'
+  'browserify:localInstance'
+  'browserify:remoteInstance'
+  'browserify:remoteConnection'
+  'browserify:remoteUser'
+  'browserify:social'
+  'browserify:storage'
   'jasmine:generic_core'
 ]
 
 taskManager.add 'test_ui', [
   'build_generic_ui'
   #'ts:generic_ui_specs'
+  'browserify:ui'
+  'browserify:user'
   'jasmine:generic_ui'
 ]
 
@@ -100,6 +110,7 @@ taskManager.add 'test_chrome', [
   'build_chrome'
   #'ts:chrome_specs'
   #'ts:mocks'
+  'browserify:chromeConnector'
   'jasmine:chrome_extension'
   'jasmine:chrome_app'
 ]
@@ -630,6 +641,19 @@ module.exports = (grunt) ->
           module: 'commonjs'
           fast: 'always'
 
+    browserify:
+      firewall: Rule.browserifySpec 'generic_core/firewall'
+      freedomModule: Rule.browserifySpec 'generic_core/freedom-module'
+      localInstance: Rule.browserifySpec 'generic_core/local-instance'
+      remoteInstance: Rule.browserifySpec 'generic_core/remote-instance'
+      remoteConnection: Rule.browserifySpec 'generic_core/remote-connection'
+      remoteUser: Rule.browserifySpec 'generic_core/remote-user'
+      social: Rule.browserifySpec 'generic_core/social'
+      storage: Rule.browserifySpec 'generic_core/storage'
+      ui: Rule.browserifySpec 'generic_ui/script/ui'
+      user: Rule.browserifySpec 'generic_ui/script/user'
+      chromeConnector: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+
     #-------------------------------------------------------------------------
     jasmine:
       chrome_extension: {
@@ -806,6 +830,7 @@ module.exports = (grunt) ->
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
