@@ -184,10 +184,6 @@ class CoreConnector implements uProxy.CoreAPI {
     return this.promiseCommand(uProxy.Command.LOGOUT, networkInfo);
   }
 
-  sendFeedback = (feedback :uProxy.UserFeedback) : Promise<void> => {
-    return this.promiseCommand(uProxy.Command.SEND_FEEDBACK, feedback);
-  }
-
   restart = () => {
     this.browserConnector_.restart();
   }
