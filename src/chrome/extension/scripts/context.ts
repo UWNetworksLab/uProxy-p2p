@@ -1,3 +1,5 @@
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
+
 import UI = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 
