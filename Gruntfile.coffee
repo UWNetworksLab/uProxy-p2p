@@ -6,7 +6,7 @@ TaskManager = require 'uproxy-lib/build/tools/taskmanager'
 
 #-------------------------------------------------------------------------
 # Define the tasks
-taskManager = new TaskManager.Manager();
+taskManager = new TaskManager.Manager()
 
 taskManager.add 'base', [
   'copy:dev'
@@ -65,27 +65,27 @@ taskManager.add 'build_firefox_xpi', [
 # --- Testing tasks ---
 taskManager.add 'test_core', [
   'base'
-  'browserify:firewall'
-  'browserify:freedomModule'
-  'browserify:localInstance'
-  'browserify:remoteInstance'
-  'browserify:remoteConnection'
-  'browserify:remoteUser'
-  'browserify:social'
-  'browserify:storage'
+  'browserify:firewallSpec'
+  'browserify:genericCoreFreedomModuleSpec'
+  'browserify:localInstanceSpec'
+  'browserify:remoteInstanceSpec'
+  'browserify:remoteConnectionSpec'
+  'browserify:remoteUserSpec'
+  'browserify:socialSpec'
+  'browserify:storageSpec'
   #'jasmine:generic_core'
 ]
 
 taskManager.add 'test_ui', [
   'base'
-  'browserify:ui'
-  'browserify:user'
+  'browserify:uiSpec'
+  'browserify:userSpec'
   #'jasmine:generic_ui'
 ]
 
 taskManager.add 'test_chrome', [
   'build_chrome'
-  'browserify:chromeConnector'
+  'browserify:chromeConnectorSpec'
   #'jasmine:chrome_extension'
   #'jasmine:chrome_app'
 ]
@@ -330,18 +330,18 @@ module.exports = (grunt) ->
       generic_ui_to_chrome:
         nonull: true
         files: [ {
-          expand: true, cwd: 'build/compile-src/generic_ui/polymer'
+          expand: true, cwd: devBuildPath + '/generic_ui/polymer'
           src: ['*.js', '*.html']
-          dest: 'build/compile-src/chrome/extension/polymer'
+          dest: chromeExtDevPath + 'polymer'
         } ]
 
       # Copy compiled generic Polymer to Firefox so it can be vulcanized.
       generic_ui_to_firefox:
         nonull: true
         files: [ {
-          expand: true, cwd: 'build/compile-src/generic_ui/polymer'
+          expand: true, cwd: devBuildPath + '/generic_ui/polymer'
           src: ['*.js', '*.html']
-          dest: 'build/compile-src/firefox/data/polymer'
+          dest: firefoxDevPath + 'data/polymer'
         } ]
 
       chrome_extension:
@@ -618,19 +618,22 @@ module.exports = (grunt) ->
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
-      genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
 
-      firewall: Rule.browserifySpec 'generic_core/firewall'
-      freedomModule: Rule.browserifySpec 'generic_core/freedom-module'
-      localInstance: Rule.browserifySpec 'generic_core/local-instance'
-      remoteInstance: Rule.browserifySpec 'generic_core/remote-instance'
-      remoteConnection: Rule.browserifySpec 'generic_core/remote-connection'
-      remoteUser: Rule.browserifySpec 'generic_core/remote-user'
-      social: Rule.browserifySpec 'generic_core/social'
-      storage: Rule.browserifySpec 'generic_core/storage'
-      ui: Rule.browserifySpec 'generic_ui/script/ui'
-      user: Rule.browserifySpec 'generic_ui/script/user'
-      chromeConnector: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+      genericCoreChromeConnector: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+      genericCoreChromeConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+      genericCoreFirewall: Rule.browserify 'generic_core/firewall'
+      genericCoreFirewallSpec: Rule.browserifySpec 'generic_core/firewall'
+      genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
+      genericCoreFreedomModuleSpec: Rule.browserifySpec 'generic_core/freedom-module'
+      genericCoreLocalInstanceSpec: Rule.browserifySpec 'generic_core/local-instance'
+      genericCoreRemoteConnectionSpec: Rule.browserifySpec 'generic_core/remote-connection'
+      genericCoreRemoteInstanceSpec: Rule.browserifySpec 'generic_core/remote-instance'
+      genericCoreRemoteUserSpec: Rule.browserifySpec 'generic_core/remote-user'
+      genericCoreSocialSpec: Rule.browserifySpec 'generic_core/social'
+      genericCoreStorageSpec: Rule.browserifySpec 'generic_core/storage'
+
+      genericUiUiSpec: Rule.browserifySpec 'generic_ui/script/ui'
+      genericUiUserSpec: Rule.browserifySpec 'generic_ui/script/user'
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -774,35 +777,35 @@ module.exports = (grunt) ->
         options:
           inline: true
         files:
-          'build/compile-src/chrome/extension/polymer/vulcanized-inline.html': 'build/compile-src/chrome/extension/polymer/root.html'
+          'build/dev/uproxy/chrome/extension/polymer/vulcanized-inline.html': chromeExtDevPath + 'polymer/root.html'
       chromeExtCsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/chrome/extension/polymer/vulcanized.html': 'build/compile-src/chrome/extension/polymer/vulcanized-inline.html'
+          'build/dev/uproxy/chrome/extension/polymer/vulcanized.html': chromeExtDevPath + 'polymer/vulcanized-inline.html'
       chromeAppInline:
         options:
           inline: true
         files:
-          'build/compile-src/chrome/app/polymer/vulcanized-inline.html': 'build/compile-src/chrome/app/polymer/ext-missing.html'
+          'build/dev/uproxy/chrome/app/polymer/vulcanized-inline.html': chromeAppDevPath + 'polymer/ext-missing.html'
       chromeAppCsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/chrome/app/polymer/vulcanized.html': 'build/compile-src/chrome/app/polymer/vulcanized-inline.html'
+          'build/dev/uproxy/chrome/app/polymer/vulcanized.html': chromeAppDevPath + 'polymer/vulcanized-inline.html'
       firefoxInline:
         options:
           inline: true
         files:
-          'build/compile-src/firefox/data/polymer/vulcanized-inline.html': 'build/compile-src/firefox/data/polymer/root.html'
+          'build/dev/uproxy/firefox/data/polymer/vulcanized-inline.html': firefoxDevPath + 'data/polymer/root.html'
       firefoxCsp:
         options:
           csp: true
           strip: true
         files:
-          'build/compile-src/firefox/data/polymer/vulcanized.html': 'build/compile-src/firefox/data/polymer/vulcanized-inline.html'
+          'build/dev/uproxy/firefox/data/polymer/vulcanized.html': firefoxDevPath + 'data/polymer/vulcanized-inline.html'
 
     clean: ['build/dev', '.tscache']
   }  # grunt.initConfig
