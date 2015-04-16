@@ -11,6 +11,7 @@ import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
 import diagnose_nat = require('./diagnose-nat');
 import version = require('../version/version');
+import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 
 import ui = ui_connector.connector;
 
@@ -18,8 +19,12 @@ var log :logging.Log = new logging.Log('social');
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
 var loggingController = freedom['loggingcontroller']();
-loggingController.setConsoleFilter(['*:I']);
-loggingController.setBufferedLogFilter(['*:D']);
+loggingController.setFilters(loggingTypes.Destination.console, {
+  '*': loggingTypes.Level.info,
+});
+loggingController.setFilters(loggingTypes.Destination.buffered, {
+  '*': loggingTypes.Level.debug,
+});
 
 export var remoteProxyInstance :social.RemoteUserInstance = null;
 
