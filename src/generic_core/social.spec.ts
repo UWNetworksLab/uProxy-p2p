@@ -55,9 +55,9 @@ describe('social_network.FreedomNetwork', () => {
 
   var network :social_network.FreedomNetwork;
   // Mock social providers.
-  freedom['SOCIAL-badmock'] = () => { return new MockSocial(); };
-  freedom['SOCIAL-mock'] = () => { return new MockSocial(); };
-  freedom['SOCIAL-mock']['api'] = 'social';
+  freedom['SOCIAL-badmock'] = <any>(() => { return new MockSocial(); });
+  freedom['SOCIAL-mock'] = <any>(() => { return new MockSocial(); });
+  freedom['SOCIAL-mock'].api = 'social';
 
   var loginPromise :Promise<void>;
   var fakeFreedomClient :freedom_Social.ClientState = {

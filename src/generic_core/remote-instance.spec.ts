@@ -15,7 +15,6 @@ import social = require('../interfaces/social');
 import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
 import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
 import globals = require('./globals');
-import storage = globals.storage;
 import local_storage = require('./storage');
 import net = require('../../../third_party/uproxy-networking/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
@@ -65,7 +64,7 @@ describe('remote_instance.RemoteInstance', () => {
     var instance0 :remote_instance.RemoteInstance;
 
    it('fresh instance has no state', (done) => {
-      storage.save = function(key :string, value :Object) {
+      globals.storage.save = function(key :string, value :Object) {
         saved = realStorage.save(key, value);
         return saved;
       };
@@ -99,8 +98,8 @@ describe('remote_instance.RemoteInstance', () => {
     var INSTANCE_ID = 'instance1';
 
     beforeEach((done) => {
-      storage = new local_storage.Storage;
-      storage.reset().then(() => {
+      globals.storage = new local_storage.Storage();
+      globals.storage.reset().then(() => {
         var network = <social.Network><any>jasmine.createSpyObj(
             'network', ['getUser']);
         network['getStorePath'] = function() { return 'networkPath'; };
