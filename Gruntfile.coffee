@@ -13,6 +13,7 @@ taskManager.add 'base', [
   'ts:devInModuleEnv'
   'ts:devInCoreEnv'
   'version_file'
+  'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
 ]
 
@@ -212,7 +213,6 @@ module.exports = (grunt) ->
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
     concat: {
-
       firefox_uproxy: {
         files: [ {
           src: [firefoxDevPath + 'data/core/uproxy.js'
@@ -559,8 +559,8 @@ module.exports = (grunt) ->
     'string-replace':
       version:
         files: [{
-          src: 'build/dev/uproxy/generic/version.js'
-          dest: 'build/dev/uproxy/generic/version.js'
+          src: 'build/dev/uproxy/version/version.js'
+          dest: 'build/dev/uproxy/version/version.js'
         }]
         options:
           replacements: [{
@@ -617,7 +617,9 @@ module.exports = (grunt) ->
           fast: 'always'
 
     browserify:
+      chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
+
       firewall: Rule.browserifySpec 'generic_core/firewall'
       freedomModule: Rule.browserifySpec 'generic_core/freedom-module'
       localInstance: Rule.browserifySpec 'generic_core/local-instance'

@@ -10,7 +10,7 @@ import user = require('./remote-user');
 import remote_connection = require('./remote-connection');
 import remote_instance = require('./remote-instance');
 import diagnose_nat = require('./diagnose-nat');
-import version = require('../generic/version');
+import version = require('../version/version');
 
 import ui = ui_connector.connector;
 
