@@ -5,15 +5,8 @@
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
-// TODO: review oauth freedo API design: having to depend on global vars is
-// bad. There should be some way to specify constructor arguments. Also: better
-// to use a promise style for async functions.
-declare var connector :ChromeUIConnector;
-
 class Chrome_oauth {
-  // TODO: remove this when we no longer need a hack to get around bad oauth
-  // API usage/design.
-  private connector_:ChromeUIConnector = connector;
+  constructor(private connector_:ChromeUIConnector) {}
 
   public initiateOAuth(
       redirectURIs:{[urls:string]:string},

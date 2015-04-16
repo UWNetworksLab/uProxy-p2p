@@ -8,25 +8,22 @@
   },
   "dependencies": {
     "SOCIAL-Google": {
-      "url": "../lib/freedom-social-xmpp/social.google.json",
+      "url": "../freedom-social-xmpp/social.google.json",
       "api": "social"
     },
     "SOCIAL-Facebook": {
-      "url": "../lib/freedom-social-firebase/social.firebase-facebook.json",
+      "url": "../freedom-social-firebase/social.firebase-facebook.json",
       "api": "social"
     },
-    "storage": {
-      "url": "../lib/storage/storage.shared.json",
-      "api": "storage"
-    },
-    "loggingprovider": {
-      "url": "uproxy-lib/loggingprovider/loggingprovider.json",
-      "api": "loggingprovider"
+    "loggingcontroller": {
+      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
     }
   },
   "permissions": [
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
+    "core.storage"
     "core.tcpsocket",
     "core.udpsocket",
     "core.xhr"

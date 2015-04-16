@@ -21,13 +21,13 @@ export interface OnEmitModuleFactory extends
 var connector :ChromeUIConnector;
 var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 
-freedom('uproxy/freedom-module.json', {
+freedom('generic_core/freedom-module.json', {
   'logger': 'uproxy-lib/loggingprovider/loggingprovider.json',
   'debug': 'debug',
-  'oauth': [Chrome_oauth]
+  'oauth': [() => { return new Chrome_oauth(connector); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
-  connector = new ChromeUIConnector();
+  connector = new ChromeUIConnector(uProxyAppChannel);
 });
 
 // Reply to pings from the uproxy website that are checking if the

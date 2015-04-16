@@ -12,13 +12,19 @@ import uproxy_chrome = require('../../../interfaces/chrome');
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
 var installedFreedomHooks :number[];
 
-declare var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
-
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
   private onCredentials_ :(credentials:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
+
+  constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
+    this.extPort_ = null;
+    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
+    // Until the extension is connected, we assume uProxy installation is
+    // incomplete.
+    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
+  }
 
   // Launch a popup instructing the user to install the extension.
   private launchInstallIncompletePage_ = () => {
@@ -42,14 +48,6 @@ class ChromeUIConnector {
         type: uproxy_core_api.Update.LAUNCH_UPROXY,
         data: ''
     });
-  }
-
-  constructor() {
-    this.extPort_ = null;
-    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
-    // Until the extension is connected, we assume uProxy installation is
-    // incomplete.
-    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
   }
 
   // Handler for when the uProxy Chrome Extension connects to this uProxy App.
@@ -97,7 +95,7 @@ class ChromeUIConnector {
       if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
-      uProxyAppChannel.emit(msgType,
+      this.uProxyAppChannel_.emit(msgType,
                             <browser_connector.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
@@ -108,7 +106,7 @@ class ChromeUIConnector {
       }
       installedFreedomHooks.push(msg.type);
       // When it fires, send data back over Chrome App -> Extension port.
-      uProxyAppChannel.on(msgType, (ret :string) => {
+      this.uProxyAppChannel_.on(msgType, (ret :string) => {
         this.sendToUI(msg.type, ret);
       });
     }
