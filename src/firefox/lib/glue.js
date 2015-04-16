@@ -56,10 +56,6 @@ function setUpConnection(freedom, panel, button) {
     proxyConfig.stopUsingProxy();
   });
 
-  var post = function(url, data, useDomainFronting) {
-    return xhr.httpPost(url, data, useDomainFronting);
-  };
-
   panel.port.on('setIcon', function(iconFiles) {
     button.state("window", {
       icon : iconFiles
@@ -93,11 +89,10 @@ function setUpConnection(freedom, panel, button) {
   });
 
   /**
-   * Install a handler for promise commands received from the UI.
-   * Promise commands return an ack or error to the UI.
+   * Install a handler for promise emits received from the panel.
+   * Promise emits return an ack or error to the panel.
    */
   var onPromiseEmit = (message, handler) => {
-    // TODO: shouldnt be type 'any'
     var promiseEmitHandler = function (args) {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
@@ -129,6 +124,12 @@ function setUpConnection(freedom, panel, button) {
     panel.port.on(message, promiseEmitHandler);
   }
 
+  var post = function(url, data, useDomainFronting) {
+    return xhr.httpPost(url, data, useDomainFronting);
+  };
+
+  // Ensure a fulfill or reject message will be sent back to the panel
+  // when required by registering messages that initiate async behaviour.
   onPromiseEmit('httpPost', post);
 
   /* Allow any pages in the addon to send messages to the UI or the core */

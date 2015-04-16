@@ -829,7 +829,7 @@ module UI {
       var logsPromise :Promise<string>;
 
       if (feedback.logs) {
-        logsPromise = this.getLogsAndNetworkInfo().then((logs) => {
+        logsPromise = core.getLogs().then((logs) => {
           var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
           return browserInfo + logs;
         });

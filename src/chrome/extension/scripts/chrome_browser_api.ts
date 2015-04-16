@@ -201,25 +201,22 @@ class ChromeBrowserApi implements BrowserAPI {
   private frontDomain_ = 'https://a0.awsstatic.com/';
 
   public httpPost = (url :string, data :any, useDomainFronting: boolean) : Promise<void> => {
-    var setHostInHeader :Function;
-    var removeSendHeaderListener = () => {};
-
-    if (useDomainFronting) {
-      setHostInHeader = (details) => {
-        details.requestHeaders.push({
-          name: 'Host',
-          value: url
-          /* 'd2zfqthxsdq309.cloudfront.net' */
-        });
-        return { requestHeaders: details.requestHeaders };
-      };
-
-      removeSendHeaderListener = () => {
+    var setHostInHeader :Function = (details) => {
+      details.requestHeaders.push({
+        name: 'Host',
+        value: url
+      });
+      return { requestHeaders: details.requestHeaders };
+    };
+    var removeSendHeaderListener = () => {
+      if (useDomainFronting) {
         chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader, {
           urls: ['https://a0.awsstatic.com/']
         }, ['requestHeaders', 'blocking']);
-      };
+      }
+    };
 
+    if (useDomainFronting) {
       chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
         urls: ['https://a0.awsstatic.com/']
       }, ['requestHeaders', 'blocking']);
@@ -238,6 +235,8 @@ class ChromeBrowserApi implements BrowserAPI {
       }
       var params = JSON.stringify(data);
       if (useDomainFronting) {
+        // Request will reach correct end domain because the url
+        // is packaged in the 'Host' header.
         xhr.open('POST', frontDomain_, true);
       } else {
         xhr.open('POST', url, true);

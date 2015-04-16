@@ -12,9 +12,19 @@ var port :ContentScriptPort;
 
 declare var ui :UI.UserInterface;
 
+interface FullfillAndReject {
+  fulfill :Function;
+  reject :Function;
+};
+
 class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement;
+
+  // Global unique promise ID.
+  private promiseId_ :number = 1;
+  private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
+      {};
 
   constructor() {
     port.on('handleUrlData', function(url :string) {
@@ -70,29 +80,18 @@ class FirefoxBrowserApi implements BrowserAPI {
     return this.promiseEmit('httpPost', { url: url, data: data, useDomainFronting: useDomainFronting });
   }
 
-  // Global unique promise ID.
-  private promiseId_ :number = 1;
-  private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
-      {};
-
-  interface FullfillAndReject {
-    fulfill :Function;
-    reject :Function;
-  };
-
   /**
-   * Send a Command from the UI to the Core, as a result of some user
-   * interaction.  Command returns a promise that fulfills/rejects upon
-   * an ack/reject from the backend.
+   * Emit a message to the add-on that initiates asynchronous behaviour
+   * in the add-on. Return a promise that fulfills/rejects upon the async
+   * behaviour completing/failing.
    */
-  public promiseEmit = (message :string, data ?:any)
-      : Promise<any> => {
+  public promiseEmit = (message :string, data ?:any) : Promise<any> => {
     var promiseId :number = ++(this.promiseId_);
     var payload = {
       data: data,
       promiseId: promiseId
     }
-    console.log('Firefox emitting, expecting async return: ' + message,
+    console.log('Firefox expects promise fulfill/reject after emitting: ' + message,
         JSON.stringify(payload));
 
     // Create a new promise and store its fulfill and reject functions.
@@ -109,15 +108,14 @@ class FirefoxBrowserApi implements BrowserAPI {
       reject: rejectFunc
     };
 
-    // Send request to backend.
+    // Emit message to add-on environment (specifically to glue.js).
     port.emit(message, payload);
-
     return promise;
   }
 
   private handleEmitFulfilled_ = (data :any) => {
     var promiseId = data.promiseId;
-    console.log('promise emit fulfilled ' + promiseId);
+    console.log('Firefox promise emit fulfilled ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId]
           .fulfill(data.argsForCallback);
@@ -129,7 +127,7 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   private handleEmitRejected_ = (data :any) => {
     var promiseId = data.promiseId;
-    console.log('promise emit rejected ' + promiseId);
+    console.log('Firefox promise emit rejected ' + promiseId);
     if (this.mapPromiseIdToFulfillAndReject_[promiseId]) {
       this.mapPromiseIdToFulfillAndReject_[promiseId]
           .reject(data.errorForCallback);
@@ -138,7 +136,4 @@ class FirefoxBrowserApi implements BrowserAPI {
       console.warn('reject not found ' + promiseId);
     }
   }
-
-
-
 }
