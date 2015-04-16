@@ -65,27 +65,27 @@ taskManager.add 'build_firefox_xpi', [
 # --- Testing tasks ---
 taskManager.add 'test_core', [
   'base'
-  'browserify:firewallSpec'
+  'browserify:genericCoreFirewallSpec'
   'browserify:genericCoreFreedomModuleSpec'
-  'browserify:localInstanceSpec'
-  'browserify:remoteInstanceSpec'
-  'browserify:remoteConnectionSpec'
-  'browserify:remoteUserSpec'
-  'browserify:socialSpec'
-  'browserify:storageSpec'
+  'browserify:genericCoreLocalInstanceSpec'
+  'browserify:genericCoreRemoteInstanceSpec'
+  'browserify:genericCoreRemoteConnectionSpec'
+  'browserify:genericCoreRemoteUserSpec'
+  'browserify:genericCoreSocialSpec'
+  'browserify:genericCoreStorageSpec'
   #'jasmine:generic_core'
 ]
 
 taskManager.add 'test_ui', [
   'base'
-  'browserify:uiSpec'
-  'browserify:userSpec'
+  'browserify:genericUiUiSpec'
+  'browserify:genericUiUserSpec'
   #'jasmine:generic_ui'
 ]
 
 taskManager.add 'test_chrome', [
   'build_chrome'
-  'browserify:chromeConnectorSpec'
+  'browserify:chromeExtensionConnectorSpec'
   #'jasmine:chrome_extension'
   #'jasmine:chrome_app'
 ]
@@ -619,8 +619,8 @@ module.exports = (grunt) ->
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
 
-      genericCoreChromeConnector: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
-      genericCoreChromeConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+      chromeExtensionConnector: Rule.browserify 'chrome/extension/scripts/chrome_core/connector'
+      chromeExtensionConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
       genericCoreFirewall: Rule.browserify 'generic_core/firewall'
       genericCoreFirewallSpec: Rule.browserifySpec 'generic_core/firewall'
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
