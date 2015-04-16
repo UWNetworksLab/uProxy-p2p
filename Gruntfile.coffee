@@ -10,9 +10,10 @@ taskManager = new TaskManager.Manager();
 
 taskManager.add 'base', [
   'copy:dev'
-  'version_file'
   'ts:devInModuleEnv'
   'ts:devInCoreEnv'
+  'version_file'
+  'browserify:genericCoreFreedomModule'
 ]
 
 #
@@ -21,36 +22,19 @@ taskManager.add 'version_file', [
   'string-replace:version'
 ]
 
-# --- Build tasks ---
-taskManager.add 'build_generic_core', [
-  'base'
-#  'ts:generic_core'
-  # 'copy:core_libs'
-]
-
-taskManager.add 'build_generic_ui', [
-  'base'
-  #'ts:generic_ui'
-]
-
 taskManager.add 'build_chrome_app', [
-  'build_generic_core'
-  'build_generic_ui'
-  #'ts:chrome_app'
-  #'symlink:polymerLibToChromeApp'
-  'vulcanize:chromeAppInline'
-  'vulcanize:chromeAppCsp'
+  'base'
+  #'vulcanize:chromeAppInline'
+  #'vulcanize:chromeAppCsp'
   'copy:chrome_app'
 ]
 
 taskManager.add 'build_chrome_ext', [
-  'build_generic_core'
-  'build_generic_ui'
+  'base'
   'copy:generic_ui_to_chrome'
-  #'ts:chrome_ext'
   #'symlink:polymerLibToChromeExt'
-  'vulcanize:chromeExtInline'
-  'vulcanize:chromeExtCsp'
+  #'vulcanize:chromeExtInline'
+  #'vulcanize:chromeExtCsp'
   'copy:chrome_extension'
   # 'shell:extract_chrome_tests'
 ]
@@ -62,13 +46,10 @@ taskManager.add 'build_chrome', [
 
 # Firefox build tasks.
 taskManager.add 'build_firefox', [
-  'build_generic_core'
-  'build_generic_ui'
+  'base'
   'copy:generic_ui_to_firefox'
-  #'ts:firefox'
-  #'symlink:polymerLibToFirefox'
-  'vulcanize:firefoxInline'
-  'vulcanize:firefoxCsp'
+  #'vulcanize:firefoxInline'
+  #'vulcanize:firefoxCsp'
   'copy:firefox'
   'concat:firefox_uproxy'
   'concat:firefox_dependencies'
@@ -82,26 +63,23 @@ taskManager.add 'build_firefox_xpi', [
 
 # --- Testing tasks ---
 taskManager.add 'test_core', [
-  'build_generic_core'
-  #'ts:logging'
-  #'ts:webrtc'
-  #'ts:generic_core_specs'
-  #'ts:mocks'
-  'jasmine:generic_core'
+  'base'
+  #'browserify:generic_core'
+  #'jasmine:generic_core'
 ]
 
 taskManager.add 'test_ui', [
   'build_generic_ui'
-  #'ts:generic_ui_specs'
-  'jasmine:generic_ui'
+  #'browserify:generic_ui'
+  #'jasmine:generic_ui'
 ]
 
 taskManager.add 'test_chrome', [
   'build_chrome'
-  #'ts:chrome_specs'
-  #'ts:mocks'
-  'jasmine:chrome_extension'
-  'jasmine:chrome_app'
+  #'browserify:chrome_extension'
+  #'browserify:chrome_app'
+  #'jasmine:chrome_extension'
+  #'jasmine:chrome_app'
 ]
 
 taskManager.add 'everything', [
@@ -290,18 +268,8 @@ module.exports = (grunt) ->
               src: ['freedom-typings/**/*', 'promise-polyfill.js'],
               dest: thirdPartyBuildPath
           },
-          # Use the third_party definitions from uproxy-networking. Copied to
-          # the same location relative to their compiled location in uproxy-
-          # networking so they have the same relative path to the created
-          # `.d.ts` files from |build/dev|.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(uproxyNetworkingPath, 'build/third_party'),
-              src: ['**/*', '!tsd.*'],
-              dest: thirdPartyBuildPath
-          },
-          #
+          # Copy the distirbution directory of uproxy-networking into third
+          # party.
           {
               nonull: true,
               expand: true,
@@ -309,6 +277,17 @@ module.exports = (grunt) ->
               src: ['**/*'],
               dest: path.join(thirdPartyBuildPath, 'uproxy-networking/'),
           },
+          # Use the third_party definitions from uproxy-networking.
+          {
+              nonull: true,
+              expand: true,
+              cwd: path.join(uproxyNetworkingPath, 'build/third_party'),
+              src: ['i18n/**', 'ipaddrjs/**', 'ipaddrjs/**', 'regex2dfa/**',
+                    'polymer/**', 'sha1/**', 'socks5-http-client/**',
+                    'uTransformers/**'],
+              dest: thirdPartyBuildPath
+          },
+
         ]
 
       # Copy releveant non-typescript src files to dev build.
@@ -573,12 +552,12 @@ module.exports = (grunt) ->
     'string-replace':
       version:
         files: [{
-          src: 'build/dev/uproxy/generic/version-template.js'
+          src: 'build/dev/uproxy/generic/version.js'
           dest: 'build/dev/uproxy/generic/version.js'
         }]
         options:
           replacements: [{
-            pattern: /VERSION_REPLACE/g
+            pattern: /\"___VERSION_TEMPLATE___\"/g
             replacement: JSON.stringify
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
@@ -599,8 +578,8 @@ module.exports = (grunt) ->
       # directory.
       devInModuleEnv:
         src: [
-          devBuildPath + '/interfaces/*.ts'
-          devBuildPath + '/generic_core/*.ts'
+          devBuildPath + '/interfaces/**/*.ts'
+          devBuildPath + '/generic_core/**/*.ts'
           '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'
@@ -629,6 +608,9 @@ module.exports = (grunt) ->
           declaration: true
           module: 'commonjs'
           fast: 'always'
+
+    browserify:
+      genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -816,6 +798,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
+  grunt.loadNpmTasks 'grunt-browserify'
 
   #-------------------------------------------------------------------------
   # Register the tasks
