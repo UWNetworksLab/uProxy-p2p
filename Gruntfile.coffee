@@ -232,7 +232,7 @@ module.exports = (grunt) ->
                 firefoxDevPath + 'data/scripts/core_connector.js'
                 firefoxDevPath + 'data/scripts/background.js'
                 firefoxDevPath + 'data/scripts/lodash.min.js']
-          dest: firefoxDevPath + 'data/scripts/dependencies.js'
+          dest: firefoxDevPath + 'data/scripts/context.js'
         }]
       }
     }  # concat
@@ -604,8 +604,10 @@ module.exports = (grunt) ->
         src: [
           devBuildPath + '/chrome/app/**/*.ts'
           devBuildPath + '/chrome/extension/**/*.ts'
+          devBuildPath + '/generic_ui/**/*.ts'
           devBuildPath + '/**/*.core-env.spec.ts'
           devBuildPath + '/**/*.core-env.ts'
+          '!' + devBuildPath + '/**/*.d.ts'
         ]
         options:
           target: 'es5'

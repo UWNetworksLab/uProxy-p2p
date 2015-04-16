@@ -1,4 +1,4 @@
-<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='../../../../../third_party/bower/paper-button/paper-button.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='app-bar.html'>
 
@@ -50,7 +50,7 @@
       <span>one-time connection</span>
     </uproxy-app-bar>
 
-    <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
+    <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
       There was an error parsing the uproxy connection link, please try
       navigating to the link again or asking your friend for a new link.
     </uproxy-bubble>
@@ -65,7 +65,7 @@
         <paper-button on-tap='{{ startGetting }}'>Start getting a new connection</paper-button>
       </div>
 
-      <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
+      <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
         There was an error starting the connection and it had to be terminated.
         Please try starting another connection.
       </uproxy-bubble>
@@ -112,7 +112,7 @@
           Stop getting access
         </paper-button>
 
-        <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
+        <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
           <p>You are currently getting access.</p>
           <p>
             If you would like to start a new one-time connection, press "Stop
@@ -139,7 +139,7 @@
         <div>
           <a href='#' on-tap='{{ switchToGetting }}'>Get access instead</a>
 
-          <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
+          <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
             <p>
               You are currently in the process of trying to share access.  If
               you would like to get access instead ,click the link above.
@@ -160,7 +160,7 @@
 
         <paper-button raised class='stop' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
 
-        <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
+        <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
           <p>You are currently sharing access.</p>
 
           <p>

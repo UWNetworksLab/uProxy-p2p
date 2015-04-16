@@ -5,55 +5,55 @@
  * TODO: firefox bindings.
  */
 
-import user_interface = require('../../interfaces/ui');
+import ui_constants = require('../../interfaces/ui');
 import Persistent = require('../../interfaces/persistent');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../third_party/uproxy-networking/net/net.types');
-import CoreConnector = require('./core_connector');
+import noreConnector = require('./core_connector');
 import user = require('./user');
 import User = user.User;
 import social = require('../../interfaces/social');
 
-// Singleton model for data bindings.
-var model :UI.Model = {
-  networkNames: [],
-  onlineNetwork: null,
-  contacts: {
-    getAccessContacts: {
-      onlinePending: [],
-      offlinePending: [],
-      onlineTrustedUproxy: [],
-      offlineTrustedUproxy: [],
-      onlineUntrustedUproxy: [],
-      offlineUntrustedUproxy: []
-    },
-    shareAccessContacts: {
-      onlinePending: [],
-      offlinePending: [],
-      onlineTrustedUproxy: [],
-      offlineTrustedUproxy: [],
-      onlineUntrustedUproxy: [],
-      offlineUntrustedUproxy: []
-    }
-  },
-  globalSettings: {
-    version: 0,
-    description: '',
-    stunServers: [],
-    hasSeenSharingEnabledScreen: false,
-    hasSeenWelcome: false,
-    mode : user_interface.Mode.GET,
-    allowNonUnicast: false
-  },
-  reconnecting: false
-};
 
 // TODO: currently we have a UI object (typescript module, i.e. namespace)
 // and a ui object (singleton intance of UI.UserInterface).  We should
 // change the names of these to avoid confusion.
 module UI {
+  // Singleton model for data bindings.
+  export var model :UI.Model = {
+    networkNames: [],
+    onlineNetwork: null,
+    contacts: {
+      getAccessContacts: {
+        onlinePending: [],
+        offlinePending: [],
+        onlineTrustedUproxy: [],
+        offlineTrustedUproxy: [],
+        onlineUntrustedUproxy: [],
+        offlineUntrustedUproxy: []
+      },
+      shareAccessContacts: {
+        onlinePending: [],
+        offlinePending: [],
+        onlineTrustedUproxy: [],
+        offlineTrustedUproxy: [],
+        onlineUntrustedUproxy: [],
+        offlineUntrustedUproxy: []
+      }
+    },
+    globalSettings: {
+      version: 0,
+      description: '',
+      stunServers: [],
+      hasSeenSharingEnabledScreen: false,
+      hasSeenWelcome: false,
+      mode : ui_constants.Mode.GET,
+      allowNonUnicast: false
+    },
+    reconnecting: false
+  };
 
   // Filenames for icons.
   // Two important things about using these strings:
@@ -123,14 +123,6 @@ module UI {
     unique ?:string;
   }
 
-  export enum CopyPasteError {
-    NONE = 0,
-    BAD_URL, // url is somehow invalid
-    LOGGED_IN, // trying to copy+paste while logged in to a network
-    UNEXPECTED, // received a url at an invalid time
-    FAILED // something about the connection failed
-  }
-
   /**
    * The User Interface class.
    *
@@ -139,10 +131,10 @@ module UI {
    * for UI interaction.
    * Any COMMANDs from the UI should be directly called from the 'core' object.
    */
-  export class UserInterface implements user_interface.UiApi {
+  export class UserInterface implements ui_constants.UiApi {
     public DEBUG = false;  // Set to true to show the model in the UI.
 
-    public view :user_interface.View;
+    public view :ui_constants.View;
 
     // Current state within the splash (onboarding).  Needs to be part
     // of the ui object so it can be saved/restored when popup closes and opens.
@@ -166,7 +158,7 @@ module UI {
     public copyPasteBytesSent :number = 0;
     public copyPasteBytesReceived :number = 0;
 
-    public copyPasteError :CopyPasteError = CopyPasteError.NONE;
+    public copyPasteError :ui_constants.CopyPasteError = ui_constants.CopyPasteError.NONE;
     public copyPasteGettingMessage :string = '';
     public copyPasteSharingMessage :string = '';
 
@@ -191,17 +183,17 @@ module UI {
      */
     public copyPastePendingEndpoint :net.Endpoint = null;
 
-    private core_ :CoreConnector = null;
+    private core_ :uproxy_core_api.CoreApi = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
      * Upon construction, the UI installs update handlers on core.
      */
     constructor(
-        public core   :CoreConnector,
+        public core   :uproxy_core_api.CoreApi,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
-      this.view = user_interface.View.SPLASH;  // Begin at the splash intro.
+      this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
       this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
@@ -405,13 +397,13 @@ module UI {
         }
 
         if (data.mode === 'get') {
-          model.globalSettings.mode = user_interface.Mode.GET;
+          model.globalSettings.mode = ui_constants.Mode.GET;
           this.core_.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.getExpanded = true;
           }
         } else if (data.mode === 'share') {
-          model.globalSettings.mode = user_interface.Mode.SHARE;
+          model.globalSettings.mode = ui_constants.Mode.SHARE;
           this.core_.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.shareExpanded = true;
@@ -459,31 +451,31 @@ module UI {
 
       if (model.onlineNetwork) {
         console.log('Ignoring URL since we have an active network');
-        this.copyPasteError = CopyPasteError.LOGGED_IN;
+        this.copyPasteError = ui_constants.CopyPasteError.LOGGED_IN;
         return;
       }
 
-      this.view = user_interface.View.COPYPASTE;
+      this.view = ui_constants.View.COPYPASTE;
 
       var match = url.match(/https:\/\/www.uproxy.org\/(request|offer)\/(.*)/)
       if (!match) {
         console.error('parsed url that did not match');
-        this.copyPasteError = CopyPasteError.BAD_URL;
+        this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
         return;
       }
 
-      this.copyPasteError = CopyPasteError.NONE;
+      this.copyPasteError = ui_constants.CopyPasteError.NONE;
       try {
         payload = JSON.parse(atob(decodeURIComponent(match[2])));
       } catch (e) {
         console.error('malformed string from browser');
-        this.copyPasteError = CopyPasteError.BAD_URL;
+        this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
         return;
       }
 
       if (social.SharingState.NONE !== this.copyPasteSharingState) {
         console.info('should not be processing a URL while in the middle of sharing');
-        this.copyPasteError = CopyPasteError.UNEXPECTED;
+        this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
         return;
       }
 
@@ -498,7 +490,7 @@ module UI {
           expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
           if (social.GettingState.TRYING_TO_GET_ACCESS !== this.copyPasteGettingState) {
             console.warn('currently not expecting any information, aborting');
-            this.copyPasteError = CopyPasteError.UNEXPECTED;
+            this.copyPasteError = ui_constants.CopyPasteError.UNEXPECTED;
             return;
           }
           break;
@@ -507,7 +499,7 @@ module UI {
       console.log('Sending messages from url to app');
       for (var i in payload) {
         if (payload[i].type !== expectedType) {
-          this.copyPasteError = CopyPasteError.BAD_URL;
+          this.copyPasteError = ui_constants.CopyPasteError.BAD_URL;
           return;
         }
 
@@ -654,7 +646,7 @@ module UI {
           this.reconnect(network.name);
         } else {
           this.showNotification('You have been logged out of ' + network.name);
-          this.view = user_interface.View.SPLASH;
+          this.view = ui_constants.View.SPLASH;
         }
       }
 
@@ -799,7 +791,7 @@ module UI {
               // Login with last oauth token failed, give up on reconnect.
               this.stopReconnect();
               this.showNotification('You have been logged out of ' + network);
-              this.view = user_interface.View.SPLASH;
+              this.view = ui_constants.View.SPLASH;
             });
           }
         }).catch((e) => {

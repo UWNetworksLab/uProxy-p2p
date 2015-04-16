@@ -1,5 +1,5 @@
+/// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
-import context = require('../scripts/context');
 
 Polymer({
   editDescription: function() {
@@ -9,13 +9,13 @@ Polymer({
   saveDescription: function() {
     this.model.globalSettings.description = this.descriptionInput;
     this.editing = false;
-    context.core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   cancelEditing: function() {
     this.editing = false;
   },
   ready: function() {
-    this.model = model;
+    this.model = browserified_exports.model;
     this.editing = false;
     this.descriptionInput = '';
   }
