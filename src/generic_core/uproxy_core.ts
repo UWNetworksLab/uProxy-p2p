@@ -17,9 +17,9 @@ import ui = ui_connector.connector;
 var log :logging.Log = new logging.Log('social');
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
-var loggingProvider = freedom['loggingprovider']();
-loggingProvider.setConsoleFilter(['*:I']);
-loggingProvider.setBufferedLogFilter(['*:D']);
+var loggingController = freedom['loggingcontroller']();
+loggingController.setConsoleFilter(['*:I']);
+loggingController.setBufferedLogFilter(['*:D']);
 
 export var remoteProxyInstance :social.RemoteUserInstance = null;
 
@@ -416,7 +416,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   public getLogs = () : Promise<string> => {
-    return loggingProvider.getLogs().then((rawLogs:string[]) => {
+    return loggingController.getLogs().then((rawLogs:string[]) => {
         var formattedLogsWithVersionInfo =
             'Version: ' + JSON.stringify(version.UPROXY_VERSION) + '\n\n';
         formattedLogsWithVersionInfo += this.formatLogs_(rawLogs);

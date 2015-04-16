@@ -23,7 +23,7 @@
   "permissions": [
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
-    "core.storage"
+    "core.storage",
     "core.tcpsocket",
     "core.udpsocket",
     "core.xhr"

@@ -22,8 +22,9 @@ var connector :ChromeUIConnector;
 var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 
 freedom('generic_core/freedom-module.json', {
-  'logger': 'uproxy-lib/loggingprovider/loggingprovider.json',
+  'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
+  'portType': 'frame',
   'oauth': [() => { return new Chrome_oauth(connector); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();

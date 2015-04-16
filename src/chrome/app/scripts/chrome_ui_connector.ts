@@ -10,7 +10,7 @@ import uproxy_chrome = require('../../../interfaces/chrome');
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var installedFreedomHooks :number[];
+var installedFreedomHooks :number[] = [];
 
 class ChromeUIConnector {
 
