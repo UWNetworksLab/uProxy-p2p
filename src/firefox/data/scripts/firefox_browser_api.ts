@@ -12,11 +12,6 @@ var port :ContentScriptPort;
 
 declare var ui :UI.UserInterface;
 
-interface FullfillAndReject {
-  fulfill :Function;
-  reject :Function;
-};
-
 class FirefoxBrowserApi implements BrowserAPI {
 
   public browserSpecificElement;

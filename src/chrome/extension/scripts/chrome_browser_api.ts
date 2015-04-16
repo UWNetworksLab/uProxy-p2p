@@ -201,7 +201,7 @@ class ChromeBrowserApi implements BrowserAPI {
   private frontDomain_ = 'https://a0.awsstatic.com/';
 
   public httpPost = (url :string, data :any, useDomainFronting: boolean) : Promise<void> => {
-    var setHostInHeader :Function = (details) => {
+    var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
         value: url
@@ -210,15 +210,19 @@ class ChromeBrowserApi implements BrowserAPI {
     };
     var removeSendHeaderListener = () => {
       if (useDomainFronting) {
+        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
+        /*
+        This causes compiler errors. Not sure if chrome.d.ts is out of date.
         chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader, {
-          urls: ['https://a0.awsstatic.com/']
+          urls: [this.frontDomain_]
         }, ['requestHeaders', 'blocking']);
+        */
       }
     };
 
     if (useDomainFronting) {
       chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-        urls: ['https://a0.awsstatic.com/']
+        urls: [this.frontDomain_]
       }, ['requestHeaders', 'blocking']);
     }
 
@@ -237,7 +241,7 @@ class ChromeBrowserApi implements BrowserAPI {
       if (useDomainFronting) {
         // Request will reach correct end domain because the url
         // is packaged in the 'Host' header.
-        xhr.open('POST', frontDomain_, true);
+        xhr.open('POST', this.frontDomain_, true);
       } else {
         xhr.open('POST', url, true);
       }
