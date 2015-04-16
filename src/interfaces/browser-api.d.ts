@@ -20,6 +20,7 @@ interface BrowserAPI {
    * determine how to handle clicks to the notification
    */
   showNotification(text :string, tag :string) :void;
+  httpPost(url :string, data :any, useDomainFronting: boolean) : Promise<void>;
 }
 
 declare var Notification : {

@@ -197,4 +197,52 @@ class ChromeBrowserApi implements BrowserAPI {
       notification.close();
     }, 5000);
   }
+
+  private frontDomain_ = 'https://a0.awsstatic.com/';
+
+  public httpPost = (url :string, data :any, useDomainFronting: boolean) : Promise<void> => {
+    var setHostInHeader :Function;
+    var removeSendHeaderListener = () => {};
+
+    if (useDomainFronting) {
+      setHostInHeader = (details) => {
+        details.requestHeaders.push({
+          name: 'Host',
+          value: url
+          /* 'd2zfqthxsdq309.cloudfront.net' */
+        });
+        return { requestHeaders: details.requestHeaders };
+      };
+
+      removeSendHeaderListener = () => {
+        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader, {
+          urls: ['https://a0.awsstatic.com/']
+        }, ['requestHeaders', 'blocking']);
+      };
+
+      chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
+        urls: ['https://a0.awsstatic.com/']
+      }, ['requestHeaders', 'blocking']);
+    }
+
+    return new Promise<void>((fulfill, reject) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+          if (xhr.status == 200) {
+            fulfill();
+          } else {
+            reject(new Error('POST failed with HTTP code ' + xhr.status));
+          }
+        }
+      }
+      var params = JSON.stringify(data);
+      if (useDomainFronting) {
+        xhr.open('POST', frontDomain_, true);
+      } else {
+        xhr.open('POST', url, true);
+      }
+      xhr.send(params);
+    }).then(removeSendHeaderListener, removeSendHeaderListener);
+  }
 }
