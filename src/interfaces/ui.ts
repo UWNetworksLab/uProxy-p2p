@@ -31,3 +31,10 @@ export interface UiApi {
   // updateAll(data:Object) : void;
 }
 
+export enum CopyPasteError {
+  NONE = 0,
+  BAD_URL, // url is somehow invalid
+  LOGGED_IN, // trying to copy+paste while logged in to a network
+  UNEXPECTED, // received a url at an invalid time
+  FAILED // something about the connection failed
+}

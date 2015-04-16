@@ -1,3 +1,5 @@
+/// <reference path='./context.d.ts' />
+
 Polymer({
   email: '',
   feedback: '',
@@ -5,7 +7,7 @@ Polymer({
   close: function() {
     this.$.feedbackPanel.close();
   },
-  open: function(e, detail, signal) {
+  open: function(e :Event, detail :{ includeLogs: boolean }) {
     if (detail && detail.includeLogs) {
       this.$.logCheckbox.checked = true;
     }
@@ -13,7 +15,7 @@ Polymer({
   },
   sendFeedback: function() {
     this.$.sendingFeedbackDialog.open();
-    core.sendFeedback({
+    browserified_exports.core.sendFeedback({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
@@ -40,7 +42,7 @@ Polymer({
       });
       this.close();
       this.$.sendingFeedbackDialog.close();
-    }).catch((e) => {
+    }).catch((e :Error) => {
       this.fire('open-dialog', {
         heading: 'Email feedback instead?',
         message: 'Oops! We were unable to submit your feedback to uproxy.org. Please copy and paste your feedback in an email to info@uproxy.org.',
@@ -55,7 +57,7 @@ Polymer({
     this.ui.openTab('view-logs.html');
   },
   ready: function() {
-    this.ui = ui;
-    this.model = model;
+    this.ui = browserified_exports.ui;
+    this.model = browserified_exports.model;
   }
 });

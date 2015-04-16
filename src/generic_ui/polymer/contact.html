@@ -1,6 +1,6 @@
-<link rel='import' href='../lib/polymer/polymer.html'>
-<link rel='import' href='../lib/core-icons/core-icons.html'>
-<link rel='import' href='../lib/core-collapse/core-collapse.html'>
+<link rel='import' href='../../../../../third_party/bower/polymer/polymer.html'>
+<link rel='import' href='../../../../../third_party/bower/core-icons/core-icons.html'>
+<link rel='import' href='../../../../../third_party/bower/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
 
 <polymer-element name='uproxy-contact' attributes='contact, isOnline' on-set-trying-to-get='{{ setIsTryingToGet }}'>
@@ -121,28 +121,28 @@
 
       <div flex class="iconWrapper">
         <core-icon icon="open-in-new"
-            hidden?="{{ !contact.url || (model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded) }}"
+            hidden?="{{ !contact.url || (model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded) || (model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded) }}"
             title="{{ contact.url }}" on-tap="{{ openLink }}"></core-icon>
       </div>
 
       <!-- TODO: Simplify show/hide logic of getting/sharing/expand/collapse icons. E.g. Angular allowed if/else-like logic to select what is displayed. -->
       <img src='../icons/getting_animated.gif' class='accessIcon'
-          hidden?='{{ model.globalSettings.mode!=uProxy.Mode.GET || !contact.isSharingWithMe }}'>
+          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.GET || !contact.isSharingWithMe }}'>
       <img src='../icons/sharing_animated.gif' class='accessIcon'
-          hidden?='{{ model.globalSettings.mode!=uProxy.Mode.SHARE || !contact.isGettingFromMe }}'>
+          hidden?='{{ model.globalSettings.mode!=ui_constants.Mode.SHARE || !contact.isGettingFromMe }}'>
       <!-- If you are sharing with or getting from a contact, the glowing sharing/getting icon will replace the expand/collapse chevron. -->
       <!-- Show expand chevron in only two cases: when contact is collapsed in GET mode and you're not getting from them OR when contact is collapsed in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-more" class="expand"
-        hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
+        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && !contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && !contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
       <!-- Show collapse chevron in only two cases: when contact is expanded in GET mode and you're not getting from them OR when contact is expanded in SHARE mode and you're not sharing with them. -->
       <core-icon icon="expand-less" class="expand"
-        hidden?='{{ !(model.globalSettings.mode==uProxy.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==uProxy.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
+        hidden?='{{ !(model.globalSettings.mode==ui_constants.Mode.GET && contact.getExpanded && !contact.isSharingWithMe) && !(model.globalSettings.mode==ui_constants.Mode.SHARE && contact.shareExpanded && !contact.isGettingFromMe) }}'>
       </core-icon>
     </div> <!-- end of #nameRow -->
 
     <core-collapse id='getControls' class='expandedControls'
-      hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+      hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
       opened='{{ contact.getExpanded }}'>
 
       <div id='getInstanceControls' hidden?='{{ contact.gettingConsentState != GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED }}'>
@@ -198,7 +198,7 @@
     </core-collapse> <!-- end of getControls -->
 
     <core-collapse id='shareControls' class='expandedControls'
-      hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+      hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
       opened='{{ contact.shareExpanded }}'>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>

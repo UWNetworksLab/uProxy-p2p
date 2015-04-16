@@ -1,12 +1,21 @@
-/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='ui.ts' />
+/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+
+import user_interface = require('ui');
+import browser_api = require('../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import browser_connector = require('../../interfaces/browser_connector');
+import uproxy_core_api = require('../../interfaces/uproxy_core_api');
+import CoreApi = uproxy_core_api.CoreApi;
+import social = require('../../interfaces/social');
+import user = require('./user');
+import User = user.User;
 
 describe('UI.UserInterface', () => {
 
-  var ui :UI.UserInterface;
-  var mockBrowserApi;
-  var updateToHandlerMap = {};
-  var mockCore;
+  var ui :user_interface.UserInterface;
+  var mockBrowserApi :BrowserAPI;
+  var updateToHandlerMap :{[name :string] :Function} = {};
+  var mockCore :CoreApi;
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
@@ -17,13 +26,13 @@ describe('UI.UserInterface', () => {
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
     // instead of being triggered by events emitted from the core.
-    mockCore.onUpdate.and.callFake((key :any, handler : any) => {
+    (<jasmine.Spy>mockCore.onUpdate).and.callFake((key :any, handler : any) => {
       updateToHandlerMap[key] = handler;
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
         ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification']);
-    ui = new UI.UserInterface(mockCore, mockBrowserApi);
+    ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });
 
@@ -64,16 +73,16 @@ describe('UI.UserInterface', () => {
                      online: true,
                      roster: {}});
       ui.syncUser(getUserAndInstance('testUserId', 'Alice', 'instance1'));
-      var user :UI.User = model.onlineNetwork.roster['testUserId'];
+      var user :User = user_interface.model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
-      expect(model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.getAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
-      expect(model.contacts.getAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
-      expect(model.contacts.shareAccessContacts.onlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.shareAccessContacts.offlineTrustedUproxy.length).toEqual(0);
-      expect(model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
-      expect(model.contacts.shareAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.getAccessContacts.onlineTrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.getAccessContacts.offlineTrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.getAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
+      expect(user_interface.model.contacts.getAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.shareAccessContacts.onlineTrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.shareAccessContacts.offlineTrustedUproxy.length).toEqual(0);
+      expect(user_interface.model.contacts.shareAccessContacts.onlineUntrustedUproxy.length).toEqual(1);
+      expect(user_interface.model.contacts.shareAccessContacts.offlineUntrustedUproxy.length).toEqual(0);
     });
 
     it('Sets correct flags for uProxy users', () => {
@@ -85,7 +94,7 @@ describe('UI.UserInterface', () => {
       var userMessage = getUserAndInstance('testUserId', 'Alice', 'instance1');
       userMessage.allInstanceIds.push('instance2');
       ui.syncUser(userMessage);
-      var user :UI.User = model.onlineNetwork.roster['testUserId'];
+      var user :User = user_interface.model.onlineNetwork.roster['testUserId'];
       expect(user).toBeDefined();
       expect(ui['mapInstanceIdToUser_']['instance1'].name).toEqual('Alice');
       expect(ui['mapInstanceIdToUser_']['instance2'].name).toEqual('Alice');
@@ -128,7 +137,7 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.SHARING_ICON);
+          .toHaveBeenCalledWith(user_interface.SHARING_ICON);
     });
 
     it('Extension icon doesnt change if you stop giving to 1 of several ' +
@@ -138,17 +147,17 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.SHARING_ICON);
-      expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
+          .toHaveBeenCalledWith(user_interface.SHARING_ICON);
+      expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.count()).toEqual(1);
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
-      expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
+      expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.count()).toEqual(1);
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
-      expect(mockBrowserApi.setIcon)
-          .not.toHaveBeenCalledWith(UI.DEFAULT_ICON);
+      expect(<jasmine.Spy>mockBrowserApi.setIcon)
+          .not.toHaveBeenCalledWith(user_interface.DEFAULT_ICON);
     });
 
     it('Extension icon changes if you stop giving to all getters',
@@ -158,19 +167,19 @@ describe('UI.UserInterface', () => {
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.SHARING_ICON);
-      expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
+          .toHaveBeenCalledWith(user_interface.SHARING_ICON);
+      expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.count()).toEqual(1);
       updateToHandlerMap[uproxy_core_api.Update.START_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       // The icon should not be reset if it's already displaying the correct
       // icon.
-      expect(mockBrowserApi.setIcon.calls.count()).toEqual(1);
+      expect((<jasmine.Spy>mockBrowserApi.setIcon).calls.count()).toEqual(1);
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId');
       updateToHandlerMap[uproxy_core_api.Update.STOP_GIVING_TO_FRIEND]
           .call(ui, 'testGetterId2');
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.DEFAULT_ICON);
+          .toHaveBeenCalledWith(user_interface.DEFAULT_ICON);
     });
 
     it('Extension icon changes when you start getting access', () => {
@@ -183,7 +192,7 @@ describe('UI.UserInterface', () => {
       ui.startGettingInUiAndConfig(
           'testInstanceId', { address : 'testAddress' , port : 0 });
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.GETTING_ICON);
+          .toHaveBeenCalledWith(user_interface.GETTING_ICON);
     });
 
     it('Extension icon changes when you stop getting access', () => {
@@ -192,11 +201,11 @@ describe('UI.UserInterface', () => {
           'testGiverId', { address : 'testAddress' , port : 0 });
       ui['instanceGettingAccessFrom_'] = 'testGiverId';
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.GETTING_ICON);
+          .toHaveBeenCalledWith(user_interface.GETTING_ICON);
       updateToHandlerMap[uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND]
           .call(ui, {instanceId: 'testGiverId', error: false});
       expect(mockBrowserApi.setIcon)
-          .toHaveBeenCalledWith(UI.DEFAULT_ICON);
+          .toHaveBeenCalledWith(user_interface.DEFAULT_ICON);
     });
 
     it('Sharing status updates when you start and stop sharing', () => {
@@ -248,9 +257,9 @@ describe('UI.UserInterface', () => {
         online: true
       };
       ui['syncNetwork_'](networkMessage);
-      expect(model.onlineNetwork).toBeDefined();
-      expect(model.onlineNetwork.name).toEqual(networkMessage.name);
-      expect(model.onlineNetwork.userId).toEqual(networkMessage.userId);
+      expect(user_interface.model.onlineNetwork).toBeDefined();
+      expect(user_interface.model.onlineNetwork.name).toEqual(networkMessage.name);
+      expect(user_interface.model.onlineNetwork.userId).toEqual(networkMessage.userId);
     });
 
     it('Clears fields when network goes offline', () => {
@@ -273,13 +282,13 @@ describe('UI.UserInterface', () => {
                     imageData: 'imageData'
                   }
                 });
-      expect(model.onlineNetwork.userName).toEqual('testName');
-      expect(model.onlineNetwork.imageData).toEqual('imageData');
+      expect(user_interface.model.onlineNetwork.userName).toEqual('testName');
+      expect(user_interface.model.onlineNetwork.imageData).toEqual('imageData');
 
       // Logout
       networkMessage  = {name: 'Facebook', userId: '', online: false};
       ui['syncNetwork_'](networkMessage);
-      expect(model.onlineNetwork).toEqual(null);
+      expect(user_interface.model.onlineNetwork).toEqual(null);
     });
 
   });  // syncNetwork_

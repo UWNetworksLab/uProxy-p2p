@@ -1,13 +1,13 @@
-<link rel="import" href="../lib/polymer/polymer.html">
-<link rel="import" href="../lib/core-signals/core-signals.html">
-<link rel="import" href="../lib/core-header-panel/core-header-panel.html">
-<link rel="import" href="../lib/core-drawer-panel/core-drawer-panel.html">
-<link rel="import" href="../lib/core-toolbar/core-toolbar.html">
-<link rel="import" href="../lib/core-icon-button/core-icon-button.html">
-<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
-<link rel="import" href="../lib/paper-tabs/paper-tabs.html">
-<link rel="import" href="../lib/paper-toast/paper-toast.html">
-<link rel="import" href="../lib/core-tooltip/core-tooltip.html">
+<link rel="import" href="../../../../../third_party/bower/polymer/polymer.html">
+<link rel="import" href="../../../../../third_party/bower/core-signals/core-signals.html">
+<link rel="import" href="../../../../../third_party/bower/core-header-panel/core-header-panel.html">
+<link rel="import" href="../../../../../third_party/bower/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../../../../../third_party/bower/core-toolbar/core-toolbar.html">
+<link rel="import" href="../../../../../third_party/bower/core-icon-button/core-icon-button.html">
+<link rel='import' href='../../../../../third_party/bower/paper-dialog/paper-action-dialog.html'>
+<link rel="import" href="../../../../../third_party/bower/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../../../third_party/bower/paper-toast/paper-toast.html">
+<link rel="import" href="../../../../../third_party/bower/core-tooltip/core-tooltip.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -158,32 +158,32 @@
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
-    <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
+    <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
-    <uproxy-copypaste id='copypaste' hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
+    <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
     <uproxy-feedback></uproxy-feedback>
 
-    <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
+    <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
-        hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
+        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
       <core-header-panel drawer>
         <div class='content' fit>
           <uproxy-settings id='settings'></uproxy-settings>
         </div>
       </core-header-panel>
       <core-header-panel main
-          hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
+          hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
 
         <core-toolbar>
 
           <core-icon icon="menu" core-drawer-toggle></core-icon>
           <div id='title' flex>uProxy</div>
 
-          <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
+          <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
             <h3>Cannot open manual connection</h3>
             <p>
               It is not currently possible to open a manual connection at the
@@ -226,11 +226,11 @@
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster' class='roster'
-                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+                  hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
                   contacts='{{model.contacts.getAccessContacts}}'>
               </uproxy-roster>
               <uproxy-roster id='share-roster' class='roster'
-                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+                  hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
                   contacts='{{model.contacts.shareAccessContacts}}'>
               </uproxy-roster>
             </div>
@@ -268,7 +268,7 @@
         text='{{ ui.toastMessage }}' responsiveWidth='320px'
         style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(ui.toastMessage, UI.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
       </div>
     </paper-toast>
 

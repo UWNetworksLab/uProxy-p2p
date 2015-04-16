@@ -1,24 +1,27 @@
-/// <reference path='user.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
+
+import user_interface = require('./ui');
+import user = require('./user');
+import social = require('../../interfaces/social');
 
 describe('UI.User', () => {
-  var user :UI.User;
-  var ui :UI.UserInterface;
+  var sampleUser :user.User;
+  var ui :user_interface.UserInterface;
 
   beforeEach(() => {
     spyOn(console, 'log');
-    ui = jasmine.createSpyObj<UI.UserInterface>('UserInterface', ['showNotification']);
-    user = new UI.User('fakeuser', null, ui);
-    user.update(makeUpdateMessage({}));
+    ui = jasmine.createSpyObj<user_interface.UserInterface>('UserInterface', ['showNotification']);
+    sampleUser = new user.User('fakeuser', null, ui);
+    sampleUser.update(makeUpdateMessage({}));
   });
 
   // TODO: rename to getInstanceData?
-  function getInstance(id :string, description :string) :InstanceData {
+  function getInstance(id :string, description :string) :social.InstanceData {
     return {
       instanceId: id,
       description: description,
-      localSharingWithRemote: SharingState.NONE,
-      localGettingFromRemote: GettingState.NONE,
+      localSharingWithRemote: social.SharingState.NONE,
+      localGettingFromRemote: social.GettingState.NONE,
       isOnline: true,
       bytesSent: 0,
       bytesReceived: 0
@@ -53,15 +56,15 @@ describe('UI.User', () => {
   }
 
   it('check default state', () => {
-    expect(user.userId).toEqual('fakeuser');
-    expect(user.offeringInstances).toEqual([]);
-    expect(user.allInstanceIds).toEqual([]);
-    expect(user.name).toEqual('fakename');
-    expect(user.imageData).toEqual('fakeimage.uri');
+    expect(sampleUser.userId).toEqual('fakeuser');
+    expect(sampleUser.offeringInstances).toEqual([]);
+    expect(sampleUser.allInstanceIds).toEqual([]);
+    expect(sampleUser.name).toEqual('fakename');
+    expect(sampleUser.imageData).toEqual('fakeimage.uri');
   });
 
   it('does not change description if only 1 instance', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1'
       ],
@@ -69,11 +72,11 @@ describe('UI.User', () => {
         getInstance('instance1', '')
       ]
     }));
-    expect(user.offeringInstances[0].description).toEqual('');
+    expect(sampleUser.offeringInstances[0].description).toEqual('');
   });
 
   it('updates empty descriptions when multiple instances', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1',
         'instance2',
@@ -85,13 +88,13 @@ describe('UI.User', () => {
         getInstance('instance3', '')
       ]
     }));
-    expect(user.offeringInstances[0].description).toEqual('Computer 1');
-    expect(user.offeringInstances[1].description).toEqual('laptop');
-    expect(user.offeringInstances[2].description).toEqual('Computer 3');
+    expect(sampleUser.offeringInstances[0].description).toEqual('Computer 1');
+    expect(sampleUser.offeringInstances[1].description).toEqual('laptop');
+    expect(sampleUser.offeringInstances[2].description).toEqual('Computer 3');
   });
 
   it('show notification if isOffering changes when not ignoring', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         'instance1'
       ],
@@ -101,11 +104,11 @@ describe('UI.User', () => {
     }));
 
     expect(ui.showNotification).toHaveBeenCalledWith(
-        user.name + ' offered you access', { mode: 'get', user: 'fakeuser' })
+        sampleUser.name + ' offered you access', { mode: 'get', user: 'fakeuser' })
   });
 
   it('does not show notification if isOffering changes when ignoring', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       consent: {
         localGrantsAccessToRemote: false,
         localRequestsAccessFromRemote: false,
@@ -124,7 +127,7 @@ describe('UI.User', () => {
   });
 
   it('shows notificaion if isRequesting changes when not ignoring', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       consent: {
         localGrantsAccessToRemote: false,
         localRequestsAccessFromRemote: false,
@@ -134,11 +137,11 @@ describe('UI.User', () => {
       }
     }));
     expect(ui.showNotification).toHaveBeenCalledWith(
-        user.name + ' is requesting access', { mode: 'share', user: 'fakeuser' });
+        sampleUser.name + ' is requesting access', { mode: 'share', user: 'fakeuser' });
   });
 
   it('does not show notificaion if isRequesting changes when ignoring', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       consent: {
         localGrantsAccessToRemote: false,
         localRequestsAccessFromRemote: false,
@@ -151,7 +154,7 @@ describe('UI.User', () => {
   });
 
   it('does not replace instances', () => {
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         '1',
         '2'
@@ -162,10 +165,10 @@ describe('UI.User', () => {
       ]
     }));
 
-    var second = user.offeringInstances[1];
+    var second = sampleUser.offeringInstances[1];
     expect(second.instanceId).toEqual('2');
 
-    user.update(makeUpdateMessage({
+    sampleUser.update(makeUpdateMessage({
       allInstanceIds: [
         '2'
       ],
@@ -174,7 +177,7 @@ describe('UI.User', () => {
       ]
     }));
 
-    expect(user.offeringInstances[0]).toBe(second);
+    expect(sampleUser.offeringInstances[0]).toBe(second);
   });
 
   // TODO: more specs

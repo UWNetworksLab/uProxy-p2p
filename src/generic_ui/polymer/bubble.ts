@@ -1,8 +1,9 @@
 Polymer({
+  active: false,
   close: function() {
     this.fire('closed');
   },
-  isHidden: function(element) {
+  isHidden: function(element :HTMLElement) {
     // an element is considered to be hidden if it is not displayed or any of
     // its parents are not displayed
     if (window.getComputedStyle(element).display === 'none') {
@@ -112,7 +113,7 @@ Polymer({
   domReady: function() {
     this.doReposition();
   },
-  activeChanged: function(old, val) {
+  activeChanged: function(old :boolean, val :boolean) {
     if (val) {
       // we will un-hide the element at the end of repositioning
       this.doReposition();
