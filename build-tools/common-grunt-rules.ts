@@ -134,11 +134,13 @@ export class Rule {
     // single JS file, see: https://docs.npmjs.com/files/package.json#main), or
     // the names of individual files from npm modules, using the require.resolve
     // nameing style, see: https://github.com/substack/node-resolve
-    npmLibNames ?:string[]
+    npmLibNames ?:string[];
     // Paths within this repository's build directory to be copied.
-    pathsFromDevBuild ?:string[]
+    pathsFromDevBuild ?:string[];
     // Paths within third party to be copied.
-    pathsFromThirdPartyBuild ?:string[]
+    pathsFromThirdPartyBuild ?:string[];
+    // Other copy-style paths to be copied
+    files ?:CopyFilesDescription[];
     // A relative (to devBuildPath) destination to copy files to.
     localDestPath:string; }) :CopyRule {
 
@@ -146,6 +148,7 @@ export class Rule {
     copyInfo.npmLibNames = copyInfo.npmLibNames || [];
     copyInfo.pathsFromDevBuild = copyInfo.pathsFromDevBuild || [];
     copyInfo.pathsFromThirdPartyBuild = copyInfo.pathsFromThirdPartyBuild || [];
+    copyInfo.files = copyInfo.files || [];
 
     var destPath = path.join(this.config.devBuildPath, copyInfo.localDestPath);
     var destPathForLibs = path.join(destPath, this.config.localLibsDestPath);
@@ -209,7 +212,7 @@ export class Rule {
       });
     });
 
-    return { files: allFilesForlibPaths };
+    return { files: allFilesForlibPaths.concat(copyInfo.files) };
   }
 
 }  // class Rule
