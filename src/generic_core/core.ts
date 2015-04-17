@@ -620,8 +620,8 @@ class uProxyCore implements uProxy.CoreAPI {
                         emailReplacer);
     text = text.replace(/("name":")([^"]*)(")/g, nameReplacer);
     text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
-    text = text.replace(/("imageData":")([^"]*)(")/g, '"imageData":"IMAGE_DATA"');
-    text = text.replace(/("url":")([^"]*)(")/g, '"url":"URL"');
+    text = text.replace(/"imageData":"[^"]*"/g, '"imageData":"IMAGE_DATA"');
+    text = text.replace(/"url":"[^"]*"/g, '"url":"URL"');
     return text;
   }
 }  // class uProxyCore
