@@ -73,7 +73,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
     public startShare = () :Promise<void> => {
       if (this.rtcToNet_) {
         log.error('rtcToNet_ already exists');
-        return;
+        throw new Error('rtcToNet_ already exists');
       }
 
       this.rtcToNet_ = new rtc_to_net.RtcToNet();
@@ -139,12 +139,14 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
         log.error('Currently have a connection open');
+        throw new Error('Currently have a connection open');
       }
 
       // TODO: sync properly between the extension and the app on proxy settings
       // rather than this cooincidentally the same data.
       if (null != this.socksToRtc_) {
         log.error('socksToRtc_ already exists');
+        throw new Error('socksToRtc_ already exists');
       }
 
       this.socksToRtc_ = new socks_to_rtc.SocksToRtc();

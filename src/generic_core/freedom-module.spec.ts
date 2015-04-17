@@ -8,6 +8,12 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+    'core.storage': () => { return new freedom_mocks.MockStorage(); },
+    'loggingcontroller': () => { return new freedomMocker.MockModuleSelfConstructor(); }
+});
 
 import social = require('../interfaces/social');
 import social_network = require('./social');
@@ -36,7 +42,7 @@ describe('Core', () => {
   });
 
   it('passes modifyConsent to the correct user', () => {
-    spyOn(social, 'getNetwork').and.callFake(() => {
+    spyOn(social_network, 'getNetwork').and.callFake(() => {
       return network;
     });
     spyOn(network, 'getUser').and.callFake(() => {

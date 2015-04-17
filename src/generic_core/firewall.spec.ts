@@ -1,6 +1,12 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+});
+
 import firewall = require('./firewall');
+
 class MockPolicy implements firewall.ResponsePolicy {
   failures : number = 0;
   onValidationFailure(s :string, level :firewall.Severity) {

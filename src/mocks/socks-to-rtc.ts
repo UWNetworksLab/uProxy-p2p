@@ -7,10 +7,6 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
   public rejectStart :(v :Object) => void;
 
   public start = () => {
-    return new Promise<net.Endpoint>((resolve, reject) => {
-      this.resolveStart = resolve;
-      this.rejectStart = reject;
-    });
   }
 
   public stop = () => {
@@ -23,7 +19,16 @@ export class SocksToRtcMock { // TODO implements SocksToRtc.SocksToRtc {
     this.events[name] = fn;
   }
 
+  public startFromConfig = () => {
+    return new Promise<net.Endpoint>((resolve, reject) => {
+      this.resolveStart = resolve;
+      this.rejectStart = reject;
+    });
+  }
+
   // TODO: remove onceStopping_ when
   // https://github.com/uProxy/uproxy/issues/1264 is resolved.
   private onceStopping_ = new Promise(() => {});
+
+  public onceStopped = new Promise(() => {});
 }
