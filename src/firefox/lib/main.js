@@ -3,7 +3,7 @@ var panels = require("sdk/panel");
 var self = require("sdk/self");
 const {Cu} = require("chrome");
 
-Cu.import(self.data.url('freedom-for-firefox.jsm'));
+Cu.import(self.data.url('freedom-for-firefox/freedom-for-firefox.jsm'));
 
 // Main uProxy button.
 var button = buttons.ActionButton({
@@ -19,8 +19,8 @@ var button = buttons.ActionButton({
 var panel;
 
 // Load freedom.
-var manifest = self.data.url('core/freedom-module.json');
-var loggingProviderManifest = self.data.url("core/uproxy-lib/loggingprovider/loggingprovider.json");
+var manifest = self.data.url('generic_core/freedom-module.json');
+var loggingProviderManifest = self.data.url("uproxy-lib/loggingprovider/freedom-module.json");
 freedom(manifest, {
   'logger': loggingProviderManifest,
   'debug': 'debug'
@@ -29,7 +29,7 @@ freedom(manifest, {
   panel = panels.Panel({
     width: 371,
     height: 600,
-    contentURL: self.data.url("index.html")
+    contentURL: self.data.url("generic_ui/index.html")
   })
 
   // Set up connection between freedom and content script.

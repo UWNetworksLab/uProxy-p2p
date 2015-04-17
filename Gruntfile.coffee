@@ -141,7 +141,7 @@ Rule = new rules.Rule({
 #-------------------------------------------------------------------------
 chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/')
 chromeAppDevPath = path.join(devBuildPath, 'chrome/app/')
-firefoxDevPath = path.join(devBuildPath, 'chrome/firefox/')
+firefoxDevPath = path.join(devBuildPath, 'firefox/')
 
 
 #-------------------------------------------------------------------------
@@ -441,87 +441,38 @@ module.exports = (grunt) ->
       # Firefox. Assumes the top-level tasks generic_core and generic_ui
       # completed.
       firefox:
-        files: [ {
-          # The platform specific stuff, and...
-          expand: true, cwd: 'src/firefox/'
-          src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
-          dest: firefoxDevPath
-        }, {  # Freedom manifest for uproxy
-          expand: true, cwd: 'src/generic_core/'
-          src: ['freedom-module.json']
-          dest: firefoxDevPath + 'data/core/'
-        }, {  # Additional hack - TODO: remove this once social enum is gone.
-          expand: true, cwd: 'third_party', flatten: true
-          src: [
-            'freedom-ts-hacks/social-enum.js'
+        Rule.copyLibs
+          npmLibNames: [
+            'freedom-for-firefox'
           ]
-          dest: firefoxDevPath + 'data/core/'
-         }, {
-           expand: true, cwd: 'build/compile-src', flatten: true
-           src: FILES.uproxy_common
-           dest: firefoxDevPath + 'data/core/'
-        # ... the generic core stuff
-        }, {
-          expand: true, cwd: 'build/compile-src/generic_core'
-          src: ['**'],
-          dest: firefoxDevPath + 'data/core/'
-        }, {
-        # ... the generic UI stuff
-          expand: true, cwd: 'build/compile-src/generic_ui'
-          src: ['scripts/**', '*.html', 'polymer/vulcanized.*', '!**/*.ts']
-          dest: firefoxDevPath + 'data/'
-        }, {
-          # Icons and fonts
-          expand: true, cwd: 'src/'
-          src: ['icons/*', 'fonts/*']
-          dest: firefoxDevPath + 'data/'
-        }, {
-          expand: true, cwd: 'build/compile-src', flatten: true
-          src: FILES.uproxy_common
-              .concat [
-                'firefox/data/scripts/*.js'
-              ]
-          dest: firefoxDevPath + 'data/scripts'
-        # freedom for firefox
-        }, {
-          expand: true, cwd: 'node_modules/freedom-for-firefox/'
-          src: ['freedom-for-firefox.jsm']
-          dest: firefoxDevPath + 'data'
-        }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'node_modules/uproxy-networking/dist/',
-          src: FILES.uproxy_networking_common,
-          dest: firefoxDevPath + 'data/core/uproxy-networking'
-        }, {
-          expand: true, cwd: 'node_modules/freedom/providers/social'
-          src: ['websocket-server/**']
-          dest: firefoxDevPath + 'data/lib'
-        }, {
-          expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/'
-          src: ['**']
-          dest: firefoxDevPath + 'data/lib/freedom-social-xmpp'
-        }, {
-          expand: true, cwd: 'node_modules/freedom-social-firebase/dist/'
-          src: ['**']
-          dest: firefoxDevPath + 'data/lib/freedom-social-firebase'
-        }, {
-          expand: true, cwd: 'node_modules/freedom/providers/storage/shared'
-          src: ['**']
-          dest: firefoxDevPath + 'data/lib/storage'
-        }, {
-          expand: true, cwd: 'node_modules/uproxy-lib/dist/',
-          src: FILES.uproxy_lib_common,
-          dest: firefoxDevPath + 'data/core/uproxy-lib'
-        }, { # Copy uproxy-networking files.
-          expand: true, cwd: 'third_party/lib'
-          src: FILES.thirdPartyUi
-          dest: firefoxDevPath + 'data/lib'
-        }, {
-          # Copy vulcanized files containing compiled Polymer
-          # code.
-          expand: true, cwd: 'build/compile-src/firefox/data'
-          src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
-          dest: firefoxDevPath + 'data'
-        } ]
+          pathsFromDevBuild: [
+            'generic_core'
+            'generic_ui'
+          ]
+          pathsFromThirdPartyBuild: [
+            'bower'
+            'sha1'
+            'uproxy-lib/loggingprovider'
+            'proxy-networking/churn-pipe'
+          ]
+          files: [
+            {
+              expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-social-xmpp'
+            },
+            {
+              expand: true, cwd: 'node_modules/freedom-social-firebase/dist/',
+              src: ['**']
+              dest: firefoxDevPath + '/data/freedom-social-firebase'
+            },
+            { # uProxy Icons and fonts
+              expand: true, cwd: 'src/'
+              src: ['icons/*', 'fonts/*']
+              dest: firefoxDevPath + 'data/'
+            }
+          ]
+          localDestPath: 'firefox/data'
 
       integration:
         files: [ {
