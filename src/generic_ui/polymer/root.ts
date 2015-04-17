@@ -91,7 +91,7 @@ Polymer({
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = browserified_exports.ui;
-    this.ui_constants = browserified_exports.ui_constants;
+    this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = browserified_exports.model;
     this.closeToastTimeout = null;
