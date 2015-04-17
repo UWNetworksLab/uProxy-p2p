@@ -130,9 +130,6 @@ module Core {
           userId: client.userId
         });
         return;
-      } else if (client.status == UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
-        // Ignore non-uproxy contacts
-        return;
       }
 
       log.debug('received client', client);
@@ -156,6 +153,7 @@ module Core {
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         case UProxyClient.Status.OFFLINE:
+        case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
