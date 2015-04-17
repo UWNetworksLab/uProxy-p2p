@@ -137,9 +137,6 @@ var log :logging.Log = new logging.Log('remote-user');
           userId: client.userId
         });
         return;
-      } else if (client.status == social.ClientStatus.ONLINE_WITH_OTHER_APP) {
-        // Ignore non-uproxy contacts
-        return;
       }
 
       log.debug('received client', client);
@@ -163,6 +160,7 @@ var log :logging.Log = new logging.Log('remote-user');
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
         case social.ClientStatus.OFFLINE:
+        case social.ClientStatus.ONLINE_WITH_OTHER_APP:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
