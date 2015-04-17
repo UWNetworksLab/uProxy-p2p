@@ -470,8 +470,10 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // email regex taken from regular-expressions.info
     text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
                         emailReplacer);
-    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
     text = text.replace(/("name":")([^"]*)(")/g, nameReplacer);
+    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
+    text = text.replace(/"imageData":"[^"]*"/g, '"imageData":"IMAGE_DATA"');
+    text = text.replace(/"url":"[^"]*"/g, '"url":"URL"');
     return text;
   }
 }  // class uProxyCore
