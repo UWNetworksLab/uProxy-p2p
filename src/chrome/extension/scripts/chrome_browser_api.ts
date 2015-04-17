@@ -200,31 +200,35 @@ class ChromeBrowserApi implements BrowserAPI {
 
   private frontDomain_ = 'https://a0.awsstatic.com/';
 
-  public httpPost = (url :string, data :any, useDomainFronting: boolean) : Promise<void> => {
+  // If cloudfrontDomain is provided, the request is made via
+  // frontDomain_.
+  // cloudfrontPath should not start with a leading forward slash.
+  public httpPost = (url :string,
+                     data :any,
+                     cloudfrontDomain = "",
+                     cloudfrontPath = "") : Promise<void> => {
+
+    var destinationUrl = url;
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
-        value: url
+        value: cloudfrontDomain
       });
       return { requestHeaders: details.requestHeaders };
     };
-    var removeSendHeaderListener = () => {
-      if (useDomainFronting) {
-        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
-        /*
-        This causes compiler errors. Not sure if chrome.d.ts is out of date.
-        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader, {
-          urls: [this.frontDomain_]
-        }, ['requestHeaders', 'blocking']);
-        */
-      }
-    };
 
-    if (useDomainFronting) {
+    if (cloudfrontDomain) {
+      destinationUrl = this.frontDomain_ + cloudfrontPath;
       chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-        urls: [this.frontDomain_]
+        urls: [this.frontDomain_ + "*"]
       }, ['requestHeaders', 'blocking']);
     }
+
+    var removeSendHeaderListener = () => {
+      if (cloudfrontDomain) {
+        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
+      }
+    };
 
     return new Promise<void>((fulfill, reject) => {
       var xhr = new XMLHttpRequest();
@@ -238,13 +242,7 @@ class ChromeBrowserApi implements BrowserAPI {
         }
       }
       var params = JSON.stringify(data);
-      if (useDomainFronting) {
-        // Request will reach correct end domain because the url
-        // is packaged in the 'Host' header.
-        xhr.open('POST', this.frontDomain_, true);
-      } else {
-        xhr.open('POST', url, true);
-      }
+      xhr.open('POST', destinationUrl, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
   }

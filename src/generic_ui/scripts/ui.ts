@@ -816,14 +816,14 @@ module UI {
       }
     }
 
-    private FeedbackUrls_ = [
-      "https://d1wtwocg4wx1ih.cloudfront.net/submit-feedback"
+    private FrontDomains_ = [
+      "d1wtwocg4wx1ih.cloudfront.net"
     ]
 
     public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
-      if (!maxAttempts || maxAttempts > this.FeedbackUrls_.length) {
+      if (!maxAttempts || maxAttempts > this.FrontDomains_.length) {
         // default to trying every possible URL
-        maxAttempts = this.FeedbackUrls_.length;
+        maxAttempts = this.FrontDomains_.length;
       }
 
       var logsPromise :Promise<string>;
@@ -851,7 +851,9 @@ module UI {
             // we want to keep trying this until we either run out of urls to
             // send to or one of the requests succeeds.  We set this up by
             // creating a lambda to call the post with failures set up to recurse
-            return this.browserApi.httpPost(this.FeedbackUrls_[attempts++], payload, true).catch(doAttempts);
+            return this.browserApi.httpPost("", payload,
+              this.FrontDomains_[attempts++], "submit-feedback"
+            ).catch(doAttempts);
           }
 
           throw error;
