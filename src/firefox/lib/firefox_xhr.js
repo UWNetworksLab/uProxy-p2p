@@ -4,10 +4,12 @@
 
 const {XMLHttpRequest} = require("sdk/net/xhr");
 
-var frontDomain = 'https://a0.awsstatic.com/';
-
 var xhr = {
-  httpPost : function (url, data, cloudfrontDomain, cloudfrontPath) {
+  httpPost : function (url,
+                       data,
+                       cloudfrontDomain,
+                       cloudfrontPath,
+                       frontDomain) {
     return new Promise(function (fulfill, reject) {
       var request = new XMLHttpRequest();
       request.onreadystatechange = function() {
