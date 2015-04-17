@@ -129,7 +129,7 @@ function setUpConnection(freedom, panel, button) {
 
   function post(data) {
     return xhr.httpPost(data.url, data.data, data.cloudfrontDomain,
-        data.cloudfrontPath);
+        data.cloudfrontPath, data.frontDomain);
   };
 
   // Ensure a fulfill or reject message will be sent back to the panel

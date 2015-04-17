@@ -20,7 +20,20 @@ interface BrowserAPI {
    * determine how to handle clicks to the notification
    */
   showNotification(text :string, tag :string) :void;
-  httpPost(url :string, data :any, cloudfrontDomain ?:string, cloudfrontPath ?:string) : Promise<void>;
+
+  // Should end in a forward slash.
+  frontDomain :string;
+
+  /**
+    * Make a POST request to a given url.
+    *
+    * If cloudfrontDomain is provided, we really want to visit
+    * cloudfrontDomain + cloudfrontPath (url is ignored).
+    * Domain fronted requests are made via frontDomain.
+    * cloudfrontPath should not start with a leading forward slash.
+    */
+  httpPost(url :string, data :any, cloudfrontDomain ?:string,
+           cloudfrontPath ?:string) : Promise<void>;
 }
 
 declare var Notification : {

@@ -4,7 +4,7 @@
 
 const {XMLHttpRequest} = require("sdk/net/xhr");
 
-var frontDomain_ = 'https://a0.awsstatic.com/';
+var frontDomain = 'https://a0.awsstatic.com/';
 
 var xhr = {
   httpPost : function (url, data, cloudfrontDomain, cloudfrontPath) {
@@ -23,7 +23,10 @@ var xhr = {
 
       if (cloudfrontDomain) {
         cloudfrontPath = cloudfrontPath || '';
-        request.open('POST', frontDomain_ + cloudfrontPath, true);
+        // Only the front domain is exposed on the wire. The cloudfrontPath
+        // should be encrypted. The cloudfrontPath needs to be here and not
+        // in the Host header, which can only take a host name.
+        request.open('POST', frontDomain + cloudfrontPath, true);
         request.setRequestHeader('Host', cloudfrontDomain);
       } else {
         request.open('POST', url, true);

@@ -816,14 +816,14 @@ module UI {
       }
     }
 
-    private FrontDomains_ = [
+    private cloudfrontDomains_ = [
       "d1wtwocg4wx1ih.cloudfront.net"
     ]
 
     public sendFeedback = (feedback :uProxy.UserFeedback, maxAttempts?:number) : Promise<void> => {
-      if (!maxAttempts || maxAttempts > this.FrontDomains_.length) {
+      if (!maxAttempts || maxAttempts > this.cloudfrontDomains_.length) {
         // default to trying every possible URL
-        maxAttempts = this.FrontDomains_.length;
+        maxAttempts = this.cloudfrontDomains_.length;
       }
 
       var logsPromise :Promise<string>;
@@ -852,7 +852,7 @@ module UI {
             // send to or one of the requests succeeds.  We set this up by
             // creating a lambda to call the post with failures set up to recurse
             return this.browserApi.httpPost("", payload,
-              this.FrontDomains_[attempts++], "submit-feedback"
+              this.cloudfrontDomains_[attempts++], "submit-feedback"
             ).catch(doAttempts);
           }
 

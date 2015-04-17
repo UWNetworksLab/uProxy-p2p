@@ -198,16 +198,13 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
-  private frontDomain_ = 'https://a0.awsstatic.com/';
+  // This must be included in manifest.json's list of permissions.
+  public frontDomain = 'https://a0.awsstatic.com/';
 
-  // If cloudfrontDomain is provided, the request is made via
-  // frontDomain_.
-  // cloudfrontPath should not start with a leading forward slash.
   public httpPost = (url :string,
                      data :any,
                      cloudfrontDomain = "",
                      cloudfrontPath = "") : Promise<void> => {
-
     var destinationUrl = url;
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
@@ -218,9 +215,12 @@ class ChromeBrowserApi implements BrowserAPI {
     };
 
     if (cloudfrontDomain) {
-      destinationUrl = this.frontDomain_ + cloudfrontPath;
+      // Only the front domain is exposed on the wire. The cloudfrontPath
+      // should be encrypted. The cloudfrontPath needs to be here and not
+      // in the Host header, which can only take a host name.
+      destinationUrl = this.frontDomain + cloudfrontPath;
       chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-        urls: [this.frontDomain_ + "*"]
+        urls: [this.frontDomain + "*"]
       }, ['requestHeaders', 'blocking']);
     }
 

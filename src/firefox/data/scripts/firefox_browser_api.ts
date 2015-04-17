@@ -71,8 +71,18 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public httpPost = (url :string, data :any, cloudfrontDomain = "", cloudfrontPath = "") : Promise<void> => {
-    return this.promiseEmit('httpPost', { url: url, data: data, cloudfrontDomain: cloudfrontDomain, cloudfrontPath: cloudfrontPath });
+  public frontDomain = 'https://a0.awsstatic.com/';
+
+  public httpPost = (url :string,
+                     data :any,
+                     cloudfrontDomain = "",
+                     cloudfrontPath = "") : Promise<void> => {
+    return this.promiseEmit('httpPost', {
+        url: url,
+        data: data,
+        cloudfrontDomain: cloudfrontDomain,
+        cloudfrontPath: cloudfrontPath,
+        frontDomain: this.frontDomain });
   }
 
   /**
@@ -116,7 +126,7 @@ class FirefoxBrowserApi implements BrowserAPI {
           .fulfill(data.argsForCallback);
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
-      console.warn('fulfill not found ' + promiseId);
+      console.warn('Firefox promise fulfill not found ' + promiseId);
     }
   }
 
@@ -128,7 +138,7 @@ class FirefoxBrowserApi implements BrowserAPI {
           .reject(data.errorForCallback);
       delete this.mapPromiseIdToFulfillAndReject_[promiseId];
     } else {
-      console.warn('reject not found ' + promiseId);
+      console.warn('Firefox promise reject not found ' + promiseId);
     }
   }
 }
