@@ -29,7 +29,7 @@ function openDownloadAppPage() : void {
       }
     );
     // After the app is installed via the webstore, open up uProxy.
-    context.core.onceConnected.then(context.ui.browserApi.bringUproxyToFront);
+    context.chromeCoreConnector.onceConnected.then(context.ui.browserApi.bringUproxyToFront);
   });
 }
 

@@ -13,7 +13,6 @@ import ChromeMessage = chrome_api.ChromeMessage;
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
 
-import context = require('../scripts/context');
 import UI = require('../../../generic_ui/scripts/ui');
 import UiInterface = require('../../../interfaces/ui');
 import UiApi = UiInterface.UiApi;
@@ -146,7 +145,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show its start page.
-        context.ui.view = UiInterface.View.SPLASH;
+        background.ui.view = UiInterface.View.SPLASH;
         chrome.browserAction.setIcon({
           path: {
             "19": "icons/19_" + UI.LOGGED_OUT_ICON,
@@ -176,14 +175,14 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, we should show the browser specific page
     // that shows the "app missing" message.
-    context.ui.view = UiInterface.View.BROWSER_ERROR;
+    background.ui.view = UiInterface.View.BROWSER_ERROR;
 
 
     if (this.status.connected) {
       // TODO: Consider displaying a notification if the user was giving access.
       // Ensure that proxying has stopped.
-      if (context.ui.isGettingAccess()) {
-        context.ui.stopGettingInUiAndConfig(true);
+      if (background.ui.isGettingAccess()) {
+        background.ui.stopGettingInUiAndConfig(true);
       }
       // Update this.status.
       this.status.connected = false;

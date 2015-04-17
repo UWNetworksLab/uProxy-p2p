@@ -12,18 +12,19 @@ import ChromeCoreConnector = require('./chrome_core_connector');
 import ChromeTabAuth = require('./chrome_tab_auth');
 
 import UiApi = require('../../../interfaces/ui');
-import UI = require('../../../generic_ui/scripts/ui');
+import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 
 /// <reference path='../../../freedom/typings/social.d.ts' />
 /// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
 
+export import model = user_interface.model;
 
-var ui   :UI.UserInterface;  // singleton referenced in both options and popup.
+export var ui   :user_interface.UserInterface;  // singleton referenced in both options and popup.
 // --------------------- Communicating with the App ----------------------------
-var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
-var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
 var chromeBrowserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
@@ -67,7 +68,7 @@ chrome.runtime.onMessageExternal.addListener((request :any, sender :chrome.runti
  * Primary initialization of the Chrome Extension. Installs hooks so that
  * updates from the Chrome App side propogate to the UI.
  */
-function initUI() : UI.UserInterface {
+function initUI() : user_interface.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
@@ -133,7 +134,7 @@ function initUI() : UI.UserInterface {
     ['blocking']
   );
 
-  return new UI.UserInterface(core, chromeBrowserApi);
+  return new user_interface.UserInterface(core, chromeBrowserApi);
 }
 
 console.log('Initializing chrome extension background page...');
