@@ -1,30 +1,19 @@
+import diagnose_nat = require('./diagnose-nat');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-networking/net/net.types');
+import remote_connection = require('./remote-connection');
+import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
 import social_network = require('./social');
 import storage = globals.storage;
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
-import remote_connection = require('./remote-connection');
-import remote_instance = require('./remote-instance');
-import diagnose_nat = require('./diagnose-nat');
 import version = require('../version/version');
-import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 
 import ui = ui_connector.connector;
-
-var log :logging.Log = new logging.Log('social');
-
-// Note that the proxy runs extremely slowly in debug ('*:D') mode.
-var loggingController = freedom['loggingcontroller']();
-loggingController.setFilters(loggingTypes.Destination.console, {
-  '*': loggingTypes.Level.info,
-});
-loggingController.setFilters(loggingTypes.Destination.buffered, {
-  '*': loggingTypes.Level.debug,
-});
 
 export var remoteProxyInstance :social.RemoteUserInstance = null;
 
@@ -32,6 +21,18 @@ export var remoteProxyInstance :social.RemoteUserInstance = null;
 // either sharing or using a proxy through the copy+paste interface (i.e.
 // without an instance)
 export var copyPasteConnection :remote_connection.RemoteConnection = null;
+
+var log :logging.Log = new logging.Log('core');
+log.info('Loading core', version.UPROXY_VERSION);
+
+// Note that the proxy runs extremely slowly in debug ('*:D') mode.
+var loggingController = freedom['loggingcontroller']();
+loggingController.setDefaultFilter(
+    loggingTypes.Destination.console,
+    loggingTypes.Level.info);
+loggingController.setDefaultFilter(
+    loggingTypes.Destination.buffered,
+    loggingTypes.Level.debug);
 
 /**
  * Primary uProxy backend. Handles which social networks one is connected to,
