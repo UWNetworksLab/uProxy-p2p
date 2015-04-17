@@ -128,13 +128,13 @@ function setUpConnection(freedom, panel, button) {
   };
 
   function post(data) {
-    return xhr.httpPost(data.url, data.data, data.cloudfrontDomain,
-        data.cloudfrontPath, data.frontDomain);
+    return xhr.frontedPost(data.data, data.externalDomain,
+        data.cloudfrontDomain, data.cloudfrontPath);
   };
 
   // Ensure a fulfill or reject message will be sent back to the panel
   // when required by registering messages that initiate async behaviour.
-  onPromiseEmit('httpPost', post);
+  onPromiseEmit('frontedPost', post);
 
   /* Allow any pages in the addon to send messages to the UI or the core */
   pagemod.PageMod({

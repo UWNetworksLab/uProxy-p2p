@@ -5,35 +5,36 @@
 const {XMLHttpRequest} = require("sdk/net/xhr");
 
 var xhr = {
-  httpPost : function (url,
-                       data,
-                       cloudfrontDomain,
-                       cloudfrontPath,
-                       frontDomain) {
+  frontedPost : function (data,
+                          externalDomain,
+                          cloudfrontDomain,
+                          cloudfrontPath) {
     return new Promise(function (fulfill, reject) {
       var request = new XMLHttpRequest();
-      request.onreadystatechange = function() {
-        if (request.readyState == 4) {
-          if (request.status == 200) {
+      request.onload = function(){
+        fulfill();
+      };
+      request.onerror = function(){
+        reject(new Error('POST failed with HTTP code ' + request.status));
+      };
+      /*request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            if (request.status == 200) {
             fulfill();
           } else {
-            reject(new Error('POST failed with HTTP code ' + request.status));
+
           }
         }
-      }
+      }*/
       var params = JSON.stringify(data);
 
-      if (cloudfrontDomain) {
-        cloudfrontPath = cloudfrontPath || '';
-        // Only the front domain is exposed on the wire. The cloudfrontPath
-        // should be encrypted. The cloudfrontPath needs to be here and not
-        // in the Host header, which can only take a host name.
-        request.open('POST', frontDomain + cloudfrontPath, true);
-        // The true destination address is set as the Host in the header.
-        request.setRequestHeader('Host', cloudfrontDomain);
-      } else {
-        request.open('POST', url, true);
-      }
+      cloudfrontPath = cloudfrontPath || '';
+      // Only the front domain is exposed on the wire. The cloudfrontPath
+      // should be encrypted. The cloudfrontPath needs to be here and not
+      // in the Host header, which can only take a host name.
+      request.open('POST', externalDomain + cloudfrontPath, true);
+      // The true destination address is set as the Host in the header.
+      request.setRequestHeader('Host', cloudfrontDomain);
       request.send(params);
     });
   }

@@ -71,18 +71,16 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public frontDomain = 'https://a0.awsstatic.com/';
-
-  public httpPost = (url :string,
-                     data :any,
-                     cloudfrontDomain = "",
-                     cloudfrontPath = "") : Promise<void> => {
-    return this.promiseEmit('httpPost', {
-        url: url,
+  public frontedPost = (data :any,
+                        externalDomain :string,
+                        cloudfrontDomain :string,
+                        cloudfrontPath = "") : Promise<void> => {
+    return this.promiseEmit('frontedPost', {
         data: data,
+        externalDomain: externalDomain,
         cloudfrontDomain: cloudfrontDomain,
-        cloudfrontPath: cloudfrontPath,
-        frontDomain: this.frontDomain });
+        cloudfrontPath: cloudfrontPath
+      });
   }
 
   /**
