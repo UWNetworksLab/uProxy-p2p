@@ -21,18 +21,14 @@ interface BrowserAPI {
    */
   showNotification(text :string, tag :string) :void;
 
-  // Should end in a forward slash.
-  frontDomain :string;
-
   /**
-    * Make a POST request to a given url.
+    * Make a domain fronted POST request to cloudfrontDomain/cloudfrontPath.
     *
-    * If cloudfrontDomain is provided, we really want to visit
-    * cloudfrontDomain + cloudfrontPath (url is ignored).
-    * Domain fronted requests are made via frontDomain.
+    * externalDomain is visible on the wire, and used to 'front' the request
+    * to Cloudfront. externalDomain should end in a forward slash.
     * cloudfrontPath should not start with a leading forward slash.
     */
-  httpPost(url :string, data :any, cloudfrontDomain ?:string,
+  frontedPost(data :any, externalDomain :string, cloudfrontDomain :string,
            cloudfrontPath ?:string) : Promise<void>;
 }
 

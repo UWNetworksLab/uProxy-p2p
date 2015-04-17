@@ -183,6 +183,8 @@ module UI {
 
     // is a proxy currently set
     private proxySet_ :boolean = false;
+    // Must be included in Chrome extension manifest's list of permissions.
+    public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
     /*
      * This is used to store the information for setting up a copy+paste
@@ -851,7 +853,7 @@ module UI {
             // we want to keep trying this until we either run out of urls to
             // send to or one of the requests succeeds.  We set this up by
             // creating a lambda to call the post with failures set up to recurse
-            return this.browserApi.httpPost("", payload,
+            return this.browserApi.frontedPost(payload, this.AWS_FRONT_DOMAIN,
               this.cloudfrontDomains_[attempts++], "submit-feedback"
             ).catch(doAttempts);
           }

@@ -198,17 +198,13 @@ class ChromeBrowserApi implements BrowserAPI {
     }, 5000);
   }
 
-  // This must be included in manifest.json's list of permissions.
-  public frontDomain = 'https://a0.awsstatic.com/';
-
-  public httpPost = (url :string,
-                     data :any,
-                     cloudfrontDomain = "",
-                     cloudfrontPath = "") : Promise<void> => {
-    var requestUrl = url;
-    // setHostInHeader is needed for domain fronted requests. The true
-    // destination is set as the Host in the request header (instead of as the
-    // url when the xhr is opened).
+  public frontedPost = (data :any,
+                        externalDomain :string,
+                        cloudfrontDomain :string,
+                        cloudfrontPath = "") : Promise<void> => {
+    // Set the Cloudfront destination as the Host in the request header,
+    // hiding the cloudfront URL from observers but still informing
+    // the external domain (e.g. AWS) where the request should be forwarded.
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
@@ -217,20 +213,15 @@ class ChromeBrowserApi implements BrowserAPI {
       return { requestHeaders: details.requestHeaders };
     };
 
-    if (cloudfrontDomain) {
-      // Only the front domain is exposed on the wire. The cloudfrontPath
-      // should be encrypted. The cloudfrontPath needs to be here and not
-      // in the Host header, which can only take a host name.
-      requestUrl = this.frontDomain + cloudfrontPath;
-      chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-        urls: [this.frontDomain + "*"]
-      }, ['requestHeaders', 'blocking']);
-    }
+    chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
+      urls: [externalDomain + "*"]
+    }, ['requestHeaders', 'blocking']);
 
     var removeSendHeaderListener = () => {
-      if (cloudfrontDomain) {
-        chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
-      }
+      // Remove the functionality of setHostInHeader after we're done with our
+      // post so that we don't interfere with any other requests.
+      // This will be called after the POST has succeeded or failed.
+      chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
     };
 
     return new Promise<void>((fulfill, reject) => {
@@ -245,7 +236,7 @@ class ChromeBrowserApi implements BrowserAPI {
         }
       }
       var params = JSON.stringify(data);
-      xhr.open('POST', requestUrl, true);
+      xhr.open('POST', externalDomain + cloudfrontPath, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
   }
