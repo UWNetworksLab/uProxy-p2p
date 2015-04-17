@@ -1,6 +1,6 @@
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-import user_interface = require('ui');
+import user_interface = require('./ui');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import browser_connector = require('../../interfaces/browser_connector');
@@ -31,7 +31,7 @@ describe('UI.UserInterface', () => {
     });
 
     mockBrowserApi = jasmine.createSpyObj('browserApi',
-        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification']);
+        ['setIcon', 'startUsingProxy', 'stopUsingProxy', 'openTab', 'showNotification', 'on']);
     ui = new user_interface.UserInterface(mockCore, mockBrowserApi);
     spyOn(console, 'log');
   });

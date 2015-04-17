@@ -74,21 +74,20 @@ taskManager.add 'test_core', [
   'browserify:genericCoreRemoteUserSpec'
   'browserify:genericCoreSocialSpec'
   'browserify:genericCoreStorageSpec'
-  #'jasmine:generic_core'
+  'jasmine:generic_core'
 ]
 
 taskManager.add 'test_ui', [
   'base'
   'browserify:genericUiUiSpec'
   'browserify:genericUiUserSpec'
-  #'jasmine:generic_ui'
+  'jasmine:generic_ui'
 ]
 
 taskManager.add 'test_chrome', [
   'build_chrome'
-  'browserify:chromeExtensionConnectorSpec'
+  'browserify:chromeExtensionCoreConnectorSpec'
   #'jasmine:chrome_extension'
-  #'jasmine:chrome_app'
 ]
 
 taskManager.add 'everything', [
@@ -596,8 +595,8 @@ module.exports = (grunt) ->
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
 
-      chromeExtensionConnector: Rule.browserify 'chrome/extension/scripts/chrome_core/connector'
-      chromeExtensionConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core/connector'
+      chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
+      chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
       genericCoreFirewall: Rule.browserify 'generic_core/firewall'
       genericCoreFirewallSpec: Rule.browserifySpec 'generic_core/firewall'
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
@@ -609,113 +608,15 @@ module.exports = (grunt) ->
       genericCoreSocialSpec: Rule.browserifySpec 'generic_core/social'
       genericCoreStorageSpec: Rule.browserifySpec 'generic_core/storage'
 
-      genericUiUiSpec: Rule.browserifySpec 'generic_ui/script/ui'
-      genericUiUserSpec: Rule.browserifySpec 'generic_ui/script/user'
+      genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
+      genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
 
     #-------------------------------------------------------------------------
     jasmine:
-      chrome_extension: {
-        src: FILES.jasmine_helpers
-            .concat [
-              'build/compile-src/uproxy.js'
-              'build/compile-src/generic/version.js'
-              'build/compile-src/mocks/chrome_mocks.js'
-              'build/compile-src/generic_ui/scripts/core_connector.js'
-              'build/compile-src/generic_ui/scripts/ui.js'
-              'build/compile-src/chrome/extension/scripts/chrome_browser_api.js'
-              'build/compile-src/chrome/extension/scripts/chrome_core_connector.js'
-              'build/compile-src/chrome/extension/scripts/chrome_tab_auth.js'
-            ]
-        options:
-          specs: 'build/compile-src/chrome/extension/**/*.spec.js'
-          outfile: 'build/compile-src/chrome/extension/SpecRunner.html'
-          template: require('grunt-template-jasmine-istanbul')
-          templateOptions:
-            coverage: 'build/coverage/chrome_extension/coverage.json'
-            report:
-              type: 'html'
-              options:
-                dir: 'build/coverage/chrome_extension'
-      }
-
-      chrome_app: {
-        src: FILES.jasmine_helpers
-            .concat [
-              'build/compile-src/uproxy.js'
-              'build/compile-src/mocks/chrome_mocks.js'
-              'build/compile-src/chrome/app/scripts/chrome_ui_connector.js'
-            ]
-        options:
-          specs: 'build/compile-src/chrome/app/**/*.spec.js'
-          outfile: 'build/compile-src/chrome/app/SpecRunner.html'
-          template: require('grunt-template-jasmine-istanbul')
-          templateOptions:
-            coverage: 'build/coverage/chrome_app/coverage.json'
-            report:
-              type: 'html'
-              options:
-                dir: 'build/coverage/chrome_app'
-      }
-
-      generic_core: {
-        src: FILES.jasmine_helpers
-            .concat FILES.uproxy_common
-            .concat [
-              'build/compile-src/mocks/freedom-mocks.js'
-              'build/compile-src/mocks/socks-to-rtc.js'
-              'build/compile-src/mocks/rtc-to-net.js'
-              'build/compile-src/logging/logging.js'
-              'build/compile-src/webrtc/peerconnection.js'
-              'build/compile-src/socks-to-rtc/socks-to-rtc.js'
-              'build/compile-src/rtc-to-net/rtc-to-net.js'
-              'build/compile-src/uproxy.js'
-              'build/compile-src/generic/version.js'
-              'build/compile-src/generic_core/constants.js'
-              'build/compile-src/generic_core/consent.js'
-              'build/compile-src/generic_core/social-enum.js'
-              'build/compile-src/generic_core/local-instance.js'
-              'build/compile-src/generic_core/remote-instance.js'
-              'build/compile-src/generic_core/remote-connection.js'
-              'build/compile-src/generic_core/firewall.js'
-              'build/compile-src/generic_core/user.js'
-              'build/compile-src/generic_core/storage.js'
-              'build/compile-src/generic_core/social.js'
-              'build/compile-src/generic_core/core.js'
-              'node_modules/uproxy-lib/dist/handler/queue.js'
-            ]
-        options:
-          specs: 'build/compile-src/generic_core/**/*.spec.js'
-          # NOTE: Put any helper test-data files here:
-          keepRunner: true
-          outfile: 'build/compile-src/generic_core/SpecRunner.html'
-          helpers: []
-          template: require('grunt-template-jasmine-istanbul')
-          templateOptions:
-            coverage: 'build/coverage/generic_core/coverage.json'
-            report:
-              type: 'html'
-              options:
-                dir: 'build/coverage/generic_core'
-      }
-
-      generic_ui: {
-        src: FILES.jasmine_helpers
-            .concat FILES.uproxy_common.map((s) -> 'build/compile-src/' + s)
-            .concat [
-              'build/compile-src/generic_ui/scripts/user.js'
-              'build/compile-src/generic_ui/scripts/ui.js'
-            ]
-        options:
-          specs: 'build/compile-src/generic_ui/scripts/**/*.spec.js'
-          template: require('grunt-template-jasmine-istanbul')
-          outfile: 'build/compile-src/generic_ui/SpecRunner.html'
-          templateOptions:
-            coverage: 'build/coverage/generic_ui/coverage.json'
-            report:
-              type: 'html'
-              options:
-                dir: 'build/coverage/generic_ui'
-      }
+      chrome_extension: Rule.jasmineSpec 'chrome/extension/scripts/'
+      generic_core: Rule.jasmineSpec 'generic_core'
+      generic_ui: Rule.jasmineSpec('generic_ui/scripts',
+          [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')]);
 
 
     jasmine_chromeapp: {

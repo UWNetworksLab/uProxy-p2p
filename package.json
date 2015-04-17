@@ -17,6 +17,7 @@
     }
   ],
   "devDependencies": {
+    "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
     "es6-promise": "^2.0.0",
     "freedom-for-chrome": "^0.4.11",
