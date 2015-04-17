@@ -3,32 +3,34 @@
  */
 
 var Request = require("sdk/request").Request;
+const {XMLHttpRequest} = require("sdk/net/xhr");
 
+var frontDomain_ = 'https://a0.awsstatic.com/';
 var xhr = {
-  var frontDomain_ = 'https://a0.awsstatic.com/';
-
-  var httpPost = function (url, data, useDomainFronting) {
-    var requestHeaders = {};
-    var removeSendHeaderListener = function(){};
-
-    if (useDomainFronting) {
-      requestHeaders = {'Host': url};
-      url = frontDomain_;
-    }
-
+  httpPost : function (url, data, cloudfrontDomain, cloudfrontPath) {
     return new Promise(function (fulfill, reject) {
-      Request({
-        url: url,
-        content: JSON.stringify(data),
-        headers: requestHeaders,
-        onComplete: function (response) {
-          if (response.status == 200) {
+      var request = new XMLHttpRequest();
+      request.onreadystatechange = function() {
+        console.log('state changed: ' + request.readyState + ' ' + request.status);
+        if (request.readyState == 4) {
+          if (request.status == 200) {
             fulfill();
           } else {
-            reject(new Error('POST failed with HTTP code ' + response.status));
+            reject(new Error('POST failed with HTTP code ' + request.status));
           }
         }
-      }).post();
+      }
+      var params = JSON.stringify(data);
+
+      if (cloudfrontDomain) {
+        request.open('POST', frontDomain_ + cloudfrontPath, true);
+        request.setRequestHeader('Host', cloudfrontDomain);
+        console.log('making request to: ' + frontDomain_ + cloudfrontPath);
+      } else {
+        request.open('POST', url, true);
+        console.log('making request to: ' + url);
+      }
+      request.send(params);
     });
   }
 };

@@ -71,8 +71,8 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public httpPost = (url :string, data :any, useDomainFronting: boolean) : Promise<void> => {
-    return this.promiseEmit('httpPost', { url: url, data: data, useDomainFronting: useDomainFronting });
+  public httpPost = (url :string, data :any, cloudfrontDomain = "", cloudfrontPath = "") : Promise<void> => {
+    return this.promiseEmit('httpPost', { url: url, data: data, cloudfrontDomain: cloudfrontDomain, cloudfrontPath: cloudfrontPath });
   }
 
   /**
@@ -85,7 +85,7 @@ class FirefoxBrowserApi implements BrowserAPI {
     var payload = {
       data: data,
       promiseId: promiseId
-    }
+    };
     console.log('Firefox expects promise fulfill/reject after emitting: ' + message,
         JSON.stringify(payload));
 

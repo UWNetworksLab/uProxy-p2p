@@ -92,27 +92,27 @@ function setUpConnection(freedom, panel, button) {
    * Install a handler for promise emits received from the panel.
    * Promise emits return an ack or error to the panel.
    */
-  var onPromiseEmit = (message, handler) => {
+  function onPromiseEmit(message, handler) {
+    console.log('on promise emit called');
     var promiseEmitHandler = function (args) {
       // Ensure promiseId is set for all requests
       if (!args.promiseId) {
         var err = 'onPromiseEmit called with message ' + message +
                   'with promiseId undefined';
-        log.error(err);
         return Promise.reject(new Error(err));
       }
 
       // Call handler function, then return success or failure to UI.
       handler(args.data).then(
-        (argsForCallback) => {
+        function (argsForCallback) {
           var fulfillData = {
             message: message,
             promiseId: args.promiseId,
             argsForCallback: argsForCallback
-          }
+          };
           panel.port.emit('emitFulfilled', fulfillData);
         },
-        (errorForCallback) => {
+        function (errorForCallback) {
           var rejectionData = {
             promiseId: args.promiseId,
             errorForCallback: errorForCallback.toString()
@@ -120,12 +120,17 @@ function setUpConnection(freedom, panel, button) {
           panel.port.emit('emitRejected', rejectionData);
         }
       );
-    };
-    panel.port.on(message, promiseEmitHandler);
-  }
+    }.bind(this);
 
-  var post = function(url, data, useDomainFronting) {
-    return xhr.httpPost(url, data, useDomainFronting);
+    panel.port.on(message, function(args) {
+      console.log(args.data);
+      promiseEmitHandler(args);
+    }.bind(this));
+  };
+
+  function post(data) {
+    console.log('calling xhr.httpPost ' + data.cloudfrontDomain + ' ' + data.cloudfrontPath);
+    return xhr.httpPost(data.url, data.data, data.cloudfrontDomain, data.cloudfrontPath);
   };
 
   // Ensure a fulfill or reject message will be sent back to the panel
