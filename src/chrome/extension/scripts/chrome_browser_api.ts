@@ -205,9 +205,6 @@ class ChromeBrowserApi implements BrowserAPI {
     // Set the Cloudfront destination as the Host in the request header,
     // hiding the Cloudfront URL from observers but still informing
     // the external domain (e.g. AWS) where the request should be forwarded.
-    // Since this is the callback passed to chrome's onBeforeSendHeaders,
-    // the function is called and modifies request headers before POSTs are
-    // sent.
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
@@ -216,8 +213,10 @@ class ChromeBrowserApi implements BrowserAPI {
       return { requestHeaders: details.requestHeaders };
     };
 
+    // Call setHostInHeader before sending POST requests by adding
+    // a listener to chrome's onBeforeSendHeaders.
     chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
-      urls: [externalDomain + "*"]
+      urls: [externalDomain + "*"] /* URLs this listener applies to. */
     }, ['requestHeaders', 'blocking']);
 
     var removeSendHeaderListener = () => {
