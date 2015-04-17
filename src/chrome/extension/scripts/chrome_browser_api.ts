@@ -205,7 +205,10 @@ class ChromeBrowserApi implements BrowserAPI {
                      data :any,
                      cloudfrontDomain = "",
                      cloudfrontPath = "") : Promise<void> => {
-    var destinationUrl = url;
+    var requestUrl = url;
+    // setHostInHeader is needed for domain fronted requests. The true
+    // destination is set as the Host in the request header (instead of as the
+    // url when the xhr is opened).
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
@@ -218,7 +221,7 @@ class ChromeBrowserApi implements BrowserAPI {
       // Only the front domain is exposed on the wire. The cloudfrontPath
       // should be encrypted. The cloudfrontPath needs to be here and not
       // in the Host header, which can only take a host name.
-      destinationUrl = this.frontDomain + cloudfrontPath;
+      requestUrl = this.frontDomain + cloudfrontPath;
       chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
         urls: [this.frontDomain + "*"]
       }, ['requestHeaders', 'blocking']);
@@ -242,7 +245,7 @@ class ChromeBrowserApi implements BrowserAPI {
         }
       }
       var params = JSON.stringify(data);
-      xhr.open('POST', destinationUrl, true);
+      xhr.open('POST', requestUrl, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);
   }

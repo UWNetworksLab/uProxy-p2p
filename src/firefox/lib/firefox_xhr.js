@@ -27,6 +27,7 @@ var xhr = {
         // should be encrypted. The cloudfrontPath needs to be here and not
         // in the Host header, which can only take a host name.
         request.open('POST', frontDomain + cloudfrontPath, true);
+        // The true destination address is set as the Host in the header.
         request.setRequestHeader('Host', cloudfrontDomain);
       } else {
         request.open('POST', url, true);
