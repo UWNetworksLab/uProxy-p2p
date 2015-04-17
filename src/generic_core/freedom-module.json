@@ -3,6 +3,7 @@
   "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
   "app": {
     "script": [
+      "../bower/lodash/lodash.min.js",
       "freedom-module.static.js"
     ]
   },
@@ -18,12 +19,16 @@
     "loggingcontroller": {
       "url": "../uproxy-lib/loggingprovider/freedom-module.json",
       "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "../uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "logginglistener"
     }
   },
   "permissions": [
     "core.rtcpeerconnection",
     "core.rtcdatachannel",
-    "core.storage"
+    "core.storage",
     "core.tcpsocket",
     "core.udpsocket",
     "core.xhr"

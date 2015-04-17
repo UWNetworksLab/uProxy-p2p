@@ -6,7 +6,7 @@ import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import ChromeUIConnector = require('./chrome_ui_connector');
 
 class Chrome_oauth {
-  constructor(private connector_:ChromeUIConnector) {}
+  constructor(private options_:{connector:ChromeUIConnector;}) {}
 
   public initiateOAuth(
       redirectURIs:{[urls:string]:string},
@@ -40,10 +40,10 @@ class Chrome_oauth {
       authUrl:string,
       stateObj:{redirect:string},
       continuation:(credentials:Object)=> void) {
-    this.connector_.sendToUI(
+    this.options_.connector.sendToUI(
         uproxy_core_api.Update.GET_CREDENTIALS,
         {url :authUrl, redirect :stateObj.redirect});
-    this.connector_.setOnCredentials(continuation);
+    this.options_.connector.setOnCredentials(continuation);
   }
 
 }  // class Chrome_oauth

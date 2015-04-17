@@ -1,8 +1,8 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-import ui_constants = require('../../interfaces/ui');
 import social = require('../../interfaces/social');
+import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 
 interface button_description {
@@ -23,11 +23,11 @@ Polymer({
     heading: '',
     buttons: []
   },
-  updateView: function(e :Event, detail :{ view :ui_constants.View }) {
+  updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == ui_constants.View.ROSTER && browserified_exports.ui.view == ui_constants.View.SPLASH) {
+    if (detail.view == ui_types.View.ROSTER && browserified_exports.ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
       this.closeSettings();
       this.$.modeTabs.updateBar();
@@ -39,14 +39,14 @@ Polymer({
   },
   rosterView: function() {
     console.log('rosterView called');
-    browserified_exports.ui.view = ui_constants.View.ROSTER;
+    browserified_exports.ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
-    browserified_exports.model.globalSettings.mode = ui_constants.Mode.GET;
+    browserified_exports.model.globalSettings.mode = ui_types.Mode.GET;
     browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   setShareMode: function() {
-    browserified_exports.model.globalSettings.mode = ui_constants.Mode.SHARE;
+    browserified_exports.model.globalSettings.mode = ui_types.Mode.SHARE;
     browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   closedWelcome: function() {
@@ -58,7 +58,7 @@ Polymer({
     browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   dismissCopyPasteError: function() {
-    browserified_exports.ui.copyPasteError = ui_constants.CopyPasteError.NONE;
+    browserified_exports.ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
   openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
@@ -91,7 +91,7 @@ Polymer({
   ready: function() {
     // Expose global ui object and UI module in this context.
     this.ui = browserified_exports.ui;
-    this.ui_constants = ui_constants;
+    this.ui_constants = browserified_exports.ui_constants;
     this.user_interface = user_interface;
     this.model = browserified_exports.model;
     this.closeToastTimeout = null;

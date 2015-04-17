@@ -35,9 +35,11 @@ taskManager.add 'build_chrome_ext', [
   'base'
   'copy:generic_ui_to_chrome'
   #'symlink:polymerLibToChromeExt'
-  #'vulcanize:chromeExtInline'
-  #'vulcanize:chromeExtCsp'
+  'vulcanize:chromeExtInline'
+  'vulcanize:chromeExtCsp'
   'copy:chrome_extension'
+  'browserify:chromeExtMain'
+  'browserify:chromeContext'
   # 'shell:extract_chrome_tests'
 ]
 
@@ -173,9 +175,8 @@ FILES =
   ]
   # Files which are required at run-time everywhere.
   uproxy_common: [
-    'uproxy.js'
-    'generic/version.js'
-    'third_party/lib/lodash/lodash.min.js'
+    'version/version.js'
+    '../../third_party/bower/lodash/lodash.min.js'
   ]
 
   uproxy_networking_common: [
@@ -353,9 +354,19 @@ module.exports = (grunt) ->
           src: ['**', '!**/*.md', '!**/*.ts', '!polymer/*.html']
           dest: chromeExtDevPath
         }, {
+          # generic_ui stuff
+          expand: true, cwd: devBuildPath + '/generic_ui'
+          src: ['**/*.js']
+          dest: devBuildPath + '/chrome/generic_ui'
+        }, {
+          #interfaces
+          expand: true, cwd: devBuildPath + '/interfaces'
+          src: ['**/*.js']
+          dest: devBuildPath + '/chrome/interfaces'
+        }, {
           # generic_ui compiled source.
           # (Assumes the typescript task has executed)
-          expand: true, cwd: 'build/compile-src/generic_ui'
+          expand: true, cwd: devBuildPath + '/generic_ui'
           src: ['scripts/**', '*.html', '!**/*.ts']
           dest: chromeExtDevPath
         }, {
@@ -364,11 +375,8 @@ module.exports = (grunt) ->
           src: ['icons/*', 'fonts/*']
           dest: chromeExtDevPath
         }, {
-          expand: true, cwd: 'build/compile-src/', flatten: true
+          expand: true, cwd: devBuildPath, flatten: true
           src: FILES.uproxy_common
-            .concat [
-              'chrome/extension/scripts/*.js'
-            ]
           dest: chromeExtDevPath + 'scripts/'
         }, {
           # Copy third party UI files required for polymer.
@@ -594,6 +602,8 @@ module.exports = (grunt) ->
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
+      chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
+      chromeContext: Rule.browserify 'chrome/extension/scripts/context'
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'

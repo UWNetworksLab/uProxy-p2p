@@ -10,7 +10,7 @@ import uproxy_chrome = require('../../../interfaces/chrome');
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var installedFreedomHooks :number[];
+var installedFreedomHooks :number[] = [];
 
 class ChromeUIConnector {
 
@@ -85,7 +85,7 @@ class ChromeUIConnector {
   // Receive a message from the extension.
   // This usually installs freedom handlers.
   private onExtMsg_ = (msg :browser_connector.Payload) => {
-    console.log('extension message: ', msg);
+    console.log('[chrome ui connector] Extension message: ', uproxy_core_api.Command[msg.type]);
     var msgType = '' + msg.type;
     // Pass 'emit's from the UI to Core.
     if ('emit' == msg.cmd) {
@@ -96,12 +96,13 @@ class ChromeUIConnector {
         chrome.runtime.reload();
       }
       this.uProxyAppChannel_.emit(msgType,
-                            <browser_connector.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
+          {data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
       if (installedFreedomHooks.indexOf(msg.type) >= 0) {
-        console.log('freedom already has a hook for ' + msg.type);
+        console.error('[chrome ui connector] Freedom already has a hook for ' +
+            uproxy_core_api.Command[msg.type]);
         return;
       }
       installedFreedomHooks.push(msg.type);

@@ -18,16 +18,19 @@ export interface OnEmitModuleFactory extends
   freedom_types.FreedomModuleFactoryManager<OnEmitModule> {};
 
 // Remember which handlers freedom has installed.
-var connector :ChromeUIConnector;
+var oauthOptions :{connector:ChromeUIConnector;} = {
+  connector: null
+};
 var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
 
 freedom('generic_core/freedom-module.json', {
-  'logger': 'uproxy-lib/loggingprovider/loggingprovider.json',
+  'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
-  'oauth': [() => { return new Chrome_oauth(connector); }]
+  'portType': 'frame',
+  'oauth': [() => { return new Chrome_oauth(oauthOptions); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();
-  connector = new ChromeUIConnector(uProxyAppChannel);
+  oauthOptions.connector = new ChromeUIConnector(uProxyAppChannel);
 });
 
 // Reply to pings from the uproxy website that are checking if the

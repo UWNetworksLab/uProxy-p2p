@@ -14,7 +14,7 @@ import Persistent = require('../interfaces/persistent');
 var log :logging.Log = new logging.Log('storage');
 
   // Platform-independent storage provider.
-  var fStorage :freedom_Storage = freedom['storage']();
+  var fStorage :freedom_Storage = freedom['core.storage']();
 
   // Set false elsewhere to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;

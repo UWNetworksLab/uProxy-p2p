@@ -109,15 +109,16 @@ class MockLoggingProvider {
 
 var freedom = () => {
   return new MockChannel();
-}
-freedom['storage'] = () => { return new MockStorage({}); };
+};
+
+freedom['core.storage'] = () => { return new MockStorage({}); };
 var mockSocial = () => { return new MockSocial(); };
 mockSocial['api'] = 'social';
 mockSocial['manifest'] = 'I have no manifest :)';
 
 freedom['loggers'] = {};
 freedom['core'] = () => { return new MockCore(); };
-freedom['loggingprovider'] = () => { return new MockLoggingProvider(); };
+freedom['loggingcontroller'] = () => { return new MockLoggingProvider(); };
 freedom['core.rtcpeerconnection'] = () => { return new MockCorePeerConnection(); };
 freedom['SOCIAL-websocket'] = mockSocial;
 
