@@ -219,7 +219,7 @@ class ChromeBrowserApi implements BrowserAPI {
 
     var removeSendHeaderListener = () => {
       // Remove the functionality of setHostInHeader after we're done with our
-      // post so that we don't interfere with any other requests.
+      // POST so that we don't interfere with any other requests.
       // This will be called after the POST has succeeded or failed.
       chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
     };
@@ -236,6 +236,9 @@ class ChromeBrowserApi implements BrowserAPI {
         }
       }
       var params = JSON.stringify(data);
+      // Only the front domain is exposed on the wire. The cloudfrontPath
+      // should be encrypted. The cloudfrontPath needs to be here and not
+      // in the Host header, which can only take a host name.
       xhr.open('POST', externalDomain + cloudfrontPath, true);
       xhr.send(params);
     }).then(removeSendHeaderListener, removeSendHeaderListener);

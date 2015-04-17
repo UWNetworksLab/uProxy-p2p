@@ -17,17 +17,7 @@ var xhr = {
       request.onerror = function(){
         reject(new Error('POST failed with HTTP code ' + request.status));
       };
-      /*request.onreadystatechange = function() {
-          if (request.readyState == 4) {
-            if (request.status == 200) {
-            fulfill();
-          } else {
-
-          }
-        }
-      }*/
       var params = JSON.stringify(data);
-
       cloudfrontPath = cloudfrontPath || '';
       // Only the front domain is exposed on the wire. The cloudfrontPath
       // should be encrypted. The cloudfrontPath needs to be here and not
