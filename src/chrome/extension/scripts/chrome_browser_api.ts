@@ -203,8 +203,11 @@ class ChromeBrowserApi implements BrowserAPI {
                         cloudfrontDomain :string,
                         cloudfrontPath = "") : Promise<void> => {
     // Set the Cloudfront destination as the Host in the request header,
-    // hiding the cloudfront URL from observers but still informing
+    // hiding the Cloudfront URL from observers but still informing
     // the external domain (e.g. AWS) where the request should be forwarded.
+    // Since this is the callback passed to chrome's onBeforeSendHeaders,
+    // the function is called and modifies request headers before POSTs are
+    // sent.
     var setHostInHeader = (details) => {
       details.requestHeaders.push({
         name: 'Host',
