@@ -102,7 +102,7 @@ function setUpConnection(freedom, panel, button) {
         return Promise.reject(new Error(err));
       }
 
-      // Call handler function, then return success or failure to UI.
+      // Call handler function, then return success or failure to the panel.
       handler(args.data).then(
         function (argsForCallback) {
           var fulfillData = {
@@ -123,14 +123,13 @@ function setUpConnection(freedom, panel, button) {
     }.bind(this);
 
     panel.port.on(message, function(args) {
-      console.log(args.data);
       promiseEmitHandler(args);
     }.bind(this));
   };
 
   function post(data) {
-    console.log('calling xhr.httpPost ' + data.cloudfrontDomain + ' ' + data.cloudfrontPath);
-    return xhr.httpPost(data.url, data.data, data.cloudfrontDomain, data.cloudfrontPath);
+    return xhr.httpPost(data.url, data.data, data.cloudfrontDomain,
+        data.cloudfrontPath);
   };
 
   // Ensure a fulfill or reject message will be sent back to the panel
