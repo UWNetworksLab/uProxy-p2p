@@ -40,7 +40,8 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
-  # 'shell:extract_chrome_tests'
+  'browserify:chromeVulcanized'
+  'string-replace:vulcanized'
 ]
 
 taskManager.add 'build_chrome', [
@@ -147,7 +148,7 @@ firefoxDevPath = path.join(devBuildPath, 'chrome/firefox/')
 browserifyIntegrationTest = (path) ->
   Rule.browserifySpec(path, {
     browserifyOptions: { standalone: 'browserified_exports' }
-  });
+  })
 
 #-------------------------------------------------------------------------
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
@@ -380,7 +381,7 @@ module.exports = (grunt) ->
           dest: chromeExtDevPath + 'scripts/'
         }, {
           # Copy third party UI files required for polymer.
-          expand: true, cwd: 'third_party/lib'
+          expand: true, cwd: 'build/third_party/bower'
           src: FILES.thirdPartyUi
           dest: chromeExtDevPath + 'lib'
         }, {
@@ -558,6 +559,21 @@ module.exports = (grunt) ->
               'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
               'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
           }]
+      vulcanized:
+        files: [
+          {
+            src: path.join(chromeExtDevPath, 'polymer/vulcanized.html')
+            dest: path.join(chromeExtDevPath, 'polymer/vulcanized.html')
+          }
+        ]
+        options:
+          replacements: [{
+            pattern: /vulcanized\.js/
+            replacement: 'vulcanized.static.js'
+          }, {
+            pattern: /<script src=\"[a-zA-Z_./]+third_party\/bower\/([^"]+)"><\/script>/
+            replacement: '<script src="../lib/$1"></script>'
+          }]
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
@@ -604,6 +620,7 @@ module.exports = (grunt) ->
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
       chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
       chromeContext: Rule.browserify 'chrome/extension/scripts/context'
+      chromeVulcanized: Rule.browserify('chrome/extension/polymer/vulcanized', {})# no exports from this
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
@@ -663,13 +680,23 @@ module.exports = (grunt) ->
 
     vulcanize:
       chromeExtInline:
-        options: { inline: true }
+        options:
+          inline: true
+          excludes:
+            scripts: [
+              'polymer.js'
+            ]
         files: [{
           src: chromeExtDevPath + 'polymer/root.html'
           dest: 'build/dev/uproxy/chrome/extension/polymer/vulcanized-inline.html'
         }]
       chromeExtCsp:
-        options: { csp: true }
+        options:
+          csp: true
+          excludes:
+            scripts: [
+              'polymer.js'
+            ]
         files: [{
           src: chromeExtDevPath + '/polymer/vulcanized-inline.html'
           dest: 'build/dev/uproxy/chrome/extension/polymer/vulcanized.html'

@@ -2,7 +2,6 @@
 //import ui_constants = require('../../interfaces/ui');
 
 interface StaticInPanel {
-  ui_constants: any;
   ui :any;
   core :any;
   model :any;

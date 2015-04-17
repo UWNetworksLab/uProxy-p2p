@@ -3,11 +3,9 @@
 import core_connector = require('../../../generic_ui/scripts/core_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
-import UI = require('../../../generic_ui/scripts/ui');
+import user_interface = require('../../../generic_ui/scripts/ui');
 import chromeInterface = require('../../../interfaces/chrome');
-
-declare var core :CoreConnector;
-declare var model :UI.Model;
+import background = require('./background');
 
 // TODO: write a similar class for Firefox that will implement a common
 // interface as Chrome
@@ -26,7 +24,7 @@ class ChromeTabAuth {
   }
 
   public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
-    if (model.reconnecting && this.lastOAuthURL_) {
+    if (user_interface.model.reconnecting && this.lastOAuthURL_) {
       this.sendCredentials_(this.lastOAuthURL_);
     } else {
       this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
@@ -52,11 +50,11 @@ class ChromeTabAuth {
   }
 
   private onError_ = (errorText :string) : void => {
-    core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
+    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
   }
 
   private sendCredentials_ = (url :string) : void => {
-    core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
+    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
 
