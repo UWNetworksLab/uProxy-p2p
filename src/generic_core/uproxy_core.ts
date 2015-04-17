@@ -29,7 +29,7 @@ log.info('Loading core', version.UPROXY_VERSION);
 var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
-    loggingTypes.Level.info);
+    loggingTypes.Level.warning);
 loggingController.setDefaultFilter(
     loggingTypes.Destination.buffered,
     loggingTypes.Level.debug);
