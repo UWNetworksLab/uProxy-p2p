@@ -11,16 +11,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/uproxy.js",
-      "scripts/user.js",
-      "scripts/ui.js",
-      "scripts/chrome_browser_api.js",
-      "scripts/core_connector.js",
-      "scripts/chrome_tab_auth.js",
-      "scripts/chrome_core_connector.js",
-      "scripts/background.js",
-      "scripts/version.js",
-      "scripts/lodash.min.js"
+      "scripts/background.static.js"
     ]
   },
   "browser_action": {
