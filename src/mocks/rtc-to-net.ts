@@ -8,11 +8,11 @@ export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
 
   public resolveReady :() => void;
   public rejectReady :(v :Object) => void;
-  public resolveClosed :() => void;
-  public rejectClosed :(v :Object) => void;
+  public resolveStopped :() => void;
+  public rejectStopped :(v :Object) => void;
 
   public onceReady :Promise<void>;
-  public onceClosed :Promise<void>;
+  public onceStopped :Promise<void>;
 
   constructor() {
     this.onceReady = new Promise<void>((resolve, reject) => {
@@ -20,9 +20,9 @@ export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
       this.rejectReady = reject;
     });
 
-    this.onceClosed = new Promise<void>((resolve, reject) => {
-      this.resolveClosed = resolve;
-      this.rejectClosed = reject;
+    this.onceStopped = new Promise<void>((resolve, reject) => {
+      this.resolveStopped = resolve;
+      this.rejectStopped = reject;
     });
 
   }
@@ -37,7 +37,4 @@ export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
   }
 
   public startFromConfig = () => {}
-
-  public onceStopped = new Promise(() => {});
-
 }

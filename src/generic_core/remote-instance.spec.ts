@@ -154,7 +154,9 @@ describe('remote_instance.RemoteInstance', () => {
       },
       // TODO: remove onceStopping_ when
       // https://github.com/uProxy/uproxy/issues/1264 is resolved.
-      'onceStopping_': new Promise((F, R) => {})
+      'onceStopping_': new Promise((F, R) => {}),
+      'handleSignalFromPeer': () => {},
+      'startFromConfig' : () => { return Promise.resolve()}
     };
 
     it('can start proxying', (done) => {
@@ -221,19 +223,20 @@ describe('remote_instance.RemoteInstance', () => {
     var fakeSocksToRtc = {
       'handleSignalFromPeer': () => {},
       'on': () => {},
-      'start': () => { return Promise.resolve(); },
+      'startFromConfig': () => { return Promise.resolve(); },
       'stop': () => { return Promise.resolve(); },
       // TODO: remove onceStopping_ when
       // https://github.com/uProxy/uproxy/issues/1264 is resolved.
-      'onceStopping_': new Promise((F, R) => {})
+      'onceStopping_': new Promise((F, R) => {}),
     };
     var fakeRtcToNet = {
       'handleSignalFromPeer': () => {},
-      'onceClosed': new Promise((F, R) => {}),  // return unresolved promise
+      'onceStopped': new Promise((F, R) => {}),  // return unresolved promise
       'signalsForPeer': {setSyncHandler: () => {}},
       'bytesReceivedFromPeer': {setSyncHandler: () => {}},
       'bytesSentToPeer': {setSyncHandler: () => {}},
-      'onceReady': new Promise((F, R) => {})  // return unresolved promise
+      'onceReady': new Promise((F, R) => {}),  // return unresolved promise
+      'startFromConfig': () => {}
     };
     var fakeOffer :signals.Message = {
       type: signals.Type.OFFER,
