@@ -194,7 +194,7 @@ import ui = ui_connector.connector;
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) :remote_user.User => {
+    public addUser = (userId :string) :remote_user.User => {
       if (!this.isNewFriend_(userId)) {
         log.error('Cannot add already existing user', userId);
       }
@@ -211,7 +211,7 @@ import ui = ui_connector.connector;
      */
     protected getOrAddUser_ = (userId :string) :remote_user.User => {
       if (this.isNewFriend_(userId)) {
-        return this.addUser_(userId);
+        return this.addUser(userId);
       }
       return this.getUser(userId);
     }
@@ -459,7 +459,7 @@ import ui = ui_connector.connector;
           if (keys[i].indexOf(myKey) === 0) {
             var userId = keys[i].substr(myKey.length);
             if (this.isNewFriend_(userId)) {
-              this.addUser_(userId);
+              this.addUser(userId);
             }
           }
         }

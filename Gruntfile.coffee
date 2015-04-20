@@ -592,7 +592,8 @@ module.exports = (grunt) ->
     #-------------------------------------------------------------------------
     jasmine:
       chrome_extension: Rule.jasmineSpec 'chrome/extension/scripts/'
-      generic_core: Rule.jasmineSpec 'generic_core'
+      generic_core: Rule.jasmineSpec('generic_core',
+          [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')]);
       generic_ui: Rule.jasmineSpec('generic_ui/scripts',
           [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')]);
 
