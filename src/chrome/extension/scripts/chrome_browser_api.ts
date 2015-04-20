@@ -67,10 +67,7 @@ class ChromeBrowserApi implements BrowserAPI {
       }
     };
 
-    // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
-    // is why we employ a hacky thing here.
-    // https://github.com/uProxy/uproxy/issues/374
-    (<any>chrome.proxy.settings).clear({scope: 'regular'});
+    chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.windows.onRemoved.addListener((closedWindowId) => {
       // If either the window launching uProxy, or the popup with uProxy
