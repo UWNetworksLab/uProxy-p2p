@@ -12,7 +12,7 @@ import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mo
 import freedom_mocks = require('../mocks/freedom-mocks');
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
     'core.storage': () => { return new freedom_mocks.MockStorage(); },
-    'loggingcontroller': () => { return new freedomMocker.MockModuleSelfConstructor(); }
+    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); }
 });
 
 import social = require('../interfaces/social');

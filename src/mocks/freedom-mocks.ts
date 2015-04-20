@@ -46,3 +46,7 @@ export class MockStorage implements freedom_Storage {
   }
 
 }  // class MockStorage
+
+export class MockLoggingController {
+  public setDefaultFilter = (destination :number, level :number) => {}
+}

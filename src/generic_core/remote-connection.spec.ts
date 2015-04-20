@@ -154,7 +154,7 @@ describe('remote_connection.RemoteConnection', () => {
 
     });
   });
-/*
+
   describe('signal handling', () => {
     it('signal from client with no setup', () => {
       spyOn(rtcToNet, 'handleSignalFromPeer');
@@ -182,5 +182,5 @@ describe('remote_connection.RemoteConnection', () => {
       expect(socksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
     });
   });
-*/
+
 });

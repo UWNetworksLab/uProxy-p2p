@@ -60,9 +60,11 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
     // TODO: should probably either return something or throw errors
     public handleSignal = (message :social.PeerMessage) => {
-      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === message.type) {
+      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === message.type
+          && this.rtcToNet_) {
         this.rtcToNet_.handleSignalFromPeer(<signals.Message>message.data);
-      } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === message.type) {
+      } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === message.type
+                 && this.socksToRtc_) {
         this.socksToRtc_.handleSignalFromPeer(<signals.Message>message.data);
       } else {
         log.warn('Invalid signal: ', social.PeerMessageType[message.type]);
