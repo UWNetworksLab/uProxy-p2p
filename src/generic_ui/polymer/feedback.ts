@@ -54,7 +54,7 @@ Polymer({
     });
   },
   viewLogs: function() {
-    this.ui.openTab('view-logs.html');
+    this.ui.openTab('generic_ui/view-logs.html');
   },
   ready: function() {
     this.ui = browserified_exports.ui;

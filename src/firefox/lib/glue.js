@@ -8,7 +8,7 @@
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
-var uProxy = require('uproxy.js').uProxy;
+var uproxy_core_api = require('./interfaces/uproxy_core_api.js');
 var { Ci, Cc, Cr } = require("chrome");
 var self = require("sdk/self");
 var events = require("sdk/system/events");
@@ -35,15 +35,15 @@ function setUpConnection(freedom, panel, button) {
   }
 
   // Set up listeners between core and ui.
-  for (var command in uProxy.Command) {
-    if (typeof uProxy.Command[command] === 'number') {
-      connect('' + uProxy.Command[command], panel.port, freedom);
+  for (var command in uproxy_core_api.Command) {
+    if (typeof uproxy_core_api.Command[command] === 'number') {
+      connect('' + uproxy_core_api.Command[command], panel.port, freedom);
     }
   }
 
-  for (var update in uProxy.Update) {
-    if (typeof uProxy.Update[update] === 'number') {
-      connect('' + uProxy.Update[update], freedom, panel.port);
+  for (var update in uproxy_core_api.Update) {
+    if (typeof uproxy_core_api.Update[update] === 'number') {
+      connect('' + uproxy_core_api.Update[update], freedom, panel.port);
     }
   }
 
@@ -89,15 +89,15 @@ function setUpConnection(freedom, panel, button) {
 
   /* Allow any pages in the addon to send messages to the UI or the core */
   pagemod.PageMod({
-    include: self.data.url('*'),
+    include: self.data.url('very-much-not-index.html'),
     contentScriptFile: self.data.url('scripts/content-proxy.js'),
     onAttach: function(worker) {
       worker.port.on('update', function(data) {
-        panel.port.emit(uProxy.Update[data.update], data.data);
+        panel.port.emit(uproxy_core_api.Update[data.update], data.data);
       });
 
       worker.port.on('command', function(data) {
-        freedom.emit(uProxy.Command[data.command], data.data);
+        freedom.emit(uproxy_core_api.Command[data.command], data.data);
       });
 
       // If we receive a getLogs message from a webpage (specifically
@@ -105,19 +105,19 @@ function setUpConnection(freedom, panel, button) {
       // the returned value when it is being passed to the UI with a
       // COMMAND_FULFILLED update.
       worker.port.on('getLogs', function(data) {
-        freedom.emit(uProxy.Command.GET_LOGS, {data: data.data, promiseId: -1});
+        freedom.emit(uproxy_core_api.Command.GET_LOGS, {data: data.data, promiseId: -1});
         var forwardLogsToContentScript = function(data) {
-          if (data['command'] == uProxy.Command.GET_LOGS) {
+          if (data['command'] == uproxy_core_api.Command.GET_LOGS) {
             // Forward logs to content-proxy.js
             worker.port.emit('message', {
               logs: true,
               data: data.argsForCallback
             });
-            freedom.off(uProxy.Update.COMMAND_FULFILLED,
+            freedom.off(uproxy_core_api.Update.COMMAND_FULFILLED,
               forwardLogsToContentScript);
           }
         };
-        freedom.on(uProxy.Update.COMMAND_FULFILLED, forwardLogsToContentScript);
+        freedom.on(uproxy_core_api.Update.COMMAND_FULFILLED, forwardLogsToContentScript);
       });
 
       worker.port.on('showPanel', function(data) {
