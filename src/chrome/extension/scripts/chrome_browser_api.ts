@@ -228,15 +228,12 @@ class ChromeBrowserApi implements BrowserAPI {
 
     return new Promise<void>((fulfill, reject) => {
       var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-          if (xhr.status == 200) {
-            fulfill();
-          } else {
-            reject(new Error('POST failed with HTTP code ' + xhr.status));
-          }
-        }
-      }
+      xhr.onload = function(){
+        fulfill();
+      };
+      xhr.onerror = function(){
+        reject(new Error('POST failed with HTTP code ' + xhr.status));
+      };
       var params = JSON.stringify(data);
       // Only the front domain is exposed on the wire. The cloudfrontPath
       // should be encrypted. The cloudfrontPath needs to be here and not
