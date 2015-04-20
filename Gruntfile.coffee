@@ -71,7 +71,7 @@ taskManager.add 'build_firefox_xpi', [
 taskManager.add 'test_core', [
   'base'
   'browserify:genericCoreFirewallSpec'
-  'browserify:genericCoreFreedomModuleSpec'
+  'browserify:genericCoreUproxyCoreSpec'
   'browserify:genericCoreLocalInstanceSpec'
   'browserify:genericCoreRemoteInstanceSpec'
   'browserify:genericCoreRemoteConnectionSpec'
@@ -574,7 +574,7 @@ module.exports = (grunt) ->
       genericCoreFirewall: Rule.browserify 'generic_core/firewall'
       genericCoreFirewallSpec: Rule.browserifySpec 'generic_core/firewall'
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
-      genericCoreFreedomModuleSpec: Rule.browserifySpec 'generic_core/freedom-module'
+      genericCoreUproxyCoreSpec: Rule.browserifySpec 'generic_core/uproxy_core'
       genericCoreLocalInstanceSpec: Rule.browserifySpec 'generic_core/local-instance'
       genericCoreRemoteConnectionSpec: Rule.browserifySpec 'generic_core/remote-connection'
       genericCoreRemoteInstanceSpec: Rule.browserifySpec 'generic_core/remote-instance'

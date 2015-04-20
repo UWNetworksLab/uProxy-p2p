@@ -7,6 +7,13 @@
  */
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+    'core.storage': () => { return new freedom_mocks.MockStorage(); },
+    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); }
+});
+
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
