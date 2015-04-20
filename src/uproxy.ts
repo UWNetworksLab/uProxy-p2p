@@ -41,7 +41,6 @@ module uProxy {
     HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
     SEND_CREDENTIALS,
     UPDATE_GLOBAL_SETTINGS,
-    SEND_FEEDBACK,
     GET_LOGS,
     GET_NAT_TYPE
   }
@@ -214,7 +213,6 @@ module uProxy {
     // TODO: use Event instead of attaching manual handler. This allows event
     // removal, etc.
     onUpdate(update :Update, handler :Function) : void;
-    sendFeedback(feedback :UserFeedback) : void;
   }
 
   /**

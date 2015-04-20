@@ -6,6 +6,7 @@
  */
 
 var proxyConfig = require('firefox_proxy_config.js').proxyConfig;
+var xhr = require('firefox_xhr.js').xhr;
 
 // TODO: rename uproxy.js/ts to uproxy-enums.js/ts
 var uProxy = require('uproxy.js').uProxy;
@@ -86,6 +87,54 @@ function setUpConnection(freedom, panel, button) {
       }
     });
   });
+
+  /**
+   * Install a handler for promise emits received from the panel.
+   * Promise emits return an ack or error to the panel.
+   */
+  function onPromiseEmit(message, handler) {
+    console.log('on promise emit called');
+    var promiseEmitHandler = function (args) {
+      // Ensure promiseId is set for all requests
+      if (!args.promiseId) {
+        var err = 'onPromiseEmit called with message ' + message +
+                  'with promiseId undefined';
+        return Promise.reject(new Error(err));
+      }
+
+      // Call handler function, then return success or failure to the panel.
+      handler(args.data).then(
+        function (argsForCallback) {
+          var fulfillData = {
+            message: message,
+            promiseId: args.promiseId,
+            argsForCallback: argsForCallback
+          };
+          panel.port.emit('emitFulfilled', fulfillData);
+        },
+        function (errorForCallback) {
+          var rejectionData = {
+            promiseId: args.promiseId,
+            errorForCallback: errorForCallback.toString()
+          };
+          panel.port.emit('emitRejected', rejectionData);
+        }
+      );
+    }.bind(this);
+
+    panel.port.on(message, function(args) {
+      promiseEmitHandler(args);
+    }.bind(this));
+  };
+
+  function post(data) {
+    return xhr.frontedPost(data.data, data.externalDomain,
+        data.cloudfrontDomain, data.cloudfrontPath);
+  };
+
+  // Ensure a fulfill or reject message will be sent back to the panel
+  // when required by registering messages that initiate async behaviour.
+  onPromiseEmit('frontedPost', post);
 
   /* Allow any pages in the addon to send messages to the UI or the core */
   pagemod.PageMod({

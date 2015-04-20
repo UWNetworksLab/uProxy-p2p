@@ -197,4 +197,49 @@ class ChromeBrowserApi implements BrowserAPI {
       notification.close();
     }, 5000);
   }
+
+  public frontedPost = (data :any,
+                        externalDomain :string,
+                        cloudfrontDomain :string,
+                        cloudfrontPath = "") : Promise<void> => {
+    // Set the Cloudfront destination as the Host in the request header,
+    // hiding the Cloudfront URL from observers but still informing
+    // the external domain (e.g. AWS) where the request should be forwarded.
+    var setHostInHeader = (details) => {
+      details.requestHeaders.push({
+        name: 'Host',
+        value: cloudfrontDomain
+      });
+      return { requestHeaders: details.requestHeaders };
+    };
+
+    // Call setHostInHeader before sending POST requests by adding
+    // a listener to chrome's onBeforeSendHeaders.
+    chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
+      urls: [externalDomain + "*"] /* URLs this listener applies to. */
+    }, ['requestHeaders', 'blocking']);
+
+    var removeSendHeaderListener = () => {
+      // Remove the functionality of setHostInHeader after we're done with our
+      // POST so that we don't interfere with any other requests.
+      // This will be called after the POST has succeeded or failed.
+      chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
+    };
+
+    return new Promise<void>((fulfill, reject) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function(){
+        fulfill();
+      };
+      xhr.onerror = function(){
+        reject(new Error('POST failed with HTTP code ' + xhr.status));
+      };
+      var params = JSON.stringify(data);
+      // Only the front domain is exposed on the wire. The cloudfrontPath
+      // should be encrypted. The cloudfrontPath needs to be here and not
+      // in the Host header, which can only take a host name.
+      xhr.open('POST', externalDomain + cloudfrontPath, true);
+      xhr.send(params);
+    }).then(removeSendHeaderListener, removeSendHeaderListener);
+  }
 }

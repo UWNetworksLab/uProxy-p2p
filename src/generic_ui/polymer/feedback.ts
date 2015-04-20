@@ -13,7 +13,7 @@ Polymer({
   },
   sendFeedback: function() {
     this.$.sendingFeedbackDialog.open();
-    core.sendFeedback({
+    ui.sendFeedback({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,

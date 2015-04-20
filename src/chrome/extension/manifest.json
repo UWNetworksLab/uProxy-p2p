@@ -38,6 +38,7 @@
     "webRequest",
     "https://uproxy.org/request/*",
     "https://uproxy.org/offer/*",
+    "https://a0.awsstatic.com/",
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
