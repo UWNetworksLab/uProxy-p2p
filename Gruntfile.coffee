@@ -33,15 +33,14 @@ taskManager.add 'build_chrome_app', [
 
 taskManager.add 'build_chrome_ext', [
   'base'
-  'copy:generic_ui_to_chrome'
-  #'symlink:polymerLibToChromeExt'
+  'copy:chrome_extension'
+  'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
-  'copy:chrome_extension'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
   'browserify:chromeVulcanized'
-  'string-replace:vulcanized'
+  'string-replace:chromeExtVulcanized'
 ]
 
 taskManager.add 'build_chrome', [
@@ -52,12 +51,14 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add 'build_firefox', [
   'base'
-  'copy:generic_ui_to_firefox'
-  #'vulcanize:firefoxInline'
-  #'vulcanize:firefoxCsp'
+  #copy:generic_ui_to_firefox'
   'copy:firefox'
+  'vulcanize:firefoxInline'
+  'vulcanize:firefoxCsp'
+  'string-replace:firefoxVulcanized'
   'concat:firefox_uproxy'
   'concat:firefox_dependencies'
+  'browserify:firefoxVulcanized'
 ]
 
 taskManager.add 'build_firefox_xpi', [
@@ -136,7 +137,7 @@ Rule = new rules.Rule({
   # The path to copy modules from this repository into. e.g. as used by sample
   # apps.
   localLibsDestPath: localLibsDestPath
-});
+})
 
 #-------------------------------------------------------------------------
 chromeExtDevPath = path.join(devBuildPath, 'chrome/extension/')
@@ -204,6 +205,22 @@ FILES =
   ]
 
 #------------------------------------------------------------------------------
+finishVulcanized = (basePath) ->
+  files: [
+    {
+      src: path.join(basePath, '/polymer/vulcanized.html')
+      dest: path.join(basePath, '/polymer/vulcanized.html')
+    }
+  ]
+  options:
+    replacements: [{
+      pattern: /vulcanized\.js/
+      replacement: 'vulcanized.static.js'
+    }, {
+      pattern: /<script src=\"[a-zA-Z_./]+third_party\/bower\/([^"]+)"><\/script>/
+      replacement: '<script src="../lib/$1"></script>'
+    }]
+
 module.exports = (grunt) ->
   grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
@@ -329,68 +346,40 @@ module.exports = (grunt) ->
           }
         ]
 
-      # Copy compiled generic Polymer to Chrome so it can be vulcanized.
-      generic_ui_to_chrome:
-        nonull: true
-        files: [ {
-          expand: true, cwd: devBuildPath + '/generic_ui/polymer'
-          src: ['*.js', '*.html']
-          dest: chromeExtDevPath + 'polymer'
-        } ]
-
-      # Copy compiled generic Polymer to Firefox so it can be vulcanized.
-      generic_ui_to_firefox:
-        nonull: true
-        files: [ {
-          expand: true, cwd: devBuildPath + '/generic_ui/polymer'
-          src: ['*.js', '*.html']
-          dest: firefoxDevPath + 'data/polymer'
-        } ]
-
       chrome_extension:
-        nonull: true
-        files: [ {
-          # The platform specific non-compiled stuff, and...
-          expand: true, cwd: 'src/chrome/extension'
-          src: ['**', '!**/*.md', '!**/*.ts', '!polymer/*.html']
-          dest: chromeExtDevPath
-        }, {
-          # generic_ui stuff
-          expand: true, cwd: devBuildPath + '/generic_ui'
-          src: ['**/*.js']
-          dest: devBuildPath + '/chrome/generic_ui'
-        }, {
-          #interfaces
-          expand: true, cwd: devBuildPath + '/interfaces'
-          src: ['**/*.js']
-          dest: devBuildPath + '/chrome/interfaces'
-        }, {
-          # generic_ui compiled source.
-          # (Assumes the typescript task has executed)
-          expand: true, cwd: devBuildPath + '/generic_ui'
-          src: ['scripts/**', '*.html', '!**/*.ts']
-          dest: chromeExtDevPath
-        }, {
-          # Icons and fonts
-          expand: true, cwd: 'src/'
-          src: ['icons/*', 'fonts/*']
-          dest: chromeExtDevPath
-        }, {
-          expand: true, cwd: devBuildPath, flatten: true
-          src: FILES.uproxy_common
-          dest: chromeExtDevPath + 'scripts/'
-        }, {
-          # Copy third party UI files required for polymer.
-          expand: true, cwd: 'build/third_party/bower'
-          src: FILES.thirdPartyUi
-          dest: chromeExtDevPath + 'lib'
-        }, {
-          # Copy vulcanized files containing compiled Polymer
-          # code.
-          expand: true, cwd: 'build/compile-src/chrome/extension'
-          src: ['polymer/vulcanized.js', 'polymer/vulcanized.html']
-          dest: chromeExtDevPath
-        } ]
+        Rule.copyLibs
+          npmLibNames: [
+          ]
+          pathsFromDevBuild: [
+            'generic_ui'
+            'interfaces'
+            'icons'
+            'fonts'
+          ]
+          pathsFromThirdPartyBuild: [
+            'bower'
+          ]
+          files: [
+            {
+              expand: true, cwd: devBuildPath, flatten: true
+              src: FILES.uproxy_common
+              dest: chromeExtDevPath + '/generic_ui/scripts'
+            }
+            {
+              expand: true, cwd: devBuildPath, flatten: true
+              src: FILES.uproxy_common
+              dest: chromeExtDevPath + '/scripts'
+            }
+          ]
+          localDestPath: 'chrome/extension'
+      chrome_extension_additional:
+        files: [
+          { # copy chrome extension panel components from the background
+            expand: true, cwd: chromeExtDevPath
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*']
+            dest: chromeExtDevPath + '/generic_ui'
+          }
+        ]
 
       chrome_app:
         Rule.copyLibs
@@ -448,6 +437,7 @@ module.exports = (grunt) ->
           pathsFromDevBuild: [
             'generic_core'
             'generic_ui'
+            'interfaces'
           ]
           pathsFromThirdPartyBuild: [
             'bower'
@@ -470,6 +460,21 @@ module.exports = (grunt) ->
               expand: true, cwd: 'src/'
               src: ['icons/*', 'fonts/*']
               dest: firefoxDevPath + 'data/'
+            },
+            { # lib
+              expand: true, cwd: devBuildPath
+              src: ['interfaces/*.js']
+              dest: firefoxDevPath + '/lib'
+            },
+            {
+              expand: true, cwd: firefoxDevPath + '/data'
+              src: ['polymer/*']
+              dest: firefoxDevPath + '/data/generic_ui'
+            },
+            {
+              expand: true, cwd: 'build/third_party/bower'
+              src: FILES.thirdPartyUi
+              dest: firefoxDevPath + '/data/lib'
             }
           ]
           localDestPath: 'firefox/data'
@@ -510,21 +515,11 @@ module.exports = (grunt) ->
               'freedom-social-xmpp': '<%= pkgs.freedomxmpp.version %>'
               'freedom-social-firebase': '<%= pkgs.freedomfirebase.version %>'
           }]
-      vulcanized:
-        files: [
-          {
-            src: path.join(chromeExtDevPath, 'polymer/vulcanized.html')
-            dest: path.join(chromeExtDevPath, 'polymer/vulcanized.html')
-          }
-        ]
-        options:
-          replacements: [{
-            pattern: /vulcanized\.js/
-            replacement: 'vulcanized.static.js'
-          }, {
-            pattern: /<script src=\"[a-zA-Z_./]+third_party\/bower\/([^"]+)"><\/script>/
-            replacement: '<script src="../lib/$1"></script>'
-          }]
+      chromeExtVulcanized:
+        finishVulcanized(chromeExtDevPath + '/generic_ui')
+      firefoxVulcanized:
+        finishVulcanized(firefoxDevPath + '/data/generic_ui')
+
 
     #-------------------------------------------------------------------------
     # All typescript compiles to locations in `build/`
@@ -570,8 +565,9 @@ module.exports = (grunt) ->
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
       chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
-      chromeContext: Rule.browserify 'chrome/extension/scripts/context'
-      chromeVulcanized: Rule.browserify('chrome/extension/polymer/vulcanized', {})# no exports from this
+      chromeContext: Rule.browserify 'chrome/extension/generic_ui/scripts/context'
+      chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
+      firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
       chromeExtensionCoreConnectorSpec: Rule.browserifySpec 'chrome/extension/scripts/chrome_core_connector'
@@ -594,7 +590,7 @@ module.exports = (grunt) ->
       chrome_extension: Rule.jasmineSpec 'chrome/extension/scripts/'
       generic_core: Rule.jasmineSpec 'generic_core'
       generic_ui: Rule.jasmineSpec('generic_ui/scripts',
-          [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')]);
+          [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')])
 
 
     jasmine_chromeapp: {
@@ -638,8 +634,8 @@ module.exports = (grunt) ->
               'polymer.js'
             ]
         files: [{
-          src: chromeExtDevPath + 'polymer/root.html'
-          dest: 'build/dev/uproxy/chrome/extension/polymer/vulcanized-inline.html'
+          src: chromeExtDevPath + '/generic_ui/polymer/root.html'
+          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
         }]
       chromeExtCsp:
         options:
@@ -649,8 +645,8 @@ module.exports = (grunt) ->
               'polymer.js'
             ]
         files: [{
-          src: chromeExtDevPath + '/polymer/vulcanized-inline.html'
-          dest: 'build/dev/uproxy/chrome/extension/polymer/vulcanized.html'
+          src: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
+          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized.html'
         }]
       chromeAppInline:
         options: { inline: true }
@@ -665,16 +661,26 @@ module.exports = (grunt) ->
           dest: 'build/dev/uproxy/chrome/app/polymer/vulcanized.html'
         }]
       firefoxInline:
-        options: { inline: true }
+        options:
+          inline: true
+          excludes:
+            scripts: [
+              'polymer.js'
+            ]
         files: [{
-          src: firefoxDevPath + 'data/polymer/root.html'
-          dest: 'build/dev/uproxy/firefox/data/polymer/vulcanized-inline.html'
+          src: firefoxDevPath + '/data/generic_ui/polymer/root.html'
+          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
         }]
       firefoxCsp:
-        options: { csp: true }
+        options:
+          csp: true
+          excludes:
+            scripts: [
+              'polymer.js'
+            ]
         files: [{
-          src: firefoxDevPath + 'data/polymer/vulcanized-inline.html'
-          dest: 'build/dev/uproxy/firefox/data/polymer/vulcanized.html'
+          src: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
+          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html'
         }]
 
     clean: ['build/dev', '.tscache']

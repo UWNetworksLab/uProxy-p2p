@@ -32,6 +32,18 @@ freedom(manifest, {
     contentURL: self.data.url("generic_ui/index.html")
   })
 
+  panel.on('error', function(error) {
+    console.error('ERROR IN PANEL', error);
+  });
+
+  panel.on('show', function() {
+    console.log('PANEL SHOWN');
+  });
+
+  panel.on('message', function() {
+    console.log('PANEL MESSAGE');
+  });
+
   // Set up connection between freedom and content script.
   require('glue.js').setUpConnection(new uproxy(), panel, button);
   require('url-handler.js').setup(panel, button);
