@@ -90,14 +90,13 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    // By default, or when a successful connection is closed, this promise will
-    // reject to indicate the remote connection is not ready to accept signals.
-    // Only if the peer sent an OFFER signal and an rtcToNet instance is created
-    // will this fulfill.
-    // TODO: to make it clearer what this promise is waiting for, change to
-    // something like:
-    // Promise.all([this.receivedOffer_, this.connection_.onceSharerCreated])
-    private onceSharerReadyForOffer_ :Promise<void>;
+    // Promise that tracks if an OFFER signal from a client peer is the next
+    // signal for our remote connection to handle. When non-OFFER singals are
+    // received before an OFFER, the promise is rejected. When an OFFER is
+    // received, the promise is reset and fulfilled.
+    private onceNextSignalIsOfferFromClientPeer_ :Promise<void> = null;
+    private receivedOfferFromClientPeer_ :Function;
+    private receivedOtherSignalFromClientPeer_ :Function;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -112,7 +111,7 @@ export var remoteProxyInstance :RemoteInstance = null;
         public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
-      this.setSharerToNotReady_();
+      this.resetOnceNextSignalIsOfferFromClientPeer_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -194,18 +193,23 @@ export var remoteProxyInstance :RemoteInstance = null;
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
-          this.onceSharerReadyForOffer_ = this.connection_.onceSharerCreated;
+          this.resetOnceNextSignalIsOfferFromClientPeer_();
+          this.receivedOfferFromClientPeer_();
           this.startShare_();
+        } else {
+          this.receivedOtherSignalFromClientPeer_();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        return this.onceSharerReadyForOffer_.then(() => {
+        return Promise.all([this.onceNextSignalIsOfferFromClientPeer_,
+                            this.connection_.onceSharerCreated]).then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
           });
-        }).catch((e) => {
-          log.info(e + ' Received signal ' + signalFromRemote.type);
+        }).catch(() => {
+          log.info('Received signal ' + signalFromRemote['type'] +
+              ' before receiving OFFER');
           return Promise.resolve<void>();
         });
 
@@ -271,19 +275,22 @@ export var remoteProxyInstance :RemoteInstance = null;
       if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
       } else if (this.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
-        // Stop forwarding messages to the remote connection until we receive
-        // another OFFER.
-        this.setSharerToNotReady_();
+        // Since we're stopping sharing, discard the OFFER which initiated this
+        // session.
+        this.resetOnceNextSignalIsOfferFromClientPeer_();
       }
       return this.connection_.stopShare();
     }
 
-    // When a sharer remote-instance is first created, or after a sharer closes
-    // a connection, we set that they are not ready to handle an incoming offer.
-    private setSharerToNotReady_ = () => {
-      this.onceSharerReadyForOffer_ =
-          Promise.reject(new Error('Ignoring signal from client without ' +
-                                   'rtcToNet ready to handle OFFER first.'));
+    // Reset onceNextSignalIsOfferFromClientPeer_ to a promise that fulfills
+    // when an OFFER is received and rejected if another signal is received
+    // first.
+    private resetOnceNextSignalIsOfferFromClientPeer_ = () => {
+      this.onceNextSignalIsOfferFromClientPeer_ =
+          new Promise<void>((fulfill, reject) => {
+            this.receivedOfferFromClientPeer_ = fulfill;
+            this.receivedOtherSignalFromClientPeer_ = reject;
+          });
     }
 
     /**
