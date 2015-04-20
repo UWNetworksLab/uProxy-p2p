@@ -31,7 +31,3 @@ interface BrowserAPI {
   frontedPost(data :any, externalDomain :string, cloudfrontDomain :string,
            cloudfrontPath ?:string) : Promise<void>;
 }
-
-declare var Notification : {
-  new (title :string, options ?:any) : any;
-}
