@@ -91,15 +91,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    // By default, or when a successful connection is closed, this promise will
-    // reject to indicate the remote connection is not ready to accept signals.
-    // Only if the peer sent an OFFER signal and an rtcToNet instance is created
-    // will this fulfill.
-    // TODO: to make it clearer what this promise is waiting for, change to
-    // something like:
-    // Promise.all([this.receivedOffer_, this.connection_.onceSharerCreated])
-    private onceSharerReadyForOffer_ :Promise<void>;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -113,7 +104,6 @@ export var remoteProxyInstance :RemoteInstance = null;
         public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
-      this.setSharerToNotReady_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -195,19 +185,15 @@ export var remoteProxyInstance :RemoteInstance = null;
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
-          this.onceSharerReadyForOffer_ = this.connection_.onceSharerCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        return this.onceSharerReadyForOffer_.then(() => {
+        return this.connection_.onceSharerCreated.then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
           });
-        }).catch((e) => {
-          log.info(e + ' Received signal ' + signalFromRemote.type);
-          return Promise.resolve<void>();
         });
 
         /*
@@ -240,6 +226,9 @@ export var remoteProxyInstance :RemoteInstance = null;
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
       } else {
+        // Implies that the SharingState is TRYING_TO_SHARE_ACCESS because
+        // the client peer should never be able to try to get if they are
+        // already getting (and this sharer is already sharing).
         sharingStopped = this.stopShare();
       }
 
@@ -271,20 +260,8 @@ export var remoteProxyInstance :RemoteInstance = null;
 
       if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
-      } else if (this.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
-        // Stop forwarding messages to the remote connection until we receive
-        // another OFFER.
-        this.setSharerToNotReady_();
       }
       return this.connection_.stopShare();
-    }
-
-    // When a sharer remote-instance is first created, or after a sharer closes
-    // a connection, we set that they are not ready to handle an incoming offer.
-    private setSharerToNotReady_ = () => {
-      this.onceSharerReadyForOffer_ =
-          Promise.reject(new Error('Ignoring signal from client without ' +
-                                   'rtcToNet ready to handle OFFER first.'));
     }
 
     /**
