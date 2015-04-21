@@ -91,10 +91,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    // If an OFFER signal from a client peer has been received. When false,
-    // all other signals are rejected and not forwarded to remote-connection.
-    private hasSeenOffer :boolean = false;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -189,12 +185,7 @@ export var remoteProxyInstance :RemoteInstance = null;
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
-          this.hasSeenOffer = true;
           this.startShare_();
-        } else if (!this.hasSeenOffer) {
-          log.info('Received signal ' + signalFromRemote['type'] +
-              ' before receiving OFFER');
-          return Promise.resolve<void>();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
@@ -269,10 +260,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
       if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
-      } else if (this.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
-        // Since we're stopping sharing, discard the OFFER which initiated this
-        // session.
-        this.hasSeenOffer = false;
       }
       return this.connection_.stopShare();
     }

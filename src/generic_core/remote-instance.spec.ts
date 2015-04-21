@@ -256,14 +256,6 @@ describe('remote_instance.RemoteInstance', () => {
       spyOn(rtc_to_net, 'RtcToNet').and.returnValue(fakeRtcToNet);
     });
 
-    it('ignores CANDIDATE signal from client peer as server without OFFER', (done) => {
-      alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate).then(() => {
-        expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-        expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
-        done();
-      });
-    });
-
     it('handles OFFER signal from client peer as server', (done) => {
       alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER, fakeOffer).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
