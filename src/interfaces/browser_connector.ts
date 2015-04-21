@@ -42,5 +42,11 @@ export interface CoreBrowserConnector {
 
   restart() : void;
 
+  connect() :Promise<void>;
+
+  on(name :string, callback :Function) :void;
+  on(name :'core_connect', callback :() => void) :void;
+  on(name :'core_disconnect', callback :() => void) :void;
+
   status :StatusObject;
 }

@@ -37,6 +37,14 @@ class CoreConnector implements uproxy_core_api.CoreApi {
                                     this.handleRequestRejected_);
   }
 
+  public on = (name :string, callback :Function) => {
+    this.browserConnector_.on(name, callback);
+  }
+
+  public connect = () :Promise<void> => {
+    return this.browserConnector_.connect();
+  }
+
   public connected = () => {
     return this.browserConnector_.status.connected;
   }
