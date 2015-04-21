@@ -3,7 +3,6 @@
   "description": "The uProxy backend provides a mesh web proxy. Access the web through your social connections.",
   "app": {
     "script": [
-      "../bower/lodash/lodash.min.js",
       "freedom-module.static.js"
     ]
   },
