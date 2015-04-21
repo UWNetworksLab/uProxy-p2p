@@ -137,6 +137,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
    */
   public updateGlobalSettings = (newSettings :uproxy_core_api.GlobalSettings) => {
     newSettings.version = globals.STORAGE_VERSION;
+    if (newSettings.stunServers.length === 0) {
+      newSettings.stunServers = globals.DEFAULT_STUN_SERVERS;
+    }
     globals.storage.save<uproxy_core_api.GlobalSettings>('globalSettings', newSettings)
       .catch((e) => {
         log.error('Could not save globalSettings to storage', e.stack);
