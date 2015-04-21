@@ -91,13 +91,9 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    // Promise that tracks if an OFFER signal from a client peer is the next
-    // signal for our remote connection to handle. When non-OFFER singals are
-    // received before an OFFER, the promise is rejected. When an OFFER is
-    // received, the promise is reset and fulfilled.
-    private onceNextSignalIsOfferFromClientPeer_ :Promise<void> = null;
-    private receivedOfferFromClientPeer_ :Function;
-    private receivedOtherSignalFromClientPeer_ :Function;
+    // If an OFFER signal from a client peer has been received. When false,
+    // all other signals are rejected and not forwarded to remote-connection.
+    private hasSeenOffer :boolean = false;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -112,7 +108,6 @@ export var remoteProxyInstance :RemoteInstance = null;
         public user :remote_user.User,
         public instanceId :string) {
       this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
-      this.resetOnceNextSignalIsOfferFromClientPeer_();
 
       storage.load<RemoteInstanceState>(this.getStorePath())
           .then((state:RemoteInstanceState) => {
@@ -194,24 +189,20 @@ export var remoteProxyInstance :RemoteInstance = null;
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
-          this.resetOnceNextSignalIsOfferFromClientPeer_();
-          this.receivedOfferFromClientPeer_();
+          this.hasSeenOffer = true;
           this.startShare_();
-        } else {
-          this.receivedOtherSignalFromClientPeer_();
+        } else if (!this.hasSeenOffer) {
+          log.info('Received signal ' + signalFromRemote['type'] +
+              ' before receiving OFFER');
+          return Promise.resolve<void>();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        return Promise.all([this.onceNextSignalIsOfferFromClientPeer_,
-                            this.connection_.onceSharerCreated]).then(() => {
+        return this.connection_.onceSharerCreated.then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
           });
-        }).catch(() => {
-          log.info('Received signal ' + signalFromRemote['type'] +
-              ' before receiving OFFER');
-          return Promise.resolve<void>();
         });
 
         /*
@@ -278,20 +269,9 @@ export var remoteProxyInstance :RemoteInstance = null;
       } else if (this.localSharingWithRemote === social.SharingState.SHARING_ACCESS) {
         // Since we're stopping sharing, discard the OFFER which initiated this
         // session.
-        this.resetOnceNextSignalIsOfferFromClientPeer_();
+        this.hasSeenOffer = false;
       }
       return this.connection_.stopShare();
-    }
-
-    // Reset onceNextSignalIsOfferFromClientPeer_ to a promise that fulfills
-    // when an OFFER is received and rejected if another signal is received
-    // first.
-    private resetOnceNextSignalIsOfferFromClientPeer_ = () => {
-      this.onceNextSignalIsOfferFromClientPeer_ =
-          new Promise<void>((fulfill, reject) => {
-            this.receivedOfferFromClientPeer_ = fulfill;
-            this.receivedOtherSignalFromClientPeer_ = reject;
-          });
     }
 
     /**
