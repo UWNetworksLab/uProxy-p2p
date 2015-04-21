@@ -51,7 +51,8 @@ module UI {
       hasSeenSharingEnabledScreen: false,
       hasSeenWelcome: false,
       mode : ui_constants.Mode.GET,
-      allowNonUnicast: false
+      allowNonUnicast: false,
+      statsReportingEnabled: false
     },
     reconnecting: false
   };

@@ -22,6 +22,7 @@ export interface GlobalSettings {
   hasSeenWelcome   :boolean;
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
+  statsReportingEnabled :boolean;
 }
 
 export interface InitialState {

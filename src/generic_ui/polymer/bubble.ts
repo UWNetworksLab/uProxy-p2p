@@ -116,7 +116,9 @@ Polymer({
   activeChanged: function(old :boolean, val :boolean) {
     if (val) {
       // we will un-hide the element at the end of repositioning
-      this.doReposition();
+      this.async(() => {
+        this.doReposition();
+      });
     } else {
       this.setAttribute('hidden', '');
     }
