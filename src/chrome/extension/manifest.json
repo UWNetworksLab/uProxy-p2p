@@ -35,7 +35,6 @@
   "web_accessible_resources": [
     "copypaste.html"
   ],
-  "options_page": "generic_ui/index.html",
   "externally_connectable": {
     "ids" : ["fmdppkkepalnkeommjadgbhiohihdhii"],
     "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]
