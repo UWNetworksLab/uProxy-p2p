@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel="import" href='description.html'>
@@ -80,6 +81,16 @@
       margin-right: 5px;
       font-size: 10px;
     }
+    paper-checkbox::shadow #checkboxLabel {
+      font-size: 12px;
+    }
+/*    paper-checkbox::shadow #checkmark {
+      position: fixed;
+    }
+    paper-checkbox::shadow #checkboxContainer {
+      width: 14px;
+      height: 14px;
+    }*/
     core-icon[icon=announcement],
     core-icon[icon=help],
     core-icon[icon=settings],
@@ -149,6 +160,9 @@
           <paper-button raised on-tap="{{resetStunServers}}">Reset</paper-button>
           <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
           <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
+          <p>
+            <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats reporting enabled'></paper-checkbox>
+          </p>
         </div>
 
         <hr>
