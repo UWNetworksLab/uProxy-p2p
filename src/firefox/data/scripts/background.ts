@@ -1,15 +1,17 @@
-// TODO(salomegeo): rewrite it in typescript.
+import user_interface = require('../../../generic_ui/scripts/ui');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import FirefoxCoreConnector = require('./firefox_connector');
+import FirefoxBrowserApi = require('./firefox_browser_api');
 
-
-var ui   :UI.UserInterface;
-var core :;
-
+export import model = user_interface.model;
+export var ui   :user_interface.UserInterface;
+export var core :CoreConnector;
 function initUI() {
-    var firefoxConnector = new FirefoxConnector();
-    core = new CoreConnector(firefoxConnector);
+    var firefoxCoreConnector = new FirefoxCoreConnector();
+    core = new CoreConnector(firefoxCoreConnector);
     var firefoxBrowserApi = new FirefoxBrowserApi();
 
-    return new UI.UserInterface(core, firefoxBrowserApi);
+    return new user_interface.UserInterface(core, firefoxBrowserApi);
 }
 
 if (undefined === ui) {

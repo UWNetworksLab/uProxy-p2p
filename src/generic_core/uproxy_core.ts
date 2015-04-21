@@ -12,6 +12,7 @@ import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user = require('./remote-user');
 import version = require('../version/version');
+import _ = require('lodash');
 
 import ui = ui_connector.connector;
 

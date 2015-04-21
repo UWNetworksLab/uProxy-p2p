@@ -30,6 +30,7 @@ import consent = require('./consent');
 import globals = require('./globals');
 import ui = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import _ = require('lodash');
 
 import storage = globals.storage;
 

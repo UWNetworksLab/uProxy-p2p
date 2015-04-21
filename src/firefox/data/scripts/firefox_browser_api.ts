@@ -5,18 +5,17 @@
  * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
 
-/// <reference path='../../../third_party/firefox/firefox.d.ts' />
+/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
 
-import browser_api =  require('../../../interfaces/browser-api');
+import browser_api =  require('../../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
 import user_interface = require('../../../generic_ui/scripts/ui');
-
-var port :ContentScriptPort;
-
-declare var ui :user_interface.UserInterface;
+import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import port = require('./port');
 
 class FirefoxBrowserApi implements BrowserAPI {
 
-  public browserSpecificElement;
+  public browserSpecificElement :string;
 
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
@@ -50,7 +49,9 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('showNotification', { text: text, tag: tag });
   }
 
-  public on(name :string, callback :Function) => {
+  public on = (name :string, callback :Function) => {
     port.on(name, callback);
   }
 }
+
+export = FirefoxBrowserApi;

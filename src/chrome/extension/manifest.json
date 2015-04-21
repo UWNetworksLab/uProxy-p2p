@@ -11,8 +11,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/background.static.js",
-      "scripts/lodash.min.js"
+      "scripts/background.static.js"
     ]
   },
   "browser_action": {
