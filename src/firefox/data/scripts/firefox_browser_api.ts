@@ -12,7 +12,11 @@ import BrowserAPI = browser_api.BrowserAPI;
 import user_interface = require('../../../generic_ui/scripts/ui');
 import net = require('../../../../../third_party/uproxy-networking/net/net.types');
 import port = require('./port');
-import core_connector = require('../../../generic_ui/scripts/core_connector');
+
+interface FullfillAndReject {
+  fulfill :Function;
+  reject :Function;
+}
 
 class FirefoxBrowserApi implements BrowserAPI {
 
@@ -20,7 +24,7 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
-  private mapPromiseIdToFulfillAndReject_ :{[id :number] :core_connector.FullfillAndReject} =
+  private mapPromiseIdToFulfillAndReject_ :{[id :number] :FullfillAndReject} =
       {};
 
   constructor() {
