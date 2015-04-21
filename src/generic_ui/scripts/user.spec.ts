@@ -3,6 +3,7 @@
 import user_interface = require('./ui');
 import user = require('./user');
 import social = require('../../interfaces/social');
+import _ = require('lodash');
 
 describe('UI.User', () => {
   var sampleUser :user.User;

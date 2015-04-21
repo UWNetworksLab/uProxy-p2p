@@ -19,6 +19,7 @@ import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
+import _ = require('lodash');
 
 import storage = globals.storage;
 import ui = ui_connector.connector;

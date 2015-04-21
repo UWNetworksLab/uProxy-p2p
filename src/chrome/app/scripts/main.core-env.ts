@@ -21,7 +21,8 @@ export interface OnEmitModuleFactory extends
 var oauthOptions :{connector:ChromeUIConnector;} = {
   connector: null
 };
-var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
+export var uProxyAppChannel :freedom_types.OnAndEmit<any,any>;
+export var moduleName = 'uProxy App Top Level';
 
 freedom('generic_core/freedom-module.json', {
   'logger': 'uproxy-lib/loggingprovider/freedom-module.json',

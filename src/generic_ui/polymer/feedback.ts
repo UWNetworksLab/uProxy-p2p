@@ -15,7 +15,7 @@ Polymer({
   },
   sendFeedback: function() {
     this.$.sendingFeedbackDialog.open();
-    browserified_exports.core.sendFeedback({
+    browserified_exports.ui.sendFeedback({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,

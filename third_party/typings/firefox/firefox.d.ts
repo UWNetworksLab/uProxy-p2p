@@ -1,6 +1,6 @@
-export interface ContentScriptPort {
-  emit(method :string, data ?:any);
-  on(method :string, handler :Function);
+interface ContentScriptPort {
+  emit(method :string, data ?:Object) :void;
+  on(method :string, handler :Function) :void;
+  once(method :string, handler :Function) :void;
+  removeListener(method :string, handler :Function) :void;
 }
-
-declare var port :ContentScriptPort;

@@ -175,6 +175,8 @@ module UI {
 
     // is a proxy currently set
     private proxySet_ :boolean = false;
+    // Must be included in Chrome extension manifest's list of permissions.
+    public AWS_FRONT_DOMAIN = 'https://a0.awsstatic.com/';
 
     /*
      * This is used to store the information for setting up a copy+paste
@@ -182,8 +184,6 @@ module UI {
      * the start of proxying
      */
     public copyPastePendingEndpoint :net.Endpoint = null;
-
-    private core_ :uproxy_core_api.CoreApi = null;
 
     /**
      * UI must be constructed with hooks to Notifications and Core.
@@ -194,7 +194,6 @@ module UI {
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
       this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
-      this.core_ = core;
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -398,13 +397,13 @@ module UI {
 
         if (data.mode === 'get') {
           model.globalSettings.mode = ui_constants.Mode.GET;
-          this.core_.updateGlobalSettings(model.globalSettings);
+          this.core.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.getExpanded = true;
           }
         } else if (data.mode === 'share') {
           model.globalSettings.mode = ui_constants.Mode.SHARE;
-          this.core_.updateGlobalSettings(model.globalSettings);
+          this.core.updateGlobalSettings(model.globalSettings);
           if (contact) {
             contact.shareExpanded = true;
           }
@@ -484,7 +483,7 @@ module UI {
         case 'request':
           expectedType = social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER;
           this.copyPasteSharingMessage = '';
-          this.core_.startCopyPasteShare();
+          this.core.startCopyPasteShare();
           break;
         case 'offer':
           expectedType = social.PeerMessageType.SIGNAL_FROM_SERVER_PEER;
@@ -503,7 +502,7 @@ module UI {
           return;
         }
 
-        this.core_.sendCopyPasteSignal(payload[i]);
+        this.core.sendCopyPasteSignal(payload[i]);
       }
     }
 
@@ -811,6 +810,53 @@ module UI {
         clearInterval(this.reconnectInterval_);
         this.reconnectInterval_ = null;
       }
+    }
+
+    private cloudfrontDomains_ = [
+      "d1wtwocg4wx1ih.cloudfront.net"
+    ]
+
+    public sendFeedback = (feedback :uproxy_core_api.UserFeedback, maxAttempts?:number) : Promise<void> => {
+      if (!maxAttempts || maxAttempts > this.cloudfrontDomains_.length) {
+        // default to trying every possible URL
+        maxAttempts = this.cloudfrontDomains_.length;
+      }
+
+      var logsPromise :Promise<string>;
+
+      if (feedback.logs) {
+        logsPromise = this.core.getLogs().then((logs :string) => {
+          var browserInfo = 'Browser Info: ' + feedback.browserInfo + '\n\n';
+          return browserInfo + logs;
+        });
+      } else {
+        logsPromise = Promise.resolve('');
+      }
+
+      return logsPromise.then((logs :string) => {
+        var attempts = 0;
+
+        var payload = {
+          email: feedback.email,
+          feedback: feedback.feedback,
+          logs: logs
+        };
+
+        var doAttempts = (error?:Error) :Promise<void> => {
+          if (attempts < maxAttempts) {
+            // we want to keep trying this until we either run out of urls to
+            // send to or one of the requests succeeds.  We set this up by
+            // creating a lambda to call the post with failures set up to recurse
+            return this.browserApi.frontedPost(payload, this.AWS_FRONT_DOMAIN,
+              this.cloudfrontDomains_[attempts++], "submit-feedback"
+            ).catch(doAttempts);
+          }
+
+          throw error;
+        }
+
+        return doAttempts();
+      });
     }
   }  // class UserInterface
 
