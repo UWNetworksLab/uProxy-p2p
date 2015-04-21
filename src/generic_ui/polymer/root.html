@@ -209,7 +209,7 @@
             <i class='materialDesignIcon' hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'>drive_fusiontable</i>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsHelpTextOpen }}'>
+          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
             <h3>Anonymous stats enabled</h3>
             <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
           </uproxy-bubble>
@@ -234,7 +234,7 @@
           </div>
         </core-toolbar>
 
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsHelpTextOpen }}'>
+        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
           <h3>Welcome to uProxy!</h3>
           <p>
             To get started, choose "Get access" or "Share access" and then click

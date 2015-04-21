@@ -30,7 +30,7 @@ Polymer({
     if (detail.view == ui_types.View.ROSTER && browserified_exports.ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
       if (!browserified_exports.model.globalSettings.hasSeenWelcome) {
-        this.statsHelpTextOpen = true;
+        this.statsDialogOrBubbleOpen = true;
         this.$.statsDialog.toggle();
       }
       this.closeSettings();
@@ -108,7 +108,7 @@ Polymer({
     }
   },
   closeStatsBubble: function() {
-    this.statsHelpTextOpen = false;
+    this.statsDialogOrBubbleOpen = false;
   },
   enableStats: function() {
     // TODO: clean up the logic which controls which welcome dialog or bubble
@@ -117,7 +117,7 @@ Polymer({
   },
   disableStats: function() {
     this.model.globalSettings.statsReportingEnabled = false;
-    this.statsHelpTextOpen = false;
+    this.statsDialogOrBubbleOpen = false;
   },
   tabSelected: function(e :Event) {
     // setting the value is taken care of in the polymer binding, we just need
@@ -181,6 +181,9 @@ Polymer({
     // above the bottom of the window.
     return padding;
   },
+  // mainPanel.selected can be either "drawer" or "main"
+  // Our "drawer" is the settings panel. When the settings panel is open,
+  // make sure to hide the stats tooltip so the two don't overlap.
   drawerToggled: function() {
     if (this.$.mainPanel.selected == 'drawer') {
       // Drawer was opened.
