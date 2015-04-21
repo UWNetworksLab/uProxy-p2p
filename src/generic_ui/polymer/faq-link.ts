@@ -3,9 +3,9 @@
 Polymer({
   anchor: '',
   openFaq: function() {
-    this.ui.openTab('faq.html#' + this.anchor);
+    browserified_exports.ui.openTab('generic_ui/faq.html#' + this.anchor);
   },
   ready: function() {
-    this.ui = browserified_exports.ui;
+    //this.ui = browserified_exports.ui;
   }
 });
