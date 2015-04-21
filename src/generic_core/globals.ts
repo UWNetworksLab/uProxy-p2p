@@ -10,26 +10,22 @@ export var storage = new local_storage.Storage();
 export var STORAGE_VERSION = 1;
 export var MESSAGE_VERSION = 1;
 
-export var DEFAULT_STUN_SERVERS_ = [
+export var DEFAULT_STUN_SERVERS = [
   {urls: ['stun:stun.services.mozilla.com']},
   {urls: ['stun:stun.stunprotocol.org']},
-  {
-    urls: [
-      'stun:stun.l.google.com:19302',
-      'stun:stun1.l.google.com:19302',
-      'stun:stun2.l.google.com:19302',
-      'stun:stun3.l.google.com:19302',
-      'stun:stun4.l.google.com:19302'
-    ]
-  }
+  {urls: ['stun:stun.l.google.com:19302']},
+  {urls: ['stun:stun1.l.google.com:19302']},
+  {urls: ['stun:stun2.l.google.com:19302']},
+  {urls: ['stun:stun3.l.google.com:19302']},
+  {urls: ['stun:stun4.l.google.com:19302']},
 ];
 
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
-  // variable can modify DEFAULT_STUN_SERVERS_ as well.
+  // variable can modify DEFAULT_STUN_SERVERS as well.
 export var settings :uproxy_core_api.GlobalSettings = {
   description: '',
-  stunServers: DEFAULT_STUN_SERVERS_.slice(0),
+  stunServers: DEFAULT_STUN_SERVERS.slice(0),
   hasSeenSharingEnabledScreen: false,
   hasSeenWelcome: false,
   allowNonUnicast: false,
@@ -48,7 +44,7 @@ export var loadSettings :Promise<void> =
       // servers.
       if (!settings.stunServers
           || settings.stunServers.length == 0) {
-        settings.stunServers = DEFAULT_STUN_SERVERS_.slice(0);
+        settings.stunServers = DEFAULT_STUN_SERVERS.slice(0);
       }
       // If storage does not know if this user has seen a specific overlay
       // yet, assume the user has not seen it so that they will not miss any

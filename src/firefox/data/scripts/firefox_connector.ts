@@ -28,6 +28,10 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
     this.send(ready);
   }
 
+  public connect = () :Promise<void> => {
+    this.emit('core_connect');
+    return Promise.resolve<void>();
+  }
 
   /**
    * Attach handlers for updates emitted from the uProxy Core.
@@ -47,6 +51,18 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
   public restart = () => {
     // TODO implement restart for firefox
     // https://github.com/uProxy/uproxy/issues/751
+  }
+
+  private events_ :{[name :string] :Function} = {};
+
+  public on = (name :string, callback :Function) => {
+    this.events_[name] = callback;
+  }
+
+  private emit = (name :string, ...args :Object[]) => {
+    if (name in this.events_) {
+      this.events_[name].apply(null, args);
+    }
   }
 
 }  // class FirefoxConnector

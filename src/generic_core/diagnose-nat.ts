@@ -1,9 +1,12 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
 /// <reference path='../../../third_party/sha1/sha1.d.ts' />
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
 
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import _ = require('lodash');
+import globals = require('./globals');
 
 // Both Ping and NAT type detection need help from a server. The following
 // ip/port is the instance we run on EC2.
@@ -629,17 +632,8 @@ export function doUdpTest() {
       });
 }
 
-var stunServers = [
-  'stun:stun.services.mozilla.com',
-  'stun:stun.stunprotocol.org',
-  'stun:stun.l.google.com:19302',
-  'stun:stun1.l.google.com:19302',
-  'stun:stun2.l.google.com:19302',
-  'stun:stun3.l.google.com:19302',
-  'stun:stun4.l.google.com:19302'
-];
-
 function doStunAccessTest() {
+  var stunServers = <string[]>_(globals.settings.stunServers).map('urls').flatten().value();
   log.info('perform Stun access test');
   for (var i = 0; i < stunServers.length; i++) {
     var promises : Promise<number>[] = [];

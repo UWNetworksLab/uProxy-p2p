@@ -4,7 +4,7 @@
  * Handles all connection and communication with the uProxy Chrome App.
  */
 /// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-import background = require('./background');
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
 import browser_connector = require('../../../interfaces/browser_connector');
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import chrome_api = require('../../../interfaces/chrome');
@@ -13,9 +13,7 @@ import ChromeMessage = chrome_api.ChromeMessage;
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
 
-import UI = require('../../../generic_ui/scripts/ui');
-import UiInterface = require('../../../interfaces/ui');
-import UiApi = UiInterface.UiApi;
+import user_interface = require('../../../generic_ui/scripts/ui');
 
 /**
  * Chrome-Extension-specific uProxy Core API implementation.
@@ -106,6 +104,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         promiseId: 0
       }
       this.send(ready);
+      this.emit('core_connect');
     });
   }
 
@@ -145,11 +144,10 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show its start page.
-        background.ui.view = UiInterface.View.SPLASH;
         chrome.browserAction.setIcon({
           path: {
-            "19": "icons/19_" + UI.LOGGED_OUT_ICON,
-            "38": "icons/38_" + UI.LOGGED_OUT_ICON
+            "19": "icons/19_" + user_interface.LOGGED_OUT_ICON,
+            "38": "icons/38_" + user_interface.LOGGED_OUT_ICON
           }
         });
         this.fulfillConnect_();
@@ -173,18 +171,10 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     // be establish (i.e. this.appPort_.postMessage in connect_ failed).
     console.log('Disconnected from app, previous status was ' +
                 this.status.connected);
-    // When disconnected from the app, we should show the browser specific page
-    // that shows the "app missing" message.
-    background.ui.view = UiInterface.View.BROWSER_ERROR;
 
+    this.emit('core_disconnect');
 
     if (this.status.connected) {
-      // TODO: Consider displaying a notification if the user was giving access.
-      // Ensure that proxying has stopped.
-      if (background.ui.isGettingAccess()) {
-        background.ui.stopGettingInUiAndConfig(true);
-      }
-      // Update this.status.
       this.status.connected = false;
       this.onceConnected = new Promise<void>((F, R) => { this.fulfillConnect_ = F; });
     }
@@ -278,6 +268,18 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     }
     this.send(restart);
     chrome.runtime.reload();
+  }
+
+  private events_ :{[name :string] :Function} = {};
+
+  public on = (name :string, callback :Function) => {
+    this.events_[name] = callback;
+  }
+
+  private emit = (name :string, ...args :Object[]) => {
+    if (name in this.events_) {
+      this.events_[name].apply(null, args);
+    }
   }
 }  // class ChromeConnector
 

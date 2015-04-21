@@ -7,6 +7,7 @@
 
 import ui_constants = require('../../interfaces/ui');
 import Persistent = require('../../interfaces/persistent');
+import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
@@ -190,10 +191,26 @@ module UI {
      * Upon construction, the UI installs update handlers on core.
      */
     constructor(
-        public core   :uproxy_core_api.CoreApi,
+        public core   :CoreConnector,
         public browserApi :BrowserAPI) {
       // TODO: Determine the best way to describe view transitions.
       this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+
+      core.on('core_connect', () => {
+        this.view = ui_constants.View.SPLASH;
+      });
+
+      core.on('core_disconnect', () => {
+        // When disconnected from the app, we should show the browser specific page
+        // that shows the "app missing" message.
+        this.view = ui_constants.View.BROWSER_ERROR;
+
+        if (this.isGettingAccess()) {
+          this.stopGettingInUiAndConfig(true);
+        }
+      });
+
+      core.connect();
 
       // Attach handlers for UPDATES received from core.
       // TODO: Implement the rest of the fine-grained state updates.
@@ -532,7 +549,7 @@ module UI {
 
       if (askUser) {
         this.browserApi.setIcon(UI.ERROR_ICON);
-        this.browserApi.launchTabIfNotOpen('disconnected.html');
+        this.browserApi.launchTabIfNotOpen('generic_ui/disconnected.html');
         return;
       }
 
