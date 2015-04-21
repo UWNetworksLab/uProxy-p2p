@@ -111,6 +111,8 @@ Polymer({
     this.statsHelpTextOpen = false;
   },
   enableStats: function() {
+    // TODO: clean up the logic which controls which welcome dialog or bubble
+    // is shown.
     this.model.globalSettings.statsReportingEnabled = true;
   },
   disableStats: function() {
