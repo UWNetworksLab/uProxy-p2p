@@ -125,14 +125,14 @@ Polymer({
     browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   signalToFireChanged: function() {
-    if (this.ui.signalToFire != '') {
-      this.fire('core-signal', {name: this.ui.signalToFire});
-      this.ui.signalToFire = '';
+    if (browserified_exports.ui.signalToFire != '') {
+      this.fire('core-signal', {name: browserified_exports.ui.signalToFire});
+      browserified_exports.ui.signalToFire = '';
     }
   },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
-    this.ui.toastMessage = null;
+    browserified_exports.ui.toastMessage = null;
   },
   messageNotNull: function(toastMessage :string) {
     // Whether the toast is shown is controlled by if ui.toastMessage
