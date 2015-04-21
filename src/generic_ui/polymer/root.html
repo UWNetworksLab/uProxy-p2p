@@ -207,7 +207,7 @@
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsHelpTextOpen }}'>
             <h3>Anonymous stats enabled</h3>
-            <p>This icon means you have opted in to sharing anonymous statistics to uProxy. Click to adjust settings.</p>
+            <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
           </uproxy-bubble>
 
           <core-tooltip label='You are available for sharing.' position='left'>
@@ -279,7 +279,8 @@
     </paper-action-dialog>
 
     <paper-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
-      <p>uProxy is currently in alpha. Help us improve...</p>
+      <p>This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely. <uproxy-faq-link anchor='doesUproxyLogData'>More information.</uproxy-faq-link> You can change your choice at any time, from the Settings menu.</p>
+      <p>Would you like to enable anonymous metrics collection?</p>
       <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
       <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
     </paper-action-dialog>
