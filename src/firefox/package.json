@@ -5,7 +5,7 @@
   "description": "uProxy",
   "author": "uProxy Team <info@uproxy.org>",
   "license": "Apache 2.0",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "permissions": {
     "private-browsing": true
   }
