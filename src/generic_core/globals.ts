@@ -29,7 +29,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   hasSeenWelcome: false,
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
-  version: STORAGE_VERSION
+  version: STORAGE_VERSION,
+  statsReportingEnabled: false
 };
 
 export var natType :string = '';
@@ -59,6 +60,9 @@ export var loadSettings :Promise<void> =
       }
       if (typeof settings.mode == 'undefined') {
         settings.mode = user_interface.Mode.GET;
+      }
+      if (settings.statsReportingEnabled == null) {
+        settings.statsReportingEnabled = false;
       }
     }).catch((e) => {
       log.info('No global settings loaded', e.message);

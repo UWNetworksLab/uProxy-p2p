@@ -151,7 +151,8 @@ describe('uproxy core', function() {
         stunServers: [],
         hasSeenSharingEnabledScreen: true,
         hasSeenWelcome: false,
-        allowNonUnicast: true
+        allowNonUnicast: true,
+        statsReportingEnabled: false
       };
       alice.emit('' + uproxy_core_api.Command.UPDATE_GLOBAL_SETTINGS,
                  {data: globalSettings});
