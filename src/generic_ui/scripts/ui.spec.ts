@@ -5,7 +5,7 @@ import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import browser_connector = require('../../interfaces/browser_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
-import CoreApi = uproxy_core_api.CoreApi;
+import CoreConnector = require('./core_connector');
 import social = require('../../interfaces/social');
 import user = require('./user');
 import User = user.User;
@@ -15,13 +15,13 @@ describe('UI.UserInterface', () => {
   var ui :user_interface.UserInterface;
   var mockBrowserApi :BrowserAPI;
   var updateToHandlerMap :{[name :string] :Function} = {};
-  var mockCore :CoreApi;
+  var mockCore :CoreConnector;
 
   beforeEach(() => {
     // Create a fresh UI object before each test.
     mockCore = jasmine.createSpyObj(
         'core',
-        ['reset', 'onUpdate', 'sendCommand']);
+        ['reset', 'onUpdate', 'sendCommand', 'on', 'connect']);
 
     // Store all the handlers for Updates from core in a map.
     // These functions will be called directly from tests
