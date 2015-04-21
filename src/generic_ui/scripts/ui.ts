@@ -532,7 +532,7 @@ module UI {
 
       if (askUser) {
         this.browserApi.setIcon(UI.ERROR_ICON);
-        this.browserApi.launchTabIfNotOpen('disconnected.html');
+        this.browserApi.launchTabIfNotOpen('generic_ui/disconnected.html');
         return;
       }
 
