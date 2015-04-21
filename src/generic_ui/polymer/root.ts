@@ -40,8 +40,6 @@ Polymer({
   },
   statsIconClicked: function() {
     this.$.mainPanel.openDrawer();
-    // Expand advanced settings.
-    this.displayAdvancedSettings = true;
   },
   closeSettings: function() {
     this.$.mainPanel.closeDrawer();
