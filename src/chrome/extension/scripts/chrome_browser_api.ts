@@ -172,8 +172,8 @@ class ChromeBrowserApi implements BrowserAPI {
           icon: 'icons/38_' + UI.DEFAULT_ICON,
           tag: tag
         });
-    notification.onclick = function() {
-      this.trigger('notificationClicked', this.tag);
+    notification.onclick = () => {
+      this.emit('notificationClicked', tag);
     };
     setTimeout(function() {
       notification.close();
@@ -186,7 +186,7 @@ class ChromeBrowserApi implements BrowserAPI {
     this.events_[name] = callback;
   }
 
-  public trigger = (name :string, ...args :Object[]) => {
+  public emit = (name :string, ...args :Object[]) => {
     if (name in this.events_) {
       this.events_[name].apply(null, args);
     } else {

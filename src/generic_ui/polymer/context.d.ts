@@ -1,10 +1,10 @@
 //TODO figure out why this line is causing compilation to fail
 //import ui_constants = require('../../interfaces/ui');
 
-interface StaticInPanel {
+interface UiGlobals {
   ui :any;
   core :any;
   model :any;
 }
 
-declare var browserified_exports :StaticInPanel;
+declare var browserified_exports :UiGlobals;

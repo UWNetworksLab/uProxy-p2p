@@ -90,7 +90,6 @@ function initUI() : user_interface.UserInterface {
   chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   chromeCoreConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                            chromeBrowserApi.bringUproxyToFront);
-  chromeCoreConnector.connect();
 
   core = new CoreConnector(chromeCoreConnector);
   var oAuth = new ChromeTabAuth();
@@ -119,7 +118,7 @@ function initUI() : user_interface.UserInterface {
       // to allow a url to be pasted twice if there has been at least a second
       // delay in order to allow users to try connecting again.
       if (lastUrl !== url || Date.now() - lastUrlTime > 1000) {
-        chromeBrowserApi.trigger('urlData', url);
+        chromeBrowserApi.emit('urlData', url);
       } else {
         console.warn('Received duplicate url events', url);
       }
