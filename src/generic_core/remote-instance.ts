@@ -235,6 +235,9 @@ export var remoteProxyInstance :RemoteInstance = null;
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
       } else {
+        // Implies that the SharingState is TRYING_TO_SHARE_ACCESS because
+        // the client peer should never be able to try to get if they are
+        // already getting (and this sharer is already sharing).
         sharingStopped = this.stopShare();
       }
 
