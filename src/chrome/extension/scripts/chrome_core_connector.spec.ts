@@ -35,7 +35,8 @@ var chromeBrowserApi :ChromeBrowserApi;
 describe('core-connector', () => {
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
-    'showNotification']);
+     'showNotification',
+     'on']);
 
   var chromeCoreConnector :ChromeCoreConnector;
   chromeCoreConnector = new ChromeCoreConnector();
@@ -47,6 +48,7 @@ describe('core-connector', () => {
   beforeEach(() => {
     ui = new UI.UserInterface(core, chromeBrowserApi);
     spyOn(console, 'log');
+    spyOn(console, 'warn');
   });
 
   it('attempts chrome.runtime.connect().', () => {
