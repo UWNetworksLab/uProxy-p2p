@@ -11,7 +11,7 @@ taskManager = new TaskManager.Manager()
 taskManager.add 'base', [
   'copy:dev'
   'ts:devInModuleEnv'
-  'ts:devInCoreEnv'
+  'ts:generic_ui'
   'version_file'
   'browserify:chromeAppMain'
   'browserify:genericCoreFreedomModule'
@@ -25,6 +25,7 @@ taskManager.add 'version_file', [
 
 taskManager.add 'build_chrome_app', [
   'base'
+  'ts:chrome_app'
   'copy:chrome_app'
   'vulcanize:chromeAppInline'
   'vulcanize:chromeAppCsp'
@@ -33,6 +34,7 @@ taskManager.add 'build_chrome_app', [
 
 taskManager.add 'build_chrome_ext', [
   'base'
+  'ts:chrome_extension'
   'copy:chrome_extension'
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
@@ -51,13 +53,13 @@ taskManager.add 'build_chrome', [
 # Firefox build tasks.
 taskManager.add 'build_firefox', [
   'base'
-  #copy:generic_ui_to_firefox'
+  'ts:firefox'
   'copy:firefox'
+  'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
   'string-replace:firefoxVulcanized'
-  'concat:firefox_uproxy'
-  'concat:firefox_dependencies'
+  'browserify:firefoxContext'
   'browserify:firefoxVulcanized'
 ]
 
@@ -178,7 +180,6 @@ FILES =
   # Files which are required at run-time everywhere.
   uproxy_common: [
     'version/version.js'
-    '../../third_party/bower/lodash/lodash.min.js'
   ]
 
   uproxy_networking_common: [
@@ -221,6 +222,17 @@ finishVulcanized = (basePath) ->
       replacement: '<script src="../lib/$1"></script>'
     }]
 
+compileTypescript = (files) ->
+  src: files.concat('!**/*.d.ts')
+  options:
+    target: 'es5'
+    comments: true
+    noImplicitAny: true
+    sourceMap: false
+    declaration: true
+    module: 'commonjs'
+    fast: 'always'
+
 module.exports = (grunt) ->
   grunt.initConfig {
     pkg: grunt.file.readJSON('package.json')
@@ -232,31 +244,6 @@ module.exports = (grunt) ->
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
-
-    concat: {
-      firefox_uproxy: {
-        files: [ {
-          src: [firefoxDevPath + 'data/core/uproxy.js'
-                firefoxDevPath + 'lib/exports.js']
-          dest: firefoxDevPath + 'lib/uproxy.js'
-        }]
-      }
-
-      firefox_dependencies: {
-        files: [ {
-          src: [firefoxDevPath + 'data/scripts/port.js'
-                firefoxDevPath + 'data/scripts/user.js'
-                firefoxDevPath + 'data/scripts/uproxy.js'
-                firefoxDevPath + 'data/scripts/ui.js'
-                firefoxDevPath + 'data/scripts/firefox_browser_api.js'
-                firefoxDevPath + 'data/scripts/firefox_connector.js'
-                firefoxDevPath + 'data/scripts/core_connector.js'
-                firefoxDevPath + 'data/scripts/background.js'
-                firefoxDevPath + 'data/scripts/lodash.min.js']
-          dest: firefoxDevPath + 'data/scripts/context.js'
-        }]
-      }
-    }  # concat
 
     #-------------------------------------------------------------------------
     copy: {
@@ -438,12 +425,14 @@ module.exports = (grunt) ->
             'generic_core'
             'generic_ui'
             'interfaces'
+            'icons'
+            'fonts'
           ]
           pathsFromThirdPartyBuild: [
             'bower'
             'sha1'
             'uproxy-lib/loggingprovider'
-            'proxy-networking/churn-pipe'
+            'uproxy-networking/churn-pipe'
           ]
           files: [
             {
@@ -456,28 +445,23 @@ module.exports = (grunt) ->
               src: ['**']
               dest: firefoxDevPath + '/data/freedom-social-firebase'
             },
-            { # uProxy Icons and fonts
-              expand: true, cwd: 'src/'
-              src: ['icons/*', 'fonts/*']
-              dest: firefoxDevPath + 'data/'
-            },
             { # lib
               expand: true, cwd: devBuildPath
               src: ['interfaces/*.js']
               dest: firefoxDevPath + '/lib'
-            },
-            {
-              expand: true, cwd: firefoxDevPath + '/data'
-              src: ['polymer/*']
-              dest: firefoxDevPath + '/data/generic_ui'
-            },
-            {
-              expand: true, cwd: 'build/third_party/bower'
-              src: FILES.thirdPartyUi
-              dest: firefoxDevPath + '/data/lib'
             }
           ]
           localDestPath: 'firefox/data'
+      firefox_additional:
+        files: [
+          { # copy chrome extension panel components from the background
+            expand: true, cwd: firefoxDevPath + '/data'
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*']
+            dest: firefoxDevPath + '/data/generic_ui'
+          }
+        ]
+
+
 
       integration:
         files: [ {
@@ -527,46 +511,45 @@ module.exports = (grunt) ->
     ts:
       # Compile all non-sample typescript code into the development build
       # directory.
-      devInModuleEnv:
-        src: [
-          devBuildPath + '/interfaces/**/*.ts'
-          devBuildPath + '/generic_core/**/*.ts'
-          '!' + devBuildPath + '/**/*.d.ts'
-          '!' + devBuildPath + '/**/*.core-env.ts'
-          '!' + devBuildPath + '/**/*.core-env.spec.ts'
-        ]
-        options:
-          target: 'es5'
-          comments: true
-          noImplicitAny: true
-          sourceMap: false
-          declaration: true
-          module: 'commonjs'
-          fast: 'always'
+      devInModuleEnv: compileTypescript [
+        devBuildPath + '/interfaces/**/*.ts'
+        devBuildPath + '/generic_core/**/*.ts'
+        '!' + devBuildPath + '/**/*.core-env.ts'
+        '!' + devBuildPath + '/**/*.core-env.spec.ts'
+      ]
 
-      devInCoreEnv:
-        src: [
-          devBuildPath + '/chrome/app/**/*.ts'
-          devBuildPath + '/chrome/extension/**/*.ts'
-          devBuildPath + '/generic_ui/**/*.ts'
-          devBuildPath + '/**/*.core-env.spec.ts'
-          devBuildPath + '/**/*.core-env.ts'
-          '!' + devBuildPath + '/**/*.d.ts'
-        ]
-        options:
-          target: 'es5'
-          comments: true
-          noImplicitAny: true
-          sourceMap: false
-          declaration: true
-          module: 'commonjs'
-          fast: 'always'
+      generic_ui: compileTypescript [
+        devBuildPath + '/generic_ui/**/*.ts'
+        devBuildPath + '/**/*.core-env.spec.ts'
+        devBuildPath + '/**/*.core-env.ts'
+      ]
+
+      chrome_extension: compileTypescript [
+        devBuildPath + '/chrome/extension/**/*.ts'
+      ]
+
+      chrome_app: compileTypescript [
+        devBuildPath + '/chrome/app/**/*.ts'
+      ]
+
+      firefox: compileTypescript [
+        devBuildPath + '/firefox/**/*.ts'
+      ]
+
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
       chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
       chromeContext: Rule.browserify 'chrome/extension/generic_ui/scripts/context'
       chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
+      firefoxContext:
+        src: [
+          firefoxDevPath + '/data/scripts/background.js'
+        ]
+        dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
+        options:
+          browserifyOptions:
+            standalone: 'browserified_exports'
       firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
@@ -691,7 +674,6 @@ module.exports = (grunt) ->
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-clean'
-  grunt.loadNpmTasks 'grunt-contrib-concat'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-gitinfo'
@@ -705,4 +687,4 @@ module.exports = (grunt) ->
   # Register the tasks
   taskManager.list().forEach((taskName) =>
     grunt.registerTask taskName, (taskManager.get taskName)
-  );
+  )

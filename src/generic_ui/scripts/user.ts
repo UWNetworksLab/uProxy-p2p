@@ -8,6 +8,7 @@
 
 import social = require('../../interfaces/social');
 import UI = require('./ui');
+import _ = require('lodash');
 
 export enum GettingConsentState {
   LOCAL_REQUESTED_REMOTE_GRANTED = 100,
