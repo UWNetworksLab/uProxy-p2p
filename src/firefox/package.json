@@ -1,10 +1,10 @@
 {
-  "name": "uproxy",
-  "title": "uProxy",
-  "id": "jid1-DhGl7eIwcjxVEQ",
-  "description": "uProxy Alpha version for Firefox.",
-  "author": "",
-  "license": "MPL 2.0",
+  "name": "uproxy-firefox",
+  "title": "uProxy Beta",
+  "id": "jid1-uTe1Bgrsb76jSA",
+  "description": "uProxy",
+  "author": "uProxy Team <info@uproxy.org>",
+  "license": "Apache 2.0",
   "version": "0.8.0",
   "permissions": {
     "private-browsing": true
