@@ -604,7 +604,7 @@ module.exports = (grunt) ->
       'dist':
         options:
           'mozilla-addon-sdk': 'latest'
-          extension_dir: 'build/dev/firefox'
+          extension_dir: 'build/dev/uproxy/firefox'
           dist_dir: 'build/dist/'
 
     vulcanize:
