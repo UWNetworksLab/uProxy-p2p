@@ -90,7 +90,6 @@ function initUI() : user_interface.UserInterface {
   chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
   chromeCoreConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
                            chromeBrowserApi.bringUproxyToFront);
-  chromeCoreConnector.connect();
 
   core = new CoreConnector(chromeCoreConnector);
   var oAuth = new ChromeTabAuth();
