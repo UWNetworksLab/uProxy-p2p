@@ -29,10 +29,19 @@ Polymer({
     // this event.
     if (detail.view == ui_types.View.ROSTER && browserified_exports.ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
+      if (!browserified_exports.model.globalSettings.hasSeenWelcome) {
+        this.statsHelpTextOpen = true;
+        this.$.statsDialog.toggle();
+      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
     browserified_exports.ui.view = detail.view;
+  },
+  statsIconClicked: function() {
+    this.$.mainPanel.openDrawer();
+    // Expand advanced settings.
+    this.displayAdvancedSettings = true;
   },
   closeSettings: function() {
     this.$.mainPanel.closeDrawer();
@@ -100,6 +109,16 @@ Polymer({
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
   },
+  closeStatsBubble: function() {
+    this.statsHelpTextOpen = false;
+  },
+  enableStats: function() {
+    this.model.globalSettings.statsReportingEnabled = true;
+  },
+  disableStats: function() {
+    this.model.globalSettings.statsReportingEnabled = false;
+    this.statsHelpTextOpen = false;
+  },
   tabSelected: function(e :Event) {
     // setting the value is taken care of in the polymer binding, we just need
     // to sync the value to core
@@ -161,5 +180,17 @@ Polymer({
     // If there are no status bars, toasts should still 'float' a little
     // above the bottom of the window.
     return padding;
+  },
+  drawerToggled: function() {
+    if (this.$.mainPanel.selected == 'drawer') {
+      // Drawer was opened.
+      this.$.statsTooltip.disabled = true;
+    } else {
+      // Drawer was closed.
+      this.$.statsTooltip.disabled = false;
+    }
+  },
+  observe: {
+    '$.mainPanel.selected' : 'drawerToggled'
   }
 });
