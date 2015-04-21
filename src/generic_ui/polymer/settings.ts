@@ -1,11 +1,19 @@
 /// <reference path='./context.d.ts' />
 
 Polymer({
-  DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
-                         {urls: ['stun:stun1.l.google.com:19302']},
-                         {urls: ['stun:stun2.l.google.com:19302']},
-                         {urls: ['stun:stun3.l.google.com:19302']},
-                         {urls: ['stun:stun4.l.google.com:19302']}],
+  DEFAULT_STUN_SERVERS: [
+    {urls: ['stun:stun.services.mozilla.com']},
+    {urls: ['stun:stun.stunprotocol.org']},
+    {
+      urls: [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+        'stun:stun3.l.google.com:19302',
+        'stun:stun4.l.google.com:19302'
+      ]
+    }
+  ],
   displayAdvancedSettings: false,
   logOut: function() {
     browserified_exports.ui.logout({name: browserified_exports.model.onlineNetwork.name,

@@ -10,14 +10,19 @@ export var storage = new local_storage.Storage();
 export var STORAGE_VERSION = 1;
 export var MESSAGE_VERSION = 1;
 
-export var DEFAULT_STUN_SERVERS_ =
-  [
-    {urls: ['stun:stun.l.google.com:19302']},
-    {urls: ['stun:stun1.l.google.com:19302']},
-    {urls: ['stun:stun2.l.google.com:19302']},
-    {urls: ['stun:stun3.l.google.com:19302']},
-    {urls: ['stun:stun4.l.google.com:19302']}
-  ];
+export var DEFAULT_STUN_SERVERS_ = [
+  {urls: ['stun:stun.services.mozilla.com']},
+  {urls: ['stun:stun.stunprotocol.org']},
+  {
+    urls: [
+      'stun:stun.l.google.com:19302',
+      'stun:stun1.l.google.com:19302',
+      'stun:stun2.l.google.com:19302',
+      'stun:stun3.l.google.com:19302',
+      'stun:stun4.l.google.com:19302'
+    ]
+  }
+];
 
   // Initially, the STUN servers are a copy of the default.
   // We need to use slice to copy the values, otherwise modifying this
