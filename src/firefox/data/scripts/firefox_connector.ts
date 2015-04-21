@@ -4,20 +4,19 @@
  * Handles all connection and communication with the uProxy core and ui..
  */
 
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/firefox/firefox.d.ts' />
+/// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
 
 import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 import browser_connector = require('../../../interfaces/browser_connector');
-
-var port :ContentScriptPort;
+import port = require('./port');
 
 /**
  * Firefox-specific uProxy CoreBrowserConnector implementation.
  */
 class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
-  public status :StatusObject;
+  public status :browser_connector.StatusObject;
 
   constructor() {
     this.status = { connected: true };
@@ -33,7 +32,7 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
   /**
    * Attach handlers for updates emitted from the uProxy Core.
    */
-  public onUpdate = (update :browser_connector.Update, handler :Function) => {
+  public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     port.on('' + update, handler);
   }
 
@@ -51,3 +50,5 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
   }
 
 }  // class FirefoxConnector
+
+export = FirefoxConnector;

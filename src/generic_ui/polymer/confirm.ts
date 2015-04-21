@@ -1,3 +1,5 @@
+declare var stopProxying :Function;
+
 Polymer({
   undoProxyConfig: function() {
     stopProxying();

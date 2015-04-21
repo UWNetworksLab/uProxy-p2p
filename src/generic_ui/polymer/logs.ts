@@ -1,3 +1,6 @@
+declare var bringUproxyToFront :() => void;
+declare var getLogs :() => Promise<string>;
+
 Polymer({
   logs: '',
   loadingLogs: true,

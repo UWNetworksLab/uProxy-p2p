@@ -11,11 +11,10 @@ notifications:
 before_install:
   - "export DISPLAY=:10.0"
   - "Xvfb :10 -screen 0 1280x1024x24 &"
-  - "google-chrome --version"
-  - "firefox -v"
+  - npm install -g grunt-cli bower
 install:
-  - "npm install -g bower"
-  - "bower install --allow-root"
-  - "shippable_retry npm install"
+  - "google-chrome --version"
+  - "firefox -v || echo 'No firefox installed.'"
+  - "shippable_retry ./setup.sh install"
 script:
-  - "grunt test --verbose"
+  - "grunt test"

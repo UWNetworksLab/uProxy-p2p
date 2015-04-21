@@ -66,7 +66,6 @@ export enum Command {
   HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
   SEND_CREDENTIALS,
   UPDATE_GLOBAL_SETTINGS,
-  SEND_FEEDBACK,
   GET_LOGS,
   GET_NAT_TYPE
 }
@@ -138,6 +137,8 @@ export interface CoreApi {
 
   modifyConsent(command :ConsentCommand) : void;
 
+  getLogs() :Promise<string>;
+
   // CopyPaste interactions
 
   /*
@@ -177,6 +178,5 @@ export interface CoreApi {
   // TODO: use Event instead of attaching manual handler. This allows event
   // removal, etc.
   onUpdate(update :Update, handler :Function) : void;
-  sendFeedback(feedback :UserFeedback) : void;
 }
 

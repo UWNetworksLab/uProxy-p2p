@@ -132,7 +132,7 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
-      var ackResponse :Function = (msg :string) => {
+      var ackResponse = (msg :string) => {
         console.log('connect_: in ackResponse');
         if (ChromeMessage.ACK !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
