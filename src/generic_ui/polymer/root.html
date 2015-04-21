@@ -83,6 +83,14 @@
         font-size: 20px;
         margin: 0px 0px 0px 36px;
       }
+      .materialDesignIcon {
+        font-family: 'Material Icons';
+        text-rendering: optimizeLegibility;
+        font-style: normal;
+        text-transform: none;
+        font-size: 24px; /* preferred icon size */
+        color: #006A5A;
+      }
       #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
         padding: 0px;
@@ -140,6 +148,10 @@
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      uproxy-faq-link .linkText {
+        text-decoration: underline;
+        color: rgba(0,0,0,0.40);
+      }
       paper-toast {
         position: fixed;
         left: 12px;
@@ -193,6 +205,15 @@
             </p>
           </uproxy-bubble>
 
+          <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
+            <i class='materialDesignIcon' hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'>drive_fusiontable</i>
+          </core-tooltip>
+
+          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
+            <h3>Anonymous stats enabled</h3>
+            <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
+          </uproxy-bubble>
+
           <core-tooltip label='You are available for sharing.' position='left'>
             <img id='sharingEnabledIcon'
               src='../icons/sharing-enabled-toolbar.png'
@@ -213,7 +234,7 @@
           </div>
         </core-toolbar>
 
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
           <h3>Welcome to uProxy!</h3>
           <p>
             To get started, choose "Get access" or "Share access" and then click
@@ -259,6 +280,18 @@
           {{button.text}}
         </paper-button>
       </template>
+    </paper-action-dialog>
+
+    <paper-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
+      <p>
+        This is a beta release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>More information.</span>
+        </uproxy-faq-link> You can change your choice at any time, from the Settings menu.
+      </p>
+      <p>Would you like to enable anonymous metrics collection?</p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
+      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
     </paper-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

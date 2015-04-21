@@ -169,6 +169,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.hasSeenWelcome = newSettings.hasSeenWelcome;
     globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
     globals.settings.mode = newSettings.mode;
+    globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
   }
 
   /**

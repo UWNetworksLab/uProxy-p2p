@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower/polymer/polymer.html">
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel="import" href='description.html'>
@@ -80,6 +81,25 @@
       margin-right: 5px;
       font-size: 10px;
     }
+    paper-checkbox::shadow #checkboxLabel {
+      font-size: 12px;
+    }
+    #metricsCheckbox core-icon[icon="help"]{
+      height: 15px;
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      margin-right: 0px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    #metricsCheckbox core-icon[icon="help"]:hover {
+      opacity: 1;
+    }
+    #metricsCheckbox paper-checkbox, uproxy-faq-link {
+      display: table-cell;
+    }
     core-icon[icon=announcement],
     core-icon[icon=help],
     core-icon[icon=settings],
@@ -149,6 +169,12 @@
           <paper-button raised on-tap="{{resetStunServers}}">Reset</paper-button>
           <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
           <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
+        </div>
+        <div id='metricsCheckbox'>
+          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats reporting enabled'></paper-checkbox>
+          <uproxy-faq-link anchor='doesUproxyLogData'>
+            <core-icon icon="help"></core-icon>
+          </uproxy-faq-link>
         </div>
 
         <hr>
