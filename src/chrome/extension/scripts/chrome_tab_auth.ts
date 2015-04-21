@@ -1,9 +1,11 @@
-/// <reference path='../../../generic_ui/scripts/core_connector.ts'/>
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../uproxy.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
 
-declare var core :CoreConnector;
-declare var model :UI.Model;
+import core_connector = require('../../../generic_ui/scripts/core_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import user_interface = require('../../../generic_ui/scripts/ui');
+import chromeInterface = require('../../../interfaces/chrome');
+import background = require('./background');
 
 // TODO: write a similar class for Firefox that will implement a common
 // interface as Chrome
@@ -21,8 +23,8 @@ class ChromeTabAuth {
   constructor() {
   }
 
-  public login = (oauthInfo :OAuthInfo) : void => {
-    if (model.reconnecting && this.lastOAuthURL_) {
+  public login = (oauthInfo :chromeInterface.OAuthInfo) : void => {
+    if (user_interface.model.reconnecting && this.lastOAuthURL_) {
       this.sendCredentials_(this.lastOAuthURL_);
     } else {
       this.launchAuthTab_(oauthInfo.url, oauthInfo.redirect);
@@ -31,7 +33,7 @@ class ChromeTabAuth {
 
 
   private launchAuthTab_ = (url :string, redirectUrl :string) : void => {
-    var onTabChange = (tabId, changeInfo, tab) => {
+    var onTabChange = (tabId :number, changeInfo :chrome.tabs.TabChangeInfo, tab :chrome.tabs.Tab) => {
       if (tab.url.indexOf(redirectUrl) === 0) {
         chrome.tabs.onUpdated.removeListener(onTabChange);
         chrome.tabs.remove(tabId);
@@ -48,10 +50,12 @@ class ChromeTabAuth {
   }
 
   private onError_ = (errorText :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, errorText);
+    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, errorText);
   }
 
   private sendCredentials_ = (url :string) : void => {
-    core.sendCommand(uProxy.Command.SEND_CREDENTIALS, url);
+    background.core.sendCommand(uproxy_core_api.Command.SEND_CREDENTIALS, url);
   }
 }
+
+export = ChromeTabAuth;

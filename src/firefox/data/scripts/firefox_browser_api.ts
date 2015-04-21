@@ -4,37 +4,33 @@
  * Firefox-specific implementation of the Browser API.
  * TODO(salomegeo): Figure out if it's possible to set proxy from content script.
  */
-/// <reference path='../../../interfaces/browser-api.d.ts' />
-/// <reference path='../../../interfaces/firefox.d.ts' />
-/// <reference path='../../../generic_ui/scripts/ui.ts' />
 
-var port :ContentScriptPort;
+/// <reference path='../../../../../third_party/typings/firefox/firefox.d.ts' />
 
-declare var ui :UI.UserInterface;
+import browser_api =  require('../../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import user_interface = require('../../../generic_ui/scripts/ui');
+import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import port = require('./port');
+
+interface FullfillAndReject {
+  fulfill :Function;
+  reject :Function;
+}
 
 class FirefoxBrowserApi implements BrowserAPI {
 
-  public browserSpecificElement;
+  public browserSpecificElement :string;
 
   // Global unique promise ID.
   private promiseId_ :number = 1;
-  private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
+  private mapPromiseIdToFulfillAndReject_ :{[id :number] :FullfillAndReject} =
       {};
 
   constructor() {
-    port.on('handleUrlData', function(url :string) {
-      ui.handleUrlData(url);
-    });
-
-    port.on('notificationClicked', function(tag :string) {
-      ui.handleNotificationClick(tag);
-    });
-
     port.on('emitFulfilled', this.handleEmitFulfilled_);
     port.on('emitRejected', this.handleEmitRejected_);
   }
-
-  // For browser icon.
 
   public setIcon = (iconFile :string) : void => {
     port.emit('setIcon',
@@ -52,10 +48,7 @@ class FirefoxBrowserApi implements BrowserAPI {
     port.emit('launchTabIfNotOpen', url);
   }
 
-  // For proxy configuration.
-  // Sends message back to add-on environment, which handles proxy settings.
-
-  public startUsingProxy = (endpoint:Net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint) => {
     port.emit('startUsingProxy', endpoint);
   }
 
@@ -69,6 +62,10 @@ class FirefoxBrowserApi implements BrowserAPI {
 
   public showNotification = (text :string, tag :string) => {
     port.emit('showNotification', { text: text, tag: tag });
+  }
+
+  public on = (name :string, callback :Function) => {
+    port.on(name, callback);
   }
 
   public frontedPost = (data :any,
@@ -140,3 +137,5 @@ class FirefoxBrowserApi implements BrowserAPI {
     }
   }
 }
+
+export = FirefoxBrowserApi;

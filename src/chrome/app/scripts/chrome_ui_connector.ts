@@ -1,17 +1,30 @@
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../third_party/typings/chrome/chrome-app.d.ts'/>
+/// <reference path='../../../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../../third_party/typings/chrome/chrome-app.d.ts'/>
+
+import browser_connector = require('../../../interfaces/browser_connector');
+import freedom_types = require('freedom.types');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import uproxy_chrome = require('../../../interfaces/chrome');
 
 // See the ChromeCoreConnector, which communicates to this class.
 // TODO: Finish this class with tests and pull into its own file.
 var UPROXY_CHROME_EXTENSION_ID = 'pjpcdnccaekokkkeheolmpkfifcbibnj';
-var installedFreedomHooks = [];
-declare var uProxyAppChannel :OnAndEmit<any,any>;
+var installedFreedomHooks :number[] = [];
 
 class ChromeUIConnector {
 
   private extPort_:chrome.runtime.Port;    // The port that the extension connects to.
-  private onCredentials_ :(Object) => void;
+  private onCredentials_ :(credentials:Object) => void;
   private INSTALL_INCOMPLETE_PAGE_ :string = '../install-incomplete.html';
+
+  constructor(private uProxyAppChannel_ :freedom_types.OnAndEmit<any,any>) {
+    this.extPort_ = null;
+    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
+    // Until the extension is connected, we assume uProxy installation is
+    // incomplete.
+    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
+  }
 
   // Launch a popup instructing the user to install the extension.
   private launchInstallIncompletePage_ = () => {
@@ -32,17 +45,9 @@ class ChromeUIConnector {
   private launchUproxy_ = () => {
     this.extPort_.postMessage({
         cmd: 'fired',
-        type: uProxy.Update.LAUNCH_UPROXY,
+        type: uproxy_core_api.Update.LAUNCH_UPROXY,
         data: ''
     });
-  }
-
-  constructor() {
-    this.extPort_ = null;
-    chrome.runtime.onConnectExternal.addListener(this.onConnect_);
-    // Until the extension is connected, we assume uProxy installation is
-    // incomplete.
-    chrome.app.runtime.onLaunched.addListener(this.launchInstallIncompletePage_);
   }
 
   // Handler for when the uProxy Chrome Extension connects to this uProxy App.
@@ -62,7 +67,7 @@ class ChromeUIConnector {
     // Because there is no callback when you call runtime.connect and it
     // sucessfully connects, the extension depends on a message received from
     // this app, so it knows the connection was successful.
-    this.extPort_.postMessage(ChromeMessage.ACK);
+    this.extPort_.postMessage(uproxy_chrome.ChromeMessage.ACK);
     this.extPort_.onMessage.addListener(this.onExtMsg_);
 
     // Once the extension is connected, we know that installation of uProxy
@@ -79,35 +84,36 @@ class ChromeUIConnector {
 
   // Receive a message from the extension.
   // This usually installs freedom handlers.
-  private onExtMsg_ = (msg :uProxy.Payload) => {
-    console.log('extension message: ', msg);
+  private onExtMsg_ = (msg :browser_connector.Payload) => {
+    console.log('[chrome ui connector] Extension message: ', uproxy_core_api.Command[msg.type]);
     var msgType = '' + msg.type;
-    // Pass 'emit's from the UI to Core. These are uProxy.Commands.
+    // Pass 'emit's from the UI to Core.
     if ('emit' == msg.cmd) {
-      if (msg.type == uProxy.Command.SEND_CREDENTIALS) {
+      if (msg.type == uproxy_core_api.Command.SEND_CREDENTIALS) {
         this.onCredentials_(msg.data);
       }
-      if (msg.type == uProxy.Command.RESTART) {
+      if (msg.type == uproxy_core_api.Command.RESTART) {
         chrome.runtime.reload();
       }
-      uProxyAppChannel.emit(msgType,
-                            <uProxy.PromiseCommand>{data: msg.data, promiseId: msg.promiseId});
+      this.uProxyAppChannel_.emit(msgType,
+          {data: msg.data, promiseId: msg.promiseId});
 
     // Install onUpdate handlers by request from the UI.
     } else if ('on' == msg.cmd) {
       if (installedFreedomHooks.indexOf(msg.type) >= 0) {
-        console.log('freedom already has a hook for ' + msg.type);
+        console.error('[chrome ui connector] Freedom already has a hook for ' +
+            uproxy_core_api.Command[msg.type]);
         return;
       }
       installedFreedomHooks.push(msg.type);
       // When it fires, send data back over Chrome App -> Extension port.
-      uProxyAppChannel.on(msgType, (ret :string) => {
+      this.uProxyAppChannel_.on(msgType, (ret :string) => {
         this.sendToUI(msg.type, ret);
       });
     }
   }
 
-  public sendToUI = (type :uProxy.Update, data ?:any) => {
+  public sendToUI = (type :uproxy_core_api.Update, data?:Object) => {
     this.extPort_.postMessage({
         cmd: 'fired',
         type: type,
@@ -115,8 +121,9 @@ class ChromeUIConnector {
     });
   }
 
-  public setOnCredentials = (onCredentials :(Object) => void) => {
+  public setOnCredentials = (onCredentials:(credentials:Object) => void) => {
     this.onCredentials_ = onCredentials;
   }
 }
 
+export = ChromeUIConnector;

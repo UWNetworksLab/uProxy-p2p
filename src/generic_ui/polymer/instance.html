@@ -1,6 +1,6 @@
-<link rel="import" href="../lib/polymer/polymer.html">
-<link rel='import' href='../lib/core-icons/core-icons.html'>
-<link rel="import" href="../lib/paper-button/paper-button.html">
+<link rel="import" href="../../bower/polymer/polymer.html">
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel="import" href="../../bower/paper-button/paper-button.html">
 
 <polymer-element name='uproxy-instance' attributes='user, instance, network'>
   <template>
@@ -39,7 +39,7 @@
     </style>
 
     <div id='wrapper' class='{{ instance.isOnline ? "online" : "offline" }}'
-         hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'>
+         hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'>
 
       <p id='description' hidden?='{{ !instance.description }}'>
         {{ instance.description }}

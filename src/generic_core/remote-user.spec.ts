@@ -1,9 +1,16 @@
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='user.ts' />
-/// <reference path='social.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import social = require('../interfaces/social');
+import remote_user = require('./remote-user');
+import remote_instance = require('./remote-instance');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import local_storage = require('./storage');
+import consent = require('./consent');
 
-describe('Core.User', () => {
+import globals = require('./globals');
+import storage = globals.storage;
+
+describe('remote_user.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
   var network = jasmine.createSpyObj('network', [
       'api',
@@ -13,11 +20,11 @@ describe('Core.User', () => {
   network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
   network['send'] = () => { return Promise.resolve(); };
 
-  var user :Core.User;
-  var instance :Core.RemoteInstance;
+  var user :remote_user.User;
+  var instance :remote_instance.RemoteInstance;
 
   it('creates with the correct userId', (done) => {
-    user = new Core.User(network, 'fakeuser');
+    user = new remote_user.User(network, 'fakeuser');
     expect(user.userId).toEqual('fakeuser');
     expect(user['network']).toEqual(network);
     storage.load(user.getStorePath()).catch((e) => {
@@ -61,24 +68,24 @@ describe('Core.User', () => {
 
   it('sends an instance message to newly ONLINE clients', () => {
     spyOn(user, 'sendInstanceHandshake');
-    var clientState :UProxyClient.State = {
+    var clientState :social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: UProxyClient.Status.ONLINE,
+      status: social.ClientStatus.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
     expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(social.ClientStatus.ONLINE);
   });
 
   it('does not re-send instance messages to the same client', () => {
     spyOn(user, 'sendInstanceHandshake');
-    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
-    var clientState :UProxyClient.State = {
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(social.ClientStatus.ONLINE);
+    var clientState :social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: UProxyClient.Status.ONLINE,
+      status: social.ClientStatus.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
@@ -86,10 +93,10 @@ describe('Core.User', () => {
   });
 
   it('does not add clients that are ONLINE_WITH_OTHER_APP', () => {
-    var clientState :UProxyClient.State = {
+    var clientState :social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeNonUproxyClient',
-      status: UProxyClient.Status.ONLINE_WITH_OTHER_APP,
+      status: social.ClientStatus.ONLINE_WITH_OTHER_APP,
       timestamp: 12346
     };
     user.handleClient(clientState);
@@ -97,10 +104,10 @@ describe('Core.User', () => {
   });
 
   it('deletes DISCONNECTED client', () => {
-    var clientState :UProxyClient.State = {
+    var clientState :social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: UProxyClient.Status.OFFLINE,
+      status: social.ClientStatus.OFFLINE,
       timestamp: 12346
     };
     user.handleClient(clientState);
@@ -109,22 +116,22 @@ describe('Core.User', () => {
 
   it('re-adds an re-sends instance message to new ONLINE clients', () => {
     spyOn(user, 'sendInstanceHandshake');
-    var clientState :UProxyClient.State = {
+    var clientState :social.ClientState = {
       userId: 'fakeuser',
       clientId: 'fakeclient',
-      status: UProxyClient.Status.ONLINE,
+      status: social.ClientStatus.ONLINE,
       timestamp: 12345
     };
     user.handleClient(clientState);
     expect(user.sendInstanceHandshake).toHaveBeenCalledWith('fakeclient');
-    expect(user.clientIdToStatusMap['fakeclient']).toEqual(UProxyClient.Status.ONLINE);
+    expect(user.clientIdToStatusMap['fakeclient']).toEqual(social.ClientStatus.ONLINE);
   });
 
   it('logs an error when receiving a ClientState with wrong userId', () => {
-    var clientState :UProxyClient.State = {
+    var clientState :social.ClientState = {
       userId: 'fakeuserd',
       clientId: 'fakeclient',
-      status: UProxyClient.Status.ONLINE,
+      status: social.ClientStatus.ONLINE,
       timestamp: 12345
     };
     spyOn(console, 'error');
@@ -136,7 +143,7 @@ describe('Core.User', () => {
     it('handles an INSTANCE message', () => {
       spyOn(user, 'syncInstance_').and.returnValue(Promise.resolve());
       user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.INSTANCE,
+        type: social.PeerMessageType.INSTANCE,
         data: {
           instanceId: 'instanceId', description: '', keyHash: '',
           consent: {isOffering: false, isRequesting: false}
@@ -150,7 +157,7 @@ describe('Core.User', () => {
       spyOn(user, 'clientToInstance');
       spyOn(user, 'getInstance').and.returnValue(instance);
       user.handleMessage('fakeclient', {
-        type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
         data: {}
       });
       expect(instance.handleSignal).toHaveBeenCalled();
@@ -158,25 +165,18 @@ describe('Core.User', () => {
 
   });  // describe communications
 
-  var instanceData :Instance = {
-    instanceId: 'fakeinstance',
-    keyHash: null,
-    status: null,
-    consent: {isRequesting: false, isOffering: false}
-  };
-
   var instanceHandshake = {
-    instanceId: instanceData.instanceId,
-    keyHash: instanceData.keyHash,
+    instanceId: 'fakeinstance',
+    keyHash: <string>null,
     description: 'fake instance',
     consent: {isRequesting: false, isOffering: false}
   }
 
   describe('client <---> instance', () => {
     it('syncs clientId <--> instanceId mapping', (done) => {
-      var realStorage = new Core.Storage;
-      var saved;
-      storage.save = function(key, value) {
+      var realStorage = new local_storage.Storage;
+      var saved :Promise<Object>;
+      storage.save = function(key :string, value :Object) {
         saved = realStorage.save(key, value);
         return saved;
       };
@@ -194,10 +194,10 @@ describe('Core.User', () => {
 
     it('cleanly updates for new clientId <--> instanceId mappings', () => {
       // New client to be associated with the same instance.
-      var clientState :UProxyClient.State = {
+      var clientState :social.ClientState = {
         userId: 'fakeuser',
         clientId: 'fakeclient2',
-        status: UProxyClient.Status.ONLINE,
+        status: social.ClientStatus.ONLINE,
         timestamp: 12345
       };
       // Add the new client.
@@ -216,12 +216,12 @@ describe('Core.User', () => {
   });  // describe client <---> instance
 
   describe('local consent towards remote proxy', () => {
-    var user = new Core.User(network, 'fakeuser2');
+    var user = new remote_user.User(network, 'fakeuser2');
 
     it('can request access, and cancel that request', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.REQUEST).then(() => {
         expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
-        user.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST).then(() => {
+        user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_REQUEST).then(() => {
           expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
           done();
         });
@@ -229,7 +229,7 @@ describe('Core.User', () => {
     });
 
     it('ignores offer from remote', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.IGNORE_OFFER).then(() => {
         expect(user.consent.ignoringRemoteUserOffer).toEqual(true);
         done();
       });
@@ -237,7 +237,7 @@ describe('Core.User', () => {
 
     it('un-ignore cancels ignore setting', (done) => {
       user.consent.ignoringRemoteUserOffer = true;
-      user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER).then(() => {
         expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
         done();
       });
@@ -245,9 +245,9 @@ describe('Core.User', () => {
 
     it('ignore-offers bit reset after requesting', (done) => {
       user.consent.localRequestsAccessFromRemote = false;
-      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.IGNORE_OFFER).then(() => {
         expect(user.consent.ignoringRemoteUserOffer).toEqual(true);
-        user.modifyConsent(uProxy.ConsentUserAction.REQUEST).then(() => {
+        user.modifyConsent(uproxy_core_api.ConsentUserAction.REQUEST).then(() => {
           expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
           expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
           done();
@@ -256,12 +256,12 @@ describe('Core.User', () => {
     });
 
     it('invalid proxy transitions do not modify consent', (done) => {
-      var emptyConsent = new Consent.State();
+      var emptyConsent = new consent.State();
 
-      user.consent = new Consent.State();
-      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_REQUEST).then(() => {
+      user.consent = new consent.State();
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_REQUEST).then(() => {
         expect(user.consent).toEqual(emptyConsent);
-        user.modifyConsent(uProxy.ConsentUserAction.UNIGNORE_OFFER).then(() => {
+        user.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER).then(() => {
           expect(user.consent).toEqual(emptyConsent);
           // proxy consent modifications did not touch client consent
           expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
@@ -273,7 +273,7 @@ describe('Core.User', () => {
 
   describe('local consent towards remote client', () => {
     it('can offer access', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
         done();
       });
@@ -281,7 +281,7 @@ describe('Core.User', () => {
 
     it('can cancel access', (done) => {
       user.consent.localGrantsAccessToRemote = true;
-      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(false);
         done();
       });
@@ -289,7 +289,7 @@ describe('Core.User', () => {
 
     it('allows request from remote', (done) => {
       user.consent.localGrantsAccessToRemote = false;
-      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
         done();
       });
@@ -299,7 +299,7 @@ describe('Core.User', () => {
         (done) => {
       user.consent.remoteRequestsAccessFromLocal = true;
       user.consent.ignoringRemoteUserRequest = false;
-      user.modifyConsent(uProxy.ConsentUserAction.IGNORE_REQUEST).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.IGNORE_REQUEST).then(() => {
         expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
         expect(user.consent.ignoringRemoteUserRequest).toEqual(true);
         done();
@@ -307,14 +307,14 @@ describe('Core.User', () => {
     });
 
     it('can re-accept even after ignoring', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
         done();
       });
     });
 
     it('cancelling after granted returns to remote offer', (done) => {
-      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(false);
         expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
         done();
@@ -324,7 +324,7 @@ describe('Core.User', () => {
     it('ignore-requests bit reset after granting', (done) => {
       user.consent.localGrantsAccessToRemote = false;
       user.consent.ignoringRemoteUserRequest = true;
-      user.modifyConsent(uProxy.ConsentUserAction.OFFER).then(() => {
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.OFFER).then(() => {
         expect(user.consent.localGrantsAccessToRemote).toEqual(true);
         expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
         done();
@@ -332,13 +332,13 @@ describe('Core.User', () => {
     });
 
     it('invalid client transitions do not modify consent', (done) => {
-      var emptyConsent = new Consent.State();
+      var emptyConsent = new consent.State();
 
-      user.consent = new Consent.State();
-      user.modifyConsent(uProxy.ConsentUserAction.CANCEL_OFFER).then(() => {
+      user.consent = new consent.State();
+      user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(
-            uProxy.ConsentUserAction.UNIGNORE_REQUEST).then(() => {
+            uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST).then(() => {
           expect(user.consent).toEqual(emptyConsent);
           // Client consent modifications did not touch proxy consent
           expect(user.consent.localGrantsAccessToRemote).toEqual(false);

@@ -1,8 +1,21 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../scripts/ui.ts' />
-/// <reference path='../../uproxy.ts' />
+/// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-declare var ui :UI.UserInterface;
+import social = require('../../interfaces/social');
+import ui_types = require('../../interfaces/ui');
+import user_interface = require('../scripts/ui');
+
+interface button_description {
+  text :string;
+  signal :string;
+  dismissive :boolean;
+}
+
+interface dialog_description {
+  heading :string;
+  message :string;
+  buttons: button_description[];
+}
 
 Polymer({
   dialog: {
@@ -10,44 +23,53 @@ Polymer({
     heading: '',
     buttons: []
   },
-  updateView: function(e, detail, sender) {
+  updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
+    if (detail.view == ui_types.View.ROSTER && browserified_exports.ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
+      if (!browserified_exports.model.globalSettings.hasSeenWelcome) {
+        this.statsHelpTextOpen = true;
+        this.$.statsDialog.toggle();
+      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
-    ui.view = detail.view;
+    browserified_exports.ui.view = detail.view;
+  },
+  statsIconClicked: function() {
+    this.$.mainPanel.openDrawer();
+    // Expand advanced settings.
+    this.displayAdvancedSettings = true;
   },
   closeSettings: function() {
     this.$.mainPanel.closeDrawer();
   },
   rosterView: function() {
     console.log('rosterView called');
-    ui.view = uProxy.View.ROSTER;
+    browserified_exports.ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
-    model.globalSettings.mode = uProxy.Mode.GET;
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.model.globalSettings.mode = ui_types.Mode.GET;
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   setShareMode: function() {
-    model.globalSettings.mode = uProxy.Mode.SHARE;
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.model.globalSettings.mode = ui_types.Mode.SHARE;
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   closedWelcome: function() {
-    model.globalSettings.hasSeenWelcome = true;
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.model.globalSettings.hasSeenWelcome = true;
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   closedSharing: function() {
-    model.globalSettings.hasSeenSharingEnabledScreen = true;
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.model.globalSettings.hasSeenSharingEnabledScreen = true;
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   dismissCopyPasteError: function() {
-    ui.copyPasteError = UI.CopyPasteError.NONE;
+    browserified_exports.ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
-  openDialog: function(e, detail, sender) {
+  openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
      * signal was fired. It should be of the form:
      *
@@ -69,7 +91,7 @@ Polymer({
       this.$.dialog.open();
     });
   },
-  dialogButtonClick: function(event, detail, target) {
+  dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
@@ -77,20 +99,30 @@ Polymer({
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
-    this.ui = ui;
-    this.UI = UI;
-    this.uProxy = uProxy;
-    this.model = model;
+    this.ui = browserified_exports.ui;
+    this.ui_constants = ui_types;
+    this.user_interface = user_interface;
+    this.model = browserified_exports.model;
     this.closeToastTimeout = null;
-    if(ui.browserApi.browserSpecificElement){
-      var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
+    if (browserified_exports.ui.browserApi.browserSpecificElement){
+      var browserCustomElement = document.createElement(browserified_exports.ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
   },
-  tabSelected: function(e) {
+  closeStatsBubble: function() {
+    this.statsHelpTextOpen = false;
+  },
+  enableStats: function() {
+    this.model.globalSettings.statsReportingEnabled = true;
+  },
+  disableStats: function() {
+    this.model.globalSettings.statsReportingEnabled = false;
+    this.statsHelpTextOpen = false;
+  },
+  tabSelected: function(e :Event) {
     // setting the value is taken care of in the polymer binding, we just need
     // to sync the value to core
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   signalToFireChanged: function() {
     if (this.ui.signalToFire != '') {
@@ -102,7 +134,7 @@ Polymer({
   closeToast: function() {
     this.ui.toastMessage = null;
   },
-  messageNotNull: function(toastMessage) {
+  messageNotNull: function(toastMessage :string) {
     // Whether the toast is shown is controlled by if ui.toastMessage
     // is null. This function returns whether ui.toastMessage == null,
     // and also sets a timeout to close the toast.
@@ -114,7 +146,7 @@ Polymer({
     return false;
   },
   openTroubleshoot: function() {
-    if (this.stringMatches(ui.toastMessage, UI.GET_FAILED_MSG)) {
+    if (this.stringMatches(browserified_exports.ui.toastMessage, user_interface.GET_FAILED_MSG)) {
       this.troubleshootTitle = "Unable to get access";
     } else {
       this.troubleshootTitle = "Unable to share access";
@@ -122,15 +154,15 @@ Polymer({
     this.closeToast();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
-  stringMatches: function(toastMessage, failureMsgConstant) {
+  stringMatches: function(str1 :string, str2 :string) {
     // Determine if the error in the toast is a getter or sharer error
     // by comparing the error string to getter/sharer error constants.
-    if (toastMessage) {
-      return toastMessage.indexOf(failureMsgConstant) > -1;
+    if (str1) {
+      return str1.indexOf(str2) > -1;
     }
     return false;
   },
-  topOfStatuses: function(gettingStatus, sharingStatus) {
+  topOfStatuses: function(gettingStatus :social.GettingState, sharingStatus :social.SharingState) {
     // Returns number of pixels from the bottom of the window a toast
     // can be positioned without interfering with the getting or sharing
     // status bars.
@@ -148,5 +180,17 @@ Polymer({
     // If there are no status bars, toasts should still 'float' a little
     // above the bottom of the window.
     return padding;
+  },
+  drawerToggled: function() {
+    if (this.$.mainPanel.selected == 'drawer') {
+      // Drawer was opened.
+      this.$.statsTooltip.disabled = true;
+    } else {
+      // Drawer was closed.
+      this.$.statsTooltip.disabled = false;
+    }
+  },
+  observe: {
+    '$.mainPanel.selected' : 'drawerToggled'
   }
 });

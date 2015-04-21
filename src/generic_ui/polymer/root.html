@@ -1,13 +1,13 @@
-<link rel="import" href="../lib/polymer/polymer.html">
-<link rel="import" href="../lib/core-signals/core-signals.html">
-<link rel="import" href="../lib/core-header-panel/core-header-panel.html">
-<link rel="import" href="../lib/core-drawer-panel/core-drawer-panel.html">
-<link rel="import" href="../lib/core-toolbar/core-toolbar.html">
-<link rel="import" href="../lib/core-icon-button/core-icon-button.html">
-<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
-<link rel="import" href="../lib/paper-tabs/paper-tabs.html">
-<link rel="import" href="../lib/paper-toast/paper-toast.html">
-<link rel="import" href="../lib/core-tooltip/core-tooltip.html">
+<link rel="import" href="../../bower/polymer/polymer.html">
+<link rel="import" href="../../bower/core-signals/core-signals.html">
+<link rel="import" href="../../bower/core-header-panel/core-header-panel.html">
+<link rel="import" href="../../bower/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../../bower/core-toolbar/core-toolbar.html">
+<link rel="import" href="../../bower/core-icon-button/core-icon-button.html">
+<link rel='import' href='../../bower/paper-dialog/paper-action-dialog.html'>
+<link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
@@ -82,6 +82,14 @@
       #title {
         font-size: 20px;
         margin: 0px 0px 0px 36px;
+      }
+      .materialDesignIcon {
+        font-family: 'Material Icons';
+        text-rendering: optimizeLegibility;
+        font-style: normal;
+        text-transform: none;
+        font-size: 24px; /* preferred icon size */
+        color: #006A5A;
       }
       #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
@@ -158,32 +166,32 @@
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
 
-    <div id='browserElementContainer' hidden?='{{uProxy.View.BROWSER_ERROR !== ui.view}}'></div>
+    <div id='browserElementContainer' hidden?='{{ui_constants.View.BROWSER_ERROR !== ui.view}}'></div>
 
-    <uproxy-copypaste id='copypaste' hidden?='{{ uProxy.View.COPYPASTE !== ui.view }}'>
+    <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
     <uproxy-feedback></uproxy-feedback>
 
-    <uproxy-splash id='splash' hidden?='{{uProxy.View.SPLASH!=ui.view}}'>
+    <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
-        hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
+        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
       <core-header-panel drawer>
         <div class='content' fit>
-          <uproxy-settings id='settings'></uproxy-settings>
+          <uproxy-settings id='settings' displayAdvancedSettings='{{ displayAdvancedSettings }}'></uproxy-settings>
         </div>
       </core-header-panel>
       <core-header-panel main
-          hidden?='{{ ui.view !== uProxy.View.ROSTER }}'>
+          hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
 
         <core-toolbar>
 
           <core-icon icon="menu" core-drawer-toggle></core-icon>
           <div id='title' flex>uProxy</div>
 
-          <uproxy-bubble class='error' active='{{ ui.copyPasteError === UI.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
+          <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
             <h3>Cannot open manual connection</h3>
             <p>
               It is not currently possible to open a manual connection at the
@@ -191,6 +199,15 @@
               manual connection, please log out through the settings menu and
               re-paste the link.
             </p>
+          </uproxy-bubble>
+
+          <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
+            <i class='materialDesignIcon' hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'>drive_fusiontable</i>
+          </core-tooltip>
+
+          <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsHelpTextOpen }}'>
+            <h3>Anonymous stats enabled</h3>
+            <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
           </uproxy-bubble>
 
           <core-tooltip label='You are available for sharing.' position='left'>
@@ -213,7 +230,7 @@
           </div>
         </core-toolbar>
 
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome }}'>
+        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsHelpTextOpen }}'>
           <h3>Welcome to uProxy!</h3>
           <p>
             To get started, choose "Get access" or "Share access" and then click
@@ -226,11 +243,11 @@
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster' class='roster'
-                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.GET}}'
+                  hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
                   contacts='{{model.contacts.getAccessContacts}}'>
               </uproxy-roster>
               <uproxy-roster id='share-roster' class='roster'
-                  hidden?='{{model.globalSettings.mode!=uProxy.Mode.SHARE}}'
+                  hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
                   contacts='{{model.contacts.shareAccessContacts}}'>
               </uproxy-roster>
             </div>
@@ -261,6 +278,13 @@
       </template>
     </paper-action-dialog>
 
+    <paper-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
+      <p>This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely. <uproxy-faq-link anchor='doesUproxyLogData'>More information.</uproxy-faq-link> You can change your choice at any time, from the Settings menu.</p>
+      <p>Would you like to enable anonymous metrics collection?</p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
+      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
+    </paper-action-dialog>
+
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
     <paper-toast id='toast'
@@ -268,7 +292,7 @@
         text='{{ ui.toastMessage }}' responsiveWidth='320px'
         style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(ui.toastMessage, UI.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, UI.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
       </div>
     </paper-toast>
 

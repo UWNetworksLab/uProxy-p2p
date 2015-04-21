@@ -1,18 +1,21 @@
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+
 // Describes the interface for functions that have different implications
 // for different browsers.
 
-interface BrowserAPI {
+export interface BrowserAPI {
   // Configuration and control of the browsers proxy settings.
-  startUsingProxy(endpoint:Net.Endpoint) : void;
-  stopUsingProxy() : void;
+  startUsingProxy(endpoint:net.Endpoint) :void;
+  stopUsingProxy() :void;
   // Set the browser icon for the extension/add-on.
-  setIcon(iconFile :string) : void;
+  setIcon(iconFile :string) :void;
   // Open a new tab if it is not already open
   launchTabIfNotOpen(url :string) :void;
   // Open a new tab
-  openTab(url :string) : void;
-  bringUproxyToFront() : void;
-  browserSpecificElement : string;
+  openTab(url :string) :void;
+  bringUproxyToFront() :void;
+  // TODO: write comment to explain what browserSpecificElement is.
+  browserSpecificElement :string;
 
   /*
    * tag is used to uniquely identify notifications.  If it is a json-encoded
@@ -30,8 +33,8 @@ interface BrowserAPI {
    */
   frontedPost(data :any, externalDomain :string, cloudfrontDomain :string,
            cloudfrontPath ?:string) : Promise<void>;
-}
 
-declare var Notification : {
-  new (title :string, options ?:any) : any;
+  on(name :string, callback :Function) :void;
+  on(name :'urlData', callback :(url :string) => void) :void;
+  on(name :'notificationClicked', callback :(tag :string) => void) :void;
 }

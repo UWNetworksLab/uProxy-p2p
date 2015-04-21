@@ -1,7 +1,5 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../scripts/core_connector.ts' />
-
-declare var core :CoreConnector;
+/// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 Polymer({
   editDescription: function() {
@@ -11,13 +9,13 @@ Polymer({
   saveDescription: function() {
     this.model.globalSettings.description = this.descriptionInput;
     this.editing = false;
-    core.updateGlobalSettings(model.globalSettings);
+    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
   },
   cancelEditing: function() {
     this.editing = false;
   },
   ready: function() {
-    this.model = model;
+    this.model = browserified_exports.model;
     this.editing = false;
     this.descriptionInput = '';
   }

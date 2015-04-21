@@ -20,18 +20,26 @@
  * The tricky bit is that the Instance is associated not with the 'human' chat
  * client, but with the 'uProxy' non-human client.
  */
-/// <reference path='remote-instance.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-/// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/user.d.ts' />
-/// <reference path='../freedom/typings/social.d.ts' />
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import remote_instance = require('./remote-instance');
+import social = require('../interfaces/social');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import consent = require('./consent');
+import globals = require('./globals');
+import ui = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import _ = require('lodash');
 
-module Core {
-  var log :Logging.Log = new Logging.Log('user');
+import storage = globals.storage;
+
+import Persistent = require('../interfaces/persistent');
+
+var log :logging.Log = new logging.Log('remote-user');
 
   /**
-   * Core.User
+   * remote_user.User
    *
    * Builts upon a freedom.Social.UserProfile.
    * Maintains a mapping between a User's clientIds and instanceIds, while
@@ -40,17 +48,17 @@ module Core {
    *
    * NOTE: Deals with communications purely in terms of instanceIds.
    */
-  export class User implements BaseUser, Core.Persistent {
+  export class User implements social.BaseUser, Persistent {
 
     // Name of the user as provided by the social network.
     public name :string;
-    public clientIdToStatusMap :{ [clientId :string] :UProxyClient.Status };
+    public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
     public profile :freedom_Social.UserProfile;
 
-    public consent :Consent.State = new Consent.State();
+    public consent :consent.State = new consent.State();
 
     // Each instance is a user and social network pair.
-    private instances_ :{ [instanceId :string] :Core.RemoteInstance };
+    private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
     private clientToInstanceMap_ :{ [clientId :string] :string };
     private instanceToClientMap_ :{ [instanceId :string] :string };
 
@@ -61,7 +69,7 @@ module Core {
       this.notifyUI();
     });
 
-    private fulfillNameReceived_ : (string) => void;
+    private fulfillNameReceived_ :(name:string) => void;
     public onceNameReceived : Promise<string> = new Promise<string>((F, R) => {
       this.fulfillNameReceived_ = F;
     });
@@ -76,7 +84,7 @@ module Core {
      * not appear in the UI until actually receiving and being updated with a
      * full UserProfile.
      */
-    constructor(public network :Social.Network,
+    constructor(public network :social.Network,
                 public userId  :string) {
       log.debug('New user', userId);
       this.name = 'pending';
@@ -89,7 +97,7 @@ module Core {
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
 
-      storage.load<UserState>(this.getStorePath()).then((state) => {
+      storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
         this.fulfillStorageLoad_();
       }).catch((e) => {
@@ -123,7 +131,7 @@ module Core {
      *  - Sends local instance information as an 'Instance Handshake' to the
      *    remote client if it is known to be uProxy client.
      */
-    public handleClient = (client :UProxyClient.State) : void => {
+    public handleClient = (client :social.ClientState) : void => {
       if (client.userId != this.userId) {
         log.error('received client with unexpected userId', {
           clientUserId: this.userId,
@@ -144,16 +152,16 @@ module Core {
 
       switch (client.status) {
         // Send an instance message to newly ONLINE remote uProxy clients.
-        case UProxyClient.Status.ONLINE:
+        case social.ClientStatus.ONLINE:
           if (!(client.clientId in this.clientIdToStatusMap) ||
-              this.clientIdToStatusMap[client.clientId] != UProxyClient.Status.ONLINE) {
+              this.clientIdToStatusMap[client.clientId] != social.ClientStatus.ONLINE) {
             // Client is new, or has changed status from !ONLINE to ONLINE.
             this.sendInstanceHandshake(client.clientId);
           }
           this.clientIdToStatusMap[client.clientId] = client.status;
           break;
-        case UProxyClient.Status.OFFLINE:
-        case UProxyClient.Status.ONLINE_WITH_OTHER_APP:
+        case social.ClientStatus.OFFLINE:
+        case social.ClientStatus.ONLINE_WITH_OTHER_APP:
           // Just delete OFFLINE clients, because they will never be ONLINE
           // again as the same clientID (removes clientId from clientIdToStatusMap
           // and related data structures).
@@ -173,23 +181,22 @@ module Core {
      * handler.
      * Emits an error for a message from a client which doesn't exist.
      */
-    public handleMessage = (clientId :string, msg :uProxy.Message) : void => {
+    public handleMessage = (clientId :string, msg :social.PeerMessage) : void => {
       if (!(clientId in this.clientIdToStatusMap)) {
         log.error('%1 received message for non-existing client %2',
                   this.userId, clientId);
         return;
       }
-      var msgType :uProxy.MessageType = msg.type;
       switch (msg.type) {
-        case uProxy.MessageType.INSTANCE:
-          this.syncInstance_(clientId, <InstanceHandshake>msg.data)
+        case social.PeerMessageType.INSTANCE:
+          this.syncInstance_(clientId, <social.InstanceHandshake>msg.data)
               .catch((e) => {
             log.error('syncInstance_ failed for ', msg.data);
           });
           return;
 
-        case uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER:
-        case uProxy.MessageType.SIGNAL_FROM_SERVER_PEER:
+        case social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER:
+        case social.PeerMessageType.SIGNAL_FROM_SERVER_PEER:
           var instance = this.getInstance(this.clientToInstance(clientId));
           if (!instance) {
             // TODO: this may occur due to a race condition where uProxy has
@@ -200,10 +207,10 @@ module Core {
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, msg.data);
+          instance.handleSignal(msg.type, <signals.Message>msg.data);
           return;
 
-        case uProxy.MessageType.INSTANCE_REQUEST:
+        case social.PeerMessageType.INSTANCE_REQUEST:
           log.debug('received instance request', clientId);
           this.sendInstanceHandshake(clientId);
           return;
@@ -216,7 +223,7 @@ module Core {
       }
     }
 
-    public getInstance = (instanceId:string) : Core.RemoteInstance => {
+    public getInstance = (instanceId:string) : remote_instance.RemoteInstance => {
       return this.instances_[instanceId];
     }
 
@@ -240,11 +247,11 @@ module Core {
      */
     public syncInstance_ = (
         clientId :string,
-        instanceHandshake :InstanceHandshake) : Promise<void> => {
+        instanceHandshake :social.InstanceHandshake) : Promise<void> => {
       // TODO: use handlerQueues to process instances messages in order, to
       // address potential race conditions described in
       // https://github.com/uProxy/uproxy/issues/734
-      if (UProxyClient.Status.ONLINE !== this.clientIdToStatusMap[clientId]) {
+      if (social.ClientStatus.ONLINE !== this.clientIdToStatusMap[clientId]) {
         log.error('Received an instance handshake from a non-uProxy client',
                   clientId);
         return Promise.reject(new Error(
@@ -270,7 +277,7 @@ module Core {
       var instance = this.instances_[instanceId];
       if (!instance) {
         // Create a new instance.
-        instance = new Core.RemoteInstance(this, instanceId);
+        instance = new remote_instance.RemoteInstance(this, instanceId);
         this.instances_[instanceId] = instance;
       }
       return instance.update(instanceHandshake).then(() => {
@@ -303,7 +310,7 @@ module Core {
       delete this.clientToInstanceMap_[clientId];
     }
 
-    public currentStateForUI = () : UI.UserMessage => {
+    public currentStateForUI = () : social.UserData => {
       if ('pending' == this.name) {
         log.warn('Not showing UI without profile');
         return  null;
@@ -317,8 +324,9 @@ module Core {
       }
 
       var isOnline = false;
-      var offeringInstanceStatesForUi = [];
-      var allInstanceIds = [];
+      var offeringInstanceStatesForUi :social.InstanceData[] = [];
+      var allInstanceIds :string[] = [];
+
       for (var instanceId in this.instances_) {
         allInstanceIds.push(instanceId);
         var instance = this.instances_[instanceId];
@@ -363,14 +371,14 @@ module Core {
     public notifyUI = () : void => {
       var state = this.currentStateForUI();
       if (state) {
-        ui.syncUser(state);
+        ui.connector.syncUser(state);
       }
     }
 
     public monitor = () : void => {
       for (var clientId in this.clientIdToStatusMap) {
         var isMissingInstance =
-            (this.clientIdToStatusMap[clientId] == UProxyClient.Status.ONLINE) &&
+            (this.clientIdToStatusMap[clientId] == social.ClientStatus.ONLINE) &&
             !(clientId in this.clientToInstanceMap_);
         if (isMissingInstance) {
           log.warn('monitor could not find instance for clientId', clientId);
@@ -379,10 +387,10 @@ module Core {
       }
     }
 
-    private requestInstance_ = (clientId) : void => {
+    private requestInstance_ = (clientId:string) : void => {
       log.debug('requesting instance', clientId);
-      var instanceRequest :uProxy.Message = {
-        type: uProxy.MessageType.INSTANCE_REQUEST,
+      var instanceRequest :social.PeerMessage = {
+        type: social.PeerMessageType.INSTANCE_REQUEST,
         data: {}
       };
       this.network.send(this, clientId, instanceRequest);
@@ -394,7 +402,7 @@ module Core {
         return false;
       }
       var status = this.clientIdToStatusMap[clientId];
-      if (status == UProxyClient.Status.ONLINE) {
+      if (status == social.ClientStatus.ONLINE) {
         return true;
       }
       return false;
@@ -408,14 +416,14 @@ module Core {
       this.onceLoaded.then(() => {
         if (Object.keys(this.instances_).length > 0) {
           var state = this.currentState();
-          storage.save<UserState>(this.getStorePath(), state).catch(() => {
+          storage.save<social.UserState>(this.getStorePath(), state).catch(() => {
             log.error('Could not save user to storage');
           });
         }
       });
     }
 
-    public restoreState = (state :UserState) : void => {
+    public restoreState = (state :social.UserState) : void => {
       if (this.name === 'pending') {
         this.name = state.name;
       }
@@ -436,7 +444,7 @@ module Core {
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
-          this.instances_[instanceId] = new Core.RemoteInstance(this, instanceId);
+          this.instances_[instanceId] = new remote_instance.RemoteInstance(this, instanceId);
         }
       }
 
@@ -449,7 +457,7 @@ module Core {
       }
     }
 
-    public currentState = () :UserState => {
+    public currentState = () :social.UserState => {
       return _.cloneDeep({
         name : this.name,
         imageData: this.profile.imageData,
@@ -478,11 +486,10 @@ module Core {
       // Ensure that the user is loaded so that we have correct consent bits.
       return this.onceLoaded.then(() => {
         var instanceMessage = {
-          type: uProxy.MessageType.INSTANCE,
+          type: social.PeerMessageType.INSTANCE,
           data: {
             instanceId: myInstance.instanceId,
-            keyHash: myInstance.keyHash,
-            description: core.globalSettings.description,
+            description: globals.settings.description,
             consent: {
               isRequesting: this.consent.localRequestsAccessFromRemote,
               isOffering: this.consent.localGrantsAccessToRemote
@@ -506,9 +513,9 @@ module Core {
      * remote instance afterwards.  Returns a Promise which fulfills once
      * the consent has been modified.
      */
-    public modifyConsent = (action :uProxy.ConsentUserAction) : Promise<void> => {
+    public modifyConsent = (action :uproxy_core_api.ConsentUserAction) : Promise<void> => {
       var consentModified = this.onceLoaded.then(() => {
-        if (!Consent.handleUserAction(this.consent, action)) {
+        if (!consent.handleUserAction(this.consent, action)) {
           return Promise.reject(new Error(
               'Invalid user action on consent ' +
               JSON.stringify({
@@ -525,10 +532,10 @@ module Core {
       consentModified.then(() => {
         // If remote is currently an active client, but user revokes access, also
         // stop the proxy session.
-        if (uProxy.ConsentUserAction.CANCEL_OFFER === action) {
+        if (uproxy_core_api.ConsentUserAction.CANCEL_OFFER === action) {
           for (var instanceId in this.instances_) {
             if (this.instances_[instanceId].localSharingWithRemote ==
-                SharingState.SHARING_ACCESS) {
+                social.SharingState.SHARING_ACCESS) {
               this.instances_[instanceId].stopShare();
             }
           }
@@ -562,15 +569,3 @@ module Core {
     }
 
   }  // class User
-
-  export interface UserState {
-    name        :string;
-    imageData   :string;
-    url         :string;
-    // Only save and load the instanceIDs. The actual RemoteInstances will
-    // be saved and loaded separately.
-    instanceIds :string[];
-    consent :Consent.State;
-  }
-
-}  // module uProxy

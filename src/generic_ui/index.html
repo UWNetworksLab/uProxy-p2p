@@ -4,10 +4,9 @@
 <head>
   <title>uProxy</title>
   <meta name='viewport' content='width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes'>
-  <script src='lib/webcomponentsjs/webcomponents.min.js'></script>
+  <script src='../bower/webcomponentsjs/webcomponents.min.js'></script>
 
-  <script src='scripts/dependencies.js'></script>
-  <script src='scripts/uproxy.js'></script>
+  <script src='scripts/context.static.js'></script>
 
   <link rel='import' href='polymer/vulcanized.html'>
   <link href='fonts/Roboto.css' rel='stylesheet' type='text/css'>
@@ -24,6 +23,13 @@
       font-family: Quicksand;
       src: url(fonts/Quicksand-Bold.ttf);
       font-weight: 700;
+    }
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: local('Material Icons'), local('MaterialIcons-Regular'), url(fonts/2fcrYFNaTjcS6g4U3t-Y5UEw0lE80llgEseQY3FEmqw.woff2) format('woff2');
+      /*local('Material Icons'), local('MaterialIcons-Regular'), */
     }
     html {
       height: 100%;

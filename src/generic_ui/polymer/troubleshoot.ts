@@ -1,4 +1,8 @@
 Polymer({
+  analyzingNetwork: false,
+  analyzedNetwork: false,
+  natType: '',
+  natImpact: '',
   close: function() {
     this.$.troubleshootDialog.close();
   },
@@ -13,7 +17,7 @@ Polymer({
   },
   getNatType: function() {
     this.analyzingNetwork = true;
-    core.getNatType().then((natType) => {
+    browserified_exports.core.getNatType().then((natType :string) => {
       this.natType = natType;
       if (natType === 'SymmetricNAT') {
         this.natImpact = 'very likely';
@@ -25,13 +29,5 @@ Polymer({
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;
     });
-  },
-  ready: function() {
-    this.ui = ui;
-    this.model = model;
-    this.analyzingNetwork = false;
-    this.analyzedNetwork = false;
-    this.natType = '';
-    this.natImpact = '';
   }
 });

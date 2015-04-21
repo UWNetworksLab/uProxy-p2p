@@ -1,7 +1,7 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 Polymer({
-  hideForSearch: function(name, query) {
+  hideForSearch: function(name :string, query :string) {
     if (query.length === 0) {
       return false;
     }

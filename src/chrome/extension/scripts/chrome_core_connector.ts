@@ -3,13 +3,19 @@
  *
  * Handles all connection and communication with the uProxy Chrome App.
  */
-/// <reference path='background.ts'/>
-/// <reference path='../../../uproxy.ts'/>
-
-/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+import background = require('./background');
+import browser_connector = require('../../../interfaces/browser_connector');
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import chrome_api = require('../../../interfaces/chrome');
+import ChromeMessage = chrome_api.ChromeMessage;
 
 var UPROXY_CHROME_APP_ID :string = 'fmdppkkepalnkeommjadgbhiohihdhii';
 var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
+
+import UI = require('../../../generic_ui/scripts/ui');
+import UiInterface = require('../../../interfaces/ui');
+import UiApi = UiInterface.UiApi;
 
 /**
  * Chrome-Extension-specific uProxy Core API implementation.
@@ -26,17 +32,17 @@ var SYNC_TIMEOUT         :number = 1000;  // milliseconds.
  * that the user (which is the Extension / UI) won't have to deal with
  * connectivity explicitly, but has the option to chain promises if desired.
  */
-class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
+class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
 
   private appId_   :string;                // ID of target Chrome App.
   private appPort_ :chrome.runtime.Port;   // For speaking to App.
-  private queue_   :uProxy.Payload[];  // Queue for outgoing appPort_ msgs.
+  private queue_   :browser_connector.Payload[];  // Queue for outgoing appPort_ msgs.
 
   // Status object indicating whether we're connected to the app.
   // TODO: Since this is equivalent to whether or not appPort_ is null, we
   // should probably consider turning it into a function, while at the same time
   // preserving potential data bindings.
-  public status :StatusObject;
+  public status :browser_connector.StatusObject;
 
   // A freedom-type indexed object where each key provides a list of listener
   // callbacks: e.g. { type1 :[listener1_for_type1, ...], ... }
@@ -85,7 +91,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
       // in order to prevent duplicate requests, and will need to be re-sent
       // after each successful reconnection to the app.
       for (var type in this.listeners_) {
-        // Convert type from string back to number (uProxy.Update enum) for
+        // Convert type from string back to number (uproxy_core_api.Update enum) for
         // payload to app.
         var payload = {
           cmd: 'on',
@@ -94,9 +100,9 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         console.log('Connecting listener for', JSON.stringify(payload));
         this.send(payload);
       }
-      var ready :uProxy.Payload = {
+      var ready :browser_connector.Payload = {
         cmd: 'emit',
-        type: uProxy.Command.GET_INITIAL_STATE,
+        type: uproxy_core_api.Command.GET_INITIAL_STATE,
         promiseId: 0
       }
       this.send(ready);
@@ -126,7 +132,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
     return new Promise<chrome.runtime.Port>((F, R) => {
       // Wait for message from the other side to ACK our connection to Freedom
       // (there is no callback for a runtime connection [25 Aug 2013])
-      var ackResponse :Function = (msg :string) => {
+      var ackResponse = (msg :string) => {
         console.log('connect_: in ackResponse');
         if (ChromeMessage.ACK !== msg) {
           R(new Error('Unexpected msg from uProxy App: ' + msg));
@@ -139,7 +145,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show its start page.
-        ui.view = uProxy.View.SPLASH;
+        background.ui.view = UiInterface.View.SPLASH;
         chrome.browserAction.setIcon({
           path: {
             "19": "icons/19_" + UI.LOGGED_OUT_ICON,
@@ -169,14 +175,14 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
                 this.status.connected);
     // When disconnected from the app, we should show the browser specific page
     // that shows the "app missing" message.
-    ui.view = uProxy.View.BROWSER_ERROR;
+    background.ui.view = UiInterface.View.BROWSER_ERROR;
 
 
     if (this.status.connected) {
       // TODO: Consider displaying a notification if the user was giving access.
       // Ensure that proxying has stopped.
-      if (ui.isGettingAccess()) {
-        ui.stopGettingInUiAndConfig(true);
+      if (background.ui.isGettingAccess()) {
+        background.ui.stopGettingInUiAndConfig(true);
       }
       // Update this.status.
       this.status.connected = false;
@@ -197,7 +203,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
    * These handlers persist through disconnections and reconnections, and may be
    * installed whether or not the Extension is currently connected to the App.
    */
-  public onUpdate = (update :uProxy.Update, handler :Function) => {
+  public onUpdate = (update :uproxy_core_api.Update, handler :Function) => {
     var type = '' + update;
     if (!(type in this.listeners_)) {
       this.listeners_[type] = [];
@@ -218,7 +224,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
    * the message for the next successful connection.
    * If skipQueue==true, payloads will not be enqueued when app is disconnected.
    */
-  public send = (payload :uProxy.Payload,
+  public send = (payload :browser_connector.Payload,
                  skipQueue :Boolean = false) => {
     if (!this.status.connected || null == this.appPort_) {
       if (!skipQueue) {
@@ -236,7 +242,7 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
 
   /**
    * Receive messages from the chrome.runtime.Port.
-   * These *must* some form of uProxy.Update.
+   * These *must* some form of uproxy_core_api.Update.
    */
   private receive_ = (msg :{type :string; data :any}) => {
     if (msg.type in this.listeners_) {
@@ -265,12 +271,14 @@ class ChromeCoreConnector implements uProxy.CoreBrowserConnector {
   }
 
   public restart() {
-    var restart :uProxy.Payload = {
+    var restart :browser_connector.Payload = {
       cmd: 'emit',
-      type: uProxy.Command.RESTART,
+      type: uproxy_core_api.Command.RESTART,
       promiseId: 0
     }
     this.send(restart);
     chrome.runtime.reload();
   }
 }  // class ChromeConnector
+
+export = ChromeCoreConnector
