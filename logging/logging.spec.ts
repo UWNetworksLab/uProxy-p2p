@@ -110,6 +110,18 @@ describe('Client logging shim using Freedom', () => {
       });
     });
 
+    it('handles recursive objects', (done) => {
+      var obj :any = { property: 'value' };
+      obj.pts = obj;
+
+      log.info(obj);
+
+      mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
+        expect((<jasmine.Spy>mockLogger.info).calls.mostRecent().args[0]).toMatch(/property/);
+        done();
+      });
+    });
+
     it('responds to level changes', (done) => {
       logginglistener.handleEvent('levelchange', loggingProviderTypes.Level.warn);
 

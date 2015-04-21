@@ -1,8 +1,10 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/circular-json/circular-json.d.ts' />
 
 import freedomTypes = require('freedom.types');
 import loggingProviderTypes = require('../loggingprovider/loggingprovider.types');
+import CircularJSON = require('circular-json');
 
 // Perform log message formatting. Formats an array of arguments to a
 // single string.
@@ -15,7 +17,7 @@ function formatStringMessageWithArgs_(args :Object[])
     var arg = args[i];
     if ('string' !== typeof(arg) && !(arg instanceof String)) {
       try {
-        arg = JSON.stringify(arg);
+        arg = CircularJSON.stringify(arg);
       } catch (e) {
         if (arg && typeof(arg.toString) === 'function') {
           arg = arg.toString();
