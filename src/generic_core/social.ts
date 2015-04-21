@@ -37,7 +37,7 @@ import ui = ui_connector.connector;
 
 
 
-  var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
+  export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
       enableMonitoring: true
@@ -54,7 +54,7 @@ import ui = ui_connector.connector;
 
   var log :logging.Log = new logging.Log('social');
 
-  var LOGIN_TIMEOUT :number = 5000;  // ms
+  export var LOGIN_TIMEOUT :number = 5000;  // ms
 
   export var MANUAL_NETWORK_ID = 'Manual';
 

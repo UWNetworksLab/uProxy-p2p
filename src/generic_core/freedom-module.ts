@@ -41,6 +41,15 @@ social_network.initializeNetworks();
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
 var core = new uproxy_core.uProxyCore();
+var exported = {
+  core: core,
+  moduleName: 'uProxy Core Freedom Module',
+  social_network: social_network,
+  version: version,
+  browser_connector: browser_connector,
+  ui_connector: ui_connector
+};
+export = exported;
 
 ui_connector.onCommand(
     uproxy_core_api.Command.GET_INITIAL_STATE,
