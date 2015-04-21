@@ -116,15 +116,9 @@ ui_connector.onCommand(
     core.updateGlobalSettings);
 
 ui_connector.onPromiseCommand(
-    uproxy_core_api.Command.SEND_FEEDBACK,
-    core.sendFeedback);
-
-ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_LOGS,
     core.getLogsAndNetworkInfo);
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_NAT_TYPE,
     core.getNatType);
-
-

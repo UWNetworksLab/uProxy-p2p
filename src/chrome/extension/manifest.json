@@ -11,8 +11,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/background.static.js",
-      "scripts/lodash.min.js"
+      "scripts/background.static.js"
     ]
   },
   "browser_action": {
@@ -30,6 +29,7 @@
     "webRequest",
     "https://uproxy.org/request/*",
     "https://uproxy.org/offer/*",
+    "https://a0.awsstatic.com/",
     "webRequestBlocking"
   ],
   "web_accessible_resources": [
