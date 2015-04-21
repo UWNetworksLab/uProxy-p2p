@@ -91,7 +91,7 @@ taskManager.add 'test_ui', [
 taskManager.add 'test_chrome', [
   'build_chrome'
   'browserify:chromeExtensionCoreConnectorSpec'
-  #'jasmine:chrome_extension'
+  'jasmine:chrome_extension'
 ]
 
 taskManager.add 'everything', [
@@ -587,7 +587,8 @@ module.exports = (grunt) ->
 
     #-------------------------------------------------------------------------
     jasmine:
-      chrome_extension: Rule.jasmineSpec 'chrome/extension/scripts/'
+      chrome_extension: Rule.jasmineSpec('chrome/extension/scripts/',
+          [path.join('build/dev/uproxy/mocks/chrome_mocks.js')]);
       generic_core: Rule.jasmineSpec('generic_core',
           [path.join(thirdPartyBuildPath, 'bower/lodash/lodash.js')]);
       generic_ui: Rule.jasmineSpec('generic_ui/scripts',
