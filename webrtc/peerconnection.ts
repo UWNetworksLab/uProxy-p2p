@@ -104,6 +104,16 @@ export interface PeerConnection<TSignallingMessage> {
 //      3.1. completeConnection_ -> [Fulfill onceConnected]
 export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
+  // Interval, in milliseconds, after which the peerconnection will
+  // terminate if no heartbeat is received from the peer.
+  private static HEARTBEAT_TIMEOUT_MS_ = 10000;
+
+  // Interval, in milliseconds, at which heartbeats are sent to the peer.
+  private static HEARTBEAT_INTERVAL_MS_ = 2000;
+
+  // Message which is sent for heartbeats.
+  private static HEARTBEAT_MESSAGE_ = 'heartbeat';
+
   // Global listing of active peer connections. Helpful for debugging when you
   // are in Freedom.
   public static peerConnections :{ [name:string] : PeerConnection<signals.Message> } = {};
@@ -540,13 +550,66 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   // Saves the given data channel as the control channel for this peer
-  // connection. The appropriate callbacks for opening/closing
-  // this channel are registered here.
+  // connection. The appropriate callbacks for opening, closing, and
+  // initiating a heartbeat is are registered here.
   private registerControlChannel_ = (controlChannel:DataChannel)
       : Promise<void> => {
     this.controlDataChannel_ = controlChannel;
     this.controlDataChannel_.onceClosed.then(this.close);
-    return this.controlDataChannel_.onceOpened.then(this.completeConnection_);
+    return this.controlDataChannel_.onceOpened.then(
+          this.completeConnection_).then(() => {
+      this.initiateHeartbeat_(controlChannel);
+    });
+  }
+
+  // Heartbeats take the form of a string message sent over the control
+  // channel at regular intervals; if no heartbeat is received from the
+  // remote peer for >HEARTBEAT_TIMEOUT_MS_ then the peerconnection is
+  // closed with an error. The motivation for this is Firefox's poor
+  // handling of sudden connection closures:
+  //   https://github.com/uProxy/uproxy/issues/1358
+  private initiateHeartbeat_ = (channel:DataChannel) : void => {
+    log.debug('%1: initiating heartbeat', this.peerName_);
+
+    var terminate = false;
+    channel.onceClosed.then(() => {
+      terminate = true;
+    });
+
+    // Listen for heartbeats from the other side.
+    var lastPingTimestamp :number = Date.now();
+    channel.dataFromPeerQueue.setSyncHandler((data:Data) => {
+      if (data.str && data.str === PeerConnectionClass.HEARTBEAT_MESSAGE_) {
+        lastPingTimestamp = Date.now();
+      } else {
+        log.warn('%1: unexpected data on control channel: %2',
+            this.peerName_, data);
+      }
+    });
+
+    // The loop, which sends heartbeats and monitors the last
+    // time received.
+    var send = () => {
+      channel.send({
+        str: PeerConnectionClass.HEARTBEAT_MESSAGE_
+      }).catch((e:Error) => {
+        log.error('%1: error sending heartbeat: %2',
+            this.peerName_, e.message);
+      });
+
+      if (Date.now() - lastPingTimestamp >
+          PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_) {
+        log.debug('%1: heartbeat timeout, terminating', this.peerName_);
+        this.closeWithError_('no heartbeat received for >' +
+            PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_ + 'ms');
+      } else if (!terminate) {
+        setTimeout(send, PeerConnectionClass.HEARTBEAT_INTERVAL_MS_);
+      } else {
+        log.debug('%1: no heartbeat received for >%2ms, terminating',
+            this.peerName_, PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_);
+      }
+    };
+    send();
   }
 
   // For debugging: prints the state of the peer connection including all
