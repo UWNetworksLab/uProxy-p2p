@@ -13,8 +13,10 @@ import Data = peerconnection.Data;
 import Message = require('./message.types');
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
-loggingController.setDefaultFilter(loggingTypes.Destination.buffered, loggingTypes.Level.debug);
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+    loggingTypes.Level.debug);
+loggingController.setDefaultFilter(loggingTypes.Destination.buffered,
+    loggingTypes.Level.debug);
 
 export var moduleName = 'freedom-chat';
 export var log :logging.Log = new logging.Log(moduleName);
@@ -96,10 +98,10 @@ a.negotiateConnection()
   .then((aTextDataChannel:DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
     parentFreedomModule.emit('ready', {});
-    // Change logging tolerance once connected. This is to demo how to use the
-    // logging controller. TODO: cleanup provider to show that we are supposed
-    // to do that.
-    freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
+
+    parentFreedomModule.on('stop', () => {
+      a.close();
+    });
   })
   .catch((e:any) => {
     log.error('error while opening datachannel: ' + e.message);

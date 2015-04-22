@@ -11,6 +11,8 @@ var sendAreaB = <HTMLInputElement>document.getElementById("sendAreaB");
 var receiveAreaA = <HTMLInputElement>document.getElementById("receiveAreaA");
 var receiveAreaB = <HTMLInputElement>document.getElementById("receiveAreaB");
 
+var stopButton = document.getElementById("stopButton");
+
 freedom('freedom-module.json', {
     'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
     'debug': 'debug'
@@ -42,6 +44,10 @@ freedom('freedom-module.json', {
   }
   chat.on('receiveA', receive.bind(null, receiveAreaA));
   chat.on('receiveB', receive.bind(null, receiveAreaB));
+
+  stopButton.onclick = () => {
+    chat.emit('stop');
+  };
 }, (e:Error) => {
   console.error('could not load freedom: ' + e.message);
 });

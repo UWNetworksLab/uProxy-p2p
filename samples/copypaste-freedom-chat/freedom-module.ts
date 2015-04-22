@@ -11,8 +11,10 @@ import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
 export var loggingController = freedom['loggingcontroller']();
-loggingController.setDefaultFilter(loggingTypes.Destination.console, loggingTypes.Level.info);
-loggingController.setDefaultFilter(loggingTypes.Destination.buffered, loggingTypes.Level.debug);
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+    loggingTypes.Level.debug);
+loggingController.setDefaultFilter(loggingTypes.Destination.buffered,
+    loggingTypes.Level.debug);
 
 
 export var moduleName = 'copypaste-socks';
