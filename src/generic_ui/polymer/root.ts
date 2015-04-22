@@ -106,6 +106,11 @@ Polymer({
       var browserCustomElement = document.createElement(browserified_exports.ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
+    if (browserified_exports.ui.view == ui_types.View.ROSTER &&
+        !browserified_exports.model.globalSettings.hasSeenWelcome) {
+      this.statsDialogOrBubbleOpen = true;
+      this.$.statsDialog.open();
+    }
   },
   closeStatsBubble: function() {
     this.statsDialogOrBubbleOpen = false;
