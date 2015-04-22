@@ -21,8 +21,11 @@ import browser_connector = require('../interfaces/browser_connector');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
 import logging_types = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
 
 import ui_connector = ui.connector;
+
 
 // Prepare all the social providers from the manifest.
 social_network.initializeNetworks();
@@ -31,6 +34,8 @@ social_network.initializeNetworks();
 // Register Core responses to UI commands.
 // --------------------------------------------------------------------------
 var core = new uproxy_core.uProxyCore();
+
+// These are exported for debugging from the browser console.
 var exported = {
   core: core,
   moduleName: 'uProxy Core Freedom Module',
@@ -40,6 +45,8 @@ var exported = {
   ui_connector: ui_connector,
   loggingController: uproxy_core.loggingController,
   logging_types: logging_types,
+  socks_to_rtc: socks_to_rtc,
+  rtc_to_net: rtc_to_net,
 };
 export = exported;
 
