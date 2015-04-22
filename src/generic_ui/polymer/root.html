@@ -83,14 +83,6 @@
         font-size: 20px;
         margin: 0px 0px 0px 36px;
       }
-      .materialDesignIcon {
-        font-family: 'Material Icons';
-        text-rendering: optimizeLegibility;
-        font-style: normal;
-        text-transform: none;
-        font-size: 24px; /* preferred icon size */
-        color: #006A5A;
-      }
       #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
         padding: 0px;
@@ -206,7 +198,8 @@
           </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
-            <i class='materialDesignIcon' hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'>drive_fusiontable</i>
+            <img src='../icons/stats-enabled.svg'
+              hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></img>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
