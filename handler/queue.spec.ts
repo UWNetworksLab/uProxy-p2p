@@ -136,6 +136,22 @@ describe('Handler Queue', function() {
           done();
         })
   });
+
+  it('successive setSyncHandler', function(done) {
+    queue.handle('A');
+    queue.setSyncNextHandler((s:string) => {
+      expect(s).toEqual('A');
+      return 0;
+    }).then(() => {
+      queue.setSyncNextHandler((s2:string) => {
+        expect(s2).toEqual('B');
+        expect(queue.getStats().handler_rejections).toEqual(0);
+        done();
+        return 0;
+      });
+      queue.handle('B');
+    });
+  });
 });  // describe('Handler Queue', ... )
 
 describe('Aggregated Handler Queue', function() {

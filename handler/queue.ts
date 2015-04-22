@@ -44,27 +44,27 @@ export class HandlerQueueStats {
   //
   // queued_events - queued_handled_events - rejected_events = number
   //   of events in queue right now.
-  total_events : number;
+  total_events : number = 0;
   // Ever-queued-events
-  queued_events : number;
+  queued_events : number = 0;
   // Events that were immediately handled (b/c there was a handler set).
-  immediately_handled_events : number;
+  immediately_handled_events : number = 0;
   // Events that were handled after going through the queue.
-  queued_handled_events : number;
+  queued_handled_events : number = 0;
   // Number of events rejected in a queue clear.
-  rejected_events : number;
+  rejected_events : number = 0;
   // Number of times a handler was set on this queue (the handler was
   // previously null).
-  handler_set_count : number;
+  handler_set_count : number = 0;
   // Number of times a handler was changed on this queue (the handler
   // was previously non-null).
-  handler_change_count : number;
+  handler_change_count : number = 0;
   // Number of times a handler was un-set on this queue (when then
   // handler previously non-null).
-  handler_clear_count : number;
+  handler_clear_count : number = 0;
   // Number of times we set a new handler while we have an existing
   // promise, causing a rejection of that promise.
-  handler_rejections : number;
+  handler_rejections : number = 0;
 }
 
 // The |QueueHandler| is the abstraction for the stream of functions that
@@ -233,6 +233,9 @@ export class Queue<Feed,Result>
   // If you have an unfulfilled promise, calling setHandler rejects the old
   // promise.
   public setHandler = (handler:(x:Feed) => Promise<Result>) : void => {
+    if (!handler) {
+      throw new Error('handler must not be null');
+    }
     if (this.rejectFn_) {
       this.stats_.handler_rejections++;
       this.rejectFn_(new Error('Cancelled by a call to setHandler'));
@@ -275,8 +278,6 @@ export class Queue<Feed,Result>
   // something to handle.
   public setNextHandler = (handler:(x:Feed) => Promise<Result>)
       : Promise<Result> => {
-    this.stats_.handler_set_count++;
-
     return new Promise((F,R) => {
       this.setHandler((x:Feed) : Promise<Result> => {
         // Note: we don't call stopHandling() within this handler because that
@@ -288,7 +289,11 @@ export class Queue<Feed,Result>
         resultPromise.then(F);
         return resultPromise;
       });
-      this.rejectFn_ = R;
+      if (this.handler_) {
+        // If |handler| has not already run, and removed itself, leave a
+        // rejection function behind as well.
+        this.rejectFn_ = R;
+      }
     });
   }
 
