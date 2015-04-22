@@ -571,11 +571,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   private initiateHeartbeat_ = (channel:DataChannel) : void => {
     log.debug('%1: initiating heartbeat', this.peerName_);
 
-    var terminate = false;
-    channel.onceClosed.then(() => {
-      terminate = true;
-    });
-
     // Listen for heartbeats from the other side.
     var lastPingTimestamp :number = Date.now();
     channel.dataFromPeerQueue.setSyncHandler((data:Data) => {
@@ -587,9 +582,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       }
     });
 
-    // The loop, which sends heartbeats and monitors the last
-    // time received.
-    var send = () => {
+    // Send and monitors heartbeats.
+    var loop = setInterval(() => {
       channel.send({
         str: PeerConnectionClass.HEARTBEAT_MESSAGE_
       }).catch((e:Error) => {
@@ -602,14 +596,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         log.debug('%1: heartbeat timeout, terminating', this.peerName_);
         this.closeWithError_('no heartbeat received for >' +
             PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_ + 'ms');
-      } else if (!terminate) {
-        setTimeout(send, PeerConnectionClass.HEARTBEAT_INTERVAL_MS_);
-      } else {
-        log.debug('%1: no heartbeat received for >%2ms, terminating',
-            this.peerName_, PeerConnectionClass.HEARTBEAT_TIMEOUT_MS_);
+        clearInterval(loop);
       }
-    };
-    send();
+    }, PeerConnectionClass.HEARTBEAT_INTERVAL_MS_);
   }
 
   // For debugging: prints the state of the peer connection including all
