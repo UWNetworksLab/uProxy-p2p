@@ -4,11 +4,11 @@
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
 <link rel='import' href='../../bower/core-label/core-label.html'>
-<link rel='import' href='../../bower/paper-dialog/paper-action-dialog.html'>
 <link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='action-dialog.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -117,7 +117,7 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
-    paper-action-dialog {
+    uproxy-action-dialog {
       top: 30%;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
@@ -179,12 +179,12 @@
         <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SUBMIT FEEDBACK</div>
       </div>
     </core-overlay>
-    <paper-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+    <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
       <div id='sendingFeedback'>
         Sending feedback<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
-    </paper-action-dialog>
+    </uproxy-action-dialog>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>
