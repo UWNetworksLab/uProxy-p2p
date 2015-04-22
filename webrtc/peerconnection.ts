@@ -504,10 +504,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // handled.
   private onPeerStartedDataChannel_ =
       (channelInfo:{channel:string}) : void => {
-      log.debug('%1: peer created channel %2',
-          this.peerName_, channelInfo.channel);
       this.addRtcDataChannel_(channelInfo.channel).then((dc:DataChannel) => {
         var label :string = dc.getLabel();
+        log.debug('%1: peer created channel %2', this.peerName_, label);
         if (label === PeerConnectionClass.CONTROL_CHANNEL_LABEL) {
           // If the peer has started the control channel, register it
           // as this user's control channel as well.
