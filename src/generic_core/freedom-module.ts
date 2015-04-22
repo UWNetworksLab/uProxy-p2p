@@ -20,6 +20,7 @@ import version = require('../version/version');
 import browser_connector = require('../interfaces/browser_connector');
 import ui = require('./ui_connector');
 import uproxy_core = require('./uproxy_core');
+import logging_types = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 
 import ui_connector = ui.connector;
 
@@ -36,7 +37,9 @@ var exported = {
   social_network: social_network,
   version: version,
   browser_connector: browser_connector,
-  ui_connector: ui_connector
+  ui_connector: ui_connector,
+  loggingController: uproxy_core.loggingController,
+  logging_types: logging_types,
 };
 export = exported;
 

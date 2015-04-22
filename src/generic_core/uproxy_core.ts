@@ -27,7 +27,7 @@ var log :logging.Log = new logging.Log('core');
 log.info('Loading core', version.UPROXY_VERSION);
 
 // Note that the proxy runs extremely slowly in debug ('*:D') mode.
-var loggingController = freedom['loggingcontroller']();
+export var loggingController = freedom['loggingcontroller']();
 loggingController.setDefaultFilter(
     loggingTypes.Destination.console,
     loggingTypes.Level.warn);
