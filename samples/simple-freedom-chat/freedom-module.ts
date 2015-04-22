@@ -98,6 +98,10 @@ a.negotiateConnection()
   .then((aTextDataChannel:DataChannel) => {
     connectDataChannel('A', aTextDataChannel);
     parentFreedomModule.emit('ready', {});
+
+    parentFreedomModule.on('stop', () => {
+      a.close();
+    });
   })
   .catch((e:any) => {
     log.error('error while opening datachannel: ' + e.message);
