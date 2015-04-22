@@ -7,7 +7,7 @@
 /// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import social = require('../../interfaces/social');
-import UI = require('./ui');
+import user_interface = require('./ui');
 import _ = require('lodash');
 
 export enum GettingConsentState {
@@ -55,8 +55,8 @@ export class User implements social.BaseUser {
   /**
    * Initialize the user to an 'empty' default.
    */
-  constructor(public userId :string, public network :UI.Network,
-      private ui_ :UI.UserInterface) {
+  constructor(public userId :string, public network :user_interface.Network,
+      private ui_ :user_interface.UserInterface) {
     console.log('new user: ' + this.userId);
     this.name = '';
     this.offeringInstances = [];
@@ -101,7 +101,7 @@ export class User implements social.BaseUser {
     }
 
     this.name = profile.name;
-    this.imageData = profile.imageData || UI.DEFAULT_USER_IMG;
+    this.imageData = profile.imageData || user_interface.DEFAULT_USER_IMG;
     this.url = profile.url;
 
     // iterate backwards to allow removing elements
@@ -177,7 +177,7 @@ export class User implements social.BaseUser {
   // enums evaluate to numbers.
   // CONSIDER: Avoid strings for values and string-param dependencies
   // https://github.com/uProxy/uproxy/issues/769
-  public getCategories = () : UI.UserCategories => {
+  public getCategories = () : user_interface.UserCategories => {
     var isTrustedForSharing = false;
     var isTrustedForGetting = false;
     var isPendingForSharing = false;
