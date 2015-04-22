@@ -220,11 +220,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         });
       }
     });
-    this.pc_.on('onnegotiationneeded', () => {
-      this.negotiateConnection_().catch((e:Error) => {
-        log.error('%1: negotiation failed: ', this.peerName_, e.message);
-      });
-    });
+    this.pc_.on('onnegotiationneeded', this.onNegotiationNeeded_);
     this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
     this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
     this.pc_.on('oniceconnectionstatechange', this.onIceConnectionStateChange_);
@@ -338,47 +334,37 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         });
   }
 
-  // Called when openDataChannel is called to and we have not yet negotiated
-  // our connection, or called when some WebRTC internal event requires
-  // renegotiation of SDP headers.
-  private negotiateConnection_ = () : Promise<void> => {
-    log.debug('%1: negotiateConnection_', this.peerName_);
-
-    if (this.pcState === State.DISCONNECTED) {
-      return Promise.reject(new Error(this.peerName_ + ': ' +
-          'negotiateConnection_ called on ' +
-          'DISCONNECTED state.'));
-    }
-
-    if (this.pcState === State.CONNECTING) {
-      return Promise.reject(new Error('Unexpected call to ' +
-          'negotiateConnection_: ' + this.toString()));
-    }
+  // Called when an on onnegotiationneeded event is received.
+  private onNegotiationNeeded_ = () : void => {
+    log.debug('%1: negotiation needed', this.peerName_);
 
     // CONSIDER: might we ever need to re-create an onAnswer? Exactly how/when
     // do onnegotiation events get raised? Do they get raised on both sides?
     // Or only for the initiator?
-    if (this.pcState === State.WAITING || this.pcState == State.CONNECTED) {
+    if (this.pcState === State.WAITING || this.pcState === State.CONNECTED) {
       this.pcState = State.CONNECTING;
       this.fulfillConnecting_();
-      this.pc_.createOffer()
-          .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
-            // Emit the offer signal before calling setLocalDescription, which
-            // initiates ICE candidate gathering. If we did the reverse then
-            // we may emit ICE candidate signals before the offer, confusing
-            // some clients:
-            //   https://github.com/uProxy/uproxy/issues/784
-            this.emitSignalForPeer_({
-              type: signals.Type.OFFER,
-              description: {type: d.type, sdp: d.sdp}
-            });
-            this.pc_.setLocalDescription(d);
-          })
-          .catch((e) => {
-            this.closeWithError_('Failed to set local description: ' +
-                e.toString());
-          });
-      return this.onceConnected;
+      this.pc_.createOffer().then(
+          (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+        // Emit the offer signal before calling setLocalDescription, which
+        // initiates ICE candidate gathering. If we did the reverse then
+        // we may emit ICE candidate signals before the offer, confusing
+        // some clients:
+        //   https://github.com/uProxy/uproxy/issues/784
+        this.emitSignalForPeer_({
+          type: signals.Type.OFFER,
+          description: {
+            type: d.type,
+            sdp: d.sdp
+          }
+        });
+        this.pc_.setLocalDescription(d);
+      }).catch((e:Error) => {
+        this.closeWithError_('failed to set local description: ' + e.message);
+      });
+    } else {
+      this.closeWithError_('onnegotiationneeded fired in unexpected state ' +
+          State[this.pcState]);
     }
   }
 
