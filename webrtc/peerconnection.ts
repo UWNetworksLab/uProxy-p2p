@@ -106,10 +106,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Interval, in milliseconds, after which the peerconnection will
   // terminate if no heartbeat is received from the peer.
-  private static HEARTBEAT_TIMEOUT_MS_ = 10000;
+  private static HEARTBEAT_TIMEOUT_MS_ = 30000;
 
   // Interval, in milliseconds, at which heartbeats are sent to the peer.
-  private static HEARTBEAT_INTERVAL_MS_ = 2000;
+  private static HEARTBEAT_INTERVAL_MS_ = 5000;
 
   // Message which is sent for heartbeats.
   private static HEARTBEAT_MESSAGE_ = 'heartbeat';
