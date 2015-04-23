@@ -100,10 +100,6 @@
       /* Remove the underline from the Feedback textbox. */
       height: 0px;
     }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
-    }
     paper-input-decorator {
       font-size: 1.4em;
     }
@@ -134,6 +130,14 @@
     #feedbackPaperTextarea {
       height: 190px;
       margin: 0em;
+    }
+    paper-autogrow-textarea::shadow .textarea-container {
+      padding: 0.25em;
+      background-color: rgb(240,240,240);
+    }
+    paper-autogrow-textarea::shadow .mirror-text {
+      white-space: pre-wrap; /* css-3 */
+      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
     }
     </style>
 
