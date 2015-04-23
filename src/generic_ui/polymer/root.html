@@ -4,7 +4,6 @@
 <link rel="import" href="../../bower/core-drawer-panel/core-drawer-panel.html">
 <link rel="import" href="../../bower/core-toolbar/core-toolbar.html">
 <link rel="import" href="../../bower/core-icon-button/core-icon-button.html">
-<link rel='import' href='../../bower/paper-dialog/paper-action-dialog.html'>
 <link rel="import" href="../../bower/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower/core-tooltip/core-tooltip.html">
@@ -18,6 +17,7 @@
 <link rel='import' href='feedback.html'>
 <link rel='import' href='reconnect.html'>
 <link rel='import' href='troubleshoot.html'>
+<link rel='import' href='action-dialog.html'>
 <link rel='import' href='browser-elements.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
@@ -83,14 +83,6 @@
         font-size: 20px;
         margin: 0px 0px 0px 36px;
       }
-      .materialDesignIcon {
-        font-family: 'Material Icons';
-        text-rendering: optimizeLegibility;
-        font-style: normal;
-        text-transform: none;
-        font-size: 24px; /* preferred icon size */
-        color: #006A5A;
-      }
       #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
         padding: 0px;
@@ -144,7 +136,7 @@
         color: white;
         margin-bottom: 3px;
       }
-      paper-action-dialog {
+      uproxy-action-dialog {
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
@@ -206,7 +198,8 @@
           </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
-            <i class='materialDesignIcon' hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'>drive_fusiontable</i>
+            <img src='../icons/stats-enabled.svg'
+              hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></img>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
@@ -271,7 +264,7 @@
 
     <!-- Dialog is opened when .toggle() is called in openDialog -->
     <!-- Without layered="false", styling needs to be prefixed with 'html /deep/' in order to have effect on the dialog contents.'  -->
-    <paper-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
+    <uproxy-action-dialog backdrop layered="false" heading="{{ dialog.heading }}" id="dialog">
       <p>{{ dialog.message }}</p>
       <template repeat='{{ button in dialog.buttons }}'>
         <paper-button
@@ -280,9 +273,9 @@
           {{button.text}}
         </paper-button>
       </template>
-    </paper-action-dialog>
+    </uproxy-action-dialog>
 
-    <paper-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
       <p>
         This is a beta release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
         <uproxy-faq-link anchor='doesUproxyLogData'>
@@ -292,7 +285,7 @@
       <p>Would you like to enable anonymous metrics collection?</p>
       <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
       <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
-    </paper-action-dialog>
+    </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
