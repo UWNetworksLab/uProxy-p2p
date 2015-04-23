@@ -84,6 +84,19 @@
     paper-checkbox::shadow #checkboxLabel {
       font-size: 12px;
     }
+    paper-checkbox::shadow #checkboxContainer {
+      margin-left: 1px;
+      width: 16px;
+      height: 16px;
+    }
+    paper-checkbox::shadow #checkbox:not(.checked) {
+      border: solid 2px rgb(112,112,112);
+    }
+    paper-checkbox::shadow #checkmark {
+      position: fixed;
+      margin-top: 1px;
+      margin-left: 1px;
+    }
     #metricsCheckbox core-icon[icon="help"]{
       height: 15px;
       color: grey;
