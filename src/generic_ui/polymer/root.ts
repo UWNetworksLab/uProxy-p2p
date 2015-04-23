@@ -120,7 +120,7 @@ Polymer({
     this.statsDialogOrBubbleOpen = false;
   },
   tabSelected: function(e :Event) {
-    if (browserified_exports.ui.isSharingDisabled &&
+    if (this.ui.isSharingDisabled &&
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
       this.model.globalSettings.mode = ui_types.Mode.GET;
