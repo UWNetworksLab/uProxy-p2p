@@ -7,4 +7,4 @@ interface UiGlobals {
   model :any;
 }
 
-declare var browserified_exports :UiGlobals;
+declare var ui_context :UiGlobals;

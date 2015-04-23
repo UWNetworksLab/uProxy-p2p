@@ -539,8 +539,15 @@ module.exports = (grunt) ->
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
-      chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
-      chromeContext: Rule.browserify 'chrome/extension/generic_ui/scripts/context'
+      chromeExtMain: Rule.browserify('chrome/extension/scripts/background',
+        browserifyOptions:
+          standalone: 'ui_context'
+      )
+      chromeContext: Rule.browserify('chrome/extension/generic_ui/scripts/context',
+        browserifyOptions:
+          standalone: 'ui_context'
+      )
+
       chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
       firefoxContext:
         src: [
@@ -549,7 +556,7 @@ module.exports = (grunt) ->
         dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
         options:
           browserifyOptions:
-            standalone: 'browserified_exports'
+            standalone: 'ui_context'
       firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
