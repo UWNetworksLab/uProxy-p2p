@@ -42,8 +42,8 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^24.0.0",
-    "uproxy-networking": "^9.0.0",
+    "uproxy-lib": "^25.0.0",
+    "uproxy-networking": "^10.0.0",
     "utransformers": "^0.2.1"
   },
   "peerDependencies": {
