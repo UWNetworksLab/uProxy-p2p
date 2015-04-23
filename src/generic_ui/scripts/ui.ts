@@ -182,6 +182,8 @@ export class UserInterface implements ui_constants.UiApi {
    */
   public copyPastePendingEndpoint :net.Endpoint = null;
 
+  public isSharingDisabled = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -191,6 +193,13 @@ export class UserInterface implements ui_constants.UiApi {
       public browserApi :BrowserAPI) {
     // TODO: Determine the best way to describe view transitions.
     this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+
+    var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
+    if (firefoxMatches) {
+      if (parseInt(firefoxMatches[1], 10) >= 37) {
+        this.isSharingDisabled = true;
+      }
+    }
 
     core.on('core_connect', () => {
       this.view = ui_constants.View.SPLASH;
@@ -414,7 +423,7 @@ export class UserInterface implements ui_constants.UiApi {
         if (contact) {
           contact.getExpanded = true;
         }
-      } else if (data.mode === 'share') {
+      } else if (data.mode === 'share' && !this.isSharingDisabled) {
         model.globalSettings.mode = ui_constants.Mode.SHARE;
         this.core.updateGlobalSettings(model.globalSettings);
         if (contact) {
