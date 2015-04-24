@@ -131,6 +131,8 @@ export class User implements social.BaseUser {
 
     // Update gettingConsentState, used to display correct getting buttons.
     if (this.offeringInstances.length > 0) {
+      // Expand the contact if there previously were no offers and we are not
+      // ignoring offers.
       if ((this.gettingConsentState ==
           GettingConsentState.NO_OFFER_OR_REQUEST ||
           this.gettingConsentState ==
@@ -159,6 +161,8 @@ export class User implements social.BaseUser {
 
     // Update sharingConsentState, used to display correct sharing buttons.
     if (this.consent_.remoteRequestsAccessFromLocal) {
+      // Expand the contact if there previously were no requests and we are not
+      // ignoring requests.
       if ((this.sharingConsentState ==
           SharingConsentState.NO_OFFER_OR_REQUEST ||
           this.sharingConsentState ==
