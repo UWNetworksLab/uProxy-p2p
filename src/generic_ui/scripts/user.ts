@@ -131,6 +131,13 @@ export class User implements social.BaseUser {
 
     // Update gettingConsentState, used to display correct getting buttons.
     if (this.offeringInstances.length > 0) {
+      if ((this.gettingConsentState ==
+          GettingConsentState.NO_OFFER_OR_REQUEST ||
+          this.gettingConsentState ==
+          GettingConsentState.LOCAL_REQUESTED_REMOTE_NO_ACTION) &&
+          !this.consent_.ignoringRemoteUserOffer) {
+        this.getExpanded = true;
+      }
       if (this.consent_.localRequestsAccessFromRemote) {
         this.gettingConsentState =
             GettingConsentState.LOCAL_REQUESTED_REMOTE_GRANTED;
@@ -152,6 +159,13 @@ export class User implements social.BaseUser {
 
     // Update sharingConsentState, used to display correct sharing buttons.
     if (this.consent_.remoteRequestsAccessFromLocal) {
+      if ((this.sharingConsentState ==
+          SharingConsentState.NO_OFFER_OR_REQUEST ||
+          this.sharingConsentState ==
+          SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION) &&
+          !this.consent_.ignoringRemoteUserRequest) {
+        this.shareExpanded = true;
+      }
       if (this.consent_.localGrantsAccessToRemote) {
         this.sharingConsentState =
             SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED;
