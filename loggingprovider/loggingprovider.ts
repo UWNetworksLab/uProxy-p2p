@@ -109,14 +109,26 @@ export class ConsoleLoggingDestination extends AbstractLoggingDestination {
 
   protected log_ = (level :logging.Level, tag :string, message :logging.Message) :void => {
     if (level === logging.Level.debug) {
-      freedomConsole.debug(tag, formatMessage(message));
+      freedomConsole.debug(tag, this.formatMessage_(message));
     } else if (level === logging.Level.info) {
-      freedomConsole.info(tag, formatMessage(message));
+      freedomConsole.info(tag, this.formatMessage_(message));
     } else if (level === logging.Level.warn) {
-      freedomConsole.warn(tag, formatMessage(message));
+      freedomConsole.warn(tag, this.formatMessage_(message));
     } else {
-      freedomConsole.error(tag, formatMessage(message));
+      freedomConsole.error(tag, this.formatMessage_(message));
     }
+  }
+
+  // Exports the date and message fields, yielding something like:
+  //   [Apr 23 15:07:12.586] listening on port 9999
+  // Since the Chrome and Firefox consoles provide some metadata support,
+  // this ultimately results in something like this in the JavaScript
+  // console:
+  //   (i) simple-socks [Apr 23 15:07:12.586] listening on port 9999
+  // (where (i) is a cute little symbol indicating the level and the
+  // tag, simple-socks is in red.
+  private formatMessage_ = (l:logging.Message) : string => {
+    return '[' + dateToString_(l.timestamp) + '] ' + l.message;
   }
 }
 
@@ -149,11 +161,6 @@ function dateToString_(d:Date) : string {
       (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ':' +
       (d.getSeconds() < 10 ? '0' : '') + d.getSeconds() + '.' +
       d.getMilliseconds();
-}
-
-function formatMessage(l:logging.Message) : string {
-  return logging.Level[l.level][0].toUpperCase() + ' [' +
-         dateToString_(l.timestamp) + '] ' + l.message;
 }
 
 // Interface for accumulating log messages.
@@ -231,20 +238,25 @@ export class LoggingController implements logging.Controller  {
     return new ArrayBuffer(0);
   }
 
-  // Gets log in plaintext, which should really be used in development env
-  // only.
-  // Usage: getLogs(['network', 'xmpp']);
-  // It will return log message with tag 'netowrk' and 'xmpp' only.
-  // getLogs() without specify any tag will return all messages.
+  // Exports log in plaintext.
+  // If specified, tags limits the exported messages to those having any of
+  // the specified tags.
   public getLogs = (tags?:string[]) : string[] => {
     // TODO: use input to select log message.
     if (!tags || tags.length === 0) {
-      return logBuffer.map(formatMessage);
+      return logBuffer.map(this.formatMessage_);
     } else {
       return logBuffer.filter((m:logging.Message) => {
         return tags.indexOf(m.tag) >= 0;
-      }).map(formatMessage);
+      }).map(this.formatMessage_);
     }
+  }
+
+  // Exports all message fields, yielding something like:
+  //   simple-socks I [Apr 23 15:07:12.586] listening on port 9999
+  private formatMessage_(l:logging.Message) : string {
+    return l.tag + ' ' + logging.Level[l.level][0].toUpperCase() +
+        ' [' + dateToString_(l.timestamp) + '] ' + l.message;
   }
 
   // Clears all the logs stored in buffer.
