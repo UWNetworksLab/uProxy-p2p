@@ -42,7 +42,12 @@
       color: #cbcbcb;
     }
     #noContactsFound {
-      margin-top: 2em;
+      margin-top: 0.75em;
+    }
+    #inviteFriends {
+      font-size: 12px;
+      padding-top: 10px;
+      color: rgb(150,150,150);
     }
     #loadingContacts {
       margin-top: 0.5em;
@@ -71,7 +76,10 @@
         Loading uProxy friends<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
-      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time</div>
+      <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
+        None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time.
+        <p id='inviteFriends'>To invite friends to uProxy, send them a link to https://www.uproxy.org</p>
+      </div>
     </div>
 
     <div hidden?='{{ !model.onlineNetwork.hasContacts }}'>
@@ -103,7 +111,7 @@
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='Friends running uProxy'
+          groupTitle='Friends who have uProxy'
           onlineContacts='{{ contacts.onlineUntrustedUproxy }}'
           offlineContacts='{{ contacts.offlineUntrustedUproxy }}'
           searchQuery='{{ searchQuery }}'></uproxy-roster-group>
