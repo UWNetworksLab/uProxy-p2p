@@ -19,6 +19,7 @@
 <link rel='import' href='troubleshoot.html'>
 <link rel='import' href='dialog.html'>
 <link rel='import' href='browser-elements.html'>
+<link rel='import' href='icons.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
 
@@ -102,12 +103,12 @@
         font-size: 20px;
         margin: 0px 0px 0px 36px;
       }
+      core-icon.status {
+        cursor: pointer;
+        color: #006A5A;
+      }
       #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
-        padding: 0px;
-        height: 20px;
-        width: 20px;
-        cursor: pointer;
       }
       #settings {
         top: 0;
@@ -140,11 +141,9 @@
         overflow: hidden;
         font-size: 14px;
       }
-      .statusText img {
-        vertical-align: middle;
+      .statusText core-icon {
         padding-right: 20px;
-        width: 19px;
-        height: 19px;
+        color: #0EC5AF;
       }
       uproxy-bubble {
         z-index: 1;
@@ -217,8 +216,8 @@
           </uproxy-bubble>
 
           <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
-            <img src='../icons/stats-enabled.svg'
-              hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></img>
+            <core-icon icon='uproxy-icons:stats-enabled' class='status'
+              hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
@@ -227,10 +226,9 @@
           </uproxy-bubble>
 
           <core-tooltip label='You are available for sharing.' position='left'>
-            <img id='sharingEnabledIcon'
-              src='../icons/sharing-enabled-toolbar.png'
+            <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
-              on-tap='{{ setShareMode }}'></img>
+              on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
@@ -282,10 +280,16 @@
 
             <div id='status'>
               <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
-                <div class='statusText'><img src='../icons/getting.png'>{{ui.gettingStatus}}</div>
+                <div class='statusText'>
+                  <core-icon icon='uproxy-icons:receive'></core-icon>
+                  {{ui.gettingStatus}}
+                </div>
               </div>
               <div class='statusRow' hidden?='{{!ui.sharingStatus}}'>
-                <div class='statusText'><img src='../icons/sharing.png'>{{ui.sharingStatus}}</div>
+                <div class='statusText'>
+                  <core-icon icon='uproxy-icons:share'></core-icon>
+                  {{ui.sharingStatus}}
+                </div>
               </div>
             </div>
           </div>
