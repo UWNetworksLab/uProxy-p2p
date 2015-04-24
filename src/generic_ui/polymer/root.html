@@ -45,9 +45,28 @@
         color: #20F1DE;
         opacity: .4;
       }
+      /* Since notification number should always be opacity = 1, we force
+         the .tab-content to be opacity = 1 and instead add the .notSelected class to just tab text. There's no way to have .tab-content opacity
+         of 0.6 while its child element (the number) has opacity 1.  */
       paper-tab::shadow .tab-content{
         font-size: 14px;
         text-transform: uppercase;
+        opacity: 1;
+      }
+      .notSelected {
+        opacity: 0.6;
+      }
+      .tabNotificationNumber {
+        margin-left: 10px;
+        margin-bottom: 1px;
+        padding: 3px 6px;
+        background-color: #11B6A7;
+        border-radius: 50%;
+        font-weight: 400;
+        font-size: 10px;
+      }
+      .addLeftPadding {
+        padding-left: 10px;
       }
       core-drawer-panel {
         overflow: auto;
@@ -221,8 +240,20 @@
 
           <div class='bottom fit'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
-              <paper-tab>Get Access</paper-tab>
-              <paper-tab>Share Access</paper-tab>
+              <paper-tab id='getPaperTab'>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, addLeftPadding: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>Get Access</span>
+                <span class='tabNotificationNumber'
+                  hidden?='{{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length == 0 }}'>
+                  {{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length }}
+                </span>
+              </paper-tab>
+              <paper-tab id='sharePaperTab'>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, addLeftPadding: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>Share Access</span>
+                <span class='tabNotificationNumber'
+                  hidden?='{{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length == 0 }}'>
+                  {{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length }}
+                </span>
+              </paper-tab>
             </paper-tabs>
           </div>
         </core-toolbar>
