@@ -31,7 +31,7 @@
     }
     #loadContacts {
       text-align: center;
-      margin: 75px;
+      margin: 75px 80px;
     }
     #loadContacts div {
       font-size: 17px;
@@ -45,9 +45,14 @@
       margin-top: 0.75em;
     }
     #inviteFriends {
-      font-size: 12px;
+      font-size: 13px;
       padding-top: 10px;
       color: rgb(150,150,150);
+    }
+    #inviteFriends a {
+      text-decoration: none;
+      font-weight: 500;
+      color: #00b5a4;
     }
     #loadingContacts {
       margin-top: 0.5em;
@@ -78,7 +83,7 @@
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
         None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time.
-        <p id='inviteFriends'>To invite friends to uProxy, send them a link to https://www.uproxy.org</p>
+        <p id='inviteFriends'>To invite friends to uProxy, send them a link to <a href="https://www.uproxy.org" target="_blank">www.uproxy.org</a></p>
       </div>
     </div>
 
