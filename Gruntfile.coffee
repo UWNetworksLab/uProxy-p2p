@@ -245,6 +245,8 @@ module.exports = (grunt) ->
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
+    clean: ['build/dev', '.tscache']
+
     #-------------------------------------------------------------------------
     copy: {
       # Copy all needed third party libraries to appropriate locations.
@@ -672,8 +674,6 @@ module.exports = (grunt) ->
           src: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
           dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html'
         }]
-
-    clean: ['build/dev', '.tscache']
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
