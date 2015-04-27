@@ -196,7 +196,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
-      if (parseInt(firefoxMatches[1], 10) >= 37) {
+      if (parseInt(firefoxMatches[1], 10) === 37) {
         this.isSharingDisabled = true;
       }
     }
