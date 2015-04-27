@@ -1,24 +1,19 @@
-declare var browser :string;
+/// <reference path='./context.d.ts' />
 
 Polymer({
-  DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
-                         {urls: ['stun:stun1.l.google.com:19302']},
-                         {urls: ['stun:stun2.l.google.com:19302']},
-                         {urls: ['stun:stun3.l.google.com:19302']},
-                         {urls: ['stun:stun4.l.google.com:19302']}],
   displayAdvancedSettings: false,
   logOut: function() {
-    ui.logout({name: model.onlineNetwork.name,
-               userId: model.onlineNetwork.userId}).then(() => {
+    ui_context.ui.logout({name: ui_context.model.onlineNetwork.name,
+                                   userId: ui_context.model.onlineNetwork.userId}).then(() => {
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
-    }).catch((e) => {
+    }).catch((e :Error) => {
       console.error('logout returned error: ', e);
     });
   },
   restart: function() {
-    core.restart();
+    ui_context.core.restart();
   },
   toggleAdvancedSettings: function() {
     this.displayAdvancedSettings = !this.displayAdvancedSettings;
@@ -30,16 +25,16 @@ Polymer({
     }
   },
   setStunServer: function() {
-    model.globalSettings.stunServers = [{urls: [this.stunServer]}];
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.stunServers = [{urls: [this.stunServer]}];
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;
     }
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
-    model.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS;
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.stunServers = [];
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
     if(!this.$.confirmNewServer.hidden) {
       this.$.confirmNewServer.hidden = true;
     }
@@ -49,7 +44,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-feedback'});
   },
   ready: function() {
-    this.ui = ui;
-    this.model = model;
+    this.ui = ui_context.ui;
+    this.model = ui_context.model;
   }
 });

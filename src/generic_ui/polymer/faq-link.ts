@@ -1,9 +1,10 @@
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='./context.d.ts' />
+
 Polymer({
   anchor: '',
   openFaq: function() {
-    this.ui.openTab('faq.html#' + this.anchor);
+    ui_context.ui.openTab('generic_ui/faq.html#' + this.anchor);
   },
-  ready: function() {
-    this.ui = ui;
-  }
+  ready: function() {}
 });

@@ -3,16 +3,22 @@
  *
  * Chrome-specific implementation of the Browser API.
  */
-/// <reference path='../../../interfaces/browser-api.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../networking-typings/communications.d.ts' />
 
+import browser_api = require('../../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import UI = require('../../../generic_ui/scripts/ui');
+
+/// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
     LAUNCHING,
     LAUNCHED
 }
+
+declare var Notification :any; //TODO remove this
 
 class ChromeBrowserApi implements BrowserAPI {
 
@@ -42,7 +48,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private POPUP_URL = "index.html";
+  private POPUP_URL = "generic_ui/index.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -61,9 +67,7 @@ class ChromeBrowserApi implements BrowserAPI {
       }
     };
 
-    // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
-    // is why we employ a hacky thing here.
-    chrome.proxy.settings['clear']({scope: 'regular'});
+    chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.windows.onRemoved.addListener((closedWindowId) => {
       // If either the window launching uProxy, or the popup with uProxy
@@ -71,13 +75,11 @@ class ChromeBrowserApi implements BrowserAPI {
       if (closedWindowId == this.popupWindowId_) {
         this.popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
         this.popupState_ = PopupState.NOT_LAUNCHED;
-      } else if (closedWindowId == mainWindowId) {
-        mainWindowId = chrome.windows.WINDOW_ID_NONE;
       }
     });
   }
 
-  public startUsingProxy = (endpoint:Net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint) => {
     if (this.running_ == false) {
       this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
       this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
@@ -134,8 +136,7 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
+    if (this.popupState_ == PopupState.NOT_LAUNCHED) {
       this.popupState_ = PopupState.LAUNCHING;
       this.popupCreationStartTime_ = Date.now();
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
@@ -146,25 +147,6 @@ class ChromeBrowserApi implements BrowserAPI {
                      width: 371,
                      height: 600}, this.newPopupCreated_);
 
-    } else if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
-      this.popupState_ = PopupState.LAUNCHING;
-      this.popupCreationStartTime_ = Date.now();
-      // If the popup is not open, but uProxy is being launched from a Chrome
-      // window, open the popup under the extension icon in that window.
-      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
-        if (windowThatLaunchedUproxy) {
-          // TODO (lucyhe): test this positioning in Firefox & Windows.
-          var popupTop = windowThatLaunchedUproxy.top + 70;
-          var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: this.POPUP_URL,
-                                 type: "popup",
-                                 width: 371,
-                                 height: 600,
-                                 top: popupTop,
-                                 left: popupLeft}, this.newPopupCreated_);
-        }
-      });
     } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
@@ -176,7 +158,7 @@ class ChromeBrowserApi implements BrowserAPI {
   /**
     * Callback passed to chrome.windows.create.
     */
-  private newPopupCreated_ = (popup) => {
+  private newPopupCreated_ = (popup :chrome.windows.Window) => {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
@@ -190,12 +172,26 @@ class ChromeBrowserApi implements BrowserAPI {
           icon: 'icons/38_' + UI.DEFAULT_ICON,
           tag: tag
         });
-    notification.onclick = function() {
-      ui.handleNotificationClick(this.tag);
+    notification.onclick = () => {
+      this.emit('notificationClicked', tag);
     };
     setTimeout(function() {
       notification.close();
     }, 5000);
+  }
+
+  private events_ :{[name :string] :Function} = {};
+
+  public on = (name :string, callback :Function) => {
+    this.events_[name] = callback;
+  }
+
+  public emit = (name :string, ...args :Object[]) => {
+    if (name in this.events_) {
+      this.events_[name].apply(null, args);
+    } else {
+      console.error('Attempted to trigger an unknown event', name);
+    }
   }
 
   public frontedPost = (data :any,
@@ -205,7 +201,7 @@ class ChromeBrowserApi implements BrowserAPI {
     // Set the Cloudfront destination as the Host in the request header,
     // hiding the Cloudfront URL from observers but still informing
     // the external domain (e.g. AWS) where the request should be forwarded.
-    var setHostInHeader = (details) => {
+    var setHostInHeader = (details :chrome.webRequest.OnBeforeSendHeadersDetails) => {
       details.requestHeaders.push({
         name: 'Host',
         value: cloudfrontDomain
@@ -243,3 +239,5 @@ class ChromeBrowserApi implements BrowserAPI {
     }).then(removeSendHeaderListener, removeSendHeaderListener);
   }
 }
+
+export = ChromeBrowserApi;

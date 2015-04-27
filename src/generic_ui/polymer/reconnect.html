@@ -1,7 +1,7 @@
-<link rel='import' href='../lib/polymer/polymer.html'>
-<link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='../lib/paper-dialog/paper-dialog.html'>
-<link rel='import' href='../lib/paper-progress/paper-progress.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-progress/paper-progress.html'>
+<link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-reconnect'>
   <template>
@@ -16,13 +16,10 @@
       margin: 10px 2px 3px 2px;
       font-size: 12px;
     }
-    paper-dialog {
+    uproxy-dialog {
       top: 20%;
       min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
-    }
-    paper-action-dialog::shadow #scroller {
-      padding: 18px 20px 0px 20px;
     }
     paper-progress::shadow #activeProgress {
       background-color: #009688;
@@ -32,14 +29,14 @@
     }
     </style>
 
-    <paper-dialog backdrop opened='{{ model.reconnecting }}'
+    <uproxy-dialog backdrop opened='{{ model.reconnecting }}'
         layered='false' id='reconnectDialog' autoCloseDisabled='true'>
       <div>
         <p>Attempting to re-connect.</p>
         <paper-progress indeterminate='true'></paper-progress>
         <paper-button on-tap='{{ logout }}'>Log-out of uProxy</paper-button>
       </div>
-    </paper-dialog>
+    </uproxy-dialog>
 
   </template>
   <script src='reconnect.js'></script>

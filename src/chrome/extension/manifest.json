@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extName__",
-  "version": "0.7.0",
+  "version": "0.8.4",
   "manifest_version": 2,
   "description": "__MSG_extDescription__",
   "minimum_chrome_version": "41.0.2272.63",
@@ -11,16 +11,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "scripts/uproxy.js",
-      "scripts/user.js",
-      "scripts/ui.js",
-      "scripts/chrome_browser_api.js",
-      "scripts/core_connector.js",
-      "scripts/chrome_tab_auth.js",
-      "scripts/chrome_core_connector.js",
-      "scripts/background.js",
-      "scripts/version.js",
-      "scripts/lodash.min.js"
+      "scripts/background.static.js"
     ]
   },
   "browser_action": {
@@ -44,7 +35,6 @@
   "web_accessible_resources": [
     "copypaste.html"
   ],
-  "options_page": "index.html",
   "externally_connectable": {
     "ids" : ["fmdppkkepalnkeommjadgbhiohihdhii"],
     "matches" : ["*://*.uproxy.org/*", "*://uproxysite.appspot.com/*", "*://test-dot-uproxysite.appspot.com/*", "*://beta-dot-uproxysite.appspot.com/*"]

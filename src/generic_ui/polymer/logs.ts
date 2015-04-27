@@ -1,6 +1,5 @@
-// TODO: Include a .d.ts file from get_logs.ts so we can remove these.
-declare var getLogs :Function;
-declare var bringUproxyToFront :Function;
+declare var bringUproxyToFront :() => void;
+declare var getLogs :() => Promise<string>;
 
 Polymer({
   logs: '',

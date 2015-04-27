@@ -24,11 +24,11 @@ class ProxyTester {
 
     // Discard endpoint info; we'll get it again later via .onceListening().
     this.echoServer_ = server;
-    return server.listen().then((endpoint:Net.Endpoint) => { return endpoint.port; });
+    return server.listen().then((endpoint:net.Endpoint) => { return endpoint.port; });
   }
 
   // Assumes webEndpoint is IPv4.
-  private connectThroughSocks_ = (socksEndpoint:Net.Endpoint, webEndpoint:Net.Endpoint) : Promise<Tcp.Connection> => {
+  private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<Tcp.Connection> => {
     var connection = new Tcp.Connection({endpoint: socksEndpoint});
     var authRequest = Socks.composeAuthHandshakeBuffer([Socks.Auth.NOAUTH]);
     connection.send(authRequest);
@@ -61,10 +61,10 @@ class ProxyTester {
     });
   }
 
-  public connect = (socksEndpoint: Net.Endpoint,
+  public connect = (socksEndpoint: net.Endpoint,
                     port:number,
                     address?:string) : Promise<string> => {
-    var echoEndpoint :Net.Endpoint = {
+    var echoEndpoint :net.Endpoint = {
       address: address || this.localhost_,
       port: port
     };

@@ -1,14 +1,14 @@
-<link rel='import' href='../lib/polymer/polymer.html'>
-<link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='../lib/paper-checkbox/paper-checkbox.html'>
-<link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
-<link rel='import' href='../lib/core-label/core-label.html'>
-<link rel='import' href='../lib/paper-dialog/paper-action-dialog.html'>
-<link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
-<link rel='import' href='../lib/core-overlay/core-overlay.html'>
-<link rel='import' href='../lib/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
+<link rel='import' href='../../bower/core-label/core-label.html'>
+<link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -100,10 +100,6 @@
       /* Remove the underline from the Feedback textbox. */
       height: 0px;
     }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
-    }
     paper-input-decorator {
       font-size: 1.4em;
     }
@@ -117,7 +113,7 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
-    paper-action-dialog {
+    uproxy-action-dialog {
       top: 30%;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
@@ -134,6 +130,14 @@
     #feedbackPaperTextarea {
       height: 190px;
       margin: 0em;
+    }
+    paper-autogrow-textarea::shadow .textarea-container {
+      padding: 0.25em;
+      background-color: rgb(240,240,240);
+    }
+    paper-autogrow-textarea::shadow .mirror-text {
+      white-space: pre-wrap; /* css-3 */
+      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
     }
     </style>
 
@@ -179,12 +183,12 @@
         <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SUBMIT FEEDBACK</div>
       </div>
     </core-overlay>
-    <paper-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+    <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
       <div id='sendingFeedback'>
         Sending feedback<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
-    </paper-action-dialog>
+    </uproxy-action-dialog>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>

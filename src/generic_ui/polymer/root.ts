@@ -1,8 +1,21 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../scripts/ui.ts' />
-/// <reference path='../../uproxy.ts' />
+/// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
-declare var ui :UI.UserInterface;
+import social = require('../../interfaces/social');
+import ui_types = require('../../interfaces/ui');
+import user_interface = require('../scripts/ui');
+
+interface button_description {
+  text :string;
+  signal :string;
+  dismissive :boolean;
+}
+
+interface dialog_description {
+  heading :string;
+  message :string;
+  buttons: button_description[];
+}
 
 Polymer({
   dialog: {
@@ -10,44 +23,51 @@ Polymer({
     heading: '',
     buttons: []
   },
-  updateView: function(e, detail, sender) {
+  updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == uProxy.View.ROSTER && ui.view == uProxy.View.SPLASH) {
+    if (detail.view == ui_types.View.ROSTER && ui_context.ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
+      if (!ui_context.model.globalSettings.hasSeenWelcome) {
+        this.statsDialogOrBubbleOpen = true;
+        this.$.statsDialog.toggle();
+      }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
-    ui.view = detail.view;
+    ui_context.ui.view = detail.view;
+  },
+  statsIconClicked: function() {
+    this.$.mainPanel.openDrawer();
   },
   closeSettings: function() {
     this.$.mainPanel.closeDrawer();
   },
   rosterView: function() {
     console.log('rosterView called');
-    ui.view = uProxy.View.ROSTER;
+    ui_context.ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
-    model.globalSettings.mode = uProxy.Mode.GET;
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.mode = ui_types.Mode.GET;
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   setShareMode: function() {
-    model.globalSettings.mode = uProxy.Mode.SHARE;
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.mode = ui_types.Mode.SHARE;
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   closedWelcome: function() {
-    model.globalSettings.hasSeenWelcome = true;
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.hasSeenWelcome = true;
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   closedSharing: function() {
-    model.globalSettings.hasSeenSharingEnabledScreen = true;
-    core.updateGlobalSettings(model.globalSettings);
+    ui_context.model.globalSettings.hasSeenSharingEnabledScreen = true;
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   dismissCopyPasteError: function() {
-    ui.copyPasteError = UI.CopyPasteError.NONE;
+    ui_context.ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
-  openDialog: function(e, detail, sender) {
+  openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
      * signal was fired. It should be of the form:
      *
@@ -69,7 +89,7 @@ Polymer({
       this.$.dialog.open();
     });
   },
-  dialogButtonClick: function(event, detail, target) {
+  dialogButtonClick: function(event :Event, detail :Object, target :HTMLElement) {
     var signal = target.getAttribute('data-signal');
     if (signal) {
       this.fire('core-signal', { name: signal });
@@ -77,32 +97,60 @@ Polymer({
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
-    this.ui = ui;
-    this.UI = UI;
-    this.uProxy = uProxy;
-    this.model = model;
+    this.ui = ui_context.ui;
+    this.ui_constants = ui_types;
+    this.user_interface = user_interface;
+    this.model = ui_context.model;
     this.closeToastTimeout = null;
-    if(ui.browserApi.browserSpecificElement){
-      var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
+    if (ui_context.ui.browserApi.browserSpecificElement){
+      var browserCustomElement = document.createElement(ui_context.ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
+    if (ui_context.ui.view == ui_types.View.ROSTER &&
+        !ui_context.model.globalSettings.hasSeenWelcome) {
+      this.statsDialogOrBubbleOpen = true;
+      this.$.statsDialog.open();
+    }
   },
-  tabSelected: function(e) {
-    // setting the value is taken care of in the polymer binding, we just need
-    // to sync the value to core
-    core.updateGlobalSettings(model.globalSettings);
+  closeStatsBubble: function() {
+    this.statsDialogOrBubbleOpen = false;
+  },
+  enableStats: function() {
+    // TODO: clean up the logic which controls which welcome dialog or bubble
+    // is shown.
+    this.model.globalSettings.statsReportingEnabled = true;
+  },
+  disableStats: function() {
+    this.model.globalSettings.statsReportingEnabled = false;
+    this.statsDialogOrBubbleOpen = false;
+  },
+  tabSelected: function(e :Event) {
+    if (this.ui.isSharingDisabled &&
+        this.model.globalSettings.mode == ui_types.Mode.SHARE) {
+      // Keep the mode on get and display an error dialog.
+      this.model.globalSettings.mode = ui_types.Mode.GET;
+      this.fire('open-dialog', {
+        heading: 'Sharing Unavailable',
+        message: 'Oops! Unfortunately, due to a bug introduced in Firefox 37, sharing from Firefox currently does not work. You can track the issue at bugzil.la/1157766. We hope this will be fixed soon, but in the mean time, the best workaround is to try the uProxy extension for Chrome.',
+        buttons: [{text: 'Close', dismissive: true}]
+      });
+    } else {
+      // setting the value is taken care of in the polymer binding, we just need
+      // to sync the value to core
+      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    }
   },
   signalToFireChanged: function() {
-    if (this.ui.signalToFire != '') {
-      this.fire('core-signal', {name: this.ui.signalToFire});
-      this.ui.signalToFire = '';
+    if (ui_context.ui.signalToFire != '') {
+      this.fire('core-signal', {name: ui_context.ui.signalToFire});
+      ui_context.ui.signalToFire = '';
     }
   },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
-    this.ui.toastMessage = null;
+    ui_context.ui.toastMessage = null;
   },
-  messageNotNull: function(toastMessage) {
+  messageNotNull: function(toastMessage :string) {
     // Whether the toast is shown is controlled by if ui.toastMessage
     // is null. This function returns whether ui.toastMessage == null,
     // and also sets a timeout to close the toast.
@@ -114,7 +162,7 @@ Polymer({
     return false;
   },
   openTroubleshoot: function() {
-    if (this.stringMatches(ui.toastMessage, UI.GET_FAILED_MSG)) {
+    if (this.stringMatches(ui_context.ui.toastMessage, user_interface.GET_FAILED_MSG)) {
       this.troubleshootTitle = "Unable to get access";
     } else {
       this.troubleshootTitle = "Unable to share access";
@@ -122,15 +170,15 @@ Polymer({
     this.closeToast();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
-  stringMatches: function(toastMessage, failureMsgConstant) {
+  stringMatches: function(str1 :string, str2 :string) {
     // Determine if the error in the toast is a getter or sharer error
     // by comparing the error string to getter/sharer error constants.
-    if (toastMessage) {
-      return toastMessage.indexOf(failureMsgConstant) > -1;
+    if (str1) {
+      return str1.indexOf(str2) > -1;
     }
     return false;
   },
-  topOfStatuses: function(gettingStatus, sharingStatus) {
+  topOfStatuses: function(gettingStatus :social.GettingState, sharingStatus :social.SharingState) {
     // Returns number of pixels from the bottom of the window a toast
     // can be positioned without interfering with the getting or sharing
     // status bars.
@@ -148,5 +196,20 @@ Polymer({
     // If there are no status bars, toasts should still 'float' a little
     // above the bottom of the window.
     return padding;
+  },
+  // mainPanel.selected can be either "drawer" or "main"
+  // Our "drawer" is the settings panel. When the settings panel is open,
+  // make sure to hide the stats tooltip so the two don't overlap.
+  drawerToggled: function() {
+    if (this.$.mainPanel.selected == 'drawer') {
+      // Drawer was opened.
+      this.$.statsTooltip.disabled = true;
+    } else {
+      // Drawer was closed.
+      this.$.statsTooltip.disabled = false;
+    }
+  },
+  observe: {
+    '$.mainPanel.selected' : 'drawerToggled'
   }
 });

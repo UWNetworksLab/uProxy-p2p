@@ -17,19 +17,27 @@
  *    },
  *    ...
  */
-/// <reference path='firewall.ts' />
-/// <reference path='local-instance.ts' />
-/// <reference path='user.ts' />
-/// <reference path='../uproxy.ts' />
-/// <reference path='../interfaces/network.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
 
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/social.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/social.d.ts' />
 
-module Social {
-  var NETWORK_OPTIONS = {
+import firewall = require('./firewall');
+import local_instance = require('./local-instance');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import remote_user = require('./remote-user');
+import social = require('../interfaces/social');
+import ui_connector = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import user = require('./remote-user');
+import globals = require('./globals');
+import storage = globals.storage;
+
+import ui = ui_connector.connector;
+
+
+
+  export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
       enableMonitoring: true
@@ -44,10 +52,11 @@ module Social {
     }
   }
 
-  var log :Logging.Log = new Logging.Log('social');
+  var log :logging.Log = new logging.Log('social');
 
-  var LOGIN_TIMEOUT :number = 5000;  // ms
+  export var LOGIN_TIMEOUT :number = 5000;  // ms
 
+  export var MANUAL_NETWORK_ID = 'Manual';
 
   // PREFIX is the string prefix indicating which social providers in the
   // freedom manifest we want to treat as social providers for uProxy.
@@ -59,10 +68,10 @@ module Social {
   // This simplified Social to being a SocialNetwork and removes the need for
   // this module. `initializeNetworks` becomes part of the core constructor.
   // TODO(salomegeo): Change structure of network
-  export var networks:{[networkName:string] :{[userId:string]:Network}} = {};
-  export var pendingNetworks:{[networkName:string]:Network} = {};
+  export var networks:{[networkName:string] :{[userId:string]:social.Network}} = {};
+  export var pendingNetworks:{[networkName:string]:social.Network} = {};
 
-  export function removeNetwork(networkName :string, userId :string) {
+  export function removeNetwork(networkName :string, userId :string) :void {
     if (networkName !== MANUAL_NETWORK_ID) {
       delete networks[networkName][userId];
     }
@@ -72,7 +81,7 @@ module Social {
   /**
    * Goes through network names and gets a reference to each social provider.
    */
-  export function initializeNetworks() {
+  export function initializeNetworks() :void {
     for (var dependency in freedom) {
       if (freedom.hasOwnProperty(dependency)) {
         if (dependency.indexOf(PREFIX) !== 0 ||
@@ -93,7 +102,7 @@ module Social {
   /**
    * Retrieves reference to the network |networkName|.
    */
-  export function getNetwork(networkName :string, userId :string) : Network {
+  export function getNetwork(networkName :string, userId :string) :social.Network {
     if (!(networkName in networks)) {
       log.warn('Network does not exist', networkName);
       return null;
@@ -109,11 +118,11 @@ module Social {
     return networks[networkName][userId];
   }
 
-  export function getOnlineNetwork() : NetworkState {
-    for (var network in Social.networks) {
-      if (Object.keys(Social.networks[network]).length > 0) {
-        var userId = Object.keys(Social.networks[network])[0];
-        return Social.networks[network][userId].getNetworkState();
+  export function getOnlineNetwork() :social.NetworkState {
+    for (var network in networks) {
+      if (Object.keys(networks[network]).length > 0) {
+        var userId = Object.keys(networks[network])[0];
+        return networks[network][userId].getNetworkState();
       }
     }
     return null;
@@ -128,22 +137,22 @@ module Social {
       // we'll change this.
       userId = (Object.keys(networks[networkName]))[0];
     };
-    var payload :UI.NetworkMessage = {
+    var payload :social.NetworkMessage = {
       name: networkName,
       online: online,
       userId: userId
     };
-    ui.update(uProxy.Update.NETWORK, payload);
+    ui.update(uproxy_core_api.Update.NETWORK, payload);
   }
 
   // Implements those portions of the Network interface for which the logic is
   // common to multiple Network implementations. Essentially an abstract base
   // class for Network implementations, except that TypeScript does not allow
   // abstract classes.
-  export class AbstractNetwork implements Network {
+  export class AbstractNetwork implements social.Network {
 
-    public roster     :{[userId: string] :Core.User};
-    public myInstance :Core.LocalInstance;
+    public roster     :{[userId:string] :remote_user.User};
+    public myInstance :local_instance.LocalInstance;
 
     private SaveKeys = {
       ME: 'me'
@@ -153,7 +162,7 @@ module Social {
       this.roster = {};
     }
 
-    public getStorePath = () : string => {
+    public getStorePath = () :string => {
       return this.myInstance.instanceId + '/roster/';
     }
 
@@ -162,18 +171,19 @@ module Social {
      * from storage, or create a new one if this is the first time this uProxy
      * installation has interacted with this network.
      */
-    protected prepareLocalInstance_ = (userId :string) : Promise<void> => {
+    protected prepareLocalInstance_ = (userId :string) :Promise<void> => {
       var key = this.name + userId;
-      return storage.load<Instance>(key).then((result :Instance) => {
-        this.myInstance = new Core.LocalInstance(this, userId, result);
+      return storage.load<social.BaseInstance>(key).then((result) => {
+        this.myInstance = new local_instance.LocalInstance(this, userId, result);
         log.info('loaded local instance from storage',
                  result, this.myInstance.instanceId);
       }, (e) => {
-        this.myInstance = new Core.LocalInstance(this, userId);
-        log.info('generating new local instance',
-                 this.myInstance.instanceId);
-        return storage.save<Instance>(key, this.myInstance.currentState()).catch((e) => {
-          log.error('Could not save new LocalInstance', this.myInstance.instanceId, e.stack);
+        this.myInstance = new local_instance.LocalInstance(this, userId);
+        log.info('generating new local instance', this.myInstance.instanceId);
+        return storage.save<social.BaseInstance>(key, this.myInstance.currentState())
+            .catch((e:Error) => {
+          log.error('Could not save new LocalInstance: ',
+              this.myInstance.instanceId, e.toString());
         });
       });
     }
@@ -184,12 +194,12 @@ module Social {
      * Adds a new user to the roster.  Promise will be rejected if the user is
      * already in the roster.
      */
-    protected addUser_ = (userId :string) : Core.User => {
+    public addUser = (userId :string) :remote_user.User => {
       if (!this.isNewFriend_(userId)) {
         log.error('Cannot add already existing user', userId);
       }
       log.debug('added user to roster', userId);
-      var newUser = new Core.User(this, userId);
+      var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
       return newUser;
     }
@@ -199,9 +209,9 @@ module Social {
      * roster, a new User object will be created - in that case the User may
      * be missing fields like .name if it is not found in storage.
      */
-    protected getOrAddUser_ = (userId :string) : Core.User => {
+    protected getOrAddUser_ = (userId :string) :remote_user.User => {
       if (this.isNewFriend_(userId)) {
-        return this.addUser_(userId);
+        return this.addUser(userId);
       }
       return this.getUser(userId);
     }
@@ -211,7 +221,7 @@ module Social {
      * roster, and also isn't just our own userId, since we can receive XMPP
      * messages for ourself too.
      */
-    protected isNewFriend_ = (userId :string) : boolean => {
+    protected isNewFriend_ = (userId :string) :boolean => {
       return !(this.myInstance && this.myInstance.userId == userId) &&
              !(userId in this.roster);
     }
@@ -220,33 +230,33 @@ module Social {
       return this.myInstance.instanceId;
     }
 
-    public getUser = (userId :string) : Core.User => {
+    public getUser = (userId :string) :remote_user.User => {
       return this.roster[userId];
     }
 
-    public resendInstanceHandshakes = () : void => {
+    public resendInstanceHandshakes = () :void => {
       // Do nothing for non-freedom networks (e.g. manual).
     }
 
     //================ Subclasses must override these methods ================//
 
     // From Social.Network:
-    public login = (remember :boolean) : Promise<void> => {
+    public login = (remember :boolean) :Promise<void> => {
       throw new Error('Operation not implemented');
     }
     public logout = () : Promise<void> => {
       throw new Error('Operation not implemented');
     }
-    public flushQueuedInstanceMessages = () : void => {
+    public flushQueuedInstanceMessages = () :void => {
       throw new Error('Operation not implemented');
     }
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    recipientClientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       throw new Error('Operation not implemented');
     }
 
-    public getNetworkState = () : NetworkState => {
+    public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
     }
 
@@ -331,7 +341,7 @@ module Social {
      */
     public handleUserProfile = (profile :freedom_Social.UserProfile) : void => {
       var userId = profile.userId;
-      if (!Firewall.isValidUserProfile(profile, null)) {
+      if (!firewall.isValidUserProfile(profile, null)) {
         log.error('Firewall: invalid user profile', profile);
         return;
       }
@@ -342,12 +352,12 @@ module Social {
         log.info('Received own XMPP profile', profile);
 
         // Update UI with own information.
-        var userProfileMessage :UI.UserProfileMessage = {
+        var userProfileMessage :social.UserProfileMessage = {
           userId: profile.userId,
           name: profile.name,
           imageData: profile.imageData
         };
-        ui.update(uProxy.Update.USER_SELF, <UI.UserMessage>{
+        ui.update(uproxy_core_api.Update.USER_SELF, <social.UserData>{
           network: this.name,
           user:    userProfileMessage
         });
@@ -375,13 +385,13 @@ module Social {
      * Public to permit testing.
      */
     public handleClientState = (freedomClient :freedom_Social.ClientState) : void => {
-      if (!Firewall.isValidClientState(freedomClient, null)) {
+      if (!firewall.isValidClientState(freedomClient, null)) {
         log.error('Firewall: invalid client state:', freedomClient);
         return;
       }
-      var client :UProxyClient.State =
+      var client :social.ClientState =
         freedomClientToUproxyClient(freedomClient);
-      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
         return;
       }
@@ -390,7 +400,7 @@ module Social {
         // Log out if it's our own client id.
         // TODO: Consider adding myself to the roster.
         if (client.clientId === this.myInstance.clientId &&
-            client.status === UProxyClient.Status.OFFLINE) {
+            client.status === social.ClientStatus.OFFLINE) {
           this.fulfillLogout_();
         }
         log.info('received own ClientState', client);
@@ -411,16 +421,16 @@ module Social {
      * Public to permit testing.
      */
     public handleMessage = (incoming :freedom_Social.IncomingMessage) : void => {
-      if (!Firewall.isValidIncomingMessage(incoming, null)) {
+      if (!firewall.isValidIncomingMessage(incoming, null)) {
         log.error('Firewall: invalid incoming message:', incoming);
         return;
       }
       var userId = incoming.from.userId;
-      var msg :uProxy.Message = JSON.parse(incoming.message);
+      var msg :social.PeerMessage = JSON.parse(incoming.message);
 
-      var client :UProxyClient.State =
+      var client :social.ClientState =
           freedomClientToUproxyClient(incoming.from);
-      if (client.status === UProxyClient.Status.ONLINE_WITH_OTHER_APP) {
+      if (client.status === social.ClientStatus.ONLINE_WITH_OTHER_APP) {
         // Ignore clients that aren't using uProxy.
         return;
       }
@@ -449,7 +459,7 @@ module Social {
           if (keys[i].indexOf(myKey) === 0) {
             var userId = keys[i].substr(myKey.length);
             if (this.isNewFriend_(userId)) {
-              this.addUser_(userId);
+              this.addUser(userId);
             }
           }
         }
@@ -502,12 +512,12 @@ module Social {
               // Notify UI that this network is online before we fulfill
               // the onceLoggedIn_ promise.  This ensures that the UI knows
               // that the network is online before we send user updates.
-              var payload :UI.NetworkMessage = {
+              var payload :social.NetworkMessage = {
                 name: this.name,
                 online: true,
                 userId: freedomClient.userId
               };
-              ui.update(uProxy.Update.NETWORK, payload);
+              ui.update(uproxy_core_api.Update.NETWORK, payload);
             });
           });
       return this.onceLoggedIn_
@@ -519,7 +529,7 @@ module Social {
               for (var userId in this.roster) {
                 this.roster[userId].handleLogout();
               }
-              Social.removeNetwork(this.name, this.myInstance.userId);
+              removeNetwork(this.name, this.myInstance.userId);
               log.debug('Fulfilling onceLoggedOut_');
             }).catch((e) => {
               log.error('Error fulfilling onceLoggedOut_', e.message);
@@ -544,13 +554,13 @@ module Social {
     /**
      * Promise the sending of |msg| to a client with id |clientId|.
      */
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    clientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       var messageString = JSON.stringify({
         type: message.type,
         data: message.data,
-        version: uProxy.MESSAGE_VERSION
+        version: globals.MESSAGE_VERSION
       });
       log.info('sending message', {
         userTo: user.userId,
@@ -603,18 +613,18 @@ module Social {
 
     private isFirebase_ = () : boolean => {
       // Default to false.
-      var options = NETWORK_OPTIONS[this.name];
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.isFirebase === true : false;
     }
 
     private isMonitoringEnabled_ = () : boolean => {
       // Default to true.
-      var options = NETWORK_OPTIONS[this.name];
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
       return options ? options.enableMonitoring === true : true;
     }
 
-    public getNetworkState = () : NetworkState => {
-      var rosterState : {[userId :string] :UI.UserMessage} = {};
+    public getNetworkState = () : social.NetworkState => {
+      var rosterState : {[userId :string] :social.UserData} = {};
       for (var userId in this.roster) {
         var userState = this.roster[userId].currentStateForUI()
         if (userState !== null) {
@@ -661,12 +671,12 @@ module Social {
       return Promise.resolve<void>();
     }
 
-    public send = (user :Core.User,
+    public send = (user :remote_user.User,
                    recipientClientId :string,
-                   message :uProxy.Message) : Promise<void> => {
+                   message :social.PeerMessage) : Promise<void> => {
       // TODO: Batch messages.
       // Relay the message to the UI for display to the user.
-      ui.update(uProxy.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
+      ui.update(uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
 
       return Promise.resolve<void>();
     }
@@ -674,7 +684,7 @@ module Social {
     // TODO: Consider adding a mechanism for reporting back to the UI that a
     // message is malformed or otherwise invalid.
     public receive = (senderClientId :string,
-                      message :uProxy.Message) : void => {
+                      message :social.PeerMessage) : void => {
       log.debug('Received incoming manual message from %1: %2',
                 senderClientId, message);
 
@@ -686,23 +696,23 @@ module Social {
       // Hack so that handleMessage treats this client as online and doesn't
       // reject.
       // TODO: refactor manual network to have its own client messages.
-      user.clientIdToStatusMap[senderClientId] = UProxyClient.Status.ONLINE;
+      user.clientIdToStatusMap[senderClientId] = social.ClientStatus.ONLINE;
       user.handleMessage(senderUserId, message);
     }
 
   }  // class ManualNetwork
 
-}  // module Social
 
-function freedomClientToUproxyClient(
-  freedomClientState :freedom_Social.ClientState) : UProxyClient.State {
+export function freedomClientToUproxyClient(
+  freedomClientState :freedom_Social.ClientState) :social.ClientState {
   // Convert status from Freedom style enum value ({'ONLINE': 'ONLINE',
   // 'OFFLINE: 'OFFLINE'}) to TypeScript style {'ONLINE': 4000, 4000: 'ONLINE',
   // 'OFFLINE': 4001, 4001: 'OFFLINE'} value.
-  return {
+  var state :social.ClientState = {
     userId:    freedomClientState.userId,
     clientId:  freedomClientState.clientId,
-    status:    UProxyClient.Status[freedomClientState.status],
+    status:    (<any>social.ClientStatus)[freedomClientState.status],
     timestamp: freedomClientState.timestamp
   };
+  return state;
 }

@@ -4,7 +4,7 @@
     "description": "The title that appears in the Chrome Extensions listing"
   },
   "appDescription": {
-    "message": "(Beta version) uProxy, part 2 of 2.  You will also need part 1 of 2 to use uProxy.",
+    "message": "(Alpha version) uProxy, part 2 of 2.  You will also need part 1 of 2 to use uProxy.",
     "description": "The description that appears in the Chrome Extensions listing"
   }
 }

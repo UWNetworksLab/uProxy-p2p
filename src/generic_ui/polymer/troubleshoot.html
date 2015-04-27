@@ -1,10 +1,10 @@
-<link rel='import' href='../lib/polymer/polymer.html'>
-<link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='../lib/paper-dialog/paper-dialog.html'>
-<link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
-<link rel='import' href='../lib/core-icons/core-icons.html'>
-<link rel='import' href='../lib/core-signals/core-signals.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-troubleshoot' attributes='titleText'>
   <template>
@@ -45,12 +45,12 @@
       margin: 10px 2px 3px 2px;
       font-size: 12px;
     }
-    paper-dialog {
+    uproxy-dialog {
       top: 20%;
       min-width: 305px;
       z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
-    paper-dialog::shadow #scroller {
+    uproxy-dialog::shadow #scroller {
       padding: 12px;
     }
     #askToAnalyze, #analyzeNetwork, #analyzedNetwork {
@@ -79,14 +79,14 @@
     <!-- Listen for the 'open-troubleshoot' event, which the user can trigger after proxying fails. -->
     <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
 
-    <paper-dialog backdrop layered='false' id='troubleshootDialog'>
+    <uproxy-dialog backdrop layered='false' id='troubleshootDialog'>
       <core-icon class="button" icon="clear" on-tap='{{ close }}'></core-icon>
       <h1>{{ titleText }}</h1>
 
       <!-- First screen in the dialog asks user if they want to diagnose their network. -->
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
-          It could be that your network's NAT type is incompatible with uProxy. Would you like to uProxy to analyze your network?
+          It could be that your network's NAT type is incompatible with uProxy. Would you like uProxy to analyze your network?
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
@@ -126,7 +126,7 @@
         </div>
       </div>
 
-    </paper-dialog>
+    </uproxy-dialog>
 
   </template>
   <script src='troubleshoot.js'></script>

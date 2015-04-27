@@ -1,15 +1,18 @@
-class RtcToNetMock { // TODO implements RtcToNet.RtcToNet {
-  public signalsForPeer = new Handler.Queue<WebRtc.SignallingMessage, void>();
-  public bytesReceivedFromPeer = new Handler.Queue<number, void>();
-  public bytesSentToPeer = new Handler.Queue<number, void>();
+import handler_queue = require('../../../third_party/uproxy-lib/handler/queue');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+
+export class RtcToNetMock { // TODO implements rtc_to_net.RtcToNet {
+  public signalsForPeer = new handler_queue.Queue<signals.Message, void>();
+  public bytesReceivedFromPeer = new handler_queue.Queue<number, void>();
+  public bytesSentToPeer = new handler_queue.Queue<number, void>();
 
   public resolveReady :() => void;
   public rejectReady :(v :Object) => void;
-  public resolveClosed :() => void;
-  public rejectClosed :(v :Object) => void;
+  public resolveStopped :() => void;
+  public rejectStopped :(v :Object) => void;
 
   public onceReady :Promise<void>;
-  public onceClosed :Promise<void>;
+  public onceStopped :Promise<void>;
 
   constructor() {
     this.onceReady = new Promise<void>((resolve, reject) => {
@@ -17,9 +20,9 @@ class RtcToNetMock { // TODO implements RtcToNet.RtcToNet {
       this.rejectReady = reject;
     });
 
-    this.onceClosed = new Promise<void>((resolve, reject) => {
-      this.resolveClosed = resolve;
-      this.rejectClosed = reject;
+    this.onceStopped = new Promise<void>((resolve, reject) => {
+      this.resolveStopped = resolve;
+      this.rejectStopped = reject;
     });
 
   }
@@ -32,4 +35,6 @@ class RtcToNetMock { // TODO implements RtcToNet.RtcToNet {
 
   public toString = () => {
   }
+
+  public startFromConfig = () => {}
 }

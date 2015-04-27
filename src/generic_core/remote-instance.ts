@@ -5,17 +5,33 @@
  * allows any pair of uProxy installations to speak to one another regarding
  * consent, proxying status, and any other signalling information.
  */
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
-/// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='consent.ts' />
-/// <reference path='core.ts' />
-/// <reference path='remote-connection.ts' />
-/// <reference path='social.ts' />
-/// <reference path='../third_party/typings/lodash/lodash.d.ts' />
 
-module Core {
-  var log :Logging.Log = new Logging.Log('remote-instance');
+/// <reference path='../../../third_party/typings/lodash/lodash.d.ts' />
+
+import consent = require('./consent');
+import globals = require('./globals');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import net = require('../../../third_party/uproxy-networking/net/net.types');
+import remote_connection = require('./remote-connection');
+import remote_user = require('./remote-user');
+import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import social = require('../interfaces/social');
+import ui_connector = require('./ui_connector');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import user_interface = require('../interfaces/ui');
+import _ = require('lodash');
+
+import storage = globals.storage;
+import ui = ui_connector.connector;
+
+import Persistent = require('../interfaces/persistent');
+
+// Keep track of the current remote instance who is acting as a proxy server
+// for us.
+export var remoteProxyInstance :RemoteInstance = null;
+
+// module Core {
+  var log :logging.Log = new logging.Log('remote-instance');
 
   /**
    * RemoteInstance - represents a remote uProxy installation.
@@ -29,7 +45,7 @@ module Core {
    * - Locally, via a user command from the UI.
    * - Remotely, via consent bits sent over the wire by a friend.
    */
-  export class RemoteInstance implements Instance, Core.Persistent {
+  export class RemoteInstance implements social.BaseInstance, Persistent {
 
     public keyHash     :string;
     public description :string;
@@ -38,10 +54,10 @@ module Core {
     public bytesReceived    :number = 0;
     // Current proxy access activity of the remote instance with respect to the
     // local instance of uProxy.
-    public localGettingFromRemote = GettingState.NONE;
-    public localSharingWithRemote = SharingState.NONE;
+    public localGettingFromRemote = social.GettingState.NONE;
+    public localSharingWithRemote = social.SharingState.NONE;
 
-    public wireConsentFromRemote :uProxy.ConsentWireState = {
+    public wireConsentFromRemote :social.ConsentWireState = {
       isRequesting: false,
       isOffering: false
     };
@@ -69,19 +85,11 @@ module Core {
     // socksToRtc_.start
     public RTC_TO_NET_TIMEOUT :number = this.SOCKS_TO_RTC_TIMEOUT + 15000;
     // Timeouts for when to abort starting up SocksToRtc and RtcToNet.
-    private startSocksToRtcTimeout_ = null;
-    private startRtcToNetTimeout_ = null;
+    // TODO: why are these not in remote-connection?
+    private startSocksToRtcTimeout_ :number = null;
+    private startRtcToNetTimeout_ :number = null;
 
-    private connection_ :Core.RemoteConnection = null;
-
-    // By default, or when a successful connection is closed, this promise will
-    // reject to indicate the remote connection is not ready to accept signals.
-    // Only if the peer sent an OFFER signal and an rtcToNet instance is created
-    // will this fulfill.
-    // TODO: to make it clearer what this promise is waiting for, change to
-    // something like:
-    // Promise.all([this.receivedOffer_, this.connection_.onceSharerCreated])
-    private onceSharerReadyForOffer_ :Promise<void>;
+    private connection_ :remote_connection.RemoteConnection = null;
 
     /**
      * Construct a Remote Instance as the result of receiving an instance
@@ -93,16 +101,15 @@ module Core {
      */
     constructor(
         // The User which this instance belongs to.
-        public user :Core.User,
+        public user :remote_user.User,
         public instanceId :string) {
-      this.connection_ = new Core.RemoteConnection(this.handleConnectionUpdate_);
-      this.setSharerToNotReady_();
+      this.connection_ = new remote_connection.RemoteConnection(this.handleConnectionUpdate_);
 
       storage.load<RemoteInstanceState>(this.getStorePath())
-          .then((state) => {
+          .then((state:RemoteInstanceState) => {
             this.restoreState(state);
             this.fulfillStorageLoad_();
-          }).catch((e) => {
+          }).catch((e:Error) => {
             // Instance not found in storage - we should fulfill the create
             // promise anyway as this is not an error.
             log.info('No stored state for instance', instanceId);
@@ -110,9 +117,9 @@ module Core {
           });
     }
 
-    private handleConnectionUpdate_ = (update :uProxy.Update, data?:any) => {
+    private handleConnectionUpdate_ = (update :uproxy_core_api.Update, data?:any) => {
       switch (update) {
-        case uProxy.Update.SIGNALLING_MESSAGE:
+        case uproxy_core_api.Update.SIGNALLING_MESSAGE:
           var clientId = this.user.instanceToClient(this.instanceId);
           if (!clientId) {
             log.error('Could not find clientId for instance', this);
@@ -120,21 +127,21 @@ module Core {
           }
           this.user.network.send(this.user, clientId, data);
           break;
-        case uProxy.Update.STOP_GIVING:
-          ui.update(uProxy.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
+        case uproxy_core_api.Update.STOP_GIVING:
+          ui.update(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
           break;
-        case uProxy.Update.START_GIVING:
-          ui.update(uProxy.Update.START_GIVING_TO_FRIEND, this.instanceId);
+        case uproxy_core_api.Update.START_GIVING:
+          ui.update(uproxy_core_api.Update.START_GIVING_TO_FRIEND, this.instanceId);
           break;
-        case uProxy.Update.STOP_GETTING:
+        case uproxy_core_api.Update.STOP_GETTING:
           clearTimeout(this.startSocksToRtcTimeout_);
-          ui.update(uProxy.Update.STOP_GETTING_FROM_FRIEND, {
+          ui.update(uproxy_core_api.Update.STOP_GETTING_FROM_FRIEND, {
             instanceId: this.instanceId,
             error: data
           });
           remoteProxyInstance = null;
           break;
-        case uProxy.Update.STATE:
+        case uproxy_core_api.Update.STATE:
           this.bytesSent = data.bytesSent;
           this.bytesReceived = data.bytesReceived;
           this.localGettingFromRemote = data.localGettingFromRemote;
@@ -164,9 +171,9 @@ module Core {
      * TODO: assuming that signal is valid, should we remove signal?
      * TODO: return a boolean on success/failure
      */
-    public handleSignal = (type:uProxy.MessageType,
-                           signalFromRemote:Object) :Promise<void> => {
-      if (uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER === type) {
+    public handleSignal = (type:social.PeerMessageType,
+                           signalFromRemote:signals.Message) :Promise<void> => {
+      if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
           log.warn('Remote side attempted access without permission');
@@ -174,23 +181,19 @@ module Core {
         }
 
         // Create a new rtcToNet object everytime there is an OFFER signal.
-        if (signalFromRemote['type'] == WebRtc.SignalType.OFFER) {
+        if (signalFromRemote.type == signals.Type.OFFER) {
           // TODO: Move the logic for resetting the onceSharerCreated promise inside
           // remote-connection.ts.
           this.connection_.resetSharerCreated();
-          this.onceSharerReadyForOffer_ = this.connection_.onceSharerCreated;
           this.startShare_();
         }
         // Wait for the new rtcToNet instance to be created before you handle
         // additional messages from a client peer.
-        return this.onceSharerReadyForOffer_.then(() => {
+        return this.connection_.onceSharerCreated.then(() => {
           this.connection_.handleSignal({
             type: type,
             data: signalFromRemote
           });
-        }).catch((e) => {
-          log.info(e + ' Received signal ' + signalFromRemote['type']);
-          return Promise.resolve<void>();
         });
 
         /*
@@ -199,7 +202,7 @@ module Core {
         https://github.com/uProxy/uproxy-lib/tree/lucyhe-emitcancelsignal
         Issue: https://github.com/uProxy/uproxy/issues/1256
 
-        } else if (signalFromRemote['type'] == WebRtc.SignalType.CANCEL_OFFER) {
+        } else if (signalFromRemote['type'] == signals.Type.CANCEL_OFFER) {
           this.stopShare();
           return;
         }
@@ -219,10 +222,13 @@ module Core {
       */
     private startShare_ = () : void => {
       var sharingStopped :Promise<void>;
-      if (this.localSharingWithRemote === SharingState.NONE) {
+      if (this.localSharingWithRemote === social.SharingState.NONE) {
         // Stop any existing sharing attempts with this instance.
         sharingStopped = Promise.resolve<void>();
       } else {
+        // Implies that the SharingState is TRYING_TO_SHARE_ACCESS because
+        // the client peer should never be able to try to get if they are
+        // already getting (and this sharer is already sharing).
         sharingStopped = this.stopShare();
       }
 
@@ -233,7 +239,7 @@ module Core {
         // assumption that our peer failed to start getting access.
         this.startRtcToNetTimeout_ = setTimeout(() => {
           log.warn('Timing out rtcToNet_ connection');
-          ui.update(uProxy.Update.FRIEND_FAILED_TO_GET, this.user.name);
+          ui.update(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, this.user.name);
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
@@ -247,34 +253,22 @@ module Core {
     }
 
     public stopShare = () :Promise<void> => {
-      if (this.localSharingWithRemote === SharingState.NONE) {
+      if (this.localSharingWithRemote === social.SharingState.NONE) {
         log.warn('Cannot stop sharing while currently not sharing.');
         return Promise.resolve<void>();
       }
 
-      if (this.localSharingWithRemote === SharingState.TRYING_TO_SHARE_ACCESS) {
+      if (this.localSharingWithRemote === social.SharingState.TRYING_TO_SHARE_ACCESS) {
         clearTimeout(this.startRtcToNetTimeout_);
-      } else if (this.localSharingWithRemote === SharingState.SHARING_ACCESS) {
-        // Stop forwarding messages to the remote connection until we receive
-        // another OFFER.
-        this.setSharerToNotReady_();
       }
       return this.connection_.stopShare();
-    }
-
-    // When a sharer remote-instance is first created, or after a sharer closes
-    // a connection, we set that they are not ready to handle an incoming offer.
-    private setSharerToNotReady_ = () => {
-      this.onceSharerReadyForOffer_ =
-          Promise.reject(new Error('Ignoring signal from client without ' +
-                                   'rtcToNet ready to handle OFFER first.'));
     }
 
     /**
      * Begin to use this remote instance as a proxy server, if permission is
      * currently granted.
      */
-    public start = () :Promise<Net.Endpoint> => {
+    public start = () :Promise<net.Endpoint> => {
       if (!this.wireConsentFromRemote.isOffering) {
         log.warn('Lacking permission to proxy');
         return Promise.reject(Error('Lacking permission to proxy'));
@@ -286,7 +280,7 @@ module Core {
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet().then((endpoints :Net.Endpoint) => {
+      return this.connection_.startGet().then((endpoints :net.Endpoint) => {
         clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });
@@ -295,7 +289,7 @@ module Core {
     /**
      * Stop using this remote instance as a proxy server.
      */
-    public stop = () : Promise<void> => {
+    public stop = () :Promise<void> => {
       return this.connection_.stopGet();
     }
 
@@ -304,7 +298,7 @@ module Core {
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :InstanceHandshake) : Promise<void> => {
+    public update = (data :social.InstanceHandshake) :Promise<void> => {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
@@ -313,7 +307,7 @@ module Core {
       });
     }
 
-    private updateConsentFromWire_ = (bits: uProxy.ConsentWireState) => {
+    private updateConsentFromWire_ = (bits :social.ConsentWireState) => {
       var userConsent = this.user.consent;
 
       // Update this remoteInstance.
@@ -365,7 +359,9 @@ module Core {
      * Returns a snapshot of a RemoteInstance's state for the UI. This includes
      * fields like isCurrentProxyClient that we don't want to save to storage.
      */
-    public currentStateForUi = () :UI.Instance => {
+    // TODO: bad smell: remote-instance should not need to know the structure of
+    // UI message data. Maybe rename to |getInstanceData|?
+    public currentStateForUi = () :social.InstanceData => {
       return {
         instanceId:             this.instanceId,
         description:            this.description,
@@ -379,21 +375,21 @@ module Core {
     }
 
     public handleLogout = () => {
-      if (this.connection_.localSharingWithRemote !== SharingState.NONE) {
+      if (this.connection_.localSharingWithRemote !== social.SharingState.NONE) {
         log.info('Closing rtcToNet_ for logout');
         this.connection_.stopShare();
       }
 
-      if (this.connection_.localGettingFromRemote !== GettingState.NONE) {
+      if (this.connection_.localGettingFromRemote !== social.GettingState.NONE) {
         log.info('Stopping socksToRtc_ for logout');
         this.connection_.stopGet();
       }
     }
 
-  }  // class Core.RemoteInstance
+  }  // class remote_instance.RemoteInstance
 
   export interface RemoteInstanceState {
-    wireConsentFromRemote :uProxy.ConsentWireState;
+    wireConsentFromRemote :social.ConsentWireState;
     description           :string;
     keyHash               :string;
   }
@@ -401,4 +397,4 @@ module Core {
   // TODO: Implement obfuscation.
   export enum ObfuscationType {NONE, RANDOM1 }
 
-}  // module Core
+// }  // module Core

@@ -1,43 +1,51 @@
 /**
  * Chrome oauth provider
  **/
-/// <reference path='background.ts'/>
 
-var connector :ChromeUIConnector;
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import ChromeUIConnector = require('./chrome_ui_connector');
 
-var Chrome_oauth = function() {
-};
+class Chrome_oauth {
+  constructor(private options_:{connector:ChromeUIConnector;}) {}
 
-Chrome_oauth.prototype.initiateOAuth = function(redirectURIs, continuation) {
-  // If we have uproxy.org pick that one,
-  // otherwise pick the first http from the list.
-  var redirect;
-  for (var i in redirectURIs) {
-    if (redirectURIs[i] === 'https://www.uproxy.org/oauth-redirect-uri') {
-      redirect = redirectURIs[i];
-      break;
+  public initiateOAuth(
+      redirectURIs:{[urls:string]:string},
+      continuation:(result:{redirect:string;state:string;}) => void) {
+    // If we have uproxy.org pick that one,
+    // otherwise pick the first http from the list.
+    var redirect :string;
+    for (var i in redirectURIs) {
+      if (redirectURIs[i] === 'https://www.uproxy.org/oauth-redirect-uri') {
+        redirect = redirectURIs[i];
+        break;
+      }
+
+      if (redirect !== '' && (redirectURIs[i].indexOf('https://') === 0 ||
+          redirectURIs[i].indexOf('http://') === 0)) {
+        redirect = redirectURIs[i];
+      }
     }
 
-    if (redirect !== '' && (redirectURIs[i].indexOf('https://') === 0 ||
-        redirectURIs[i].indexOf('http://') === 0)) {
-      redirect = redirectURIs[i];
+    if (redirect) {
+      continuation({
+        redirect: redirect,
+        state: ''
+      });
+      return true
     }
+    return false;
   }
 
-  if (redirect) {
-    continuation({
-      redirect: redirect,
-      state: ''
-    });
-    return true
+  public launchAuthFlow(
+      authUrl:string,
+      stateObj:{redirect:string},
+      continuation:(credentials:Object)=> void) {
+    this.options_.connector.sendToUI(
+        uproxy_core_api.Update.GET_CREDENTIALS,
+        {url :authUrl, redirect :stateObj.redirect});
+    this.options_.connector.setOnCredentials(continuation);
   }
-  return false;
-}
 
-Chrome_oauth.prototype.launchAuthFlow = function(authUrl, stateObj, continuation) {
-  connector.sendToUI(uProxy.Update.GET_CREDENTIALS,
-                    {url :authUrl, redirect :stateObj.redirect});
-  connector.setOnCredentials((result) => {
-    continuation(result);
-  });
-};
+}  // class Chrome_oauth
+
+export = Chrome_oauth;

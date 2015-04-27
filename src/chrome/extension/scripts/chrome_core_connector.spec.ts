@@ -1,8 +1,15 @@
-/// <reference path='chrome_core_connector.ts' />
-/// <reference path='../../../generic_ui/scripts/core_connector.ts' />
-/// <reference path='../../../generic_ui/scripts/ui.ts' />
-/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
+/// <reference path='../../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import ChromeCoreConnector = require('./chrome_core_connector');
+import ChromeBrowserApi = require('./chrome_browser_api');
+import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import UI = require('../../../generic_ui/scripts/ui');
+import chrome_api = require('../../../interfaces/chrome');
+import ChromeMessage = chrome_api.ChromeMessage;
+import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
+import browser_connector = require('../../../interfaces/browser_connector');
+
+var ui :UI.UserInterface;
 
 // Mock for the Chrome App's port as if the App actually exists.
 var mockAppPort = () => {
@@ -28,7 +35,8 @@ var chromeBrowserApi :ChromeBrowserApi;
 describe('core-connector', () => {
   chromeBrowserApi = jasmine.createSpyObj('ChromeBrowserApi',
     ['bringUproxyToFront',
-    'showNotification']);
+     'showNotification',
+     'on']);
 
   var chromeCoreConnector :ChromeCoreConnector;
   chromeCoreConnector = new ChromeCoreConnector();
@@ -40,6 +48,7 @@ describe('core-connector', () => {
   beforeEach(() => {
     ui = new UI.UserInterface(core, chromeBrowserApi);
     spyOn(console, 'log');
+    spyOn(console, 'warn');
   });
 
   it('attempts chrome.runtime.connect().', () => {
@@ -76,31 +85,31 @@ describe('core-connector', () => {
   var connectToApp = () : Promise<void> => {
     // Does not contain expect statements since the testing of this
     // behaviour is done in the next test.
-    var acker = null;
+    var acker :Function;
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
-    spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
-      if (null !== acker) {
+    spyOn(port.onMessage, 'addListener').and.callFake((handler :Function) => {
+      if (acker) {
         return;
       }
       acker = handler;
     });
-    spyOn(port, 'postMessage').and.callFake((msg) => {
+    spyOn(port, 'postMessage').and.callFake((msg :Object) => {
       if (acker) {
         acker(ChromeMessage.ACK);
       }
     });
-    spyOn(port.onDisconnect, 'addListener').and.callFake((f) => {
+    spyOn(port.onDisconnect, 'addListener').and.callFake((f :Function) => {
       disconnect = f;
     });
     return chromeCoreConnector.connect();
   };
 
   it('connects to App when present.', (done) => {
-    var acker = null;
+    var acker :Function;
     // A 'valid' chrome.runtime.Port indicates successful connection.
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
-    spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
-      if (null !== acker) {
+    spyOn(port.onMessage, 'addListener').and.callFake((handler :Function) => {
+      if (acker) {
         expect(handler).toEqual(chromeCoreConnector['receive_']);
         return;
       }
@@ -109,14 +118,14 @@ describe('core-connector', () => {
       acker = handler;
     });
     // Short-circuit postMessage to pretend Chrome App ACKS correctly.
-    spyOn(port, 'postMessage').and.callFake((msg) => {
+    spyOn(port, 'postMessage').and.callFake((msg :Object) => {
       expect(port.postMessage).toHaveBeenCalledWith(ChromeMessage.CONNECT);
       expect(acker).not.toBeNull();
       acker(ChromeMessage.ACK);
     });
 
     // Capture the disconnection fulfillment or next spec.
-    spyOn(port.onDisconnect, 'addListener').and.callFake((f) => {
+    spyOn(port.onDisconnect, 'addListener').and.callFake((f :Function) => {
       disconnect = f;
     });
 
@@ -130,10 +139,10 @@ describe('core-connector', () => {
       expect(chromeCoreConnector.status.connected).toEqual(true);
       // Check that onUpdate callbacks were successfully sent to app.
       expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
-        cmd: 'on', type: uProxy.Update.COMMAND_FULFILLED
+        cmd: 'on', type: uproxy_core_api.Update.COMMAND_FULFILLED
       });
       expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
-        cmd: 'on', type: uProxy.Update.COMMAND_REJECTED
+        cmd: 'on', type: uproxy_core_api.Update.COMMAND_REJECTED
       });
       expect(chrome.browserAction['setIcon']).toHaveBeenCalledWith(
         {
@@ -205,13 +214,13 @@ describe('core-connector', () => {
   // specs.
   it('reconnects to App when it returns.', (done) => {
     var port = mockAppPort();
-    var acker = null;
+    var acker :Function = null;
     spyOn(chrome.runtime, 'connect').and.returnValue(port);
-    spyOn(port.onMessage, 'addListener').and.callFake((handler) => {
+    spyOn(port.onMessage, 'addListener').and.callFake((handler :Function) => {
       if (null !== acker) { return; }
       acker = handler;
     });
-    spyOn(port, 'postMessage').and.callFake((msg) => {
+    spyOn(port, 'postMessage').and.callFake((msg :Object) => {
       acker(ChromeMessage.ACK);
     });
     // Spy the queue flusher for the next spec.
@@ -230,8 +239,8 @@ describe('core-connector', () => {
   });
 
   it('flushes the queue correctly.', () => {
-    var flushed = [];
-    spyOn(chromeCoreConnector, 'send').and.callFake((payload) => {
+    var flushed :browser_connector.Payload[] = [];
+    spyOn(chromeCoreConnector, 'send').and.callFake((payload :browser_connector.Payload) => {
       flushed.push(payload);
     });
     chromeCoreConnector.flushQueue();
@@ -244,12 +253,12 @@ describe('core-connector', () => {
 
   it('onUpdate calls send.', () => {
     spyOn(chromeCoreConnector, 'send');
-    // TODO: Cannot use the uProxy.Update enum until the 'common' communications
-    // chromeCoreConnector.onUpdate(uProxy.Update.ALL, () => {});
+    // TODO: Cannot use the uproxy_core_api.Update enum until the 'common' communications
+    // chromeCoreConnector.onUpdate(uproxy_core_api.Update.ALL, () => {});
     // typescript file is ready.
     // expect(chromeCoreConnector['send']).toHaveBeenCalledWith({
       // cmd: 'on',
-      // type: uProxy.Update.ALL
+      // type: uproxy_core_api.Update.ALL
     // });
   });
 
