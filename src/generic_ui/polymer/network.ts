@@ -4,15 +4,19 @@
 
 import ui_constants = require('../../interfaces/ui');
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
 Polymer({
   connect: function() {
-    ui_context.ui.login(this.networkName).then(() => {
+    ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // Fire an update-view event, which root.ts listens for.
       this.fire('update-view', {view: ui_constants.View.ROSTER});
-      ui_context.ui.bringUproxyToFront();
+      ui.bringUproxyToFront();
     }).catch((e :Error) => {
-      ui_context.ui.showNotification('There was a problem signing in to ' + this.networkName + '.  Please try again.');
+      ui.showNotification('There was a problem signing in to ' + this.networkName + '.  Please try again.');
       console.warn('Did not log in ', e);
     });
   },

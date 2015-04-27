@@ -5,6 +5,10 @@ import ui_constants = require('../../interfaces/ui');
 import net = require('../../../../third_party/uproxy-networking/net/net.types');
 import user_interface = require('../scripts/ui');
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
 Polymer({
   aborted: false, // did the user manually cancel the last connection
   ready: function() {
@@ -18,10 +22,10 @@ Polymer({
     };
     // Expose global ui object and UI module in this context. This allows the
     // hidden? watch for the get/give toggle to actually update.
-    this.ui = ui_context.ui;
+    this.ui = ui;
     this.ui_constants = ui_constants;
     this.GettingState = social.GettingState;
-    this.model = ui_context.model;
+    this.model = model;
   },
   start: function() {
     if (!this.instance.isOnline) {
@@ -33,7 +37,7 @@ Polymer({
     console.log('[polymer] calling core.start(', this.path, ')');
 
     this.aborted = false;
-    ui_context.core.start(this.path).then((endpoint :net.Endpoint) => {
+    core.start(this.path).then((endpoint :net.Endpoint) => {
       console.log('[polymer] received core.start promise fulfillment.');
       console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
       this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
@@ -43,8 +47,8 @@ Polymer({
         // if the failure is because of a user action, do nothing
         return;
       }
-      ui_context.ui.toastMessage = user_interface.GET_FAILED_MSG + this.user.name;
-      ui_context.ui.bringUproxyToFront();
+      ui.toastMessage = user_interface.GET_FAILED_MSG + this.user.name;
+      ui.bringUproxyToFront();
       console.error('Unable to start proxying ', e);
       this.fire('set-trying-to-get', {isTryingToGet: false});
     });
@@ -53,6 +57,6 @@ Polymer({
     this.fire('set-trying-to-get', {isTryingToGet: false});
     this.aborted = true;
     console.log('[polymer] calling core.stop()');
-    ui_context.core.stop();
+    core.stop();
   }
 });
