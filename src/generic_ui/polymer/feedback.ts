@@ -15,7 +15,7 @@ Polymer({
   },
   sendFeedback: function() {
     this.$.sendingFeedbackDialog.open();
-    browserified_exports.ui.sendFeedback({
+    ui_context.ui.sendFeedback({
       email: this.email,
       feedback: this.feedback,
       logs: this.$.logCheckbox.checked,
@@ -57,7 +57,7 @@ Polymer({
     this.ui.openTab('generic_ui/view-logs.html');
   },
   ready: function() {
-    this.ui = browserified_exports.ui;
-    this.model = browserified_exports.model;
+    this.ui = ui_context.ui;
+    this.model = ui_context.model;
   }
 });

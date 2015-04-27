@@ -13,13 +13,13 @@ Polymer({
       console.error('Invalid call to setState: ' + state);
       return;
     }
-    browserified_exports.ui.splashState = state;
+    ui_context.ui.splashState = state;
   },
   next: function() {
-    this.setState(browserified_exports.ui.splashState + 1);
+    this.setState(ui_context.ui.splashState + 1);
   },
   prev: function() {
-    this.setState(browserified_exports.ui.splashState - 1);
+    this.setState(ui_context.ui.splashState - 1);
   },
   copypaste: function() {
     this.fire('core-signal', { name: 'copypaste-init' });
@@ -28,7 +28,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-feedback'});
   },
   ready: function() {
-    this.ui = browserified_exports.ui;
-    this.model = browserified_exports.model;
+    this.ui = ui_context.ui;
+    this.model = ui_context.model;
   }
 });
