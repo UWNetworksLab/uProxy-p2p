@@ -80,8 +80,10 @@
       border-top: 1px solid rgb(221, 221, 221);
       text-transform: uppercase;
     }
-    .uproxy-logo {
+    #logo {
       margin-bottom: 1em;
+      width: 114px;
+      height: 114px;
     }
     .prevArrow {
       position: absolute;
@@ -100,7 +102,7 @@
 
     <div vertical layout id='intro1' hidden?='{{SPLASH_STATES.INTRO!==ui.splashState}}'>
       <div class='view' flex>
-        <img class='uproxy-logo' src='../icons/smiley.png'>
+        <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
           uProxy helps you share your access to the internet or get internet
