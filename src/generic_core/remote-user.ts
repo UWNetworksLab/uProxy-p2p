@@ -86,7 +86,6 @@ var log :logging.Log = new logging.Log('remote-user');
      */
     constructor(public network :social.Network,
                 public userId  :string) {
-      log.debug('New user', userId);
       this.name = 'pending';
       this.profile = {
         userId: this.userId,
@@ -119,7 +118,6 @@ var log :logging.Log = new logging.Log('remote-user');
       this.name = profile.name;
       this.fulfillNameReceived_(this.name);
       this.profile = profile;
-      log.debug('Updating user', this.userId);
       this.saveToStorage();
       this.notifyUI();
     }

@@ -198,7 +198,6 @@ import ui = ui_connector.connector;
       if (!this.isNewFriend_(userId)) {
         log.error('Cannot add already existing user', userId);
       }
-      log.debug('added user to roster', userId);
       var newUser = new remote_user.User(this, userId);
       this.roster[userId] = newUser;
       return newUser;
@@ -349,7 +348,7 @@ import ui = ui_connector.connector;
       if (userId == this.myInstance.userId) {
         // TODO: we may want to verify that our status is ONLINE before
         // sending out any instance messages.
-        log.info('Received own XMPP profile', profile);
+        log.info('Received own UserProfile', profile);
 
         // Update UI with own information.
         var userProfileMessage :social.UserProfileMessage = {
@@ -368,7 +367,7 @@ import ui = ui_connector.connector;
       }
       // Otherwise, this is a remote contact. Add them to the roster if
       // necessary, and update their profile.
-      log.debug('Received XMPP profile for other user', profile);
+      log.debug('Received UserProfile for other user', profile);
       this.getOrAddUser_(userId).update(profile);
     }
 

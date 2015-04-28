@@ -377,13 +377,13 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     // replaces the values with the prefix + a counter.
     // e.g.
     //   jsonFieldReplace(
-    //       '{"name":"Alice"}...{"name":"Bob"}...Alice...Bob...',
+    //       '{"name":"Alice"}...{\\"name\\":\\"Bob\\"}...Alice...Bob...',
     //        'name', 'NAME_');
     // will return:
-    //   '{"name":"NAME_1"}...{"name":"NAME_2"}...NAME_1...NAME_2...'
+    //   '{"name":"NAME_1"}...{\\"name\\":\\"NAME_2\\"}...NAME_1...NAME_2...'
     var jsonFieldReplace = (text :string, key :string, prefix :string)
         : string => {
-      var re = new RegExp('"' + key + '":"([^"]*)"', 'g');
+      var re = new RegExp('\\\\*"' + key + '\\\\*":\\\\*"([^\\\\"]+)\\\\*"', 'g');
       var matches :string[];
       var uniqueValueSet :{[value :string] :Boolean} = {};
       while (matches = re.exec(text)) {
@@ -401,9 +401,8 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
 
     text = jsonFieldReplace(text, 'name', 'NAME_');
     text = jsonFieldReplace(text, 'userId', 'USER_ID_');
-    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
-    text = text.replace(/"imageData":"[^"]*"/g, '"imageData":"IMAGE_DATA"');
-    text = text.replace(/"url":"[^"]*"/g, '"url":"URL"');
+    text = jsonFieldReplace(text, 'imageData', 'IMAGE_DATA_');
+    text = jsonFieldReplace(text, 'url', 'URL_');
 
     // Replace any emails that may have been missed when replacing userIds.
     // Email regex taken from regular-expressions.info
