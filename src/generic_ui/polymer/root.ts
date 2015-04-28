@@ -5,6 +5,10 @@ import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
 interface button_description {
   text :string;
   signal :string;
@@ -27,16 +31,16 @@ Polymer({
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
     // this event.
-    if (detail.view == ui_types.View.ROSTER && ui_context.ui.view == ui_types.View.SPLASH) {
+    if (detail.view == ui_types.View.ROSTER && ui.view == ui_types.View.SPLASH) {
       this.fire('core-signal', {name: "login-success"});
-      if (!ui_context.model.globalSettings.hasSeenWelcome) {
+      if (!model.globalSettings.hasSeenWelcome) {
         this.statsDialogOrBubbleOpen = true;
         this.$.statsDialog.toggle();
       }
       this.closeSettings();
       this.$.modeTabs.updateBar();
     }
-    ui_context.ui.view = detail.view;
+    ui.view = detail.view;
   },
   statsIconClicked: function() {
     this.$.mainPanel.openDrawer();
@@ -46,26 +50,26 @@ Polymer({
   },
   rosterView: function() {
     console.log('rosterView called');
-    ui_context.ui.view = ui_types.View.ROSTER;
+    ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
-    ui_context.model.globalSettings.mode = ui_types.Mode.GET;
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.mode = ui_types.Mode.GET;
+    core.updateGlobalSettings(model.globalSettings);
   },
   setShareMode: function() {
-    ui_context.model.globalSettings.mode = ui_types.Mode.SHARE;
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.mode = ui_types.Mode.SHARE;
+    core.updateGlobalSettings(model.globalSettings);
   },
   closedWelcome: function() {
-    ui_context.model.globalSettings.hasSeenWelcome = true;
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.hasSeenWelcome = true;
+    core.updateGlobalSettings(model.globalSettings);
   },
   closedSharing: function() {
-    ui_context.model.globalSettings.hasSeenSharingEnabledScreen = true;
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.hasSeenSharingEnabledScreen = true;
+    core.updateGlobalSettings(model.globalSettings);
   },
   dismissCopyPasteError: function() {
-    ui_context.ui.copyPasteError = ui_types.CopyPasteError.NONE;
+    ui.copyPasteError = ui_types.CopyPasteError.NONE;
   },
   openDialog: function(e :Event, detail :dialog_description) {
     /* 'detail' parameter holds the data that was passed when the open-dialog
@@ -97,17 +101,17 @@ Polymer({
   },
   ready: function() {
     // Expose global ui object and UI module in this context.
-    this.ui = ui_context.ui;
+    this.ui = ui;
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
-    this.model = ui_context.model;
+    this.model = model;
     this.closeToastTimeout = null;
-    if (ui_context.ui.browserApi.browserSpecificElement){
-      var browserCustomElement = document.createElement(ui_context.ui.browserApi.browserSpecificElement);
+    if (ui.browserApi.browserSpecificElement){
+      var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
     }
-    if (ui_context.ui.view == ui_types.View.ROSTER &&
-        !ui_context.model.globalSettings.hasSeenWelcome) {
+    if (ui.view == ui_types.View.ROSTER &&
+        !model.globalSettings.hasSeenWelcome) {
       this.statsDialogOrBubbleOpen = true;
       this.$.statsDialog.open();
     }
@@ -137,18 +141,18 @@ Polymer({
     } else {
       // setting the value is taken care of in the polymer binding, we just need
       // to sync the value to core
-      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+      core.updateGlobalSettings(model.globalSettings);
     }
   },
   signalToFireChanged: function() {
-    if (ui_context.ui.signalToFire != '') {
-      this.fire('core-signal', {name: ui_context.ui.signalToFire});
-      ui_context.ui.signalToFire = '';
+    if (ui.signalToFire != '') {
+      this.fire('core-signal', {name: ui.signalToFire});
+      ui.signalToFire = '';
     }
   },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
-    ui_context.ui.toastMessage = null;
+    ui.toastMessage = null;
   },
   messageNotNull: function(toastMessage :string) {
     // Whether the toast is shown is controlled by if ui.toastMessage
@@ -162,7 +166,7 @@ Polymer({
     return false;
   },
   openTroubleshoot: function() {
-    if (this.stringMatches(ui_context.ui.toastMessage, user_interface.GET_FAILED_MSG)) {
+    if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
       this.troubleshootTitle = "Unable to get access";
     } else {
       this.troubleshootTitle = "Unable to share access";

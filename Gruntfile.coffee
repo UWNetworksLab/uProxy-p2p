@@ -39,6 +39,10 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
+  'vulcanize:chromeDisconnectedInline'
+  'vulcanize:chromeDisconnectedCsp'
+  'vulcanize:chromeViewLogsInline'
+  'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
   'browserify:chromeVulcanized'
@@ -58,6 +62,10 @@ taskManager.add 'build_firefox', [
   'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
+  'vulcanize:firefoxDisconnectedInline'
+  'vulcanize:firefoxDisconnectedCsp'
+  'vulcanize:firefoxViewLogsInline'
+  'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
   'browserify:firefoxContext'
   'browserify:firefoxVulcanized'
@@ -221,6 +229,30 @@ finishVulcanized = (basePath) ->
       pattern: /<script src=\"[a-zA-Z_./]+third_party\/bower\/([^"]+)"><\/script>/
       replacement: '<script src="../lib/$1"></script>'
     }]
+
+vulcanizeInline = (src, dest) ->
+  options:
+    inline: true
+    excludes:
+      scripts: [
+        'polymer.js'
+      ]
+  files: [{
+    src: src
+    dest: dest
+  }]
+
+vulcanizeCsp = (src, dest) ->
+  options:
+    csp: true
+    excludes:
+      scripts: [
+        'polymer.js'
+      ]
+  files: [{
+    src: src
+    dest: dest
+  }]
 
 compileTypescript = (files) ->
   src: files.concat('!**/*.d.ts')
@@ -619,61 +651,61 @@ module.exports = (grunt) ->
 
     vulcanize:
       chromeExtInline:
-        options:
-          inline: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: chromeExtDevPath + '/generic_ui/polymer/root.html'
-          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            chromeExtDevPath + '/generic_ui/polymer/root.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html')
       chromeExtCsp:
-        options:
-          csp: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
-          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized.html'
-        }]
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized.html')
       chromeAppInline:
-        options: { inline: true }
-        files: [{
-          src: chromeAppDevPath + '/polymer/ext-missing.html'
-          dest: 'build/dev/uproxy/chrome/app/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            chromeAppDevPath + '/polymer/ext-missing.html',
+            chromeAppDevPath + '/polymer/vulcanized-inline.html')
       chromeAppCsp:
-        options: { csp: true }
-        files: [{
-          src: chromeAppDevPath + '/polymer/vulcanized-inline.html'
-          dest: 'build/dev/uproxy/chrome/app/polymer/vulcanized.html'
-        }]
+        vulcanizeCsp(
+            chromeAppDevPath + '/polymer/vulcanized-inline.html',
+            chromeAppDevPath + '/polymer/vulcanized.html')
       firefoxInline:
-        options:
-          inline: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: firefoxDevPath + '/data/generic_ui/polymer/root.html'
-          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/root.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html')
       firefoxCsp:
-        options:
-          csp: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
-          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html'
-        }]
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
+      chromeDisconnectedInline:
+          vulcanizeInline(
+              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
+              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
+      chromeDisconnectedCsp:
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
+      firefoxDisconnectedInline:
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
+      firefoxDisconnectedCsp:
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
+      chromeViewLogsInline:
+        vulcanizeInline(
+            chromeExtDevPath + '/generic_ui/polymer/logs.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html')
+      chromeViewLogsCsp:
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs.html')
+      firefoxViewLogsInline:
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/logs.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html')
+      firefoxViewLogsCsp:
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs.html')
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------

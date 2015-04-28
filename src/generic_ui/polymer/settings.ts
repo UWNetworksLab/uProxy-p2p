@@ -1,10 +1,14 @@
 /// <reference path='./context.d.ts' />
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
 Polymer({
   displayAdvancedSettings: false,
   logOut: function() {
-    ui_context.ui.logout({name: ui_context.model.onlineNetwork.name,
-                                   userId: ui_context.model.onlineNetwork.userId}).then(() => {
+    ui.logout({name: model.onlineNetwork.name,
+                                   userId: model.onlineNetwork.userId}).then(() => {
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
@@ -13,7 +17,7 @@ Polymer({
     });
   },
   restart: function() {
-    ui_context.core.restart();
+    core.restart();
   },
   toggleAdvancedSettings: function() {
     this.displayAdvancedSettings = !this.displayAdvancedSettings;
@@ -25,16 +29,16 @@ Polymer({
     }
   },
   setStunServer: function() {
-    ui_context.model.globalSettings.stunServers = [{urls: [this.stunServer]}];
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.stunServers = [{urls: [this.stunServer]}];
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;
     }
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
-    ui_context.model.globalSettings.stunServers = [];
-    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    model.globalSettings.stunServers = [];
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmNewServer.hidden) {
       this.$.confirmNewServer.hidden = true;
     }
@@ -44,7 +48,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-feedback'});
   },
   ready: function() {
-    this.ui = ui_context.ui;
-    this.model = ui_context.model;
+    this.ui = ui;
+    this.model = model;
   }
 });
