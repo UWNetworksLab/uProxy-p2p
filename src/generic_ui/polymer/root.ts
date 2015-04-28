@@ -131,7 +131,7 @@ Polymer({
       this.model.globalSettings.mode = ui_types.Mode.GET;
       this.fire('open-dialog', {
         heading: 'Sharing Unavailable',
-        message: 'Oops! Unfortunately, due to a bug introduced in Firefox 37, sharing from Firefox currently does not work. You can track the issue at bugzil.la/1157766. We hope this will be fixed soon, but in the mean time, the best workaround is to try the uProxy extension for Chrome.',
+        message: 'Oops! You\'re using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome.',
         buttons: [{text: 'Close', dismissive: true}]
       });
     } else {
