@@ -661,11 +661,11 @@ module.exports = (grunt) ->
       chromeAppInline:
         vulcanizeInline(
             chromeAppDevPath + '/polymer/ext-missing.html',
-            'build/dev/uproxy/chrome/app/polymer/vulcanized-inline.html')
+            chromeAppDevPath + '/polymer/vulcanized-inline.html')
       chromeAppCsp:
         vulcanizeCsp(
             chromeAppDevPath + '/polymer/vulcanized-inline.html',
-            'build/dev/uproxy/chrome/app/polymer/vulcanized.html')
+            chromeAppDevPath + '/polymer/vulcanized.html')
       firefoxInline:
         vulcanizeInline(
             firefoxDevPath + '/data/generic_ui/polymer/root.html',
