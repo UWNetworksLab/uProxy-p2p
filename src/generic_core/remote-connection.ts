@@ -198,6 +198,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
           },
           false
       ).then((endpoint :net.Endpoint) => {
+        log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
         this.stateRefresh_();
         return endpoint;
