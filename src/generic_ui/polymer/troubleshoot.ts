@@ -17,7 +17,7 @@ Polymer({
   },
   getNatType: function() {
     this.analyzingNetwork = true;
-    browserified_exports.core.getNatType().then((natType :string) => {
+    ui_context.core.getNatType().then((natType :string) => {
       this.natType = natType;
       if (natType === 'SymmetricNAT') {
         this.natImpact = 'very likely';

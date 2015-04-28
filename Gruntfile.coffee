@@ -39,6 +39,10 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
+  'vulcanize:chromeDisconnectedInline'
+  'vulcanize:chromeDisconnectedCsp'
+  'vulcanize:chromeViewLogsInline'
+  'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
   'browserify:chromeContext'
   'browserify:chromeVulcanized'
@@ -58,6 +62,10 @@ taskManager.add 'build_firefox', [
   'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
+  'vulcanize:firefoxDisconnectedInline'
+  'vulcanize:firefoxDisconnectedCsp'
+  'vulcanize:firefoxViewLogsInline'
+  'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
   'browserify:firefoxContext'
   'browserify:firefoxVulcanized'
@@ -222,6 +230,30 @@ finishVulcanized = (basePath) ->
       replacement: '<script src="../lib/$1"></script>'
     }]
 
+vulcanizeInline = (src, dest) ->
+  options:
+    inline: true
+    excludes:
+      scripts: [
+        'polymer.js'
+      ]
+  files: [{
+    src: src
+    dest: dest
+  }]
+
+vulcanizeCsp = (src, dest) ->
+  options:
+    csp: true
+    excludes:
+      scripts: [
+        'polymer.js'
+      ]
+  files: [{
+    src: src
+    dest: dest
+  }]
+
 compileTypescript = (files) ->
   src: files.concat('!**/*.d.ts')
   options:
@@ -244,6 +276,8 @@ module.exports = (grunt) ->
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
+
+    clean: ['build/dev', '.tscache']
 
     #-------------------------------------------------------------------------
     copy: {
@@ -539,8 +573,15 @@ module.exports = (grunt) ->
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
-      chromeExtMain: Rule.browserify 'chrome/extension/scripts/background'
-      chromeContext: Rule.browserify 'chrome/extension/generic_ui/scripts/context'
+      chromeExtMain: Rule.browserify('chrome/extension/scripts/background',
+        browserifyOptions:
+          standalone: 'ui_context'
+      )
+      chromeContext: Rule.browserify('chrome/extension/generic_ui/scripts/context',
+        browserifyOptions:
+          standalone: 'ui_context'
+      )
+
       chromeVulcanized: Rule.browserify('chrome/extension/generic_ui/polymer/vulcanized', {})# no exports from this
       firefoxContext:
         src: [
@@ -549,7 +590,7 @@ module.exports = (grunt) ->
         dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
         options:
           browserifyOptions:
-            standalone: 'browserified_exports'
+            standalone: 'ui_context'
       firefoxVulcanized: Rule.browserify('firefox/data/generic_ui/polymer/vulcanized', {})# no exports from this
 
       chromeExtensionCoreConnector: Rule.browserify 'chrome/extension/scripts/chrome_core_connector'
@@ -610,63 +651,61 @@ module.exports = (grunt) ->
 
     vulcanize:
       chromeExtInline:
-        options:
-          inline: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: chromeExtDevPath + '/generic_ui/polymer/root.html'
-          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            chromeExtDevPath + '/generic_ui/polymer/root.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html')
       chromeExtCsp:
-        options:
-          csp: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html'
-          dest: chromeExtDevPath + '/generic_ui/polymer/vulcanized.html'
-        }]
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized.html')
       chromeAppInline:
-        options: { inline: true }
-        files: [{
-          src: chromeAppDevPath + '/polymer/ext-missing.html'
-          dest: 'build/dev/uproxy/chrome/app/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            chromeAppDevPath + '/polymer/ext-missing.html',
+            chromeAppDevPath + '/polymer/vulcanized-inline.html')
       chromeAppCsp:
-        options: { csp: true }
-        files: [{
-          src: chromeAppDevPath + '/polymer/vulcanized-inline.html'
-          dest: 'build/dev/uproxy/chrome/app/polymer/vulcanized.html'
-        }]
+        vulcanizeCsp(
+            chromeAppDevPath + '/polymer/vulcanized-inline.html',
+            chromeAppDevPath + '/polymer/vulcanized.html')
       firefoxInline:
-        options:
-          inline: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: firefoxDevPath + '/data/generic_ui/polymer/root.html'
-          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
-        }]
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/root.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html')
       firefoxCsp:
-        options:
-          csp: true
-          excludes:
-            scripts: [
-              'polymer.js'
-            ]
-        files: [{
-          src: firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html'
-          dest: firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html'
-        }]
-
-    clean: ['build/dev', '.tscache']
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
+      chromeDisconnectedInline:
+          vulcanizeInline(
+              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
+              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
+      chromeDisconnectedCsp:
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
+      firefoxDisconnectedInline:
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
+      firefoxDisconnectedCsp:
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
+      chromeViewLogsInline:
+        vulcanizeInline(
+            chromeExtDevPath + '/generic_ui/polymer/logs.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html')
+      chromeViewLogsCsp:
+        vulcanizeCsp(
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs-inline.html',
+            chromeExtDevPath + '/generic_ui/polymer/vulcanized-view-logs.html')
+      firefoxViewLogsInline:
+        vulcanizeInline(
+            firefoxDevPath + '/data/generic_ui/polymer/logs.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html')
+      firefoxViewLogsCsp:
+        vulcanizeCsp(
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs-inline.html',
+            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-view-logs.html')
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------

@@ -9,13 +9,13 @@ Polymer({
   saveDescription: function() {
     this.model.globalSettings.description = this.descriptionInput;
     this.editing = false;
-    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
   },
   cancelEditing: function() {
     this.editing = false;
   },
   ready: function() {
-    this.model = browserified_exports.model;
+    this.model = ui_context.model;
     this.editing = false;
     this.descriptionInput = '';
   }

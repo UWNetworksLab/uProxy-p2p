@@ -17,9 +17,9 @@ Polymer({
     }
   },
   ready: function() {
-    this.ui = browserified_exports.ui;
+    this.ui = ui_context.ui;
     this.ui_constants = ui_constants;
-    this.model = browserified_exports.model;
+    this.model = ui_context.model;
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
     this.isTryingToGet = false;
@@ -44,7 +44,7 @@ Polymer({
       action: action
     };
     console.log('[polymer] consent command', command)
-    browserified_exports.core.modifyConsent(command);
+    ui_context.core.modifyConsent(command);
   },
 
   // Proxy UserActions.

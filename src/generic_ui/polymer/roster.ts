@@ -9,14 +9,14 @@ Polymer({
   ready: function() {
     console.log('initializing roster');
 
-    this.ui = browserified_exports.ui;
+    this.ui = ui_context.ui;
     this.ui_constants = ui_constants;
-    this.model = browserified_exports.model;
+    this.model = ui_context.model;
   },
   loadContacts: function() {
     // If no contacts have loaded, show the animation for a total of 5 seconds,
     // and then display the "no online friends" message.
-    if (!browserified_exports.model.onlineNetwork.hasContacts) {
+    if (!ui_context.model.onlineNetwork.hasContacts) {
       this.loadingContacts = true;
       setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
     }

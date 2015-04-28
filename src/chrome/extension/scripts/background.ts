@@ -72,7 +72,12 @@ function initUI() : user_interface.UserInterface {
   chromeBrowserApi = new ChromeBrowserApi();
   // TODO (lucyhe): Make sure that the "install" event isn't missed if we
   // are adding the listener after the event is fired.
-  chrome.runtime.onInstalled.addListener(() => {
+  chrome.runtime.onInstalled.addListener((details :chrome.runtime.InstalledDetails) => {
+    if (details.reason !== 'install') {
+      // we only want to launch the window on the first install
+      return;
+    }
+
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
         // Do not open the extension when it's installed if the user is
         // going through the inline install flow.

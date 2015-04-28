@@ -13,8 +13,8 @@ import browser_api = require('../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../third_party/uproxy-networking/net/net.types');
 import noreConnector = require('./core_connector');
-import user = require('./user');
-import User = user.User;
+import user_module = require('./user');
+import User = user_module.User;
 import social = require('../../interfaces/social');
 
 // Singleton model for data bindings.
@@ -196,7 +196,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
-      if (parseInt(firefoxMatches[1], 10) >= 37) {
+      if (parseInt(firefoxMatches[1], 10) === 37) {
         this.isSharingDisabled = true;
       }
     }

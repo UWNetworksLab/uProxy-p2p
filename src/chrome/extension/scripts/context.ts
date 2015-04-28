@@ -4,12 +4,17 @@
 import ui_constants = require('../../../interfaces/ui');
 import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
+import ChromeCoreConnector = require('./chrome_core_connector');
 
-var panel :UiGlobals = (<any>chrome.extension.getBackgroundPage()).browserified_exports;
-export var ui :user_interface.UserInterface= panel.ui;
-export var core :CoreConnector = panel.core;
-export var chromeCoreConnector = (<any>panel).chromeCoreConnector;
-export var model :user_interface.Model = panel.model;
+interface ChromeGlobals extends UiGlobals {
+  chromeCoreConnector :ChromeCoreConnector;
+}
+
+var ui_context :ChromeGlobals = (<any>chrome.extension.getBackgroundPage()).ui_context;
+export var ui :user_interface.UserInterface= ui_context.ui;
+export var core :CoreConnector = ui_context.core;
+export var chromeCoreConnector = ui_context.chromeCoreConnector;
+export var model :user_interface.Model = ui_context.model;
 ui.browser = 'chrome';
 
 console.log('Loaded dependencies for Chrome Extension.');

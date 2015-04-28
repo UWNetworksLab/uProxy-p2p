@@ -1,10 +1,14 @@
 /// <reference path='./context.d.ts' />
 
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
 Polymer({
   displayAdvancedSettings: false,
   logOut: function() {
-    browserified_exports.ui.logout({name: browserified_exports.model.onlineNetwork.name,
-                                   userId: browserified_exports.model.onlineNetwork.userId}).then(() => {
+    ui.logout({name: model.onlineNetwork.name,
+                                   userId: model.onlineNetwork.userId}).then(() => {
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
@@ -13,7 +17,7 @@ Polymer({
     });
   },
   restart: function() {
-    browserified_exports.core.restart();
+    core.restart();
   },
   toggleAdvancedSettings: function() {
     this.displayAdvancedSettings = !this.displayAdvancedSettings;
@@ -25,16 +29,16 @@ Polymer({
     }
   },
   setStunServer: function() {
-    browserified_exports.model.globalSettings.stunServers = [{urls: [this.stunServer]}];
-    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
+    model.globalSettings.stunServers = [{urls: [this.stunServer]}];
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;
     }
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
-    browserified_exports.model.globalSettings.stunServers = [];
-    browserified_exports.core.updateGlobalSettings(browserified_exports.model.globalSettings);
+    model.globalSettings.stunServers = [];
+    core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmNewServer.hidden) {
       this.$.confirmNewServer.hidden = true;
     }
@@ -44,7 +48,7 @@ Polymer({
     this.fire('core-signal', {name: 'open-feedback'});
   },
   ready: function() {
-    this.ui = browserified_exports.ui;
-    this.model = browserified_exports.model;
+    this.ui = ui;
+    this.model = model;
   }
 });
