@@ -81,9 +81,6 @@
       margin-right: 5px;
       font-size: 10px;
     }
-    paper-checkbox::shadow #checkboxLabel {
-      font-size: 12px;
-    }
     paper-checkbox::shadow #checkboxContainer {
       margin-left: 1px;
       width: 16px;
@@ -184,7 +181,7 @@
           <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
         </div>
         <div id='metricsCheckbox'>
-          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats reporting enabled'></paper-checkbox>
+          <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='Anonymous stats enabled'></paper-checkbox>
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link>
