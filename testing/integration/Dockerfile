@@ -13,20 +13,8 @@ RUN apt-get update -qq -y && apt-get install -qq -y \
   xvfb \
   unzip \
   nodejs nodejs-dev npm \
-  openssh-server \
   git \
   default-jre vnc4server aptitude  
-
-# Install sshd (might be useful)
-# (pulled from https://docs.docker.com/examples/running_ssh_service/)
-RUN apt-get update && apt-get install -y openssh-server
-RUN mkdir /var/run/sshd
-RUN echo 'root:screencast' | chpasswd
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-# SSH login fix. Otherwise user is kicked off after login
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-ENV NOTVISIBLE "in users profile"
-RUN echo "export VISIBLE=now" >> /etc/profile
 
 
 # Install Chrome Beta
@@ -39,24 +27,13 @@ RUN wget -q https://chromedriver.storage.googleapis.com/$(wget -qO- https://chro
 RUN unzip -qq chromedriver_linux64.zip -d /usr/bin && rm chromedriver_linux64.zip
 RUN chromedriver --version
 
-# Install Firefox Beta
-RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 247510BE
-RUN echo 'deb http://ppa.launchpad.net/ubuntu-mozilla-daily/firefox-aurora/ubuntu trusty main' >> /etc/apt/sources.list.d/firefox.list
-RUN echo 'deb-src http://ppa.launchpad.net/ubuntu-mozilla-daily/firefox-aurora/ubuntu trusty main'  >> /etc/apt/sources.list.d/firefox.list
-RUN apt-get update -qq -y
-RUN apt-get install -qq -y firefox
-
 # delete all the apt list files since they're big and get stale quickly
 RUN rm -rf /var/lib/apt/lists/*
 
 # Freedom-specific installs & hacks
-RUN ln -s /usr/bin/nodejs /usr/bin/node; npm install -g grunt-cli; 
+RUN ln -s /usr/bin/nodejs /usr/bin/node; npm install -g grunt-cli;  npm install -g bower;
 
-RUN mkdir /src
-COPY src /src
-RUN chmod +x /src/*
+RUN mkdir /src; cd /src ; git checkout git@github.com:uProxy/uproxy-networking.git ; cd uproxy-networking; ./setup.sh install ; grunt ; grunt samples
 
-# Run sshd.
-EXPOSE 22
-EXPOSE 5900
-CMD ["/usr/sbin/sshd", "-D"]
+EXPOSE 9000 9999
+
