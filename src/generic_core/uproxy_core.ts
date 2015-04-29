@@ -383,15 +383,21 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     //   '{"name":"NAME_1"}...{\\"name\\":\\"NAME_2\\"}...NAME_1...NAME_2...'
     var jsonFieldReplace = (text :string, key :string, prefix :string)
         : string => {
-      var re = new RegExp('\\\\*"' + key + '\\\\*":\\\\*"([^\\\\"]+)\\\\*"', 'g');
+      // Allow for escaped JSON to be matched, e.g. {\"name\":\"Bob\"}
+      var re = new RegExp('\\\\*"' + key + '\\\\*":\\\\*"([^"]+)"', 'g');
       var matches :string[];
       var uniqueValueSet :{[value :string] :Boolean} = {};
       while (matches = re.exec(text)) {
+        matches[1].replace(/\\+$/, '');  // Removing trailing \
         uniqueValueSet[matches[1]] = true;  // Add userId, name, etc to set.
       }
       var index = 1;
       for (var value in uniqueValueSet) {
-        text = text.replace(new RegExp(value, 'g'), prefix + index);
+        // Replace all occurances of value in text.
+        // We need to convert value to a RegExp for global replacement, which
+        // means replacing every \ with \\
+        var escapedRegex = new RegExp(value.replace(/\\/g, '\\\\'), 'g');
+        text = text.replace(escapedRegex, prefix + index);
         ++index;
       }
       return text;
