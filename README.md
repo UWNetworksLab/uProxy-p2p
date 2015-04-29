@@ -31,9 +31,9 @@ Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwS
 Note: you will either need to run these as root, or set the directories they
 modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/local)
 
-- [node](http://nodejs.org/) and the Node Package Manaager (NPM):
+- [node](http://nodejs.org/) and npm (Node's package manager):
 
-    - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
+    - On Mac with Brew, you can do: `brew install node` (You may need to update your brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - On Ubuntu, you can do `apt-get install nodejs`.
     - We also need to create symlink ( if we are not running legacy node) <br>
