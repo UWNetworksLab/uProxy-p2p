@@ -373,39 +373,49 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
   }
 
   private formatLogs_ = (logs :string[]) :string => {
-    // replace the emails with consistent tags throughout the logs
-    var emails :string[] = [];
-    var names :string[] = [];
-
-    var emailReplacer = (email :string) :string => {
-      var id = _.indexOf(emails, email);
-      if (id === -1) {
-        id = emails.length;
-        emails.push(email);
+    // Searches through text for all JSON fields of the specified key, then
+    // replaces the values with the prefix + a counter.
+    // e.g.
+    //   jsonFieldReplace(
+    //       '{"name":"Alice"}...{\\"name\\":\\"Bob\\"}...Alice...Bob...',
+    //        'name', 'NAME_');
+    // will return:
+    //   '{"name":"NAME_1"}...{\\"name\\":\\"NAME_2\\"}...NAME_1...NAME_2...'
+    var jsonFieldReplace = (text :string, key :string, prefix :string)
+        : string => {
+      // Allow for escaped JSON to be matched, e.g. {\"name\":\"Bob\"}
+      var re = new RegExp('\\\\*"' + key + '\\\\*":\\\\*"([^"]+)"', 'g');
+      var matches :string[];
+      var uniqueValueSet :{[value :string] :Boolean} = {};
+      while (matches = re.exec(text)) {
+        matches[1].replace(/\\+$/, '');  // Removing trailing \
+        uniqueValueSet[matches[1]] = true;  // Add userId, name, etc to set.
       }
-
-      return 'EMAIL_' + id;
-    }
-
-    var nameReplacer = (match :string, pre :string, name :string, post :string):string => {
-      var id = _.indexOf(names, name);
-      if (id === -1) {
-        id = names.length;
-        names.push(name);
+      var index = 1;
+      for (var value in uniqueValueSet) {
+        // Replace all occurances of value in text.
+        var escapedRegex = new RegExp(
+            // Escape all special regex characters, from
+            // http://stackoverflow.com/questions/3446170/
+            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),
+            'g');
+        text = text.replace(escapedRegex, prefix + index);
+        ++index;
       }
-
-      return pre + 'NAME_' + id + post;
+      return text;
     }
 
     var text = logs.join('\n');
 
-    // email regex taken from regular-expressions.info
+    text = jsonFieldReplace(text, 'name', 'NAME_');
+    text = jsonFieldReplace(text, 'userId', 'USER_ID_');
+    text = jsonFieldReplace(text, 'imageData', 'IMAGE_DATA_');
+    text = jsonFieldReplace(text, 'url', 'URL_');
+
+    // Replace any emails that may have been missed when replacing userIds.
+    // Email regex taken from regular-expressions.info
     text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
-                        emailReplacer);
-    text = text.replace(/("name":")([^"]*)(")/g, nameReplacer);
-    text = text.replace(/data:image\/.+;base64,[A-Za-z0-9+\/=]+/g, 'IMAGE_DATA');
-    text = text.replace(/"imageData":"[^"]*"/g, '"imageData":"IMAGE_DATA"');
-    text = text.replace(/"url":"[^"]*"/g, '"url":"URL"');
+                        'EMAIL_ADDRESS');
     return text;
   }
 }  // class uProxyCore
