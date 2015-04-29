@@ -396,7 +396,9 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
         // Replace all occurances of value in text.
         // We need to convert value to a RegExp for global replacement, which
         // means replacing every \ with \\
-        var escapedRegex = new RegExp(value.replace(/\\/g, '\\\\'), 'g');
+        var escapedRegex = new RegExp(
+            value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"),
+            'g');
         text = text.replace(escapedRegex, prefix + index);
         ++index;
       }
