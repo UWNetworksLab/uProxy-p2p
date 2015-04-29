@@ -133,12 +133,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
 
   // --- CoreApi interface requirements (sending COMMANDS) ---
 
-  // TODO: Reconnect this hook, which while we're testing, sends a new instance
-  // message anytime we click on the user in the UI.
-  sendInstance = (clientId :string) => {
-    this.sendCommand(uproxy_core_api.Command.SEND_INSTANCE_HANDSHAKE_MESSAGE, clientId);
-  }
-
   modifyConsent = (command:uproxy_core_api.ConsentCommand) => {
     console.log('Modifying consent.', command);
     this.sendCommand(uproxy_core_api.Command.MODIFY_CONSENT, command);

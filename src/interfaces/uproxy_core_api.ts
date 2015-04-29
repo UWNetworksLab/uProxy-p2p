@@ -52,7 +52,6 @@ export enum Command {
   RESTART,
   LOGIN,
   LOGOUT,
-  SEND_INSTANCE_HANDSHAKE_MESSAGE,
   START_PROXYING,
   STOP_PROXYING,
   MODIFY_CONSENT,       // TODO: make this work with the consent piece.
