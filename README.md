@@ -59,6 +59,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
  1. In the root uProxy directory, run:
    * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).  This will also install the static content dependencies (mostly Polymer components).
+   * `./setup.sh install` - this will set up build tools and third-party dependencies.
    * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
