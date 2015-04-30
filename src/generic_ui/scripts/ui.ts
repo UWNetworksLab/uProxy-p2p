@@ -880,4 +880,9 @@ export class UserInterface implements ui_constants.UiApi {
       return doAttempts();
     });
   }
+
+  public setMode = (mode :ui_constants.Mode) => {
+    model.globalSettings.mode = mode;
+    this.core.updateGlobalSettings(model.globalSettings);
+  }
 }  // class UserInterface
