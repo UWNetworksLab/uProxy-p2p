@@ -73,8 +73,8 @@ Note that if any local dependencies have changed (i.e. changes to bower dependen
 These are the steps to try uProxy in the Chrome browser.
 
 - In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled
-- Click 'Load unpacked extension...' and select `build/dev/chrome/app`
-- Click 'Load unpacked extension...' and select `build/dev/chrome/extension`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/app`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/extension`
 
 You need both the uProxy Chrome App and the uProxy Extension.
 
@@ -88,7 +88,7 @@ These are the steps to try uProxy in the Firefox browser.
 Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
     - A quick way to get started is to download/extract the zip mentioned in "Prerequisites"
 
-- Run `cd build/dev/firefox`
+- Run `cd build/dev/uproxy/firefox`
 
 - Run `cfx run` and Firefox should launch with the uProxy add-on installed
 
