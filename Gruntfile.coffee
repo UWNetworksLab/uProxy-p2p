@@ -674,22 +674,6 @@ module.exports = (grunt) ->
         vulcanizeCsp(
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-      chromeDisconnectedInline:
-          vulcanizeInline(
-              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
-              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      chromeDisconnectedCsp:
-        vulcanizeCsp(
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
-      firefoxDisconnectedInline:
-        vulcanizeInline(
-            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      firefoxDisconnectedCsp:
-        vulcanizeCsp(
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
       chromeViewLogsInline:
         vulcanizeInline(
             chromeExtDevPath + '/generic_ui/polymer/logs.html',

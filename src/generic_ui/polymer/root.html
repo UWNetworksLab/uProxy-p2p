@@ -10,7 +10,6 @@
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='confirm.html'>
 <link rel="import" href='logs.html'>
 <link rel='import' href='copypaste.html'>
 <link rel='import' href='bubble.html'>
@@ -342,6 +341,9 @@
         Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.
       </p>
       <paper-button affirmative class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
+      <p id='proxyReverted' hidden>
+        Proxy settings reverted. You are now using your local Internet connection.
+      </p>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

@@ -41,11 +41,6 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
     chromeBrowserApi.bringUproxyToFront();
   }
 
-  // handle requests to stop proxying
-  if (request && request.stopProxying) {
-    ui.stopGettingInUiAndConfig(false);
-  }
-
   // handle requests to get logs
   if (request && request.getLogs) {
     core.getLogs().then((logs) => {
