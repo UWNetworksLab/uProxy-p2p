@@ -781,8 +781,6 @@ export class UserInterface implements ui_constants.UiApi {
   }
 
   public reconnect = (network :string) => {
-    if()
-
     // TODO: this reconnect logic has some issues:
     // 1. It only attempts to re-use the last access_token, and doesn't
     //    use refresh_tokens to get a new access_token when they expire.
