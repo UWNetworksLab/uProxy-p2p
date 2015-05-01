@@ -104,6 +104,16 @@ taskManager.add 'test_chrome', [
   'jasmine:chrome_extension'
 ]
 
+taskManager.add 'integration_test', [
+  'build_chrome'
+  'copy:integration'
+  'ts:integration_specs'
+  'ts:integration_freedom_module'
+  'browserify:integrationSpec'
+  'browserify:integrationFreedomModule'
+  'jasmine_chromeapp'
+]
+
 taskManager.add 'everything', [
   'build'
   'test'
@@ -502,11 +512,11 @@ module.exports = (grunt) ->
           # Copy compiled Chrome App code, required for integration tests
           expand: true, cwd: chromeAppDevPath
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
-          dest: 'build/compile-src/integration'
+          dest: devBuildPath + '/integration'
         }, {
           expand: true, cwd: 'src/integration/'
-          src: ['gtalk_credentials.js', 'integration.json']
-          dest: 'build/compile-src/integration'
+          src: ['integration.json']
+          dest: devBuildPath + '/integration'
         }]
     }  # copy
 
@@ -570,6 +580,14 @@ module.exports = (grunt) ->
         devBuildPath + '/firefox/**/*.ts'
       ]
 
+      integration_specs: compileTypescript [
+      	devBuildPath + '/integration/*.ts'
+      	'!' + devBuildPath + '/integration/test_connection.ts'
+      ]
+      integration_freedom_module: compileTypescript [
+      	devBuildPath + '/integration/test_connection.ts'
+      ]
+
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -608,6 +626,8 @@ module.exports = (grunt) ->
 
       genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
       genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
+      integrationSpec: Rule.browserifySpec 'integration/core'
+      integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -619,19 +639,19 @@ module.exports = (grunt) ->
 
     jasmine_chromeapp: {
       all: {
-        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-              'build/compile-src/integration/scripts/uproxy.js',
-              'build/compile-src/integration/gtalk_credentials.js',
-              'build/compile-src/integration/**/*.js',
-              'build/compile-src/integration/**/*.json',
-              'build/compile-src/integration/core.spec.js']
+        files: [
+          {
+            cwd: devBuildPath + '/integration/',
+            src: ['**/*'],
+            dest: './',
+            expand: true
+          }
+        ],
+        scripts: ['freedom-for-chrome/freedom-for-chrome.js',
+                  'core.spec.static.js'
+        ],
         options: {
-          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-                  'build/compile-src/integration/scripts/uproxy.js',
-                  'build/compile-src/integration/scripts/uproxy-lib/arraybuffers/arraybuffers.js',
-                  'build/compile-src/integration/gtalk_credentials.js',
-                  'build/compile-src/integration/core.spec.js'
-          ],
+          outdir: 'build/dev/uproxy/integration/'
           # Uncomment this for debugging
           # keepRunner: true,
         }
