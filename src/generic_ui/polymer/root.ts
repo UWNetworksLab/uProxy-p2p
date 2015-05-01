@@ -151,7 +151,7 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    ui.stopGettingInUiAndConfig(false);
+    this.async(() => { this.ui.stopGettingInUiAndConfig(false); });
   },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
