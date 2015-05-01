@@ -556,6 +556,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (askUser) {
       this.browserApi.setIcon(ERROR_ICON);
+      this.bringUproxyToFront();
       this.disconnectedWhileProxying = true;
       return;
     }

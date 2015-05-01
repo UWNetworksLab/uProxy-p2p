@@ -115,10 +115,10 @@
       #rosterContainer {
         height: 100%;
       }
-      #rosterContainer > #roster-panel {
+      #rosterContainer #roster-panel {
         overflow: auto;
       }
-      #roster-panel > uproxy-roster {
+      #rosterContainer uproxy-roster {
         position: relative;
         overflow-y: auto;
         display: block;
@@ -128,7 +128,7 @@
         height: 58px;
         background-color: #283230;
       }
-      .statusRow > .statusText {
+      .statusRow .statusText {
         color: #fff;
         padding-left: 20px;
         padding-right: 20px;
@@ -138,7 +138,7 @@
         overflow: hidden;
         font-size: 14px;
       }
-      .statusText > core-icon {
+      .statusRow core-icon {
         padding-right: 20px;
         color: #0EC5AF;
       }
@@ -150,6 +150,9 @@
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      .core-overlay-backdrop {
+        z-index: 1001;
+      }
       uproxy-action-dialog paper-button {
         background-color: #009688; /* teal */
         color: white;
@@ -158,9 +161,6 @@
       uproxy-faq-link .linkText {
         text-decoration: underline;
         color: rgba(0,0,0,0.40);
-      }
-      .core-overlay-backdrop {
-        z-index: 1001;
       }
       #disconnectDialog {
         text-align: center;
