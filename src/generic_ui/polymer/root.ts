@@ -151,11 +151,7 @@ Polymer({
     }
   },
   revertProxySettings: function() {
-    // This needs to be done asynchronously because otherwise
-    // two actions are trying to update the opened state of the dialog
-    // at the same time: 1) tapping the "Continue..." button in the dialog
-    // 2) setting disconnectedWhileProxying to false in ui.ts
-    this.async(() => { this.ui.stopGettingInUiAndConfig(false); });
+    this.ui.stopGettingInUiAndConfig(false);
   },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
