@@ -71,12 +71,6 @@ taskManager.add 'build_firefox', [
   'browserify:firefoxVulcanized'
 ]
 
-taskManager.add 'build_firefox_xpi', [
-  'build_firefox'
-  'mozilla-addon-sdk'
-  'mozilla-cfx-xpi:dist'
-]
-
 # --- Testing tasks ---
 taskManager.add 'test_core', [
   'base'
@@ -120,6 +114,13 @@ taskManager.add 'test', [
 taskManager.add 'build', [
   'build_chrome'
   'build_firefox'
+]
+
+taskManager.add 'dist', [
+  'build'
+  'copy:dist'
+  'mozilla-addon-sdk'
+  'mozilla-cfx-xpi:dist'
 ]
 
 taskManager.add 'default', [
@@ -354,16 +355,84 @@ module.exports = (grunt) ->
       # Copy releveant files for distribution.
       dist:
         files: [
-          {
-              nonull: true,
-              expand: true,
-              cwd: devBuildPath,
-              src: ['**/*',
-                    '!**/*.spec.js',
-                    '!**/*.spec.*.js',
-                    '!samples/**/*',],
-              dest: 'build/dist/',
-              onlyIf: 'modified'
+          { # Chrome extension
+            expand: true
+            cwd: chromeExtDevPath
+            src: [
+              'manifest.json'
+
+              'bower/webcomponentsjs/webcomponents.min.js'
+              'bower/polymer/polymer.js'
+
+              'generic_ui/*.html'
+              'generic_ui/polymer/vulcanized*.{html,js}'
+              '!generic_ui/polymer/vulcanized*inline.html'
+              '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+
+              'generic_ui/scripts/context.static.js'
+              'scripts/background.static.js'
+              '!**/*spec*'
+
+              # extra components we use
+              'generic_ui/fonts/*'
+              'generic_ui/icons/*'
+              'icons/*'
+              '_locales/**'
+            ]
+            dest: 'build/dist/chrome/extension'
+          }
+          { # Chrome app
+            expand: true
+            cwd: chromeAppDevPath
+            src: [
+              'manifest.json'
+              '*.html'
+
+              'bower/webcomponentsjs/webcomponents.min.js'
+
+              # UI for not-connected
+              'polymer/vulcanized.{html,js}'
+
+              # actual scripts that run things
+              'freedom-*/*'
+              '**/freedom-module.json'
+              '**/*.static.js'
+              '!**/*spec*'
+
+              'icons/*'
+              'fonts/*'
+              '_locales/**'
+            ]
+            dest: 'build/dist/chrome/app'
+          }
+          { # Firefox
+            expand: true
+            cwd: firefoxDevPath
+            src: [
+              'package.json'
+
+              # addon sdk scripts
+              'lib/**/*.js'
+
+              'data/freedom-*/*'
+              'data/**/freedom-module.json'
+              'data/**/*.static.js'
+              '!**/*spec*'
+
+              'data/bower/webcomponentsjs/webcomponents.min.js'
+              'data/bower/polymer/polymer.js'
+
+              'data/generic_ui/*.html'
+              'data/generic_ui/polymer/vulcanized*.{html,js}'
+              '!data/generic_ui/polymer/vulcanized*inline.html'
+              '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+
+              'data/fonts/*'
+              'data/icons/*'
+              'data/generic_ui/fonts/*'
+              'data/generic_ui/icons/*'
+            ]
+            dest: 'build/dist/firefox'
           }
         ]
 
@@ -646,8 +715,8 @@ module.exports = (grunt) ->
       'dist':
         options:
           'mozilla-addon-sdk': 'latest'
-          extension_dir: 'build/dev/uproxy/firefox'
-          dist_dir: 'build/dist/'
+          extension_dir: 'build/dist/firefox'
+          dist_dir: 'build/dist'
 
     vulcanize:
       chromeExtInline:
