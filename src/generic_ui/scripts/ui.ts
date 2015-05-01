@@ -139,6 +139,7 @@ export class UserInterface implements ui_constants.UiApi {
 
   // Instance you are getting access from.
   // Null if you are not getting access.
+  public instanceTryingToGetAccessFrom :string = null;
   private instanceGettingAccessFrom_ :string = null;
 
   // The instances you are giving access to.
@@ -562,6 +563,51 @@ export class UserInterface implements ui_constants.UiApi {
     this.browserApi.stopUsingProxy();
   }
 
+  public startGettingFromInstance = (instanceId :string) :Promise<void> => {
+    var user = this.mapInstanceIdToUser_[instanceId];
+
+    var path = <social.InstancePath>{
+      network: {
+        name: user.network.name,
+        userId: user.network.userId
+      },
+      userId: user.userId,
+      instanceId: instanceId
+    };
+
+    this.instanceTryingToGetAccessFrom = instanceId;
+
+    return this.core.start(path).then((endpoint :net.Endpoint) => {
+      this.instanceTryingToGetAccessFrom = null;
+
+      this.startGettingInUiAndConfig(instanceId, endpoint);
+    }).catch((e :Error) => {
+      // this is only an error if we are still trying to get access from the
+      // instance
+      if (this.instanceTryingToGetAccessFrom !== instanceId) {
+        return;
+      }
+
+      this.toastMessage = GET_FAILED_MSG + user.name;
+      this.bringUproxyToFront();
+      return Promise.reject(e);
+    });
+  }
+
+  public stopGettingFromInstance = (instanceId :string) :void => {
+    if (instanceId === this.instanceTryingToGetAccessFrom) {
+      // aborting pending connection
+      this.instanceTryingToGetAccessFrom = null;
+    } else if (instanceId === this.instanceGettingAccessFrom_) {
+      // instance will be unset in eventual callback from core
+    } else {
+      // we have no idea what's going on
+      console.error('Attempting to stop getting from unknown instance');
+    }
+
+    this.core.stop();
+  }
+
   public startGettingInUi = () => {
     if (this.isGivingAccess()) {
       this.browserApi.setIcon(GETTING_SHARING_ICON);
@@ -879,5 +925,10 @@ export class UserInterface implements ui_constants.UiApi {
 
       return doAttempts();
     });
+  }
+
+  public setMode = (mode :ui_constants.Mode) => {
+    model.globalSettings.mode = mode;
+    this.core.updateGlobalSettings(model.globalSettings);
   }
 }  // class UserInterface
