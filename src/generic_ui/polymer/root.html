@@ -176,6 +176,16 @@
       .core-overlay-backdrop {
         z-index: 1001;
       }
+      #disconnectDialog h1 {
+        font-size: 1.25em;
+      }
+      #disconnectDialog img {
+        height: 50px;
+        width: 50px;
+      }
+      #disconnectDialog #errorIconContainer {
+        text-align: center;
+      }
     </style>
 
     <core-signals on-core-signal-close-settings="{{ closeSettings }}"></core-signals>
@@ -310,7 +320,7 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy">
       <p>
         This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
         <uproxy-faq-link anchor='doesUproxyLogData'>
@@ -320,6 +330,18 @@
       <p>Would you like to enable anonymous metrics collection?</p>
       <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
       <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
+    </uproxy-action-dialog>
+
+    <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
+        opened="{{ ui.disconnectedWhileProxying }}" autoCloseDisabled="true">
+      <div id="errorIconContainer">
+        <img src='../icons/128_error.png'>
+      </div>
+      <h1>Oops! You've been disconnected from your friend in uProxy.</h1>
+      <p>
+        Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.
+      </p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
