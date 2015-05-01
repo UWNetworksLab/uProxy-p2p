@@ -669,6 +669,9 @@ export class UserInterface implements ui_constants.UiApi {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);
       } else {
+        if (this.instanceGettingAccessFrom_ != null) {
+          this.disconnectedWhileProxying = true;
+        }
         this.showNotification('You have been logged out of ' + network.name);
         this.view = ui_constants.View.SPLASH;
       }
