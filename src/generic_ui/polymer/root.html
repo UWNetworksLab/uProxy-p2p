@@ -150,6 +150,9 @@
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      uproxy-action-dialog::shadow #scroller {
+        overflow: visible;
+      }
       .core-overlay-backdrop {
         z-index: 1001;
       }
@@ -345,10 +348,6 @@
         </p>
       </div>
       <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
-      <p id='proxyReverted' hidden>
-        Proxy settings reverted. You are now using your local Internet connection.
-      </p>
-      <paper-button affirmative class='dialogButton' hidden>Okay</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
