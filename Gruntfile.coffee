@@ -39,8 +39,6 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
-  'vulcanize:chromeDisconnectedInline'
-  'vulcanize:chromeDisconnectedCsp'
   'vulcanize:chromeViewLogsInline'
   'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
@@ -62,8 +60,6 @@ taskManager.add 'build_firefox', [
   'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
-  'vulcanize:firefoxDisconnectedInline'
-  'vulcanize:firefoxDisconnectedCsp'
   'vulcanize:firefoxViewLogsInline'
   'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
@@ -674,22 +670,6 @@ module.exports = (grunt) ->
         vulcanizeCsp(
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-      chromeDisconnectedInline:
-          vulcanizeInline(
-              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
-              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      chromeDisconnectedCsp:
-        vulcanizeCsp(
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
-      firefoxDisconnectedInline:
-        vulcanizeInline(
-            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      firefoxDisconnectedCsp:
-        vulcanizeCsp(
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
       chromeViewLogsInline:
         vulcanizeInline(
             chromeExtDevPath + '/generic_ui/polymer/logs.html',

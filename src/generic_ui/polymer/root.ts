@@ -148,6 +148,9 @@ Polymer({
       ui.signalToFire = '';
     }
   },
+  revertProxySettings: function() {
+    this.ui.stopGettingInUiAndConfig(false);
+  },
   /* All functions below help manage paper-toast behaviour. */
   closeToast: function() {
     ui.toastMessage = null;
