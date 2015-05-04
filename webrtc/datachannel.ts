@@ -97,13 +97,17 @@ export class DataChannelClass implements DataChannel {
 
   public dataFromPeerQueue      :handler.Queue<Data,void>;
 
-  // The |toPeerDataQueue_| is chunked by the send call and conjection
+  // The |toPeerDataQueue_| is chunked by the send call and congestion
   // controlled by the handler this class sets.
   private toPeerDataQueue_        :handler.Queue<Data,void>;
   // This is the total number of bytes in all the ArrayBuffers in
   // toPeerDataQueue_.
   // TODO: Count bytes in strings as well.
   private toPeerDataBytes_        :number;
+
+  // This is an upper bound on |bufferedAmount|, which is updated
+  // (increased) on each call to send.  (However, these updates do not
+  // account for string messages.)
   private lastBrowserBufferedAmount_ :number;
 
   public onceOpened      :Promise<void>;
@@ -159,7 +163,7 @@ export class DataChannelClass implements DataChannel {
     });
     this.onceOpened.then(() => {
       this.isOpen_ = true;
-      this.conjestionControlSendHandler();
+      this.sendNext_();
     });
     this.onceClosed.then(() => {
         if(!this.isOpen_) {
@@ -254,15 +258,6 @@ export class DataChannelClass implements DataChannel {
       promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
     });
 
-    // This check is logically redundant with the check in
-    // conjestionControlSendHandler, but it triggers much sooner (synchronously
-    // during the call to send), which is valuable to reduce overshoot,
-    // especially in fast flows that create web worker scheduling anomalies.
-    if (this.toPeerDataBytes_ + this.lastBrowserBufferedAmount_
-        > PC_QUEUE_LIMIT) {
-      this.setOverflow_(true);
-    }
-
     // CONSIDER: can we change the interface to support not having the dummy
     // extra return at the end?
     return Promise.all(promises).then(() => { return; });
@@ -276,6 +271,7 @@ export class DataChannelClass implements DataChannel {
       } else if(data.buffer) {
         this.toPeerDataBytes_ -= data.buffer.byteLength;
         this.rtcDataChannel_.sendBuffer(data.buffer);
+        this.lastBrowserBufferedAmount_ += data.buffer.byteLength;
       } else {
         // Data is good when it meets the type expected of the Data. If type-
         // saftey is ensured at compile time, this should never happen.
@@ -288,7 +284,7 @@ export class DataChannelClass implements DataChannel {
       return Promise.reject(new Error(
           'Error in send: ' + JSON.stringify(e)));
     }
-    this.conjestionControlSendHandler();
+    this.sendNext_();
     return Promise.resolve<void>();
   }
 
@@ -300,37 +296,37 @@ export class DataChannelClass implements DataChannel {
     this.overflow_ = overflow;
   }
 
-  // TODO: make this timeout adaptive so that we keep the buffer as full as we
-  // can without wasting timeout callbacks. When DataChannels correctly has a
-  // callback for buffering, we don't need to do this anymore.
-  private conjestionControlSendHandler = () : void => {
+  private canSendMore_ = () : boolean => {
+    return this.isOpen_ && this.lastBrowserBufferedAmount_ < PC_QUEUE_LIMIT;
+  }
+
+  private sendNext_ = () : void => {
+    if (!this.canSendMore_()) {
+      this.setOverflow_(true);
+      this.waitForOverflowToClear_();
+      return;
+    }
+    if (this.toPeerDataQueue_.getLength() === 0) {
+      this.setOverflow_(false);
+    }
+    if (this.toPeerDataQueue_.isHandling()) {
+      log.error('Last packet handler should not still be present');
+      this.close();
+      return;
+    }
+    this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
+  }
+
+  private waitForOverflowToClear_ = () : void => {
     this.rtcDataChannel_.getBufferedAmount().then((bufferedAmount:number) => {
       this.lastBrowserBufferedAmount_ = bufferedAmount;
-      if(this.toPeerDataQueue_.isHandling()) {
-        log.error('Last packet handler should not still be present');
-        this.close();
-      }
 
-      if(bufferedAmount + CHUNK_SIZE > PC_QUEUE_LIMIT) {
-        this.setOverflow_(true);
-        if (!this.isOpen_) {
-          // The remote peer has closed the channel, so we should stop
-          // trying to drain the send buffer.
-          return;
-        }
-        setTimeout(this.conjestionControlSendHandler, 20);
-      } else {
-        if (this.toPeerDataQueue_.getLength() === 0) {
-          this.setOverflow_(false);
-        }
-        // This processes one block from the queue, which (in Chrome) is
-        // expected to be no larger than 4 KB.  We will then go through the
-        // whole loop again, including checking the buffered amount, before
-        // processing the next block.  This is inefficient because it
-        // introduces an extra IPC call per block; a more efficient
-        // implementation would check the available buffered amount, and
-        // then pull that many bytes off of the queue.
-        this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
+      if (this.canSendMore_()) {
+        this.sendNext_();
+      } else if (this.isOpen_) {
+        // TODO: Remove polling once https://code.google.com/p/webrtc/issues/detail?id=4613
+        // is resolved (adding an event to RTCDataChannel).
+        setTimeout(this.waitForOverflowToClear_, 20);
       }
     });
   }
