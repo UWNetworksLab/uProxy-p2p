@@ -53,12 +53,10 @@ Polymer({
     ui.view = ui_types.View.ROSTER;
   },
   setGetMode: function() {
-    model.globalSettings.mode = ui_types.Mode.GET;
-    core.updateGlobalSettings(model.globalSettings);
+    ui.setMode(ui_types.Mode.GET);
   },
   setShareMode: function() {
-    model.globalSettings.mode = ui_types.Mode.SHARE;
-    core.updateGlobalSettings(model.globalSettings);
+    ui.setMode(ui_types.Mode.SHARE);
   },
   closedWelcome: function() {
     model.globalSettings.hasSeenWelcome = true;
@@ -132,7 +130,7 @@ Polymer({
     if (this.ui.isSharingDisabled &&
         this.model.globalSettings.mode == ui_types.Mode.SHARE) {
       // Keep the mode on get and display an error dialog.
-      this.model.globalSettings.mode = ui_types.Mode.GET;
+      this.ui.setMode(ui_types.Mode.GET);
       this.fire('open-dialog', {
         heading: 'Sharing Unavailable',
         message: 'Oops! You\'re using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome.',

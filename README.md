@@ -59,6 +59,7 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
 
  1. In the root uProxy directory, run:
    * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).  This will also install the static content dependencies (mostly Polymer components).
+   * `./setup.sh install` - this will set up build tools and third-party dependencies.
    * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
@@ -72,8 +73,8 @@ Note that if any local dependencies have changed (i.e. changes to bower dependen
 These are the steps to try uProxy in the Chrome browser.
 
 - In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled
-- Click 'Load unpacked extension...' and select `build/dev/chrome/app`
-- Click 'Load unpacked extension...' and select `build/dev/chrome/extension`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/app`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/extension`
 
 You need both the uProxy Chrome App and the uProxy Extension.
 
@@ -87,7 +88,7 @@ These are the steps to try uProxy in the Firefox browser.
 Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
     - A quick way to get started is to download/extract the zip mentioned in "Prerequisites"
 
-- Run `cd build/dev/firefox`
+- Run `cd build/dev/uproxy/firefox`
 
 - Run `cfx run` and Firefox should launch with the uProxy add-on installed
 

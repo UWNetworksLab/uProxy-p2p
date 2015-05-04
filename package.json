@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -21,7 +21,7 @@
     "bower": "^1.4.1",
     "es6-promise": "^2.0.0",
     "freedom-for-chrome": "^0.4.11",
-    "freedom-for-firefox": "^0.6.7",
+    "freedom-for-firefox": "0.6.10",
     "freedom-social-firebase": "^0.0.12",
     "freedom-social-xmpp": "^0.3.6",
     "fs-extra": "^0.12.0",

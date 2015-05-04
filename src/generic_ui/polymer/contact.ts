@@ -1,8 +1,11 @@
 /// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+/// <reference path='../../../../third_party/typings/lodash/lodash.d.ts' />
 
 import ui_constants = require('../../interfaces/ui');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import user = require('../scripts/user');
+import _ = require('lodash');
 
 Polymer({
   contact: {
@@ -22,14 +25,10 @@ Polymer({
     this.model = ui_context.model;
     this.GettingConsentState = user.GettingConsentState;
     this.SharingConsentState = user.SharingConsentState;
-    this.isTryingToGet = false;
   },
   openLink: function(event :Event) {
     this.ui.browserApi.openTab(this.contact.url);
     event.stopPropagation();  // Don't toggle when link is clicked.
-  },
-  setIsTryingToGet: function(e :Event, data :{ isTryingToGet :boolean }) {
-    this.isTryingToGet = data.isTryingToGet;
   },
   // |action| is the string end for a uproxy_core_api.ConsentUserAction
   modifyConsent: function(action :uproxy_core_api.ConsentUserAction) {
@@ -62,5 +61,8 @@ Polymer({
     this.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER);
   },
   ignoreRequest: function() { this.modifyConsent(uproxy_core_api.ConsentUserAction.IGNORE_REQUEST) },
-  unignoreRequest: function() { this.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST) }
+  unignoreRequest: function() { this.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST) },
+  hasInstance: function(instanceId :string) {
+    return instanceId && _.contains(this.contact.allInstanceIds, instanceId);
+  },
 });
