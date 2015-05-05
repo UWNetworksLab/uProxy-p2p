@@ -33,11 +33,11 @@ var testConnection = (socksEndpoint :net.Endpoint) : Promise<Boolean> => {
   });
 }
 
-class AliceOAuthView extends oauth_view_mock.OAuthView {
+class AliceMockOAuth extends oauth_view_mock.MockOAuth {
   public refreshToken  = ALICE.REFRESH_TOKEN;
 }
 
-class BobOAuthView extends oauth_view_mock.OAuthView {
+class BobMockOAuth extends oauth_view_mock.MockOAuth {
   public refreshToken = BOB.REFRESH_TOKEN;
 }
 
@@ -53,12 +53,12 @@ describe('uproxy core', function() {
   it('loads uproxy', (done) => {
     // Ensure that aliceSocialInterface and bobSocialInterface are set.
     var alicePromise = freedom(uProxyFreedom,
-        {oauth: [AliceOAuthView], debug: 'log'})
+        {oauth: [AliceMockOAuth], debug: 'log'})
         .then(function(interface) {
       alice = interface();
     });
     var bobPromise = freedom(uProxyFreedom,
-        {oauth: [BobOAuthView], debug: 'log'})
+        {oauth: [BobMockOAuth], debug: 'log'})
         .then(function(interface) {
       bob = interface();
     });

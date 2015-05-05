@@ -4,7 +4,7 @@ var CLIENT_ID =
     '746567772449-mv4h0e34orsf6t6kkbbht22t9otijip0.apps.googleusercontent.com';
 var CLIENT_SECRET = 'M-EGTuFRaWLS5q_hygpJZMBu';
 
-export class OAuthView {
+export class MockOAuth {
   public refreshToken :string = null;
   public initiateOAuth = (redirectURIs :string[], continuation :Function) => {
     continuation({redirect: REDIRECT_URL, state: ''});
@@ -18,17 +18,15 @@ export class OAuthView {
       continuation(undefined, 'No refreshToken set.');
       return;
     }
-    return Helper.getAccessToken(this.refreshToken).then(function(accessToken) {
+    return this.getAccessToken(this.refreshToken).then(function(accessToken) {
       continuation(REDIRECT_URL + '?access_token=' + accessToken);
     }).catch(function(e) {
       continuation(undefined, 'Failed to get access token');
     });
   }
-}
 
-var Helper = {
   // Returns a Promise that fulfills with an access token.
-  getAccessToken: function(refreshToken :string) {
+  public getAccessToken = (refreshToken :string) => {
     return new Promise(function(fulfill, resolve) {
       var data = 'refresh_token=' + refreshToken +
           '&client_id=' + CLIENT_ID +
@@ -43,4 +41,4 @@ var Helper = {
       xhr.send(data);
     });
   }
-};  // end of Helper
+};  // end of MockOAuth
