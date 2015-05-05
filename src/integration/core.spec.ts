@@ -7,9 +7,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
 import net = require('../../../third_party/uproxy-networking/net/net.types');
 import credentials = require('./gtalk_credentials');
-import oauth_view_mock = require('./oauth_view_mock');
-
-import freedom_types = require('freedom.types');
+import mock_oauth = require('./mock_oauth');
 
 import ALICE = credentials.ALICE;
 import BOB = credentials.BOB;
@@ -33,19 +31,11 @@ var testConnection = (socksEndpoint :net.Endpoint) : Promise<Boolean> => {
   });
 }
 
-class AliceMockOAuth extends oauth_view_mock.MockOAuth {
-  public refreshToken  = ALICE.REFRESH_TOKEN;
-}
-
-class BobMockOAuth extends oauth_view_mock.MockOAuth {
-  public refreshToken = BOB.REFRESH_TOKEN;
-}
-
 describe('uproxy core', function() {
   (<any>jasmine).DEFAULT_TIMEOUT_INTERVAL = 10000;
   var uProxyFreedom = 'files/generic_core/freedom-module.json';
-  var alice :any//freedom_types.OnAndEmit<any,any>;
-  var bob :any//freedom_types.OnAndEmit<any,any>;
+  var alice :any;
+  var bob :any;
   var alicePath :Object;
   var bobPath :Object;
   var promiseId = 0;
@@ -53,12 +43,12 @@ describe('uproxy core', function() {
   it('loads uproxy', (done) => {
     // Ensure that aliceSocialInterface and bobSocialInterface are set.
     var alicePromise = freedom(uProxyFreedom,
-        {oauth: [AliceMockOAuth], debug: 'log'})
+        {oauth: [() => { return new mock_oauth.MockOAuth(ALICE.REFRESH_TOKEN) }], debug: 'log'})
         .then(function(interface) {
       alice = interface();
     });
     var bobPromise = freedom(uProxyFreedom,
-        {oauth: [BobMockOAuth], debug: 'log'})
+        {oauth: [() => { return new mock_oauth.MockOAuth(BOB.REFRESH_TOKEN) }], debug: 'log'})
         .then(function(interface) {
       bob = interface();
     });

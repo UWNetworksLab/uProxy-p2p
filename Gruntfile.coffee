@@ -513,10 +513,6 @@ module.exports = (grunt) ->
           expand: true, cwd: chromeAppDevPath
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
           dest: devBuildPath + '/integration'
-        }, {
-          expand: true, cwd: 'src/integration/'
-          src: ['integration.json']
-          dest: devBuildPath + '/integration'
         }]
     }  # copy
 

@@ -5,7 +5,9 @@ var CLIENT_ID =
 var CLIENT_SECRET = 'M-EGTuFRaWLS5q_hygpJZMBu';
 
 export class MockOAuth {
-  public refreshToken :string = null;
+  constructor(public refreshToken :string) {
+  }
+
   public initiateOAuth = (redirectURIs :string[], continuation :Function) => {
     continuation({redirect: REDIRECT_URL, state: ''});
     return true;
