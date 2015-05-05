@@ -395,7 +395,18 @@ module.exports = (grunt) ->
               'polymer/vulcanized.{html,js}'
 
               # actual scripts that run things
-              'freedom-*/*'
+              'freedom-for-chrome/freedom-for-chrome.js'
+              'freedom-social-xmpp/social.google.json'
+              'freedom-social-xmpp/socialprovider.js'
+              'freedom-social-xmpp/vcardstore.js'
+              'freedom-social-xmpp/node-xmpp-browser.js'
+              'freedom-social-xmpp/google-auth.js'
+              'freedom-social-firebase/social.firebase-facebook.json'
+              'freedom-social-firebase/firebase-shims.js'
+              'freedom-social-firebase/firebase.js'
+              'freedom-social-firebase/firebase-social-provider.js'
+              'freedom-social-firebase/facebook-social-provider.js'
+
               '**/freedom-module.json'
               '**/*.static.js'
               '!**/*spec*'
@@ -415,7 +426,18 @@ module.exports = (grunt) ->
               # addon sdk scripts
               'lib/**/*.js'
 
-              'data/freedom-*/*'
+              'data/freedom-for-firefox/freedom-for-firefox.jsm'
+              'data/freedom-social-xmpp/social.google.json'
+              'data/freedom-social-xmpp/socialprovider.js'
+              'data/freedom-social-xmpp/vcardstore.js'
+              'data/freedom-social-xmpp/node-xmpp-browser.js'
+              'data/freedom-social-xmpp/google-auth.js'
+              'data/freedom-social-firebase/social.firebase-facebook.json'
+              'data/freedom-social-firebase/firebase-shims.js'
+              'data/freedom-social-firebase/firebase.js'
+              'data/freedom-social-firebase/firebase-social-provider.js'
+              'data/freedom-social-firebase/facebook-social-provider.js'
+
               'data/**/freedom-module.json'
               'data/**/*.static.js'
               '!**/*spec*'
