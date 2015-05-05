@@ -1,0 +1,21 @@
+{
+  "name": "core.tcpsocket wrapper integration tests",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "dependencies": {
+    "loggingcontroller": {
+      "url": "uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    }
+  },
+  "permissions": [
+    "core.tcpsocket"
+  ]
+}
