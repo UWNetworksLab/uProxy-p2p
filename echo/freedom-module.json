@@ -1,0 +1,22 @@
+{
+  "name": "TCP Echo Server",
+  "description": "Listen for incoming requests, and echo them back.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "dependencies": {
+    "loggingcontroller": {
+      "url": "../loggingprovider/freedom-module.json",
+      "api": "loggingcontroller"
+    },
+    "logginglistener": {
+      "url": "../loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    }
+  },
+  "permissions": [
+    "core.tcpsocket"
+  ]
+}
