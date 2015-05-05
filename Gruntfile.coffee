@@ -391,6 +391,7 @@ module.exports = (grunt) ->
               'bower/webcomponentsjs/webcomponents.min.js'
 
               # UI for not-connected
+              # This is not browserified so we use .js instead of .static.js
               'polymer/vulcanized.{html,js}'
 
               # actual scripts that run things
