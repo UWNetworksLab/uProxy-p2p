@@ -24,14 +24,6 @@ Polymer({
   contactsChanged: function() {
     var property = (this.mode == ui_constants.Mode.GET) ? 'isSharingWithMe' : 'isGettingFromMe';
     // TODO add typing for this to DefinitelyTyped
-    this.sortedContacts = (<any>_)(this.onlineContacts)
-        .concat(this.offlineContacts)
-        .sortByOrder([property, 'isOnline'], [false, false]).value();
-  },
-  offlineContactsChanged: function() {
-    this.contactsChanged();
-  },
-  onlineContactsChanged: function() {
-    this.contactsChanged();
+    this.sortedContacts = (<any>_).sortByOrder(this.contacts, [property, 'isOnline'], [false, false]);
   },
 });

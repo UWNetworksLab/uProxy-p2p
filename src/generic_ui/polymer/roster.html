@@ -94,32 +94,29 @@
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
           groupTitle='{{mode==ui_constants.Mode.GET ? "Offers" : "Requests"}}'
-          onlineContacts='{{ contacts.onlinePending }}'
-          offlineContacts='{{ contacts.offlinePending }}'
+          contacts='{{ contacts.pending }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
       <hr color="#eee"
-          hidden?='{{ ((contacts.onlinePending.length == 0 && contacts.offlinePending.length == 0)) || (contacts.onlineTrustedUproxy.length == 0 && contacts.offlineTrustedUproxy.length == 0) }}'></hr>
+          hidden?='{{ contacts.pending.length == 0 || contacts.trustedUproxy.length == 0 }}'></hr>
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
           groupTitle='{{mode==ui_constants.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
-          onlineContacts='{{ contacts.onlineTrustedUproxy }}'
-          offlineContacts='{{ contacts.offlineTrustedUproxy }}'
+          contacts='{{ contacts.trustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
       <hr color="#eee"
-          hidden?='{{ (contacts.onlineUntrustedUproxy.length == 0 && contacts.offlineUntrustedUproxy.length == 0) || ((contacts.onlineTrustedUproxy.length == 0 && contacts.offlineTrustedUproxy.length == 0) && (contacts.onlinePending.length == 0 && contacts.offlinePending.length == 0)) }}'></hr>
+          hidden?='{{ contacts.untrustedUproxy.length == 0 || (contacts.trustedUproxy.length == 0 && contacts.pending.length == 0) }}'></hr>
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
           groupTitle='Friends who have uProxy'
-          onlineContacts='{{ contacts.onlineUntrustedUproxy }}'
-          offlineContacts='{{ contacts.offlineUntrustedUproxy }}'
+          contacts='{{ contacts.untrustedUproxy }}'
           searchQuery='{{ searchQuery }}'
           mode='{{ mode }}'></uproxy-roster-group>
     </div>

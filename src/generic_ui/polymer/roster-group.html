@@ -2,7 +2,7 @@
 <link rel='import' href='contact.html'>
 
 <polymer-element name='uproxy-roster-group'
-    attributes='onlineContacts, offlineContacts, groupTitle, searchQuery, mode'>
+    attributes='contacts, groupTitle, searchQuery, mode'>
 
   <template>
     <style>
@@ -15,7 +15,7 @@
     </style>
 
     <div class='header'
-        hidden?='{{ onlineContacts.length == 0 && offlineContacts.length == 0 }}'>
+        hidden?='{{ contacts.length === 0 }}'>
         {{ groupTitle }}
     </div>
 

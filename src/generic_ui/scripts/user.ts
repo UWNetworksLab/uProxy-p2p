@@ -223,23 +223,22 @@ export class User implements social.BaseUser {
     }
 
     // Convert booleans into strings.
-    var isOnlineString = this.isOnline ? 'online' : 'offline';
-    var gettingTrustString = 'UntrustedUproxy';
+    var gettingTrustString = 'untrustedUproxy';
     if (isPendingForGetting) {
-      gettingTrustString = 'Pending';
+      gettingTrustString = 'pending';
     } else if (isTrustedForGetting) {
-      gettingTrustString = 'TrustedUproxy';
+      gettingTrustString = 'trustedUproxy';
     }
-    var sharingTrustString = 'UntrustedUproxy';
+    var sharingTrustString = 'untrustedUproxy';
     if (isPendingForSharing) {
-      sharingTrustString = 'Pending';
+      sharingTrustString = 'pending';
     } else if (isTrustedForSharing) {
-      sharingTrustString = 'TrustedUproxy';
+      sharingTrustString = 'trustedUproxy';
     }
 
     return {
-      getTab: isOnlineString + gettingTrustString,
-      shareTab: isOnlineString + sharingTrustString
+      getTab: gettingTrustString,
+      shareTab: sharingTrustString
     };
   }
 

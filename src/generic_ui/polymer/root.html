@@ -243,11 +243,11 @@
 
           <core-tooltip label='You are available for sharing.' position='left'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
-              hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+              hidden?='{{ model.contacts.shareAccessContacts.trustedUproxy.length === 0 }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && model.contacts.shareAccessContacts.trustedUproxy.length > 0 }}'>
             <h3>Sharing Enabled</h3>
             <p>This icon means you're available for sharing access with friends you've offered access to.</p>
           </uproxy-bubble>
@@ -255,17 +255,17 @@
           <div class='bottom fit'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>Get Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>Get Access</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>Share Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>Share Access</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.shareAccessContacts.pending.length }}
                 </span>
               </paper-tab>
             </paper-tabs>
