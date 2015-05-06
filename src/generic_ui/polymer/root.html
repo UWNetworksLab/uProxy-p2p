@@ -286,11 +286,13 @@
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
-                  contacts='{{model.contacts.getAccessContacts}}'>
+                  contacts='{{model.contacts.getAccessContacts}}'
+                  mode='{{ui_constants.Mode.GET}}'>
               </uproxy-roster>
               <uproxy-roster id='share-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
-                  contacts='{{model.contacts.shareAccessContacts}}'>
+                  contacts='{{model.contacts.shareAccessContacts}}'
+                  mode='{{ui_constants.Mode.SHARE}}'>
               </uproxy-roster>
             </div>
 
