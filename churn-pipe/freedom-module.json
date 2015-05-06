@@ -1,0 +1,71 @@
+{
+  "name": "Churn pipe",
+  "description": "Obfuscating network pipe.",
+  "app": {
+    "script": [
+      "freedom-module.static.js"
+    ]
+  },
+  "provides": [
+    "churnPipe"
+  ],
+  "api": {
+    "churnPipe": {
+      "bind": {
+        "type": "method",
+        "value": [
+          "string",
+          "number",
+          "string",
+          "number",
+          "string",
+          "buffer",
+          "string"
+        ]
+      },
+      "send": {
+        "type": "method",
+        "value": [
+          "buffer"
+        ]
+      },
+      "sendTo": {
+        "type": "method",
+        "value": [
+          "buffer",
+          {
+            "address": "string",
+            "port": "number"
+          }
+        ]
+      },
+      "getLocalEndpoint": {
+        "type": "method",
+        "value": [],
+        "ret": {
+          "address": "string",
+          "port": "number"
+        }
+      },
+      "message": {
+        "type": "event",
+        "value": {
+          "data": "buffer",
+          "source": {
+            "address": "string",
+            "port": "number"
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "logginglistener": {
+      "url": "../../uproxy-lib/loggingprovider/freedom-module.json",
+      "api": "logginglistener"
+    }
+  },
+  "permissions": [
+    "core.udpsocket"
+  ]
+}
