@@ -1,0 +1,80 @@
+{
+  "intro": {
+    "message": "هذه عينة التطبيق يحدد الجوارب إنشاء الوكلاء بين اثنين من المستخدمين. تبادل الرسائل الأولي يشير يحدث يدويا (على سبيل المثال، عبر البريد الإلكتروني أو الدردشة)، بينما يستخدم إنشاء الوكلاء لاحق متوافق مع WebRTC."
+  },
+  "giveAccess": {
+    "message": "منح حق الوصول"
+  },
+  "giveDescription": {
+    "message": "السماح لشخص لمشاركة اتصال الانترنت الخاص بك."
+  },
+  "getAccess": {
+    "message": "الوصول"
+  },
+  "getDescription": {
+    "message": "تجاوز الحجب عن طريق استخدام اتصال الإنترنت لشخص آخر."
+  },
+  "italian": {
+    "message": "Italiano"
+  },
+  "english": {
+    "message": "English"
+  },
+  "arabic": {
+    "message": "العربية"
+  },
+  "farsi": {
+    "message": "فارسی"
+  },
+  "pasteAndGenerateReply": {
+    "message": "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'إنشاء الرد \"."
+  },
+  "generateReply": {
+    "message": "توليد الرد"
+  },
+  "copyPasteAndSend": {
+    "message": "نسخ / لصق النص الكامل أعلاه وإرساله إلى الطرف الآخر."
+  },
+  "warning": {
+    "message": "تحذير: مراقب الذي يرى هذه الرسالة قد تكون قادرة على تحديد ما إذا كنت تستخدم uProxy، حتى إرسالها عبر قناة خاصة تثق به."
+  },
+  "bytesSent": {
+    "message": " وحدات البايت المرسلة إلى الطرف البعيد."
+  },
+  "bytesReceived": {
+    "message": " بايت الواردة من الطرف البعيد."
+  },
+  "generateHandshakeAndSend": {
+    "message": "انقر فوق الزر أدناه لإنشاء رسالة مصافحة لإرسالها إلى الطرف الآخر. هذه الرسالة بإعلام الطرف الآخر كيفية تحديد موقع لك على الشبكة. هذه المعلومات يمكن أن تنتهي بسرعة، لذلك تشرع إلا عند والطرف الآخر على استعداد."
+  },
+  "generate": {
+    "message": "انتج"
+  },
+  "pasteAndStartProxying": {
+    "message": "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'بدء إنشاء الوكلاء \"."
+  },
+  "startProxying": {
+    "message": "بدء إنشاء الوكلاء"
+  },
+  "proxyingStateNotYetAttempted" : {
+    "message" : "تقاسم الوضع: في انتظار إدخال المستخدم"
+  },
+  "proxyingStateConnecting" : {
+    "message" : "وضع مشاركة: في انتظار اتصال ..."
+  },
+  "proxyingStateStarted" : {
+    "message" : "وضع مشاركة: نشاطات"
+  },
+  "proxyingStateStopped" : {
+    "message" : "وضع مشاركة: توقف"
+  },
+  "proxyEndpoint" : {
+    "message" : " الجوارب وكيل الإصغاء"
+  },
+  "proxyEndpointUsageExample" : {
+    "message" : "الاستخدام سبيل المثال:"
+  },
+  "stopProxying" : {
+    "message" : "وقف إنشاء الوكلاء"
+  }
+}

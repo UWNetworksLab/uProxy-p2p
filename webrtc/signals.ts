@@ -1,3 +1,5 @@
+/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
+
 // This enum describes a simple signal message protocol for establishing P2P
 // connections. TODO: rename to more accurately describe the intended
 // abstraction: namely: INIT, DATA, END
