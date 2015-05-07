@@ -10,7 +10,6 @@
 <link rel="import" href='splash.html'>
 <link rel="import" href='roster.html'>
 <link rel="import" href='settings.html'>
-<link rel="import" href='confirm.html'>
 <link rel="import" href='logs.html'>
 <link rel='import' href='copypaste.html'>
 <link rel='import' href='bubble.html'>
@@ -30,9 +29,6 @@
         text-align: left;
         color: rgb(112, 112, 112);
       }
-      paper-tab {
-        cursor: pointer;
-      }
       paper-tabs::shadow #selectionBar {
         /*
          * we are seeing an issue with the bar when initially loading it where
@@ -41,6 +37,9 @@
          */
         width: 50%;
         background-color: #20F1DE;
+      }
+      paper-tab {
+        cursor: pointer;
       }
       paper-tab::shadow #ink {
         color: #20F1DE;
@@ -54,10 +53,10 @@
         text-transform: uppercase;
         opacity: 1 !important;
       }
-      .notSelected {
+      paper-tab .notSelected {
         opacity: 0.6;
       }
-      .tabNotificationNumber {
+      paper-tab .tabNotificationNumber {
         margin-left: 10px;
         margin-bottom: 1px;
         padding: 3px 6px;
@@ -66,7 +65,7 @@
         font-weight: 400;
         font-size: 10px;
       }
-      .withNotification {
+      paper-tab .withNotification {
         padding-left: 10px;
       }
       core-drawer-panel {
@@ -88,26 +87,26 @@
         padding: 0px;
         height: 60px;
       }
-      core-icon[icon="menu"] {
+      core-toolbar core-icon[icon="menu"] {
         margin: 0px 0px 0px 16px;
         opacity: 0.6;
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
         transition: all 0.23s !important;
       }
-      core-icon[icon="menu"]:hover {
+      core-toolbar core-icon[icon="menu"]:hover {
         opacity: 1;
         cursor: pointer;
       }
-      #title {
+      core-toolbar #title {
         font-size: 20px;
         margin: 0px 0px 0px 36px;
       }
-      core-icon.status {
+      core-toolbar core-icon.status {
         cursor: pointer;
         color: #006A5A;
       }
-      #sharingEnabledIcon {
+      core-toolbar #sharingEnabledIcon {
         margin: 0px 15px 0px  0px;
       }
       #settings {
@@ -116,22 +115,20 @@
       #rosterContainer {
         height: 100%;
       }
-      .roster {
+      #rosterContainer #roster-panel {
+        overflow: auto;
+      }
+      #rosterContainer uproxy-roster {
         position: relative;
         overflow-y: auto;
         display: block;
       }
-      #roster-panel {
-        overflow: auto;
-      }
-      #status {
-        width: 100%;
-      }
       .statusRow {
+        width: 100%;
         height: 58px;
         background-color: #283230;
       }
-      .statusText {
+      .statusRow .statusText {
         color: #fff;
         padding-left: 20px;
         padding-right: 20px;
@@ -141,7 +138,7 @@
         overflow: hidden;
         font-size: 14px;
       }
-      .statusText core-icon {
+      .statusRow core-icon {
         padding-right: 20px;
         color: #0EC5AF;
       }
@@ -149,18 +146,40 @@
         z-index: 1;
         font-size: 13px; /* reset to normal, core-toolbar interferes with font sizes */
       }
-      paper-button[class=dialogButton] {
-        background-color: #009688; /* teal */
-        color: white;
-        margin-bottom: 3px;
-      }
       uproxy-action-dialog {
         top: 20%;
         z-index: 1002; /* Must be greater than core-overlay-backdrop */
       }
+      uproxy-action-dialog::shadow #scroller {
+        overflow: visible;
+      }
+      .core-overlay-backdrop {
+        z-index: 1001;
+      }
+      uproxy-action-dialog paper-button {
+        background-color: #009688; /* teal */
+        color: white;
+        margin-bottom: 3px;
+      }
       uproxy-faq-link .linkText {
         text-decoration: underline;
         color: rgba(0,0,0,0.40);
+      }
+      #disconnectDialog {
+        text-align: center;
+      }
+      #disconnectDialog h1 {
+        font-size: 1.25em;
+      }
+      #disconnectDialog img {
+        height: 50px;
+        width: 50px;
+      }
+      #disconnectDialog #disconnectDialogText {
+        text-align: left;
+      }
+      #disconnectDialog paper-button {
+        font-size: 12px;
       }
       paper-toast {
         position: fixed;
@@ -170,11 +189,8 @@
         padding: 16px 16px 12px 20px;
         font-size: 12px;
       }
-      #toastHelpLink {
+      paper-toast #toastHelpLink {
         color: #47B5AA;
-      }
-      .core-overlay-backdrop {
-        z-index: 1001;
       }
     </style>
 
@@ -268,11 +284,11 @@
 
           <div id='rosterContainer' vertical layout>
             <div id='roster-panel' flex>
-              <uproxy-roster id='get-roster' class='roster'
+              <uproxy-roster id='get-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
                   contacts='{{model.contacts.getAccessContacts}}'>
               </uproxy-roster>
-              <uproxy-roster id='share-roster' class='roster'
+              <uproxy-roster id='share-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
                   contacts='{{model.contacts.shareAccessContacts}}'>
               </uproxy-roster>
@@ -310,7 +326,7 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy" id="dialog">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy">
       <p>
         This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
         <uproxy-faq-link anchor='doesUproxyLogData'>
@@ -320,6 +336,18 @@
       <p>Would you like to enable anonymous metrics collection?</p>
       <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
       <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
+    </uproxy-action-dialog>
+
+    <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
+        opened="{{ ui.disconnectedWhileProxying }}" autoCloseDisabled>
+      <img src='../icons/128_error.png'>
+      <div id="disconnectDialogText">
+        <h1>Oops! You've been disconnected from your friend.</h1>
+        <p>
+          Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.
+        </p>
+      </div>
+      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>

@@ -39,8 +39,6 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
-  'vulcanize:chromeDisconnectedInline'
-  'vulcanize:chromeDisconnectedCsp'
   'vulcanize:chromeViewLogsInline'
   'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
@@ -62,8 +60,6 @@ taskManager.add 'build_firefox', [
   'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
-  'vulcanize:firefoxDisconnectedInline'
-  'vulcanize:firefoxDisconnectedCsp'
   'vulcanize:firefoxViewLogsInline'
   'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
@@ -103,6 +99,16 @@ taskManager.add 'test_chrome', [
   'build_chrome'
   'browserify:chromeExtensionCoreConnectorSpec'
   'jasmine:chrome_extension'
+]
+
+taskManager.add 'integration_test', [
+  'build_chrome'
+  'copy:integration'
+  'ts:integration_specs'
+  'ts:integration_freedom_module'
+  'browserify:integrationSpec'
+  'browserify:integrationFreedomModule'
+  'jasmine_chromeapp'
 ]
 
 taskManager.add 'everything', [
@@ -513,11 +519,7 @@ module.exports = (grunt) ->
           # Copy compiled Chrome App code, required for integration tests
           expand: true, cwd: chromeAppDevPath
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
-          dest: 'build/compile-src/integration'
-        }, {
-          expand: true, cwd: 'src/integration/'
-          src: ['gtalk_credentials.js', 'integration.json']
-          dest: 'build/compile-src/integration'
+          dest: devBuildPath + '/integration'
         }]
     }  # copy
 
@@ -581,6 +583,14 @@ module.exports = (grunt) ->
         devBuildPath + '/firefox/**/*.ts'
       ]
 
+      integration_specs: compileTypescript [
+      	devBuildPath + '/integration/*.ts'
+      	'!' + devBuildPath + '/integration/test_connection.ts'
+      ]
+      integration_freedom_module: compileTypescript [
+      	devBuildPath + '/integration/test_connection.ts'
+      ]
+
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -620,6 +630,8 @@ module.exports = (grunt) ->
 
       genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
       genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
+      integrationSpec: Rule.browserifySpec 'integration/core'
+      integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -631,19 +643,19 @@ module.exports = (grunt) ->
 
     jasmine_chromeapp: {
       all: {
-        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-              'build/compile-src/integration/scripts/uproxy.js',
-              'build/compile-src/integration/gtalk_credentials.js',
-              'build/compile-src/integration/**/*.js',
-              'build/compile-src/integration/**/*.json',
-              'build/compile-src/integration/core.spec.js']
+        files: [
+          {
+            cwd: devBuildPath + '/integration/',
+            src: ['**/*'],
+            dest: './',
+            expand: true
+          }
+        ],
+        scripts: ['freedom-for-chrome/freedom-for-chrome.js',
+                  'core.spec.static.js'
+        ],
         options: {
-          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-                  'build/compile-src/integration/scripts/uproxy.js',
-                  'build/compile-src/integration/scripts/uproxy-lib/arraybuffers/arraybuffers.js',
-                  'build/compile-src/integration/gtalk_credentials.js',
-                  'build/compile-src/integration/core.spec.js'
-          ],
+          outdir: 'build/dev/uproxy/integration/'
           # Uncomment this for debugging
           # keepRunner: true,
         }
@@ -686,22 +698,6 @@ module.exports = (grunt) ->
         vulcanizeCsp(
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-      chromeDisconnectedInline:
-          vulcanizeInline(
-              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
-              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      chromeDisconnectedCsp:
-        vulcanizeCsp(
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
-      firefoxDisconnectedInline:
-        vulcanizeInline(
-            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      firefoxDisconnectedCsp:
-        vulcanizeCsp(
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
       chromeViewLogsInline:
         vulcanizeInline(
             chromeExtDevPath + '/generic_ui/polymer/logs.html',

@@ -185,6 +185,8 @@ export class UserInterface implements ui_constants.UiApi {
 
   public isSharingDisabled = false;
 
+  public disconnectedWhileProxying = false;
+
   /**
    * UI must be constructed with hooks to Notifications and Core.
    * Upon construction, the UI installs update handlers on core.
@@ -561,10 +563,12 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (askUser) {
       this.browserApi.setIcon(ERROR_ICON);
-      this.browserApi.launchTabIfNotOpen('generic_ui/disconnected.html');
+      this.bringUproxyToFront();
+      this.disconnectedWhileProxying = true;
       return;
     }
 
+    this.disconnectedWhileProxying = false;
     this.proxySet_ = false;
     this.browserApi.stopUsingProxy();
   }
@@ -714,10 +718,14 @@ export class UserInterface implements ui_constants.UiApi {
       model.onlineNetwork = null;
 
       if (!this.isLogoutExpected_ && !network.online &&
-          this.browser == 'chrome') {
+          this.browser == 'chrome' && !this.disconnectedWhileProxying &&
+          this.instanceGettingAccessFrom_ == null) {
         console.warn('Unexpected logout, reconnecting to ' + network.name);
         this.reconnect(network.name);
       } else {
+        if (this.instanceGettingAccessFrom_ != null) {
+          this.stopGettingInUiAndConfig(true);
+        }
         this.showNotification('You have been logged out of ' + network.name);
         this.view = ui_constants.View.SPLASH;
       }
