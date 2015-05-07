@@ -177,7 +177,7 @@ Polymer({
     }
     return false;
   },
-  topOfStatuses: function(gettingStatus :social.GettingState, sharingStatus :social.SharingState) {
+  topOfStatuses: function(statuses: string[], visible :boolean) {
     // Returns number of pixels from the bottom of the window a toast
     // can be positioned without interfering with the getting or sharing
     // status bars.
@@ -185,16 +185,21 @@ Polymer({
     // bottom of its parent element, this function is needed to control toast
     // placement rather than a simpler solution such as moving the toast
     // inside the roster element.
-    var padding = 10;
+    var height = 10; // should start 10px up
     var statusRowHeight = 58; // From style of the statusRow divs.
-    if (gettingStatus && sharingStatus) {
-      return 2 * statusRowHeight + padding;
-    } else if (gettingStatus || sharingStatus) {
-      return statusRowHeight + padding;
+
+    if (!visible) {
+      // if the statuses are not on the screen, we don't need to do anything
+      return height;
     }
-    // If there are no status bars, toasts should still 'float' a little
-    // above the bottom of the window.
-    return padding;
+
+    for (var i in statuses) {
+      if (statuses[i]) {
+        height += statusRowHeight;
+      }
+    }
+
+    return height;
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,
