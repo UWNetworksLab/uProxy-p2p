@@ -29,15 +29,16 @@
         font-size: 14px;
         color: rgb(112, 112, 112);
         padding-top: 7px;
+        cursor: pointer;
       }
-      core-icon[icon=create] {
+      #savedDescription core-icon {
         height: 16px;
         width: 16px;
         margin: 0px 0px 4px 3px;
         opacity: 0.6;
         float: right;
       }
-      core-icon[icon=create]:hover{
+      #savedDescription:hover core-icon {
         opacity: 1;
       }
     </style>
@@ -49,9 +50,9 @@
       <paper-button raised on-tap="{{ saveDescription }}">Save</paper-button>
       <paper-button raised on-tap="{{ cancelEditing }}">Cancel</paper-button>
     </div>
-    <div id='savedDescription' hidden?='{{ editing }}'>
+    <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
       {{ model.globalSettings.description || 'Name this device' }}
-      <core-icon icon='create' on-tap='{{ editDescription }}'></core-icon>
+      <core-icon icon='create'></core-icon>
     </div>
   </template>
   <script src='description.js'></script>
