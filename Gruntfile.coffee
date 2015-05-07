@@ -83,6 +83,7 @@ taskManager.add 'test_core', [
   'browserify:genericCoreFirewallSpec'
   'browserify:genericCoreUproxyCoreSpec'
   'browserify:genericCoreLocalInstanceSpec'
+  'browserify:genericCoreMetricsSpec'
   'browserify:genericCoreRemoteInstanceSpec'
   'browserify:genericCoreRemoteConnectionSpec'
   'browserify:genericCoreRemoteUserSpec'
@@ -418,6 +419,11 @@ module.exports = (grunt) ->
           ]
           files: [
             {
+              expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
+              src: ['anonmetrics.json', 'metric.js']
+              dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
+            },
+            {
               expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
               src: ['**']
               dest: chromeAppDevPath + '/freedom-social-xmpp'
@@ -469,6 +475,11 @@ module.exports = (grunt) ->
             'uproxy-networking/churn-pipe'
           ]
           files: [
+            {
+              expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
+              src: ['anonmetrics.json', 'metric.js']
+              dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
+            },
             {
               expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
               src: ['**']
@@ -600,6 +611,7 @@ module.exports = (grunt) ->
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
       genericCoreUproxyCoreSpec: Rule.browserifySpec 'generic_core/uproxy_core'
       genericCoreLocalInstanceSpec: Rule.browserifySpec 'generic_core/local-instance'
+      genericCoreMetricsSpec: Rule.browserifySpec 'generic_core/metrics'
       genericCoreRemoteConnectionSpec: Rule.browserifySpec 'generic_core/remote-connection'
       genericCoreRemoteInstanceSpec: Rule.browserifySpec 'generic_core/remote-instance'
       genericCoreRemoteUserSpec: Rule.browserifySpec 'generic_core/remote-user'

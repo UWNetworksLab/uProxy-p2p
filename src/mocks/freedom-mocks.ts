@@ -50,3 +50,21 @@ export class MockStorage implements freedom_Storage {
 export class MockLoggingController {
   public setDefaultFilter = (destination :number, level :number) => {}
 }
+
+export class MockMetrics {
+  private data_ :{[name :string] :any} = {};
+  public report = (key :string, value :any) => {
+    this.data_[key] = value;
+    return Promise.resolve();
+  }
+  public retrieve = () => {
+    var obfuscatedData :{[name :string] :string} = {};
+    for (var key in this.data_) {
+      obfuscatedData[key] = Math.random().toString();
+    }
+    return Promise.resolve(obfuscatedData);
+  }
+  public retrieveUnsafe = () => {
+    return Promise.resolve(this.data_);
+  }
+}
