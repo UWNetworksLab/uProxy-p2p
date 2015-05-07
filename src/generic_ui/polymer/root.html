@@ -353,11 +353,11 @@
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
     <paper-toast id='toast'
-        opened='{{ messageNotNull(ui.toastMessage) }}'
-        text='{{ ui.toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'>
+        text='{{ toastMessage }}' responsiveWidth='320px'
+        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'
+        duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(ui.toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
       </div>
     </paper-toast>
 
