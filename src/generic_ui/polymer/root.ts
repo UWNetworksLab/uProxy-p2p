@@ -27,6 +27,7 @@ Polymer({
     heading: '',
     buttons: []
   },
+  toastMessage: '',
   updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -103,7 +104,6 @@ Polymer({
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;
-    this.closeToastTimeout = null;
     if (ui.browserApi.browserSpecificElement){
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
@@ -151,20 +151,14 @@ Polymer({
   revertProxySettings: function() {
     this.ui.stopGettingInUiAndConfig(false);
   },
-  /* All functions below help manage paper-toast behaviour. */
-  closeToast: function() {
-    ui.toastMessage = null;
-  },
-  messageNotNull: function(toastMessage :string) {
-    // Whether the toast is shown is controlled by if ui.toastMessage
-    // is null. This function returns whether ui.toastMessage == null,
-    // and also sets a timeout to close the toast.
-    if (toastMessage) {
-      clearTimeout(this.clearToastTimeout);
-      this.clearToastTimeout = setTimeout(this.closeToast, 10000);
-      return true;
+  toastMessageChanged: function(oldVal :string, newVal :string) {
+    if (newVal) {
+      this.toastMessage = newVal;
+      this.$.toast.show();
+
+      // clear the message so we can pick up on other changes
+      ui.toastMessage = null;
     }
-    return false;
   },
   openTroubleshoot: function() {
     if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
@@ -172,7 +166,7 @@ Polymer({
     } else {
       this.troubleshootTitle = "Unable to share access";
     }
-    this.closeToast();
+    this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   stringMatches: function(str1 :string, str2 :string) {
@@ -215,6 +209,7 @@ Polymer({
     }
   },
   observe: {
-    '$.mainPanel.selected' : 'drawerToggled'
+    '$.mainPanel.selected' : 'drawerToggled',
+    'ui.toastMessage': 'toastMessageChanged',
   }
 });
