@@ -108,13 +108,19 @@ export class Server {
 
   // Invoked when the socket terminates.
   private onDisconnectHandler_ = (info:freedom_TcpSocket.DisconnectInfo) : void => {
-    log.debug('%1: disconnected: %2', this.id_, JSON.stringify(info));
+    if (info) {
+      log.debug('%1: onDisconnect: %2', this.id_, info);
+    } else {
+      // TODO: Consider removing this check when this issue is fixed:
+      //         https://github.com/freedomjs/freedom-for-firefox/issues/63
+      log.warn('%1: onDisconnect without info', this.id_);
+    }
 
     this.counter_.discard();
 
     this.counter_.onceDestroyed().then(() => {
       log.debug('%1: closed socket channel', this.id_);
-      if (info.errcode === 'SUCCESS') {
+      if (info && info.errcode === 'SUCCESS') {
         this.fulfillShutdown_(SocketCloseKind.WE_CLOSED_IT);
       } else {
         // TODO: investigate which other values occur
@@ -390,12 +396,14 @@ export class Connection {
   // Invoked when the socket is closed for any reason.
   // Fulfills onceClosed.
   private onDisconnectHandler_ = (info:freedom_TcpSocket.DisconnectInfo) : void => {
-    log.debug('%1: onDisconnect: %2', [
-        this.connectionId,
-        JSON.stringify(info)]);
+    if (info) {
+      log.debug('%1: onDisconnect: %2', this.connectionId, info);
+    } else {
+      log.warn('%1: onDisconnect without info', this.connectionId);
+    }
 
     if (this.state_ === Connection.State.CLOSED) {
-      log.warn('%1: Got onDisconnect in closed state', [this.connectionId]);
+      log.warn('%1: Got onDisconnect in closed state', this.connectionId);
       return;
     }
 
@@ -410,9 +418,9 @@ export class Connection {
       // CONSIDER: can this happen after a onceConnected promise rejection? if so,
       // do we want to preserve the SocketCloseKind.NEVER_CONNECTED result for
       // onceClosed?
-      if (info.errcode === 'SUCCESS') {
+      if (info && info.errcode === 'SUCCESS') {
         this.fulfillClosed_(SocketCloseKind.WE_CLOSED_IT);
-      } else if (info.errcode === 'CONNECTION_CLOSED') {
+      } else if (info && info.errcode === 'CONNECTION_CLOSED') {
         this.fulfillClosed_(SocketCloseKind.REMOTELY_CLOSED);
       } else {
         this.fulfillClosed_(SocketCloseKind.UNKOWN);
