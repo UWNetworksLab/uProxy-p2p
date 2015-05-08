@@ -171,28 +171,6 @@ var log :logging.Log = new logging.Log('churn');
     throw new Error('no srflx or host candidate found');
   };
 
-  // Returns a key for use with mirrorPipes_.
-  var makeEndpointKey_ = (endpoint:net.Endpoint) : string => {
-    return endpoint.address + ':' + endpoint.port;
-  };
-
-  // Retry an async function with exponential backoff for up to 2 seconds
-  // before failing.
-  var retry_ = (func:() => Promise<void>, delayMs?:number) : Promise<void> => {
-    delayMs = delayMs || 10;
-    return func().catch((err) => {
-      delayMs *= 2;
-      if (delayMs > 2000) {
-        return Promise.reject(err);
-      }
-      return new Promise<void>((F, R) => {
-        setTimeout(() => {
-          this.retry_(func, delayMs).then(F, R);
-        }, delayMs);
-      });
-    });
-  }
-
   /**
    * A uproxypeerconnection-like Freedom module which establishes obfuscated
    * connections.
@@ -259,8 +237,7 @@ var log :logging.Log = new logging.Log('churn');
       this.haveForwardingSocketEndpoint_ = F;
     });
 
-    // A map from remote transport addresses to local pipes that represent them.
-    private mirrorPipes_ : { [k: string]: ChurnPipe } = {};
+    private pipe_ :ChurnPipe;
 
     private static internalConnectionId_ = 0;
 
@@ -289,7 +266,7 @@ var log :logging.Log = new logging.Log('churn');
       Promise.all([this.onceHaveWebRtcEndpoint_,
                    this.onceHaveRemoteEndpoint_,
                    this.onceProbingComplete_]).then((answers:any[]) => {
-        this.configurePipes_(answers[0], answers[1], answers[2]);
+        this.configurePipe_(answers[0], answers[1], answers[2]);
       });
 
       // Handle |pcState| and related promises.
@@ -340,149 +317,28 @@ var log :logging.Log = new logging.Log('churn');
       this.probeConnection_.negotiateConnection();
     }
 
-    // Add and return a local pipe that represents a specific remote address
-    // for both send and receive.
-    private addLocalPipe_ = (
-        webRtcEndpoint:net.Endpoint,
-        remoteEndpoint:net.Endpoint,
-        publicPipe:ChurnPipe)
-        : Promise<ChurnPipe> => {
-      log.info('%1: Adding local pipe between %2 and %3',
-          this.peerName, webRtcEndpoint, remoteEndpoint);
-      var key = makeEndpointKey_(remoteEndpoint);
-      if (this.mirrorPipes_[key]) {
-        log.warn('%1: Got redundant call to add local pipe for %2',
-            this.peerName,
-            key);
-        // Return the pipe, but wait until it's ready.
-        return this.mirrorPipes_[key].getLocalEndpoint().then(
-            (ignored:net.Endpoint) => {
-          return this.mirrorPipes_[key];
-        });
-      }
-
-      var localPipe = freedom['churnPipe']();
-      this.mirrorPipes_[key] = localPipe;
-
-      // Packets received by this pipe should be obfuscated and forwarded
-      // to the corresponding remote endpoint.
-      localPipe.on('message', (m:churn_pipe_types.Message) => {
-        publicPipe.sendTo(m.data, remoteEndpoint);
-      });
-
-      return localPipe.bind(
-          '127.0.0.1',
-          0,
-          webRtcEndpoint.address,
-          webRtcEndpoint.port,
-          'none', // no need to obfuscate local-only traffic.
-          undefined,
-          undefined)
-      .catch((e:Error) => {
-        log.error('%1: error establishing local pipe: %2',
-            this.peerName,
-            e.message);
-      })
-      .then(localPipe.getLocalEndpoint)
-      .then((forwardingSocketEndpoint:net.Endpoint) => {
-        log.info('%1: configured local pipe between %2 and %3',
-            this.peerName,
-            JSON.stringify(forwardingSocketEndpoint),
-            JSON.stringify(webRtcEndpoint));
-        return localPipe;
-      });
-    }
-
-    private bindPublicPipe_ = (publicPipe:ChurnPipe, local:net.Endpoint,
-        remote:net.Endpoint) : Promise<void> => {
-      return publicPipe.bind(
-          local.address,
-          local.port,
-          remote.address,
-          remote.port,
-          'caesar',
-          new Uint8Array([13]).buffer,
-          '{}');
-    };
-
-    // Establishes the two pipes required to sustain the obfuscated
-    // connection:
-    //  - a non-obfuscated, local only, between WebRTC and a new,
-    //    automatically allocated, port
-    //  - remote, obfuscated, port
-    private configurePipes_ = (
+    private configurePipe_ = (
         webRtcEndpoint:net.Endpoint,
         remoteEndpoint:net.Endpoint,
         natEndpoints:NatPair) : void => {
       log.debug('%1: configuring pipes...', this.peerName);
-      var publicPipe = freedom['churnPipe']();
-      // This retry is needed because the browser releases the UDP port
-      // asynchronously after we call close() on the RTCPeerConnection, so
-      // this.bindPublicPipe_ may initially fail, until the port is released.
-      retry_(() => {
-        return this.bindPublicPipe_(
-            publicPipe, natEndpoints.internal, remoteEndpoint);
-      })
-        // TODO(ldixon): renable FTE support instead of caesar cipher.
-        // publicPipe.bind(
-        //     natEndpoints.internal.address,
-        //     natEndpoints.internal.port,
-        //     remoteEndpoint.address,
-        //     remoteEndpoint.port,
-        //     'fte',
-        //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-        //     JSON.stringify({
-        //       'plaintext_dfa': regex2dfa('^.*$'),
-        //       'plaintext_max_len': 1400,
-        //       // This is equivalent to Rabbit cipher.
-        //       'ciphertext_dfa': regex2dfa('^.*$'),
-        //       'ciphertext_max_len': 1450
-        //     }))
-        .then(() => {
-          log.info('%1: configured obfuscating pipe between %2 and %3',
-              this.peerName,
-              JSON.stringify(natEndpoints.internal),
-              JSON.stringify(remoteEndpoint));
-        }, (e:Error) => {
-        log.error('%1: error establishing public pipe between %2 and %3: %4',
-            this.peerName,
-            makeEndpointKey_(natEndpoints.internal),
-            makeEndpointKey_(remoteEndpoint),
-            e.message);
-      });
-
-      publicPipe.on('message', (m:churn_pipe_types.Message) => {
-        // This is the particular local pipe associated with this sender.
-        var localPipe = this.mirrorPipes_[makeEndpointKey_(m.source)];
-        if (localPipe) {
-          // Note: due to asynchronous setup, it's possible that this pipe
-          // has not yet been bound.  Hopefully, the send call will be
-          // queued behind the bind call.  If not, the packet may just be
-          // dropped (which should be acceptable for a brief period).
-          localPipe.send(m.data);
-        } else if (this.pcState == peerconnection.State.WAITING ||
-                   this.pcState == peerconnection.State.CONNECTING) {
-          log.info('%1: Got packet from new source; peer has symmetric NAT?',
-              this.peerName);
-          this.addLocalPipe_(webRtcEndpoint, m.source, publicPipe).then(
-              (localPipe:ChurnPipe) => {
-            // Don't drop the first packet.
-            localPipe.send(m.data);
-          });
-        } else {
-          log.warn('%1: Received unexpected packet of length %2 from %3' 
-                       + ' while in state %4',
-              this.peerName,
-              m.data.byteLength,
-              makeEndpointKey_(m.source),
-              this.pcState);
-        }
-      });
-
-      this.addLocalPipe_(webRtcEndpoint, remoteEndpoint, publicPipe).then(
-          (pipe:ChurnPipe) => {
-        return pipe.getLocalEndpoint();
-      }).then(this.haveForwardingSocketEndpoint_);
+      this.pipe_ = freedom['churnPipe']();
+      this.pipe_.setTransformer('caesar',
+          new Uint8Array([13]).buffer,
+          '{}');
+      // TODO(ldixon): renable FTE support instead of caesar cipher.
+      //     'fte',
+      //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
+      //     JSON.stringify({
+      //       'plaintext_dfa': regex2dfa('^.*$'),
+      //       'plaintext_max_len': 1400,
+      //       // This is equivalent to Rabbit cipher.
+      //       'ciphertext_dfa': regex2dfa('^.*$'),
+      //       'ciphertext_max_len': 1450
+      //     }
+      this.pipe_.bindLocal(natEndpoints.internal);
+      this.pipe_.setBrowserEndpoint(webRtcEndpoint);
+      this.pipe_.bindRemote(remoteEndpoint).then(this.haveForwardingSocketEndpoint_);
     }
 
     private configureObfuscatedConnection_ = () => {

@@ -11,50 +11,37 @@
   ],
   "api": {
     "churnPipe": {
-      "bind": {
+      "setTransformer": {
         "type": "method",
         "value": [
-          "string",
-          "number",
-          "string",
-          "number",
           "string",
           "buffer",
           "string"
         ]
       },
-      "send": {
+      "bindLocal": {
         "type": "method",
-        "value": [
-          "buffer"
-        ]
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }]
       },
-      "sendTo": {
+      "setBrowserEndpoint": {
         "type": "method",
-        "value": [
-          "buffer",
-          {
-            "address": "string",
-            "port": "number"
-          }
-        ]
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }]
       },
-      "getLocalEndpoint": {
+      "bindRemote": {
         "type": "method",
-        "value": [],
+        "value": [{
+          "address": "string",
+          "port": "number"
+        }],
         "ret": {
           "address": "string",
           "port": "number"
-        }
-      },
-      "message": {
-        "type": "event",
-        "value": {
-          "data": "buffer",
-          "source": {
-            "address": "string",
-            "port": "number"
-          }
         }
       }
     }

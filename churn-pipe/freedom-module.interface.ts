@@ -2,24 +2,11 @@
 
 import net = require('../net/net.types');
 
-export interface Message {
-  data: ArrayBuffer
-  source: net.Endpoint
-}
-
 export interface freedom_ChurnPipe {
-  bind(localAddress :string,
-       localPort :number,
-       remoteAddress :string,
-       remotePort :number,
-       transformerName :string,
-       key ?:ArrayBuffer,
-       config ?:string) : Promise<void>;
-  send(buffer :ArrayBuffer) : Promise<void>;
-  sendTo(buffer :ArrayBuffer, to :net.Endpoint) : Promise<void>;
-
-  getLocalEndpoint() : Promise<net.Endpoint>;
-
-  on(t:'message', f:(message:Message) => void) : void;
-  on(t:string, f:Function) : void;
+  setTransformer(transformerName :string,
+      key ?:ArrayBuffer,
+      config ?:string) : Promise<void>;
+  bindLocal(publicEndpoint:net.Endpoint) : Promise<void>;
+  setBrowserEndpoint(browserEndpoint:net.Endpoint) : Promise<void>;
+  bindRemote (remoteEndpoint:net.Endpoint) : Promise<net.Endpoint>;
 }
