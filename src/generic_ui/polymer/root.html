@@ -201,7 +201,7 @@
     <uproxy-copypaste id='copypaste' hidden?='{{ ui_constants.View.COPYPASTE !== ui.view }}'>
     </uproxy-copypaste>
 
-    <uproxy-feedback></uproxy-feedback>
+    <uproxy-feedback id='feedback'></uproxy-feedback>
 
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
@@ -354,7 +354,7 @@
 
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses(ui.gettingStatus, ui.sharingStatus) }}px;'
+        style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
