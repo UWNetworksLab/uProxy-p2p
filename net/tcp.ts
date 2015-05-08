@@ -343,7 +343,7 @@ export class Connection {
             // We need this guard because the getInfo call is async and a
             // close may happen affter the freedom socket connects and the
             // getInfo completes.
-            if(this.state_ !== Connection.State.CLOSED) {
+            if(this.state_ === Connection.State.CONNECTING) {
               this.state_ = Connection.State.CONNECTED;
             }
           });
@@ -353,11 +353,7 @@ export class Connection {
           JSON.stringify(connectionKind)));
     }
 
-    // Use the dataFromSocketQueue handler for data from the socket.
-    this.connectionSocket_.on('onData',
-        (readInfo:freedom_TcpSocket.ReadInfo) : void => {
-      this.dataFromSocketQueue.handle(readInfo.data);
-    });
+    this.connectionSocket_.on('onData', this.onData_);
 
     this.onceClosed = new Promise<SocketCloseKind>((F, R) => {
       this.fulfillClosed_ = F;
@@ -377,6 +373,11 @@ export class Connection {
     });
 
     this.connectionSocket_.on('onDisconnect', this.onDisconnectHandler_);
+  }
+
+  // Use the dataFromSocketQueue handler for data from the socket.
+  private onData_ = (readInfo:freedom_TcpSocket.ReadInfo) : void => {
+    this.dataFromSocketQueue.handle(readInfo.data);
   }
 
   // Receive returns a promise for exactly the next |ArrayBuffer| of data.
@@ -435,10 +436,17 @@ export class Connection {
   public close = () : Promise<SocketCloseKind> => {
     log.debug('%1: close', [this.connectionId]);
 
-    if (this.state_ === Connection.State.CLOSED) {
+    if (this.state_ === Connection.State.CLOSING ||
+        this.state_ === Connection.State.CLOSED) {
       log.debug('%1: close called when already closed', [
           this.connectionId]);
     } else {
+      this.state_ = Connection.State.CLOSING;
+
+      this.dataFromSocketQueue.stopHandling();
+      this.dataFromSocketQueue.clear();
+      this.connectionSocket_.off('onData', this.onData_);
+
       this.counter_.wrap(this.connectionSocket_.close);
     }
 
@@ -483,7 +491,8 @@ export module Connection {
   export enum State {
     ERROR, // Cannot change state.
     CONNECTING, // Can change to ERROR or CONNECTED.
-    CONNECTED, // Can change to ERROR or CLOSED.
+    CONNECTED, // Can change to ERROR or CLOSING/CLOSED.
+    CLOSING, // Can change to CLOSED or ERROR.
     CLOSED // Cannot change state.
   }
 } // module Connection
