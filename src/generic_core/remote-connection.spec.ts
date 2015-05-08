@@ -17,8 +17,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 import remote_connection = require('./remote-connection');
 import social = require('../interfaces/social');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
-import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
 import rtc_to_net_mock = require('../mocks/rtc-to-net');
 import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
 

@@ -1,6 +1,6 @@
 /// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import social = require('./social');
 import ui = require('./ui');
 

@@ -12,11 +12,11 @@ import remote_user = require('./remote-user');
 import consent = require('./consent');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
-import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
+import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
 import globals = require('./globals');
 import local_storage = require('./storage');
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 
 
