@@ -2,6 +2,21 @@
   "intro" : {
     "message" : "این برنامه نمونه وکالتی SOCKS بین دو کاربر را برقرار. تبادل پیام های سیگنالینگ اولیه دستی رخ می دهد (به عنوان مثال، از طریق ایمیل و یا چت)، در حالی که پس از آن با استفاده از وکالتی WebRTC فعال میکند."
   },
+  "useCrypto" : {
+    "message" : "Use cryptography to sign/encrypt exchange?"
+  },
+  "userPublicKey" : {
+    "message" : "Your public key is: "
+  },
+  "friendPublicKey" : {
+    "message" : "Your friend's public key is: "
+  },
+  "signed" : {
+    "message" : "Signaling message has valid signature!"
+  },
+  "incorrectlySigned" : {
+    "message" : "Signaling message does not have valid signature!"
+  },
   "giveAccess" : {
     "message" : "دسترسی"
   },
