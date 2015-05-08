@@ -44,6 +44,15 @@ describe('DataChannel', function() {
     datachannel.createFromRtcDataChannel(mockRtcDataChannel).then(
         (channel:datachannel.DataChannel) => {
       var readyToClose = false;
+
+      // Fill the buffer.
+      channel.send({
+        buffer: new ArrayBuffer(datachannel.PC_QUEUE_LIMIT)
+      });
+      expect(sendBufferSpy).toHaveBeenCalled();
+      sendBufferSpy.calls.reset()
+
+      // Tack on one additional message, and then close the channel.
       channel.send({
         buffer: new Uint8Array([0, 1, 2]).buffer
       });
@@ -93,11 +102,21 @@ describe('DataChannel', function() {
         (channel:datachannel.DataChannel) => {
       channel.onceOpened.then(() => {
         var baselineBufferedAmountCalls = getBufferedAmountSpy.calls.count();
+
+        // Fill the buffer.
+        channel.send({
+          buffer: new ArrayBuffer(datachannel.PC_QUEUE_LIMIT)
+        });
+
+        // Tack on one additional message, and then close the channel.
+        channel.send({
+          buffer: new Uint8Array([0, 1, 2]).buffer
+        });
         channel.close();
 
         // channel.close() starts the loop, which will check getBufferedAmount
         // every 20 ms, but does not synchronously check it.
-        expect(getBufferedAmountSpy.calls.count()).toEqual(baselineBufferedAmountCalls);
+        expect(getBufferedAmountSpy.calls.count()).toEqual(baselineBufferedAmountCalls + 1);
 
         // Have core.rtcdatachannel immediately emit an onclose event, as if the remote
         // peer had closed the connection.  This should take effect in <20 ms.
