@@ -35,11 +35,11 @@
   "english" : {
     "message" : "English"
   },
-  "arabic": {
-    "message": "العربية"
+  "arabic" : {
+    "message" : "العربية"
   },  
-  "farsi": {
-    "message": "فارسی"
+  "farsi" : {
+    "message" : "فارسی"
   },  
   "pasteAndGenerateReply" : {
     "message" : "Paste the text received from the other party below and click 'Generate reply'."

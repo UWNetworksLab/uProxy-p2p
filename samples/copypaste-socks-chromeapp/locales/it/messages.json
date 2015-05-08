@@ -20,11 +20,11 @@
   "english" : {
     "message" : "English"
   },
-  "arabic": {
-    "message": "العربية"
+  "arabic" : {
+    "message" : "العربية"
   },  
-  "farsi": {
-    "message": "فارسی"
+  "farsi" : {
+    "message" : "فارسی"
   },  
   "pasteAndGenerateReply" : {
     "message" : "Incollare il testo ricevuto dall'altra parte sottostante e fare clic su 'Generate risposta'."
