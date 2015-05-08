@@ -59,5 +59,8 @@ Polymer({
   ready: function() {
     this.ui = ui_context.ui;
     this.model = ui_context.model;
-  }
+  },
+  computed: {
+    'opened': '$.feedbackPanel.opened'
+  },
 });
