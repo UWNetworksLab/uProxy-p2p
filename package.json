@@ -22,6 +22,7 @@
     "circular-json": "^0.1.6",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
+    "freedomjs-anonymized-metrics": "~0.1.0",
     "freedom-for-chrome": "^0.4.11",
     "freedom-for-firefox": "0.6.10",
     "freedom-social-firebase": "^0.0.12",

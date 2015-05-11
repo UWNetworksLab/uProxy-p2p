@@ -10,8 +10,9 @@
 import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
 import freedom_mocks = require('../mocks/freedom-mocks');
 freedom = freedomMocker.makeMockFreedomInModuleEnv({
-    'core.storage': () => { return new freedom_mocks.MockStorage(); },
-    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); }
+    'core.storage': () => { return new freedom_mocks.MockFreedomStorage(); },
+    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); },
+    'metrics': () => { return new freedom_mocks.MockMetrics(); }
 });
 
 import remote_connection = require('./remote-connection');
