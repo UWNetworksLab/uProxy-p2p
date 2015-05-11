@@ -271,6 +271,24 @@ var log :logging.Log = new logging.Log('remote-user');
       this.clientToInstanceMap_[clientId] = instanceId;
       this.instanceToClientMap_[instanceId] = clientId;
 
+      // Set user's name from the instance, only if it is not yet set.
+      // This is a work-around for not getting a UserProfile for some users,
+      // see https://github.com/uProxy/uproxy/issues/1510
+      if (instanceHandshake.name && this.name == 'pending') {
+        log.info('No UserProfile available, setting name from instance');
+        this.name = instanceHandshake.name;
+        this.fulfillNameReceived_(instanceHandshake.name);
+      } else if (instanceHandshake.userId && this.name == 'pending') {
+        // Sometimes users don't get their own UserProfile.  In this case
+        // if we haven't received their UserProfile either, we should set
+        // their name to what they believe their userId is.  For GTalk users,
+        // this should be the non-anomized ID (i.e. not a
+        // @public.talk.google.com ID).
+        log.info('No UserProfile available, setting name from userId');
+        this.name = instanceHandshake.userId;
+        this.fulfillNameReceived_(instanceHandshake.userId);
+      }
+
       // Create or update the Instance object.
       var instance = this.instances_[instanceId];
       if (!instance) {
@@ -491,7 +509,9 @@ var log :logging.Log = new logging.Log('remote-user');
             consent: {
               isRequesting: this.consent.localRequestsAccessFromRemote,
               isOffering: this.consent.localGrantsAccessToRemote
-            }
+            },
+            name: myInstance.name,
+            userId: myInstance.userId
           }
         };
         return this.network.send(this, clientId, instanceMessage);

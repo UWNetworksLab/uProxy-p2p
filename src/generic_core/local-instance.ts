@@ -22,8 +22,8 @@ import Persistent = require('../interfaces/persistent');
     public instanceId  :string;
     public keyHash     :string;
     public clientId    :string;
+    public name        :string;
     private imageData_ :string;
-    private name_      :string;
 
     /**
      * Generate an instance for oneself, either from scratch or based on some
@@ -71,14 +71,14 @@ import Persistent = require('../interfaces/persistent');
     }
 
     public updateProfile = (profile :social.UserProfileMessage) :void => {
-      this.name_ = profile.name;
+      this.name = profile.name;
       this.imageData_ = profile.imageData;
     }
 
     public getUserProfile = () :social.UserProfileMessage => {
       return {
         userId: this.userId,
-        name: this.name_,
+        name: this.name,
         imageData: this.imageData_
       };
     }
