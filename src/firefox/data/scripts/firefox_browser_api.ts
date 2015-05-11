@@ -10,7 +10,7 @@
 import browser_api =  require('../../../interfaces/browser_api');
 import BrowserAPI = browser_api.BrowserAPI;
 import user_interface = require('../../../generic_ui/scripts/ui');
-import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../../../third_party/uproxy-lib/net/net.types');
 import port = require('./port');
 
 interface FullfillAndReject {

@@ -3,7 +3,7 @@
  * interface to be extended as classes specific to particular components.
  */
 
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import uproxy_core_api = require('./uproxy_core_api');
 

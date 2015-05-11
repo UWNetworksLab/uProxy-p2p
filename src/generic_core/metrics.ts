@@ -1,4 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/anonymized-metrics.d.ts' />
+/// <reference path='../../../third_party/freedomjs-anonymized-metrics/freedomjs-anonymized-metrics.d.ts' />
 
 import crypto = require('../../../third_party/uproxy-lib/crypto/random');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');

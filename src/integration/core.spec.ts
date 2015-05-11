@@ -5,7 +5,7 @@
 import browser_connector = require('../interfaces/browser_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arraybuffers');
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import credentials = require('./gtalk_credentials');
 import mock_oauth = require('./mock_oauth');
 

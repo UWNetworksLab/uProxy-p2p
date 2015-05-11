@@ -172,7 +172,6 @@ browserifyIntegrationTest = (path) ->
 #-------------------------------------------------------------------------
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
-uproxyNetworkingPath = path.dirname(require.resolve('uproxy-networking/package.json'))
 
 #ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
 # TODO(ldixon): update utransformers package to uproxy-obfuscators
@@ -198,19 +197,17 @@ FILES =
     'version/version.js'
   ]
 
-  uproxy_networking_common: [
-    'ipaddrjs/ipaddr.min.js'
-    'tcp/tcp.js'
-    'socks-common/socks-headers.js'
-    'socks-to-rtc/socks-to-rtc.js'
-    'rtc-to-net/rtc-to-net.js'
-  ]
   uproxy_lib_common: [
+    'ipaddrjs/ipaddr.min.js'
     'logging/logging.js'
     'loggingprovider/loggingprovider.js'
     'loggingprovider/loggingprovider.json'
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
+    'rtc-to-net/rtc-to-net.js'
+    'socks-common/socks-headers.js'
+    'socks-to-rtc/socks-to-rtc.js'
+    'tcp/tcp.js'
     'webrtc/datachannel.js'
     'webrtc/peerconnection.js'
   ]
@@ -278,7 +275,6 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON('package.json')
     pkgs:
       lib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
-      net: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
       freedom: grunt.file.readJSON('node_modules/freedom/package.json')
       freedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
@@ -322,26 +318,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: path.join(uproxyLibPath, 'third_party'),
-              src: ['freedom-typings/**/*', 'promise-polyfill.js'],
-              dest: thirdPartyBuildPath
-          },
-          # Copy the distirbution directory of uproxy-networking into third
-          # party.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(uproxyNetworkingPath, 'build/dist'),
               src: ['**/*'],
-              dest: path.join(thirdPartyBuildPath, 'uproxy-networking/'),
-          },
-          # Use the third_party definitions from uproxy-networking.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(uproxyNetworkingPath, 'build/third_party'),
-              src: ['i18n/**', 'ipaddrjs/**', 'ipaddrjs/**', 'regex2dfa/**',
-                    'polymer/**', 'sha1/**', 'socks5-http-client/**',
-                    'uTransformers/**'],
               dest: thirdPartyBuildPath
           }
         ]
@@ -513,7 +490,7 @@ module.exports = (grunt) ->
             'bower'
             'sha1'
             'uproxy-lib/loggingprovider'
-            'uproxy-networking/churn-pipe'
+            'uproxy-lib/churn-pipe'
           ]
           files: [
             {
@@ -570,7 +547,7 @@ module.exports = (grunt) ->
             'bower'
             'sha1'
             'uproxy-lib/loggingprovider'
-            'uproxy-networking/churn-pipe'
+            'uproxy-lib/churn-pipe'
           ]
           files: [
             {
@@ -631,7 +608,6 @@ module.exports = (grunt) ->
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
               'uproxy-lib': '<%= pkgs.lib.version %>'
-              'uproxy-networking': '<%= pkgs.net.version %>'
               freedom: '<%= pkgs.freedom.version %>'
               'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
               'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
