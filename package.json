@@ -19,6 +19,8 @@
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "bower": "^1.4.1",
+    "circular-json": "^0.1.6",
+    "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "freedomjs-anonymized-metrics": "~0.1.0",
     "freedom-for-chrome": "^0.4.11",
@@ -43,8 +45,7 @@
     "lodash": "^3.7.0",
     "regex2dfa": "^0.1.6",
     "tsd": "^0.5.7",
-    "uproxy-lib": "^25.0.0",
-    "uproxy-networking": "^10.0.0",
+    "uproxy-lib": "^26.0.0",
     "utransformers": "^0.2.1"
   },
   "peerDependencies": {
