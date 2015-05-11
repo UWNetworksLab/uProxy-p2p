@@ -3,19 +3,19 @@
     "message" : "هذه عينة التطبيق يحدد الجوارب إنشاء الوكلاء بين اثنين من المستخدمين. تبادل الرسائل الأولي يشير يحدث يدويا (على سبيل المثال، عبر البريد الإلكتروني أو الدردشة)، بينما يستخدم إنشاء الوكلاء لاحق متوافق مع WebRTC."
   },
   "useCrypto" : {
-    "message" : "Use cryptography to sign/encrypt exchange?"
+    "message" : "استخدام التشفير لتوقيع / تبادل تشفير؟"
   },
   "userPublicKey" : {
-    "message" : "Your public key is: "
+    "message" : "المفتاح العمومي الخاص بك هو: "
   },
   "friendPublicKey" : {
-    "message" : "Your friend's public key is: "
+    "message" : "المفتاح العمومي صديقك هو: "
   },
   "signed" : {
-    "message" : "Signaling message has valid signature!"
+    "message" : "مما يشير إلى رسالة له توقيع صالح!"
   },
   "incorrectlySigned" : {
-    "message" : "Signaling message does not have valid signature!"
+    "message" : "يشير رسالة لايوجد توقيع صالح!"
   },
   "giveAccess" : {
     "message" : "منح حق الوصول"

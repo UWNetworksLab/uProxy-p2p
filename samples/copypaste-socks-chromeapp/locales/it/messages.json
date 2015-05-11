@@ -3,19 +3,19 @@
     "message" : "Questa applicazione di esempio stabilisce SOCKS proxy tra due utenti. Lo scambio intial di messaggi di segnalazione avviene manualmente (ad esempio, via e-mail o la chat), mentre il successivo inoltro utilizza WebRTC."
   },
   "useCrypto" : {
-    "message" : "Use cryptography to sign/encrypt exchange?"
+    "message" : "Usare la crittografia di firmare / cifrare scambio?"
   },
   "userPublicKey" : {
-    "message" : "Your public key is: "
+    "message" : "La chiave pubblica è: "
   },
   "friendPublicKey" : {
-    "message" : "Your friend's public key is: "
+    "message" : "La chiave pubblica del tuo amico è: "
   },
   "signed" : {
-    "message" : "Signaling message has valid signature!"
+    "message" : "Segnalazione messaggio ha firma valida!"
   },
   "incorrectlySigned" : {
-    "message" : "Signaling message does not have valid signature!"
+    "message" : "Segnalazione messaggio non ha firma valida!"
   },
   "giveAccess" : {
     "message" : "Dare accesso"
