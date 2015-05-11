@@ -11,7 +11,7 @@
 /// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
 
-export class MockStorage implements freedom_Storage {
+export class MockFreedomStorage implements freedom_Storage {
 
   private store_ :{[key :string] :Object} = {};
 
@@ -45,7 +45,7 @@ export class MockStorage implements freedom_Storage {
     return Promise.resolve<void>();
   }
 
-}  // class MockStorage
+}  // class MockFreedomStorage
 
 export class MockLoggingController {
   public setDefaultFilter = (destination :number, level :number) => {}

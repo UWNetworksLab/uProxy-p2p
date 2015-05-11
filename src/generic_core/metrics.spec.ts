@@ -1,29 +1,8 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import metrics_module = require('./metrics');
-import storage_interface = require('../interfaces/storage');
-
-export class MockStorage implements storage_interface.Storage {
-  constructor(private data_ ?:any) {
-  }
-  public reset = () : Promise<void> => {
-    return Promise.resolve<void>();
-  }
-  public load<T>(key :string) : Promise<T> {
-    if (this.data_[key]) {
-      return Promise.resolve(this.data_[key]);
-    } else {
-      return Promise.reject('non-existing key');
-    }
-  }
-  public save<T>(key :string, val :T) : Promise<T> {
-    this.data_[key] = val;
-    return Promise.resolve();
-  }
-  public keys = () : Promise<string[]> => {
-    return Promise.resolve(Object.keys(this.data_));
-  }
-}  // class MockStorage
+import mock_storage = require('../mocks/mock-storage');
+var MockStorage = mock_storage.MockStorage;
 
 describe('metrics_module.Metrics', () => {
   it('Loads data from storage', (done) => {
@@ -63,11 +42,11 @@ describe('metrics_module.Metrics', () => {
   it('getReport reports obfuscated success and failure values', (done) => {
     var storage = new MockStorage({metrics: {success: 1, failure: 2}});
     var metrics = new metrics_module.Metrics(storage);
-    metrics.getReport().then((payload :Object) => {
-      expect(metrics.data_.success).toBeDefined();
-      expect(metrics.data_.success).not.toEqual(3);
-      expect(metrics.data_.failure).toBeDefined();
-      expect(metrics.data_.failure).not.toEqual(3);
+    metrics.getReport().then((payload :any) => {
+      expect(payload['success-v1']).toBeDefined();
+      expect(payload['success-v1']).not.toEqual(1);
+      expect(payload['failure-v1']).toBeDefined();
+      expect(payload['failure-v1']).not.toEqual(2);
       done();
     });
   });
@@ -110,14 +89,16 @@ describe('metrics_module.DailyMetricsReporter', () => {
   });
 
   it('Invokes on report callback at stored time if in the future', (done) => {
+    var MS_INTO_FUTURE = 10;
+    var timestamp = Date.now() + MS_INTO_FUTURE;
     var storage = new MockStorage(
-        {'metrics-report-timestamp': {nextSendTimestamp: Date.now() + 10}});
+        {'metrics-report-timestamp': {nextSendTimestamp: timestamp}});
     var onReportCallback = jasmine.createSpy('onReportCallback');
     var dailyMetricsReport = new metrics_module.DailyMetricsReporter(
         mockedMetrics, storage, onReportCallback);
     dailyMetricsReport.onceLoaded_.then(() => {
       expect(mockedMetrics.getReport).not.toHaveBeenCalled();
-      jasmine.clock().tick(10);
+      jasmine.clock().tick(MS_INTO_FUTURE);
       expect(mockedMetrics.getReport).toHaveBeenCalled();
       done();
     });

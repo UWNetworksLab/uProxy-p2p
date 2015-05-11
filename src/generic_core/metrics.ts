@@ -9,8 +9,8 @@ var log :logging.Log = new logging.Log('metrics');
 
 export interface MetricsData {
   version :number;
-  success :number;
-  failure :number;
+  success :number;  // Number of successes for getting access only.
+  failure :number;  // Number of failures for getting access only.
 };
 
 export class Metrics {
@@ -56,7 +56,7 @@ export class Metrics {
     }
   }
 
-  public getReport = () => {
+  public getReport = () : Promise<Object> => {
     try {
       crypto.randomUint32();
     } catch (e) {
@@ -97,7 +97,7 @@ export interface DailyMetricsReporterData {
 
 
 export class DailyMetricsReporter {
-  // 10 days in milliseconds.
+  // 5 days in milliseconds.
   public static MAX_TIMEOUT = 5 * 24 * 60 * 60 * 1000;
 
   public onceLoaded_ :Promise<void>;  // Only public for tests
@@ -160,7 +160,7 @@ export class DailyMetricsReporter {
     var randomFloat = Math.random();
     var MS_PER_DAY = 24 * 60 * 60 * 1000;
     var offset_ms = -Math.floor(Math.log(randomFloat) / (1 / MS_PER_DAY));
-    var offset_ms = Math.min(offset_ms, DailyMetricsReporter.MAX_TIMEOUT);
+    offset_ms = Math.min(offset_ms, DailyMetricsReporter.MAX_TIMEOUT);
     return Date.now() + offset_ms;
   }
 
