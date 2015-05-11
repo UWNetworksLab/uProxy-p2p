@@ -195,7 +195,7 @@ var log :logging.Log = new logging.Log('churn');
 
     public onceConnecting :Promise<void>;
     public onceConnected :Promise<void>;
-    public onceDisconnected :Promise<void>;
+    public onceClosed :Promise<void>;
 
     // A short-lived connection used to determine network addresses on which
     // we might be able to communicate with the remote host.
@@ -278,8 +278,8 @@ var log :logging.Log = new logging.Log('churn');
       this.onceConnected = this.obfuscatedConnection_.onceConnected.then(() => {
         this.pcState = peerconnection.State.CONNECTED;
       });
-      this.onceDisconnected = this.obfuscatedConnection_.onceDisconnected.then(
-          () => { this.pcState = peerconnection.State.DISCONNECTED; });
+      this.onceClosed = this.obfuscatedConnection_.onceClosed.then(
+          () => { this.pcState = peerconnection.State.CLOSED; });
 
       // Debugging.
       this.onceProbingComplete_.then((endpoint:NatPair) => {

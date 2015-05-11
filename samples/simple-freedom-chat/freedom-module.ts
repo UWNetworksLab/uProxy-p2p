@@ -60,8 +60,8 @@ function makePeerConnection(name:string) {
   }, (e:Error) => {
     log.error('%1 failed to connect: %2', name, e.message);
   });
-  pc.onceDisconnected.then(() => {
-    log.info(name + ': onceDisconnected');
+  pc.onceClosed.then(() => {
+    log.info(name + ': onceClosed');
   });
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     log.info(name + ': peerOpenedChannelQueue: ' + d.toString());

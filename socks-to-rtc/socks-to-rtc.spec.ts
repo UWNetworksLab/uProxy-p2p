@@ -78,7 +78,7 @@ describe('SOCKS server', function() {
       negotiateConnection: jasmine.createSpy('negotiateConnection'),
       onceConnecting: noopPromise,
       onceConnected: noopPromise,
-      onceDisconnected: noopPromise,
+      onceClosed: noopPromise,
       close: jasmine.createSpy('close')
     };
   });
@@ -109,7 +109,7 @@ describe('SOCKS server', function() {
     (<any>mockTcpServer.onceListening).and.returnValue(Promise.resolve(mockEndpoint));
     (<any>mockTcpServer.onceShutdown).and.returnValue(voidPromise);
     mockPeerConnection.onceConnected = voidPromise;
-    mockPeerConnection.onceDisconnected = voidPromise;
+    mockPeerConnection.onceClosed = voidPromise;
 
     server.start(mockTcpServer, mockPeerConnection).catch(onceServerStopped).then(done);
   });
@@ -123,7 +123,7 @@ describe('SOCKS server', function() {
     (<any>mockTcpServer.onceListening).and.returnValue(Promise.resolve(mockEndpoint));
     (<any>mockTcpServer.onceShutdown).and.returnValue(terminatePromise);
     mockPeerConnection.onceConnected = voidPromise;
-    mockPeerConnection.onceDisconnected = terminatePromise;
+    mockPeerConnection.onceClosed = terminatePromise;
 
     server.start(mockTcpServer, mockPeerConnection).then(onceServerStopped).then(done);
     terminate();

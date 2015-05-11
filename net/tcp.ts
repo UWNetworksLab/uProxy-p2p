@@ -278,7 +278,7 @@ export class Connection {
 
   // isClosed() === state_ === Connection.State.CLOSED iff onceClosed
   // has been rejected or fulfilled. We use isClosed to ensure that we only
-  // fulfill/reject the onceDisconnectd once.
+  // fulfill/reject the onceClosed once.
   private state_ :Connection.State;
   // The underlying Freedom TCP socket.
   private connectionSocket_ :freedom_TcpSocket.Socket;

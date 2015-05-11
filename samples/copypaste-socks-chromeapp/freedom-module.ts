@@ -85,7 +85,7 @@ parentModule.on('start', () => {
   socksRtc.startFromConfig(
       localhostEndpoint,
       pcConfig,
-      false) // obfuscate
+      true) // obfuscate
     .then((endpoint:net.Endpoint) => {
       log.info('socksRtc ready. listening to SOCKS5 on: ' + JSON.stringify(endpoint));
       log.info('` curl -x socks5h://localhost:9999 www.google.com `')
@@ -110,7 +110,7 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       rtcNet.startFromConfig(
           { allowNonUnicast:true },
           pcConfig,
-          false); // obfuscate
+          true); // obfuscate
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.

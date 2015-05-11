@@ -18,9 +18,9 @@ export interface Data extends datachannel.Data {}
 // Describes the state of a P2P connection.
 export enum State {
   WAITING,      // Can move to CONNECTING.
-  CONNECTING,   // Can move to CONNECTED or DISCONNECTED.
-  CONNECTED,    // Can move to DISCONNECTED.
-  DISCONNECTED  // End-state, cannot change.
+  CONNECTING,   // Can move to CONNECTED or CLOSED.
+  CONNECTED,    // Can move to CLOSED.
+  CLOSED  // End-state, cannot change.
 }
 
 export interface PeerConnection<TSignallingMessage> {
@@ -40,8 +40,8 @@ export interface PeerConnection<TSignallingMessage> {
   onceConnecting  :Promise<void>;
   // The |onceConnected| promise is fulfilled when pcState === CONNECTED
   onceConnected :Promise<void>;
-  // The |onceDisconnected| promise is fulfilled when pcState === DISCONNECTED
-  onceDisconnected :Promise<void>;
+  // The |onceClosed| promise is fulfilled when pcState === CLOSED
+  onceClosed :Promise<void>;
 
   // Try to connect to the peer. Will change state from |WAITING| to
   // |CONNECTING|. If there was an error, promise is rejected. Otherwise
@@ -65,8 +65,7 @@ export interface PeerConnection<TSignallingMessage> {
   signalForPeerQueue :handler.QueueHandler<TSignallingMessage, void>;
 
   // Closing the peer connection will close all associated data channels
-  // and set |pcState| to |DISCONNECTED| (and hence fulfills
-  // |onceDisconnected|)
+  // and set |pcState| to |CLOSED| (and hence fulfills |onceClosed|)
   close: () => Promise<void>;
 }
 
@@ -131,8 +130,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Fulfilled once we are connected to the peer. Rejected if connection fails
   // to be established.
   public onceConnected :Promise<void>;
-  // Fulfilled when disconnected. Will never reject.
-  public onceDisconnected :Promise<void>;
+  // Fulfilled when closed. Will never reject.
+  public onceClosed :Promise<void>;
 
   // Queue of channels opened up by the remote peer.
   public peerOpenedChannelQueue :handler.Queue<DataChannel,void>;
@@ -143,12 +142,12 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       handler.Queue<freedom_RTCPeerConnection.RTCIceCandidate,void>;
 
   // Internal promise completion functions for the |onceConnecting|,
-  // |onceConnected| and |onceDisconnected| promises. Must only be
+  // |onceConnected| and |onceClosed| promises. Must only be
   // called once (per respective promise).
   private fulfillConnecting_    : () => void;
   private fulfillConnected_     :() => void;
   private rejectConnected_      :(e:Error) => void;
-  private fulfillDisconnected_  :() => void;
+  private fulfillClosed_  :() => void;
 
   // Data channel that acts as a control for if the peer connection should be
   // open or closed. Created during connection start up.
@@ -181,15 +180,15 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         this.fulfillConnected_ = () => { this.onceConnecting.then(F); };
         this.rejectConnected_ = R;
       });
-    this.onceDisconnected = new Promise<void>((F,R) => {
-        this.fulfillDisconnected_ = F;
+    this.onceClosed = new Promise<void>((F,R) => {
+        this.fulfillClosed_ = F;
       });
 
     // Once connected, add to global listing. Helpful for debugging.
     // Once disconnected, remove from global listing.
     this.onceConnected.then(() => {
       PeerConnectionClass.peerConnections[this.peerName_] = this;
-      this.onceDisconnected.then(() => {
+      this.onceClosed.then(() => {
         delete PeerConnectionClass.peerConnections[this.peerName_];
       });
     }, (e:Error) => {
@@ -244,8 +243,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       this.rejectConnected_(new Error('close was called while connecting.'));
     }
 
-    this.pcState = State.DISCONNECTED;
-    this.fulfillDisconnected_();
+    this.pcState = State.CLOSED;
+    this.fulfillClosed_();
 
     return this.pc_.getSignalingState().then((state:string) => {
       if (state !== 'closed') {
@@ -259,8 +258,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     if (this.pcState === State.CONNECTING) {
       this.rejectConnected_(new Error(s));
     }
-    this.pcState = State.DISCONNECTED;
-    this.fulfillDisconnected_();
+    this.pcState = State.CLOSED;
+    this.fulfillClosed_();
     this.pc_.getSignalingState().then((state:string) => {
       if (state !== 'closed') {
         // Note is expected to invoke |onSignallingStateChange_|
@@ -314,11 +313,14 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     var state = this.pc_.getIceConnectionState().then((state:string) => {
       log.debug('%1: ice connection state: %2', this.peerName_, state);
 
+      if (state === 'disconnected') {
+        log.warn('%1: transient disconnection detected', this.peerName_);
+      }
+
       // No action is needed when the state reaches 'connected', because
       // |this.completeConnection_| is called by the datachannel's |onopen|.
-      if ((state === 'disconnected' || state === 'failed') &&
-          this.pcState != State.DISCONNECTED) {
-      this.closeWithError_('Connection lost: ' + state);
+      if (state === 'failed' && this.pcState !== State.CLOSED) {
+        this.closeWithError_('Connection lost: ' + state);
       }
     });
   }
