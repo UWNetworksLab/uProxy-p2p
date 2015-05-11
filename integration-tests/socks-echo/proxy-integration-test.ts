@@ -133,6 +133,26 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
     }
   }
 
+  public closeEchoConnections = () : Promise<void> => {
+    var allPromises :Promise<void>[] = [];
+    for (var i in this.echoServers_) {
+      var s = this.echoServers_[i];
+      allPromises.push(s.closeAll());
+    }
+    return Promise.all(allPromises).then(() => {
+      console.log('closeEchoConnections complete.');
+    });
+  }
+
+  public notifyClose = (connectionId:string) : Promise<void> => {
+    var connection = this.connections_[connectionId];
+    connection.onceClosed.then(() => {
+      console.log('notifyClose: Closing ' + connectionId);
+      this.dispatchEvent_('sockClosed', connection.connectionId);
+    });
+    return Promise.resolve<void>();
+  }
+
   public echo = (connectionId:string, content:ArrayBuffer) : Promise<ArrayBuffer> => {
     return this.echoMultiple(connectionId, [content])
         .then((responses:ArrayBuffer[]) : ArrayBuffer => {
