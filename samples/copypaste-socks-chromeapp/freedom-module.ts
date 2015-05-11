@@ -16,9 +16,12 @@ import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 // you're debugging. Since the proxy outputs quite a lot of messages, show only
 // warnings by default from the rest of the system.  Note that the proxy is
 // extremely slow in debug mode.
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.info);
-freedom['loggingcontroller']().setFilters(loggingTypes.Destination.console, {
+var loggingController = freedom['loggingcontroller']();
+
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+                                   loggingTypes.Level.info);
+
+loggingController.setFilters(loggingTypes.Destination.console, {
   'SocksToRtc': loggingTypes.Level.info,
   'RtcToNet': loggingTypes.Level.info
 });
