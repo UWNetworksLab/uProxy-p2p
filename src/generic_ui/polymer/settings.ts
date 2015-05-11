@@ -30,7 +30,7 @@ Polymer({
   },
   setStunServer: function() {
     model.globalSettings.stunServers = [{urls: [this.stunServer]}];
-    core.updateGlobalSettings(model.globalSettings);
+    this.saveGlobalSettings();
     if(!this.$.confirmResetServers.hidden) {
       this.$.confirmResetServers.hidden = true;
     }
@@ -46,6 +46,12 @@ Polymer({
   },
   openFeedbackForm: function() {
     this.fire('core-signal', {name: 'open-feedback'});
+  },
+  saveGlobalSettings: function() {
+    core.updateGlobalSettings(model.globalSettings);
+  },
+  observe: {
+    'model.globalSettings.statsReportingEnabled' : 'saveGlobalSettings'
   },
   ready: function() {
     this.ui = ui;

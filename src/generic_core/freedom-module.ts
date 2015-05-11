@@ -23,6 +23,8 @@ import uproxy_core = require('./uproxy_core');
 import logging_types = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import globals = require('./globals');
+import metrics_module = require('./metrics');
 
 import ui_connector = ui.connector;
 
@@ -107,3 +109,13 @@ ui_connector.onPromiseCommand(
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.GET_NAT_TYPE,
     core.getNatType);
+
+var dailyMetricsReporter = new metrics_module.DailyMetricsReporter(
+    globals.metrics, globals.storage,
+    (payload :any) => {
+      if (globals.settings.statsReportingEnabled) {
+        ui_connector.update(
+            uproxy_core_api.Update.POST_TO_CLOUDFRONT,
+            {payload: payload, cloudfrontPath: 'submit-rappor-stats'});
+      }
+    });

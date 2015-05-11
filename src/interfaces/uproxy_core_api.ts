@@ -99,7 +99,8 @@ export enum Update {
   START_GIVING,
   STOP_GIVING,
   STATE,
-  FRIEND_FAILED_TO_GET
+  FRIEND_FAILED_TO_GET,
+  POST_TO_CLOUDFRONT
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
@@ -122,6 +123,12 @@ export interface ConsentCommand {
   path    :social.UserPath;
   action  :ConsentUserAction;
 }
+
+export interface CloudfrontPostData {
+  payload        :Object;
+  cloudfrontPath :string;
+}
+
 /**
  * The primary interface to the uProxy Core.
  *
