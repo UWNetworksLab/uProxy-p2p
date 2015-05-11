@@ -68,8 +68,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
-    }).then(() => {
-      this.user.notifyUI();
     });
 
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
