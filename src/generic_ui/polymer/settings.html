@@ -126,11 +126,7 @@
       white-space: pre-wrap; /* css-3 */
       white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
     }
-    core-icon[icon=announcement],
-    core-icon[icon=help],
-    core-icon[icon=settings],
-    core-icon[icon=refresh],
-    core-icon[icon=settings-power] {
+    #settingsLinks core-icon {
       height: 20px;
       width: 20px;
       margin-right: 5px;
@@ -203,7 +199,7 @@
         </uproxy-link>
 
         <uproxy-link on-tap='{{ logOut }}' role='button'>
-          <core-icon icon='settings-power'></core-icon>
+          <core-icon icon="uproxy-icons:logout"></core-icon>
           Log-out of uProxy
         </uproxy-link>
       </div>

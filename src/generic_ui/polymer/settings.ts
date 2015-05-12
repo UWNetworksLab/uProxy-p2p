@@ -26,6 +26,9 @@ Polymer({
   openAdvancedSettingsForm: function() {
     this.fire('core-signal', {name: 'open-advanced-settings'});
   },
+  observe: {
+    'model.globalSettings.statsReportingEnabled' : 'saveGlobalSettings'
+  },
   ready: function() {
     this.ui = ui;
     this.model = model;

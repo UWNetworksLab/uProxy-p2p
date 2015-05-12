@@ -1,6 +1,7 @@
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
+import metrics_module = require('./metrics');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
 
@@ -70,3 +71,5 @@ export var loadSettings :Promise<void> =
     }).catch((e) => {
       log.info('No global settings loaded', e.message);
     });
+
+export var metrics = new metrics_module.Metrics(storage);

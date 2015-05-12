@@ -169,7 +169,9 @@ describe('remote_user.User', () => {
     instanceId: 'fakeinstance',
     keyHash: <string>null,
     description: 'fake instance',
-    consent: {isRequesting: false, isOffering: false}
+    consent: {isRequesting: false, isOffering: false},
+    name: 'nameFromInstance',
+    userId: 'userIdFromInstance'
   }
 
   describe('client <---> instance', () => {
@@ -211,6 +213,43 @@ describe('remote_user.User', () => {
 
     it('syncs UI after updating instance', () => {
       user.syncInstance_('fakeclient', instanceHandshake);
+    });
+
+    it('Sets user name if pending', () => {
+      var pendingUser = new remote_user.User(network, 'pendingUser');
+      pendingUser.handleClient({
+        userId: 'pendingUser', clientId: 'fakeclient',
+        status: social.ClientStatus.ONLINE, timestamp: 12345
+      });
+      expect(pendingUser.name).toEqual('pending');
+      pendingUser.syncInstance_('fakeclient', instanceHandshake);
+      expect(pendingUser.name).toEqual(instanceHandshake.name);
+    });
+
+    it('Sets user name to userId if pending and no name in handshake', () => {
+      var pendingUser = new remote_user.User(network, 'pendingUser');
+      pendingUser.handleClient({
+        userId: 'pendingUser', clientId: 'fakeclient',
+        status: social.ClientStatus.ONLINE, timestamp: 12345
+      });
+      expect(pendingUser.name).toEqual('pending');
+      pendingUser.syncInstance_('fakeclient', {
+        instanceId: 'fakeinstance', keyHash: <string>null, description: 'x',
+        consent: {isRequesting: false, isOffering: false},
+        name: '', userId: 'userIdFromInstance'
+      });
+      expect(pendingUser.name).toEqual('userIdFromInstance');
+    });
+
+    it('Does not change name for non-pending user', () => {
+      var namedUser = new remote_user.User(network, 'userId');
+      namedUser.handleClient({
+        userId: 'pendingUser', clientId: 'fakeclient',
+        status: social.ClientStatus.ONLINE, timestamp: 12345
+      });
+      namedUser.update({name: 'Henry', userId: 'userId', timestamp: 42});
+      namedUser.syncInstance_('fakeclient', instanceHandshake);
+      expect(namedUser.name).toEqual('Henry');
     });
 
   });  // describe client <---> instance

@@ -11,7 +11,7 @@
 import consent = require('./consent');
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
@@ -68,8 +68,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     public onceLoaded : Promise<void> = new Promise<void>((F, R) => {
       this.fulfillStorageLoad_ = F;
-    }).then(() => {
-      this.user.notifyUI();
     });
 
     // Whether or not there is a UI update (triggered by this.user.notifyUI())
