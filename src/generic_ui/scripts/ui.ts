@@ -10,6 +10,7 @@ import Persistent = require('../../interfaces/persistent');
 import CoreConnector = require('./core_connector');
 import uproxy_core_api = require('../../interfaces/uproxy_core_api');
 import browser_api = require('../../interfaces/browser_api');
+// import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import BrowserAPI = browser_api.BrowserAPI;
 import net = require('../../../../third_party/uproxy-networking/net/net.types');
 import noreConnector = require('./core_connector');
@@ -47,7 +48,9 @@ export var model :Model = {
     hasSeenWelcome: false,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
-    statsReportingEnabled: false
+    statsReportingEnabled: false,
+    // TODO: Reviewer, can we initialize this and globals in one place?
+    consoleFilter: 2 // loggingTypes.Level.warn
   },
   reconnecting: false
 };

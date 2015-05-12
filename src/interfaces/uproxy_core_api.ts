@@ -1,5 +1,6 @@
 /// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
+import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import net = require('../../../third_party/uproxy-networking/net/net.types');
 import social = require('./social');
 import ui = require('./ui');
@@ -23,6 +24,7 @@ export interface GlobalSettings {
   allowNonUnicast  :boolean;
   mode             :ui.Mode;
   statsReportingEnabled :boolean;
+  consoleFilter    :loggingTypes.Level;
 }
 
 export interface InitialState {
@@ -135,7 +137,7 @@ export interface CoreApi {
   // TODO: Implement this or remove it.
   // sendInstanceHandshakeMessage(clientId :string) : void;
 
-  modifyConsent(command :ConsentCommand) : void;
+  modifyConsent(command :ConsentCommand) :void;
 
   getLogs() :Promise<string>;
 
@@ -167,7 +169,7 @@ export interface CoreApi {
   start(instancePath :social.InstancePath) : Promise<net.Endpoint>;
   stop () : void;
 
-  updateGlobalSettings(newSettings :GlobalSettings) : void;
+  updateGlobalSettings(newSettings :GlobalSettings) :void;
   // TODO: rename toggle-option and/or replace with real configuration system.
   // TODO: Implement this or remove it.
   // changeOption(option :string) : void;
@@ -177,6 +179,6 @@ export interface CoreApi {
 
   // TODO: use Event instead of attaching manual handler. This allows event
   // removal, etc.
-  onUpdate(update :Update, handler :Function) : void;
+  onUpdate(update :Update, handler :Function) :void;
 }
 
