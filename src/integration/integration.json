@@ -2,17 +2,7 @@
   "name": "fully proxying integration tests",
   "app": {
     "script": [
-      "scripts/uproxy-lib/arraybuffers/arraybuffers.js",
-      "scripts/uproxy-lib/handler/queue.js",
-      "scripts/uproxy-networking/ipaddrjs/ipaddr.min.js",
-      "scripts/uproxy-lib/logging/logging.js",
-      "scripts/uproxy-networking/tcp/tcp.js",
-      "scripts/uproxy-lib/webrtc/datachannel.js",
-      "scripts/uproxy-lib/webrtc/peerconnection.js",
-      "scripts/uproxy-networking/socks-common/socks-headers.js",
-      "scripts/uproxy-networking/socks-to-rtc/socks-to-rtc.js",
-      "scripts/uproxy-networking/rtc-to-net/rtc-to-net.js",
-      "test_connection.js"
+      "test_connection.static.js"
     ]
   },
   "provides": [

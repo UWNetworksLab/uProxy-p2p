@@ -27,6 +27,7 @@ Polymer({
     heading: '',
     buttons: []
   },
+  toastMessage: '',
   updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -103,7 +104,6 @@ Polymer({
     this.ui_constants = ui_types;
     this.user_interface = user_interface;
     this.model = model;
-    this.closeToastTimeout = null;
     if (ui.browserApi.browserSpecificElement){
       var browserCustomElement = document.createElement(ui.browserApi.browserSpecificElement);
       this.$.browserElementContainer.appendChild(browserCustomElement);
@@ -148,20 +148,17 @@ Polymer({
       ui.signalToFire = '';
     }
   },
-  /* All functions below help manage paper-toast behaviour. */
-  closeToast: function() {
-    ui.toastMessage = null;
+  revertProxySettings: function() {
+    this.ui.stopGettingInUiAndConfig(false);
   },
-  messageNotNull: function(toastMessage :string) {
-    // Whether the toast is shown is controlled by if ui.toastMessage
-    // is null. This function returns whether ui.toastMessage == null,
-    // and also sets a timeout to close the toast.
-    if (toastMessage) {
-      clearTimeout(this.clearToastTimeout);
-      this.clearToastTimeout = setTimeout(this.closeToast, 10000);
-      return true;
+  toastMessageChanged: function(oldVal :string, newVal :string) {
+    if (newVal) {
+      this.toastMessage = newVal;
+      this.$.toast.show();
+
+      // clear the message so we can pick up on other changes
+      ui.toastMessage = null;
     }
-    return false;
   },
   openTroubleshoot: function() {
     if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
@@ -169,7 +166,7 @@ Polymer({
     } else {
       this.troubleshootTitle = "Unable to share access";
     }
-    this.closeToast();
+    this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});
   },
   stringMatches: function(str1 :string, str2 :string) {
@@ -180,7 +177,7 @@ Polymer({
     }
     return false;
   },
-  topOfStatuses: function(gettingStatus :social.GettingState, sharingStatus :social.SharingState) {
+  topOfStatuses: function(statuses: string[], visible :boolean) {
     // Returns number of pixels from the bottom of the window a toast
     // can be positioned without interfering with the getting or sharing
     // status bars.
@@ -188,16 +185,21 @@ Polymer({
     // bottom of its parent element, this function is needed to control toast
     // placement rather than a simpler solution such as moving the toast
     // inside the roster element.
-    var padding = 10;
+    var height = 10; // should start 10px up
     var statusRowHeight = 58; // From style of the statusRow divs.
-    if (gettingStatus && sharingStatus) {
-      return 2 * statusRowHeight + padding;
-    } else if (gettingStatus || sharingStatus) {
-      return statusRowHeight + padding;
+
+    if (!visible) {
+      // if the statuses are not on the screen, we don't need to do anything
+      return height;
     }
-    // If there are no status bars, toasts should still 'float' a little
-    // above the bottom of the window.
-    return padding;
+
+    for (var i in statuses) {
+      if (statuses[i]) {
+        height += statusRowHeight;
+      }
+    }
+
+    return height;
   },
   // mainPanel.selected can be either "drawer" or "main"
   // Our "drawer" is the settings panel. When the settings panel is open,
@@ -212,6 +214,7 @@ Polymer({
     }
   },
   observe: {
-    '$.mainPanel.selected' : 'drawerToggled'
+    '$.mainPanel.selected' : 'drawerToggled',
+    'ui.toastMessage': 'toastMessageChanged',
   }
 });

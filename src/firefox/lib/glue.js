@@ -57,9 +57,7 @@ function setUpConnection(freedom, panel, button) {
   });
 
   panel.port.on('setIcon', function(iconFiles) {
-    button.state("window", {
-      icon : iconFiles
-    });
+    button.icon = iconFiles;
   });
 
   panel.port.on('showPanel', function() {

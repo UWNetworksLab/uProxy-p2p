@@ -27,7 +27,7 @@ export var moduleName = 'uProxy App Top Level';
 freedom('generic_core/freedom-module.json', {
   'logger': 'uproxy-lib/loggingprovider/freedom-module.json',
   'debug': 'debug',
-  'portType': 'frame',
+  'portType': 'worker',
   'oauth': [() => { return new Chrome_oauth(oauthOptions); }]
 }).then((uProxyModuleFactory:OnEmitModuleFactory) => {
   uProxyAppChannel = uProxyModuleFactory();

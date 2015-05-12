@@ -7,7 +7,7 @@ import storage = globals.storage;
 
 local_storage.DEBUG_STATESTORAGE = false;
 
-// Depends on the MockStorage that executes everything synchronously.
+// Depends on the MockFreedomStorage that executes everything synchronously.
 describe('local_storage.Storage', () => {
 
   beforeEach(() => {

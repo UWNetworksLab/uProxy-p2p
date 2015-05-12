@@ -1,22 +1,22 @@
-/// <reference path="../networking-typings/communications.d.ts" />
-/// <reference path="../socks-common/socks-headers.d.ts" />
-/// <reference path="../tcp/tcp.d.ts" />
+import tcp = require('../../../third_party/uproxy-lib/net/tcp');
+import socks_common = require('../../../third_party/uproxy-lib/socks-common/socks-headers');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 
 class ProxyTester {
-  private echoServer_ :Tcp.Server;
-  private connections_ :{ [index:string]: Tcp.Connection; } = {};
+  private echoServer_ :tcp.Server;
+  private connections_ :{ [index:string]: tcp.Connection; } = {};
   private localhost_ :string = '127.0.0.1';
 
   constructor() {
   }
 
   public startEchoServer = () : Promise<number> => {
-    var server = new Tcp.Server({
+    var server = new tcp.Server({
       address: this.localhost_,
       port: 0
     });
 
-    server.connectionsQueue.setSyncHandler((tcpConnection:Tcp.Connection) => {
+    server.connectionsQueue.setSyncHandler((tcpConnection:tcp.Connection) => {
       tcpConnection.dataFromSocketQueue.setSyncHandler((buffer:ArrayBuffer) => {
         tcpConnection.send(buffer);
       });
@@ -28,33 +28,33 @@ class ProxyTester {
   }
 
   // Assumes webEndpoint is IPv4.
-  private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<Tcp.Connection> => {
-    var connection = new Tcp.Connection({endpoint: socksEndpoint});
-    var authRequest = Socks.composeAuthHandshakeBuffer([Socks.Auth.NOAUTH]);
+  private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
+    var connection = new tcp.Connection({endpoint: socksEndpoint});
+    var authRequest = socks_common.composeAuthHandshakeBuffer([socks_common.Auth.NOAUTH]);
     connection.send(authRequest);
-    var connected = new Promise<Tcp.ConnectionInfo>((F, R) => {
+    var connected = new Promise<tcp.ConnectionInfo>((F, R) => {
       connection.onceConnected.then(F);
       connection.onceClosed.then(R);
     });
     var firstBufferPromise :Promise<ArrayBuffer> = connection.receiveNext();
-    return connected.then((i:Tcp.ConnectionInfo) => {
+    return connected.then((i:tcp.ConnectionInfo) => {
       return firstBufferPromise;
     }).then((buffer:ArrayBuffer) : Promise<ArrayBuffer> => {
-      var auth = Socks.interpretAuthResponse(buffer);
-      if (auth != Socks.Auth.NOAUTH) {
+      var auth = socks_common.interpretAuthResponse(buffer);
+      if (auth != socks_common.Auth.NOAUTH) {
         throw new Error('SOCKS server returned unexpected AUTH response.  ' +
-                        'Expected NOAUTH (' + Socks.Auth.NOAUTH + ') but got ' + auth);
+                        'Expected NOAUTH (' + socks_common.Auth.NOAUTH + ') but got ' + auth);
       }
 
-      var request :Socks.Request = {
-        command: Socks.Command.TCP_CONNECT,
+      var request :socks_common.Request = {
+        command: socks_common.Command.TCP_CONNECT,
         endpoint: webEndpoint,
       };
-      connection.send(Socks.composeRequestBuffer(request));
+      connection.send(socks_common.composeRequestBuffer(request));
       return connection.receiveNext();
-    }).then((buffer:ArrayBuffer) : Promise<Tcp.Connection> => {
-      var response = Socks.interpretResponseBuffer(buffer);
-      if (response.reply != Socks.Reply.SUCCEEDED) {
+    }).then((buffer:ArrayBuffer) : Promise<tcp.Connection> => {
+      var response = socks_common.interpretResponseBuffer(buffer);
+      if (response.reply != socks_common.Reply.SUCCEEDED) {
         return Promise.reject(response);
       }
       return Promise.resolve(connection);
@@ -69,7 +69,7 @@ class ProxyTester {
       port: port
     };
     return this.connectThroughSocks_(socksEndpoint, echoEndpoint)
-           .then((connection:Tcp.Connection) => {
+           .then((connection:tcp.Connection) => {
         this.connections_[connection.connectionId] = connection;
         return connection.connectionId;
       }).catch((e) => {

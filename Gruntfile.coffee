@@ -39,8 +39,6 @@ taskManager.add 'build_chrome_ext', [
   'copy:chrome_extension_additional'
   'vulcanize:chromeExtInline'
   'vulcanize:chromeExtCsp'
-  'vulcanize:chromeDisconnectedInline'
-  'vulcanize:chromeDisconnectedCsp'
   'vulcanize:chromeViewLogsInline'
   'vulcanize:chromeViewLogsCsp'
   'browserify:chromeExtMain'
@@ -62,19 +60,11 @@ taskManager.add 'build_firefox', [
   'copy:firefox_additional'
   'vulcanize:firefoxInline'
   'vulcanize:firefoxCsp'
-  'vulcanize:firefoxDisconnectedInline'
-  'vulcanize:firefoxDisconnectedCsp'
   'vulcanize:firefoxViewLogsInline'
   'vulcanize:firefoxViewLogsCsp'
   'string-replace:firefoxVulcanized'
   'browserify:firefoxContext'
   'browserify:firefoxVulcanized'
-]
-
-taskManager.add 'build_firefox_xpi', [
-  'build_firefox'
-  'mozilla-addon-sdk'
-  'mozilla-cfx-xpi:dist'
 ]
 
 # --- Testing tasks ---
@@ -83,6 +73,7 @@ taskManager.add 'test_core', [
   'browserify:genericCoreFirewallSpec'
   'browserify:genericCoreUproxyCoreSpec'
   'browserify:genericCoreLocalInstanceSpec'
+  'browserify:genericCoreMetricsSpec'
   'browserify:genericCoreRemoteInstanceSpec'
   'browserify:genericCoreRemoteConnectionSpec'
   'browserify:genericCoreRemoteUserSpec'
@@ -104,6 +95,16 @@ taskManager.add 'test_chrome', [
   'jasmine:chrome_extension'
 ]
 
+taskManager.add 'integration_test', [
+  'build_chrome'
+  'copy:integration'
+  'ts:integration_specs'
+  'ts:integration_freedom_module'
+  'browserify:integrationSpec'
+  'browserify:integrationFreedomModule'
+  'jasmine_chromeapp'
+]
+
 taskManager.add 'everything', [
   'build'
   'test'
@@ -120,6 +121,13 @@ taskManager.add 'test', [
 taskManager.add 'build', [
   'build_chrome'
   'build_firefox'
+]
+
+taskManager.add 'dist', [
+  'build'
+  'copy:dist'
+  'mozilla-addon-sdk'
+  'mozilla-cfx-xpi:dist'
 ]
 
 taskManager.add 'default', [
@@ -164,7 +172,6 @@ browserifyIntegrationTest = (path) ->
 #-------------------------------------------------------------------------
 freedomForChromePath = path.dirname(require.resolve('freedom-for-chrome/package.json'))
 uproxyLibPath = path.dirname(require.resolve('uproxy-lib/package.json'))
-uproxyNetworkingPath = path.dirname(require.resolve('uproxy-networking/package.json'))
 
 #ipaddrjsPath = path.dirname(require.resolve('ipaddr.js/package.json'))
 # TODO(ldixon): update utransformers package to uproxy-obfuscators
@@ -190,19 +197,17 @@ FILES =
     'version/version.js'
   ]
 
-  uproxy_networking_common: [
-    'ipaddrjs/ipaddr.min.js'
-    'tcp/tcp.js'
-    'socks-common/socks-headers.js'
-    'socks-to-rtc/socks-to-rtc.js'
-    'rtc-to-net/rtc-to-net.js'
-  ]
   uproxy_lib_common: [
+    'ipaddrjs/ipaddr.min.js'
     'logging/logging.js'
     'loggingprovider/loggingprovider.js'
     'loggingprovider/loggingprovider.json'
     'arraybuffers/arraybuffers.js'
     'handler/queue.js'
+    'rtc-to-net/rtc-to-net.js'
+    'socks-common/socks-headers.js'
+    'socks-to-rtc/socks-to-rtc.js'
+    'tcp/tcp.js'
     'webrtc/datachannel.js'
     'webrtc/peerconnection.js'
   ]
@@ -270,7 +275,6 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON('package.json')
     pkgs:
       lib: grunt.file.readJSON('node_modules/uproxy-lib/package.json')
-      net: grunt.file.readJSON('node_modules/uproxy-networking/package.json')
       freedom: grunt.file.readJSON('node_modules/freedom/package.json')
       freedomchrome: grunt.file.readJSON('node_modules/freedom-for-chrome/package.json')
       freedomfirefox: grunt.file.readJSON('node_modules/freedom-for-firefox/package.json')
@@ -314,26 +318,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: path.join(uproxyLibPath, 'third_party'),
-              src: ['freedom-typings/**/*', 'promise-polyfill.js'],
-              dest: thirdPartyBuildPath
-          },
-          # Copy the distirbution directory of uproxy-networking into third
-          # party.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(uproxyNetworkingPath, 'build/dist'),
               src: ['**/*'],
-              dest: path.join(thirdPartyBuildPath, 'uproxy-networking/'),
-          },
-          # Use the third_party definitions from uproxy-networking.
-          {
-              nonull: true,
-              expand: true,
-              cwd: path.join(uproxyNetworkingPath, 'build/third_party'),
-              src: ['i18n/**', 'ipaddrjs/**', 'ipaddrjs/**', 'regex2dfa/**',
-                    'polymer/**', 'sha1/**', 'socks5-http-client/**',
-                    'uTransformers/**'],
               dest: thirdPartyBuildPath
           }
         ]
@@ -354,16 +339,115 @@ module.exports = (grunt) ->
       # Copy releveant files for distribution.
       dist:
         files: [
-          {
-              nonull: true,
-              expand: true,
-              cwd: devBuildPath,
-              src: ['**/*',
-                    '!**/*.spec.js',
-                    '!**/*.spec.*.js',
-                    '!samples/**/*',],
-              dest: 'build/dist/',
-              onlyIf: 'modified'
+          { # Chrome extension
+            expand: true
+            cwd: chromeExtDevPath
+            src: [
+              'manifest.json'
+
+              'bower/webcomponentsjs/webcomponents.min.js'
+              'bower/polymer/polymer.js'
+
+              'generic_ui/*.html'
+              'generic_ui/polymer/vulcanized*.{html,js}'
+              '!generic_ui/polymer/vulcanized*inline.html'
+              '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+
+              'generic_ui/scripts/copypaste.js'
+              'generic_ui/scripts/get_logs.js'
+              'generic_ui/scripts/context.static.js'
+              'scripts/background.static.js'
+              '!**/*spec*'
+
+              # extra components we use
+              'generic_ui/fonts/*'
+              'generic_ui/icons/*'
+              'icons/*'
+              '_locales/**'
+            ]
+            dest: 'build/dist/chrome/extension'
+          }
+          { # Chrome app
+            expand: true
+            cwd: chromeAppDevPath
+            src: [
+              'manifest.json'
+              '*.html'
+
+              'bower/webcomponentsjs/webcomponents.min.js'
+              'bower/polymer/polymer.js'
+
+              # UI for not-connected
+              # This is not browserified so we use .js instead of .static.js
+              'polymer/vulcanized.{html,js}'
+
+              # actual scripts that run things
+              'freedomjs-anonymized-metrics/anonmetrics.json'
+              'freedomjs-anonymized-metrics/metric.js'
+              'freedom-for-chrome/freedom-for-chrome.js'
+              'freedom-social-xmpp/social.google.json'
+              'freedom-social-xmpp/socialprovider.js'
+              'freedom-social-xmpp/vcardstore.js'
+              'freedom-social-xmpp/node-xmpp-browser.js'
+              'freedom-social-xmpp/google-auth.js'
+              'freedom-social-firebase/social.firebase-facebook.json'
+              'freedom-social-firebase/firebase-shims.js'
+              'freedom-social-firebase/firebase.js'
+              'freedom-social-firebase/firebase-social-provider.js'
+              'freedom-social-firebase/facebook-social-provider.js'
+
+              '**/freedom-module.json'
+              '**/*.static.js'
+              '!**/*spec*'
+
+              'icons/*'
+              'fonts/*'
+              '_locales/**'
+            ]
+            dest: 'build/dist/chrome/app'
+          }
+          { # Firefox
+            expand: true
+            cwd: firefoxDevPath
+            src: [
+              'package.json'
+
+              # addon sdk scripts
+              'lib/**/*.js'
+
+              'data/freedomjs-anonymized-metrics/anonmetrics.json'
+              'data/freedomjs-anonymized-metrics/metric.js'
+              'data/freedom-for-firefox/freedom-for-firefox.jsm'
+              'data/freedom-social-xmpp/social.google.json'
+              'data/freedom-social-xmpp/socialprovider.js'
+              'data/freedom-social-xmpp/vcardstore.js'
+              'data/freedom-social-xmpp/node-xmpp-browser.js'
+              'data/freedom-social-xmpp/google-auth.js'
+              'data/freedom-social-firebase/social.firebase-facebook.json'
+              'data/freedom-social-firebase/firebase-shims.js'
+              'data/freedom-social-firebase/firebase.js'
+              'data/freedom-social-firebase/firebase-social-provider.js'
+              'data/freedom-social-firebase/facebook-social-provider.js'
+
+              'data/**/freedom-module.json'
+              'data/**/*.static.js'
+              'data/scripts/get_logs.js'
+              '!**/*spec*'
+
+              'data/bower/webcomponentsjs/webcomponents.min.js'
+              'data/bower/polymer/polymer.js'
+
+              'data/generic_ui/*.html'
+              'data/generic_ui/polymer/vulcanized*.{html,js}'
+              '!data/generic_ui/polymer/vulcanized*inline.html'
+              '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+
+              'data/fonts/*'
+              'data/icons/*'
+              'data/generic_ui/fonts/*'
+              'data/generic_ui/icons/*'
+            ]
+            dest: 'build/dist/firefox'
           }
         ]
 
@@ -397,7 +481,7 @@ module.exports = (grunt) ->
         files: [
           { # copy chrome extension panel components from the background
             expand: true, cwd: chromeExtDevPath
-            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*']
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html']
             dest: chromeExtDevPath + '/generic_ui'
           }
         ]
@@ -414,9 +498,14 @@ module.exports = (grunt) ->
             'bower'
             'sha1'
             'uproxy-lib/loggingprovider'
-            'uproxy-networking/churn-pipe'
+            'uproxy-lib/churn-pipe'
           ]
           files: [
+            {
+              expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
+              src: ['anonmetrics.json', 'metric.js']
+              dest: chromeAppDevPath + '/freedomjs-anonymized-metrics'
+            },
             {
               expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
               src: ['**']
@@ -466,9 +555,14 @@ module.exports = (grunt) ->
             'bower'
             'sha1'
             'uproxy-lib/loggingprovider'
-            'uproxy-networking/churn-pipe'
+            'uproxy-lib/churn-pipe'
           ]
           files: [
+            {
+              expand: true, cwd: 'node_modules/freedomjs-anonymized-metrics/',
+              src: ['anonmetrics.json', 'metric.js']
+              dest: firefoxDevPath + 'data/freedomjs-anonymized-metrics'
+            },
             {
               expand: true, cwd: 'node_modules/freedom-social-xmpp/dist/',
               src: ['**']
@@ -502,11 +596,7 @@ module.exports = (grunt) ->
           # Copy compiled Chrome App code, required for integration tests
           expand: true, cwd: chromeAppDevPath
           src: ['**', '!**/spec', '!**/*.md', '!**/*.ts']
-          dest: 'build/compile-src/integration'
-        }, {
-          expand: true, cwd: 'src/integration/'
-          src: ['gtalk_credentials.js', 'integration.json']
-          dest: 'build/compile-src/integration'
+          dest: devBuildPath + '/integration'
         }]
     }  # copy
 
@@ -526,7 +616,6 @@ module.exports = (grunt) ->
               version: '<%= pkg.version %>'
               gitcommit: '<%= gitinfo.local.branch.current.SHA %>'
               'uproxy-lib': '<%= pkgs.lib.version %>'
-              'uproxy-networking': '<%= pkgs.net.version %>'
               freedom: '<%= pkgs.freedom.version %>'
               'freedom-for-chrome': '<%= pkgs.freedomchrome.version %>'
               'freedom-for-firefox': '<%= pkgs.freedomfirefox.version %>'
@@ -570,6 +659,14 @@ module.exports = (grunt) ->
         devBuildPath + '/firefox/**/*.ts'
       ]
 
+      integration_specs: compileTypescript [
+      	devBuildPath + '/integration/*.ts'
+      	'!' + devBuildPath + '/integration/test_connection.ts'
+      ]
+      integration_freedom_module: compileTypescript [
+      	devBuildPath + '/integration/test_connection.ts'
+      ]
+
 
     browserify:
       chromeAppMain: Rule.browserify 'chrome/app/scripts/main.core-env'
@@ -600,6 +697,7 @@ module.exports = (grunt) ->
       genericCoreFreedomModule: Rule.browserify 'generic_core/freedom-module'
       genericCoreUproxyCoreSpec: Rule.browserifySpec 'generic_core/uproxy_core'
       genericCoreLocalInstanceSpec: Rule.browserifySpec 'generic_core/local-instance'
+      genericCoreMetricsSpec: Rule.browserifySpec 'generic_core/metrics'
       genericCoreRemoteConnectionSpec: Rule.browserifySpec 'generic_core/remote-connection'
       genericCoreRemoteInstanceSpec: Rule.browserifySpec 'generic_core/remote-instance'
       genericCoreRemoteUserSpec: Rule.browserifySpec 'generic_core/remote-user'
@@ -608,6 +706,8 @@ module.exports = (grunt) ->
 
       genericUiUiSpec: Rule.browserifySpec 'generic_ui/scripts/ui'
       genericUiUserSpec: Rule.browserifySpec 'generic_ui/scripts/user'
+      integrationSpec: Rule.browserifySpec 'integration/core'
+      integrationFreedomModule: Rule.browserify 'integration/test_connection'
 
     #-------------------------------------------------------------------------
     jasmine:
@@ -619,19 +719,19 @@ module.exports = (grunt) ->
 
     jasmine_chromeapp: {
       all: {
-        src: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-              'build/compile-src/integration/scripts/uproxy.js',
-              'build/compile-src/integration/gtalk_credentials.js',
-              'build/compile-src/integration/**/*.js',
-              'build/compile-src/integration/**/*.json',
-              'build/compile-src/integration/core.spec.js']
+        files: [
+          {
+            cwd: devBuildPath + '/integration/',
+            src: ['**/*'],
+            dest: './',
+            expand: true
+          }
+        ],
+        scripts: ['freedom-for-chrome/freedom-for-chrome.js',
+                  'core.spec.static.js'
+        ],
         options: {
-          paths: ['node_modules/freedom-for-chrome/freedom-for-chrome.js',
-                  'build/compile-src/integration/scripts/uproxy.js',
-                  'build/compile-src/integration/scripts/uproxy-lib/arraybuffers/arraybuffers.js',
-                  'build/compile-src/integration/gtalk_credentials.js',
-                  'build/compile-src/integration/core.spec.js'
-          ],
+          outdir: 'build/dev/uproxy/integration/'
           # Uncomment this for debugging
           # keepRunner: true,
         }
@@ -646,8 +746,8 @@ module.exports = (grunt) ->
       'dist':
         options:
           'mozilla-addon-sdk': 'latest'
-          extension_dir: 'build/dev/uproxy/firefox'
-          dist_dir: 'build/dist/'
+          extension_dir: 'build/dist/firefox'
+          dist_dir: 'build/dist'
 
     vulcanize:
       chromeExtInline:
@@ -674,22 +774,6 @@ module.exports = (grunt) ->
         vulcanizeCsp(
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized-inline.html',
             firefoxDevPath + '/data/generic_ui/polymer/vulcanized.html')
-      chromeDisconnectedInline:
-          vulcanizeInline(
-              chromeExtDevPath + '/generic_ui/polymer/confirm.html',
-              chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      chromeDisconnectedCsp:
-        vulcanizeCsp(
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            chromeExtDevPath + '/generic_ui/polymer/vulcanized-disconnected.html')
-      firefoxDisconnectedInline:
-        vulcanizeInline(
-            firefoxDevPath + '/data/generic_ui/polymer/confirm.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html')
-      firefoxDisconnectedCsp:
-        vulcanizeCsp(
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected-inline.html',
-            firefoxDevPath + '/data/generic_ui/polymer/vulcanized-disconnected.html')
       chromeViewLogsInline:
         vulcanizeInline(
             chromeExtDevPath + '/generic_ui/polymer/logs.html',
