@@ -98,7 +98,6 @@ var log :logging.Log = new logging.Log('remote-user');
 
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
-        this.fulfillStorageLoad_();
       }).catch((e) => {
         // User not found in storage - we should fulfill the create promise
         // anyway as this is not an error.
@@ -385,10 +384,12 @@ var log :logging.Log = new logging.Log('remote-user');
      * Only sends to UI if the user is ready to be visible. (has UserProfile)
      */
     public notifyUI = () : void => {
-      var state = this.currentStateForUI();
-      if (state) {
-        ui.connector.syncUser(state);
-      }
+      this.onceLoaded.then(() => {
+        var state = this.currentStateForUI();
+        if (state) {
+          ui.connector.syncUser(state);
+        }
+      });
     }
 
     public monitor = () : void => {
@@ -457,12 +458,16 @@ var log :logging.Log = new logging.Log('remote-user');
       }
 
       // Restore all instances.
+      var onceLoadedPromises :Promise<void>[] = [];
       for (var i in state.instanceIds) {
         var instanceId = state.instanceIds[i];
         if (!(instanceId in this.instances_)) {
           this.instances_[instanceId] = new remote_instance.RemoteInstance(this, instanceId);
+          onceLoadedPromises.push(this.instances_[instanceId].onceLoaded);
         }
+        
       }
+      Promise.all(onceLoadedPromises).then(this.fulfillStorageLoad_);
 
       if (state.consent) {
         this.consent = state.consent;
