@@ -353,6 +353,8 @@ module.exports = (grunt) ->
               '!generic_ui/polymer/vulcanized*inline.html'
               '!generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
 
+              'generic_ui/scripts/copypaste.js'
+              'generic_ui/scripts/get_logs.js'
               'generic_ui/scripts/context.static.js'
               'scripts/background.static.js'
               '!**/*spec*'
@@ -373,6 +375,7 @@ module.exports = (grunt) ->
               '*.html'
 
               'bower/webcomponentsjs/webcomponents.min.js'
+              'bower/polymer/polymer.js'
 
               # UI for not-connected
               # This is not browserified so we use .js instead of .static.js
@@ -428,6 +431,7 @@ module.exports = (grunt) ->
 
               'data/**/freedom-module.json'
               'data/**/*.static.js'
+              'data/scripts/get_logs.js'
               '!**/*spec*'
 
               'data/bower/webcomponentsjs/webcomponents.min.js'
@@ -477,7 +481,7 @@ module.exports = (grunt) ->
         files: [
           { # copy chrome extension panel components from the background
             expand: true, cwd: chromeExtDevPath
-            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*']
+            src: ['polymer/*', 'scripts/*', 'icons/*', 'fonts/*', '*.html']
             dest: chromeExtDevPath + '/generic_ui'
           }
         ]
