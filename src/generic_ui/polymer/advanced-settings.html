@@ -50,20 +50,6 @@
       text-align: center;
       background-color: #ffffff;
     }
-    core-icon[icon="launch"],
-    core-icon[icon="help"]{
-      height: 15px;
-      color: grey;
-      opacity: 0.6;
-      margin-bottom: 2px;
-      -webkit-transition: all 0.23s !important;
-      -moz-transition: all 0.23s !important;
-      transition: all 0.23s !important;
-    }
-    core-icon[icon="launch"]:hover,
-    core-icon[icon="help"]:hover{
-      opacity: 1;
-    }
     core-tooltip::shadow #tooltip {
       /* Without this, the first time you view the
          tooltip, it appears off center. */
@@ -84,10 +70,6 @@
     }
     paper-input-decorator {
       font-size: 1.4em;
-    }
-    uproxy-action-dialog {
-      top: 30%;
-      z-index: 1002; /* Must be greater than core-overlay-backdrop */
     }
     paper-progress::shadow #activeProgress {
       background-color: #009688;
@@ -137,12 +119,6 @@
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>SET</div>
       </div>
     </core-overlay>
-    <uproxy-action-dialog backdrop layered="false" id='sendingAdvancedSettingsDialog' autoCloseDisabled='true'>
-      <div id='sendingAdvancedSettings'>
-        Setting<br>
-        <paper-progress indeterminate='true'></paper-progress>
-      </div>
-    </uproxy-action-dialog>
   </template>
   <script src='advanced-settings.js'></script>
 </polymer-element>

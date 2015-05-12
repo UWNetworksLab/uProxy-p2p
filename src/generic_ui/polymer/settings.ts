@@ -5,8 +5,6 @@ var core = ui_context.core;
 var model = ui_context.model;
 
 Polymer({
-  displayAdvancedSettings: false,
-  advancedSettings: JSON.stringify(model.globalSettings, null, ' '),
   logOut: function() {
     ui.logout({name: model.onlineNetwork.name,
                                    userId: model.onlineNetwork.userId}).then(() => {
