@@ -1,31 +1,26 @@
 /// <reference path='./context.d.ts' />
 
-// TODO:Reviewer I copied this from settings.tx. Should both files use this.core as specified in ready()?
-var ui = ui_context.ui;
-var core = ui_context.core;
-var model = ui_context.model;
-
 Polymer({
-  settings: JSON.stringify(model.globalSettings, null, ' '),
+  settings: '',
   close: function() {
-    this.$.feedbackPanel.close();
+    this.$.advancedSettingsPanel.close();
   },
   open: function(e :Event, detail :{ includeLogs: boolean }) {
+    this.settings = JSON.stringify(ui_context.model.globalSettings, null, ' ');
     this.$.advancedSettingsPanel.open();
   },
   setAdvancedSettings: function() {
-    this.model.globalSettings = JSON.parse(this.advancedSettings);
-    // TODO: Catch errors.
-    core.updateGlobalSettings(model.globalSettings);
-    // TODO: Add confirmation back in.
-    // if(!this.$.confirmResetAdvancedSettings.hidden) {
-    //   this.$.confirmResetAdvancedSettings.hidden = true;
-    // }
-    // this.$.confirmUpdateAdvancedSettings.hidden = false;
-  },
-  ready: function() {
-    this.ui = ui_context.ui;
-    this.model = ui_context.model;
+    try {
+    ui_context.model.globalSettings = JSON.parse(this.settings);
+    }
+    catch (e) {
+      this.$.failedSetAdvancedSettings.hidden = false;
+      this.$.confirmSetAdvancedSettings.hidden = true;
+    }
+
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+    this.$.failedSetAdvancedSettings.hidden = true;
+    this.$.confirmSetAdvancedSettings.hidden = false;
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
