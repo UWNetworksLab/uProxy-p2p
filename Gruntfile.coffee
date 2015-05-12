@@ -379,6 +379,8 @@ module.exports = (grunt) ->
               'polymer/vulcanized.{html,js}'
 
               # actual scripts that run things
+              'freedomjs-anonymized-metrics/anonmetrics.json'
+              'freedomjs-anonymized-metrics/metric.js'
               'freedom-for-chrome/freedom-for-chrome.js'
               'freedom-social-xmpp/social.google.json'
               'freedom-social-xmpp/socialprovider.js'
@@ -410,6 +412,8 @@ module.exports = (grunt) ->
               # addon sdk scripts
               'lib/**/*.js'
 
+              'data/freedomjs-anonymized-metrics/anonmetrics.json'
+              'data/freedomjs-anonymized-metrics/metric.js'
               'data/freedom-for-firefox/freedom-for-firefox.jsm'
               'data/freedom-social-xmpp/social.google.json'
               'data/freedom-social-xmpp/socialprovider.js'
