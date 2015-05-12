@@ -22,12 +22,12 @@ var CHUNK_SIZE = 1024 * 15;
 // The maximum amount of bytes we should allow to get queued up in
 // peerconnection. Any more and we start queueing in JS. There are two reasons
 // to limit this:
-// 0. Data channels are closed by WebRTC when the buffer fills, so we really
+// 1. Data channels are closed by WebRTC when the buffer fills, so we really
 // don't want that to happen accidentally. More info in this thread, which
 // mentions a limit of 16MB for Chrome 37+ and 100 messages for previous versions:
 //   https://code.google.com/p/webrtc/issues/detail?id=2866
 
-// 1. This limit sets the reaction time for backpressure.  Having extremely fast
+// 2. This limit sets the reaction time for backpressure.  Having extremely fast
 // backpressure reaction time is crucial to preventing a huge backlog of TCP
 // data events.  If CHURN is enabled, this backlog also blocks all UDP data
 // transmission, and if the backlog exceeds 5 seconds, it can cause the
