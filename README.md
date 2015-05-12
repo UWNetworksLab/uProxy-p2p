@@ -91,19 +91,6 @@ Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/
 
 You can use `grunt build_firefox` from the root directory of the repository to compile just Firefox comonents.
 
-
-#### Starting two instances of Chrome on the same machine
-
-To test proxying without using multiple computers, you can launch two separate instances of Chrome (specifying different directories for user-data-dir).  To launch a new instance of Chrome on Mac, run:
-```"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --user-data-dir=${DIR_NAME}/.chrome-beta-test-user```
-where DIR_NAME is set to the name of a directory where you want to store custom chrome profiles, e.g. `/tmp/`.
-
-In each instance of Chrome, load the uProxy app and extension as describe above.
-
-You can also test between one instance of Chrome and one instance in Firefox.
-
-Then in each instance, within uProxy, sign into Google with gmail accounts that have already added each other as contacts.  After sign-in both contacts should be visible on each other's roster.  Once proxying is started in the UI, try visiting any web page from the client's Chrome window.  To verify that traffic is actually being proxied, open the debug console for the server's uProxy Chrome App. You should see traces indicating the flow of traffic through the proxy.
-
 ### Development and re-building uProxy
 
 uProxy uses the Grunt build system for its build tasks. Here is a list
