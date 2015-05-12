@@ -97,7 +97,7 @@
     </style>
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
-    <core-signals on-core-signal-open-advanced-settings="{{ open }}"></core-signals>
+    <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
 
     <core-overlay id='advancedSettingsPanel'>
       <div id='container' vertical layout>
@@ -106,9 +106,9 @@
         </uproxy-app-bar>
         <div id='formContainer' flex>
           <p class='inputLabel'>Edit your settings below</p>
-          <paper-input-decorator id='advancedSettingsDecorator' label="Edit your settings">
-            <paper-autogrow-textarea id="advancedSettingsPaperTextarea">
-              <textarea id="advancedSettingsInput"
+          <paper-input-decorator id='advancedSettingsDecorator' label='Edit your settings'>
+            <paper-autogrow-textarea id='advancedSettingsPaperTextarea'>
+              <textarea id='advancedSettingsInput'
                      value='{{ settings }}'>
               </textarea>
             </paper-autogrow-textarea>
