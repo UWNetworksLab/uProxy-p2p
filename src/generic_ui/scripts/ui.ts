@@ -782,6 +782,11 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   private categorizeUser_ = (user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) => {
+    if (oldCategory === newCategory) {
+      // no need to do any work if nothing changed
+      return;
+    }
+
     if (oldCategory) {
       // remove user from old category
       var oldCategoryArray = contacts[oldCategory];
