@@ -33,16 +33,19 @@ var CHUNK_SIZE = 1024 * 15;
 // transmission, and if the backlog exceeds 5 seconds, it can cause the
 // PeerConnection to experience ICE disconnection.
 
-// NOTE: Setting this value to zero gives us the fastest possible backpressure
+// Setting this value to zero would give the fastest possible backpressure
 // reaction time, by pausing the socket after every message, forcing a call to
 // "getBufferedAmount", and only resuming the socket  after the message is
 // actually sent.  This appears to improve our resilience to disconnection when
 // downloading from super-fast servers
-// (https://github.com/uProxy/uproxy/issues/1511).  However, lowering this
-// value to zero also effectively negates the performance benefits from
+// (https://github.com/uProxy/uproxy/issues/1511) or loading many pages
+// simultaneously.  However, lowering this value to zero also effectively
+// negates the performance benefits from
 // https://github.com/uProxy/uproxy/issues/1474, and even further regresses
-// the CPU intensity.
-export var PC_QUEUE_LIMIT = 0;
+// the CPU intensity.  In testing on slow sharers with ultra-fast sources,
+// 64 KiB seems to be the largest safe value, and when loading many pages
+// simultaneously, 16 KiB seems to be the largest safe value.
+export var PC_QUEUE_LIMIT = 16 * 1024;
 
 // Javascript has trouble representing integers larger than 2^53. So we simply
 // don't support trying to send array's bigger than that.
