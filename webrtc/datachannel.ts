@@ -17,7 +17,7 @@ var log :logging.Log = new logging.Log('DataChannel');
 // Messages are limited to a 16KB length by SCTP; we use 15k for safety.
 // TODO: test if we can up this to 16k; test the edge-cases!
 // http://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-07#section-6.6
-var CHUNK_SIZE = 1024 * 15;
+export var CHUNK_SIZE = 1024 * 15;
 
 // The maximum amount of bytes we should allow to get queued up in
 // peerconnection. Any more and we start queueing in JS. There are two reasons
