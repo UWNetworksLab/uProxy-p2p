@@ -44,6 +44,7 @@ Polymer({
     ui.view = detail.view;
   },
   statsIconClicked: function() {
+        this.dir = 'rtl';
     this.$.mainPanel.openDrawer();
   },
   closeSettings: function() {
@@ -113,6 +114,8 @@ Polymer({
       this.statsDialogOrBubbleOpen = true;
       this.$.statsDialog.open();
     }
+    this.dir = 'ltr';
+    console.log(this.dir);
   },
   closeStatsBubble: function() {
     this.statsDialogOrBubbleOpen = false;

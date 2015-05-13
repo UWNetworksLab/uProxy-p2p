@@ -94,6 +94,9 @@
       margin-top: 1px;
       margin-left: 1px;
     }
+    paper-checkbox::shadow #checkboxLabel {
+      padding: 0px 8px;
+    }
     #metricsCheckbox core-icon[icon="help"]{
       height: 15px;
       color: grey;
@@ -113,7 +116,9 @@
     #settingsLinks core-icon {
       height: 20px;
       width: 20px;
-      margin-right: 5px;
+    }
+    #settingsLinks .label {
+      margin: 0px 5px;
     }
     .advancedSettingsText {
       font-size: 12px;
@@ -155,17 +160,17 @@
 
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
           <core-icon icon="announcement"></core-icon>
-          Submit Feedback
+          <span class='label'>Submit Feedback</span>
         </uproxy-link>
 
         <uproxy-faq-link>
           <core-icon icon="help"></core-icon>
-          Get Help
+          <span class='label'>Get Help</span>
         </uproxy-faq-link>
 
         <uproxy-link on-tap='{{ toggleAdvancedSettings }}' role='button'>
           <core-icon icon="settings"></core-icon>
-          Advanced Settings
+          <span class='label'>Advanced Settings</span>
         </uproxy-link>
         <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
           <paper-input-decorator label="Custom STUN server">

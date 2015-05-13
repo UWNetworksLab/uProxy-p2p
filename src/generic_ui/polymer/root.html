@@ -26,7 +26,7 @@
     <style>
       :host {
         font-family: Roboto, sans-serif;
-        text-align: left;
+        text-align: start;
         color: rgb(112, 112, 112);
       }
       paper-tabs::shadow #selectionBar {
@@ -88,7 +88,7 @@
         height: 60px;
       }
       core-toolbar core-icon[icon="menu"] {
-        margin: 0px 0px 0px 16px;
+        margin: 0px 16px;
         opacity: 0.6;
         -webkit-transition: all 0.23s !important;
         -moz-transition: all 0.23s !important;
@@ -100,14 +100,14 @@
       }
       core-toolbar #title {
         font-size: 20px;
-        margin: 0px 0px 0px 36px;
+        margin: 0px 36px;
       }
       core-toolbar core-icon.status {
         cursor: pointer;
         color: #006A5A;
       }
       core-toolbar #sharingEnabledIcon {
-        margin: 0px 15px 0px  0px;
+        margin: 0px 15px;
       }
       #settings {
         top: 0;
@@ -176,7 +176,7 @@
         width: 50px;
       }
       #disconnectDialog #disconnectDialogText {
-        text-align: left;
+        text-align: start;
       }
       #disconnectDialog paper-button {
         font-size: 12px;
@@ -252,7 +252,7 @@
             <p>This icon means you're available for sharing access with friends you've offered access to.</p>
           </uproxy-bubble>
 
-          <div class='bottom fit'>
+          <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
                 <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>Get Access</span>
