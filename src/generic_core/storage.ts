@@ -3,19 +3,18 @@
  *
  * Provides a promise-based interface to the storage provider.
  */
-/// <reference path='util.ts' />
-/// <reference path='../interfaces/instance.d.ts' />
-/// <reference path='../interfaces/persistent.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
-/// <reference path='../freedom/typings/freedom.d.ts' />
-/// <reference path='../freedom/typings/storage.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
 
-module Core {
-  var log :Logging.Log = new Logging.Log('storage');
+import Persistent = require('../interfaces/persistent');
+
+var log :logging.Log = new logging.Log('storage');
 
   // Platform-independent storage provider.
-  var fStorage :freedom_Storage = freedom['storage']();
+  var fStorage :freedom_Storage = freedom['core.storage']();
 
   // Set false elsewhere to disable log messages (ie. from jasmine)
   export var DEBUG_STATESTORAGE = true;
@@ -47,7 +46,7 @@ module Core {
      * TODO: Consider using a storage provider that works with JSON.
      * TODO: Really reject the promise!
      */
-    public load = <T>(key :string) : Promise<T> => {
+    public load<T>(key :string) : Promise<T> {
       log.debug('loading', key);
       return fStorage.get(key).then((result :string) => {
         if (typeof result === 'undefined' || result === null) {
@@ -63,7 +62,7 @@ module Core {
      * value of |key| if it existed (according to the freedom interface.)
      */
     // TODO: should not return a value in the promise. Should be Promise<void>
-    public save = <T>(key :string, val :T) : Promise<T> => {
+    public save<T>(key :string, val :T) : Promise<T> {
       log.debug('Saving to storage', {
         key: key,
         newVal: val
@@ -108,4 +107,3 @@ module Core {
     }
     */
   }  // class Storage
-}  // module Core

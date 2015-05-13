@@ -1,7 +1,7 @@
 {
   "name": "uProxy",
   "description": "Share your pathway to the Internet",
-  "version": "0.6.1",
+  "version": "0.8.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/uproxy/uproxy"
@@ -17,37 +17,40 @@
     }
   ],
   "devDependencies": {
-    "es6-promise": "^0.1.1",
-    "freedom-for-chrome": "~0.4.11",
-    "freedom-for-firefox": "~0.6.7",
-    "freedom-social-xmpp": "~0.3.6",
+    "arraybuffer-slice": "^0.1.2",
+    "bower": "^1.4.1",
+    "es6-promise": "^2.0.0",
+    "freedom-for-chrome": "^0.4.11",
+    "freedom-for-firefox": "0.6.10",
+    "freedom-social-firebase": "^0.0.12",
+    "freedom-social-xmpp": "^0.3.6",
     "fs-extra": "^0.12.0",
-    "grunt": "~0.4.2",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-connect": "~0.7.1",
-    "grunt-contrib-copy": "~0.4.1",
-    "grunt-contrib-jasmine": "~0.6.1",
-    "grunt-contrib-symlink": "~0.3.0",
-    "grunt-contrib-uglify": "~0.2.2",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-yuidoc": "~0.4.0",
+    "grunt": "^0.4.2",
+    "grunt-browserify": "^3.3.1",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-jasmine": "^0.8.0",
     "grunt-gitinfo": "^0.1.7",
+    "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-mozilla-addon-sdk": "^0.4.0",
-    "grunt-remove": "^0.1.0",
-    "grunt-shell": "~0.3.1",
     "grunt-string-replace": "^1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
-    "grunt-ts": "^1.11",
+    "grunt-ts": "^4.0.0",
     "grunt-verbosity": "^0.2.2",
     "grunt-vulcanize": "^0.6.0",
-    "typescript": "^1.0.1",
-    "uproxy-churn": "^0.0.5",
-    "uproxy-lib": "^19.0.0",
-    "uproxy-networking": "^6.0.0"
+    "ipaddr.js": "^0.1.3",
+    "lodash": "^3.7.0",
+    "regex2dfa": "^0.1.6",
+    "tsd": "^0.5.7",
+    "uproxy-lib": "^25.0.0",
+    "uproxy-networking": "^10.0.0",
+    "utransformers": "^0.2.1"
   },
   "peerDependencies": {
-    "freedom": "~0.6.18"
+    "freedom": "^0.6.18"
+  },
+  "scripts": {
+    "install": "./node_modules/.bin/bower install"
   },
   "private": true
 }

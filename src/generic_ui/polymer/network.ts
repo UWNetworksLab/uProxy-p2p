@@ -1,18 +1,22 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../scripts/core_connector.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../scripts/ui.ts' />
+/// <reference path='./context.d.ts' />
 
-declare var ui :UI.UserInterface;
-declare var core :CoreConnector;
+import ui_constants = require('../../interfaces/ui');
+
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
 
 Polymer({
   connect: function() {
-    core.login(this.networkName).then(() => {
+    ui.login(this.networkName).then(() => {
       console.log('connected to ' + this.networkName);
       // Fire an update-view event, which root.ts listens for.
-      this.fire('update-view', {view: uProxy.View.ROSTER});
+      this.fire('update-view', {view: ui_constants.View.ROSTER});
       ui.bringUproxyToFront();
-    }).catch((e) => {
+    }).catch((e :Error) => {
+      ui.showNotification('There was a problem signing in to ' + this.networkName + '.  Please try again.');
       console.warn('Did not log in ', e);
     });
   },

@@ -1,11 +1,14 @@
-<link rel='import' href='../lib/polymer/polymer.html'>
-<link rel='import' href='../lib/paper-button/paper-button.html'>
-<link rel='import' href='../lib/paper-checkbox/paper-checkbox.html'>
-<link rel='import' href='../lib/paper-input/paper-input-decorator.html'>
-<link rel='import' href='../lib/paper-input/paper-autogrow-textarea.html'>
-<link rel='import' href='../lib/core-label/core-label.html'>
-<link rel='import' href='../lib/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
+<link rel='import' href='../../bower/core-label/core-label.html'>
+<link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
 <link rel='import' href='faq-link.html'>
+<link rel='import' href='dialog.html'>
 
 <polymer-element name='uproxy-feedback' attributes=''>
   <template>
@@ -14,10 +17,22 @@
       text-align: center;
       font-color: #009688;  /* dark green */
     }
+    uproxy-app-bar {
+      font-size: 18px;
+    }
+    #feedbackPanel {
+      height: 100%;
+      width: 100%;
+      background-color: white;
+    }
+    #container {
+      height: 100%;
+    }
     #formContainer {
-      margin: 30px;
+      padding: 30px;
       text-align: left;
       color: #009688;
+      overflow: auto;
     }
     .inputLabel {
       font-weight: bold;
@@ -30,10 +45,9 @@
       margin: 0.5em 0em;
     }
     #logCheckboxLabel {
-      display: inline-table;
+      cursor: pointer;
     }
     #logCheckbox {
-      display: table-cell;
       padding-right:10px;
       vertical-align: middle;
     }
@@ -42,9 +56,6 @@
       margin-top: 1em;
     }
     #sendFeedback {
-      position: absolute;
-      bottom: 0;
-      left: 0;
       width: 100%;
       padding-top: 1.5em;
       padding-bottom: 1.5em;
@@ -53,11 +64,10 @@
       font-weight: bold;
       cursor: pointer;
       text-align: center;
+      background-color: #ffffff;
     }
+    core-icon[icon="launch"],
     core-icon[icon="help"]{
-      height: 15px;
-    }
-    core-icon[icon="launch"]{
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -66,8 +76,14 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    core-icon[icon="launch"]:hover{
+    core-icon[icon="launch"]:hover,
+    core-icon[icon="help"]:hover{
       opacity: 1;
+    }
+    core-tooltip::shadow #tooltip {
+      /* Without this, the first time you view the
+         tooltip, it appears off center. */
+      left: -64px !important;
     }
     paper-button {
       background-color: #009688; /* teal */
@@ -84,10 +100,6 @@
       /* Remove the underline from the Feedback textbox. */
       height: 0px;
     }
-    paper-input-decorator[id=feedbackDecorator] /deep/ .textarea-container {
-      padding: 0.25em;
-      background-color: rgb(240,240,240);
-    }
     paper-input-decorator {
       font-size: 1.4em;
     }
@@ -101,6 +113,17 @@
     paper-checkbox::shadow #checkbox {
       border-color: grey;
     }
+    uproxy-action-dialog {
+      top: 30%;
+      z-index: 1002; /* Must be greater than core-overlay-backdrop */
+    }
+    #sendingFeedback {
+      text-align: center;
+      font-size: 16px;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
     #feedbackDecorator {
       height: 190px;
     }
@@ -108,52 +131,64 @@
       height: 190px;
       margin: 0em;
     }
+    paper-autogrow-textarea::shadow .textarea-container {
+      padding: 0.25em;
+      background-color: rgb(240,240,240);
+    }
+    paper-autogrow-textarea::shadow .mirror-text {
+      white-space: pre-wrap; /* css-3 */
+      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    }
     </style>
 
-    <uproxy-app-bar on-go-back='{{ backToSettings }}'>
-      Submit feedback
-    </uproxy-app-bar>
+    <!-- Listen for the 'open-feedback' event, which is fired by the settings and splash pages. -->
+    <core-signals on-core-signal-open-feedback="{{ open }}"></core-signals>
 
-    <div id='formContainer'>
-      <p class='inputLabel'>Email (optional)</p>
-      <paper-input-decorator id='emailDecorator' label="Email address">
-        <input id="emailInput"
-               is="core-input"
-               value='{{ email }}'>
-      </paper-input-decorator>
-
-      <p class='inputLabel'>Enter your feedback below</p>
-
-        <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
-          <paper-autogrow-textarea id="feedbackPaperTextarea">
-            <textarea id="feedbackInput"
-                   value='{{ feedback }}'>
-            </textarea>
-          </paper-autogrow-textarea>
-        </paper-input-decorator>
-
-      <div id='logCheckboxContainer'>
-        <core-label id='logCheckboxLabel' horizontal layout>
-          <paper-checkbox for id='logCheckbox'></paper-checkbox>
-          Include logs
-        </core-label>
-        <core-tooltip id='logsTooltip' label='View your logs' position='right'>
-          <uproxy-link on-tap='{{ viewLogs }}'>
-            <core-icon icon="launch"></core-icon>
-          </uproxy-link>
-        </core-tooltip>
+    <core-overlay id='feedbackPanel'>
+      <div id='container' vertical layout>
+        <uproxy-app-bar on-go-back='{{ close }}'>
+          Submit feedback
+        </uproxy-app-bar>
+        <div id='formContainer' flex>
+          <p class='inputLabel'>Email (optional)</p>
+          <paper-input-decorator id='emailDecorator' label="Email address">
+            <input id="emailInput"
+                   is="core-input"
+                   value='{{ email }}'>
+          </paper-input-decorator>
+          <p class='inputLabel'>Enter your feedback below</p>
+          <paper-input-decorator id='feedbackDecorator' label="Write your feedback">
+            <paper-autogrow-textarea id="feedbackPaperTextarea">
+              <textarea id="feedbackInput"
+                     value='{{ feedback }}'>
+              </textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
+          <div id='logCheckboxContainer'>
+            <paper-checkbox for id='logCheckbox'></paper-checkbox>
+            <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
+              Analyze network and include logs
+            </span>
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </div>
+          <p id='moreInfo'>
+            Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
+            <uproxy-faq-link anchor='doesUproxyLogData'>
+              <core-icon icon="help"></core-icon>
+            </uproxy-faq-link>
+          </p>
+        </div> <!-- end of form container -->
+        <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SUBMIT FEEDBACK</div>
       </div>
-
-      <p id='moreInfo'>
-        Your feedback and email address will be sent to uProxy.org. Your logs and email may include personally identifiable information.
-        <uproxy-faq-link anchor='doesUproxyLogData'>
-          <core-icon icon="help"></core-icon>
-        </uproxy-faq-link>
-      </p>
-
-      <div id='sendFeedback' on-tap='{{ sendFeedback }}'>SEND FEEDBACK</div>
-    </div>
-
+    </core-overlay>
+    <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
+      <div id='sendingFeedback'>
+        Sending feedback<br>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+    </uproxy-action-dialog>
   </template>
   <script src='feedback.js'></script>
 </polymer-element>

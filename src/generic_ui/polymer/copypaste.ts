@@ -1,27 +1,29 @@
+/// <reference path='./context.d.ts' />
 /*
  * copypaste.ts
  *
  * This file handles the client interactions for the copypaste portion of the
  * app.
  */
+import ui_constants = require('../../interfaces/ui');
+import social = require('../../interfaces/social');
+
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
 
 Polymer({
-  GettingState: GettingState,
-  SharingState: SharingState,
-  model: model,
-  ui: ui,
-  UI: UI,
   init: function() {
     /* bring copyPaste to the front in get mode */
-    ui.view = uProxy.View.COPYPASTE;
+    ui.view = ui_constants.View.COPYPASTE;
 
-    if (ui.copyPasteGettingState === GettingState.NONE) {
+    if (ui.copyPasteGettingState === social.GettingState.NONE) {
       this.startGetting();
     }
   },
   startGetting: function() {
     var doneStopping :Promise<void>;
-    if (ui.copyPasteGettingState !== GettingState.NONE) {
+    if (ui.copyPasteGettingState !== social.GettingState.NONE) {
       console.warn('aborting previous copy+paste getting connection');
       doneStopping = this.stopGetting();
     } else {
@@ -30,7 +32,7 @@ Polymer({
 
     doneStopping.then(() => {
       ui.copyPasteGettingMessage = '';
-      ui.copyPasteError = UI.CopyPasteError.NONE;
+      ui.copyPasteError = ui_constants.CopyPasteError.NONE;
       ui.copyPastePendingEndpoint = null;
 
       return core.startCopyPasteGet();
@@ -44,19 +46,19 @@ Polymer({
       // an error, so we are just going to warn about it.
 
       console.warn('error when starting copy+paste get', e);
-      ui.copyPasteError = UI.CopyPasteError.FAILED;
+      ui.copyPasteError = ui_constants.CopyPasteError.FAILED;
     });
   },
   handleBackClick: function() {
     // do not let the user navigate away from this view if copypaste is active
-    if ((ui.copyPasteGettingState === GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
-        ui.copyPasteSharingState === SharingState.SHARING_ACCESS) {
+    if ((ui.copyPasteGettingState === social.GettingState.GETTING_ACCESS && ui.copyPastePendingEndpoint === null) ||
+        ui.copyPasteSharingState === social.SharingState.SHARING_ACCESS) {
       return;
     }
 
-    if (ui.copyPasteGettingState === GettingState.NONE &&
-        ui.copyPasteSharingState === SharingState.NONE) {
-      ui.view = uProxy.View.SPLASH;
+    if (ui.copyPasteGettingState === social.GettingState.NONE &&
+        ui.copyPasteSharingState === social.SharingState.NONE) {
+      ui.view = ui_constants.View.SPLASH;
       return;
     }
 
@@ -84,18 +86,17 @@ Polymer({
       return;
     }
 
-    if (ui.copyPasteGettingState !== GettingState.GETTING_ACCESS) {
+    if (ui.copyPasteGettingState !== social.GettingState.GETTING_ACCESS) {
       console.error('Attempting to start copy+paste when not getting access');
       return;
     }
 
-    this.ui.startGettingInUi();
-    ui.browserApi.startUsingProxy(ui.copyPastePendingEndpoint);
+    ui.startGettingInUiAndConfig(null, ui.copyPastePendingEndpoint);
     ui.copyPastePendingEndpoint = null;
   },
   switchToGetting: function() {
     this.stopSharing().then(() => {
-      if (ui.copyPasteGettingState === GettingState.NONE) {
+      if (ui.copyPasteGettingState === social.GettingState.NONE) {
         this.startGetting();
       }
     });
@@ -103,17 +104,17 @@ Polymer({
   stopSharing: function() {
     return core.stopCopyPasteShare();
   },
-  select: function(e, d, sender) {
+  select: function(e :Event, d :Object, sender :HTMLInputElement) {
     sender.focus();
     sender.select();
   },
   dismissError: function() {
-    ui.copyPasteError = UI.CopyPasteError.NONE;
+    ui.copyPasteError = ui_constants.CopyPasteError.NONE;
   },
   exitMode: function() {
     // if we are currently in the middle of setting up a connection, end it
     var doneStopping :Promise<void>;
-    if (ui.copyPasteGettingState !== GettingState.NONE) {
+    if (ui.copyPasteGettingState !== social.GettingState.NONE) {
       doneStopping = this.stopGetting()
     } else {
       doneStopping = Promise.resolve<void>();
@@ -122,7 +123,7 @@ Polymer({
     doneStopping.catch((e) => {
       console.warn('Error while closing getting connection', e);
     }).then(() => {
-      if (ui.copyPasteSharingState !== SharingState.NONE) {
+      if (ui.copyPasteSharingState !== social.SharingState.NONE) {
         return this.stopSharing();
       }
     }).catch((e) => {
@@ -130,7 +131,14 @@ Polymer({
     }).then(() => {
       // go back to the previous view regardless of whether we successfully
       // stopped the connection
-      ui.view = uProxy.View.SPLASH;
+      ui.view = ui_constants.View.SPLASH;
     })
+  },
+  ready: function() {
+    this.ui = ui;
+    this.ui_constants = ui_constants;
+    this.model = model;
+    this.GettingState = social.GettingState;
+    this.SharingState = social.SharingState;
   }
 });

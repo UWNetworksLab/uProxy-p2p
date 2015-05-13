@@ -5,17 +5,28 @@
  * to a remote uproxy client is correct in addition to handling of events
  * after that connection is established
  */
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
-/// <reference path='../webrtc/peerconnection.d.ts' />
-/// <reference path='remote-connection.ts' />
-/// <reference path='../mocks/rtc-to-net.ts' />
-/// <reference path='../mocks/socks-to-rtc.ts' />
+/// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
-describe('Core.RemoteConnection', () => {
-  var connection :Core.RemoteConnection;
-  var socksToRtc :SocksToRtcMock
-  var rtcToNet :RtcToNetMock;
-  var updateSpy :(x :uProxy.Update, data?:Object) => void;
+import freedomMocker = require('../../../third_party/uproxy-lib/freedom/mocks/mock-freedom-in-module-env');
+import freedom_mocks = require('../mocks/freedom-mocks');
+freedom = freedomMocker.makeMockFreedomInModuleEnv({
+    'core.storage': () => { return new freedom_mocks.MockStorage(); },
+    'loggingcontroller': () => { return new freedom_mocks.MockLoggingController(); }
+});
+
+import remote_connection = require('./remote-connection');
+import social = require('../interfaces/social');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import rtc_to_net_mock = require('../mocks/rtc-to-net');
+import socks_to_rtc_mock = require('../mocks/socks-to-rtc');
+
+describe('remote_connection.RemoteConnection', () => {
+  var connection :remote_connection.RemoteConnection;
+  var socksToRtc :socks_to_rtc_mock.SocksToRtcMock
+  var rtcToNet :rtc_to_net_mock.RtcToNetMock;
+  var updateSpy :(x :uproxy_core_api.Update, data?:Object) => void;
 
   // TODO replace with jasmine's builtin fail function once
   // grunt-contrib-jasmine includes the latest jasmine version
@@ -25,26 +36,26 @@ describe('Core.RemoteConnection', () => {
 
   beforeEach(() => {
     // always use spy objects for RtcToNet and SocksToRtc
-    socksToRtc = new SocksToRtcMock();
-    rtcToNet = new RtcToNetMock();
+    socksToRtc = new socks_to_rtc_mock.SocksToRtcMock();
+    rtcToNet = new rtc_to_net_mock.RtcToNetMock();
 
     // TODO RemoteConnection should eventually be modified to take
     // implementations for the stream connectors as constructor arguments
-    spyOn(SocksToRtc, 'SocksToRtc').and.returnValue(socksToRtc);
-    spyOn(RtcToNet, 'RtcToNet').and.returnValue(rtcToNet);
+    spyOn(socks_to_rtc, 'SocksToRtc').and.returnValue(socksToRtc);
+    spyOn(rtc_to_net, 'RtcToNet').and.returnValue(rtcToNet);
 
     updateSpy = jasmine.createSpy('updateSpy');
-    connection = new Core.RemoteConnection(updateSpy);
+    connection = new remote_connection.RemoteConnection(updateSpy);
   });
 
   describe('client setup', () => {
     it('basic setup', () => {
-      spyOn(socksToRtc, 'start').and.callThrough();
+      spyOn(socksToRtc, 'startFromConfig').and.callThrough();
 
       connection.startGet();
 
-      expect(socksToRtc.start).toHaveBeenCalled();
-      expect(connection.localGettingFromRemote).toEqual(GettingState.TRYING_TO_GET_ACCESS);
+      expect(socksToRtc.startFromConfig).toHaveBeenCalled();
+      expect(connection.localGettingFromRemote).toEqual(social.GettingState.TRYING_TO_GET_ACCESS);
     });
 
     it('starting get twice fails', () => {
@@ -57,7 +68,7 @@ describe('Core.RemoteConnection', () => {
       socksToRtc.resolveStart(null);
 
       start.then(() => {
-        expect(connection.localGettingFromRemote).toEqual(GettingState.GETTING_ACCESS);
+        expect(connection.localGettingFromRemote).toEqual(social.GettingState.GETTING_ACCESS);
         done();
       }).catch(failTest);
     });
@@ -75,8 +86,8 @@ describe('Core.RemoteConnection', () => {
     it('basic setup', () => {
       connection.startShare();
 
-      expect(RtcToNet.RtcToNet).toHaveBeenCalled();
-      expect(connection.localSharingWithRemote).toEqual(SharingState.TRYING_TO_SHARE_ACCESS);
+      expect(rtc_to_net.RtcToNet).toHaveBeenCalled();
+      expect(connection.localSharingWithRemote).toEqual(social.SharingState.TRYING_TO_SHARE_ACCESS);
     });
 
     it('sharing access after success', (done) => {
@@ -85,35 +96,36 @@ describe('Core.RemoteConnection', () => {
       rtcToNet.resolveReady();
 
       rtcToNet.onceReady.then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.SHARING_ACCESS);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
         done();
       }).catch(failTest);
     });
 
     it('cleanup after failure to start', (done) => {
-      connection.startShare();
+      var onceReady = connection.startShare();
 
-      rtcToNet.rejectReady(Error('fake rejection'));
-
-      rtcToNet.onceReady.then(failTest)
+      onceReady.then(failTest)
       .catch(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.NONE);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.NONE);
         done();
       });
+
+      rtcToNet.rejectReady(Error('fake rejection'));
     });
 
     it('close after successful start', (done) => {
       connection.startShare();
 
-      rtcToNet.resolveReady();
       rtcToNet.onceReady.then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.SHARING_ACCESS);
-        rtcToNet.resolveClosed();
-        return rtcToNet.onceClosed;
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.SHARING_ACCESS);
+        rtcToNet.resolveStopped();
+        return rtcToNet.onceStopped;
       }).then(() => {
-        expect(connection.localSharingWithRemote).toEqual(SharingState.NONE);
+        expect(connection.localSharingWithRemote).toEqual(social.SharingState.NONE);
         done();
       }).catch(failTest);
+
+      rtcToNet.resolveReady();
     });
 
   });
@@ -131,14 +143,14 @@ describe('Core.RemoteConnection', () => {
 
         // updateSpy should not get called immediately for byte updates
         jasmine.clock().tick(1);
-        expect(updateSpy).not.toHaveBeenCalledWith(uProxy.Update.STATE, jasmine.objectContaining({
+        expect(updateSpy).not.toHaveBeenCalledWith(uproxy_core_api.Update.STATE, jasmine.objectContaining({
           bytesSent: 4321,
           bytesReceived: 1234
         }));
 
         // byte updates should be batched and sent every second
         jasmine.clock().tick(1000);
-        expect(updateSpy).toHaveBeenCalledWith(uProxy.Update.STATE, jasmine.objectContaining({
+        expect(updateSpy).toHaveBeenCalledWith(uproxy_core_api.Update.STATE, jasmine.objectContaining({
           bytesSent: 4321,
           bytesReceived: 1234
         }));
@@ -156,7 +168,7 @@ describe('Core.RemoteConnection', () => {
       spyOn(socksToRtc, 'handleSignalFromPeer');
 
       connection.handleSignal({
-        type: uProxy.MessageType.SIGNAL_FROM_CLIENT_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
         data: {}
       });
 
@@ -169,7 +181,7 @@ describe('Core.RemoteConnection', () => {
       spyOn(socksToRtc, 'handleSignalFromPeer');
 
       connection.handleSignal({
-        type: uProxy.MessageType.SIGNAL_FROM_SERVER_PEER,
+        type: social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
         data: {}
       });
 

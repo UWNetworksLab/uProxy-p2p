@@ -1,8 +1,9 @@
 Polymer({
+  active: false,
   close: function() {
     this.fire('closed');
   },
-  isHidden: function(element) {
+  isHidden: function(element :HTMLElement) {
     // an element is considered to be hidden if it is not displayed or any of
     // its parents are not displayed
     if (window.getComputedStyle(element).display === 'none') {
@@ -29,7 +30,7 @@ Polymer({
     // In the future, it would be nice to move to a model where elements are
     // not created until we want to show them, this chunk of code can be
     // removed once that happens.
-    var prev = this.previousSibling;
+    var prev = this.previousElementSibling;
     if (!prev || this.isHidden(prev)) {
       // This handles the case where the bubble is active (should be displayed)
       // but it would actually not be shown since its target is not visible.
@@ -47,7 +48,7 @@ Polymer({
     this.reposition();
   },
   reposition: function() {
-    var prev = this.previousSibling;
+    var prev = this.previousElementSibling;
     if (!prev) {
       // this handles the case where the element has been removed from the DOM
       // before a callback
@@ -112,10 +113,12 @@ Polymer({
   domReady: function() {
     this.doReposition();
   },
-  activeChanged: function(old, val) {
+  activeChanged: function(old :boolean, val :boolean) {
     if (val) {
       // we will un-hide the element at the end of repositioning
-      this.doReposition();
+      this.async(() => {
+        this.doReposition();
+      });
     } else {
       this.setAttribute('hidden', '');
     }

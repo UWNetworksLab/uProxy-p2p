@@ -24,14 +24,16 @@ To manage dependencies we use:
 
 ## Development setup
 
+Please read the [uProxy Coding Guide](https://docs.google.com/document/d/12RfgwSLnEm-X5Knj1xFVGpp-MH7BdWjuzzo_g7xabro/edit) to learn more about contributing to uProxy. 
+
 ### Pre-Requirements to build uProxy
 
 Note: you will either need to run these as root, or set the directories they
 modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/local)
 
-- [node](http://nodejs.org/) and the Node Package Manaager (NPM):
+- [node](http://nodejs.org/) and npm (Node's package manager):
 
-    - On Mac with Brew, you can do: `brew install node` (You may need to update you brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
+    - On Mac with Brew, you can do: `brew install node` (You may need to update your brew package manager, e.g. `brew update`). You can also install directly from a Mac package off the [NodeJS Website](http://nodejs.org/).
 
     - On Ubuntu, you can do `apt-get install nodejs`.
     - We also need to create symlink ( if we are not running legacy node) <br>
@@ -46,8 +48,6 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
     - If you install npm things globally, you'll need to do so as the
       appropriate super-user.
 
-- [bower](http://bower.io/) 1.0 or later: Install globally with `npm install -g bower`. If you already have bower installed at a lower version, run `npm update -g bower`.
-
     - To run binaries from globally-installed npm packages without
       fully-qualifying paths, make sure you have added your npm bin directory to your path (e.g. `export PATH=$PATH:/usr/local/share/npm/bin/grunt`).
 
@@ -58,8 +58,8 @@ modify (`/usr/local`) to being editable by your user (sudo chown -R $USER /usr/l
  1. Clone uProxy and its submodules (and its submodules' submodules...): `git clone https://github.com/uProxy/uProxy.git` or `git clone git@github.com:uProxy/uproxy.git` if you have your ssh access to github set up (useful if you use 2-step auth for github, which you should do).
 
  1. In the root uProxy directory, run:
-   * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).
-   * `bower install` - this will install the static content dependencies (mostly Polymer components).
+   * `npm install` - this will install all node npm module development dependencies; you'll see lots of npm messages. (watch out for errors; sometimes npm module installation is broken, downloads fail etc).  This will also install the static content dependencies (mostly Polymer components).
+   * `./setup.sh install` - this will set up build tools and third-party dependencies.
    * `grunt` - this will build everything, including uProxy for Chrome and Firefox.
 
 Note that if any local dependencies have changed (i.e. changes to bower dependencies, updates to FreeDOM), you will have to run `npm update` and/or `bower install` to update these dependencies, then rerun `grunt`
@@ -73,8 +73,8 @@ Note that if any local dependencies have changed (i.e. changes to bower dependen
 These are the steps to try uProxy in the Chrome browser.
 
 - In Chrome, go to `chrome://extensions`, make sure 'Developer mode' is enabled
-- Click 'Load unpacked extension...' and select `build/dev/chrome/app`
-- Click 'Load unpacked extension...' and select `build/dev/chrome/extension`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/app`
+- Click 'Load unpacked extension...' and select `build/dev/uproxy/chrome/extension`
 
 You need both the uProxy Chrome App and the uProxy Extension.
 
@@ -88,7 +88,7 @@ These are the steps to try uProxy in the Firefox browser.
 Instructions can be found here: https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation
     - A quick way to get started is to download/extract the zip mentioned in "Prerequisites"
 
-- Run `cd build/dev/firefox`
+- Run `cd build/dev/uproxy/firefox`
 
 - Run `cfx run` and Firefox should launch with the uProxy add-on installed
 

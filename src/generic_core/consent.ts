@@ -1,7 +1,11 @@
-module Consent {
-  var log :Logging.Log = new Logging.Log('consent');
+import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import social = require('../interfaces/social');
+import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
-  export class State implements uProxy.ConsentState {
+//module Consent {
+  var log :logging.Log = new logging.Log('consent');
+
+  export class State implements social.ConsentState {
     // Whether I am requesting access from my friend or not.  This should
     // remain true even after my friend grants me access (to indicate that
     // I've accepted their access-grant, and that I should automatically
@@ -32,38 +36,38 @@ module Consent {
 
   // Returns false on invalid actions.
   export function handleUserAction(
-      state :State, action :uProxy.ConsentUserAction) :boolean {
+      state :State, action :uproxy_core_api.ConsentUserAction) :boolean {
     switch(action) {
-      case uProxy.ConsentUserAction.OFFER:
+      case uproxy_core_api.ConsentUserAction.OFFER:
         state.localGrantsAccessToRemote = true;
         state.ignoringRemoteUserRequest = false;
         break;
-      case uProxy.ConsentUserAction.CANCEL_OFFER:
+      case uproxy_core_api.ConsentUserAction.CANCEL_OFFER:
         state.localGrantsAccessToRemote = false;
         break;
-      case uProxy.ConsentUserAction.IGNORE_REQUEST:
+      case uproxy_core_api.ConsentUserAction.IGNORE_REQUEST:
         state.ignoringRemoteUserRequest = true;
         break;
-      case uProxy.ConsentUserAction.UNIGNORE_REQUEST:
+      case uproxy_core_api.ConsentUserAction.UNIGNORE_REQUEST:
         state.ignoringRemoteUserRequest = false;
         break;
-      case uProxy.ConsentUserAction.REQUEST:
+      case uproxy_core_api.ConsentUserAction.REQUEST:
         state.localRequestsAccessFromRemote = true;
         state.ignoringRemoteUserOffer = false;
         break;
-      case uProxy.ConsentUserAction.CANCEL_REQUEST:
+      case uproxy_core_api.ConsentUserAction.CANCEL_REQUEST:
         state.localRequestsAccessFromRemote = false;
         break;
-      case uProxy.ConsentUserAction.IGNORE_OFFER:
+      case uproxy_core_api.ConsentUserAction.IGNORE_OFFER:
         state.ignoringRemoteUserOffer = true;
         break;
-      case uProxy.ConsentUserAction.UNIGNORE_OFFER:
+      case uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER:
         state.ignoringRemoteUserOffer = false;
         break;
       default:
-        log.warn('Invalid uProxy.ConsentUserAction', action);
+        log.warn('Invalid ConsentUserAction', action);
         return false;
     }
     return true;
   }
-}
+//}

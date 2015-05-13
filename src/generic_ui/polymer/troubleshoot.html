@@ -1,0 +1,133 @@
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/core-icons/core-icons.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
+<link rel='import' href='faq-link.html'>
+<link rel='import' href='dialog.html'>
+
+<polymer-element name='uproxy-troubleshoot' attributes='titleText'>
+  <template>
+    <style>
+    :host {
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.5em;
+      margin-top: 1.4em;
+    }
+    core-icon[icon="clear"] {
+      float: right;
+    }
+    core-icon[icon="help"] {
+      height: 15px;
+      width: 15px;
+    }
+    core-icon[icon="help"],
+    core-icon[icon="clear"] {
+      color: grey;
+      opacity: 0.6;
+      margin-bottom: 2px;
+      -webkit-transition: all 0.23s !important;
+      -moz-transition: all 0.23s !important;
+      transition: all 0.23s !important;
+    }
+    core-icon[icon="help"]:hover,
+    core-icon[icon="clear"]:hover {
+      opacity: 1;
+    }
+    core-icon.button {
+      cursor: pointer;
+    }
+    paper-button {
+      background-color: #009688; /* teal */
+      color: white;
+      margin: 10px 2px 3px 2px;
+      font-size: 12px;
+    }
+    uproxy-dialog {
+      top: 20%;
+      min-width: 305px;
+      z-index: 1002; /* Must be greater than core-overlay-backdrop */
+    }
+    uproxy-dialog::shadow #scroller {
+      padding: 12px;
+    }
+    #askToAnalyze, #analyzeNetwork, #analyzedNetwork {
+      padding: 0px 15px 15px;
+      color: rgba(0,0,0,0.55);
+    }
+    #analyzeNetwork {
+      text-align: center;
+      font-size: 14px;
+    }
+    #analyzedNetwork {
+      text-align: left;
+    }
+    #analyzedNetworkButtons {
+      text-align: center;
+    }
+    paper-progress::shadow #activeProgress {
+      background-color: #009688;
+    }
+    uproxy-faq-link .linkText {
+      text-decoration: underline;
+      color: rgba(0,0,0,0.40);
+    }
+    </style>
+
+    <!-- Listen for the 'open-troubleshoot' event, which the user can trigger after proxying fails. -->
+    <core-signals on-core-signal-open-troubleshoot='{{ open }}'></core-signals>
+
+    <uproxy-dialog backdrop layered='false' id='troubleshootDialog'>
+      <core-icon class="button" icon="clear" on-tap='{{ close }}'></core-icon>
+      <h1>{{ titleText }}</h1>
+
+      <!-- First screen in the dialog asks user if they want to diagnose their network. -->
+      <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
+        <p>
+          It could be that your network's NAT type is incompatible with uProxy. Would you like uProxy to analyze your network?
+          <uproxy-faq-link anchor='doesUproxyLogData'>
+            <core-icon icon="help"></core-icon>
+          </uproxy-faq-link><br>
+        </p>
+        <paper-button on-tap='{{ getNatType }}'>
+          Yes
+        </paper-button>
+        <paper-button on-tap='{{ close }}'>
+          No
+        </paper-button>
+      </div>
+
+      <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
+      <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
+        Analyzing network<br>
+        <paper-progress indeterminate='true'></paper-progress>
+      </div>
+
+      <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
+      <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
+        It looks like you are on a <strong>{{ natType }}</strong>, which is <strong>{{ natImpact }}</strong> interfering with your ability to connect to friends.
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>More info</span>
+        </uproxy-faq-link><br><br>
+        Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?
+        <uproxy-faq-link anchor='doesUproxyLogData'>
+          <span class='linkText'>Privacy policy</span>
+        </uproxy-faq-link>
+        <br>
+        <div id='analyzedNetworkButtons'>
+          <paper-button on-tap='{{ submitFeedback }}'>
+            Yes
+          </paper-button>
+          <paper-button on-tap='{{ close }}'>
+            No
+          </paper-button>
+        </div>
+      </div>
+
+    </uproxy-dialog>
+
+  </template>
+  <script src='troubleshoot.js'></script>
+</polymer-element>

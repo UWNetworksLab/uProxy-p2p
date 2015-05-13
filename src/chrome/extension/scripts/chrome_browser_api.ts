@@ -3,16 +3,23 @@
  *
  * Chrome-specific implementation of the Browser API.
  */
-/// <reference path='../../../interfaces/browser-api.d.ts' />
-/// <reference path='../../../third_party/typings/chrome/chrome.d.ts'/>
-/// <reference path='../../../networking-typings/communications.d.ts' />
 
+import browser_api = require('../../../interfaces/browser_api');
+import BrowserAPI = browser_api.BrowserAPI;
+import net = require('../../../../../third_party/uproxy-networking/net/net.types');
+import UI = require('../../../generic_ui/scripts/ui');
+import Constants = require('../../../generic_ui/scripts/constants');
+
+/// <reference path='../../../../third_party/typings/chrome/chrome.d.ts'/>
+/// <reference path='../../../../networking-typings/communications.d.ts' />
 
 enum PopupState {
     NOT_LAUNCHED,
     LAUNCHING,
     LAUNCHED
 }
+
+declare var Notification :any; //TODO remove this
 
 class ChromeBrowserApi implements BrowserAPI {
 
@@ -42,7 +49,7 @@ class ChromeBrowserApi implements BrowserAPI {
   // Chrome Window ID given to the uProxy popup.
   private popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
   // The URL to launch when the user clicks on the extension icon.
-  private POPUP_URL = "index.html";
+  private POPUP_URL = "generic_ui/index.html";
   // When we last called chrome.windows.create (for logging purposes).
   private popupCreationStartTime_ = Date.now();
 
@@ -61,9 +68,7 @@ class ChromeBrowserApi implements BrowserAPI {
       }
     };
 
-    // TODO: tsd's chrome definition is missing .clear on ChromeSetting, which
-    // is why we employ a hacky thing here.
-    chrome.proxy.settings['clear']({scope: 'regular'});
+    chrome.proxy.settings.clear({scope: 'regular'});
 
     chrome.windows.onRemoved.addListener((closedWindowId) => {
       // If either the window launching uProxy, or the popup with uProxy
@@ -71,13 +76,11 @@ class ChromeBrowserApi implements BrowserAPI {
       if (closedWindowId == this.popupWindowId_) {
         this.popupWindowId_ = chrome.windows.WINDOW_ID_NONE;
         this.popupState_ = PopupState.NOT_LAUNCHED;
-      } else if (closedWindowId == mainWindowId) {
-        mainWindowId = chrome.windows.WINDOW_ID_NONE;
       }
     });
   }
 
-  public startUsingProxy = (endpoint:Net.Endpoint) => {
+  public startUsingProxy = (endpoint:net.Endpoint) => {
     if (this.running_ == false) {
       this.uproxyConfig_.rules.singleProxy.host = endpoint.address;
       this.uproxyConfig_.rules.singleProxy.port = endpoint.port;
@@ -85,15 +88,7 @@ class ChromeBrowserApi implements BrowserAPI {
       this.running_ = true;
       chrome.proxy.settings.get({incognito:false},
         (details) => {
-          // TODO (lucyhe): Remove this if statement when Chrome issue 448172
-          // is resolved and we can safely assume that details is defined.
-          if (details) {
-            this.preUproxyConfig_ = details.value;
-          } else {
-            this.preUproxyConfig_ = {mode: "system"};
-            console.warn('Current proxy settings undefined. Received error: ' +
-              chrome.runtime.lastError.message);
-          }
+          this.preUproxyConfig_ = details.value;
           chrome.proxy.settings.set({
               value: this.uproxyConfig_,
               scope: 'regular'
@@ -102,18 +97,8 @@ class ChromeBrowserApi implements BrowserAPI {
     }
   };
 
-  public stopUsingProxy = (askUser :boolean) => {
-    if (askUser && this.running_ == true) {
-      // Create a tab which prompts the user to decide if they want
-      // to reset their proxy config.
-      this.launchTabIfNotOpen("disconnected.html");
-    } else if (!askUser && this.running_ == true) {
-      this.revertProxySettings_();
-    }
-  };
-
-  private revertProxySettings_ = () => {
-    if (this.running_ == true) {
+  public stopUsingProxy = () => {
+    if (this.running_) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;
       chrome.proxy.settings.set({
@@ -152,8 +137,7 @@ class ChromeBrowserApi implements BrowserAPI {
   }
 
   public bringUproxyToFront = () => {
-    if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId == chrome.windows.WINDOW_ID_NONE) {
+    if (this.popupState_ == PopupState.NOT_LAUNCHED) {
       this.popupState_ = PopupState.LAUNCHING;
       this.popupCreationStartTime_ = Date.now();
       // If neither popup nor Chrome window are open (e.g. if uProxy is launched
@@ -164,25 +148,6 @@ class ChromeBrowserApi implements BrowserAPI {
                      width: 371,
                      height: 600}, this.newPopupCreated_);
 
-    } else if (this.popupState_ == PopupState.NOT_LAUNCHED
-        && mainWindowId != chrome.windows.WINDOW_ID_NONE) {
-      this.popupState_ = PopupState.LAUNCHING;
-      this.popupCreationStartTime_ = Date.now();
-      // If the popup is not open, but uProxy is being launched from a Chrome
-      // window, open the popup under the extension icon in that window.
-      chrome.windows.get(mainWindowId, (windowThatLaunchedUproxy) => {
-        if (windowThatLaunchedUproxy) {
-          // TODO (lucyhe): test this positioning in Firefox & Windows.
-          var popupTop = windowThatLaunchedUproxy.top + 70;
-          var popupLeft = windowThatLaunchedUproxy.left + windowThatLaunchedUproxy.width - 430;
-          chrome.windows.create({url: this.POPUP_URL,
-                                 type: "popup",
-                                 width: 371,
-                                 height: 600,
-                                 top: popupTop,
-                                 left: popupLeft}, this.newPopupCreated_);
-        }
-      });
     } else if (this.popupState_ == PopupState.LAUNCHED) {
       // If the popup is already open, simply focus on it.
       chrome.windows.update(this.popupWindowId_, {focused: true});
@@ -194,19 +159,86 @@ class ChromeBrowserApi implements BrowserAPI {
   /**
     * Callback passed to chrome.windows.create.
     */
-  private newPopupCreated_ = (popup) => {
+  private newPopupCreated_ = (popup :chrome.windows.Window) => {
     console.log("Time between browser icon click and popup launch (ms): " +
         (Date.now() - this.popupCreationStartTime_));
     this.popupWindowId_ = popup.id;
     this.popupState_ = PopupState.LAUNCHED;
   }
 
-  public showNotification = (notificationText :string) => {
+  public showNotification = (text :string, tag :string) => {
     var notification =
-        new Notification('uProxy', { body: notificationText,
-                         icon: 'icons/38_' + Constants.DEFAULT_ICON});
+        new Notification('uProxy', {
+          body: text,
+          icon: 'icons/38_' + Constants.DEFAULT_ICON,
+          tag: tag
+        });
+    notification.onclick = () => {
+      this.emit('notificationClicked', tag);
+    };
     setTimeout(function() {
       notification.close();
     }, 5000);
   }
+
+  private events_ :{[name :string] :Function} = {};
+
+  public on = (name :string, callback :Function) => {
+    this.events_[name] = callback;
+  }
+
+  public emit = (name :string, ...args :Object[]) => {
+    if (name in this.events_) {
+      this.events_[name].apply(null, args);
+    } else {
+      console.error('Attempted to trigger an unknown event', name);
+    }
+  }
+
+  public frontedPost = (data :any,
+                        externalDomain :string,
+                        cloudfrontDomain :string,
+                        cloudfrontPath = "") : Promise<void> => {
+    // Set the Cloudfront destination as the Host in the request header,
+    // hiding the Cloudfront URL from observers but still informing
+    // the external domain (e.g. AWS) where the request should be forwarded.
+    var setHostInHeader = (details :chrome.webRequest.OnBeforeSendHeadersDetails) => {
+      details.requestHeaders.push({
+        name: 'Host',
+        value: cloudfrontDomain
+      });
+      return { requestHeaders: details.requestHeaders };
+    };
+
+    // Call setHostInHeader before sending POST requests by adding
+    // a listener to chrome's onBeforeSendHeaders.
+    chrome.webRequest.onBeforeSendHeaders.addListener(setHostInHeader, {
+      urls: [externalDomain + "*"] /* URLs this listener applies to. */
+    }, ['requestHeaders', 'blocking']);
+
+    var removeSendHeaderListener = () => {
+      // Remove the functionality of setHostInHeader after we're done with our
+      // POST so that we don't interfere with any other requests.
+      // This will be called after the POST has succeeded or failed.
+      chrome.webRequest.onBeforeSendHeaders.removeListener(setHostInHeader);
+    };
+
+    return new Promise<void>((fulfill, reject) => {
+      var xhr = new XMLHttpRequest();
+      xhr.onload = function(){
+        fulfill();
+      };
+      xhr.onerror = function(){
+        reject(new Error('POST failed with HTTP code ' + xhr.status));
+      };
+      var params = JSON.stringify(data);
+      // Only the front domain is exposed on the wire. The cloudfrontPath
+      // should be encrypted. The cloudfrontPath needs to be here and not
+      // in the Host header, which can only take a host name.
+      xhr.open('POST', externalDomain + cloudfrontPath, true);
+      xhr.send(params);
+    }).then(removeSendHeaderListener, removeSendHeaderListener);
+  }
 }
+
+export = ChromeBrowserApi;

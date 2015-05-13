@@ -1,0 +1,67 @@
+<link rel="import" href="../../bower/polymer/polymer.html">
+<link rel='import' href='../../bower/paper-progress/paper-progress.html'>
+
+<polymer-element name='uproxy-logs'>
+  <template>
+    <style>
+      :host {
+        background-color: #FFFFFF;
+        font-family: Roboto, sans-serif;
+        font-size: 13px;
+      }
+      #container {
+        text-align: center;
+        margin: 50px;
+      }
+      #openUproxy {
+        color: #009688;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      paper-progress::shadow #progressContainer {
+        background-color: #ffffff;
+        opacity: 0.5;
+      }
+      paper-progress::shadow #activeProgress {
+        background-color: #009688;
+      }
+      paper-progress {
+        margin-bottom: 1em;
+        width: 275px;
+      }
+      #loadingLogs {
+        font-family: Roboto, sans-serif;
+        text-align: center;
+      }
+      #logs {
+        font-family: monospace;
+        font-size: 14px;
+        text-align: left;
+        padding: 10px;
+        background: lightgray;
+      }
+      pre {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;  /* Firefox */
+        white-space: -o-pre-wrap;    /* Firefox */
+        word-wrap: break-word;
+      }
+      h1 {
+        margin-bottom: 1em;
+      }
+    </style>
+
+    <div id='container'>
+      <h1>Logs & Network Analysis</h1>
+      <p>To send your logs to the uProxy team for help, <span id='openUproxy' on-tap='{{ openUproxy }}'>open uProxy</span> and click 'Submit Feedback'</p>
+      <div id='logs'>
+        <div id="loadingLogs" hidden?="{{ !loadingLogs }}">
+          <p>Retrieving logs and analyzing your network...</p>
+          <paper-progress indeterminate='true'></paper-progress>
+        </div>
+        <pre>{{ logs }}</pre>
+      </div> <!-- end of errorText -->
+    </div>
+  </template>
+  <script src='logs.js'></script>
+</polymer-element>

@@ -1,36 +1,32 @@
-Polymer({
-  // Make GettingState enum available to polymer
-  GettingState: GettingState,
+/// <reference path='./context.d.ts' />
 
+import social = require('../../interfaces/social');
+import ui_constants = require('../../interfaces/ui');
+import net = require('../../../../third_party/uproxy-networking/net/net.types');
+import user_interface = require('../scripts/ui');
+
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
+
+Polymer({
   ready: function() {
-    this.path = <InstancePath>{
-      network : {
-       name: this.network.name,
-       userId: this.network.userId
-      },
-      userId: this.user.userId,
-      instanceId: this.instance.instanceId
-    };
     // Expose global ui object and UI module in this context. This allows the
     // hidden? watch for the get/give toggle to actually update.
     this.ui = ui;
-    this.uProxy = uProxy;
+    this.ui_constants = ui_constants;
+    this.GettingState = social.GettingState;
     this.model = model;
   },
-
   start: function() {
-    console.log('[polymer] calling core.start(', this.path, ')');
-    core.start(this.path).then((endpoint) => {
-      console.log('[polymer] received core.start promise fulfillment.');
-      console.log('[polymer] endpoint: ' + JSON.stringify(endpoint));
-      this.ui.startGettingInUiAndConfig(this.instance.instanceId, endpoint);
-    }).catch((e) => {
-      ui.browserApi.showNotification('Unable to get access from ' + this.user.name);
-      console.error('Unable to start proxying ', e);
-    });
+    if (!this.instance.isOnline) {
+      this.ui.toastMessage = this.user.name + ' is offline';
+      return;
+    }
+
+    ui.startGettingFromInstance(this.instance.instanceId);
   },
   stop: function() {
-    console.log('[polymer] calling core.stop()');
-    core.stop();
+    ui.stopGettingFromInstance(this.instance.instanceId);
   }
 });

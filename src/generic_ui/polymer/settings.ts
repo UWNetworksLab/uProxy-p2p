@@ -1,21 +1,18 @@
-declare var browser :string;
+/// <reference path='./context.d.ts' />
+
+var ui = ui_context.ui;
+var core = ui_context.core;
+var model = ui_context.model;
 
 Polymer({
-  model: model,
-  browser: browser,
-  DEFAULT_STUN_SERVERS: [{urls: ['stun:stun.l.google.com:19302']},
-                         {urls: ['stun:stun1.l.google.com:19302']},
-                         {urls: ['stun:stun2.l.google.com:19302']},
-                         {urls: ['stun:stun3.l.google.com:19302']},
-                         {urls: ['stun:stun4.l.google.com:19302']}],
   displayAdvancedSettings: false,
   logOut: function() {
-    core.logout({name: model.onlineNetwork.name,
-                 userId: model.onlineNetwork.userId}).then(() => {
+    ui.logout({name: model.onlineNetwork.name,
+                                   userId: model.onlineNetwork.userId}).then(() => {
       // Nothing to do here - the UI should receive a NETWORK update
       // saying that the network is offline, and will update the display
       // as result of that.
-    }).catch((e) => {
+    }).catch((e :Error) => {
       console.error('logout returned error: ', e);
     });
   },
@@ -40,7 +37,7 @@ Polymer({
     this.$.confirmNewServer.hidden = false;
   },
   resetStunServers: function() {
-    model.globalSettings.stunServers = this.DEFAULT_STUN_SERVERS;
+    model.globalSettings.stunServers = [];
     core.updateGlobalSettings(model.globalSettings);
     if(!this.$.confirmNewServer.hidden) {
       this.$.confirmNewServer.hidden = true;
@@ -48,9 +45,10 @@ Polymer({
     this.$.confirmResetServers.hidden = false;
   },
   openFeedbackForm: function() {
-    ui.view = uProxy.View.FEEDBACK;
+    this.fire('core-signal', {name: 'open-feedback'});
   },
   ready: function() {
     this.ui = ui;
+    this.model = model;
   }
 });

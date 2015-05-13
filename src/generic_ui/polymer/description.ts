@@ -1,11 +1,22 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
-/// <reference path='../scripts/core_connector.ts' />
-
-declare var core :CoreConnector;
+/// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
 Polymer({
-  model: model,
-  update: function() {
-    core.updateGlobalSettings(model.globalSettings);
+  editDescription: function() {
+    this.descriptionInput = this.model.globalSettings.description;
+    this.editing = true;
+  },
+  saveDescription: function() {
+    this.model.globalSettings.description = this.descriptionInput;
+    this.editing = false;
+    ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+  },
+  cancelEditing: function() {
+    this.editing = false;
+  },
+  ready: function() {
+    this.model = ui_context.model;
+    this.editing = false;
+    this.descriptionInput = '';
   }
 });

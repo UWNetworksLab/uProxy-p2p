@@ -1,4 +1,4 @@
-<link rel='import' href='../lib/paper-button/paper-button.html'>
+<link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='app-bar.html'>
 
@@ -8,6 +8,13 @@
     :host {
       text-align: center;
     }
+    p {
+      text-align: left;
+      margin: 0 0 24px 0;
+    }
+    textarea {
+      margin-bottom: 24px;
+    }
     textarea.message {
       width: 80%;
       height: 10em;
@@ -15,14 +22,21 @@
     paper-button {
       background: #009688;  /* dark green */
       color: white;
+      margin-bottom: 24px;
     }
     paper-button.stop {
       background: rgb(221, 221, 221);
       color: rgb(112, 112, 112);
     }
+    #getting, #sharing, #nothing {
+      margin: 24px;
+    }
     a {
       font-weight: bold;
       color: #009688;
+    }
+    uproxy-app-bar::shadow span {
+      font-size: 18px;
     }
     </style>
 
@@ -30,12 +44,13 @@
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
-      <span hidden?='{{ GettingState.NONE === ui.copyPasteGettingState || SharingState.TRYING_TO_SHARE_ACCESS == ui.copyPasteSharingState }}'>Request a one time connection</span>
-      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a one time connection</span>
-      <span hidden?='{{ ui.copyPasteSharingState !== SharingState.NONE || ui.copyPasteGettingState !== GettingState.NONE }}'>Manual Connection</span>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>Request a </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState) }}'>Start a </span>
+      <span>one-time connection</span>
     </uproxy-app-bar>
 
-    <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
+    <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
       There was an error parsing the uproxy connection link, please try
       navigating to the link again or asking your friend for a new link.
     </uproxy-bubble>
@@ -50,7 +65,7 @@
         <paper-button on-tap='{{ startGetting }}'>Start getting a new connection</paper-button>
       </div>
 
-      <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
+      <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
         There was an error starting the connection and it had to be terminated.
         Please try starting another connection.
       </uproxy-bubble>
@@ -78,7 +93,7 @@
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteGettingState !== GettingState.GETTING_ACCESS }}'>
-        <p>Success!  A one time connection has been established.</p>
+        <p>Success!  A one-time connection has been established.</p>
 
         <p>
           To
@@ -97,7 +112,7 @@
           Stop getting access
         </paper-button>
 
-        <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
+        <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
           <p>You are currently getting access.</p>
           <p>
             If you would like to start a new one-time connection, press "Stop
@@ -124,7 +139,7 @@
         <div>
           <a href='#' on-tap='{{ switchToGetting }}'>Get access instead</a>
 
-          <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
+          <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
             <p>
               You are currently in the process of trying to share access.  If
               you would like to get access instead ,click the link above.
@@ -132,7 +147,7 @@
 
             <p>
               If you would like to start a one-time connection with someone
-              else, press the "Back" button and then "Start a one time
+              else, press the "Back" button and then "Start a one-time
               connection" to start a new session.
             </p>
           </uproxy-bubble>
@@ -141,11 +156,11 @@
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteSharingState !== SharingState.SHARING_ACCESS }}'>
-        <p>Success!  A one time connection has been established.</p>
+        <p>Success!  A one-time connection has been established.</p>
 
         <paper-button raised class='stop' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
 
-        <uproxy-bubble active='{{ ui.copyPasteError === UI.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
+        <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
           <p>You are currently sharing access.</p>
 
           <p>

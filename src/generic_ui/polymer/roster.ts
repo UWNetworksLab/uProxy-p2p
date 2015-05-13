@@ -1,29 +1,22 @@
-/// <reference path='../../interfaces/ui-polymer.d.ts' />
+/// <reference path='./context.d.ts' />
+/// <reference path='../../../../third_party/polymer/polymer.d.ts' />
+
+import ui_constants = require('../../interfaces/ui');
 
 Polymer({
-  model: model,
   loadingContacts: false,
   searchQuery: '',
   ready: function() {
     console.log('initializing roster');
 
-    this.ui = ui;
-    this.uProxy = uProxy;
-
-    // Initialize roster here.
-    // this.contacts contains either all the contact groups for the get tab
-    // or all the contact groups for the share tab.
-    this.onlinePending = this.contacts.onlinePending;
-    this.offlinePending = this.contacts.offlinePending;
-    this.onlineTrustedUproxyContacts = this.contacts.onlineTrustedUproxy;
-    this.offlineTrustedUproxyContacts = this.contacts.offlineTrustedUproxy;
-    this.onlineUntrustedUproxyContacts = this.contacts.onlineUntrustedUproxy;
-    this.offlineUntrustedUproxyContacts = this.contacts.offlineUntrustedUproxy;
+    this.ui = ui_context.ui;
+    this.ui_constants = ui_constants;
+    this.model = ui_context.model;
   },
   loadContacts: function() {
     // If no contacts have loaded, show the animation for a total of 5 seconds,
     // and then display the "no online friends" message.
-    if (!model.onlineNetwork.hasContacts) {
+    if (!ui_context.model.onlineNetwork.hasContacts) {
       this.loadingContacts = true;
       setTimeout(function(){ this.loadingContacts = false; }.bind(this), 5000);
     }

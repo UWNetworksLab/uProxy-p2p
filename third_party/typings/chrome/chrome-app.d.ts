@@ -21,12 +21,12 @@ declare module chrome.app.runtime {
     }
 
     interface LaunchedEvent {
-        addListener(callback: (launchData: LaunchData) => void);
-        removeListener(callback: (launchData: LaunchData) => void)
+        addListener(callback: (launchData: LaunchData) => void) :void;
+        removeListener(callback: (launchData: LaunchData) => void) :void;
     }
 
     interface RestartedEvent {
-        addListener(callback: () => void);
+        addListener(callback: () => void) :void;
     }
 
     var onLaunched: LaunchedEvent;
