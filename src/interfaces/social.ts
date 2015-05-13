@@ -3,7 +3,7 @@
  * interface to be extended as classes specific to particular components.
  */
 
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import uproxy_core_api = require('./uproxy_core_api');
 
@@ -142,6 +142,8 @@ export interface InstanceHandshake {
   keyHash     :string;
   consent     :ConsentWireState;
   description ?:string;
+  name        :string;
+  userId      :string;
 }
 
 // Describing whether or not a remote instance is currently accessing or not,
@@ -196,6 +198,7 @@ export interface UserState {
  */
 export interface LocalUserInstance extends BaseInstance {
   userId :string;
+  name   :string;
 }
 
 export interface RemoteUserInstance extends BaseInstance {

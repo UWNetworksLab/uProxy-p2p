@@ -7,6 +7,7 @@ import arraybuffers = require('../../../third_party/uproxy-lib/arraybuffers/arra
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import _ = require('lodash');
 import globals = require('./globals');
+import sha1 = require('crypto/sha1');
 
 // Both Ping and NAT type detection need help from a server. The following
 // ip/port is the instance we run on EC2.

@@ -1,4 +1,4 @@
-import net = require('../../../third_party/uproxy-networking/net/net.types');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
 
 // Describes the interface for functions that have different implications
 // for different browsers.

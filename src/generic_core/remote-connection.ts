@@ -7,11 +7,11 @@
 
 import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
-import net = require('../../../third_party/uproxy-networking/net/net.types');
-import rtc_to_net = require('../../../third_party/uproxy-networking/rtc-to-net/rtc-to-net');
+import net = require('../../../third_party/uproxy-lib/net/net.types');
+import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import social = require('../interfaces/social');
-import socks_to_rtc = require('../../../third_party/uproxy-networking/socks-to-rtc/socks-to-rtc');
+import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 
 // module Core {
@@ -202,11 +202,13 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
       ).then((endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
+        globals.metrics.increment('success');
         this.stateRefresh_();
         this.activeEndpoint = endpoint;
         return endpoint;
       }).catch((e :Error) => {
         this.localGettingFromRemote = social.GettingState.NONE;
+        globals.metrics.increment('failure');
         this.stateRefresh_();
         return Promise.reject(Error('Could not start proxy'));
       });

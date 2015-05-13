@@ -41,11 +41,6 @@ chrome.runtime.onMessage.addListener((request :any, sender: chrome.runtime.Messa
     chromeBrowserApi.bringUproxyToFront();
   }
 
-  // handle requests to stop proxying
-  if (request && request.stopProxying) {
-    ui.stopGettingInUiAndConfig(false);
-  }
-
   // handle requests to get logs
   if (request && request.getLogs) {
     core.getLogs().then((logs) => {
@@ -131,7 +126,7 @@ function initUI() : user_interface.UserInterface {
       lastUrlTime = Date.now();
 
       return {
-        redirectUrl: chrome.extension.getURL('copypaste.html')
+        redirectUrl: chrome.extension.getURL('generic_ui/copypaste.html')
       };
     },
     { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
