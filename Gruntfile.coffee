@@ -108,6 +108,7 @@ taskManager.add 'integration_test', [
 taskManager.add 'everything', [
   'build'
   'test'
+  'integration_test'
 ]
 
 # This is the target run by Travis. Targets in here should run locally
