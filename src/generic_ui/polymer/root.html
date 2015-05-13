@@ -272,7 +272,12 @@
           </div>
         </core-toolbar>
 
-        <uproxy-bubble on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
+        <!--
+          core-header class ensures this gets inserted in the header portion of
+          core-header-panel and it is positioned below the toolbar (see
+          https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
+        -->
+        <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
           <h3>Welcome to uProxy!</h3>
           <p>
             To get started, choose "Get access" or "Share access" and then click
