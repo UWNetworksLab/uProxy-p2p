@@ -55,6 +55,7 @@ Polymer({
         ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
 
         this.settings = this.jsonifySettings_(ui_context.model.globalSettings);
+        this.$.advancedSettingsPaperTextarea.update();
       }
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
