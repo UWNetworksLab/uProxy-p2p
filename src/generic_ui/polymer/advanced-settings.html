@@ -94,7 +94,7 @@
       padding-top: 0px;
       color: rgb(112, 112, 112);
     }
-    #failedSetAdvancedSettings, #failedKeyValueSetAdvancedSettings {
+    .error {
       color: rgb(200, 112, 112);
     }
     </style>
@@ -117,8 +117,8 @@
             </paper-autogrow-textarea>
           </paper-input-decorator>
           <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>Settings saved</p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>Could not set: bad format</p>
-          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>Could not set: JSON value mismatch</p>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>Could not set: bad format</p>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>Could not set: JSON value mismatch</p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>SET</div>
       </div>

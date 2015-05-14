@@ -14,18 +14,9 @@ export enum StatusState {
 };
 
 Polymer({
+  StatusState: StatusState,
   settings: '',
   status: StatusState.EMPTY,
-  refreshMessageVisibility_: function() {
-    this.$.confirmSetAdvancedSettings.hidden =
-      (this.status !== StatusState.SET);
-
-    this.$.failedSetAdvancedSettings.hidden =
-      (this.status !== StatusState.PARSE_ERROR);
-
-    this.$.failedKeyValueSetAdvancedSettings.hidden =
-      (this.status !== StatusState.KEY_VALUE_ERROR);
-  },
   jsonifySettings_: function(settingsObject :Object) {
     return JSON.stringify(settingsObject, null, ' ');
   },
@@ -68,8 +59,6 @@ Polymer({
     } catch (e) {
       this.status = StatusState.PARSE_ERROR;
     }
-
-    this.refreshMessageVisibility_();
   },
   computed: {
     'opened': '$.advancedSettingsPanel.opened'
