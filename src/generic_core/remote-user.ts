@@ -352,14 +352,10 @@ var log :logging.Log = new logging.Log('remote-user');
           isOnline = true;
         }
       }
-      if (allInstanceIds.length === 0) {
-        // Don't send users to UI if they don't have any instances (i.e. are not
+      if (!this.network.areAllContactsUproxy() && allInstanceIds.length === 0) {
+        // For networks which give us profiles for non-uProxy contacts, don't
+        // send users to the UI unless they have instances (they may not be
         // uProxy users).
-        // TODO: ideally we should not have User objects for users without
-        // instances, but for now we create Users whenever we get a UserProfile
-        // or ClientState from the social provider that isn't
-        // ONLINE_WITH_OTHER_APP.  For now this is necessary because we don't
-        // yet load instances from storage until User objects are created.
         return null;
       }
 
@@ -465,7 +461,7 @@ var log :logging.Log = new logging.Log('remote-user');
           this.instances_[instanceId] = new remote_instance.RemoteInstance(this, instanceId);
           onceLoadedPromises.push(this.instances_[instanceId].onceLoaded);
         }
-        
+
       }
       Promise.all(onceLoadedPromises).then(this.fulfillStorageLoad_);
 
