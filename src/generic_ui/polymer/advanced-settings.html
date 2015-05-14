@@ -7,7 +7,7 @@
 <link rel='import' href='../../bower/core-overlay/core-overlay.html'>
 <link rel='import' href='../../bower/core-signals/core-signals.html'>
 
-<polymer-element name='uproxy-advanced-settings' attributes=''>
+<polymer-element name='uproxy-advanced-settings'>
   <template>
     <style>
     :host {
@@ -94,6 +94,11 @@
       padding-top: 0px;
       color: rgb(112, 112, 112);
     }
+    .failedAdvancedSettingsText {
+      font-size: 12px;
+      padding-top: 0px;
+      color: rgb(200, 112, 112);
+    }
     </style>
 
     <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
@@ -107,14 +112,15 @@
         <div id='formContainer' flex>
           <p class='inputLabel'>Edit your settings below</p>
           <paper-input-decorator id='advancedSettingsDecorator' label='Edit your settings'>
-            <paper-autogrow-textarea id='advancedSettingsPaperTextarea'>
+            <paper-autogrow-textarea id='advancedSettingsPaperTextarea' target='advancedSettingsInput'>
               <textarea id='advancedSettingsInput'
                      value='{{ settings }}'>
               </textarea>
             </paper-autogrow-textarea>
           </paper-input-decorator>
-          <p id='confirmSetAdvancedSettings' class='advancedSettingstext' hidden>Settings saved</p>
-          <p id='failedSetAdvancedSettings' class='advancedSettingstext' hidden>Could not set: bad format</p>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden='{{ status !== StatusState.SET }}'>Settings saved</p>
+          <p id='failedSetAdvancedSettings' class='failedAdvancedSettingsText' hidden='{{ status !== StatusState.PARSE_ERROR }}'>Could not set: bad format</p>
+          <p id='failedKeyValueSetAdvancedSettings' class='failedAdvancedSettingsText' hidden='{{ status !== StatusState.KEY_VALUE_ERROR }}'>Could not set: JSON value mismatch</p>
         </div> <!-- end of form container -->
         <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>SET</div>
       </div>
