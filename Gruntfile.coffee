@@ -684,7 +684,7 @@ module.exports = (grunt) ->
         src: [
           firefoxDevPath + '/data/scripts/background.js'
         ]
-        dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
+        dest: firefoxDevPath + '/data/scripts/context.static.js'
         options:
           browserifyOptions:
             standalone: 'ui_context'
