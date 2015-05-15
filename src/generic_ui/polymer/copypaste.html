@@ -20,13 +20,7 @@
       height: 10em;
     }
     paper-button {
-      background: #009688;  /* dark green */
-      color: white;
       margin-bottom: 24px;
-    }
-    paper-button.stop {
-      background: rgb(221, 221, 221);
-      color: rgb(112, 112, 112);
     }
     #getting, #sharing, #nothing {
       margin: 24px;
@@ -107,7 +101,7 @@
           Start getting access
         </paper-button>
 
-        <paper-button raised class='stop' on-tap='{{ stopGetting }}'
+        <paper-button raised class='grey' on-tap='{{ stopGetting }}'
             hidden?='{{ ui.copyPastePendingEndpoint !== null }}'>
           Stop getting access
         </paper-button>
@@ -158,7 +152,7 @@
       <div class='connected' hidden?='{{ ui.copyPasteSharingState !== SharingState.SHARING_ACCESS }}'>
         <p>Success!  A one-time connection has been established.</p>
 
-        <paper-button raised class='stop' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
+        <paper-button raised class='grey' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
 
         <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
           <p>You are currently sharing access.</p>
