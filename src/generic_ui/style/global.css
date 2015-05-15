@@ -1,0 +1,19 @@
+/* add simple classes to buttons for green and grey */
+body /deep/ paper-button {
+  background: #009688;  /* teal 500 */
+  color: white;
+}
+
+body /deep/ paper-button[disabled] {
+  background: #4DB6AC;  /* teal 300 */
+}
+
+body /deep/ paper-button.grey {
+  background: #DDDDDD;
+  color: #707070;
+}
+
+/* all paper-progress places should be green */
+body /deep/ paper-progress::shadow #activeProgress {
+  background: #009688;
+}
