@@ -40,6 +40,9 @@
     },
     "circular-json/circular-json.d.ts": {
       "commit": "9c2d795cc1d98cd3e11186de9290776c66578ea0"
+    },
+    "xregexp/xregexp.d.ts": {
+      "commit": "1cef384b4f1abab501f16e4e07ccef2ad10585c4"
     }
   }
 }
