@@ -2,6 +2,7 @@
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
 <link rel='import' href='../../bower/core-collapse/core-collapse.html'>
 <link rel='import' href='instance.html'>
+<link rel='import' href='i18next-element.html'>
 
 <polymer-element name='uproxy-contact' attributes='contact, isOnline'>
 
@@ -206,7 +207,7 @@
         <div horizontal layout>
           <core-icon icon='mail'></core-icon>
           <p class='preButtonText' flex>
-            {{ contact.name }} requests access from you.
+            {{ 'Access' | $$({name: contact.name}) }}
           </p>
         </div>
         <paper-button raised on-tap='{{ offer }}'>Grant</paper-button>

@@ -28,13 +28,15 @@ i18n.init({
 i18n.addResources('en-US', 'translation', {
   'Good': 'Bueno',
   'Bad': 'Malo',
-  'Hello': 'Hello __name__'
+  'Hello': 'Hello __name__',
+  'Access': '__name__ requests access from you.'
 });
 
 i18n.addResources('fr', 'translation', {
   'Good': 'Bien',
   'Bad': 'Mal',
-  'Hello': 'Bonjour __name__'
+  'Hello': 'Bonjour __name__',
+  'Access': 'french __name__ french french.'
 });
 
 i18n.addResourceBundle('en-US', 'translation', {
@@ -43,8 +45,9 @@ i18n.addResourceBundle('en-US', 'translation', {
 });
 
 // If we want to create a global Polymer filter instead:
-// declare var PolymerExpressions: any;
-// PolymerExpressions.prototype.$$ = i18n_t;
+ declare var PolymerExpressions: any;
+ var i18n_t = i18n.t;
+ PolymerExpressions.prototype.$$ = i18n_t;
 
 // Example usage of these tests:
 // isRightToLeft.test('hi') --> false
