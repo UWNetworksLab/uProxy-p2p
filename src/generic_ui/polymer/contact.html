@@ -78,8 +78,6 @@
       opacity: 0.5;
     }
     paper-button {
-      background: rgb(221, 221, 221);
-      color: rgb(112, 112, 112);
       font-size: 1em;
       margin: 14px 5px 5px 2px;
       padding-left: 1em;
@@ -95,10 +93,6 @@
     }
     core-icon[icon=check] {
       color: #009688;
-    }
-    .highlightedButton {
-      background: #009688;  /* dark green */
-      color: white;
     }
     p.preButtonDetailedText {
       margin: 18px 0px 0px 0px;
@@ -173,22 +167,22 @@
           </p>
         </div>
         <p class='preButtonDetailedText'>You will be able to get access when {{ contact.name }} accepts.</p>
-        <paper-button raised on-tap='{{ cancelRequest }}'>Cancel Request</paper-button>
+        <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>Cancel Request</paper-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
         <p class='preButtonText'>They've offered you access.</p>
-        <paper-button class='highlightedButton' raised on-tap='{{ request }}'>Accept Offer</paper-button>
-        <paper-button class='highlightedButton' raised on-tap='{{ ignoreOffer }}'>Ignore</paper-button>
+        <paper-button raised on-tap='{{ request }}'>Accept Offer</paper-button>
+        <paper-button raised on-tap='{{ ignoreOffer }}'>Ignore</paper-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_IGNORED }}'>
         <p class='preButtonText'>They've offered you access.</p>
-        <paper-button raised on-tap='{{ unignoreOffer }}'>Stop ignoring offers</paper-button>
+        <paper-button class='grey' raised on-tap='{{ unignoreOffer }}'>Stop ignoring offers</paper-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.NO_OFFER_OR_REQUEST }}'>
-        <paper-button raised class='highlightedButton' on-tap='{{ request }}'>
+        <paper-button raised on-tap='{{ request }}'>
           Ask for access
         </paper-button>
       </div>
@@ -201,11 +195,11 @@
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_ACCEPTED }}'>
         <p class='preButtonText'>You've given them access.</p>
-        <paper-button raised on-tap='{{ cancelOffer }}'>Revoke Access</paper-button>
+        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>Revoke Access</paper-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.LOCAL_OFFERED_REMOTE_NO_ACTION }}'>
-        <paper-button raised on-tap='{{ cancelOffer }}'>Cancel Offer</paper-button>
+        <paper-button class='grey' raised on-tap='{{ cancelOffer }}'>Cancel Offer</paper-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_NO_ACTION }}'>
@@ -215,18 +209,18 @@
             {{ contact.name }} requests access from you.
           </p>
         </div>
-        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Grant</paper-button>
-        <paper-button raised class='highlightedButton' on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
+        <paper-button raised on-tap='{{ offer }}'>Grant</paper-button>
+        <paper-button raised on-tap='{{ ignoreRequest }}'>Ignore</paper-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.REMOTE_REQUESTED_LOCAL_IGNORED }}'>
         <p class='preButtonText'>They requested access through you.</p>
-        <paper-button raised on-tap='{{ unignoreRequest }}'>Stop ignoring requests</paper-button>
+        <paper-button class='grey' raised on-tap='{{ unignoreRequest }}'>Stop ignoring requests</paper-button>
       </div>
 
       <div hidden?='{{ contact.sharingConsentState != SharingConsentState.NO_OFFER_OR_REQUEST }}'>
         <p class='preButtonText'>You have not granted them access.</p>
-        <paper-button raised class='highlightedButton' on-tap='{{ offer }}'>Offer Access</paper-button>
+        <paper-button raised on-tap='{{ offer }}'>Offer Access</paper-button>
       </div>
     </core-collapse> <!-- end of shareControls -->
 
