@@ -15,32 +15,24 @@ i18n.init({
   resStore: window.i18nResources
 });
 
-function addI18nResources(resStore :IResourceStore) {
-  Polymer.mixin(window.i18nResources, resStore);
-};
-
 var i18n_t = i18n.t;
 
-addI18nResources({
-  'en-US': {
-    translation: {
-      'Good': 'Bueno',
-      'Bad': 'Malo',
-      'Hello': 'Hello __name__'
-    }
-  }
+
+// In order for this to compile, add two definitions to I18nextStatic in i18next.d.ts:
+// addResources(language: string, namespace: string, resources :IResourceStoreKey): void;
+// addResourceBundle(language: string, namespace: string, resources :IResourceStoreKey): void;
+
+i18n.addResources('en-US', 'translation', {
+  'Good': 'Bueno',
+  'Bad': 'Malo',
+  'Hello': 'Hello __name__'
 });
 
-addI18nResources({
-  'fr': {
-    translation: {
-      'Good': 'Bien',
-      'Bad': 'Mal',
-      'Hello': 'Bonjour __name__'
-    }
-  }
+i18n.addResources('fr', 'translation', {
+  'Good': 'Bien',
+  'Bad': 'Mal',
+  'Hello': 'Bonjour __name__'
 });
-
 
 i18n.addResourceBundle('en-US', 'translation', {
   'Squid': '__count__ Squid',
@@ -52,5 +44,9 @@ PolymerExpressions.prototype.$$ = i18n_t;
 Polymer({
   $$: function() {
     return i18n_t.apply(window, arguments);
+  },
+  changeLanguage: function(lng :string) {
+    i18n.setLng(lng);
+    // TODO: trigger refresh for text to update.
   }
 });
