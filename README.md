@@ -104,7 +104,8 @@ of uProxy's Grunt commands:
  *  `dist` - Generates distribution files, including the Firefox xpi
  *  `clean` - Cleans up
  *  `test` - Run unit tests
- *  `everything` - 'test', then 'build'
+ *  `integration_test` - Run integration tests
+ *  `everything` - 'build', 'test' and then 'integration_test'
 
 The easiest way to stay current is to pull changes, run `grunt build` to build
 your distribution, and re-run as you make changes to the files.

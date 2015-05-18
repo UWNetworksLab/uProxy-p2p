@@ -40,15 +40,18 @@ import ui = ui_connector.connector;
   export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: false
     },
     'Facebook': {
       isFirebase: true,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: true
     },
     'Google+': {
       isFirebase: true,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: false
     }
   }
 
@@ -257,6 +260,12 @@ import ui = ui_connector.connector;
 
     public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
+    }
+
+    public areAllContactsUproxy = () : boolean => {
+      // Default to false.
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
+      return options ? options.areAllContactsUproxy === true : false;
     }
 
   }  // class AbstractNetwork
