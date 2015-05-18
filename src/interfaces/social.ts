@@ -87,6 +87,7 @@ export interface NetworkState {
 export interface NetworkOptions {
   isFirebase :boolean;
   enableMonitoring :boolean;
+  areAllContactsUproxy :boolean;
 }
 
 /**
@@ -278,5 +279,7 @@ export interface Network {
       => Promise<void>;
 
   getNetworkState : () => NetworkState;
+
+  areAllContactsUproxy : () => boolean;
 }
 

@@ -108,6 +108,7 @@ taskManager.add 'integration_test', [
 taskManager.add 'everything', [
   'build'
   'test'
+  'integration_test'
 ]
 
 # This is the target run by Travis. Targets in here should run locally
@@ -359,6 +360,8 @@ module.exports = (grunt) ->
               'scripts/background.static.js'
               '!**/*spec*'
 
+              'generic_ui/style/*.css'
+
               # extra components we use
               'generic_ui/fonts/*'
               'generic_ui/icons/*'
@@ -441,6 +444,8 @@ module.exports = (grunt) ->
               'data/generic_ui/polymer/vulcanized*.{html,js}'
               '!data/generic_ui/polymer/vulcanized*inline.html'
               '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
+
+              'data/generic_ui/style/*.css'
 
               'data/fonts/*'
               'data/icons/*'
