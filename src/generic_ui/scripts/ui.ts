@@ -39,6 +39,8 @@ export var model :Model = {
       offlineUntrustedUproxy: []
     }
   },
+  // It would be nice to initialize this in shared code, but these settings
+  // will be overwritten by a message from the core.
   globalSettings: {
     version: 0,
     description: '',
@@ -47,7 +49,8 @@ export var model :Model = {
     hasSeenWelcome: false,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
-    statsReportingEnabled: false
+    statsReportingEnabled: false,
+    consoleFilter: 2 // loggingTypes.Level.warn
   },
   reconnecting: false
 };
