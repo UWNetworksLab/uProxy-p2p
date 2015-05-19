@@ -24,6 +24,8 @@ class ChromeBrowserApi implements BrowserAPI {
 
   public browserSpecificElement = "uproxy-app-missing";
 
+  public canProxy = true;
+
   // For browser action.
 
   public ICON_DIR :string = 'icons/';
@@ -69,6 +71,23 @@ class ChromeBrowserApi implements BrowserAPI {
 
     chrome.proxy.settings.clear({scope: 'regular'});
 
+    chrome.proxy.settings.get({}, (details) => {
+      this.canProxy = this.canControlProxy(details.levelOfControl);
+    });
+
+    chrome.proxy.settings.onChange.addListener((details) => {
+      if (!this.canControlProxy(details.levelOfControl)) {
+        if (this.canProxy && this.running_) {
+          // only emit the event if we are learning about this for the first
+          // time and a proxy is currently active
+          this.emit('proxyDisconnected');
+        }
+        this.canProxy = false;
+      } else {
+        this.canProxy = true;
+      }
+    });
+
     chrome.windows.onRemoved.addListener((closedWindowId) => {
       // If either the window launching uProxy, or the popup with uProxy
       // is closed, reset the IDs tracking those windows.
@@ -77,6 +96,11 @@ class ChromeBrowserApi implements BrowserAPI {
         this.popupState_ = PopupState.NOT_LAUNCHED;
       }
     });
+  }
+
+  private canControlProxy = (level :string) :boolean => {
+    return level === 'controllable_by_this_extension' ||
+           level === 'controlled_by_this_extension';
   }
 
   public startUsingProxy = (endpoint:net.Endpoint) => {
@@ -100,10 +124,7 @@ class ChromeBrowserApi implements BrowserAPI {
     if (this.running_) {
       console.log('Reverting Chrome proxy settings');
       this.running_ = false;
-      chrome.proxy.settings.set({
-        value: this.preUproxyConfig_,
-        scope: 'regular'
-      });
+      chrome.proxy.settings.clear({ scope: 'regular' });
     }
   };
 
