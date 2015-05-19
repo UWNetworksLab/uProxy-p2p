@@ -1,5 +1,6 @@
 import local_storage = require('./storage');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
+import loggingTypes = require('../../../third_party/uproxy-lib/loggingprovider/loggingprovider.types');
 import metrics_module = require('./metrics');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
 import user_interface = require('../interfaces/ui');
@@ -32,7 +33,8 @@ export var settings :uproxy_core_api.GlobalSettings = {
   allowNonUnicast: false,
   mode: user_interface.Mode.GET,
   version: STORAGE_VERSION,
-  statsReportingEnabled: false
+  statsReportingEnabled: false,
+  consoleFilter: loggingTypes.Level.warn
 };
 
 export var natType :string = '';

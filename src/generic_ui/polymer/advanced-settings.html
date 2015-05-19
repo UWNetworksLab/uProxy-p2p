@@ -1,0 +1,119 @@
+<link rel='import' href='../../bower/polymer/polymer.html'>
+<link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
+<link rel='import' href='../../bower/paper-input/paper-autogrow-textarea.html'>
+<link rel='import' href='../../bower/core-label/core-label.html'>
+<link rel='import' href='../../bower/core-tooltip/core-tooltip.html'>
+<link rel='import' href='../../bower/core-overlay/core-overlay.html'>
+<link rel='import' href='../../bower/core-signals/core-signals.html'>
+
+<polymer-element name='uproxy-advanced-settings'>
+  <template>
+    <style>
+    :host {
+      text-align: center;
+      font-color: #009688;  /* dark green */
+    }
+    uproxy-app-bar {
+      font-size: 18px;
+    }
+    #advancedSettingsPanel {
+      height: 100%;
+      width: 100%;
+      background-color: white;
+    }
+    #container {
+      height: 100%;
+    }
+    #formContainer {
+      padding: 30px;
+      text-align: left;
+      color: #009688;
+      overflow: auto;
+    }
+    .inputLabel {
+      font-weight: bold;
+      margin: 0;
+    }
+    #moreInfo {
+      color: grey;
+      margin-top: 1em;
+    }
+    #setAdvancedSettings {
+      width: 100%;
+      padding-top: 1.5em;
+      padding-bottom: 1.5em;
+      border-top: 1px solid rgb(221, 221, 221);
+      color: #009688;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      background-color: #ffffff;
+    }
+    core-tooltip::shadow #tooltip {
+      /* Without this, the first time you view the
+         tooltip, it appears off center. */
+      left: -64px !important;
+    }
+    paper-input-decorator /deep/ .cursor {
+      background-color: #009688;
+    }
+    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .unfocused-underline,
+    paper-input-decorator[id=advancedSettingsDecorator] /deep/ .focused-underline {
+      /* Remove the underline from the advanced settings textbox. */
+      height: 0px;
+    }
+    paper-input-decorator {
+      font-size: 1.4em;
+    }
+    #advancedSettingsDecorator {
+      height: 350px;
+    }
+    #advancedSettingsPaperTextarea {
+      height: 350px;
+      margin: 0em;
+    }
+    paper-autogrow-textarea::shadow .textarea-container {
+      padding: 0.25em;
+      background-color: rgb(240,240,240);
+    }
+    paper-autogrow-textarea::shadow .mirror-text {
+      white-space: pre-wrap; /* css-3 */
+      white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    }
+    .advancedSettingsText {
+      font-size: 12px;
+      padding-top: 0px;
+      color: rgb(112, 112, 112);
+    }
+    .error {
+      color: rgb(200, 112, 112);
+    }
+    </style>
+
+    <!-- Listen for the 'open-advanced-settings' event, which is fired by the settings page. -->
+    <core-signals on-core-signal-open-advanced-settings='{{ open }}'></core-signals>
+
+    <core-overlay id='advancedSettingsPanel'>
+      <div id='container' vertical layout>
+        <uproxy-app-bar on-go-back='{{ close }}'>
+          Advanced settings
+        </uproxy-app-bar>
+        <div id='formContainer' flex>
+          <p class='inputLabel'>Edit your settings below</p>
+          <paper-input-decorator id='advancedSettingsDecorator' label='Edit your settings'>
+            <paper-autogrow-textarea id='advancedSettingsPaperTextarea' class='font::inherit'>
+              <textarea id='advancedSettingsInput'
+                     value='{{ settings }}'>
+              </textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
+          <p id='confirmSetAdvancedSettings' class='advancedSettingsText' hidden?='{{ status !== StatusState.SET }}'>Settings saved</p>
+          <p id='failedSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.PARSE_ERROR }}'>Could not set: bad format</p>
+          <p id='failedKeyValueSetAdvancedSettings' class='advancedSettingsText error' hidden?='{{ status !== StatusState.KEY_VALUE_ERROR }}'>Could not set: JSON value mismatch</p>
+        </div> <!-- end of form container -->
+        <div id='setAdvancedSettings' on-tap='{{ setAdvancedSettings }}'>SET</div>
+      </div>
+    </core-overlay>
+  </template>
+  <script src='advanced-settings.js'></script>
+</polymer-element>

@@ -1,10 +1,10 @@
-<link rel="import" href="../../bower/polymer/polymer.html">
+<link rel='import' href='../../bower/polymer/polymer.html'>
 <link rel='import' href='../../bower/paper-button/paper-button.html'>
 <link rel='import' href='../../bower/paper-checkbox/paper-checkbox.html'>
 <link rel='import' href='../../bower/paper-input/paper-input-decorator.html'>
 <link rel='import' href='../../bower/core-icons/core-icons.html'>
-<link rel="import" href='description.html'>
-<link rel="import" href="faq-link.html">
+<link rel='import' href='description.html'>
+<link rel='import' href='faq-link.html'>
 <link rel='import' href='link.html'>
 
 <polymer-element name='uproxy-settings'>
@@ -95,7 +95,7 @@
     paper-checkbox::shadow #checkboxLabel {
       padding: 0px 8px;
     }
-    #metricsCheckbox core-icon[icon="help"]{
+    #metricsCheckbox core-icon[icon='help']{
       height: 15px;
       color: grey;
       opacity: 0.6;
@@ -105,7 +105,7 @@
       -moz-transition: all 0.23s !important;
       transition: all 0.23s !important;
     }
-    #metricsCheckbox core-icon[icon="help"]:hover {
+    #metricsCheckbox core-icon[icon='help']:hover {
       opacity: 1;
     }
     #metricsCheckbox paper-checkbox, uproxy-faq-link {
@@ -117,11 +117,6 @@
     }
     #settingsLinks .label {
       margin: 0px 5px;
-    }
-    .advancedSettingsText {
-      font-size: 12px;
-      padding-top: 0px;
-      color: rgb(112, 112, 112);
     }
     hr {
       border: 0;
@@ -158,6 +153,7 @@
 
         <uproxy-link on-tap='{{ openFeedbackForm }}' role='button'>
           <core-icon icon="announcement"></core-icon>
+          <!-- try taking out these .label spans and see what happens. -->
           <span class='label'>{{ 'submitFeedback' | $$ }}</span>
         </uproxy-link>
 
@@ -166,23 +162,15 @@
           <span class='label'>{{ 'getHelp' | $$ }}</span>
         </uproxy-faq-link>
 
-        <uproxy-link on-tap='{{ toggleAdvancedSettings }}' role='button'>
+        <uproxy-link on-tap='{{ openAdvancedSettingsForm }}' role='button'>
           <core-icon icon="settings"></core-icon>
           <span class='label'>{{ 'advancedSettings' | $$ }}</span>
         </uproxy-link>
-        <div id='advancedSettings' hidden?='{{!displayAdvancedSettings}}'>
-          <paper-input-decorator label="Custom STUN server">
-            <input is="core-input" value='{{stunServer}}'>
-          </paper-input-decorator>
-          <paper-button raised on-tap="{{setStunServer}}">Update</paper-button>
-          <paper-button raised on-tap="{{resetStunServers}}">Reset</paper-button>
-          <p id='confirmNewServer' class='advancedSettingsText' hidden>STUN server updated. New server will be used for future connections.</p>
-          <p id='confirmResetServers' class='advancedSettingsText' hidden>STUN servers reset. Default servers will be used for future connections.</p>
-        </div>
+
         <div id='metricsCheckbox'>
           <paper-checkbox checked='{{ model.globalSettings.statsReportingEnabled }}' label='{{ "statsEnabledTitle" | $$ }}'></paper-checkbox>
           <uproxy-faq-link anchor='doesUproxyLogData'>
-            <core-icon icon="help"></core-icon>
+            <core-icon icon='help'></core-icon>
           </uproxy-faq-link>
         </div>
 
