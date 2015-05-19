@@ -12,6 +12,8 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
+declare var i18n_t :Function;
+
 Polymer({
   init: function() {
     /* bring copyPaste to the front in get mode */
@@ -64,7 +66,7 @@ Polymer({
 
     this.fire('open-dialog', {
       heading: 'Go back?',
-      message: 'Are you sure you want to end this one-time connection?',
+      message: i18n_t('areYouSure'),
       buttons: [{
         text: 'Yes',
         signal: 'copypaste-back'

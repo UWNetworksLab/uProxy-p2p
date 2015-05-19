@@ -38,79 +38,81 @@
     <core-signals on-core-signal-copypaste-init='{{ init }}'></core-signals>
 
     <uproxy-app-bar disableback='{{ ui.copyPasteGettingState === GettingState.GETTING_ACCESS || ui.copyPasteSharingState === SharingState.SHARING_ACCESS }}' on-go-back='{{ handleBackClick }}'>
-      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>Share a </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>Request a </span>
-      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState) }}'>Start a </span>
-      <span>one-time connection</span>
+      <span hidden?='{{ SharingState.NONE === ui.copyPasteSharingState }}'>
+        {{ 'shareOneTime' | $$ }}
+      </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState }}'>
+        {{ 'requestOneTime' | $$ }}
+      </span>
+      <span hidden?='{{ SharingState.NONE !== ui.copyPasteSharingState || !(SharingState.NONE !== ui.copyPasteSharingState || GettingState.NONE === ui.copyPasteGettingState) }}'>
+        {{ 'startOneTime' | $$ }}
+      </span>
     </uproxy-app-bar>
 
     <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.BAD_URL }}' on-closed='{{ dismissError }}' class='error'>
-      There was an error parsing the uproxy connection link, please try
-      navigating to the link again or asking your friend for a new link.
+      {{ 'errorParsingLink' | $$ }}
     </uproxy-bubble>
 
     <div id='nothing' hidden?='{{ ui.copyPasteGettingState !== GettingState.NONE || ui.copyPasteSharingState !== SharingState.NONE }}'>
       <p>
-        You are no longer getting access.  To request a connection, click the
-        button below.
+        {{ 'noLongerGetting' | $$ }}
       </p>
 
       <div>
-        <paper-button on-tap='{{ startGetting }}'>Start getting a new connection</paper-button>
+        <paper-button on-tap='{{ startGetting }}'>
+          {{ 'startNewConnection' | $$ }}
+        </paper-button>
       </div>
 
       <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.FAILED }}' on-closed='{{ dismissError }}' class='error'>
-        There was an error starting the connection and it had to be terminated.
-        Please try starting another connection.
+        {{ 'errorStartingConnection' | $$ }}
       </uproxy-bubble>
 
-      <p>To share your connection, please ask your friend to send you their link.</p>
+      <p>{{ 'sendConnectionLink' | $$ }}</p>
     </div>
 
     <div id='getting' hidden?='{{ ui.copyPasteGettingState === GettingState.NONE || ui.copyPasteSharingState !== SharingState.NONE }}'>
       <div class='link' hidden?='{{ ui.copyPasteGettingState !== GettingState.TRYING_TO_GET_ACCESS }}'>
         <p>
-          To request access from a friend, copy and paste this URL to them over
-          a secure channel
+          {{ 'copyConnectionLink' | $$ }}
         </p>
 
         <textarea readonly hidden?='{{ !ui.copyPasteGettingMessage.length }}'
           class='message' on-tap='{{ select }}'>https://www.uproxy.org/request/{{ ui.copyPasteGettingMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>Loading...</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteGettingMessage.length }}'>{{ 'loading' | $$ }}</span>
 
         <p>
-          To finish setting up the connection, your friend needs to click on the
-          link and send you a link from their uProxy client.  When you click on
-          it, you'll be ready to start getting access.
+          {{ 'friendNeedsToClick' | $$ }}
         </p>
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteGettingState !== GettingState.GETTING_ACCESS }}'>
-        <p>Success!  A one-time connection has been established.</p>
+        <p>{{ 'oneTimeSuccess' | $$ }}</p>
 
         <p>
-          To
-          <span hidden?='{{ ui.copyPastePendingEndpoint === null}}'>start</span>
-          <span hidden?='{{ ui.copyPastePendingEndpoint !== null}}'>stop</span>
-          getting access from your friend, click the button below.
+          <span hidden?='{{ ui.copyPastePendingEndpoint === null}}'>
+            {{ 'startOneTimeInstruction' | $$ }}
+          </span>
+          <span hidden?='{{ ui.copyPastePendingEndpoint !== null}}'>
+            {{ 'stopOneTimeInstruction' | $$ }}
+          </span>
         </p>
 
         <paper-button raised on-tap='{{ startProxying }}'
             hidden?='{{ ui.copyPastePendingEndpoint === null }}'>
-          Start getting access
+          {{ 'startGetting' | $$ }}
         </paper-button>
 
         <paper-button raised class='grey' on-tap='{{ stopGetting }}'
             hidden?='{{ ui.copyPastePendingEndpoint !== null }}'>
-          Stop getting access
+          {{ 'stopGetting' | $$ }}
         </paper-button>
 
         <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
-          <p>You are currently getting access.</p>
+          <p>{{ 'oneTimeGetting' | $$ }}</p>
           <p>
-            If you would like to start a new one-time connection, press "Stop
-            Getting Access" first.
+            {{ 'stopOneTimeGettingBeforeNew' | $$ }}
           </p>
         </uproxy-bubble>
       </div>
@@ -118,31 +120,27 @@
 
     <div id='sharing' hidden?='{{ ui.copyPasteSharingState === SharingState.NONE }}'>
       <div class='link' hidden?='{{ ui.copyPasteSharingState !== SharingState.TRYING_TO_SHARE_ACCESS }}'>
-        <p>Your friend has requested to use your internet connection.</p>
+        <p>{{ 'friendRequestedOneTime' | $$ }}</p>
 
         <p>
-          If you'd like to give them access, copy and paste this URL back to
-          them.
+          {{ 'howToOfferOneTime' | $$ }}
         </p>
 
         <textarea readonly hidden?='{{ !ui.copyPasteSharingMessage.length }}'
           class='message' on-tap='{{ select }}'>https://www.uproxy.org/offer/{{ ui.copyPasteSharingMessage }}</textarea>
 
-        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>Loading...</span>
+        <span class='message-loading' hidden?='{{ ui.copyPasteSharingMessage.length }}'>{{ 'loading' | $$ }}Loading...</span>
 
         <div>
-          <a href='#' on-tap='{{ switchToGetting }}'>Get access instead</a>
+          <a href='#' on-tap='{{ switchToGetting }}'>{{ 'getOneTimeInstead' | $$ }}</a>
 
           <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}'>
             <p>
-              You are currently in the process of trying to share access.  If
-              you would like to get access instead ,click the link above.
+              {{ 'tryingToShareOneTime' | $$ }}
             </p>
 
             <p>
-              If you would like to start a one-time connection with someone
-              else, press the "Back" button and then "Start a one-time
-              connection" to start a new session.
+              {{ 'getOneTimeInsteadInstruction' | $$ }}
             </p>
           </uproxy-bubble>
         </div>
@@ -150,16 +148,15 @@
       </div>
 
       <div class='connected' hidden?='{{ ui.copyPasteSharingState !== SharingState.SHARING_ACCESS }}'>
-        <p>Success!  A one-time connection has been established.</p>
+        <p>{{ 'oneTimeSuccess' | $$ }}</p>
 
-        <paper-button raised class='grey' on-tap='{{ stopSharing }}'>Stop sharing access</paper-button>
+        <paper-button raised class='grey' on-tap='{{ stopSharing }}'>{{ 'stopOneTimeSharing' | $$ }}</paper-button>
 
         <uproxy-bubble active='{{ ui.copyPasteError === ui_constants.CopyPasteError.UNEXPECTED }}' on-closed='{{ dismissError }}' class='error'>
-          <p>You are currently sharing access.</p>
+          <p>{{ 'oneTimeSharing' | $$ }}</p>
 
           <p>
-            If you would like to start a new one-time connection, press "Stop
-            Getting Access" first.
+            {{ 'stopOneTimeSharingBeforeNew' | $$ }}
           </p>
         </uproxy-bubble>
       </div>

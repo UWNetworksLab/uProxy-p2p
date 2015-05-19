@@ -8,46 +8,6 @@ import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
 import regEx = require('xregexp');
 import XRegExp = regEx.XRegExp;
-import i18n = require('i18next');
-//import i18n = I18Next.i18n;
-
-interface I18nWindow extends Window { i18nResources: any; }
-
-declare var window: I18nWindow;
-
-window.i18nResources = {};
-
-i18n.init({
-  resStore: window.i18nResources
-});
-
-// In order for this to compile, add two definitions to I18nextStatic in i18next.d.ts:
-// addResources(language: string, namespace: string, resources :IResourceStoreKey): void;
-// addResourceBundle(language: string, namespace: string, resources :IResourceStoreKey): void;
-
-i18n.addResources('en-US', 'translation', {
-  'Good': 'Bueno',
-  'Bad': 'Malo',
-  'Hello': 'Hello __name__',
-  'Access': '__name__ requests access from you.'
-});
-
-i18n.addResources('fr', 'translation', {
-  'Good': 'Bien',
-  'Bad': 'Mal',
-  'Hello': 'Bonjour __name__',
-  'Access': 'french __name__ french french.'
-});
-
-i18n.addResourceBundle('en-US', 'translation', {
-  'Squid': '__count__ Squid',
-  'Squid_plural': '__count__ Squids'
-});
-
-// If we want to create a global Polymer filter instead:
- declare var PolymerExpressions: any;
- var i18n_t = i18n.t;
- PolymerExpressions.prototype.$$ = i18n_t;
 
 // Example usage of these tests:
 // isRightToLeft.test('hi') --> false
