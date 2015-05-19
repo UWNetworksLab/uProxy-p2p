@@ -190,6 +190,7 @@
         font-size: 12px;
       }
       paper-toast #toastHelpLink {
+        text-transform: uppercase;
         color: #47B5AA;
       }
     </style>
@@ -222,47 +223,44 @@
           <div id='title' flex>uProxy</div>
 
           <uproxy-bubble class='error' active='{{ ui.copyPasteError === ui_constants.CopyPasteError.LOGGED_IN }}' on-closed='{{ dismissCopyPasteError }}'>
-            <h3>Cannot open manual connection</h3>
+            <h3>{{ 'cantOpenOneTimeTitle' | $$ }}</h3>
             <p>
-              It is not currently possible to open a manual connection at the
-              same time as being signed in to a social network.  To launch a
-              manual connection, please log out through the settings menu and
-              re-paste the link.
+              {{ 'cantOpenOneTimeMessage' | $$ }}
             </p>
           </uproxy-bubble>
 
-          <core-tooltip id='statsTooltip' label='You are sharing anonymous stats.' position='left'>
+          <core-tooltip id='statsTooltip' label='{{ "statsEnabledTooltip" | $$ }}' position='left'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closeStatsBubble }}' active='{{ model.globalSettings.statsReportingEnabled && statsDialogOrBubbleOpen }}'>
-            <h3>Anonymous stats enabled</h3>
-            <p>This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.</p>
+            <h3>{{ 'statsEnabledTitle' | $$ }}</h3>
+            <p>{{ 'statsEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
 
-          <core-tooltip label='You are available for sharing.' position='left'>
+          <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='left'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
           <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
-            <h3>Sharing Enabled</h3>
-            <p>This icon means you're available for sharing access with friends you've offered access to.</p>
+            <h3>{{ 'sharingEnabledTitle' | $$ }}</h3>
+            <p>{{ 'sharingEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
 
           <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>Get Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>{{ 'getAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length == 0 }}'>
                   {{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>Share Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>{{ 'shareAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
                   hidden?='{{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length == 0 }}'>
                   {{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length }}
@@ -278,10 +276,9 @@
           https://www.polymer-project.org/0.5/docs/elements/core-header-panel.html)
         -->
         <uproxy-bubble class='core-header' on-closed='{{ closedWelcome }}' active='{{ !model.globalSettings.hasSeenWelcome && !statsDialogOrBubbleOpen }}'>
-          <h3>Welcome to uProxy!</h3>
+          <h3>{{ 'welcome' | $$ }}</h3>
           <p>
-            To get started, choose "Get access" or "Share access" and then click
-            on a friend to connect.
+            {{ 'welcomeMessage' | $$ }}
           </p>
         </uproxy-bubble>
 
@@ -331,28 +328,28 @@
       </template>
     </uproxy-action-dialog>
 
-    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="Welcome to uProxy">
+    <uproxy-action-dialog id='statsDialog' backdrop layered="false" heading="{{ 'welcome' | $$ }}">
       <p>
-        This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.
+        {{ 'alphaMessage' | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>More information.</span>
-        </uproxy-faq-link> You can change your choice at any time, from the Settings menu.
+          <span class='linkText'>{{ 'moreInfo' | $$ }}</span>
+        </uproxy-faq-link>{{ 'changeStatsChoice' | $$ }}
       </p>
-      <p>Would you like to enable anonymous metrics collection?</p>
-      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>I'm in</paper-button>
-      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>No thanks</paper-button>
+      <p>{{ 'enableMetrics' | $$ }}</p>
+      <paper-button affirmative class='dialogButton' on-tap='{{ enableStats }}'>{{ 'imIn' | $$ }}</paper-button>
+      <paper-button dismissive class='dialogButton' on-tap='{{ disableStats }}'>{{ 'noThanks' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-action-dialog id='disconnectDialog' backdrop layered="false"
         opened="{{ ui.disconnectedWhileProxying }}" autoCloseDisabled>
       <img src='../icons/128_error.png'>
       <div id="disconnectDialogText">
-        <h1>Oops! You've been disconnected from your friend.</h1>
+        <h1>{{ 'disconnectedTitle' | $$ }}</h1>
         <p>
-          Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.
+          {{ 'disconnectedMessage' | $$ }}
         </p>
       </div>
-      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>Continue Browsing Without uProxy</paper-button>
+      <paper-button class='dialogButton' on-tap='{{ revertProxySettings }}'>{{ 'continueBrowsing' | $$ }}</paper-button>
     </uproxy-action-dialog>
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
@@ -362,7 +359,7 @@
         style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
+          hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>{{ 'getHelp' | $$ }}
       </div>
     </paper-toast>
 

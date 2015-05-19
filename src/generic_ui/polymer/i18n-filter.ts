@@ -27,8 +27,14 @@ i18n.addResources('en-US', 'translation', {
   'done': 'Done',
   'yes': 'Yes',
   'no': 'No',
+  'ok': 'OK',
+  'close': 'Close',
+  'cancel': 'Cancel',
   'startGetting': 'Start getting access',
   'stopGetting': 'Stop getting access',
+  'submitFeedback': 'Submit Feedback',
+  'getHelp': 'Get Help',
+  'logout': 'Log-out of uProxy',
 
   /* Text for getting access */
   'grantedYouAccess': '__name__ has granted you access',
@@ -40,6 +46,7 @@ i18n.addResources('en-US', 'translation', {
   'ignore': 'Ignore',
   'stopIgnoringOffers': 'Stop ignoring offers',
   'askForAccess': 'Ask for access',
+  'friendOffline': '__name__ is offline',
 
   /* Text for sharing access */
   'grantedFriendAccess': 'You\'ve given them access.',
@@ -80,9 +87,88 @@ i18n.addResources('en-US', 'translation', {
   'goBack': 'Go back?',
   'areYouSure': 'Are you sure you want to end this one-time connection?',
 
-  /* Settings panel */
-  'nameThisDevice': 'Name this device'
+  /* Submit feedback */
+  'emailTitle': 'Email (optional)',
+  'emailPlaceholder': 'Email address',
+  'feedbackTitle': 'Enter your feedback below',
+  'feedbackPlaceholder': 'Write your feedback',
+  'networkAndLogs': 'Analyze network and include logs',
+  'PIIMessage': 'Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.',
+  'thankYou': 'Thank you!',
+  'feedbackSubmitted': 'Your feedback has been submitted to the uProxy development team.',
+  'emailInsteadTitle': 'Email feedback instead?',
+  'emailInsteadMessage': 'Oops! We were unable to submit your feedback to uproxy.org. Please copy and paste your feedback in an email to info@uproxy.org.',
 
+  /* Logs */
+  'logsTitle': 'Logs & Network Analysis',
+  'toSendLogs': 'To send your logs to the uProxy team for help:',
+  'openFeedback': 'open uProxy and click \'Submit Feedback\'',
+  'retrievingLogs': 'Retrieving logs and analyzing your network...',
+
+  /* Network */
+  'submitFeedback': 'There was a problem signing in to __network__.  Please try again.',
+
+  /* Reconnect */
+  'attemptingReconnect': 'Attempting to re-connect.',
+
+  /* Root */
+  'cantOpenOneTimeTitle': 'Cannot open manual connection',
+  'cantOpenOneTimeMessage': 'It is not currently possible to open a manual connection at the same time as being signed in to a social network.  To launch a manual connection, please log out through the settings menu and re-paste the link.',
+  'statsEnabledTitle': 'Anonymous stats enabled',
+  'statsEnabledMessage': 'This icon means you have opted in to sharing anonymous statistics with the uProxy team. Click to adjust settings.',
+  'statsEnabledTooltip': 'You are sharing anonymous stats.',
+  'sharingEnabledTitle': 'Sharing Enabled',
+  'sharingEnabledMessage': 'This icon means you\'re available for sharing access with friends you\'ve offered access to.',
+  'statsEnabledTooltip': 'You are available for sharing.',
+  'getAccess': 'Get Access',
+  'shareAccess': 'Share Access',
+  'welcome': 'Welcome to uProxy',
+  'welcomeMessage': 'To get started, choose "Get access" or "Share access" and then click on a friend to connect.',
+  'alphaMessage': 'This is an alpha release of uProxy. You can help us improve uProxy by sharing anonymous metrics with the development team. Data reported is anonymized by the client and transmitted securely.',
+  'moreInfo': 'More information.',
+  'changeStatsChoice': 'You can change your choice at any time, from the Settings menu.',
+  'enableMetrics': 'Would you like to enable anonymous metrics collection?',
+  'imIn': 'I\'m in',
+  'noThanks': 'No thanks',
+  'disconnectedTitle': 'Oops! You\'ve been disconnected from your friend.',
+  'disconnectedMessage': 'Please proceed with caution. Your web traffic will no longer be routed through your friend. You may want to close any sensitive windows you have open, before proceeding.',
+  'continueBrowsing': 'Continue Browsing Without uProxy',
+  'sharingUnavailableTitle': 'Sharing Unavailable',
+  'sharingUnavailableMessage': 'Oops! You\'re using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome.',
+  'unableToGet': 'Unable to get access',
+  'unableToShare': 'Unable to share access',
+
+  /* Roster */
+  'loadingFriends': 'Loading uProxy friends',
+  'noFriendsOnline': 'None of your friends on __network__ are signed into uProxy at this time.',
+  'toInviteFriends': 'To invite friends to uProxy, send them a link to https://www.uproxy.org',
+  'offers': 'Offers',
+  'requests': 'Requests',
+  'friendsWhoShare': 'Friends you can get access from',
+  'friendsWhoCanGet': 'Friends who can get access from you',
+  'uproxyFriends': 'Friends who have uProxy',
+
+  /* Settings panel */
+  'connectedWith': 'Connected with __network__',
+  'nameThisDevice': 'Name this device',
+  'deviceDescription': 'Device description',
+  'advancedSettings': 'Advanced Settings',
+  'restart': 'Restart',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+
+  /* Submit feedback */
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
+  'submitFeedback': 'Submit feedback',
 });
 
 i18n.addResources('fr', 'translation', {

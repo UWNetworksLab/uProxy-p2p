@@ -9,6 +9,8 @@ import user_interface = require('../scripts/ui');
 import regEx = require('xregexp');
 import XRegExp = regEx.XRegExp;
 
+declare var i18n_t :Function;
+
 // Example usage of these tests:
 // isRightToLeft.test('hi') --> false
 // isRightToLeft.test('لك الوص') --> true
@@ -142,9 +144,9 @@ Polymer({
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
       this.fire('open-dialog', {
-        heading: 'Sharing Unavailable',
-        message: 'Oops! You\'re using Firefox 37, which has a bug that prevents sharing from working (see git.io/vf5x1). This bug is fixed in Firefox 38, so you can enable sharing by upgrading Firefox or switching to Chrome.',
-        buttons: [{text: 'Close', dismissive: true}]
+        heading: i18n_t('sharingUnavailableTitle'),
+        message: i18n_t('sharingUnavailableMessage'),
+        buttons: [{text: i18n_t('close'), dismissive: true}]
       });
     } else {
       // setting the value is taken care of in the polymer binding, we just need
@@ -172,9 +174,9 @@ Polymer({
   },
   openTroubleshoot: function() {
     if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
-      this.troubleshootTitle = "Unable to get access";
+      this.troubleshootTitle = i18n_t('unableToGet');
     } else {
-      this.troubleshootTitle = "Unable to share access";
+      this.troubleshootTitle = i18n_t('unableToShare');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});

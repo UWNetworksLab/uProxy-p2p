@@ -139,19 +139,19 @@
     <core-overlay id='feedbackPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'submitFeedback' | $$ }}Submit feedback
+          {{ 'submitFeedback' | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ 'submitFeedback' | $$ }}Email (optional)</p>
+          <p class='inputLabel'>{{ 'emailOptional' | $$ }}</p>
           <paper-input-decorator id='emailDecorator'
               label="{{ 'submitFeedback' | $$ }}Email address">
             <input id="emailInput"
                    is="core-input"
                    value='{{ email }}'>
           </paper-input-decorator>
-          <p class='inputLabel'>{{ 'submitFeedback' | $$ }}Enter your feedback below</p>
+          <p class='inputLabel'>{{ 'feedbackTitle' | $$ }}</p>
           <paper-input-decorator id='feedbackDecorator'
-              label="{{ 'submitFeedback' | $$ }}Write your feedback">
+              label="{{ 'feedbackPlaceholder' | $$ }}">
             <paper-autogrow-textarea id="feedbackPaperTextarea">
               <textarea id="feedbackInput"
                      value='{{ feedback }}'>
@@ -161,14 +161,14 @@
           <div id='logCheckboxContainer'>
             <paper-checkbox for id='logCheckbox'></paper-checkbox>
             <span id='logCheckboxLabel' on-tap='{{ viewLogs }}'>
-              {{ 'submitFeedback' | $$ }}Analyze network and include logs
+              {{ 'networkAndLogs' | $$ }}
             </span>
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
           </div>
           <p id='moreInfo'>
-            {{ 'submitFeedback' | $$ }}Your feedback and email address will be sent to uProxy.org. Your logs, network information and email may include personally identifiable information.
+            {{ 'PIIMessage' | $$ }}
             <uproxy-faq-link anchor='doesUproxyLogData'>
               <core-icon icon="help"></core-icon>
             </uproxy-faq-link>
@@ -179,7 +179,7 @@
     </core-overlay>
     <uproxy-action-dialog backdrop layered="false" id='sendingFeedbackDialog' autoCloseDisabled='true'>
       <div id='sendingFeedback'>
-        {{ 'submitFeedback' | $$ }}Sending feedback<br>
+        {{ 'sendingFeedback' | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
     </uproxy-action-dialog>
