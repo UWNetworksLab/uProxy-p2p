@@ -65,13 +65,13 @@ Polymer({
     }
 
     this.fire('open-dialog', {
-      heading: 'Go back?',
+      heading: i18n_t('goBack'),
       message: i18n_t('areYouSure'),
       buttons: [{
-        text: 'Yes',
+        text: i18n_t('yes'),
         signal: 'copypaste-back'
       }, {
-        text: 'No',
+        text: i18n_t('no'),
         dismissive: true
       }]
     });

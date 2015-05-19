@@ -25,6 +25,8 @@ i18n.addResources('en-US', 'translation', {
 
   /* Frequently used text */
   'done': 'Done',
+  'yes': 'Yes',
+  'no': 'No',
   'startGetting': 'Start getting access',
   'stopGetting': 'Stop getting access',
 
@@ -75,7 +77,12 @@ i18n.addResources('en-US', 'translation', {
   'oneTimeSharing': 'You are currently sharing access.',
   'stopOneTimeSharing': 'Stop sharing access',
   'stopOneTimeSharingBeforeNew': 'If you would like to start a new one-time connection, press "Stop Sharing Access" first.',
-  'areYouSure': 'Are you sure you want to end this one-time connection?'
+  'goBack': 'Go back?',
+  'areYouSure': 'Are you sure you want to end this one-time connection?',
+
+  /* Settings panel */
+  'nameThisDevice': 'Name this device'
+
 });
 
 i18n.addResources('fr', 'translation', {

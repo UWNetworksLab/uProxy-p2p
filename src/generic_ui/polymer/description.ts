@@ -1,6 +1,8 @@
 /// <reference path='./context.d.ts' />
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 
+declare var i18n_t :Function;
+
 Polymer({
   editDescription: function() {
     this.descriptionInput = this.model.globalSettings.description;
@@ -18,5 +20,6 @@ Polymer({
     this.model = ui_context.model;
     this.editing = false;
     this.descriptionInput = '';
+    this.descriptionPlaceholder = i18n_t('nameThisDevice');
   }
 });
