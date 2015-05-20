@@ -13,6 +13,4 @@ export var browserConnector = ui_context.browserConnector;
 export var model :user_interface.Model = ui_context.model;
 ui.browser = 'chrome';
 
-//var whatever = new user_interface.UserInterface(core, browserConnector);
-
 console.log('Loaded dependencies for Chrome Extension.');
