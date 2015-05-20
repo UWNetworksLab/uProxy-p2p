@@ -31,7 +31,7 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 };
 
 export var rtcNet = new rtc_to_net.RtcToNet();
-rtcNet.startFromConfig({ allowNonUnicast: true }, pcConfig, false); // obfuscate
+rtcNet.startFromConfig({ allowNonUnicast: true }, pcConfig); // obfuscate
 
 //-----------------------------------------------------------------------------
 export var socksRtc = new socks_to_rtc.SocksToRtc();
