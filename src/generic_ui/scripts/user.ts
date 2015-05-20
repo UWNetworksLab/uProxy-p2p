@@ -8,6 +8,8 @@
 
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
+import i18n_module = require('./i18n-filter');
+import i18n_t = i18n_module.i18n_t;
 import _ = require('lodash');
 
 export enum GettingConsentState {
@@ -77,10 +79,10 @@ export class User implements social.BaseUser {
       if (!payload.consent.ignoringRemoteUserOffer) {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
           if (payload.consent.localRequestsAccessFromRemote) {
-            this.ui_.showNotification(profile.name + ' granted you access',
+            this.ui_.showNotification(i18n_t('grantedAccessNotification', {name: profile.name}),
                          { mode: 'get', user: this.userId });
           } else {
-            this.ui_.showNotification(profile.name + ' offered you access',
+            this.ui_.showNotification(i18n_t('offeredAccessNotification', {name: profile.name}),
                          { mode: 'get', user: this.userId });
           }
         }
@@ -90,10 +92,10 @@ export class User implements social.BaseUser {
       if (!payload.consent.ignoringRemoteUserRequest) {
         if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
           if (payload.consent.localGrantsAccessToRemote) {
-            this.ui_.showNotification(profile.name + ' has accepted your offer for access',
+            this.ui_.showNotification(i18n_t('acceptedOfferNotification', {name: profile.name}),
                          { mode: 'share', user: this.userId });
           } else {
-            this.ui_.showNotification(profile.name + ' is requesting access',
+            this.ui_.showNotification(i18n_t('requestingAccessNotification', {name: profile.name}),
                          { mode: 'share', user: this.userId });
           }
         }
@@ -252,7 +254,7 @@ export class User implements social.BaseUser {
       var instance = this.offeringInstances[i];
       if (!instance.description) {
         // Set description to "Computer 1", "Computer 2", etc.
-        instance.description = 'Computer ' + (i + 1);
+        instance.description = i18n_t('descriptionDefault', {number: i + 1});
       }
     }
   }
