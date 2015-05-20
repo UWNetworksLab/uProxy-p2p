@@ -1,7 +1,7 @@
 /// <reference path='../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../third_party/typings/i18next/i18next.d.ts' />
 
-declare var i18n: I18nextStatic;
+import i18n = require('i18next');
 
 Polymer({
   $$: function() {

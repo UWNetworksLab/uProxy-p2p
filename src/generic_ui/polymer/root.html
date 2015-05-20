@@ -335,7 +335,7 @@
       <p>
         {{ 'alphaMessage' | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>{{ 'moreInfo' | $$ }}</span>
+          <span class='linkText'>{{ 'moreInformation' | $$ }}</span>
         </uproxy-faq-link>{{ 'changeStatsChoice' | $$ }}
       </p>
       <p>{{ 'enableMetrics' | $$ }}</p>
@@ -362,7 +362,7 @@
         style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened && !$.advancedSettings.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
-          hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>{{ 'getHelp' | $$ }}
+          hidden?='{{ !unableToShare && !unableToGet }}'>{{ 'getHelp' | $$ }}
       </div>
     </paper-toast>
 

@@ -39,6 +39,8 @@ Polymer({
     buttons: []
   },
   toastMessage: '',
+  unableToGet: '',
+  unableToShare: '',
   updateView: function(e :Event, detail :{ view :ui_types.View }) {
     // If we're switching from the SPLASH page to the ROSTER, fire an
     // event indicating the user has logged in. roster.ts listens for
@@ -166,28 +168,24 @@ Polymer({
   toastMessageChanged: function(oldVal :string, newVal :string) {
     if (newVal) {
       this.toastMessage = newVal;
+      this.unableToShare = ui.unableToShare;
+      this.unableToGet = ui.unableToGet;
       this.$.toast.show();
 
       // clear the message so we can pick up on other changes
       ui.toastMessage = null;
+      ui.unableToShare = false;
+      ui.unableToGet = false;
     }
   },
   openTroubleshoot: function() {
-    if (this.stringMatches(ui.toastMessage, user_interface.GET_FAILED_MSG)) {
+    if (this.ui.unableToGet) {
       this.troubleshootTitle = i18n_t('unableToGet');
     } else {
       this.troubleshootTitle = i18n_t('unableToShare');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});
-  },
-  stringMatches: function(str1 :string, str2 :string) {
-    // Determine if the error in the toast is a getter or sharer error
-    // by comparing the error string to getter/sharer error constants.
-    if (str1) {
-      return str1.indexOf(str2) > -1;
-    }
-    return false;
   },
   topOfStatuses: function(statuses: string[], visible :boolean) {
     // Returns number of pixels from the bottom of the window a toast

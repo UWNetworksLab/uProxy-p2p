@@ -139,12 +139,12 @@
     <core-overlay id='feedbackPanel'>
       <div id='container' vertical layout>
         <uproxy-app-bar on-go-back='{{ close }}'>
-          {{ 'submitFeedback' | $$ }}
+          {{ 'submitFeedback_sentenceCase' | $$ }}
         </uproxy-app-bar>
         <div id='formContainer' flex>
-          <p class='inputLabel'>{{ 'emailOptional' | $$ }}</p>
+          <p class='inputLabel'>{{ 'emailTitle' | $$ }}</p>
           <paper-input-decorator id='emailDecorator'
-              label="{{ 'submitFeedback' | $$ }}Email address">
+              label="{{ 'emailPlaceholder' | $$ }}">
             <input id="emailInput"
                    is="core-input"
                    value='{{ email }}'>

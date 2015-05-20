@@ -42,11 +42,11 @@
     </style>
 
     <div id='editingDescription' hidden?='{{ !editing }}'>
-      <paper-input-decorator label="Description">
+      <paper-input-decorator label="{{ 'description' | $$ }}">
         <input is="core-input" value='{{ descriptionInput }}'>
       </paper-input-decorator>
-      <paper-button raised on-tap="{{ saveDescription }}">Save</paper-button>
-      <paper-button raised on-tap="{{ cancelEditing }}">Cancel</paper-button>
+      <paper-button raised on-tap="{{ saveDescription }}">{{ 'save' | $$ }}</paper-button>
+      <paper-button raised on-tap="{{ cancelEditing }}">{{ 'cancel' | $$ }}</paper-button>
     </div>
     <div id='savedDescription' hidden?='{{ editing }}' on-tap='{{ editDescription }}'>
       {{ model.globalSettings.description || descriptionPlaceholder }}

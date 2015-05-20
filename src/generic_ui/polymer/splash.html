@@ -103,39 +103,38 @@
         <core-icon id='logo' icon="uproxy-logo:logo"></core-icon>
         <h1 class='uproxyTitle'><span class='first-u'>u</span>Proxy</h1>
         <p>
-          uProxy helps you share your access to the internet or get internet
-          access from friends
+          {{ 'aboutUproxy' | $$ }}
         </p>
 
         <div id='nextWrapper'>
-          <paper-button raised on-tap='{{next}}'>Next</paper-button>
+          <paper-button raised on-tap='{{next}}'>{{ 'next' | $$ }}</paper-button>
         </div>
       </div>
 
       <uproxy-faq-link anchor='whatIsUproxy'>
-        Learn more about uProxy
+        {{ 'learnMoreUproxy' | $$ }}
       </uproxy-faq-link>
     </div>
 
     <div vertical layout id='networks' hidden?='{{SPLASH_STATES.NETWORKS!==ui.splashState}}'>
       <div class='view' flex>
-        <h1 class='sub'>Where can you find your contacts the quickest?</h1>
-        <p>uProxy uses social networks to help you set up connections with your friends</p>
+        <h1 class='sub'>{{ 'whichSocialNetwork' | $$ }}</h1>
+        <p>{{ 'whySocialNetwork' | $$ }}</p>
         <template repeat='{{ n in model.networkNames }}' vertical layout>
           <uproxy-network networkName='{{n}}'></uproxy-network>
         </template>
         <p id='oneTimeConnection'>
-          <a href='#' on-tap='{{ copypaste }}'>Set up a one-time connection</a>
+          <a href='#' on-tap='{{ copypaste }}'>{{ 'setUpOneTime' | $$ }}</a>
         </p>
         <p>
-          We won't share your data or post publicly without your consent
+          {{ 'weWontPost' | $$ }}
         </p>
         <span id='submitFeedback' on-tap='{{ openFeedbackForm }}'>
-          Submit Feedback
+          {{ 'submitFeedback' | $$ }}
         </span>
       </div>
       <uproxy-faq-link anchor='whyDoesUproxyConnect'>
-        Learn more about social networks
+        {{ 'learnMoreSocial' | $$ }}
       </uproxy-faq-link>
     </div>
 

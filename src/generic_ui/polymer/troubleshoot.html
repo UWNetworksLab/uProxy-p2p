@@ -81,42 +81,42 @@
       <!-- First screen in the dialog asks user if they want to diagnose their network. -->
       <div id='askToAnalyze' hidden?='{{ analyzingNetwork || analyzedNetwork }}'>
         <p>
-          It could be that your network's NAT type is incompatible with uProxy. Would you like uProxy to analyze your network?
+          {{ 'askToAnalyze' | $$ }}
           <uproxy-faq-link anchor='doesUproxyLogData'>
             <core-icon icon="help"></core-icon>
           </uproxy-faq-link><br>
         </p>
         <paper-button on-tap='{{ getNatType }}'>
-          Yes
+          {{ 'yes' | $$ }}
         </paper-button>
         <paper-button on-tap='{{ close }}'>
-          No
+          {{ 'no' | $$ }}
         </paper-button>
       </div>
 
       <!-- Second screen in dialog shows a loading bar as we get NAT type. -->
       <div id='analyzeNetwork' hidden?='{{ !analyzingNetwork }}'>
-        Analyzing network<br>
+        {{ 'analyzingNetwork' | $$ }}<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
 
       <!-- Third screen in dialog shows NAT type and asks user if they want to submit feedback. -->
       <div id='analyzedNetwork' hidden?='{{ !analyzedNetwork }}'>
-        It looks like you are on a <strong>{{ natType }}</strong>, which is <strong>{{ natImpact }}</strong> interfering with your ability to connect to friends.
+        {{ 'analysisResults' | $$({natType: natType, natImpact: natImpact}) }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>More info</span>
+          <span class='linkText'>{{ 'moreInfo' | $$ }}</span>
         </uproxy-faq-link><br><br>
-        Would you like to submit your NAT type to the uProxy team, to help us better understand the networks our users are on?
+        {{ 'askToSubmitAnalysis' | $$ }}
         <uproxy-faq-link anchor='doesUproxyLogData'>
-          <span class='linkText'>Privacy policy</span>
+          <span class='linkText'>{{ 'privacyPolicy' | $$ }}</span>
         </uproxy-faq-link>
         <br>
         <div id='analyzedNetworkButtons'>
           <paper-button on-tap='{{ submitFeedback }}'>
-            Yes
+            {{ 'yes' | $$ }}
           </paper-button>
           <paper-button on-tap='{{ close }}'>
-            No
+            {{ 'no' | $$ }}
           </paper-button>
         </div>
       </div>
