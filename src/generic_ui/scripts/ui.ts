@@ -18,8 +18,8 @@ import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
-import i18n_module = require('./i18n-filter');
-import i18n_t = i18n_module.i18n_t;
+import translator_module = require('./translator');
+import i18n_t = translator_module.i18n_t;
 
 // var i18n_t = i18n.t;
 // i18n.init({

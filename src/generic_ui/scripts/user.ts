@@ -8,8 +8,8 @@
 
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
-import i18n_module = require('./i18n-filter');
-import i18n_t = i18n_module.i18n_t;
+import translator_module = require('./translator');
+import i18n_t = translator_module.i18n_t;
 import _ = require('lodash');
 
 export enum GettingConsentState {
