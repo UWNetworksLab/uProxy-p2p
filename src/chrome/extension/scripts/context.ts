@@ -6,15 +6,13 @@ import user_interface = require('../../../generic_ui/scripts/ui');
 import CoreConnector = require('../../../generic_ui/scripts/core_connector');
 import ChromeCoreConnector = require('./chrome_core_connector');
 
-interface ChromeGlobals extends UiGlobals {
-  chromeCoreConnector :ChromeCoreConnector;
-}
-
-var ui_context :ChromeGlobals = (<any>chrome.extension.getBackgroundPage()).ui_context;
+var ui_context :UiGlobals = (<any>chrome.extension.getBackgroundPage()).ui_context;
 export var ui :user_interface.UserInterface= ui_context.ui;
 export var core :CoreConnector = ui_context.core;
-export var chromeCoreConnector = ui_context.chromeCoreConnector;
+export var browserConnector = ui_context.browserConnector;
 export var model :user_interface.Model = ui_context.model;
 ui.browser = 'chrome';
+
+//var whatever = new user_interface.UserInterface(core, browserConnector);
 
 console.log('Loaded dependencies for Chrome Extension.');
