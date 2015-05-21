@@ -110,8 +110,7 @@ export enum ProviderType {
 
 enum BridgingState {
   NEW,
-  INITIATING,
-  ANSWERING
+  BRIDGING
 }
 
 // Establishes connectivity with the help of a variety of peerconnection
@@ -196,7 +195,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   public negotiateConnection = () : Promise<void> => {
     log.debug('%1: negotiating, offering %2 provider',
         this.name_, ProviderType[this.preferredProviderType_]);
-    this.state_ = BridgingState.INITIATING;
     this.bridgeWith_(
         this.preferredProviderType_,
         this.makeFromProviderType_(this.preferredProviderType_));
@@ -254,6 +252,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     this.providerType_ = providerType;
     this.provider_ = provider;
 
+    this.state_ = BridgingState.BRIDGING;
     this.connecting_();
   }
 
@@ -273,7 +272,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
         provider = message.providers[ProviderType[providerType]];
         log.debug('%1: received offer, responding with %2 provider',
             this.name_, ProviderType[providerType]);
-        this.state_ = BridgingState.ANSWERING;
         this.bridgeWith_(
             providerType,
             this.makeFromProviderType_(providerType));
@@ -297,6 +295,9 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   public openDataChannel = (channelLabel:string,
       options?:freedom_RTCPeerConnection.RTCDataChannelInit)
       : Promise<peerconnection.DataChannel> => {
+    if (this.state_ === BridgingState.NEW) {
+      throw new Error('cannot open channel before provider has been created');
+    }
     return this.provider_.openDataChannel(channelLabel, options);
   }
 
