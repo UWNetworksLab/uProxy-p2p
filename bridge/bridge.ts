@@ -58,7 +58,7 @@ export interface SignallingMessage {
   // All concrete PeerConnection providers offered by the peer.
   // The remote bridge should select one, indicating its choice in the
   // answer.
-  providers ?:Provider[];
+  providers ?:{[name:string] : Provider};
 }
 
 // BridgingPeerConnection-specific message type.
@@ -72,7 +72,6 @@ export enum SignallingMessageType {
 // provider. Generally, a batch of signalling messages will be sufficient to
 // establish a peerconnection with a peer.
 export interface Provider {
-  name ?:string;
   signals ?:Object[];
 }
 
@@ -85,52 +84,28 @@ export interface Provider {
 export var makeSingleProviderMessage = (
     signalType:SignallingMessageType,
     providerType:ProviderType,
-    signals:Object[]) : Provider => {
-  return {
+    signals:Object[]) : SignallingMessage => {
+  var signal :SignallingMessage = {
     type: SignallingMessageType[signalType],
-    providers: [
-      {
-        name: ProviderType[providerType],
-        signals: signals
-      }
-    ]
+    providers: {}
   };
+  signal.providers[ProviderType[providerType]] = {
+    signals: signals
+  };
+  return signal;
 }
 
-// Finds the first provider listed, throwing if none is found.
+// Finds the "best" provider listed, throwing if none is found.
+// Currently, churn is favoured.
 // Public for testing.
-export var pickBestProvider = (
-    providers:Provider[]) : Provider => {
-  var legacy: Provider;
-  var churn: Provider;
-  for (var i = 0; i < providers.length; i++) {
-    var provider = providers[i];
-    if (provider.name === undefined) {
-      continue;
-    }
-    if (provider.name === ProviderType[ProviderType.LEGACY]) {
-      legacy = provider;
-    } else if (provider.name === ProviderType[ProviderType.CHURN]) {
-      churn = provider;
-    }
-  }
-  if (churn || legacy) {
-    return churn || legacy;
+export var pickBestProviderType = (
+    providers ?:{[name:string] : Provider}) : ProviderType => {
+  if (ProviderType[ProviderType.CHURN] in providers) {
+    return ProviderType.CHURN;
+  } else if (ProviderType[ProviderType.LEGACY] in providers) {
+    return ProviderType.LEGACY;
   }
   throw new Error('no supported provider found');
-}
-
-// Finds the requested provider, throwing if not found.
-var findProvider = (
-    type:ProviderType,
-    providers:Provider[]) : Provider => {
-  for (var i = 0; i < providers.length; i++) {
-    var provider = providers[i];
-    if (provider.name && provider.name === ProviderType[type]) {
-      return provider;
-    }
-  }
-  throw new Error('provider ' + ProviderType[type] + ' not found');
 }
 
 ////////
@@ -381,8 +356,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     try {
       var provider: Provider;
       if (this.state_ === BridgingState.NEW) {
-        provider = pickBestProvider(message.providers);
-        var providerType = (<any>ProviderType)[provider.name];
+        var providerType = pickBestProviderType(message.providers);
+        provider = message.providers[ProviderType[providerType]];
         log.debug('%1: received offer, responding with %2 provider',
             this.name_, ProviderType[providerType]);
         this.state_ = BridgingState.ANSWERING;
@@ -390,7 +365,11 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
             providerType,
             this.makeFromProviderType_(providerType));
       } else {
-        provider = findProvider(this.providerType_, message.providers);
+        if (ProviderType[this.providerType_] in message.providers) {
+          provider = message.providers[ProviderType[this.providerType_]];
+        } else {
+          throw new Error('cannot find signals for current provider');
+        }
       }
 
       // Unbatch the signals and forward to the provider.
