@@ -295,9 +295,9 @@ describe('remote_user.User', () => {
     });
 
     it('invalid proxy transitions do not modify consent', (done) => {
-      var emptyConsent = new consent.State();
+      var emptyConsent = new consent.State(false);
 
-      user.consent = new consent.State();
+      user.consent = new consent.State(false);
       user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_REQUEST).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(uproxy_core_api.ConsentUserAction.UNIGNORE_OFFER).then(() => {
@@ -371,9 +371,9 @@ describe('remote_user.User', () => {
     });
 
     it('invalid client transitions do not modify consent', (done) => {
-      var emptyConsent = new consent.State();
+      var emptyConsent = new consent.State(false);
 
-      user.consent = new consent.State();
+      user.consent = new consent.State(false);
       user.modifyConsent(uproxy_core_api.ConsentUserAction.CANCEL_OFFER).then(() => {
         expect(user.consent).toEqual(emptyConsent);
         user.modifyConsent(

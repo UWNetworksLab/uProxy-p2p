@@ -72,7 +72,9 @@ export class User implements social.BaseUser {
     }
 
     // if we do not have stored state, no use in checking for changes
-    if (this.consent_) {
+    if (this.consent_ &&
+        // Don't show notifications for other instances of yourself
+        this.userId != user_interface.model.onlineNetwork.userId) {
       // notifications for get mode
       if (!payload.consent.ignoringRemoteUserOffer) {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {

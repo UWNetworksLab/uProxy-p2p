@@ -30,7 +30,7 @@ describe('remote_instance.RemoteInstance', () => {
       'sendInstanceHandshake',
       'updateRemoteRequestsAccessFromLocal'
   ]);
-  user.consent = new consent.State();
+  user.consent = new consent.State(false);
 
   user.network = <social.Network><any>jasmine.createSpyObj(
       'network', ['getUser']);
