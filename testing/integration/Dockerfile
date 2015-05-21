@@ -27,13 +27,6 @@ RUN wget -q https://chromedriver.storage.googleapis.com/$(wget -qO- https://chro
 RUN unzip -qq chromedriver_linux64.zip -d /usr/bin && rm chromedriver_linux64.zip
 RUN chromedriver --version
 
-# delete all the apt list files since they're big and get stale quickly
-RUN rm -rf /var/lib/apt/lists/*
 
-# Freedom-specific installs & hacks
-RUN ln -s /usr/bin/nodejs /usr/bin/node; npm install -g grunt-cli;  npm install -g bower;
-
-RUN mkdir /src; cd /src ; git checkout git@github.com:uProxy/uproxy-networking.git ; cd uproxy-networking; ./setup.sh install ; grunt ; grunt samples
-
-EXPOSE 9000 9999
+EXPOSE 9000
 
