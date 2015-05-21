@@ -9,6 +9,7 @@ import consent = require('./consent');
 
 import globals = require('./globals');
 import storage = globals.storage;
+import local_instance = require('./local-instance');
 
 describe('remote_user.User', () => {
   // Prepare a fake Social.Network object to construct User on top of.
@@ -19,6 +20,8 @@ describe('remote_user.User', () => {
   ]);
   network['getLocalInstanceId'] = function() { return 'dummyInstanceId'; };
   network['send'] = () => { return Promise.resolve(); };
+  network['myInstance'] =
+      new local_instance.LocalInstance(network, 'localUserId');
 
   var user :remote_user.User;
   var instance :remote_instance.RemoteInstance;
@@ -385,6 +388,24 @@ describe('remote_user.User', () => {
         });
       });
     });
+  });
+
+  it('Initializes with consent for local user', () => {
+    user = new remote_user.User(network, network.myInstance.userId);
+    expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
+    expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
+    expect(user.consent.localGrantsAccessToRemote).toEqual(true);
+    expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
+    expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
+  });
+
+  it('Initializes without consent for other users', () => {
+    user = new remote_user.User(network, 'otherUser');
+    expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
+    expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
+    expect(user.consent.localGrantsAccessToRemote).toEqual(false);
+    expect(user.consent.remoteRequestsAccessFromLocal).toEqual(false);
+    expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
   });
 
 });  // uProxy.User

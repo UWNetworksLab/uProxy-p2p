@@ -244,11 +244,11 @@
 
           <core-tooltip label='You are available for sharing.' position='left'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
-              hidden?='{{ model.contacts.shareAccessContacts.trustedUproxy.length === 0 }}'
+              hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && model.contacts.shareAccessContacts.trustedUproxy.length > 0 }}'>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
             <h3>Sharing Enabled</h3>
             <p>This icon means you're available for sharing access with friends you've offered access to.</p>
           </uproxy-bubble>

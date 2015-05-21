@@ -4,6 +4,7 @@
 import social = require('../../interfaces/social');
 import ui_types = require('../../interfaces/ui');
 import user_interface = require('../scripts/ui');
+import user_module = require('../scripts/user');
 
 var ui = ui_context.ui;
 var core = ui_context.core;
@@ -213,8 +214,20 @@ Polymer({
       this.$.statsTooltip.disabled = false;
     }
   },
+  isSharingEnabledWithOthers: false,
+  updateIsSharingEnabledWithOthers: function() {
+    var trustedContacts = model.contacts.shareAccessContacts.trustedUproxy;
+    if (trustedContacts.length === 1) {
+      this.isSharingEnabledWithOthers =
+          trustedContacts[0].userId != model.onlineNetwork.userId;
+    } else {
+      this.isSharingEnabledWithOthers = trustedContacts.length > 0;
+    }
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
+    'model.contacts.shareAccessContacts.trustedUproxy':
+        'updateIsSharingEnabledWithOthers'
   }
 });
