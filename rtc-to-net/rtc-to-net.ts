@@ -157,7 +157,7 @@ import logging = require('../logging/logging');
       // fulfills first.  https://github.com/uProxy/uproxy/issues/760
       this.onceReady = this.peerConnection_.onceConnected.then(() => {});
       this.onceReady.catch(this.fulfillStopping_);
-      this.peerConnection_.onceDisconnected
+      this.peerConnection_.onceClosed
         .then(() => {
           log.debug('peerconnection terminated');
         }, (e:Error) => {

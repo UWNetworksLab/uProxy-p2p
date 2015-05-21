@@ -10,8 +10,10 @@ import net = require('../../net/net.types');
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.info);
+var loggingController = freedom['loggingcontroller']();
+loggingController = loggingController.setDefaultFilter(
+    loggingTypes.Destination.console,
+    loggingTypes.Level.info);
 
 var log :logging.Log = new logging.Log('simple TURN');
 

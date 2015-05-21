@@ -6,8 +6,9 @@ import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 
 // Example of how to set custom logging level: we set everything to debug for
 // testing echo server.
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.debug);
+var loggingController = freedom['loggingcontroller']();
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+                                   loggingTypes.Level.debug);
 
 if (typeof freedom !== 'undefined') {
   freedom().providePromises(AbstractProxyIntegrationTest);

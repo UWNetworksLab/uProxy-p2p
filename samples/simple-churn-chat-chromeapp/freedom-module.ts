@@ -14,11 +14,11 @@ import Data = peerconnection.Data;
 
 import Message = require('./message.types');
 
-export var loggingController = freedom['loggingcontroller']();
-loggingController.setDefaultFilter(loggingTypes.Destination.console,
-    loggingTypes.Level.debug);
-loggingController.setDefaultFilter(loggingTypes.Destination.buffered,
-    loggingTypes.Level.debug);
+// Example of how to configure logging level:
+//
+//   var loggingController = freedom['loggingcontroller']();
+//   loggingController.setDefaultFilter(loggingTypes.Destination.console,
+//                                      loggingTypes.Level.info);
 
 export var moduleName = 'churn chat';
 export var log :logging.Log = new logging.Log(moduleName);
@@ -63,8 +63,8 @@ function makePeerConnection(name:string) {
   }, (e:Error) => {
     log.error('%1 failed to connect: %2', name, e.message);
   });
-  pc.onceDisconnected.then(() => {
-    log.info(name + ': onceDisconnected');
+  pc.onceClosed.then(() => {
+    log.info(name + ': onceClosed');
   });
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
     log.info(name + ': peerOpenedChannelQueue: ' + d.toString());

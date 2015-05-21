@@ -56,6 +56,26 @@ export function socksEchoTestDescription(useChurn:boolean) {
     }).then(done);
   });
 
+  it('detects a remote close', (done) => {
+    var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
+    var testModule = createTestModule();
+    var connId : string;
+    testModule.startEchoServer().then((port:number) => {
+      return testModule.connect(port);
+    }).then((connectionId:string) => {
+      connId = connectionId;
+      return testModule.echo(connectionId, input);
+    }).then((output:ArrayBuffer) => {
+      expect(arraybuffers.byteEquality(input, output)).toBe(true);
+      testModule.notifyClose(connId).then(() => {
+        testModule.on('sockClosed', (cnnid:string) => {
+          expect(cnnid).toBe(connId);
+          done();
+        });
+        testModule.closeEchoConnections();});
+    });
+  });
+
   it('run multiple echo tests in a batch on one connection', (done) => {
     var testBuffers = testStrings.map(arraybuffers.stringToArrayBuffer);
     var testModule = createTestModule();

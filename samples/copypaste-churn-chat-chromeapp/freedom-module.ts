@@ -8,8 +8,9 @@ import churn = require('../../churn/churn');
 
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.debug);
+var loggingController = freedom['loggingcontroller']();
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+                                   loggingTypes.Level.debug);
 
 import logging = require('../../logging/logging');
 var log :logging.Log = new logging.Log('copypaste churn chat');

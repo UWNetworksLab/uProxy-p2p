@@ -35,55 +35,39 @@ describe('DataChannel', function() {
     // Pretend the core.rtcdatachannel is buffering a lot of data.
     // This will cause DataChannel to buffer sends.
     var getBufferedAmountSpy = spyOn(mockRtcDataChannel, 'getBufferedAmount');
-    getBufferedAmountSpy.and.callFake(() => {
-      return Promise.resolve(datachannel.PC_QUEUE_LIMIT);
-    });
+    getBufferedAmountSpy.and.returnValue(
+        Promise.resolve(datachannel.PC_QUEUE_LIMIT));
 
     var sendBufferSpy = spyOn(mockRtcDataChannel, 'sendBuffer');
 
     datachannel.createFromRtcDataChannel(mockRtcDataChannel).then(
         (channel:datachannel.DataChannel) => {
-      var readyToClose = false;
+      // Try to send one more chunk of data than can be sent, given the amount
+      // of data supposedly buffered.
+      var numChunks = Math.floor(datachannel.PC_QUEUE_LIMIT /
+          datachannel.CHUNK_SIZE) + 2;
+      for (var i = 0; i < numChunks; i++) {
+        channel.send({
+          buffer: new ArrayBuffer(datachannel.CHUNK_SIZE)
+        });
+      }
 
-      // Fill the buffer.
-      channel.send({
-        buffer: new ArrayBuffer(datachannel.PC_QUEUE_LIMIT)
-      });
-      expect(sendBufferSpy).toHaveBeenCalled();
-      sendBufferSpy.calls.reset()
+      // At this point, there should be one message remaining to be sent.
+      expect(sendBufferSpy.calls.count()).toEqual(numChunks - 1);
 
-      // Tack on one additional message, and then close the channel.
-      channel.send({
-        buffer: new Uint8Array([0, 1, 2]).buffer
-      });
-
+      // Close the channel and pretend core.rtcdatachannel is no longer
+      // buffering any data.
       channel.close();
-
-      // At this point, our message should not yet have been sent.
-      // Now that we've requested the channel be closed, "unblock" the
-      // core.rtcdatachannel to drain the message queue.
-      expect(sendBufferSpy).not.toHaveBeenCalled();
-      getBufferedAmountSpy.and.returnValue(Promise.resolve(
-          datachannel.PC_QUEUE_LIMIT / 2));
+      getBufferedAmountSpy.and.returnValue(Promise.resolve(0));
 
       // Wait for 100 ms, substantially longer than the 20 ms interval used
       // by the congestion control handler to check for room in the browser's
       // send buffer. During that time, DataChannel should wake up, detect
       // the free space, and call send.
       setTimeout(() => {
-        expect(sendBufferSpy).toHaveBeenCalled();
-
-        // After send has been called, now simulate the browser successfully
-        // sending the data, and hence draining its buffer.  This means that
-        // the channel is now ready to close.
-        getBufferedAmountSpy.and.returnValue(Promise.resolve(0));
-        readyToClose = true;
-      }, 100);
-
-      channel.onceClosed.then(() => {
-        expect(readyToClose).toBe(true);
+        expect(sendBufferSpy.calls.count()).toEqual(numChunks);
         done();
-      });
+      }, 100);
     });
   });
 

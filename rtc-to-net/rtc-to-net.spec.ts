@@ -63,7 +63,7 @@ describe('RtcToNet', function() {
       negotiateConnection: jasmine.createSpy('negotiateConnection'),
       onceConnecting: noopPromise,
       onceConnected: noopPromise,
-      onceDisconnected: noopPromise,
+      onceClosed: noopPromise,
       peerOpenedChannelQueue: new handler.Queue(),
       close: jasmine.createSpy('close')
     };
@@ -86,7 +86,7 @@ describe('RtcToNet', function() {
 
   it('onceStopped fulfills on peerconnection termination', (done) => {
     mockPeerconnection.onceConnected = voidPromise;
-    mockPeerconnection.onceDisconnected = <any>Promise.resolve();
+    mockPeerconnection.onceClosed = <any>Promise.resolve();
 
     server.start(mockProxyConfig, mockPeerconnection)
       .then(() => { return server.onceStopped; })

@@ -154,7 +154,7 @@ module SocksToRtc {
       this.tcpServer_.onceShutdown().then((kind:tcp.SocketCloseKind) => {
         log.info('server socket closed: %1', tcp.SocketCloseKind[kind]);
       }).then(this.fulfillStopping_);
-      this.peerConnection_.onceDisconnected
+      this.peerConnection_.onceClosed
         .then(() => {
           log.info('peerconnection terminated');
         }, (e:Error) => {

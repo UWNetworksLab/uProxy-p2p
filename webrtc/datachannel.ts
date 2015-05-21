@@ -17,15 +17,36 @@ var log :logging.Log = new logging.Log('DataChannel');
 // Messages are limited to a 16KB length by SCTP; we use 15k for safety.
 // TODO: test if we can up this to 16k; test the edge-cases!
 // http://tools.ietf.org/html/draft-ietf-rtcweb-data-channel-07#section-6.6
-var CHUNK_SIZE = 1024 * 15;
+export var CHUNK_SIZE = 1024 * 15;
+
 // The maximum amount of bytes we should allow to get queued up in
-// peerconnection. Any more and we start queueing in JS. Data channels are
-// closed by WebRTC when the buffer fills, so we really don't want that happen
-// accidentally. More info in this thread (note that 250Kb is well below both
-// the 16MB for Chrome 37+ and "100 messages" of previous versions mentioned):
+// peerconnection. Any more and we start queueing in JS. There are two reasons
+// to limit this:
+// 1. Data channels are closed by WebRTC when the buffer fills, so we really
+// don't want that to happen accidentally. More info in this thread, which
+// mentions a limit of 16MB for Chrome 37+ and 100 messages for previous versions:
 //   https://code.google.com/p/webrtc/issues/detail?id=2866
-// CONSIDER: make it 0. There is no size in the spec.
-export var PC_QUEUE_LIMIT = 1024 * 250;
+
+// 2. This limit sets the reaction time for backpressure.  Having extremely fast
+// backpressure reaction time is crucial to preventing a huge backlog of TCP
+// data events.  If CHURN is enabled, this backlog also blocks all UDP data
+// transmission, and if the backlog exceeds 5 seconds, it can cause the
+// PeerConnection to experience ICE disconnection.
+
+// Setting this value to zero would give the fastest possible backpressure
+// reaction time, by pausing the socket after every message, forcing a call to
+// "getBufferedAmount", and only resuming the socket  after the message is
+// actually sent.  This appears to improve our resilience to disconnection when
+// downloading from super-fast servers
+// (https://github.com/uProxy/uproxy/issues/1511) or loading many pages
+// simultaneously.  However, lowering this value to zero also effectively
+// negates the performance benefits from
+// https://github.com/uProxy/uproxy/issues/1474, and even further regresses
+// the CPU intensity.  In testing on slow sharers with ultra-fast sources,
+// 64 KiB seems to be the largest safe value, and when loading many pages
+// simultaneously, 16 KiB seems to be the largest safe value.
+export var PC_QUEUE_LIMIT = 16 * 1024;
+
 // Javascript has trouble representing integers larger than 2^53. So we simply
 // don't support trying to send array's bigger than that.
 var MAX_MESSAGE_SIZE = Math.pow(2, 53);
@@ -297,7 +318,7 @@ export class DataChannelClass implements DataChannel {
   }
 
   private canSendMore_ = () : boolean => {
-    return this.isOpen_ && this.lastBrowserBufferedAmount_ < PC_QUEUE_LIMIT;
+    return this.isOpen_ && this.lastBrowserBufferedAmount_ <= PC_QUEUE_LIMIT;
   }
 
   private sendNext_ = () : void => {

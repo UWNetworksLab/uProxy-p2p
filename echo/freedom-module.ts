@@ -10,8 +10,9 @@ import net = require('../net/net.types');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 
 // Example of how to add custom setting for the logging controller's filtering.
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.debug);
+var loggingController = freedom['loggingcontroller']();
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+                                   loggingTypes.Level.debug);
 
 // The underlying TCP echo server.
 var tcpServer :TcpEchoServer;

@@ -7,6 +7,7 @@ import arraybuffers = require('../../arraybuffers/arraybuffers');
 import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
 import net = require('../../net/net.types');
+import tcp = require('../../net/tcp');
 import signals = require('../../webrtc/signals');
 
 import logging = require('../../logging/logging');
@@ -16,9 +17,12 @@ import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 // you're debugging. Since the proxy outputs quite a lot of messages, show only
 // warnings by default from the rest of the system.  Note that the proxy is
 // extremely slow in debug mode.
-freedom['loggingcontroller']().setDefaultFilter(loggingTypes.Destination.console,
-                                                loggingTypes.Level.info);
-freedom['loggingcontroller']().setFilters(loggingTypes.Destination.console, {
+var loggingController = freedom['loggingcontroller']();
+
+loggingController.setDefaultFilter(loggingTypes.Destination.console,
+                                   loggingTypes.Level.info);
+
+loggingController.setFilters(loggingTypes.Destination.console, {
   'SocksToRtc': loggingTypes.Level.info,
   'RtcToNet': loggingTypes.Level.info
 });
@@ -55,8 +59,86 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 var socksRtc:socks_to_rtc.SocksToRtc;
 var rtcNet:rtc_to_net.RtcToNet;
 
-parentModule.on('start', () => {
+
+// Listen for GET/GIVE requests, to control the app without user
+// interaction.
+var tcpServer:tcp.Server;
+
+var localhostControlEndpoints:[net.Endpoint] = [
+  { address: '127.0.0.1', port: 9000 },
+  { address: '127.0.0.1', port: 9010 },
+  { address: '127.0.0.1', port: 9020 }];
+
+function setupServer(endpoint:net.Endpoint) {
+  tcpServer = new tcp.Server(endpoint);
+  tcpServer.connectionsQueue.setSyncHandler((conn:tcp.Connection) => {
+    conn.dataFromSocketQueue.setSyncHandler((buf:ArrayBuffer) => {
+      var str = arraybuffers.arrayBufferToString(buf);
+      if (str.substr(0,3).toUpperCase() == "GET") {
+        doStart();
+        setTimeout(() => {
+          parentModule.emit('gatherMessage');
+        }, 500);
+      } else if (str.substr(0,4).toUpperCase() == "GIVE") {
+        log.info("GIVE found.");
+        // skip past space, and then read SDP.
+        var sdp = str.substr(5);
+        parentModule.emit('giveWithSDP', sdp);
+      } else {
+        log.info("I don't understand that command. (" + str + ")");
+      }
+    });
+  });
+
+  tcpServer.listen().then((endpoint) => {
+    log.info('Remote-commands available on %1', endpoint);
+  }).catch((e:Error) => {
+    log.error('Failed to listen on remote-command socket: %1', e.message);
+    if (localhostControlEndpoints.length > 1) {
+      setupServer(localhostControlEndpoints.shift());
+    }
+  });
+}
+
+setupServer(localhostControlEndpoints[0]);
+
+parentModule.on('giveSendBack', (data:ArrayBuffer) => {
+  log.info('giveSendBack: with arraybuf of ' + data.byteLength);
+  var conn:tcp.Connection = null;
+  var all_conns = tcpServer.connections();
+  if (all_conns.length < 1) {
+    log.info("'giveSendBack': Weird, didn't find a connection.");
+    return;
+  }
+  conn = all_conns[0];
+  conn.send(data);
+  conn.close();
+})
+
+// Invokd from main.core-env.ts, upon 'gatherMessage', which comes
+// back with our connection ID and the SDP, as a utf-8 string.
+parentModule.on('getSendBack', (data:ArrayBuffer) => {
+  log.info('getSendBack: with arraybuf of ' + data.byteLength);
+  var conn:tcp.Connection = null;
+  var all_conns = tcpServer.connections();
+  if (all_conns.length < 1) {
+    log.info("'getSendBack': Weird, didn't find a connection.");
+    return;
+  }
+  conn = all_conns[0];
+  conn.send(data);
+  conn.dataFromSocketQueue.setNextHandler((buf:ArrayBuffer) => {
+    var sdp = arraybuffers.arrayBufferToString(buf);
+    log.info('got sdp ' + sdp);
+    parentModule.emit('gotPeerSDP', sdp);
+    conn.close();
+    return Promise.resolve<void>();
+  });
+});
+
+var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port: 9999 };
+
   socksRtc = new socks_to_rtc.SocksToRtc();
 
   // Forward signalling channel messages to the UI.
@@ -89,10 +171,12 @@ parentModule.on('start', () => {
       parentModule.emit('proxyingStarted', endpoint);
     })
     .catch((e) => {
-      console.error('socksRtc Error: ' + e + '; ' + this.socksRtc.toString());
+      console.error('socksRtc Error: ' + e + '; ' + socksRtc.toString());
     });
   log.info('created socks-to-rtc');
-});
+}
+
+parentModule.on('start', doStart);
 
 // Receive signalling channel messages from the UI.
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
