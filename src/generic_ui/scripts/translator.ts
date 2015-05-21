@@ -40,3 +40,4 @@ i18n.addResources('fr', 'translation', createI18nDictionary(french_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
 
 export var i18n_t = i18n.t;
+export var i18n_setLng = i18n.setLng;

@@ -594,5 +594,21 @@
   "descriptionDefault": {
     "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them.",
     "message": "Computer __number__"
+  },
+  "language": {
+    "description": "Language used by the application.",
+    "message": "Language"
+  },
+  "selectLanguage": {
+    "description": "Instruction to select language used by the application.",
+    "message": "Select a language"
+  },
+  "english": {
+    "description": "English language.",
+    "message": "English"
+  },
+  "farsi": {
+    "description": "Farsi language.",
+    "message": "Farsi"
   }
 }

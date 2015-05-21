@@ -19,12 +19,9 @@ import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
 import translator_module = require('./translator');
-import i18n_t = translator_module.i18n_t;
 
-// var i18n_t = i18n.t;
-// i18n.init({
-//   resStore: window.i18nResources
-// });
+var i18n_t = translator_module.i18n_t;
+var i18n_setLng = translator_module.i18n_setLng;
 
 // Singleton model for data bindings.
 export var model :Model = {

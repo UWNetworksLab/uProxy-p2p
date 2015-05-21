@@ -9,8 +9,9 @@
 import social = require('../../interfaces/social');
 import user_interface = require('./ui');
 import translator_module = require('./translator');
-import i18n_t = translator_module.i18n_t;
 import _ = require('lodash');
+
+var i18n_t = translator_module.i18n_t;
 
 export enum GettingConsentState {
   LOCAL_REQUESTED_REMOTE_GRANTED = 100,

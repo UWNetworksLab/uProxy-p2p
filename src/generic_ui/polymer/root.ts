@@ -10,6 +10,7 @@ import regEx = require('xregexp');
 import XRegExp = regEx.XRegExp;
 
 declare var i18n_t :Function;
+declare var i18n_setLng :Function;
 
 // Example usage of these tests:
 // isRightToLeft.test('hi') --> false
