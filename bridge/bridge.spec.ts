@@ -9,7 +9,6 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
 
 import aggregate = require('../handler/aggregate');
 import bridge = require('./bridge');
-import churn_types = require('../churn/churn.types');
 import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');
 import peerconnection = require('../webrtc/peerconnection');
@@ -43,25 +42,6 @@ var candidateSignal1: peerconnection_types.Message = {
 
 var noMoreCandidatesSignal: peerconnection_types.Message = {
   type: peerconnection_types.Type.NO_MORE_CANDIDATES
-};
-
-var churnOfferSignal: churn_types.ChurnSignallingMessage = {
-  webrtcMessage: offerSignal
-};
-
-var churnCandidateSignal1: churn_types.ChurnSignallingMessage = {
-  webrtcMessage: candidateSignal1
-};
-
-var churnNoMoreCandidatesSignal: churn_types.ChurnSignallingMessage = {
-  webrtcMessage: noMoreCandidatesSignal
-};
-
-var churnPublicEndpointSignal: churn_types.ChurnSignallingMessage = {
-  publicEndpoint: {
-    address: '127.0.0.1',
-    port: 80
-  }
 };
 
 ////////
