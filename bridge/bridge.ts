@@ -286,11 +286,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       }
 
       // Unbatch the signals and forward to the provider.
-      for (var i = 0; i < provider.signals.length; i++) {
-        var signal = provider.signals[i];
-        log.debug('%1: unbatched signal: %2', this.name_, signal);
-        this.provider_.handleSignalMessage(signal);
-      }
+      provider.signals.forEach(this.provider_.handleSignalMessage);
     } catch (e) {
       this.signalForPeerQueue.handle({
         errorOnLastMessage: true
