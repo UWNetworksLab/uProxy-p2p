@@ -47,30 +47,22 @@ export var basicObfuscation = (
 // Signalling messages (wire protocol).
 ////////
 
-// Wraps and batches the output of one or more concrete PeerConnection
-// providers. Generally, just one of these messages needs to be sent by each
-// peer in order to establish a connection. This is very useful in
-// copypaste-type scenarios.
+// Wraps the signals of one or more concrete PeerConnection providers.
 export interface SignallingMessage {
-  // Not actually read by this class but uProxy uses this as a hint
-  // one or two places.
-  type ?:string;
   // All concrete PeerConnection providers offered by the peer.
   // The remote bridge should select one, indicating its choice in the
   // answer.
   providers ?:{[name:string] : Provider};
+  // Currently just a coarse-grained indication that there was an error
+  // processing the previous message, most likely because no supported
+  // provider was found.
+  errorOnLastMessage ?:boolean;
 }
 
-// BridgingPeerConnection-specific message type.
-export enum SignallingMessageType {
-  OFFER,
-  ANSWER,
-  ERROR
-}
-
-// Encapsulates a batch of signalling messages from a concrete PeerConnection
-// provider. Generally, a batch of signalling messages will be sufficient to
-// establish a peerconnection with a peer.
+// One or more signals from a concrete PeerConnection provider.
+// In the case of >1 signal, each will be passed in order to the provider.
+// This may be useful in copypaste-type scenarios, although note that this
+// class does not perform any batching by itself.
 export interface Provider {
   signals ?:Object[];
 }
@@ -82,11 +74,9 @@ export interface Provider {
 // Constructs a signalling message suitable for the initial offer.
 // Public for testing.
 export var makeSingleProviderMessage = (
-    signalType:SignallingMessageType,
     providerType:ProviderType,
     signals:Object[]) : SignallingMessage => {
   var signal :SignallingMessage = {
-    type: SignallingMessageType[signalType],
     providers: {}
   };
   signal.providers[ProviderType[providerType]] = {
@@ -109,65 +99,6 @@ export var pickBestProviderType = (
 }
 
 ////////
-// Signalling message batching for concrete providers.
-////////
-
-// Public for testing.
-export class LegacySignalAggregator implements aggregate.Aggregator<
-    peerconnection_types.Message,
-    peerconnection_types.Message[]> {
-  private signals_ :peerconnection_types.Message[] = [];
-  private haveNoMoreCandidates_ = false;
-
-  public input = (signal:peerconnection_types.Message) => {
-    this.signals_.push(signal);
-    this.haveNoMoreCandidates_ = this.haveNoMoreCandidates_ || (
-        signal.type &&
-        signal.type === peerconnection_types.Type.NO_MORE_CANDIDATES);
-  }
-
-  public check = () => {
-    if (this.haveNoMoreCandidates_) {
-      var batch = this.signals_;
-      this.signals_ = [];
-      this.haveNoMoreCandidates_ = false;
-      return batch;
-    }
-    return null;
-  }
-}
-
-// Public for testing.
-export class ChurnSignalAggregator implements aggregate.Aggregator<
-    churn_types.ChurnSignallingMessage,
-    churn_types.ChurnSignallingMessage[]> {
-  private signals_ :churn_types.ChurnSignallingMessage[] = [];
-  private haveNoMoreCandidates_ = false;
-  private haveEndpoint_ = false;
-
-  public input = (signal:churn_types.ChurnSignallingMessage) => {
-    this.signals_.push(signal);
-    this.haveNoMoreCandidates_ = this.haveNoMoreCandidates_ || (
-        signal.webrtcMessage &&
-        signal.webrtcMessage.type &&
-        signal.webrtcMessage.type === peerconnection_types.Type.NO_MORE_CANDIDATES);
-    this.haveEndpoint_ = this.haveEndpoint_ ||
-        (signal.publicEndpoint !== undefined);
-  }
-
-  public check = () => {
-    if (this.haveNoMoreCandidates_ && this.haveEndpoint_) {
-      var batch = this.signals_;
-      this.signals_ = [];
-      this.haveNoMoreCandidates_ = false;
-      this.haveEndpoint_ = false;
-      return batch;
-    }
-    return null;
-  }
-}
-
-////////
 // The class itself.
 ////////
 
@@ -184,8 +115,7 @@ enum BridgingState {
 }
 
 // Establishes connectivity with the help of a variety of peerconnection
-// providers, batching signalling messages for the benefit of copypaste
-// scenarios.
+// providers.
 //
 // This early iteration has two key characteristics:
 //  - an offer includes *one* provider, its type chosen at construction time
@@ -198,8 +128,6 @@ enum BridgingState {
 // of the CHURN or LEGACY provider.
 //
 // TODO: Pass non-bridging signalling messages through, to support old clients.
-// TODO: Batching complicates a few things here and it's so useful that it
-//       probably should just be pushed up to the PeerConnection interface.
 export class BridgingPeerConnection implements peerconnection.PeerConnection<
     SignallingMessage> {
 
@@ -305,25 +233,17 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   }
 
   // Configures the bridge with this provider by establishing queue
-  // forwarding, signal batching, and fulfilling onceBridging_.
-  // State is *not* set here: that depends on whether we're initiating or
-  // answering.
+  // forwarding and fulfilling onceConnecting_.
   private bridgeWith_ = (
       providerType:ProviderType,
       provider:peerconnection.PeerConnection<Object>) : void => {
-    var batcher = aggregate.createAggregateHandler(
-        this.makeBatcher_(providerType));
-    batcher.nextAggregate().then((batchedSignals) => {
-      this.signalForPeerQueue.handle(makeSingleProviderMessage(
-          this.state_ === BridgingState.INITIATING ?
-              SignallingMessageType.OFFER :
-              SignallingMessageType.ANSWER,
-          providerType,
-          batchedSignals));
+    // Transform messages before forwarding them.
+    provider.signalForPeerQueue.setSyncHandler((signal: Object) => {
+      var wrappedSignal = this.wrapSignal_(signal);
+      this.signalForPeerQueue.handle(wrappedSignal);
     });
-    provider.signalForPeerQueue.setSyncHandler(batcher.handle);
 
-    // Forward new channel queue.
+    // Forward the channel opened queue.
     provider.peerOpenedChannelQueue.setHandler(
         this.peerOpenedChannelQueue.handle);
 
@@ -337,20 +257,13 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     this.connecting_();
   }
 
-  private makeBatcher_ = (type:ProviderType): aggregate.Aggregator<
-      Object, Object[]> => {
-    if (type !== ProviderType.LEGACY && type !== ProviderType.CHURN) {
-      throw new Error('unknown provider type');
-    }
-    return type === ProviderType.LEGACY ?
-        new LegacySignalAggregator() :
-        new ChurnSignalAggregator();    
+  private wrapSignal_ = (signal:Object) : SignallingMessage => {
+    return makeSingleProviderMessage(this.providerType_, [signal]);
   }
 
   // Unbatches the signals and forwards them to the current provider,
   // first creating a provider if necessary.
-  public handleSignalMessage = (
-      message:SignallingMessage) : void => {
+  public handleSignalMessage = (message:SignallingMessage) : void => {
     log.debug('%1: handling signal: %2', this.name_, message);
 
     try {
@@ -380,8 +293,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       }
     } catch (e) {
       this.signalForPeerQueue.handle({
-        type: SignallingMessageType[
-            SignallingMessageType.ERROR]
+        errorOnLastMessage: true
       });
     }
   }

@@ -79,11 +79,9 @@ describe("makeSingleProviderMessage", function() {
       }
     ];
     var result = bridge.makeSingleProviderMessage(
-        bridge.SignallingMessageType.OFFER,
         bridge.ProviderType.LEGACY,
         signals);
     var expected: bridge.SignallingMessage = {
-      type: 'OFFER',
       providers: {
         'LEGACY': {
           signals: signals
@@ -93,10 +91,6 @@ describe("makeSingleProviderMessage", function() {
     expect(result).toEqual(expected);
   });
 });
-
-////////
-// Batching.
-////////
 
 describe('pickBestProviderType', function() {
   it('basic', () => {
@@ -130,50 +124,6 @@ describe('pickBestProviderType', function() {
   });
 });
 
-describe('LegacySignalAggregator', function() {
-  it('simple batch', (done) => {
-    var batcher = aggregate.createAggregateHandler(
-        new bridge.LegacySignalAggregator());
-
-    batcher.nextAggregate().then((signals: peerconnection_types.Message[]) => {
-      expect(signals.length).toEqual(3);
-      expect(signals[0]).toEqual(offerSignal);
-      expect(signals[1]).toEqual(candidateSignal1);
-      expect(signals[2]).toEqual(noMoreCandidatesSignal);
-      done();
-    });
-
-    batcher.handle(offerSignal);
-    batcher.handle(candidateSignal1);
-    batcher.handle(noMoreCandidatesSignal);
-
-    batcher.handle(candidateSignal1);
-  });
-});
-
-describe('ChurnSignalAggregator', function() {
-  it('simple batch', (done) => {
-    var batcher = aggregate.createAggregateHandler(
-        new bridge.ChurnSignalAggregator());
-
-    batcher.nextAggregate().then((signals: peerconnection_types.Message[]) => {
-      expect(signals.length).toEqual(4);
-      expect(signals[0]).toEqual(churnOfferSignal);
-      expect(signals[1]).toEqual(churnCandidateSignal1);
-      expect(signals[2]).toEqual(churnNoMoreCandidatesSignal);
-      expect(signals[3]).toEqual(churnPublicEndpointSignal);
-      done();
-    });
-
-    batcher.handle(churnOfferSignal);
-    batcher.handle(churnCandidateSignal1);
-    batcher.handle(churnNoMoreCandidatesSignal);
-    batcher.handle(churnPublicEndpointSignal);
-
-    batcher.handle(churnCandidateSignal1);
-  });
-});
-
 ////////
 // The class itself.
 ////////
@@ -193,7 +143,7 @@ describe('BridgingPeerConnection', function() {
     };
   });
 
-  it('offer and answer', (done) => {
+  it('offer, answer, wrapping', (done) => {
     var bob = bridge.best();
     spyOn(bob, 'makeLegacy_').and.returnValue(mockProvider);
 
@@ -210,17 +160,12 @@ describe('BridgingPeerConnection', function() {
       }
     });
 
-    // Make the mock provider send a batch of messages.
-    // Later, we will verify these are contained in the answer.
     mockProviderSignalQueue.handle(candidateSignal1);
-    mockProviderSignalQueue.handle(noMoreCandidatesSignal);
 
     bob.signalForPeerQueue.setSyncHandler(
         (signal:bridge.SignallingMessage) => {
-      expect(signal.type).toEqual('ANSWER');
       expect(Object.keys(signal.providers)).toContain('LEGACY');
-      expect(signal.providers['LEGACY'].signals).toEqual([
-        candidateSignal1, noMoreCandidatesSignal]);
+      expect(signal.providers['LEGACY'].signals).toEqual([candidateSignal1]);
       done();
     });
   });
@@ -237,7 +182,7 @@ describe('BridgingPeerConnection', function() {
 
     bob.signalForPeerQueue.setSyncHandler(
         (signal:bridge.SignallingMessage) => {
-      expect(signal.type).toEqual('ERROR');
+      expect(signal.errorOnLastMessage).toBeDefined();
       done();
     });
   });
@@ -276,7 +221,7 @@ describe('BridgingPeerConnection', function() {
 
     bob.signalForPeerQueue.setSyncHandler(
         (signal:bridge.SignallingMessage) => {
-      expect(signal.type).toEqual('ERROR');
+      expect(signal.errorOnLastMessage).toBeDefined();
       done();
     });
   });
