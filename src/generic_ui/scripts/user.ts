@@ -50,7 +50,7 @@ export class User implements social.BaseUser {
   public sharingConsentState :SharingConsentState =
       SharingConsentState.NO_OFFER_OR_REQUEST;
 
-  private isOnline_ :boolean = false;
+  public isOnline :boolean = false;
 
   /**
    * Initialize the user to an 'empty' default.
@@ -127,7 +127,7 @@ export class User implements social.BaseUser {
     this.allInstanceIds = payload.allInstanceIds;
     this.updateInstanceDescriptions();
     this.consent_ = payload.consent;
-    this.isOnline_ = payload.isOnline;
+    this.isOnline = payload.isOnline;
 
     // Update gettingConsentState, used to display correct getting buttons.
     if (this.offeringInstances.length > 0) {
@@ -223,23 +223,22 @@ export class User implements social.BaseUser {
     }
 
     // Convert booleans into strings.
-    var isOnlineString = this.isOnline_ ? 'online' : 'offline';
-    var gettingTrustString = 'UntrustedUproxy';
+    var gettingTrustString = 'untrustedUproxy';
     if (isPendingForGetting) {
-      gettingTrustString = 'Pending';
+      gettingTrustString = 'pending';
     } else if (isTrustedForGetting) {
-      gettingTrustString = 'TrustedUproxy';
+      gettingTrustString = 'trustedUproxy';
     }
-    var sharingTrustString = 'UntrustedUproxy';
+    var sharingTrustString = 'untrustedUproxy';
     if (isPendingForSharing) {
-      sharingTrustString = 'Pending';
+      sharingTrustString = 'pending';
     } else if (isTrustedForSharing) {
-      sharingTrustString = 'TrustedUproxy';
+      sharingTrustString = 'trustedUproxy';
     }
 
     return {
-      getTab: isOnlineString + gettingTrustString,
-      shareTab: isOnlineString + sharingTrustString
+      getTab: gettingTrustString,
+      shareTab: sharingTrustString
     };
   }
 
