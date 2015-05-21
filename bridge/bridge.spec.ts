@@ -79,11 +79,11 @@ describe("makeSingleProviderMessage", function() {
       }
     ];
     var result = bridge.makeSingleProviderMessage(
-        bridge.ProviderType.LEGACY,
+        bridge.ProviderType.PLAIN,
         signals);
     var expected: bridge.SignallingMessage = {
       providers: {
-        'LEGACY': {
+        'PLAIN': {
           signals: signals
         }
       }
@@ -94,7 +94,7 @@ describe("makeSingleProviderMessage", function() {
 
 describe('pickBestProviderType', function() {
   it('basic', () => {
-    var legacyProvider: bridge.Provider = {
+    var plainProvider: bridge.Provider = {
       signals: [
         {
           'line': 1
@@ -109,7 +109,7 @@ describe('pickBestProviderType', function() {
       ]
     };
     var result = bridge.pickBestProviderType({
-      'LEGACY': legacyProvider,
+      'PLAIN': plainProvider,
       'CHURN': churnProvider
     });
     expect(result).toEqual(bridge.ProviderType.CHURN);
@@ -145,12 +145,12 @@ describe('BridgingPeerConnection', function() {
 
   it('offer, answer, wrapping', (done) => {
     var bob = bridge.best();
-    spyOn(bob, 'makeLegacy_').and.returnValue(mockProvider);
+    spyOn(bob, 'makePlain_').and.returnValue(mockProvider);
 
     bob.handleSignalMessage({
       type: 'OFFER',
       providers: {
-        'LEGACY': {
+        'PLAIN': {
           signals: [
             offerSignal,
             candidateSignal1,
@@ -164,14 +164,14 @@ describe('BridgingPeerConnection', function() {
 
     bob.signalForPeerQueue.setSyncHandler(
         (signal:bridge.SignallingMessage) => {
-      expect(Object.keys(signal.providers)).toContain('LEGACY');
-      expect(signal.providers['LEGACY'].signals).toEqual([candidateSignal1]);
+      expect(Object.keys(signal.providers)).toContain('PLAIN');
+      expect(signal.providers['PLAIN'].signals).toEqual([candidateSignal1]);
       done();
     });
   });
 
   it('rejects answer having different provider', (done) => {
-    var bob = bridge.legacy();
+    var bob = bridge.preObfuscation();
     bob.negotiateConnection();
     bob.handleSignalMessage({
       type: 'ANSWER',
@@ -188,17 +188,17 @@ describe('BridgingPeerConnection', function() {
   });
 
   it('onceConnecting fulfills when negotiateConnection called', (done) => {
-    var bob = bridge.legacy();
+    var bob = bridge.best();
     bob.negotiateConnection();
     bob.onceConnecting.then(done);
   });
 
   it('onceConnecting fulfills when valid offer received', (done) => {
-    var bob = bridge.legacy();
+    var bob = bridge.best();
     bob.handleSignalMessage({
       type: 'OFFER',
       providers: {
-        'LEGACY': {
+        'PLAIN': {
           signals: [
             offerSignal,
             candidateSignal1,
@@ -227,13 +227,13 @@ describe('BridgingPeerConnection', function() {
   });
 
   it('onceConnected rejects if closed before negotiation', (done) => {
-    var bob = bridge.legacy();
+    var bob = bridge.best();
     bob.close();
     bob.onceConnected.catch(done);
   });
 
   it('onceClosed fulfills if closed before negotiation', (done) => {
-    var bob = bridge.legacy();
+    var bob = bridge.best();
     bob.close();
     bob.onceClosed.then(done);
   });

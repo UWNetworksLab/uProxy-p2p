@@ -25,17 +25,26 @@ export var best = (
   return basicObfuscation(name, config);
 }
 
-// Creates a new bridge which only attempts legacy, non-obfuscated,
-// peerconnections.
+// Creates a new bridge which runs in passthrough mode.
+// Use this if you are speaking with an ancient peer, without
+// support for bridging.
 export var legacy = (
     name?:string,
     config?:freedom_RTCPeerConnection.RTCConfiguration)
     :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.LEGACY, name, config);
+  return new BridgingPeerConnection(ProviderType.PASSTHROUGH, name, config);
 }
 
-// Creates a new bridge which attempts to speak obfuscation.
-// Use this if you think the remote peer supports it.
+// Use this if you think the remote peer supports bridging but
+// you don't want to use obfuscation.
+export var preObfuscation = (
+    name?:string,
+    config?:freedom_RTCPeerConnection.RTCConfiguration)
+    :BridgingPeerConnection => {
+  return new BridgingPeerConnection(ProviderType.PLAIN, name, config);
+}
+
+// Use this if you think the remote peer supports obfuscation.
 export var basicObfuscation = (
     name?:string,
     config?:freedom_RTCPeerConnection.RTCConfiguration)
@@ -92,8 +101,8 @@ export var pickBestProviderType = (
     providers ?:{[name:string] : Provider}) : ProviderType => {
   if (ProviderType[ProviderType.CHURN] in providers) {
     return ProviderType.CHURN;
-  } else if (ProviderType[ProviderType.LEGACY] in providers) {
-    return ProviderType.LEGACY;
+  } else if (ProviderType[ProviderType.PLAIN] in providers) {
+    return ProviderType.PLAIN;
   }
   throw new Error('no supported provider found');
 }
@@ -104,13 +113,9 @@ export var pickBestProviderType = (
 
 // Exported for constructor of exported class.
 export enum ProviderType {
-  LEGACY,
-  CHURN
-}
-
-enum BridgingState {
-  NEW,
-  BRIDGING
+  PLAIN,
+  CHURN,
+  PASSTHROUGH
 }
 
 // Establishes connectivity with the help of a variety of peerconnection
@@ -124,9 +129,7 @@ enum BridgingState {
 // including >1 provider in offers and describing the protocol between
 // SocksToRtc and RtcToNet. To preserve backwards compatibility, we should
 // strive to always support the initial offer case here, which will pick one
-// of the CHURN or LEGACY provider.
-//
-// TODO: Pass non-bridging signalling messages through, to support old clients.
+// of the CHURN or PLAIN provider.
 export class BridgingPeerConnection implements peerconnection.PeerConnection<
     SignallingMessage> {
 
@@ -176,8 +179,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   private provider_ :peerconnection.PeerConnection<any>;
 
-  private state_: BridgingState = BridgingState.NEW;
-
   // Private, use the static constructors instead.
   constructor(
       private preferredProviderType_ :ProviderType,
@@ -187,8 +188,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
     // Some logging niceties.
     this.onceConnecting.then(() => {
-      log.debug('%1: now bridging (current state: %2)',
-          this.name_, BridgingState[this.state_]);
+      log.debug('%1: now bridging with %2 provider',
+          this.name_, ProviderType[this.providerType_]);
     });
   }
 
@@ -203,22 +204,23 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   private makeFromProviderType_ = (
       type:ProviderType) : peerconnection.PeerConnection<any> => {
-    if (type !== ProviderType.LEGACY && type !== ProviderType.CHURN) {
+    if (type !== ProviderType.PLAIN && type !== ProviderType.CHURN &&
+        type !== ProviderType.PASSTHROUGH) {
       throw new Error('unknown provider type ' + type);
     }
 
     var pc :freedom_RTCPeerConnection.RTCPeerConnection =
         freedom['core.rtcpeerconnection'](this.config_);
-    return type === ProviderType.LEGACY ?
-        this.makeLegacy_(pc) :
-        this.makeChurn_(pc);
+    return type === ProviderType.CHURN ?
+        this.makeChurn_(pc) :
+        this.makePlain_(pc);
   }
 
   // Factored out for mocking purposes.
-  private makeLegacy_ = (
+  private makePlain_ = (
       pc:freedom_RTCPeerConnection.RTCPeerConnection)
       : peerconnection.PeerConnection<peerconnection_types.Message> => {
-    log.debug('%1: constructing legacy peerconnection', this.name_);
+    log.debug('%1: constructing plain peerconnection', this.name_);
     return new peerconnection.PeerConnectionClass(pc, this.name_);
   }
 
@@ -235,13 +237,17 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   private bridgeWith_ = (
       providerType:ProviderType,
       provider:peerconnection.PeerConnection<Object>) : void => {
-    // Transform messages before forwarding them.
-    provider.signalForPeerQueue.setSyncHandler((signal: Object) => {
-      var wrappedSignal = this.wrapSignal_(signal);
-      this.signalForPeerQueue.handle(wrappedSignal);
-    });
-
-    // Forward the channel opened queue.
+    // Forward queues; all signals should be wrapped, except
+    // in passthrough mode.
+    if (providerType === ProviderType.PASSTHROUGH) {
+      provider.signalForPeerQueue.setHandler(
+          this.signalForPeerQueue.handle);
+    } else {
+      provider.signalForPeerQueue.setSyncHandler((signal: Object) => {
+        var wrappedSignal = this.wrapSignal_(signal);
+        this.signalForPeerQueue.handle(wrappedSignal);
+      });
+    }
     provider.peerOpenedChannelQueue.setHandler(
         this.peerOpenedChannelQueue.handle);
 
@@ -252,7 +258,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     this.providerType_ = providerType;
     this.provider_ = provider;
 
-    this.state_ = BridgingState.BRIDGING;
     this.connecting_();
   }
 
@@ -267,24 +272,45 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
     try {
       var provider: Provider;
-      if (this.state_ === BridgingState.NEW) {
-        var providerType = pickBestProviderType(message.providers);
-        provider = message.providers[ProviderType[providerType]];
-        log.debug('%1: received offer, responding with %2 provider',
-            this.name_, ProviderType[providerType]);
-        this.bridgeWith_(
-            providerType,
-            this.makeFromProviderType_(providerType));
+      if (this.provider_ === undefined) {
+        try {
+          var providerType = pickBestProviderType(message.providers);
+          provider = message.providers[ProviderType[providerType]];
+          log.debug('%1: received offer, responding with %2 provider',
+              this.name_, ProviderType[providerType]);
+          this.bridgeWith_(
+              providerType,
+              this.makeFromProviderType_(providerType));
+        } catch (e) {
+          // Check if this is a message from an ancient client.
+          // If so, enter passthrough mode.
+          var legacyMessage = <peerconnection_types.Message>message;
+          if (legacyMessage.type !== undefined && (legacyMessage.candidate ||
+              legacyMessage.description)) {
+            log.debug('%1: looks like legacy peerconnection, entering ' +
+                'passthrough mode', this.name_);
+            this.bridgeWith_(
+                ProviderType.PASSTHROUGH,
+                this.makeFromProviderType_(ProviderType.PASSTHROUGH));
+          } else {
+            throw e;
+          }
+        }
+      }
+
+      // Unbatch the signals for the provider in use and forward to the
+      // provider, unless we're in passthrough mode in which case we just
+      // forward the message directly.
+      if (this.providerType_ === ProviderType.PASSTHROUGH) {
+        this.provider_.handleSignalMessage(message);
       } else {
         if (ProviderType[this.providerType_] in message.providers) {
           provider = message.providers[ProviderType[this.providerType_]];
         } else {
           throw new Error('cannot find signals for current provider');
         }
+        provider.signals.forEach(this.provider_.handleSignalMessage);
       }
-
-      // Unbatch the signals and forward to the provider.
-      provider.signals.forEach(this.provider_.handleSignalMessage);
     } catch (e) {
       this.signalForPeerQueue.handle({
         errorOnLastMessage: true
@@ -295,14 +321,14 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   public openDataChannel = (channelLabel:string,
       options?:freedom_RTCPeerConnection.RTCDataChannelInit)
       : Promise<peerconnection.DataChannel> => {
-    if (this.state_ === BridgingState.NEW) {
+    if (this.provider_ === undefined) {
       throw new Error('cannot open channel before provider has been created');
     }
     return this.provider_.openDataChannel(channelLabel, options);
   }
 
   public close = () : Promise<void> => {
-    if (this.state_ === BridgingState.NEW) {
+    if (this.provider_ === undefined) {
       this.rejectConnected_(new Error('closed before negotiation succeeded'));
       this.closed_();
     } else {

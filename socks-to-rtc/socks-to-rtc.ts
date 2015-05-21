@@ -105,7 +105,7 @@ module SocksToRtc {
           new tcp.Server(localSocksServerEndpoint),
           obfuscate ?
             bridge.basicObfuscation('sockstortc', config) :
-            bridge.legacy('sockstortc', config));
+            bridge.preObfuscation('sockstortc', config));
     }
 
     // Starts the SOCKS server with the supplied TCP server and peerconnection.
