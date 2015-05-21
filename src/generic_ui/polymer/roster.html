@@ -4,7 +4,7 @@
 <link rel="import" href="../../bower/core-icons/social-icons.html">
 <link rel='import' href='roster-group.html'>
 
-<polymer-element name='uproxy-roster' attributes='contacts'>
+<polymer-element name='uproxy-roster' attributes='contacts, mode'>
 
   <template>
     <style>
@@ -90,33 +90,32 @@
 
       <!-- uProxy contacts offering access to or requesting access from user -->
       <uproxy-roster-group
-          groupTitle='{{model.globalSettings.mode==ui_constants.Mode.GET ? "Offers" : "Requests"}}'
-          onlineContacts='{{ contacts.onlinePending }}'
-          offlineContacts='{{ contacts.offlinePending }}'
+          groupTitle='{{mode==ui_constants.Mode.GET ? "Offers" : "Requests"}}'
+          contacts='{{ contacts.pending }}'
           searchQuery='{{ searchQuery }}'
-          pending="{{ true }}"></uproxy-roster-group>
+          mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Trusted if there are no Trusted contacts, or if there are no Pending contacts -->
       <hr color="#eee"
-          hidden?='{{ ((contacts.onlinePending.length == 0 && contacts.offlinePending.length == 0)) || (contacts.onlineTrustedUproxy.length == 0 && contacts.offlineTrustedUproxy.length == 0) }}'></hr>
+          hidden?='{{ contacts.pending.length == 0 || contacts.trustedUproxy.length == 0 }}'></hr>
 
       <!-- trusted uProxy contacts -->
       <uproxy-roster-group
-          groupTitle='{{model.globalSettings.mode==ui_constants.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
-          onlineContacts='{{ contacts.onlineTrustedUproxy }}'
-          offlineContacts='{{ contacts.offlineTrustedUproxy }}'
-          searchQuery='{{ searchQuery }}'></uproxy-roster-group>
+          groupTitle='{{mode==ui_constants.Mode.GET ? "Friends you can get access from" : "Friends who can get access from you"}}'
+          contacts='{{ contacts.trustedUproxy }}'
+          searchQuery='{{ searchQuery }}'
+          mode='{{ mode }}'></uproxy-roster-group>
 
       <!-- Hide HR above Untrusted if there are no Untrusted contacts, or if there are no Trusted & Pending contacts -->
       <hr color="#eee"
-          hidden?='{{ (contacts.onlineUntrustedUproxy.length == 0 && contacts.offlineUntrustedUproxy.length == 0) || ((contacts.onlineTrustedUproxy.length == 0 && contacts.offlineTrustedUproxy.length == 0) && (contacts.onlinePending.length == 0 && contacts.offlinePending.length == 0)) }}'></hr>
+          hidden?='{{ contacts.untrustedUproxy.length == 0 || (contacts.trustedUproxy.length == 0 && contacts.pending.length == 0) }}'></hr>
 
       <!-- untrusted uProxy contacts -->
       <uproxy-roster-group
           groupTitle='Friends who have uProxy'
-          onlineContacts='{{ contacts.onlineUntrustedUproxy }}'
-          offlineContacts='{{ contacts.offlineUntrustedUproxy }}'
-          searchQuery='{{ searchQuery }}'></uproxy-roster-group>
+          contacts='{{ contacts.untrustedUproxy }}'
+          searchQuery='{{ searchQuery }}'
+          mode='{{ mode }}'></uproxy-roster-group>
     </div>
 
   </template>

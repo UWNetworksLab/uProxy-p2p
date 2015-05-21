@@ -65,4 +65,14 @@ Polymer({
   hasInstance: function(instanceId :string) {
     return instanceId && _.contains(this.contact.allInstanceIds, instanceId);
   },
+  fireChanged: function() {
+    // this is needed as a slight hack since the observer on the contacts array
+    // a level up does not pick up on changes in contact properties
+    this.fire('contact-changed');
+  },
+  observe: {
+    'contact.isSharingWithMe': 'fireChanged',
+    'contact.isGettingFromMe': 'fireChanged',
+    'contact.isOnline': 'fireChanged',
+  },
 });
