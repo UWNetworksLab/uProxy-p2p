@@ -304,7 +304,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     return new churn.Connection(pc, this.name_);
   }
 
-  // Configures the bridge with this provider by establishing setting queue
+  // Configures the bridge with this provider by establishing queue
   // forwarding, signal batching, and fulfilling onceBridging_.
   // State is *not* set here: that depends on whether we're initiating or
   // answering.

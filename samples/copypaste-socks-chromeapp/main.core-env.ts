@@ -137,7 +137,7 @@ module copypaste_module {
   // appropriate. Returns null if the field contents are malformed.
   export function parseInboundMessages(inboundMessageFieldValue:string) : void {
     try {
-      // Decode and de-deserialise the pasted text.
+      // Decode and de-serialise the pasted text.
       var messageJson = base64Decode(inboundMessageFieldValue.trim());
       parsedInboundMessage = JSON.parse(messageJson);
 
