@@ -7,7 +7,6 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv({
   'core.rtcpeerconnection': () => { return new mockFreedomRtcPeerConnection(); }
 });
 
-import aggregate = require('../handler/aggregate');
 import bridge = require('./bridge');
 import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');

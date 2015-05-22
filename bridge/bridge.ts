@@ -1,7 +1,6 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
 
-import aggregate = require('../handler/aggregate');
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');
 import handler = require('../handler/queue');
