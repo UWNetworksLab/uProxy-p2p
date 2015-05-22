@@ -9,7 +9,7 @@ export var core :CoreConnector;
 export var browserConnector: FirefoxCoreConnector;
 function initUI() {
     browserConnector = new FirefoxCoreConnector();
-    core = new CoreConnector(firefoxCoreConnector);
+    core = new CoreConnector(browserConnector);
     var firefoxBrowserApi = new FirefoxBrowserApi();
 
     return new user_interface.UserInterface(core, firefoxBrowserApi);

@@ -17,6 +17,7 @@ import port = require('./port');
 class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   public status :browser_connector.StatusObject;
+  public onceConnected :Promise<void>;
 
   constructor() {
     this.status = { connected: true };
@@ -30,6 +31,7 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   public connect = () :Promise<void> => {
     this.emit('core_connect');
+    this.onceConnected = Promise.resolve<void>();
     return Promise.resolve<void>();
   }
 
