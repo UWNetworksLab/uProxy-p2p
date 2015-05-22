@@ -25,16 +25,6 @@ export var best = (
   return basicObfuscation(name, config);
 }
 
-// Creates a new bridge which runs in passthrough mode.
-// Use this if you are speaking with an ancient peer, without
-// support for bridging.
-export var legacy = (
-    name?:string,
-    config?:freedom_RTCPeerConnection.RTCConfiguration)
-    :BridgingPeerConnection => {
-  return new BridgingPeerConnection(ProviderType.PASSTHROUGH, name, config);
-}
-
 // Use this if you think the remote peer supports bridging but
 // you don't want to use obfuscation.
 export var preObfuscation = (
@@ -114,8 +104,7 @@ export var pickBestProviderType = (
 // Exported for constructor of exported class.
 export enum ProviderType {
   PLAIN,
-  CHURN,
-  PASSTHROUGH
+  CHURN
 }
 
 // Establishes connectivity with the help of a variety of peerconnection
@@ -204,8 +193,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   private makeFromProviderType_ = (
       type:ProviderType) : peerconnection.PeerConnection<any> => {
-    if (type !== ProviderType.PLAIN && type !== ProviderType.CHURN &&
-        type !== ProviderType.PASSTHROUGH) {
+    if (type !== ProviderType.PLAIN && type !== ProviderType.CHURN) {
       throw new Error('unknown provider type ' + type);
     }
 
@@ -237,17 +225,11 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   private bridgeWith_ = (
       providerType:ProviderType,
       provider:peerconnection.PeerConnection<Object>) : void => {
-    // Forward queues; all signals should be wrapped, except
-    // in passthrough mode.
-    if (providerType === ProviderType.PASSTHROUGH) {
-      provider.signalForPeerQueue.setHandler(
-          this.signalForPeerQueue.handle);
-    } else {
-      provider.signalForPeerQueue.setSyncHandler((signal: Object) => {
-        var wrappedSignal = this.wrapSignal_(signal);
-        this.signalForPeerQueue.handle(wrappedSignal);
-      });
-    }
+    // Forward queues, wrapping signals.
+    provider.signalForPeerQueue.setSyncHandler((signal: Object) => {
+      var wrappedSignal = this.wrapSignal_(signal);
+      this.signalForPeerQueue.handle(wrappedSignal);
+    });
     provider.peerOpenedChannelQueue.setHandler(
         this.peerOpenedChannelQueue.handle);
 
@@ -273,44 +255,22 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     try {
       var provider: Provider;
       if (this.provider_ === undefined) {
-        try {
-          var providerType = pickBestProviderType(message.providers);
-          provider = message.providers[ProviderType[providerType]];
-          log.debug('%1: received offer, responding with %2 provider',
-              this.name_, ProviderType[providerType]);
-          this.bridgeWith_(
-              providerType,
-              this.makeFromProviderType_(providerType));
-        } catch (e) {
-          // Check if this is a message from an ancient client.
-          // If so, enter passthrough mode.
-          var legacyMessage = <peerconnection_types.Message>message;
-          if (legacyMessage.type !== undefined && (legacyMessage.candidate ||
-              legacyMessage.description)) {
-            log.debug('%1: looks like legacy peerconnection, entering ' +
-                'passthrough mode', this.name_);
-            this.bridgeWith_(
-                ProviderType.PASSTHROUGH,
-                this.makeFromProviderType_(ProviderType.PASSTHROUGH));
-          } else {
-            throw e;
-          }
-        }
+        var providerType = pickBestProviderType(message.providers);
+        provider = message.providers[ProviderType[providerType]];
+        log.debug('%1: received offer, responding with %2 provider',
+            this.name_, ProviderType[providerType]);
+        this.bridgeWith_(
+            providerType,
+            this.makeFromProviderType_(providerType));
       }
 
-      // Unbatch the signals for the provider in use and forward to the
-      // provider, unless we're in passthrough mode in which case we just
-      // forward the message directly.
-      if (this.providerType_ === ProviderType.PASSTHROUGH) {
-        this.provider_.handleSignalMessage(message);
+      // Unbatch and forward signals to the concrete provider.
+      if (ProviderType[this.providerType_] in message.providers) {
+        provider = message.providers[ProviderType[this.providerType_]];
       } else {
-        if (ProviderType[this.providerType_] in message.providers) {
-          provider = message.providers[ProviderType[this.providerType_]];
-        } else {
-          throw new Error('cannot find signals for current provider');
-        }
-        provider.signals.forEach(this.provider_.handleSignalMessage);
+        throw new Error('cannot find signals for current provider');
       }
+      provider.signals.forEach(this.provider_.handleSignalMessage);
     } catch (e) {
       this.signalForPeerQueue.handle({
         errorOnLastMessage: true
