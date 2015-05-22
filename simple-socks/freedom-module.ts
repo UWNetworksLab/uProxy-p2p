@@ -39,7 +39,7 @@ socksRtc.on('signalForPeer', rtcNet.handleSignalFromPeer);
 socksRtc.startFromConfig(
     localhostEndpoint,
     pcConfig,
-    false) // initiate with obfuscation
+    true) // initiate with obfuscation
   .then((endpoint:net.Endpoint) => {
     log.info('SocksToRtc listening on: ' + JSON.stringify(endpoint));
     log.info('curl -x socks5h://' + endpoint.address + ':' + endpoint.port +
