@@ -15,8 +15,8 @@ var log :logging.Log = new logging.Log('bridge');
 ////////
 
 // Creates a bridge which initiates with the best provider and will pair
-// with any supported provider. Use this for convenience, or when you
-// will not be initiating.
+// with any of the provider types known to this bridge. Use this for
+// convenience or or when you will not be initiating.
 export var best = (
     name?:string,
     config?:freedom_RTCPeerConnection.RTCConfiguration)
