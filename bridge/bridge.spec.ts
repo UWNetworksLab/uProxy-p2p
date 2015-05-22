@@ -62,10 +62,8 @@ describe("makeSingleProviderMessage", function() {
         bridge.ProviderType.PLAIN,
         signals);
     var expected: bridge.SignallingMessage = {
-      providers: {
-        'PLAIN': {
-          signals: signals
-        }
+      signals: {
+        'PLAIN': signals
       }
     };
     expect(result).toEqual(expected);
@@ -74,23 +72,19 @@ describe("makeSingleProviderMessage", function() {
 
 describe('pickBestProviderType', function() {
   it('basic', () => {
-    var plainProvider: bridge.Provider = {
-      signals: [
-        {
-          'line': 1
-        }
-      ]
-    };
-    var churnProvider: bridge.Provider = {
-      signals: [
-        {
-          'line': 1
-        }
-      ]
-    };
+    var plainSignals :Object[] = [
+      {
+        'line': 1
+      }
+    ];
+    var churnSignals :Object[] = [
+      {
+        'line': 1
+      }
+    ];
     var result = bridge.pickBestProviderType({
-      'PLAIN': plainProvider,
-      'CHURN': churnProvider
+      'PLAIN': plainSignals,
+      'CHURN': churnSignals
     });
     expect(result).toEqual(bridge.ProviderType.CHURN);
   });
@@ -98,7 +92,7 @@ describe('pickBestProviderType', function() {
   it('no providers', () => {
     expect(() => {
       bridge.pickBestProviderType({
-        'MAGIC': {}
+        'MAGIC': []
       });
     }).toThrow();
   });
@@ -129,23 +123,21 @@ describe('BridgingPeerConnection', function() {
 
     bob.handleSignalMessage({
       type: 'OFFER',
-      providers: {
-        'PLAIN': {
-          signals: [
+      signals: {
+        'PLAIN': [
             offerSignal,
             candidateSignal1,
             noMoreCandidatesSignal
           ]
         }
-      }
     });
 
     mockProviderSignalQueue.handle(candidateSignal1);
 
     bob.signalForPeerQueue.setSyncHandler(
-        (signal:bridge.SignallingMessage) => {
-      expect(Object.keys(signal.providers)).toContain('PLAIN');
-      expect(signal.providers['PLAIN'].signals).toEqual([candidateSignal1]);
+        (message:bridge.SignallingMessage) => {
+      expect(Object.keys(message.signals)).toContain('PLAIN');
+      expect(message.signals['PLAIN']).toEqual([candidateSignal1]);
       done();
     });
   });
@@ -155,8 +147,8 @@ describe('BridgingPeerConnection', function() {
     bob.negotiateConnection();
     bob.handleSignalMessage({
       type: 'ANSWER',
-      providers: {
-        'CHURN': {}
+      signals: {
+        'CHURN': []
       }
     });
 
@@ -177,14 +169,12 @@ describe('BridgingPeerConnection', function() {
     var bob = bridge.best();
     bob.handleSignalMessage({
       type: 'OFFER',
-      providers: {
-        'PLAIN': {
-          signals: [
-            offerSignal,
-            candidateSignal1,
-            noMoreCandidatesSignal
-          ]
-        }
+      signals: {
+        'PLAIN': [
+          offerSignal,
+          candidateSignal1,
+          noMoreCandidatesSignal
+        ]
       }
     });
     bob.onceConnecting.then(done);
@@ -194,8 +184,8 @@ describe('BridgingPeerConnection', function() {
     var bob = bridge.best();
     bob.handleSignalMessage({
       type: 'OFFER',
-      providers: {
-        'MAGIC': {}
+      signals: {
+        'MAGIC': []
       }
     });
 

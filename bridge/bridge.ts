@@ -48,22 +48,18 @@ export var basicObfuscation = (
 
 // Wraps the signals of one or more concrete PeerConnection providers.
 export interface SignallingMessage {
-  // All concrete PeerConnection providers offered by the peer.
-  // The remote bridge should select one, indicating its choice in the
-  // answer.
-  providers ?:{[name:string] : Provider};
+  // One or more signalling messages, for one or more concrete
+  // PeerConnection providers. The remote bridge should select
+  // a provider and respond with signalling messages from that.
+  // The ability to "batch" multiple signalling messages into one
+  // may be useful in copypaste-type scenarios, although note
+  // that this class does not itself perform any batching.
+  signals?: { [providerName: string]: Object[] };
+
   // Currently just a coarse-grained indication that there was an error
   // processing the previous message, most likely because no supported
   // provider was found.
   errorOnLastMessage ?:boolean;
-}
-
-// One or more signals from a concrete PeerConnection provider.
-// In the case of >1 signal, each will be passed in order to the provider.
-// This may be useful in copypaste-type scenarios, although note that this
-// class does not perform any batching by itself.
-export interface Provider {
-  signals ?:Object[];
 }
 
 ////////
@@ -75,23 +71,21 @@ export interface Provider {
 export var makeSingleProviderMessage = (
     providerType:ProviderType,
     signals:Object[]) : SignallingMessage => {
-  var signal :SignallingMessage = {
-    providers: {}
+  var message :SignallingMessage = {
+    signals: {}
   };
-  signal.providers[ProviderType[providerType]] = {
-    signals: signals
-  };
-  return signal;
+  message.signals[ProviderType[providerType]] = signals;
+  return message;
 }
 
-// Finds the "best" provider listed, throwing if none is found.
-// Currently, churn is favoured.
+// Finds the "best" provider offered within a set of batched signals, throwing
+// if none is found. Currently, churn is favoured.
 // Public for testing.
 export var pickBestProviderType = (
-    providers ?:{[name:string] : Provider}) : ProviderType => {
-  if (ProviderType[ProviderType.CHURN] in providers) {
+    signals ?:{[providerName:string] : Object[]}) : ProviderType => {
+  if (ProviderType[ProviderType.CHURN] in signals) {
     return ProviderType.CHURN;
-  } else if (ProviderType[ProviderType.PLAIN] in providers) {
+  } else if (ProviderType[ProviderType.PLAIN] in signals) {
     return ProviderType.PLAIN;
   }
   throw new Error('no supported provider found');
@@ -253,10 +247,8 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     log.debug('%1: handling signal: %2', this.name_, message);
 
     try {
-      var provider: Provider;
       if (this.provider_ === undefined) {
-        var providerType = pickBestProviderType(message.providers);
-        provider = message.providers[ProviderType[providerType]];
+        var providerType = pickBestProviderType(message.signals);
         log.debug('%1: received offer, responding with %2 provider',
             this.name_, ProviderType[providerType]);
         this.bridgeWith_(
@@ -265,12 +257,12 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
       }
 
       // Unbatch and forward signals to the concrete provider.
-      if (ProviderType[this.providerType_] in message.providers) {
-        provider = message.providers[ProviderType[this.providerType_]];
+      if (ProviderType[this.providerType_] in message.signals) {
+        message.signals[ProviderType[this.providerType_]].forEach(
+            this.provider_.handleSignalMessage);
       } else {
         throw new Error('cannot find signals for current provider');
       }
-      provider.signals.forEach(this.provider_.handleSignalMessage);
     } catch (e) {
       this.signalForPeerQueue.handle({
         errorOnLastMessage: true
