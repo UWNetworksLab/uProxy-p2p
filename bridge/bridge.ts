@@ -31,9 +31,9 @@ export var basicObfuscation = (
   return new BridgingPeerConnection(ProviderType.CHURN, name, config);
 }
 
-// Creates a bridge which initiates with the best provider and will pair
-// with any of the provider types known to this bridge. Use this for
-// convenience or or when you will not be initiating.
+// Creates a bridge which initiates with the best provider and can
+// accept an offer from any of the provider types known to this
+// bridge. Use this for convenience or or when you will not be initiating.
 export var best = basicObfuscation;
 
 ////////
