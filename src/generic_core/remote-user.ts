@@ -97,7 +97,7 @@ var log :logging.Log = new logging.Log('remote-user');
       this.instanceToClientMap_ = {};
 
       this.consent =
-          new consent.State(userId == this.network.myInstance.userId);
+          new consent.State(userId === this.network.myInstance.userId);
 
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
@@ -356,18 +356,12 @@ var log :logging.Log = new logging.Log('remote-user');
         }
       }
 
-      if (this.network.areAllContactsUproxy()) {
-        // All contacts have uProxy enabled for this network.  Only keep the
-        // contact from the UI if it is the logged in user and there are no
-        // other instances.
-        if (this.userId == this.network.myInstance.userId &&
-            allInstanceIds.length === 0) {
-          return null;
-        }
-      } else if (allInstanceIds.length === 0) {
-        // For networks which give us profiles for non-uProxy contacts, don't
-        // send users to the UI unless they have instances (they may not be
-        // uProxy users).
+      if (allInstanceIds.length === 0 &&
+          (!this.network.areAllContactsUproxy() ||
+           this.userId === this.network.myInstance.userId)) {
+        // Don't send users with no instances to the UI if either the network
+        // gives us non-uProxy contacts, or it is the user we are logged in
+        // with.
         return null;
       }
 

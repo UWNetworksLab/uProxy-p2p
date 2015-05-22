@@ -393,19 +393,15 @@ describe('remote_user.User', () => {
   it('Initializes with consent for local user', () => {
     user = new remote_user.User(network, network.myInstance.userId);
     expect(user.consent.localRequestsAccessFromRemote).toEqual(true);
-    expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
     expect(user.consent.localGrantsAccessToRemote).toEqual(true);
     expect(user.consent.remoteRequestsAccessFromLocal).toEqual(true);
-    expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
   });
 
   it('Initializes without consent for other users', () => {
     user = new remote_user.User(network, 'otherUser');
     expect(user.consent.localRequestsAccessFromRemote).toEqual(false);
-    expect(user.consent.ignoringRemoteUserOffer).toEqual(false);
     expect(user.consent.localGrantsAccessToRemote).toEqual(false);
     expect(user.consent.remoteRequestsAccessFromLocal).toEqual(false);
-    expect(user.consent.ignoringRemoteUserRequest).toEqual(false);
   });
 
 });  // uProxy.User

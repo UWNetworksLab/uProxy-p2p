@@ -219,9 +219,7 @@ import ui = ui_connector.connector;
     }
 
     /**
-     * Helper to determine if |userId| is a "new friend" to be added to the
-     * roster, and also isn't just our own userId, since we can receive XMPP
-     * messages for ourself too.
+     * Helper to determine if |userId| is a "new friend".
      */
     protected isNewFriend_ = (userId :string) :boolean => {
       return !(userId in this.roster);

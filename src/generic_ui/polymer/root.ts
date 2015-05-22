@@ -219,7 +219,7 @@ Polymer({
     var trustedContacts = model.contacts.shareAccessContacts.trustedUproxy;
     if (trustedContacts.length === 1) {
       this.isSharingEnabledWithOthers =
-          trustedContacts[0].userId != model.onlineNetwork.userId;
+          trustedContacts[0].userId !== model.onlineNetwork.userId;
     } else {
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
@@ -227,6 +227,11 @@ Polymer({
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
+    // Use an observer on model.contacts.shareAccessContacts.trustedUproxy
+    // so that we can detect any time elements are added or removed from this
+    // array.  Unfortunately if we try doing
+    //   someMethod(model.contacts.shareAccessContacts.trustedUproxy)
+    // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers'
   }
