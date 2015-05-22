@@ -14,16 +14,6 @@ var log :logging.Log = new logging.Log('bridge');
 // Static constructors.
 ////////
 
-// Creates a bridge which initiates with the best provider and will pair
-// with any of the provider types known to this bridge. Use this for
-// convenience or or when you will not be initiating.
-export var best = (
-    name?:string,
-    config?:freedom_RTCPeerConnection.RTCConfiguration)
-    :BridgingPeerConnection => {
-  return basicObfuscation(name, config);
-}
-
 // Use this if you think the remote peer supports bridging but
 // you don't want to use obfuscation.
 export var preObfuscation = (
@@ -40,6 +30,11 @@ export var basicObfuscation = (
     :BridgingPeerConnection => {
   return new BridgingPeerConnection(ProviderType.CHURN, name, config);
 }
+
+// Creates a bridge which initiates with the best provider and will pair
+// with any of the provider types known to this bridge. Use this for
+// convenience or or when you will not be initiating.
+export var best = basicObfuscation;
 
 ////////
 // Signalling messages (wire protocol).
