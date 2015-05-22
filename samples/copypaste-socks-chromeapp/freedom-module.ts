@@ -9,6 +9,7 @@ import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
 import net = require('../../net/net.types');
 import tcp = require('../../net/tcp');
 import signals = require('../../webrtc/signals');
+import bridge = require('../../bridge/bridge');
 
 import logging = require('../../logging/logging');
 import loggingTypes = require('../../loggingprovider/loggingprovider.types');
@@ -18,14 +19,9 @@ import loggingTypes = require('../../loggingprovider/loggingprovider.types');
 // warnings by default from the rest of the system.  Note that the proxy is
 // extremely slow in debug mode.
 var loggingController = freedom['loggingcontroller']();
-
-loggingController.setDefaultFilter(loggingTypes.Destination.console,
-                                   loggingTypes.Level.info);
-
-loggingController.setFilters(loggingTypes.Destination.console, {
-  'SocksToRtc': loggingTypes.Level.info,
-  'RtcToNet': loggingTypes.Level.info
-});
+loggingController.setDefaultFilter(
+    loggingTypes.Destination.console,
+    loggingTypes.Level.debug);
 
 var log :logging.Log = new logging.Log('copypaste-socks');
 
@@ -164,7 +160,7 @@ var doStart = () => {
   socksRtc.startFromConfig(
       localhostEndpoint,
       pcConfig,
-      false) // obfuscate
+      false) // initiate with obfuscation
     .then((endpoint:net.Endpoint) => {
       log.info('socksRtc ready. listening to SOCKS5 on: ' + JSON.stringify(endpoint));
       log.info('` curl -x socks5h://localhost:9999 www.google.com `')
@@ -188,10 +184,9 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
   } else {
     if (rtcNet === undefined) {
       rtcNet = new rtc_to_net.RtcToNet();
-      rtcNet.startFromConfig(
-          { allowNonUnicast:true },
-          pcConfig,
-          false); // obfuscate
+      rtcNet.startFromConfig({
+        allowNonUnicast:true
+      }, pcConfig);
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.

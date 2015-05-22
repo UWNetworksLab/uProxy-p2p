@@ -10,12 +10,11 @@ import ipaddr = require('ipaddr.js');
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import peerconnection = require('../webrtc/peerconnection');
-import signals = require('../webrtc/signals');
 import handler = require('../handler/queue');
 
 import ProxyConfig = require('./proxyconfig');
 
-import churn = require('../churn/churn');
+import bridge = require('../bridge/bridge');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
 import socks = require('../socks-common/socks-headers');
@@ -63,7 +62,7 @@ import logging = require('../logging/logging');
     public proxyConfig :ProxyConfig;
 
     // Message handler queues to/from the peer.
-    public signalsForPeer :handler.QueueHandler<signals.Message, void>;
+    public signalsForPeer :handler.QueueHandler<Object, void>;
 
     // The two Queues below only count bytes transferred between the SOCKS
     // client and the remote host(s) the client wants to connect to. WebRTC
@@ -103,8 +102,7 @@ import logging = require('../logging/logging');
 
     // The connection to the peer that is acting as a proxy client. Once
     // assigned, is never un-assigned. Use in this class to tell if started.
-    private peerConnection_
-        :peerconnection.PeerConnection<signals.Message> = null;
+    private peerConnection_ :peerconnection.PeerConnection<Object>;
 
     // This pool manages the data channels for the PeerConnection.
     private pool_ :Pool;
@@ -119,28 +117,18 @@ import logging = require('../logging/logging');
     // removed.
     private sessions_ :{ [channelLabel:string] : Session } = {};
 
-    // As start() but handles creation of peerconnection.
+    // As start() but handles creation of a bridging peerconnection.
     public startFromConfig = (
         proxyConfig:ProxyConfig,
-        pcConfig:freedom_RTCPeerConnection.RTCConfiguration,
-        obfuscate:boolean) => {
-      if (pcConfig) {
-        var pc :freedom_RTCPeerConnection.RTCPeerConnection =
-            freedom['core.rtcpeerconnection'](pcConfig);
-        return this.start(
-            proxyConfig,
-            obfuscate ?
-                new churn.Connection(pc, 'RtcToNet') :
-                new peerconnection.PeerConnectionClass(pc));
-      }
+        config:freedom_RTCPeerConnection.RTCConfiguration) => {
+      return this.start(proxyConfig, bridge.best('rtctonet', config));
     }
 
     // Starts with the supplied peerconnection.
     // Returns this.onceReady.
     public start = (
         proxyConfig:ProxyConfig,
-        peerconnection:peerconnection.PeerConnection<
-          signals.Message>)
+        peerconnection:peerconnection.PeerConnection<Object>)
         : Promise<void> => {
       if (this.peerConnection_) {
         throw new Error('already configured');
@@ -251,7 +239,7 @@ import logging = require('../logging/logging');
       });
     }
 
-    public handleSignalFromPeer = (message:signals.Message) :void => {
+    public handleSignalFromPeer = (message:Object) :void => {
       return this.peerConnection_.handleSignalMessage(message);
     }
 

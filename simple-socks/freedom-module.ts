@@ -31,7 +31,7 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 };
 
 export var rtcNet = new rtc_to_net.RtcToNet();
-rtcNet.startFromConfig({ allowNonUnicast: true }, pcConfig, false); // obfuscate
+rtcNet.startFromConfig({ allowNonUnicast: true }, pcConfig);
 
 //-----------------------------------------------------------------------------
 export var socksRtc = new socks_to_rtc.SocksToRtc();
@@ -39,7 +39,7 @@ socksRtc.on('signalForPeer', rtcNet.handleSignalFromPeer);
 socksRtc.startFromConfig(
     localhostEndpoint,
     pcConfig,
-    false) // obfuscate
+    false) // initiate with obfuscation
   .then((endpoint:net.Endpoint) => {
     log.info('SocksToRtc listening on: ' + JSON.stringify(endpoint));
     log.info('curl -x socks5h://' + endpoint.address + ':' + endpoint.port +

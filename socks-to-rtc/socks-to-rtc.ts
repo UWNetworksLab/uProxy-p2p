@@ -4,10 +4,9 @@
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import peerconnection = require('../webrtc/peerconnection');
-import signals = require('../webrtc/signals');
 import handler = require('../handler/queue');
 
-import churn = require('../churn/churn');
+import bridge = require('../bridge/bridge');
 import net = require('../net/net.types');
 import tcp = require('../net/tcp');
 import socks = require('../socks-common/socks-headers');
@@ -63,8 +62,7 @@ module SocksToRtc {
 
     // The connection to the peer that is acting as the endpoint for the proxy
     // connection.
-    private peerConnection_
-        :peerconnection.PeerConnection<signals.Message>;
+    private peerConnection_ :peerconnection.PeerConnection<Object>;
 
     // This pool manages the PeerConnection's datachannels.
     private pool_ : Pool;
@@ -93,22 +91,25 @@ module SocksToRtc {
       }
     }
 
-    // Handles creation of a TCP server and peerconnection. Returns the endpoint
-    // it ended up listening on (if |localSocksServerEndpoint| has port set to
-    // 0, then a dynamic port is allocated and this port is returned within the
-    // promise's endpoint).  NOTE: Users of this class MUST add on-event
-    // listeners before calling this method.
+    // Handles creation of a TCP server and bridging peerconnection. Returns
+    // the endpoint it ended up listening on (if |localSocksServerEndpoint|
+    // has port set to 0 then a dynamic port is allocated and this port is
+    // returned within the promise's endpoint).
+    // NOTE: Users of this class MUST add on-event listeners before calling
+    //       this method.
+    // NOTE: The arguments here are likely to change as more PeerConnection
+    //       providers and options are added; for now, setting obfuscate to
+    //       true implies the basicObfuscation bridge while false implies
+    //       preObfuscation.
     public startFromConfig = (
         localSocksServerEndpoint:net.Endpoint,
-        pcConfig:freedom_RTCPeerConnection.RTCConfiguration,
+        config:freedom_RTCPeerConnection.RTCConfiguration,
         obfuscate?:boolean) : Promise<net.Endpoint> => {
-      var pc :freedom_RTCPeerConnection.RTCPeerConnection =
-          freedom['core.rtcpeerconnection'](pcConfig);
       return this.start(
           new tcp.Server(localSocksServerEndpoint),
           obfuscate ?
-              new churn.Connection(pc, 'SocksToRtc') :
-              new peerconnection.PeerConnectionClass(pc));
+            bridge.basicObfuscation('sockstortc', config) :
+            bridge.preObfuscation('sockstortc', config));
     }
 
     // Starts the SOCKS server with the supplied TCP server and peerconnection.
@@ -116,9 +117,7 @@ module SocksToRtc {
     // method is public only for testing purposes.
     public start = (
         tcpServer:tcp.Server,
-        // TODO(iislucas): are the types correct here? Does an obfuscated
-        // channel have a different signalling type?
-        peerconnection:peerconnection.PeerConnection<signals.Message>)
+        peerconnection:peerconnection.PeerConnection<Object>)
         : Promise<net.Endpoint> => {
       if (this.tcpServer_) {
         throw new Error('already configured');
@@ -240,8 +239,7 @@ module SocksToRtc {
       });
     }
 
-    public handleSignalFromPeer = (signal:signals.Message)
-        : void => {
+    public handleSignalFromPeer = (signal:Object) : void => {
       this.peerConnection_.handleSignalMessage(signal);
     }
 
