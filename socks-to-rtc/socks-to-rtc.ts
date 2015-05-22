@@ -97,6 +97,10 @@ module SocksToRtc {
     // returned within the promise's endpoint).
     // NOTE: Users of this class MUST add on-event listeners before calling
     //       this method.
+    // NOTE: The arguments here are likely to change as more PeerConnection
+    //       providers and options are added; for now, setting obfuscate to
+    //       true implies the basicObfuscation bridge while false implies
+    //       preObfuscation.
     public startFromConfig = (
         localSocksServerEndpoint:net.Endpoint,
         config:freedom_RTCPeerConnection.RTCConfiguration,
