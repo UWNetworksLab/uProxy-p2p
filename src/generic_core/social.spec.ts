@@ -321,25 +321,11 @@ describe('social_network.FreedomNetwork', () => {
 
   });  // describe events & communication
 
-  describe('outgoing communications', () => {
-
-    it('calls the social provider sendMessage', () => {
-      var network = new social_network.FreedomNetwork('mock');
-      spyOn(network, 'getStorePath').and.returnValue('');
-      network['freedomApi_'].sendMessage = jasmine.createSpy('sendMessage');
-      var msg = {type: social.PeerMessageType.INSTANCE, data: {'doge': 'wows'}};
-      network.send(network.addUser('mockuser'), 'fakeclient', msg);
-      expect(network['freedomApi_'].sendMessage).toHaveBeenCalledWith(
-        'fakeclient',
-        JSON.stringify({
-          type: msg.type, data: msg.data, version: globals.MESSAGE_VERSION
-        }));
-    });
-  });
-
   it('JSON.parse and stringify messages at the right layer', (done) => {
     var network = new social_network.FreedomNetwork('mock');
-      spyOn(network, 'getStorePath').and.returnValue('');
+    spyOn(network, 'getStorePath').and.returnValue('');
+    network['myInstance'] =
+            new local_instance.LocalInstance(network, 'localUserId');
     var user = network.addUser('mockuser');
     spyOn(user, 'handleMessage');
     var inMsg = {
@@ -385,61 +371,5 @@ describe('social_network.FreedomNetwork', () => {
     });
   });
   */
-
-});
-
-
-describe('social_network.ManualNetwork', () => {
-
-  var network :social_network.ManualNetwork =
-      new social_network.ManualNetwork('Manual');
-
-  var loginPromise :Promise<void>;
-
-  beforeEach(() => {
-    // Silence logging to keep test output clean.
-    spyOn(console, 'log');
-  });
-
-  it('can send messages to the UI', () => {
-    spyOn(ui, 'update');
-
-    var message :social.PeerMessage = {
-      type: social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-      data: {
-        elephants: 'have trunks',
-        birds: 'do not'
-      }
-    };
-    network.send(network.getUser('mockuser'), 'dummyClientId', message);
-    expect(ui.update).toHaveBeenCalledWith(
-        uproxy_core_api.Update.MANUAL_NETWORK_OUTBOUND_MESSAGE, message);
-  });
-
-  it('adds the sender to the roster upon receving a message', (done) => {
-    var senderClientId = 'dummy_client_id';
-    var senderUserId = senderClientId;
-    spyOn(network, 'getStorePath').and.returnValue('');
-
-    network.receive(senderClientId, VALID_MESSAGE);
-    expect(network.getUser(senderUserId)).toBeDefined();
-    done();
-  });
-
-  it('routes received messages appropriately', (done) => {
-    var senderClientId = 'dummy_client_id';
-    var senderUserId = senderClientId;
-
-    // Send an initial message so ManualNetwork creates the user object that we
-    // will spy on.
-    network.receive(senderClientId, VALID_MESSAGE)
-    var user = network.getUser(senderUserId);
-    expect(user).toBeDefined();
-    spyOn(user, 'handleMessage').and.returnValue(Promise.resolve());
-    network.receive(senderClientId, VALID_MESSAGE);
-    expect(user.handleMessage).toHaveBeenCalledWith(
-        senderClientId, VALID_MESSAGE);
-    done();
-  });
 
 });

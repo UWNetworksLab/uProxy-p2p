@@ -25,11 +25,11 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
     ignoringRemoteUserRequest :boolean;
     ignoringRemoteUserOffer :boolean;
 
-    constructor() {
-      this.localRequestsAccessFromRemote = false;
+    constructor(initialConsent :boolean) {
+      this.localRequestsAccessFromRemote = initialConsent;
       this.ignoringRemoteUserOffer = false;
-      this.localGrantsAccessToRemote = false;
-      this.remoteRequestsAccessFromLocal = false;
+      this.localGrantsAccessToRemote = initialConsent;
+      this.remoteRequestsAccessFromLocal = initialConsent;
       this.ignoringRemoteUserRequest = false;
     }
   }
