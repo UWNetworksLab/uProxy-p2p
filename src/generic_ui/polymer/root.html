@@ -14,6 +14,7 @@
 <link rel='import' href='copypaste.html'>
 <link rel='import' href='bubble.html'>
 <link rel='import' href='feedback.html'>
+<link rel='import' href='advanced-settings.html'>
 <link rel='import' href='reconnect.html'>
 <link rel='import' href='troubleshoot.html'>
 <link rel='import' href='dialog.html'>
@@ -201,6 +202,8 @@
 
     <uproxy-feedback id='feedback'></uproxy-feedback>
 
+    <uproxy-advanced-settings id='advancedSettings'></uproxy-advanced-settings>
+
     <uproxy-splash id='splash' hidden?='{{ui_constants.View.SPLASH!=ui.view}}'>
     </uproxy-splash>
 
@@ -241,11 +244,11 @@
 
           <core-tooltip label='You are available for sharing.' position='left'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
-              hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+              hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
             <h3>Sharing Enabled</h3>
             <p>This icon means you're available for sharing access with friends you've offered access to.</p>
           </uproxy-bubble>
@@ -253,17 +256,17 @@
           <div class='bottom fit'>
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>Get Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>Get Access</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>Share Access</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>Share Access</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.shareAccessContacts.pending.length }}
                 </span>
               </paper-tab>
             </paper-tabs>
@@ -289,11 +292,13 @@
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
-                  contacts='{{model.contacts.getAccessContacts}}'>
+                  contacts='{{model.contacts.getAccessContacts}}'
+                  mode='{{ui_constants.Mode.GET}}'>
               </uproxy-roster>
               <uproxy-roster id='share-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
-                  contacts='{{model.contacts.shareAccessContacts}}'>
+                  contacts='{{model.contacts.shareAccessContacts}}'
+                  mode='{{ui_constants.Mode.SHARE}}'>
               </uproxy-roster>
             </div>
 
@@ -357,7 +362,7 @@
 
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
+        style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened && !$.advancedSettings.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !stringMatches(toastMessage, user_interface.GET_FAILED_MSG) && !stringMatches(toastMessage, user_interface.SHARE_FAILED_MSG) }}'>GET HELP
