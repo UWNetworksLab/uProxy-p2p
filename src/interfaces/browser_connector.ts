@@ -49,4 +49,5 @@ export interface CoreBrowserConnector {
   on(name :'core_disconnect', callback :() => void) :void;
 
   status :StatusObject;
+  onceConnected :Promise<void>;
 }
