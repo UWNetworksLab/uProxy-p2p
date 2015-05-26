@@ -55,7 +55,7 @@ var log :logging.Log = new logging.Log('remote-user');
     public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
     public profile :freedom_Social.UserProfile;
 
-    public consent :consent.State = new consent.State();
+    public consent :consent.State;
 
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
@@ -95,6 +95,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+
+      this.consent =
+          new consent.State(userId === this.network.myInstance.userId);
 
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
@@ -352,10 +355,13 @@ var log :logging.Log = new logging.Log('remote-user');
           isOnline = true;
         }
       }
-      if (!this.network.areAllContactsUproxy() && allInstanceIds.length === 0) {
-        // For networks which give us profiles for non-uProxy contacts, don't
-        // send users to the UI unless they have instances (they may not be
-        // uProxy users).
+
+      if (allInstanceIds.length === 0 &&
+          (!this.network.areAllContactsUproxy() ||
+           this.userId === this.network.myInstance.userId)) {
+        // Don't send users with no instances to the UI if either the network
+        // gives us non-uProxy contacts, or it is the user we are logged in
+        // with.
         return null;
       }
 
