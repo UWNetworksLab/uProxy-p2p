@@ -194,14 +194,12 @@ class Pipe {
    * Sends a message over the network to the specified destination.
    * The message is obfuscated before it hits the wire.
    */
-  private sendTo_ = (buffer:ArrayBuffer, to:net.Endpoint) => {
+  private sendTo_ = (buffer:ArrayBuffer, to:net.Endpoint) : void => {
     var transformedBuffer = this.transformer_.transform(buffer);
-    return this.publicSocket_.sendTo(
+    this.publicSocket_.sendTo.reckless(
       transformedBuffer,
       to.address,
-      to.port).then(() => {
-        return Promise.resolve();
-      });
+      to.port)
   }
 
   /**
@@ -217,7 +215,7 @@ class Pipe {
       port: recvFromInfo.port
     };
     this.getMirrorSocket_(source).then((mirrorSocket:freedom_UdpSocket.Socket) => {
-      mirrorSocket.sendTo(
+      mirrorSocket.sendTo.reckless(
           buffer,
           this.browserEndpoint_.address,
           this.browserEndpoint_.port);

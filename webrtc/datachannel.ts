@@ -288,10 +288,10 @@ export class DataChannelClass implements DataChannel {
   private handleSendDataToPeer_ = (data:Data) : Promise<void> => {
     try {
       if(typeof data.str === 'string') {
-        this.rtcDataChannel_.send(data.str);
+        this.rtcDataChannel_.send.reckless(data.str);
       } else if(data.buffer) {
         this.toPeerDataBytes_ -= data.buffer.byteLength;
-        this.rtcDataChannel_.sendBuffer(data.buffer);
+        this.rtcDataChannel_.sendBuffer.reckless(data.buffer);
         this.lastBrowserBufferedAmount_ += data.buffer.byteLength;
       } else {
         // Data is good when it meets the type expected of the Data. If type-

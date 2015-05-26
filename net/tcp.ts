@@ -271,7 +271,7 @@ export class Connection {
   // Queue of data to be handled, and the capacity to set a handler and
   // handle the data.
   public dataFromSocketQueue :handler.Queue<ArrayBuffer,void>;
-  public dataToSocketQueue :handler.Queue<ArrayBuffer, freedom_TcpSocket.WriteInfo>;
+  public dataToSocketQueue :handler.Queue<ArrayBuffer,void>;
 
   // Public unique connectionId.
   public connectionId :string;
@@ -294,8 +294,7 @@ export class Connection {
     this.connectionId = 'N' + Connection.globalConnectionId_++;
 
     this.dataFromSocketQueue = new handler.Queue<ArrayBuffer,void>();
-    this.dataToSocketQueue =
-        new handler.Queue<ArrayBuffer,freedom_TcpSocket.WriteInfo>();
+    this.dataToSocketQueue = new handler.Queue<ArrayBuffer,void>();
 
     if(Object.keys(connectionKind).length !== 1) {
       //log.error(this.connectionId + ': Bad New Tcp Connection Kind:' +
@@ -370,8 +369,8 @@ export class Connection {
     // queuing data to be send to the socket.
     this.onceConnected.then(() => {
       this.dataToSocketQueue.setHandler((buffer:ArrayBuffer) => {
-        return this.counter_.wrap(this.connectionSocket_.write.bind(
-                this.connectionSocket_, buffer));
+        this.connectionSocket_.write.reckless(buffer);
+        return Promise.resolve<void>();
       });
     });
     this.onceConnected.catch((e:Error) => {
@@ -475,7 +474,7 @@ export class Connection {
   /**
    * Sends a message that is pre-formatted as an arrayBuffer.
    */
-  public send = (msg :ArrayBuffer) : Promise<freedom_TcpSocket.WriteInfo> => {
+  public send = (msg :ArrayBuffer) : Promise<void> => {
     return this.dataToSocketQueue.handle(msg);
   }
 
