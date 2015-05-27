@@ -50,6 +50,9 @@ export var remoteProxyInstance :RemoteInstance = null;
     public keyHash     :string;
     public description :string;
 
+    // Client version of the remote peer.
+    public messageVersion :number;
+
     public bytesSent   :number = 0;
     public bytesReceived    :number = 0;
     // Current proxy access activity of the remote instance with respect to the
@@ -177,7 +180,8 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:signals.Message) :Promise<void> => {
+                           signalFromRemote:signals.Message,
+                           messageVersion:number) :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
         if (!this.user.consent.localGrantsAccessToRemote) {
@@ -304,11 +308,13 @@ export var remoteProxyInstance :RemoteInstance = null;
      * Instance Message.
      * Assumes that |data| actually belongs to this instance.
      */
-    public update = (data :social.InstanceHandshake) :Promise<void> => {
+    public update = (data:social.InstanceHandshake,
+        messageVersion:number) :Promise<void> => {
       return this.onceLoaded.then(() => {
         this.keyHash = data.keyHash;
         this.description = data.description;
         this.updateConsentFromWire_(data.consent);
+        this.messageVersion = messageVersion;
         this.saveToStorage();
       });
     }
