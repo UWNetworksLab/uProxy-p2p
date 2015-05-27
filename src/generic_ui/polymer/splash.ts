@@ -34,9 +34,10 @@ Polymer({
   },
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
-      console.log(JSON.stringify('New language: ' + detail.item.getAttribute('languageCode')));
-      console.log(ui.i18n_t('yes'));
-      ui.i18n_setLng(detail.item.getAttribute('languageCode'));
+      var newLanguage = detail.item.getAttribute('languageCode');
+      this.model.globalSettings.language = newLanguage;
+      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
+      ui.i18n_setLng(newLanguage);
       window.location.reload();
     }
   },

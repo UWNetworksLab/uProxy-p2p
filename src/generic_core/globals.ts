@@ -69,6 +69,9 @@ export var loadSettings :Promise<void> =
       if (settings.statsReportingEnabled == null) {
         settings.statsReportingEnabled = false;
       }
+      if (settings.language == null) {
+        settings.language = 'en-US';
+      }
     }).catch((e) => {
       log.info('No global settings loaded', e.message);
     });

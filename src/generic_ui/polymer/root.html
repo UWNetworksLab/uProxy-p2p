@@ -219,7 +219,7 @@
     </uproxy-splash>
 
     <core-drawer-panel id='mainPanel' forceNarrow='true' drawerWidth='300px'
-        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}'>
+        hidden?='{{ ui.view !== ui_constants.View.ROSTER }}' rightDrawer='{{ dir == "rtl" ? true : false }}'>
       <core-header-panel drawer>
         <div class='content' fit>
           <uproxy-settings id='settings'></uproxy-settings>
@@ -240,7 +240,7 @@
             </p>
           </uproxy-bubble>
 
-          <core-tooltip id='statsTooltip' label='{{ "statsEnabledTooltip" | $$ }}' position='left'>
+          <core-tooltip id='statsTooltip' label='{{ "statsEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon icon='uproxy-icons:stats-enabled' class='status'
               hidden?='{{ !model.globalSettings.statsReportingEnabled }}' on-tap='{{ statsIconClicked }}'></core-icon>
           </core-tooltip>
@@ -250,7 +250,7 @@
             <p>{{ 'statsEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
 
-          <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='left'>
+          <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='{{ dir == "rtl" ? "right" : "left" }}'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
               hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>

@@ -18,6 +18,7 @@ var isCommonUnicode = XRegExp('[\\p{Common}]');
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
+var RTL_LANGUAGES :string[] = ['ar', 'fa', 'ur', 'he'];
 
 interface button_description {
   text :string;
@@ -128,7 +129,7 @@ Polymer({
       this.statsDialogOrBubbleOpen = true;
       this.$.statsDialog.open();
     }
-    this.dir = 'ltr';
+    this.updateDirectionality();
   },
   closeStatsBubble: function() {
     this.statsDialogOrBubbleOpen = false;
@@ -214,6 +215,16 @@ Polymer({
       this.isSharingEnabledWithOthers = trustedContacts.length > 0;
     }
   },
+  updateDirectionality: function() {
+    // We need to update the directionality of the UI.
+    for (var i = 0; i < RTL_LANGUAGES.length; i++) {
+      if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
+        this.dir = 'rtl';
+        return;
+      }
+    }
+    this.dir = 'ltr';
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
@@ -225,5 +236,6 @@ Polymer({
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
     'ui.signalToFire': 'signalToFireChanged',
+    'model.globalSettings.language': 'updateDirectionality'
   }
 });
