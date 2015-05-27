@@ -25,7 +25,7 @@
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import remote_instance = require('./remote-instance');
 import social = require('../interfaces/social');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import consent = require('./consent');
 import globals = require('./globals');
 import ui = require('./ui_connector');
@@ -208,7 +208,7 @@ var log :logging.Log = new logging.Log('remote-user');
             log.error('failed to get instance', clientId);
             return;
           }
-          instance.handleSignal(msg.type, <signals.Message>msg.data,
+          instance.handleSignal(msg.type, <bridge.SignallingMessage>msg.data,
               msg.version);
           return;
 

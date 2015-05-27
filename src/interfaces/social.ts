@@ -4,7 +4,6 @@
  */
 
 import net = require('../../../third_party/uproxy-lib/net/net.types');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import uproxy_core_api = require('./uproxy_core_api');
 
 export interface UserPath {
@@ -113,7 +112,7 @@ export interface PeerMessage {
   type :PeerMessageType;
   // TODO: Add a comment to explain the types that data can take and their
   // relationship to MessageType.
-  data : InstanceHandshake | signals.Message | {};
+  data: Object;
 }
 
 // Actual type sent over the wire; version is added immediately before

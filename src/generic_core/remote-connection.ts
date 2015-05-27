@@ -9,10 +9,12 @@ import globals = require('./globals');
 import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-net');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import social = require('../interfaces/social');
 import socks_to_rtc = require('../../../third_party/uproxy-lib/socks-to-rtc/socks-to-rtc');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
+import peerconnection = require('../../../third_party/uproxy-lib/webrtc/peerconnection');
+import tcp = require('../../../third_party/uproxy-lib/net/tcp');
 
 // module Core {
   var log :logging.Log = new logging.Log('remote-connection');
@@ -50,7 +52,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
     }
 
     private createSender_ = (type :social.PeerMessageType) => {
-      return (signal :signals.Message) => {
+      return (signal :bridge.SignallingMessage) => {
         this.sendUpdate_(uproxy_core_api.Update.SIGNALLING_MESSAGE, {
           type: type,
           data: signal
@@ -62,28 +64,41 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
     public handleSignal = (message :social.PeerMessage) => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === message.type
           && this.rtcToNet_) {
-        this.rtcToNet_.handleSignalFromPeer(<signals.Message>message.data);
+        this.rtcToNet_.handleSignalFromPeer(<bridge.SignallingMessage>message.data);
       } else if (social.PeerMessageType.SIGNAL_FROM_SERVER_PEER === message.type
                  && this.socksToRtc_) {
-        this.socksToRtc_.handleSignalFromPeer(<signals.Message>message.data);
+        this.socksToRtc_.handleSignalFromPeer(<bridge.SignallingMessage>message.data);
       } else {
         log.warn('Invalid signal: ', social.PeerMessageType[message.type]);
         return;
       }
     };
 
-    public startShare = () :Promise<void> => {
+    public startShare = (remoteVersion:number) :Promise<void> => {
       if (this.rtcToNet_) {
         log.error('rtcToNet_ already exists');
         throw new Error('rtcToNet_ already exists');
       }
 
+      var config :freedom_RTCPeerConnection.RTCConfiguration = {
+        iceServers: globals.settings.stunServers
+      };
+
+      var pc: peerconnection.PeerConnection<Object>;
+      if (remoteVersion < 2) {
+        log.debug('peer is running client version 1, using old peerconnection');
+        pc = new peerconnection.PeerConnectionClass(
+          freedom['core.rtcpeerconnection'](config),
+          'rtctonet');
+      } else {
+        log.debug('peer is running client version >1, using bridge');
+        pc = bridge.best('rtctonet', config);
+      }
+
       this.rtcToNet_ = new rtc_to_net.RtcToNet();
-      this.rtcToNet_.startFromConfig(
-        { allowNonUnicast: globals.settings.allowNonUnicast },
-        { iceServers: globals.settings.stunServers },
-        false
-      );
+      this.rtcToNet_.start({
+        allowNonUnicast: globals.settings.allowNonUnicast
+      }, pc);
 
       this.rtcToNet_.signalsForPeer.setSyncHandler(this.createSender_(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER));
       this.rtcToNet_.bytesReceivedFromPeer.setSyncHandler(this.handleBytesReceived_);
@@ -136,7 +151,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
       return this.sharingReset_;
     }
 
-    public startGet = () :Promise<net.Endpoint> => {
+    public startGet = (remoteVersion:number) :Promise<net.Endpoint> => {
       if (this.localGettingFromRemote !== social.GettingState.NONE) {
         // This should not happen. If it does, something else is broken. Still, we
         // continue to actually proxy through the instance.
@@ -188,16 +203,28 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
       this.localGettingFromRemote = social.GettingState.TRYING_TO_GET_ACCESS;
       this.stateRefresh_();
 
-      return this.socksToRtc_.startFromConfig(
-          {
-            address: '127.0.0.1',
-            port: 0
-          },
-          {
-            iceServers: globals.settings.stunServers
-          },
-          false
-      ).then((endpoint :net.Endpoint) => {
+      var tcpServer = new tcp.Server({
+        address: '127.0.0.1',
+        port: 0
+      });
+
+      var config :freedom_RTCPeerConnection.RTCConfiguration = {
+        iceServers: globals.settings.stunServers
+      };
+
+      var pc: peerconnection.PeerConnection<Object>;
+      if (remoteVersion < 2) {
+        log.debug('peer is running client version 1, using old peerconnection');
+        pc = new peerconnection.PeerConnectionClass(
+          freedom['core.rtcpeerconnection'](config),
+          'sockstortc');
+      } else {
+        log.debug('peer is running client version >1, offering basicObfuscation');
+        pc = bridge.basicObfuscation('sockstortc', config);
+      }
+
+      return this.socksToRtc_.start(tcpServer, pc).then(
+          (endpoint :net.Endpoint) => {
         log.info('SOCKS proxy listening on %1', endpoint);
         this.localGettingFromRemote = social.GettingState.GETTING_ACCESS;
         globals.metrics.increment('success');

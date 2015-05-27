@@ -14,7 +14,7 @@ import logging = require('../../../third_party/uproxy-lib/logging/logging');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import remote_connection = require('./remote-connection');
 import remote_user = require('./remote-user');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 import social = require('../interfaces/social');
 import ui_connector = require('./ui_connector');
 import uproxy_core_api = require('../interfaces/uproxy_core_api');
@@ -180,7 +180,7 @@ export var remoteProxyInstance :RemoteInstance = null;
      * TODO: return a boolean on success/failure
      */
     public handleSignal = (type:social.PeerMessageType,
-                           signalFromRemote:signals.Message,
+                           signalFromRemote:bridge.SignallingMessage,
                            messageVersion:number) :Promise<void> => {
       if (social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER === type) {
         // If the remote peer sent signal as the client, we act as server.
@@ -253,7 +253,7 @@ export var remoteProxyInstance :RemoteInstance = null;
           this.stopShare();
         }, this.RTC_TO_NET_TIMEOUT);
 
-        this.connection_.startShare().then(() => {
+        this.connection_.startShare(this.messageVersion).then(() => {
           clearTimeout(this.startRtcToNetTimeout_);
         }, () => {
           log.warn('Could not start sharing.');
@@ -290,7 +290,8 @@ export var remoteProxyInstance :RemoteInstance = null;
         this.connection_.stopGet();
       }, this.SOCKS_TO_RTC_TIMEOUT);
 
-      return this.connection_.startGet().then((endpoints :net.Endpoint) => {
+      return this.connection_.startGet(this.messageVersion).then(
+          (endpoints :net.Endpoint) => {
         clearTimeout(this.startSocksToRtcTimeout_);
         return endpoints;
       });

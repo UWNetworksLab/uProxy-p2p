@@ -17,8 +17,8 @@ import rtc_to_net = require('../../../third_party/uproxy-lib/rtc-to-net/rtc-to-n
 import globals = require('./globals');
 import local_storage = require('./storage');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
-import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
 import local_instance = require('./local-instance');
+import bridge = require('../../../third_party/uproxy-lib/bridge/bridge');
 
 
 describe('remote_instance.RemoteInstance', () => {
@@ -160,8 +160,7 @@ describe('remote_instance.RemoteInstance', () => {
       // TODO: remove onceStopping_ when
       // https://github.com/uProxy/uproxy/issues/1264 is resolved.
       'onceStopping_': new Promise((F, R) => {}),
-      'handleSignalFromPeer': () => {},
-      'startFromConfig' : () => { return Promise.resolve()}
+      'handleSignalFromPeer': () => {}
     };
 
     it('can start proxying', (done) => {
@@ -228,7 +227,7 @@ describe('remote_instance.RemoteInstance', () => {
     var fakeSocksToRtc = {
       'handleSignalFromPeer': () => {},
       'on': () => {},
-      'startFromConfig': () => { return Promise.resolve(); },
+      'start': () => { return Promise.resolve(); },
       'stop': () => { return Promise.resolve(); },
       // TODO: remove onceStopping_ when
       // https://github.com/uProxy/uproxy/issues/1264 is resolved.
@@ -241,15 +240,12 @@ describe('remote_instance.RemoteInstance', () => {
       'bytesReceivedFromPeer': {setSyncHandler: () => {}},
       'bytesSentToPeer': {setSyncHandler: () => {}},
       'onceReady': new Promise((F, R) => {}),  // return unresolved promise
-      'startFromConfig': () => {}
+      'start': () => {}
     };
-    var fakeOffer :signals.Message = {
-      type: signals.Type.OFFER,
-      data: 'really fake offer'
-    };
-    var fakeCandidate :signals.Message = {
-      type: signals.Type.CANDIDATE,
-      data: 'really fake candidate'
+    var fakeSignallingMessage :bridge.SignallingMessage = {
+      providers: {
+        'FAKE': {}
+      }
     };
 
     beforeEach(() => {
@@ -263,9 +259,10 @@ describe('remote_instance.RemoteInstance', () => {
 
     it('handles OFFER signal from client peer as server', (done) => {
       alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
-          fakeOffer, globals.MESSAGE_VERSION).then(() => {
+          fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
-        expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(fakeOffer);
+        expect(fakeRtcToNet.handleSignalFromPeer).toHaveBeenCalledWith(
+            fakeSignallingMessage);
         done();
       });
     });
@@ -274,8 +271,9 @@ describe('remote_instance.RemoteInstance', () => {
       alice.wireConsentFromRemote.isOffering = true;
       alice.start().then(() => {
         alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_SERVER_PEER,
-            fakeCandidate, globals.MESSAGE_VERSION).then(() => {
-          expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(fakeCandidate);
+            fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
+          expect(fakeSocksToRtc.handleSignalFromPeer).toHaveBeenCalledWith(
+              fakeSignallingMessage);
           expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
           done();
         });
@@ -283,7 +281,7 @@ describe('remote_instance.RemoteInstance', () => {
     });
 
     it('rejects invalid signals', (done) => {
-      alice.handleSignal(social.PeerMessageType.INSTANCE, fakeCandidate,
+      alice.handleSignal(social.PeerMessageType.INSTANCE, fakeSignallingMessage,
           globals.MESSAGE_VERSION).then(() => {
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
@@ -293,8 +291,8 @@ describe('remote_instance.RemoteInstance', () => {
 
     it('rejects message from client if consent has not been granted', (done) => {
       alice.user.consent.localGrantsAccessToRemote = false;
-      alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER, fakeCandidate,
-          globals.MESSAGE_VERSION).then(() => {
+      alice.handleSignal(social.PeerMessageType.SIGNAL_FROM_CLIENT_PEER,
+          fakeSignallingMessage, globals.MESSAGE_VERSION).then(() => {
         expect(fakeSocksToRtc.handleSignalFromPeer).not.toHaveBeenCalled();
         expect(fakeRtcToNet.handleSignalFromPeer).not.toHaveBeenCalled();
         done();
