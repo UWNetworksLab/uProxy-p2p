@@ -21,6 +21,7 @@
 <link rel='import' href='dialog.html'>
 <link rel='import' href='browser-elements.html'>
 <link rel='import' href='icons.html'>
+<link rel='import' href='proxy-error.html'>
 
 <polymer-element name='uproxy-root' attributes='model' on-update-view='{{ updateView }}' on-open-dialog='{{ openDialog }}'>
 
@@ -135,14 +136,22 @@
         padding-left: 20px;
         padding-right: 20px;
         padding-top: 19px;
-        text-overflow: ellipsis;
         white-space: nowrap;
-        overflow: hidden;
         font-size: 14px;
+      }
+      .statusText, .statusText [flex] {
+        /* cut off the statusText itself, or any contained flex-grow element */
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
       .statusRow core-icon {
         padding-right: 20px;
+      }
+      .statusRow a, .statusRow core-icon {
         color: #0EC5AF;
+      }
+      .statusRow.error core-icon {
+        color: #DD2D2D;
       }
       uproxy-bubble {
         z-index: 1;
@@ -243,11 +252,11 @@
 
           <core-tooltip label='{{ "sharingEnabledTooltip" | $$ }}' position='left'>
             <core-icon id='sharingEnabledIcon' icon='uproxy-icons:share' class='status'
-              hidden?='{{model.contacts.shareAccessContacts.onlineTrustedUproxy.length==0 && model.contacts.shareAccessContacts.offlineTrustedUproxy.length==0}}'
+              hidden?='{{ !isSharingEnabledWithOthers }}'
               on-tap='{{ setShareMode }}'></core-icon>
           </core-tooltip>
 
-          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && (model.contacts.shareAccessContacts.onlineTrustedUproxy.length > 0 || model.contacts.shareAccessContacts.offlineTrustedUproxy.length > 0) }}'>
+          <uproxy-bubble on-closed='{{ closedSharing }}' active='{{ !model.globalSettings.hasSeenSharingEnabledScreen && isSharingEnabledWithOthers }}'>
             <h3>{{ 'sharingEnabledTitle' | $$ }}</h3>
             <p>{{ 'sharingEnabledMessage' | $$ }}</p>
           </uproxy-bubble>
@@ -255,17 +264,17 @@
           <div class='bottom fit' dir="ltr">
             <paper-tabs id='modeTabs' selected='{{ model.globalSettings.mode }}' on-core-activate='{{ tabSelected }}'>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length > 0} | tokenList }}'>{{ 'getAccess' | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.GET, withNotification: model.contacts.getAccessContacts.pending.length > 0} | tokenList }}'>{{ 'getAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.getAccessContacts.onlinePending.length + model.contacts.getAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.getAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.getAccessContacts.pending.length }}
                 </span>
               </paper-tab>
               <paper-tab>
-                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length > 0} | tokenList }}'>{{ 'shareAccess' | $$ }}</span>
+                <span class='{{ {notSelected: model.globalSettings.mode != ui_constants.Mode.SHARE, withNotification: model.contacts.shareAccessContacts.pending.length > 0} | tokenList }}'>{{ 'shareAccess' | $$ }}</span>
                 <span class='tabNotificationNumber'
-                  hidden?='{{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length == 0 }}'>
-                  {{ model.contacts.shareAccessContacts.onlinePending.length + model.contacts.shareAccessContacts.offlinePending.length }}
+                  hidden?='{{ model.contacts.shareAccessContacts.pending.length === 0 }}'>
+                  {{ model.contacts.shareAccessContacts.pending.length }}
                 </span>
               </paper-tab>
             </paper-tabs>
@@ -290,15 +299,26 @@
             <div id='roster-panel' flex>
               <uproxy-roster id='get-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.GET}}'
-                  contacts='{{model.contacts.getAccessContacts}}'>
+                  contacts='{{model.contacts.getAccessContacts}}'
+                  mode='{{ui_constants.Mode.GET}}'>
               </uproxy-roster>
               <uproxy-roster id='share-roster'
                   hidden?='{{model.globalSettings.mode!=ui_constants.Mode.SHARE}}'
-                  contacts='{{model.contacts.shareAccessContacts}}'>
+                  contacts='{{model.contacts.shareAccessContacts}}'
+                  mode='{{ui_constants.Mode.SHARE}}'>
               </uproxy-roster>
             </div>
 
             <div id='status'>
+              <div class='statusRow error' hidden?='{{ ui.browserApi.canProxy }}'>
+                <div class='statusText' horizontal layout>
+                  <core-icon icon='warning'></core-icon>
+                  <span flex>
+                    Other proxy settings in use
+                  </span>
+                  <a href='#' on-tap='{{ openProxyError }}'>GET HELP</a>
+                </div>
+              </div>
               <div class='statusRow' hidden?='{{!ui.gettingStatus}}'>
                 <div class='statusText'>
                   <core-icon icon='uproxy-icons:receive'></core-icon>
@@ -356,9 +376,11 @@
 
     <uproxy-troubleshoot titleText='{{ troubleshootTitle }}'></uproxy-troubleshoot>
 
+    <uproxy-proxy-error id='proxyError'></uproxy-proxy-error>
+
     <paper-toast id='toast'
         text='{{ toastMessage }}' responsiveWidth='320px'
-        style='bottom: {{ topOfStatuses([ui.gettingStatus, ui.sharingStatus], ui.view == ui_constants.View.ROSTER && !$.feedback.opened && !$.advancedSettings.opened) }}px;'
++        style='bottom: {{ topOfStatuses($.status.offsetHeight, ui.view == ui_constants.View.ROSTER && !$.feedback.opened) }}px;'
         duration='10000'>
       <div id='toastHelpLink' on-tap="{{ openTroubleshoot }}"
           hidden?='{{ !unableToShare && !unableToGet }}'>{{ 'getHelp' | $$ }}

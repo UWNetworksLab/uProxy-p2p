@@ -1,7 +1,6 @@
 /// <reference path='../../../../../third_party/polymer/polymer.d.ts' />
 /// <reference path='../../../../../third_party/typings/chrome/chrome.d.ts' />
-
-import context = require('../scripts/context');
+/// <reference path='../../../generic_ui/polymer/context.d.ts' />
 
 // Launch the Chrome webstore page for the uProxy app,
 // or activate the user's tab open to uproxy.org/chrome-install
@@ -29,7 +28,7 @@ function openDownloadAppPage() : void {
       }
     );
     // After the app is installed via the webstore, open up uProxy.
-    context.chromeCoreConnector.onceConnected.then(context.ui.browserApi.bringUproxyToFront);
+    ui_context.browserConnector.onceConnected.then(ui_context.ui.browserApi.bringUproxyToFront);
   });
 }
 

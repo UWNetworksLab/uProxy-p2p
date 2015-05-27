@@ -23,6 +23,8 @@ describe('Core', () => {
   network.getUser = null;
   network.getStorePath = function() { return 'network-store-path'; };
   network['login'] = (remember:boolean) => { return Promise.resolve<void>() };
+  network['myInstance'] =
+            new local_instance.LocalInstance(network, 'localUserId');
   var user = new remote_user.User(network, 'fake-login');
   user.getInstance = null;
   user.notifyUI = () => {};

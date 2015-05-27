@@ -18,6 +18,7 @@ import globals = require('./globals');
 import local_storage = require('./storage');
 import net = require('../../../third_party/uproxy-lib/net/net.types');
 import signals = require('../../../third_party/uproxy-lib/webrtc/signals');
+import local_instance = require('./local-instance');
 
 
 describe('remote_instance.RemoteInstance', () => {
@@ -30,7 +31,7 @@ describe('remote_instance.RemoteInstance', () => {
       'sendInstanceHandshake',
       'updateRemoteRequestsAccessFromLocal'
   ]);
-  user.consent = new consent.State();
+  user.consent = new consent.State(false);
 
   user.network = <social.Network><any>jasmine.createSpyObj(
       'network', ['getUser']);
@@ -105,6 +106,8 @@ describe('remote_instance.RemoteInstance', () => {
             'network', ['getUser']);
         network['getStorePath'] = function() { return 'networkPath'; };
         network['getLocalInstanceId'] = function() { return 'myInstanceId'; };
+        network['myInstance'] =
+            new local_instance.LocalInstance(network, 'localUserId');
         var user = new remote_user.User(network, 'testUser');
         user.update({userId: 'testUser', name: 'Alice'});
         instance = new remote_instance.RemoteInstance(user, INSTANCE_ID);

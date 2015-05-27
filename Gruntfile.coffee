@@ -368,7 +368,7 @@ module.exports = (grunt) ->
 
               'generic_ui/scripts/copypaste.js'
               'generic_ui/scripts/get_logs.js'
-              'generic_ui/scripts/context.static.js'
+              'scripts/context.static.js'
               'scripts/background.static.js'
               '!**/*spec*'
 
@@ -705,7 +705,7 @@ module.exports = (grunt) ->
         browserifyOptions:
           standalone: 'ui_context'
       )
-      chromeContext: Rule.browserify('chrome/extension/generic_ui/scripts/context',
+      chromeContext: Rule.browserify('chrome/extension/scripts/context',
         browserifyOptions:
           standalone: 'ui_context'
       )
@@ -715,7 +715,7 @@ module.exports = (grunt) ->
         src: [
           firefoxDevPath + '/data/scripts/background.js'
         ]
-        dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
+        dest: firefoxDevPath + '/data/scripts/context.static.js'
         options:
           browserifyOptions:
             standalone: 'ui_context'
