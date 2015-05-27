@@ -8,9 +8,6 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-declare var i18n_setLng :Function;
-declare var i18n_t :Function;
-
 Polymer({
   SPLASH_STATES: {
     INTRO: 0,
@@ -38,8 +35,9 @@ Polymer({
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
       console.log(JSON.stringify('New language: ' + detail.item.getAttribute('languageCode')));
-      console.log(i18n_t('yes'));
-      i18n_setLng(detail.item.getAttribute('languageCode'));
+      console.log(ui.i18n_t('yes'));
+      ui.i18n_setLng(detail.item.getAttribute('languageCode'));
+      window.location.reload();
     }
   },
   ready: function() {

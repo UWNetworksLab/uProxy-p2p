@@ -10,10 +10,6 @@ import user_module = require('../scripts/user');
 import regEx = require('xregexp');
 import XRegExp = regEx.XRegExp;
 
-
-declare var i18n_t :Function;
-declare var i18n_setLng :Function;
-
 // Example usage of these tests:
 // isRightToLeft.test('hi') --> false
 // isRightToLeft.test('لك الوص') --> true
@@ -152,9 +148,9 @@ Polymer({
       // Keep the mode on get and display an error dialog.
       this.ui.setMode(ui_types.Mode.GET);
       this.fire('open-dialog', {
-        heading: i18n_t('sharingUnavailableTitle'),
-        message: i18n_t('sharingUnavailableMessage'),
-        buttons: [{text: i18n_t('close'), dismissive: true}]
+        heading: ui.i18n_t('sharingUnavailableTitle'),
+        message: ui.i18n_t('sharingUnavailableMessage'),
+        buttons: [{text: ui.i18n_t('close'), dismissive: true}]
       });
     } else {
       // setting the value is taken care of in the polymer binding, we just need
@@ -186,9 +182,9 @@ Polymer({
   },
   openTroubleshoot: function() {
     if (this.ui.unableToGet) {
-      this.troubleshootTitle = i18n_t('unableToGet');
+      this.troubleshootTitle = ui.i18n_t('unableToGet');
     } else {
-      this.troubleshootTitle = i18n_t('unableToShare');
+      this.troubleshootTitle = ui.i18n_t('unableToShare');
     }
     this.$.toast.dismiss();
     this.fire('core-signal', {name: 'open-troubleshoot'});

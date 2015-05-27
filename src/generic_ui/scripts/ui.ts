@@ -20,8 +20,8 @@ import User = user_module.User;
 import social = require('../../interfaces/social');
 import translator_module = require('./translator');
 
-var i18n_t = translator_module.i18n_t;
-var i18n_setLng = translator_module.i18n_setLng;
+//var i18n_t = translator_module.i18n_t;
+//var i18n_setLng = translator_module.i18n_setLng;
 
 // Singleton model for data bindings.
 export var model :Model = {
@@ -50,7 +50,8 @@ export var model :Model = {
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false,
-    consoleFilter: 2 // loggingTypes.Level.warn
+    consoleFilter: 2, // loggingTypes.Level.warn
+    language: 'en-US'
   },
   reconnecting: false
 };
@@ -185,6 +186,9 @@ export class UserInterface implements ui_constants.UiApi {
   public isSharingDisabled = false;
 
   public disconnectedWhileProxying = false;
+
+  public i18n_t :Function = translator_module.i18n_t;
+  public i18n_setLng :Function = translator_module.i18n_setLng;
 
   /**
    * UI must be constructed with hooks to Notifications and Core.
@@ -345,7 +349,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       var user = this.mapInstanceIdToUser_[instanceId];
       user.isGettingFromMe = true;
-      this.showNotification(i18n_t('startedProxying', {name: user.name}),
+      this.showNotification(this.i18n_t('startedProxying', {name: user.name}),
           { mode: 'share', user: user.userId });
     });
 
@@ -356,7 +360,7 @@ export class UserInterface implements ui_constants.UiApi {
 
       // only show a notification if we knew we were prokying
       if (typeof this.instancesGivingAccessTo[instanceId] !== 'undefined') {
-        this.showNotification(i18n_t('stoppedProxying', {name: user.name}),
+        this.showNotification(this.i18n_t('stoppedProxying', {name: user.name}),
             { mode: 'share', user: user.userId });
       }
       delete this.instancesGivingAccessTo[instanceId];
@@ -379,7 +383,7 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.FRIEND_FAILED_TO_GET, (nameOfFriend :string) => {
       // Setting this variable will toggle a paper-toast (in root.html)
       // to open.
-      this.toastMessage = i18n_t('unableToShareWith', {name: nameOfFriend});
+      this.toastMessage = this.i18n_t('unableToShareWith', {name: nameOfFriend});
       this.unableToShare = true;
     });
 
@@ -448,7 +452,7 @@ export class UserInterface implements ui_constants.UiApi {
   private updateGettingStatusBar_ = () => {
     // TODO: localize this.
     if (this.instanceGettingAccessFrom_) {
-      this.gettingStatus = i18n_t('gettingAccessFrom', {
+      this.gettingStatus = this.i18n_t('gettingAccessFrom', {
         name: this.mapInstanceIdToUser_[this.instanceGettingAccessFrom_].name
       });
     } else {
@@ -463,16 +467,16 @@ export class UserInterface implements ui_constants.UiApi {
     if (instanceIds.length === 0) {
       this.sharingStatus = null;
     } else if (instanceIds.length === 1) {
-      this.sharingStatus = i18n_t('sharingAccessWith_one', {
+      this.sharingStatus = this.i18n_t('sharingAccessWith_one', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name
       });
     } else if (instanceIds.length === 2) {
-      this.sharingStatus = i18n_t('sharingAccessWith_two', {
+      this.sharingStatus = this.i18n_t('sharingAccessWith_two', {
         name1: this.mapInstanceIdToUser_[instanceIds[0]].name,
         name2: this.mapInstanceIdToUser_[instanceIds[1]].name
       });
     } else {
-      this.sharingStatus = i18n_t('sharingAccessWith_two', {
+      this.sharingStatus = this.i18n_t('sharingAccessWith_two', {
         name: this.mapInstanceIdToUser_[instanceIds[0]].name,
         numOthers: (instanceIds.length - 1)
       });
@@ -611,7 +615,7 @@ export class UserInterface implements ui_constants.UiApi {
         return;
       }
 
-      this.toastMessage = i18n_t('unableToGetFrom', {name: user.name});
+      this.toastMessage = this.i18n_t('unableToGetFrom', {name: user.name});
       this.unableToGet = true;
       this.bringUproxyToFront();
       return Promise.reject(e);
@@ -740,7 +744,7 @@ export class UserInterface implements ui_constants.UiApi {
         if (this.instanceGettingAccessFrom_ != null) {
           this.stopGettingInUiAndConfig(true);
         }
-        this.showNotification(i18n_t('loggedOut', {network: network.name}));
+        this.showNotification(this.i18n_t('loggedOut', {network: network.name}));
         this.view = ui_constants.View.SPLASH;
       }
     }
@@ -888,7 +892,7 @@ export class UserInterface implements ui_constants.UiApi {
           }).catch((e) => {
             // Login with last oauth token failed, give up on reconnect.
             this.stopReconnect();
-            this.showNotification(i18n_t('loggedOut', {network: network}));
+            this.showNotification(this.i18n_t('loggedOut', {network: network}));
             this.view = ui_constants.View.SPLASH;
           });
         }

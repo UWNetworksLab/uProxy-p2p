@@ -1,5 +1,3 @@
-declare var i18n_t :Function;
-
 Polymer({
   analyzingNetwork: false,
   analyzedNetwork: false,
@@ -22,11 +20,11 @@ Polymer({
     ui_context.core.getNatType().then((natType :string) => {
       this.natType = natType;
       if (natType === 'SymmetricNAT') {
-        this.natImpact = i18n_t('veryLikely');
+        this.natImpact = ui.i18n_t('veryLikely');
       } else if (natType === 'PortRestrictedCone') {
-        this.natImpact = i18n_t('possibly');
+        this.natImpact = ui.i18n_t('possibly');
       } else {
-        this.natImpact = i18n_t('unlikely');
+        this.natImpact = ui.i18n_t('unlikely');
       }
       this.analyzingNetwork = false;
       this.analyzedNetwork = true;

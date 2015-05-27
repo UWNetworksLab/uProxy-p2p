@@ -12,8 +12,6 @@ var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
 
-declare var i18n_t :Function;
-
 Polymer({
   init: function() {
     /* bring copyPaste to the front in get mode */
@@ -65,13 +63,13 @@ Polymer({
     }
 
     this.fire('open-dialog', {
-      heading: i18n_t('goBack'),
-      message: i18n_t('areYouSure'),
+      heading: ui.i18n_t('goBack'),
+      message: ui.i18n_t('areYouSure'),
       buttons: [{
-        text: i18n_t('yes'),
+        text: ui.i18n_t('yes'),
         signal: 'copypaste-back'
       }, {
-        text: i18n_t('no'),
+        text: ui.i18n_t('no'),
         dismissive: true
       }]
     });

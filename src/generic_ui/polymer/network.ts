@@ -4,8 +4,6 @@
 
 import ui_constants = require('../../interfaces/ui');
 
-declare var i18n_t :Function;
-
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
@@ -18,7 +16,7 @@ Polymer({
       this.fire('update-view', {view: ui_constants.View.ROSTER});
       ui.bringUproxyToFront();
     }).catch((e :Error) => {
-      ui.showNotification(i18n_t('errorSigningIn', {network: this.networkName}));
+      ui.showNotification(ui.i18n_t('errorSigningIn', {network: this.networkName}));
       console.warn('Did not log in ', e);
     });
   },

@@ -5,8 +5,6 @@ import ui_constants = require('../../interfaces/ui');
 import net = require('../../../../third_party/uproxy-lib/net/net.types');
 import user_interface = require('../scripts/ui');
 
-declare var i18n_t :Function;
-
 var ui = ui_context.ui;
 var core = ui_context.core;
 var model = ui_context.model;
@@ -22,7 +20,7 @@ Polymer({
   },
   start: function() {
     if (!this.instance.isOnline) {
-      this.ui.toastMessage = i18n_t('friendOffline', { name: this.user.name });
+      this.ui.toastMessage = ui.i18n_t('friendOffline', { name: this.user.name });
       return;
     }
 
