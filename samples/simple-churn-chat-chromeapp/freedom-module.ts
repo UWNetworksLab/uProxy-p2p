@@ -50,9 +50,7 @@ function connectDataChannel(name:string, d:DataChannel) {
 // Make a peer connection which logs stuff that happens.
 function makePeerConnection(name:string) {
   var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
-    iceServers: [{
-      urls: ['stun:stun.l.google.com:19302']},
-      {urls: ['stun:stun1.l.google.com:19302']}]
+    iceServers: []
   };
   var pc :PeerConnection<churn_types.ChurnSignallingMessage> =
       new churn.Connection(freedom['core.rtcpeerconnection'](pcConfig),

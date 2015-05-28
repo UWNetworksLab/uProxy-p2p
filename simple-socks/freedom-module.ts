@@ -25,9 +25,11 @@ loggingController.setDefaultFilter(loggingTypes.Destination.console,
 var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port:9999 };
 
 //-----------------------------------------------------------------------------
+// Don't specify STUN servers because they aren't needed and can, in fact,
+// present a problem when Simple SOCKS is running on a system behind a NAT
+// without support for hair-pinning.
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
-  iceServers: [{urls: ['stun:stun.l.google.com:19302']},
-               {urls: ['stun:stun1.l.google.com:19302']}]
+  iceServers: []
 };
 
 export var rtcNet = new rtc_to_net.RtcToNet();
