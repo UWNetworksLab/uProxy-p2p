@@ -171,6 +171,11 @@ var log :logging.Log = new logging.Log('churn');
     throw new Error('no srflx or host candidate found');
   };
 
+  // Generates a key suitable for use with CaesarCipher, viz. 1-255.
+  var generateCaesarKey_ = () : number => {
+    return (random.randomUint32() % 254) + 1;
+  }
+
   /**
    * A uproxypeerconnection-like Freedom module which establishes obfuscated
    * connections.
@@ -181,6 +186,9 @@ var log :logging.Log = new logging.Log('churn');
    *
    * This is mostly a thin wrapper over uproxypeerconnection except for the
    * magic required during setup.
+   *
+   * Right now, CaesarCipher is used with a key which is randomly generated
+   * each time a new connection is negotiated.
    *
    * TODO: Give the uproxypeerconnections name, to help debugging.
    * TODO: Allow obfuscation parameters be configured.
@@ -237,6 +245,12 @@ var log :logging.Log = new logging.Log('churn');
       this.haveForwardingSocketEndpoint_ = F;
     });
 
+    // Fulfills once we know the obfuscation key for caesar cipher.
+    private haveCaesarKey_ :(key:number) => void;
+    private onceHaveCaesarKey_ = new Promise((F, R) => {
+      this.haveCaesarKey_ = F;
+    });
+
     private pipe_ :ChurnPipe;
 
     private static internalConnectionId_ = 0;
@@ -265,8 +279,9 @@ var log :logging.Log = new logging.Log('churn');
       this.configureProbeConnection_(probeRtcPc);
       Promise.all([this.onceHaveWebRtcEndpoint_,
                    this.onceHaveRemoteEndpoint_,
-                   this.onceProbingComplete_]).then((answers:any[]) => {
-        this.configurePipe_(answers[0], answers[1], answers[2]);
+                   this.onceProbingComplete_,
+                   this.onceHaveCaesarKey_]).then((answers:any[]) => {
+        this.configurePipe_(answers[0], answers[1], answers[2], answers[3]);
       });
 
       // Handle |pcState| and related promises.
@@ -297,6 +312,9 @@ var log :logging.Log = new logging.Log('churn');
             this.peerName,
             JSON.stringify(endpoint));
       });
+      this.onceHaveCaesarKey_.then((key:number) => {
+        log.debug('%1: caesar key is %2', this.peerName, key);
+      });
     }
 
     private configureProbeConnection_ = (
@@ -320,11 +338,12 @@ var log :logging.Log = new logging.Log('churn');
     private configurePipe_ = (
         webRtcEndpoint:net.Endpoint,
         remoteEndpoint:net.Endpoint,
-        natEndpoints:NatPair) : void => {
+        natEndpoints:NatPair,
+        key:number) : void => {
       log.debug('%1: configuring pipes...', this.peerName);
       this.pipe_ = freedom['churnPipe']();
       this.pipe_.setTransformer('caesar',
-          new Uint8Array([13]).buffer,
+          new Uint8Array([key]).buffer,
           '{}');
       // TODO(ldixon): renable FTE support instead of caesar cipher.
       //     'fte',
@@ -407,6 +426,14 @@ var log :logging.Log = new logging.Log('churn');
     }
 
     public negotiateConnection = () : Promise<void> => {
+      // Generate a key and send it to the remote party.
+      // Once they've received it, they'll be able to establish
+      // a matching pipe.
+      var key = generateCaesarKey_();
+      this.haveCaesarKey_(key);
+      this.signalForPeerQueue.handle({
+        caesar: key
+      });
       return this.obfuscatedConnection_.negotiateConnection();
     }
 
@@ -417,6 +444,9 @@ var log :logging.Log = new logging.Log('churn');
         churnMessage:ChurnSignallingMessage) : void => {
       if (churnMessage.publicEndpoint !== undefined) {
         this.haveRemoteEndpoint_(churnMessage.publicEndpoint);
+      }
+      if (churnMessage.caesar !== undefined) {
+        this.haveCaesarKey_(churnMessage.caesar);
       }
       if (churnMessage.webrtcMessage) {
         var message = churnMessage.webrtcMessage;

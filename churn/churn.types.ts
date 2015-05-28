@@ -7,4 +7,5 @@ import net = require('../net/net.types');
 export interface ChurnSignallingMessage {
   webrtcMessage ?:signals.Message;
   publicEndpoint ?:net.Endpoint;
+  caesar ?:number;
 }
