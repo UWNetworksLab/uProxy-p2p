@@ -18,3 +18,9 @@ body /deep/ paper-button.grey {
 body /deep/ paper-progress::shadow #activeProgress {
   background: #009688;
 }
+
+body /deep/ a {
+  text-decoration: none;
+  font-weight: 500;
+  color: #009688;
+}
