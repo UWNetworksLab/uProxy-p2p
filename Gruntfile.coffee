@@ -108,6 +108,7 @@ taskManager.add 'integration_test', [
 taskManager.add 'everything', [
   'build'
   'test'
+  'integration_test'
 ]
 
 # This is the target run by Travis. Targets in here should run locally
@@ -281,7 +282,7 @@ module.exports = (grunt) ->
       freedomxmpp: grunt.file.readJSON('node_modules/freedom-social-xmpp/package.json')
       freedomfirebase: grunt.file.readJSON('node_modules/freedom-social-firebase/package.json')
 
-    clean: ['build/dev', '.tscache']
+    clean: ['build/dev', 'build/dist', '.tscache']
 
     #-------------------------------------------------------------------------
     copy: {
@@ -330,8 +331,20 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*'],
+              src: [
+                '**/*',
+                '!generic_core/dist_build/*',
+                '!generic_core/dev_build/*'
+              ],
               dest: devBuildPath,
+              onlyIf: 'modified'
+          }
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/generic_core/dev_build/',
+              src: ['*'],
+              dest: devBuildPath + '/generic_core',
               onlyIf: 'modified'
           }
         ]
@@ -355,9 +368,11 @@ module.exports = (grunt) ->
 
               'generic_ui/scripts/copypaste.js'
               'generic_ui/scripts/get_logs.js'
-              'generic_ui/scripts/context.static.js'
+              'scripts/context.static.js'
               'scripts/background.static.js'
               '!**/*spec*'
+
+              'generic_ui/style/*.css'
 
               # extra components we use
               'generic_ui/fonts/*'
@@ -397,6 +412,7 @@ module.exports = (grunt) ->
               'freedom-social-firebase/facebook-social-provider.js'
 
               '**/freedom-module.json'
+              '!generic_core/freedom-module.json'
               '**/*.static.js'
               '!**/*spec*'
 
@@ -405,6 +421,12 @@ module.exports = (grunt) ->
               '_locales/**'
             ]
             dest: 'build/dist/chrome/app'
+          }
+          { # Chrome app freedom-module
+            expand: true
+            cwd: 'src/generic_core/dist_build/'
+            src: ['*']
+            dest: 'build/dist/chrome/app/generic_core'
           }
           { # Firefox
             expand: true
@@ -430,6 +452,7 @@ module.exports = (grunt) ->
               'data/freedom-social-firebase/facebook-social-provider.js'
 
               'data/**/freedom-module.json'
+              '!generic_core/freedom-module.json'
               'data/**/*.static.js'
               'data/scripts/get_logs.js'
               '!**/*spec*'
@@ -442,12 +465,20 @@ module.exports = (grunt) ->
               '!data/generic_ui/polymer/vulcanized*inline.html'
               '!data/generic_ui/polymer/vulcanized.js' # vulcanized.html uses vulcanized.static.js
 
+              'data/generic_ui/style/*.css'
+
               'data/fonts/*'
               'data/icons/*'
               'data/generic_ui/fonts/*'
               'data/generic_ui/icons/*'
             ]
             dest: 'build/dist/firefox'
+          }
+          { # Firefox freedom-module
+            expand: true
+            cwd: 'src/generic_core/dist_build/'
+            src: ['*']
+            dest: 'build/dist/firefox/data/generic_core/'
           }
         ]
 
@@ -684,7 +715,7 @@ module.exports = (grunt) ->
         src: [
           firefoxDevPath + '/data/scripts/background.js'
         ]
-        dest: firefoxDevPath + '/data/generic_ui/scripts/context.static.js'
+        dest: firefoxDevPath + '/data/scripts/context.static.js'
         options:
           browserifyOptions:
             standalone: 'ui_context'

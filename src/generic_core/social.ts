@@ -40,15 +40,18 @@ import ui = ui_connector.connector;
   export var NETWORK_OPTIONS :{[name:string]:social.NetworkOptions} = {
     'Google': {
       isFirebase: false,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: false
     },
     'Facebook': {
       isFirebase: true,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: true
     },
     'Google+': {
       isFirebase: true,
-      enableMonitoring: true
+      enableMonitoring: true,
+      areAllContactsUproxy: false
     }
   }
 
@@ -216,13 +219,10 @@ import ui = ui_connector.connector;
     }
 
     /**
-     * Helper to determine if |userId| is a "new friend" to be added to the
-     * roster, and also isn't just our own userId, since we can receive XMPP
-     * messages for ourself too.
+     * Helper to determine if |userId| is a "new friend".
      */
     protected isNewFriend_ = (userId :string) :boolean => {
-      return !(this.myInstance && this.myInstance.userId == userId) &&
-             !(userId in this.roster);
+      return !(userId in this.roster);
     }
 
     public getLocalInstanceId = () : string => {
@@ -257,6 +257,12 @@ import ui = ui_connector.connector;
 
     public getNetworkState = () :social.NetworkState => {
       throw new Error('Operation not implemented');
+    }
+
+    public areAllContactsUproxy = () : boolean => {
+      // Default to false.
+      var options :social.NetworkOptions = NETWORK_OPTIONS[this.name];
+      return options ? options.areAllContactsUproxy === true : false;
     }
 
   }  // class AbstractNetwork
@@ -362,12 +368,8 @@ import ui = ui_connector.connector;
         });
 
         this.myInstance.updateProfile(userProfileMessage);
-
-        return;
       }
-      // Otherwise, this is a remote contact. Add them to the roster if
-      // necessary, and update their profile.
-      log.debug('Received UserProfile for other user', profile);
+      log.debug('Received UserProfile', profile);
       this.getOrAddUser_(userId).update(profile);
     }
 
@@ -395,11 +397,12 @@ import ui = ui_connector.connector;
         return;
       }
 
-      if (client.userId == this.myInstance.userId) {
-        // Log out if it's our own client id.
-        // TODO: Consider adding myself to the roster.
-        if (client.clientId === this.myInstance.clientId &&
-            client.status === social.ClientStatus.OFFLINE) {
+      if (client.userId == this.myInstance.userId &&
+          client.clientId === this.myInstance.clientId) {
+        if (client.status === social.ClientStatus.OFFLINE) {
+          // Our client is disconnected, log out of the social network
+          // (the social provider is responsible for clean up so we don't
+          // need to call logout here).
           this.fulfillLogout_();
         }
         log.info('received own ClientState', client);

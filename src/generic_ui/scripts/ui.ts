@@ -24,22 +24,18 @@ export var model :Model = {
   onlineNetwork: null,
   contacts: {
     getAccessContacts: {
-      onlinePending: [],
-      offlinePending: [],
-      onlineTrustedUproxy: [],
-      offlineTrustedUproxy: [],
-      onlineUntrustedUproxy: [],
-      offlineUntrustedUproxy: []
+      pending: [],
+      trustedUproxy: [],
+      untrustedUproxy: [],
     },
     shareAccessContacts: {
-      onlinePending: [],
-      offlinePending: [],
-      onlineTrustedUproxy: [],
-      offlineTrustedUproxy: [],
-      onlineUntrustedUproxy: [],
-      offlineUntrustedUproxy: []
+      pending: [],
+      trustedUproxy: [],
+      untrustedUproxy: [],
     }
   },
+  // It would be nice to initialize this in shared code, but these settings
+  // will be overwritten by a message from the core.
   globalSettings: {
     version: 0,
     description: '',
@@ -49,7 +45,8 @@ export var model :Model = {
     splashState : 0,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
-    statsReportingEnabled: false
+    statsReportingEnabled: false,
+    consoleFilter: 2 // loggingTypes.Level.warn
   },
   reconnecting: false
 };
@@ -67,12 +64,9 @@ export var GET_FAILED_MSG :string = 'Unable to get access from ';
 
 export interface ContactCategory {
   [type :string] :User[];
-  onlinePending :User[];
-  offlinePending :User[];
-  onlineTrustedUproxy :User[];
-  offlineTrustedUproxy :User[];
-  onlineUntrustedUproxy :User[];
-  offlineUntrustedUproxy :User[];
+  pending :User[];
+  trustedUproxy :User[];
+  untrustedUproxy :User[];
 }
 
 export interface Contacts {
@@ -416,6 +410,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     browserApi.on('urlData', this.handleUrlData);
     browserApi.on('notificationClicked', this.handleNotificationClick);
+    browserApi.on('proxyDisconnected', this.proxyDisconnected);
   }
 
   // Because of an observer (in root.ts) watching the value of
@@ -559,6 +554,14 @@ export class UserInterface implements ui_constants.UiApi {
       }
 
       this.core.sendCopyPasteSignal(payload[i]);
+    }
+  }
+
+  public proxyDisconnected = () => {
+    if (this.isGettingAccess()) {
+      this.stopGettingFromInstance(this.instanceGettingAccessFrom_);
+      this.fireSignal('open-proxy-error');
+      this.bringUproxyToFront();
     }
   }
 
@@ -838,11 +841,13 @@ export class UserInterface implements ui_constants.UiApi {
   };
 
   private categorizeUser_ = (user :User, contacts :ContactCategory, oldCategory :string, newCategory :string) => {
-    if (oldCategory == null) {
-      // User hasn't yet been categorized.
-      contacts[newCategory].push(user);
-    } else if (oldCategory != newCategory) {
-      // Remove user from old category.
+    if (oldCategory === newCategory) {
+      // no need to do any work if nothing changed
+      return;
+    }
+
+    if (oldCategory) {
+      // remove user from old category
       var oldCategoryArray = contacts[oldCategory];
       for (var i = 0; i < oldCategoryArray.length; ++i) {
         if (oldCategoryArray[i] == user) {
@@ -850,10 +855,11 @@ export class UserInterface implements ui_constants.UiApi {
           break;
         }
       }
-      // Add users to new category.
-      if (newCategory) {
-        contacts[newCategory].push(user);
-      }
+    }
+
+    if (newCategory) {
+      // add user to new category
+      contacts[newCategory].push(user);
     }
   }
 

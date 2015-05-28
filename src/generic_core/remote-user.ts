@@ -55,7 +55,7 @@ var log :logging.Log = new logging.Log('remote-user');
     public clientIdToStatusMap :{ [clientId :string] :social.ClientStatus };
     public profile :freedom_Social.UserProfile;
 
-    public consent :consent.State = new consent.State();
+    public consent :consent.State;
 
     // Each instance is a user and social network pair.
     private instances_ :{ [instanceId :string] :remote_instance.RemoteInstance };
@@ -95,6 +95,9 @@ var log :logging.Log = new logging.Log('remote-user');
       this.instances_ = {};
       this.clientToInstanceMap_ = {};
       this.instanceToClientMap_ = {};
+
+      this.consent =
+          new consent.State(userId === this.network.myInstance.userId);
 
       storage.load<social.UserState>(this.getStorePath()).then((state) => {
         this.restoreState(state);
@@ -356,14 +359,13 @@ var log :logging.Log = new logging.Log('remote-user');
           gettingInstanceIds.push(instanceId);
         }
       }
-      if (allInstanceIds.length === 0) {
-        // Don't send users to UI if they don't have any instances (i.e. are not
-        // uProxy users).
-        // TODO: ideally we should not have User objects for users without
-        // instances, but for now we create Users whenever we get a UserProfile
-        // or ClientState from the social provider that isn't
-        // ONLINE_WITH_OTHER_APP.  For now this is necessary because we don't
-        // yet load instances from storage until User objects are created.
+
+      if (allInstanceIds.length === 0 &&
+          (!this.network.areAllContactsUproxy() ||
+           this.userId === this.network.myInstance.userId)) {
+        // Don't send users with no instances to the UI if either the network
+        // gives us non-uProxy contacts, or it is the user we are logged in
+        // with.
         return null;
       }
 
@@ -470,7 +472,7 @@ var log :logging.Log = new logging.Log('remote-user');
           this.instances_[instanceId] = new remote_instance.RemoteInstance(this, instanceId);
           onceLoadedPromises.push(this.instances_[instanceId].onceLoaded);
         }
-        
+
       }
       Promise.all(onceLoadedPromises).then(this.fulfillStorageLoad_);
 

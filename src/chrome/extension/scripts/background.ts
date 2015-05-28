@@ -22,7 +22,7 @@ import uproxy_core_api = require('../../../interfaces/uproxy_core_api');
 export import model = user_interface.model;
 
 // --------------------- Communicating with the App ----------------------------
-export var chromeCoreConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
+export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
 var browserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
@@ -85,13 +85,13 @@ chrome.browserAction.onClicked.addListener((tab) => {
   browserApi.bringUproxyToFront();
 });
 
-chromeCoreConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
-chromeCoreConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
-                         browserApi.bringUproxyToFront);
+browserConnector = new ChromeCoreConnector({ name: 'uproxy-extension-to-app-port' });
+browserConnector.onUpdate(uproxy_core_api.Update.LAUNCH_UPROXY,
+                          browserApi.bringUproxyToFront);
 
-core = new CoreConnector(chromeCoreConnector);
+core = new CoreConnector(browserConnector);
 var oAuth = new ChromeTabAuth();
-chromeCoreConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
+browserConnector.onUpdate(uproxy_core_api.Update.GET_CREDENTIALS,
                          oAuth.login.bind(oAuth));
 
 // used for de-duplicating urls caught by the listeners
@@ -130,3 +130,4 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ['https://www.uproxy.org/request/*', 'https://www.uproxy.org/offer/*'] },
   ['blocking']
 );
+
