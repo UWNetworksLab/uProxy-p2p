@@ -51,25 +51,25 @@ export interface ConnectionState {
 // TODO: Finalize which of these can be removed, then clean up accordingly.
 export enum Command {
   GET_INITIAL_STATE = 1000,
-  RESTART,
-  LOGIN,
-  LOGOUT,
-  SEND_INSTANCE_HANDSHAKE_MESSAGE,
-  START_PROXYING,
-  STOP_PROXYING,
-  MODIFY_CONSENT,       // TODO: make this work with the consent piece.
-  START_PROXYING_COPYPASTE_GET,
-  STOP_PROXYING_COPYPASTE_GET,
-  START_PROXYING_COPYPASTE_SHARE,
-  STOP_PROXYING_COPYPASTE_SHARE,
-  COPYPASTE_SIGNALLING_MESSAGE,
+  RESTART = 1001,
+  LOGIN = 1002,
+  LOGOUT = 1003,
+  SEND_INSTANCE_HANDSHAKE_MESSAGE = 1004,
+  START_PROXYING = 1005,
+  STOP_PROXYING = 1006,
+  MODIFY_CONSENT = 1007, // TODO: make this work with the consent piece.
+  START_PROXYING_COPYPASTE_GET = 1008,
+  STOP_PROXYING_COPYPASTE_GET = 1009,
+  START_PROXYING_COPYPASTE_SHARE = 1010,
+  STOP_PROXYING_COPYPASTE_SHARE = 1011,
+  COPYPASTE_SIGNALLING_MESSAGE = 1012,
 
   // Payload should be a HandleManualNetworkInboundMessageCommand.
-  HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE,
-  SEND_CREDENTIALS,
-  UPDATE_GLOBAL_SETTINGS,
-  GET_LOGS,
-  GET_NAT_TYPE
+  HANDLE_MANUAL_NETWORK_INBOUND_MESSAGE = 1013,
+  SEND_CREDENTIALS = 1014,
+  UPDATE_GLOBAL_SETTINGS = 1015,
+  GET_LOGS = 1016,
+  GET_NAT_TYPE = 1017
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
@@ -78,31 +78,30 @@ export enum Command {
 // TODO: Finalize which of these can be removed, then clean up accordingly.
 export enum Update {
   INITIAL_STATE = 2000,
-  NETWORK,      // One particular network.
-  USER_SELF,    // Local / myself on the network.
-  USER_FRIEND,  // Remote friend on the roster.
-  INSTANCE,
-  COMMAND_FULFILLED,
-  COMMAND_REJECTED,
-  START_GETTING_FROM_FRIEND,
-  STOP_GETTING_FROM_FRIEND,
-  START_GIVING_TO_FRIEND,
-  STOP_GIVING_TO_FRIEND,
+  NETWORK = 2001,      // One particular network.
+  USER_SELF = 2002,    // Local / myself on the network.
+  USER_FRIEND = 2003,  // Remote friend on the roster.
+  COMMAND_FULFILLED = 2005,
+  COMMAND_REJECTED = 2006,
+  START_GETTING_FROM_FRIEND = 2007,
+  STOP_GETTING_FROM_FRIEND = 2008,
+  START_GIVING_TO_FRIEND = 2009,
+  STOP_GIVING_TO_FRIEND = 2010,
   // Payload should be a Message.
-  MANUAL_NETWORK_OUTBOUND_MESSAGE,
+  MANUAL_NETWORK_OUTBOUND_MESSAGE = 2011,
   // TODO: "Get credentials" is a command, not an "update". Consider
   // renaming the "Update" enum.
-  GET_CREDENTIALS,
-  LAUNCH_UPROXY,
+  GET_CREDENTIALS = 2012,
+  LAUNCH_UPROXY = 2013,
 
-  SIGNALLING_MESSAGE, /* copypaste messages */
-  START_GETTING,
-  STOP_GETTING,
-  START_GIVING,
-  STOP_GIVING,
-  STATE,
-  FRIEND_FAILED_TO_GET,
-  POST_TO_CLOUDFRONT
+  SIGNALLING_MESSAGE = 2014, /* copypaste messages */
+  START_GETTING = 2015,
+  STOP_GETTING = 2016,
+  START_GIVING = 2017,
+  STOP_GIVING = 2018,
+  STATE = 2019,
+  FRIEND_FAILED_TO_GET = 2020,
+  POST_TO_CLOUDFRONT = 2021
 }
 
 // Action taken by the user. These values are not on the wire. They are passed
