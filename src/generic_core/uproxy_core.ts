@@ -170,6 +170,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     globals.settings.allowNonUnicast = newSettings.allowNonUnicast;
     globals.settings.mode = newSettings.mode;
     globals.settings.statsReportingEnabled = newSettings.statsReportingEnabled;
+    globals.settings.splashState = newSettings.splashState;
   }
 
   /**
@@ -417,5 +418,20 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     text = text.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/ig,
                         'EMAIL_ADDRESS');
     return text;
+  }
+
+  public sendInitialState = () => {
+    // Only send update to UI when global settings have loaded.
+    globals.loadSettings.then(() => {
+      ui.update(
+          uproxy_core_api.Update.INITIAL_STATE,
+          {
+            networkNames: Object.keys(social_network.networks),
+            globalSettings: globals.settings,
+            onlineNetwork: social_network.getOnlineNetwork(),
+            copyPasteState: copyPasteConnection.currentStateForUI(),
+            copyPastePendingEndpoint: copyPasteConnection.activeEndpoint
+          });
+    });
   }
 }  // class uProxyCore

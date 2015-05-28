@@ -16,6 +16,7 @@ import noreConnector = require('./core_connector');
 import user_module = require('./user');
 import User = user_module.User;
 import social = require('../../interfaces/social');
+import Constants = require('./constants');
 
 // Singleton model for data bindings.
 export var model :Model = {
@@ -45,7 +46,7 @@ export var model :Model = {
     stunServers: [],
     hasSeenSharingEnabledScreen: false,
     hasSeenWelcome: false,
-    splashState : 0
+    splashState : 0,
     mode : ui_constants.Mode.GET,
     allowNonUnicast: false,
     statsReportingEnabled: false
@@ -60,16 +61,6 @@ export var model :Model = {
 // 2) These are only the suffixes of the icon names. Because we have
 // different sizes of icons, the actual filenames have the dimension
 // as a prefix. E.g. "19_online.gif" for the 19x19 pixel version.
-
-// Icons for browser bar, also used for notifications.
-export var DEFAULT_ICON :string = 'online.gif';
-export var LOGGED_OUT_ICON :string = 'offline.gif';
-export var SHARING_ICON :string = 'sharing.gif';
-export var GETTING_ICON :string = 'getting.gif';
-export var ERROR_ICON :string = 'error.gif';
-export var GETTING_SHARING_ICON :string = 'gettingandsharing.gif';
-
-export var DEFAULT_USER_IMG = 'icons/contact-default.png';
 
 export var SHARE_FAILED_MSG :string = 'Unable to share access with ';
 export var GET_FAILED_MSG :string = 'Unable to get access from ';
@@ -203,6 +194,7 @@ export class UserInterface implements ui_constants.UiApi {
 
     core.on('core_connect', () => {
       this.view = ui_constants.View.SPLASH;
+      core.getInitialState();
     });
 
     core.on('core_disconnect', () => {
@@ -230,6 +222,42 @@ export class UserInterface implements ui_constants.UiApi {
       // because Polymer elements bound to globalSettings' values can
       // only react to updates to globalSettings and not reassignments.
       model.globalSettings = state.globalSettings;
+
+      this.copyPasteGettingState = state.copyPasteState.localGettingFromRemote;
+      this.copyPasteSharingState = state.copyPasteState.localSharingWithRemote;
+      this.copyPasteBytesSent = state.copyPasteState.bytesSent;
+      this.copyPasteBytesReceived = state.copyPasteState.bytesReceived;
+      this.copyPastePendingEndpoint = state.copyPastePendingEndpoint;
+      if (this.copyPasteGettingState !== social.GettingState.NONE ||
+          this.copyPasteSharingState !== social.SharingState.NONE) {
+        this.view = ui_constants.View.COPYPASTE;
+      }
+
+      if (state['onlineNetwork'] === null) {
+        return;
+      }
+      if (model.onlineNetwork === null) {
+        model.onlineNetwork = {
+          name:   state['onlineNetwork'].name,
+          userId: state['onlineNetwork'].profile.userId,
+          userName: state['onlineNetwork'].profile.name,
+          imageData: state['onlineNetwork'].profile.imageData,
+          roster: {},
+          hasContacts: false
+        };
+      }
+
+      if (this.view === ui_constants.View.COPYPASTE) {
+        console.error(
+            'User cannot be online while having a copy-paste connection');
+      }
+      this.view = ui_constants.View.ROSTER;
+
+      for (var userId in state['onlineNetwork'].roster) {
+        this.syncUser(state['onlineNetwork'].roster[userId]);
+      }
+      this.updateSharingStatusBar_();
+
     });
 
     // Add or update the online status of a network.
@@ -560,7 +588,6 @@ export class UserInterface implements ui_constants.UiApi {
 
     if (askUser) {
       this.browserApi.setIcon(Constants.ERROR_ICON);
-      this.browserApi.setIcon(ERROR_ICON);
       this.bringUproxyToFront();
       this.disconnectedWhileProxying = true;
       return;
@@ -728,6 +755,15 @@ export class UserInterface implements ui_constants.UiApi {
         this.view = ui_constants.View.SPLASH;
       }
     }
+
+    if (network.online && !model.onlineNetwork) {
+      model.onlineNetwork = {
+        name:   network.name,
+        userId: network.userId,
+        roster: {},
+        hasContacts: false
+      };
+    }
   }
 
   // Synchronize the data about the current user.
@@ -774,6 +810,22 @@ export class UserInterface implements ui_constants.UiApi {
     for (var i = 0; i < payload.allInstanceIds.length; ++i) {
       this.mapInstanceIdToUser_[payload.allInstanceIds[i]] = user;
     }
+
+      for (var i = 0; i < payload.offeringInstances.length; i++) {
+        if (payload.offeringInstances[i].localGettingFromRemote ===
+            social.GettingState.GETTING_ACCESS) {
+          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
+          user.isSharingWithMe = true;
+          this.updateGettingStatusBar_();
+          break;
+        }
+      }
+
+      for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
+        this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
+        user.isGettingFromMe = true;
+      }
+
 
     var newUserCategories = user.getCategories();
     // Update the user's category in both get and share tabs.
@@ -823,27 +875,6 @@ export class UserInterface implements ui_constants.UiApi {
     return this.core.logout(networkInfo);
   }
 
-      for (var i = 0; i < payload.offeringInstances.length; i++) {
-        if (payload.offeringInstances[i].localGettingFromRemote ===
-            GettingState.GETTING_ACCESS) {
-          this.instanceGettingAccessFrom_ = payload.offeringInstances[i].instanceId;
-          user.isSharingWithMe = true;
-          this.updateGettingStatusBar_();
-          break;
-        }
-      }
-
-      for (var i = 0; i < payload.gettingInstanceIds.length; i++) {
-        this.instancesGivingAccessTo[payload.gettingInstanceIds[i]] = true;
-        user.isGettingFromMe = true;
-      }
-
-      var newUserCategories = user.getCategories();
-      // Update the user's category in both get and share tabs.
-      this.categorizeUser_(user, model.contacts.getAccessContacts,
-          oldUserCategories.getTab, newUserCategories.getTab);
-      this.categorizeUser_(user, model.contacts.shareAccessContacts,
-          oldUserCategories.shareTab, newUserCategories.shareTab);
   public reconnect = (network :string) => {
     // TODO: this reconnect logic has some issues:
     // 1. It only attempts to re-use the last access_token, and doesn't

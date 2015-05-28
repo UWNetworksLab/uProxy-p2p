@@ -11,10 +11,12 @@ interface ChromeGlobals extends UiGlobals {
 }
 
 var ui_context :ChromeGlobals = (<any>chrome.extension.getBackgroundPage()).ui_context;
-export var ui :user_interface.UserInterface= ui_context.ui;
 export var core :CoreConnector = ui_context.core;
 export var chromeCoreConnector = ui_context.chromeCoreConnector;
 export var model :user_interface.Model = ui_context.model;
+
+export var ui :user_interface.UserInterface = new user_interface.UserInterface(core, ui_context.browserApi);
+
 ui.browser = 'chrome';
 
 console.log('Loaded dependencies for Chrome Extension.');

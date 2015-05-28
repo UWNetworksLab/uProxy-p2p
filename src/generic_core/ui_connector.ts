@@ -87,19 +87,6 @@ export class UIConnector {
     bgAppPageChannel.emit('' + type, data);
   }
 
-  public sendInitialState = () => {
-    // Only send update to UI when global settings have loaded.
-    globals.loadSettings.then(() => {
-      this.update(
-          uproxy_core_api.Update.INITIAL_STATE,
-          {
-            networkNames: Object.keys(social_network.networks),
-            globalSettings: globals.settings,
-            onlineNetwork: social_network.getOnlineNetwork()
-          });
-    });
-  }
-
   public syncUser = (payload:social.UserData) => {
     this.update(uproxy_core_api.Update.USER_FRIEND, payload);
   }

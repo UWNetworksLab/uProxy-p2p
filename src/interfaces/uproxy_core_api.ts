@@ -25,11 +25,12 @@ export interface GlobalSettings {
   statsReportingEnabled :boolean;
   splashState : number;
 }
-
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
   onlineNetwork: social.NetworkState;
+  copyPasteState: ConnectionState;
+  copyPastePendingEndpoint :net.Endpoint
 }
 
 export interface ConnectionState {

@@ -163,7 +163,7 @@ export var remoteProxyInstance :RemoteInstance = null;
     }
 
     public isSharing = () => {
-      return this.localSharingWithRemote === SharingState.SHARING_ACCESS;
+      return this.localSharingWithRemote === social.SharingState.SHARING_ACCESS;
     }
 
     /**

@@ -54,7 +54,7 @@ export = exported;
 
 ui_connector.onCommand(
     uproxy_core_api.Command.GET_INITIAL_STATE,
-    ui_connector.sendInitialState);
+    core.sendInitialState);
 
 ui_connector.onPromiseCommand(
     uproxy_core_api.Command.LOGIN,

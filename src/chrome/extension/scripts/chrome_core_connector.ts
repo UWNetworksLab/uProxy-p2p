@@ -99,7 +99,6 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         console.log('Connecting listener for', JSON.stringify(payload));
         this.send(payload);
       }
-      core.getInitialState();
       this.emit('core_connect');
     });
   }
@@ -140,11 +139,6 @@ class ChromeCoreConnector implements browser_connector.CoreBrowserConnector {
         this.appPort_.onMessage.addListener(this.receive_);
         this.status.connected = true;
         // Once connected, the extension popup should show its start page.
-        // When extension is loaded initially, this is called but
-        // ui might not be loaded yet.
-        if (typeof core.ui !== 'undefined') {
-          core.ui.view = uProxy.View.SPLASH;
-        }
         chrome.browserAction.setIcon({
           path: {
             "19": "icons/19_" + Constants.LOGGED_OUT_ICON,

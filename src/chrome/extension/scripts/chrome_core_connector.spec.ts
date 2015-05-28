@@ -40,7 +40,6 @@ describe('core-connector', () => {
     ['bringUproxyToFront',
      'showNotification',
      'on']);
-  core.ui = ui;
 
 
 

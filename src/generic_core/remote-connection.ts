@@ -42,7 +42,7 @@ import uproxy_core_api = require('../interfaces/uproxy_core_api');
     // TODO: set up a better type for this
     private sendUpdate_ :(x :uproxy_core_api.Update, data?:Object) => void;
 
-    public activeEndpoint = null;
+    public activeEndpoint :net.Endpoint = null;
 
     constructor(
       sendUpdate :(x :uproxy_core_api.Update, data?:Object) => void

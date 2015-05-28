@@ -29,7 +29,6 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   private promiseId_ :number = 1;
   private mapPromiseIdToFulfillAndReject_ :{[id :number] : FullfillAndReject} =
       {};
-  public ui;
 
   constructor(private browserConnector_ :browser_connector.CoreBrowserConnector) {
     this.browserConnector_.onUpdate(uproxy_core_api.Update.COMMAND_FULFILLED,
@@ -71,7 +70,7 @@ class CoreConnector implements uproxy_core_api.CoreApi {
   }
 
   public getInitialState = () => {
-    this.sendCommand(uProxy.Command.GET_INITIAL_STATE);
+    this.sendCommand(uproxy_core_api.Command.GET_INITIAL_STATE);
   }
 
   /**

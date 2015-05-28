@@ -674,7 +674,7 @@ module.exports = (grunt) ->
         browserifyOptions:
           standalone: 'ui_context'
       )
-      chromeContext: Rule.browserify('chrome/extension/generic_ui/scripts/context',
+      chromeContext: Rule.browserify('chrome/extension/scripts/context',
         browserifyOptions:
           standalone: 'ui_context'
       )
