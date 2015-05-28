@@ -235,7 +235,6 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged',
-    'model.globalSettings.language': 'updateDirectionality'
+    'ui.signalToFire': 'signalToFireChanged'
   }
 });
