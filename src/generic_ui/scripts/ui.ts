@@ -199,6 +199,7 @@ export class UserInterface implements ui_constants.UiApi {
       public browserApi :BrowserAPI) {
     // TODO: Determine the best way to describe view transitions.
     this.view = ui_constants.View.SPLASH;  // Begin at the splash intro.
+    this.i18n_setLng(model.globalSettings.language);
 
     var firefoxMatches = navigator.userAgent.match(/Firefox\/(\d+)/);
     if (firefoxMatches) {
@@ -229,6 +230,12 @@ export class UserInterface implements ui_constants.UiApi {
     core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :uproxy_core_api.InitialState) => {
       console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
       model.networkNames = state.networkNames;
+
+      // Update language in UI if necessary.
+      if (state.globalSettings.language != model.globalSettings.language) {
+        this.i18n_setLng(state.globalSettings.language);
+      }
+
       // TODO: Do not allow reassignment of globalSettings. Instead
       // write a 'syncGlobalSettings' function that iterates through
       // the values in state[globalSettings] and assigns the
@@ -966,5 +973,11 @@ export class UserInterface implements ui_constants.UiApi {
   public setMode = (mode :ui_constants.Mode) => {
     model.globalSettings.mode = mode;
     this.core.updateGlobalSettings(model.globalSettings);
+  }
+
+  public updateLanguage = (newLanguage :string) => {
+    model.globalSettings.language = newLanguage;
+    this.core.updateGlobalSettings(model.globalSettings);
+    this.i18n_setLng(newLanguage);
   }
 }  // class UserInterface

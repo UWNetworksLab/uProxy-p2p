@@ -225,6 +225,11 @@ Polymer({
     }
     this.dir = 'ltr';
   },
+  languageChanged: function(oldLanguage :string, newLanguage :string) {
+    if (typeof oldLanguage != 'undefined') {
+      window.location.reload();
+    }
+  },
   observe: {
     '$.mainPanel.selected' : 'drawerToggled',
     'ui.toastMessage': 'toastMessageChanged',
@@ -235,6 +240,7 @@ Polymer({
     // in root.html, someMethod is not invoked when items are added or removed.
     'model.contacts.shareAccessContacts.trustedUproxy':
         'updateIsSharingEnabledWithOthers',
-    'ui.signalToFire': 'signalToFireChanged'
+    'ui.signalToFire': 'signalToFireChanged',
+    'model.globalSettings.language': 'languageChanged'
   }
 });

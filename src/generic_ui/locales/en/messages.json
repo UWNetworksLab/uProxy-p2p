@@ -610,5 +610,21 @@
   "farsi": {
     "description": "Farsi language.",
     "message": "Farsi"
+  },
+  "extMissingTitle": {
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy.",
+    "message": "You're almost ready to use uProxy!"
+  },
+  "extMissingText": {
+    "description": "Shown in Chrome to instruct the user to install part 1 of uProxy.",
+    "message": "Download and enable part 1 of uProxy to get started."
+  },
+  "appMissingTitle": {
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy.",
+    "message": "You're almost ready to use uProxy!"
+  },
+  "appMissingText": {
+    "description": "Shown in Chrome to instruct the user to install part 2 of uProxy.",
+    "message": "Download and enable part 2 of uProxy to get started."
   }
 }

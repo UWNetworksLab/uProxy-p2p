@@ -35,9 +35,7 @@ Polymer({
   updateLanguage: function(event :Event, detail :any, sender :HTMLElement) {
     if (detail.isSelected) {
       var newLanguage = detail.item.getAttribute('languageCode');
-      this.model.globalSettings.language = newLanguage;
-      ui_context.core.updateGlobalSettings(ui_context.model.globalSettings);
-      ui.i18n_setLng(newLanguage);
+      ui.updateLanguage(newLanguage);
       window.location.reload();
     }
   },
