@@ -92,11 +92,6 @@ export var remoteProxyInstance :RemoteInstance = null;
 
     private connection_ :remote_connection.RemoteConnection = null;
 
-    // True once we have called startShare() on the remote connection since
-    // construction or since state changed to STOP_GIVING. Used to ensure
-    // only one RtcToNet instance is created for each proxying attempt.
-    private haveCalledStartShare_ = false;
-
     /**
      * Construct a Remote Instance as the result of receiving an instance
      * handshake, or loadig from storage. Typically, instances are initialized
@@ -135,7 +130,6 @@ export var remoteProxyInstance :RemoteInstance = null;
           this.user.network.send(this.user, clientId, data);
           break;
         case uproxy_core_api.Update.STOP_GIVING:
-          this.haveCalledStartShare_ = false;
           ui.update(uproxy_core_api.Update.STOP_GIVING_TO_FRIEND, this.instanceId);
           break;
         case uproxy_core_api.Update.START_GIVING:
@@ -191,8 +185,7 @@ export var remoteProxyInstance :RemoteInstance = null;
 
         // Create a new RtcToNet instance each time a new round of client peer
         // messages begins.
-        if (!this.haveCalledStartShare_) {
-          this.haveCalledStartShare_ = true;
+        if (signalFromRemote.first) {
           this.connection_.resetSharerCreated();
           this.startShare_();
         }
