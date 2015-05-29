@@ -59,6 +59,10 @@
     "message": "شما می توانید برای دسترسی هنگامی که __name__ را قبول خواهد بود.",
     "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
   },
+  "cancelRequest": {
+    "message": "لغو درخواست",
+    "description": "Label for button which will take back a request to get Internet access through a friend."
+  },
   "offeredYouAccess": {
     "message": "آنها دسترسی شما ارائه شده است.",
     "description": "A friend has offered their Internet access to the user."
@@ -604,12 +608,12 @@
     "description": "Instruction to select language used by the application."
   },
   "english": {
-    "message": "English",
-    "description": "English language."
+    "description": "English language.",
+    "message": "English"
   },
   "farsi": {
-    "message": "فارسی",
-    "description": "Farsi language."
+    "description": "Farsi language.",
+    "message": "فارسی"
   },
   "arabic": {
     "description": "Arabic language.",

@@ -59,6 +59,10 @@
     "message": "Vous serez en mesure d'obtenir l'accès lorsque __name__ accepte.",
     "description": "User will be able to access the Internet through their friend, once that friend gives the user permission."
   },
+  "cancelRequest": {
+    "message": "Demande D'Annulation",
+    "description": "Label for button which will take back a request to get Internet access through a friend."
+  },
   "offeredYouAccess": {
     "message": "Ils ont offert l'accès vous.",
     "description": "A friend has offered their Internet access to the user."
@@ -604,12 +608,12 @@
     "description": "Instruction to select language used by the application."
   },
   "english": {
-    "message": "Anglais",
-    "description": "English language."
+    "description": "English language.",
+    "message": "English"
   },
   "farsi": {
-    "message": "فارسی",
-    "description": "Farsi language."
+    "description": "Farsi language.",
+    "message": "فارسی"
   },
   "arabic": {
     "description": "Arabic language.",

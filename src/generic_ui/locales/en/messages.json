@@ -59,6 +59,10 @@
     "description": "User will be able to access the Internet through their friend, once that friend gives the user permission.",
     "message": "You will be able to get access when __name__ accepts."
   },
+  "cancelRequest": {
+    "description": "Label for button which will take back a request to get Internet access through a friend.",
+    "message": "Cancel Request"
+  },
   "offeredYouAccess": {
     "description": "A friend has offered their Internet access to the user.",
     "message": "They've offered you access."

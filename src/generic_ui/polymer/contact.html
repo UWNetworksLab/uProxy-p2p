@@ -167,7 +167,7 @@
           </p>
         </div>
         <p class='preButtonDetailedText'>{{ 'waitingForAccess' | $$({name: contact.name}) }}</p>
-        <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>Cancel Request</paper-button>
+        <paper-button class='grey' raised on-tap='{{ cancelRequest }}'>{{ 'cancelRequest' | $$ }}</paper-button>
       </div>
 
       <div hidden?='{{ contact.gettingConsentState != GettingConsentState.REMOTE_OFFERED_LOCAL_NO_ACTION }}'>
