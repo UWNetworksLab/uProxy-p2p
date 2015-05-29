@@ -245,7 +245,8 @@ describe('remote_instance.RemoteInstance', () => {
     var fakeSignallingMessage :bridge.SignallingMessage = {
       providers: {
         'FAKE': {}
-      }
+      },
+      first: true
     };
 
     beforeEach(() => {
