@@ -21,6 +21,7 @@ interface Message {
 var english_source :MessageResource = <MessageResource>require('../locales/en/messages.json');
 var french_source :MessageResource = <MessageResource>require('../locales/fr/messages.json');
 var arabic_source :MessageResource = <MessageResource>require('../locales/ar/messages.json');
+var farsi_source :MessageResource = <MessageResource>require('../locales/fa/messages.json');
 
 function createI18nDictionary(sourceFile :MessageResource) : IResourceStoreKey {
   var i18nDictionary :IResourceStoreKey = {};
@@ -38,6 +39,7 @@ i18n.init({
 i18n.addResources('en-US', 'translation', createI18nDictionary(english_source));
 i18n.addResources('fr', 'translation', createI18nDictionary(french_source));
 i18n.addResources('ar', 'translation', createI18nDictionary(arabic_source));
+i18n.addResources('fa', 'translation', createI18nDictionary(farsi_source));
 
 export var i18n_t = i18n.t;
 export var i18n_setLng = i18n.setLng;

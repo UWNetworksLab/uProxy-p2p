@@ -101,7 +101,11 @@
       height: 20px;
       width: 20px;
     }
-    paper-item::shadow .button-content {
+    #languageLink paper-item {
+      font-size: 13px;
+      line-height: 14px;
+    }
+    #languageLink paper-item::shadow .button-content {
       padding: 0;
     }
     </style>
@@ -125,8 +129,18 @@
           <paper-dropdown-menu label="{{ 'language' | $$ }}">
             <paper-dropdown class="dropdown">
                 <core-menu class="menu" on-core-select='{{ updateLanguage }}'>
-                    <paper-item languageCode='en-US'>{{ 'english' | $$ }}</paper-item>
-                    <paper-item languageCode='ar'>{{ 'farsi' | $$ }}</paper-item>
+                    <paper-item languageCode='en-US'>
+                      <bdi>{{ 'english' | $$ }}</bdi>
+                    </paper-item>
+                    <paper-item languageCode='fa'>
+                      <bdi>{{ 'farsi' | $$ }}</bdi>
+                    </paper-item>
+                    <paper-item languageCode='ar'>
+                      <bdi>{{ 'arabic' | $$ }}</bdi>
+                    </paper-item>
+                    <paper-item languageCode='fr'>
+                      <bdi>{{ 'french' | $$ }}</bdi>
+                    </paper-item>
                 </core-menu>
             </paper-dropdown>
           </paper-dropdown-menu>

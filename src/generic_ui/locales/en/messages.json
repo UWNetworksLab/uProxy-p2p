@@ -609,7 +609,15 @@
   },
   "farsi": {
     "description": "Farsi language.",
-    "message": "Farsi"
+    "message": "فارسی"
+  },
+  "arabic": {
+    "description": "Arabic language.",
+    "message": "العربية"
+  },
+  "french": {
+    "description": "French language.",
+    "message": "Français"
   },
   "extMissingTitle": {
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy.",

@@ -16,12 +16,13 @@
       .highlightedButton {
         background: #009688;  /* dark green */
         color: white;
+        text-transform: uppercase;
       }
     </style>
     <div>
       <h1>{{ 'appMissingTitle' | $$ }}</h1>
       <div>{{ 'appMissingText' | $$ }}</div><br>
-      <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>NEXT</paper-button>
+      <paper-button class='highlightedButton' raised on-tap='{{ downloadApp }}'>{{ 'next' | $$ }}</paper-button>
     </div>
 
   </template>

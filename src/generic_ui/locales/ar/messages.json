@@ -594,5 +594,45 @@
   "descriptionDefault": {
     "message": "__number__ الكمبيوتر",
     "description": "If a friend has more than one computer, the computers are given this default name (with increasing numbers) to differentiate them."
+  },
+  "language": {
+    "message": "لغة",
+    "description": "Language used by the application."
+  },
+  "selectLanguage": {
+    "message": "اختيار اللغة",
+    "description": "Instruction to select language used by the application."
+  },
+  "english": {
+    "message": "English",
+    "description": "English language."
+  },
+  "farsi": {
+    "message": "الفارسية",
+    "description": "Farsi language."
+  },
+  "arabic": {
+    "description": "Arabic language.",
+    "message": "العربية"
+  },
+  "french": {
+    "description": "French language.",
+    "message": "Français"
+  },
+  "extMissingTitle": {
+    "message": "كنت تقريبا جاهزة للاستخدام uProxy!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "extMissingText": {
+    "message": "تحميل وتمكين جزء 1 من uProxy للبدء.",
+    "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
+  },
+  "appMissingTitle": {
+    "message": "كنت تقريبا جاهزة للاستخدام uProxy!",
+    "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
+  },
+  "appMissingText": {
+    "message": "تحميل وتمكين الجزء 2 من uProxy للبدء.",
+    "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
   }
 }
