@@ -54,6 +54,10 @@ export interface SignallingMessage {
   // processing the previous message, most likely because no supported
   // provider was found.
   errorOnLastMessage ?:boolean;
+
+  // If present, indicates that this message is first in a round of
+  // signaling messages.
+  first ?:boolean;
 }
 
 ////////
@@ -156,6 +160,10 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   private provider_ :peerconnection.PeerConnection<any>;
 
+  // True until a signalling message has been sent.
+  // Used to set the first field in signalling messages.
+  private first_ = true;
+
   // Private, use the static constructors instead.
   constructor(
       private preferredProviderType_ :ProviderType,
@@ -232,7 +240,12 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   }
 
   private wrapSignal_ = (signal:Object) : SignallingMessage => {
-    return makeSingleProviderMessage(this.providerType_, [signal]);
+    var message = makeSingleProviderMessage(this.providerType_, [signal]);
+    if (this.first_) {
+      message.first = true;
+      this.first_ = false;
+    }
+    return message;
   }
 
   // Unbatches the signals and forwards them to the current provider,
