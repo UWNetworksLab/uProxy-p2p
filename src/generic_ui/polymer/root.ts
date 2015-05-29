@@ -216,7 +216,7 @@ Polymer({
     }
   },
   updateDirectionality: function() {
-    // We need to update the directionality of the UI.
+    // Update the directionality of the UI.
     for (var i = 0; i < RTL_LANGUAGES.length; i++) {
       if (RTL_LANGUAGES[i] == model.globalSettings.language.substring(0,2)) {
         this.dir = 'rtl';
