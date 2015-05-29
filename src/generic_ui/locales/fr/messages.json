@@ -623,7 +623,7 @@
     "message": "Vous êtes presque prêt à utiliser uProxy!",
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
   },
-  "extMissingText": {
+  "extMissingMessage": {
     "message": "Téléchargez et activer la partie 1 de uProxy pour commencer.",
     "description": "Shown in Chrome to instruct the user to install part 1 of uProxy."
   },
@@ -631,7 +631,7 @@
     "message": "Vous êtes presque prêt à utiliser uProxy!",
     "description": "Shown in Chrome if the user has not finished installing both parts of uProxy."
   },
-  "appMissingText": {
+  "appMissingMessage": {
     "message": "Téléchargez et activer la partie 2 de uProxy pour commencer.",
     "description": "Shown in Chrome to instruct the user to install part 2 of uProxy."
   }
