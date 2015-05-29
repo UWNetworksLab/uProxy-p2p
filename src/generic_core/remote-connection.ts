@@ -219,8 +219,8 @@ import tcp = require('../../../third_party/uproxy-lib/net/tcp');
           freedom['core.rtcpeerconnection'](config),
           'sockstortc');
       } else {
-        log.debug('peer is running client version >1, offering basicObfuscation');
-        pc = bridge.basicObfuscation('sockstortc', config);
+        log.debug('peer is running client version >1, using bridge');
+        pc = bridge.preObfuscation('sockstortc', config);
       }
 
       return this.socksToRtc_.start(tcpServer, pc).then(

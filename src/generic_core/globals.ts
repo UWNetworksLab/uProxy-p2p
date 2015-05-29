@@ -12,7 +12,7 @@ export var storage = new local_storage.Storage();
 export var STORAGE_VERSION = 1;
 
 // 1: initial release
-// 2: uproxy-lib v27, move to bridge and support basicObfuscation
+// 2: uproxy-lib v27, move to bridge but no obfuscation yet
 export var MESSAGE_VERSION = 2;
 
 export var DEFAULT_STUN_SERVERS = [
