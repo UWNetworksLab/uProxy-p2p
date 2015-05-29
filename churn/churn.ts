@@ -174,7 +174,7 @@ var log :logging.Log = new logging.Log('churn');
   // Generates a key suitable for use with CaesarCipher, viz. 1-255.
   var generateCaesarKey_ = (): number => {
     try {
-      return (random.randomUint32() % 254) + 1;
+      return (random.randomUint32() % 255) + 1;
     } catch (e) {
       // https://github.com/uProxy/uproxy/issues/1593
       log.debug('crypto unavailable, using Math.random');
