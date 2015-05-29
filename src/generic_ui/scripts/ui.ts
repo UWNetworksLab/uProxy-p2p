@@ -212,22 +212,12 @@ export class UserInterface implements ui_constants.UiApi {
       }
     });
 
-    core.connect();
+    core.connect()
+        .then(core.getFullState)
+        .then(this.updateInitialState);
 
     // Attach handlers for UPDATES received from core.
-    // TODO: Implement the rest of the fine-grained state updates.
-    // (We begin with the simplest, total state update, above.)
-    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE, (state :uproxy_core_api.InitialState) => {
-      console.log('Received uproxy_core_api.Update.INITIAL_STATE:', state);
-      model.networkNames = state.networkNames;
-      // TODO: Do not allow reassignment of globalSettings. Instead
-      // write a 'syncGlobalSettings' function that iterates through
-      // the values in state[globalSettings] and assigns the
-      // individual values to model.globalSettings. This is required
-      // because Polymer elements bound to globalSettings' values can
-      // only react to updates to globalSettings and not reassignments.
-      model.globalSettings = state.globalSettings;
-    });
+    core.onUpdate(uproxy_core_api.Update.INITIAL_STATE_DEPRECATED_0_8_9, this.updateInitialState);
 
     // Add or update the online status of a network.
     core.onUpdate(uproxy_core_api.Update.NETWORK, this.syncNetwork_);
@@ -951,5 +941,16 @@ export class UserInterface implements ui_constants.UiApi {
   public setMode = (mode :ui_constants.Mode) => {
     model.globalSettings.mode = mode;
     this.core.updateGlobalSettings(model.globalSettings);
+  }
+
+  private updateInitialState = (state :uproxy_core_api.InitialState) => {
+    model.networkNames = state.networkNames;
+    // TODO: Do not allow reassignment of globalSettings. Instead
+    // write a 'syncGlobalSettings' function that iterates through
+    // the values in state[globalSettings] and assigns the
+    // individual values to model.globalSettings. This is required
+    // because Polymer elements bound to globalSettings' values can
+    // only react to updates to globalSettings and not reassignments.
+    model.globalSettings = state.globalSettings;
   }
 }  // class UserInterface

@@ -30,7 +30,7 @@ export interface GlobalSettings {
 export interface InitialState {
   networkNames :string[];
   globalSettings :GlobalSettings;
-  onlineNetwork: social.NetworkState;
+  onlineNetworks: social.NetworkState[];
 }
 
 export interface ConnectionState {
@@ -50,7 +50,7 @@ export interface ConnectionState {
 //
 // TODO: Finalize which of these can be removed, then clean up accordingly.
 export enum Command {
-  GET_INITIAL_STATE = 1000,
+  GET_INITIAL_STATE_DEPRECATED_0_8_9 = 1000,
   RESTART = 1001,
   LOGIN = 1002,
   LOGOUT = 1003,
@@ -69,15 +69,14 @@ export enum Command {
   SEND_CREDENTIALS = 1014,
   UPDATE_GLOBAL_SETTINGS = 1015,
   GET_LOGS = 1016,
-  GET_NAT_TYPE = 1017
+  GET_NAT_TYPE = 1017,
+  GET_FULL_STATE = 1018
 }
 
 // Updates are sent from the Core to the UI, to update state that the UI must
 // expose to the user.
-//
-// TODO: Finalize which of these can be removed, then clean up accordingly.
 export enum Update {
-  INITIAL_STATE = 2000,
+  INITIAL_STATE_DEPRECATED_0_8_9 = 2000,
   NETWORK = 2001,      // One particular network.
   USER_SELF = 2002,    // Local / myself on the network.
   USER_FRIEND = 2003,  // Remote friend on the roster.
@@ -140,8 +139,8 @@ export interface CloudfrontPostData {
 // TODO: Rename CoreApi.
 export interface CoreApi {
   // Send your own instanceId to target clientId.
-  // TODO: Implement this or remove it.
-  // sendInstanceHandshakeMessage(clientId :string) : void;
+
+  getFullState() :Promise<InitialState>;
 
   modifyConsent(command :ConsentCommand) :void;
 

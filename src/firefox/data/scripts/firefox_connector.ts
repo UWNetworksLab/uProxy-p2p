@@ -21,12 +21,6 @@ class FirefoxConnector implements browser_connector.CoreBrowserConnector {
 
   constructor() {
     this.status = { connected: true };
-    var ready :browser_connector.Payload = {
-      cmd: 'emit',
-      type: uproxy_core_api.Command.GET_INITIAL_STATE,
-      promiseId: 0
-    }
-    this.send(ready);
   }
 
   public connect = () :Promise<void> => {
