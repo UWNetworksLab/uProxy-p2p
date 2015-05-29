@@ -74,16 +74,16 @@ export class User implements social.BaseUser {
     // if we do not have stored state, no use in checking for changes
     if (this.consent_ &&
         // Don't show notifications for other instances of yourself
-        this.userId !== user_interface.model.onlineNetwork.userId) {
+        this.userId !== this.network.userId) {
       // notifications for get mode
       if (!payload.consent.ignoringRemoteUserOffer) {
         if (this.offeringInstances.length === 0 && payload.offeringInstances.length > 0) {
           if (payload.consent.localRequestsAccessFromRemote) {
             this.ui_.showNotification(profile.name + ' granted you access',
-                         { mode: 'get', user: this.userId });
+                         { mode: 'get', network: this.network.name, user: this.userId });
           } else {
             this.ui_.showNotification(profile.name + ' offered you access',
-                         { mode: 'get', user: this.userId });
+                         { mode: 'get', network: this.network.name, user: this.userId });
           }
         }
       }
@@ -93,10 +93,10 @@ export class User implements social.BaseUser {
         if (!this.consent_.remoteRequestsAccessFromLocal && payload.consent.remoteRequestsAccessFromLocal) {
           if (payload.consent.localGrantsAccessToRemote) {
             this.ui_.showNotification(profile.name + ' has accepted your offer for access',
-                         { mode: 'share', user: this.userId });
+                         { mode: 'share', network: this.network.name, user: this.userId });
           } else {
             this.ui_.showNotification(profile.name + ' is requesting access',
-                         { mode: 'share', user: this.userId });
+                         { mode: 'share', network: this.network.name, user: this.userId });
           }
         }
       }

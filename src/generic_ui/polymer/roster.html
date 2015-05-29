@@ -67,19 +67,19 @@
     <core-signals on-core-signal-login-success="{{ loadContacts }}"></core-signals>
 
     <!-- Shown if there are no contacts found so far -->
-    <div id='loadContacts' hidden?='{{ model.onlineNetwork.hasContacts }}'>
+    <div id='loadContacts' hidden?='{{ hasContacts }}'>
       <core-icon icon="social:person" class="no-friends"></core-icon>
       <div id='loadingContacts' hidden?='{{ !loadingContacts }}'>
         Loading uProxy friends<br>
         <paper-progress indeterminate='true'></paper-progress>
       </div>
       <div id='noContactsFound' hidden?='{{ loadingContacts }}'>
-        None of your friends on {{ model.onlineNetwork.name }} are signed into uProxy at this time.
+        None of your friends are signed into uProxy at this time.
         <p id='inviteFriends'>To invite friends to uProxy, send them a link to <a href="https://www.uproxy.org" target="_blank">www.uproxy.org</a></p>
       </div>
     </div>
 
-    <div hidden?='{{ !model.onlineNetwork.hasContacts }}'>
+    <div hidden?='{{ !hasContacts }}'>
       <!-- Intentionally hiding search box. May decide to readd it later. -->
       <input type='text' id='search' placeholder='Search' value='{{ searchQuery }}' hidden></input>
 
