@@ -199,7 +199,7 @@ class Pipe {
     this.publicSocket_.sendTo.reckless(
       transformedBuffer,
       to.address,
-      to.port)
+      to.port);
   }
 
   /**

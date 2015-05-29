@@ -368,9 +368,8 @@ export class Connection {
     // |dataToSocketQueue| allows a class using this connection to start
     // queuing data to be send to the socket.
     this.onceConnected.then(() => {
-      this.dataToSocketQueue.setHandler((buffer:ArrayBuffer) => {
+      this.dataToSocketQueue.setSyncHandler((buffer:ArrayBuffer) : void => {
         this.connectionSocket_.write.reckless(buffer);
-        return Promise.resolve<void>();
       });
     });
     this.onceConnected.catch((e:Error) => {
