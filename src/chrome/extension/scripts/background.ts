@@ -24,7 +24,7 @@ export import model = user_interface.model;
 // --------------------- Communicating with the App ----------------------------
 export var browserConnector :ChromeCoreConnector;  // way for ui to speak to a uProxy.CoreApi
 export var core :CoreConnector;  // way for ui to speak to a uProxy.CoreApi
-var browserApi :ChromeBrowserApi;
+export var browserApi :ChromeBrowserApi;
 // Chrome Window ID of the window used to launch uProxy,
 // i.e. the window where the extension icon was clicked
 // or the window where the user is completing the install flow.

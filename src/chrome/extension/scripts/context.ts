@@ -10,10 +10,13 @@ import browser_connector = require('../../../interfaces/browser_connector');
 var ui_context :UiGlobals = (<any>chrome.extension.getBackgroundPage()).ui_context;
 export var core :CoreConnector = ui_context.core;
 export var browserConnector :browser_connector.CoreBrowserConnector = ui_context.browserConnector;
-export var model :user_interface.Model;
 
 export var ui :user_interface.UserInterface = new user_interface.UserInterface(core, ui_context.browserApi);
 
+export var model :user_interface.Model = user_interface.model;
+
 ui.browser = 'chrome';
+
+core.getInitialState();
 
 console.log('Loaded dependencies for Chrome Extension.');

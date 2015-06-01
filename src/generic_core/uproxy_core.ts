@@ -175,6 +175,7 @@ export class uProxyCore implements uproxy_core_api.CoreApi {
     loggingController.setDefaultFilter(
       loggingTypes.Destination.console,
       globals.settings.consoleFilter);
+  }
 
   /**
    * Modifies the local consent value as the result of a local user action.
