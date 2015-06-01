@@ -10,6 +10,7 @@
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/storage.d.ts' />
 
+import MockEventHandler = require('../../../third_party/uproxy-lib/freedom/mocks/mock-eventhandler');
 
 export class MockFreedomStorage implements freedom_Storage {
 
@@ -66,5 +67,12 @@ export class MockMetrics {
   }
   public retrieveUnsafe = () => {
     return Promise.resolve(this.data_);
+  }
+}
+
+// TODO: push into uproxy-lib
+export class MockTcpSocket extends MockEventHandler {
+  constructor() {
+    super(['onConnection', 'onDisconnect']);
   }
 }
